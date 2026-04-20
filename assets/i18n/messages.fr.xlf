@@ -2939,16 +2939,6 @@
         <target>Description/commentaire</target>
       </segment>
     </unit>
-    <unit id="80889600222732792">
-      <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
-        </target>
-      </segment>
-    </unit>
     <unit id="2900727946848099689">
       <segment state="initial">
         <source>Measure name must be unique.</source>
@@ -3901,6 +3891,12 @@
       <segment state="initial">
         <source>Max section</source>
         <target>Max canton</target>
+      </segment>
+    </unit>
+    <unit id="9071236182141230808">
+      <segment state="initial">
+        <source>uncertainty parameter</source>
+        <target>Incertitude paramètre</target>
       </segment>
     </unit>
   </file>

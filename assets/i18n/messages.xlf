@@ -1168,13 +1168,6 @@
         <source>Parameter</source>
       </segment>
     </unit>
-    <unit id="80889600222732792">
-      <segment>
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
-        </source>
-      </segment>
-    </unit>
     <unit id="981945747118080282">
       <segment>
         <source>Parameter 1-2</source>
@@ -3228,6 +3221,11 @@
     <unit id="6362609002121607636">
       <segment>
         <source>Working load</source>
+      </segment>
+    </unit>
+    <unit id="9071236182141230808">
+      <segment>
+        <source>uncertainty parameter</source>
       </segment>
     </unit>
   </file>
