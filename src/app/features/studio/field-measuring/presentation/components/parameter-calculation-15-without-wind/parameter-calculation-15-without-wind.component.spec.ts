@@ -244,7 +244,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
           parameter_1_2: 2,
           parameter_2_3: 2.5,
           parameter_1_3: 3,
-          checkValidity: true
+          checkValidity: true,
+          uncertainty: 0
         },
         cableTemperature: {
           cableSolarFlux: 123,

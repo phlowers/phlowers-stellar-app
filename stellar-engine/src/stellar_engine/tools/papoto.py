@@ -43,5 +43,5 @@ def calculate_papoto(inputs):
         "parameter_2_3": papoto.parameter_2_3[0],
         "parameter_1_3": papoto.parameter_1_3[0],
         "checkValidity": bool(papoto.check_validity()[0]),
-        "uncertainty": 2 * std_parameter,
+        "uncertainty": float(2 * std_parameter),
     }
