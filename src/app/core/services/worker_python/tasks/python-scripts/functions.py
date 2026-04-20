@@ -338,11 +338,11 @@ def init_section(js_inputs: dict):
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
     input_initial_condition = next(
-            condition
-            for condition in input_initial_conditions
-            if condition["uuid"] == input_section["selected_initial_condition_uuid"]
-        )
-    
+        condition
+        for condition in input_initial_conditions
+        if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+    )
+
     input_charges = input_section["charges"] if "charges" in input_section else []
     input_charge = (
         None
@@ -369,7 +369,8 @@ def init_section(js_inputs: dict):
         df,
         sagging_parameter=initial_condition.base_parameters,
         sagging_temperature=initial_condition.base_temperature,
-        bundle_number=input_section["cables_amount"])
+        bundle_number=input_section["cables_amount"],
+    )
     section.angles_sense = "clockwise"
 
     cable_array = CableArray(
@@ -444,8 +445,9 @@ def init_section(js_inputs: dict):
         df.copy(),
         sagging_parameter=initial_condition.base_parameters,
         sagging_temperature=initial_condition.base_temperature,
-        bundle_number=input_section["cables_amount"])
-    
+        bundle_number=input_section["cables_amount"],
+    )
+
     if initial_condition:
         base_section.sagging_parameter = initial_condition.base_parameters
     base_section.sagging_temperature = (

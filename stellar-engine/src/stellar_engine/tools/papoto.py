@@ -35,11 +35,13 @@ def calculate_papoto(inputs):
         V3=V3,
     )
 
+    uncertainty_dict = papoto.uncertainty(draw_number=1000, angle_error=0.01)
+    std_parameter = uncertainty_dict["std_parameter_valid_values"]
     return {
         "parameter": papoto.parameter[0],
-        # "uncertainty_parameter": 0, # uncertainty isn't set yet in mechaphlowers
         "parameter_1_2": papoto.parameter_1_2[0],
         "parameter_2_3": papoto.parameter_2_3[0],
         "parameter_1_3": papoto.parameter_1_3[0],
-        "check_validity": bool(papoto.check_validity()[0]),
+        "checkValidity": bool(papoto.check_validity()[0]),
+        "uncertainty": 2 * std_parameter,
     }

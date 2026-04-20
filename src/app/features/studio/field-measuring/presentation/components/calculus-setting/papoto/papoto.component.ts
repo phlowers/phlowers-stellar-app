@@ -152,6 +152,7 @@ export class PapotoComponent {
         ...d,
         outputs: { ...d.outputs, papoto: result }
       }));
+      console.log(result);
     } finally {
       this.isCalculating.set(false);
     }

@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
+import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
 import { AxesNorms, View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { Dictionary } from 'lodash';
@@ -356,14 +356,7 @@ export interface TaskOutputs {
     text_to_display: number[];
   };
   /** Output from calculatePapoto task */
-  [Task.calculatePapoto]: {
-    parameter: number;
-    // uncertainty_parameter: number;
-    parameter_1_2: number;
-    parameter_2_3: number;
-    parameter_1_3: number;
-    check_validity: boolean;
-  };
+  [Task.calculatePapoto]: PapotoResult;
   /** Output from calculateGuying task */
   [Task.calculateGuying]: {
     tensionInGuy: number;
