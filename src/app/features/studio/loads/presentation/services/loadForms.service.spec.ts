@@ -231,7 +231,7 @@ describe('LoadFormsService', () => {
         ...mockCharge,
         data: { ...mockChargeData, spanLoads: null as unknown as typeof mockChargeData.spanLoads }
       };
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
         charges: [chargeWithNullSpanLoads]
@@ -244,7 +244,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should use empty supports array when section has no supports', () => {
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
         charges: [mockCharge],
@@ -357,24 +357,24 @@ describe('LoadFormsService', () => {
 
     it('should use empty array for supports when section has no supports', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         supports: undefined as unknown as typeof mockSection.supports
       });
 
       await service.calculateLoad();
 
-      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
       expect(Array.isArray(mockPlotService.temporaryLoadData?.spanLoads)).toBe(true);
     });
 
     it('should use empty array for supports when section is null', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       await service.calculateLoad();
 
-      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
   });
 

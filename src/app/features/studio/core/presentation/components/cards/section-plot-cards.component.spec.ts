@@ -10,6 +10,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 interface MockPlotService {
   litData: WritableSignal<GetSectionOutput | null>;
+  section: WritableSignal<object | null>;
 }
 
 interface MockSpanService {
@@ -68,7 +69,8 @@ describe('SectionPlotCardsComponent', () => {
 
   beforeEach(() => {
     plotServiceMock = {
-      litData: signal<GetSectionOutput | null>(null)
+      litData: signal<GetSectionOutput | null>(null),
+      section: signal<object | null>(null)
     };
     spanServiceMock = {
       section: signal<object | null>(null)
@@ -210,7 +212,8 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
 
   beforeEach(async () => {
     plotServiceMock = {
-      litData: signal<GetSectionOutput | null>(null)
+      litData: signal<GetSectionOutput | null>(null),
+      section: signal<object | null>(null)
     };
     spanServiceMock = {
       section: signal<object | null>(null)

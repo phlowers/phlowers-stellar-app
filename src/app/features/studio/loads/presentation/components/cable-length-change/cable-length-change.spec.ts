@@ -581,7 +581,7 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should return early without calling plotOptionsChange when getSupportIndex returns -1', () => {
-      mockPlotService.getSupportIndex.mockReturnValue(-1);
+      mockSpanService.getSupportIndex.mockReturnValue(-1);
       mockPlotService.plotOptionsChange.mockClear();
 
       component.onScopeChange('support-uuid-1');
@@ -589,7 +589,8 @@ describe('CableLengthChangeComponent', () => {
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
-    it('should populate supportRefOptions and enable supportRef without changing the plot view for a valid span', () => {
+    it('should populate supportRefOptions, enable supportRef and update the plot view for a valid span', () => {
+      mockPlotService.plotOptionsChange.mockClear();
       component.onScopeChange('support-uuid-1');
 
       expect(component.supportRefOptions()).toEqual([
@@ -597,11 +598,11 @@ describe('CableLengthChangeComponent', () => {
         { label: '2', value: 'RIGHT' }
       ]);
       expect(component.form.controls.supportRef.enabled).toBe(true);
-      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
     });
 
     it('should load saved modification values when one exists for the span', () => {
-      mockPlotService.section.set({
+      mockSpanService.section.set({
         ...mockSection,
         cable_modifications: [
           {
@@ -625,7 +626,7 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should reset form to defaults and set hasSavedModification to true when no saved modification exists', () => {
-      mockPlotService.section.set({ ...mockSection, cable_modifications: [] } as unknown as Section);
+      mockSpanService.section.set({ ...mockSection, cable_modifications: [] } as unknown as Section);
 
       component.onScopeChange('support-uuid-1');
 
@@ -680,7 +681,7 @@ describe('CableLengthChangeComponent', () => {
   // reloadSectionFromDb (private) — success path
   // ---------------------------------------------------------------------------
   describe('reloadSectionFromDb()', () => {
-    it('should call plotService.section.set when study and section are found', async () => {
+    it('should call spanService.section.set when study and section are found', async () => {
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid-1' } as unknown as Study);
       const updatedSection: Partial<Section> = { ...mockSection, cable_modifications: [] };
       mockCableModificationsService.getStudy.mockResolvedValue({
@@ -689,25 +690,25 @@ describe('CableLengthChangeComponent', () => {
 
       await (component as unknown as { reloadSectionFromDb(): Promise<void> }).reloadSectionFromDb();
 
-      expect(mockPlotService.section.set).toHaveBeenCalledWith(updatedSection);
+      expect(mockSpanService.section.set).toHaveBeenCalledWith(updatedSection as Section);
     });
 
-    it('should not call plotService.section.set when study is not found', async () => {
+    it('should not call spanService.section.set when study is not found', async () => {
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid-1' } as unknown as Study);
       mockCableModificationsService.getStudy.mockResolvedValue(undefined);
 
       await (component as unknown as { reloadSectionFromDb(): Promise<void> }).reloadSectionFromDb();
 
-      expect(mockPlotService.section.set).not.toHaveBeenCalled();
+      expect(mockSpanService.section.set).not.toHaveBeenCalled();
     });
 
-    it('should not call plotService.section.set when studyUuid is missing', async () => {
+    it('should not call spanService.section.set when studyUuid is missing', async () => {
       mockPlotService.study.mockReturnValue(null);
 
       await (component as unknown as { reloadSectionFromDb(): Promise<void> }).reloadSectionFromDb();
 
       expect(mockCableModificationsService.getStudy).not.toHaveBeenCalled();
-      expect(mockPlotService.section.set).not.toHaveBeenCalled();
+      expect(mockSpanService.section.set).not.toHaveBeenCalled();
     });
   });
 
@@ -720,9 +721,9 @@ describe('CableLengthChangeComponent', () => {
 
     beforeEach(async () => {
       // Override section to return null before creating the component so the effect fires with null
-      mockPlotService.section = createSignalMock<Partial<Section> | null>(
+      mockSpanService.section = createSignalMock<Partial<Section> | null>(
         null
-      ) as unknown as vi.Mocked<PlotService>['section'];
+      ) as unknown as vi.Mocked<PlotSpanService>['section'];
 
       nullSectionFixture = TestBed.createComponent(CableLengthChangeComponent);
       nullSectionComponent = nullSectionFixture.componentInstance;

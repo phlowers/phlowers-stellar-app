@@ -58,7 +58,6 @@ export class LoadFormsService {
   saveTemporaryLoadDataInSection = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     const studyUuid = this.plotService.study()?.uuid;
-    const section = this.spanService.section();
     const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid || !temporaryLoadData) {
       return;

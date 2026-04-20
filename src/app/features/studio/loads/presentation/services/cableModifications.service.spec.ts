@@ -108,7 +108,8 @@ describe('CableModificationsService', () => {
       loading: createSignalMock(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
-      error: createSignalMock(null)
+      error: createSignalMock(null),
+      pythonErrorCode: createSignalMock(null)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
       section: createSignalMock<Section | null>(mockSectionBase),

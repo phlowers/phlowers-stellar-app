@@ -35,3 +35,14 @@
 
 ## 7. Skill : Le Nettoyeur & 8. Le Scribe
 - Suppression imports morts + `git aa && git cs -m "[type]: [msg]" && git push`.
+
+## 9. Skill : Le Réparateur de Tests (Spécialiste Vitest)
+**Rôle :** Urgentiste des suites de tests cassées.
+- **Analyse d'Échec :** Analyse d'abord le log d'erreur de Vitest. Identifie si l'échec est dû à :
+    1. Un mock périmé (ex: PyodideService a changé).
+    2. Un sélecteur `data-testid` manquant ou renommé.
+    3. Une véritable régression dans la logique métier.
+- **Règle de Non-Régression :** Interdiction de supprimer un test ou de baisser les assertions pour le faire passer.
+- **Mocks & Spies :** Vérifie que les `vi.spyOn` ou `vi.mock` sont toujours alignés avec les signatures des services réels.
+- **Objectif Couverture :** Si la correction diminue la couverture sous les 100%, tu dois ajouter des cas de tests pour compenser.
+- **Validation :** Après correction, explique pourquoi le test échouait pour éviter que l'erreur ne se reproduise.

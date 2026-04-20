@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
@@ -72,6 +72,8 @@ export class CableLengthChangeComponent {
   readonly hasActiveModification = computed(() => {
     return this.hasSavedModification();
   });
+
+  private previousSectionUuid: string | null = null;
 
   constructor() {
     // Track dirty state when user edits content fields (RG.LON-CAB.ENR-BTN.1)

@@ -507,8 +507,8 @@ describe('ClimateComponent', () => {
     });
 
     it('should return early when section is missing', async () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
       const loadFormsService = TestBed.inject(LoadFormsService);
       const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
 
@@ -600,8 +600,8 @@ describe('ClimateComponent', () => {
 
   describe('initForm', () => {
     it('should build frontierSupportOptions when section has supports', async () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal>).set({
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
         uuid: 'section-uuid-1',
         supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }]
       });
@@ -613,8 +613,8 @@ describe('ClimateComponent', () => {
     });
 
     it('should build no frontierSupportOptions when section has fewer than 3 supports', async () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal>).set({
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
         uuid: 'section-uuid-1',
         supports: [{ uuid: 's1' }, { uuid: 's2' }]
       });

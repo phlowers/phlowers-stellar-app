@@ -587,7 +587,8 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle,
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.addObstacle,
           expect.objectContaining({ obstacles: [mockObstacle] })
         );
       });
@@ -601,7 +602,8 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle,
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.addObstacle,
           expect.objectContaining({ obstacles: [mockObstacle, secondObstacle] })
         );
       });
@@ -1244,7 +1246,11 @@ describe('PlotService', () => {
     it('should call workerPythonService with correct task params', async () => {
       service.plotOptionsChange({ view: '2d', startSupport: 2, endSupport: 5 });
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [] },
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
         error: null
       });
 
@@ -1266,7 +1272,11 @@ describe('PlotService', () => {
 
     it('should set litData directly from sectionOutput.current', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [] },
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
         error: null
       });
 
@@ -1291,7 +1301,11 @@ describe('PlotService', () => {
         ]
       };
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [mockDist] },
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: [mockDist]
+        },
         error: null
       });
 
@@ -1303,7 +1317,11 @@ describe('PlotService', () => {
     it('should include obstacle coordinates returned by Python in litData', async () => {
       const obstacleCoords = [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] as [number, number, number][] }];
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: obstacleCoords, distances: [] },
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: obstacleCoords,
+          distances: []
+        },
         error: null
       });
 
@@ -1315,7 +1333,11 @@ describe('PlotService', () => {
 
     it('should NOT call Task.addObstacle — obstacle coordinates come from sectionOutput', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput }, obstacles: [], distances: [] },
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
         error: null
       });
 

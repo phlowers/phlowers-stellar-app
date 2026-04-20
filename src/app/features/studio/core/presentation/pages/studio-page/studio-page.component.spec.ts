@@ -47,6 +47,7 @@ class PlotServiceMock {
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
   litData = signal<{ parameter?: number[]; utilization_rate?: number[] } | null>(null);
   loading: SignalFn<boolean> = createSignalMock<boolean>(false);
+  section = signal<Section | null>(null);
   plotOptions = vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
   plotOptionsChange = vi.fn();
   resetAll = vi.fn();
@@ -862,6 +863,7 @@ describe('StudioPageComponent - HTML rendering', () => {
 
     const mockObstacleFormService = {
       setExistingObstacle: vi.fn(),
+      clearPositions: vi.fn(),
       results: signal({ oblique: null, vertical: null, horizontal: null })
     };
 
@@ -983,7 +985,7 @@ describe('HTML rendering - distance radio buttons disabled state', () => {
     })
       .overrideComponent(StudioPageComponent, {
         set: {
-          imports: [FormsModule, RadioButtonModule, SelectModule, DecimalPipe],
+          imports: [FormsModule, RadioButtonModule, SelectModule, SelectButtonModule, DecimalPipe],
           schemas: [CUSTOM_ELEMENTS_SCHEMA]
         }
       })

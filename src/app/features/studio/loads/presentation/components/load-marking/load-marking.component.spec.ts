@@ -127,7 +127,7 @@ describe('LoadMarkingComponent', () => {
     });
 
     it('does nothing when getSupportIndex returns -1 for selected span', () => {
-      (mockPlotService['getSupportIndex'] as ReturnType<typeof vi.fn>).mockReturnValue(-1);
+      (mockSpanService['getSupportIndex'] as ReturnType<typeof vi.fn>).mockReturnValue(-1);
 
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();

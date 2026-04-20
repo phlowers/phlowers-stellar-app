@@ -225,7 +225,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     }
 
     // 'span' mode: use middle span index
-    const { startSupport, endSupport } = this.plotService.plotOptions();
+    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
     const [middleSpanIndex] = findMiddleSpan(startSupport, endSupport);
     const value = values[middleSpanIndex];
     return value === undefined ? null : round(value, 2);
