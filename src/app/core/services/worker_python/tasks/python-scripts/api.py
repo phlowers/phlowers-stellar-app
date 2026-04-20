@@ -68,3 +68,8 @@ def get_support_coordinates(js_inputs):
 def get_aspect_ratio(js_inputs):
     python_inputs = js_to_python(js_inputs)
     return plot_settings.get_aspect_ratio(python_inputs, plt_line)
+
+
+def get_wind_incidence(js_inputs):
+    python_inputs = js_to_python(js_inputs)
+    return temperature.get_wind_attack_angle(python_inputs)
