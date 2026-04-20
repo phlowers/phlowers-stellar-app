@@ -77,6 +77,25 @@ class Cable:
     linear_resistance_temperature_coef: float
     radial_thermal_conductivity: float
     has_magnetic_heart: bool
+    is_bimetallic: bool | None = None
+    rts_cable: float | None = None
+    rts_layer_1: float | None = None
+    nb_strand_layer_1: float | None = None
+    rts_layer_2: float | None = None
+    nb_strand_layer_2: float | None = None
+    rts_layer_3: float | None = None
+    nb_strand_layer_3: float | None = None
+    rts_layer_4: float | None = None
+    nb_strand_layer_4: float | None = None
+    rts_layer_5: float | None = None
+    nb_strand_layer_5: float | None = None
+    rts_layer_6: float | None = None
+    nb_strand_layer_6: float | None = None
+    rts_layer_7: float | None = None
+    nb_strand_layer_7: float | None = None
+    rts_layer_8: float | None = None
+    nb_strand_layer_8: float | None = None
+    safety_coefficient: float | None = None
 
 
 

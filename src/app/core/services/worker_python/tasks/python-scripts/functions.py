@@ -434,7 +434,6 @@ def init_section(js_inputs: dict):
             "dilatation_coefficient": "1/K",
         }
     )
-    logger.debug(f"cable rrts test - rts overage: {cable_array.rts_coverage()}")
     engine = BalanceEngine(cable_array=cable_array, section_array=section)
     plt_line = PlotEngine(engine)
     engine.solve_adjustment()
