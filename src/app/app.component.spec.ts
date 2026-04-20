@@ -22,7 +22,6 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
-import { MessageService } from 'primeng/api';
 
 class Worker {
   url: string;
@@ -70,8 +69,6 @@ describe('AppComponent', () => {
     vi.clearAllMocks();
     // @ts-expect-error worker
     globalThis.Worker = Worker;
-    readySubject = new BehaviorSubject<boolean>(false);
-    workerReadySubject = new BehaviorSubject<boolean>(true);
 
     mockNotificationService = {
       success: vi.fn(),
@@ -85,7 +82,7 @@ describe('AppComponent', () => {
     mockStorageService = {
       setPersistentStorage: vi.fn().mockResolvedValue(undefined),
       createDatabase: vi.fn().mockResolvedValue(undefined),
-      ready$: readySubject,
+      ready$: new BehaviorSubject<boolean>(false),
       db: mockDb
     } as unknown as StorageService;
 
@@ -140,9 +137,7 @@ describe('AppComponent', () => {
       }
     });
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
-    TestBed.overrideProvider(OnlineService, { useValue: mockOnlineService });
     TestBed.overrideProvider(NotificationService, { useValue: mockNotificationService });
-    TestBed.overrideProvider(UserService, { useValue: mockUserService });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
     TestBed.overrideProvider(MaintenanceService, { useValue: mockMaintenanceService });
     TestBed.overrideProvider(LinesService, { useValue: mockLinesService });
@@ -161,11 +156,6 @@ describe('AppComponent', () => {
 
   it('should have the correct title', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
-  });
-
-  it('should not have userDialog or saveUser (login flow removed)', () => {
-    expect((component as unknown as Record<string, unknown>)['userDialog']).toBeUndefined();
-    expect((component as unknown as Record<string, unknown>)['saveUser']).toBeUndefined();
   });
 
   it('should never call users.clear() in any scenario', async () => {
@@ -226,64 +216,7 @@ describe('AppComponent', () => {
       component.ngOnInit();
       await fixture.whenStable();
 
-      expect(component.userDialog()).toBe(true);
-    });
-
-    it('should not show user dialog if a user exists', async () => {
-      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.getUser
-      mockUserService.getUser.mockResolvedValue({ email: 'test@example.com' });
-
-      // Trigger the effect via toSignal
-      readySubject.next(true);
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      expect(component.userDialog()).toBe(false);
-    });
-
-    it('should save valid user and close dialog', async () => {
-      component.form.setValue({ email: 'test@example.com' });
-      //@ts-expect-error mockResolvedValue does not exist on the mockUserService.createUser
-      mockUserService.createUser.mockResolvedValue(undefined);
-
-      await component.saveUser();
-
-      expect(component.submitted()).toBe(true);
-      expect(mockUserService.createUser).toHaveBeenCalledWith({
-        email: 'test@example.com'
-      });
-      expect(component.userDialog()).toBe(false);
-      expect(mockNotificationService.success).toHaveBeenCalledWith('User info set');
-    });
-
-    it('should not save user with empty email', async () => {
-      component.form.setValue({ email: '' });
-
-      await component.saveUser();
-
-      expect(component.submitted()).toBe(true);
-      expect(mockDb.users.add).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Email validation', () => {
-    it('should validate correct email formats', () => {
-      // Import the validateEmail function from the component file
-      const validateEmail = (email: string) => {
-        return String(email)
-          .toLowerCase()
-          .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-          );
-      };
-
-      expect(validateEmail('test@example.com')).toBeTruthy();
-      expect(validateEmail('test.name@example.co.uk')).toBeTruthy();
-      expect(validateEmail('test+label@example.com')).toBeTruthy();
-
-      expect(validateEmail('invalid-email')).toBeFalsy();
-      expect(validateEmail('test@')).toBeFalsy();
-      expect(validateEmail('@example.com')).toBeFalsy();
+      expect(mockWorkerService.setup).toHaveBeenCalled();
     });
   });
 });
