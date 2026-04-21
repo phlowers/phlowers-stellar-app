@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs, PythonErrorCode } from '@services/worker_python/tasks/types';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
@@ -16,15 +18,19 @@ describe('TemperatureCalculationComponent', () => {
   let fixture: ComponentFixture<TemperatureCalculationComponent>;
   let componentRef: ComponentRef<TemperatureCalculationComponent>;
   let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
+  let workerReadySubject: BehaviorSubject<boolean>;
 
   beforeEach(async () => {
+    workerReadySubject = new BehaviorSubject<boolean>(false);
+
     workerPythonServiceMock = {
-      runTask: vi.fn()
+      runTask: vi.fn(),
+      ready$: workerReadySubject.asObservable()
     } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
       imports: [TemperatureCalculationComponent],
-      providers: [{ provide: WorkerPythonService, useValue: workerPythonServiceMock }]
+      providers: [provideNoopAnimations(), { provide: WorkerPythonService, useValue: workerPythonServiceMock }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TemperatureCalculationComponent);
@@ -133,7 +139,11 @@ describe('TemperatureCalculationComponent', () => {
     });
 
     it('should be true during calculation and false after', async () => {
-      let resolveTask!: (value: { result: TaskOutputs[Task.temperatureCalculation]; error: TaskError | null }) => void;
+      let resolveTask!: (value: {
+        result: TaskOutputs[Task.temperatureCalculation];
+        error: TaskError | null;
+        pythonErrorCode: PythonErrorCode | null;
+      }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
           resolveTask = res;
@@ -147,7 +157,11 @@ describe('TemperatureCalculationComponent', () => {
       const calcPromise = component.calculateTemperature();
       expect(component.isCalculating()).toBe(true);
 
-      resolveTask({ result: { cableSolarFlux: 0, cableTemperature: 0, cableTemperatureUncertainty: 0 }, error: null });
+      resolveTask({
+        result: { cableSolarFlux: 0, cableTemperature: 0, cableTemperatureUncertainty: 0 },
+        error: null,
+        pythonErrorCode: null
+      });
       await calcPromise;
 
       expect(component.isCalculating()).toBe(false);
@@ -174,7 +188,8 @@ describe('TemperatureCalculationComponent', () => {
 
     workerPythonServiceMock.runTask.mockResolvedValue({
       result: mockResult,
-      error: null
+      error: null,
+      pythonErrorCode: null
     });
 
     // Set all required fields
@@ -224,6 +239,151 @@ describe('TemperatureCalculationComponent', () => {
       const el = getByTestId('calculate-temperature-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+
+    describe('wind incidence area', () => {
+      beforeEach(() => {
+        componentRef.setInput(
+          'measureData',
+          createTestMeasureData({ azimuth: 45, windDirection: 'North', windIncidenceMode: 'auto' })
+        );
+        fixture.detectChanges();
+      });
+
+      it('should show spinner when worker is not ready', () => {
+        expect(getByTestId('wind-incidence-spinner')).toBeTruthy();
+        expect(getByTestId('wind-incidence-value')).toBeNull();
+      });
+
+      it('should show value and hide spinner when worker is ready', async () => {
+        workerPythonServiceMock.runTask.mockResolvedValue({
+          result: { windIncidence: 58.00000000000001 },
+          error: null,
+          pythonErrorCode: null
+        });
+        workerReadySubject.next(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(getByTestId('wind-incidence-spinner')).toBeNull();
+        const valueEl = getByTestId('wind-incidence-value');
+        expect(valueEl).toBeTruthy();
+        expect(valueEl?.textContent).toContain('58°');
+      });
+    });
+  });
+
+  describe('isWindIncidenceLoading', () => {
+    it('should be true when worker is not ready', () => {
+      expect(component.isWindIncidenceLoading()).toBe(true);
+    });
+
+    it('should be false when worker becomes ready', () => {
+      workerReadySubject.next(true);
+      expect(component.isWindIncidenceLoading()).toBe(false);
+    });
+  });
+
+  describe('computeWindIncidence rounding', () => {
+    beforeEach(() => {
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ azimuth: 45, windDirection: 'North', windIncidenceMode: 'auto' })
+      );
+      fixture.detectChanges();
+    });
+
+    it('should round 58.00000000000001 to 58', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: { windIncidence: 58.00000000000001 },
+        error: null,
+        pythonErrorCode: null
+      });
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.measureData().windIncidence).toBe(58);
+    });
+
+    it('should round 63.999999999999986 to 64', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: { windIncidence: 63.999999999999986 },
+        error: null,
+        pythonErrorCode: null
+      });
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.measureData().windIncidence).toBe(64);
+    });
+
+    it('should not update windIncidence when task returns an error', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: undefined,
+        error: TaskError.CALCULATION_ERROR,
+        pythonErrorCode: null
+      });
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.measureData().windIncidence).toBeNull();
+    });
+  });
+
+  describe('wind incidence deduplication effect', () => {
+    beforeEach(() => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: { windIncidence: 45 },
+        error: null,
+        pythonErrorCode: null
+      });
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ azimuth: 45, windDirection: 'North', windIncidenceMode: 'auto' })
+      );
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+    });
+
+    it('should call runTask once for initial valid inputs', async () => {
+      await fixture.whenStable();
+      const windCalls = workerPythonServiceMock.runTask.mock.calls.filter(([task]) => task === Task.getWindIncidence);
+      expect(windCalls.length).toBe(1);
+    });
+
+    it('should not call runTask again when same azimuth and windDirection are set', async () => {
+      await fixture.whenStable();
+      component.updateField('azimuth', 45);
+      component.updateField('windDirection', 'North');
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const windCalls = workerPythonServiceMock.runTask.mock.calls.filter(([task]) => task === Task.getWindIncidence);
+      expect(windCalls.length).toBe(1);
+    });
+
+    it('should call runTask again when azimuth changes', async () => {
+      await fixture.whenStable();
+      component.updateField('azimuth', 90);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const windCalls = workerPythonServiceMock.runTask.mock.calls.filter(([task]) => task === Task.getWindIncidence);
+      expect(windCalls.length).toBe(2);
+    });
+
+    it('should call runTask again when windDirection changes', async () => {
+      await fixture.whenStable();
+      component.updateField('windDirection', 'South');
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const windCalls = workerPythonServiceMock.runTask.mock.calls.filter(([task]) => task === Task.getWindIncidence);
+      expect(windCalls.length).toBe(2);
     });
   });
 });

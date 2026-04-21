@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, input, model, signal, computed } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, input, model, signal, computed, effect } from '@angular/core';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NgClass, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -15,7 +17,6 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
-import { DecimalPipe } from '@angular/common';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -28,6 +29,7 @@ import { DecimalPipe } from '@angular/common';
     SelectButtonModule,
     RadioButtonModule,
     MessageModule,
+    ProgressSpinnerModule,
     IconComponent,
     ButtonComponent,
     DecimalPipe
@@ -61,11 +63,36 @@ export class TemperatureCalculationComponent {
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
   readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto', disabled: true },
+    { label: $localize`Auto`, value: 'auto' },
     { label: $localize`Perpendicular`, value: 'perpendicular' }
   ];
 
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
+
+  readonly isWindIncidenceLoading = computed(() => !this.workerReady());
+  private readonly lastWindIncidenceInput = signal<{ azimuth: number; windDirection: string } | null>(null);
+
+  private readonly windIncidenceEffect = effect(() => {
+    const isWorkerReady = this.workerReady();
+    const { azimuth, windDirection } = this.measureData();
+
+    if (!isWorkerReady || azimuth === null || windDirection === null) {
+      this.lastWindIncidenceInput.set(null);
+      return;
+    }
+
+    const lastInput = this.lastWindIncidenceInput();
+    const hasSameInput =
+      lastInput !== null && lastInput.azimuth === azimuth && lastInput.windDirection === windDirection;
+
+    if (hasSameInput) {
+      return;
+    }
+
+    this.lastWindIncidenceInput.set({ azimuth, windDirection });
+    void this.computeWindIncidence(azimuth, windDirection);
+  });
 
   isTransitOutOfBounds = computed(() => {
     const transit = this.measureData().transit;
@@ -82,6 +109,16 @@ export class TemperatureCalculationComponent {
     const option = this.windDirectionOptions().find((opt) => opt.value === windDirection);
     return option?.label ?? windDirection;
   });
+
+  private async computeWindIncidence(azimuth: number, windDirection: string): Promise<void> {
+    const { result, error } = await this.workerPythonService.runTask(Task.getWindIncidence, {
+      azimuth,
+      windDirection
+    });
+    if (!error && result !== undefined) {
+      this.measureData.update((d) => ({ ...d, windIncidence: Math.round(result.windIncidence) }));
+    }
+  }
 
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));

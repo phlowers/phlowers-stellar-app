@@ -70,8 +70,26 @@
       />
     </dt>
     <dd class="windIncidence__value">
-      @if (measureData().windIncidenceMode === 'auto') {
-        {{ measureData().windIncidence }}
+      @if (
+        measureData().windIncidenceMode === 'auto' &&
+        measureData().windDirection !== null &&
+        measureData().azimuth !== null
+      ) {
+        @if (isWindIncidenceLoading()) {
+          <p-progressspinner
+            styleClass="wind-incidence-loader"
+            strokeWidth="2"
+            aria-label="Computing wind incidence"
+            i18n-aria-label
+            data-testid="wind-incidence-spinner"
+          />
+        } @else {
+          <span data-testid="wind-incidence-value">{{ measureData().windIncidence }}°</span>
+        }
+      } @else if (measureData().windIncidenceMode === 'auto') {
+        <p-message severity="warn" size="small" variant="simple" i18n>
+          Wind direction and azimuth are required.
+        </p-message>
       } @else {
         90°
       }
