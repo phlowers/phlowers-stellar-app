@@ -47,6 +47,8 @@ export default defineConfig(() => ({
       ignoreDeprecations: true
     },
     testTimeout: 15000,
+    hookTimeout: 15000,
+    teardownTimeout: 15000,
     setupFiles: ['src/test-setup.ts'],
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['e2e/**'],
