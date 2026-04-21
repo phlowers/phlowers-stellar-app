@@ -132,7 +132,7 @@ def test_standard_case(balance_engine_simple):
     )
     engine = balance_engine_simple
 
-    result = change_obstacles_coordinates(df, engine)
+    change_obstacles_coordinates(df, engine)
 
     # np.testing.assert_array_almost_equal(
     #     result["x"].to_numpy(), np.array([100.0, 100.0, 10.0, np.nan])
@@ -140,4 +140,3 @@ def test_standard_case(balance_engine_simple):
     # np.testing.assert_array_almost_equal(
     #     result["z"].to_numpy(), np.array([1955.0, 1900.0, 1950.0, 2050.0])
     # )
-

@@ -10,8 +10,6 @@ from mechaphlowers.data.catalog.catalog import (
 )
 from mechaphlowers.data.units import convert_weight_to_mass
 
-from stellar_engine.plot import obstacles
-
 
 @pytest.fixture
 def example_obstacle_inputs():

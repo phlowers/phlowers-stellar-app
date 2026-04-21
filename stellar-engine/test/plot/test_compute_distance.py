@@ -1,14 +1,9 @@
 import numpy as np
 import pandas as pd
 import pytest
-from mechaphlowers import BalanceEngine, CableArray, PlotEngine, SectionArray
+from mechaphlowers import BalanceEngine, CableArray, SectionArray
 from mechaphlowers.data.catalog.catalog import (
     sample_cable_catalog,
-)
-
-from stellar_engine.plot.obstacles import (
-    add_obstacles,
-    compute_distances,
 )
 
 
@@ -139,11 +134,11 @@ def _make_df(rows):
 
 #     compute_distances({}, plt)
 
-    # result = change_obstacles_coordinates(df, engine)
+# result = change_obstacles_coordinates(df, engine)
 
-    # np.testing.assert_array_almost_equal(
-    #      result["x"].to_numpy(), np.array([100.0, 100.0, 10.0, 200.0]
-    # ))
-    # np.testing.assert_array_almost_equal(
-    #      result["z"].to_numpy(), np.array([1955.0, 1900.0, 1950.0, 2050.0]
-    # ))
+# np.testing.assert_array_almost_equal(
+#      result["x"].to_numpy(), np.array([100.0, 100.0, 10.0, 200.0]
+# ))
+# np.testing.assert_array_almost_equal(
+#      result["z"].to_numpy(), np.array([1955.0, 1900.0, 1950.0, 2050.0]
+# ))
