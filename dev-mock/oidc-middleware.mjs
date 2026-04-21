@@ -36,15 +36,19 @@ function loadClaims() {
 }
 
 /**
- * Express-compatible middleware factory.
- * @param {import('express').Application} app
+ * Connect-compatible middleware for Angular 19+ Vite dev server.
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @param {() => void} next
  */
-export default function (app) {
-  app.get('/auth/userinfo', (_req, res) => {
+export default function (req, res, next) {
+  if (req.method === 'GET' && req.url === '/auth/userinfo') {
     const claims = loadClaims();
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');
-    res.json(claims);
+    res.end(JSON.stringify(claims));
     console.log('[oidc-mock] GET /auth/userinfo →', claims.email);
-  });
+  } else {
+    next();
+  }
 }
