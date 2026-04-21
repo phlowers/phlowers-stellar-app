@@ -3,12 +3,12 @@ import pandas as pd
 from mechaphlowers.entities.arrays import SectionArray, CableArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
+from mechaphlowers.utils import ArrayTools
 from typing import Optional
 from dataclasses import dataclass
 import logging
 from importlib.metadata import version
 import sys
-from mechaphlowers.utils import ArrayTools
 
 from stellar_engine.entities.inputs import ClimateCharge
 
@@ -313,7 +313,7 @@ def get_coordinates(
     line_angle_rad = engine.section_array.data.line_angle.to_numpy()
     tension_max, _ = engine.span_model.tensions_sup_inf()
     utilization_rate = engine.cable_array.utilization_rate(tension_max)
-    logger.debug(f"utilization rate: {utilization_rate}")
+    logger.debug("utilization rate: %s", utilization_rate)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
