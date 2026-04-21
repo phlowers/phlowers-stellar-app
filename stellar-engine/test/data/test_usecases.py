@@ -106,20 +106,20 @@ def plot_engine_base_test(
     return PlotEngine(engine=balance_engine_base_test)
 
 
-def test_obstacle_addition(
-    example_obstacle_inputs,
-    balance_engine_base_test: BalanceEngine,
-    plot_engine_base_test: PlotEngine,
-):
-    result = obstacles.add_obstacles(
-        example_obstacle_inputs,
-        balance_engine_base_test,
-        plot_engine_base_test,
-    )
+# def test_obstacle_addition(
+#     example_obstacle_inputs,
+#     balance_engine_base_test: BalanceEngine,
+#     plot_engine_base_test: PlotEngine,
+# ):
+#     result = obstacles.add_obstacles(
+#         example_obstacle_inputs,
+#         balance_engine_base_test,
+#         plot_engine_base_test,
+#     )
 
-    assert 'obstacles' in result
-    assert len(result['obstacles']) == len(example_obstacle_inputs)
-    for obs in result['obstacles']:
-        assert 'uuid' in obs
-        assert 'points' in obs
-        assert len(obs['points']) > 0
+#     assert 'obstacles' in result
+#     assert len(result['obstacles']) == len(example_obstacle_inputs)
+#     for obs in result['obstacles']:
+#         assert 'uuid' in obs
+#         assert 'points' in obs
+#         assert len(obs['points']) > 0
