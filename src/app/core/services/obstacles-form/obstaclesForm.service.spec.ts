@@ -847,6 +847,38 @@ describe('ObstacleFormService', () => {
 
       expect(mockPlotService.loading()).toBe(false);
     });
+
+    it('should set loading to true at the start of async flow', async () => {
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-loading-true' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      mockPlotService.loading.set(false);
+
+      let loadingDuringExecution = false;
+      mockObstacleStateService.addObstacle.mockImplementation(async () => {
+        loadingDuringExecution = mockPlotService.loading();
+        return null;
+      });
+
+      await service.calculateAndSave();
+
+      expect(loadingDuringExecution).toBe(true);
+    });
+
+    it('should set loading to false even when an error is thrown', async () => {
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-loading-error' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('worker failure'));
+
+      await expect(service.calculateAndSave()).rejects.toThrow('worker failure');
+
+      expect(mockPlotService.loading()).toBe(false);
+    });
   });
 
   describe('isFormValid', () => {

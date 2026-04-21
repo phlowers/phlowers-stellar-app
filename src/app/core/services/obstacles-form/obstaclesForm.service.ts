@@ -304,29 +304,33 @@ export class ObstacleFormService {
     }
     const obstacle = this.buildObstacleFromForm();
 
-    // 1. Merge new/updated obstacle into the in-memory section
-    this.upsertObstacleInSection(obstacle);
-    const allObstacles = this.spanService.section()?.obstacles ?? [obstacle];
+    this.plotService.loading.set(true);
+    try {
+      // 1. Merge new/updated obstacle into the in-memory section
+      this.upsertObstacleInSection(obstacle);
+      const allObstacles = this.spanService.section()?.obstacles ?? [obstacle];
 
-    // 2. Register all obstacles in Python worker — get computed render positions for current span
-    const obstacleOutput = await this.obstacleStateService.addObstacle(
-      allObstacles,
-      this.plotOptionsService.plotOptions()
-    );
+      // 2. Register all obstacles in Python worker — get computed render positions for current span
+      const obstacleOutput = await this.obstacleStateService.addObstacle(
+        allObstacles,
+        this.plotOptionsService.plotOptions()
+      );
 
-    // 3. Update rendering (litData.obstacles)
-    this.applyObstacleOutputToLitData(obstacleOutput);
+      // 3. Update rendering (litData.obstacles)
+      this.applyObstacleOutputToLitData(obstacleOutput);
 
-    // 4. Persist domain object to IndexedDB
-    await this.saveSection();
+      // 4. Persist domain object to IndexedDB
+      await this.saveSection();
 
-    // 5. Recalculate distances
-    await this.obstacleStateService.calculateDistances(allObstacles, this.plotOptionsService.plotOptions());
+      // 5. Recalculate distances
+      await this.obstacleStateService.calculateDistances(allObstacles, this.plotOptionsService.plotOptions());
 
-    // 5. Update UI selection
-    const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
-    this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
-    this.plotService.loading.set(false);
+      // 6. Update UI selection
+      const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
+      this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
+    } finally {
+      this.plotService.loading.set(false);
+    }
   }
 
   private applyObstacleOutputToLitData(obstacleOutput: ObstacleOutput | null): void {

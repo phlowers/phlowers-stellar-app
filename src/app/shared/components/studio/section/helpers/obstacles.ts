@@ -138,7 +138,7 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
     // Resolve display name from the domain obstacle matching by UUID
     const obstacleUuid = litObstacle.uuid;
     const formObstacle = obstacles.find((o) => o.uuid === litObstacle.uuid);
-    const obstacleName = formObstacle?.name ?? '';
+    const obstacleName = formObstacle?.name ?? litObstacle.uuid;
 
     return litObstacle.points.flatMap(([cx, cy, cz], pointIndex) => {
       // Map absolute Python coords [x, y, z] to Plotly axes

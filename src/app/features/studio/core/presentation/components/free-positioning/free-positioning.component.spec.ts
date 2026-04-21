@@ -11,6 +11,7 @@ import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.serv
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
+import { PythonErrorCode, TaskError } from '@core/services/worker_python/tasks/types';
 import Plotly from 'plotly.js-dist-min';
 
 vi.mock('@shared/components/studio/section/helpers/createPlotData');
@@ -732,8 +733,9 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should use left support altitude when referenceSupport is null', async () => {
+      const obstacleOutput = { obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3]] }] };
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
+        result: obstacleOutput,
         error: null
       });
       litDataSignal.set(litDataWithTwoSupports);
@@ -743,6 +745,12 @@ describe('FreePositioningComponent', () => {
       await flushDebounceAndMicrotasks();
 
       expect(component.referenceSupportAltitudeNgf()).toBe(100);
+      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
+      expect(mockCreatePlotData).toHaveBeenCalled();
+      expect(mockCreatePlotData.mock.calls[0][0]).toEqual({
+        ...litDataWithTwoSupports,
+        obstacles: obstacleOutput.obstacles
+      });
     });
 
     it('should use left support altitude when referenceSupport is LEFT', async () => {
@@ -783,8 +791,10 @@ describe('FreePositioningComponent', () => {
         supports: [[[10, 20, 100]]]
       };
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataOnlyOneSupport }
+        result: { obstacles: [] },
+        error: null
       });
+      litDataSignal.set(litDataOnlyOneSupport);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
       );
@@ -794,6 +804,24 @@ describe('FreePositioningComponent', () => {
 
       // Support index 1 doesn't exist → getSupportAltitudeNgf returns 0
       expect(component.referenceSupportAltitudeNgf()).toBe(0);
+    });
+
+    it('should stop and expose worker errors without clearing litData', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        pythonErrorCode: PythonErrorCode.SolverError
+      });
+      litDataSignal.set(litDataWithTwoSupports);
+
+      component.recreatePlots();
+      await flushDebounceAndMicrotasks();
+
+      expect(mockPlotService.error()).toBe(TaskError.CALCULATION_ERROR);
+      expect(mockPlotService.pythonErrorCode()).toBe(PythonErrorCode.SolverError);
+      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
+      expect(mockCreatePlotData).not.toHaveBeenCalled();
+      expect(component.isLoading()).toBe(false);
     });
   });
 });

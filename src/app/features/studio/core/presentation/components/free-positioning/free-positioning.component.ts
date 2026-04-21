@@ -179,25 +179,43 @@ export class FreePositioningComponent implements OnDestroy {
     const filteredObstacles = allObstacles.filter(
       (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
     );
-    const litData = await this.workerPythonService.runTask(Task.addObstacle, {
+    const currentLitData = this.plotService.litData();
+    if (!currentLitData) {
+      this.isLoading.set(false);
+      return;
+    }
+
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.addObstacle, {
       obstacles: filteredObstacles,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
     });
 
+    this.plotService.error.set(error);
+    this.plotService.pythonErrorCode.set(pythonErrorCode ?? null);
+
+    if (error) {
+      this.logger.warn('Unable to refresh free positioning plots after obstacle update.');
+      this.isLoading.set(false);
+      return;
+    }
+
+    const updatedLitData: GetSectionOutput = {
+      ...currentLitData,
+      obstacles: result?.obstacles ?? []
+    };
+
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(
-      this.getSupportAltitudeNgf(this.plotService.litData()!, referenceSupportIndex)
-    );
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(updatedLitData, referenceSupportIndex));
 
     const supports = this.spanService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(this.plotService.litData()!, startSupport, 'face', supports);
-    await this.createPlot(this.plotService.litData()!, startSupport, 'profile', supports);
+    await this.createPlot(updatedLitData, startSupport, 'face', supports);
+    await this.createPlot(updatedLitData, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
