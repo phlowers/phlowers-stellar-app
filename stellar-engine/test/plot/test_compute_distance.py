@@ -1,15 +1,14 @@
-from mechaphlowers import BalanceEngine, CableArray, SectionArray, PlotEngine
 import numpy as np
 import pandas as pd
 import pytest
+from mechaphlowers import BalanceEngine, CableArray, PlotEngine, SectionArray
+from mechaphlowers.data.catalog.catalog import (
+    sample_cable_catalog,
+)
 
 from stellar_engine.plot.obstacles import (
     add_obstacles,
-    change_obstacles_coordinates,
     compute_distances,
-)
-from mechaphlowers.data.catalog.catalog import (
-    sample_cable_catalog,
 )
 
 

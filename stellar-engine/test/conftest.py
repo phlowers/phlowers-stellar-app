@@ -1,6 +1,5 @@
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 projet_dir: Path = Path(__file__).resolve().parents[1]
 print("--conftest--")

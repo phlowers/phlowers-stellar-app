@@ -6,15 +6,15 @@
 
 from unittest.mock import MagicMock
 
-from mechaphlowers import BalanceEngine, CableArray, SectionArray
 import numpy as np
 import pandas as pd
 import pytest
-
-from stellar_engine.plot.obstacles import change_obstacles_coordinates
+from mechaphlowers import BalanceEngine, CableArray, SectionArray
 from mechaphlowers.data.catalog.catalog import (
     sample_cable_catalog,
 )
+
+from stellar_engine.plot.obstacles import change_obstacles_coordinates
 
 
 def _make_balance_engine(span_lengths, conductor_altitudes):
@@ -367,13 +367,8 @@ class TestChangeObstaclesCoordinates:
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from unittest.mock import MagicMock
 
-import numpy as np
-import pandas as pd
 import pytest
-
-from stellar_engine.plot.obstacles import change_obstacles_coordinates
 
 
 def _make_balance_engine(span_length, conductor_altitude):
@@ -384,190 +379,3 @@ def _make_balance_engine(span_length, conductor_altitude):
         conductor_altitude
     )
     return engine
-
-
-class TestChangeObstaclesCoordinates:
-    """Tests for change_obstacles_coordinates."""
-
-    def _make_df(self, rows):
-        return pd.DataFrame(rows)
-
-    def test_reverses_x_for_span_axis(self):
-        df = self._make_df(
-            [
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "span_axis",
-                    "altitude_type": "absolute",
-                    "x": 30.0,
-                    "y": 0.0,
-                    "z": 10.0,
-                },
-            ]
-        )
-        engine = _make_balance_engine(
-            span_length=[100.0], conductor_altitude=[5.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        assert result["x"].iloc[0] == pytest.approx(70.0)
-
-    def test_does_not_reverse_x_for_non_span_axis(self):
-        df = self._make_df(
-            [
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "other",
-                    "altitude_type": "absolute",
-                    "x": 30.0,
-                    "y": 0.0,
-                    "z": 10.0,
-                },
-            ]
-        )
-        engine = _make_balance_engine(
-            span_length=[100.0], conductor_altitude=[5.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        assert result["x"].iloc[0] == pytest.approx(30.0)
-
-    def test_adds_altitude_for_support_foot_relative(self):
-        df = self._make_df(
-            [
-                {
-                    "span_index": 1,
-                    "lateral_distance_type": "other",
-                    "altitude_type": "support_foot_relative",
-                    "x": 10.0,
-                    "y": 0.0,
-                    "z": 5.0,
-                },
-            ]
-        )
-        engine = _make_balance_engine(
-            span_length=[100.0, 200.0], conductor_altitude=[3.0, 7.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        assert result["z"].iloc[0] == pytest.approx(12.0)
-
-    def test_does_not_add_altitude_for_absolute(self):
-        df = self._make_df(
-            [
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "other",
-                    "altitude_type": "absolute",
-                    "x": 10.0,
-                    "y": 0.0,
-                    "z": 5.0,
-                },
-            ]
-        )
-        engine = _make_balance_engine(
-            span_length=[100.0], conductor_altitude=[3.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        assert result["z"].iloc[0] == pytest.approx(5.0)
-
-    def test_combined_x_reversal_and_z_offset(self):
-        df = self._make_df(
-            [
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "span_axis",
-                    "altitude_type": "support_foot_relative",
-                    "x": 20.0,
-                    "y": 5.0,
-                    "z": 8.0,
-                },
-            ]
-        )
-        engine = _make_balance_engine(
-            span_length=[150.0], conductor_altitude=[10.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        assert result["x"].iloc[0] == pytest.approx(130.0)
-        assert result["z"].iloc[0] == pytest.approx(18.0)
-        assert result["y"].iloc[0] == pytest.approx(5.0)
-
-    def test_multiple_rows_mixed(self):
-        df = self._make_df(
-            [
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "span_axis",
-                    "altitude_type": "absolute",
-                    "x": 10.0,
-                    "y": 0.0,
-                    "z": 5.0,
-                },
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "other",
-                    "altitude_type": "support_foot_relative",
-                    "x": 40.0,
-                    "y": 1.0,
-                    "z": 3.0,
-                },
-                {
-                    "span_index": 0,
-                    "lateral_distance_type": "span_axis",
-                    "altitude_type": "support_foot_relative",
-                    "x": 60.0,
-                    "y": 2.0,
-                    "z": 7.0,
-                },
-            ]
-        )
-        engine = _make_balance_engine(
-            span_length=[200.0], conductor_altitude=[10.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        np.testing.assert_array_almost_equal(
-            result["x"].values, [190.0, 40.0, 140.0]
-        )
-        np.testing.assert_array_almost_equal(
-            result["z"].values, [5.0, 13.0, 17.0]
-        )
-
-    def test_readonly_array_does_not_raise(self):
-        """Reproduce ValueError: assignment destination is read-only.
-
-        When the DataFrame backing arrays are read-only (e.g. from pandas CoW
-        or from constructing via read-only numpy arrays), to_numpy() returns a
-        non-writable view. The function must still work.
-        """
-        x = np.array([30.0, 60.0])
-        x.flags.writeable = False
-        z = np.array([5.0, 8.0])
-        z.flags.writeable = False
-
-        df = pd.DataFrame(
-            {
-                "span_index": [0, 0],
-                "lateral_distance_type": ["span_axis", "span_axis"],
-                "altitude_type": ["support_foot_relative", "absolute"],
-                "x": x,
-                "y": [0.0, 0.0],
-                "z": z,
-            }
-        )
-        engine = _make_balance_engine(
-            span_length=[100.0], conductor_altitude=[10.0]
-        )
-
-        result = change_obstacles_coordinates(df, engine)
-
-        np.testing.assert_array_almost_equal(result["x"].values, [70.0, 40.0])
-        np.testing.assert_array_almost_equal(result["z"].values, [15.0, 8.0])
