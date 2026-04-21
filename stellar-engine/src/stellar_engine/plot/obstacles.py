@@ -8,11 +8,11 @@ import logging
 import time
 from typing import Literal
 
-from mechaphlowers import BalanceEngine, PlotEngine
-from mechaphlowers.entities.arrays import ObstacleArray
-from mechaphlowers.core.geometry.distances import DistanceResult
 import numpy as np
 import pandas as pd
+from mechaphlowers import BalanceEngine, PlotEngine
+from mechaphlowers.core.geometry.distances import DistanceResult
+from mechaphlowers.entities.arrays import ObstacleArray
 
 logger = logging.getLogger(__name__)
 
@@ -59,14 +59,20 @@ def change_obstacles_coordinates(
     return df
 
 
-def get_current_obstacles(plot_engine: PlotEngine, project: bool, support_index: int) -> list:
-    obs = plot_engine.obstacles_dict(project=project, frame_index=support_index)
+def get_current_obstacles(
+    plot_engine: PlotEngine, project: bool, support_index: int
+) -> list:
+    obs = plot_engine.obstacles_dict(
+        project=project, frame_index=support_index
+    )
     return [
         {"uuid": key, "points": value.tolist()} for key, value in obs.items()
     ]
 
 
-def delete_obstacle(uuid: str, plot_engine: PlotEngine, project: bool, support_index: int) -> Literal["success"]:
+def delete_obstacle(
+    uuid: str, plot_engine: PlotEngine, project: bool, support_index: int
+) -> Literal["success"]:
     logger.info(f"Deleting obstacle with uuid: {uuid}")
     try:
         del plot_engine.position_engine.obstacles_array._data[uuid]
@@ -74,14 +80,21 @@ def delete_obstacle(uuid: str, plot_engine: PlotEngine, project: bool, support_i
     except KeyError:
         logger.warning(f"Obstacle with uuid: {uuid} not found.")
     finally:
-        result = get_current_obstacles(plot_engine, project=project, support_index=support_index)
+        result = get_current_obstacles(
+            plot_engine, project=project, support_index=support_index
+        )
         logger.info(f"Current obstacles after deletion attempt: {result}")
         return {"obstacles": result}
 
 
 def add_obstacles(
-    inputs: list, balance_engine: BalanceEngine, plot_engine: PlotEngine, project: bool, support_index: int):
-    logger.info(f"Adding obstacles...")
+    inputs: list,
+    balance_engine: BalanceEngine,
+    plot_engine: PlotEngine,
+    project: bool,
+    support_index: int,
+):
+    logger.info("Adding obstacles...")
     ti = time.time()
     print(ti)
     print(f"Received obstacles: {inputs}")
@@ -107,7 +120,9 @@ def add_obstacles(
             )
 
     if not rows:
-        logger.info("No obstacle positions to register — clearing all obstacles.")
+        logger.info(
+            "No obstacle positions to register — clearing all obstacles."
+        )
         plot_engine.position_engine.obstacles_array._data.clear()
         return {"obstacles": []}
 
@@ -116,39 +131,57 @@ def add_obstacles(
     df = change_obstacles_coordinates(df, balance_engine)
     plot_engine.add_obstacles(ObstacleArray(df))
 
-    result = get_current_obstacles(plot_engine, project=project, support_index=support_index)
+    result = get_current_obstacles(
+        plot_engine, project=project, support_index=support_index
+    )
     print(f"Obstacles after addition: {result}")
     print(f"Time taken to add obstacles: {time.time() - ti} seconds")
     return {"obstacles": result}
 
 
-def compute_distances(inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int):
-    logger.info(f"Computing distances for obstacles...")
+def compute_distances(
+    inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
+):
+    logger.info("Computing distances for obstacles...")
     print(f"Received inputs for distance computation: {inputs}")
     points_for_plot = plot_engine.position_engine.get_points_for_plot()
     result = []
 
-    for obstacle in plot_engine.position_engine.obstacles_array.data.to_dict(orient="records"):
+    for obstacle in plot_engine.position_engine.obstacles_array.data.to_dict(
+        orient="records"
+    ):
         span_index = obstacle["span_index"]
-        plot_engine.position_engine.distance_engine.add_curves(curve_points=points_for_plot[0].coords[span_index])
+        plot_engine.position_engine.distance_engine.add_curves(
+            curve_points=points_for_plot[0].coords[span_index]
+        )
         points_for_plot[1].coords[obstacle["span_index"]]
-        sea_level_groud_coords_start = plot_engine.position_engine.section_pts.supports_ground_coords[span_index].copy()
-        sea_level_groud_coords_end = plot_engine.position_engine.section_pts.supports_ground_coords[span_index + 1].copy()
-        sea_level_groud_coords_start[2] = 0.
-        sea_level_groud_coords_end[2] = 0.
-        
+        sea_level_groud_coords_start = (
+            plot_engine.position_engine.section_pts.supports_ground_coords[
+                span_index
+            ].copy()
+        )
+        sea_level_groud_coords_end = (
+            plot_engine.position_engine.section_pts.supports_ground_coords[
+                span_index + 1
+            ].copy()
+        )
+        sea_level_groud_coords_start[2] = 0.0
+        sea_level_groud_coords_end[2] = 0.0
+
         plot_engine.position_engine.distance_engine.add_span_frame(
-            x_axis_start=sea_level_groud_coords_start, 
+            x_axis_start=sea_level_groud_coords_start,
             x_axis_end=sea_level_groud_coords_end,
         )
-    # Compute the distance from a point to the curve
+        # Compute the distance from a point to the curve
         try:
             distance_result: DistanceResult = (
-                plot_engine.position_engine.distance_engine.plane_distance(np.array([obstacle['x'], obstacle['y'], obstacle['z']]))
+                plot_engine.position_engine.distance_engine.plane_distance(
+                    np.array([obstacle['x'], obstacle['y'], obstacle['z']])
+                )
             )
             u_proj, v_proj = distance_result.projection_points(
-                    distance_result.point_base
-                )
+                distance_result.point_base
+            )
             result.append(
                 {
                     "obstacleUuid": obstacle["name"],
@@ -167,19 +200,21 @@ def compute_distances(inputs: dict, plot_engine: PlotEngine, project: bool, supp
             )
 
         except ValueError as e:
-            logger.error(f"Error computing distance for obstacle {obstacle['name']}: {e}")
+            logger.error(
+                f"Error computing distance for obstacle {obstacle['name']}: {e}"
+            )
             result.append(
                 {
                     "obstacleUuid": obstacle["name"],
                     "points": [
                         {
                             "pointIndex": obstacle["point_index"],
-                            "linePoint":[],
-                            "virtualPointHorizontal":[],
-                            "virtualPointVertical":[],
-                            "distanceDiagonal":[],
-                            "distanceHorizontal":[],
-                            "distanceVertical":[],
+                            "linePoint": [],
+                            "virtualPointHorizontal": [],
+                            "virtualPointVertical": [],
+                            "distanceDiagonal": [],
+                            "distanceHorizontal": [],
+                            "distanceVertical": [],
                         }
                     ],
                 }

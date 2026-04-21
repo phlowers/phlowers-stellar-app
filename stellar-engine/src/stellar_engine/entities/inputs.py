@@ -9,8 +9,6 @@ from dataclasses import dataclass
 from typing import Literal, Optional
 
 
-
-
 @dataclass
 class Support:
     uuid: str
@@ -96,7 +94,6 @@ class Cable:
     rts_layer_8: float | None = None
     nb_strand_layer_8: float | None = None
     safety_coefficient: float | None = None
-
 
 
 @dataclass
