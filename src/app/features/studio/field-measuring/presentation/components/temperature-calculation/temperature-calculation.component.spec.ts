@@ -255,7 +255,30 @@ describe('TemperatureCalculationComponent', () => {
         expect(getByTestId('wind-incidence-value')).toBeNull();
       });
 
-      it('should show value and hide spinner when worker is ready', async () => {
+      it('should still show spinner when worker is ready but windIncidence is still null', async () => {
+        let resolveTask!: (value: { result: { windIncidence: number }; error: null; pythonErrorCode: null }) => void;
+        workerPythonServiceMock.runTask.mockReturnValueOnce(
+          new Promise((res) => {
+            resolveTask = res;
+          })
+        );
+
+        workerReadySubject.next(true);
+        fixture.detectChanges();
+
+        // task not yet resolved — windIncidence still null
+        expect(getByTestId('wind-incidence-spinner')).toBeTruthy();
+        expect(getByTestId('wind-incidence-value')).toBeNull();
+
+        resolveTask({ result: { windIncidence: 58 }, error: null, pythonErrorCode: null });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(getByTestId('wind-incidence-spinner')).toBeNull();
+        expect(getByTestId('wind-incidence-value')).toBeTruthy();
+      });
+
+      it('should show value and hide spinner when worker is ready and value is returned', async () => {
         workerPythonServiceMock.runTask.mockResolvedValue({
           result: { windIncidence: 58.00000000000001 },
           error: null,
@@ -271,6 +294,44 @@ describe('TemperatureCalculationComponent', () => {
         expect(valueEl).toBeTruthy();
         expect(valueEl?.textContent).toContain('58°');
       });
+
+      describe('missing inputs warning', () => {
+        it('should show warning when windDirection is null and hide spinner and value', () => {
+          componentRef.setInput(
+            'measureData',
+            createTestMeasureData({ azimuth: 45, windDirection: null, windIncidenceMode: 'auto' })
+          );
+          fixture.detectChanges();
+
+          expect(getByTestId('wind-incidence-missing-inputs-warning')).toBeTruthy();
+          expect(getByTestId('wind-incidence-spinner')).toBeNull();
+          expect(getByTestId('wind-incidence-value')).toBeNull();
+        });
+
+        it('should show warning when azimuth is null and hide spinner and value', () => {
+          componentRef.setInput(
+            'measureData',
+            createTestMeasureData({ azimuth: null, windDirection: 'North', windIncidenceMode: 'auto' })
+          );
+          fixture.detectChanges();
+
+          expect(getByTestId('wind-incidence-missing-inputs-warning')).toBeTruthy();
+          expect(getByTestId('wind-incidence-spinner')).toBeNull();
+          expect(getByTestId('wind-incidence-value')).toBeNull();
+        });
+
+        it('should not show warning when mode is perpendicular', () => {
+          componentRef.setInput(
+            'measureData',
+            createTestMeasureData({ azimuth: null, windDirection: null, windIncidenceMode: 'perpendicular' })
+          );
+          fixture.detectChanges();
+
+          expect(getByTestId('wind-incidence-missing-inputs-warning')).toBeNull();
+          expect(getByTestId('wind-incidence-perpendicular')).toBeTruthy();
+          expect(getByTestId('wind-incidence-perpendicular')?.textContent).toContain('90°');
+        });
+      });
     });
   });
 
@@ -282,6 +343,56 @@ describe('TemperatureCalculationComponent', () => {
     it('should be false when worker becomes ready', () => {
       workerReadySubject.next(true);
       expect(component.isWindIncidenceLoading()).toBe(false);
+    });
+  });
+
+  describe('windIncidenceDisplayState', () => {
+    it('should return perpendicular when mode is perpendicular', () => {
+      componentRef.setInput('measureData', createTestMeasureData({ windIncidenceMode: 'perpendicular' }));
+      expect(component.windIncidenceDisplayState()).toBe('perpendicular');
+    });
+
+    it('should return missing-inputs when mode is auto and windDirection is null', () => {
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ windIncidenceMode: 'auto', azimuth: 45, windDirection: null })
+      );
+      expect(component.windIncidenceDisplayState()).toBe('missing-inputs');
+    });
+
+    it('should return missing-inputs when mode is auto and azimuth is null', () => {
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ windIncidenceMode: 'auto', azimuth: null, windDirection: 'North' })
+      );
+      expect(component.windIncidenceDisplayState()).toBe('missing-inputs');
+    });
+
+    it('should return loading when worker is not ready', () => {
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ windIncidenceMode: 'auto', azimuth: 45, windDirection: 'North' })
+      );
+      // workerReady is false by default
+      expect(component.windIncidenceDisplayState()).toBe('loading');
+    });
+
+    it('should return loading when worker is ready but windIncidence is still null', () => {
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ windIncidenceMode: 'auto', azimuth: 45, windDirection: 'North', windIncidence: null })
+      );
+      workerReadySubject.next(true);
+      expect(component.windIncidenceDisplayState()).toBe('loading');
+    });
+
+    it('should return value when worker is ready and windIncidence is set', () => {
+      componentRef.setInput(
+        'measureData',
+        createTestMeasureData({ windIncidenceMode: 'auto', azimuth: 45, windDirection: 'North', windIncidence: 58 })
+      );
+      workerReadySubject.next(true);
+      expect(component.windIncidenceDisplayState()).toBe('value');
     });
   });
 

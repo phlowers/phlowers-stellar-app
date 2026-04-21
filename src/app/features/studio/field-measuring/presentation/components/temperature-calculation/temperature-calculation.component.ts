@@ -71,6 +71,15 @@ export class TemperatureCalculationComponent {
   private readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
 
   readonly isWindIncidenceLoading = computed(() => !this.workerReady());
+
+  readonly windIncidenceDisplayState = computed((): 'perpendicular' | 'missing-inputs' | 'loading' | 'value' => {
+    const { windIncidenceMode, windDirection, azimuth, windIncidence } = this.measureData();
+    if (windIncidenceMode !== 'auto') return 'perpendicular';
+    if (windDirection === null || azimuth === null) return 'missing-inputs';
+    if (this.isWindIncidenceLoading() || windIncidence === null) return 'loading';
+    return 'value';
+  });
+
   private readonly lastWindIncidenceInput = signal<{ azimuth: number; windDirection: string } | null>(null);
 
   private readonly windIncidenceEffect = effect(() => {
