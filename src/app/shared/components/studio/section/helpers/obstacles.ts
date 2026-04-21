@@ -127,7 +127,8 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
     (supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid)
   );
   const visibleObstacleUuids = new Set(
-    obstacles.filter((o) => visibleSupportUuids.has(o.supportUuid)).map((o) => o.uuid)
+    litData.obstacles.filter(lo => !obstacles.some(o => o.uuid === lo.uuid)).map(lo => lo.uuid).concat(
+    obstacles.filter((o) => visibleSupportUuids.has(o.supportUuid)).map((o) => o.uuid) )
   );
 
   return litData.obstacles.flatMap((litObstacle) => {

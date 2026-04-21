@@ -757,7 +757,7 @@ describe('StudioPageComponent', () => {
     it('should return the middle span value in span mode', () => {
       component.globalState.set('span');
       // startSupport=0, endSupport=4 → findMiddleSpan(0,4) = [2,3] → middleSpanIndex=2
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
       plotService.litData.set({ parameter: [100, 150, 200, 250, 300] });
       expect(component.globalParameter()).toBe(200);
     });
@@ -765,7 +765,7 @@ describe('StudioPageComponent', () => {
     it('should return null when middle span index is out of bounds in span mode', () => {
       component.globalState.set('span');
       // startSupport=8, endSupport=10 → findMiddleSpan(8,10) = [9,10] → index 9 is out of bounds
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 8, endSupport: 10 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 8, endSupport: 10 });
       plotService.litData.set({ parameter: [100, 150] });
       expect(component.globalParameter()).toBeNull();
     });
@@ -773,7 +773,7 @@ describe('StudioPageComponent', () => {
     it('should return the same span value for a single span in span mode', () => {
       component.globalState.set('span');
       // startSupport=2, endSupport=3 → findMiddleSpan(2,3) = [2,3] → middleSpanIndex=2
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 2, endSupport: 3 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 2, endSupport: 3 });
       plotService.litData.set({ parameter: [100, 150, 200, 250] });
       expect(component.globalParameter()).toBe(200);
     });
@@ -785,7 +785,7 @@ describe('StudioPageComponent', () => {
     });
 
     it('should recompute when globalState changes', () => {
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
       plotService.litData.set({ parameter: [10, 20, 30, 40, 50] });
 
       component.globalState.set('max_section');
@@ -817,13 +817,13 @@ describe('StudioPageComponent', () => {
     it('should return the middle span value in span mode', () => {
       component.globalState.set('span');
       // startSupport=0, endSupport=4 → findMiddleSpan(0,4) = [2,3] → middleSpanIndex=2
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
       plotService.litData.set({ utilization_rate: [40, 55, 70, 85, 95] });
       expect(component.globalStressRate()).toBe(70);
     });
 
     it('should recompute when globalState changes', () => {
-      plotService.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
       plotService.litData.set({ utilization_rate: [10, 20, 30, 40, 50] });
 
       component.globalState.set('max_section');

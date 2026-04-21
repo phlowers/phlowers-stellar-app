@@ -301,6 +301,22 @@ describe('createObstaclesAnnotations', () => {
     expect(label).toMatchObject({ x: 11, y: 22, z: 3, text: 'Obstacle 1' });
   });
 
+  it('should fallback to obstacle UUID when domain obstacle is not found', () => {
+    const params = basePlotParams({
+      obstacles: [], // Empty — no domain obstacles
+      litData: makeLitData([{ uuid: 'obs-missing-uuid-123', points: [[1, 2, 3]] }]),
+      view: '3d'
+    });
+    const annotations = createObstaclesAnnotations(params);
+    expect(annotations).toHaveLength(2);
+    // Label should display the UUID instead of an empty string
+    const label = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === 'obs-missing-uuid-123'
+    ) as ObstacleAnnotation;
+    expect(label).toBeTruthy();
+    expect(label.text).toBe('obs-missing-uuid-123');
+  });
+
   it('should add support altitude to z when altitudeType is relative', () => {
     const obstacle = makeObstacle({
       altitudeType: 'relative',

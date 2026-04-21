@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { CableSpanManipComponent } from './cable-span-manip';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { Section } from '@shared/domain';
@@ -31,6 +32,7 @@ describe('CableSpanManipComponent', () => {
   let component: CableSpanManipComponent;
   let fixture: ComponentFixture<CableSpanManipComponent>;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockPlotSpanService: vi.Mocked<PlotSpanService>;
   let mockCableSpanManipService: vi.Mocked<CableSpanManipService>;
   let mockChainsService: { getChains: vi.Mock };
 
@@ -43,14 +45,17 @@ describe('CableSpanManipComponent', () => {
       study: createSignalMock(null),
       loading: signal(false),
       plotOptions: createSignalMock({ startSupport: 0, endSupport: 1 }),
+      plotOptionsChange: vi.fn()
+    } as unknown as vi.Mocked<PlotService>;
+
+    mockPlotSpanService = {
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue([
         { label: 'PA1', value: 'LEFT' },
         { label: 'PA2', value: 'RIGHT' }
       ]),
-      plotOptionsChange: vi.fn(),
       getSpanOptions: signal([{ label: 'PA1 - PA2', value: 'support-uuid-1' }])
-    } as unknown as vi.Mocked<PlotService>;
+    } as unknown as vi.Mocked<PlotSpanService>;
 
     mockCableSpanManipService = {
       save: vi.fn().mockResolvedValue(undefined),
@@ -68,6 +73,7 @@ describe('CableSpanManipComponent', () => {
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: CableSpanManipService, useValue: mockCableSpanManipService },
         { provide: ChainsService, useValue: mockChainsService }
       ]
@@ -317,7 +323,6 @@ describe('CableSpanManipComponent', () => {
       expect(form?.getAttribute('aria-busy')).toBe('true');
     });
   });
-
   // ---------------------------------------------------------------------------
   // onScopeChange()
   // ---------------------------------------------------------------------------

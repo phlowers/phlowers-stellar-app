@@ -1,0 +1,1221 @@
+
+ RUN  v3.2.4 /home/infoger/phlowers-stellar-app
+
+stderr | src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts > StudioPageComponent - HTML rendering > HTML rendering - global-state-select > should render global-state-select
+NG0304: 'app-new-charge-modal' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-new-charge-modal' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-new-charge-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-studio-menu-bar' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-studio-menu-bar' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-studio-menu-bar' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-studio-top-toolbar' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-studio-top-toolbar' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-studio-top-toolbar' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-icon' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-icon' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-icon' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-icon' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-section-plot-cards' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-section-plot-cards' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-section-plot-cards' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-side-tabs' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-side-tabs' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-side-tabs' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-side-tab' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-side-tab' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-side-tab' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-side-tab' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-side-tab' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-side-tab' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-toolbar-dialog' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-toolbar-dialog' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-toolbar-dialog' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0303: Can't bind to 'isOpen' since it isn't a known property of 'app-new-charge-modal' (used in the 'StudioPageComponent2' component template).
+1. If 'app-new-charge-modal' is an Angular component and it has the 'isOpen' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-new-charge-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+NG0303: Can't bind to 'section' since it isn't a known property of 'app-studio-menu-bar' (used in the 'StudioPageComponent2' component template).
+1. If 'app-studio-menu-bar' is an Angular component and it has the 'section' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-studio-menu-bar' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+NG0303: Can't bind to 'study' since it isn't a known property of 'app-studio-menu-bar' (used in the 'StudioPageComponent2' component template).
+1. If 'app-studio-menu-bar' is an Angular component and it has the 'study' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-studio-menu-bar' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+NG0304: 'app-studio' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-studio' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-studio' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-icon' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-icon' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0304: 'app-icon' is not a known element (used in the 'StudioPageComponent2' component template):
+1. If 'app-icon' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-icon' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+NG0303: Can't bind to 'isPreview' since it isn't a known property of 'app-studio' (used in the 'StudioPageComponent2' component template).
+1. If 'app-studio' is an Angular component and it has the 'isPreview' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-studio' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+ ❯ src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts (61 tests | 5 failed) 1596ms
+   ✓ StudioPageComponent > toggleSidebar should toggle open state and width  443ms
+   ✓ StudioPageComponent > sliderOptions should reflect initial ceil and invert values 25ms
+   ✓ StudioPageComponent > ngOnInit should navigate when params are missing 21ms
+   ✓ StudioPageComponent > ngOnInit should load study and section, then set plot options 22ms
+   ✓ StudioPageComponent > ngOnInit should navigate if section not found 13ms
+   ✓ StudioPageComponent > debounceUpdateSliderOptions should call plotOptionsChange after delay 16ms
+   ✓ StudioPageComponent > debounceUpdateSliderOptions should set supports to single when diff is 1 13ms
+   ✓ StudioPageComponent > debounceUpdateSliderOptions should set spanAmountChoice to double when diff is 2 13ms
+   ✓ StudioPageComponent > sliderOptions translate callback should return value + 1 as string 11ms
+   ✓ StudioPageComponent > ngOnInit should navigate when study is null 10ms
+   ✓ StudioPageComponent > updateSliderOptions should debounce startSupport changes 12ms
+   ✓ StudioPageComponent > updateSliderOptions should debounce endSupport changes 10ms
+   ✓ StudioPageComponent > updateSliderOptions should not call debounce when values unchanged 10ms
+   ✓ StudioPageComponent > onSelectSpanAmount should set single span offset 8ms
+   ✓ StudioPageComponent > onSelectSpanAmount should set double span offset 10ms
+   ✓ StudioPageComponent > onSelectSpanAmount should reset to all supports 8ms
+   ✓ StudioPageComponent > onSelectSpanAmount single should clamp to maxSupport 8ms
+   ✓ StudioPageComponent > onSupportButtonClick right should increment supports 8ms
+   ✓ StudioPageComponent > onSupportButtonClick left should decrement supports 9ms
+   ✓ StudioPageComponent > onSupportButtonClick left should clamp to zero 8ms
+   ✓ StudioPageComponent > onSupportButtonClick right with invert should decrement supports 7ms
+   ✓ StudioPageComponent > onSupportButtonClick left with invert should increment supports 8ms
+   ✓ StudioPageComponent > onSupportButtonClick right with invert should clamp to zero 8ms
+   ✓ StudioPageComponent > ngOnDestroy should reset plot service and clear obstacle selection 8ms
+   ✓ StudioPageComponent > UC: studio page initialization and navigation > UC-SP1: should redirect to studies when route params are missing 8ms
+   ✓ StudioPageComponent > UC: studio page initialization and navigation > UC-SP2: should initialize sidebar in closed state 14ms
+   ✓ StudioPageComponent > UC: studio page initialization and navigation > UC-SP3: should open sidebar on toggle 18ms
+   ✓ StudioPageComponent > filteredObstaclesOptions > should return empty array when section is null 8ms
+   ✓ StudioPageComponent > filteredObstaclesOptions > should include only obstacles whose supportUuid falls within the slider range (endSupport exclusive) 9ms
+   ✓ StudioPageComponent > filteredObstaclesOptions > should exclude obstacles outside the slider range 12ms
+   ✓ StudioPageComponent > filteredObstaclesOptions > should not include selected obstacle when it is outside the visible slider range 9ms
+   ✓ StudioPageComponent > filteredObstaclesOptions > should exclude obstacles attached to endSupport (they belong to the next span) 15ms
+   ✓ StudioPageComponent > obstacle selection reset on span change > should reset obstacle selection when startSupport or endSupport change 10ms
+   ✓ StudioPageComponent > obstaclePointOptions > should return empty array when no obstacle is selected 7ms
+   ✓ StudioPageComponent > obstaclePointOptions > should return labeled point options for the selected obstacle 8ms
+   ✓ StudioPageComponent > obstaclePointOptions > should return empty array when selected obstacle uuid does not match any obstacle 7ms
+   ✓ StudioPageComponent > onObstacleSelect > should auto-select point index 0 when obstacle has exactly one point 8ms
+   ✓ StudioPageComponent > onObstacleSelect > should set null point index when obstacle has multiple points 11ms
+   ✓ StudioPageComponent > onObstacleSelect > should clear obstacle UUID and reset point index when called with null 12ms
+   ✓ StudioPageComponent > onObstacleSelect > should reset distanceType to null when selecting an obstacle 10ms
+   ✓ StudioPageComponent > onObstacleSelect > should reset distanceType to null when deselecting an obstacle 8ms
+   ✓ StudioPageComponent > onObstacleSelect > should load the obstacle into the form when selected 7ms
+   ✓ StudioPageComponent > globalState > should default to max_section 8ms
+   ✓ StudioPageComponent > globalParameter > should return null when litData is null 9ms
+   ✓ StudioPageComponent > globalParameter > should return null when parameter array is empty 16ms
+   ✓ StudioPageComponent > globalParameter > should return the max value across all spans in max_section mode 11ms
+   × StudioPageComponent > globalParameter > should return the middle span value in span mode 23ms
+     → expected null to be 200 // Object.is equality
+   ✓ StudioPageComponent > globalParameter > should return null when middle span index is out of bounds in span mode 8ms
+   × StudioPageComponent > globalParameter > should return the same span value for a single span in span mode 18ms
+     → expected null to be 200 // Object.is equality
+   ✓ StudioPageComponent > globalParameter > should round to 2 decimal places 15ms
+   × StudioPageComponent > globalParameter > should recompute when globalState changes 16ms
+     → expected null to be 30 // Object.is equality
+   ✓ StudioPageComponent > globalStressRate > should return null when litData is null 7ms
+   ✓ StudioPageComponent > globalStressRate > should return null when utilization_rate array is empty 7ms
+   ✓ StudioPageComponent > globalStressRate > should return the max value across all spans in max_section mode 7ms
+   × StudioPageComponent > globalStressRate > should return the middle span value in span mode 7ms
+     → expected null to be 70 // Object.is equality
+   × StudioPageComponent > globalStressRate > should recompute when globalState changes 7ms
+     → expected null to be 30 // Object.is equality
+   ✓ StudioPageComponent - HTML rendering > HTML rendering - global-state-select > should render global-state-select 178ms
+   ✓ HTML rendering - distance radio buttons disabled state > should render the three distance radio buttons 76ms
+   ✓ HTML rendering - distance radio buttons disabled state > should disable all distance radio buttons when no obstacle is selected 90ms
+   ✓ HTML rendering - distance radio buttons disabled state > should enable all distance radio buttons when an obstacle is selected 113ms
+   ✓ HTML rendering - distance radio buttons disabled state > should disable radio buttons when obstacle is deselected 78ms
+ ❯ src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts (56 tests | 5 failed) 4519ms
+   ✓ CableSpanManipComponent > should be created  392ms
+   ✓ CableSpanManipComponent > isCalculating computed > should reflect plotService.loading() as false by default 121ms
+   ✓ CableSpanManipComponent > isCalculating computed > should be true when plotService.loading() is true 114ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the form 118ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the zoom button 102ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the reset button 120ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the span select 114ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the reference support select 60ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the distance to ref support input 69ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the cable manip type select 95ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the cable manip method select 76ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the lateral distance input 97ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the altitude input 104ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the distance calculation button as disabled 97ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the distance result read-only field 76ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the anchoring select 83ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the save button 77ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the delete button 57ms
+   ✓ CableSpanManipComponent > HTML rendering - form structure > should render the calculate button 105ms
+   ✓ CableSpanManipComponent > HTML rendering - conditional anchoring sections > should render sling length when anchoring is with_sling 73ms
+   ✓ CableSpanManipComponent > HTML rendering - conditional anchoring sections > should not render chain fields when anchoring is with_sling 56ms
+   ✓ CableSpanManipComponent > HTML rendering - isWithCrane conditional > should render the longitudinal distance input when cableManipType is with_a_crane 61ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should disable save button when form is invalid 55ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should disable calculate button when form is invalid 57ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should disable save button when form is valid but not dirty 102ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should enable save button when form is valid and dirty 77ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should disable delete button when no manipulation is saved for the span 64ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should enable delete button when a manipulation is saved 71ms
+   ✓ CableSpanManipComponent > HTML rendering - button states > should disable buttons when isLoading is true 73ms
+   ✓ CableSpanManipComponent > HTML rendering - accessibility > should not set aria-busy when not loading 89ms
+   ✓ CableSpanManipComponent > HTML rendering - accessibility > should set aria-busy when loading 88ms
+   ✓ CableSpanManipComponent > onScopeChange() > should disable referenceSupport and clear options when uuid is null 51ms
+   × CableSpanManipComponent > onScopeChange() > should enable referenceSupport and set options when valid uuid is given 62ms
+     → expected false to be true // Object.is equality
+   ✓ CableSpanManipComponent > onScopeChange() > should update distRefSupportMin and distRefSupportMax from support data 52ms
+   ✓ CableSpanManipComponent > onScopeChange() > should not call plotOptionsChange when scope changes (zoom is explicit) 58ms
+   × CableSpanManipComponent > onScopeChange() > should set isDirtySinceLastSave to true for a new manipulation (no saved data) 51ms
+     → expected false to be true // Object.is equality
+   × CableSpanManipComponent > onScopeChange() > should set isDirtySinceLastSave to false when loading an existing manipulation 106ms
+     → expected true to be false // Object.is equality
+   × CableSpanManipComponent > onScopeChange() > should load saved manipulation values when one exists for the span 75ms
+     → expected null to be 'RIGHT' // Object.is equality
+   ✓ CableSpanManipComponent > resetForm() > should reset content fields to defaults 79ms
+   ✓ CableSpanManipComponent > resetForm() > should reset isDirtySinceLastSave to false 62ms
+   ✓ CableSpanManipComponent > resetForm() > should preserve the current scope 62ms
+   ✓ CableSpanManipComponent > zoomToSpan() > should not call plotOptionsChange when no scope is selected 73ms
+   × CableSpanManipComponent > zoomToSpan() > should call plotOptionsChange with span index when scope is selected 77ms
+     → expected "spy" to be called with arguments: [ { startSupport: +0, endSupport: 1 } ][90m
+
+Number of calls: [1m0[22m
+[39m
+   ✓ CableSpanManipComponent > saveForm() > should not call save service if form is invalid 57ms
+   ✓ CableSpanManipComponent > saveForm() > should call cableSpanManipService.save with form values 54ms
+   ✓ CableSpanManipComponent > saveForm() > should reset isDirtySinceLastSave after save 57ms
+   ✓ CableSpanManipComponent > saveForm() > should set hasSavedManipulation to true after save 53ms
+   ✓ CableSpanManipComponent > saveForm() > should not set hasSavedManipulation to true when save rejects 53ms
+   ✓ CableSpanManipComponent > saveForm() > should always clear isLoading even when save rejects 78ms
+   ✓ CableSpanManipComponent > saveForm() > should not reset isDirtySinceLastSave when save rejects 59ms
+   ✓ CableSpanManipComponent > deleteForm() > should call delete service when a manipulation exists for the selected span 65ms
+   ✓ CableSpanManipComponent > deleteForm() > should not call delete when no manipulation exists for the selected span 63ms
+   ✓ CableSpanManipComponent > deleteForm() > should set hasSavedManipulation to false after deletion 55ms
+   ✓ CableSpanManipComponent > deleteForm() > should reset form fields to defaults after deletion 50ms
+   ✓ CableSpanManipComponent > isFormInvalid() > should return true when scope is null 67ms
+   ✓ CableSpanManipComponent > isFormInvalid() > should return false when all required fields are valid 52ms
+ ✓ src/app/features/study/presentation/components/sections-tab/newSectionModal/manualSection/manualSection.component.spec.ts (34 tests) 6494ms
+   ✓ ManualSectionComponent > should create  713ms
+ ✓ src/app/features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/supportsTable.component.spec.ts (37 tests) 13054ms
+   ✓ SupportsTableComponent > should create  772ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's number to all supports  367ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's spanLength to all supports  383ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's spanAngle to all supports  317ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's attachmentHeight to all supports  351ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's attachmentSet to all supports  310ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's armLength to all supports  302ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's name to all supports  307ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick > should copy the first support's chainV to all supports  328ms
+   ✓ SupportsTableComponent > copyColumn with chainName > should copy chainName and propagate chainLength and chainWeight to all supports  354ms
+   ✓ SupportsTableComponent > copyColumn with empty supports array > should not emit any events when supports array is empty  362ms
+   ✓ SupportsTableComponent > copyColumn with single support > should emit only once when there is only one support  400ms
+   ✓ SupportsTableComponent > copyColumn with chainName and single support > should emit chainName, chainLength, and chainWeight when copying chainName with single support  361ms
+   ✓ SupportsTableComponent > ngOnInit > should call getData on init  420ms
+   ✓ SupportsTableComponent > getData > should load chains data  332ms
+   ✓ SupportsTableComponent > onSupportFieldChange > should emit supportChange for non-chainName fields  303ms
+   ✓ SupportsTableComponent > onSupportFieldChange > should emit chainName, chainLength, and chainWeight when chainName is changed  326ms
+   ✓ SupportsTableComponent > onSupportFieldChange > should only emit chainName when chain is not found  315ms
+   ✓ SupportsTableComponent > openAttachmentSetModal > should set the correct support and open the modal  357ms
+   ✓ SupportsTableComponent > onValidateFormAttachmentSetModal > should update support properties when form is validated  441ms
+   ✓ SupportsTableComponent > onSupportNumberDoubleClick in view mode > should not copy when mode is view  386ms
+   ✓ SupportsTableComponent > onChainNameFilter > should add a supplementary chain option when the filter value is not in the catalog  349ms
+   ✓ SupportsTableComponent > onChainNameFilter > should not update supplementary options when the filter value is already in the catalog  361ms
+   ✓ SupportsTableComponent > onSupportNameFilter > should add a supplementary support name when the filter value is not in the catalog  364ms
+   ✓ SupportsTableComponent > onSupportNameFilter > should not update supplementary names when the filter value is already in the catalog  343ms
+   ✓ SupportsTableComponent > isNumber > should return true for numeric values  342ms
+   ✓ SupportsTableComponent > isNumber > should return false for non-numeric values  316ms
+   ✓ SupportsTableComponent > getData with attachments > should populate supportFilterTable and supplementarySupportFilterTable  349ms
+   ✓ SupportsTableComponent > onSupportFieldChange with attachmentHeight > should emit attachmentHeight and the computed supportFootAltitude  314ms
+   ✓ SupportsTableComponent > HTML rendering > should render supports-table  360ms
+   ✓ SupportsTableComponent > HTML rendering > should render support-number-input for each support  333ms
+   ✓ SupportsTableComponent > HTML rendering > should render span-length-input for each support  327ms
+   ✓ SupportsTableComponent > HTML rendering > should render attachment-height-input for each support  309ms
+   ✓ SupportsTableComponent > HTML rendering > should render chain-name-select for each support  309ms
+   ✓ SupportsTableComponent > HTML rendering > should render chain-length-input for each support  307ms
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadProtoV4File > should handle FileReader errors gracefully
+Error importing file Error: fileReadError
+    at Object.reader.onerror [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:379:16[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.spec.ts:192:33
+    at _ZoneDelegate.invoke [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:410:32[90m)[39m
+    at ProxyZoneSpec.onInvoke [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone-testing.umd.js:2219:43[90m)[39m
+    at _ZoneDelegate.invoke [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:409:38[90m)[39m
+    at ZoneImpl.run [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:145:47[90m)[39m
+    at wrappedFunc [90m(/home/infoger/phlowers-stellar-app/[39mpackages/vitest-angular/setup-zone.ts:55:26[90m)[39m
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:155:11
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:26
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1897:20
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadProtoV4File > should show error message and return early when cable does not exist in database
+Error importing file Error: cableNotFound
+    at ImportStudyComponent2.validateCable [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:297:13[90m)[39m
+    at ImportStudyComponent2.processProtoV4FileContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:347:19[90m)[39m
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:367:11[90m)[39m
+
+ ✓ src/app/features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.component.spec.ts (28 tests) 10015ms
+   ✓ NewSectionModalComponent (Jest) > should create  885ms
+   ✓ NewSectionModalComponent (Jest) > should display create title when mode=create  450ms
+   ✓ NewSectionModalComponent (Jest) > should display section name when mode != create  429ms
+   ✓ NewSectionModalComponent (Jest) > should emit isOpenChange(false) when onVisibleChange(false)  369ms
+   ✓ NewSectionModalComponent (Jest) > should emit sectionChange and update validation when onSectionChange called  311ms
+   ✓ NewSectionModalComponent (Jest) > should disable validate button if required fields are missing  353ms
+   ✓ NewSectionModalComponent (Jest) > should show "create section" when mode=create  300ms
+   ✓ NewSectionModalComponent (Jest) > headerTitle > should return the view text when mode is view  327ms
+   ✓ NewSectionModalComponent (Jest) > onDuplicateSection > should call duplicateSection and emit setSection with the new section  460ms
+   ✓ NewSectionModalComponent (Jest) > onEditSection > should emit setMode(edit) and call checkFields  324ms
+   ✓ NewSectionModalComponent (Jest) > onDeleteSection > should call deleteSection and emit isOpenChange(false)  356ms
+   ✓ NewSectionModalComponent (Jest) > checkFields name uniqueness > should set isNameUnique to false when another section has the same name  309ms
+   ✓ NewSectionModalComponent (Jest) > checkFields name uniqueness > should set isNameUnique to true when no other section shares the same name  314ms
+   ✓ NewSectionModalComponent (Jest) > supportsBoundsErrors > should disable the save button when bounds errors are present  471ms
+   ✓ NewSectionModalComponent (Jest) > HTML rendering > should render new-section-dialog  314ms
+   ✓ NewSectionModalComponent (Jest) > HTML rendering > should render source-referencial-radio in create mode  327ms
+   ✓ NewSectionModalComponent (Jest) > HTML rendering > should render source-extraction-radio in create mode  429ms
+   ✓ NewSectionModalComponent (Jest) > HTML rendering > should render delete-section-btn in view mode  323ms
+   ✓ NewSectionModalComponent (Jest) > HTML rendering > should render edit-section-btn in view mode  321ms
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadProtoV4File > file reading and decoding (lines 211-228) > should handle result without data URL prefix
+Error importing file Error: cableNotFound
+    at ImportStudyComponent2.validateCable [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:297:13[90m)[39m
+    at ImportStudyComponent2.processProtoV4FileContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:347:19[90m)[39m
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:367:11[90m)[39m
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle invalid JSON in file
+Error parsing JSON SyntaxError: Unexpected token 'i', "invalid json content" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at ImportStudyComponent2.parseJsonContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:137:19[90m)[39m
+    at ImportStudyComponent2.processAppFileContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:196:31[90m)[39m
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:210:22[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.spec.ts:1271:24
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle invalid JSON in file
+Error importing file Error: fileParseError
+    at ImportStudyComponent2.parseJsonContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:140:13[90m)[39m
+    at ImportStudyComponent2.processAppFileContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:196:31[90m)[39m
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:210:22[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.spec.ts:1271:24
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+ ✓ src/app/features/studio/field-measuring/presentation/components/calculus-setting/papoto/papoto.component.spec.ts (43 tests) 2483ms
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle error during createStudy
+Error importing study Error: Database error
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.spec.ts:1398:66
+    at _ZoneDelegate.invoke [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:410:32[90m)[39m
+    at ProxyZoneSpec.onInvoke [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone-testing.umd.js:2219:43[90m)[39m
+    at _ZoneDelegate.invoke [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:409:38[90m)[39m
+    at ZoneImpl.run [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:145:47[90m)[39m
+    at wrappedFunc [90m(/home/infoger/phlowers-stellar-app/[39mpackages/vitest-angular/setup-zone.ts:55:26[90m)[39m
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:155:11
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:26
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1897:20
+    at new ZoneAwarePromise [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mzone.js[24m/bundles/zone.umd.js:2580:29[90m)[39m
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle error during createStudy
+Error importing file Error: studyImportError
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:216:20[90m)[39m
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle invalid JSON in file
+Error parsing JSON SyntaxError: Unexpected token 'i', "invalid json content" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at ImportStudyComponent2.parseJsonContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:137:19[90m)[39m
+    at ImportStudyComponent2.processAppFileContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:196:31[90m)[39m
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:210:22[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.spec.ts:1672:24
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle invalid base64 content
+Error decoding base64 DOMException {}
+
+stderr | src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts > ImportStudyComponent > loadAppFile > should handle null result from FileReader
+Error parsing JSON SyntaxError: Unexpected token '', "ée" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at ImportStudyComponent2.parseJsonContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:137:19[90m)[39m
+    at ImportStudyComponent2.processAppFileContent [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:196:31[90m)[39m
+    at Object.reader.onload [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.ts:210:22[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/features/studies/presentation/components/import-study/import-study.component.spec.ts:1748:24
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+ ✓ src/app/features/studies/presentation/components/import-study/import-study.component.spec.ts (55 tests) 4637ms
+   ✓ ImportStudyComponent > loadProtoV4File > Papa.parse error handling (lines 267-273) > should execute reject path when parseError message is in errors  518ms
+   ✓ ImportStudyComponent > loadProtoV4File > Papa.parse error handling (lines 267-273) > should throw fileParseError when parseError is not a known error  518ms
+ ✓ src/app/features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component.spec.ts (88 tests) 5949ms
+   ✓ ObstaclesFormComponent > results display > should show " - " for all results when values are null  428ms
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should create
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should close tool when visible changes to false
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should not close tool when visible changes to true
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > isCalculating signal > should start as false
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > isCalculating signal > should be true during onCalculate and false after
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > isCalculating signal > should reset to false even when calculation throws
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should calculate guying when all inputs are provided
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should not calculate when inputs are missing
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should handle calculation error
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should compute support type as Suspension when chainV is true
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should compute support type as Anchor when chainV is false
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should compute support options from selected span
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should compute vtlWithoutGuying when support is selected
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should call onExportVhl
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should call onExport
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should set form values from section when section has vtl_and_guying data
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should not set form values when section is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should not set form values when section has no vtl_and_guying inputs
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should save form data and call sectionService.createOrUpdateSection
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should not save when study is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should not save when section is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should return true when form is valid
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should return false when altitude is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should return false when horizontalDistance is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should reset form and clear all signals
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > should clear selectedSupport when selectedSpan changes
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+ ✓ src/app/features/study/presentation/components/sections-tab/sectionsTab.component.spec.ts (36 tests) 3145ms
+   ✓ SectionsTabComponent > should display "No existing section" when sections is empty  583ms
+   ✓ SectionsTabComponent > should open new section modal in create mode when clicking "Add a section"  733ms
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render guying-span-select
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render reference-support-select
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render export-vtl-btn
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render altitude-input
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render horizontal-distance-input
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render with-pulley-checkbox
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > HTML rendering > should render calculate-btn
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should have selectedSpan with both index and uuid when span is selected
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+ ✓ src/app/features/studio/core/presentation/components/top-toolbar/top-toolbar.component.spec.ts (66 tests) 2958ms
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should call getSupportOptions with the correct uuid from selectedSpan
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should populate supportOptions when selectedSpan has a valid uuid
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should enable selectedSupport control when selectedSpan has a valid uuid
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should disable selectedSupport control when selectedSpan is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should call getSupportOptions with null when selectedSpan is null
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should compute vtlWithoutGuying using the correct support index derived from selectedSpan
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should use getSpanOptionsWithIndex in the template to populate span select
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+stderr | src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts > VhlAndGuyingComponent > Regression tests - Bug #589: selectedSpan.uuid was empty > should preserve uuid when saving to section
+NG0303: Can't bind to 'btnLoading' since it isn't a known property of 'button' (used in the 'VhlAndGuyingComponent2' component template).
+1. If 'button' is an Angular component and it has the 'btnLoading' input, then verify that it is included in the '@Component.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.
+
+ ✓ src/app/features/studio/toolbar/presentation/components/vtl-and-guying/vtl-and-guying.component.spec.ts (42 tests) 2733ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/header/header.component.spec.ts (48 tests) 2579ms
+ ✓ src/app/features/studio/loads/presentation/components/cable-length-change/cable-length-change.spec.ts (54 tests) 2778ms
+ ✓ src/app/features/studio/core/presentation/components/top-toolbar/scale-view/scale-view.component.spec.ts (48 tests) 2413ms
+ ✓ src/app/features/studio/loads/presentation/components/load-marking/load-marking.component.spec.ts (32 tests) 2159ms
+ ✓ src/app/shared/components/new-charge-modal/new-charge-modal.component.spec.ts (27 tests) 2309ms
+   ✓ NewChargeModalComponent (Jest) > should display create title  334ms
+ ✓ src/app/features/study/presentation/pages/study/study.component.spec.ts (40 tests) 2273ms
+   ✓ StudyComponent > Component Creation > should initialize with default values  619ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/field-datas/field-datas.component.spec.ts (23 tests) 1788ms
+ ✓ src/app/features/studio/loads/presentation/components/climate/climate.component.spec.ts (41 tests) 1595ms
+ ✓ src/app/features/studio/core/presentation/components/menu-bar/menu-bar.component.spec.ts (46 tests) 1254ms
+stdout | src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.spec.ts > FieldMeasuringComponent > onExport > should log export data
+Export {
+  uuid: [32m'27e54046-91e8-4588-baf8-43313b842463'[39m,
+  name: [32m''[39m,
+  span: [1mnull[22m,
+  longitude: [1mnull[22m,
+  latitude: [1mnull[22m,
+  altitude: [1mnull[22m,
+  azimuth: [1mnull[22m,
+  date: [35m2026-04-21T09:13:54.963Z[39m,
+  time: [35m2026-04-21T09:13:54.963Z[39m,
+  season: [32m'summer'[39m,
+  ambientTemperature: [1mnull[22m,
+  windSpeed: [1mnull[22m,
+  windSpeedUnit: [32m'kmh'[39m,
+  windDirection: [1mnull[22m,
+  skyCover: [1mnull[22m,
+  calculationMethod: [32m'papoto'[39m,
+  leftSupport: [1mnull[22m,
+  spanLength: [1mnull[22m,
+  measuredElevationDifference: [1mnull[22m,
+  HL: [1mnull[22m,
+  H1: [1mnull[22m,
+  H2: [1mnull[22m,
+  H3: [1mnull[22m,
+  HR: [1mnull[22m,
+  VL: [1mnull[22m,
+  V1: [1mnull[22m,
+  V2: [1mnull[22m,
+  V3: [1mnull[22m,
+  VR: [1mnull[22m,
+  cableHAccDistance: [1mnull[22m,
+  cableVerticalAccAngle: [1mnull[22m,
+  calculationType: [32m'parametre'[39m,
+  cableTangentAngle: [1mnull[22m,
+  lengthBetweenSightGD: [1mnull[22m,
+  elevationDifferenceBetweenSightGD: [1mnull[22m,
+  xSight1: [1mnull[22m,
+  xSight2: [1mnull[22m,
+  xSight3: [1mnull[22m,
+  ySight1: [1mnull[22m,
+  ySight2: [1mnull[22m,
+  ySight3: [1mnull[22m,
+  transit: [1mnull[22m,
+  windIncidence: [1mnull[22m,
+  windIncidenceMode: [32m'auto'[39m,
+  diffuseSolarFlux: [33m123[39m,
+  directSolarFlux: [1mnull[22m,
+  diffuseDirectSolarFlux: [33m246[39m,
+  diffusedSolarFlux: [1mnull[22m,
+  measuredDiffusedPlusDirectSolarFlux: [1mnull[22m,
+  measuredDiffusedSolarFlux: [1mnull[22m,
+  diffusedPlusDirectSolarFlux: [1mnull[22m,
+  updateMode15C: [32m'auto'[39m,
+  parameterPapoto: [1mnull[22m,
+  parameterUncertaintyPapoto: [1mnull[22m,
+  cableTemperatureCalibration: [1mnull[22m,
+  cableTemperatureCalibrationUncertainty: [1mnull[22m,
+  manualParameterCalculation15CWithoutWind: [1mnull[22m,
+  link: [1mnull[22m,
+  voltage: [1mnull[22m,
+  spanType: [1mnull[22m,
+  phaseNumber: [1mnull[22m,
+  numberOfConductors: [1mnull[22m,
+  cableName: [1mnull[22m,
+  outputs: { papoto: [1mnull[22m, cableTemperature: [1mnull[22m, parameter15C: [1mnull[22m }
+}
+
+stdout | src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.spec.ts > FieldMeasuringComponent > onReport > should log report data
+Report {
+  uuid: [32m'2c17f143-68c0-46dc-ba66-cecc51eb42ff'[39m,
+  name: [32m''[39m,
+  span: [1mnull[22m,
+  longitude: [1mnull[22m,
+  latitude: [1mnull[22m,
+  altitude: [1mnull[22m,
+  azimuth: [1mnull[22m,
+  date: [35m2026-04-21T09:13:54.988Z[39m,
+  time: [35m2026-04-21T09:13:54.988Z[39m,
+  season: [32m'summer'[39m,
+  ambientTemperature: [1mnull[22m,
+  windSpeed: [1mnull[22m,
+  windSpeedUnit: [32m'kmh'[39m,
+  windDirection: [1mnull[22m,
+  skyCover: [1mnull[22m,
+  calculationMethod: [32m'papoto'[39m,
+  leftSupport: [1mnull[22m,
+  spanLength: [1mnull[22m,
+  measuredElevationDifference: [1mnull[22m,
+  HL: [1mnull[22m,
+  H1: [1mnull[22m,
+  H2: [1mnull[22m,
+  H3: [1mnull[22m,
+  HR: [1mnull[22m,
+  VL: [1mnull[22m,
+  V1: [1mnull[22m,
+  V2: [1mnull[22m,
+  V3: [1mnull[22m,
+  VR: [1mnull[22m,
+  cableHAccDistance: [1mnull[22m,
+  cableVerticalAccAngle: [1mnull[22m,
+  calculationType: [32m'parametre'[39m,
+  cableTangentAngle: [1mnull[22m,
+  lengthBetweenSightGD: [1mnull[22m,
+  elevationDifferenceBetweenSightGD: [1mnull[22m,
+  xSight1: [1mnull[22m,
+  xSight2: [1mnull[22m,
+  xSight3: [1mnull[22m,
+  ySight1: [1mnull[22m,
+  ySight2: [1mnull[22m,
+  ySight3: [1mnull[22m,
+  transit: [1mnull[22m,
+  windIncidence: [1mnull[22m,
+  windIncidenceMode: [32m'auto'[39m,
+  diffuseSolarFlux: [33m123[39m,
+  directSolarFlux: [1mnull[22m,
+  diffuseDirectSolarFlux: [33m246[39m,
+  diffusedSolarFlux: [1mnull[22m,
+  measuredDiffusedPlusDirectSolarFlux: [1mnull[22m,
+  measuredDiffusedSolarFlux: [1mnull[22m,
+  diffusedPlusDirectSolarFlux: [1mnull[22m,
+  updateMode15C: [32m'auto'[39m,
+  parameterPapoto: [1mnull[22m,
+  parameterUncertaintyPapoto: [1mnull[22m,
+  cableTemperatureCalibration: [1mnull[22m,
+  cableTemperatureCalibrationUncertainty: [1mnull[22m,
+  manualParameterCalculation15CWithoutWind: [1mnull[22m,
+  link: [1mnull[22m,
+  voltage: [1mnull[22m,
+  spanType: [1mnull[22m,
+  phaseNumber: [1mnull[22m,
+  numberOfConductors: [1mnull[22m,
+  cableName: [1mnull[22m,
+  outputs: { papoto: [1mnull[22m, cableTemperature: [1mnull[22m, parameter15C: [1mnull[22m }
+}
+
+stdout | src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.spec.ts > FieldMeasuringComponent > onImportStationData > should log import station data message
+Import station data
+
+ ✓ src/app/features/studies/presentation/components/studies-table/studies-table.component.spec.ts (26 tests) 1250ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.spec.ts (40 tests) 1159ms
+ ✓ src/app/shared/components/initial-condition-modal/initialConditionModal.component.spec.ts (35 tests) 995ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/temperature-calculation/temperature-calculation.component.spec.ts (24 tests) 1219ms
+ ✓ src/app/features/studies/presentation/pages/studies/studies.component.spec.ts (14 tests) 1087ms
+ ✓ src/app/features/studio/toolbar/presentation/components/l0-sum/l0-sum.component.spec.ts (16 tests) 974ms
+ ✓ src/app/features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component.spec.ts (22 tests) 917ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/calculus-setting/calculus-setting.component.spec.ts (10 tests) 863ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.spec.ts (22 tests) 870ms
+ ✓ src/app/features/studio/core/presentation/components/side-tabs/side-tabs.component.spec.ts (13 tests) 744ms
+   ✓ SideTabsComponent > toggleTab calls plotService.refreshCamera after delay  462ms
+ ✓ src/app/features/studio/toolbar/presentation/components/loads-table/loads-table.component.spec.ts (48 tests) 751ms
+ ✓ src/app/shared/components/export-dialog/export-dialog.component.spec.ts (13 tests) 635ms
+ ✓ src/app/features/studio/core/presentation/components/cards/section-plot-cards.component.spec.ts (16 tests) 404ms
+ ✓ src/app/shared/components/atoms/select-with-buttons/select-with-buttons.component.spec.ts (21 tests) 533ms
+ ✓ src/app/features/studio/toolbar/presentation/services/toolbar-dialog.service.spec.ts (40 tests) 550ms
+   ✓ ToolbarDialogService > closeTool > should set currentTool to null after delay  353ms
+ ✓ src/app/shared/components/new-study-modal/new-study-modal.component.spec.ts (9 tests) 482ms
+ ✓ src/app/features/home/presentation/pages/home/home.component.spec.ts (21 tests) 513ms
+ ✓ src/app/features/admin/presentation/pages/admin/admin.spec.ts (13 tests) 533ms
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should call helper functions with correct parameters
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:345:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should handle custom plotOptions
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:373:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should handle missing section gracefully
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:389:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should pass correct obstacle data to createPlot
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:408:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should set isPlotRefreshing signal during refresh
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:429:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should include shadow traces when baseState is enabled
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:469:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should include shadow traces when baseState is enabled
+Error refreshing plot: TypeError: shadowData is not iterable
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:163:25[90m)[39m
+    at Object.next [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:102:22[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/operators/tap.ts:189:31
+    at OperatorSubscriber._this._next [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/operators/OperatorSubscriber.ts:70:13[90m)[39m
+    at OperatorSubscriber.Subscriber.next [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/Subscriber.ts:71:12[90m)[39m
+    at emit [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/operators/debounceTime.ts:76:20[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/operators/debounceTime.ts:111:11
+    at OperatorSubscriber._this._complete [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/operators/OperatorSubscriber.ts:92:13[90m)[39m
+    at OperatorSubscriber.Subscriber.complete [90m(/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/Subscriber.ts:100:12[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39mnode_modules/[4mrxjs[24m/src/internal/Subject.ts:94:30
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should not include shadow traces when baseState is disabled
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:489:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > refreshPlot Method > should not include shadow traces when baseLitData is null
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:508:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Integration Tests > should handle complete workflow with valid data
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:683:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Integration Tests > should handle multiple successive plot refreshes
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:692:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Integration Tests > should handle multiple successive plot refreshes
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:693:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Integration Tests > should preserve obstacle data across refreshes
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:714:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Edge Cases > should handle empty litData
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:755:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Edge Cases > should handle camera null value
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:765:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Edge Cases > should handle camera with valid value
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:779:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+stderr | src/app/shared/components/studio/section/section-plot.component.spec.ts > SectionPlotComponent > Edge Cases > should handle obstacle point index updates
+Error refreshing plot: TypeError: plotEl.removeAllListeners is not a function
+    at SectionPlotComponent2.addEventListenersToPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:212:12[90m)[39m
+    at SectionPlotComponent2.refreshPlot [90m(/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.ts:193:14[90m)[39m
+    at [90m/home/infoger/phlowers-stellar-app/[39msrc/app/shared/components/studio/section/section-plot.component.spec.ts:792:7
+    at [90mfile:///home/infoger/phlowers-stellar-app/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:20
+
+ ✓ src/app/shared/components/studio/section/section-plot.component.spec.ts (44 tests) 499ms
+ ✓ src/app/shared/components/studio/studio.component.spec.ts (27 tests) 380ms
+ ✓ src/app/features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component.spec.ts (14 tests) 585ms
+ ✓ src/app/shared/components/layout/sidebar/sidebar.component.spec.ts (18 tests) 460ms
+ ✓ src/app/features/studio/core/presentation/components/cards/card/section-plot-card.component.spec.ts (13 tests) 410ms
+ ✓ src/app/app.component.spec.ts (18 tests) 400ms
+ ✓ src/app/features/studio/core/presentation/components/free-positioning/free-positioning.component.spec.ts (37 tests) 360ms
+ ✓ src/app/shared/components/atoms/input-number/input-number.component.spec.ts (26 tests) 384ms
+ ✓ src/app/core/services/obstacles-form/obstaclesForm.service.spec.ts (63 tests) 404ms
+ ✓ src/app/shared/components/atoms/button/button.component.spec.ts (26 tests) 247ms
+stderr | src/app/core/services/plot/plot.service.spec.ts > PlotService > refreshSection > should set error when workerPythonService is not ready
+refreshSection error
+
+stderr | src/app/core/services/plot/plot.service.spec.ts > PlotService > refreshSection > should set error when section is null
+refreshSection error
+
+stderr | src/app/core/services/plot/plot.service.spec.ts > PlotService > refreshSection > should set error when section has no cable_name
+refreshSection error
+
+ ✓ src/app/core/services/plot/plot.service.spec.ts (78 tests) 338ms
+ ✓ src/app/shared/components/atoms/icon/icon.component.spec.ts (18 tests) 153ms
+ ✓ src/app/features/study/presentation/components/study-header/study-header.component.spec.ts (5 tests) 252ms
+ ✓ src/app/shared/components/atoms/card-info/card-info.component.spec.ts (10 tests) 152ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/init/init.component.spec.ts (8 tests) 362ms
+ ✓ src/app/shared/components/layout/topbar/topbar.component.spec.ts (8 tests) 121ms
+ ✓ src/app/shared/components/atoms/card-study/card-study.component.spec.ts (6 tests) 191ms
+ ✓ src/app/shared/components/layout/logged-layout/logged-layout.component.spec.ts (3 tests) 127ms
+ ✓ src/app/features/studio/loads/presentation/services/loadForms.service.spec.ts (25 tests) 120ms
+ ✓ src/app/core/services/studies/studies.service.spec.ts (25 tests) 102ms
+ ✓ src/app/core/services/plot/plot-options.service.spec.ts (32 tests) 102ms
+ ✓ src/app/features/studio/loads/presentation/services/cableModifications.service.spec.ts (22 tests) 117ms
+ ✓ src/app/core/services/charges/charges.service.spec.ts (21 tests) 115ms
+ ✓ src/app/core/services/obstacle-state/obstacle-state.service.spec.ts (25 tests) 72ms
+stderr | src/app/shared/catalog/services/attachment.service.spec.ts > AttachmentService > importFromFile > should handle HTTP errors gracefully
+Error importing attachments HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  url: [32m'http://localhost:3000/data/attachments.csv'[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  name: [32m'HttpErrorResponse'[39m,
+  message: [32m'Http failure response for http://localhost:3000/data/attachments.csv: 404 Not Found'[39m,
+  error: [32m'Error'[39m
+}
+
+ ✓ src/app/shared/catalog/services/attachment.service.spec.ts (13 tests) 96ms
+ ✓ src/app/shared/catalog/services/cables.service.spec.ts (11 tests) 67ms
+stderr | src/app/core/services/worker_update/service-worker.spec.ts > Service Worker Functions > handleMessage > should handle unknown message type
+SERVICE WORKER: Unknown message type: unknown
+
+ ✓ src/app/core/services/worker_update/service-worker.spec.ts (24 tests) 44ms
+ ✓ src/app/features/news/presentation/pages/news/news.component.spec.ts (4 tests) 66ms
+ ✓ src/app/shared/components/atoms/accordion-header/accordion-header.component.spec.ts (2 tests) 110ms
+ ✓ src/app/shared/catalog/services/lines.service.spec.ts (14 tests) 81ms
+ ✓ src/app/shared/catalog/services/maintenance.service.spec.ts (11 tests) 80ms
+ ✓ src/app/features/studio/loads/presentation/services/cableSpanManip.service.spec.ts (22 tests) 97ms
+ ✓ src/app/core/services/plot/plot-resolution.service.spec.ts (21 tests) 96ms
+ ✓ src/app/shared/components/layout/not-found/not-found.component.spec.ts (2 tests) 94ms
+ ✓ src/app/shared/catalog/services/chains.service.spec.ts (11 tests) 70ms
+stderr | src/app/core/services/obstacles/obstacles.service.spec.ts > ObstaclesService > importFromFile > should handle HTTP error gracefully
+Error importing obstacle types HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  url: [32m'http://localhost:3000/data/obstacle_type_rte.csv'[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  name: [32m'HttpErrorResponse'[39m,
+  message: [32m'Http failure response for http://localhost:3000/data/obstacle_type_rte.csv: 404 Not Found'[39m,
+  error: [1mnull[22m
+}
+
+ ✓ src/app/core/services/obstacles/obstacles.service.spec.ts (16 tests) 90ms
+ ✓ src/app/shared/service/page-title/page-title.service.spec.ts (11 tests) 84ms
+ ✓ src/app/core/services/worker_update/worker_update.service.spec.ts (14 tests) 70ms
+ ✓ src/app/shared/components/studio/support/support-plot.component.spec.ts (6 tests) 90ms
+ ✓ src/app/shared/components/atoms/tag/tag.component.spec.ts (4 tests) 53ms
+ ✓ src/app/core/services/plot/plot-span.service.spec.ts (24 tests) 88ms
+ ✓ src/app/core/services/user/user.service.spec.ts (5 tests) 31ms
+ ✓ src/app/features/changelog/presentation/pages/changelog/changelog.component.spec.ts (4 tests) 86ms
+ ✓ src/app/shared/components/atoms/card/card.component.spec.ts (5 tests) 138ms
+ ✓ src/app/core/services/worker_python/worker-python.service.spec.ts (12 tests) 116ms
+ ✓ src/app/core/services/notification/notification.service.spec.ts (10 tests) 91ms
+ ✓ src/app/core/services/initial-condition/initial-condition.service.spec.ts (12 tests) 125ms
+ ✓ src/app/infrastructure/database/app-database.spec.ts (4 tests) 85ms
+ ✓ src/app/core/services/section/section.service.spec.ts (6 tests) 47ms
+ ✓ src/app/core/services/storage/storage.service.spec.ts (8 tests) 54ms
+ ✓ src/app/core/services/online/online.service.spec.ts (6 tests) 41ms
+ ✓ src/app/core/services/logger/logger.service.spec.ts (8 tests) 48ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming/tangent-aiming.component.spec.ts (1 test) 33ms
+ ✓ src/app/features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.component.spec.ts (1 test) 38ms
+ ✓ src/app/shared/components/studio/section/helpers/createDistanceTraces.spec.ts (45 tests) 33ms
+ ✓ src/app/features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/helpers.spec.ts (48 tests) 27ms
+ ✓ src/app/features/studio/core/presentation/components/side-tabs/side-tab/side-tab.component.spec.ts (1 test) 32ms
+ ✓ src/app/features/news/infrastructure/services/news.service.spec.ts (3 tests) 35ms
+ ✓ src/app/shared/components/studio/section/helpers/obstacles.spec.ts (46 tests) 34ms
+ ✓ src/app/shared/components/studio/section/helpers/createShadowPlotData.spec.ts (8 tests) 9ms
+ ✓ src/app/core/services/worker_python/worker-python.spec.ts (1 test) 25ms
+ ✓ src/app/features/changelog/infrastructure/services/changelog.service.spec.ts (3 tests) 31ms
+ ✓ src/app/shared/components/studio/section/helpers/createPlot.spec.ts (24 tests) 29ms
+ ✓ src/app/shared/components/studio/section/helpers/createPlotDataObject.spec.ts (27 tests) 31ms
+ ✓ src/app/shared/service/autocomplete/autocomplete-filters.service.spec.ts (20 tests) 19ms
+ ✓ src/app/shared/components/studio/section/helpers/createPlotData.spec.ts (15 tests) 15ms
+ ✓ src/app/shared/components/studio/section/helpers/createShadowDataObject.spec.ts (22 tests) 15ms
+ ✓ src/app/core/services/worker_python/tasks/handle-task.spec.ts (6 tests) 14ms
+ ✓ src/app/shared/domain/helpers/span-loads.helpers.spec.ts (7 tests) 21ms
+ ✓ src/app/shared/helpers/findMiddleSpan.spec.ts (6 tests) 6ms
+ ✓ src/app/features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants.spec.ts (7 tests) 6ms
+ ✓ src/app/shared/helpers/truncateDecimals.spec.ts (5 tests) 8ms
+ ✓ src/app/shared/helpers/formatSupportNumber.spec.ts (4 tests) 5ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts > StudioPageComponent > globalParameter > should return the middle span value in span mode
+AssertionError: expected null to be 200 // Object.is equality
+
+[32m- Expected:[39m 
+200
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts:762:43
+    760|       plotService.plotOptions.mockReturnValue({ invert: false, startSu…
+    761|       plotService.litData.set({ parameter: [100, 150, 200, 250, 300] }…
+    762|       expect(component.globalParameter()).toBe(200);
+       |                                           ^
+    763|     });
+    764| 
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts > StudioPageComponent > globalParameter > should return the same span value for a single span in span mode
+AssertionError: expected null to be 200 // Object.is equality
+
+[32m- Expected:[39m 
+200
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts:778:43
+    776|       plotService.plotOptions.mockReturnValue({ invert: false, startSu…
+    777|       plotService.litData.set({ parameter: [100, 150, 200, 250] });
+    778|       expect(component.globalParameter()).toBe(200);
+       |                                           ^
+    779|     });
+    780| 
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts > StudioPageComponent > globalParameter > should recompute when globalState changes
+AssertionError: expected null to be 30 // Object.is equality
+
+[32m- Expected:[39m 
+30
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts:796:43
+    794|       component.globalState.set('span');
+    795|       // findMiddleSpan(0,4) = [2,3] → index 2 → 30
+    796|       expect(component.globalParameter()).toBe(30);
+       |                                           ^
+    797|     });
+    798|   });
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts > StudioPageComponent > globalStressRate > should return the middle span value in span mode
+AssertionError: expected null to be 70 // Object.is equality
+
+[32m- Expected:[39m 
+70
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts:822:44
+    820|       plotService.plotOptions.mockReturnValue({ invert: false, startSu…
+    821|       plotService.litData.set({ utilization_rate: [40, 55, 70, 85, 95]…
+    822|       expect(component.globalStressRate()).toBe(70);
+       |                                            ^
+    823|     });
+    824| 
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts > StudioPageComponent > globalStressRate > should recompute when globalState changes
+AssertionError: expected null to be 30 // Object.is equality
+
+[32m- Expected:[39m 
+30
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.spec.ts:834:44
+    832|       component.globalState.set('span');
+    833|       // findMiddleSpan(0,4) = [2,3] → index 2 → 30
+    834|       expect(component.globalStressRate()).toBe(30);
+       |                                            ^
+    835|     });
+    836|   });
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts > CableSpanManipComponent > onScopeChange() > should enable referenceSupport and set options when valid uuid is given
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts:334:64
+    332|     it('should enable referenceSupport and set options when valid uuid…
+    333|       component.onScopeChange('support-uuid-1');
+    334|       expect(component.form.controls.referenceSupport.enabled).toBe(tr…
+       |                                                                ^
+    335|       expect(component.supportRefOptions().length).toBeGreaterThan(0);
+    336|     });
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts > CableSpanManipComponent > onScopeChange() > should set isDirtySinceLastSave to true for a new manipulation (no saved data)
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts:357:48
+    355|       component.isDirtySinceLastSave.set(false);
+    356|       component.onScopeChange('support-uuid-1');
+    357|       expect(component.isDirtySinceLastSave()).toBe(true);
+       |                                                ^
+    358|     });
+    359| 
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts > CableSpanManipComponent > onScopeChange() > should set isDirtySinceLastSave to false when loading an existing manipulation
+AssertionError: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts:386:48
+    384|       component.isDirtySinceLastSave.set(true);
+    385|       component.onScopeChange('support-uuid-1');
+    386|       expect(component.isDirtySinceLastSave()).toBe(false);
+       |                                                ^
+    387|     });
+    388| 
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts > CableSpanManipComponent > onScopeChange() > should load saved manipulation values when one exists for the span
+AssertionError: expected null to be 'RIGHT' // Object.is equality
+
+[32m- Expected:[39m 
+"RIGHT"
+
+[31m+ Received:[39m 
+null
+
+ ❯ src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts:416:62
+    414|       component.onScopeChange('support-uuid-1');
+    415| 
+    416|       expect(component.form.controls.referenceSupport.value).toBe('RIG…
+       |                                                              ^
+    417|       expect(component.form.controls.distanceToRefSupport.value).toBe(…
+    418|       expect(component.form.controls.slingLength.value).toBe(3);
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+ ❯ new ZoneAwarePromise node_modules/zone.js/bundles/zone.umd.js:2580:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts > CableSpanManipComponent > zoomToSpan() > should call plotOptionsChange with span index when scope is selected
+AssertionError: expected "spy" to be called with arguments: [ { startSupport: +0, endSupport: 1 } ][90m
+
+Number of calls: [1m0[22m
+[39m
+ ❯ src/app/features/studio/loads/presentation/components/cable-span-manip/cable-span-manip.spec.ts:464:49
+    462|       component.form.controls.scope.setValue('support-uuid-1');
+    463|       component.zoomToSpan();
+    464|       expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({…
+       |                                                 ^
+    465|     });
+    466|   });
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:410:32
+ ❯ ProxyZoneSpec.onInvoke node_modules/zone.js/bundles/zone-testing.umd.js:2219:43
+ ❯ _ZoneDelegate.invoke node_modules/zone.js/bundles/zone.umd.js:409:38
+ ❯ ZoneImpl.run node_modules/zone.js/bundles/zone.umd.js:145:47
+ ❯ wrappedFunc packages/vitest-angular/setup-zone.ts:55:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  2 failed | 109 passed (111)
+      Tests  10 failed | 2460 passed (2470)
+   Start at  11:13:08
+   Duration  65.64s (transform 7.09s, setup 37.72s, collect 47.40s, tests 100.37s, environment 2.45s, prepare 8.92s)
+
