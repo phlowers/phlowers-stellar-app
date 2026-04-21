@@ -84,10 +84,8 @@ const OBSTACLE_COLOR_UNSELECTED = 'black';
 const OBSTACLE_COLOR_ACTIVE_POINT = 'red';
 const OBSTACLE_COLOR_INACTIVE_POINT = '#922911';
 
-const getHighlightColor = (
-  obstacleUuid: string,
-  currentObstacleUuid: string | null
-): string => (obstacleUuid === currentObstacleUuid ? OBSTACLE_COLOR_ACTIVE_POINT : OBSTACLE_COLOR_UNSELECTED);
+const getHighlightColor = (obstacleUuid: string, currentObstacleUuid: string | null): string =>
+  obstacleUuid === currentObstacleUuid ? OBSTACLE_COLOR_ACTIVE_POINT : OBSTACLE_COLOR_UNSELECTED;
 
 const getMarkerAppearance = (
   obstacleUuid: string,
@@ -113,7 +111,17 @@ const getMarkerAppearance = (
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex, supports, startSupport, endSupport } = plotParams;
+  const {
+    litData,
+    obstacles,
+    view,
+    side,
+    currentObstacleUuid,
+    currentObstaclePointIndex,
+    supports,
+    startSupport,
+    endSupport
+  } = plotParams;
   const is2d = view === '2d';
 
   if (!litData?.obstacles?.length) {
@@ -123,12 +131,12 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   // Only render obstacles whose support is within the visible span window.
   // An obstacle attached to a support starts a span to the right, so the
   // endSupport itself belongs to the *next* span and must be excluded.
-  const visibleSupportUuids = new Set(
-    (supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid)
-  );
+  const visibleSupportUuids = new Set((supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid));
   const visibleObstacleUuids = new Set(
-    litData.obstacles.filter(lo => !obstacles.some(o => o.uuid === lo.uuid)).map(lo => lo.uuid).concat(
-    obstacles.filter((o) => visibleSupportUuids.has(o.supportUuid)).map((o) => o.uuid) )
+    litData.obstacles
+      .filter((lo) => !obstacles.some((o) => o.uuid === lo.uuid))
+      .map((lo) => lo.uuid)
+      .concat(obstacles.filter((o) => visibleSupportUuids.has(o.supportUuid)).map((o) => o.uuid))
   );
 
   return litData.obstacles.flatMap((litObstacle) => {
@@ -148,7 +156,12 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       const pz = cz;
 
       const color = getHighlightColor(obstacleUuid, currentObstacleUuid);
-      const { symbol, color: markerColor } = getMarkerAppearance(obstacleUuid, pointIndex, currentObstacleUuid, currentObstaclePointIndex);
+      const { symbol, color: markerColor } = getMarkerAppearance(
+        obstacleUuid,
+        pointIndex,
+        currentObstacleUuid,
+        currentObstaclePointIndex
+      );
       const annotationData = {
         obstacleUuid,
         obstaclePositionIndex: pointIndex,

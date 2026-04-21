@@ -60,10 +60,7 @@ describe('ObstacleStateService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        ObstacleStateService,
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
-      ]
+      providers: [ObstacleStateService, { provide: WorkerPythonService, useValue: mockWorkerPythonService }]
     });
 
     service = TestBed.inject(ObstacleStateService);
@@ -178,7 +175,13 @@ describe('ObstacleStateService', () => {
   describe('calculateDistances', () => {
     it('should dispatch Task.calculateObstaclesDistances with plot options', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({ result: [mockDistance], error: null });
-      const plotOptions = { startSupport: 0, endSupport: 2, view: '3d' as const, side: 'profile' as const, invert: false };
+      const plotOptions = {
+        startSupport: 0,
+        endSupport: 2,
+        view: '3d' as const,
+        side: 'profile' as const,
+        invert: false
+      };
 
       await service.calculateDistances([mockObstacle], plotOptions);
 
@@ -192,7 +195,13 @@ describe('ObstacleStateService', () => {
 
     it('should update the distances signal with the result', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({ result: [mockDistance], error: null });
-      const plotOptions = { startSupport: 0, endSupport: 1, view: '3d' as const, side: 'profile' as const, invert: false };
+      const plotOptions = {
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d' as const,
+        side: 'profile' as const,
+        invert: false
+      };
 
       await service.calculateDistances([mockObstacle], plotOptions);
 
@@ -202,7 +211,13 @@ describe('ObstacleStateService', () => {
     it('should set distances to empty array when result is null', async () => {
       service.distances.set([mockDistance]);
       mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null });
-      const plotOptions = { startSupport: 0, endSupport: 1, view: '3d' as const, side: 'profile' as const, invert: false };
+      const plotOptions = {
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d' as const,
+        side: 'profile' as const,
+        invert: false
+      };
 
       await service.calculateDistances([mockObstacle], plotOptions);
 
@@ -215,7 +230,13 @@ describe('ObstacleStateService', () => {
       const addSpy = vi.spyOn(service, 'addObstacle').mockResolvedValue(mockObstacleOutput);
       vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
       const secondObstacle = { ...mockObstacle, uuid: 'obs-2' };
-      const plotOptions = { startSupport: 0, endSupport: 1, view: '3d' as const, side: 'profile' as const, invert: false };
+      const plotOptions = {
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d' as const,
+        side: 'profile' as const,
+        invert: false
+      };
 
       await service.syncObstacles([mockObstacle, secondObstacle], plotOptions);
 
@@ -226,7 +247,13 @@ describe('ObstacleStateService', () => {
     it('should call calculateDistances when obstacles are present', async () => {
       vi.spyOn(service, 'addObstacle').mockResolvedValue(mockObstacleOutput);
       const calcSpy = vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
-      const plotOptions = { startSupport: 0, endSupport: 1, view: '3d' as const, side: 'profile' as const, invert: false };
+      const plotOptions = {
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d' as const,
+        side: 'profile' as const,
+        invert: false
+      };
 
       await service.syncObstacles([mockObstacle], plotOptions);
 
@@ -246,23 +273,34 @@ describe('ObstacleStateService', () => {
     it('should return null when obstacles array is empty', async () => {
       vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
 
-      const result = await service.syncObstacles(
-        [],
-        { startSupport: 0, endSupport: 1, view: '3d', side: 'profile', invert: false }
-      );
+      const result = await service.syncObstacles([], {
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d',
+        side: 'profile',
+        invert: false
+      });
 
       expect(result).toBeNull();
     });
 
     it('should return the addObstacle result', async () => {
-      const allOutput: ObstacleOutput = { obstacles: [{ uuid: 'obs-1', points: [[10, 5, 8]] }, { uuid: 'obs-2', points: [[1, 2, 3]] }] };
+      const allOutput: ObstacleOutput = {
+        obstacles: [
+          { uuid: 'obs-1', points: [[10, 5, 8]] },
+          { uuid: 'obs-2', points: [[1, 2, 3]] }
+        ]
+      };
       vi.spyOn(service, 'addObstacle').mockResolvedValue(allOutput);
       vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
 
-      const result = await service.syncObstacles(
-        [mockObstacle, { ...mockObstacle, uuid: 'obs-2' }],
-        { startSupport: 0, endSupport: 1, view: '3d', side: 'profile', invert: false }
-      );
+      const result = await service.syncObstacles([mockObstacle, { ...mockObstacle, uuid: 'obs-2' }], {
+        startSupport: 0,
+        endSupport: 1,
+        view: '3d',
+        side: 'profile',
+        invert: false
+      });
 
       expect(result).toEqual(allOutput);
     });

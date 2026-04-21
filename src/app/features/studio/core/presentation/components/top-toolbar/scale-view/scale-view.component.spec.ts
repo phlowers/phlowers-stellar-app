@@ -21,7 +21,6 @@ describe('ScaleViewComponent', () => {
   };
   let plotOptionsServiceMock: { setAxesNorms: ReturnType<typeof vi.fn>; setBaseScaleFactors: ReturnType<typeof vi.fn> };
   let mockPopover: { toggle: vi.Mock };
-  let mockWorkerPythonService: { runTask: vi.Mock };
 
   beforeEach(async () => {
     resolutionSignal = signal(100);
@@ -41,10 +40,6 @@ describe('ScaleViewComponent', () => {
     };
 
     mockPopover = { toggle: vi.fn() };
-
-    mockWorkerPythonService = {
-      runTask: vi.fn().mockResolvedValue({ result: null, error: null })
-    };
 
     await TestBed.configureTestingModule({
       imports: [ScaleViewComponent],

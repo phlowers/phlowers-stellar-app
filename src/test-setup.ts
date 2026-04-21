@@ -24,7 +24,7 @@ class MockResizeObserver {
 }
 
 if (!globalThis.ResizeObserver) {
-  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+  Object.assign(globalThis, { ResizeObserver: MockResizeObserver });
 }
 
 Object.defineProperty(document, 'fonts', {

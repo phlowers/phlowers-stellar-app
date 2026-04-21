@@ -30,7 +30,27 @@ const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
 });
 
 const makeSupport = (uuid: string) =>
-  ({ uuid, number: null, name: null, spanLength: null, spanAngle: null, attachmentSet: null, attachmentHeight: null, heightBelowConsole: null, towerModel: null, cableType: null, armLength: null, chainName: null, chainLength: null, chainWeight: null, chainV: null, counterWeight: null, supportFootAltitude: null, attachmentPosition: null, chainSurface: null }) satisfies Support;
+  ({
+    uuid,
+    number: null,
+    name: null,
+    spanLength: null,
+    spanAngle: null,
+    attachmentSet: null,
+    attachmentHeight: null,
+    heightBelowConsole: null,
+    towerModel: null,
+    cableType: null,
+    armLength: null,
+    chainName: null,
+    chainLength: null,
+    chainWeight: null,
+    chainV: null,
+    counterWeight: null,
+    supportFootAltitude: null,
+    attachmentPosition: null,
+    chainSurface: null
+  }) satisfies Support;
 
 describe('getObstacleClickPayload', () => {
   const obstacles = [makeObstacle(), makeObstacle({ uuid: 'obs-2', supportUuid: 'sup-2' })];
@@ -199,12 +219,8 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
     // 2 obstacles × 1 point × 2 annotations = 4
     expect(annotations).toHaveLength(4);
-    const markerA = annotations.find(
-      (a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-A'
-    ) as ObstacleAnnotation;
-    const markerB = annotations.find(
-      (a) => a.text === '●' && a.data?.obstacleUuid === 'obs-B'
-    ) as ObstacleAnnotation;
+    const markerA = annotations.find((a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-A') as ObstacleAnnotation;
+    const markerB = annotations.find((a) => a.text === '●' && a.data?.obstacleUuid === 'obs-B') as ObstacleAnnotation;
     expect(markerA.font!.color).toBe('red');
     expect(markerB.font!.color).toBe('black');
   });
