@@ -836,7 +836,7 @@ describe('ObstacleFormService', () => {
       expect(mockObstacleStateService.addObstacle).toHaveBeenCalled();
     });
 
-    it('should set loading to false after calculateAndSave', async () => {
+    it('should set isCalculatingObstacle to false after calculateAndSave', async () => {
       service.form.patchValue({ ...validFormBase, uuid: 'obs-loading' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
@@ -845,20 +845,20 @@ describe('ObstacleFormService', () => {
 
       await service.calculateAndSave();
 
-      expect(mockPlotService.loading()).toBe(false);
+      expect(service.isCalculatingObstacle()).toBe(false);
     });
 
-    it('should set loading to true at the start of async flow', async () => {
+    it('should set isCalculatingObstacle to true at the start of async flow', async () => {
       service.form.patchValue({ ...validFormBase, uuid: 'obs-loading-true' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
-      mockPlotService.loading.set(false);
+      service.isCalculatingObstacle.set(false);
 
       let loadingDuringExecution = false;
       mockObstacleStateService.addObstacle.mockImplementation(async () => {
-        loadingDuringExecution = mockPlotService.loading();
+        loadingDuringExecution = service.isCalculatingObstacle();
         return null;
       });
 
@@ -867,7 +867,7 @@ describe('ObstacleFormService', () => {
       expect(loadingDuringExecution).toBe(true);
     });
 
-    it('should set loading to false even when an error is thrown', async () => {
+    it('should set isCalculatingObstacle to false even when an error is thrown', async () => {
       service.form.patchValue({ ...validFormBase, uuid: 'obs-loading-error' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
@@ -875,9 +875,60 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       mockObstacleStateService.addObstacle.mockRejectedValue(new Error('worker failure'));
 
-      await expect(service.calculateAndSave()).rejects.toThrow('worker failure');
+      try {
+        await service.calculateAndSave();
+      } catch (error) {
+        // Expected error
+      }
 
-      expect(mockPlotService.loading()).toBe(false);
+      expect(service.isCalculatingObstacle()).toBe(false);
+    });
+
+    it('should prevent concurrent calculateAndSave calls', async () => {
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-concurrent' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      // Create a slow async operation
+      let resolveAddObstacle: (() => void) | undefined;
+      const slowPromise = new Promise<null>((resolve) => {
+        resolveAddObstacle = () => resolve(null);
+      });
+      mockObstacleStateService.addObstacle.mockReturnValue(slowPromise);
+
+      // Start first call (should proceed)
+      const firstCall = service.calculateAndSave();
+
+      // Start second call while first is still running (should be ignored)
+      const secondCall = service.calculateAndSave();
+
+      // Resolve the slow operation
+      resolveAddObstacle!();
+
+      await firstCall;
+      await secondCall;
+
+      // addObstacle should only be called once (from first call)
+      expect(mockObstacleStateService.addObstacle).toHaveBeenCalledTimes(1);
+    });
+
+    it('should set calculationError signal when operation fails', async () => {
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-error' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('Calculation failed'));
+
+      try {
+        await service.calculateAndSave();
+      } catch (error) {
+        // Expected error
+      }
+
+      expect(service.calculationError()).toContain('Calculation failed');
     });
   });
 

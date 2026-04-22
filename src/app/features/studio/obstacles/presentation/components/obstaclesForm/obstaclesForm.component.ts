@@ -21,10 +21,8 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { debounce } from 'lodash';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
-import { DEBOUNCED_UPDATE_POINT_DELAY } from '@shared/domain/obstacles/obstacle-form.constants';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { PlotService } from '@services/plot/plot.service';
 
@@ -58,7 +56,9 @@ export class ObstaclesFormComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
-  readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isCalculating = computed(
+    () => this.obstacleFormService.isCalculatingObstacle() || this.plotService.loading()
+  );
 
   constructor() {
     this.obstaclesService.ready
@@ -98,14 +98,6 @@ export class ObstaclesFormComponent {
     }
   );
 
-  private readonly debouncedUpdatePoint = debounce((key: 'x' | 'y' | 'z', value: number) => {
-    const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
-    const positionGroup = this.obstacleFormService.positions.at(currentIndex);
-    if (positionGroup) {
-      positionGroup.get(key)?.setValue(value);
-    }
-  }, DEBOUNCED_UPDATE_POINT_DELAY);
-
   private firstSupportUuidEffectRun = true;
 
   private readonly supportUuidEffect = effect(() => {
@@ -135,7 +127,11 @@ export class ObstaclesFormComponent {
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
     const targetValue = (event.target as HTMLInputElement).value;
     const numericValue = Number.parseFloat(targetValue);
-    this.debouncedUpdatePoint(key, Number.isNaN(numericValue) ? 0 : numericValue);
+    const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
+    const positionGroup = this.obstacleFormService.positions.at(currentIndex);
+    if (positionGroup) {
+      positionGroup.get(key)?.setValue(Number.isNaN(numericValue) ? 0 : numericValue);
+    }
   }
 
   setCurrentObstaclePoint(index: number) {

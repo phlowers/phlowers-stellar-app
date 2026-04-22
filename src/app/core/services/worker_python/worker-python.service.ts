@@ -148,4 +148,44 @@ export class WorkerPythonService {
       }) as (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void;
     });
   }
+
+  /**
+   * Run a calculation task in the Python worker with a timeout.
+   *
+   * @typeParam taskId - The task type from the Task enum
+   * @param task - The task to execute
+   * @param inputs - Input parameters for the task
+   * @param timeoutMs - Timeout in milliseconds (default: 30000ms = 30s)
+   * @returns Promise resolving to the task result and any error, or rejecting on timeout
+   *
+   * @throws Error if the task execution exceeds the specified timeout
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   const { result, error } = await workerService.runTaskWithTimeout(
+   *     Task.calculateObstacleDistances,
+   *     { obstacles, plotOptions },
+   *     30000
+   *   );
+   *   if (!error) {
+   *     console.log('Calculation result:', result);
+   *   }
+   * } catch (timeoutError) {
+   *   console.error('Task timed out:', timeoutError);
+   * }
+   * ```
+   */
+  runTaskWithTimeout<taskId extends Task>(
+    task: taskId,
+    inputs: TaskInputs[taskId],
+    timeoutMs = 30000
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+    return Promise.race([
+      this.runTask(task, inputs),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Task ${String(task)} timed out after ${timeoutMs}ms`)), timeoutMs)
+      )
+    ]);
+  }
 }

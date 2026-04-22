@@ -24,6 +24,8 @@ class MockObstacleFormService {
     vertical: null as number | null,
     horizontal: null as number | null
   });
+  isCalculatingObstacle = signal(false);
+  calculationError = signal<string | null>(null);
 
   returnToSpan = vi.fn();
   resetFormForNewObstacle = vi.fn();
