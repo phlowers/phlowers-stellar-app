@@ -4,7 +4,6 @@ from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArra
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
 from mechaphlowers.utils import ArrayTools
-from typing import Optional
 import logging
 from importlib.metadata import version
 import sys
@@ -37,10 +36,6 @@ stellar_logger.addHandler(handler)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 logger.addHandler(handler)
-
-
-
-
 
 
 def init_config():
@@ -78,7 +73,7 @@ def set_log_level(js_inputs: dict):
     mph_logger.setLevel(level)
     stellar_logger.setLevel(level)
     logger.setLevel(level)
-    logger.info(f"Python version: {sys.version}" )
+    logger.info(f"Python version: {sys.version}")
     mph_logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
     stellar_logger.info(f"stellar_engine version: {version('stellar_engine')}")
     return {"success": True}
@@ -301,7 +296,6 @@ def get_coordinates(
     start_support: int = 0,
     end_support: int = 0,
 ):
-    
     middle_span = get_section_middle_span(start_support, end_support)
     span, supports, insulators = plt_line.section_pts.get_points_for_plot(
         project=project, frame_index=middle_span
@@ -456,7 +450,9 @@ def init_section(js_inputs: dict):
                     "z": [],
                     "object_type": [],
                 }
-                )))
+            )
+        )
+    )
 
     # Create base engine state (before any climate changes)
     # by creating a separate BalanceEngine with same initial params
@@ -554,14 +550,20 @@ def refresh_projection(js_inputs: dict):
         else None
     )
     middle_span = get_section_middle_span(start_support, end_support)
-    obstacles = obst.get_current_obstacles(plt_line, project=False, support_index=middle_span)
+    obstacles = obst.get_current_obstacles(
+        plt_line, project=False, support_index=middle_span
+    )
 
     return {
         "sectionOutput": {"current": current_coords, "base": base_coords},
         "obstacles": obstacles,
-        "distances": obst.compute_distances(inputs=obstacles, project=project, plot_engine=plt_line, support_index=get_section_middle_span(start_support, end_support)),
+        "distances": obst.compute_distances(
+            inputs=obstacles,
+            project=project,
+            plot_engine=plt_line,
+            support_index=get_section_middle_span(start_support, end_support),
+        ),
     }
-
 
 
 init_config()

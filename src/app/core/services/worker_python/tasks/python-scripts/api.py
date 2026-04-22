@@ -86,12 +86,17 @@ def get_aspect_ratio(js_inputs):
     logger.debug(f"js_inputs for aspect ratio: {py_inputs}")
     # middle_span = get_section_middle_span(py_inputs["startSupport"], py_inputs["endSupport"])
     project = py_inputs["view"] == "2D"
-    return plot_settings.get_aspect_ratio(py_inputs, plt_line, py_inputs["startSupport"], py_inputs["endSupport"] )
+    return plot_settings.get_aspect_ratio(
+        py_inputs, plt_line, py_inputs["startSupport"], py_inputs["endSupport"]
+    )
+
 
 def extract_obstacles_inputs(js_inputs):
     logger.debug("===> extract_obstacles_inputs triggered")
     py_inputs = js_inputs.to_py()
-    middle_span = get_section_middle_span(py_inputs["startSupport"], py_inputs["endSupport"])
+    middle_span = get_section_middle_span(
+        py_inputs["startSupport"], py_inputs["endSupport"]
+    )
     project = py_inputs["view"] == "2D"
     return py_inputs["obstacles"], project, middle_span
 
@@ -106,17 +111,23 @@ def add_obstacles(js_inputs):
     logger.debug(f"js_inputs: {js_inputs.to_py()}")
     obstacles, project, middle_span = extract_obstacles_inputs(js_inputs)
     global engine, plt_line
-    return obst.add_obstacles(obstacles, engine, plt_line, project=project, support_index=middle_span)
+    return obst.add_obstacles(
+        obstacles, engine, plt_line, project=project, support_index=middle_span
+    )
 
 
 def delete_obstacle(js_inputs):
     logger.debug("===> delete_obstacle triggered")
     py_inputs = js_inputs.to_py()
     uuid = py_inputs["uuid"]
-    middle_span = get_section_middle_span(py_inputs["startSupport"], py_inputs["endSupport"])
+    middle_span = get_section_middle_span(
+        py_inputs["startSupport"], py_inputs["endSupport"]
+    )
     project = py_inputs["view"] == "2D"
     global engine, plt_line
-    return obst.delete_obstacle(uuid, plt_line, project=project, support_index=middle_span)
+    return obst.delete_obstacle(
+        uuid, plt_line, project=project, support_index=middle_span
+    )
 
 
 def clear_obstacles():
@@ -132,11 +143,14 @@ def calculate_obstacles_distances(js_inputs):
     logger.debug("===> calculate_obstacles_distances triggered")
 
     obstacles, project, middle_span = extract_obstacles_inputs(js_inputs)
-    
+
     logger.debug(f"js_inputs for distance calculation: {js_inputs.to_py()}")
-    result = obst.compute_distances(inputs=obstacles, project=project, plot_engine=plt_line, support_index=middle_span)
-    
+    result = obst.compute_distances(
+        inputs=obstacles,
+        project=project,
+        plot_engine=plt_line,
+        support_index=middle_span,
+    )
+
     logger.debug(f"Distances result: {result}")
     return result
-
-
