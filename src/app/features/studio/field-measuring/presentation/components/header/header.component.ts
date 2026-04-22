@@ -39,19 +39,17 @@ export class HeaderComponent {
   }>();
 
   readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
-    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
     const supports = this.spanService.section()?.supports ?? [];
-    const spanAmount = Math.max(endSupport - startSupport, 0);
+    const spanAmount = Math.max(supports.length - 1, 0);
     return Array.from({ length: spanAmount }, (_, index) => {
-      const actualIndex = index + startSupport;
-      const leftNum = supports[actualIndex]?.number;
-      const rightNum = supports[actualIndex + 1]?.number;
-      const left = leftNum ? formatSupportNumber(leftNum) : String(actualIndex + 1);
-      const right = rightNum ? formatSupportNumber(rightNum) : String(actualIndex + 2);
+      const leftNum = supports[index]?.number;
+      const rightNum = supports[index + 1]?.number;
+      const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);
+      const right = rightNum ? formatSupportNumber(rightNum) : String(index + 2);
       return {
         label: `${left} - ${right}`,
-        value: [actualIndex, actualIndex + 1],
-        supports: [actualIndex, actualIndex + 1]
+        value: [index, index + 1],
+        supports: [index, index + 1]
       };
     });
   });
