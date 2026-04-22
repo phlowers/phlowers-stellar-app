@@ -274,7 +274,7 @@
 
       <div class="incertainParam">
         <dt i18n>uncertainty parameter</dt>
-        <dd>{{ measureData().outputs.papoto?.uncertainty | number: '1.0-2' }} m</dd>
+        <dd>{{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }} m</dd>
       </div>
 
       <div class="param12">
