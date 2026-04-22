@@ -4,6 +4,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatStudioError } from './helpers/errors';
 
 @Component({
@@ -24,6 +25,7 @@ export class StudioComponent implements OnDestroy {
   // Services
   protected readonly plotService = inject(PlotService);
   private readonly notificationService = inject(NotificationService);
+  private readonly spanService = inject(PlotSpanService);
 
   // State
   readonly plotInitialized = signal(false);
@@ -44,7 +46,7 @@ export class StudioComponent implements OnDestroy {
     });
 
     effect(() => {
-      const section = this.plotService.section();
+      const section = this.spanService.section();
       const workerReady = this.plotService.workerReady();
       const isPreview = this.isPreview();
 

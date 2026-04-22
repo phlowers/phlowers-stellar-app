@@ -9,6 +9,8 @@ import { vi } from 'vitest';
 import { CableModificationsService } from './cableModifications.service';
 import { CableModificationParams } from './cableModifications.service.interfaces';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Task, GetSectionOutput, GetSectionWithBaseOutput, TaskError } from '@services/worker_python/tasks/types';
@@ -95,21 +97,27 @@ const mockParams: CableModificationParams = {
 describe('CableModificationsService', () => {
   let service: CableModificationsService;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockSpanService: vi.Mocked<PlotSpanService>;
+  let plotOptionsServiceMock: { refreshCamera: ReturnType<typeof vi.fn> };
   let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
   let mockStudiesService: vi.Mocked<StudiesService>;
 
   beforeEach(() => {
     mockPlotService = {
-      section: createSignalMock<Section | null>(mockSectionBase),
       study: createSignalMock<Study | null>({ uuid: 'study-uuid-1' } as Study),
       loading: createSignalMock(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
-      pythonErrorCode: createSignalMock(null),
-      refreshCamera: vi.fn(),
-      getSupportIndex: vi.fn().mockReturnValue(0)
+      pythonErrorCode: createSignalMock(null)
     } as unknown as vi.Mocked<PlotService>;
+    mockSpanService = {
+      section: createSignalMock<Section | null>(mockSectionBase),
+      getSupportIndex: vi.fn().mockReturnValue(0)
+    } as unknown as vi.Mocked<PlotSpanService>;
+    plotOptionsServiceMock = {
+      refreshCamera: vi.fn()
+    };
 
     mockWorkerPythonService = {
       runTask: vi.fn()
@@ -124,6 +132,8 @@ describe('CableModificationsService', () => {
       providers: [
         CableModificationsService,
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: StudiesService, useValue: mockStudiesService }
       ]
@@ -145,7 +155,7 @@ describe('CableModificationsService', () => {
   // ---------------------------------------------------------------------------
   describe('calculate()', () => {
     it('should return early when spanIndex is -1', async () => {
-      mockPlotService.getSupportIndex.mockReturnValue(-1);
+      mockSpanService.getSupportIndex.mockReturnValue(-1);
 
       await service.calculate(mockParams);
 
@@ -161,7 +171,7 @@ describe('CableModificationsService', () => {
 
       await service.calculate(mockParams);
 
-      expect(mockPlotService.refreshCamera).toHaveBeenCalled();
+      expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
     });
@@ -245,7 +255,7 @@ describe('CableModificationsService', () => {
     });
 
     it('should return early when sectionUuid is missing', async () => {
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       await service.save({
         spanUuid: 'su',
@@ -411,7 +421,7 @@ describe('CableModificationsService', () => {
     });
 
     it('should return early when sectionUuid is missing', async () => {
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       await service.delete('some-uuid');
 

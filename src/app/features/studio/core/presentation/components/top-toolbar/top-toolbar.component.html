@@ -1,8 +1,8 @@
 <div class="toolbar" role="menubar">
   <p-selectbutton
     [options]="threeDOptions()"
-    [disabled]="plotService.loading() || plotService.isFreePositioningMode()"
-    [ngModel]="plotService.plotOptions().view"
+    [disabled]="plotService.loading() || plotOptionsService.isFreePositioningMode()"
+    [ngModel]="plotOptionsService.plotOptions().view"
     (onChange)="plotService.plotOptionsChange({ view: $event.value })"
     optionLabel="label"
     optionValue="value"
@@ -15,13 +15,13 @@
   <div class="flex items-center gap-2">
     <p-selectbutton
       [options]="sideOptions()"
-      [disabled]="plotService.isFreePositioningMode()"
-      [ngModel]="plotService.plotOptions().side"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
+      [ngModel]="plotOptionsService.plotOptions().side"
       (onChange)="plotService.plotOptionsChange({ side: $event.value })"
       optionLabel="label"
       optionValue="value"
       allowEmpty="false"
-      [disabled]="plotService.plotOptions().view === '3d'"
+      [disabled]="plotOptionsService.plotOptions().view === '3d'"
       data-testid="side-view-selector"
     />
   </div>
@@ -33,8 +33,8 @@
     <p-toggleswitch
       inputId="invert"
       data-testid="invert-toggle"
-      [disabled]="plotService.isFreePositioningMode()"
-      [(ngModel)]="plotService.plotOptions().invert"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
+      [(ngModel)]="plotOptionsService.plotOptions().invert"
       (onChange)="plotService.plotOptionsChange({ invert: $event.checked })"
     />
   </div>

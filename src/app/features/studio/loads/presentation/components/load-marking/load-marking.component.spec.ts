@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { LoadMarkingComponent } from './load-marking.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 import { SpanOption } from '@src/app/shared/types/plot.types';
@@ -42,6 +43,7 @@ describe('LoadMarkingComponent', () => {
   let component: LoadMarkingComponent;
   let fixture: ComponentFixture<LoadMarkingComponent>;
   let mockPlotService: Record<string, unknown>;
+  let mockSpanService: Record<string, unknown>;
   let mockLoadFormsService: Record<string, unknown>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
@@ -49,12 +51,15 @@ describe('LoadMarkingComponent', () => {
 
   beforeEach(async () => {
     mockPlotService = {
-      getSpanOptions: signal<SpanOption[]>(mockSpanOptions),
-      getSupportIndex: vi.fn().mockReturnValue(0),
-      getSupportOptions: vi.fn().mockReturnValue(mockSupportOptions),
       plotOptionsChange: vi.fn(),
       temporaryLoadData: null,
       loading: signal(false)
+    };
+
+    mockSpanService = {
+      getSpanOptions: signal<SpanOption[]>(mockSpanOptions),
+      getSupportIndex: vi.fn().mockReturnValue(0),
+      getSupportOptions: vi.fn().mockReturnValue(mockSupportOptions)
     };
 
     mockLoadFormsService = {
@@ -71,6 +76,7 @@ describe('LoadMarkingComponent', () => {
       imports: [LoadMarkingComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
         { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
@@ -103,7 +109,7 @@ describe('LoadMarkingComponent', () => {
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();
 
-      expect(mockPlotService['getSupportOptions']).toHaveBeenCalledWith('support-1');
+      expect(mockSpanService['getSupportOptions']).toHaveBeenCalledWith('support-1');
       expect(component.supportsOptions()).toEqual(mockSupportOptions);
       expect(component.form.controls.referenceSupport.enabled).toBe(true);
       expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
@@ -121,7 +127,7 @@ describe('LoadMarkingComponent', () => {
     });
 
     it('does nothing when getSupportIndex returns -1 for selected span', () => {
-      (mockPlotService['getSupportIndex'] as ReturnType<typeof vi.fn>).mockReturnValue(-1);
+      (mockSpanService['getSupportIndex'] as ReturnType<typeof vi.fn>).mockReturnValue(-1);
 
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();
@@ -380,7 +386,7 @@ describe('LoadMarkingComponent', () => {
     });
 
     beforeEach(() => {
-      (mockPlotService['getSupportIndex'] as vi.Mock).mockImplementation((uuid: unknown) =>
+      (mockSpanService['getSupportIndex'] as vi.Mock).mockImplementation((uuid: unknown) =>
         uuid === 'support-1' ? 0 : uuid === 'support-2' ? 1 : -1
       );
     });
@@ -391,7 +397,7 @@ describe('LoadMarkingComponent', () => {
         // Without untracked(), that read would register section() as a dependency of
         // spanSelectEffect, causing the effect to re-run on every Dexie emission.
         const internalSignal = signal(0);
-        (mockPlotService['getSupportIndex'] as vi.Mock).mockImplementation(() => {
+        (mockSpanService['getSupportIndex'] as vi.Mock).mockImplementation(() => {
           internalSignal(); // reads a signal — simulates reading section()
           return 0;
         });

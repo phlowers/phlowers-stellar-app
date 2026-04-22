@@ -5,46 +5,48 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ScaleViewComponent } from './scale-view.component';
 
 import { PlotService } from '@services/plot/plot.service';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { PlotResolutionService } from '@services/plot/plot-resolution.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 
 describe('ScaleViewComponent', () => {
   let component: ScaleViewComponent;
   let fixture: ComponentFixture<ScaleViewComponent>;
   let resolutionSignal: ReturnType<typeof signal<number>>;
-  let mockPlotService: {
+  let mockPlotService: { refreshProjection: ReturnType<typeof vi.fn> };
+  let resolutionServiceMock: {
     resolution: ReturnType<typeof signal<number>>;
     defaultResolution: ReturnType<typeof signal<number>>;
-    setResolution: vi.Mock;
-    applyResolution: vi.Mock;
-    setAxesNorms: vi.Mock;
-    refreshProjection: vi.Mock;
+    setResolution: ReturnType<typeof vi.fn>;
+    applyResolution: ReturnType<typeof vi.fn>;
   };
+  let plotOptionsServiceMock: { setAxesNorms: ReturnType<typeof vi.fn>; setBaseScaleFactors: ReturnType<typeof vi.fn> };
   let mockPopover: { toggle: vi.Mock };
-  let mockWorkerPythonService: { runTask: vi.Mock };
 
   beforeEach(async () => {
     resolutionSignal = signal(100);
 
     mockPlotService = {
+      refreshProjection: vi.fn().mockResolvedValue(undefined)
+    };
+    resolutionServiceMock = {
       resolution: resolutionSignal,
       defaultResolution: signal(250),
       setResolution: vi.fn(),
-      applyResolution: vi.fn().mockResolvedValue(undefined),
+      applyResolution: vi.fn().mockResolvedValue(undefined)
+    };
+    plotOptionsServiceMock = {
       setAxesNorms: vi.fn(),
-      refreshProjection: vi.fn().mockResolvedValue(undefined)
+      setBaseScaleFactors: vi.fn()
     };
 
     mockPopover = { toggle: vi.fn() };
-
-    mockWorkerPythonService = {
-      runTask: vi.fn().mockResolvedValue({ result: null, error: null })
-    };
 
     await TestBed.configureTestingModule({
       imports: [ScaleViewComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: PlotResolutionService, useValue: resolutionServiceMock },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         provideNoopAnimations()
       ]
     }).compileComponents();
@@ -207,7 +209,7 @@ describe('ScaleViewComponent', () => {
 
       await component.onValidate();
 
-      expect(mockPlotService.setResolution).toHaveBeenCalledWith(75);
+      expect(resolutionServiceMock.setResolution).toHaveBeenCalledWith(75);
     });
 
     it('should call applyResolution with the current pointsControl value', async () => {
@@ -215,7 +217,7 @@ describe('ScaleViewComponent', () => {
 
       await component.onValidate();
 
-      expect(mockPlotService.applyResolution).toHaveBeenCalledWith(80);
+      expect(resolutionServiceMock.applyResolution).toHaveBeenCalledWith(80);
     });
 
     it('should call refreshProjection', async () => {
@@ -230,7 +232,20 @@ describe('ScaleViewComponent', () => {
 
         await component.onValidate();
 
-        expect(mockPlotService.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+          x: 0.2,
+          y: 1,
+          z: 1,
+          aspectMode: 'manual'
+        });
+      });
+
+      it('should call setBaseScaleFactors with plan norms when scale is "plan"', async () => {
+        component.formScaleView.get('scale')?.setValue('plan');
+
+        await component.onValidate();
+
+        expect(plotOptionsServiceMock.setBaseScaleFactors).toHaveBeenCalledWith({
           x: 0.2,
           y: 1,
           z: 1,
@@ -243,7 +258,7 @@ describe('ScaleViewComponent', () => {
 
         await component.onValidate();
 
-        expect(mockPlotService.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 1,
@@ -256,7 +271,7 @@ describe('ScaleViewComponent', () => {
 
         await component.onValidate();
 
-        expect(mockPlotService.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 0.5,
@@ -269,7 +284,7 @@ describe('ScaleViewComponent', () => {
 
         await component.onValidate();
 
-        expect(mockPlotService.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 1,
@@ -282,7 +297,7 @@ describe('ScaleViewComponent', () => {
 
         await component.onValidate();
 
-        expect(mockPlotService.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 1,

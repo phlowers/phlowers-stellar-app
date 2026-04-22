@@ -1,1 +1,9 @@
+import logging
+
 __version__ = "0.1.0"
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+logger.info("Stellar engine initialized.")
+logger.info(f"Stellar engine version: {__version__}")

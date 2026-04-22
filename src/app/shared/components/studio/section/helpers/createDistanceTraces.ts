@@ -171,6 +171,7 @@ const createPointVisuals = (
 
 const buildDistanceVisuals = (
   distances: Distance[],
+  currentObstaclePointIndex: number,
   distanceType: 'oblique' | 'vertical' | 'horizontal',
   litData: GetSectionOutput,
   view: string,
@@ -184,12 +185,13 @@ const buildDistanceVisuals = (
       continue;
     }
 
-    const obstacle = litData.obstacles?.find((o) => o.name === distance.obstacleUuid);
+    const obstacle = litData.obstacles?.find((o) => o.uuid === distance.obstacleUuid);
     if (!obstacle) {
       continue;
     }
 
-    for (const distancePoint of distance.points) {
+    const selectedPoints = distance.points.filter((p) => p.pointIndex === currentObstaclePointIndex);
+    for (const distancePoint of selectedPoints) {
       const obstacleCoord = obstacle.points[distancePoint.pointIndex];
       if (!obstacleCoord) {
         continue;
@@ -214,13 +216,14 @@ const buildDistanceVisuals = (
 export const createDistanceVisuals = (
   plotParams: CreatePlotParams
 ): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {
-  const { distances, distanceType, litData, view, side } = plotParams;
+  const { distances, distanceType, litData, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
 
-  if (!distances?.length || !litData?.obstacles?.length || !distanceType) {
+  if (!distances?.length || !litData?.obstacles?.length || !distanceType || !currentObstacleUuid) {
     return { traces: [], annotations: [] };
   }
 
-  return buildDistanceVisuals(distances, distanceType, litData, view, side);
+  const selectedDistances = distances.filter((d) => d.obstacleUuid === currentObstacleUuid);
+  return buildDistanceVisuals(selectedDistances, currentObstaclePointIndex, distanceType, litData, view, side);
 };
 
 /**

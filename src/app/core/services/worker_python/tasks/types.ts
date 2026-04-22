@@ -45,7 +45,11 @@ export enum Task {
   // Get Python-side configuration constants
   getConfig = 'getConfig',
   // Add obstacles coordinates
-  addObstacle = 'addObstacles',
+  addObstacle = 'addObstacle',
+  // Delete a single obstacle from the middleware state by UUID
+  deleteObstacle = 'deleteObstacle',
+  // Clear all obstacles from the middleware state
+  clearObstacles = 'clearObstacles',
   // calculate obstacles distances
   calculateObstaclesDistances = 'calculateObstaclesDistances',
   /** Apply a cable length modification (lengthen or shorten) on a span */
@@ -164,9 +168,9 @@ export interface GetSectionOutput {
   // sag S1 and S2
   sag: number[];
   sag_s2: number[];
-  // obstacles coordinates
+  // obstacles coordinates (merged from obstacle tasks or refreshProjection)
   obstacles?: {
-    name: string;
+    uuid: string;
     points: [number, number, number][];
   }[];
   utilization_rate: number[];
@@ -290,10 +294,25 @@ export interface TaskInputs {
   };
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
-  // Inputs for addObstacles task
-  [Task.addObstacle]: Obstacle;
+  // Inputs for addObstacle task: all current obstacles to register at once
+  [Task.addObstacle]: {
+    obstacles: Obstacle[];
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  // Inputs for deleteObstacle task
+  [Task.deleteObstacle]: {
+    uuid: string;
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  // Inputs for clearObstacles task: no inputs
+  [Task.clearObstacles]: undefined;
   // Inputs for calculateObstaclesDistances task
   [Task.calculateObstaclesDistances]: {
+    obstacles: Obstacle[];
     startSupport: number;
     endSupport: number;
     view: View;
@@ -306,11 +325,33 @@ export interface TaskInputs {
     distanceSupportRef: number;
     supportRef: 'LEFT' | 'RIGHT';
   };
-  [Task.getAspectRatio]: AxesNorms;
   [Task.getWindIncidence]: {
     azimuth: number;
     windDirection: string;
   };
+  [Task.getAspectRatio]: AxesNorms & {
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+}
+
+/**
+ * Obstacle-specific output from Python obstacle registration tasks.
+ *
+ * @remarks
+ * Returned by `addObstacle`, `deleteObstacle`, and `clearObstacles` tasks.
+ * Contains only the rendered 3D positions of the registered obstacles — not the full
+ * section geometry. Use `getLit` when full `GetSectionOutput` is needed.
+ *
+ * @category Worker Types
+ */
+export interface ObstacleOutput {
+  /** Rendered 3D coordinates for each registered obstacle */
+  obstacles: {
+    uuid: string;
+    points: [number, number, number][];
+  }[];
 }
 
 export interface DistancePoint {
@@ -346,6 +387,7 @@ export interface TaskOutputs {
   /** Output from refreshProjection task: reprojected geometry with optional base state */
   [Task.refreshProjection]: {
     sectionOutput: GetSectionWithBaseOutput;
+    obstacles: ObstacleOutput['obstacles'];
     distances: Distance[];
   };
 
@@ -388,8 +430,12 @@ export interface TaskOutputs {
   [Task.getConfig]: {
     resolution: number;
   };
-  // Output from addObstacles task
-  [Task.addObstacle]: GetSectionWithBaseOutput;
+  // Output from addObstacle task: rendered positions of all currently registered obstacles
+  [Task.addObstacle]: ObstacleOutput;
+  // Output from deleteObstacle task: rendered positions of remaining registered obstacles
+  [Task.deleteObstacle]: ObstacleOutput;
+  // Output from clearObstacles task: empty obstacle list
+  [Task.clearObstacles]: ObstacleOutput;
   // Output from calculateObstaclesDistances task
   [Task.calculateObstaclesDistances]: Distance[];
   /** Output from cableModification task: recalculated geometry with optional base state */

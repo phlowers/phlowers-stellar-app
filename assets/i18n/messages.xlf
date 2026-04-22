@@ -3228,5 +3228,15 @@
         <source>uncertainty parameter</source>
       </segment>
     </unit>
+    <unit id="2658311569006173825">
+      <segment>
+        <source>Computing wind incidence</source>
+      </segment>
+    </unit>
+    <unit id="7452118962262453473">
+      <segment>
+        <source> Wind direction and azimuth are required. </source>
+      </segment>
+    </unit>
   </file>
 </xliff>

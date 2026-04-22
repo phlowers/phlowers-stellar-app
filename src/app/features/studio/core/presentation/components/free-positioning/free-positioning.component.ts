@@ -28,6 +28,8 @@ import { Side } from '@shared/types/plot.types';
 import { GetSectionOutput, Task } from '@core/services/worker_python/tasks/types';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { formatStudioError } from '@shared/components/studio/helpers/errors';
 import { Support } from '@shared/domain';
@@ -123,6 +125,8 @@ export class FreePositioningComponent implements OnDestroy {
   // Dependencies
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   readonly sideTabsService = inject(SideTabsService);
   readonly obstacleFormService = inject(ObstacleFormService);
   readonly obstaclesService = inject(ObstaclesService);
@@ -135,7 +139,7 @@ export class FreePositioningComponent implements OnDestroy {
     });
 
     effect(() => {
-      const plotOptions = this.plotService.plotOptions();
+      const plotOptions = this.plotOptionsService.plotOptions();
       const workerReady = this.plotService.workerReady();
       const litData = this.plotService.litData();
 
@@ -164,21 +168,54 @@ export class FreePositioningComponent implements OnDestroy {
 
   recreatePlots = debounce(async () => {
     this.destroyAllPlots();
-    const startSupport = this.plotService.plotOptions().startSupport;
+    const startSupport = this.plotOptionsService.plotOptions().startSupport;
     this.isLoading.set(true);
     const obstacle = this.obstacleFormService.buildObstacleFromForm();
-    const litData = await this.workerPythonService.runTask(Task.addObstacle, obstacle);
+    const sectionObstacles = this.spanService.section()?.obstacles ?? [];
+    const allObstacles = sectionObstacles.some((o) => o.uuid === obstacle.uuid)
+      ? sectionObstacles.map((o) => (o.uuid === obstacle.uuid ? obstacle : o))
+      : [...sectionObstacles, obstacle];
+    const plotOptions = this.plotOptionsService.plotOptions();
+    const filteredObstacles = allObstacles.filter(
+      (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
+    );
+    const currentLitData = this.plotService.litData();
+    if (!currentLitData) {
+      this.isLoading.set(false);
+      return;
+    }
+
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.addObstacle, {
+      obstacles: filteredObstacles,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
+
+    this.plotService.error.set(error);
+    this.plotService.pythonErrorCode.set(pythonErrorCode ?? null);
+
+    if (error) {
+      this.logger.warn('Unable to refresh free positioning plots after obstacle update.');
+      this.isLoading.set(false);
+      return;
+    }
+
+    const updatedLitData: GetSectionOutput = {
+      ...currentLitData,
+      obstacles: result?.obstacles ?? []
+    };
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(updatedLitData, referenceSupportIndex));
 
-    const supports = this.plotService.section()?.supports ?? [];
+    const supports = this.spanService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(litData.result.current, startSupport, 'face', supports);
-    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    await this.createPlot(updatedLitData, startSupport, 'face', supports);
+    await this.createPlot(updatedLitData, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
@@ -535,7 +572,7 @@ export class FreePositioningComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Safety net: always leave the mode when this component is destroyed
-    this.plotService.isFreePositioningMode.set(false);
+    this.plotOptionsService.isFreePositioningMode.set(false);
     this.destroyAllPlots();
   }
 }

@@ -48,6 +48,9 @@ public/service-worker.interfaces.js
 
 .vscode/settings.json
 
+# Personal Copilot skills
+copilot-skills.md
+
 *.ipynb
 
 public/data/chains.csv

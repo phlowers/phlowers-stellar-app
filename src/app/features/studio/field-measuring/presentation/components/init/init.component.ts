@@ -17,6 +17,8 @@ import { Select } from 'primeng/select';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { createInitialMeasureData } from '../../helpers';
 import { MessageModule } from 'primeng/message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,6 +36,8 @@ export class InitComponent implements OnDestroy, OnInit {
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
@@ -41,7 +45,7 @@ export class InitComponent implements OnDestroy, OnInit {
       const header = this.headerTemplate();
       if (header) {
         this.toolbarDialogService.setTemplates({ header });
-        const section = this.plotService.section();
+        const section = this.spanService.section();
         const measures = section?.field_measures;
         const newMeasureName = $localize`TM ` + ((measures?.length || 0) + 1);
         this.newMeasureNameControl.setValue(newMeasureName);
@@ -71,12 +75,12 @@ export class InitComponent implements OnDestroy, OnInit {
   chooseMeasureControl = new FormControl<string | null>(null, Validators.required);
 
   async createMeasure(): Promise<void> {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     const newMeasure = createInitialMeasureData(
       section,
       this.newMeasureNameControl.value || '',
-      this.plotService.plotOptions().startSupport,
-      this.plotService.plotOptions().endSupport
+      this.plotOptionsService.plotOptions().startSupport,
+      this.plotOptionsService.plotOptions().endSupport
     );
     const allMeasures = [...(section?.field_measures || []), newMeasure];
     await this.plotService.modifySection({
