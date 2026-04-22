@@ -166,7 +166,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));
     if (options.length) {
-      options.unshift({ label: $localize`No selected`, value: null });
+      options.unshift({ label: $localize`Not selected`, value: null });
     }
     return options;
   });

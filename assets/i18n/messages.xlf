@@ -3238,5 +3238,10 @@
         <source> Wind direction and azimuth are required. </source>
       </segment>
     </unit>
+    <unit id="6839138864615473489">
+      <segment>
+        <source>Not selected</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -3911,5 +3911,11 @@
         <target> La direction du vent et l&apos;azimut sont requis. </target>
       </segment>
     </unit>
+    <unit id="6839138864615473489">
+      <segment state="initial">
+        <source>Not selected</source>
+        <target>Non sélectionné</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
