@@ -17,6 +17,7 @@ from stellar_engine.plot.run_solver import (
 from stellar_engine.plot.supports_coords import get_support_coordinates
 
 __all__ = [
+    "obstacles",
     "refresh_projection",
     "get_support_coordinates",
     "apply_span_loads",

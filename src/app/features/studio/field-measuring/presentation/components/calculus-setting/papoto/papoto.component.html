@@ -273,8 +273,8 @@
       </div>
 
       <div class="incertainParam">
-        <dt i18n><del>uncertainty parameter</del></dt>
-        <dd><del>-</del></dd>
+        <dt i18n>uncertainty parameter</dt>
+        <dd>{{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }} m</dd>
       </div>
 
       <div class="param12">
@@ -295,7 +295,7 @@
       <div class="crit">
         <dt i18n>0.5% criterion</dt>
         <dd class="crit__result">
-          @if (measureData().outputs.papoto?.check_validity) {
+          @if (measureData().outputs.papoto?.checkValidity) {
             <ng-container i18n>Yes</ng-container>
             <app-icon icon="check" class="criterion-ok" />
           } @else {
