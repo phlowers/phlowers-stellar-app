@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -18,7 +23,11 @@ function createSignalMock<T>(initialValue: T) {
 describe('LoadFormsService', () => {
   let service: LoadFormsService;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockSpanService: vi.Mocked<PlotSpanService>;
+  let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockChargesService: vi.Mocked<ChargesService>;
+  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
+  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
 
   const mockSection: Section = {
     uuid: 'section-uuid-1',
@@ -118,16 +127,20 @@ describe('LoadFormsService', () => {
 
   beforeEach(() => {
     mockPlotService = {
-      section: createSignalMock<Section | null>(null),
       study: createSignalMock(null),
       temporaryLoadData: null,
       loading: createSignalMock(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
-      error: createSignalMock(null),
-      refreshCamera: vi.fn(),
-      reapplyObstacles: vi.fn().mockResolvedValue(undefined)
+      error: createSignalMock(null)
     } as unknown as vi.Mocked<PlotService>;
+    mockSpanService = {
+      section: createSignalMock<Section | null>(null)
+    } as unknown as vi.Mocked<PlotSpanService>;
+    plotOptionsServiceMock = {
+      refreshCamera: vi.fn(),
+      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1, view: '3d' })
+    } as unknown as vi.Mocked<PlotOptionsService>;
 
     mockChargesService = {
       getSelectedChargeCase: vi.fn(),
@@ -135,11 +148,23 @@ describe('LoadFormsService', () => {
       deleteCharge: vi.fn()
     } as unknown as vi.Mocked<ChargesService>;
 
+    mockWorkerPythonService = {
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null })
+    };
+
+    mockObstacleStateService = {
+      syncObstacles: vi.fn().mockResolvedValue(null)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         LoadFormsService,
         { provide: PlotService, useValue: mockPlotService },
-        { provide: ChargesService, useValue: mockChargesService }
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+        { provide: ChargesService, useValue: mockChargesService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: ObstacleStateService, useValue: mockObstacleStateService }
       ]
     });
 
@@ -156,7 +181,7 @@ describe('LoadFormsService', () => {
 
   describe('initTemporaryLoadData', () => {
     it('should set temporaryLoadData to null when no currentChargeUuid', () => {
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: null
       } as Section);
@@ -167,7 +192,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should set temporaryLoadData to null when section is null', () => {
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       service.initTemporaryLoadData();
 
@@ -175,7 +200,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should set temporaryLoadData to null when charge not found', () => {
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'non-existent-uuid',
         charges: []
@@ -193,7 +218,7 @@ describe('LoadFormsService', () => {
         charges: [mockCharge]
       } as Section;
 
-      mockPlotService.section.mockReturnValue(sectionWithCharge);
+      mockSpanService.section.mockReturnValue(sectionWithCharge);
 
       service.initTemporaryLoadData();
 
@@ -206,7 +231,7 @@ describe('LoadFormsService', () => {
         ...mockCharge,
         data: { ...mockChargeData, spanLoads: null as unknown as typeof mockChargeData.spanLoads }
       };
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
         charges: [chargeWithNullSpanLoads]
@@ -219,7 +244,7 @@ describe('LoadFormsService', () => {
     });
 
     it('should use empty supports array when section has no supports', () => {
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
         charges: [mockCharge],
@@ -244,7 +269,7 @@ describe('LoadFormsService', () => {
     it('should return early when studyUuid is missing', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.study.mockReturnValue(null);
-      mockPlotService.section.mockReturnValue(mockSection);
+      mockSpanService.section.mockReturnValue(mockSection);
 
       await service.saveTemporaryLoadDataInSection();
 
@@ -254,7 +279,7 @@ describe('LoadFormsService', () => {
     it('should return early when sectionUuid is missing', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       await service.saveTemporaryLoadDataInSection();
 
@@ -264,17 +289,8 @@ describe('LoadFormsService', () => {
     it('should return early when selected_charge_uuid is null', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue({ ...mockSection, selected_charge_uuid: null });
-
-      await service.saveTemporaryLoadDataInSection();
-
-      expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
-    });
-
-    it('should return early when charge is not found in section', async () => {
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue({ ...mockSection, selected_charge_uuid: 'charge-uuid-1', charges: [] });
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockChargesService.getSelectedChargeCase.mockResolvedValue(null);
 
       await service.saveTemporaryLoadDataInSection();
 
@@ -284,11 +300,8 @@ describe('LoadFormsService', () => {
     it('should save temporaryLoadData to charge', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: mockCharge.uuid,
-        charges: [mockCharge]
-      } as Section);
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockChargesService.getSelectedChargeCase.mockResolvedValue(mockCharge);
       mockChargesService.createOrUpdateCharge.mockResolvedValue(undefined);
 
       await service.saveTemporaryLoadDataInSection();
@@ -307,23 +320,23 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockPlotService.reapplyObstacles).not.toHaveBeenCalled();
-      expect(mockPlotService.refreshCamera).not.toHaveBeenCalled();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      expect(plotOptionsServiceMock.refreshCamera).not.toHaveBeenCalled();
     });
 
-    it('should call refreshCamera and reapplyObstacles when temporaryLoadData is set', async () => {
+    it('should call refreshCamera and runTask(changeState) when temporaryLoadData is set', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(mockSection);
+      mockSpanService.section.mockReturnValue(mockSection);
 
       await service.calculateLoad();
 
-      expect(mockPlotService.refreshCamera).toHaveBeenCalled();
-      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
     });
 
     it('should update temporaryLoadData spanLoads with rechecked values before delegating', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(mockSection);
+      mockSpanService.section.mockReturnValue(mockSection);
 
       await service.calculateLoad();
 
@@ -334,7 +347,7 @@ describe('LoadFormsService', () => {
 
     it('should set loading to true then false', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(mockSection);
+      mockSpanService.section.mockReturnValue(mockSection);
 
       await service.calculateLoad();
 
@@ -344,31 +357,31 @@ describe('LoadFormsService', () => {
 
     it('should use empty array for supports when section has no supports', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         supports: undefined as unknown as typeof mockSection.supports
       });
 
       await service.calculateLoad();
 
-      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
       expect(Array.isArray(mockPlotService.temporaryLoadData?.spanLoads)).toBe(true);
     });
 
     it('should use empty array for supports when section is null', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       await service.calculateLoad();
 
-      expect(mockPlotService.reapplyObstacles).toHaveBeenCalled();
+      expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteLoad', () => {
     it('should return early when studyUuid is missing', () => {
       mockPlotService.study.mockReturnValue(null);
-      mockPlotService.section.mockReturnValue(mockSection);
+      mockSpanService.section.mockReturnValue(mockSection);
 
       service.deleteLoad();
 
@@ -377,7 +390,7 @@ describe('LoadFormsService', () => {
 
     it('should return early when sectionUuid is missing', () => {
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue(null);
 
       service.deleteLoad();
 
@@ -386,7 +399,7 @@ describe('LoadFormsService', () => {
 
     it('should return early when chargeUuid is missing', () => {
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: null
       } as Section);
@@ -398,7 +411,7 @@ describe('LoadFormsService', () => {
 
     it('should call deleteCharge with correct parameters', () => {
       mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockPlotService.section.mockReturnValue({
+      mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1'
       } as Section);

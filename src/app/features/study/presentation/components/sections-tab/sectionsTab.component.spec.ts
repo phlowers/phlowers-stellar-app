@@ -12,6 +12,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -538,7 +539,10 @@ describe('SectionsTabComponent', () => {
         'openTool'
       );
       const studySetSpy = vi.spyOn((component as unknown as { plotService: PlotService }).plotService.study, 'set');
-      const sectionSetSpy = vi.spyOn((component as unknown as { plotService: PlotService }).plotService.section, 'set');
+      const sectionSetSpy = vi.spyOn(
+        (component as unknown as { spanService: PlotSpanService }).spanService.section,
+        'set'
+      );
       fixture.componentRef.setInput('study', { uuid: 'study-1', sections: [mockSection] });
       fixture.detectChanges();
 

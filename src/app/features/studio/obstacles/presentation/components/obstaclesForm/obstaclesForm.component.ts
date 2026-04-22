@@ -16,7 +16,8 @@ import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -25,6 +26,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY } from '@shared/domain/obstacles/obstacle-form.constants';
 import { distinctUntilChanged, filter } from 'rxjs';
+import { PlotService } from '@services/plot/plot.service';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -48,9 +50,11 @@ import { distinctUntilChanged, filter } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ObstaclesFormComponent {
-  public readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  public readonly plotOptionsService = inject(PlotOptionsService);
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly plotService = inject(PlotService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
@@ -84,7 +88,7 @@ export class ObstaclesFormComponent {
   readonly lateralDistanceTypeOptions = [{ label: $localize`Span axis`, value: 'SPAN_AXIS' }];
 
   readonly spansOptions = computed(() => {
-    return this.plotService.getSpanOptions();
+    return this.spanService.getSpanOptions();
   });
 
   readonly supportUuidValue = toSignal(
@@ -111,18 +115,21 @@ export class ObstaclesFormComponent {
       return;
     }
     if (!supportUuid) {
-      this.plotService.isFreePositioningMode.set(false);
+      this.plotOptionsService.isFreePositioningMode.set(false);
     }
     // Skip reset when editing an existing saved obstacle — the span dropdown re-emitting
     // (e.g. after PrimeNG refreshes its options following a section save) must not wipe the form.
     const currentFormUuid = untracked(() => this.obstacleFormService.form.value.uuid);
     const isEditingExisting =
       !!currentFormUuid &&
-      untracked(() => !!this.plotService.section()?.obstacles?.some((o) => o.uuid === currentFormUuid));
+      untracked(() => !!this.spanService.section()?.obstacles?.some((o) => o.uuid === currentFormUuid));
     if (isEditingExisting) {
       return;
     }
     this.obstacleFormService.resetFormForNewObstacle(supportUuid);
+    if (supportUuid) {
+      untracked(() => this.obstacleFormService.returnToSpan());
+    }
   });
 
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {

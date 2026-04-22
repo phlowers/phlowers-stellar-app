@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { BehaviorSubject } from 'rxjs';
 import { Section } from '@shared/domain';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -122,8 +123,11 @@ describe('FieldMeasuringComponent', () => {
       selected_field_measure_uuid: testMeasure.uuid
     } as Section;
 
+    const mockSpanService = {
+      section: signal<Section | null>(mockSection)
+    };
+
     const mockPlotService = {
-      section: signal<Section | null>(mockSection),
       modifySection: vi.fn().mockResolvedValue(undefined)
     } as unknown as PlotService;
 
@@ -146,6 +150,7 @@ describe('FieldMeasuringComponent', () => {
         { provide: StudiesService, useValue: mockStudiesService },
         { provide: SectionService, useValue: mockSectionService },
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
         { provide: LinesService, useValue: mockLinesService },
         { provide: CablesService, useValue: mockCablesService }
       ]
@@ -306,6 +311,7 @@ describe('FieldMeasuringComponent', () => {
   describe('onSave', () => {
     it('should call modifySection with updated field_measures', async () => {
       const plotService = TestBed.inject(PlotService);
+      const spanService = TestBed.inject(PlotSpanService);
       const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
 
       // Open main dialog to initialize measureData from PlotService
@@ -314,7 +320,7 @@ describe('FieldMeasuringComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const measureData = component.measureData();
-      const section = plotService.section();
+      const section = spanService.section();
 
       await component.onSave();
 
@@ -325,11 +331,12 @@ describe('FieldMeasuringComponent', () => {
 
     it('should return early if section is not available', async () => {
       const plotService = TestBed.inject(PlotService);
+      const spanService = TestBed.inject(PlotSpanService);
       const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
       const closeToolSpy = vi.spyOn(toolbarDialogService, 'closeTool');
 
       // Set section to null using the signal setter
-      const sectionSignal = plotService.section as ReturnType<typeof signal<Section | null>>;
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
       sectionSignal.set(null);
 
       await component.onSave();
@@ -537,9 +544,11 @@ describe('FieldMeasuringComponent', () => {
 
   describe('onSave - adding new measure', () => {
     let plotService: PlotService;
+    let spanService: PlotSpanService;
 
     beforeEach(() => {
       plotService = TestBed.inject(PlotService);
+      spanService = TestBed.inject(PlotSpanService);
     });
 
     it('should add new field measure when uuid does not exist', async () => {
@@ -552,7 +561,7 @@ describe('FieldMeasuringComponent', () => {
         selected_field_measure_uuid: 'new-uuid'
       };
 
-      plotService.section = signal(mockSection as unknown as Section);
+      (spanService.section as ReturnType<typeof signal<Section | null>>).set(mockSection as unknown as Section);
       component.measureData.set(newMeasure);
 
       const modifySpy = vi.spyOn(plotService, 'modifySection');
@@ -570,7 +579,7 @@ describe('FieldMeasuringComponent', () => {
         field_measures: []
       };
 
-      plotService.section = signal(mockSection as unknown as Section);
+      (spanService.section as ReturnType<typeof signal<Section | null>>).set(mockSection as unknown as Section);
       component.measureData.set(null as unknown as FieldMeasure);
 
       const modifySpy = vi.spyOn(plotService, 'modifySection');

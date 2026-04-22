@@ -3,6 +3,7 @@ import { Component, signal } from '@angular/core';
 import { VhlAndGuyingComponent } from './vtl-and-guying.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
@@ -38,6 +39,7 @@ describe('VhlAndGuyingComponent', () => {
   let fixture: ComponentFixture<VhlAndGuyingComponent>;
   let toolbarDialogService: ToolbarDialogService;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockSpanService: vi.Mocked<PlotSpanService>;
   let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
   let mockSectionService: vi.Mocked<SectionService>;
   let mockMessageService: vi.Mocked<MessageService>;
@@ -61,15 +63,18 @@ describe('VhlAndGuyingComponent', () => {
     mockPlotService = {
       loading: signal(false),
       litData: signal(mockLitData),
+      study: signal(mockStudy)
+    } as unknown as vi.Mocked<PlotService>;
+
+    mockSpanService = {
       section: signal(mockSection),
-      study: signal(mockStudy),
       getSpanOptions: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
       getSpanOptionsWithIndex: vi.fn().mockReturnValue([{ label: 'Span 1', value: { index: 0, uuid: 'span-uuid-1' } }]),
       getSupportOptions: vi.fn().mockReturnValue([
         { label: '1', value: 'LEFT' },
         { label: '2', value: 'RIGHT' }
       ])
-    } as unknown as vi.Mocked<PlotService>;
+    } as unknown as vi.Mocked<PlotSpanService>;
 
     mockWorkerPythonService = {
       runTask: vi.fn()
@@ -93,6 +98,7 @@ describe('VhlAndGuyingComponent', () => {
         ToolbarDialogService,
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: SectionService, useValue: mockSectionService },
         { provide: MessageService, useValue: mockMessageService }
@@ -321,7 +327,7 @@ describe('VhlAndGuyingComponent', () => {
         comment: 'Test comment'
       }
     };
-    Object.defineProperty(mockPlotService, 'section', {
+    Object.defineProperty(mockSpanService, 'section', {
       value: signal(mockSectionWithData),
       writable: true,
       configurable: true
@@ -346,7 +352,7 @@ describe('VhlAndGuyingComponent', () => {
   });
 
   it('should not set form values when section is null', () => {
-    Object.defineProperty(mockPlotService, 'section', {
+    Object.defineProperty(mockSpanService, 'section', {
       value: signal(null),
       writable: true,
       configurable: true
@@ -361,7 +367,7 @@ describe('VhlAndGuyingComponent', () => {
       uuid: 'test-section-uuid',
       supports: [{ chainV: true }]
     };
-    Object.defineProperty(mockPlotService, 'section', {
+    Object.defineProperty(mockSpanService, 'section', {
       value: signal(mockSectionNoData),
       writable: true,
       configurable: true
@@ -455,7 +461,7 @@ describe('VhlAndGuyingComponent', () => {
       writable: true,
       configurable: true
     });
-    Object.defineProperty(mockPlotService, 'section', {
+    Object.defineProperty(mockSpanService, 'section', {
       value: signal(null),
       writable: true,
       configurable: true
@@ -603,7 +609,7 @@ describe('VhlAndGuyingComponent', () => {
       fixture.detectChanges();
 
       // Verify that getSupportOptions was called with the correct uuid
-      expect(mockPlotService.getSupportOptions).toHaveBeenCalledWith('span-uuid-1');
+      expect(mockSpanService.getSupportOptions).toHaveBeenCalledWith('span-uuid-1');
     });
 
     it('should populate supportOptions when selectedSpan has a valid uuid', () => {
@@ -649,7 +655,7 @@ describe('VhlAndGuyingComponent', () => {
       component.form.controls.selectedSpan.setValue(null);
       fixture.detectChanges();
 
-      expect(mockPlotService.getSupportOptions).toHaveBeenCalledWith(null);
+      expect(mockSpanService.getSupportOptions).toHaveBeenCalledWith(null);
     });
 
     it('should compute vtlWithoutGuying using the correct support index derived from selectedSpan', () => {
@@ -673,10 +679,10 @@ describe('VhlAndGuyingComponent', () => {
     it('should use getSpanOptionsWithIndex in the template to populate span select', () => {
       // This test verifies that the component uses the correct method
       // The template should bind to getSpanOptionsWithIndex() not getSpanOptions()
-      expect(mockPlotService.getSpanOptionsWithIndex).toBeDefined();
+      expect(mockSpanService.getSpanOptionsWithIndex).toBeDefined();
 
       // Simulate what happens in the template
-      const spanOptions = mockPlotService.getSpanOptionsWithIndex();
+      const spanOptions = mockSpanService.getSpanOptionsWithIndex();
       expect(spanOptions).toBeDefined();
       expect(spanOptions.length).toBeGreaterThan(0);
       expect(spanOptions[0].value).toHaveProperty('index');
@@ -694,7 +700,7 @@ describe('VhlAndGuyingComponent', () => {
         writable: true,
         configurable: true
       });
-      Object.defineProperty(mockPlotService, 'section', {
+      Object.defineProperty(mockSpanService, 'section', {
         value: signal(mockSectionForSave),
         writable: true,
         configurable: true

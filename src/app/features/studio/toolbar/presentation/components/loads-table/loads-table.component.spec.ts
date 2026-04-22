@@ -5,6 +5,7 @@ import { LoadsTableComponent } from './loads-table.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Charge, Section, Study } from '@shared/domain';
 import { LoadType, SymmetryType } from '@shared/domain/models/charge.model';
 import { Support } from '@shared/domain/models/support.model';
@@ -15,6 +16,7 @@ describe('LoadsTableComponent', () => {
   let mockToolbarDialogService: Partial<ToolbarDialogService>;
   let mockChargesService: Partial<ChargesService>;
   let mockPlotService: Partial<PlotService>;
+  let mockSpanService: { section: ReturnType<typeof signal<Section | null>> };
 
   const mockSupports: Support[] = [
     {
@@ -191,7 +193,10 @@ describe('LoadsTableComponent', () => {
     };
 
     mockPlotService = {
-      study: signal<Study | null>(mockStudy),
+      study: signal<Study | null>(mockStudy)
+    };
+
+    mockSpanService = {
       section: signal<Section | null>(mockSection)
     };
 
@@ -200,7 +205,8 @@ describe('LoadsTableComponent', () => {
       providers: [
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: ChargesService, useValue: mockChargesService },
-        { provide: PlotService, useValue: mockPlotService }
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService }
       ]
     }).compileComponents();
 
@@ -315,7 +321,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should not save if section uuid is missing', async () => {
-      mockPlotService.section!.set(null);
+      mockSpanService.section.set(null);
       component.chargeUuid.set('charge-uuid-1');
 
       await component.saveChanges();

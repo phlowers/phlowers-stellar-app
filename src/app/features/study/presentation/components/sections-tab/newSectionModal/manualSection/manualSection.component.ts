@@ -35,6 +35,8 @@ import { PaginatorModule } from 'primeng/paginator';
 import { v4 as uuidv4 } from 'uuid';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 
 // debounce to make it more fluid when dragging the slider
@@ -135,6 +137,8 @@ export class ManualSectionComponent implements OnInit {
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
   readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  readonly plotOptionsService = inject(PlotOptionsService);
 
   //TODO: To put into the plot service
   sliderOptions = computed<Options>(() => {
@@ -230,7 +234,7 @@ export class ManualSectionComponent implements OnInit {
   tabValueChange = (event: string | number) => {
     this.tabValue.set(String(event));
     if (event === 'graphical') {
-      this.plotService.section.set(this.section());
+      this.spanService.section.set(this.section());
       this.plotService.plotOptionsChange({
         startSupport: 0,
         endSupport: this.section().supports?.length ?? 0
@@ -419,7 +423,7 @@ export class ManualSectionComponent implements OnInit {
 
   //TODO: To put into the plot service
   updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
-    const options = this.plotService.plotOptions();
+    const options = this.plotOptionsService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },
       { val: highValue, key: 'endSupport' as const, opt: options.endSupport }

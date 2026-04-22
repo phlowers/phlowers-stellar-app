@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioMenuBarComponent } from './menu-bar.component';
-import { PlotService } from '@services/plot/plot.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -11,14 +10,12 @@ import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
-import { signal } from '@angular/core';
 import { Charge, InitialCondition, Section, Study, SymmetryType } from '@shared/domain';
 import { ActivatedRoute } from '@angular/router';
 
 describe('StudioMenuBarComponent', () => {
   let component: StudioMenuBarComponent;
   let fixture: ComponentFixture<StudioMenuBarComponent>;
-  let mockPlotService: Partial<PlotService>;
   let mockChargesService: Partial<ChargesService>;
   let mockToolbarDialogService: Partial<ToolbarDialogService>;
 
@@ -132,19 +129,6 @@ describe('StudioMenuBarComponent', () => {
   };
 
   beforeEach(async () => {
-    // Mock PlotService
-    mockPlotService = {
-      plotOptions: signal({
-        view: '3d',
-        side: 'profile',
-        startSupport: 0,
-        endSupport: 1,
-        invert: false
-      }),
-      loading: signal(false),
-      plotOptionsChange: vi.fn()
-    };
-
     // Mock ChargesService
     mockChargesService = {
       setSelectedCharge: vi.fn().mockResolvedValue(undefined),
@@ -170,7 +154,6 @@ describe('StudioMenuBarComponent', () => {
         SelectWithButtonsComponent
       ],
       providers: [
-        { provide: PlotService, useValue: mockPlotService as PlotService },
         {
           provide: ChargesService,
           useValue: mockChargesService as ChargesService

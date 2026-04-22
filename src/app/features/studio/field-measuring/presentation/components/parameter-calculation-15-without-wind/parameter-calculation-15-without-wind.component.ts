@@ -23,6 +23,7 @@ import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
@@ -76,6 +77,7 @@ export class ParameterCalculation15WithoutWindComponent {
 
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
+  readonly spanService = inject(PlotSpanService);
   readonly studiesService = inject(StudiesService);
   private readonly initialConditionService = inject(InitialConditionService);
   private readonly messageService = inject(MessageService);

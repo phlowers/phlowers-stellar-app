@@ -7,6 +7,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
@@ -35,6 +36,7 @@ import { LoadControlName, SpanFormControls, SupportOption } from './load-marking
 export class LoadMarkingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   readonly loadFormsService = inject(LoadFormsService);
 
   readonly form = this.fb.group<SpanFormControls>({
@@ -56,7 +58,7 @@ export class LoadMarkingComponent {
   });
 
   readonly spansOptions = computed(() => {
-    return this.plotService.getSpanOptions();
+    return this.spanService.getSpanOptions();
   });
   readonly isSaving = signal(false);
   readonly isCalculatingLoad = signal(false);
@@ -164,7 +166,7 @@ export class LoadMarkingComponent {
   zoomToSpan(): void {
     const uuid = this.form.controls.spanSelect.value;
     if (!uuid) return;
-    const index = this.plotService.getSupportIndex(uuid);
+    const index = this.spanService.getSupportIndex(uuid);
     if (index < 0) return;
     this.plotService.plotOptionsChange({
       startSupport: index,
@@ -188,12 +190,12 @@ export class LoadMarkingComponent {
       return;
     }
 
-    const index = untracked(() => this.plotService.getSupportIndex(supportUuid));
+    const index = untracked(() => this.spanService.getSupportIndex(supportUuid));
     if (index < 0) {
       return;
     }
 
-    this.supportsOptions.set(untracked(() => this.plotService.getSupportOptions(supportUuid)));
+    this.supportsOptions.set(untracked(() => this.spanService.getSupportOptions(supportUuid)));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
     this.applySelectedLoadValues();
   }

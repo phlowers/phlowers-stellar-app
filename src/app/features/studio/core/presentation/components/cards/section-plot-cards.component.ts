@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 @Component({
@@ -38,6 +40,8 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 export class SectionPlotCardsComponent {
   litData = signal<GetSectionOutput | null>(null);
   readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   constructor() {
     effect(() => {
       const litData = this.plotService.litData();
@@ -49,16 +53,18 @@ export class SectionPlotCardsComponent {
   }
 
   arraysOfSupports = computed(() => {
-    if (!this.plotService.section()) {
+    if (!this.spanService.section()) {
       return [];
     }
-    const array = new Array(this.plotService.plotOptions().endSupport - this.plotService.plotOptions().startSupport + 1)
+    const array = new Array(
+      this.plotOptionsService.plotOptions().endSupport - this.plotOptionsService.plotOptions().startSupport + 1
+    )
       .fill(0)
-      .map((_, index) => index + this.plotService.plotOptions().startSupport);
+      .map((_, index) => index + this.plotOptionsService.plotOptions().startSupport);
     if (array.length > 3) {
       return [];
     }
-    return this.plotService.plotOptions().invert ? [...array].reverse() : array;
+    return this.plotOptionsService.plotOptions().invert ? [...array].reverse() : array;
   });
 
   /** Returns the correct span index between two adjacent supports in the iteration. */

@@ -10,7 +10,8 @@ import {
   untracked
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
@@ -38,8 +39,8 @@ export class HeaderComponent {
   }>();
 
   readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
-    const { startSupport, endSupport } = this.plotService.plotOptions();
-    const supports = this.plotService.section()?.supports ?? [];
+    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
+    const supports = this.spanService.section()?.supports ?? [];
     const spanAmount = Math.max(endSupport - startSupport, 0);
     return Array.from({ length: spanAmount }, (_, index) => {
       const actualIndex = index + startSupport;
@@ -60,7 +61,8 @@ export class HeaderComponent {
   private hasCalculatedInitialAltitude = false;
   private previousSpan = signal<number[] | null>(null);
 
-  private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
 
   constructor() {
     // Initialize span to first available span if measureData has no span set,
@@ -112,7 +114,7 @@ export class HeaderComponent {
   }
 
   private calculateAltitude(span: number[]): void {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!section?.supports) {
       return;
     }

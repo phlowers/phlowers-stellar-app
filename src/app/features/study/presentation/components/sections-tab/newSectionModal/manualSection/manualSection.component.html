@@ -518,8 +518,8 @@
             <app-studio [isPreview]="true"></app-studio>
           </div>
           <ngx-slider
-            [value]="plotService.plotOptions().startSupport"
-            [highValue]="plotService.plotOptions().endSupport"
+            [value]="plotOptionsService.plotOptions().startSupport"
+            [highValue]="plotOptionsService.plotOptions().endSupport"
             (userChangeEnd)="updateSliderOptions($event)"
             [options]="sliderOptions()"
             class="block pb-4"

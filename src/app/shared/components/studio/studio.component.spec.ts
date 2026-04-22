@@ -4,6 +4,7 @@ import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TaskError, DataError, GetSectionOutput, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
@@ -101,11 +102,13 @@ describe('StudioComponent', () => {
     pythonErrorCode: WritableSignal<PythonErrorCode | null>;
     litData: WritableSignal<GetSectionOutput | null>;
     loading: WritableSignal<boolean>;
-    section: WritableSignal<Section | null>;
     workerReady: WritableSignal<boolean>;
     refreshSection: ReturnType<typeof vi.fn>;
   };
   let mockNotificationService: { error: ReturnType<typeof vi.fn> };
+  let mockSpanService: {
+    section: WritableSignal<Section | null>;
+  };
 
   beforeEach(async () => {
     mockPlotService = {
@@ -113,17 +116,20 @@ describe('StudioComponent', () => {
       pythonErrorCode: signal<PythonErrorCode | null>(null),
       litData: signal<GetSectionOutput | null>(null),
       loading: signal<boolean>(false),
-      section: signal<Section | null>(null),
       workerReady: signal<boolean>(false),
       refreshSection: vi.fn()
     };
     mockNotificationService = { error: vi.fn() };
+    mockSpanService = {
+      section: signal<Section | null>(null)
+    };
 
     await TestBed.configureTestingModule({
       imports: [StudioComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
-        { provide: NotificationService, useValue: mockNotificationService }
+        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: PlotSpanService, useValue: mockSpanService }
       ]
     })
       .overrideComponent(StudioComponent, {
@@ -200,7 +206,7 @@ describe('StudioComponent', () => {
   describe('Effect – preview refresh', () => {
     it('should not call refreshSection when isPreview is false', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', false);
       fixture.detectChanges();
 
@@ -209,7 +215,7 @@ describe('StudioComponent', () => {
 
     it('should not call refreshSection when worker is not ready', () => {
       mockPlotService.workerReady.set(false);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
@@ -218,7 +224,7 @@ describe('StudioComponent', () => {
 
     it('should not call refreshSection when section is null', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(null);
+      mockSpanService.section.set(null);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
@@ -227,7 +233,7 @@ describe('StudioComponent', () => {
 
     it('should call refreshSection when all conditions are met', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
@@ -236,14 +242,14 @@ describe('StudioComponent', () => {
 
     it('should call refreshSection again when section changes', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
       mockPlotService.refreshSection.mockClear();
 
       const anotherSection = { ...mockSection, uuid: 'sec-2', name: 'Section 2' };
-      mockPlotService.section.set(anotherSection);
+      mockSpanService.section.set(anotherSection);
       fixture.detectChanges();
 
       expect(mockPlotService.refreshSection).toHaveBeenCalledWith(anotherSection);

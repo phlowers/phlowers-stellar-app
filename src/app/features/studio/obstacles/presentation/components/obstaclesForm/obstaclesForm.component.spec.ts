@@ -2,9 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { signal } from '@angular/core';
 import { ObstaclesFormComponent } from './obstaclesForm.component';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { PlotService } from '@services/plot/plot.service';
 import { BehaviorSubject } from 'rxjs';
 
 vi.mock('lodash', () => ({
@@ -57,13 +59,10 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockPlotService: {
-    getSpanOptions: vi.Mock;
-    isFreePositioningMode: ReturnType<typeof signal<boolean>>;
-    loading: ReturnType<typeof signal<boolean>>;
-    section: ReturnType<typeof signal<null>>;
-  };
+  let mockSpanService: { getSpanOptions: ReturnType<typeof vi.fn>; section: ReturnType<typeof vi.fn> };
+  let mockPlotOptionsService: { isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
+  let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
     setCurrentPointIndex: vi.Mock;
@@ -77,11 +76,15 @@ describe('ObstaclesFormComponent', () => {
     Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
 
   beforeEach(async () => {
-    mockPlotService = {
+    mockSpanService = {
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
-      isFreePositioningMode: signal(false),
-      loading: signal(false),
-      section: signal(null)
+      section: vi.fn().mockReturnValue(null)
+    };
+    mockPlotOptionsService = {
+      isFreePositioningMode: signal(false)
+    };
+    mockPlotService = {
+      loading: signal(false)
     };
     mockObstacleFormService = new MockObstacleFormService();
     const indexSignal = signal<number | null>(null);
@@ -94,8 +97,10 @@ describe('ObstaclesFormComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ObstaclesFormComponent],
       providers: [
-        { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
+        { provide: PlotService, useValue: mockPlotService },
         {
           provide: ObstaclesService,
           useValue: {
@@ -409,8 +414,10 @@ describe('ObstaclesFormComponent', () => {
         .configureTestingModule({
           imports: [ObstaclesFormComponent],
           providers: [
-            { provide: PlotService, useValue: mockPlotService },
+            { provide: PlotSpanService, useValue: mockSpanService },
+            { provide: PlotOptionsService, useValue: mockPlotOptionsService },
             { provide: ObstacleFormService, useValue: mockObstacleFormService },
+            { provide: PlotService, useValue: mockPlotService },
             {
               provide: ObstaclesService,
               useValue: {
@@ -574,7 +581,7 @@ describe('ObstaclesFormComponent', () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
       expect(toggle.getAttribute('ng-reflect-model')).toBe('false');
 
-      mockPlotService.isFreePositioningMode.set(true);
+      mockPlotOptionsService.isFreePositioningMode.set(true);
       fixture.detectChanges();
 
       expect(toggle.getAttribute('ng-reflect-model')).toBe('true');
@@ -862,12 +869,30 @@ describe('ObstaclesFormComponent', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       fixture.detectChanges();
 
-      mockPlotService.isFreePositioningMode.set(true);
+      mockPlotOptionsService.isFreePositioningMode.set(true);
 
       mockObstacleFormService.form.controls.supportUuid.setValue(null);
       fixture.detectChanges();
 
-      expect(mockPlotService.isFreePositioningMode()).toBe(false);
+      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
+    });
+
+    it('should call returnToSpan when supportUuid changes to a non-null value', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(mockObstacleFormService.returnToSpan).toHaveBeenCalled();
+    });
+
+    it('should not call returnToSpan when supportUuid is cleared', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+      mockObstacleFormService.returnToSpan.mockClear();
+
+      mockObstacleFormService.form.controls.supportUuid.setValue(null);
+      fixture.detectChanges();
+
+      expect(mockObstacleFormService.returnToSpan).not.toHaveBeenCalled();
     });
   });
 

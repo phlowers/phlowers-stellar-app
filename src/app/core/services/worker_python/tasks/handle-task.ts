@@ -70,6 +70,14 @@ const tasks: Record<
     function: 'add_obstacles',
     externalPackages: []
   },
+  [Task.deleteObstacle]: {
+    function: 'delete_obstacle',
+    externalPackages: []
+  },
+  [Task.clearObstacles]: {
+    function: 'clear_obstacles',
+    externalPackages: []
+  },
   [Task.calculateObstaclesDistances]: {
     function: 'calculate_obstacles_distances',
     externalPackages: []

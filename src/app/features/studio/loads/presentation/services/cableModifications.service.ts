@@ -7,6 +7,8 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Task } from '@services/worker_python/tasks/types';
@@ -32,6 +34,8 @@ export class CableModificationsService {
     // If not used, this is a no-op.
   }
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly studiesService = inject(StudiesService);
 
@@ -43,12 +47,12 @@ export class CableModificationsService {
    * @param params Cable modification input parameters
    */
   calculate = async (params: CableModificationParams): Promise<void> => {
-    const spanIndex = this.plotService.getSupportIndex(params.spanUuid);
+    const spanIndex = this.spanService.getSupportIndex(params.spanUuid);
     if (spanIndex < 0) {
       return;
     }
 
-    this.plotService.refreshCamera();
+    this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
 
     const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.cableModification, {
@@ -73,7 +77,7 @@ export class CableModificationsService {
    */
   save = async (modification: Omit<CableModification, 'uuid'> & { uuid?: string }): Promise<void> => {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       return;
     }
@@ -114,7 +118,7 @@ export class CableModificationsService {
    */
   delete = async (uuid: string): Promise<void> => {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       return;
     }

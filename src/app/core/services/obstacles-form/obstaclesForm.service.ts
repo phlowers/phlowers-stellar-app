@@ -1,16 +1,20 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domain/obstacles/obstacle-form.constants';
 import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { ObstacleOutput } from '@services/worker_python/tasks/types';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -19,7 +23,10 @@ import { Observable } from 'rxjs';
 export class ObstacleFormService {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
 
@@ -103,17 +110,15 @@ export class ObstacleFormService {
    * (after calculateAndSave) or restored (after refreshSection on re-open).
    */
   readonly results = computed(() => {
-    const distances = this.plotService.distances();
-    // TODO: Python currently uses obstacle.name as the key in distance results instead of UUID.
-    // Once the Python layer is updated to use obstacle.uuid, replace formValue().name with formValue().uuid.
-    const obstacleName = this.formValue().name;
+    const distances = this.obstacleStateService.distances();
+    const obstacleUuid = this.formValue().uuid;
     const pointIndex = this.obstaclesService.activePointIndex();
 
-    if (!distances.length || !obstacleName || pointIndex === null) {
+    if (!distances.length || !obstacleUuid || pointIndex === null) {
       return { oblique: null, vertical: null, horizontal: null };
     }
 
-    const obstacleDistances = distances.find((d) => d.obstacleUuid === obstacleName);
+    const obstacleDistances = distances.find((d) => d.obstacleUuid === obstacleUuid);
     const pointDistances = obstacleDistances?.points?.find((p) => p.pointIndex === pointIndex);
 
     return {
@@ -147,7 +152,8 @@ export class ObstacleFormService {
 
   resetFormForNewObstacle(supportUuid: string | null): Obstacle {
     if (supportUuid) {
-      this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
+      const supports = this.spanService.getSupportOptions(supportUuid);
+      this.supportsOptions.set(supports.map((s) => ({ label: String(s.label), value: s.value })));
     } else {
       this.supportsOptions.set([]);
       // Clear supportUuid and emit value to ensure the re-slection of the same span won't block support selection.
@@ -161,7 +167,13 @@ export class ObstacleFormService {
     if (!supportUuid) {
       return;
     }
-    this.supportsOptions.set(this.plotService.getSupportOptions(supportUuid));
+    const supports = this.spanService.getSupportOptions(supportUuid);
+    this.supportsOptions.set(
+      supports.map((s) => ({
+        label: String(s.label),
+        value: s.value
+      }))
+    );
   }
 
   private resetForm(supportUuid: string | null) {
@@ -185,7 +197,7 @@ export class ObstacleFormService {
   }
 
   private findObstacle(uuid: string): Obstacle | undefined {
-    return this.plotService.section()?.obstacles?.find((o) => o.uuid === uuid);
+    return this.spanService.section()?.obstacles?.find((o) => o.uuid === uuid);
   }
 
   private patchFormFromObstacle(uuid: string, obstacle: Obstacle): void {
@@ -193,7 +205,7 @@ export class ObstacleFormService {
     if (!support) {
       return;
     }
-    const isInSpanOptions = this.plotService.getSpanOptions().some((s) => s.value === obstacle.supportUuid);
+    const isInSpanOptions = this.spanService.getSpanOptions().some((s) => s.value === obstacle.supportUuid);
     if (!isInSpanOptions) {
       return;
     }
@@ -205,14 +217,34 @@ export class ObstacleFormService {
   }
 
   private findSupportForObstacle(obstacle: Obstacle) {
-    return this.plotService.section()?.supports?.find((s) => s.uuid === obstacle.supportUuid);
+    return this.spanService.section()?.supports?.find((s) => s.uuid === obstacle.supportUuid);
   }
 
   deletePoint(index?: number): void {
     const pointIndex = index ?? this.obstaclesService.activePointIndex() ?? 0;
     this.removePosition(pointIndex);
+    this.removePointFromLitData(pointIndex);
     const newIndex = Math.max(0, this.positions.length - 1);
     this.obstaclesService.setCurrentPointIndex(newIndex);
+  }
+
+  /** Remove a point from litData.obstacles so Plotly stays in sync with the form. */
+  private removePointFromLitData(pointIndex: number): void {
+    const currentLitData = this.plotService.litData();
+    const obstacleUuid = this.form.value.uuid;
+    if (!currentLitData?.obstacles?.length || !obstacleUuid) {
+      return;
+    }
+    const updatedObstacles = currentLitData.obstacles.map((litObstacle) => {
+      if (litObstacle.uuid !== obstacleUuid) {
+        return litObstacle;
+      }
+      return {
+        ...litObstacle,
+        points: litObstacle.points.filter((_, i) => i !== pointIndex)
+      };
+    });
+    this.plotService.litData.set({ ...currentLitData, obstacles: updatedObstacles });
   }
 
   async deleteObstacle(): Promise<void> {
@@ -227,7 +259,7 @@ export class ObstacleFormService {
 
   private async removeObstacleFromSection(obstacleUuid: string): Promise<void> {
     const study = this.plotService.study();
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!study || !section) {
       return;
     }
@@ -239,6 +271,17 @@ export class ObstacleFormService {
     obstacles.splice(obstacleIndex, 1);
     section.obstacles = obstacles;
     await this.sectionService.createOrUpdateSection(study, section);
+
+    await this.obstacleStateService.deleteObstacle(obstacleUuid, this.plotOptionsService.plotOptions());
+
+    // Re-register remaining obstacles to get accurate render positions
+    const obstacleOutput = await this.obstacleStateService.addObstacle(
+      obstacles,
+      this.plotOptionsService.plotOptions()
+    );
+    this.applyObstacleOutputToLitData(obstacleOutput);
+    await this.obstacleStateService.calculateDistances(obstacles, this.plotOptionsService.plotOptions());
+
     this.messageService.add({
       severity: 'success',
       summary: $localize`Success`,
@@ -260,16 +303,43 @@ export class ObstacleFormService {
       return;
     }
     const obstacle = this.buildObstacleFromForm();
-    this.upsertObstacleInSection(obstacle);
-    await this.saveSection();
-    const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
-    this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
 
-    // Re-apply all obstacles (including the newly saved one) on top of the correct base state.
-    // reapplyObstacles re-applies loads first if temporaryLoadData is set, then adds all
-    // section obstacles and recalculates distances — keeping both loads and obstacles in sync.
-    await this.plotService.reapplyObstacles();
-    this.plotService.loading.set(false);
+    this.plotService.loading.set(true);
+    try {
+      // 1. Merge new/updated obstacle into the in-memory section
+      this.upsertObstacleInSection(obstacle);
+      const allObstacles = this.spanService.section()?.obstacles ?? [obstacle];
+
+      // 2. Register all obstacles in Python worker — get computed render positions for current span
+      const obstacleOutput = await this.obstacleStateService.addObstacle(
+        allObstacles,
+        this.plotOptionsService.plotOptions()
+      );
+
+      // 3. Update rendering (litData.obstacles)
+      this.applyObstacleOutputToLitData(obstacleOutput);
+
+      // 4. Persist domain object to IndexedDB
+      await this.saveSection();
+
+      // 5. Recalculate distances
+      await this.obstacleStateService.calculateDistances(allObstacles, this.plotOptionsService.plotOptions());
+
+      // 6. Update UI selection
+      const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
+      this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
+    } finally {
+      this.plotService.loading.set(false);
+    }
+  }
+
+  private applyObstacleOutputToLitData(obstacleOutput: ObstacleOutput | null): void {
+    const current = this.plotService.litData();
+    if (!current) return;
+    this.plotService.litData.set({
+      ...current,
+      obstacles: obstacleOutput?.obstacles ?? []
+    });
   }
 
   buildObstacleFromForm(): Obstacle {
@@ -280,9 +350,11 @@ export class ObstacleFormService {
     if (!formValue.uuid) {
       this.form.get('uuid')?.setValue(uuid, { emitEvent: false });
     }
+    const supportUuid = formValue.supportUuid!;
     return {
       uuid,
-      supportUuid: formValue.supportUuid!,
+      supportUuid,
+      supportIndex: this.spanService.getSupportIndex(supportUuid),
       name: formValue.name ?? '',
       type: formValue.type ?? '',
       altitudeType: formValue.altitudeType ?? '',
@@ -293,7 +365,7 @@ export class ObstacleFormService {
   }
 
   private upsertObstacleInSection(obstacle: Obstacle): void {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!section) {
       return;
     }
@@ -310,7 +382,7 @@ export class ObstacleFormService {
 
   private async saveSection(): Promise<void> {
     const study = this.plotService.study();
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!study || !section) {
       return;
     }
@@ -336,13 +408,14 @@ export class ObstacleFormService {
     if (!supportUuid) {
       return;
     }
-    const supportIndex = this.plotService.getSupportIndex(supportUuid);
+    const supportIndex = this.spanService.getSupportIndex(supportUuid);
     if (supportIndex >= 0) {
+      this.plotOptionsService.camera.set(null);
       this.plotService.plotOptionsChange({
         startSupport: supportIndex,
         endSupport: supportIndex + 1
       });
-      this.plotService.spanAmountChoice.set('single');
+      this.spanService.spanAmountChoice.set('single');
     }
   }
 }

@@ -32,4 +32,10 @@ def refresh_projection(
         else None
     )
 
+    obs = plot_engine.obstacles_dict()
+    obstacles = [
+        {"uuid": key, "points": value.tolist()} for key, value in obs.items()
+    ]
+    current_coords["obstacles"] = obstacles
+
     return {"current": current_coords, "base": base_coords}

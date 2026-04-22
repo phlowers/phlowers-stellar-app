@@ -203,8 +203,29 @@ describe('createPlot', () => {
       expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
 
+    it('should configure yaxis with scaleratio from axesNorms for face side', () => {
+      createPlot({ ...defaultParams, view: '2d', side: 'face', axesNorms: { x: 1, y: 2, z: 4, aspectMode: 'manual' } });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.yaxis.scaleratio).toBe(2); // z / y = 4 / 2
+      expect(layoutArg.yaxis.scaleanchor).toBe('x');
+    });
+
     it('should configure yaxis without scaleratio and scaleanchor for profile side', () => {
       createPlot({ ...defaultParams, view: '2d' });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.yaxis.scaleratio).toBeUndefined();
+      expect(layoutArg.yaxis.scaleanchor).toBeUndefined();
+    });
+
+    it('should configure yaxis without scaleratio and scaleanchor for profile side even when axesNorms is provided', () => {
+      createPlot({
+        ...defaultParams,
+        view: '2d',
+        side: 'profile',
+        axesNorms: { x: 1, y: 1, z: 30, aspectMode: 'manual' }
+      });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.yaxis.scaleratio).toBeUndefined();
