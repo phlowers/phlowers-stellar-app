@@ -8,10 +8,12 @@
 import logging
 
 from mechaphlowers import BalanceEngine, PlotEngine, units
+from mechaphlowers.utils import ArrayTools
 
 logger = logging.getLogger("mechaphlowers")
 
 
+# dead code for now
 def get_coordinates(
     balance_engine: BalanceEngine,
     plt_line: PlotEngine,
@@ -54,7 +56,7 @@ def get_coordinates(
         "load_angle": balance_engine.cable_loads.load_angle.tolist(),
         "span_length": balance_engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
-        "utilization_rate": utilization_rate.tolist(),
+        "utilization_rate": ArrayTools.decr(utilization_rate.tolist()),
     }
     result_spans = balance_engine.get_data_spans()
     result.update(result_spans)

@@ -3,6 +3,7 @@ import pandas as pd
 from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
+from mechaphlowers.utils import ArrayTools
 from typing import Optional
 import logging
 from importlib.metadata import version
@@ -311,6 +312,9 @@ def get_coordinates(
 
     loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
     line_angle_rad = engine.section_array.data.line_angle.to_numpy()
+    tension_max, _ = engine.span_model.tensions_sup_inf()
+    utilization_rate = engine.cable_array.utilization_rate(tension_max)
+    logger.debug("utilization rate: %s", utilization_rate)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
@@ -325,7 +329,7 @@ def get_coordinates(
         "load_angle": engine.cable_loads.load_angle.tolist(),
         "span_length": engine.section_array.data.span_length.tolist(),
         "loads_coords": loads_coords,
-        "utilization_rate": np.linspace(40, 90, len(engine) - 1).tolist(),
+        "utilization_rate": ArrayTools.decr(utilization_rate.tolist()),
     }
     result_spans = engine.get_data_spans()
     result.update(result_spans)
@@ -342,11 +346,11 @@ def init_section(js_inputs: dict):
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
     input_initial_condition = next(
-            condition
-            for condition in input_initial_conditions
-            if condition["uuid"] == input_section["selected_initial_condition_uuid"]
-        )
-    
+        condition
+        for condition in input_initial_conditions
+        if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+    )
+
     input_charges = input_section["charges"] if "charges" in input_section else []
     input_charge = (
         None
@@ -373,7 +377,8 @@ def init_section(js_inputs: dict):
         df,
         sagging_parameter=initial_condition.base_parameters,
         sagging_temperature=initial_condition.base_temperature,
-        bundle_number=input_section["cables_amount"])
+        bundle_number=input_section["cables_amount"],
+    )
     section.angles_sense = "clockwise"
 
     cable_array = CableArray(
@@ -461,8 +466,9 @@ def init_section(js_inputs: dict):
         df.copy(),
         sagging_parameter=initial_condition.base_parameters,
         sagging_temperature=initial_condition.base_temperature,
-        bundle_number=input_section["cables_amount"])
-    
+        bundle_number=input_section["cables_amount"],
+    )
+
     if initial_condition:
         base_section.sagging_parameter = initial_condition.base_parameters
     base_section.sagging_temperature = (
