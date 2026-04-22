@@ -13,7 +13,7 @@
           <label for="span-select" i18n>Guying span</label>
           <p-select
             id="span-select"
-            [options]="this.plotService.getSpanOptionsWithIndex()"
+            [options]="this.spanService.getSpanOptionsWithIndex()"
             optionLabel="label"
             optionValue="value"
             formControlName="selectedSpan"

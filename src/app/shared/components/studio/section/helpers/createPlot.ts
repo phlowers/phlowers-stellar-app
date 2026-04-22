@@ -142,15 +142,13 @@ const layout2d = (
   plotParams: CreatePlotParams,
   distanceAnnotations: Partial<Plotly.Annotations>[]
 ): Partial<Layout> => {
+  // For the profile view, do not constrain the Y axis — let Plotly autorange both axes
+  // independently so the actual cable altitude is displayed at a realistic scale.
+  // The axesNorms from compute_aspect_ratio are calibrated for 3D rendering and would
+  // exaggerate the vertical axis (e.g. ±10k) in 2D profile.
   let scaleratio: number | undefined;
-  if (plotParams.axesNorms) {
-    if (plotParams.side === 'face') {
-      scaleratio = plotParams.axesNorms.z / plotParams.axesNorms.y;
-    } else if (plotParams.side === 'profile') {
-      scaleratio = plotParams.axesNorms.z / plotParams.axesNorms.x;
-    }
-  } else {
-    scaleratio = plotParams.side === 'face' ? 0.2 : undefined;
+  if (plotParams.side === 'face') {
+    scaleratio = plotParams.axesNorms ? plotParams.axesNorms.z / plotParams.axesNorms.y : 0.2;
   }
 
   return {

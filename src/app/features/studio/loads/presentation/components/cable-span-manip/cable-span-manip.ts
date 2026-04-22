@@ -9,6 +9,7 @@ import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
@@ -36,6 +37,7 @@ import { truncateDecimals } from '@shared/helpers/truncateDecimals';
 export class CableSpanManipComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly cableSpanManipService = inject(CableSpanManipService);
   private readonly chainsService = inject(ChainsService);
 
@@ -90,7 +92,7 @@ export class CableSpanManipComponent implements OnInit {
     return (support?.spanLength ?? 0) + Math.abs(support?.armLength ?? 0);
   });
 
-  readonly spansOptions = this.plotService.getSpanOptions;
+  readonly spansOptions = this.spanService.getSpanOptions;
   readonly supportRefOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
   readonly chainNameOptions = signal<{ label: string; value: string }[]>([]);
 
@@ -192,10 +194,10 @@ export class CableSpanManipComponent implements OnInit {
       return;
     }
 
-    const index = this.plotService.getSupportIndex(uuid);
+    const index = this.spanService.getSupportIndex(uuid);
     if (index < 0) return;
 
-    this.supportRefOptions.set(this.plotService.getSupportOptions(uuid));
+    this.supportRefOptions.set(this.spanService.getSupportOptions(uuid));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
 
     const savedManip = this.plotService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === uuid);
@@ -238,7 +240,7 @@ export class CableSpanManipComponent implements OnInit {
   zoomToSpan(): void {
     const uuid = this.form.controls.scope.value;
     if (!uuid) return;
-    const index = this.plotService.getSupportIndex(uuid);
+    const index = this.spanService.getSupportIndex(uuid);
     if (index < 0) return;
     this.plotService.plotOptionsChange({ startSupport: index, endSupport: index + 1 });
   }

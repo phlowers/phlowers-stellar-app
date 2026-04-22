@@ -7,7 +7,6 @@ import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { PlotService } from '@services/plot/plot.service';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -61,7 +60,6 @@ export class StudioMenuBarComponent {
     return charge?.personnelPresence;
   });
   private readonly toolbarDialogService = inject(ToolbarDialogService);
-  readonly plotService = inject(PlotService);
   private readonly chargesService = inject(ChargesService);
 
   launchChargeFunction(

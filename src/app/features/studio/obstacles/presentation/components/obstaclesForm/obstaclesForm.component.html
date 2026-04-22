@@ -108,9 +108,9 @@
         inputId="freePositioning"
         name="freePositioning"
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
-        [ngModel]="plotService.isFreePositioningMode()"
+        [ngModel]="plotOptionsService.isFreePositioningMode()"
         [ngModelOptions]="{ standalone: true }"
-        (onChange)="plotService.isFreePositioningMode.set($event.checked)"
+        (onChange)="plotOptionsService.isFreePositioningMode.set($event.checked)"
       />
       <label for="freePositioning" i18n>Free positioning</label>
     </div>

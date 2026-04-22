@@ -15,6 +15,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
@@ -155,11 +156,12 @@ export class ClimateComponent {
   readonly frontierSupportOptions = signal<{ label: string; value: number }[]>([]);
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly chargesService = inject(ChargesService);
   private readonly loadFormsService = inject(LoadFormsService);
 
   async initForm() {
-    const supports = this.plotService.section()?.supports;
+    const supports = this.spanService.section()?.supports;
     const frontierSupportOptions =
       supports?.map((support, index) => {
         const num = support.number;
@@ -172,7 +174,7 @@ export class ClimateComponent {
     frontierSupportOptions.pop();
     this.frontierSupportOptions.set(frontierSupportOptions);
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       return;
     }
@@ -201,7 +203,7 @@ export class ClimateComponent {
   }
 
   resetForm() {
-    const baseClimate = getBaseClimate(this.plotService.section());
+    const baseClimate = getBaseClimate(this.spanService.section());
     this.form.reset({ ...baseClimate });
     // Update temporaryLoadData with the base climate values
     this.plotService.temporaryLoadData = {
@@ -212,7 +214,7 @@ export class ClimateComponent {
 
   deleteCharge() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       throw new Error('Study or section not found');
     }
@@ -221,7 +223,7 @@ export class ClimateComponent {
 
   async saveForm() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       return;
     }

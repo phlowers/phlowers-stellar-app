@@ -80,12 +80,27 @@ export const appendExistingObstaclesWithFormObstacle = (
   return [...remaining, formObstacle];
 };
 
-const getHighlightColor = (
+const OBSTACLE_COLOR_UNSELECTED = 'black';
+const OBSTACLE_COLOR_ACTIVE_POINT = 'red';
+const OBSTACLE_COLOR_INACTIVE_POINT = '#922911';
+
+const getHighlightColor = (obstacleUuid: string, currentObstacleUuid: string | null): string =>
+  obstacleUuid === currentObstacleUuid ? OBSTACLE_COLOR_ACTIVE_POINT : OBSTACLE_COLOR_UNSELECTED;
+
+const getMarkerAppearance = (
   obstacleUuid: string,
-  positionIndex: number,
+  pointIndex: number,
   currentObstacleUuid: string | null,
   currentObstaclePointIndex: number
-): string => (obstacleUuid === currentObstacleUuid && positionIndex === currentObstaclePointIndex ? 'red' : 'black');
+): { symbol: string; color: string } => {
+  if (obstacleUuid !== currentObstacleUuid) {
+    return { symbol: '\u25cf', color: OBSTACLE_COLOR_UNSELECTED }; // ● filled circle
+  }
+  if (pointIndex === currentObstaclePointIndex) {
+    return { symbol: '\u25c6', color: OBSTACLE_COLOR_ACTIVE_POINT }; // ◆ diamond
+  }
+  return { symbol: '\u25cb', color: OBSTACLE_COLOR_INACTIVE_POINT }; // ○ open circle
+};
 
 /**
  * Creates Plotly annotation objects for all obstacle points returned by Python (`litData.obstacles`).
@@ -96,18 +111,43 @@ const getHighlightColor = (
  * @returns An array of partial Plotly annotation objects representing obstacles.
  */
 export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { litData, obstacles, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
+  const {
+    litData,
+    obstacles,
+    view,
+    side,
+    currentObstacleUuid,
+    currentObstaclePointIndex,
+    supports,
+    startSupport,
+    endSupport
+  } = plotParams;
   const is2d = view === '2d';
 
   if (!litData?.obstacles?.length) {
     return [];
   }
 
+  // Only render obstacles whose support is within the visible span window.
+  // An obstacle attached to a support starts a span to the right, so the
+  // endSupport itself belongs to the *next* span and must be excluded.
+  const visibleSupportUuids = new Set((supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid));
+  const visibleObstacleUuids = new Set(
+    litData.obstacles
+      .filter((lo) => !obstacles.some((o) => o.uuid === lo.uuid))
+      .map((lo) => lo.uuid)
+      .concat(obstacles.filter((o) => visibleSupportUuids.has(o.supportUuid)).map((o) => o.uuid))
+  );
+
   return litData.obstacles.flatMap((litObstacle) => {
-    // Match to a form obstacle by name to resolve its UUID for click event handling
-    const formObstacle = obstacles.find((o) => o.name === litObstacle.name);
-    const obstacleUuid = formObstacle?.uuid ?? litObstacle.name;
-    const obstacleName = formObstacle?.name ?? litObstacle.name;
+    if (!visibleObstacleUuids.has(litObstacle.uuid)) {
+      return [];
+    }
+
+    // Resolve display name from the domain obstacle matching by UUID
+    const obstacleUuid = litObstacle.uuid;
+    const formObstacle = obstacles.find((o) => o.uuid === litObstacle.uuid);
+    const obstacleName = formObstacle?.name ?? litObstacle.uuid;
 
     return litObstacle.points.flatMap(([cx, cy, cz], pointIndex) => {
       // Map absolute Python coords [x, y, z] to Plotly axes
@@ -115,7 +155,13 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       const py = is2d ? cz : cy;
       const pz = cz;
 
-      const color = getHighlightColor(obstacleUuid, pointIndex, currentObstacleUuid, currentObstaclePointIndex);
+      const color = getHighlightColor(obstacleUuid, currentObstacleUuid);
+      const { symbol, color: markerColor } = getMarkerAppearance(
+        obstacleUuid,
+        pointIndex,
+        currentObstacleUuid,
+        currentObstaclePointIndex
+      );
       const annotationData = {
         obstacleUuid,
         obstaclePositionIndex: pointIndex,
@@ -129,8 +175,8 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
         x: px,
         y: py,
         z: pz,
-        text: '●',
-        font: { ...BASE_ANNOTATION.font, color, size: 14 },
+        text: symbol,
+        font: { ...BASE_ANNOTATION.font, color: markerColor, size: 14 },
         hovertext,
         data: annotationData
       } as Partial<Plotly.Annotations>;

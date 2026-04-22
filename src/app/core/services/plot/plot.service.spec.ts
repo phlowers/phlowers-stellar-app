@@ -8,7 +8,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { PlotService, checkIfProjectionNeedRefresh } from './plot.service';
+import { PlotService } from './plot.service';
+import { PlotSpanService } from './plot-span.service';
+import { PlotOptionsService } from './plot-options.service';
+import { checkIfProjectionNeedRefresh } from './plot-options.utils';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import {
@@ -17,15 +20,16 @@ import {
   DataError,
   GetSectionWithBaseOutput,
   GetSectionOutput,
+  ObstacleOutput,
   Distance
 } from '@services/worker_python/tasks/types';
-import { CatalogCable, Section, Study, SymmetryType } from '@shared/domain';
+import { CatalogCable, Section, Study } from '@shared/domain';
 import { Obstacle, LateralDistanceType, ReferenceSupport } from '@shared/domain/models/obstacle.model';
-import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 // Mock plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -41,8 +45,11 @@ interface MockWorkerPythonService {
 
 describe('PlotService', () => {
   let service: PlotService;
+  let spanService: PlotSpanService;
+  let plotOptionsService: PlotOptionsService;
   let mockWorkerPythonService: MockWorkerPythonService;
   let mockCablesService: vi.Mocked<CablesService>;
+  let obstacleStateService: ObstacleStateService;
 
   const mockGetSectionOutput: GetSectionOutput = {
     supports: [[[1, 2, 3]]],
@@ -65,7 +72,11 @@ describe('PlotService', () => {
     L0: [],
     horizontal_distance: [],
     arc_length: [],
-    T_h: []
+    T_h: [],
+    slope_left: [],
+    slope_right: [],
+    sag: [],
+    sag_s2: []
   };
 
   const mockGetSectionWithBaseOutput: GetSectionWithBaseOutput = {
@@ -208,7 +219,9 @@ describe('PlotService', () => {
     selected_charge_uuid: null,
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null
   };
 
   beforeEach(() => {
@@ -246,6 +259,9 @@ describe('PlotService', () => {
     });
 
     service = TestBed.inject(PlotService);
+    spanService = TestBed.inject(PlotSpanService);
+    plotOptionsService = TestBed.inject(PlotOptionsService);
+    obstacleStateService = TestBed.inject(ObstacleStateService);
   });
 
   afterEach(() => {
@@ -263,11 +279,11 @@ describe('PlotService', () => {
       expect(service.loading()).toBe(true);
       expect(service.workerReady()).toBe(false);
       expect(service.study()).toBeNull();
-      expect(service.section()).toBeNull();
+      expect(spanService.section()).toBeNull();
     });
 
     it('should initialize plotOptions with default values', () => {
-      const plotOptions = service.plotOptions();
+      const plotOptions = plotOptionsService.plotOptions();
       expect(plotOptions.view).toBe('3d');
       expect(plotOptions.side).toBe('profile');
       expect(plotOptions.startSupport).toBe(0);
@@ -279,130 +295,55 @@ describe('PlotService', () => {
   describe('plotOptionsChange', () => {
     it('should update a single plot option', () => {
       service.plotOptionsChange({ view: '2d' });
-      expect(service.plotOptions().view).toBe('2d');
-      expect(service.plotOptions().side).toBe('profile'); // Other options unchanged
+      expect(plotOptionsService.plotOptions().view).toBe('2d');
+      expect(plotOptionsService.plotOptions().side).toBe('profile'); // Other options unchanged
     });
 
     it('should update side option', () => {
       service.plotOptionsChange({ side: 'face' });
-      expect(service.plotOptions().side).toBe('face');
+      expect(plotOptionsService.plotOptions().side).toBe('face');
     });
 
     it('should update startSupport option', () => {
       service.plotOptionsChange({ startSupport: 5 });
-      expect(service.plotOptions().startSupport).toBe(5);
+      expect(plotOptionsService.plotOptions().startSupport).toBe(5);
     });
 
     it('should update endSupport option', () => {
       service.plotOptionsChange({ endSupport: 10 });
-      expect(service.plotOptions().endSupport).toBe(10);
+      expect(plotOptionsService.plotOptions().endSupport).toBe(10);
     });
 
     it('should update invert option', () => {
       service.plotOptionsChange({ invert: true });
-      expect(service.plotOptions().invert).toBe(true);
+      expect(plotOptionsService.plotOptions().invert).toBe(true);
     });
 
     it('should set spanAmountChoice to single when diff is 1', () => {
       service.plotOptionsChange({ startSupport: 2, endSupport: 3 });
-      expect(service.spanAmountChoice()).toBe('single');
+      expect(spanService.spanAmountChoice()).toBe('single');
     });
 
     it('should set spanAmountChoice to double when diff is 2', () => {
       service.plotOptionsChange({ startSupport: 1, endSupport: 3 });
-      expect(service.spanAmountChoice()).toBe('double');
+      expect(spanService.spanAmountChoice()).toBe('double');
     });
 
     it('should set spanAmountChoice to all when diff is greater than 2', () => {
       service.plotOptionsChange({ startSupport: 0, endSupport: 5 });
-      expect(service.spanAmountChoice()).toBe('all');
+      expect(spanService.spanAmountChoice()).toBe('all');
     });
 
     it('should not change spanAmountChoice when only view changes', () => {
-      service.spanAmountChoice.set('single');
+      spanService.spanAmountChoice.set('single');
       service.plotOptionsChange({ view: '2d' });
-      expect(service.spanAmountChoice()).toBe('single');
+      expect(spanService.spanAmountChoice()).toBe('single');
     });
 
     it('should not change spanAmountChoice when only invert changes', () => {
-      service.spanAmountChoice.set('double');
+      spanService.spanAmountChoice.set('double');
       service.plotOptionsChange({ invert: true });
-      expect(service.spanAmountChoice()).toBe('double');
-    });
-  });
-
-  describe('getSpanOptions', () => {
-    it('should compute spans from section supports uuids', () => {
-      const supports = [
-        { ...mockSection.supports[0], uuid: 'support-uuid-a', number: '1' },
-        { ...mockSection.supports[1], uuid: 'support-uuid-b', number: '2' },
-        { ...mockSection.supports[0], uuid: 'support-uuid-c', number: '3' }
-      ];
-      service.section.set({ ...mockSection, supports });
-
-      const spans = service.getSpanOptions();
-
-      expect(spans).toHaveLength(2);
-      expect(spans[0]).toEqual({
-        label: '1 - 2',
-        value: 'support-uuid-a'
-      });
-      expect(spans[1]).toEqual({
-        label: '2 - 3',
-        value: 'support-uuid-b'
-      });
-    });
-  });
-
-  describe('getSpanOptionsWithIndex', () => {
-    it('should compute spans from section supports with index and uuid', () => {
-      const supports = [
-        { ...mockSection.supports[0], uuid: 'support-uuid-a', number: '1' },
-        { ...mockSection.supports[1], uuid: 'support-uuid-b', number: '2' },
-        { ...mockSection.supports[0], uuid: 'support-uuid-c', number: '3' }
-      ];
-      service.section.set({ ...mockSection, supports });
-
-      const spans = service.getSpanOptionsWithIndex();
-
-      expect(spans).toHaveLength(2);
-      expect(spans[0]).toEqual({
-        label: '1 - 2',
-        value: { index: 0, uuid: 'support-uuid-a' }
-      });
-      expect(spans[1]).toEqual({
-        label: '2 - 3',
-        value: { index: 1, uuid: 'support-uuid-b' }
-      });
-    });
-
-    it('should return empty array when section has no supports', () => {
-      service.section.set({ ...mockSection, supports: [] });
-
-      const spans = service.getSpanOptionsWithIndex();
-
-      expect(spans).toEqual([]);
-    });
-
-    it('should handle null uuid in supports', () => {
-      const supports = [
-        { ...mockSection.supports[0], uuid: '', number: '1' },
-        { ...mockSection.supports[1], uuid: 'support-uuid-b', number: '2' },
-        { ...mockSection.supports[0], uuid: 'support-uuid-c', number: '3' }
-      ];
-      service.section.set({ ...mockSection, supports });
-
-      const spans = service.getSpanOptionsWithIndex();
-
-      expect(spans).toHaveLength(2);
-      expect(spans[0]).toEqual({
-        label: '1 - 2',
-        value: null
-      });
-      expect(spans[1]).toEqual({
-        label: '2 - 3',
-        value: { index: 1, uuid: 'support-uuid-b' }
-      });
+      expect(spanService.spanAmountChoice()).toBe('double');
     });
   });
 
@@ -492,7 +433,7 @@ describe('PlotService', () => {
 
       await service.refreshSection(mockSection);
 
-      const plotOptions = service.plotOptions();
+      const plotOptions = plotOptionsService.plotOptions();
       expect(plotOptions.startSupport).toBe(0);
       expect(plotOptions.endSupport).toBe(mockSection.supports.length - 1);
       expect(plotOptions.invert).toBe(false);
@@ -511,7 +452,7 @@ describe('PlotService', () => {
 
       await service.refreshSection(mockSection);
 
-      const plotOptions = service.plotOptions();
+      const plotOptions = plotOptionsService.plotOptions();
       expect(plotOptions.view).toBe('2d');
       expect(plotOptions.side).toBe('face');
       expect(plotOptions.startSupport).toBe(0);
@@ -587,7 +528,7 @@ describe('PlotService', () => {
 
       await service.refreshSection(sectionWithNoSupports);
 
-      const plotOptions = service.plotOptions();
+      const plotOptions = plotOptionsService.plotOptions();
       expect(plotOptions.startSupport).toBe(0);
       expect(plotOptions.endSupport).toBe(1); // default value, refreshSection doesn't update plotOptions
     });
@@ -596,6 +537,7 @@ describe('PlotService', () => {
       const mockObstacle: Obstacle = {
         uuid: 'obstacle-uuid-1',
         supportUuid: 'support-uuid-1',
+        supportIndex: 0,
         name: 'Test Obstacle',
         type: 'building',
         altitudeType: 'absolute',
@@ -604,9 +546,8 @@ describe('PlotService', () => {
         positions: [{ x: 100, y: 20, z: 5 }]
       };
 
-      const mockObstacleOutput: GetSectionOutput = {
-        ...mockGetSectionOutput,
-        obstacles: [{ name: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
+      const mockObstacleOutput: ObstacleOutput = {
+        obstacles: [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
       };
 
       const mockDistance: Distance = {
@@ -632,7 +573,7 @@ describe('PlotService', () => {
             return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: null });
           }
           if (task === Task.addObstacle) {
-            return Promise.resolve({ result: { current: mockObstacleOutput }, error: null });
+            return Promise.resolve({ result: mockObstacleOutput, error: null });
           }
           if (task === Task.calculateObstaclesDistances) {
             return Promise.resolve({ result: [mockDistance], error: null });
@@ -641,15 +582,18 @@ describe('PlotService', () => {
         });
       });
 
-      it('should call Task.addObstacle for each obstacle in section', async () => {
+      it('should call Task.addObstacle once with all section obstacles', async () => {
         const sectionWithObstacles: Section = { ...mockSection, obstacles: [mockObstacle] };
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, mockObstacle);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.addObstacle,
+          expect.objectContaining({ obstacles: [mockObstacle] })
+        );
       });
 
-      it('should call Task.addObstacle for every obstacle when section has multiple', async () => {
+      it('should call Task.addObstacle once with all obstacles when section has multiple', async () => {
         const secondObstacle: Obstacle = { ...mockObstacle, uuid: 'obstacle-uuid-2' };
         const sectionWithObstacles: Section = {
           ...mockSection,
@@ -658,8 +602,10 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, mockObstacle);
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, secondObstacle);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.addObstacle,
+          expect.objectContaining({ obstacles: [mockObstacle, secondObstacle] })
+        );
       });
 
       it('should call Task.calculateObstaclesDistances after adding obstacles', async () => {
@@ -678,15 +624,15 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(service.distances()).toEqual([mockDistance]);
+        expect(obstacleStateService.distances()).toEqual([mockDistance]);
       });
 
-      it('should update litData with the obstacle result', async () => {
+      it('should update litData with the obstacle result merged into section data', async () => {
         const sectionWithObstacles: Section = { ...mockSection, obstacles: [mockObstacle] };
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(service.litData()).toEqual(mockObstacleOutput);
+        expect(service.litData()).toEqual({ ...mockGetSectionOutput, obstacles: mockObstacleOutput.obstacles });
       });
 
       it('should not call Task.addObstacle when getLit returns an error', async () => {
@@ -704,8 +650,8 @@ describe('PlotService', () => {
       });
 
       it('should clear distances and distanceType when getLit returns an error', async () => {
-        service.distances.set([mockDistance]);
-        service.distanceType.set('oblique');
+        obstacleStateService.distances.set([mockDistance]);
+        obstacleStateService.distanceType.set('oblique');
         mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
           if (task === Task.getLit) {
             return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: TaskError.CALCULATION_ERROR });
@@ -716,8 +662,8 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(service.distances()).toEqual([]);
-        expect(service.distanceType()).toBeNull();
+        expect(obstacleStateService.distances()).toEqual([]);
+        expect(obstacleStateService.distanceType()).toBeNull();
       });
 
       it('should not call Task.addObstacle when section has no obstacles', async () => {
@@ -731,86 +677,11 @@ describe('PlotService', () => {
       });
 
       it('should clear distances when section has no obstacles', async () => {
-        service.distances.set([mockDistance]);
+        obstacleStateService.distances.set([mockDistance]);
 
         await service.refreshSection(mockSection);
 
-        expect(service.distances()).toEqual([]);
-      });
-    });
-
-    describe('with temporaryLoadData set', () => {
-      const mockChargeData: ChargeData = {
-        climate: {
-          windPressure: 100,
-          cableTemperature: 20,
-          symmetryType: SymmetryType.SYMMETRIC,
-          iceThickness: null,
-          frontierSupportNumber: null,
-          iceThicknessBefore: null,
-          iceThicknessAfter: null
-        },
-        spanLoads: [
-          {
-            supportUuid: 'support-uuid-1',
-            loadPosition: 0.5,
-            loadWeight: 50,
-            type: LoadType.PUNCTUAL,
-            referenceSupport: 'LEFT'
-          }
-        ]
-      };
-
-      const mockLoadOutput: GetSectionOutput = {
-        ...mockGetSectionOutput,
-        loads_coords: { 'support-uuid-1': [[0, 0, 10]] }
-      };
-
-      beforeEach(() => {
-        mockWorkerPythonService.setReady?.(true);
-        mockCablesService.getCable.mockResolvedValue(mockCable);
-        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
-          if (task === Task.getLit) {
-            return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: null });
-          }
-          if (task === Task.changeState) {
-            return Promise.resolve({ result: { current: mockLoadOutput, base: mockGetSectionOutput }, error: null });
-          }
-          return Promise.resolve({ result: null, error: null });
-        });
-        service.temporaryLoadData = mockChargeData;
-      });
-
-      afterEach(() => {
-        service.temporaryLoadData = null;
-      });
-
-      it('should call Task.changeState with temporaryLoadData climate and spanLoads', async () => {
-        await service.refreshSection(mockSection);
-
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
-          climate: mockChargeData.climate,
-          spanLoads: mockChargeData.spanLoads
-        });
-      });
-
-      it('should set litData to the changeState result', async () => {
-        await service.refreshSection(mockSection);
-
-        expect(service.litData()).toEqual(mockLoadOutput);
-      });
-
-      it('should not call Task.changeState when getLit returns an error', async () => {
-        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
-          if (task === Task.getLit) {
-            return Promise.resolve({ result: mockGetSectionWithBaseOutput, error: TaskError.CALCULATION_ERROR });
-          }
-          return Promise.resolve({ result: null, error: null });
-        });
-
-        await service.refreshSection(mockSection);
-
-        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.changeState, expect.anything());
+        expect(obstacleStateService.distances()).toEqual([]);
       });
     });
   });
@@ -946,7 +817,7 @@ describe('PlotService', () => {
 
       service.resetAll();
 
-      const plotOptions = service.plotOptions();
+      const plotOptions = plotOptionsService.plotOptions();
       expect(plotOptions.view).toBe('3d');
       expect(plotOptions.side).toBe('profile');
       expect(plotOptions.startSupport).toBe(0);
@@ -960,25 +831,25 @@ describe('PlotService', () => {
         center: { x: 0, y: 0, z: 0 },
         up: { x: 0, y: 0, z: 1 }
       };
-      service.camera.set(mockCamera);
+      plotOptionsService.camera.set(mockCamera);
       (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
       service.resetAll();
 
-      expect(service.camera()).toBeNull();
+      expect(plotOptionsService.camera()).toBeNull();
     });
 
     it('should reset section to null', () => {
-      service.section.set(mockSection);
+      spanService.section.set(mockSection);
       (document.getElementById as vi.Mock).mockReturnValue({
         id: 'plotly-output'
       });
 
       service.resetAll();
 
-      expect(service.section()).toBeNull();
+      expect(spanService.section()).toBeNull();
     });
 
     it('should reset study to null', () => {
@@ -1032,8 +903,8 @@ describe('PlotService', () => {
         endSupport: 10,
         invert: true
       });
-      service.camera.set(mockCamera);
-      service.section.set(mockSection);
+      plotOptionsService.camera.set(mockCamera);
+      spanService.section.set(mockSection);
       service.study.set(mockStudy);
 
       (document.getElementById as vi.Mock).mockReturnValue({
@@ -1047,11 +918,11 @@ describe('PlotService', () => {
       expect(service.error()).toBeNull();
       expect(service.litData()).toBeNull();
       expect(service.loading()).toBe(false);
-      expect(service.camera()).toBeNull();
-      expect(service.section()).toBeNull();
+      expect(plotOptionsService.camera()).toBeNull();
+      expect(spanService.section()).toBeNull();
       expect(service.study()).toBeNull();
 
-      const plotOptions = service.plotOptions();
+      const plotOptions = plotOptionsService.plotOptions();
       expect(plotOptions.view).toBe('3d');
       expect(plotOptions.side).toBe('profile');
       expect(plotOptions.startSupport).toBe(0);
@@ -1345,86 +1216,10 @@ describe('PlotService', () => {
     });
   });
 
-  describe('setAxesNorms', () => {
-    it('should update axesNorms signal', () => {
-      service.setAxesNorms({ x: 2, y: 3, z: 4, aspectMode: 'cube' });
-      expect(service.axesNorms()).toEqual({ x: 2, y: 3, z: 4, aspectMode: 'cube' });
-    });
-  });
-
-  describe('setResolution', () => {
-    it('should update resolution signal and localStorage', () => {
-      service.setResolution(75);
-      expect(service.resolution()).toBe(75);
-      expect(localStorage.getItem('plotResolution')).toBe('75');
-    });
-
-    it('should clamp value to minimum (25)', () => {
-      service.setResolution(5);
-      expect(service.resolution()).toBe(25);
-    });
-
-    it('should clamp to defaultResolution when exceeding max', () => {
-      service.defaultResolution.set(100);
-      service.setResolution(999);
-      expect(service.resolution()).toBe(100);
-    });
-
-    it('should not update if value is unchanged', () => {
-      service.setResolution(75);
-      const storageSpy = vi.spyOn(Storage.prototype, 'setItem');
-      service.setResolution(75);
-      expect(storageSpy).not.toHaveBeenCalled();
-      storageSpy.mockRestore();
-    });
-
-    it('should not update for non-finite value', () => {
-      service.setResolution(NaN);
-      // NaN → normalizes to defaultResolution, which might differ from before
-      expect(Number.isFinite(service.resolution())).toBe(true);
-    });
-  });
-
-  describe('applyResolution', () => {
-    it('should do nothing when worker is not ready', async () => {
-      mockWorkerPythonService.setReady?.(false);
-      await service.applyResolution(75);
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should do nothing when resolution is already applied', async () => {
-      mockWorkerPythonService.setReady?.(true);
-      service.appliedResolution.set(75);
-      await service.applyResolution(75);
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should run task and update appliedResolution when successful', async () => {
-      mockWorkerPythonService.setReady?.(true);
-      service.appliedResolution.set(null);
-      mockWorkerPythonService.runTask.mockResolvedValue({ error: null });
-
-      await service.applyResolution(75);
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setResolution, { resolution: 75 });
-      expect(service.appliedResolution()).toBe(75);
-    });
-
-    it('should not update appliedResolution when task returns error', async () => {
-      mockWorkerPythonService.setReady?.(true);
-      service.appliedResolution.set(null);
-      mockWorkerPythonService.runTask.mockResolvedValue({ error: TaskError.CALCULATION_ERROR });
-
-      await service.applyResolution(75);
-
-      expect(service.appliedResolution()).toBeNull();
-    });
-  });
-
   describe('modifySection', () => {
     it('should return undefined when study is null', async () => {
       service.study.set(null);
-      service.section.set(mockSection);
+      spanService.section.set(mockSection);
       const result = await service.modifySection({ name: 'Updated' });
       expect(result).toBeUndefined();
     });
@@ -1441,52 +1236,9 @@ describe('PlotService', () => {
         saved: true,
         sections: []
       });
-      service.section.set(null);
+      spanService.section.set(null);
       const result = await service.modifySection({ name: 'Updated' });
       expect(result).toBeUndefined();
-    });
-  });
-
-  describe('getCamera', () => {
-    it('should return null when plotly-output element does not exist', () => {
-      document.getElementById = vi.fn().mockReturnValue(null);
-      expect(service.getCamera()).toBeNull();
-    });
-
-    it('should return camera from _fullLayout when available', () => {
-      const mockCamera: Camera = { eye: { x: 1, y: 1, z: 1 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
-      const mockElement = { _fullLayout: { scene: { camera: mockCamera } } };
-      document.getElementById = vi.fn().mockReturnValue(mockElement);
-      expect(service.getCamera()).toEqual(mockCamera);
-    });
-
-    it('should return null when element has no _fullLayout', () => {
-      document.getElementById = vi.fn().mockReturnValue({});
-      expect(service.getCamera()).toBeNull();
-    });
-  });
-
-  describe('refreshCamera', () => {
-    it('should update camera signal when camera changes', () => {
-      const mockCamera: Camera = { eye: { x: 2, y: 2, z: 2 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
-      const mockElement = { _fullLayout: { scene: { camera: mockCamera } } };
-      document.getElementById = vi.fn().mockReturnValue(mockElement);
-      service.camera.set(null);
-
-      service.refreshCamera();
-
-      expect(service.camera()).toEqual(mockCamera);
-    });
-
-    it('should not update camera signal when camera is the same', () => {
-      const mockCamera: Camera = { eye: { x: 2, y: 2, z: 2 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
-      document.getElementById = vi.fn().mockReturnValue({ _fullLayout: { scene: { camera: mockCamera } } });
-      service.camera.set(mockCamera);
-      const setCameraSpy = vi.spyOn(service.camera, 'set');
-
-      service.refreshCamera();
-
-      expect(setCameraSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -1494,7 +1246,11 @@ describe('PlotService', () => {
     it('should call workerPythonService with correct task params', async () => {
       service.plotOptionsChange({ view: '2d', startSupport: 2, endSupport: 5 });
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
         error: null
       });
 
@@ -1513,189 +1269,81 @@ describe('PlotService', () => {
       expect(service.loading()).toBe(false);
       expect(service.error()).toBe(TaskError.CALCULATION_ERROR);
     });
-  });
 
-  describe('getSupportIndex', () => {
-    it('should return index of matching support uuid', () => {
-      service.section.set(mockSection);
-      expect(service.getSupportIndex('support-uuid-1')).toBe(0);
-      expect(service.getSupportIndex('support-uuid-2')).toBe(1);
-    });
-
-    it('should return -1 when uuid not found', () => {
-      service.section.set(mockSection);
-      expect(service.getSupportIndex('non-existent-uuid')).toBe(-1);
-    });
-
-    it('should return -1 when section is null', () => {
-      service.section.set(null);
-      expect(service.getSupportIndex('any-uuid')).toBe(-1);
-    });
-  });
-
-  describe('getSupportOptions', () => {
-    it('should return empty array when uuid is null', () => {
-      service.section.set(mockSection);
-      expect(service.getSupportOptions(null)).toEqual([]);
-    });
-
-    it('should return LEFT and RIGHT options for a valid support uuid', () => {
-      service.section.set(mockSection);
-      const options = service.getSupportOptions('support-uuid-1');
-      expect(options).toHaveLength(2);
-      expect(options[0]).toEqual({ label: '1', value: 'LEFT' });
-      expect(options[1]).toEqual({ label: '2', value: 'RIGHT' });
-    });
-
-    it('should return empty array when uuid does not match any support', () => {
-      service.section.set(mockSection);
-      expect(service.getSupportOptions('non-existent')).toEqual([]);
-    });
-  });
-
-  describe('reapplyObstacles', () => {
-    const mockObstacle: Obstacle = {
-      uuid: 'obstacle-uuid-1',
-      supportUuid: 'support-uuid-1',
-      name: 'Test Obstacle',
-      type: 'building',
-      altitudeType: 'absolute',
-      referenceSupport: ReferenceSupport.LEFT,
-      lateralDistanceType: LateralDistanceType.SPAN_AXIS,
-      positions: [{ x: 100, y: 20, z: 5 }]
-    };
-
-    const mockObstacleOutput: GetSectionOutput = {
-      ...mockGetSectionOutput,
-      obstacles: [{ name: 'obstacle-uuid-1', points: [[100, 20, 5]] }]
-    };
-
-    const mockDistance: Distance = {
-      obstacleUuid: 'obstacle-uuid-1',
-      points: [
-        {
-          pointIndex: 0,
-          linePoint: [100, 0, 40],
-          virtualPointHorizontal: [100, 20, 0],
-          virtualPointVertical: [100, 0, 40],
-          distanceDiagonal: 234,
-          distanceHorizontal: 555,
-          distanceVertical: 666
-        }
-      ]
-    };
-
-    const mockChargeData: ChargeData = {
-      climate: {
-        windPressure: 100,
-        cableTemperature: 20,
-        symmetryType: SymmetryType.SYMMETRIC,
-        iceThickness: null,
-        frontierSupportNumber: null,
-        iceThicknessBefore: null,
-        iceThicknessAfter: null
-      },
-      spanLoads: [
-        {
-          supportUuid: 'support-uuid-1',
-          loadPosition: 0.5,
-          loadWeight: 100,
-          type: LoadType.PUNCTUAL,
-          referenceSupport: 'LEFT'
-        }
-      ]
-    };
-
-    const mockLoadOutput: GetSectionOutput = {
-      ...mockGetSectionOutput,
-      loads_coords: { 'support-uuid-1': [0.5, 0, 10] }
-    };
-
-    beforeEach(() => {
-      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
-        if (task === Task.changeState) {
-          return Promise.resolve({ result: { current: mockLoadOutput, base: mockGetSectionOutput }, error: null });
-        }
-        if (task === Task.addObstacle) {
-          return Promise.resolve({ result: { current: mockObstacleOutput }, error: null });
-        }
-        if (task === Task.calculateObstaclesDistances) {
-          return Promise.resolve({ result: [mockDistance], error: null });
-        }
-        return Promise.resolve({ result: null, error: null });
+    it('should set litData directly from sectionOutput.current', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
+        error: null
       });
+
+      await service.refreshProjection();
+
+      expect(service.litData()).toEqual(mockGetSectionOutput);
     });
 
-    it('should re-add all section obstacles and update litData', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.litData.set(mockGetSectionOutput);
+    it('should set distances from result', async () => {
+      const mockDist: Distance = {
+        obstacleUuid: 'x',
+        points: [
+          {
+            pointIndex: 0,
+            linePoint: [0, 0, 0],
+            virtualPointHorizontal: [0, 0, 0],
+            virtualPointVertical: [0, 0, 0],
+            distanceDiagonal: 1,
+            distanceHorizontal: 2,
+            distanceVertical: 3
+          }
+        ]
+      };
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: [mockDist]
+        },
+        error: null
+      });
 
-      await service.reapplyObstacles();
+      await service.refreshProjection();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, mockObstacle);
-      expect(service.litData()).toEqual(mockObstacleOutput);
+      expect(obstacleStateService.distances()).toEqual([mockDist]);
     });
 
-    it('should call Task.changeState first when temporaryLoadData is set', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.temporaryLoadData = mockChargeData;
+    it('should include obstacle coordinates returned by Python in litData', async () => {
+      const obstacleCoords = [{ uuid: 'obstacle-uuid-1', points: [[100, 20, 5]] as [number, number, number][] }];
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: obstacleCoords,
+          distances: []
+        },
+        error: null
+      });
 
-      await service.reapplyObstacles();
+      await service.refreshProjection();
 
-      const calls = mockWorkerPythonService.runTask.mock.calls.map((c: unknown[]) => c[0]);
-      const changeStateIndex = calls.indexOf(Task.changeState);
-      const addObstacleIndex = calls.indexOf(Task.addObstacle);
-      expect(changeStateIndex).toBeGreaterThanOrEqual(0);
-      expect(addObstacleIndex).toBeGreaterThan(changeStateIndex);
+      expect(service.litData()).toEqual({ ...mockGetSectionOutput, obstacles: obstacleCoords });
+      expect(service.litData()?.obstacles).toEqual(obstacleCoords);
     });
 
-    it('should not call Task.changeState when temporaryLoadData is null', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.temporaryLoadData = null;
+    it('should NOT call Task.addObstacle — obstacle coordinates come from sectionOutput', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
+        error: null
+      });
 
-      await service.reapplyObstacles();
+      await service.refreshProjection();
 
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.changeState, expect.anything());
-    });
-
-    it('should call Task.calculateObstaclesDistances after adding obstacles', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-
-      await service.reapplyObstacles();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.calculateObstaclesDistances,
-        expect.objectContaining({ startSupport: expect.any(Number), endSupport: expect.any(Number) })
-      );
-    });
-
-    it('should update distances signal after recalculation', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-
-      await service.reapplyObstacles();
-
-      expect(service.distances()).toEqual([mockDistance]);
-    });
-
-    it('should not call Task.calculateObstaclesDistances when section has no obstacles', async () => {
-      service.section.set({ ...mockSection, obstacles: [] });
-
-      await service.reapplyObstacles();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(
-        Task.calculateObstaclesDistances,
-        expect.anything()
-      );
-    });
-
-    it('should apply loads then obstacles so both are reflected in litData', async () => {
-      service.section.set({ ...mockSection, obstacles: [mockObstacle] });
-      service.temporaryLoadData = mockChargeData;
-
-      await service.reapplyObstacles();
-
-      // After changeState + addObstacle, litData should be the obstacle output (last update wins)
-      expect(service.litData()).toEqual(mockObstacleOutput);
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
     });
   });
 });

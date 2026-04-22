@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
@@ -15,6 +16,9 @@ class MockChargesService {
 
 class MockPlotService {
   study = signal<Study | null>(null);
+}
+
+class MockPlotSpanService {
   section = signal<Section | null>(null);
 }
 
@@ -23,6 +27,7 @@ describe('NewChargeModalComponent (Jest)', () => {
   let fixture: ComponentFixture<NewChargeModalComponent>;
   let chargesService: MockChargesService;
   let plotService: MockPlotService;
+  let spanService: MockPlotSpanService;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -106,8 +111,9 @@ describe('NewChargeModalComponent (Jest)', () => {
   beforeEach(async () => {
     chargesService = new MockChargesService();
     plotService = new MockPlotService();
+    spanService = new MockPlotSpanService();
     plotService.study.set(mockStudy);
-    plotService.section.set(mockSection);
+    spanService.section.set(mockSection);
 
     await TestBed.configureTestingModule({
       imports: [NewChargeModalComponent],
@@ -116,7 +122,8 @@ describe('NewChargeModalComponent (Jest)', () => {
         provideHttpClientTesting(),
         provideNoopAnimations(),
         { provide: ChargesService, useValue: chargesService },
-        { provide: PlotService, useValue: plotService }
+        { provide: PlotService, useValue: plotService },
+        { provide: PlotSpanService, useValue: spanService }
       ]
     }).compileComponents();
 
@@ -331,13 +338,13 @@ describe('NewChargeModalComponent (Jest)', () => {
   });
 
   it('should return false for isNameDuplicate when section has no charges', () => {
-    plotService.section.set({ ...mockSection, charges: [] });
+    spanService.section.set({ ...mockSection, charges: [] });
     component.updateName('Any Name');
     expect(component.isNameDuplicate()).toBe(false);
   });
 
   it('should reset form when section has no charges defined', async () => {
-    plotService.section.set({
+    spanService.section.set({
       ...mockSection,
       charges: undefined
     } as unknown as Section);
