@@ -36,6 +36,12 @@
 ## 7. Skill : Le Nettoyeur & 8. Le Scribe
 - Suppression imports morts + `git aa && git cs -m "[type]: [msg]" && git push`.
 
+## 8. Skill : L’Expert Scribe Git (Sécurité & Traçabilité)
+- **Signature Obligatoire :** Chaque commit DOIT être signé numériquement (GPG/SSH). Utilise le flag `-S`.
+- **Commande :** `git add -A && git commit -S -m "[type]: [message]" && git push`
+- **Alias préconisé :** Si l'alias `git cs` est utilisé, il doit être configuré pour inclure la signature (`git config --global alias.cs "commit -S -m"`).
+- **Standard de Message :** Respect strict des Conventional Commits (`feat`, `fix`, `refactor`, etc.).
+
 ## 9. Skill : Le Réparateur de Tests (Spécialiste Vitest)
 **Rôle :** Urgentiste des suites de tests cassées.
 - **Analyse d'Échec :** Analyse d'abord le log d'erreur de Vitest. Identifie si l'échec est dû à :
