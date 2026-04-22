@@ -109,7 +109,8 @@ export interface PapotoResult {
   parameter_1_2: number;
   parameter_2_3: number;
   parameter_1_3: number;
-  check_validity: boolean;
+  checkValidity: boolean;
+  uncertainty: number;
 }
 
 /** Manual input values for the 15°C without wind parameter calculation. */

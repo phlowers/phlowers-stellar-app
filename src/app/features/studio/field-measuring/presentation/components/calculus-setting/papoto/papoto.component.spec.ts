@@ -125,7 +125,14 @@ describe('Papoto component', () => {
       expect(component.isCalculating()).toBe(true);
 
       resolveTask({
-        result: { parameter: 0, parameter_1_2: 0, parameter_2_3: 0, parameter_1_3: 0, check_validity: true },
+        result: {
+          parameter: 0,
+          parameter_1_2: 0,
+          parameter_2_3: 0,
+          parameter_1_3: 0,
+          checkValidity: true,
+          uncertainty: 0
+        },
         error: null
       });
       await calcPromise;
@@ -161,7 +168,8 @@ describe('Papoto component', () => {
       parameter_1_2: 2,
       parameter_2_3: 2.5,
       parameter_1_3: 3,
-      check_validity: true
+      checkValidity: true,
+      uncertainty: 4
     };
 
     workerPythonServiceMock.runTask.mockResolvedValue({
@@ -213,7 +221,8 @@ describe('Papoto component', () => {
         parameter_1_2: number;
         parameter_2_3: number;
         parameter_1_3: number;
-        check_validity: boolean;
+        checkValidity: boolean;
+        uncertainty: number;
       },
       error: TaskError.CALCULATION_ERROR
     });

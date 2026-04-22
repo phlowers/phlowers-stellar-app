@@ -13,4 +13,4 @@ def test_wind_incidence():
     inputs = {"azimuth": 90, "windDirection": "North-East"}
     result = get_wind_attack_angle(inputs)
     assert "windIncidence" in result
-    np.testing.assert_almost_equal(result["windIncidence"], 45)
+    np.testing.assert_allclose(result["windIncidence"], 45)

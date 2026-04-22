@@ -540,7 +540,7 @@ describe('StudioPageComponent', () => {
       } as unknown as Section);
 
       expect(component.filteredObstaclesOptions()).toEqual([
-        { label: 'No selected', value: null },
+        { label: 'Not selected', value: null },
         { label: 'Obstacle A', value: 'obs-0' },
         { label: 'Obstacle B', value: 'obs-1' },
         { label: 'Obstacle C', value: 'obs-2' }
@@ -558,7 +558,7 @@ describe('StudioPageComponent', () => {
       } as unknown as Section);
 
       expect(component.filteredObstaclesOptions()).toEqual([
-        { label: 'No selected', value: null },
+        { label: 'Not selected', value: null },
         { label: 'Obstacle B', value: 'obs-1' }
       ]);
     });
@@ -575,7 +575,7 @@ describe('StudioPageComponent', () => {
       obstaclesService.selectedObstacleUuid.set('obs-0');
 
       expect(component.filteredObstaclesOptions()).toEqual([
-        { label: 'No selected', value: null },
+        { label: 'Not selected', value: null },
         { label: 'Obstacle B', value: 'obs-1' }
       ]);
     });
@@ -591,7 +591,7 @@ describe('StudioPageComponent', () => {
       } as unknown as Section);
 
       expect(component.filteredObstaclesOptions()).toEqual([
-        { label: 'No selected', value: null },
+        { label: 'Not selected', value: null },
         { label: 'Obstacle A', value: 'obs-0' }
       ]);
     });

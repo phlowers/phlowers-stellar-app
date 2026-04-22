@@ -2939,16 +2939,6 @@
         <target>Description/commentaire</target>
       </segment>
     </unit>
-    <unit id="80889600222732792">
-      <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
-        </target>
-      </segment>
-    </unit>
     <unit id="2900727946848099689">
       <segment state="initial">
         <source>Measure name must be unique.</source>
@@ -3903,6 +3893,12 @@
         <target>Max canton</target>
       </segment>
     </unit>
+    <unit id="9071236182141230808">
+      <segment state="initial">
+        <source>uncertainty parameter</source>
+        <target>Incertitude paramètre</target>
+      </segment>
+    </unit>
     <unit id="2658311569006173825">
       <segment state="initial">
         <source>Computing wind incidence</source>
@@ -3913,6 +3909,12 @@
       <segment state="initial">
         <source> Wind direction and azimuth are required. </source>
         <target> La direction du vent et l&apos;azimut sont requis. </target>
+      </segment>
+    </unit>
+    <unit id="6839138864615473489">
+      <segment state="initial">
+        <source>Not selected</source>
+        <target>Non sélectionné</target>
       </segment>
     </unit>
   </file>
