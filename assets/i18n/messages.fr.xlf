@@ -3894,13 +3894,25 @@
     <unit id="3643941097771362577">
       <segment state="initial">
         <source>strand is not cut</source>
-        <target>le brin n'est pas coupé</target>
+        <target>le brin n&apos;est pas coupé</target>
       </segment>
     </unit>
     <unit id="1964966931243862246">
       <segment state="initial">
         <source>Max section</source>
         <target>Max canton</target>
+      </segment>
+    </unit>
+    <unit id="2658311569006173825">
+      <segment state="initial">
+        <source>Computing wind incidence</source>
+        <target>Calcul de l&apos;incidence du vent</target>
+      </segment>
+    </unit>
+    <unit id="7452118962262453473">
+      <segment state="initial">
+        <source> Wind direction and azimuth are required. </source>
+        <target> La direction du vent et l&apos;azimut sont requis. </target>
       </segment>
     </unit>
   </file>
