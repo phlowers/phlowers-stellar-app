@@ -17,7 +17,7 @@ from stellar_engine.tools import (
     papoto,
 )
 from stellar_engine.plot import plot_settings, supports_coords
-from stellar_engine.plot import obstacles as obst
+import stellar_engine.plot.obstacles as obst
 
 # duplicate from functions.py
 

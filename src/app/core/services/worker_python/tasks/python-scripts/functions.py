@@ -10,7 +10,7 @@ from importlib.metadata import version
 import sys
 
 from stellar_engine.entities.inputs import ClimateCharge
-from stellar_engine.plot import obstacles as obst
+import stellar_engine.plot.obstacles as obst
 from stellar_engine.entities.inputs import Support, Cable, InitialCondition
 from stellar_engine.core.section import generate_section_array
 
