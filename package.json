@@ -1,6 +1,6 @@
 {
   "name": "phlowers-stellar-app",
-  "version": "1.4.0",
+  "version": "1.5.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4200",
