@@ -6,7 +6,11 @@
 
 """Plot package: Visualization and solver execution utilities."""
 
-from stellar_engine.plot import obstacles
+from stellar_engine.plot.obstacles import (
+    add_obstacles,
+    compute_distances,
+    delete_obstacle,
+)
 from stellar_engine.plot.plot_2d import refresh_projection
 from stellar_engine.plot.plot_settings import get_aspect_ratio
 from stellar_engine.plot.run_solver import (
@@ -24,4 +28,7 @@ __all__ = [
     "parse_span_loads",
     "change_state",
     "get_aspect_ratio",
+    "add_obstacles",
+    "delete_obstacle",
+    "compute_distances",
 ]
