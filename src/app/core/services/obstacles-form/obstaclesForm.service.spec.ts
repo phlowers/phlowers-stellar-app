@@ -161,6 +161,7 @@ describe('ObstacleFormService', () => {
   };
   let plotOptionsServiceMock: {
     plotOptions: ReturnType<typeof signal<{ startSupport: number; endSupport: number; view: string }>>;
+    camera: ReturnType<typeof signal<unknown | null>>;
   };
   let mockObstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
@@ -204,7 +205,7 @@ describe('ObstacleFormService', () => {
     plotOptionsServiceMock = {
       plotOptions: signal({ startSupport: 0, endSupport: 1, view: '3d' }),
       camera: signal(null)
-    } as any;
+    };
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
       setCurrentPointIndex: vi.fn(),
@@ -1087,9 +1088,9 @@ describe('ObstacleFormService', () => {
     it('should reset camera to null before changing plot options', () => {
       mockSpanService.getSupportIndex.mockReturnValue(0);
       service.form.patchValue({ supportUuid: 'sup-1' });
-      (plotOptionsServiceMock as any).camera.set({ eye: { x: 1, y: -2, z: 0.5 } });
+      plotOptionsServiceMock.camera.set({ eye: { x: 1, y: -2, z: 0.5 } });
       service.returnToSpan();
-      expect((plotOptionsServiceMock as any).camera()).toBeNull();
+      expect(plotOptionsServiceMock.camera()).toBeNull();
     });
   });
 });

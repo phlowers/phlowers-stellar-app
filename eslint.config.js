@@ -6,12 +6,19 @@ import templateParser from '@angular-eslint/template-parser';
 
 export default tseslint.config(
   {
-    ignores: ['coverage/**', 'dist/**', '**/.venv/**', '.angular/**', 'docs-sphinx/**']
+    ignores: [
+      'coverage/**',
+      'dist/**',
+      '**/.venv/**',
+      '.angular/**',
+      'docs-sphinx/**',
+      'public/pyodide/**',
+      'public/service-worker.js'
+    ]
   },
-  eslint.configs.recommended,
   {
     files: ['**/*.ts'],
-    extends: [...tseslint.configs.recommended, ...tseslint.configs.stylistic],
+    extends: [eslint.configs.recommended, ...tseslint.configs.recommended, ...tseslint.configs.stylistic],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
