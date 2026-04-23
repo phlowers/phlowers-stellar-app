@@ -17,7 +17,10 @@ describe('Init component', () => {
   let mockPlotOptionsService: { plotOptions: ReturnType<typeof signal> };
   let toolbarDialogService: ToolbarDialogService;
 
+  let originalMatchMedia: typeof globalThis.matchMedia;
+
   beforeAll(() => {
+    originalMatchMedia = globalThis.matchMedia;
     // PrimeNG overlay rendering needs matchMedia
     Object.defineProperty(globalThis, 'matchMedia', {
       writable: true,
@@ -31,6 +34,13 @@ describe('Init component', () => {
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn()
       }))
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: originalMatchMedia
     });
   });
 
@@ -167,7 +177,7 @@ describe('Init component', () => {
 
     it('should reset chooseMeasureControl to null when called with undefined', () => {
       component.chooseMeasureControl.setValue('uuid-1');
-      component.onMeasureSelected(undefined as unknown as { label: string; value: string });
+      component.onMeasureSelected(undefined);
       expect(component.chooseMeasureControl.value).toBeNull();
     });
   });
@@ -190,11 +200,18 @@ describe('Init component', () => {
       } as unknown as Section);
     });
 
-    it('should call modifySection with the measure filtered out', async () => {
+    it('should call modifySection preserving selected_field_measure_uuid when deleting a non-selected measure', async () => {
+      mockSpanService.section = signal<Section | null>({
+        uuid: 'test-section-uuid',
+        field_measures: [measure1, measure2],
+        selected_field_measure_uuid: 'uuid-2'
+      } as unknown as Section);
+
       await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
 
       expect(mockPlotService.modifySection).toHaveBeenCalledWith({
-        field_measures: [measure2]
+        field_measures: [measure2],
+        selected_field_measure_uuid: 'uuid-2'
       });
     });
 
@@ -214,13 +231,18 @@ describe('Init component', () => {
       expect(component.chooseMeasureControl.value).toBeNull();
     });
 
-    it('should call modifySection with filtered measures when the selected measure is deleted', async () => {
-      component.chooseMeasureControl.setValue('uuid-1');
+    it('should call modifySection with undefined selected_field_measure_uuid when the section-selected measure is deleted', async () => {
+      mockSpanService.section = signal<Section | null>({
+        uuid: 'test-section-uuid',
+        field_measures: [measure1, measure2],
+        selected_field_measure_uuid: 'uuid-1'
+      } as unknown as Section);
 
       await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
 
       expect(mockPlotService.modifySection).toHaveBeenCalledWith({
-        field_measures: [measure2]
+        field_measures: [measure2],
+        selected_field_measure_uuid: undefined
       });
     });
 

@@ -32,7 +32,7 @@
 
   &__divider {
     border: 0;
-    border-top: 1px solid var(--surface-border, #eee);
+    border-top: 1px solid var(--star-dust-300);
     margin: 1.5rem 0;
   }
 
@@ -56,22 +56,12 @@
 
   &__limit {
     font-size: 0.85rem;
-    color: var(--text-color, #333);
+    color: var(--star-dust-950);
   }
 
   &__footer {
     display: flex;
     justify-content: flex-end;
     margin-top: 2rem;
-  }
-
-  .view-button--active {
-    background-color: var(--primary-800);
-    border-color: var(--primary-900);
-    color: var(--grey-white);
-
-    &:hover {
-      background-color: var(--primary-700);
-    }
   }
 }

@@ -6,8 +6,8 @@
   --p-button-border-radius: 0.125rem;
 
   --p-button-outlined-primary-hover-background: var(--primary-50);
-  --p-button-outlined-primary-border-color: var(--primary-900);
-  --p-button-outlined-primary-color: var(--primary-700);
+  --p-button-outlined-primary-hover-border-color: var(--primary-900);
+  --p-button-outlined-primary-hover-color: var(--primary-700);
 
   --p-button-primary-focus-ring-shadow: inherit;
   --p-button-focus-ring-width: inherit;
@@ -21,6 +21,18 @@
 
   &:focus-visible {
     @extend %focus-state;
+  }
+
+  // specif for studio's scale view launching button
+  &.view-button--active {
+    background-color: var(--primary-800);
+    border-color: var(--primary-900);
+    color: var(--grey-white);
+
+    &:hover {
+      background-color: var(--primary-700);
+      color: var(--grey-white);
+    }
   }
 }
 

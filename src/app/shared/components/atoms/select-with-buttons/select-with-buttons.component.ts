@@ -42,6 +42,10 @@ export class SelectWithButtonsComponent<T extends Record<string, unknown>> imple
   placeholder = input<string>('');
   /** Whether to show a clear button to deselect. */
   showClear = input<boolean>(false);
+  /** Message shown when the options list is empty. */
+  emptyMessage = input<string>('');
+  /** Message shown when filtering returns no results. */
+  emptyFilterMessage = input<string>('');
   /** Whether to show the view action button. */
   showViewButton = input<boolean>(true);
   /** Whether to show the edit action button. */
@@ -52,7 +56,7 @@ export class SelectWithButtonsComponent<T extends Record<string, unknown>> imple
   showDeleteButton = input<boolean>(true);
 
   /** Emitted when an option is selected. */
-  selectOption = output<T>();
+  selectOption = output<T | undefined>();
   /** Emitted when the view action is triggered for an option. */
   viewOption = output<T>();
   /** Emitted when the edit action is triggered for an option. */
@@ -90,7 +94,7 @@ export class SelectWithButtonsComponent<T extends Record<string, unknown>> imple
 
   clearSelectedOptionValue() {
     this.selectedOptionValue.set(undefined);
-    this.selectOption.emit(undefined as unknown as T);
+    this.selectOption.emit(undefined);
     this.selectComponent()?.writeValue(null);
     this.selectComponent()?.updateModel(null, null);
   }

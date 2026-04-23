@@ -3047,18 +3047,6 @@
         <target>Choisir une mesure existante</target>
       </segment>
     </unit>
-    <unit id="8878227880393471056">
-      <segment state="initial">
-        <source>No measures found</source>
-        <target>Pas de mesure trouvée</target>
-      </segment>
-    </unit>
-    <unit id="4396866374643971390">
-      <segment state="initial">
-        <source>No measures</source>
-        <target>Pas de mesure</target>
-      </segment>
-    </unit>
     <unit id="399524330429754869">
       <segment state="initial">
         <source>Ice indicator</source>
@@ -3915,6 +3903,18 @@
       <segment state="initial">
         <source>Not selected</source>
         <target>Non sélectionné</target>
+      </segment>
+    </unit>
+    <unit id="4396866374643971390">
+      <segment state="initial">
+        <source>No measures</source>
+        <target>Pas de mesure</target>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment state="initial">
+        <source>No measures found</source>
+        <target>Pas de mesure trouvée</target>
       </segment>
     </unit>
   </file>

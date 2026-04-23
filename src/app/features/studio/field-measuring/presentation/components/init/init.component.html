@@ -63,6 +63,10 @@
     [showViewButton]="false"
     [showEditButton]="false"
     [showDuplicateButton]="false"
+    emptyMessage="No measures"
+    i18n-emptyMessage
+    emptyFilterMessage="No measures found"
+    i18n-emptyFilterMessage
     (selectOption)="onMeasureSelected($event)"
     (deleteOption)="deleteMeasure($event)"
     data-testid="choose-measure-select"

@@ -28,4 +28,10 @@
       color: var(--main-error);
     }
   }
+
+  // specif for scale studio's scale view
+  &.scale-view-popover {
+    margin-top: 8px;
+    min-width: 37.5rem;
+  }
 }

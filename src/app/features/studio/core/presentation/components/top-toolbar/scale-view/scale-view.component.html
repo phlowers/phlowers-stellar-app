@@ -4,7 +4,7 @@
   label="View"
   variant="outlined"
   size="small"
-  [styleClass]="popoverOpen() ? ' view-button--active' : ''"
+  [styleClass]="popoverOpen() ? 'view-button--active' : ''"
   aria-haspopup="dialog"
   [attr.aria-expanded]="popoverOpen()"
   (onClick)="togglePopover($event)"
@@ -19,6 +19,7 @@
     data-testid="scale-view-form"
     class="view-config"
     [formGroup]="formScaleView"
+    (ngSubmit)="onValidate()"
     i18n-aria-label="@@scaleView.form.ariaLabel"
     aria-label="View configuration"
   >
@@ -82,7 +83,7 @@
     </fieldset>
 
     <footer class="view-config__footer">
-      <button app-btn type="submit" (click)="onValidate()" data-testid="scale-validate-btn">
+      <button app-btn type="submit" data-testid="scale-validate-btn">
         <ng-container i18n="@@scaleView.validate.label">Validate</ng-container>
         <app-icon icon="check" />
       </button>

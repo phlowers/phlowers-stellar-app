@@ -19,7 +19,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { createInitialMeasureData } from '../../helpers';
+import { createInitialMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { MessageModule } from 'primeng/message';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
@@ -77,7 +77,7 @@ export class InitComponent implements OnDestroy, OnInit {
     initialValue: this.chooseMeasureControl.value
   });
 
-  onMeasureSelected(measure: { label: string; value: string }): void {
+  onMeasureSelected(measure: { label: string; value: string } | null | undefined): void {
     this.chooseMeasureControl.setValue(measure?.value ?? null);
   }
 
@@ -86,10 +86,16 @@ export class InitComponent implements OnDestroy, OnInit {
     if (!section) return;
 
     const updatedMeasures = (section.field_measures ?? []).filter((m) => m.uuid !== measure.value);
+    const isDeletedMeasureSelected = section.selected_field_measure_uuid === measure.value;
+
     if (this.chooseMeasureControl.value === measure.value) {
       this.chooseMeasureControl.setValue(null);
     }
-    await this.plotService.modifySection({ field_measures: updatedMeasures });
+
+    await this.plotService.modifySection({
+      field_measures: updatedMeasures,
+      selected_field_measure_uuid: isDeletedMeasureSelected ? undefined : section.selected_field_measure_uuid
+    });
   }
 
   async createMeasure(): Promise<void> {

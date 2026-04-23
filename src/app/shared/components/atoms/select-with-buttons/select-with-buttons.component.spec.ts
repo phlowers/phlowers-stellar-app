@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
-import { SelectModule } from 'primeng/select';
+import { SelectModule, Select } from 'primeng/select';
 import { DividerModule } from 'primeng/divider';
 import { By } from '@angular/platform-browser';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -159,6 +159,20 @@ describe('SelectWithButtonsComponent', () => {
   });
 
   describe('Button visibility inputs', () => {
+    let primeSelect: Select;
+
+    beforeEach(() => {
+      primeSelect = fixture.debugElement.query(By.directive(Select)).componentInstance as Select;
+    });
+
+    async function openDropdown(): Promise<void> {
+      primeSelect.show();
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    const getInPanel = (testId: string): HTMLElement | null => document.body.querySelector(`[data-testid="${testId}"]`);
+
     it('should default all button visibility inputs to true', () => {
       expect(component.showViewButton()).toBe(true);
       expect(component.showEditButton()).toBe(true);
@@ -166,47 +180,58 @@ describe('SelectWithButtonsComponent', () => {
       expect(component.showDeleteButton()).toBe(true);
     });
 
-    it('should reflect false for showViewButton and keep other buttons true', async () => {
+    it('should render all action buttons in the dropdown by default', async () => {
+      await openDropdown();
+      expect(getInPanel('select-view-btn')).toBeTruthy();
+      expect(getInPanel('select-edit-btn')).toBeTruthy();
+      expect(getInPanel('select-duplicate-btn')).toBeTruthy();
+      expect(getInPanel('select-delete-btn')).toBeTruthy();
+    });
+
+    it('should hide view button in the dropdown when showViewButton is false', async () => {
       fixture.componentRef.setInput('showViewButton', false);
       fixture.detectChanges();
-      await fixture.whenStable();
+      await openDropdown();
       expect(component.showViewButton()).toBe(false);
-      expect(component.showEditButton()).toBe(true);
-      expect(component.showDuplicateButton()).toBe(true);
-      expect(component.showDeleteButton()).toBe(true);
+      expect(getInPanel('select-view-btn')).toBeNull();
+      expect(getInPanel('select-edit-btn')).toBeTruthy();
     });
 
-    it('should reflect false for showEditButton and keep other buttons true', async () => {
+    it('should hide edit button in the dropdown when showEditButton is false', async () => {
       fixture.componentRef.setInput('showEditButton', false);
       fixture.detectChanges();
-      await fixture.whenStable();
+      await openDropdown();
       expect(component.showEditButton()).toBe(false);
-      expect(component.showViewButton()).toBe(true);
+      expect(getInPanel('select-edit-btn')).toBeNull();
+      expect(getInPanel('select-view-btn')).toBeTruthy();
     });
 
-    it('should reflect false for showDuplicateButton', async () => {
+    it('should hide duplicate button in the dropdown when showDuplicateButton is false', async () => {
       fixture.componentRef.setInput('showDuplicateButton', false);
       fixture.detectChanges();
-      await fixture.whenStable();
+      await openDropdown();
       expect(component.showDuplicateButton()).toBe(false);
+      expect(getInPanel('select-duplicate-btn')).toBeNull();
     });
 
-    it('should reflect false for showDeleteButton', async () => {
+    it('should hide delete button in the dropdown when showDeleteButton is false', async () => {
       fixture.componentRef.setInput('showDeleteButton', false);
       fixture.detectChanges();
-      await fixture.whenStable();
+      await openDropdown();
       expect(component.showDeleteButton()).toBe(false);
+      expect(getInPanel('select-delete-btn')).toBeNull();
     });
 
-    it('should support only delete button being active (view/edit/dup false)', async () => {
+    it('should show only delete button in the dropdown when view/edit/duplicate are disabled', async () => {
       fixture.componentRef.setInput('showViewButton', false);
       fixture.componentRef.setInput('showEditButton', false);
       fixture.componentRef.setInput('showDuplicateButton', false);
       fixture.detectChanges();
-      await fixture.whenStable();
-      expect(component.showViewButton()).toBe(false);
-      expect(component.showEditButton()).toBe(false);
-      expect(component.showDuplicateButton()).toBe(false);
+      await openDropdown();
+      expect(getInPanel('select-view-btn')).toBeNull();
+      expect(getInPanel('select-edit-btn')).toBeNull();
+      expect(getInPanel('select-duplicate-btn')).toBeNull();
+      expect(getInPanel('select-delete-btn')).toBeTruthy();
       expect(component.showDeleteButton()).toBe(true);
     });
   });
