@@ -13,6 +13,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { AxesNorms } from '@shared/types/plot.types';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 
 @Component({
   selector: 'app-scale-view',
@@ -26,7 +27,8 @@ import { AxesNorms } from '@shared/types/plot.types';
     RadioButton,
     PopoverModule,
     ReactiveFormsModule,
-    Popover
+    Popover,
+    ButtonComponent
   ],
   templateUrl: './scale-view.component.html',
   styleUrls: ['./scale-view.component.scss']

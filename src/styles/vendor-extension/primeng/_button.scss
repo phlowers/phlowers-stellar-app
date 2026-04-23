@@ -1,0 +1,73 @@
+/*
+&.p-speeddial-open {
+  > button {
+    background-color: var(--primary-800);
+    border-color: var(--primary-900);
+    color: var(--grey-white);
+
+    &:hover {
+      background-color: var(--primary-700);
+    }
+  }
+
+> button {
+      @apply flex items-center gap-1 border rounded-sm;
+      padding: 0.125rem 0.5rem 0rem 0.25rem;
+      color: var(--primary-700);
+      border-color: var(--primary-700);
+      background-color: var(--grey-white);
+      font-size: 0.875rem;
+      line-height: 1;
+      transition:
+        border-color 0.2s ease-in-out,
+        color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+
+      .app-icon {
+        @apply relative;
+        bottom: 0.0625rem;
+        font-size: 1.25rem;
+      }
+
+      &:hover {
+        background-color: var(--primary-50);
+        border-color: var(--primary-900);
+      }
+
+      &:focus-visible {
+        @extend %focus-state;
+      }
+*/
+
+@use 'abstract.extracts' as app;
+
+.p-button-outlined.p-button-outlined {
+  --p-button-outlined-primary-border-color: var(--primary-700);
+  --p-button-outlined-primary-color: var(--primary-700);
+  --p-button-border-radius: 0.125rem;
+
+  --p-button-outlined-primary-hover-background: var(--primary-50);
+  --p-button-outlined-primary-border-color: var(--primary-900);
+  --p-button-outlined-primary-color: var(--primary-700);
+
+  --p-button-primary-focus-ring-shadow: inherit;
+  --p-button-focus-ring-width: inherit;
+  --p-button-focus-ring-style: inherit;
+  --p-button-primary-focus-ring-color: inherit;
+  --p-button-focus-ring-offset: inherit;
+
+  display: flex;
+  background-color: var(--grey-white);
+  line-height: 1;
+
+  &:focus-visible {
+    @extend %focus-state;
+  }
+}
+
+.p-button-sm.p-button-sm {
+  --p-button-sm-font-size: 0.875rem;
+  --p-button-sm-padding-y: 0rem;
+  --p-button-sm-padding-x: 0.25rem 0.5rem;
+  --p-button-gap: 0.25rem;
+}

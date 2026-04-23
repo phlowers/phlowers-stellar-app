@@ -1,18 +1,17 @@
+@use 'abstract.extracts' as app;
+
 .view-config {
   padding: 1.5rem;
-  background: var(--surface-card, #fdfdfd);
-  color: var(--text-color, #4b5563);
-  font-family: sans-serif;
   max-width: 37.5rem;
 
   &__section {
     margin-bottom: 1.5rem;
   }
 
-  &__label {
-    font-size: 0.9rem;
+  &__legend {
+    @extend %heading-xs;
     margin-bottom: 1rem;
-    color: var(--text-color-secondary, #666);
+    color: var(--star-dust-950);
   }
 
   &__radio-group {
@@ -27,8 +26,7 @@
     gap: 0.5rem;
 
     label {
-      cursor: pointer;
-      font-size: 0.95rem;
+      @extend %text-m-400;
     }
   }
 
@@ -67,37 +65,13 @@
     margin-top: 2rem;
   }
 
-  &__submit-btn {
-    background-color: var(--main-primary, #7b5da3) !important;
-    color: #fff !important;
-    border: none !important;
-    padding: 0.5rem 1.5rem !important;
-    transition: background 0.2s;
-    &.active,
-    &:active,
-    &:focus,
-    &:hover {
-      background-color: var(--main-secondary, #5d7ba3) !important;
-      color: #fff !important;
-    }
-  }
+  .view-button--active {
+    background-color: var(--primary-800);
+    border-color: var(--primary-900);
+    color: var(--grey-white);
 
-  .view-button {
-    background: var(--surface-card, #fff) !important;
-    color: var(--main-primary, #7b5da3) !important;
-    border-radius: var(--content-border-radius, 0.5rem) !important;
-    border: 1px solid var(--surface-border, #eee) !important;
-    transition:
-      background 0.2s,
-      color 0.2s;
-    &--active,
-    &.active,
-    &:active,
-    &:focus,
     &:hover {
-      background: var(--main-primary, #7b5da3) !important;
-      color: #fff !important;
-      border-color: var(--main-primary, #7b5da3) !important;
+      background-color: var(--primary-700);
     }
   }
 }
