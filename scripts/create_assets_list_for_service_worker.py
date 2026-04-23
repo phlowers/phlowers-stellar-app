@@ -95,6 +95,26 @@ def collect_csv_hashes(directory):
 def main(language):
     target_dir = f"dist/{language}"
 
+    package_json_file = "package.json"
+    with open(package_json_file, "r") as f:
+        package_json = json.load(f)
+    version = package_json["version"]
+
+    # Build the app_version object once — reused for version.json and assets_list.json.
+    app_version = {
+        "git_hash": get_git_revision_hash(),
+        "build_datetime_utc": datetime.utcnow()
+        .replace(tzinfo=simple_utc())
+        .isoformat(),
+        "version": version,
+    }
+
+    # Write version.json BEFORE listing files so it is included in the asset manifest.
+    version_file = os.path.join(target_dir, "version.json")
+    with open(version_file, "w") as f:
+        json.dump(app_version, f, indent=2)
+    print(f"Generated {version_file}")
+
     print(f"Listing all files in '{target_dir}':")
     print("-" * 50)
 
@@ -114,19 +134,9 @@ def main(language):
     print("-" * 50)
     print(f"Total files: {len(files)}")
     output_file = f"dist/{language}/assets_list.json"
-    package_json_file = "package.json"
-    with open(package_json_file, "r") as f:
-        package_json = json.load(f)
-    version = package_json["version"]
     csv_hashes = collect_csv_hashes(target_dir)
     res = {
-        "app_version": {
-            "git_hash": get_git_revision_hash(),
-            "build_datetime_utc": datetime.utcnow()
-            .replace(tzinfo=simple_utc())
-            .isoformat(),
-            "version": version,
-        },
+        "app_version": app_version,
         "data_hashes": csv_hashes,
         "files": [file for file in files if os.path.basename(file) not in blacklist],
     }
