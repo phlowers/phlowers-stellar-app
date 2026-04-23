@@ -74,37 +74,25 @@ export async function installApp() {
 
 /**
  * Updates the cached application assets to the latest manifest.
- * Skips re-downloading already-cached wheel files and removes
- * stale entries no longer present in the manifest.
+ * Performs a full cache reset: deletes the entire cache and re-downloads
+ * all files (including Python wheels) to ensure a clean state.
+ * The IndexedDB database is preserved.
  * @returns The updated asset manifest.
  */
 export async function updateApp() {
-  console.log('SERVICE WORKER: Update requested');
+  console.log('SERVICE WORKER: Update requested — performing full cache reset');
   const response = await fetchLatestManifest();
   if (!response.ok) {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
   }
   const manifest: AssetManifest = await response.json();
   const files = manifest.files || [];
+
+  // Full cache reset: delete and recreate.
+  await caches.delete(CACHE_NAME);
   const cache = await caches.open(CACHE_NAME);
-  let addedCount = 0;
-  for (const file of files) {
-    // do not redownload wheels if already in cache
-    if (file.startsWith('/pyodide') && file.endsWith('.whl')) {
-      if (!(await cache.match(file))) {
-        await cache.add(file);
-        addedCount++;
-      }
-    } else {
-      await cache.add(file);
-      addedCount++;
-    }
-  }
-  const cacheKeys = (await cache.keys()).map((key) => key.url.replace(self.location.origin, ''));
-  const keysToDelete = cacheKeys.filter((key) => key !== APP_VERSION_CACHE_KEY && !files.includes(key));
-  for (const key of keysToDelete) {
-    await cache.delete(key);
-  }
+  await cache.addAll(files);
+
   const appVersion = manifest.app_version;
   await cache.put(
     APP_VERSION_CACHE_KEY,
@@ -114,9 +102,7 @@ export async function updateApp() {
       }
     })
   );
-  console.log(
-    `SERVICE WORKER: Update complete (version ${appVersion}, ${addedCount} added, ${keysToDelete.length} deleted)`
-  );
+  console.log(`SERVICE WORKER: Full cache reset complete (version ${appVersion}, ${files.length} files cached)`);
   return manifest;
 }
 

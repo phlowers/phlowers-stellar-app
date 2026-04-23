@@ -10,14 +10,11 @@ import { appConfig } from './app/app.config';
 import { isDevMode } from '@angular/core';
 (globalThis as unknown as { global: typeof globalThis }).global = globalThis;
 
-bootstrapApplication(AppComponent, appConfig)
-  .then(() => {
-    if ('serviceWorker' in navigator && !isDevMode()) {
-      globalThis.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')?.catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
-      });
-    }
-  })
-  .catch((err) => console.error(err));
+// Register Service Worker before bootstrap so it is active when APP_INITIALIZER runs.
+if ('serviceWorker' in navigator && !isDevMode()) {
+  navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+    console.error('Service Worker registration failed:', error);
+  });
+}
+
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));
