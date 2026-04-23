@@ -8,6 +8,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { PlotService } from '@services/plot/plot.service';
 import { BehaviorSubject } from 'rxjs';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 vi.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
@@ -99,6 +100,7 @@ describe('ObstaclesFormComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ObstaclesFormComponent],
       providers: [
+        provideNoopAnimations(),
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
@@ -370,6 +372,22 @@ describe('ObstaclesFormComponent', () => {
       expect(getByTestId('result-vertical')?.textContent).toContain(' - ');
       expect(getByTestId('result-horizontal')?.textContent).toContain('4.1');
     });
+
+    it('should not render calculation error message when calculationError is null', () => {
+      mockObstacleFormService.calculationError.set(null);
+      fixture.detectChanges();
+
+      expect(getByTestId('calculation-error')).toBeNull();
+    });
+
+    it('should render calculation error message when calculationError is defined', () => {
+      mockObstacleFormService.calculationError.set('Calculation failed: timeout');
+      fixture.detectChanges();
+
+      const errorMessage = getByTestId('calculation-error');
+      expect(errorMessage).toBeTruthy();
+      expect(errorMessage?.textContent).toContain('Calculation failed: timeout');
+    });
   });
 
   describe('HTML rendering - obstacle name input interaction', () => {
@@ -416,6 +434,7 @@ describe('ObstaclesFormComponent', () => {
         .configureTestingModule({
           imports: [ObstaclesFormComponent],
           providers: [
+            provideNoopAnimations(),
             { provide: PlotSpanService, useValue: mockSpanService },
             { provide: PlotOptionsService, useValue: mockPlotOptionsService },
             { provide: ObstacleFormService, useValue: mockObstacleFormService },

@@ -135,18 +135,7 @@ export class WorkerPythonService {
     task: taskId,
     inputs: TaskInputs[taskId]
   ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
-    const id = uuidv4();
-    return new Promise((resolve) => {
-      this.worker?.postMessage({ task, inputs, id });
-      this.handlerMap[id] = ((
-        result: TaskOutputs[taskId],
-        error: TaskError | null,
-        pythonErrorCode: PythonErrorCode | null
-      ) => {
-        delete this.handlerMap[id];
-        resolve({ result, error, pythonErrorCode });
-      }) as (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void;
-    });
+    return this.runTaskInternal(task, inputs);
   }
 
   /**
@@ -155,7 +144,7 @@ export class WorkerPythonService {
    * @typeParam taskId - The task type from the Task enum
    * @param task - The task to execute
    * @param inputs - Input parameters for the task
-   * @param timeoutMs - Timeout in milliseconds (default: 30000ms = 30s)
+   * @param timeout - Timeout in milliseconds (default: 30000ms = 30s)
    * @returns Promise resolving to the task result and any error, or rejecting on timeout
    *
    * @throws Error if the task execution exceeds the specified timeout
@@ -164,8 +153,8 @@ export class WorkerPythonService {
    * ```typescript
    * try {
    *   const { result, error } = await workerService.runTaskWithTimeout(
-   *     Task.calculateObstacleDistances,
-   *     { obstacles, plotOptions },
+   *     Task.calculateObstaclesDistances,
+   *     { obstacles, startSupport, endSupport, view },
    *     30000
    *   );
    *   if (!error) {
@@ -179,13 +168,45 @@ export class WorkerPythonService {
   runTaskWithTimeout<taskId extends Task>(
     task: taskId,
     inputs: TaskInputs[taskId],
-    timeoutMs = 30000
+    timeout = 30000
   ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
-    return Promise.race([
-      this.runTask(task, inputs),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Task ${String(task)} timed out after ${timeoutMs}ms`)), timeoutMs)
-      )
-    ]);
+    return this.runTaskInternal(task, inputs, timeout);
+  }
+
+  private runTaskInternal<taskId extends Task>(
+    task: taskId,
+    inputs: TaskInputs[taskId],
+    timeout = 30000
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+    const worker = this.worker;
+    if (!worker) {
+      return Promise.reject(new Error('Python worker is not initialized. Call setup() before running tasks.'));
+    }
+
+    const id = uuidv4();
+    return new Promise((resolve, reject) => {
+      let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
+
+      if (timeout !== undefined) {
+        timeoutId = globalThis.setTimeout(() => {
+          delete this.handlerMap[id];
+          reject(new Error(`Task ${String(task)} timed out after ${timeout}ms`));
+        }, timeout);
+      }
+
+      this.handlerMap[id] = ((
+        result: TaskOutputs[taskId],
+        error: TaskError | null,
+        pythonErrorCode: PythonErrorCode | null
+      ) => {
+        if (timeoutId !== null) {
+          globalThis.clearTimeout(timeoutId);
+        }
+        delete this.handlerMap[id];
+        resolve({ result, error, pythonErrorCode });
+      }) as (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void;
+
+      worker.postMessage({ task, inputs, id });
+    });
   }
 }

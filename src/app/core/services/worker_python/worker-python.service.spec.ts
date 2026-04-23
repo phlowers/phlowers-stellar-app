@@ -340,22 +340,27 @@ describe('WorkerService', () => {
 
     it('should reject with timeout error when task exceeds timeout', async () => {
       service.setup();
+      vi.useFakeTimers();
 
       const mockSection = createMockSection();
       const mockCable = createMockCable();
 
-      // Use a very short timeout (10ms) and don't resolve the worker response
-      const promise = service.runTaskWithTimeout(
-        Task.getLit,
-        {
-          section: mockSection,
-          cable: mockCable
-        },
-        10
-      );
+      try {
+        const promise = service.runTaskWithTimeout(
+          Task.getLit,
+          {
+            section: mockSection,
+            cable: mockCable
+          },
+          1000
+        );
 
-      // Wait for timeout to trigger
-      await expect(promise).rejects.toThrow('Task getLit timed out after 10ms');
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await expect(promise).rejects.toThrow('Task getLit timed out after 1000ms');
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should use default timeout of 30000ms when not specified', async () => {

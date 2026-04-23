@@ -1,54 +1,54 @@
-# 🛡️ PROTOCOLE DE SÉCURITÉ CRITIQUE - STELLAR
+# 🛡️ CRITICAL SECURITY PROTOCOL - STELLAR
 
-## RÈGLES D'OR ANTI-HALLUCINATION
-- **ZÉRO TOLÉRANCE :** Ne modifie JAMAIS une ligne en dehors du périmètre défini.
-- **PAS DE REFACTORING :** Interdiction de "nettoyer" ou réorganiser le code existant.
-- **STOP & ASK :** Si une spec est ambiguë ou si un type Pyodide est inconnu, ARRÊTE-TOI.
-- **RESET :** Considère chaque nouvelle tâche comme une ardoise vierge.
+## ANTI-HALLUCINATION GOLDEN RULES
+- **ZERO TOLERANCE:** NEVER modify a single line outside the defined scope.
+- **NO REFACTORING:** Do not "clean up" or reorganize existing code.
+- **STOP & ASK:** If a spec is ambiguous or a Pyodide type is unknown, STOP.
+- **RESET:** Treat every new task as a blank slate.
 
-## 1. Skill : L’Architecte (Planification)
-- **Action :** Créer un `plan.md` en micro-étapes (max 10 lignes de code par étape).
-- **Angular :** Standalone obligatoire. Pyodide isolé dans `PyodideService`.
+## 1. Skill: The Architect (Planning)
+- **Action:** Create a `plan.md` in micro-steps (max 10 lines of code per step).
+- **Angular:** Standalone is mandatory. Pyodide must be isolated in `PyodideService`.
 
-## 2. Skill : L’Analyste (Diagnostic)
-- **Action :** Diagnostic uniquement. Interdiction de modifier les fichiers.
-- **Focus :** Identifier si l'erreur est dans le code Python, le Worker ou le Service Angular.
+## 2. Skill: The Analyst (Diagnosis)
+- **Action:** Diagnosis only. File modifications are forbidden.
+- **Focus:** Identify whether the error is in Python code, the Worker, or the Angular Service.
 
-## 3. Skill : L’Exécuteur (Action - SÉCURITÉ MAX)
-- **CONTRAINTE :** Modifie exclusivement les lignes nécessaires à l'étape du plan.
-- **INTERDICTION :** Ne touche pas aux imports ou au code environnant sans autorisation.
-- **OBLIGATION :** Utilise `Logger` et `Notification`. Pas de `console.log`.
-- **WASM :** Appelle `.destroy()` sur chaque `PyProxy` créé pour éviter les fuites mémoire.
+## 3. Skill: The Executor (Action - MAXIMUM SECURITY)
+- **CONSTRAINT:** Modify only the lines required for the current plan step.
+- **PROHIBITION:** Do not touch imports or surrounding code without authorization.
+- **REQUIREMENT:** Use `Logger` and `Notification`. No `console.log`.
+- **WASM:** Call `.destroy()` on every created `PyProxy` to avoid memory leaks.
 
-## 4. Skill : L’Auditeur (Revue Critique)
-- **Action :** Traquer les régressions, les `any` cachés et les fuites de Signals.
-- **Verdict :** Score 1-5. Si < 5, le code doit être annulé.
+## 4. Skill: The Auditor (Critical Review)
+- **Action:** Hunt regressions, hidden `any` types, and Signal leaks.
+- **Verdict:** Score from 1 to 5. If < 5, the code must be reverted.
 
-## 5. Skill : Le Testeur (Vitest 100%)
-- **Objectif :** 100% de couverture sur les Services. 80%+ sur les Components.
-- **Sélecteurs :** Uniquement `data-testid`.
-- **Mocks :** Mock obligatoire de `PyodideService`, `Logger` et `Notification`.
+## 5. Skill: The Tester (Vitest 100%)
+- **Goal:** 100% coverage on Services. 80%+ on Components.
+- **Selectors:** `data-testid` only.
+- **Mocks:** Mandatory mocks for `PyodideService`, `Logger`, and `Notification`.
 
-## 6. Skill : Le Médiateur (Rebase/Conflits)
-- **Action :** Enquêteur de code. Analyse l'impact global avant de fusionner.
-- **Règle :** "Fusion Cumulative" (Garder les deux logiques en cas de doute).
+## 6. Skill: The Mediator (Rebase/Conflicts)
+- **Action:** Code investigator. Analyze global impact before merging.
+- **Rule:** "Cumulative Merge" (keep both logics when in doubt).
 
-## 7. Skill : Le Nettoyeur & 8. Le Scribe
-- Suppression imports morts + `git aa && git cs -m "[type]: [msg]" && git push`.
+## 7. Skill: The Cleaner & 8. The Scribe
+- Remove dead imports + `git aa && git cs -m "[type]: [msg]" && git push`.
 
-## 8. Skill : L’Expert Scribe Git (Sécurité & Traçabilité)
-- **Signature Obligatoire :** Chaque commit DOIT être signé numériquement (GPG/SSH). Utilise le flag `-S`.
-- **Commande :** `git add -A && git commit -S -m "[type]: [message]" && git push`
-- **Alias préconisé :** Si l'alias `git cs` est utilisé, il doit être configuré pour inclure la signature (`git config --global alias.cs "commit -S -m"`).
-- **Standard de Message :** Respect strict des Conventional Commits (`feat`, `fix`, `refactor`, etc.).
+## 8. Skill: The Expert Git Scribe (Security & Traceability)
+- **Mandatory Signature:** Every commit MUST be digitally signed (GPG/SSH). Use the `-S` flag.
+- **Command:** `git add -A && git commit -S -m "[type]: [message]" && git push`
+- **Recommended Alias:** If the `git cs` alias is used, it must include signature (`git config --global alias.cs "commit -S -m"`).
+- **Message Standard:** Strict compliance with Conventional Commits (`feat`, `fix`, `refactor`, etc.).
 
-## 9. Skill : Le Réparateur de Tests (Spécialiste Vitest)
-**Rôle :** Urgentiste des suites de tests cassées.
-- **Analyse d'Échec :** Analyse d'abord le log d'erreur de Vitest. Identifie si l'échec est dû à :
-    1. Un mock périmé (ex: PyodideService a changé).
-    2. Un sélecteur `data-testid` manquant ou renommé.
-    3. Une véritable régression dans la logique métier.
-- **Règle de Non-Régression :** Interdiction de supprimer un test ou de baisser les assertions pour le faire passer.
-- **Mocks & Spies :** Vérifie que les `vi.spyOn` ou `vi.mock` sont toujours alignés avec les signatures des services réels.
-- **Objectif Couverture :** Si la correction diminue la couverture sous les 100%, tu dois ajouter des cas de tests pour compenser.
-- **Validation :** Après correction, explique pourquoi le test échouait pour éviter que l'erreur ne se reproduise.
+## 9. Skill: The Test Repairer (Vitest Specialist)
+**Role:** Emergency responder for broken test suites.
+- **Failure Analysis:** First analyze the Vitest error log. Identify whether the failure is due to:
+    1. An outdated mock (e.g., `PyodideService` changed).
+    2. A missing or renamed `data-testid` selector.
+    3. A real business logic regression.
+- **Non-Regression Rule:** Do not remove a test or weaken assertions just to make it pass.
+- **Mocks & Spies:** Verify that `vi.spyOn` or `vi.mock` remain aligned with real service signatures.
+- **Coverage Goal:** If the fix reduces coverage below 100%, you must add tests to compensate.
+- **Validation:** After fixing, explain why the test was failing to prevent recurrence.

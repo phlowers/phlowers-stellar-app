@@ -15,6 +15,7 @@ import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable, startWith } from 'rxjs';
 import { ObstacleOutput } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -29,6 +30,7 @@ export class ObstacleFormService {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
+  private readonly logger = inject(LoggerService);
 
   private readonly defaultPosition = { x: null, y: null, z: null } as const satisfies Position3D;
 
@@ -103,9 +105,6 @@ export class ObstacleFormService {
   }
 
   readonly supportsOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
-
-  /** Flag to prevent concurrent calculateAndSave operations */
-  private isCalculatingFlag = false;
 
   /** Signal indicating if obstacle calculation is in progress */
   readonly isCalculatingObstacle = signal(false);
@@ -316,14 +315,13 @@ export class ObstacleFormService {
     }
 
     // Prevent concurrent execution
-    if (this.isCalculatingFlag) {
-      console.warn('calculateAndSave already in progress, ignoring concurrent call');
+    if (this.isCalculatingObstacle()) {
+      this.logger.warn('calculateAndSave already in progress, ignoring concurrent call');
       return;
     }
 
     const obstacle = this.buildObstacleFromForm();
 
-    this.isCalculatingFlag = true;
     this.isCalculatingObstacle.set(true);
     this.calculationError.set(null);
 
@@ -359,7 +357,6 @@ export class ObstacleFormService {
         detail: $localize`Failed to calculate obstacle distances`
       });
     } finally {
-      this.isCalculatingFlag = false;
       this.isCalculatingObstacle.set(false);
     }
   }
