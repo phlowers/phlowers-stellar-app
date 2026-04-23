@@ -201,6 +201,9 @@ export class UpdateService {
    */
   async checkForUpdateOnce(): Promise<void> {
     try {
+      // Load the build-time version file (served from SW cache or network).
+      await this.loadCurrentVersion();
+
       const cachePopulated = await this.isCachePopulated();
       const latestVersion = await this.getLatestVersion();
 
@@ -249,6 +252,23 @@ export class UpdateService {
    */
   async install() {
     await this.postMessageToSW('install');
+  }
+
+  /**
+   * Load the current application version from the build-time version.json file.
+   * This file is generated at build time and cached by the Service Worker.
+   * Falls back to the environment-based version if the fetch fails.
+   */
+  async loadCurrentVersion(): Promise<void> {
+    try {
+      const response = await fetch('/version.json');
+      if (response.ok) {
+        const version = (await response.json()) as AppVersion;
+        this.currentVersion.set(version);
+      }
+    } catch {
+      // Keep environment-based fallback already set in the signal.
+    }
   }
 
   private async postMessageToSW(type: 'update' | 'install'): Promise<void> {

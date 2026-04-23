@@ -261,6 +261,50 @@ describe('UpdateService', () => {
     });
   });
 
+  describe('loadCurrentVersion', () => {
+    it('should update currentVersion from /version.json when fetch succeeds', async () => {
+      const serverVersion = {
+        git_hash: 'server-hash-456',
+        build_datetime_utc: '2025-06-01T00:00:00.000000',
+        version: '2.0.0'
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValueOnce(serverVersion)
+      });
+
+      await service.loadCurrentVersion();
+
+      expect(mockFetch).toHaveBeenCalledWith('/version.json');
+      expect(service.currentVersion()).toEqual(serverVersion);
+    });
+
+    it('should keep environment fallback when fetch fails', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      await service.loadCurrentVersion();
+
+      expect(service.currentVersion()).toEqual({
+        version: '1.0.0',
+        build_datetime_utc: '2024-01-01T00:00:00.000000',
+        git_hash: 'env-hash-123'
+      });
+    });
+
+    it('should keep environment fallback when response is not ok', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 404 });
+
+      await service.loadCurrentVersion();
+
+      expect(service.currentVersion()).toEqual({
+        version: '1.0.0',
+        build_datetime_utc: '2024-01-01T00:00:00.000000',
+        git_hash: 'env-hash-123'
+      });
+    });
+  });
+
   describe('isCachePopulated', () => {
     it('should return true when cache has app_version entry', async () => {
       mockCache.match.mockResolvedValueOnce(new Response('{}'));
@@ -290,6 +334,11 @@ describe('UpdateService', () => {
   });
 
   describe('checkForUpdateOnce', () => {
+    beforeEach(() => {
+      // Stub loadCurrentVersion so tests only need to mock assets_list.json fetch
+      vi.spyOn(service, 'loadCurrentVersion').mockResolvedValue();
+    });
+
     it('should call install() when cache is empty (first launch)', async () => {
       mockCache.match.mockResolvedValue(undefined); // no cached version
       mockFetch.mockResolvedValue({
