@@ -245,7 +245,10 @@ describe('Init component', () => {
     });
 
     it('should be true when the name matches an existing measure', () => {
-      component.measures.set([{ label: 'TM 1', value: 'tm-uuid-1' }, { label: 'TM 2', value: 'tm-uuid-2' }]);
+      component.measures.set([
+        { label: 'TM 1', value: 'tm-uuid-1' },
+        { label: 'TM 2', value: 'tm-uuid-2' }
+      ]);
       component.newMeasureNameControl.setValue('TM 1');
 
       expect(component.isNameAlreadyTaken()).toBe(true);

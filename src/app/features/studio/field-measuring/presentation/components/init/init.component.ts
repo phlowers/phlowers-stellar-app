@@ -85,7 +85,7 @@ export class InitComponent implements OnDestroy, OnInit {
     const section = this.spanService.section();
     if (!section) return;
 
-    const updatedMeasures = (section.field_measures ?? []).filter(m => m.uuid !== measure.value);
+    const updatedMeasures = (section.field_measures ?? []).filter((m) => m.uuid !== measure.value);
     if (this.chooseMeasureControl.value === measure.value) {
       this.chooseMeasureControl.setValue(null);
     }
