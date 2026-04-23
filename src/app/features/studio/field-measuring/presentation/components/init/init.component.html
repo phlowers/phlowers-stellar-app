@@ -51,24 +51,20 @@
 <hr />
 
 <div>
-  <label for="choose-measure">
-    <ng-container i18n>Choose an existing measure</ng-container>
-  </label>
-  <p-select
-    inputId="choose-measure"
-    required
-    fluid
-    showClear
-    appendTo="body"
-    emptyFilterMessage="No measures found"
-    i18n-emptyFilterMessage
-    emptyMessage="No measures"
-    i18n-emptyMessage
-    ariaLabelledBy="complementary-form-field-measuring-init"
-    [options]="measures()"
+  <p class="label" i18n>Choose an existing measure</p>
+  <app-select-with-buttons
+    ariaLabel="Choose an existing measure"
+    i18n-ariaLabel
     optionLabel="label"
     optionValue="value"
-    [formControl]="chooseMeasureControl"
+    [options]="measures()"
+    [selectedOption]="chooseMeasureValue()"
+    [showClear]="true"
+    [showViewButton]="false"
+    [showEditButton]="false"
+    [showDuplicateButton]="false"
+    (selectOption)="onMeasureSelected($event)"
+    (deleteOption)="deleteMeasure($event)"
     data-testid="choose-measure-select"
   />
 

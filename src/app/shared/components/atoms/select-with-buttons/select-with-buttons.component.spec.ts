@@ -158,6 +158,59 @@ describe('SelectWithButtonsComponent', () => {
     );
   });
 
+  describe('Button visibility inputs', () => {
+    it('should default all button visibility inputs to true', () => {
+      expect(component.showViewButton()).toBe(true);
+      expect(component.showEditButton()).toBe(true);
+      expect(component.showDuplicateButton()).toBe(true);
+      expect(component.showDeleteButton()).toBe(true);
+    });
+
+    it('should reflect false for showViewButton and keep other buttons true', async () => {
+      fixture.componentRef.setInput('showViewButton', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.showViewButton()).toBe(false);
+      expect(component.showEditButton()).toBe(true);
+      expect(component.showDuplicateButton()).toBe(true);
+      expect(component.showDeleteButton()).toBe(true);
+    });
+
+    it('should reflect false for showEditButton and keep other buttons true', async () => {
+      fixture.componentRef.setInput('showEditButton', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.showEditButton()).toBe(false);
+      expect(component.showViewButton()).toBe(true);
+    });
+
+    it('should reflect false for showDuplicateButton', async () => {
+      fixture.componentRef.setInput('showDuplicateButton', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.showDuplicateButton()).toBe(false);
+    });
+
+    it('should reflect false for showDeleteButton', async () => {
+      fixture.componentRef.setInput('showDeleteButton', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.showDeleteButton()).toBe(false);
+    });
+
+    it('should support only delete button being active (view/edit/dup false)', async () => {
+      fixture.componentRef.setInput('showViewButton', false);
+      fixture.componentRef.setInput('showEditButton', false);
+      fixture.componentRef.setInput('showDuplicateButton', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.showViewButton()).toBe(false);
+      expect(component.showEditButton()).toBe(false);
+      expect(component.showDuplicateButton()).toBe(false);
+      expect(component.showDeleteButton()).toBe(true);
+    });
+  });
+
   describe('Reactive input changes', () => {
     it('should react to changing selectedOption input', async () => {
       fixture.componentRef.setInput('selectedOption', '2');

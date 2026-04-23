@@ -42,6 +42,14 @@ export class SelectWithButtonsComponent<T extends Record<string, unknown>> imple
   placeholder = input<string>('');
   /** Whether to show a clear button to deselect. */
   showClear = input<boolean>(false);
+  /** Whether to show the view action button. */
+  showViewButton = input<boolean>(true);
+  /** Whether to show the edit action button. */
+  showEditButton = input<boolean>(true);
+  /** Whether to show the duplicate action button. */
+  showDuplicateButton = input<boolean>(true);
+  /** Whether to show the delete action button. */
+  showDeleteButton = input<boolean>(true);
 
   /** Emitted when an option is selected. */
   selectOption = output<T>();

@@ -25,62 +25,78 @@
         {{ item[optionLabel()] }}
       </button>
 
-      <p-divider class="divider" layout="vertical" />
+      @if (showViewButton() || showEditButton() || showDuplicateButton() || showDeleteButton()) {
+        <p-divider class="divider" layout="vertical" />
+      }
 
-      <button
-        app-btn
-        btnSize="l"
-        btnStyle="text"
-        ariaLabel="view"
-        i18n-ariaLabel
-        data-testid="select-view-btn"
-        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); viewOption.emit(item)"
-      >
-        <app-icon icon="visibility" aria-hidden="true" />
-      </button>
+      @if (showViewButton()) {
+        <button
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          ariaLabel="view"
+          i18n-ariaLabel
+          data-testid="select-view-btn"
+          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); viewOption.emit(item)"
+        >
+          <app-icon icon="visibility" aria-hidden="true" />
+        </button>
+      }
 
-      <p-divider layout="vertical" />
+      @if (showViewButton() && (showEditButton() || showDuplicateButton() || showDeleteButton())) {
+        <p-divider layout="vertical" />
+      }
 
-      <button
-        app-btn
-        btnSize="l"
-        btnStyle="text"
-        ariaLabel="edit"
-        i18n-ariaLabel
-        data-testid="select-edit-btn"
-        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); editOption.emit(item)"
-      >
-        <app-icon icon="edit" aria-hidden="true" />
-      </button>
+      @if (showEditButton()) {
+        <button
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          ariaLabel="edit"
+          i18n-ariaLabel
+          data-testid="select-edit-btn"
+          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); editOption.emit(item)"
+        >
+          <app-icon icon="edit" aria-hidden="true" />
+        </button>
+      }
 
-      <p-divider layout="vertical" />
+      @if (showEditButton() && (showDuplicateButton() || showDeleteButton())) {
+        <p-divider layout="vertical" />
+      }
 
-      <button
-        app-btn
-        btnSize="l"
-        btnStyle="text"
-        ariaLabel="duplicate"
-        i18n-ariaLabel
-        data-testid="select-duplicate-btn"
-        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); duplicateOption.emit(item)"
-      >
-        <app-icon icon="content_copy" aria-hidden="true" />
-      </button>
+      @if (showDuplicateButton()) {
+        <button
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          ariaLabel="duplicate"
+          i18n-ariaLabel
+          data-testid="select-duplicate-btn"
+          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); duplicateOption.emit(item)"
+        >
+          <app-icon icon="content_copy" aria-hidden="true" />
+        </button>
+      }
 
-      <p-divider layout="vertical" />
+      @if (showDuplicateButton() && showDeleteButton()) {
+        <p-divider layout="vertical" />
+      }
 
-      <button
-        app-btn
-        btnSize="l"
-        btnStyle="text"
-        class="erase-btn"
-        ariaLabel="delete"
-        i18n-ariaLabel
-        data-testid="select-delete-btn"
-        (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); deleteOption.emit(item)"
-      >
-        <app-icon icon="delete" aria-hidden="true" />
-      </button>
+      @if (showDeleteButton()) {
+        <button
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          class="erase-btn"
+          ariaLabel="delete"
+          i18n-ariaLabel
+          data-testid="select-delete-btn"
+          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); deleteOption.emit(item)"
+        >
+          <app-icon icon="delete" aria-hidden="true" />
+        </button>
+      }
     </div>
   </ng-template>
 </p-select>
