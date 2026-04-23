@@ -13,7 +13,8 @@ const mockCache = {
 
 const mockCaches = {
   open: vi.fn().mockResolvedValue(mockCache),
-  match: vi.fn()
+  match: vi.fn(),
+  delete: vi.fn().mockResolvedValue(true)
 };
 
 const mockFetch = vi.fn();
@@ -31,7 +32,8 @@ const mockSelf = {
 // Mock global objects
 global.caches = {
   ...mockCaches,
-  match: vi.fn()
+  match: vi.fn(),
+  delete: mockCaches.delete
 } as unknown as CacheStorage;
 global.fetch = mockFetch as unknown as typeof fetch;
 global.Response = class MockResponse {
@@ -63,6 +65,8 @@ describe('Service Worker Functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCaches.open.mockResolvedValue(mockCache);
+    mockCaches.delete.mockResolvedValue(true);
+    mockCache.addAll.mockResolvedValue(undefined);
     (global.caches.match as vi.Mock).mockResolvedValue(null);
   });
 
@@ -137,7 +141,7 @@ describe('Service Worker Functions', () => {
 
   describe('updateApp', () => {
     const mockManifest = {
-      files: ['/index.html', '/app.js', '/pyodide/file1.py'],
+      files: ['/index.html', '/app.js', '/pyodide/file1.whl'],
       app_version: '1.1.0'
     };
 
@@ -146,22 +150,18 @@ describe('Service Worker Functions', () => {
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.keys.mockResolvedValue([
-        { url: 'https://example.com/index.html' },
-        { url: 'https://example.com/old-file.js' },
-        { url: 'https://example.com/app_version' }
-      ]);
     });
 
-    it('should update app successfully', async () => {
-      mockCache.match.mockResolvedValue(null); // pyodide file not in cache
-
+    it('should perform a full cache reset and re-cache all files', async () => {
       const result = await updateApp();
 
       expect(result).toEqual(mockManifest);
-      expect(mockCache.add).toHaveBeenCalledWith('/index.html');
-      expect(mockCache.add).toHaveBeenCalledWith('/app.js');
-      expect(mockCache.add).toHaveBeenCalledWith('/pyodide/file1.py');
+      // Must delete the entire cache first
+      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
+      // Then reopen and addAll
+      expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
+      expect(mockCache.addAll).toHaveBeenCalledWith(mockManifest.files);
+      // Store new version
       expect(mockCache.put).toHaveBeenCalledWith(
         '/app_version',
         expect.objectContaining({
@@ -170,21 +170,20 @@ describe('Service Worker Functions', () => {
       );
     });
 
-    it('should skip pyodide files that are already cached', async () => {
-      mockCache.match.mockResolvedValue(new Response()); // pyodide file already in cache
+    it('should re-download Python wheels (no incremental caching)', async () => {
+      const manifestWithWheels = {
+        files: ['/index.html', '/pyodide/numpy.whl', '/pyodide/pandas.whl'],
+        app_version: '1.1.0'
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(manifestWithWheels)
+      });
 
       await updateApp();
 
-      expect(mockCache.add).not.toHaveBeenCalledWith('/pyodide/file1.whl');
-    });
-
-    it('should delete old files not in new manifest', async () => {
-      mockCache.match.mockResolvedValue(null);
-
-      await updateApp();
-
-      expect(mockCache.delete).toHaveBeenCalledWith('/old-file.js');
-      expect(mockCache.delete).not.toHaveBeenCalledWith('/app_version');
+      // All files including .whl should be in addAll (full reset)
+      expect(mockCache.addAll).toHaveBeenCalledWith(manifestWithWheels.files);
     });
 
     it('should handle empty files array', async () => {
@@ -197,7 +196,8 @@ describe('Service Worker Functions', () => {
       const result = await updateApp();
 
       expect(result).toEqual(emptyManifest);
-      expect(mockCache.add).not.toHaveBeenCalled();
+      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
+      expect(mockCache.addAll).toHaveBeenCalledWith([]);
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -482,7 +482,6 @@ describe('Service Worker Functions', () => {
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.keys.mockResolvedValue([]);
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
@@ -539,7 +538,6 @@ describe('Service Worker Functions', () => {
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.keys.mockResolvedValue([]);
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 

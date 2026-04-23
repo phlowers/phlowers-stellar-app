@@ -9,6 +9,7 @@ export const environment = {
   apiUrl: 'http://localhost:8080',
   version: '0.0.0',
   buildTime: '2025-05-14T02:20:46.200198',
+  gitHash: 'dev',
   appName: 'STELLAR',
   changelogUrl: 'https://api.github.com/repos/phlowers/mechaphlowers/releases'
 };

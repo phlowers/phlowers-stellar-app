@@ -5,6 +5,7 @@ import type { AssetManifest } from './service-worker.interfaces';
 
 export type { AssetManifest } from './service-worker.interfaces';
 import type { AppVersion } from './service-worker.interfaces';
+import { environment } from '@src/environments/environment';
 
 /**
  * Service for managing application updates via Service Worker.
@@ -30,8 +31,12 @@ import type { AppVersion } from './service-worker.interfaces';
  */
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
-  /** Signal containing the currently installed application version, or null if unknown */
-  currentVersion = signal<AssetManifest['app_version'] | null>(null);
+  /** Signal containing the currently installed application version (from build-time environment). */
+  currentVersion = signal<AppVersion>({
+    version: environment.version,
+    build_datetime_utc: environment.buildTime,
+    git_hash: environment.gitHash
+  });
   /** Signal containing the latest available application version, or null if unknown */
   latestVersion = signal<AssetManifest['app_version'] | null>(null);
   /** Signal indicating whether an update or install operation is in progress */
@@ -53,11 +58,6 @@ export class UpdateService {
       if (event.data.message) {
         switch (event.data.message) {
           case 'update_complete':
-            try {
-              await this.checkAppVersion({ silent: true });
-            } catch {
-              // Version check failed — proceed with reload anyway.
-            }
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
@@ -67,7 +67,6 @@ export class UpdateService {
             globalThis.location.href = '/';
             break;
           case 'install_complete':
-            await this.checkAppVersion({ silent: true });
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
@@ -89,18 +88,17 @@ export class UpdateService {
   }
 
   /**
-   * Retrieve the currently installed application version from cache.
+   * Check whether the Service Worker cache has been populated (i.e. app is installed).
    *
-   * @returns Promise resolving to the current version or null if not cached
+   * @returns Promise resolving to true if the SW cache contains a version entry
    */
-  async getCurrentVersion() {
-    const cache = await caches.open('app-assets');
-    const cachedResponse = await cache.match('/app_version');
-    if (cachedResponse) {
-      const version = await cachedResponse.json();
-      return version;
-    } else {
-      return null;
+  async isCachePopulated(): Promise<boolean> {
+    try {
+      const cache = await caches.open('app-assets');
+      const cachedResponse = await cache.match('/app_version');
+      return cachedResponse !== undefined;
+    } catch {
+      return false;
     }
   }
 
@@ -109,7 +107,7 @@ export class UpdateService {
    *
    * @returns Promise resolving to the latest version or null if unavailable
    */
-  async getLatestVersion() {
+  async getLatestVersion(): Promise<AppVersion | null> {
     const data = await this.getLatestAssetList();
     if (!data) {
       return null;
@@ -159,14 +157,12 @@ export class UpdateService {
    * Check if a new application version is available.
    *
    * @remarks
-   * Compares the cached version with the server version and updates
-   * the needUpdate signal accordingly.
+   * Fetches the latest version from the server and compares it with
+   * the build-time current version. Updates the needUpdate signal accordingly.
    */
   async checkAppVersion({ silent = false }: { silent?: boolean } = {}) {
-    let currentVersion: AppVersion | null = null;
     let latestVersion: AppVersion | null = null;
     try {
-      currentVersion = await this.getCurrentVersion();
       latestVersion = await this.getLatestVersion();
     } catch {
       this.needUpdate.set(false);
@@ -174,17 +170,14 @@ export class UpdateService {
     } finally {
       this.clearManifestCache();
     }
-    if (currentVersion) {
-      this.currentVersion.set(currentVersion);
-    }
     if (latestVersion) {
       this.latestVersion.set(latestVersion);
     }
-    if (!currentVersion || !latestVersion) {
+    if (!latestVersion) {
       this.needUpdate.set(false);
       return;
     }
-    if (!this.areVersionsEqual(currentVersion, latestVersion)) {
+    if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
       this.needUpdate.set(true);
     } else {
       this.needUpdate.set(false);
@@ -202,18 +195,15 @@ export class UpdateService {
    * Perform a single update/install check at application startup.
    *
    * @remarks
-   * Called once from `APP_INITIALIZER`. If `currentVersion` is null (first launch,
-   * nothing cached), triggers `install()` instead of `update()`.
-   * Does not trigger any polling or repeated checks.
+   * Called once from `APP_INITIALIZER`. If the SW cache is empty (first launch),
+   * triggers `install()`. Otherwise compares build-time version with the server
+   * version and sets needUpdate if they differ.
    */
   async checkForUpdateOnce(): Promise<void> {
     try {
-      const currentVersion = await this.getCurrentVersion();
+      const cachePopulated = await this.isCachePopulated();
       const latestVersion = await this.getLatestVersion();
 
-      if (currentVersion) {
-        this.currentVersion.set(currentVersion);
-      }
       if (latestVersion) {
         this.latestVersion.set(latestVersion);
       }
@@ -223,13 +213,13 @@ export class UpdateService {
         return;
       }
 
-      if (!currentVersion) {
+      if (!cachePopulated) {
         // First launch: nothing cached yet — install the app into the SW cache.
         await this.install();
         return;
       }
 
-      if (!this.areVersionsEqual(currentVersion, latestVersion)) {
+      if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
         // An update is available — signal the UI.
         this.needUpdate.set(true);
       }
@@ -268,17 +258,18 @@ export class UpdateService {
     this.updateLoading.set(true);
     try {
       const registration = await navigator.serviceWorker.getRegistration();
-      if (!registration?.active) {
+      if (!registration) {
         this.updateLoading.set(false);
         return;
       }
-      registration.active.postMessage({ type });
+      const ready = await navigator.serviceWorker.ready;
+      ready.active?.postMessage({ type });
     } catch {
       this.updateLoading.set(false);
     }
   }
 
   private areVersionsEqual(a: AppVersion, b: AppVersion): boolean {
-    return a.git_hash === b.git_hash && a.build_datetime_utc === b.build_datetime_utc && a.version === b.version;
+    return a.git_hash === b.git_hash && a.version === b.version;
   }
 }
