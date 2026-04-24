@@ -50,7 +50,6 @@
 }
 
 .select-with-buttons-panel.select-with-buttons-panel {
-
   .p-select-list,
   .p-select-option {
     padding: 0rem;
@@ -62,7 +61,6 @@
     }
   }
 
-
   .p-select-option.p-select-option.p-focus {
     background: unset;
     color: unset;
@@ -70,7 +68,7 @@
   }
 
   li {
-    width: 23.8125rem;
+    min-width: 23.8125rem;
   }
 
   .select-dropdown {

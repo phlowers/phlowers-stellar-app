@@ -1373,16 +1373,6 @@
         <source>Choose an existing measure</source>
       </segment>
     </unit>
-    <unit id="8878227880393471056">
-      <segment>
-        <source>No measures found</source>
-      </segment>
-    </unit>
-    <unit id="4396866374643971390">
-      <segment>
-        <source>No measures</source>
-      </segment>
-    </unit>
     <unit id="5698046514233867599">
       <segment>
         <source>Choose</source>
@@ -3241,6 +3231,16 @@
     <unit id="6839138864615473489">
       <segment>
         <source>Not selected</source>
+      </segment>
+    </unit>
+    <unit id="4396866374643971390">
+      <segment>
+        <source>No measures</source>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment>
+        <source>No measures found</source>
       </segment>
     </unit>
   </file>

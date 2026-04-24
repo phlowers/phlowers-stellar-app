@@ -368,6 +368,21 @@ describe('TemperatureCalculationComponent', () => {
       expect(component.windIncidenceDisplayState()).toBe('missing-inputs');
     });
 
+    it('should return missing-inputs when mode is auto and azimuth is undefined', () => {
+      const data = createTestMeasureData({ windIncidenceMode: 'auto', windDirection: 'North' });
+      // Simulate stored measure where azimuth field is absent (undefined)
+      const { azimuth: _removed, ...dataWithoutAzimuth } = data as typeof data & { azimuth: unknown };
+      componentRef.setInput('measureData', dataWithoutAzimuth as typeof data);
+      expect(component.windIncidenceDisplayState()).toBe('missing-inputs');
+    });
+
+    it('should return missing-inputs when mode is auto and windDirection is undefined', () => {
+      const data = createTestMeasureData({ windIncidenceMode: 'auto', azimuth: 45 });
+      const { windDirection: _removed, ...dataWithoutWind } = data as typeof data & { windDirection: unknown };
+      componentRef.setInput('measureData', dataWithoutWind as typeof data);
+      expect(component.windIncidenceDisplayState()).toBe('missing-inputs');
+    });
+
     it('should return loading when worker is not ready', () => {
       componentRef.setInput(
         'measureData',
