@@ -156,7 +156,7 @@
               aria-label="attachment height"
               i18n-aria-label
               [ngModel]="support.attachmentHeight"
-              (input)="truncateDecimals($event)"
+              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
               [id]="'attachmentHeight' + rowIndex"
               data-testid="attachment-height-input"
@@ -198,7 +198,7 @@
               aria-label="span angle"
               i18n-aria-label
               [ngModel]="support.spanAngle"
-              (input)="truncateDecimals($event)"
+              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
               [id]="'spanAngle' + rowIndex"
               data-testid="span-angle-input"
@@ -421,7 +421,7 @@
               aria-label="arm length"
               i18n-aria-label
               [ngModel]="support.armLength"
-              (input)="truncateDecimals($event)"
+              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
               [id]="'armLength' + rowIndex"
               data-testid="arm-length-input"
@@ -526,7 +526,7 @@
               aria-label="support foot altitude"
               i18n-aria-label
               [ngModel]="support.supportFootAltitude"
-              (input)="truncateDecimals($event)"
+              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
               [id]="'supportFootAltitude' + rowIndex"
               data-testid="support-foot-altitude-input"

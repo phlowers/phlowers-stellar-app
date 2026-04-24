@@ -65,7 +65,7 @@
       step="0.01"
       [attr.min]="distRefSupportMin()"
       [attr.max]="distRefSupportMax()"
-      (input)="truncateDecimals($event)"
+      (input)="truncateTwoDecimals($event)"
       formControlName="distanceToRefSupport"
       data-testid="cable-span-manip-dist-ref-support"
       [attr.aria-invalid]="form.controls.distanceToRefSupport.invalid || null"
@@ -129,7 +129,7 @@
           step="0.01"
           min="-100"
           max="5000"
-          (input)="truncateDecimals($event)"
+          (input)="truncateTwoDecimals($event)"
           formControlName="longitudinalDistance"
           data-testid="cable-span-manip-longitudinal-dist"
           [attr.aria-invalid]="form.controls.longitudinalDistance.invalid || null"
@@ -181,7 +181,7 @@
           step="0.01"
           min="-100"
           max="100"
-          (input)="truncateDecimals($event)"
+          (input)="truncateTwoDecimals($event)"
           formControlName="lateralDistance"
           data-testid="cable-span-manip-lateral-dist"
           [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
@@ -222,7 +222,7 @@
           step="0.01"
           min="-100"
           max="9000"
-          (input)="truncateDecimals($event)"
+          (input)="truncateTwoDecimals($event)"
           formControlName="altitude"
           data-testid="cable-span-manip-altitude"
           [attr.aria-invalid]="form.controls.altitude.invalid || null"
@@ -287,7 +287,7 @@
         pInputText
         id="chainLength"
         step="0.01"
-        (input)="truncateDecimals($event)"
+        (input)="truncateTwoDecimals($event)"
         formControlName="chainLength"
         data-testid="cable-span-manip-chain-length"
       />
@@ -301,7 +301,7 @@
         pInputText
         id="chainWeight"
         step="0.01"
-        (input)="truncateDecimals($event)"
+        (input)="truncateTwoDecimals($event)"
         formControlName="chainWeight"
         data-testid="cable-span-manip-chain-weight"
       />
@@ -315,7 +315,7 @@
         pInputText
         id="chainSurface"
         step="0.01"
-        (input)="truncateDecimals($event)"
+        (input)="truncateTwoDecimals($event)"
         formControlName="chainSurface"
         data-testid="cable-span-manip-chain-surface"
       />
@@ -329,7 +329,7 @@
         pInputText
         id="counterWeight"
         step="0.01"
-        (input)="truncateDecimals($event)"
+        (input)="truncateTwoDecimals($event)"
         formControlName="counterWeight"
         data-testid="cable-span-manip-counter-weight"
       />
@@ -346,7 +346,7 @@
       step="0.01"
       min="0"
       max="99"
-      (input)="truncateDecimals($event)"
+      (input)="truncateTwoDecimals($event)"
       formControlName="slingLength"
       data-testid="cable-span-manip-sling-length"
       [attr.aria-invalid]="form.controls.slingLength.invalid || null"

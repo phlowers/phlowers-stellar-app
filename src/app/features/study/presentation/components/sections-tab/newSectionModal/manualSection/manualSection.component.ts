@@ -38,6 +38,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
+import { LocationComponent } from './location/location.component';
 
 // debounce to make it more fluid when dragging the slider
 /** Debounce delay in ms for refreshing studio plot when dragging the slider. */
@@ -117,7 +118,8 @@ const orderedLineTableProperties: LineTableProperties[] = [
     MessageModule,
     ButtonComponent,
     PaginatorModule,
-    NgxSliderModule
+    NgxSliderModule,
+    LocationComponent
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss',
