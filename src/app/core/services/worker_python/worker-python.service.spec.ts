@@ -314,6 +314,79 @@ describe('WorkerService', () => {
     });
   });
 
+  describe('runTaskWithTimeout', () => {
+    it('should resolve successfully when task completes before timeout', async () => {
+      service.setup();
+
+      const mockSection = createMockSection();
+      const mockCable = createMockCable();
+
+      const promise = service.runTaskWithTimeout(Task.getLit, {
+        section: mockSection,
+        cable: mockCable
+      });
+
+      // Get the message ID from the postMessage call
+      expect(postMessageSpy).toHaveBeenCalledOnce();
+      const messageId = (postMessageSpy.mock.calls[0][0] as { id: string }).id;
+
+      // Simulate worker response before timeout
+      mockWorker.onmessage!({ data: { id: messageId, result: { lit: [] } } });
+
+      const response = await promise;
+      expect(response.result).toEqual({ lit: [] });
+      expect(response.error).toBeNull();
+    });
+
+    it('should reject with timeout error when task exceeds timeout', async () => {
+      service.setup();
+      vi.useFakeTimers();
+
+      const mockSection = createMockSection();
+      const mockCable = createMockCable();
+
+      try {
+        const promise = service.runTaskWithTimeout(
+          Task.getLit,
+          {
+            section: mockSection,
+            cable: mockCable
+          },
+          1000
+        );
+
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await expect(promise).rejects.toThrow('Task getLit timed out after 1000ms');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('should use default timeout of 30000ms when not specified', async () => {
+      service.setup();
+
+      const mockSection = createMockSection();
+      const mockCable = createMockCable();
+
+      const promise = service.runTaskWithTimeout(Task.getLit, {
+        section: mockSection,
+        cable: mockCable
+      });
+
+      // Get the message ID from the postMessage call
+      expect(postMessageSpy).toHaveBeenCalledOnce();
+      const messageId = (postMessageSpy.mock.calls[0][0] as { id: string }).id;
+
+      // Simulate worker response (well before 30s timeout)
+      mockWorker.onmessage!({ data: { id: messageId, result: { lit: [] } } });
+
+      const response = await promise;
+      expect(response.result).toEqual({ lit: [] });
+      expect(response.error).toBeNull();
+    });
+  });
+
   describe('ready$', () => {
     it('should emit current ready state', async () => {
       const readyState = await firstValueFrom(service.ready$);

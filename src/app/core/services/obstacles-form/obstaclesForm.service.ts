@@ -13,8 +13,9 @@ import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domai
 import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { map, Observable, startWith } from 'rxjs';
 import { ObstacleOutput } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -29,6 +30,7 @@ export class ObstacleFormService {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
+  private readonly logger = inject(LoggerService);
 
   private readonly defaultPosition = { x: null, y: null, z: null } as const satisfies Position3D;
 
@@ -104,6 +106,12 @@ export class ObstacleFormService {
 
   readonly supportsOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
 
+  /** Signal indicating if obstacle calculation is in progress */
+  readonly isCalculatingObstacle = signal(false);
+
+  /** Signal containing calculation error message, if any */
+  readonly calculationError = signal<string | null>(null);
+
   /**
    * Distance results for the currently selected obstacle and point, derived reactively
    * from the plotService distances. Updates automatically when distances are recalculated
@@ -132,10 +140,13 @@ export class ObstacleFormService {
     initialValue: this.form.getRawValue()
   });
 
-  readonly isFormValid = computed(() => {
-    this.formValue(); // to recalculate
-    return this.form.valid;
-  });
+  readonly isFormValid = toSignal(
+    this.form.statusChanges.pipe(
+      startWith(this.form.status),
+      map(() => this.form.valid)
+    ),
+    { initialValue: this.form.valid }
+  );
 
   readonly canCalculateAndSave = computed(() => {
     const positions = this.positionsSnapshot();
@@ -302,9 +313,18 @@ export class ObstacleFormService {
     if (this.form.invalid || !this.form.value?.supportUuid) {
       return;
     }
+
+    // Prevent concurrent execution
+    if (this.isCalculatingObstacle()) {
+      this.logger.warn('calculateAndSave already in progress, ignoring concurrent call');
+      return;
+    }
+
     const obstacle = this.buildObstacleFromForm();
 
-    this.plotService.loading.set(true);
+    this.isCalculatingObstacle.set(true);
+    this.calculationError.set(null);
+
     try {
       // 1. Merge new/updated obstacle into the in-memory section
       this.upsertObstacleInSection(obstacle);
@@ -328,8 +348,16 @@ export class ObstacleFormService {
       // 6. Update UI selection
       const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
       this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.calculationError.set($localize`Calculation failed: ${errorMessage}`);
+      this.messageService.add({
+        severity: 'error',
+        summary: $localize`Error`,
+        detail: $localize`Failed to calculate obstacle distances`
+      });
     } finally {
-      this.plotService.loading.set(false);
+      this.isCalculatingObstacle.set(false);
     }
   }
 

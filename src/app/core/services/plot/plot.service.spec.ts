@@ -40,6 +40,7 @@ interface MockWorkerPythonService {
   ready: boolean;
   ready$: ReturnType<BehaviorSubject<boolean>['asObservable']>;
   runTask: vi.Mock;
+  runTaskWithTimeout: vi.Mock;
   setReady?: (value: boolean) => void;
 }
 
@@ -235,6 +236,7 @@ describe('PlotService', () => {
         return readySubject.asObservable();
       },
       runTask: vi.fn(),
+      runTaskWithTimeout: vi.fn(),
       setReady: (value: boolean) => {
         readyValue = value;
         readySubject.next(value);
@@ -580,6 +582,15 @@ describe('PlotService', () => {
           }
           return Promise.resolve({ result: null, error: null });
         });
+        mockWorkerPythonService.runTaskWithTimeout.mockImplementation((task: unknown) => {
+          if (task === Task.addObstacle) {
+            return Promise.resolve({ result: mockObstacleOutput, error: null });
+          }
+          if (task === Task.calculateObstaclesDistances) {
+            return Promise.resolve({ result: [mockDistance], error: null });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
       });
 
       it('should call Task.addObstacle once with all section obstacles', async () => {
@@ -587,7 +598,7 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(
           Task.addObstacle,
           expect.objectContaining({ obstacles: [mockObstacle] })
         );
@@ -602,7 +613,7 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(
           Task.addObstacle,
           expect.objectContaining({ obstacles: [mockObstacle, secondObstacle] })
         );
@@ -613,7 +624,7 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(
           Task.calculateObstaclesDistances,
           expect.objectContaining({ startSupport: expect.any(Number), endSupport: expect.any(Number) })
         );
@@ -646,7 +657,10 @@ describe('PlotService', () => {
 
         await service.refreshSection(sectionWithObstacles);
 
-        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
+        expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalledWith(
+          Task.addObstacle,
+          expect.anything()
+        );
       });
 
       it('should clear distances and distanceType when getLit returns an error', async () => {
@@ -669,7 +683,10 @@ describe('PlotService', () => {
       it('should not call Task.addObstacle when section has no obstacles', async () => {
         await service.refreshSection(mockSection);
 
-        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
+        expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalledWith(
+          Task.addObstacle,
+          expect.anything()
+        );
         expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(
           Task.calculateObstaclesDistances,
           expect.anything()
@@ -1343,7 +1360,7 @@ describe('PlotService', () => {
 
       await service.refreshProjection();
 
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
+      expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalledWith(Task.addObstacle, expect.anything());
     });
   });
 });

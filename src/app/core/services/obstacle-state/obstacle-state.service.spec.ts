@@ -52,11 +52,11 @@ const mockDistance: Distance = {
 
 describe('ObstacleStateService', () => {
   let service: ObstacleStateService;
-  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
+  let mockWorkerPythonService: { runTaskWithTimeout: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockWorkerPythonService = {
-      runTask: vi.fn().mockResolvedValue({ result: mockObstacleOutput, error: null })
+      runTaskWithTimeout: vi.fn().mockResolvedValue({ result: mockObstacleOutput, error: null })
     };
 
     TestBed.configureTestingModule({
@@ -88,7 +88,7 @@ describe('ObstacleStateService', () => {
     it('should dispatch Task.addObstacle with obstacles and plotOptions', async () => {
       await service.addObstacle([mockObstacle], mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, {
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.addObstacle, {
         obstacles: [mockObstacle],
         startSupport: 0,
         endSupport: 1,
@@ -100,7 +100,7 @@ describe('ObstacleStateService', () => {
       const secondObstacle = { ...mockObstacle, uuid: 'obs-2' };
       await service.addObstacle([mockObstacle, secondObstacle], mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.addObstacle, {
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.addObstacle, {
         obstacles: [mockObstacle, secondObstacle],
         startSupport: 0,
         endSupport: 1,
@@ -115,7 +115,7 @@ describe('ObstacleStateService', () => {
     });
 
     it('should return null when task returns null result', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null });
+      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: null, error: null });
 
       const result = await service.addObstacle([mockObstacle], mockPlotOptions);
 
@@ -127,7 +127,7 @@ describe('ObstacleStateService', () => {
     it('should dispatch Task.deleteObstacle with UUID and plotOptions', async () => {
       await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.deleteObstacle, {
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.deleteObstacle, {
         uuid: 'obs-uuid-1',
         startSupport: 0,
         endSupport: 1,
@@ -142,7 +142,7 @@ describe('ObstacleStateService', () => {
     });
 
     it('should return null when task returns null result', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null });
+      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: null, error: null });
 
       const result = await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
 
@@ -154,7 +154,7 @@ describe('ObstacleStateService', () => {
     it('should dispatch Task.clearObstacles with no inputs', async () => {
       await service.clearAllObstacles();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.clearObstacles, undefined);
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.clearObstacles, undefined);
     });
 
     it('should reset distances signal', async () => {
@@ -174,7 +174,7 @@ describe('ObstacleStateService', () => {
 
   describe('calculateDistances', () => {
     it('should dispatch Task.calculateObstaclesDistances with plot options', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: [mockDistance], error: null });
+      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: [mockDistance], error: null });
       const plotOptions = {
         startSupport: 0,
         endSupport: 2,
@@ -185,7 +185,7 @@ describe('ObstacleStateService', () => {
 
       await service.calculateDistances([mockObstacle], plotOptions);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.calculateObstaclesDistances, {
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.calculateObstaclesDistances, {
         obstacles: [mockObstacle],
         startSupport: 0,
         endSupport: 2,
@@ -194,7 +194,7 @@ describe('ObstacleStateService', () => {
     });
 
     it('should update the distances signal with the result', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: [mockDistance], error: null });
+      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: [mockDistance], error: null });
       const plotOptions = {
         startSupport: 0,
         endSupport: 1,
@@ -210,7 +210,7 @@ describe('ObstacleStateService', () => {
 
     it('should set distances to empty array when result is null', async () => {
       service.distances.set([mockDistance]);
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null });
+      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: null, error: null });
       const plotOptions = {
         startSupport: 0,
         endSupport: 1,
