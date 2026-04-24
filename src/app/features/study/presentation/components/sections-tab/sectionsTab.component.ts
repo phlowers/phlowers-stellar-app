@@ -223,9 +223,10 @@ export class SectionsTabComponent {
     initialCondition,
     section
   }: {
-    initialCondition: InitialCondition;
+    initialCondition: InitialCondition | undefined;
     section: Section;
   }) => {
+    if (!initialCondition) return;
     this.setInitialCondition.emit({
       section: section,
       initialCondition: initialCondition
@@ -245,7 +246,7 @@ export class SectionsTabComponent {
     );
   }
 
-  selectChargeCase(charge: { label: string; value: string }, section: Section) {
+  selectChargeCase(charge: { label: string; value: string } | undefined, section: Section) {
     this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 

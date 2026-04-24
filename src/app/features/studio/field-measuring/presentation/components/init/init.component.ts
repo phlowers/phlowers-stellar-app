@@ -13,19 +13,19 @@ import {
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { InputText } from 'primeng/inputtext';
-import { Select } from 'primeng/select';
+import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { createInitialMeasureData } from '../../helpers';
+import { createInitialMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { MessageModule } from 'primeng/message';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-field-measuring-init',
-  imports: [IconComponent, InputText, Select, ReactiveFormsModule, ButtonComponent, MessageModule],
+  imports: [IconComponent, InputText, SelectWithButtonsComponent, ReactiveFormsModule, ButtonComponent, MessageModule],
   templateUrl: './init.component.html',
   styleUrl: './init.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -48,13 +48,13 @@ export class InitComponent implements OnDestroy, OnInit {
         const section = this.spanService.section();
         const measures = section?.field_measures;
         const newMeasureName = $localize`TM ` + ((measures?.length || 0) + 1);
-        this.newMeasureNameControl.setValue(newMeasureName);
         this.measures.set(
           measures?.map((measure) => ({
             label: measure.name || '',
             value: measure.uuid || ''
           })) || []
         );
+        this.newMeasureNameControl.setValue(newMeasureName);
       }
     });
   }
@@ -73,6 +73,30 @@ export class InitComponent implements OnDestroy, OnInit {
   newMeasureNameControl = new FormControl('', Validators.required);
   isNameAlreadyTaken = signal(false);
   chooseMeasureControl = new FormControl<string | null>(null, Validators.required);
+  readonly chooseMeasureValue = toSignal(this.chooseMeasureControl.valueChanges, {
+    initialValue: this.chooseMeasureControl.value
+  });
+
+  onMeasureSelected(measure: { label: string; value: string } | null | undefined): void {
+    this.chooseMeasureControl.setValue(measure?.value ?? null);
+  }
+
+  async deleteMeasure(measure: { label: string; value: string }): Promise<void> {
+    const section = this.spanService.section();
+    if (!section) return;
+
+    const updatedMeasures = (section.field_measures ?? []).filter((m) => m.uuid !== measure.value);
+    const isDeletedMeasureSelected = section.selected_field_measure_uuid === measure.value;
+
+    if (this.chooseMeasureControl.value === measure.value) {
+      this.chooseMeasureControl.setValue(null);
+    }
+
+    await this.plotService.modifySection({
+      field_measures: updatedMeasures,
+      selected_field_measure_uuid: isDeletedMeasureSelected ? undefined : section.selected_field_measure_uuid
+    });
+  }
 
   async createMeasure(): Promise<void> {
     const section = this.spanService.section();

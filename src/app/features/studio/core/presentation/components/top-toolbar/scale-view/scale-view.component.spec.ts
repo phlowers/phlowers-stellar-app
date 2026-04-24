@@ -332,11 +332,6 @@ describe('ScaleViewComponent', () => {
         expect(el.getAttribute('aria-expanded')).toBe('true');
       });
 
-      it('inner button should have the view-button class', () => {
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
-        expect(btn.classList).toContain('view-button');
-      });
-
       it('inner button should gain view-button--active class when popover is open', () => {
         component.popoverOpen.set(true);
         fixture.detectChanges();
@@ -369,8 +364,10 @@ describe('ScaleViewComponent', () => {
         fixture.detectChanges();
         // Click the real trigger button so event.target is a DOM element (not null),
         // preventing absolutePosition from throwing in JSDOM.
-        const btn = fixture.nativeElement.querySelector<HTMLButtonElement>('[data-testid="scale-view-trigger"] button');
-        btn?.click();
+        const innerViewBtn = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+          '[data-testid="scale-view-trigger"] button'
+        );
+        innerViewBtn?.click();
         fixture.detectChanges();
       });
 
@@ -436,9 +433,9 @@ describe('ScaleViewComponent', () => {
 
       it('clicking the validate inner button should call onValidate', () => {
         const spy = vi.spyOn(component, 'onValidate').mockResolvedValue(undefined);
-        const innerBtn = document.body.querySelector<HTMLButtonElement>('[data-testid="scale-validate-btn"] button');
+        const btn = document.body.querySelector<HTMLButtonElement>('[data-testid="scale-validate-btn"]');
 
-        innerBtn?.click();
+        btn?.click();
 
         expect(spy).toHaveBeenCalled();
       });

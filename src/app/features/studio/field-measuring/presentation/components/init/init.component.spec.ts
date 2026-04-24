@@ -17,6 +17,33 @@ describe('Init component', () => {
   let mockPlotOptionsService: { plotOptions: ReturnType<typeof signal> };
   let toolbarDialogService: ToolbarDialogService;
 
+  let originalMatchMedia: typeof globalThis.matchMedia;
+
+  beforeAll(() => {
+    originalMatchMedia = globalThis.matchMedia;
+    // PrimeNG overlay rendering needs matchMedia
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      }))
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: originalMatchMedia
+    });
+  });
+
   beforeEach(async () => {
     mockPlotService = {
       modifySection: vi.fn().mockResolvedValue(undefined)
@@ -139,6 +166,114 @@ describe('Init component', () => {
       const el = getByTestId('choose-measure-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+  });
+
+  describe('onMeasureSelected', () => {
+    it('should update chooseMeasureControl with the selected measure value', () => {
+      component.onMeasureSelected({ label: 'Measure 1', value: 'uuid-1' });
+      expect(component.chooseMeasureControl.value).toBe('uuid-1');
+    });
+
+    it('should reset chooseMeasureControl to null when called with undefined', () => {
+      component.chooseMeasureControl.setValue('uuid-1');
+      component.onMeasureSelected(undefined);
+      expect(component.chooseMeasureControl.value).toBeNull();
+    });
+  });
+
+  describe('deleteMeasure', () => {
+    const measure1 = {
+      uuid: 'uuid-1',
+      name: 'Measure 1'
+    };
+    const measure2 = {
+      uuid: 'uuid-2',
+      name: 'Measure 2'
+    };
+
+    beforeEach(() => {
+      mockSpanService.section = signal<Section | null>({
+        uuid: 'test-section-uuid',
+        field_measures: [measure1, measure2],
+        selected_field_measure_uuid: undefined
+      } as unknown as Section);
+    });
+
+    it('should call modifySection preserving selected_field_measure_uuid when deleting a non-selected measure', async () => {
+      mockSpanService.section = signal<Section | null>({
+        uuid: 'test-section-uuid',
+        field_measures: [measure1, measure2],
+        selected_field_measure_uuid: 'uuid-2'
+      } as unknown as Section);
+
+      await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
+
+      expect(mockPlotService.modifySection).toHaveBeenCalledWith({
+        field_measures: [measure2],
+        selected_field_measure_uuid: 'uuid-2'
+      });
+    });
+
+    it('should not reset chooseMeasureControl when deleting a non-selected measure', async () => {
+      component.chooseMeasureControl.setValue('uuid-2');
+
+      await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
+
+      expect(component.chooseMeasureControl.value).toBe('uuid-2');
+    });
+
+    it('should reset chooseMeasureControl when the selected measure is deleted', async () => {
+      component.chooseMeasureControl.setValue('uuid-1');
+
+      await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
+
+      expect(component.chooseMeasureControl.value).toBeNull();
+    });
+
+    it('should call modifySection with undefined selected_field_measure_uuid when the section-selected measure is deleted', async () => {
+      mockSpanService.section = signal<Section | null>({
+        uuid: 'test-section-uuid',
+        field_measures: [measure1, measure2],
+        selected_field_measure_uuid: 'uuid-1'
+      } as unknown as Section);
+
+      await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
+
+      expect(mockPlotService.modifySection).toHaveBeenCalledWith({
+        field_measures: [measure2],
+        selected_field_measure_uuid: undefined
+      });
+    });
+
+    it('should not call modifySection when section is null', async () => {
+      mockSpanService.section = signal<Section | null>(null);
+
+      await component.deleteMeasure({ label: 'Measure 1', value: 'uuid-1' });
+
+      expect(mockPlotService.modifySection).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isNameAlreadyTaken uniqueness check after deletion', () => {
+    it('should be false when measures is updated before the name control value changes', () => {
+      // Reproduces the bug: deleting TM 2 from [TM 1, TM 2] causes the default name
+      // to recalculate to "TM 2". The measures list must already be [TM 1] when
+      // valueChanges fires, otherwise "TM 2" is found in the stale list.
+      component.measures.set([{ label: 'TM 1', value: 'tm-uuid-1' }]);
+      component.newMeasureNameControl.setValue('TM 2');
+
+      expect(component.isNameAlreadyTaken()).toBe(false);
+    });
+
+    it('should be true when the name matches an existing measure', () => {
+      component.measures.set([
+        { label: 'TM 1', value: 'tm-uuid-1' },
+        { label: 'TM 2', value: 'tm-uuid-2' }
+      ]);
+      component.newMeasureNameControl.setValue('TM 1');
+
+      expect(component.isNameAlreadyTaken()).toBe(true);
     });
   });
 });

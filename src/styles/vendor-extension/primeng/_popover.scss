@@ -12,7 +12,7 @@
 
   // button is widely different in popovers.
   // Font-size and icon size correspond to small button, the rest is different from standard button style.
-  .app-btn {
+  .app-btn.app-btn-text {
     display: flex;
     width: 100%;
     color: var(--grey-800);
@@ -27,5 +27,11 @@
     &.erase-btn {
       color: var(--main-error);
     }
+  }
+
+  // specif for scale studio's scale view
+  &.scale-view-popover {
+    margin-top: 8px;
+    min-width: 37.5rem;
   }
 }
