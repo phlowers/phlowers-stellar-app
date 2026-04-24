@@ -26,10 +26,10 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   baseState: false
 };
 
+/** Service managing plot display options, camera state, and axes norms for the studio section view. */
 @Injectable({
   providedIn: 'root'
 })
-/** Service managing plot display options, camera state, and axes norms for the studio section view. */
 export class PlotOptionsService {
   readonly plotOptions = signal<PlotOptions>({ ...defaultPlotOptions });
   readonly selectedDisplayOptions = signal<SelectedDisplayOptions>({ ...defaultSelectedDisplayOptions });

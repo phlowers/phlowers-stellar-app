@@ -129,17 +129,26 @@ describe('ObstaclesFormComponent', () => {
   });
 
   describe('isCalculating computed', () => {
-    it('should reflect plotService.loading() as false by default', () => {
+    it('should be false when obstacle and plot calculations are both idle', () => {
       expect(component.isCalculating()).toBe(false);
     });
 
-    it('should be true when plotService.loading() is true', () => {
+    it('should be true when obstacle calculation is running', () => {
+      mockObstacleFormService.isCalculatingObstacle.set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should be true when plot loading is active', () => {
       (mockPlotService.loading as ReturnType<typeof signal>).set(true);
       expect(component.isCalculating()).toBe(true);
     });
 
-    it('should go back to false when plotService.loading() returns to false', () => {
+    it('should go back to false only after both sources return to idle', () => {
+      mockObstacleFormService.isCalculatingObstacle.set(true);
       (mockPlotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+
+      mockObstacleFormService.isCalculatingObstacle.set(false);
       expect(component.isCalculating()).toBe(true);
 
       (mockPlotService.loading as ReturnType<typeof signal>).set(false);

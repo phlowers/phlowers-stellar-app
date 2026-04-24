@@ -242,25 +242,11 @@ export class PlotService {
     let currentObstacles: ObstacleOutput['obstacles'] = [];
 
     if (obstacles.length) {
-      const { result: obstacleResult } = await this.workerPythonService.runTask(Task.addObstacle, {
-        obstacles,
-        startSupport: plotOptions.startSupport,
-        endSupport: plotOptions.endSupport,
-        view: plotOptions.view
-      });
+      const obstacleResult = await this.obstacleStateService.addObstacle(obstacles, plotOptions);
       if (obstacleResult?.obstacles) {
         currentObstacles = obstacleResult.obstacles;
       }
-    }
-
-    if (obstacles.length) {
-      const { result: distances } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
-        obstacles,
-        startSupport: plotOptions.startSupport,
-        endSupport: plotOptions.endSupport,
-        view: plotOptions.view
-      });
-      this.obstacleStateService.setDistances(distances ?? []);
+      await this.obstacleStateService.calculateDistances(obstacles, plotOptions);
     }
 
     if (currentLitData && currentObstacles.length > 0) {

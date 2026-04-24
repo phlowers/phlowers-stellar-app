@@ -140,6 +140,7 @@ describe('ObstacleFormService', () => {
     distanceType: ReturnType<typeof signal<'oblique' | 'vertical' | 'horizontal' | null>>;
     addObstacle: ReturnType<typeof vi.fn>;
     deleteObstacle: ReturnType<typeof vi.fn>;
+    clearAllObstacles: ReturnType<typeof vi.fn>;
     calculateDistances: ReturnType<typeof vi.fn>;
     syncObstacles: ReturnType<typeof vi.fn>;
     reset: ReturnType<typeof vi.fn>;
@@ -180,6 +181,7 @@ describe('ObstacleFormService', () => {
       distanceType: signal<'oblique' | 'vertical' | 'horizontal' | null>(null),
       addObstacle: vi.fn().mockResolvedValue(null),
       deleteObstacle: vi.fn().mockResolvedValue(null),
+      clearAllObstacles: vi.fn().mockResolvedValue(null),
       calculateDistances: vi.fn().mockResolvedValue(undefined),
       syncObstacles: vi.fn().mockResolvedValue(null),
       reset: vi.fn()
@@ -532,8 +534,12 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       service.form.patchValue({ uuid: 'obs-1' });
       await service.deleteObstacle();
-      expect(section.obstacles.length).toBe(0);
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
+      const updatedSection = mockSpanService.section();
+      expect(updatedSection?.obstacles.length).toBe(0);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        mockStudy,
+        expect.objectContaining({ obstacles: [] })
+      );
       expect(mockObstacleStateService.deleteObstacle).toHaveBeenCalledWith(
         'obs-1',
         plotOptionsServiceMock.plotOptions()
@@ -563,6 +569,107 @@ describe('ObstacleFormService', () => {
       await service.deleteObstacle();
 
       expect((mockPlotService.litData() as { obstacles: unknown[] }).obstacles).toEqual([]);
+    });
+
+    it('should rollback section and avoid persistence when worker deletion fails', async () => {
+      const obstacles: Obstacle[] = [
+        {
+          uuid: 'obs-1',
+          supportUuid: 'sup-1',
+          name: 'Obstacle 1',
+          type: 'House',
+          altitudeType: 'absolute',
+          lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+          referenceSupport: ReferenceSupport.LEFT,
+          positions: []
+        }
+      ];
+      const section = { ...mockSection, obstacles: [...obstacles] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      service.form.patchValue({ uuid: 'obs-1' });
+      mockObstacleStateService.deleteObstacle.mockRejectedValue(new Error('worker failure'));
+
+      await service.deleteObstacle();
+
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+      expect(mockSpanService.section()?.obstacles).toEqual(obstacles);
+      expect(mockObstacleStateService.clearAllObstacles).toHaveBeenCalledTimes(1);
+      expect(mockObstacleStateService.syncObstacles).toHaveBeenCalledWith(
+        obstacles,
+        plotOptionsServiceMock.plotOptions()
+      );
+      expect(mockObstaclesService.setSelectedObstacle).not.toHaveBeenCalledWith(null, null);
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: expect.any(String),
+          detail: expect.any(String)
+        })
+      );
+    });
+
+    it('should rollback section and litData when re-registering remaining obstacles fails', async () => {
+      const obstacles: Obstacle[] = [
+        {
+          uuid: 'obs-1',
+          supportUuid: 'sup-1',
+          name: 'Obstacle 1',
+          type: 'House',
+          altitudeType: 'absolute',
+          lateralDistanceType: LateralDistanceType.SPAN_AXIS,
+          referenceSupport: ReferenceSupport.LEFT,
+          positions: []
+        }
+      ];
+      const section = { ...mockSection, obstacles: [...obstacles] } as Section;
+      const initialLitData = {
+        obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3] as [number, number, number]] }]
+      };
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      mockPlotService.litData.set(initialLitData);
+      service.form.patchValue({ uuid: 'obs-1' });
+      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('re-registration failure'));
+
+      await service.deleteObstacle();
+
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+      expect(mockSpanService.section()?.obstacles).toEqual(obstacles);
+      expect(mockPlotService.litData()).toEqual(initialLitData);
+      expect(mockObstacleStateService.clearAllObstacles).toHaveBeenCalledTimes(1);
+      expect(mockObstacleStateService.syncObstacles).toHaveBeenCalledWith(
+        obstacles,
+        plotOptionsServiceMock.plotOptions()
+      );
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: expect.any(String),
+          detail: expect.any(String)
+        })
+      );
+    });
+
+    it('should refresh litData from worker output when rollback resynchronization succeeds', async () => {
+      const obstacles: Obstacle[] = [{ ...baseObstacle }];
+      const section = { ...mockSection, obstacles: [...obstacles] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+      mockPlotService.litData.set({
+        obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3] as [number, number, number]] }]
+      });
+      service.form.patchValue({ uuid: 'obs-1' });
+      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('re-registration failure'));
+      mockObstacleStateService.syncObstacles.mockResolvedValue({
+        obstacles: [{ uuid: 'obs-1', points: [[10, 20, 30] as [number, number, number]] }]
+      });
+
+      await service.deleteObstacle();
+
+      expect((mockPlotService.litData() as { obstacles: [number, number, number][][] }).obstacles).toEqual([
+        { uuid: 'obs-1', points: [[10, 20, 30]] }
+      ]);
     });
   });
 
@@ -629,10 +736,14 @@ describe('ObstacleFormService', () => {
 
       await service.calculateAndSave();
 
-      expect(section.obstacles.length).toBe(1);
-      expect(section.obstacles[0].uuid).toBe('new-uuid');
-      expect(section.obstacles[0].positions).toHaveLength(1);
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
+      const updatedSection = mockSpanService.section();
+      expect(updatedSection?.obstacles.length).toBe(1);
+      expect(updatedSection?.obstacles[0].uuid).toBe('new-uuid');
+      expect(updatedSection?.obstacles[0].positions).toHaveLength(1);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        mockStudy,
+        expect.objectContaining({ obstacles: updatedSection?.obstacles })
+      );
       expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('new-uuid', 0);
       expect(mockMessageService.add).toHaveBeenCalled();
     });
@@ -655,11 +766,18 @@ describe('ObstacleFormService', () => {
 
       await service.calculateAndSave();
 
-      const updated = section.obstacles.find((o) => o.uuid === 'obs-1')!;
+      const updated = mockSpanService.section()?.obstacles.find((o) => o.uuid === 'obs-1');
+      expect(updated).toBeDefined();
+      if (!updated) {
+        return;
+      }
       expect(updated.name).toBe('Updated Name');
       expect(updated.type).toBe('Tree');
       expect(updated.positions.length).toBe(1);
-      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(mockStudy, section);
+      expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
+        mockStudy,
+        expect.objectContaining({ obstacles: expect.any(Array) })
+      );
       expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('obs-1', 0);
     });
 
@@ -800,7 +918,6 @@ describe('ObstacleFormService', () => {
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
       service.isCalculatingObstacle.set(false);
-
       let loadingDuringExecution = false;
       mockObstacleStateService.addObstacle.mockImplementation(async () => {
         loadingDuringExecution = service.isCalculatingObstacle();
@@ -1017,9 +1134,10 @@ describe('ObstacleFormService', () => {
 
       invokeUpsert(obstacle);
 
-      expect(section.obstacles).toBeDefined();
-      expect(section.obstacles.length).toBe(1);
-      expect(section.obstacles[0].uuid).toBe('obs-new');
+      const updatedSection = mockSpanService.section();
+      expect(updatedSection?.obstacles).toBeDefined();
+      expect(updatedSection?.obstacles.length).toBe(1);
+      expect(updatedSection?.obstacles[0].uuid).toBe('obs-new');
     });
 
     it('should replace existing obstacle at the correct index', () => {
@@ -1038,10 +1156,11 @@ describe('ObstacleFormService', () => {
 
       invokeUpsert(updated);
 
-      expect(section.obstacles.length).toBe(1);
-      expect(section.obstacles[0].name).toBe('Updated Name');
-      expect(section.obstacles[0].type).toBe('Tree');
-      expect(section.obstacles[0].positions).toHaveLength(1);
+      const updatedSection = mockSpanService.section();
+      expect(updatedSection?.obstacles.length).toBe(1);
+      expect(updatedSection?.obstacles[0].name).toBe('Updated Name');
+      expect(updatedSection?.obstacles[0].type).toBe('Tree');
+      expect(updatedSection?.obstacles[0].positions).toHaveLength(1);
     });
 
     it('should append obstacle when uuid does not match existing ones', () => {
@@ -1058,9 +1177,10 @@ describe('ObstacleFormService', () => {
 
       invokeUpsert(newObstacle);
 
-      expect(section.obstacles.length).toBe(2);
-      expect(section.obstacles[0].uuid).toBe('obs-1');
-      expect(section.obstacles[1].uuid).toBe('obs-2');
+      const updatedSection = mockSpanService.section();
+      expect(updatedSection?.obstacles.length).toBe(2);
+      expect(updatedSection?.obstacles[0].uuid).toBe('obs-1');
+      expect(updatedSection?.obstacles[1].uuid).toBe('obs-2');
     });
   });
 

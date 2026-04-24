@@ -259,7 +259,7 @@
               Cable length change
             </p-tab>
             <p-tab value="3" [disabled]="true" class="cable-support" i18n>Cable manip. at support</p-tab>
-            <p-tab value="4" [disabled]="!plotService.section()?.selected_charge_uuid" class="cable-span" i18n>
+            <p-tab value="4" [disabled]="!spanService.section()?.selected_charge_uuid" class="cable-span" i18n>
               Cable manip. at span
             </p-tab>
           </p-tablist>
