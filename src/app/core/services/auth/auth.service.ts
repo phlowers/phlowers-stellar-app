@@ -110,6 +110,41 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * Create a local user from an email address (fallback login form).
+   *
+   * Used when server-side OIDC is unavailable. Stores the user in IndexedDB
+   * and sets the `currentUser` signal so the app can proceed.
+   */
+  async loginWithEmail(email: string): Promise<User> {
+    const existing = await this.storageService.db.users.get(email);
+    const user: User = {
+      uuid: existing?.uuid,
+      email,
+      studies: existing?.studies
+    };
+    await this.storageService.db.users.put(user);
+    this.currentUser.set(user);
+    return user;
+  }
+
+  /**
+   * Attempt to restore the current user from the IndexedDB cache.
+   *
+   * Used as a safety net by the auth guard in case the APP_INITIALIZER
+   * signal was not yet visible when the guard evaluated.
+   *
+   * @returns `true` if a cached user was found and restored.
+   */
+  async tryRestoreFromCache(): Promise<boolean> {
+    const cachedUser = await this.loadCachedUser();
+    if (cachedUser) {
+      this.currentUser.set(cachedUser);
+      return true;
+    }
+    return false;
+  }
+
   private async loadCachedUser(): Promise<User | null> {
     const users = await this.storageService.db.users.toArray();
     return users.length > 0 ? users[0] : null;

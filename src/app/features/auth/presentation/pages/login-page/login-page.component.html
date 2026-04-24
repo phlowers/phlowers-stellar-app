@@ -1,0 +1,76 @@
+<main class="login-page">
+  <div class="login-page__card">
+    <img
+      class="login-page__logo"
+      src="in-app-logo/stellar-logo-expanded.svg"
+      alt="Stellar"
+      i18n-alt="@@login.logoAlt"
+    />
+
+    <h1 class="login-page__title" i18n="@@login.title" data-testid="login-title">Sign in</h1>
+
+    <p class="login-page__subtitle" i18n="@@login.subtitle" data-testid="login-subtitle">
+      Enter your email address to continue.
+    </p>
+
+    @if (submitError()) {
+      <p-message
+        severity="error"
+        [text]="submitError()!"
+        data-testid="login-error"
+        role="alert"
+        aria-live="assertive"
+      />
+    }
+
+    <form class="login-page__form" [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="login-form">
+      <div class="login-page__field">
+        <label class="login-page__label" for="login-email" i18n="@@login.emailLabel"> Email </label>
+        <input
+          id="login-email"
+          class="login-page__input"
+          type="email"
+          pInputText
+          formControlName="email"
+          autocomplete="email"
+          data-testid="email-input"
+          [attr.aria-invalid]="emailControl.touched && emailControl.invalid"
+          [attr.aria-describedby]="emailControl.touched && emailControl.invalid ? 'login-email-error' : null"
+        />
+        @if (emailControl.touched && emailControl.hasError('required')) {
+          <small
+            id="login-email-error"
+            class="login-page__error"
+            data-testid="email-error"
+            role="alert"
+            i18n="@@login.emailRequired"
+          >
+            Email is required.
+          </small>
+        }
+        @if (emailControl.touched && emailControl.hasError('email') && !emailControl.hasError('required')) {
+          <small
+            id="login-email-error"
+            class="login-page__error"
+            data-testid="email-error"
+            role="alert"
+            i18n="@@login.emailInvalid"
+          >
+            Please enter a valid email address.
+          </small>
+        }
+      </div>
+
+      <button
+        class="login-page__submit"
+        type="submit"
+        pButton
+        [disabled]="isSubmitting()"
+        data-testid="submit-btn"
+        i18n="@@login.submitBtn"
+      >
+        Sign in
+      </button>
+    </form>
+  </div>
+</main>

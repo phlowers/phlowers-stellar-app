@@ -209,4 +209,52 @@ describe('AuthService', () => {
       expect(usersTableMock.put).not.toHaveBeenCalled();
     });
   });
+
+  describe('loginWithEmail', () => {
+    it('should create a user with the given email and set currentUser', async () => {
+      usersTableMock.get.mockResolvedValue(undefined);
+
+      const user = await service.loginWithEmail('new@example.com');
+
+      expect(usersTableMock.put).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@example.com' }));
+      expect(service.currentUser()?.email).toBe('new@example.com');
+      expect(user.email).toBe('new@example.com');
+    });
+
+    it('should preserve existing user fields when email matches an existing user', async () => {
+      const existingUser: User = { email: 'existing@example.com', uuid: 'uuid-1', studies: [] };
+      usersTableMock.get.mockResolvedValue(existingUser);
+
+      const user = await service.loginWithEmail('existing@example.com');
+
+      expect(usersTableMock.put).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'existing@example.com',
+          uuid: 'uuid-1',
+          studies: []
+        })
+      );
+      expect(user.uuid).toBe('uuid-1');
+    });
+  });
+
+  describe('tryRestoreFromCache', () => {
+    it('should set currentUser and return true when a cached user exists', async () => {
+      usersTableMock.toArray.mockResolvedValue([testUser]);
+
+      const result = await service.tryRestoreFromCache();
+
+      expect(result).toBe(true);
+      expect(service.currentUser()?.email).toBe(testUser.email);
+    });
+
+    it('should return false when no cached user exists', async () => {
+      usersTableMock.toArray.mockResolvedValue([]);
+
+      const result = await service.tryRestoreFromCache();
+
+      expect(result).toBe(false);
+      expect(service.currentUser()).toBeNull();
+    });
+  });
 });

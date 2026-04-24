@@ -43,9 +43,12 @@ export class UpdateService {
   updateLoading = signal(false);
 
   /**
-   * Signal that emits true when an update is available.
+   * Signal that emits true when an update or install action is available.
    */
   readonly needUpdate = signal(false);
+
+  /** True when the pending action is a first-time install (no SW cache yet). */
+  readonly isFirstLaunch = signal(false);
 
   private readonly messageService = inject(MessageService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
@@ -217,8 +220,9 @@ export class UpdateService {
       }
 
       if (!cachePopulated) {
-        // First launch: nothing cached yet — install the app into the SW cache.
-        await this.install();
+        // First launch: nothing cached yet — signal the UI so the user can confirm.
+        this.isFirstLaunch.set(true);
+        this.needUpdate.set(true);
         return;
       }
 
@@ -242,6 +246,19 @@ export class UpdateService {
    */
   async update() {
     await this.postMessageToSW('update');
+  }
+
+  /**
+   * Confirm the pending action (install or update) after user validation.
+   *
+   * Must be called from a UI button — no automatic install/update is allowed.
+   */
+  async confirmUpdate(): Promise<void> {
+    if (this.isFirstLaunch()) {
+      await this.install();
+    } else {
+      await this.update();
+    }
   }
 
   /**

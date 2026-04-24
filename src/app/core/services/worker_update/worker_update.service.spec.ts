@@ -339,7 +339,7 @@ describe('UpdateService', () => {
       vi.spyOn(service, 'loadCurrentVersion').mockResolvedValue();
     });
 
-    it('should call install() when cache is empty (first launch)', async () => {
+    it('should set needUpdate and isFirstLaunch when cache is empty (first launch)', async () => {
       mockCache.match.mockResolvedValue(undefined); // no cached version
       mockFetch.mockResolvedValue({
         ok: true,
@@ -351,7 +351,9 @@ describe('UpdateService', () => {
 
       await service.checkForUpdateOnce();
 
-      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'install' });
+      expect(service.needUpdate()).toBe(true);
+      expect(service.isFirstLaunch()).toBe(true);
+      expect(mockPostMessage).not.toHaveBeenCalled();
     });
 
     it('should set needUpdate true when versions differ and cache is populated', async () => {
