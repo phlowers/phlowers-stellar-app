@@ -104,4 +104,29 @@ export class SelectWithButtonsComponent<T extends Record<string, unknown>> imple
     this.selectOption.emit(item);
     this.selectComponent()?.hide();
   }
+
+  onViewOption(event: Event, item: T): void {
+    this.stopEvent(event);
+    this.viewOption.emit(item);
+  }
+
+  onEditOption(event: Event, item: T): void {
+    this.stopEvent(event);
+    this.editOption.emit(item);
+  }
+
+  onDuplicateOption(event: Event, item: T): void {
+    this.stopEvent(event);
+    this.duplicateOption.emit(item);
+  }
+
+  onDeleteOption(event: Event, item: T): void {
+    this.stopEvent(event);
+    this.deleteOption.emit(item);
+  }
+
+  private stopEvent(event: Event): void {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
 }

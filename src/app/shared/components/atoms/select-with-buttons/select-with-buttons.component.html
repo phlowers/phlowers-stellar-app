@@ -27,7 +27,11 @@
         {{ item[optionLabel()] }}
       </button>
 
-      @if (showViewButton() || showEditButton() || showDuplicateButton() || showDeleteButton()) {
+      @let hasDuplicateOrDelete = showDuplicateButton() || showDeleteButton();
+      @let hasEditOrMore = showEditButton() || hasDuplicateOrDelete;
+      @let hasAnyActionButton = showViewButton() || hasEditOrMore;
+
+      @if (hasAnyActionButton) {
         <p-divider class="divider" layout="vertical" />
       }
 
@@ -40,13 +44,13 @@
           aria-label="view"
           i18n-aria-label
           data-testid="select-view-btn"
-          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); viewOption.emit(item)"
+          (click)="onViewOption($event, item)"
         >
           <app-icon icon="visibility" aria-hidden="true" />
         </button>
       }
 
-      @if (showViewButton() && (showEditButton() || showDuplicateButton() || showDeleteButton())) {
+      @if (showViewButton() && hasEditOrMore) {
         <p-divider layout="vertical" />
       }
 
@@ -59,13 +63,13 @@
           aria-label="edit"
           i18n-aria-label
           data-testid="select-edit-btn"
-          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); editOption.emit(item)"
+          (click)="onEditOption($event, item)"
         >
           <app-icon icon="edit" aria-hidden="true" />
         </button>
       }
 
-      @if (showEditButton() && (showDuplicateButton() || showDeleteButton())) {
+      @if (showEditButton() && hasDuplicateOrDelete) {
         <p-divider layout="vertical" />
       }
 
@@ -78,7 +82,7 @@
           aria-label="duplicate"
           i18n-aria-label
           data-testid="select-duplicate-btn"
-          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); duplicateOption.emit(item)"
+          (click)="onDuplicateOption($event, item)"
         >
           <app-icon icon="content_copy" aria-hidden="true" />
         </button>
@@ -98,7 +102,7 @@
           aria-label="delete"
           i18n-aria-label
           data-testid="select-delete-btn"
-          (click)="$event.stopPropagation(); $event.stopImmediatePropagation(); deleteOption.emit(item)"
+          (click)="onDeleteOption($event, item)"
         >
           <app-icon icon="delete" aria-hidden="true" />
         </button>
