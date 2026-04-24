@@ -42,9 +42,6 @@ export class PlotService {
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
 
-  /** Delegate to PlotSpanService.section for backward-compatible access. */
-  readonly section = inject(PlotSpanService).section;
-
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly spanService = inject(PlotSpanService);
