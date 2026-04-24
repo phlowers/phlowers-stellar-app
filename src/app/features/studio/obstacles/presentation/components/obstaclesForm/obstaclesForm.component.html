@@ -286,6 +286,15 @@
     <div class="obstacles-form__sticky__results" data-testid="results">
       <h2 class="obstacles-form__sticky__results__title" i18n>Results:</h2>
 
+      @if (obstacleFormService.calculationError()) {
+        <p-message
+          severity="error"
+          [text]="obstacleFormService.calculationError()!"
+          styleClass="obstacles-form__sticky__results__error"
+          data-testid="calculation-error"
+        />
+      }
+
       <dl class="obstacles-form__sticky__results__grid">
         <div class="obstacles-form__sticky__results__grid__item">
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Oblique</dt>

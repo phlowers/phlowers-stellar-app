@@ -49,7 +49,7 @@ export class ObstacleStateService {
    * @returns Rendered obstacle positions after the operation, or `null` on error.
    */
   async addObstacle(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTask(Task.addObstacle, {
+    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.addObstacle, {
       obstacles,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
@@ -65,7 +65,7 @@ export class ObstacleStateService {
    * @returns Rendered obstacle positions after the removal, or `null` on error.
    */
   async deleteObstacle(uuid: string, plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTask(Task.deleteObstacle, {
+    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.deleteObstacle, {
       uuid,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
@@ -80,7 +80,7 @@ export class ObstacleStateService {
    * @returns Rendered obstacle positions after the clear (empty list), or `null` on error.
    */
   async clearAllObstacles(): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTask(Task.clearObstacles, undefined);
+    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.clearObstacles, undefined);
     this.distances.set([]);
     return result ?? null;
   }
@@ -114,7 +114,7 @@ export class ObstacleStateService {
    * @param plotOptions - Current view options (startSupport, endSupport, view).
    */
   async calculateDistances(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
-    const { result } = await this.workerPythonService.runTask(Task.calculateObstaclesDistances, {
+    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.calculateObstaclesDistances, {
       obstacles,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
