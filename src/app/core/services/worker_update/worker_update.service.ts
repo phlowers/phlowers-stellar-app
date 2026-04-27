@@ -124,7 +124,7 @@ export class UpdateService {
   /**
    * Fetch the latest asset manifest from the server with no-cache semantics.
    * The result is cached for subsequent calls within the same startup cycle.
-   * Call {@link clearManifestCache} to force a fresh fetch.
+   * Call `clearManifestCache` to force a fresh fetch.
    */
   async getLatestAssetList(): Promise<AssetManifest | null> {
     if (!this.cachedManifestPromise) {
@@ -133,7 +133,7 @@ export class UpdateService {
     return this.cachedManifestPromise;
   }
 
-  /** Clear the cached manifest so the next call to {@link getLatestAssetList} re-fetches. */
+  /** Clear the cached manifest so the next call to `getLatestAssetList` re-fetches. */
   clearManifestCache(): void {
     this.cachedManifestPromise = null;
   }
@@ -203,7 +203,7 @@ export class UpdateService {
    * @remarks
    * Called once from `APP_INITIALIZER`. If the SW cache is empty (first launch),
    * sets `isFirstLaunch` and `needUpdate` so the UI can prompt the user to confirm
-   * installation via {@link confirmUpdate}. Otherwise compares build-time version
+   * installation via `confirmUpdate`. Otherwise compares build-time version
    * with the server version and sets `needUpdate` if they differ.
    */
   async checkForUpdateOnce(): Promise<void> {
