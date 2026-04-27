@@ -10,6 +10,9 @@ import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { NotificationService } from '@services/notification/notification.service';
+import { OnlineService } from '@services/online/online.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -24,6 +27,7 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { AppUpdateOrchestratorService } from '@services/worker_update/app-update-orchestrator.service';
 import { DividerModule } from 'primeng/divider';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 const modules = [
@@ -56,7 +60,8 @@ export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
   readonly isUpdateDialogOpen = signal(false);
 
-  private readonly messageService = inject(MessageService);
+  readonly submitted = signal(false);
+  private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
   readonly updateService = inject(UpdateService);
@@ -67,6 +72,7 @@ export class AppComponent implements OnInit {
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstacleTypesService = inject(ObstaclesService);
+  private readonly logger = inject(LoggerService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
   private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
 
@@ -144,7 +150,7 @@ export class AppComponent implements OnInit {
     try {
       return await this.updateService.getLatestAssetList();
     } catch (error) {
-      console.warn('Unable to fetch latest asset manifest, using full catalog import fallback', error);
+      this.logger.warn('Unable to fetch latest asset manifest, using full catalog import fallback', error);
       return null;
     }
   }
@@ -153,6 +159,40 @@ export class AppComponent implements OnInit {
     for (const importFn of Object.values(this.csvImporters)) {
       await importFn();
     }
+  }
+
+  async saveUser() {
+    this.submitted.set(true);
+    if (this.form.valid) {
+      try {
+        await this.userService.createUser({ email: this.form.value.email! });
+      } catch (err) {
+        this.logger.error('Error creating user', err);
+        this.notificationService.error($localize`Error creating user`);
+        return;
+      }
+      this.notificationService.success($localize`User info set`);
+      this.userDialog.set(false);
+    }
+  }
+
+  async setupWorker() {
+    try {
+      this.workerService.setup();
+      await this.storageService.setPersistentStorage();
+      await this.storageService.createDatabase();
+    } catch (err) {
+      this.logger.error('Error creating database', err);
+    }
+  }
+
+  ngOnInit() {
+    this.setupWorker();
+  }
+
+  isInvalid(controlName: string) {
+    const control = this.form.get(controlName);
+    return control?.invalid && control.touched;
   }
 
   onUpdateClick() {

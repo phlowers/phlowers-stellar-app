@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@shared/model/icon.model';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 @Component({
   selector: 'app-icon',
@@ -9,7 +11,7 @@ import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@shared
     role: 'img',
     class: 'app-icon',
     '[class.filled]': 'fill()',
-    '[attr.aria-label]': 'icon()',
+    '[attr.aria-label]': 'ariaLabel() ? ariaLabel() : icon()',
     '[class.symbols-loading]': '!symbolsReady()'
   },
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,8 +22,12 @@ export class IconComponent implements OnInit {
   icon = input.required<PossibleIconNames | undefined>();
   /** Whether to render the icon in its filled variant. */
   fill = input<boolean>(false);
+  /** Optional aria label for the icon. */
+  ariaLabel = input<string | null>(null);
 
   symbolsReady = signal(false);
+  private readonly document = inject(DOCUMENT);
+  private readonly logger = inject(LoggerService);
 
   isCustomSvgIcon = computed(() => {
     return CUSTOM_SVG_ICONS.includes(this.icon() as CustomSvgIconNames);
@@ -36,16 +42,16 @@ export class IconComponent implements OnInit {
   }
 
   private async isSymbolsReady() {
-    if (document.fonts.check('1em "Material Symbols Rounded"')) {
+    if (this.document.fonts.check('1em "Material Symbols Rounded"')) {
       this.symbolsReady.set(true);
       return;
     }
 
     try {
-      await document.fonts.load('1em "Material Symbols Rounded"');
+      await this.document.fonts.load('1em "Material Symbols Rounded"');
       this.symbolsReady.set(true);
     } catch (error) {
-      console.warn('Material Symbols Rounded font failed to load:', error);
+      this.logger.warn('Material Symbols Rounded font failed to load:', error);
     }
   }
 }

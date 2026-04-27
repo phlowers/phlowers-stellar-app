@@ -21,6 +21,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputTextModule } from 'primeng/inputtext';
@@ -31,11 +32,12 @@ import { VtlAndGuying } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Option for selecting a reference support direction. */
 interface SupportOption {
-  /** Numeric label for the support. */
-  label: number;
+  /** Support number label. */
+  label: string;
   /** Left or right side of the span. */
   value: 'LEFT' | 'RIGHT';
 }
@@ -71,8 +73,10 @@ export class VhlAndGuyingComponent {
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
   public readonly plotService = inject(PlotService);
+  readonly spanService = inject(PlotSpanService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly fb = inject(FormBuilder);
+  private readonly logger = inject(LoggerService);
 
   form: FormGroup<{
     selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
@@ -101,6 +105,7 @@ export class VhlAndGuyingComponent {
   } | null>(null);
 
   readonly loading = computed(() => this.plotService.loading() || !this.plotService.litData());
+  readonly isCalculating = signal(false);
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -132,7 +137,7 @@ export class VhlAndGuyingComponent {
         this.form.controls.selectedSupport.enable({ emitEvent: false });
       }
 
-      this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan?.uuid ?? null));
+      this.supportOptions.set(this.spanService.getSupportOptions(selectedSpan?.uuid ?? null));
       this.supportType.set(null);
       this.vtlWithoutGuying.set(null);
       this.results.set(null);
@@ -173,7 +178,7 @@ export class VhlAndGuyingComponent {
 
   private updateSupportOptions(): void {
     const selectedSpan = this.form.controls.selectedSpan.value;
-    this.supportOptions.set(this.plotService.getSupportOptions(selectedSpan?.uuid ?? null));
+    this.supportOptions.set(this.spanService.getSupportOptions(selectedSpan?.uuid ?? null));
   }
 
   private updateSupportType(): void {
@@ -186,7 +191,7 @@ export class VhlAndGuyingComponent {
       return;
     }
     const supportType =
-      this.plotService.section()?.supports[supportIndex].chainV === true ? $localize`Suspension` : $localize`Anchor`;
+      this.spanService.section()?.supports[supportIndex].chainV === true ? $localize`Suspension` : $localize`Anchor`;
     this.supportType.set(supportType as 'Suspension' | 'Anchor');
   }
 
@@ -210,7 +215,7 @@ export class VhlAndGuyingComponent {
   }
 
   setFormValuesFromSection(): void {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!section) {
       return;
     }
@@ -240,18 +245,23 @@ export class VhlAndGuyingComponent {
       return;
     }
     const formValue = this.form.value;
-    const { result, error } = await this.workerPythonService.runTask(Task.calculateGuying, {
-      altitude: formValue.altitude!,
-      horizontalDistance: formValue.horizontalDistance!,
-      hasPulley: formValue.hasPulley ?? false,
-      selectedSpanIndex: formValue.selectedSpan?.index || 0,
-      selectedSupport: formValue.selectedSupport || null
-    });
-    if (error) {
-      console.error(error);
-      return;
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.calculateGuying, {
+        altitude: formValue.altitude!,
+        horizontalDistance: formValue.horizontalDistance!,
+        hasPulley: formValue.hasPulley ?? false,
+        selectedSpanIndex: formValue.selectedSpan?.index || 0,
+        selectedSupport: formValue.selectedSupport || null
+      });
+      if (error) {
+        this.logger.error(error);
+        return;
+      }
+      this.results.set(result);
+    } finally {
+      this.isCalculating.set(false);
     }
-    this.results.set(result);
   };
 
   onExportVhl(): void {
@@ -265,7 +275,7 @@ export class VhlAndGuyingComponent {
   onSave(): void {
     const formValue = this.form.value;
     const study = this.plotService.study();
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!study || !section) {
       return;
     }

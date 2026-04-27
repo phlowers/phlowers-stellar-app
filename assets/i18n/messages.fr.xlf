@@ -4,7 +4,7 @@
     <unit id="4768749765465246664">
       <segment>
         <source>Email</source>
-        <target>Email</target>
+        <target>Courriel</target>
       </segment>
     </unit>
     <unit id="7884682505577720946">
@@ -793,12 +793,6 @@
         <target>sélectionner ce canton d&apos;étude</target>
       </segment>
     </unit>
-    <unit id="3411835502741534903">
-      <segment state="initial">
-        <source>loading</source>
-        <target>chargement</target>
-      </segment>
-    </unit>
     <unit id="1724907302012419507">
       <segment state="initial">
         <source>There is no study description</source>
@@ -1090,7 +1084,7 @@
     <unit id="7866511975225263216">
       <segment state="initial">
         <source>Go back to study</source>
-        <target>Go back to study</target>
+        <target>Retourner à l’étude</target>
       </segment>
     </unit>
     <unit id="187187500641108332">
@@ -1106,7 +1100,7 @@
     <unit id="997715536640361323">
       <segment state="initial">
         <source>Expand details</source>
-        <target>Expand details</target>
+        <target>Développer les détails</target>
       </segment>
     </unit>
     <unit id="4740697952012289999">
@@ -1409,36 +1403,6 @@
         <target>Température de base</target>
       </segment>
     </unit>
-    <unit id="2205679024859102357">
-      <segment state="initial">
-        <source>Parameter (m)</source>
-        <target>Paramètre (m)</target>
-      </segment>
-    </unit>
-    <unit id="5909128736797701112">
-      <segment state="initial">
-        <source>Work load %</source>
-        <target>Charge %</target>
-      </segment>
-    </unit>
-    <unit id="3494570942698291859">
-      <segment state="initial">
-        <source>Oblique (m)</source>
-        <target>Oblique (m)</target>
-      </segment>
-    </unit>
-    <unit id="6560642783363072934">
-      <segment state="initial">
-        <source>Vertical (m)</source>
-        <target>Vertical (m)</target>
-      </segment>
-    </unit>
-    <unit id="2143129387317692084">
-      <segment state="initial">
-        <source>Horizontal (m)</source>
-        <target>Horizontal (m)</target>
-      </segment>
-    </unit>
     <unit id="3885497195825665706">
       <segment state="initial">
         <source>Next</source>
@@ -1694,13 +1658,7 @@
     <unit id="5884678477650117685">
       <segment state="initial">
         <source>Cable manip. at support</source>
-        <target>Câble manip. au support</target>
-      </segment>
-    </unit>
-    <unit id="1964106600703167330">
-      <segment state="initial">
-        <source>Cable manip. at span</source>
-        <target>Câble manip. à la portée</target>
+        <target>Manip. câble au support</target>
       </segment>
     </unit>
     <unit id="8033045192563886902">
@@ -2031,12 +1989,6 @@
       <segment state="initial">
         <source>Chain displacement acc.</source>
         <target>Déplacement chaîne acc.</target>
-      </segment>
-    </unit>
-    <unit id="8617343657467703647">
-      <segment state="initial">
-        <source>Cable slope acc.:</source>
-        <target>Pente du câble acc. :</target>
       </segment>
     </unit>
     <unit id="7700218431791238836">
@@ -2978,23 +2930,13 @@
     <unit id="5463714848868355880">
       <segment state="initial">
         <source>Tower</source>
-        <target>Tower</target>
+        <target>Pylône</target>
       </segment>
     </unit>
     <unit id="2050780142571489753">
       <segment state="initial">
         <source>Description/comment</source>
         <target>Description/commentaire</target>
-      </segment>
-    </unit>
-    <unit id="80889600222732792">
-      <segment state="initial">
-        <source>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">uncertainty parameter</pc>
-        </source>
-        <target>
-          <pc id="0" equivStart="START_TAG_DEL" equivEnd="CLOSE_TAG_DEL" type="other" dispStart="&lt;del&gt;" dispEnd="&lt;/del&gt;">Incertitude paramètre</pc>
-        </target>
       </segment>
     </unit>
     <unit id="2900727946848099689">
@@ -3103,18 +3045,6 @@
       <segment state="initial">
         <source>Choose an existing measure</source>
         <target>Choisir une mesure existante</target>
-      </segment>
-    </unit>
-    <unit id="8878227880393471056">
-      <segment state="initial">
-        <source>No measures found</source>
-        <target>Pas de mesure trouvée</target>
-      </segment>
-    </unit>
-    <unit id="4396866374643971390">
-      <segment state="initial">
-        <source>No measures</source>
-        <target>Pas de mesure</target>
       </segment>
     </unit>
     <unit id="399524330429754869">
@@ -3351,12 +3281,6 @@
         <target>Axe de la portée</target>
       </segment>
     </unit>
-    <unit id="4441055613955460887">
-      <segment state="initial">
-        <source>Line axis</source>
-        <target>Axe de la ligne</target>
-      </segment>
-    </unit>
     <unit id="381912160634740127">
       <segment state="initial">
         <source>Add point</source>
@@ -3403,24 +3327,6 @@
       <segment state="initial">
         <source>Select point</source>
         <target>Sélectionner le point</target>
-      </segment>
-    </unit>
-    <unit id="8394386160100993545">
-      <segment state="initial">
-        <source> Alt. point </source>
-        <target> Alt. point </target>
-      </segment>
-    </unit>
-    <unit id="4761670130264103669">
-      <segment state="initial">
-        <source> Ref. supp. dist. </source>
-        <target> Dist. supp. réf. </target>
-      </segment>
-    </unit>
-    <unit id="5519374178045650857">
-      <segment state="initial">
-        <source> Line axis dist. </source>
-        <target> Dist. axe ligne </target>
       </segment>
     </unit>
     <unit id="3876336363073925034">
@@ -3479,7 +3385,7 @@
     </unit>
     <unit id="scaleView.form.ariaLabel">
       <segment state="initial">
-        <source>Configuration de la vue</source>
+        <source>View configuration</source>
         <target>Configuration de la vue</target>
       </segment>
     </unit>
@@ -3564,7 +3470,19 @@
     <unit id="7000098318478933999">
       <segment state="initial">
         <source>Study actions menu</source>
-        <target>Menu des actions d'étude</target>
+        <target>Menu des actions d&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="6003852886679002771">
+      <segment state="initial">
+        <source>Cable slope left att.:</source>
+        <target>Pente du câble acc. gauche:</target>
+      </segment>
+    </unit>
+    <unit id="2889125383687756313">
+      <segment state="initial">
+        <source>Cable slope right att.:</source>
+        <target>Pente du câble acc. droit:</target>
       </segment>
     </unit>
     <unit id="1215291740212922013">
@@ -3577,6 +3495,426 @@
       <segment state="initial">
         <source>Next support</source>
         <target>Support suivant</target>
+      </segment>
+    </unit>
+    <unit id="7413830724399618712">
+      <segment state="initial">
+        <source>Relative to cable attachment</source>
+        <target>Relative accr. câble</target>
+      </segment>
+    </unit>
+    <unit id="6819720842118170063">
+      <segment state="initial">
+        <source>x:</source>
+        <target>x :</target>
+      </segment>
+    </unit>
+    <unit id="7299873402477300128">
+      <segment state="initial">
+        <source>z:</source>
+        <target>z :</target>
+      </segment>
+    </unit>
+    <unit id="971451359136104256">
+      <segment state="initial">
+        <source>y:</source>
+        <target>y :</target>
+      </segment>
+    </unit>
+    <unit id="6650741004975354715">
+      <segment state="initial">
+        <source>select an obstacle</source>
+        <target>sélectionner un obstacle</target>
+      </segment>
+    </unit>
+    <unit id="1390016399255311535">
+      <segment state="initial">
+        <source>select an obstacle&apos;s point</source>
+        <target>Sélectionner le point d&apos;un obstacle</target>
+      </segment>
+    </unit>
+    <unit id="586523524817836245">
+      <segment state="initial">
+        <source>Point <ph id="0" equiv="PH" disp="index + 1"/></source>
+        <target>Point <ph id="0" equiv="PH" disp="index + 1"/></target>
+      </segment>
+    </unit>
+    <unit id="8572591079205275141">
+      <segment state="initial">
+        <source>Cable modification</source>
+        <target>Modification du câble</target>
+      </segment>
+    </unit>
+    <unit id="4411211492569880517">
+      <segment state="initial">
+        <source>Cable length mod.</source>
+        <target>Modif. longueur câble</target>
+      </segment>
+    </unit>
+    <unit id="4131248965561242896">
+      <segment state="initial">
+        <source>Lengthening</source>
+        <target>Allongement</target>
+      </segment>
+    </unit>
+    <unit id="6494949896986424409">
+      <segment state="initial">
+        <source>Shortening</source>
+        <target>Raccourcissement</target>
+      </segment>
+    </unit>
+    <unit id="6421460271971606186">
+      <segment state="initial">
+        <source>Zoom</source>
+        <target>Zoom</target>
+      </segment>
+    </unit>
+    <unit id="7283456687925421567">
+      <segment state="initial">
+        <source> Cable length change </source>
+        <target> Modif. longueur câble </target>
+      </segment>
+    </unit>
+    <unit id="5507190015256557833">
+      <segment state="initial">
+        <source>delete cable length change</source>
+        <target>Supprimer la modification de longueur du câble</target>
+      </segment>
+    </unit>
+    <unit id="5405643706975513454">
+      <segment state="initial">
+        <source> Climate condition </source>
+        <target> Condition climatique </target>
+      </segment>
+    </unit>
+    <unit id="5574365677854298291">
+      <segment state="initial">
+        <source> Load / Marking </source>
+        <target> Charge / Marquage </target>
+      </segment>
+    </unit>
+    <unit id="361024812885364180">
+      <segment state="initial">
+        <source> Cable manip. at span </source>
+        <target> Manip. câble dans la portée </target>
+      </segment>
+    </unit>
+    <unit id="314315645942131479">
+      <segment state="initial">
+        <source>Info</source>
+        <target>Info</target>
+      </segment>
+    </unit>
+    <unit id="6759205696902713848">
+      <segment state="initial">
+        <source>Warning</source>
+        <target>Avertissement</target>
+      </segment>
+    </unit>
+    <unit id="8821344400638330739">
+      <segment state="initial">
+        <source>Study Duplication Failed</source>
+        <target>Échec de la duplication de l&apos;étude</target>
+      </segment>
+    </unit>
+    <unit id="studio.error.image.alt">
+      <segment state="initial">
+        <source>An error occurred</source>
+        <target>Une erreur s&apos;est produite</target>
+      </segment>
+    </unit>
+    <unit id="3016819249974962667">
+      <segment state="initial">
+        <source>Point alt.</source>
+        <target>Alt. point</target>
+      </segment>
+    </unit>
+    <unit id="4381478989546864547">
+      <segment state="initial">
+        <source>Ref. support dist.</source>
+        <target>Dist. supp. réf.</target>
+      </segment>
+    </unit>
+    <unit id="2702074512037019032">
+      <segment state="initial">
+        <source>Line axis dist.</source>
+        <target>Dist. axe ligne.</target>
+      </segment>
+    </unit>
+    <unit id="4303103723944581948">
+      <segment state="translated">
+        <source>A solver error occurred.</source>
+        <target>Une erreur de solveur s&apos;est produite.</target>
+      </segment>
+    </unit>
+    <unit id="272496911380424275">
+      <segment state="translated">
+        <source>The insulator chain is suspected to have reversed (above horizontal position).</source>
+        <target>La chaîne d&apos;isolateurs est suspectée d&apos;avoir basculé (position au-dessus de l&apos;horizontale).</target>
+      </segment>
+    </unit>
+    <unit id="3239031258153870723">
+      <segment state="translated">
+        <source>The solver failed to converge.</source>
+        <target>Le solveur n&apos;a pas convergé.</target>
+      </segment>
+    </unit>
+    <unit id="4796814092512031875">
+      <segment state="translated">
+        <source>A shape mismatch was detected in arrays.</source>
+        <target>Une incohérence de dimensions a été détectée dans les tableaux.</target>
+      </segment>
+    </unit>
+    <unit id="8369628526290763854">
+      <segment state="translated">
+        <source>A data-related warning was raised.</source>
+        <target>Un avertissement lié aux données a été émis.</target>
+      </segment>
+    </unit>
+    <unit id="8058206957724761513">
+      <segment state="translated">
+        <source>A balance engine warning was raised.</source>
+        <target>Un avertissement du moteur d&apos;équilibrage a été émis.</target>
+      </segment>
+    </unit>
+    <unit id="1162997080399948086">
+      <segment state="translated">
+        <source>RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.</source>
+        <target>Les données du catalogue RTS (rts_cable, rts_layer_*) sont absentes ou contiennent des valeurs NaN.</target>
+      </segment>
+    </unit>
+    <unit id="manipulatedSpan">
+      <segment state="initial">
+        <source>Manipulated span</source>
+        <target>Portée manipulée</target>
+      </segment>
+    </unit>
+    <unit id="referenceSupport">
+      <segment state="initial">
+        <source>Reference support</source>
+        <target>Support de référence</target>
+      </segment>
+    </unit>
+    <unit id="manipulatedPointCableDistRefSupport">
+      <segment state="initial">
+        <source> Manipulated point on the cable (Dist. to ref. support) </source>
+        <target> Point manipulé sur le câble (Dist. au supp. réf.) </target>
+      </segment>
+    </unit>
+    <unit id="cableManipType">
+      <segment state="initial">
+        <source>Cable manipulation type</source>
+        <target>Type de manip. du câble</target>
+      </segment>
+    </unit>
+    <unit id="cableManipMethod">
+      <segment state="initial">
+        <source> Cable manipulation method </source>
+        <target> Moyen de manip. du cable </target>
+      </segment>
+    </unit>
+    <unit id="manipFixedPointPosition">
+      <segment state="initial">
+        <source>Manipulation fixed point position</source>
+        <target>Position point fixe manipulation</target>
+      </segment>
+    </unit>
+    <unit id="longitudinalDistance">
+      <segment state="initial">
+        <source> Longitudinal dist. </source>
+        <target> Dist. longitudinale </target>
+      </segment>
+    </unit>
+    <unit id="lateralDistance">
+      <segment state="initial">
+        <source>Lateral dist.</source>
+        <target>Dist. latérale</target>
+      </segment>
+    </unit>
+    <unit id="altitude">
+      <segment state="initial">
+        <source>Altitude</source>
+        <target>Altitude</target>
+      </segment>
+    </unit>
+    <unit id="distCalcBetweenPoints">
+      <segment state="initial">
+        <source>Dist. calc. between points</source>
+        <target>Calcul distance entre points</target>
+      </segment>
+    </unit>
+    <unit id="distance">
+      <segment state="initial">
+        <source>Distance</source>
+        <target>Distance</target>
+      </segment>
+    </unit>
+    <unit id="anchoring">
+      <segment state="initial">
+        <source>Anchoring</source>
+        <target>Accrochage</target>
+      </segment>
+    </unit>
+    <unit id="chainName">
+      <segment state="initial">
+        <source>Chain name</source>
+        <target>Nom de la chaîne</target>
+      </segment>
+    </unit>
+    <unit id="chainLength">
+      <segment state="initial">
+        <source>Chain length</source>
+        <target>Longueur chaîne</target>
+      </segment>
+    </unit>
+    <unit id="chainWeight">
+      <segment state="initial">
+        <source>Chain weight</source>
+        <target>Poids chaîne</target>
+      </segment>
+    </unit>
+    <unit id="chainSurface">
+      <segment state="initial">
+        <source>Chain surface</source>
+        <target>Surface de chaîne</target>
+      </segment>
+    </unit>
+    <unit id="counterWeight">
+      <segment state="initial">
+        <source>Counter weight</source>
+        <target>Contrepoids</target>
+      </segment>
+    </unit>
+    <unit id="slingLength">
+      <segment state="initial">
+        <source>Sling length</source>
+        <target>Longueur de l&apos;élingue</target>
+      </segment>
+    </unit>
+    <unit id="5552885238769285726">
+      <segment state="initial">
+        <source>erase span&apos;s cable manipulation</source>
+        <target>supprimer la manipulation du câble dans la portée</target>
+      </segment>
+    </unit>
+    <unit id="7538726695771189991">
+      <segment state="initial">
+        <source>With a crane</source>
+        <target>À la grue</target>
+      </segment>
+    </unit>
+    <unit id="8935057406125868491">
+      <segment state="initial">
+        <source>Temporary support</source>
+        <target>Support provisoire</target>
+      </segment>
+    </unit>
+    <unit id="6667965603420020393">
+      <segment state="initial">
+        <source>Clamp</source>
+        <target>Pince</target>
+      </segment>
+    </unit>
+    <unit id="4021521782447475905">
+      <segment state="initial">
+        <source>Pulley</source>
+        <target>Poulie</target>
+      </segment>
+    </unit>
+    <unit id="4351133266457573059">
+      <segment state="initial">
+        <source>With sling</source>
+        <target>Avec élingue</target>
+      </segment>
+    </unit>
+    <unit id="4044156232805548048">
+      <segment state="initial">
+        <source>With chain</source>
+        <target>Avec chaîne</target>
+      </segment>
+    </unit>
+    <unit id="6362609002121607636">
+      <segment state="initial">
+        <source>Working load</source>
+        <target>Taux de travail</target>
+      </segment>
+    </unit>
+    <unit id="2093118893864037907">
+      <segment state="initial">
+        <source>working load is fine</source>
+        <target>le taux de travail est correct</target>
+      </segment>
+    </unit>
+    <unit id="2444192565233629568">
+      <segment state="initial">
+        <source>working load is at risk</source>
+        <target>le taux de travail est à risque</target>
+      </segment>
+    </unit>
+    <unit id="2250406333539669727">
+      <segment state="initial">
+        <source>working load is too high</source>
+        <target>le taux de travail est trop élevé</target>
+      </segment>
+    </unit>
+    <unit id="2990892512247067172">
+      <segment state="initial">
+        <source>working load is unknown</source>
+        <target>le taux de travail est inconnu</target>
+      </segment>
+    </unit>
+    <unit id="3324641849641959859">
+      <segment state="initial">
+        <source>strand is cut</source>
+        <target>le brin est coupé</target>
+      </segment>
+    </unit>
+    <unit id="3643941097771362577">
+      <segment state="initial">
+        <source>strand is not cut</source>
+        <target>le brin n&apos;est pas coupé</target>
+      </segment>
+    </unit>
+    <unit id="1964966931243862246">
+      <segment state="initial">
+        <source>Max section</source>
+        <target>Max canton</target>
+      </segment>
+    </unit>
+    <unit id="9071236182141230808">
+      <segment state="initial">
+        <source>uncertainty parameter</source>
+        <target>Incertitude paramètre</target>
+      </segment>
+    </unit>
+    <unit id="2658311569006173825">
+      <segment state="initial">
+        <source>Computing wind incidence</source>
+        <target>Calcul de l&apos;incidence du vent</target>
+      </segment>
+    </unit>
+    <unit id="7452118962262453473">
+      <segment state="initial">
+        <source> Wind direction and azimuth are required. </source>
+        <target> La direction du vent et l&apos;azimut sont requis. </target>
+      </segment>
+    </unit>
+    <unit id="6839138864615473489">
+      <segment state="initial">
+        <source>Not selected</source>
+        <target>Non sélectionné</target>
+      </segment>
+    </unit>
+    <unit id="4396866374643971390">
+      <segment state="initial">
+        <source>No measures</source>
+        <target>Pas de mesure</target>
+      </segment>
+    </unit>
+    <unit id="8878227880393471056">
+      <segment state="initial">
+        <source>No measures found</source>
+        <target>Pas de mesure trouvée</target>
       </segment>
     </unit>
   </file>

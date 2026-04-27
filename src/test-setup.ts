@@ -9,6 +9,7 @@ import '@angular/compiler';
 import '@analogjs/vitest-angular/setup-zone';
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
 const testBed = getTestBed();
@@ -23,7 +24,7 @@ class MockResizeObserver {
 }
 
 if (!globalThis.ResizeObserver) {
-  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+  Object.assign(globalThis, { ResizeObserver: MockResizeObserver });
 }
 
 Object.defineProperty(document, 'fonts', {
@@ -57,7 +58,9 @@ vi.mock('plotly.js-dist-min', () => {
 });
 
 const mockMessageService = {
-  add: vi.fn()
+  add: vi.fn(),
+  messageObserver: new Subject(),
+  clearObserver: new Subject()
 };
 
 export const globalTestSetup = {

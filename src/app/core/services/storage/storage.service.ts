@@ -5,7 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AppDatabase } from '@infrastructure/database';
 import { ProtectedTablesSnapshot } from './protected-tables-snapshot.interface';
@@ -21,6 +22,7 @@ export class StorageService {
   private readonly _ready = new BehaviorSubject<boolean>(false);
   /** The Dexie `AppDatabase` instance used for all local data access. */
   public db!: AppDatabase;
+  private readonly logger = inject(LoggerService);
 
   /** Observable that emits `true` once the database is created and ready. */
   get ready$(): Observable<boolean> {
@@ -50,7 +52,7 @@ export class StorageService {
       this.db = new AppDatabase();
       this._ready.next(true);
     } catch (error) {
-      console.error('StorageService createDatabase - error:', error);
+      this.logger.error('StorageService createDatabase - error:', error);
       throw error;
     }
   }

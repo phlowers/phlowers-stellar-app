@@ -218,7 +218,7 @@ wheels = [
 
 [[package]]
 name = "ipykernel"
-version = "6.29.5"
+version = "7.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appnope", marker = "sys_platform == 'darwin'" },
@@ -235,9 +235,9 @@ dependencies = [
     { name = "tornado" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/5c/67594cb0c7055dc50814b21731c22a601101ea3b1b50a9a1b090e11f5d0f/ipykernel-6.29.5.tar.gz", hash = "sha256:f093a22c4a40f8828f8e330a9c297cb93dcab13bd9678ded6de8e5cf81c56215", size = 163367 }
+sdist = { url = "https://files.pythonhosted.org/packages/ca/8d/b68b728e2d06b9e0051019640a40a9eb7a88fcd82c2e1b5ce70bef5ff044/ipykernel-7.2.0.tar.gz", hash = "sha256:18ed160b6dee2cbb16e5f3575858bc19d8f1fe6046a9a680c708494ce31d909e", size = 176046 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/94/5c/368ae6c01c7628438358e6d337c19b05425727fbb221d2a3c4303c372f42/ipykernel-6.29.5-py3-none-any.whl", hash = "sha256:afdb66ba5aa354b09b91379bac28ae4afebbb30e8b39510c9690afb7a10421b5", size = 117173 },
+    { url = "https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl", hash = "sha256:3bbd4420d2b3cc105cbdf3756bfc04500b1e52f090a90716851f3916c62e1661", size = 118788 },
 ]
 
 [[package]]
@@ -341,7 +341,7 @@ wheels = [
 
 [[package]]
 name = "mechaphlowers"
-version = "0.6.0rc2"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -354,9 +354,9 @@ dependencies = [
     { name = "thermohl" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/08/7b/46b484f1cb1f28c8b99bc8197d8c7c81c11d26395daf4d113d986e757278/mechaphlowers-0.6.0rc2.tar.gz", hash = "sha256:5d3335b434e9860d119ce73f9d6180d7021ed158c1e289fcfb12ad64fece7041", size = 117025 }
+sdist = { url = "https://files.pythonhosted.org/packages/90/29/1bc81ba29d6a2a2348aba2ad5ed376529dff6e798393ed13dfcfc362908f/mechaphlowers-0.8.0.tar.gz", hash = "sha256:a4b7110d80b2a2266d6e61dc12b9cbc21f8d3e7634c662f395d004b443776b80", size = 147632 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/54/23f8cd441576bf9596346f42f6d073a3477bde1f397dfbe4da7938e40817/mechaphlowers-0.6.0rc2-py3-none-any.whl", hash = "sha256:4a5baf3c758896c66a8aa9b1df5a217ae59c99e5c802c527d79387048ca97fe1", size = 140170 },
+    { url = "https://files.pythonhosted.org/packages/1c/4b/7c9de785f6b1885eb59f5a5665c1046e0d6d3b37e91b96d674d4898883b2/mechaphlowers-0.8.0-py3-none-any.whl", hash = "sha256:980842884d26244f913320a92cb4fdabad7bcf139a10a5746ecc3e77929839ae", size = 178148 },
 ]
 
 [[package]]
@@ -892,11 +892,11 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mechaphlowers", specifier = ">=0.6.0rc2" }]
+requires-dist = [{ name = "mechaphlowers", specifier = "==0.8.0" }]
 
 [package.metadata.requires-dev]
 all = [
-    { name = "ipykernel", specifier = "==6.29.5" },
+    { name = "ipykernel", specifier = "==7.2.0" },
     { name = "ipython", specifier = "==8.26.0" },
     { name = "mypy", specifier = "==1.11.2" },
     { name = "pandas-stubs", specifier = "==2.2.3.241009" },
@@ -911,7 +911,7 @@ all = [
     { name = "unittest-xml-reporting", specifier = "==3.2.0" },
 ]
 dev = [
-    { name = "ipykernel", specifier = "==6.29.5" },
+    { name = "ipykernel", specifier = "==7.2.0" },
     { name = "ipython", specifier = "==8.26.0" },
     { name = "mypy", specifier = "==1.11.2" },
     { name = "pandas-stubs", specifier = "==2.2.3.241009" },

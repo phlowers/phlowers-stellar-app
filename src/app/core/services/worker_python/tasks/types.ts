@@ -5,9 +5,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable, ClimateCharge, Section, SpanLoad } from '@shared/domain';
-import { View } from '@shared/types/plot.types';
-import { Dictionary } from 'lodash';
+import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
+import { AxesNorms, View } from '@shared/types/plot.types';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
 
 /**
  * Available calculation tasks for the Python worker.
@@ -19,30 +19,44 @@ import { Dictionary } from 'lodash';
  * @category Worker Types
  */
 export enum Task {
-  /** Run unit tests in Python environment */
+  //  Run unit tests in Python environment
   runTests = 'runTests',
-  /** Calculate line geometry (LIT - Ligne Informatisée de Transport) */
+  //  Calculate line geometry (LIT - Ligne Informatisée de Transport)
   getLit = 'getLit',
-  /** Change climate/load state and recalculate */
+  // Change climate/load state and recalculate
   changeState = 'changeState',
-  /** Refresh the projection view */
+  // Refresh the projection view
   refreshProjection = 'refreshProjection',
-  /** Get coordinates for support display */
+  // Get coordinates for support display
   getSupportCoordinates = 'getSupportCoordinates',
-  /** Calculate PAPOTO (field measurement) parameters */
+  // Calculate PAPOTO (field measurement) parameters
   calculatePapoto = 'calculatePapoto',
-  /** Calculate guying forces and angles */
+  // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
-  /** Set Python logging level */
+  // Set Python logging level
   setLogLevel = 'setLogLevel',
-  /** Calculate cable temperature from ambient conditions */
+  // Calculate cable temperature from ambient conditions
   temperatureCalculation = 'temperatureCalculation',
-  /** Calculate parameter at 15°C without wind */
+  // Calculate parameter at 15°C without wind
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind',
-  /** Set the number of calculation points per span */
+  // Set the number of calculation points per span
   setResolution = 'setResolution',
-  /** Get Python-side configuration constants */
-  getConfig = 'getConfig'
+  // Get Python-side configuration constants
+  getConfig = 'getConfig',
+  // Add obstacles coordinates
+  addObstacle = 'addObstacle',
+  // Delete a single obstacle from the middleware state by UUID
+  deleteObstacle = 'deleteObstacle',
+  // Clear all obstacles from the middleware state
+  clearObstacles = 'clearObstacles',
+  // calculate obstacles distances
+  calculateObstaclesDistances = 'calculateObstaclesDistances',
+  /** Apply a cable length modification (lengthen or shorten) on a span */
+  cableModification = 'cableModification',
+  // get aspect ratio for plotting scale
+  getAspectRatio = 'getAspectRatio',
+  // get wind incidence angle for cable temperature calculation
+  getWindIncidence = 'getWindIncidence'
 }
 
 /**
@@ -53,6 +67,29 @@ export enum Task {
 export enum DataError {
   /** Cable not found in catalog */
   NO_CABLE_FOUND = 'NO_CABLE_FOUND'
+}
+
+/**
+ * Python exception class names raised by the mechaphlowers library.
+ * Used to map Python-side errors to localized user-facing messages.
+ *
+ * @category Worker Types
+ */
+export enum PythonErrorCode {
+  /** Generic solver error */
+  SolverError = 'SolverError',
+  /** Insulator chain suspected to have reversed above horizontal position */
+  SuspectedChainReversal = 'SuspectedChainReversal',
+  /** Numerical solver failed to converge */
+  ConvergenceError = 'ConvergenceError',
+  /** Shape mismatch detected in arrays */
+  ShapeError = 'ShapeError',
+  /** Data-related warning */
+  DataWarning = 'DataWarning',
+  /** Balance engine warning */
+  BalanceEngineWarning = 'BalanceEngineWarning',
+  /** RTS catalog data missing or contains NaN values */
+  RtsDataNotAvailable = 'RtsDataNotAvailable'
 }
 
 /**
@@ -104,13 +141,17 @@ export interface GetSectionOutput {
   /** Cable displacement values */
   displacement: number[][];
   /** Coordinates of applied loads by support UUID */
-  loads_coords: Dictionary<number[]>;
+  loads_coords: Record<string, number[]>;
   /** Span lengths */
   span_length: number[];
   /** Elevation values at each support */
   elevation: number[];
   /** Cable sag parameter (unitless) at each span */
   parameter: number[];
+  // Slope angle of the left support of the span
+  slope_left: number[];
+  // Slope angle of the right support of the span
+  slope_right: number[];
   /** Superior (upper) tension at each support (daN) */
   tension_sup: number[];
   /** Inferior (lower) tension at each support (daN) */
@@ -123,6 +164,15 @@ export interface GetSectionOutput {
   arc_length: number[];
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
+  // sag S1 and S2
+  sag: number[];
+  sag_s2: number[];
+  // obstacles coordinates (merged from obstacle tasks or refreshProjection)
+  obstacles?: {
+    uuid: string;
+    points: [number, number, number][];
+  }[];
+  utilization_rate: number[];
 }
 
 /**
@@ -243,6 +293,79 @@ export interface TaskInputs {
   };
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
+  // Inputs for addObstacle task: all current obstacles to register at once
+  [Task.addObstacle]: {
+    obstacles: Obstacle[];
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  // Inputs for deleteObstacle task
+  [Task.deleteObstacle]: {
+    uuid: string;
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  // Inputs for clearObstacles task: no inputs
+  [Task.clearObstacles]: undefined;
+  // Inputs for calculateObstaclesDistances task
+  [Task.calculateObstaclesDistances]: {
+    obstacles: Obstacle[];
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  /** Inputs for cableModification task */
+  [Task.cableModification]: {
+    spanIndex: number;
+    widthCable: 'lengthening' | 'shortening';
+    sizeCable: number;
+    distanceSupportRef: number;
+    supportRef: 'LEFT' | 'RIGHT';
+  };
+  [Task.getWindIncidence]: {
+    azimuth: number;
+    windDirection: string;
+  };
+  [Task.getAspectRatio]: AxesNorms & {
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+}
+
+/**
+ * Obstacle-specific output from Python obstacle registration tasks.
+ *
+ * @remarks
+ * Returned by `addObstacle`, `deleteObstacle`, and `clearObstacles` tasks.
+ * Contains only the rendered 3D positions of the registered obstacles — not the full
+ * section geometry. Use `getLit` when full `GetSectionOutput` is needed.
+ *
+ * @category Worker Types
+ */
+export interface ObstacleOutput {
+  /** Rendered 3D coordinates for each registered obstacle */
+  obstacles: {
+    uuid: string;
+    points: [number, number, number][];
+  }[];
+}
+
+export interface DistancePoint {
+  pointIndex: number;
+  linePoint: [number, number, number];
+  virtualPointHorizontal: [number, number, number];
+  virtualPointVertical: [number, number, number];
+  distanceDiagonal: number;
+  distanceHorizontal: number;
+  distanceVertical: number;
+}
+
+export interface Distance {
+  obstacleUuid?: string;
+  points: DistancePoint[];
 }
 
 /**
@@ -261,7 +384,12 @@ export interface TaskOutputs {
   /** Output from changeState task: recalculated geometry with optional base state */
   [Task.changeState]: GetSectionWithBaseOutput;
   /** Output from refreshProjection task: reprojected geometry with optional base state */
-  [Task.refreshProjection]: GetSectionWithBaseOutput;
+  [Task.refreshProjection]: {
+    sectionOutput: GetSectionWithBaseOutput;
+    obstacles: ObstacleOutput['obstacles'];
+    distances: Distance[];
+  };
+
   /** Output from getSupportCoordinates task: 2D display coordinates for supports */
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
@@ -269,14 +397,7 @@ export interface TaskOutputs {
     text_to_display: number[];
   };
   /** Output from calculatePapoto task */
-  [Task.calculatePapoto]: {
-    parameter: number;
-    // uncertainty_parameter: number;
-    parameter_1_2: number;
-    parameter_2_3: number;
-    parameter_1_3: number;
-    check_validity: boolean;
-  };
+  [Task.calculatePapoto]: PapotoResult;
   /** Output from calculateGuying task */
   [Task.calculateGuying]: {
     tensionInGuy: number;
@@ -307,5 +428,23 @@ export interface TaskOutputs {
   /** Output from getConfig task */
   [Task.getConfig]: {
     resolution: number;
+  };
+  // Output from addObstacle task: rendered positions of all currently registered obstacles
+  [Task.addObstacle]: ObstacleOutput;
+  // Output from deleteObstacle task: rendered positions of remaining registered obstacles
+  [Task.deleteObstacle]: ObstacleOutput;
+  // Output from clearObstacles task: empty obstacle list
+  [Task.clearObstacles]: ObstacleOutput;
+  // Output from calculateObstaclesDistances task
+  [Task.calculateObstaclesDistances]: Distance[];
+  /** Output from cableModification task: recalculated geometry with optional base state */
+  [Task.cableModification]: GetSectionWithBaseOutput;
+  [Task.getAspectRatio]: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  [Task.getWindIncidence]: {
+    windIncidence: number;
   };
 }

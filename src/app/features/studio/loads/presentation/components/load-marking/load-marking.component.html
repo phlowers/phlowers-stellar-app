@@ -1,0 +1,129 @@
+<form [formGroup]="form" class="span__form" data-testid="span-form">
+  <div class="span__reset">
+    <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="span-reset">
+      <app-icon icon="refresh" />
+      <ng-container i18n>Reset</ng-container>
+    </button>
+  </div>
+
+  <div>
+    <div class="flex items-baseline justify-between mb-0.5">
+      <label for="spanSelect" class="mb-0" i18n>Span</label>
+
+      <button
+        class="flex items-center m-0"
+        app-btn
+        type="button"
+        btnStyle="outlined"
+        btnSize="s"
+        (click)="zoomToSpan()"
+        data-testid="span-zoom"
+      >
+        <app-icon icon="filter_center_focus" />
+        <ng-container i18n>Zoom</ng-container>
+      </button>
+    </div>
+    <p-select
+      inputId="spanSelect"
+      [options]="spansOptions()"
+      fluid
+      formControlName="spanSelect"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="span-select"
+    />
+  </div>
+
+  <div>
+    <label for="referenceSupport" i18n>Reference support</label>
+    <p-select
+      inputId="referenceSupport"
+      [options]="supportsOptions()"
+      fluid
+      formControlName="referenceSupport"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="reference-support"
+    />
+  </div>
+
+  <div class="col-span-2">
+    <label for="type" i18n>Load type</label>
+    <p-select
+      inputId="type"
+      fluid
+      [options]="loadTypeOptions"
+      formControlName="type"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="load-type"
+    />
+  </div>
+  <div class="col-span-2 flex items-center">
+    <p-toggleswitch disabled inputId="freePositioning" name="freePositioning" data-testid="free-positioning" />
+    <label for="freePositioning" i18n> Free positioning </label>
+  </div>
+
+  <div>
+    <label for="loadPosition" i18n>Dist. to ref. support</label>
+    <p-inputgroup>
+      <input
+        pInputText
+        type="number"
+        id="loadPosition"
+        fluid
+        formControlName="loadPosition"
+        data-testid="load-position"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+  @if (form.get('type')?.value === 'punctual') {
+    <div>
+      <label for="loadWeight" i18n>Load</label>
+      <p-inputgroup>
+        <input pInputText type="number" id="loadWeight" fluid formControlName="loadWeight" data-testid="load-weight" />
+        <p-inputgroup-addon>daN</p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+  }
+
+  <div class="span__btns">
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      aria-label="erase load case"
+      i18n-aria-label
+      (click)="deleteCharge()"
+      data-testid="delete-load"
+    >
+      <app-icon icon="delete" />
+    </button>
+
+    <button
+      app-btn
+      type="submit"
+      btnStyle="outlined"
+      (click)="saveLoadCase()"
+      [disabled]="isFormInvalid() || isSaving()"
+      [btnLoading]="isSaving()"
+      data-testid="save-load"
+    >
+      <app-icon icon="save" />
+      <ng-container i18n>Save</ng-container>
+    </button>
+
+    <button
+      app-btn
+      [disabled]="isFormInvalid() || isCalculatingLoad()"
+      [btnLoading]="isCalculatingLoad()"
+      type="button"
+      (click)="calculateLoadCase()"
+      data-testid="calculate-load"
+    >
+      <app-icon icon="rocket_launch" />
+      <ng-container i18n>Calculate</ng-container>
+    </button>
+  </div>
+</form>

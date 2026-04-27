@@ -13,6 +13,8 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task } from '@services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 @Component({
   selector: 'app-papoto',
@@ -47,6 +49,7 @@ export class PapotoComponent {
   measureData = model.required<FieldMeasure>();
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly workerPythonService = inject(WorkerPythonService);
 
   // Compute the dynamic left support options based on selectedSpan
@@ -57,9 +60,14 @@ export class PapotoComponent {
     }
 
     const [leftIndex, rightIndex] = span;
+    const supports = this.spanService.section()?.supports ?? [];
+    const leftNum = supports[leftIndex]?.number;
+    const rightNum = supports[rightIndex]?.number;
+    const leftLabel = leftNum ? formatSupportNumber(leftNum) : String(leftIndex + 1);
+    const rightLabel = rightNum ? formatSupportNumber(rightNum) : String(rightIndex + 1);
     return [
-      { label: `${leftIndex + 1}`, value: `${leftIndex + 1}` },
-      { label: `${rightIndex + 1}`, value: `${rightIndex + 1}` }
+      { label: leftLabel, value: leftLabel },
+      { label: rightLabel, value: rightLabel }
     ];
   });
 
@@ -87,6 +95,7 @@ export class PapotoComponent {
   papotoHelpDialog = signal<boolean>(false);
 
   papotoError = signal<boolean>(false);
+  readonly isCalculating = signal(false);
 
   isFormValid = computed(() => {
     const data = this.measureData();
@@ -122,27 +131,31 @@ export class PapotoComponent {
       ...d,
       outputs: { ...d.outputs, papoto: null }
     }));
-    const { result, error } = await this.workerPythonService.runTask(Task.calculatePapoto, {
-      spanLength: data.spanLength || 0,
-      measuredElevationDifference: data.measuredElevationDifference || 0,
-      HL: data.HL || 0,
-      H1: data.H1 || 0,
-      H2: data.H2 || 0,
-      H3: data.H3 || 0,
-      HR: data.HR || 0,
-      VL: data.VL || 0,
-      V1: data.V1 || 0,
-      V2: data.V2 || 0,
-      V3: data.V3 || 0,
-      VR: data.VR || 0
-    });
-    if (error) {
-      this.papotoError.set(true);
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.calculatePapoto, {
+        spanLength: data.spanLength || 0,
+        measuredElevationDifference: data.measuredElevationDifference || 0,
+        HL: data.HL || 0,
+        H1: data.H1 || 0,
+        H2: data.H2 || 0,
+        H3: data.H3 || 0,
+        HR: data.HR || 0,
+        VL: data.VL || 0,
+        V1: data.V1 || 0,
+        V2: data.V2 || 0,
+        V3: data.V3 || 0,
+        VR: data.VR || 0
+      });
+      if (error) {
+        this.papotoError.set(true);
+      }
+      this.measureData.update((d) => ({
+        ...d,
+        outputs: { ...d.outputs, papoto: result }
+      }));
+    } finally {
+      this.isCalculating.set(false);
     }
-
-    this.measureData.update((d) => ({
-      ...d,
-      outputs: { ...d.outputs, papoto: result }
-    }));
   }
 }

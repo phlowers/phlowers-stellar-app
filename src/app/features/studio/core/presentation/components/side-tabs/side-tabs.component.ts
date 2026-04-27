@@ -12,7 +12,7 @@ import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { isNumber } from 'lodash';
 
@@ -33,7 +33,7 @@ export class SideTabsComponent {
 
   public panelWidth = signal<string>('0px');
 
-  private readonly plotService = inject(PlotService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly sideTabsService = inject(SideTabsService);
 
   constructor() {
@@ -45,7 +45,7 @@ export class SideTabsComponent {
         this.focusPanel(toggle);
       }
       setTimeout(() => {
-        this.plotService.refreshCamera();
+        this.plotOptionsService.refreshCamera();
       }, REFRESH_STUDIO_DELAY);
     });
   }

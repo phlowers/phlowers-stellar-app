@@ -2,7 +2,7 @@
 
 <app-studio-menu-bar
   (openNewChargeModal)="openNewChargeModal()"
-  [section]="plotService.section()"
+  [section]="spanService.section()"
   [study]="plotService.study()"
 ></app-studio-menu-bar>
 
@@ -10,44 +10,174 @@
 
 <div class="graph-tools">
   <div class="graph-tools__left">
-    @if (plotService.isFreePositioningMode()) {
+    @if (plotOptionsService.isFreePositioningMode()) {
       <app-free-positioning class="plot-view" />
     } @else {
       <app-studio class="plot-view" [isPreview]="false" />
     }
 
     <section class="graph-tools-cards">
-      <div class="quick-measures">
-        <dl class="quick-measures__list">
-          <div>
-            <dt class="quick-measures__list__title" i18n>Parameter (m)</dt>
-            <dd class="quick-measures__list__value">123</dd>
+      <div class="graph-tools-cards__item global-params">
+        <p-selectbutton
+          [options]="globalStateOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="globalState()"
+          (ngModelChange)="globalState.set($event)"
+          class="global-params__select-button"
+          data-testid="global-state-select"
+        />
+
+        <dl class="global-params__list">
+          <div class="global-params__list__item">
+            <dt class="global-params__list__title" i18n>Parameter</dt>
+            <dd class="global-params__list__value">{{ globalParameter() !== null ? globalParameter() : '-' }} m</dd>
           </div>
 
-          <div>
-            <dt class="quick-measures__list__title" i18n>Work load %</dt>
-            <dd class="quick-measures__list__value">123</dd>
+          <hr class="global-params__separator" />
+
+          <div class="global-params__list__item">
+            <dt class="global-params__list__title" i18n>Working load</dt>
+            <dd class="global-params__list__value global-params__list__value--items-center">
+              @let stressRate = globalStressRate();
+              {{ stressRate !== null ? stressRate : '-' }}&nbsp;%
+              @if (stressRate !== null && stressRate <= 75) {
+                <app-icon
+                  icon="check"
+                  class="global-params__list__load-status global-params__list__load-status--success"
+                  ariaLabel="working load is fine"
+                  i18n-ariaLabel
+                />
+              } @else if (stressRate !== null && stressRate > 75 && stressRate <= 100) {
+                <app-icon
+                  icon="priority_high"
+                  class="global-params__list__load-status global-params__list__load-status--warning"
+                  ariaLabel="working load is at risk"
+                  i18n-ariaLabel
+                />
+              } @else if (stressRate !== null && stressRate > 100) {
+                <app-icon
+                  icon="close_small"
+                  class="global-params__list__load-status global-params__list__load-status--error"
+                  ariaLabel="working load is too high"
+                  i18n-ariaLabel
+                />
+              } @else {
+                <app-icon
+                  icon="close_small"
+                  class="global-params__list__load-status global-params__list__load-status--unknown"
+                  ariaLabel="working load is unknown"
+                  i18n-ariaLabel
+                />
+              }
+
+              @if (isGlobalCutStrand()) {
+                <app-icon
+                  icon="content_cut"
+                  class="global-params__list__cut-status global-params__list__cut-status--cut"
+                  ariaLabel="strand is cut"
+                  i18n-ariaLabel
+                />
+              } @else {
+                <app-icon
+                  icon="content_cut"
+                  class="global-params__list__cut-status global-params__list__cut-status--uncut"
+                  ariaLabel="strand is not cut"
+                  i18n-ariaLabel
+                />
+              }
+            </dd>
           </div>
         </dl>
+      </div>
 
-        <hr class="quick-measures__separator" />
+      <div class="graph-tools-cards__item quick-measures">
+        <p-select
+          ariaLabel="select an obstacle"
+          i18n-ariaLabel
+          styleClass="quick-measures__select"
+          [options]="filteredObstaclesOptions()"
+          [ngModel]="obstaclesService.selectedObstacleUuid()"
+          (ngModelChange)="onObstacleSelect($event)"
+          [disabled]="!filteredObstaclesOptions().length"
+          data-testid="quick-measures-select-obstacle"
+        />
 
-        <p-select [disabled]="true" data-testid="quick-measures-select" />
+        @if (obstaclePointOptions().length > 1) {
+          <p-select
+            @pointSelect
+            ariaLabel="select an obstacle's point"
+            i18n-ariaLabel
+            styleClass="quick-measures__select"
+            [options]="obstaclePointOptions()"
+            [ngModel]="obstaclesService.activePointIndex()"
+            (ngModelChange)="obstaclesService.activePointIndex.set($event)"
+            data-testid="quick-measures-select-obstacle-point"
+          />
+        }
 
         <dl class="quick-measures__list">
           <div>
-            <dt class="quick-measures__list__title" i18n>Oblique (m)</dt>
-            <dd class="quick-measures__list__value"></dd>
+            <dt class="quick-measures__list__title">
+              <label for="oblique-distance" i18n>Oblique</label>
+              <p-radiobutton
+                name="distanceType"
+                value="oblique"
+                inputId="oblique-distance"
+                [(ngModel)]="obstacleStateService.distanceType"
+                [disabled]="!obstaclesService.selectedObstacleUuid()"
+                data-testid="oblique-distance-radio"
+              />
+            </dt>
+            <dd class="quick-measures__list__value" data-testid="distance-oblique-value">
+              @if (obstacleFormService.results().oblique !== null) {
+                {{ obstacleFormService.results().oblique | number: '1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
           </div>
 
           <div>
-            <dt class="quick-measures__list__title" i18n>Vertical (m)</dt>
-            <dd class="quick-measures__list__value"></dd>
+            <dt class="quick-measures__list__title">
+              <label for="vertical-distance" i18n>Vertical</label>
+              <p-radiobutton
+                name="distanceType"
+                value="vertical"
+                inputId="vertical-distance"
+                [(ngModel)]="obstacleStateService.distanceType"
+                [disabled]="!obstaclesService.selectedObstacleUuid()"
+                data-testid="vertical-distance-radio"
+              />
+            </dt>
+            <dd class="quick-measures__list__value" data-testid="distance-vertical-value">
+              @if (obstacleFormService.results().vertical !== null) {
+                {{ obstacleFormService.results().vertical | number: '1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
           </div>
 
           <div>
-            <dt class="quick-measures__list__title" i18n>Horizontal (m)</dt>
-            <dd class="quick-measures__list__value"></dd>
+            <dt class="quick-measures__list__title">
+              <label for="horizontal-distance" i18n>Horizontal</label>
+              <p-radiobutton
+                name="distanceType"
+                value="horizontal"
+                inputId="horizontal-distance"
+                [(ngModel)]="obstacleStateService.distanceType"
+                [disabled]="!obstaclesService.selectedObstacleUuid()"
+                data-testid="horizontal-distance-radio"
+              />
+            </dt>
+            <dd class="quick-measures__list__value" data-testid="distance-horizontal-value">
+              @if (obstacleFormService.results().horizontal !== null) {
+                {{ obstacleFormService.results().horizontal | number: '1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
           </div>
         </dl>
       </div>
@@ -73,9 +203,9 @@
           appendTo="body"
           class="supports-select__p-select"
           data-testid="support-select"
-          [disabled]="plotService.loading() || plotService.isFreePositioningMode()"
+          [disabled]="plotService.loading() || plotOptionsService.isFreePositioningMode()"
           [options]="spanAmountChoiceOptions()"
-          [ngModel]="plotService.spanAmountChoice()"
+          [ngModel]="spanService.spanAmountChoice()"
           (onChange)="onSelectSpanAmount($event.value)"
         />
 
@@ -92,11 +222,11 @@
       </div>
 
       <div class="slider-plot-cards">
-        @if (this.plotService.section()) {
+        @if (this.spanService.section()) {
           <ngx-slider
-            [class.inverted]="plotService.plotOptions().invert"
-            [value]="plotService.plotOptions().startSupport"
-            [highValue]="plotService.plotOptions().endSupport"
+            [class.inverted]="plotOptionsService.plotOptions().invert"
+            [value]="plotOptionsService.plotOptions().startSupport"
+            [highValue]="plotOptionsService.plotOptions().endSupport"
             (userChangeEnd)="updateSliderOptions($event)"
             [options]="sliderOptions()"
             class="block"
@@ -119,13 +249,22 @@
           data-testid="load-tabs"
         >
           <p-tablist>
-            <p-tab value="0" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Climate condition</p-tab>
-            <p-tab value="1" [disabled]="!plotService.section()?.selected_charge_uuid" i18n>Load / Marking</p-tab>
-            <p-tab value="2" [disabled]="true" i18n>Cable manip. at support</p-tab>
-            <p-tab value="3" [disabled]="true" i18n>Cable manip. at span</p-tab>
+            <p-tab value="0" [disabled]="!spanService.section()?.selected_charge_uuid" class="climate" i18n>
+              Climate condition
+            </p-tab>
+            <p-tab value="1" [disabled]="!spanService.section()?.selected_charge_uuid" class="load-marking" i18n>
+              Load / Marking
+            </p-tab>
+            <p-tab value="2" [disabled]="!spanService.section()?.selected_charge_uuid" class="cable-length" i18n>
+              Cable length change
+            </p-tab>
+            <p-tab value="3" [disabled]="true" class="cable-support" i18n>Cable manip. at support</p-tab>
+            <p-tab value="4" [disabled]="!spanService.section()?.selected_charge_uuid" class="cable-span" i18n>
+              Cable manip. at span
+            </p-tab>
           </p-tablist>
 
-          @if (!plotService.section()?.charges?.length) {
+          @if (!spanService.section()?.charges?.length) {
             <div class="flex items-center justify-center gap-1 my-4">
               <app-icon icon="info" />
               <p i18n>In order to add charges, you need to create a charge case.</p>
@@ -144,32 +283,30 @@
             </div>
           }
 
-          @if (plotService.section()?.selected_charge_uuid) {
+          @if (spanService.section()?.selected_charge_uuid) {
             <p-tabpanels>
               <p-tabpanel value="0">
-                <app-climate [chargeUuid]="plotService.section()?.selected_charge_uuid ?? ''" />
+                <app-climate [chargeUuid]="spanService.section()?.selected_charge_uuid ?? ''" />
               </p-tabpanel>
 
               <p-tabpanel value="1">
-                <app-span />
+                <app-load-marking />
               </p-tabpanel>
 
               <p-tabpanel value="2">
-                <p class="m-0">
-                  At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                  deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
-                  provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum
-                  fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis
-                  est eligendi optio cumque nihil impedit quo minus.
-                </p>
+                <app-cable-length-change />
               </p-tabpanel>
 
               <p-tabpanel value="3">
                 <p class="m-0">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cumque consequuntur vero, iste ducimus ipsam
-                  soluta ab libero maxime, excepturi quia, veniam nostrum. Debitis necessitatibus veritatis mollitia
-                  numquam? Optio, minus cum.
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, praesentium eveniet quisquam numquam
+                  maiores cum vel perferendis minus explicabo? Laudantium voluptas facere nobis tenetur ipsum quis et in
+                  quibusdam ea.
                 </p>
+              </p-tabpanel>
+
+              <p-tabpanel value="4">
+                <app-cable-span-manip />
               </p-tabpanel>
             </p-tabpanels>
           }

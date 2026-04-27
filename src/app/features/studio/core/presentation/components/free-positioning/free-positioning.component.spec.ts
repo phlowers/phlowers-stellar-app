@@ -4,11 +4,14 @@ import { FormArray, FormBuilder } from '@angular/forms';
 import { FreePositioningComponent } from './free-positioning.component';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
+import { PythonErrorCode, TaskError } from '@core/services/worker_python/tasks/types';
 import Plotly from 'plotly.js-dist-min';
 
 vi.mock('@shared/components/studio/section/helpers/createPlotData');
@@ -50,18 +53,26 @@ describe('FreePositioningComponent', () => {
     obstacles: []
   });
   const errorSignal = signal<unknown>(null);
+  const pythonErrorCodeSignal = signal<unknown>(null);
   const loadingSignal = signal(false);
 
   const mockPlotService = {
-    plotOptions: plotOptionsSignal,
     workerReady: workerReadySignal,
     litData: litDataSignal,
-    section: sectionSignal,
     error: errorSignal,
+    pythonErrorCode: pythonErrorCodeSignal,
     loading: loadingSignal,
-    camera: signal(null),
-    isFreePositioningMode: signal(false),
     temporaryLoadData: null
+  };
+
+  const mockSpanService = {
+    section: sectionSignal
+  };
+
+  const mockPlotOptionsService = {
+    plotOptions: plotOptionsSignal,
+    camera: signal(null),
+    isFreePositioningMode: signal(false)
   };
 
   const mockWorkerPythonService = {
@@ -97,7 +108,7 @@ describe('FreePositioningComponent', () => {
   };
 
   const mockObstaclesService = {
-    currentPointIndex: signal(0)
+    activePointIndex: signal<number | null>(0)
   };
 
   let positionsFormArray: FormArray;
@@ -119,7 +130,20 @@ describe('FreePositioningComponent', () => {
 
     return {
       form,
-      positions: positionsFormArray
+      positions: positionsFormArray,
+      buildObstacleFromForm: vi.fn().mockReturnValue({
+        uuid: null,
+        name: 'test',
+        type: 'tree',
+        supportUuid: 's0',
+        referenceSupport: null,
+        altitudeType: 'absolute',
+        lateralDistanceType: 'left',
+        positions: [
+          { x: 1, y: 2, z: 3 },
+          { x: 4, y: 5, z: 6 }
+        ]
+      })
     };
   };
 
@@ -142,6 +166,8 @@ describe('FreePositioningComponent', () => {
       providers: [
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: SideTabsService, useValue: mockSideTabsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: ObstaclesService, useValue: mockObstaclesService }
@@ -208,7 +234,7 @@ describe('FreePositioningComponent', () => {
       // absolute by default
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(100, 50);
       (component as unknown as { handleClick: (evt: unknown, type: string, plotElement: unknown) => void }).handleClick(
@@ -227,7 +253,7 @@ describe('FreePositioningComponent', () => {
 
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 0, y: 0, z: 0 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(100, 50);
       (component as unknown as { handleClick: (evt: unknown, type: string, plotElement: unknown) => void }).handleClick(
@@ -261,7 +287,7 @@ describe('FreePositioningComponent', () => {
     it('should update y only on face click in absolute mode, keeping z unchanged', () => {
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 10, y: 0, z: 0 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 25);
       component['handleClick'](makeClickEvent(), 'face', plotElement);
@@ -277,7 +303,7 @@ describe('FreePositioningComponent', () => {
 
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 10, y: 0, z: 7 }));
-      mockObstaclesService.currentPointIndex.set(0);
+      mockObstaclesService.activePointIndex.set(0);
 
       const plotElement = makeFakePlotElement(5, 50);
       component['handleClick'](makeClickEvent(), 'face', plotElement);
@@ -293,6 +319,12 @@ describe('FreePositioningComponent', () => {
       errorSignal.set(null);
       // formatStudioError returns 'Unknown error' for null
       expect(component.getErrorString()).toBeTruthy();
+    });
+
+    it('should return python-specific message when pythonErrorCode is set', () => {
+      errorSignal.set('CALCULATION_ERROR');
+      pythonErrorCodeSignal.set('SolverError');
+      expect(component.getErrorString()).toContain('solver');
     });
   });
 
@@ -594,7 +626,7 @@ describe('FreePositioningComponent', () => {
       positionsFormArray.clear();
       positionsFormArray.push(fb.group({ x: 1, y: 2, z: 3 }));
       positionsFormArray.push(fb.group({ x: 4, y: 5, z: 6 }));
-      mockObstaclesService.currentPointIndex.set(1);
+      mockObstaclesService.activePointIndex.set(1);
 
       const fakePlot = {
         _fullLayout: { margin: { l: 0, r: 0, t: 0, b: 0 } }
@@ -701,21 +733,32 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should use left support altitude when referenceSupport is null', async () => {
+      const obstacleOutput = { obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3]] }] };
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataWithTwoSupports }
+        result: obstacleOutput,
+        error: null
       });
+      litDataSignal.set(litDataWithTwoSupports);
       mockObstacleFormService.form.get('referenceSupport')?.setValue(null);
 
       component.recreatePlots();
       await flushDebounceAndMicrotasks();
 
       expect(component.referenceSupportAltitudeNgf()).toBe(100);
+      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
+      expect(mockCreatePlotData).toHaveBeenCalled();
+      expect(mockCreatePlotData.mock.calls[0][0]).toEqual({
+        ...litDataWithTwoSupports,
+        obstacles: obstacleOutput.obstacles
+      });
     });
 
     it('should use left support altitude when referenceSupport is LEFT', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataWithTwoSupports }
+        result: { obstacles: [] },
+        error: null
       });
+      litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.LEFT
       );
@@ -728,8 +771,10 @@ describe('FreePositioningComponent', () => {
 
     it('should use right support altitude when referenceSupport is RIGHT', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataWithTwoSupports }
+        result: { obstacles: [] },
+        error: null
       });
+      litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
       );
@@ -746,8 +791,10 @@ describe('FreePositioningComponent', () => {
         supports: [[[10, 20, 100]]]
       };
       mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { current: litDataOnlyOneSupport }
+        result: { obstacles: [] },
+        error: null
       });
+      litDataSignal.set(litDataOnlyOneSupport);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
       );
@@ -757,6 +804,24 @@ describe('FreePositioningComponent', () => {
 
       // Support index 1 doesn't exist → getSupportAltitudeNgf returns 0
       expect(component.referenceSupportAltitudeNgf()).toBe(0);
+    });
+
+    it('should stop and expose worker errors without clearing litData', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        pythonErrorCode: PythonErrorCode.SolverError
+      });
+      litDataSignal.set(litDataWithTwoSupports);
+
+      component.recreatePlots();
+      await flushDebounceAndMicrotasks();
+
+      expect(mockPlotService.error()).toBe(TaskError.CALCULATION_ERROR);
+      expect(mockPlotService.pythonErrorCode()).toBe(PythonErrorCode.SolverError);
+      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
+      expect(mockCreatePlotData).not.toHaveBeenCalled();
+      expect(component.isLoading()).toBe(false);
     });
   });
 });

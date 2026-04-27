@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, catchError, firstValueFrom, of } from 'rxjs';
 import { CatalogObstacleTypeEntity } from '@infrastructure/database';
@@ -40,11 +41,15 @@ export class ObstaclesService {
    */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
-  /** Index of the currently selected obstacle point. */
-  currentPointIndex = signal<number>(0);
+  /** UUID of the obstacle currently selected in the quick-measures p-select (drives plot highlighting). */
+  selectedObstacleUuid = signal<string | null>(null);
+
+  /** Index of the currently active obstacle point — shared by the form editor and plot highlighting. */
+  activePointIndex = signal<number | null>(null);
 
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -52,14 +57,20 @@ export class ObstaclesService {
     });
   }
 
-  /** Sets the current obstacle point index. */
+  /** Sets the active obstacle point index. */
   setCurrentPointIndex(index: number): void {
-    this.currentPointIndex.set(index);
+    this.activePointIndex.set(index);
   }
 
-  /** Resets the current obstacle point index to zero. */
+  /** Resets the active obstacle point index to null (no point selected). */
   resetCurrentPointIndex(): void {
-    this.currentPointIndex.set(0);
+    this.activePointIndex.set(null);
+  }
+
+  /** Sets the selected obstacle and point for quick-measures display and plot highlighting. */
+  setSelectedObstacle(uuid: string | null, pointIndex: number | null): void {
+    this.selectedObstacleUuid.set(uuid);
+    this.activePointIndex.set(pointIndex);
   }
 
   /** Retrieve all obstacle types from the database.
@@ -119,7 +130,7 @@ export class ObstaclesService {
         })
         .pipe(
           catchError((error) => {
-            console.error('Error importing obstacle types', error);
+            this.logger.error('Error importing obstacle types', error);
             return of('');
           })
         )

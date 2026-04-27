@@ -57,7 +57,7 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 500, error: null });
+      expect(result).toEqual({ result: mockResult, runTime: 500, error: null, pythonErrorCode: null });
     });
 
     it('should handle getLit task', async () => {
@@ -90,7 +90,7 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 200, error: null });
+      expect(result).toEqual({ result: mockResult, runTime: 200, error: null, pythonErrorCode: null });
     });
 
     it('should handle unknown task', async () => {
@@ -106,8 +106,45 @@ describe('Task handlers', () => {
       expect(result).toEqual({
         result: null,
         runTime: expect.any(Number),
-        error: 'CALCULATION_ERROR'
+        error: 'CALCULATION_ERROR',
+        pythonErrorCode: null
       });
+    });
+
+    it('should extract pythonErrorCode when the exception message contains a PythonErrorCode value', async () => {
+      // The mock task function raises an error whose message includes 'SolverError'
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => {
+        throw new Error('mechaphlowers.SolverError: mechanical equilibrium failed');
+      });
+
+      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+
+      expect(result.result).toBeNull();
+      expect(result.error).toBe('CALCULATION_ERROR');
+      expect(result.pythonErrorCode).toBe('SolverError');
+    });
+
+    it('should extract pythonErrorCode ConvergenceError from exception message', async () => {
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => {
+        throw new Error('ConvergenceError: optimizer reached maximum iterations');
+      });
+
+      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+
+      expect(result.pythonErrorCode).toBe('ConvergenceError');
+    });
+
+    it('should set pythonErrorCode to null when exception message contains no known PythonErrorCode', async () => {
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => {
+        throw new Error('ValueError: unexpected input shape');
+      });
+
+      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+
+      expect(result.pythonErrorCode).toBeNull();
     });
   });
 });

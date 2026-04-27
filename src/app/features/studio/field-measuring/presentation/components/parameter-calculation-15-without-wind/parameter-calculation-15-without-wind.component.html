@@ -3,8 +3,8 @@
   (isOpenChange)="initialConditionModalOpen.set($event)"
   [mode]="'create'"
   [initialConditionInput]="initialConditionInput()"
-  [initialConditions]="this.plotService.section()?.initial_conditions ?? []"
-  [section]="this.plotService.section()!"
+  [initialConditions]="this.spanService.section()?.initial_conditions ?? []"
+  [section]="this.spanService.section()!"
   [study]="this.plotService.study()"
   [isInsideToolsDialog]="true"
   (addInitialCondition)="addInitialCondition($event)"
@@ -139,7 +139,13 @@
 </div>
 
 <div class="text-right mt-8">
-  <button app-btn (click)="calculateParameter15C()" [disabled]="!isFormValid()" data-testid="calculate-parameter-btn">
+  <button
+    app-btn
+    (click)="calculateParameter15C()"
+    [disabled]="!isFormValid()"
+    [btnLoading]="isCalculating()"
+    data-testid="calculate-parameter-btn"
+  >
     <app-icon icon="rocket_launch" />
     <ng-container i18n>Calculate setting parameter at 15°C</ng-container>
   </button>

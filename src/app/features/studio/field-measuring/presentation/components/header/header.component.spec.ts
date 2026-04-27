@@ -3,13 +3,11 @@ import { Component } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
-import { Section } from '@shared/domain';
+import { Section, Support } from '@shared/domain';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { SelectOption, SPAN_OPTIONS } from '../../constants';
 import { createTestMeasureData } from '../../helpers';
-import { PlotService } from '@services/plot/plot.service';
-import { Support } from '@shared/domain';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 @Component({
   selector: 'app-icon',
@@ -23,7 +21,6 @@ describe('HeaderComponent', () => {
   let fixture: ComponentFixture<HeaderComponent>;
 
   const mockMeasureData: FieldMeasure = createTestMeasureData();
-  const mockSpanOptions: SelectOption[] = SPAN_OPTIONS;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,7 +40,6 @@ describe('HeaderComponent', () => {
   describe('Component Creation', () => {
     it('should create', () => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       expect(component).toBeTruthy();
     });
 
@@ -77,7 +73,6 @@ describe('HeaderComponent', () => {
   describe('Header Info Display', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -133,7 +128,6 @@ describe('HeaderComponent', () => {
   describe('Location Fields Display', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -201,7 +195,6 @@ describe('HeaderComponent', () => {
   describe('Field Change Events', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -261,9 +254,10 @@ describe('HeaderComponent', () => {
   describe('Span Change Events', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
+
+    afterEach(() => vi.restoreAllMocks());
 
     it('should emit fieldChange when selectedSpan changes to valid span', () => {
       const fieldChangeSpy = vi.fn();
@@ -299,9 +293,9 @@ describe('HeaderComponent', () => {
       // Create a new component instance to capture initialization
       const newFixture = TestBed.createComponent(HeaderComponent);
       const newComponent = newFixture.componentInstance;
-      const plotService = TestBed.inject(PlotService);
+      const spanService = TestBed.inject(PlotSpanService);
 
-      // Mock PlotService to return a valid section with supports
+      // Mock services to return a valid section with supports
       const mockSection = {
         supports: [
           { attachmentHeight: 10 } as Partial<Support>,
@@ -309,17 +303,13 @@ describe('HeaderComponent', () => {
           { attachmentHeight: 15 } as Partial<Support>
         ]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
-      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
-        typeof plotService.plotOptions
-      >);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as ReturnType<typeof spanService.section>);
 
       newComponent.fieldChange.subscribe(fieldChangeSpy);
 
       // Set measure data without a span
       const measureDataWithoutSpan = { ...mockMeasureData, span: null };
       newFixture.componentRef.setInput('measureData', measureDataWithoutSpan);
-      newFixture.componentRef.setInput('spanOptions', mockSpanOptions);
       newFixture.detectChanges();
 
       // Should have emitted fieldChange with span set to first span [0, 1]
@@ -349,11 +339,14 @@ describe('HeaderComponent', () => {
   });
 
   describe('Spans Computed Property', () => {
-    it('should return spans starting at index 0 when startSupport is 0', () => {
-      const plotService = TestBed.inject(PlotService);
-      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 0, endSupport: 2 } as ReturnType<
-        typeof plotService.plotOptions
-      >);
+    afterEach(() => vi.restoreAllMocks());
+
+    it('should return all spans from all section supports', () => {
+      const plotSpanService = TestBed.inject(PlotSpanService);
+      const mockSection = {
+        supports: [{ attachmentHeight: 10 }, { attachmentHeight: 12 }, { attachmentHeight: 15 }]
+      };
+      vi.spyOn(plotSpanService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotSpanService.section>);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1] });
       fixture.detectChanges();
@@ -364,42 +357,8 @@ describe('HeaderComponent', () => {
       ]);
     });
 
-    it('should offset span indices by startSupport when startSupport is non-zero', () => {
-      // Scenario: section has spans 1-2, 2-3, 3-4 (supports 0,1,2,3)
-      // User selects spans 2-3 and 3-4 with the slider → startSupport=1, endSupport=3
-      const plotService = TestBed.inject(PlotService);
-      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
-        typeof plotService.plotOptions
-      >);
-
-      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
-      fixture.detectChanges();
-
-      expect(component.spans()).toEqual([
-        { label: '2 - 3', value: [1, 2], supports: [1, 2] },
-        { label: '3 - 4', value: [2, 3], supports: [2, 3] }
-      ]);
-    });
-
-    it('should NOT include out-of-range spans when startSupport is non-zero', () => {
-      // Regression: before the fix, selecting spans 2-3 and 3-4 showed 1-2 and 2-3 instead
-      const plotService = TestBed.inject(PlotService);
-      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
-        typeof plotService.plotOptions
-      >);
-
-      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2] });
-      fixture.detectChanges();
-
-      const labels = component.spans().map((s) => s.label);
-      expect(labels).not.toContain('1 - 2');
-      expect(labels).toContain('2 - 3');
-      expect(labels).toContain('3 - 4');
-    });
-
-    it('should auto-initialize to the first selected span (not the first section span) when no span is set', () => {
-      // Regression: before the fix, the auto-selected default was [0,1] even when startSupport=1
-      const plotService = TestBed.inject(PlotService);
+    it('should return spans for all consecutive support pairs', () => {
+      const plotSpanService = TestBed.inject(PlotSpanService);
       const mockSection = {
         supports: [
           { attachmentHeight: 10 },
@@ -408,10 +367,29 @@ describe('HeaderComponent', () => {
           { attachmentHeight: 18 }
         ]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotService.section>);
-      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 1, endSupport: 3 } as ReturnType<
-        typeof plotService.plotOptions
-      >);
+      vi.spyOn(plotSpanService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotSpanService.section>);
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1] });
+      fixture.detectChanges();
+
+      expect(component.spans()).toEqual([
+        { label: '1 - 2', value: [0, 1], supports: [0, 1] },
+        { label: '2 - 3', value: [1, 2], supports: [1, 2] },
+        { label: '3 - 4', value: [2, 3], supports: [2, 3] }
+      ]);
+    });
+
+    it('should auto-initialize to the first span [0, 1] when no span is set', () => {
+      const plotSpanService = TestBed.inject(PlotSpanService);
+      const mockSection = {
+        supports: [
+          { attachmentHeight: 10 },
+          { attachmentHeight: 12 },
+          { attachmentHeight: 15 },
+          { attachmentHeight: 18 }
+        ]
+      };
+      vi.spyOn(plotSpanService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotSpanService.section>);
 
       const fieldChangeSpy = vi.fn();
       const newFixture = TestBed.createComponent(HeaderComponent);
@@ -419,22 +397,26 @@ describe('HeaderComponent', () => {
       newFixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
       newFixture.detectChanges();
 
-      // The auto-initialized span should be [1, 2] (first span in selection), not [0, 1]
       expect(fieldChangeSpy).toHaveBeenCalledWith({
-        field: 'span',
-        value: [1, 2]
-      });
-      expect(fieldChangeSpy).not.toHaveBeenCalledWith({
         field: 'span',
         value: [0, 1]
       });
     });
 
-    it('should return empty array when startSupport equals endSupport', () => {
-      const plotService = TestBed.inject(PlotService);
-      vi.spyOn(plotService, 'plotOptions').mockReturnValue({ startSupport: 2, endSupport: 2 } as ReturnType<
-        typeof plotService.plotOptions
-      >);
+    it('should return empty array when section has no supports', () => {
+      const plotSpanService = TestBed.inject(PlotSpanService);
+      vi.spyOn(plotSpanService, 'section').mockReturnValue(null);
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
+      fixture.detectChanges();
+
+      expect(component.spans()).toEqual([]);
+    });
+
+    it('should return empty array when section has only one support', () => {
+      const plotSpanService = TestBed.inject(PlotSpanService);
+      const mockSection = { supports: [{ attachmentHeight: 10 }] };
+      vi.spyOn(plotSpanService, 'section').mockReturnValue(mockSection as ReturnType<typeof plotSpanService.section>);
 
       fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: null });
       fixture.detectChanges();
@@ -444,14 +426,15 @@ describe('HeaderComponent', () => {
   });
 
   describe('Altitude Calculation from Attachment Heights', () => {
-    let plotService: PlotService;
+    let spanService: PlotSpanService;
 
     beforeEach(() => {
-      plotService = TestBed.inject(PlotService);
+      spanService = TestBed.inject(PlotSpanService);
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
+
+    afterEach(() => vi.restoreAllMocks());
 
     it('should calculate and set altitude from attachment heights when span changes', () => {
       const fieldChangeSpy = vi.fn();
@@ -461,7 +444,7 @@ describe('HeaderComponent', () => {
         supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: 12.5 }, { attachmentHeight: 15 }]
       };
 
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Change span to [0, 1]
       component.onSpanChange([0, 1]);
@@ -478,7 +461,7 @@ describe('HeaderComponent', () => {
       const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
-      vi.spyOn(plotService, 'section').mockReturnValue(null);
+      vi.spyOn(spanService, 'section').mockReturnValue(null);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -494,7 +477,7 @@ describe('HeaderComponent', () => {
       component.fieldChange.subscribe(fieldChangeSpy);
 
       const mockSection = { supports: null };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -512,7 +495,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [null, { attachmentHeight: 12.5 }]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -530,7 +513,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, null]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -548,7 +531,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: null }, { attachmentHeight: 12.5 }]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -566,7 +549,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: 10.5 }, { attachmentHeight: null }]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       // Clear any previous calls
       fieldChangeSpy.mockClear();
@@ -584,7 +567,7 @@ describe('HeaderComponent', () => {
       const mockSection = {
         supports: [{ attachmentHeight: 10 }, { attachmentHeight: 15 }, { attachmentHeight: 20 }]
       };
-      vi.spyOn(plotService, 'section').mockReturnValue(mockSection as unknown as Section);
+      vi.spyOn(spanService, 'section').mockReturnValue(mockSection as unknown as Section);
 
       component.onSpanChange([1, 2]);
       fixture.detectChanges();
@@ -600,7 +583,6 @@ describe('HeaderComponent', () => {
   describe('Grid Layout', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -631,7 +613,6 @@ describe('HeaderComponent', () => {
       };
 
       fixture.componentRef.setInput('measureData', dataWithNulls);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
 
       expect(fixture.nativeElement).toBeTruthy();
@@ -639,7 +620,6 @@ describe('HeaderComponent', () => {
 
     it('should handle empty span options array', () => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', []);
       fixture.detectChanges();
 
       const spanSelect = fixture.nativeElement.querySelector('#portee');
@@ -655,7 +635,6 @@ describe('HeaderComponent', () => {
       };
 
       fixture.componentRef.setInput('measureData', dataWithZeros);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
 
       const element = fixture.nativeElement;
@@ -690,8 +669,8 @@ describe('HeaderComponent', () => {
       const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);
 
-      component.onFieldChange('longitude', 180.0);
-      component.onFieldChange('latitude', 90.0);
+      component.onFieldChange('longitude', 180.1);
+      component.onFieldChange('latitude', 90.2);
       component.onFieldChange('altitude', 9999.99999999);
       component.onFieldChange('azimuth', 359.99);
 
@@ -702,7 +681,6 @@ describe('HeaderComponent', () => {
   describe('Label Attributes', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 
@@ -726,7 +704,6 @@ describe('HeaderComponent', () => {
   describe('Definition List Structure', () => {
     beforeEach(() => {
       fixture.componentRef.setInput('measureData', mockMeasureData);
-      fixture.componentRef.setInput('spanOptions', mockSpanOptions);
       fixture.detectChanges();
     });
 

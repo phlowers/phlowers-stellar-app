@@ -11,6 +11,8 @@ import { InitialCondition } from './initial-condition.model';
 import { Support } from './support.model';
 import { VtlAndGuying } from './vtl-and-guying.model';
 import { Obstacle } from './obstacle.model';
+import { CableModification } from './cable-modification.model';
+import { CableSpanManipulation } from './cable-span-manipulation.model';
 
 /**
  * Section domain model - represents a power line section.
@@ -122,4 +124,12 @@ export interface Section {
   selected_field_measure_uuid: string | undefined;
   /** VTL and guying calculation data */
   vtl_and_guying: VtlAndGuying | undefined;
+  /** Array of cable length modifications on this section's spans */
+  cable_modifications: CableModification[];
+  /** UUID of the currently selected cable modification */
+  selected_cable_modification_uuid: string | null;
+  /** Array of cable span manipulations on this section's spans */
+  cable_span_manipulations: CableSpanManipulation[];
+  /** UUID of the currently selected cable span manipulation */
+  selected_cable_span_manipulation_uuid: string | null;
 }

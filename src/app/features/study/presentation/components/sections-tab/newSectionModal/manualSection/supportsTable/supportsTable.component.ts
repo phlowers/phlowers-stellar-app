@@ -29,6 +29,7 @@ import {
   getSupportFieldValues,
   SUPPORT_FIELD_LIMITS
 } from './helpers';
+import { truncateDecimals } from '@shared/helpers/truncateDecimals';
 
 /**
  * Editable table of supports within a section.
@@ -97,6 +98,8 @@ export class SupportsTableComponent implements OnInit {
 
   public onlyPositiveNumbers = /^\d*$/;
   public onlyPositiveNumbersWithDecimal = /^\d*[,.]?\d{0,2}$/;
+
+  readonly truncateDecimals = truncateDecimals;
 
   optionsChainV = [
     { label: $localize`Yes`, value: true },
@@ -187,13 +190,5 @@ export class SupportsTableComponent implements OnInit {
 
   isNumber(value: unknown) {
     return isNumber(value);
-  }
-
-  truncateDecimals(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const sepIndex = input.value.indexOf('.');
-    if (sepIndex !== -1 && input.value.substring(sepIndex + 1).length > 2) {
-      input.value = input.value.substring(0, sepIndex + 3);
-    }
   }
 }

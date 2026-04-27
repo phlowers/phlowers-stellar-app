@@ -108,9 +108,9 @@
         inputId="freePositioning"
         name="freePositioning"
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
-        [ngModel]="plotService.isFreePositioningMode()"
+        [ngModel]="plotOptionsService.isFreePositioningMode()"
         [ngModelOptions]="{ standalone: true }"
-        (onChange)="plotService.isFreePositioningMode.set($event.checked)"
+        (onChange)="plotOptionsService.isFreePositioningMode.set($event.checked)"
       />
       <label for="freePositioning" i18n>Free positioning</label>
     </div>
@@ -133,30 +133,28 @@
   <ul class="obstacles-form__points" data-testid="points-list">
     @for (obstacle of obstacleFormService.positions.controls; track $index) {
       <li
-        [class.obstacles-form__points__point--active]="obstaclesService.currentPointIndex() === $index"
-        [attr.aria-selected]="obstaclesService.currentPointIndex() === $index ? 'true' : 'false'"
-        class="obstacles-form__points__point"
+        [class.obstacles-item--active]="obstaclesService.activePointIndex() === $index"
+        [attr.aria-selected]="obstaclesService.activePointIndex() === $index ? 'true' : 'false'"
+        class="obstacles-item"
         data-testid="point-item"
       >
         <button
           type="button"
-          class="obstacles-form__points__point__select"
+          class="obstacles-item__select"
           (click)="setCurrentObstaclePoint($index)"
           data-testid="select-point"
         >
           <span class="sr-only"><ng-container i18n>Select point</ng-container>&nbsp;{{ $index + 1 }}</span>
         </button>
 
-        <div class="obstacles-form__points__point__header">
-          <p class="obstacles-form__points__point__header__label">
-            <ng-container i18n>Point</ng-container> {{ $index + 1 }}
-          </p>
+        <div class="obstacles-item__header">
+          <p class="obstacles-item__title"><ng-container i18n>Point</ng-container> {{ $index + 1 }}</p>
           <button
             app-btn
             btnStyle="danger"
             btnSize="s"
             type="button"
-            class="obstacles-form__points__point__header__btn"
+            class="obstacles-item__erase-btn"
             (click)="obstacleFormService.deletePoint($index); $event.stopPropagation()"
             aria-label="delete point"
             i18n-aria-label
@@ -166,16 +164,16 @@
           </button>
         </div>
 
-        <div class="obstacles-form__points__point__form">
+        <div class="obstacles-item__form">
           <label
-            [for]="'altitudePoint' + $index"
-            class="obstacles-form__points__point__form__label alt-point-label"
             i18n
+            [for]="'altitudePoint' + $index"
+            class="obstacles-item__label alt-point-label"
+            data-testid="label-point-altitude"
+            >Point alt.</label
           >
-            Alt. point
-          </label>
 
-          <p-inputgroup class="obstacles-form__points__point__form__input">
+          <p-inputgroup class="obstacles-item__input">
             <input
               (input)="onPositionInput($event, 'z')"
               pInputText
@@ -192,14 +190,14 @@
           </p-inputgroup>
 
           <label
-            [for]="'distanceToRefSupport' + $index"
-            class="obstacles-form__points__point__form__label dist-ref-label"
             i18n
+            [for]="'distanceToRefSupport' + $index"
+            class="obstacles-item__label dist-ref-label"
+            data-testid="label-ref-distance"
+            >Ref. support dist.</label
           >
-            Ref. supp. dist.
-          </label>
 
-          <p-inputgroup class="obstacles-form__points__point__form__input">
+          <p-inputgroup class="obstacles-item__input">
             <input
               pInputText
               (input)="onPositionInput($event, 'x')"
@@ -216,14 +214,14 @@
           </p-inputgroup>
 
           <label
-            [for]="'distanceToLineAxis' + $index"
-            class="obstacles-form__points__point__form__label dist-axis-label"
             i18n
+            [for]="'distanceToLineAxis' + $index"
+            class="obstacles-item__label dist-axis-label"
+            data-testid="label-axis-distance"
+            >Line axis dist.</label
           >
-            Line axis dist.
-          </label>
 
-          <p-inputgroup class="obstacles-form__points__point__form__input">
+          <p-inputgroup class="obstacles-item__input">
             <input
               pInputText
               (input)="onPositionInput($event, 'y')"
@@ -275,6 +273,7 @@
         type="button"
         (click)="obstacleFormService.calculateAndSave()"
         [disabled]="!obstacleFormService.canCalculateAndSave()"
+        [btnLoading]="isCalculating()"
         data-testid="calculate-save"
       >
         <app-icon icon="rocket_launch" />
@@ -287,14 +286,26 @@
     <div class="obstacles-form__sticky__results" data-testid="results">
       <h2 class="obstacles-form__sticky__results__title" i18n>Results:</h2>
 
+      @if (obstacleFormService.calculationError()) {
+        <p-message
+          severity="error"
+          [text]="obstacleFormService.calculationError()!"
+          styleClass="obstacles-form__sticky__results__error"
+          data-testid="calculation-error"
+        />
+      }
+
       <dl class="obstacles-form__sticky__results__grid">
         <div class="obstacles-form__sticky__results__grid__item">
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Oblique</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-oblique">
-              {{ obstacleFormService.results().oblique ?? 'N/A' }}
+              {{
+                obstacleFormService.results().oblique !== null
+                  ? (obstacleFormService.results().oblique | number: '1.0-2') + ' m'
+                  : '-'
+              }}
             </span>
-            <ng-container i18n>m</ng-container>
           </dd>
         </div>
 
@@ -302,9 +313,12 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Vertical</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-vertical">
-              {{ obstacleFormService.results().vertical ?? 'N/A' }}
+              {{
+                obstacleFormService.results().vertical !== null
+                  ? (obstacleFormService.results().vertical | number: '1.0-2') + ' m'
+                  : '-'
+              }}
             </span>
-            <ng-container i18n>m</ng-container>
           </dd>
         </div>
 
@@ -312,9 +326,12 @@
           <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Horizontal</dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-horizontal">
-              {{ obstacleFormService.results().horizontal ?? 'N/A' }}
+              {{
+                obstacleFormService.results().horizontal !== null
+                  ? (obstacleFormService.results().horizontal | number: '1.0-2') + ' m'
+                  : '-'
+              }}
             </span>
-            <ng-container i18n>m</ng-container>
           </dd>
         </div>
       </dl>

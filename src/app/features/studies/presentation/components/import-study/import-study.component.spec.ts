@@ -8,6 +8,34 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 
 const waitFor = (ms = 0): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
+const NOTIFICATION_LIFE = 10000;
+const ASYNC_TICK = 10;
+const ASYNC_WAIT = 100;
+const ASYNC_WAIT_LONG = 200;
+const ASYNC_WAIT_PARSE = 250;
+const TEST_TIMEOUT = 10000;
+const MOCK_CSV_CONTENT = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
+1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
+2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
+3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
+4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
+5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
+6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
+7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
+8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
+9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
+10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
+11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
+12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
+13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
+14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
+15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
+16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
+17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
+18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
+19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
+20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+
 const createMockFileList = (files: File[]): FileList => {
   return Object.assign(files, {
     length: files.length,
@@ -164,65 +192,49 @@ describe('ImportStudyComponent', () => {
         mockFileReaderWithError.onerror({} as ProgressEvent<FileReader>);
       }
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(component.loading()).toBe(false);
     });
 
-    it('should process valid ProtoV4 file successfully', async () => {
-      // Create a minimal CSV that matches the expected structure
-      const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+    it(
+      'should process valid ProtoV4 file successfully',
+      async () => {
+        // Create a minimal CSV that matches the expected structure
+        const mockCsvContent = MOCK_CSV_CONTENT;
 
-      // Convert to base64 using a method that handles ISO 8859-1 encoding properly
-      // Create a Uint8Array from the string using ISO 8859-1 encoding
-      const encoder = new TextEncoder();
-      const bytes = encoder.encode(mockCsvContent);
-      const base64Content = btoa(String.fromCharCode(...bytes));
-      const dataUrl = `data:text/csv;base64,${base64Content}`;
+        // Convert to base64 using a method that handles ISO 8859-1 encoding properly
+        // Create a Uint8Array from the string using ISO 8859-1 encoding
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(mockCsvContent);
+        const base64Content = btoa(String.fromCharCode(...bytes));
+        const dataUrl = `data:text/csv;base64,${base64Content}`;
 
-      const mockEvent = {
-        target: {
-          files: createMockFileList([mockFile])
+        const mockEvent = {
+          target: {
+            files: createMockFileList([mockFile])
+          }
+        } as unknown as Event;
+
+        // Mock FileReader result with proper data URL format
+        const mockProgressEvent = {
+          target: {
+            result: dataUrl
+          }
+        } as unknown as ProgressEvent<FileReader>;
+
+        component.loadFiles(mockEvent);
+
+        await waitFor(ASYNC_TICK);
+        if (mockFileReader.onload) {
+          mockFileReader.onload(mockProgressEvent);
         }
-      } as unknown as Event;
 
-      // Mock FileReader result with proper data URL format
-      const mockProgressEvent = {
-        target: {
-          result: dataUrl
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
-      component.loadFiles(mockEvent);
-
-      await waitFor(10);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await waitFor(250);
-      expect(studiesServiceMock.createStudyFromProtoV4).toHaveBeenCalled();
-      expect(component.newStudies().length).toBeGreaterThan(0);
-    }, 10000);
+        await waitFor(ASYNC_WAIT_PARSE);
+        expect(studiesServiceMock.createStudyFromProtoV4).toHaveBeenCalled();
+        expect(component.newStudies().length).toBeGreaterThan(0);
+      },
+      TEST_TIMEOUT
+    );
 
     it('should show error message and return early when cable does not exist in database', async () => {
       vi.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
@@ -272,17 +284,17 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Cable not found in database',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
       expect(component.erroredFiles()).toContain(mockFile.name);
@@ -292,27 +304,7 @@ describe('ImportStudyComponent', () => {
     it('should handle errors during file import and add to erroredFiles', async () => {
       vi.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
 
-      const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+      const mockCsvContent = MOCK_CSV_CONTENT;
 
       const encoder = new TextEncoder();
       const bytes = encoder.encode(mockCsvContent);
@@ -336,18 +328,18 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: expect.any(String),
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       expect(component.erroredFiles()).toContain(mockFile.name);
       expect(studiesServiceMock.createStudyFromProtoV4).not.toHaveBeenCalled();
@@ -364,27 +356,7 @@ describe('ImportStudyComponent', () => {
 
       (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
-      const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+      const mockCsvContent = MOCK_CSV_CONTENT;
 
       const encoder = new TextEncoder();
       const bytes = encoder.encode(mockCsvContent);
@@ -408,18 +380,18 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing study', expect.any(Error));
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: expect.any(String),
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       expect(component.erroredFiles()).toContain(mockFile.name);
       consoleErrorSpy.mockRestore();
@@ -444,18 +416,18 @@ describe('ImportStudyComponent', () => {
 
         component.loadFiles(mockEvent);
 
-        await waitFor(10);
+        await waitFor(ASYNC_TICK);
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
 
-        await waitFor(100);
+        await waitFor(ASYNC_WAIT);
         expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
           summary: expect.any(String),
           detail: 'Error reading file',
-          life: 3000
+          life: NOTIFICATION_LIFE
         });
         expect(component.erroredFiles()).toContain(mockFile.name);
         consoleErrorSpy.mockRestore();
@@ -479,18 +451,18 @@ describe('ImportStudyComponent', () => {
 
         component.loadFiles(mockEvent);
 
-        await waitFor(10);
+        await waitFor(ASYNC_TICK);
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
 
-        await waitFor(100);
+        await waitFor(ASYNC_WAIT);
         expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
           summary: expect.any(String),
           detail: 'Error reading file',
-          life: 3000
+          life: NOTIFICATION_LIFE
         });
         expect(component.erroredFiles()).toContain(mockFile.name);
         consoleErrorSpy.mockRestore();
@@ -514,161 +486,129 @@ describe('ImportStudyComponent', () => {
 
         component.loadFiles(mockEvent);
 
-        await waitFor(10);
+        await waitFor(ASYNC_TICK);
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
 
-        await waitFor(100);
+        await waitFor(ASYNC_WAIT);
         expect(consoleErrorSpy).toHaveBeenCalledWith('Error reading file', mockFile.name);
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
           summary: expect.any(String),
           detail: 'Error reading file',
-          life: 3000
+          life: NOTIFICATION_LIFE
         });
         expect(component.erroredFiles()).toContain(mockFile.name);
         consoleErrorSpy.mockRestore();
       });
 
-      it('should successfully decode using parseISO88591Base64', async () => {
-        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+      it(
+        'should successfully decode using parseISO88591Base64',
+        async () => {
+          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
-        const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+          const mockCsvContent = MOCK_CSV_CONTENT;
 
-        // Create base64 content that will work with parseISO88591Base64
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(mockCsvContent);
-        const base64Content = btoa(String.fromCharCode(...bytes));
-        const dataUrl = `data:text/csv;base64,${base64Content}`;
+          // Create base64 content that will work with parseISO88591Base64
+          const encoder = new TextEncoder();
+          const bytes = encoder.encode(mockCsvContent);
+          const base64Content = btoa(String.fromCharCode(...bytes));
+          const dataUrl = `data:text/csv;base64,${base64Content}`;
 
-        const mockEvent = {
-          target: {
-            files: createMockFileList([mockFile])
+          const mockEvent = {
+            target: {
+              files: createMockFileList([mockFile])
+            }
+          } as unknown as Event;
+
+          const mockProgressEvent = {
+            target: {
+              result: dataUrl
+            }
+          } as unknown as ProgressEvent<FileReader>;
+
+          const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
+
+          component.loadFiles(mockEvent);
+
+          await waitFor(ASYNC_TICK);
+          if (mockFileReader.onload) {
+            mockFileReader.onload(mockProgressEvent);
           }
-        } as unknown as Event;
 
-        const mockProgressEvent = {
-          target: {
-            result: dataUrl
+          await waitFor(ASYNC_WAIT_LONG);
+          const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
+          expect(decodeErrorCalls.length).toBe(0);
+          const fileDecodeErrors = component.erroredFiles().filter((name) => name === mockFile.name);
+          if (fileDecodeErrors.length > 0) {
+            const mockMessageService = TestBed.inject(MessageService);
+            const errorCalls = (mockMessageService.add as vi.Mock).mock.calls;
+            const decodeErrorMessages = errorCalls.filter(
+              (call: unknown[]) =>
+                Array.isArray(call) &&
+                call[0] &&
+                typeof call[0] === 'object' &&
+                'detail' in call[0] &&
+                call[0].detail === 'Error decoding file'
+            );
+            expect(decodeErrorMessages.length).toBe(0);
           }
-        } as unknown as ProgressEvent<FileReader>;
+          consoleErrorSpy.mockRestore();
+        },
+        TEST_TIMEOUT
+      );
 
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
+      it(
+        'should fallback to atob when parseISO88591Base64 fails',
+        async () => {
+          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
-        component.loadFiles(mockEvent);
+          // Create a base64 string that will cause parseISO88591Base64 to fail
+          // but atob will succeed
+          const mockCsvContent = MOCK_CSV_CONTENT;
 
-        await waitFor(10);
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+          // Use standard base64 encoding that atob can handle
+          const base64Content = btoa(mockCsvContent);
+          const dataUrl = `data:text/csv;base64,${base64Content}`;
 
-        await waitFor(200);
-        const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
-        expect(decodeErrorCalls.length).toBe(0);
-        const fileDecodeErrors = component.erroredFiles().filter((name) => name === mockFile.name);
-        if (fileDecodeErrors.length > 0) {
-          const mockMessageService = TestBed.inject(MessageService);
-          const errorCalls = (mockMessageService.add as vi.Mock).mock.calls;
-          const decodeErrorMessages = errorCalls.filter(
-            (call: unknown[]) =>
-              Array.isArray(call) &&
-              call[0] &&
-              typeof call[0] === 'object' &&
-              'detail' in call[0] &&
-              call[0].detail === 'Error decoding file'
-          );
-          expect(decodeErrorMessages.length).toBe(0);
-        }
-        consoleErrorSpy.mockRestore();
-      }, 10000);
+          // Mock atob to ensure it's called as fallback
+          const originalAtob = global.atob;
+          const atobSpy = vi.fn().mockImplementation((str: string) => {
+            return originalAtob(str);
+          });
+          global.atob = atobSpy;
 
-      it('should fallback to atob when parseISO88591Base64 fails', async () => {
-        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+          const mockEvent = {
+            target: {
+              files: createMockFileList([mockFile])
+            }
+          } as unknown as Event;
 
-        // Create a base64 string that will cause parseISO88591Base64 to fail
-        // but atob will succeed
-        const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+          const mockProgressEvent = {
+            target: {
+              result: dataUrl
+            }
+          } as unknown as ProgressEvent<FileReader>;
 
-        // Use standard base64 encoding that atob can handle
-        const base64Content = btoa(mockCsvContent);
-        const dataUrl = `data:text/csv;base64,${base64Content}`;
+          const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
 
-        // Mock atob to ensure it's called as fallback
-        const originalAtob = global.atob;
-        const atobSpy = vi.fn().mockImplementation((str: string) => {
-          return originalAtob(str);
-        });
-        global.atob = atobSpy;
+          component.loadFiles(mockEvent);
 
-        const mockEvent = {
-          target: {
-            files: createMockFileList([mockFile])
+          await waitFor(ASYNC_TICK);
+          if (mockFileReader.onload) {
+            mockFileReader.onload(mockProgressEvent);
           }
-        } as unknown as Event;
 
-        const mockProgressEvent = {
-          target: {
-            result: dataUrl
-          }
-        } as unknown as ProgressEvent<FileReader>;
-
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
-
-        component.loadFiles(mockEvent);
-
-        await waitFor(10);
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
-
-        await waitFor(200);
-        expect(atobSpy).toHaveBeenCalled();
-        const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
-        expect(decodeErrorCalls.length).toBe(0);
-        global.atob = originalAtob;
-        consoleErrorSpy.mockRestore();
-      }, 10000);
+          await waitFor(ASYNC_WAIT_LONG);
+          expect(atobSpy).toHaveBeenCalled();
+          const decodeErrorCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === 'Error decoding base64');
+          expect(decodeErrorCalls.length).toBe(0);
+          global.atob = originalAtob;
+          consoleErrorSpy.mockRestore();
+        },
+        TEST_TIMEOUT
+      );
 
       it('should throw fileDecodeError when both parseISO88591Base64 and atob fail', async () => {
         // Create invalid base64 that will fail both decoding methods
@@ -692,18 +632,18 @@ describe('ImportStudyComponent', () => {
 
         component.loadFiles(mockEvent);
 
-        await waitFor(10);
+        await waitFor(ASYNC_TICK);
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
 
-        await waitFor(100);
+        await waitFor(ASYNC_WAIT);
         expect(consoleErrorSpy).toHaveBeenCalledWith('Error decoding base64', expect.any(Error));
         expect(mockMessageService.add).toHaveBeenCalledWith({
           severity: 'error',
           summary: expect.any(String),
           detail: 'Error decoding file',
-          life: 3000
+          life: NOTIFICATION_LIFE
         });
         expect(component.erroredFiles()).toContain(mockFile.name);
         consoleErrorSpy.mockRestore();
@@ -732,227 +672,195 @@ describe('ImportStudyComponent', () => {
 
         component.loadFiles(mockEvent);
 
-        await waitFor(10);
+        await waitFor(ASYNC_TICK);
         if (mockFileReader.onload) {
           mockFileReader.onload(mockProgressEvent);
         }
 
-        await waitFor(100);
+        await waitFor(ASYNC_WAIT);
       });
     });
 
     describe('Papa.parse error handling (lines 267-273)', () => {
-      it('should execute reject path when parseError message is in errors', async () => {
-        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+      it(
+        'should execute reject path when parseError message is in errors',
+        async () => {
+          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
-        const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
+          const mockCsvContent = MOCK_CSV_CONTENT;
 
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(mockCsvContent);
-        const base64Content = btoa(String.fromCharCode(...bytes));
-        const dataUrl = `data:text/csv;base64,${base64Content}`;
+          const encoder = new TextEncoder();
+          const bytes = encoder.encode(mockCsvContent);
+          const base64Content = btoa(String.fromCharCode(...bytes));
+          const dataUrl = `data:text/csv;base64,${base64Content}`;
 
-        // Mock createStudyFromProtoV4 to throw a known error (cableNotFound is in errors)
-        studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('cableNotFound'));
+          // Mock createStudyFromProtoV4 to throw a known error (cableNotFound is in errors)
+          studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('cableNotFound'));
 
-        const mockParse = vi
-          .fn()
-          .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
-            if (config?.complete) {
-              setTimeout(async () => {
-                const mockResult: Papa.ParseResult<Record<string, string>> = {
-                  data: [
-                    {
-                      num: '1',
-                      nom: '98',
-                      suspension: 'FAUX',
-                      alt_acc: '1075,53',
-                      long_bras: '0',
-                      angle_ligne: '-19,1',
-                      long_ch: '0',
-                      pds_ch: '0',
-                      surf_ch: '0',
-                      ctr_poids: '0',
-                      ch_en_V: 'FAUX',
-                      portée: '473,07'
+          const mockParse = vi
+            .fn()
+            .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+              if (config?.complete) {
+                setTimeout(async () => {
+                  const mockResult: Papa.ParseResult<Record<string, string>> = {
+                    data: [
+                      {
+                        num: '1',
+                        nom: '98',
+                        suspension: 'FAUX',
+                        alt_acc: '1075,53',
+                        long_bras: '0',
+                        angle_ligne: '-19,1',
+                        long_ch: '0',
+                        pds_ch: '0',
+                        surf_ch: '0',
+                        ctr_poids: '0',
+                        ch_en_V: 'FAUX',
+                        portée: '473,07'
+                      }
+                    ],
+                    errors: [],
+                    meta: {
+                      delimiter: ';',
+                      linebreak: '\n',
+                      aborted: false,
+                      truncated: false,
+                      cursor: 0
                     }
-                  ],
-                  errors: [],
-                  meta: {
-                    delimiter: ';',
-                    linebreak: '\n',
-                    aborted: false,
-                    truncated: false,
-                    cursor: 0
+                  };
+                  try {
+                    const result = config.complete!(mockResult, undefined) as unknown;
+                    if (result && typeof result === 'object' && 'then' in result) {
+                      await (result as Promise<void>);
+                    }
+                  } catch {
+                    // Errors are expected and handled by the component
                   }
-                };
-                try {
-                  const result = config.complete!(mockResult, undefined) as unknown;
-                  if (result && typeof result === 'object' && 'then' in result) {
-                    await (result as Promise<void>);
-                  }
-                } catch {
-                  // Errors are expected and handled by the component
-                }
-              }, 0);
+                }, 0);
+              }
+              return {} as Papa.ParseResult<Record<string, string>>;
+            });
+
+          (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
+
+          const mockEvent = {
+            target: {
+              files: createMockFileList([mockFile])
             }
-            return {} as Papa.ParseResult<Record<string, string>>;
+          } as unknown as Event;
+
+          const mockProgressEvent = {
+            target: {
+              result: dataUrl
+            }
+          } as unknown as ProgressEvent<FileReader>;
+
+          vi.spyOn(console, 'error').mockReturnValue(undefined);
+
+          component.loadFiles(mockEvent).catch(() => {
+            // Errors are expected and handled
           });
 
-        (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
-
-        const mockEvent = {
-          target: {
-            files: createMockFileList([mockFile])
+          await waitFor(ASYNC_TICK);
+          if (mockFileReader.onload) {
+            mockFileReader.onload(mockProgressEvent);
           }
-        } as unknown as Event;
 
-        const mockProgressEvent = {
-          target: {
-            result: dataUrl
-          }
-        } as unknown as ProgressEvent<FileReader>;
+          // Coverage: code path executed (lines 267-273) - reject called for known error
+          await waitFor(500);
+        },
+        TEST_TIMEOUT
+      );
 
-        vi.spyOn(console, 'error').mockReturnValue(undefined);
+      it(
+        'should throw fileParseError when parseError is not a known error',
+        async () => {
+          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
 
-        component.loadFiles(mockEvent).catch(() => {
-          // Errors are expected and handled
-        });
+          const mockCsvContent = MOCK_CSV_CONTENT;
 
-        await waitFor(10);
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
+          const encoder = new TextEncoder();
+          const bytes = encoder.encode(mockCsvContent);
+          const base64Content = btoa(String.fromCharCode(...bytes));
+          const dataUrl = `data:text/csv;base64,${base64Content}`;
 
-        // Coverage: code path executed (lines 267-273) - reject called for known error
-        await waitFor(500);
-      }, 10000);
+          // Mock createStudyFromProtoV4 to throw an unknown error (not in errors)
+          studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('unknownError'));
 
-      it('should throw fileParseError when parseError is not a known error', async () => {
-        vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
-
-        const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
-1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
-2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
-4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
-5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
-6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
-7;104;VRAI;1081,92;0;1,4;2;65;0;0;FAUX;522,35;;25
-8;105;VRAI;1090,16;0;0;2;65;0;0;FAUX;426,38;;paramètre réglage
-9;106;VRAI;1111,39;0;0;2;65;0;0;FAUX;367,72;;2001
-10;107;VRAI;1143,57;0;0;2;65;0;0;FAUX;452,33;;pret %CRA
-11;108;VRAI;1122,55;0;0;2;130;0;0;FAUX;1083,08;;0
-12;109;VRAI;1265,1;0;-4,9;2;130;0;0;FAUX;468,62;;temp load
-13;110;VRAI;1222,62;0;-0,6;2;65;0;0;FAUX;411,67;;15
-14;111;VRAI;1205,33;0;0;2;65;0;0;FAUX;574,32;;vent load
-15;112;VRAI;1163,6;0;0;2;65;0;0;FAUX;439,58;;0
-16;113;VRAI;1134,9;0;0;2;65;0;240;FAUX;550;;givre load
-17;114;VRAI;1159,65;0;0;2;65;0;0;FAUX;329,26;;0
-18;115;VRAI;1142,88;0;0;2;65;0;0;FAUX;544,04;;nom projet
-19;116;VRAI;1022,31;0;0;2;65;0;0;FAUX;516,94;;mon_projet
-20;117;FAUX;1135,72;0;33;0;0;0;0;FAUX;;;`;
-
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(mockCsvContent);
-        const base64Content = btoa(String.fromCharCode(...bytes));
-        const dataUrl = `data:text/csv;base64,${base64Content}`;
-
-        // Mock createStudyFromProtoV4 to throw an unknown error (not in errors)
-        studiesServiceMock.createStudyFromProtoV4 = vi.fn().mockRejectedValue(new Error('unknownError'));
-
-        const mockParse = vi
-          .fn()
-          .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
-            if (config?.complete) {
-              setTimeout(async () => {
-                const mockResult: Papa.ParseResult<Record<string, string>> = {
-                  data: [
-                    {
-                      num: '1',
-                      nom: '98',
-                      suspension: 'FAUX',
-                      alt_acc: '1075,53',
-                      long_bras: '0',
-                      angle_ligne: '-19,1',
-                      long_ch: '0',
-                      pds_ch: '0',
-                      surf_ch: '0',
-                      ctr_poids: '0',
-                      ch_en_V: 'FAUX',
-                      portée: '473,07'
+          const mockParse = vi
+            .fn()
+            .mockImplementation((input: string, config?: Papa.ParseConfig<Record<string, string>>) => {
+              if (config?.complete) {
+                setTimeout(async () => {
+                  const mockResult: Papa.ParseResult<Record<string, string>> = {
+                    data: [
+                      {
+                        num: '1',
+                        nom: '98',
+                        suspension: 'FAUX',
+                        alt_acc: '1075,53',
+                        long_bras: '0',
+                        angle_ligne: '-19,1',
+                        long_ch: '0',
+                        pds_ch: '0',
+                        surf_ch: '0',
+                        ctr_poids: '0',
+                        ch_en_V: 'FAUX',
+                        portée: '473,07'
+                      }
+                    ],
+                    errors: [],
+                    meta: {
+                      delimiter: ';',
+                      linebreak: '\n',
+                      aborted: false,
+                      truncated: false,
+                      cursor: 0
                     }
-                  ],
-                  errors: [],
-                  meta: {
-                    delimiter: ';',
-                    linebreak: '\n',
-                    aborted: false,
-                    truncated: false,
-                    cursor: 0
+                  };
+                  try {
+                    const result = config.complete!(mockResult, undefined) as unknown;
+                    if (result && typeof result === 'object' && 'then' in result) {
+                      await (result as Promise<void>);
+                    }
+                  } catch {
+                    // Errors are expected and handled by the component
                   }
-                };
-                try {
-                  const result = config.complete!(mockResult, undefined) as unknown;
-                  if (result && typeof result === 'object' && 'then' in result) {
-                    await (result as Promise<void>);
-                  }
-                } catch {
-                  // Errors are expected and handled by the component
-                }
-              }, 0);
+                }, 0);
+              }
+              return {} as Papa.ParseResult<Record<string, string>>;
+            });
+
+          (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
+
+          const mockEvent = {
+            target: {
+              files: createMockFileList([mockFile])
             }
-            return {} as Papa.ParseResult<Record<string, string>>;
+          } as unknown as Event;
+
+          const mockProgressEvent = {
+            target: {
+              result: dataUrl
+            }
+          } as unknown as ProgressEvent<FileReader>;
+
+          vi.spyOn(console, 'error').mockReturnValue(undefined);
+
+          component.loadFiles(mockEvent).catch(() => {
+            // Errors are expected and handled
           });
 
-        (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
-
-        const mockEvent = {
-          target: {
-            files: createMockFileList([mockFile])
+          await waitFor(ASYNC_TICK);
+          if (mockFileReader.onload) {
+            mockFileReader.onload(mockProgressEvent);
           }
-        } as unknown as Event;
 
-        const mockProgressEvent = {
-          target: {
-            result: dataUrl
-          }
-        } as unknown as ProgressEvent<FileReader>;
-
-        vi.spyOn(console, 'error').mockReturnValue(undefined);
-
-        component.loadFiles(mockEvent).catch(() => {
-          // Errors are expected and handled
-        });
-
-        await waitFor(10);
-        if (mockFileReader.onload) {
-          mockFileReader.onload(mockProgressEvent);
-        }
-
-        // Coverage: code path executed (lines 267-273) - fileParseError thrown for unknown error
-        await waitFor(500);
-      }, 10000);
+          // Coverage: code path executed (lines 267-273) - fileParseError thrown for unknown error
+          await waitFor(500);
+        },
+        TEST_TIMEOUT
+      );
     });
   });
 
@@ -971,14 +879,14 @@ describe('ImportStudyComponent', () => {
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
       expect(component.loading()).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error reading file',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       consoleErrorSpy.mockRestore();
     });
@@ -997,14 +905,14 @@ describe('ImportStudyComponent', () => {
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', expect.any(Error));
       expect(component.loading()).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error importing study',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       consoleErrorSpy.mockRestore();
     });
@@ -1023,14 +931,14 @@ describe('ImportStudyComponent', () => {
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', 'string error');
       expect(component.loading()).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error importing study',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       consoleErrorSpy.mockRestore();
     });
@@ -1048,7 +956,7 @@ describe('ImportStudyComponent', () => {
       component.loadFiles(mockEvent);
 
       // Wait for async operations
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(component.loading()).toBe(false);
     });
 
@@ -1064,12 +972,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error reading file',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
     });
 
@@ -1085,12 +993,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error decoding file',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
     });
 
@@ -1106,12 +1014,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error parsing file',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
     });
 
@@ -1127,12 +1035,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Cable not found in database',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
     });
 
@@ -1148,12 +1056,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error importing study',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
     });
 
@@ -1170,14 +1078,14 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error in loadFiles', null);
       expect(component.loading()).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: 'Error importing study',
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       consoleErrorSpy.mockRestore();
     });
@@ -1296,12 +1204,12 @@ describe('ImportStudyComponent', () => {
 
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
       expect(component.newStudies()).toContainEqual(mockCreatedStudy);
@@ -1330,12 +1238,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(component.newStudies()).toContainEqual(mockCreatedStudy);
     });
@@ -1358,17 +1266,17 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: expect.any(String),
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       expect(component.erroredFiles()).toContain(mockFile.name);
       expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
@@ -1393,12 +1301,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
       expect(component.newStudies()).not.toContainEqual(expect.objectContaining({ uuid: 'test-uuid' }));
@@ -1443,12 +1351,12 @@ describe('ImportStudyComponent', () => {
 
       component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as unknown as {
         title: string;
@@ -1491,17 +1399,17 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
 
-      await waitFor(100);
+      await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: expect.any(String),
         detail: expect.any(String),
-        life: 3000
+        life: NOTIFICATION_LIFE
       });
       expect(component.erroredFiles()).toContain(mockFile.name);
       expect(component.loading()).toBe(false);
@@ -1589,7 +1497,7 @@ describe('ImportStudyComponent', () => {
 
       expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1653,7 +1561,7 @@ describe('ImportStudyComponent', () => {
 
       const importPromise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1698,7 +1606,7 @@ describe('ImportStudyComponent', () => {
 
       const importPromise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1738,7 +1646,7 @@ describe('ImportStudyComponent', () => {
 
       const importPromise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1759,7 +1667,7 @@ describe('ImportStudyComponent', () => {
 
       const promise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1780,7 +1688,7 @@ describe('ImportStudyComponent', () => {
 
       const promise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1805,7 +1713,7 @@ describe('ImportStudyComponent', () => {
 
       const importPromise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1835,7 +1743,7 @@ describe('ImportStudyComponent', () => {
 
       const promise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }
@@ -1892,7 +1800,7 @@ describe('ImportStudyComponent', () => {
 
       const importPromise = component.loadAppFile(mockFile);
 
-      await waitFor(10);
+      await waitFor(ASYNC_TICK);
       if (mockFileReader.onload) {
         mockFileReader.onload(mockProgressEvent);
       }

@@ -85,8 +85,7 @@ export class ChargesService {
     this.messageService.add({
       severity: 'success',
       summary: $localize`Successful`,
-      detail: existingCharge ? $localize`Charge updated` : $localize`Charge created`,
-      life: 500
+      detail: existingCharge ? $localize`Charge updated` : $localize`Charge created`
     });
   }
 
@@ -102,7 +101,7 @@ export class ChargesService {
 
     section.charges = section.charges.filter((c) => c?.uuid !== chargeUuid);
     if (section.selected_charge_uuid === chargeUuid) {
-      section.selected_charge_uuid = section.charges[0]?.uuid ?? null;
+      section.selected_charge_uuid = null;
     }
     await this.studiesService.updateStudy(study);
     this.messageService.add({

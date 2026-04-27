@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, computed, inject } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 /** Represents a single data field with label, value, and unit. */
 interface DataField {
@@ -59,9 +61,20 @@ export class SectionPlotCardComponent {
   /** Zero-based index of the support or span. */
   index = input.required<number>();
 
+  private readonly spanService = inject(PlotSpanService);
+
   cardTitle = computed(() => {
     const idx = this.index();
-    return this.type() === 'support' ? `N°${idx + 1}` : `${idx + 1}-${idx + 2}`;
+    const supports = this.spanService.section()?.supports;
+    if (this.type() === 'support') {
+      const num = supports?.[idx]?.number;
+      return num ? formatSupportNumber(num) : String(idx + 1);
+    }
+    const numLeft = supports?.[idx]?.number;
+    const numRight = supports?.[idx + 1]?.number;
+    const left = numLeft ? formatSupportNumber(numLeft) : String(idx + 1);
+    const right = numRight ? formatSupportNumber(numRight) : String(idx + 2);
+    return `${left}-${right}`;
   });
 
   cardColor = computed(() => (this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'));
@@ -190,11 +203,6 @@ export class SectionPlotCardComponent {
             label: $localize`Angle balancement:`,
             value: this.getFormatedNumberIndex(loadAngle),
             unit: '°'
-          },
-          {
-            label: $localize`Cable slope acc.:`,
-            value: this.getFormatedNumberIndex(loadAngle),
-            unit: '°'
           }
         ]
       }
@@ -241,13 +249,17 @@ export class SectionPlotCardComponent {
   // Expanded data for span type
   spanExpandedData = computed((): DataField[] => {
     const litData = this.litData();
+    const sag = litData?.sag;
+    const sagS2 = litData?.sag_s2;
     const horizontalDistance = litData?.horizontal_distance;
     const arcLength = litData?.arc_length;
     const th = litData?.T_h;
     const tensionInf = litData?.tension_inf;
+    const slopeLeft = litData?.slope_left;
+    const slopeRight = litData?.slope_right;
     return [
-      { label: $localize`Arrow F1:`, value: '-', unit: 'm' },
-      { label: $localize`Arrow F2:`, value: '-', unit: 'm' },
+      { label: $localize`Arrow F1:`, value: this.getFormatedNumberIndex(sag), unit: 'm' },
+      { label: $localize`Arrow F2:`, value: this.getFormatedNumberIndex(sagS2), unit: 'm' },
       {
         label: $localize`Horizontal dist. acc.:`,
         value: this.getFormatedNumberIndex(horizontalDistance),
@@ -267,6 +279,16 @@ export class SectionPlotCardComponent {
         label: $localize`Inf tension  acc.:`,
         value: this.getFormatedNumberIndex(tensionInf),
         unit: 'daN'
+      },
+      {
+        label: $localize`Cable slope left att.:`,
+        value: this.getFormatedNumberIndex(slopeLeft),
+        unit: '°'
+      },
+      {
+        label: $localize`Cable slope right att.:`,
+        value: this.getFormatedNumberIndex(slopeRight),
+        unit: '°'
       }
     ];
   });

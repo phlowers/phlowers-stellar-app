@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, input, model, signal, computed } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, input, model, signal, computed, effect } from '@angular/core';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NgClass, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
@@ -15,7 +17,6 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
-import { DecimalPipe } from '@angular/common';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -28,6 +29,7 @@ import { DecimalPipe } from '@angular/common';
     SelectButtonModule,
     RadioButtonModule,
     MessageModule,
+    ProgressSpinnerModule,
     IconComponent,
     ButtonComponent,
     DecimalPipe
@@ -54,17 +56,59 @@ export class TemperatureCalculationComponent {
   measureData = model.required<FieldMeasure>();
 
   temperatureCalculationError = signal<boolean>(false);
+  readonly isCalculating = signal(false);
 
   readonly transitBounds = TRANSIT_BOUNDS;
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
   readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto', disabled: true },
+    { label: $localize`Auto`, value: 'auto' },
     { label: $localize`Perpendicular`, value: 'perpendicular' }
   ];
 
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
+
+  readonly isWindIncidenceLoading = computed(() => !this.workerReady());
+
+  readonly windIncidenceDisplayState = computed((): 'perpendicular' | 'missing-inputs' | 'loading' | 'value' => {
+    const { windIncidenceMode, windDirection, azimuth, windIncidence } = this.measureData();
+    if (windIncidenceMode !== 'auto') return 'perpendicular';
+    if (windDirection === null || windDirection === undefined || azimuth === null || azimuth === undefined)
+      return 'missing-inputs';
+    if (this.isWindIncidenceLoading() || windIncidence === null) return 'loading';
+    return 'value';
+  });
+
+  private readonly lastWindIncidenceInput = signal<{ azimuth: number; windDirection: string } | null>(null);
+
+  private readonly windIncidenceEffect = effect(() => {
+    const isWorkerReady = this.workerReady();
+    const { azimuth, windDirection } = this.measureData();
+
+    if (
+      !isWorkerReady ||
+      azimuth === null ||
+      azimuth === undefined ||
+      windDirection === null ||
+      windDirection === undefined
+    ) {
+      this.lastWindIncidenceInput.set(null);
+      return;
+    }
+
+    const lastInput = this.lastWindIncidenceInput();
+    const hasSameInput =
+      lastInput !== null && lastInput.azimuth === azimuth && lastInput.windDirection === windDirection;
+
+    if (hasSameInput) {
+      return;
+    }
+
+    this.lastWindIncidenceInput.set({ azimuth, windDirection });
+    void this.computeWindIncidence(azimuth, windDirection);
+  });
 
   isTransitOutOfBounds = computed(() => {
     const transit = this.measureData().transit;
@@ -82,6 +126,16 @@ export class TemperatureCalculationComponent {
     return option?.label ?? windDirection;
   });
 
+  private async computeWindIncidence(azimuth: number, windDirection: string): Promise<void> {
+    const { result, error } = await this.workerPythonService.runTask(Task.getWindIncidence, {
+      azimuth,
+      windDirection
+    });
+    if (!error && result !== undefined) {
+      this.measureData.update((d) => ({ ...d, windIncidence: Math.round(result.windIncidence) }));
+    }
+  }
+
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
   }
@@ -93,28 +147,33 @@ export class TemperatureCalculationComponent {
       ...d,
       outputs: { ...d.outputs, cableTemperature: null }
     }));
-    const { result, error } = await this.workerPythonService.runTask(Task.temperatureCalculation, {
-      cableName: data.cableName!,
-      ambientTemperature: data.ambientTemperature || 0,
-      longitude: data.longitude || 0,
-      latitude: data.latitude || 0,
-      altitude: data.altitude ?? 0,
-      azimuth: data.azimuth ?? 0,
-      transit: data.transit!,
-      date: data.date ?? null,
-      time: data.time ?? null,
-      windSpeed: data.windSpeed ?? 0,
-      windSpeedUnit: data.windSpeedUnit ?? 'kmh',
-      windDirection: data.windDirection ?? 'North',
-      skyCover: data.skyCover ?? ''
-    });
-    if (error) {
-      this.temperatureCalculationError.set(true);
-      return;
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.temperatureCalculation, {
+        cableName: data.cableName!,
+        ambientTemperature: data.ambientTemperature || 0,
+        longitude: data.longitude || 0,
+        latitude: data.latitude || 0,
+        altitude: data.altitude ?? 0,
+        azimuth: data.azimuth ?? 0,
+        transit: data.transit!,
+        date: data.date ?? null,
+        time: data.time ?? null,
+        windSpeed: data.windSpeed ?? 0,
+        windSpeedUnit: data.windSpeedUnit ?? 'kmh',
+        windDirection: data.windDirection ?? 'North',
+        skyCover: data.skyCover ?? ''
+      });
+      if (error) {
+        this.temperatureCalculationError.set(true);
+        return;
+      }
+      this.measureData.update((d) => ({
+        ...d,
+        outputs: { ...d.outputs, cableTemperature: result }
+      }));
+    } finally {
+      this.isCalculating.set(false);
     }
-    this.measureData.update((d) => ({
-      ...d,
-      outputs: { ...d.outputs, cableTemperature: result }
-    }));
   }
 }

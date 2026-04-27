@@ -7,7 +7,9 @@ This section covers general application features and configuration.
 application_update
 custom_components
 engine_worker
+obstacles_and_obstacle_distances
 offline_database
+plot_refresh_pipeline
 theme_styles
 angular_signals_pitfalls
 ```

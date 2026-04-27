@@ -15,10 +15,12 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LoadFormsService } from '../../services/loadForms.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
 
 /** Validator that rejects non-integer numeric values. */
@@ -98,6 +100,9 @@ export class ClimateComponent {
   private readonly destroyRef = inject(DestroyRef);
   readonly constraints = climateConstraints;
 
+  readonly isSaving = signal(false);
+  readonly isCalculatingLoad = signal(false);
+
   form: FormGroup<{
     windPressure: FormControl<number | null>;
     cableTemperature: FormControl<number | null>;
@@ -151,21 +156,25 @@ export class ClimateComponent {
   readonly frontierSupportOptions = signal<{ label: string; value: number }[]>([]);
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly chargesService = inject(ChargesService);
   private readonly loadFormsService = inject(LoadFormsService);
 
   async initForm() {
-    const supports = this.plotService.section()?.supports;
+    const supports = this.spanService.section()?.supports;
     const frontierSupportOptions =
-      supports?.map((_, index) => ({
-        label: (index + 1).toString(),
-        value: index + 1
-      })) ?? [];
+      supports?.map((support, index) => {
+        const num = support.number;
+        return {
+          label: num ? formatSupportNumber(num) : String(index + 1),
+          value: index + 1
+        };
+      }) ?? [];
     frontierSupportOptions.shift();
     frontierSupportOptions.pop();
     this.frontierSupportOptions.set(frontierSupportOptions);
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       return;
     }
@@ -194,7 +203,7 @@ export class ClimateComponent {
   }
 
   resetForm() {
-    const baseClimate = getBaseClimate(this.plotService.section());
+    const baseClimate = getBaseClimate(this.spanService.section());
     this.form.reset({ ...baseClimate });
     // Update temporaryLoadData with the base climate values
     this.plotService.temporaryLoadData = {
@@ -205,7 +214,7 @@ export class ClimateComponent {
 
   deleteCharge() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       throw new Error('Study or section not found');
     }
@@ -214,15 +223,26 @@ export class ClimateComponent {
 
   async saveForm() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
-      throw new Error('Study or section not found');
+      return;
     }
-    this.loadFormsService.saveTemporaryLoadDataInSection();
+    this.isSaving.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+      await this.loadFormsService.saveTemporaryLoadDataInSection();
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   async calculateForm() {
-    await this.loadFormsService.calculateLoad();
+    this.isCalculatingLoad.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+    } finally {
+      this.isCalculatingLoad.set(false);
+    }
   }
 
   isFormValid(): boolean {

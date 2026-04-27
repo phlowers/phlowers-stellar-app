@@ -1,10 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { SortEvent } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 @Component({
   selector: 'app-button',
@@ -18,7 +22,9 @@ class MockButtonComponent {}
   standalone: true,
   template: ''
 })
-class MockIconComponent {}
+class MockIconComponent {
+  icon = input<string>();
+}
 
 describe('L0SumComponent', () => {
   let component: L0SumComponent;
@@ -48,12 +54,21 @@ describe('L0SumComponent', () => {
       litData: vi.fn().mockReturnValue(mockLitData)
     } as unknown as PlotService;
 
+    const mockPlotSpanService = {
+      section: vi.fn().mockReturnValue(null)
+    } as unknown as PlotSpanService;
+
     await TestBed.configureTestingModule({
-      providers: [ToolbarDialogService, provideHttpClientTesting(), { provide: PlotService, useValue: mockPlotService }]
+      providers: [
+        ToolbarDialogService,
+        provideHttpClientTesting(),
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockPlotSpanService }
+      ]
     })
       .overrideComponent(L0SumComponent, {
         set: {
-          imports: [MockButtonComponent, MockIconComponent]
+          imports: [CommonModule, TableModule, ProgressSpinnerModule, MockButtonComponent, MockIconComponent]
         }
       })
       .compileComponents();
@@ -195,7 +210,7 @@ describe('L0SumComponent', () => {
         { span: '1-2', l0: 100, index: 0 }
       ];
       const event = { field: 'span', order: null, data };
-      expect(() => component.customSort(event as SortEvent)).not.toThrow();
+      expect(() => component.customSort(event as unknown as SortEvent)).not.toThrow();
     });
   });
 });

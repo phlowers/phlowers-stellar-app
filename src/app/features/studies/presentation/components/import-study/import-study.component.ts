@@ -6,12 +6,13 @@ import Papa from 'papaparse';
 import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { ToastModule } from 'primeng/toast';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { NotificationService } from '@services/notification/notification.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /**
  * Parse a ISO 8859-1 base64 string
@@ -86,24 +87,14 @@ const formatProtoV4Parameters = (rawParameters: string[], fileName: string): Pro
 /**
  * Builds a PrimeNG toast message for a given import error type.
  * @param type - Key identifying the error in the `errors` map
- * @returns Toast message configuration object
+ * @returns Toast detail string for the error
  */
-const importErrorMessage = (type: keyof typeof errors) => {
-  return {
-    severity: 'error',
-    summary: $localize`Error`,
-    detail: errors[type] || $localize`Error importing study`,
-    life: 3000
-  };
+const importErrorDetail = (type: keyof typeof errors): string => {
+  return errors[type] || $localize`Error importing study`;
 };
 
-/** Toast message shown on successful study import. */
-const importSuccessMessage = {
-  severity: 'success',
-  summary: $localize`Success`,
-  detail: $localize`Study imported successfully`,
-  life: 3000
-};
+/** Detail message shown on successful study import. */
+const importSuccessDetail = $localize`Study imported successfully`;
 
 /**
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
@@ -112,7 +103,7 @@ const importSuccessMessage = {
  */
 @Component({
   selector: 'app-import-study',
-  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent, ToastModule],
+  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -122,9 +113,10 @@ export class ImportStudyComponent {
   newStudies = signal<Study[]>([]);
   erroredFiles = signal<string[]>([]);
   private readonly studiesService = inject(StudiesService);
-  private readonly messageService = inject(MessageService);
+  private readonly notificationService = inject(NotificationService);
   private readonly cablesService = inject(CablesService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly logger = inject(LoggerService);
 
   async deleteStudy(uuid: string) {
     await this.studiesService.deleteStudy(uuid);
@@ -135,7 +127,7 @@ export class ImportStudyComponent {
     try {
       return atob(textContent);
     } catch (error: unknown) {
-      console.error('Error decoding base64', error);
+      this.logger.error('Error decoding base64', error);
       throw new Error('fileDecodeError');
     }
   }
@@ -144,7 +136,7 @@ export class ImportStudyComponent {
     try {
       return JSON.parse(jsonContent) as Record<string, unknown>;
     } catch (error: unknown) {
-      console.error('Error parsing JSON', error);
+      this.logger.error('Error parsing JSON', error);
       throw new Error('fileParseError');
     }
   }
@@ -196,7 +188,7 @@ export class ImportStudyComponent {
     }
 
     this.newStudies.set([...this.newStudies(), createdStudy]);
-    this.messageService.add(importSuccessMessage);
+    this.notificationService.success(importSuccessDetail);
   }
 
   private async processAppFileContent(result: string, resolve: () => void): Promise<void> {
@@ -220,14 +212,14 @@ export class ImportStudyComponent {
           if (error instanceof Error && error.message in errors) {
             reject(error);
           } else {
-            console.error('Error importing study', error);
+            this.logger.error('Error importing study', error);
             reject(new Error('studyImportError'));
           }
         }
       };
 
       reader.onerror = (e) => {
-        console.error('Error reading file', e);
+        this.logger.error('Error reading file', e);
         reject(new Error('fileReadError'));
       };
 
@@ -273,7 +265,7 @@ export class ImportStudyComponent {
       try {
         return atob(base64Content);
       } catch (decodeError: unknown) {
-        console.error('Error decoding base64', decodeError);
+        this.logger.error('Error decoding base64', decodeError);
         throw new Error('fileDecodeError');
       }
     }
@@ -314,7 +306,7 @@ export class ImportStudyComponent {
     reject: (error: Error) => void
   ): void {
     if (jsonResults.errors && jsonResults.errors.length > 0) {
-      console.error('Error parsing file', jsonResults.errors);
+      this.logger.error('Error parsing file', jsonResults.errors);
       reject(new Error('fileParseError'));
       return;
     }
@@ -325,7 +317,7 @@ export class ImportStudyComponent {
       .createStudyFromProtoV4(supports, parameters)
       .then((study) => {
         this.newStudies.set([...this.newStudies(), study]);
-        this.messageService.add(importSuccessMessage);
+        this.notificationService.success(importSuccessDetail);
         resolve();
       })
       .catch((parseError: unknown) => {
@@ -344,7 +336,7 @@ export class ImportStudyComponent {
     reject: (error: Error) => void
   ): Promise<void> {
     if (!result) {
-      console.error('Error reading file', fileName);
+      this.logger.error('Error reading file', fileName);
       throw new Error('fileReadError');
     }
 
@@ -377,7 +369,7 @@ export class ImportStudyComponent {
           if (error instanceof Error && error.message in errors) {
             reject(error);
           } else {
-            console.error('Error importing study', error);
+            this.logger.error('Error importing study', error);
             reject(new Error('studyImportError'));
           }
         }
@@ -411,11 +403,7 @@ export class ImportStudyComponent {
       return;
     }
 
-    this.messageService.add({
-      severity: 'error',
-      summary: $localize`Error`,
-      detail: errors.fileTypeNotAllowed
-    });
+    this.notificationService.error(errors.fileTypeNotAllowed);
     this.erroredFiles.set([...this.erroredFiles(), ...invalidFiles.map((file) => file.name)]);
   }
 
@@ -428,8 +416,8 @@ export class ImportStudyComponent {
 
   private handleFileError(fileError: unknown, fileName: string): void {
     const errorType = this.getErrorType(fileError);
-    console.error('Error importing file', fileError);
-    this.messageService.add(importErrorMessage(errorType));
+    this.logger.error('Error importing file', fileError);
+    this.notificationService.error(importErrorDetail(errorType));
     this.erroredFiles.set([...this.erroredFiles(), fileName]);
   }
 
@@ -452,10 +440,10 @@ export class ImportStudyComponent {
   }
 
   private handleLoadFilesError(error: unknown): void {
-    console.error('Error in loadFiles', error);
+    this.logger.error('Error in loadFiles', error);
     this.loading.set(false);
     const errorType = this.getErrorType(error);
-    this.messageService.add(importErrorMessage(errorType));
+    this.notificationService.error(importErrorDetail(errorType));
   }
 
   async loadFiles(event: Event) {

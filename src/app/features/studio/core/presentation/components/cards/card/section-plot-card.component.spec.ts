@@ -6,6 +6,7 @@ import { SectionPlotCardComponent } from './section-plot-card.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 const mockLitData: GetSectionOutput = {
   supports: [[[1, 2, 3]]],
@@ -40,7 +41,11 @@ const mockLitData: GetSectionOutput = {
   L0: [100, 200, 300],
   horizontal_distance: [99, 199, 299],
   arc_length: [101, 201, 301],
-  T_h: [3000, 2000, 1000]
+  T_h: [3000, 2000, 1000],
+  slope_left: [0.01, 0.02, 0.03],
+  slope_right: [0.04, 0.05, 0.06],
+  sag: [1, 2, 3],
+  sag_s2: [4, 5, 6]
 };
 
 @Component({
@@ -61,8 +66,13 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
   let hostComponent: TestHostComponent;
 
   beforeEach(async () => {
+    const mockPlotSpanService = {
+      section: vi.fn().mockReturnValue(null)
+    };
+
     await TestBed.configureTestingModule({
-      imports: [SectionPlotCardComponent, TestHostComponent, CardComponent, IconComponent, NoopAnimationsModule]
+      imports: [SectionPlotCardComponent, TestHostComponent, CardComponent, IconComponent, NoopAnimationsModule],
+      providers: [{ provide: PlotSpanService, useValue: mockPlotSpanService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionPlotCardComponent);
@@ -99,7 +109,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     fixture.componentRef.setInput('type', 'support');
     fixture.componentRef.setInput('index', 2);
     fixture.componentRef.setInput('litData', mockLitData);
-    expect(component.cardTitle()).toBe('N°3');
+    expect(component.cardTitle()).toBe('3');
     expect(component.cardColor()).toBe('icon-wrapper--support');
 
     fixture.componentRef.setInput('type', 'span');
@@ -135,7 +145,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       hostFixture.detectChanges();
 
       let title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
-      expect(title.textContent?.trim()).toBe('N°4');
+      expect(title.textContent?.trim()).toBe('4');
 
       hostComponent.cardType = 'span';
       hostComponent.cardIndex = 4;
@@ -198,7 +208,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     expect(spanData.length).toBe(5);
     expect(support[0].fields.length).toBe(4);
     expect(spanData[0].label).toContain('Span length');
-    expect(spanExpandedData.length).toBe(6);
+    expect(spanExpandedData.length).toBe(8);
   });
 
   describe('HTML rendering', () => {
@@ -221,7 +231,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       const el = getByTestId('card-title');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('P');
-      expect(el?.textContent?.trim()).toBe('N°1');
+      expect(el?.textContent?.trim()).toBe('1');
     });
   });
 });

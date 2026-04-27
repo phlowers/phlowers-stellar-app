@@ -25,6 +25,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -84,6 +85,7 @@ export class SectionsTabComponent {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly chargesService = inject(ChargesService);
 
   createInitialCondition(section: Section): InitialCondition {
@@ -221,9 +223,10 @@ export class SectionsTabComponent {
     initialCondition,
     section
   }: {
-    initialCondition: InitialCondition;
+    initialCondition: InitialCondition | undefined;
     section: Section;
   }) => {
+    if (!initialCondition) return;
     this.setInitialCondition.emit({
       section: section,
       initialCondition: initialCondition
@@ -243,7 +246,7 @@ export class SectionsTabComponent {
     );
   }
 
-  selectChargeCase(charge: { label: string; value: string }, section: Section) {
+  selectChargeCase(charge: { label: string; value: string } | undefined, section: Section) {
     this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
   }
 
@@ -258,7 +261,7 @@ export class SectionsTabComponent {
   viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit', section: Section) {
     if (charge?.value) {
       this.plotService.study.set(this.study());
-      this.plotService.section.set(section);
+      this.spanService.section.set(section);
       this.toolbarDialogService.openTool('load-table', {
         mode,
         chargeUuid: charge.value

@@ -7,16 +7,15 @@
 /// <reference lib="webworker" />
 
 import { loadPyodide } from 'pyodide';
-import change_state from './tasks/python-scripts/change_state.py';
 import functions from './tasks/python-scripts/functions.py';
-import guying from './tasks/python-scripts/guying.py';
-import temperature from './tasks/python-scripts/temperature.py';
-import parameter_15_without_wind from './tasks/python-scripts/parameter_15_without_wind.py';
+import tools from './tasks/python-scripts/api.py';
+import change_state from './tasks/python-scripts/change_state.py';
+import cable_modification from './tasks/python-scripts/cable_modification.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, change_state, guying, temperature, parameter_15_without_wind];
+const pythonFiles = [functions, change_state, tools, cable_modification];
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;

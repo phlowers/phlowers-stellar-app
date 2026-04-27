@@ -123,7 +123,26 @@ describe('WorkerService', () => {
     electric_resistance_20: undefined,
     linear_resistance_temperature_coef: undefined,
     radial_thermal_conductivity: undefined,
-    has_magnetic_heart: undefined
+    has_magnetic_heart: undefined,
+    is_bimetallic: undefined,
+    rts_cable: undefined,
+    rts_layer_1: undefined,
+    nb_strand_layer_1: undefined,
+    rts_layer_2: undefined,
+    nb_strand_layer_2: undefined,
+    rts_layer_3: undefined,
+    nb_strand_layer_3: undefined,
+    rts_layer_4: undefined,
+    nb_strand_layer_4: undefined,
+    rts_layer_5: undefined,
+    nb_strand_layer_5: undefined,
+    rts_layer_6: undefined,
+    nb_strand_layer_6: undefined,
+    rts_layer_7: undefined,
+    nb_strand_layer_7: undefined,
+    rts_layer_8: undefined,
+    nb_strand_layer_8: undefined,
+    safety_coefficient: undefined
   });
 
   beforeEach(() => {
@@ -201,7 +220,7 @@ describe('WorkerService', () => {
       // Simulate worker message with id and result
       mockWorker.onmessage!({ data: { id: mockId, result: mockResult } });
 
-      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, undefined);
+      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, null, null);
     });
   });
 
@@ -230,7 +249,7 @@ describe('WorkerService', () => {
 
       const response = await promise;
       expect(response.result).toBeUndefined();
-      expect(response.error).toBeUndefined();
+      expect(response.error).toBeNull();
     });
 
     it('should post message to worker with getLit task', async () => {
@@ -268,7 +287,7 @@ describe('WorkerService', () => {
 
       const response = await promise;
       expect(response.result).toEqual(mockResult);
-      expect(response.error).toBeUndefined();
+      expect(response.error).toBeNull();
     });
 
     it('should generate unique id for each task', async () => {
@@ -289,9 +308,82 @@ describe('WorkerService', () => {
 
       const [response1, response2] = await Promise.all([promise1, promise2]);
       expect(response1.result).toBeUndefined();
-      expect(response1.error).toBeUndefined();
+      expect(response1.error).toBeNull();
       expect(response2.result).toBeUndefined();
-      expect(response2.error).toBeUndefined();
+      expect(response2.error).toBeNull();
+    });
+  });
+
+  describe('runTaskWithTimeout', () => {
+    it('should resolve successfully when task completes before timeout', async () => {
+      service.setup();
+
+      const mockSection = createMockSection();
+      const mockCable = createMockCable();
+
+      const promise = service.runTaskWithTimeout(Task.getLit, {
+        section: mockSection,
+        cable: mockCable
+      });
+
+      // Get the message ID from the postMessage call
+      expect(postMessageSpy).toHaveBeenCalledOnce();
+      const messageId = (postMessageSpy.mock.calls[0][0] as { id: string }).id;
+
+      // Simulate worker response before timeout
+      mockWorker.onmessage!({ data: { id: messageId, result: { lit: [] } } });
+
+      const response = await promise;
+      expect(response.result).toEqual({ lit: [] });
+      expect(response.error).toBeNull();
+    });
+
+    it('should reject with timeout error when task exceeds timeout', async () => {
+      service.setup();
+      vi.useFakeTimers();
+
+      const mockSection = createMockSection();
+      const mockCable = createMockCable();
+
+      try {
+        const promise = service.runTaskWithTimeout(
+          Task.getLit,
+          {
+            section: mockSection,
+            cable: mockCable
+          },
+          1000
+        );
+
+        await vi.advanceTimersByTimeAsync(1000);
+
+        await expect(promise).rejects.toThrow('Task getLit timed out after 1000ms');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('should use default timeout of 30000ms when not specified', async () => {
+      service.setup();
+
+      const mockSection = createMockSection();
+      const mockCable = createMockCable();
+
+      const promise = service.runTaskWithTimeout(Task.getLit, {
+        section: mockSection,
+        cable: mockCable
+      });
+
+      // Get the message ID from the postMessage call
+      expect(postMessageSpy).toHaveBeenCalledOnce();
+      const messageId = (postMessageSpy.mock.calls[0][0] as { id: string }).id;
+
+      // Simulate worker response (well before 30s timeout)
+      mockWorker.onmessage!({ data: { id: messageId, result: { lit: [] } } });
+
+      const response = await promise;
+      expect(response.result).toEqual({ lit: [] });
+      expect(response.error).toBeNull();
     });
   });
 

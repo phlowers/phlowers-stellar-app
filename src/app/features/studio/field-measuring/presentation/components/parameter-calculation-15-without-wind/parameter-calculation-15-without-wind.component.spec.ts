@@ -4,6 +4,7 @@ import { ComponentRef } from '@angular/core';
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -40,7 +41,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: vi.fn(),
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null }),
       ready$: new BehaviorSubject<boolean>(true)
     } as unknown as vi.Mocked<WorkerPythonService>;
 
@@ -134,6 +135,54 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(component.measureData().updateMode15C).toBe('auto');
   });
 
+  describe('isCalculating signal', () => {
+    it('should start as false', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true during calculation and false after', async () => {
+      let resolveTask!: (value: {
+        result: TaskOutputs[Task.calculateParameter15CWithoutWind];
+        error: TaskError | null;
+      }) => void;
+      workerPythonServiceMock.runTask.mockReturnValueOnce(
+        new Promise((res) => {
+          resolveTask = res;
+        })
+      );
+
+      component.updateMeasureData('updateMode15C', 'manual');
+      component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+
+      const calcPromise = component.calculateParameter15C();
+      expect(component.isCalculating()).toBe(true);
+
+      resolveTask({
+        result: { parameter15CMinusUncertainty: 0, parameter15C: 0, parameter15CPlusUncertainty: 0 },
+        error: null
+      });
+      await calcPromise;
+
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should reset to false even when calculation throws', async () => {
+      workerPythonServiceMock.runTask.mockRejectedValue(new Error('unexpected'));
+
+      component.updateMeasureData('updateMode15C', 'manual');
+      component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+
+      await expect(component.calculateParameter15C()).rejects.toThrow('unexpected');
+      expect(component.isCalculating()).toBe(false);
+    });
+  });
+
   it('should call workerPythonService with correct parameters when calculating parameter 15C', async () => {
     const mockResult = {
       parameter15CMinusUncertainty: 1885,
@@ -195,7 +244,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
           parameter_1_2: 2,
           parameter_2_3: 2.5,
           parameter_1_3: 3,
-          check_validity: true
+          checkValidity: true,
+          uncertainty: 0
         },
         cableTemperature: {
           cableSolarFlux: 123,

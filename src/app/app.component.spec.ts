@@ -6,7 +6,7 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { MessageService } from 'primeng/api';
+import { NotificationService } from '@services/notification/notification.service';
 import { OnlineService } from '@services/online/online.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -46,7 +46,7 @@ class MockWorker implements Partial<Worker> {
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
-  let mockMessageService: MessageService;
+  let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let mockStorageService: StorageService;
   let mockWorkerService: WorkerPythonService;
   let mockOnlineService: OnlineService;
@@ -93,9 +93,10 @@ describe('AppComponent', () => {
     globalThis.Worker = MockWorker as typeof Worker;
     workerReadySubject = new BehaviorSubject<boolean>(true);
 
-    mockMessageService = {
-      add: vi.fn()
-    } as unknown as MessageService;
+    mockNotificationService = {
+      success: vi.fn(),
+      error: vi.fn()
+    };
 
     mockDb.users.toArray = vi.fn().mockResolvedValue([]);
     mockDb.users.add = vi.fn();
@@ -262,10 +263,12 @@ describe('AppComponent', () => {
 
       await component.setupData();
 
-      expect(
-        (mockStorageService as unknown as { assertProtectedTablesUnchanged: ReturnType<typeof vi.fn> })
-          .assertProtectedTablesUnchanged
-      ).toHaveBeenCalledTimes(1);
+      expect(component.submitted()).toBe(true);
+      expect(mockUserService.createUser).toHaveBeenCalledWith({
+        email: 'test@example.com'
+      });
+      expect(component.userDialog()).toBe(false);
+      expect(mockNotificationService.success).toHaveBeenCalledWith('User info set');
     });
 
     it('should throw when StorageService detects protected data changes during catalog sync', async () => {
@@ -322,8 +325,8 @@ describe('AppComponent - HTML rendering', () => {
     TestBed.overrideProvider(OnlineService, {
       useValue: { online$: new BehaviorSubject<boolean>(true) }
     });
-    TestBed.overrideProvider(MessageService, {
-      useValue: { add: vi.fn(), messageObserver: new BehaviorSubject(null), clearObserver: new BehaviorSubject(null) }
+    TestBed.overrideProvider(NotificationService, {
+      useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() }
     });
     TestBed.overrideProvider(UserService, {
       useValue: {
@@ -370,6 +373,11 @@ describe('AppComponent - HTML rendering', () => {
 
     fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
+  });
+
+  it('should render app-toast', () => {
+    const el = getByTestId('app-toast');
+    expect(el).toBeTruthy();
   });
 
   it('should render update-dialog', () => {

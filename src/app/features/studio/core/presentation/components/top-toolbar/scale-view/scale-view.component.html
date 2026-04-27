@@ -2,7 +2,9 @@
   data-testid="scale-view-trigger"
   i18n-label="@@scaleView.button.label"
   label="View"
-  [styleClass]="'view-button' + (popoverOpen() ? ' view-button--active' : '')"
+  variant="outlined"
+  size="small"
+  [styleClass]="popoverOpen() ? 'view-button--active' : ''"
   aria-haspopup="dialog"
   [attr.aria-expanded]="popoverOpen()"
   (onClick)="togglePopover($event)"
@@ -17,11 +19,12 @@
     data-testid="scale-view-form"
     class="view-config"
     [formGroup]="formScaleView"
+    (ngSubmit)="onValidate()"
     i18n-aria-label="@@scaleView.form.ariaLabel"
-    aria-label="Configuration de la vue"
+    aria-label="View configuration"
   >
     <fieldset data-testid="scale-fieldset" class="view-config__section">
-      <legend class="view-config__label text-xs-200" i18n="@@scaleView.scale.legend">Select the display scale.</legend>
+      <legend class="view-config__legend" i18n="@@scaleView.scale.legend">Select the display scale.</legend>
 
       <div class="view-config__radio-group">
         <div data-testid="scale-radio-plan" class="view-config__radio-item">
@@ -49,7 +52,7 @@
     <hr class="view-config__divider" aria-hidden="true" />
 
     <fieldset data-testid="points-fieldset" class="view-config__section">
-      <legend class="view-config__label text-sm-200" i18n="@@scaleView.points.legend">
+      <legend class="view-config__legend" i18n="@@scaleView.points.legend">
         Choose the number of points to display per range.
       </legend>
 
@@ -80,18 +83,10 @@
     </fieldset>
 
     <footer class="view-config__footer">
-      <p-button
-        data-testid="scale-validate-btn"
-        i18n-label="@@scaleView.validate.label"
-        label="Validate"
-        type="submit"
-        (onClick)="onValidate()"
-        styleClass="view-config__submit-btn"
-      >
-        <ng-template #icon>
-          <app-icon icon="check_small" />
-        </ng-template>
-      </p-button>
+      <button app-btn type="submit" data-testid="scale-validate-btn">
+        <ng-container i18n="@@scaleView.validate.label">Validate</ng-container>
+        <app-icon icon="check" />
+      </button>
     </footer>
   </form>
 </p-popover>

@@ -3,7 +3,9 @@ import { Component, input, signal, WritableSignal } from '@angular/core';
 import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { PlotService } from '@services/plot/plot.service';
-import { TaskError, DataError, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { TaskError, DataError, GetSectionOutput, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
 
@@ -59,7 +61,9 @@ const mockSection: Section = {
   selected_charge_uuid: null,
   field_measures: [],
   selected_field_measure_uuid: undefined,
-  vtl_and_guying: undefined
+  vtl_and_guying: undefined,
+  cable_modifications: [],
+  selected_cable_modification_uuid: null
 };
 
 const mockLitData: GetSectionOutput = {
@@ -83,7 +87,11 @@ const mockLitData: GetSectionOutput = {
   tension_inf: [],
   horizontal_distance: [],
   arc_length: [],
-  T_h: []
+  T_h: [],
+  slope_left: [],
+  slope_right: [],
+  sag: [],
+  sag_s2: []
 };
 
 describe('StudioComponent', () => {
@@ -91,26 +99,38 @@ describe('StudioComponent', () => {
   let fixture: ComponentFixture<StudioComponent>;
   let mockPlotService: {
     error: WritableSignal<TaskError | DataError | null>;
+    pythonErrorCode: WritableSignal<PythonErrorCode | null>;
     litData: WritableSignal<GetSectionOutput | null>;
     loading: WritableSignal<boolean>;
-    section: WritableSignal<Section | null>;
     workerReady: WritableSignal<boolean>;
-    refreshSection: vi.Mock;
+    refreshSection: ReturnType<typeof vi.fn>;
+  };
+  let mockNotificationService: { error: ReturnType<typeof vi.fn> };
+  let mockSpanService: {
+    section: WritableSignal<Section | null>;
   };
 
   beforeEach(async () => {
     mockPlotService = {
       error: signal<TaskError | DataError | null>(null),
+      pythonErrorCode: signal<PythonErrorCode | null>(null),
       litData: signal<GetSectionOutput | null>(null),
       loading: signal<boolean>(false),
-      section: signal<Section | null>(null),
       workerReady: signal<boolean>(false),
       refreshSection: vi.fn()
+    };
+    mockNotificationService = { error: vi.fn() };
+    mockSpanService = {
+      section: signal<Section | null>(null)
     };
 
     await TestBed.configureTestingModule({
       imports: [StudioComponent],
-      providers: [{ provide: PlotService, useValue: mockPlotService }]
+      providers: [
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: PlotSpanService, useValue: mockSpanService }
+      ]
     })
       .overrideComponent(StudioComponent, {
         remove: { imports: [SectionPlotComponent] },
@@ -133,42 +153,60 @@ describe('StudioComponent', () => {
       expect(component['plotService']).toBe(mockPlotService);
     });
 
+    it('should inject NotificationService', () => {
+      expect(component['notificationService']).toBe(mockNotificationService);
+    });
+
     it('should have isPreview input set to false', () => {
       expect(component.isPreview()).toBe(false);
     });
   });
 
-  describe('errorString computed', () => {
-    it('should format null error', () => {
+  describe('Effect – error notification', () => {
+    it('should not call notificationService.error when error is null', () => {
       mockPlotService.error.set(null);
-      expect(component.errorString()).toBe(formatStudioError(null));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
     });
 
-    it('should format TaskError.CALCULATION_ERROR', () => {
+    it('should call notificationService.error with formatted message on CALCULATION_ERROR', () => {
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
-      expect(component.errorString()).toBe(formatStudioError(TaskError.CALCULATION_ERROR));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.CALCULATION_ERROR));
     });
 
-    it('should format DataError.NO_CABLE_FOUND', () => {
+    it('should call notificationService.error with formatted message on NO_CABLE_FOUND', () => {
       mockPlotService.error.set(DataError.NO_CABLE_FOUND);
-      expect(component.errorString()).toBe(formatStudioError(DataError.NO_CABLE_FOUND));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(DataError.NO_CABLE_FOUND));
     });
 
-    it('should format TaskError.SOLVER_DID_NOT_CONVERGE', () => {
+    it('should call notificationService.error with formatted message on SOLVER_DID_NOT_CONVERGE', () => {
       mockPlotService.error.set(TaskError.SOLVER_DID_NOT_CONVERGE);
-      expect(component.errorString()).toBe(formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE));
     });
 
-    it('should format TaskError.PYODIDE_LOAD_ERROR', () => {
+    it('should call notificationService.error with formatted message on PYODIDE_LOAD_ERROR', () => {
       mockPlotService.error.set(TaskError.PYODIDE_LOAD_ERROR);
-      expect(component.errorString()).toBe(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
+    });
+
+    it('should use pythonErrorCode message when pythonErrorCode is set', () => {
+      mockPlotService.error.set(TaskError.CALCULATION_ERROR);
+      mockPlotService.pythonErrorCode.set(PythonErrorCode.SolverError);
+      fixture.detectChanges();
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.SolverError)
+      );
     });
   });
 
   describe('Effect – preview refresh', () => {
     it('should not call refreshSection when isPreview is false', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', false);
       fixture.detectChanges();
 
@@ -177,7 +215,7 @@ describe('StudioComponent', () => {
 
     it('should not call refreshSection when worker is not ready', () => {
       mockPlotService.workerReady.set(false);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
@@ -186,7 +224,7 @@ describe('StudioComponent', () => {
 
     it('should not call refreshSection when section is null', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(null);
+      mockSpanService.section.set(null);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
@@ -195,7 +233,7 @@ describe('StudioComponent', () => {
 
     it('should call refreshSection when all conditions are met', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
@@ -204,22 +242,48 @@ describe('StudioComponent', () => {
 
     it('should call refreshSection again when section changes', () => {
       mockPlotService.workerReady.set(true);
-      mockPlotService.section.set(mockSection);
+      mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
       mockPlotService.refreshSection.mockClear();
 
       const anotherSection = { ...mockSection, uuid: 'sec-2', name: 'Section 2' };
-      mockPlotService.section.set(anotherSection);
+      mockSpanService.section.set(anotherSection);
       fixture.detectChanges();
 
       expect(mockPlotService.refreshSection).toHaveBeenCalledWith(anotherSection);
     });
   });
 
+  describe('plotInitialized signal', () => {
+    it('should start as false', () => {
+      expect(component.plotInitialized()).toBe(false);
+    });
+
+    it('should become true when litData changes from null to a value', () => {
+      expect(component.plotInitialized()).toBe(false);
+
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+
+      expect(component.plotInitialized()).toBe(true);
+    });
+
+    it('should remain true once set even if litData goes back to null', () => {
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(true);
+
+      mockPlotService.litData.set(null);
+      fixture.detectChanges();
+
+      expect(component.plotInitialized()).toBe(true);
+    });
+  });
+
   describe('Template – loading state', () => {
-    it('should show spinner when loading', () => {
+    it('should show spinner when loading and not yet initialized', () => {
       mockPlotService.loading.set(true);
       fixture.detectChanges();
 
@@ -234,26 +298,39 @@ describe('StudioComponent', () => {
       const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
       expect(spinner).toBeFalsy();
     });
+
+    it('should not show spinner when loading but already initialized', () => {
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(true);
+
+      mockPlotService.loading.set(true);
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
+      expect(spinner).toBeFalsy();
+    });
   });
 
   describe('Template – error state', () => {
-    it('should show error message when error is set', () => {
+    it('should show rocket image when error is set', () => {
       mockPlotService.loading.set(false);
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
       fixture.detectChanges();
 
-      const errorEl = fixture.nativeElement.querySelector('.text-red-500');
-      expect(errorEl).toBeTruthy();
-      expect(errorEl.textContent).toContain(formatStudioError(TaskError.CALCULATION_ERROR));
+      const errorImg = fixture.nativeElement.querySelector('[data-testid="studio-error-image"]') as HTMLImageElement;
+      expect(errorImg).toBeTruthy();
+      expect(errorImg.tagName).toBe('IMG');
+      expect(errorImg.src).toContain('rocket.png');
     });
 
-    it('should not show error message when no error', () => {
+    it('should not show rocket image when no error', () => {
       mockPlotService.loading.set(false);
       mockPlotService.error.set(null);
       fixture.detectChanges();
 
-      const errorEl = fixture.nativeElement.querySelector('.text-red-500');
-      expect(errorEl).toBeFalsy();
+      const errorImg = fixture.nativeElement.querySelector('[data-testid="studio-error-image"]');
+      expect(errorImg).toBeFalsy();
     });
   });
 
@@ -283,6 +360,17 @@ describe('StudioComponent', () => {
 
       const plot = fixture.nativeElement.querySelector('app-section-plot');
       expect(plot).toBeFalsy();
+    });
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should reset plotService.error to null on destroy', () => {
+      mockPlotService.error.set(TaskError.CALCULATION_ERROR);
+      fixture.detectChanges();
+
+      fixture.destroy();
+
+      expect(mockPlotService.error()).toBeNull();
     });
   });
 });

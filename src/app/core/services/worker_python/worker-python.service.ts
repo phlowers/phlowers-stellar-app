@@ -8,7 +8,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
+import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 
 /**
  * Service for managing the Python (Pyodide) web worker.
@@ -56,8 +56,10 @@ export class WorkerPythonService {
     runTime: 0
   });
   /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handlerMap: Record<string, (result: any, error: TaskError | null) => void> = {};
+  handlerMap: Record<
+    string,
+    (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void
+  > = {};
 
   /**
    * Observable indicating whether the worker is ready.
@@ -100,7 +102,12 @@ export class WorkerPythonService {
         const activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
         this.runTask(Task.setLogLevel, { activateDebugLogs });
       } else if (data.id) {
-        this.handlerMap[data.id](data.result, data.error);
+        const handler = this.handlerMap[data.id];
+        if (handler) {
+          const error = (data.error as TaskError) ?? null;
+          const pythonErrorCode = (data.pythonErrorCode as PythonErrorCode) ?? null;
+          handler(data.result, error, pythonErrorCode);
+        }
       }
     };
   }
@@ -127,14 +134,79 @@ export class WorkerPythonService {
   runTask<taskId extends Task>(
     task: taskId,
     inputs: TaskInputs[taskId]
-  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null }> {
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+    return this.runTaskInternal(task, inputs);
+  }
+
+  /**
+   * Run a calculation task in the Python worker with a timeout.
+   *
+   * @typeParam taskId - The task type from the Task enum
+   * @param task - The task to execute
+   * @param inputs - Input parameters for the task
+   * @param timeout - Timeout in milliseconds (default: 30000ms = 30s)
+   * @returns Promise resolving to the task result and any error, or rejecting on timeout
+   *
+   * @throws Error if the task execution exceeds the specified timeout
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   const { result, error } = await workerService.runTaskWithTimeout(
+   *     Task.calculateObstaclesDistances,
+   *     { obstacles, startSupport, endSupport, view },
+   *     30000
+   *   );
+   *   if (!error) {
+   *     console.log('Calculation result:', result);
+   *   }
+   * } catch (timeoutError) {
+   *   console.error('Task timed out:', timeoutError);
+   * }
+   * ```
+   */
+  runTaskWithTimeout<taskId extends Task>(
+    task: taskId,
+    inputs: TaskInputs[taskId],
+    timeout = 30000
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+    return this.runTaskInternal(task, inputs, timeout);
+  }
+
+  private runTaskInternal<taskId extends Task>(
+    task: taskId,
+    inputs: TaskInputs[taskId],
+    timeout = 30000
+  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+    const worker = this.worker;
+    if (!worker) {
+      return Promise.reject(new Error('Python worker is not initialized. Call setup() before running tasks.'));
+    }
+
     const id = uuidv4();
-    return new Promise((resolve) => {
-      this.worker?.postMessage({ task, inputs, id });
-      this.handlerMap[id] = (result: TaskOutputs[taskId], error: TaskError | null) => {
+    return new Promise((resolve, reject) => {
+      let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
+
+      if (timeout !== undefined) {
+        timeoutId = globalThis.setTimeout(() => {
+          delete this.handlerMap[id];
+          reject(new Error(`Task ${String(task)} timed out after ${timeout}ms`));
+        }, timeout);
+      }
+
+      this.handlerMap[id] = ((
+        result: TaskOutputs[taskId],
+        error: TaskError | null,
+        pythonErrorCode: PythonErrorCode | null
+      ) => {
+        if (timeoutId !== null) {
+          globalThis.clearTimeout(timeoutId);
+        }
         delete this.handlerMap[id];
-        resolve({ result, error });
-      };
+        resolve({ result, error, pythonErrorCode });
+      }) as (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void;
+
+      worker.postMessage({ task, inputs, id });
     });
   }
 }

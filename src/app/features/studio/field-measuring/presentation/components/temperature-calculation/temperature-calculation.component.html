@@ -63,17 +63,39 @@
         (onChange)="updateField('windIncidenceMode', $event.value)"
         optionLabel="label"
         optionValue="value"
-        optionDisabled="disabled"
         allowEmpty="false"
         ariaLabelledBy="windIncidenceLabel"
         data-testid="wind-incidence-mode-selector"
       />
     </dt>
     <dd class="windIncidence__value">
-      @if (measureData().windIncidenceMode === 'auto') {
-        {{ measureData().windIncidence }}
-      } @else {
-        90°
+      @switch (windIncidenceDisplayState()) {
+        @case ('loading') {
+          <p-progressspinner
+            styleClass="wind-incidence-loader"
+            strokeWidth="2"
+            ariaLabel="Computing wind incidence"
+            i18n-ariaLabel
+            data-testid="wind-incidence-spinner"
+          />
+        }
+        @case ('missing-inputs') {
+          <p-message
+            severity="warn"
+            size="small"
+            variant="simple"
+            i18n
+            data-testid="wind-incidence-missing-inputs-warning"
+          >
+            Wind direction and azimuth are required.
+          </p-message>
+        }
+        @case ('value') {
+          <span data-testid="wind-incidence-value">{{ measureData().windIncidence }}°</span>
+        }
+        @case ('perpendicular') {
+          <span data-testid="wind-incidence-perpendicular">90°</span>
+        }
       }
     </dd>
   </dl>
@@ -128,7 +150,13 @@
 </div>
 
 <div class="text-right">
-  <button app-btn (click)="calculateTemperature()" [disabled]="!isFormValid()" data-testid="calculate-temperature-btn">
+  <button
+    app-btn
+    (click)="calculateTemperature()"
+    [disabled]="!isFormValid()"
+    [btnLoading]="isCalculating()"
+    data-testid="calculate-temperature-btn"
+  >
     <app-icon icon="rocket_launch" />
     <ng-container i18n>Calculate</ng-container>
   </button>

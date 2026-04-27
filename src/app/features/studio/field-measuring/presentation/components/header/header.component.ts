@@ -10,7 +10,8 @@ import {
   untracked
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
@@ -18,6 +19,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { isEqual } from 'lodash';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 @Component({
   selector: 'app-header',
@@ -37,14 +39,17 @@ export class HeaderComponent {
   }>();
 
   readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
-    const { startSupport, endSupport } = this.plotService.plotOptions();
-    const spanAmount = Math.max(endSupport - startSupport, 0);
+    const supports = this.spanService.section()?.supports ?? [];
+    const spanAmount = Math.max(supports.length - 1, 0);
     return Array.from({ length: spanAmount }, (_, index) => {
-      const actualIndex = index + startSupport;
+      const leftNum = supports[index]?.number;
+      const rightNum = supports[index + 1]?.number;
+      const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);
+      const right = rightNum ? formatSupportNumber(rightNum) : String(index + 2);
       return {
-        label: `${actualIndex + 1} - ${actualIndex + 2}`,
-        value: [actualIndex, actualIndex + 1],
-        supports: [actualIndex, actualIndex + 1]
+        label: `${left} - ${right}`,
+        value: [index, index + 1],
+        supports: [index, index + 1]
       };
     });
   });
@@ -54,7 +59,8 @@ export class HeaderComponent {
   private hasCalculatedInitialAltitude = false;
   private previousSpan = signal<number[] | null>(null);
 
-  private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
 
   constructor() {
     // Initialize span to first available span if measureData has no span set,
@@ -106,7 +112,7 @@ export class HeaderComponent {
   }
 
   private calculateAltitude(span: number[]): void {
-    const section = this.plotService.section();
+    const section = this.spanService.section();
     if (!section?.supports) {
       return;
     }

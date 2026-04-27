@@ -1,29 +1,34 @@
-// @ts-check
-const eslint = require('@eslint/js');
-const tseslint = require('typescript-eslint');
-const angular = require('angular-eslint');
-const tsParser = require('@typescript-eslint/parser');
-const angularTemplateEslintPlugin = require('@angular-eslint/eslint-plugin-template');
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import angular from 'angular-eslint';
+import tsParser from '@typescript-eslint/parser';
+import templateParser from '@angular-eslint/template-parser';
 
-module.exports = tseslint.config(
+export default tseslint.config(
   {
-    ignores: ['coverage/**', 'dist/**', '**/.venv/**', '.angular/**', 'docs-sphinx/**']
+    ignores: [
+      'coverage/**',
+      'dist/**',
+      '**/.venv/**',
+      '.angular/**',
+      'docs-sphinx/**',
+      'public/pyodide/**',
+      'public/service-worker.js'
+    ]
   },
   {
+    files: ['**/*.ts'],
+    extends: [eslint.configs.recommended, ...tseslint.configs.recommended, ...tseslint.configs.stylistic],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: './tsconfig.json'
       }
     },
-    files: ['**/*.ts'],
-    extends: [
-      eslint.configs.recommended,
-      ...tseslint.configs.recommended,
-      ...tseslint.configs.stylistic,
-      ...angular.configs.tsRecommended
-    ],
     processor: angular.processInlineTemplates,
+    plugins: {
+      '@angular-eslint': angular.tsPlugin
+    },
     rules: {
       '@angular-eslint/directive-selector': [
         'error',
@@ -42,6 +47,10 @@ module.exports = tseslint.config(
         }
       ],
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }
+      ],
       'no-restricted-globals': [
         'error',
         {
@@ -53,7 +62,12 @@ module.exports = tseslint.config(
   },
   {
     files: ['**/*.html'],
-    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
+    languageOptions: {
+      parser: templateParser
+    },
+    plugins: {
+      '@angular-eslint/template': angular.templatePlugin
+    },
     rules: {
       '@angular-eslint/template/i18n': [
         'warn',
@@ -63,9 +77,6 @@ module.exports = tseslint.config(
           checkId: false
         }
       ]
-    },
-    plugins: {
-      angularTemplate: angularTemplateEslintPlugin
     }
   }
 );

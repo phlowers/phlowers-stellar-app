@@ -1,0 +1,44 @@
+@use 'abstract.extracts' as app;
+
+.p-button-outlined.p-button-outlined {
+  --p-button-outlined-primary-border-color: var(--primary-700);
+  --p-button-outlined-primary-color: var(--primary-700);
+  --p-button-border-radius: 0.125rem;
+
+  --p-button-outlined-primary-hover-background: var(--primary-50);
+  --p-button-outlined-primary-hover-border-color: var(--primary-900);
+  --p-button-outlined-primary-hover-color: var(--primary-700);
+
+  --p-button-primary-focus-ring-shadow: inherit;
+  --p-button-focus-ring-width: inherit;
+  --p-button-focus-ring-style: inherit;
+  --p-button-primary-focus-ring-color: inherit;
+  --p-button-focus-ring-offset: inherit;
+
+  display: flex;
+  background-color: var(--grey-white);
+  line-height: 1;
+
+  &:focus-visible {
+    @extend %focus-state;
+  }
+
+  // specif for studio's scale view launching button
+  &.view-button--active {
+    background-color: var(--primary-800);
+    border-color: var(--primary-900);
+    color: var(--grey-white);
+
+    &:hover {
+      background-color: var(--primary-700);
+      color: var(--grey-white);
+    }
+  }
+}
+
+.p-button-sm.p-button-sm {
+  --p-button-sm-font-size: 0.875rem;
+  --p-button-sm-padding-y: 0rem;
+  --p-button-sm-padding-x: 0.25rem 0.5rem;
+  --p-button-gap: 0.25rem;
+}

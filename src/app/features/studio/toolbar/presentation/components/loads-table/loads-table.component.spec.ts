@@ -5,6 +5,7 @@ import { LoadsTableComponent } from './loads-table.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Charge, Section, Study } from '@shared/domain';
 import { LoadType, SymmetryType } from '@shared/domain/models/charge.model';
 import { Support } from '@shared/domain/models/support.model';
@@ -15,6 +16,7 @@ describe('LoadsTableComponent', () => {
   let mockToolbarDialogService: Partial<ToolbarDialogService>;
   let mockChargesService: Partial<ChargesService>;
   let mockPlotService: Partial<PlotService>;
+  let mockSpanService: { section: ReturnType<typeof signal<Section | null>> };
 
   const mockSupports: Support[] = [
     {
@@ -170,7 +172,9 @@ describe('LoadsTableComponent', () => {
     selected_charge_uuid: 'charge-uuid-1',
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null
   };
 
   beforeEach(async () => {
@@ -189,7 +193,10 @@ describe('LoadsTableComponent', () => {
     };
 
     mockPlotService = {
-      study: signal<Study | null>(mockStudy),
+      study: signal<Study | null>(mockStudy)
+    };
+
+    mockSpanService = {
       section: signal<Section | null>(mockSection)
     };
 
@@ -198,7 +205,8 @@ describe('LoadsTableComponent', () => {
       providers: [
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: ChargesService, useValue: mockChargesService },
-        { provide: PlotService, useValue: mockPlotService }
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockSpanService }
       ]
     }).compileComponents();
 
@@ -313,7 +321,7 @@ describe('LoadsTableComponent', () => {
     });
 
     it('should not save if section uuid is missing', async () => {
-      mockPlotService.section!.set(null);
+      mockSpanService.section.set(null);
       component.chargeUuid.set('charge-uuid-1');
 
       await component.saveChanges();
@@ -419,12 +427,12 @@ describe('LoadsTableComponent', () => {
       const rows = component.spanLoadRows();
       expect(rows).toHaveLength(2);
       expect(rows[0].spanLabel).toBe('1 - 2');
-      expect(rows[0].referenceSupport).toBe(1);
+      expect(rows[0].referenceSupport).toBe('1');
       expect(rows[0].type).toBe(LoadType.PUNCTUAL);
       expect(rows[0].loadWeight).toBe(100);
       expect(rows[0].loadPosition).toBe(50);
       expect(rows[1].spanLabel).toBe('2 - 3');
-      expect(rows[1].referenceSupport).toBe(3);
+      expect(rows[1].referenceSupport).toBe('3');
       expect(rows[1].type).toBe(LoadType.MARKING);
     });
 

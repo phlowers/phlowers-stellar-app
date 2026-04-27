@@ -9,6 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -18,7 +19,9 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PossibleIconNames } from '@shared/model/icon.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 
 /** Row data for the L0 summary table. */
@@ -45,6 +48,8 @@ export class L0SumComponent {
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly logger = inject(LoggerService);
 
   readonly l0Rows = signal<L0Row[]>([]);
 
@@ -74,12 +79,14 @@ export class L0SumComponent {
         return;
       }
 
+      const supports = this.spanService.section()?.supports ?? [];
       const spans: L0Row[] = litData.L0.map((value, index) => {
-        const start = index + 1;
-        const end = index + 2;
-        const label = `${start}-${end}`;
+        const leftNum = supports[index]?.number;
+        const rightNum = supports[index + 1]?.number;
+        const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);
+        const right = rightNum ? formatSupportNumber(rightNum) : String(index + 2);
         return {
-          span: label,
+          span: `${left}-${right}`,
           l0: value,
           index
         };
@@ -96,7 +103,7 @@ export class L0SumComponent {
 
   onExport() {
     // TODO: Implement export functionality
-    console.log('Export L0 sum', {
+    this.logger.log('Export L0 sum', {
       rows: this.l0Rows(),
       total: this.totalL0()
     });

@@ -6,6 +6,8 @@ import { InputText } from 'primeng/inputtext';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { MessageService } from 'primeng/api';
 import { ChargesService } from '@services/charges/charges.service';
@@ -102,10 +104,11 @@ const mockCharge: Charge = {
 describe('ClimateComponent effect edge cases', () => {
   it('should return early when studyUuid is missing', async () => {
     const plotServiceMock = {
-      study: signal(null),
-      section: signal({ uuid: 'section-uuid-1', supports: [] }),
-      calculateCharge: vi.fn()
+      study: signal(null)
     } as unknown as PlotService;
+    const spanServiceMock = {
+      section: signal({ uuid: 'section-uuid-1', supports: [] })
+    };
     const chargesServiceMock = {
       getCharge: vi.fn().mockResolvedValue(mockCharge),
       createOrUpdateCharge: vi.fn(),
@@ -116,6 +119,7 @@ describe('ClimateComponent effect edge cases', () => {
       imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
+        { provide: PlotSpanService, useValue: spanServiceMock },
         { provide: WorkerPythonService, useValue: {} },
         { provide: MessageService, useValue: { add: vi.fn() } },
         { provide: ChargesService, useValue: chargesServiceMock }
@@ -134,10 +138,11 @@ describe('ClimateComponent effect edge cases', () => {
   it('should return early when charge has no data', async () => {
     const chargeWithoutData = { uuid: 'test', data: null } as unknown as Charge;
     const plotServiceMock = {
-      study: signal({ uuid: 'study-uuid-1' }),
-      section: signal({ uuid: 'section-uuid-1', supports: [] }),
-      calculateCharge: vi.fn()
+      study: signal({ uuid: 'study-uuid-1' })
     } as unknown as PlotService;
+    const spanServiceMock = {
+      section: signal({ uuid: 'section-uuid-1', supports: [] })
+    };
     const chargesServiceMock = {
       getCharge: vi.fn().mockResolvedValue(chargeWithoutData),
       createOrUpdateCharge: vi.fn(),
@@ -148,6 +153,7 @@ describe('ClimateComponent effect edge cases', () => {
       imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
+        { provide: PlotSpanService, useValue: spanServiceMock },
         { provide: WorkerPythonService, useValue: {} },
         { provide: MessageService, useValue: { add: vi.fn() } },
         { provide: ChargesService, useValue: chargesServiceMock }
@@ -167,7 +173,7 @@ describe('ClimateComponent effect edge cases', () => {
   });
 });
 
-describe('ClimateComponent (Jest)', () => {
+describe('ClimateComponent', () => {
   let component: ClimateComponent;
   let fixture: ComponentFixture<ClimateComponent>;
 
@@ -196,9 +202,6 @@ describe('ClimateComponent (Jest)', () => {
   beforeEach(async () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
-      section: signal({ uuid: 'section-uuid-1' }),
-      calculateCharge: vi.fn(),
-      refreshCamera: vi.fn(),
       loading: signal(false),
       temporaryLoadData: {
         climate: {
@@ -213,6 +216,12 @@ describe('ClimateComponent (Jest)', () => {
         spanLoads: []
       }
     } as unknown as PlotService;
+    const spanServiceMock = {
+      section: signal({ uuid: 'section-uuid-1' })
+    };
+    const plotOptionsServiceMock = {
+      refreshCamera: vi.fn()
+    };
     const messageServiceMock = {
       add: vi.fn()
     } as unknown as MessageService;
@@ -235,6 +244,8 @@ describe('ClimateComponent (Jest)', () => {
       imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
+        { provide: PlotSpanService, useValue: spanServiceMock },
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
         { provide: ChargesService, useValue: chargesServiceMock },
@@ -323,8 +334,8 @@ describe('ClimateComponent (Jest)', () => {
     });
 
     it('should throw error when section is not found', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal>).set(null);
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set(null);
 
       expect(() => component.deleteCharge()).toThrow('Study or section not found');
     });
@@ -410,8 +421,8 @@ describe('ClimateComponent (Jest)', () => {
 
   describe('resetForm with initial condition', () => {
     it('should reset form to base climate values from initial condition', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal>).set({
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
         uuid: 'section-uuid-1',
         initial_conditions: [{ uuid: 'ic-1', base_temperature: 25 }],
         selected_initial_condition_uuid: 'ic-1'
@@ -433,8 +444,8 @@ describe('ClimateComponent (Jest)', () => {
     });
 
     it('should reset to default temperature 15 when no initial condition', () => {
-      const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal>).set({
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
         uuid: 'section-uuid-1',
         initial_conditions: [],
         selected_initial_condition_uuid: undefined
@@ -451,7 +462,8 @@ describe('ClimateComponent (Jest)', () => {
 
     it('should update temporaryLoadData with base climate values', () => {
       const plotService = TestBed.inject(PlotService);
-      (plotService.section as ReturnType<typeof signal>).set({
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
         uuid: 'section-uuid-1',
         initial_conditions: [{ uuid: 'ic-1', base_temperature: 20 }],
         selected_initial_condition_uuid: 'ic-1'
@@ -462,6 +474,94 @@ describe('ClimateComponent (Jest)', () => {
       expect(plotService.temporaryLoadData?.climate.cableTemperature).toBe(20);
       expect(plotService.temporaryLoadData?.climate.windPressure).toBe(0);
       expect(plotService.temporaryLoadData?.climate.iceThickness).toBe(0);
+    });
+  });
+
+  describe('saveForm', () => {
+    it('should call calculateLoad then saveTemporaryLoadDataInSection when study and section exist', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      const callOrder: string[] = [];
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(() => {
+        callOrder.push('calculate');
+        return Promise.resolve();
+      });
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockImplementation(() => {
+        callOrder.push('save');
+        return Promise.resolve();
+      });
+
+      await component.saveForm();
+
+      expect(callOrder).toEqual(['calculate', 'save']);
+    });
+
+    it('should return early when study is missing', async () => {
+      const plotService = TestBed.inject(PlotService);
+      (plotService.study as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
+
+      await component.saveForm();
+
+      expect(calculateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return early when section is missing', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
+
+      await component.saveForm();
+
+      expect(calculateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isSaving signal', () => {
+    it('should be false by default', () => {
+      expect(component.isSaving()).toBe(false);
+    });
+
+    it('should be true during saveForm then false after', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      let resolveTask!: () => void;
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockResolvedValue(undefined);
+
+      const promise = component.saveForm();
+      expect(component.isSaving()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isSaving()).toBe(false);
+    });
+  });
+
+  describe('isCalculatingLoad signal', () => {
+    it('should be false by default', () => {
+      expect(component.isCalculatingLoad()).toBe(false);
+    });
+
+    it('should be true during calculateForm then false after', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
+      let resolveTask!: () => void;
+      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+        () =>
+          new Promise<void>((res) => {
+            resolveTask = res;
+          })
+      );
+
+      const promise = component.calculateForm();
+      expect(component.isCalculatingLoad()).toBe(true);
+      resolveTask();
+      await promise;
+      expect(component.isCalculatingLoad()).toBe(false);
     });
   });
 
@@ -495,6 +595,34 @@ describe('ClimateComponent (Jest)', () => {
       const calcBtn = getByTestId('calculate-btn') as HTMLButtonElement;
       expect(saveBtn.disabled).toBe(true);
       expect(calcBtn.disabled).toBe(true);
+    });
+  });
+
+  describe('initForm', () => {
+    it('should build frontierSupportOptions when section has supports', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }]
+      });
+
+      await component.initForm();
+
+      // shift removes first, pop removes last → 1 option remains from 3 supports
+      expect(component.frontierSupportOptions().length).toBe(1);
+    });
+
+    it('should build no frontierSupportOptions when section has fewer than 3 supports', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }]
+      });
+
+      await component.initForm();
+
+      // shift removes first, pop removes last → 0 options remain from 2 supports
+      expect(component.frontierSupportOptions().length).toBe(0);
     });
   });
 });

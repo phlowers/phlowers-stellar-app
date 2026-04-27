@@ -47,11 +47,20 @@
 
 ---
 
-*Dernière mise à jour : 12/03/2026 — Audit Phase 3A*
+*Last updated: 2026-04-14 — Fix bug charge delete*
 
 ---
 
-## 4. `ServerStatus` — `core/services/news/news.service.ts`
+## 4. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
+
+- **Type**: function
+- **Reason**: `loadForms.service.ts` now imports `recheckSpanLoads` from `@shared/domain/helpers/span-loads.helpers` (the improved, immutable version). The local `helpers.ts` export is never imported anywhere. Note: `emptySpanLoad` from the same file IS still used by `load-marking.component.ts`.
+- **Detected on**: 2026-04-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
+## 5. `ServerStatus` — `core/services/news/news.service.ts`
 
 | | |
 |---|---|
@@ -64,7 +73,7 @@
 
 ---
 
-## 5. `ServerStatus` — `core/services/changelog/changelog.service.ts`
+## 6. `ServerStatus` — `core/services/changelog/changelog.service.ts`
 
 | | |
 |---|---|
@@ -77,7 +86,7 @@
 
 ---
 
-## 6. Stale UI component files after DDD migration
+## 7. Stale UI component files after DDD migration
 
 ### `FieldMeasuringComponent` — `ui/pages/studio/toolbar-dialog/field-measuring/field-measuring.component.ts`
 
@@ -151,3 +160,46 @@
 | Impact suppression | Delete `jest.config.ts` and `fileTransformer.js` (Jest-specific transform) |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-03-18 |
+
+---
+
+## 12. `clearPersistedFormData()` — `src/app/features/studio/loads/presentation/services/cableModifications.service.ts`
+- **Type**: method
+- **Reason**: No-op placeholder with no body. Called by `CableLengthChangeComponent.deleteForm()` but has no observable side effects. Component-level tests already verify the call sites; no meaningful unit test can be written for the service method itself until a real implementation is added.
+- **Detected on**: 2026-04-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
+## 13. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
+| Code | Public `loadObstacle(uuid)` + private helpers `patchFormFromObstacle` and `findObstacle` |
+| 🔍 Preuve | `loadObstacle` is never called from any component or service — only referenced in its own spec file. Its logic partially duplicates `setExistingObstacle`. The two private helpers are only reachable via `loadObstacle`. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Remove `loadObstacle`, `patchFormFromObstacle`, `findSupportForObstacle`, and `findObstacle` (~30 lines) and their spec coverage |
+| Status | ⏳ PENDING REVIEW |
+| Detected on | 2026-03-26 |
+
+---
+
+## 14. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/loads/presentation/helpers.ts` |
+| **Type** | function |
+| 🔍 Preuve | Removed in PR `feat/694/base-form--cable-span-manipulation` as unused/duplicate. No remaining references in the codebase after removal. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Function deleted from `helpers.ts`; confirm no callers exist before closing the PR |
+| Status | ⏳ PENDING REVIEW |
+| Detected on | 2026-04-13 |
+
+---
+
+## 15 `deleteLoad()` — `src/app/features/studio/loads/presentation/services/loadForms.service.ts`
+
+- **Type**: method
+- **Reason**: After the fix for bug #526, `deleteCharge()` in `load-marking.component.ts` no longer calls `deleteLoad()`. No other caller exists in the codebase.
+- **Detected on**: 2026-04-14
+- **Status**: ⏳ PENDING REVIEW
+
+---

@@ -28,6 +28,8 @@ import { Side } from '@shared/types/plot.types';
 import { GetSectionOutput, Task } from '@core/services/worker_python/tasks/types';
 import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { formatStudioError } from '@shared/components/studio/helpers/errors';
 import { Support } from '@shared/domain';
@@ -36,6 +38,8 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 // Constants
 const PLOT_CONFIG = {
@@ -54,12 +58,6 @@ export const DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY = 100;
 const PLOT_IDS = {
   FACE: 'plotly-output-single-span-face-2',
   PROFILE: 'plotly-output-single-span-profile-2'
-} as const;
-
-const AXIS_CONFIG = {
-  backgroundcolor: 'gainsboro',
-  gridcolor: 'dimgray',
-  showbackground: true
 } as const;
 
 interface MousePosition {
@@ -121,15 +119,18 @@ export class FreePositioningComponent implements OnDestroy {
   faceMousePosition = signal<MousePosition | null>(null);
 
   getErrorString = computed(() => {
-    return formatStudioError(this.plotService.error());
+    return formatStudioError(this.plotService.error(), this.plotService.pythonErrorCode());
   });
 
   // Dependencies
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   readonly sideTabsService = inject(SideTabsService);
   readonly obstacleFormService = inject(ObstacleFormService);
   readonly obstaclesService = inject(ObstaclesService);
+  private readonly logger = inject(LoggerService);
   private readonly positionsValue: Signal<unknown>;
 
   constructor() {
@@ -138,7 +139,7 @@ export class FreePositioningComponent implements OnDestroy {
     });
 
     effect(() => {
-      const plotOptions = this.plotService.plotOptions();
+      const plotOptions = this.plotOptionsService.plotOptions();
       const workerReady = this.plotService.workerReady();
       const litData = this.plotService.litData();
 
@@ -158,7 +159,7 @@ export class FreePositioningComponent implements OnDestroy {
     });
 
     effect(() => {
-      this.obstaclesService.currentPointIndex();
+      this.obstaclesService.activePointIndex();
       this.positionsValue();
 
       untracked(() => this.debounceUpdateSelectedPositionMarkers());
@@ -167,24 +168,54 @@ export class FreePositioningComponent implements OnDestroy {
 
   recreatePlots = debounce(async () => {
     this.destroyAllPlots();
-    const startSupport = this.plotService.plotOptions().startSupport;
+    const startSupport = this.plotOptionsService.plotOptions().startSupport;
     this.isLoading.set(true);
-    const litData = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: startSupport,
-      endSupport: startSupport + 1,
-      view: '2d'
+    const obstacle = this.obstacleFormService.buildObstacleFromForm();
+    const sectionObstacles = this.spanService.section()?.obstacles ?? [];
+    const allObstacles = sectionObstacles.some((o) => o.uuid === obstacle.uuid)
+      ? sectionObstacles.map((o) => (o.uuid === obstacle.uuid ? obstacle : o))
+      : [...sectionObstacles, obstacle];
+    const plotOptions = this.plotOptionsService.plotOptions();
+    const filteredObstacles = allObstacles.filter(
+      (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
+    );
+    const currentLitData = this.plotService.litData();
+    if (!currentLitData) {
+      this.isLoading.set(false);
+      return;
+    }
+
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.addObstacle, {
+      obstacles: filteredObstacles,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
     });
+
+    this.plotService.error.set(error);
+    this.plotService.pythonErrorCode.set(pythonErrorCode ?? null);
+
+    if (error) {
+      this.logger.warn('Unable to refresh free positioning plots after obstacle update.');
+      this.isLoading.set(false);
+      return;
+    }
+
+    const updatedLitData: GetSectionOutput = {
+      ...currentLitData,
+      obstacles: result?.obstacles ?? []
+    };
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(litData.result.current, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(updatedLitData, referenceSupportIndex));
 
-    const supports = this.plotService.section()?.supports ?? [];
+    const supports = this.spanService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(litData.result.current, startSupport, 'face', supports);
-    await this.createPlot(litData.result.current, startSupport, 'profile', supports);
+    await this.createPlot(updatedLitData, startSupport, 'face', supports);
+    await this.createPlot(updatedLitData, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
@@ -243,7 +274,7 @@ export class FreePositioningComponent implements OnDestroy {
         if (y == null) return [];
         return Array.from(y as ArrayLike<number>);
       })
-      .filter((v) => typeof v === 'number' && isFinite(v));
+      .filter((v) => typeof v === 'number' && Number.isFinite(v));
   }
 
   /**
@@ -306,14 +337,14 @@ export class FreePositioningComponent implements OnDestroy {
         b: PLOT_CONFIG.MARGIN_BOTTOM
       },
       yaxis: {
-        ...AXIS_CONFIG,
+        ...PLOT_AXIS_CONFIG,
         showticklabels: true,
         showgrid: true,
         showline: true,
         ...(sharedRange ? { range: [...sharedRange], autorange: false } : {})
       },
       xaxis: {
-        ...AXIS_CONFIG,
+        ...PLOT_AXIS_CONFIG,
         showticklabels: true,
         showgrid: true,
         showline: true
@@ -373,13 +404,11 @@ export class FreePositioningComponent implements OnDestroy {
 
     const x = evt.layerX - layout.margin.l;
     const y = evt.layerY - layout.margin.t;
-    // TODO: try to find another way to detect if the click not on the background
-    const target = evt.target as Element & { className?: { baseVal?: string }; tagName?: string };
-    if (!target?.className?.baseVal?.includes('drag') && target.tagName !== 'CANVAS') {
-      return;
-    }
+    const plotWidth = plotElement.clientWidth - layout.margin.l - layout.margin.r;
+    const plotHeight = plotElement.clientHeight - layout.margin.t - layout.margin.b;
+    if (x < 0 || x > plotWidth || y < 0 || y > plotHeight) return;
 
-    const previousSelected = this.obstaclesService.currentPointIndex();
+    const previousSelected = this.obstaclesService.activePointIndex();
     if (!isNumber(previousSelected)) return;
     const positions = this.obstacleFormService.positions.value as Position3D[];
     const previousSelectedObstacle = positions.find((_o, index) => index === previousSelected);
@@ -388,12 +417,12 @@ export class FreePositioningComponent implements OnDestroy {
     let newObstacle: Position3D;
     if (type === 'profile') {
       // Profile plot: update x and z, keep y
-      const clickedAbsoluteAltitude = parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const clickedAbsoluteAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(2));
       const zValue = this.isAbsoluteAltitudeMode()
         ? clickedAbsoluteAltitude
-        : parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
+        : Number.parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
       newObstacle = {
-        x: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        x: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
         y: previousSelectedObstacle.y ?? null,
         z: zValue
       };
@@ -401,7 +430,7 @@ export class FreePositioningComponent implements OnDestroy {
       // Face plot: update y only, keep x and z
       newObstacle = {
         x: previousSelectedObstacle.x ?? null,
-        y: parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        y: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
         z: previousSelectedObstacle.z ?? null
       };
     }
@@ -443,7 +472,7 @@ export class FreePositioningComponent implements OnDestroy {
         standoff: 20,
         font: {
           size: 30,
-          color: index === this.obstaclesService.currentPointIndex() ? 'red' : 'black'
+          color: index === this.obstaclesService.activePointIndex() ? 'red' : 'black'
         }
       });
     });
@@ -511,7 +540,7 @@ export class FreePositioningComponent implements OnDestroy {
 
       const plotElement = document.getElementById(plotId) as PlotElement | null;
       if (!plotElement) {
-        console.warn(`Plot element not found: ${plotId}`);
+        this.logger.warn(`Plot element not found: ${plotId}`);
         return;
       }
       const annotations = this.getAnnotations(
@@ -519,7 +548,6 @@ export class FreePositioningComponent implements OnDestroy {
         side
       );
 
-      // const width = plotElement.clientWidth;
       const layout = this.getPlotLayout();
       const config = this.getPlotConfig();
 
@@ -527,7 +555,7 @@ export class FreePositioningComponent implements OnDestroy {
       this.attachEventListeners(side, plotElement);
       this.setPlotReference(side, plot);
     } catch (error) {
-      console.error(`Error creating plot for ${side}:`, error);
+      this.logger.error(`Error creating plot for ${side}:`, error);
     }
   }
 
@@ -544,7 +572,7 @@ export class FreePositioningComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Safety net: always leave the mode when this component is destroyed
-    this.plotService.isFreePositioningMode.set(false);
+    this.plotOptionsService.isFreePositioningMode.set(false);
     this.destroyAllPlots();
   }
 }

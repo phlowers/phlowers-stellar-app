@@ -15,6 +15,7 @@ Usage:
     uv run scripts/set_up_mechaphlowers_v2.py
     uv run scripts/set_up_mechaphlowers_v2.py --local-cdn-dir /path/to/cdn
     uv run scripts/set_up_mechaphlowers_v2.py --local-mechaphlowers
+    uv run scripts/set_up_mechaphlowers_v2.py --engine-only
 """
 
 import argparse
@@ -34,9 +35,7 @@ import requests
 SCRIPTS_DIR = Path(__file__).parent
 PACKAGE_JSON = SCRIPTS_DIR.parent / "package.json"
 PYODIDE_DIR = Path("./public/pyodide")
-PACKAGES_JSON = Path(
-    "./src/app/core/services/worker_python/python-packages.json"
-)
+PACKAGES_JSON = Path("./src/app/core/services/worker_python/python-packages.json")
 SE_DIR = Path("./stellar-engine")
 SE_DIST = SE_DIR / "dist"
 SE_INPUT = SE_DIR / "input"
@@ -81,9 +80,7 @@ def find_wheel(directory: Path, pattern: str, label: str) -> Path:
     """Return the single wheel matching *pattern* in *directory*."""
     found = sorted(directory.glob(pattern))
     if len(found) != 1:
-        print(
-            f"Error: expected 1 {label} wheel in {directory}, found {len(found)}"
-        )
+        print(f"Error: expected 1 {label} wheel in {directory}, found {len(found)}")
         raise SystemExit(1)
     return found[0]
 
@@ -106,10 +103,7 @@ def wheel_deps(whl: Path) -> list[str]:
 
 def pyodide_version() -> str:
     """Read Pyodide version from ``package.json``."""
-    return (
-        json.loads(PACKAGE_JSON.read_text())["dependencies"]["pyodide"]
-        .lstrip("^~")
-    )
+    return json.loads(PACKAGE_JSON.read_text())["dependencies"]["pyodide"].lstrip("^~")
 
 
 # ── Step 1 – Build stellar-engine ────────────────────────────────────────────
@@ -156,9 +150,7 @@ def download_pyodide(registry: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         tgz = Path(tmp) / "pyodide.tgz"
         tgz.write_bytes(
-            requests.get(
-                f"{registry}/pyodide/-/pyodide-{ver}.tgz", timeout=60
-            ).content
+            requests.get(f"{registry}/pyodide/-/pyodide-{ver}.tgz", timeout=60).content
         )
         with tarfile.open(tgz, "r:gz") as tar:
             tar.extractall(path=PYODIDE_DIR, filter="data")
@@ -177,9 +169,7 @@ def download_pyodide(registry: str) -> None:
 # ── Step 3 – Download packages ───────────────────────────────────────────────
 
 
-def download_packages(
-    se_wheel: Path, local_wheel: Path | None
-) -> dict[str, str]:
+def download_packages(se_wheel: Path, local_wheel: Path | None) -> dict[str, str]:
     """Download stellar-engine's transitive dependencies via pip.
 
     Returns ``{normalized_name: version}`` for all wheels in output dir.
@@ -189,8 +179,16 @@ def download_packages(
     print(f"  stellar-engine requires: {', '.join(deps)}")
 
     cmd = [
-        "uvx", "--python", ">=3.13,<3.14", "pip", "download",
-        "-d", str(PYODIDE_DIR), "-c", str(CONSTRAINTS), *deps,
+        "uvx",
+        "--python",
+        ">=3.13,<3.14",
+        "pip",
+        "download",
+        "-d",
+        str(PYODIDE_DIR),
+        "-c",
+        str(CONSTRAINTS),
+        *deps,
     ]
     if local_wheel:
         cmd.extend(["--find-links", str(SE_INPUT)])
@@ -250,9 +248,7 @@ def replace_with_cdn(
                         local_cdn / v
                         for v in (
                             fname,
-                            fname.replace(
-                                "-py3-none-any.whl", "-cp313-none-any.whl"
-                            ),
+                            fname.replace("-py3-none-any.whl", "-cp313-none-any.whl"),
                             fname.replace(
                                 "-py2.py3-none-any.whl", "-cp313-none-any.whl"
                             ),
@@ -298,11 +294,7 @@ def deduplicate(cdn_names: set[str]) -> None:
     for name, ws in by_name.items():
         if len(ws) <= 1:
             continue
-        prefs = (
-            ("pyodide", "-cp313-")
-            if name in cdn_names
-            else ("-cp313-", "pyodide")
-        )
+        prefs = ("pyodide", "-cp313-") if name in cdn_names else ("-cp313-", "pyodide")
         keep = (
             next((w for w in ws if prefs[0] in w.lower()), None)
             or next((w for w in ws if prefs[1] in w.lower()), None)
@@ -321,8 +313,7 @@ def compile_wheels(cdn_names: set[str]) -> None:
 
     # Protect core files and CDN wheels from compilation
     to_protect = [PYODIDE_DIR / n for n in CORE_FILES] + [
-        w for w in PYODIDE_DIR.glob("*.whl")
-        if parse_wheel(w.name)[0] in cdn_names
+        w for w in PYODIDE_DIR.glob("*.whl") if parse_wheel(w.name)[0] in cdn_names
     ]
     moved = []
     for src in to_protect:
@@ -334,13 +325,26 @@ def compile_wheels(cdn_names: set[str]) -> None:
     if cdn_count:
         print(f"  Skipping {cdn_count} CDN wheels (already compiled)")
 
-    subprocess.run(
+    result = subprocess.run(
         [
-            "uvx", "--from", "pyodide-build", "pyodide", "py-compile",
-            "--compression-level", "6", str(PYODIDE_DIR),
+            "uvx",
+            "--from",
+            "pyodide-build",
+            "pyodide",
+            "py-compile",
+            "--compression-level",
+            "6",
+            str(PYODIDE_DIR),
         ],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
+
+    if result.returncode:
+        print(f"  ✗ pyodide py-compile failed (exit {result.returncode})")
+        print(f"    stdout: {result.stdout}")
+        print(f"    stderr: {result.stderr}")
+        raise SystemExit(1)
 
     for name in moved:
         shutil.move(str(safe / name), str(PYODIDE_DIR / name))
@@ -383,6 +387,34 @@ def finalize(cdn_names: set[str], downloaded: dict[str, str]) -> int:
     return len(packages)
 
 
+# ── Engine-only mode ──────────────────────────────────────────────────────────
+
+
+def engine_only(local_wheel: Path | None) -> None:
+    """Build stellar-engine, place it in PYODIDE_DIR, update packages JSON."""
+    se_wheel = build_stellar_engine(local_wheel)
+
+    # Remove old stellar-engine wheels from PYODIDE_DIR
+    for old in PYODIDE_DIR.glob("stellar_engine*.whl"):
+        old.unlink()
+
+    dest = PYODIDE_DIR / se_wheel.name
+    shutil.copy(se_wheel, dest)
+    print(f"  Copied {se_wheel.name} → {dest}")
+
+    # Update only the stellar-engine entry in python-packages.json
+    packages = json.loads(PACKAGES_JSON.read_text())
+    packages["stellar-engine"] = {
+        "file_name": se_wheel.name,
+        "name": se_wheel.name.split("-")[0],
+        "source": "local",
+    }
+    PACKAGES_JSON.write_text(
+        json.dumps(packages, ensure_ascii=False, indent=2, sort_keys=True)
+    )
+    print(f"  ✓ Updated stellar-engine in {PACKAGES_JSON}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
@@ -390,16 +422,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build stellar-engine and prepare Python packages for Pyodide",
     )
+    parser.add_argument("--npm-registry-url", default="https://registry.npmjs.org/")
     parser.add_argument(
-        "--npm-registry-url", default="https://registry.npmjs.org/"
-    )
-    parser.add_argument(
-        "--local-cdn-dir", type=Path,
+        "--local-cdn-dir",
+        type=Path,
         help="Local directory with pre-downloaded CDN wheels",
     )
     parser.add_argument(
-        "--local-mechaphlowers", action="store_true",
+        "--local-mechaphlowers",
+        action="store_true",
         help="Use a local mechaphlowers wheel from stellar-engine/input/",
+    )
+    parser.add_argument(
+        "--engine-only",
+        action="store_true",
+        help="Only rebuild stellar-engine and update its wheel in place",
     )
     args = parser.parse_args()
 
@@ -411,6 +448,16 @@ def main() -> None:
     if args.local_mechaphlowers:
         local_wheel = find_wheel(SE_INPUT, "mechaphlowers*.whl", "mechaphlowers")
         print(f"  Found local mechaphlowers wheel: {local_wheel.name}")
+
+    if args.engine_only:
+        print("\n" + "=" * 50)
+        print("ENGINE-ONLY MODE")
+        print("=" * 50)
+        engine_only(local_wheel)
+        print("\n" + "=" * 50)
+        print("✓ stellar-engine rebuilt and updated")
+        print("=" * 50)
+        return
 
     ver = pyodide_version()
     mech = (
@@ -455,9 +502,7 @@ def main() -> None:
         else:
             pypi_count += 1
     print("=" * 50)
-    print(
-        f"✓ Setup complete: {num} packages ({cdn_count} CDN, {pypi_count} PyPI)"
-    )
+    print(f"✓ Setup complete: {num} packages ({cdn_count} CDN, {pypi_count} PyPI)")
     print(f"  Config: {PACKAGES_JSON}")
     print("=" * 50)
 

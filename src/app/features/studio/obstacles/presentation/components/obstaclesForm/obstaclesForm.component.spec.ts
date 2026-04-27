@@ -2,10 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { signal } from '@angular/core';
 import { ObstaclesFormComponent } from './obstaclesForm.component';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { PlotService } from '@services/plot/plot.service';
 import { BehaviorSubject } from 'rxjs';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 vi.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
@@ -16,12 +19,14 @@ class MockObstacleFormService {
   positions: FormArray<
     FormGroup<{ x: FormControl<number | null>; y: FormControl<number | null>; z: FormControl<number | null> }>
   >;
-  supportsOptions = signal([{ label: 1, value: 1 }]);
+  supportsOptions = signal([{ label: '1', value: 'LEFT' as const }]);
   results = signal({
     oblique: null as number | null,
     vertical: null as number | null,
     horizontal: null as number | null
   });
+  isCalculatingObstacle = signal(false);
+  calculationError = signal<string | null>(null);
 
   returnToSpan = vi.fn();
   resetFormForNewObstacle = vi.fn();
@@ -57,10 +62,12 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockPlotService: { getSpanOptions: vi.Mock; isFreePositioningMode: ReturnType<typeof signal> };
+  let mockSpanService: { getSpanOptions: ReturnType<typeof vi.fn>; section: ReturnType<typeof vi.fn> };
+  let mockPlotOptionsService: { isFreePositioningMode: ReturnType<typeof signal> };
   let mockObstacleFormService: MockObstacleFormService;
+  let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
-    currentPointIndex: ReturnType<typeof signal<number>>;
+    activePointIndex: ReturnType<typeof signal<number | null>>;
     setCurrentPointIndex: vi.Mock;
     resetCurrentPointIndex: vi.Mock;
   };
@@ -72,14 +79,20 @@ describe('ObstaclesFormComponent', () => {
     Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
 
   beforeEach(async () => {
-    mockPlotService = {
+    mockSpanService = {
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
+      section: vi.fn().mockReturnValue(null)
+    };
+    mockPlotOptionsService = {
       isFreePositioningMode: signal(false)
     };
+    mockPlotService = {
+      loading: signal(false)
+    };
     mockObstacleFormService = new MockObstacleFormService();
-    const indexSignal = signal(0);
+    const indexSignal = signal<number | null>(null);
     obstaclesService = {
-      currentPointIndex: indexSignal,
+      activePointIndex: indexSignal,
       setCurrentPointIndex: vi.fn((i: number) => indexSignal.set(i)),
       resetCurrentPointIndex: vi.fn()
     };
@@ -87,8 +100,11 @@ describe('ObstaclesFormComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ObstaclesFormComponent],
       providers: [
-        { provide: PlotService, useValue: mockPlotService },
+        provideNoopAnimations(),
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
+        { provide: PlotService, useValue: mockPlotService },
         {
           provide: ObstaclesService,
           useValue: {
@@ -110,6 +126,34 @@ describe('ObstaclesFormComponent', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('isCalculating computed', () => {
+    it('should be false when obstacle and plot calculations are both idle', () => {
+      expect(component.isCalculating()).toBe(false);
+    });
+
+    it('should be true when obstacle calculation is running', () => {
+      mockObstacleFormService.isCalculatingObstacle.set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should be true when plot loading is active', () => {
+      (mockPlotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+    });
+
+    it('should go back to false only after both sources return to idle', () => {
+      mockObstacleFormService.isCalculatingObstacle.set(true);
+      (mockPlotService.loading as ReturnType<typeof signal>).set(true);
+      expect(component.isCalculating()).toBe(true);
+
+      mockObstacleFormService.isCalculatingObstacle.set(false);
+      expect(component.isCalculating()).toBe(true);
+
+      (mockPlotService.loading as ReturnType<typeof signal>).set(false);
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   describe('HTML rendering - form structure', () => {
@@ -262,6 +306,8 @@ describe('ObstaclesFormComponent', () => {
     });
 
     it('should mark the active point item with aria-selected', () => {
+      obstaclesService.activePointIndex.set(0);
+      fixture.detectChanges();
       const pointItems = fixture.nativeElement.querySelectorAll('[data-testid="point-item"]');
       expect(pointItems[0].getAttribute('aria-selected')).toBe('true');
     });
@@ -275,11 +321,47 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
+  describe('HTML rendering - point labels', () => {
+    it('should render "Point alt." as the altitude label', () => {
+      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]');
+      expect(labels.length).toBe(1);
+      expect(labels[0].textContent.trim()).toBe('Point alt.');
+    });
+
+    it('should render "Ref. support dist." as the reference support distance label', () => {
+      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]');
+      expect(labels.length).toBe(1);
+      expect(labels[0].textContent.trim()).toBe('Ref. support dist.');
+    });
+
+    it('should render "Line axis dist." as the line axis distance label', () => {
+      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]');
+      expect(labels.length).toBe(1);
+      expect(labels[0].textContent.trim()).toBe('Line axis dist.');
+    });
+
+    it('should render one label per point for each label type when multiple positions exist', () => {
+      const fb = new FormBuilder();
+      mockObstacleFormService.positions.push(
+        fb.group({
+          x: new FormControl<number | null>(1),
+          y: new FormControl<number | null>(2),
+          z: new FormControl<number | null>(3)
+        })
+      );
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]').length).toBe(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]').length).toBe(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]').length).toBe(2);
+    });
+  });
+
   describe('HTML rendering - results display', () => {
-    it('should display N/A for all results initially', () => {
-      expect(getByTestId('result-oblique')?.textContent).toContain('N/A');
-      expect(getByTestId('result-vertical')?.textContent).toContain('N/A');
-      expect(getByTestId('result-horizontal')?.textContent).toContain('N/A');
+    it('should display " - " for all results initially', () => {
+      expect(getByTestId('result-oblique')?.textContent).toContain(' - ');
+      expect(getByTestId('result-vertical')?.textContent).toContain(' - ');
+      expect(getByTestId('result-horizontal')?.textContent).toContain(' - ');
     });
 
     it('should display computed results after calculation', () => {
@@ -296,8 +378,24 @@ describe('ObstaclesFormComponent', () => {
       fixture.detectChanges();
 
       expect(getByTestId('result-oblique')?.textContent).toContain('7.3');
-      expect(getByTestId('result-vertical')?.textContent).toContain('N/A');
+      expect(getByTestId('result-vertical')?.textContent).toContain(' - ');
       expect(getByTestId('result-horizontal')?.textContent).toContain('4.1');
+    });
+
+    it('should not render calculation error message when calculationError is null', () => {
+      mockObstacleFormService.calculationError.set(null);
+      fixture.detectChanges();
+
+      expect(getByTestId('calculation-error')).toBeNull();
+    });
+
+    it('should render calculation error message when calculationError is defined', () => {
+      mockObstacleFormService.calculationError.set('Calculation failed: timeout');
+      fixture.detectChanges();
+
+      const errorMessage = getByTestId('calculation-error');
+      expect(errorMessage).toBeTruthy();
+      expect(errorMessage?.textContent).toContain('Calculation failed: timeout');
     });
   });
 
@@ -345,8 +443,11 @@ describe('ObstaclesFormComponent', () => {
         .configureTestingModule({
           imports: [ObstaclesFormComponent],
           providers: [
-            { provide: PlotService, useValue: mockPlotService },
+            provideNoopAnimations(),
+            { provide: PlotSpanService, useValue: mockSpanService },
+            { provide: PlotOptionsService, useValue: mockPlotOptionsService },
             { provide: ObstacleFormService, useValue: mockObstacleFormService },
+            { provide: PlotService, useValue: mockPlotService },
             {
               provide: ObstaclesService,
               useValue: {
@@ -428,17 +529,17 @@ describe('ObstaclesFormComponent', () => {
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(obstaclesService.currentPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
   });
 
   describe('initializes and resets form based on support uuid', () => {
-    it('should call resetFormForNewObstacle with null on init', () => {
-      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+    it('should not call resetFormForNewObstacle on init (first effect run is skipped)', () => {
+      expect(mockObstacleFormService.resetFormForNewObstacle).not.toHaveBeenCalled();
     });
 
-    it('should reset form based on initial null support uuid', () => {
-      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+    it('should not reset form on initial render when support uuid is null', () => {
+      expect(mockObstacleFormService.resetFormForNewObstacle).not.toHaveBeenCalled();
     });
 
     it('should reset form when support uuid changes', () => {
@@ -510,7 +611,7 @@ describe('ObstaclesFormComponent', () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
       expect(toggle.getAttribute('ng-reflect-model')).toBe('false');
 
-      mockPlotService.isFreePositioningMode.set(true);
+      mockPlotOptionsService.isFreePositioningMode.set(true);
       fixture.detectChanges();
 
       expect(toggle.getAttribute('ng-reflect-model')).toBe('true');
@@ -632,7 +733,7 @@ describe('ObstaclesFormComponent', () => {
 
       (getByTestId('select-point') as HTMLButtonElement).click();
 
-      expect(obstaclesService.currentPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
 
     it('should set current obstacle point on input focus', () => {
@@ -653,7 +754,7 @@ describe('ObstaclesFormComponent', () => {
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(obstaclesService.currentPointIndex()).toBe(0);
+      expect(obstaclesService.activePointIndex()).toBe(0);
     });
   });
 
@@ -798,20 +899,38 @@ describe('ObstaclesFormComponent', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       fixture.detectChanges();
 
-      mockPlotService.isFreePositioningMode.set(true);
+      mockPlotOptionsService.isFreePositioningMode.set(true);
 
       mockObstacleFormService.form.controls.supportUuid.setValue(null);
       fixture.detectChanges();
 
-      expect(mockPlotService.isFreePositioningMode()).toBe(false);
+      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
+    });
+
+    it('should call returnToSpan when supportUuid changes to a non-null value', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+
+      expect(mockObstacleFormService.returnToSpan).toHaveBeenCalled();
+    });
+
+    it('should not call returnToSpan when supportUuid is cleared', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      fixture.detectChanges();
+      mockObstacleFormService.returnToSpan.mockClear();
+
+      mockObstacleFormService.form.controls.supportUuid.setValue(null);
+      fixture.detectChanges();
+
+      expect(mockObstacleFormService.returnToSpan).not.toHaveBeenCalled();
     });
   });
 
   describe('results display', () => {
-    it('should show N/A for all results when values are null', () => {
-      expect(getByTestId('result-oblique')?.textContent).toContain('N/A');
-      expect(getByTestId('result-vertical')?.textContent).toContain('N/A');
-      expect(getByTestId('result-horizontal')?.textContent).toContain('N/A');
+    it('should show " - " for all results when values are null', () => {
+      expect(getByTestId('result-oblique')?.textContent).toContain(' - ');
+      expect(getByTestId('result-vertical')?.textContent).toContain(' - ');
+      expect(getByTestId('result-horizontal')?.textContent).toContain(' - ');
     });
 
     it('should display oblique result when set', () => {
@@ -819,8 +938,8 @@ describe('ObstaclesFormComponent', () => {
       fixture.detectChanges();
 
       expect(getByTestId('result-oblique')?.textContent).toContain('42.5');
-      expect(getByTestId('result-vertical')?.textContent).toContain('N/A');
-      expect(getByTestId('result-horizontal')?.textContent).toContain('N/A');
+      expect(getByTestId('result-vertical')?.textContent).toContain(' - ');
+      expect(getByTestId('result-horizontal')?.textContent).toContain(' - ');
     });
 
     it('should display vertical result when set', () => {

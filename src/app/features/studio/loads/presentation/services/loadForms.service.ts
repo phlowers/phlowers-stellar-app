@@ -1,10 +1,14 @@
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
+import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
+import { emptySpanLoad } from '../helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
-import { recheckSpanLoads } from '../helpers';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,24 +24,27 @@ export class LoadFormsService {
    * Initialize the temporary load data by getting the selected charge case and checking the span loads
    */
   initTemporaryLoadData = () => {
-    const currentChargeUuid = this.plotService.section()?.selected_charge_uuid;
+    const currentChargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!currentChargeUuid) {
       this.plotService.temporaryLoadData = null;
       return;
     }
-    const charge = this.plotService.section()?.charges?.find((c) => c.uuid === currentChargeUuid);
+    const charge = this.spanService.section()?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
       this.plotService.temporaryLoadData = null;
       return;
     }
     const newData = cloneDeep(charge.data);
-    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], this.plotService.section()?.supports ?? []);
+    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], this.spanService.section()?.supports ?? []);
     this.plotService.temporaryLoadData = newData;
   };
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
@@ -51,7 +58,7 @@ export class LoadFormsService {
   saveTemporaryLoadDataInSection = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid || !temporaryLoadData) {
       return;
     }
@@ -59,39 +66,77 @@ export class LoadFormsService {
     if (!currentCharge) {
       return;
     }
-    currentCharge.data = temporaryLoadData;
-    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, currentCharge);
+    await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, {
+      ...currentCharge,
+      data: temporaryLoadData
+    });
   };
 
   /**
-   * Calculate the load by running the change state task
+   * Calculate the load by running the changeState task, then re-sync all saved obstacles on top.
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     if (!temporaryLoadData) {
       return;
     }
-    this.plotService.refreshCamera();
+    this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
 
-    const currentSection = this.plotService.section();
-    const { result, error } = await this.workerPythonService.runTask(Task.changeState, {
-      climate: temporaryLoadData!.climate,
-      spanLoads: recheckSpanLoads(temporaryLoadData!.spanLoads, currentSection?.supports ?? [])
+    const currentSection = this.spanService.section();
+    const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
+    this.plotService.temporaryLoadData = {
+      ...temporaryLoadData,
+      spanLoads: checkedSpanLoads
+    };
+
+    const { result: changeResult } = await this.workerPythonService.runTask(Task.changeState, {
+      climate: temporaryLoadData.climate,
+      spanLoads: checkedSpanLoads
     });
-    this.plotService.litData.set(result?.current ?? null);
-    this.plotService.baseLitData.set(result?.base ?? null);
-    this.plotService.error.set(error);
+    if (changeResult) {
+      this.plotService.litData.set(changeResult.current);
+      this.plotService.baseLitData.set(changeResult.base);
+    }
+
+    const obstacles = currentSection?.obstacles ?? [];
+    if (obstacles.length > 0) {
+      const syncedOutput = await this.obstacleStateService.syncObstacles(
+        obstacles,
+        this.plotOptionsService.plotOptions()
+      );
+      if (syncedOutput) {
+        const current = this.plotService.litData();
+        if (current) {
+          this.plotService.litData.set({ ...current, obstacles: syncedOutput.obstacles });
+        }
+      }
+    }
+
     this.plotService.loading.set(false);
   };
+
+  /**
+   * Reset the span load for the given support UUID to its empty state.
+   */
+  deleteSpanLoad(supportUuid: string): void {
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    if (!temporaryLoadData) return;
+
+    const spanLoad = temporaryLoadData.spanLoads.find((s) => s.supportUuid === supportUuid);
+    if (!spanLoad) return;
+
+    const reset = { ...emptySpanLoad, supportUuid };
+    Object.assign(spanLoad, reset);
+  }
 
   /**
    * Delete the load by deleting the charge case
    */
   deleteLoad() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
-    const chargeUuid = this.plotService.section()?.selected_charge_uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!studyUuid || !sectionUuid || !chargeUuid) return;
     this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
   }

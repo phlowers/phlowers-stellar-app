@@ -22,6 +22,8 @@ import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
 import { PlotService } from '@services/plot/plot.service';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
@@ -66,6 +68,7 @@ export class ParameterCalculation15WithoutWindComponent {
   });
 
   parameter15CError = signal<boolean>(false);
+  readonly isCalculating = signal(false);
 
   readonly updateModeOptions = [
     { label: $localize`Auto`, value: 'auto' },
@@ -74,9 +77,11 @@ export class ParameterCalculation15WithoutWindComponent {
 
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
+  readonly spanService = inject(PlotSpanService);
   readonly studiesService = inject(StudiesService);
   private readonly initialConditionService = inject(InitialConditionService);
   private readonly messageService = inject(MessageService);
+  private readonly logger = inject(LoggerService);
 
   isFormValid = computed(() => {
     const isManual = this.measureData().updateMode15C === 'manual';
@@ -129,7 +134,7 @@ export class ParameterCalculation15WithoutWindComponent {
     }));
     const data = this.measureData();
     if (!this.isFormValid()) {
-      console.error('Missing required fields for parameter calculation');
+      this.logger.error('Missing required fields for parameter calculation');
       this.parameter15CError.set(true);
       return;
     }
@@ -149,18 +154,23 @@ export class ParameterCalculation15WithoutWindComponent {
       cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty || null
     };
     const dataToSend = isManual ? manualDataToSend : autoDataToSend;
-    const { result, error } = await this.workerPythonService.runTask(Task.calculateParameter15CWithoutWind, {
-      ...dataToSend,
-      span_index: data.span?.[0] ?? null
-    });
-    if (error) {
-      this.parameter15CError.set(true);
-      return;
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.calculateParameter15CWithoutWind, {
+        ...dataToSend,
+        span_index: data.span?.[0] ?? null
+      });
+      if (error) {
+        this.parameter15CError.set(true);
+        return;
+      }
+      this.measureData.update((d) => ({
+        ...d,
+        outputs: { ...d.outputs, parameter15C: result }
+      }));
+    } finally {
+      this.isCalculating.set(false);
     }
-    this.measureData.update((d) => ({
-      ...d,
-      outputs: { ...d.outputs, parameter15C: result }
-    }));
   }
 
   onCreateInitialCondition(type: 'minus' | 'nominal' | 'plus') {
