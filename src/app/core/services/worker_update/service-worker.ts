@@ -74,8 +74,9 @@ export async function installApp() {
 
 /**
  * Updates the cached application assets to the latest manifest.
- * Performs a full cache reset: deletes the entire cache and re-downloads
- * all files (including Python wheels) to ensure a clean state.
+ * Caches new assets into a temporary cache first, then atomically
+ * swaps it with the old cache to avoid leaving the app with a
+ * partial/empty cache if the download fails mid-way.
  * The IndexedDB database is preserved.
  * @returns The updated asset manifest.
  */
@@ -88,22 +89,43 @@ export async function updateApp() {
   const manifest: AssetManifest = await response.json();
   const files = manifest.files || [];
 
-  // Full cache reset: delete and recreate.
-  await caches.delete(CACHE_NAME);
-  const cache = await caches.open(CACHE_NAME);
-  await cache.addAll(files);
+  const TEMP_CACHE_NAME = `${CACHE_NAME}-tmp`;
 
-  const appVersion = manifest.app_version;
-  await cache.put(
-    APP_VERSION_CACHE_KEY,
-    new Response(JSON.stringify(appVersion), {
-      headers: {
-        'content-type': 'application/json'
+  // Cache into a temporary cache first so the old cache remains intact on failure.
+  try {
+    await caches.delete(TEMP_CACHE_NAME);
+    const tempCache = await caches.open(TEMP_CACHE_NAME);
+    await tempCache.addAll(files);
+
+    const appVersion = manifest.app_version;
+    await tempCache.put(
+      APP_VERSION_CACHE_KEY,
+      new Response(JSON.stringify(appVersion), {
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    );
+
+    // Swap: delete old cache and rename temp cache.
+    await caches.delete(CACHE_NAME);
+    const finalCache = await caches.open(CACHE_NAME);
+    const tempKeys = await tempCache.keys();
+    for (const request of tempKeys) {
+      const cached = await tempCache.match(request);
+      if (cached) {
+        await finalCache.put(request, cached);
       }
-    })
-  );
-  console.log(`SERVICE WORKER: Full cache reset complete (version ${appVersion}, ${files.length} files cached)`);
-  return manifest;
+    }
+    await caches.delete(TEMP_CACHE_NAME);
+
+    console.log(`SERVICE WORKER: Full cache reset complete (version ${appVersion}, ${files.length} files cached)`);
+    return manifest;
+  } catch (error) {
+    // Rollback: clean up the temporary cache so it doesn't linger.
+    await caches.delete(TEMP_CACHE_NAME);
+    throw error;
+  }
 }
 
 const NO_CACHE_INIT: RequestInit = {

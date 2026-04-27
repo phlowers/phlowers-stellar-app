@@ -64,7 +64,7 @@
 
 ---
 
-## 4. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
+## 11. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
 
 - **Type**: function
 - **Reason**: `loadForms.service.ts` now imports `recheckSpanLoads` from `@shared/domain/helpers/span-loads.helpers` (the improved, immutable version). The local `helpers.ts` export is never imported anywhere. Note: `emptySpanLoad` from the same file IS still used by `load-marking.component.ts`.

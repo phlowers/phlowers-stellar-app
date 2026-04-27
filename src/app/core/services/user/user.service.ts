@@ -20,8 +20,7 @@ export class UserService {
 
   /**
    * Get the user from the database.
-   * Returns the first valid user, or null if none exists.
-   * Never performs automatic deletion — violating users are preserved and an error state is returned.
+   * Returns the first user found, or null if none exists.
    */
   async getUser(): Promise<UserEntity | null> {
     const users = await this.storageService.db.users.toArray();

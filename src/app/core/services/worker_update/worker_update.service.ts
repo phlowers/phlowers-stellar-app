@@ -71,6 +71,9 @@ export class UpdateService {
             break;
           case 'install_complete':
             this.updateLoading.set(false);
+            this.needUpdate.set(false);
+            this.isFirstLaunch.set(false);
+            await this.loadCurrentVersion();
             this.messageService.add({
               severity: 'success',
               summary: $localize`Install successful`,
@@ -199,8 +202,9 @@ export class UpdateService {
    *
    * @remarks
    * Called once from `APP_INITIALIZER`. If the SW cache is empty (first launch),
-   * triggers `install()`. Otherwise compares build-time version with the server
-   * version and sets needUpdate if they differ.
+   * sets `isFirstLaunch` and `needUpdate` so the UI can prompt the user to confirm
+   * installation via {@link confirmUpdate}. Otherwise compares build-time version
+   * with the server version and sets `needUpdate` if they differ.
    */
   async checkForUpdateOnce(): Promise<void> {
     try {

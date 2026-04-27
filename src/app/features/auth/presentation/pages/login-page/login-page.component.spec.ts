@@ -162,15 +162,11 @@ describe('LoginPageComponent', () => {
     });
 
     it('should trim the email before submitting', async () => {
-      component.emailControl.setValue('user@example.com');
-      // Verify trim() is applied by spying on the control value
-      const trimSpy = vi.spyOn(String.prototype, 'trim');
+      component.emailControl.setValue('  user@example.com  ');
 
       await component.onSubmit();
 
-      expect(trimSpy).toHaveBeenCalled();
       expect(authServiceMock.loginWithEmail).toHaveBeenCalledWith('user@example.com');
-      trimSpy.mockRestore();
     });
 
     it('should set submitError on login failure', async () => {
