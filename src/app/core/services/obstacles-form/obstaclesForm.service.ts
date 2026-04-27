@@ -16,6 +16,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable, startWith } from 'rxjs';
 import { ObstacleOutput } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { PlotOptions } from '@shared/types/plot.types';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -263,41 +264,77 @@ export class ObstacleFormService {
     if (!obstacleUuid) {
       return;
     }
-    await this.removeObstacleFromSection(obstacleUuid);
+    const wasDeleted = await this.removeObstacleFromSection(obstacleUuid);
+    if (!wasDeleted) {
+      return;
+    }
     this.resetFormForNewObstacle(null);
     this.obstaclesService.setSelectedObstacle(null, null);
   }
 
-  private async removeObstacleFromSection(obstacleUuid: string): Promise<void> {
+  private async removeObstacleFromSection(obstacleUuid: string): Promise<boolean> {
     const study = this.plotService.study();
     const section = this.spanService.section();
     if (!study || !section) {
-      return;
+      return false;
     }
     const obstacles = section.obstacles ?? [];
     const obstacleIndex = obstacles.findIndex((o) => o.uuid === obstacleUuid);
     if (obstacleIndex === -1) {
-      return;
+      return false;
     }
-    obstacles.splice(obstacleIndex, 1);
-    section.obstacles = obstacles;
-    await this.sectionService.createOrUpdateSection(study, section);
 
-    await this.obstacleStateService.deleteObstacle(obstacleUuid, this.plotOptionsService.plotOptions());
+    const updatedObstacles = obstacles.filter((o) => o.uuid !== obstacleUuid);
+    const updatedSection = { ...section, obstacles: updatedObstacles };
+    const plotOptions = this.plotOptionsService.plotOptions();
+    const previousLitData = this.plotService.litData();
 
-    // Re-register remaining obstacles to get accurate render positions
-    const obstacleOutput = await this.obstacleStateService.addObstacle(
-      obstacles,
-      this.plotOptionsService.plotOptions()
-    );
-    this.applyObstacleOutputToLitData(obstacleOutput);
-    await this.obstacleStateService.calculateDistances(obstacles, this.plotOptionsService.plotOptions());
+    try {
+      await this.obstacleStateService.deleteObstacle(obstacleUuid, plotOptions);
 
-    this.messageService.add({
-      severity: 'success',
-      summary: $localize`Success`,
-      detail: $localize`Obstacle deleted`
-    });
+      // Re-register remaining obstacles to get accurate render positions.
+      const obstacleOutput = await this.obstacleStateService.addObstacle(updatedObstacles, plotOptions);
+      this.applyObstacleOutputToLitData(obstacleOutput);
+      await this.obstacleStateService.calculateDistances(updatedObstacles, plotOptions);
+
+      await this.sectionService.createOrUpdateSection(study, updatedSection);
+      this.spanService.section.set(updatedSection);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: $localize`Success`,
+        detail: $localize`Obstacle deleted`
+      });
+      return true;
+    } catch {
+      // Roll back in-memory section to avoid diverging from persisted data on failure.
+      this.spanService.section.set(section);
+      this.plotService.litData.set(previousLitData);
+      await this.resyncWorkerAfterDeleteRollback(section.obstacles ?? [], plotOptions);
+      this.messageService.add({
+        severity: 'error',
+        summary: $localize`Error`,
+        detail: $localize`Failed to delete obstacle`
+      });
+      return false;
+    }
+  }
+
+  /** Rebuild worker obstacle state after local rollback to keep future distance calculations consistent. */
+  private async resyncWorkerAfterDeleteRollback(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
+    try {
+      await this.obstacleStateService.clearAllObstacles();
+      if (!obstacles.length) {
+        return;
+      }
+
+      const obstacleOutput = await this.obstacleStateService.syncObstacles(obstacles, plotOptions);
+      if (obstacleOutput) {
+        this.applyObstacleOutputToLitData(obstacleOutput);
+      }
+    } catch (error) {
+      this.logger.warn('Failed to resynchronize obstacle worker state after rollback', error);
+    }
   }
 
   async saveObstacle(): Promise<void> {
@@ -324,7 +361,6 @@ export class ObstacleFormService {
 
     this.isCalculatingObstacle.set(true);
     this.calculationError.set(null);
-
     try {
       // 1. Merge new/updated obstacle into the in-memory section
       this.upsertObstacleInSection(obstacle);
@@ -397,15 +433,13 @@ export class ObstacleFormService {
     if (!section) {
       return;
     }
-    if (!section.obstacles) {
-      section.obstacles = [];
-    }
-    const existingIndex = section.obstacles.findIndex((o) => o.uuid === obstacle.uuid);
-    if (existingIndex !== -1) {
-      section.obstacles[existingIndex] = obstacle;
-    } else {
-      section.obstacles.push(obstacle);
-    }
+    const currentObstacles = section.obstacles ?? [];
+    const existingIndex = currentObstacles.findIndex((o) => o.uuid === obstacle.uuid);
+    const nextObstacles =
+      existingIndex !== -1
+        ? currentObstacles.map((existingObstacle, index) => (index === existingIndex ? obstacle : existingObstacle))
+        : [...currentObstacles, obstacle];
+    this.spanService.section.set({ ...section, obstacles: nextObstacles });
   }
 
   private async saveSection(): Promise<void> {

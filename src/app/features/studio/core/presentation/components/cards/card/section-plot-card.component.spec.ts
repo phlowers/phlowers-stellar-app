@@ -6,7 +6,7 @@ import { SectionPlotCardComponent } from './section-plot-card.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 const mockLitData: GetSectionOutput = {
   supports: [[[1, 2, 3]]],
@@ -66,13 +66,13 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
   let hostComponent: TestHostComponent;
 
   beforeEach(async () => {
-    const mockPlotService = {
+    const mockPlotSpanService = {
       section: vi.fn().mockReturnValue(null)
     };
 
     await TestBed.configureTestingModule({
       imports: [SectionPlotCardComponent, TestHostComponent, CardComponent, IconComponent, NoopAnimationsModule],
-      providers: [{ provide: PlotService, useValue: mockPlotService }]
+      providers: [{ provide: PlotSpanService, useValue: mockPlotSpanService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SectionPlotCardComponent);

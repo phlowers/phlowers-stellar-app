@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
@@ -55,6 +56,7 @@ export class SectionPlotComponent {
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
+  private readonly documentRef = inject(DOCUMENT);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
@@ -171,6 +173,7 @@ export class SectionPlotComponent {
       const distances = this.obstacleStateService.distances();
       const distanceType = this.obstacleStateService.distanceType();
       const plot = await createPlot({
+        documentRef: this.documentRef,
         plotId: PLOT_ID,
         data: plotData,
         invert: plotOptions.invert,

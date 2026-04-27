@@ -11,10 +11,10 @@ import { Section } from '@shared/domain';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Support } from '@shared/domain/models/support.model';
 
+/** Service managing span navigation state and support-index computations for the section view. */
 @Injectable({
   providedIn: 'root'
 })
-/** Service managing span navigation state and support-index computations for the section view. */
 export class PlotSpanService {
   /** Current section displayed in the studio. Kept here so span computeds have a single reactive source. */
   readonly section = signal<Section | null>(null);
@@ -59,14 +59,18 @@ export class PlotSpanService {
       return [];
     }
     const supports = this.section()?.supports;
-    const spanIndex = supports?.findIndex((s) => s.uuid === supportUuid);
-    if (spanIndex !== undefined && spanIndex >= 0 && supports) {
-      return [
-        { label: this.supportLabel(supports[spanIndex], spanIndex), value: 'LEFT' },
-        { label: this.supportLabel(supports[spanIndex + 1], spanIndex + 1), value: 'RIGHT' }
-      ];
+    if (!supports) {
+      return [];
     }
-    return [];
+    const spanIndex = supports?.findIndex((s) => s.uuid === supportUuid);
+    if (spanIndex === undefined || spanIndex < 0 || spanIndex >= supports.length - 1) {
+      return [];
+    }
+
+    return [
+      { label: this.supportLabel(supports[spanIndex], spanIndex), value: 'LEFT' },
+      { label: this.supportLabel(supports[spanIndex + 1], spanIndex + 1), value: 'RIGHT' }
+    ];
   }
 
   /** Reset span navigation state to initial defaults. */

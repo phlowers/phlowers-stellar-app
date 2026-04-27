@@ -4,7 +4,7 @@ import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
-import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 /** Represents a single data field with label, value, and unit. */
@@ -61,11 +61,11 @@ export class SectionPlotCardComponent {
   /** Zero-based index of the support or span. */
   index = input.required<number>();
 
-  private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
 
   cardTitle = computed(() => {
     const idx = this.index();
-    const supports = this.plotService.section()?.supports;
+    const supports = this.spanService.section()?.supports;
     if (this.type() === 'support') {
       const num = supports?.[idx]?.number;
       return num ? formatSupportNumber(num) : String(idx + 1);
