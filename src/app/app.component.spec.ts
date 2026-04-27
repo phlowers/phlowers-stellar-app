@@ -57,7 +57,8 @@ describe('AppComponent', () => {
       toArray: vi.fn(),
       get: vi.fn().mockResolvedValue(undefined),
       put: vi.fn().mockResolvedValue(undefined),
-      clear: vi.fn()
+      clear: vi.fn(),
+      add: vi.fn()
     },
     metadata: {
       get: vi.fn().mockResolvedValue(null),

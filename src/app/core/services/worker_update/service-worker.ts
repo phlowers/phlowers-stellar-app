@@ -20,15 +20,6 @@ function fetchWithTimeout(
 }
 
 /**
- * Sanitizes a value for safe logging by removing control characters
- * (newlines, carriage returns, tabs, etc.) that could be used for log injection.
- */
-function sanitizeForLog(value: unknown): string {
-  // eslint-disable-next-line no-control-regex -- Intentional: removing control characters to prevent log injection
-  return String(value).replace(/[\n\r\t\v\f\x00-\x1f\x7f-\x9f]/g, '_');
-}
-
-/**
  * Fetches the latest asset manifest (`assets_list.json`) from the server.
  * @returns A `Response` promise for the manifest file.
  */
@@ -77,9 +68,7 @@ export async function installApp() {
       }
     })
   );
-  console.log(
-    `SERVICE WORKER: App installed (version ${sanitizeForLog(buildVersion)}, ${filesToInstall.length} files)`
-  );
+  console.log('SERVICE WORKER: App installed', filesToInstall.length, 'files');
   return manifest;
 }
 
@@ -130,9 +119,7 @@ export async function updateApp() {
     }
     await caches.delete(TEMP_CACHE_NAME);
 
-    console.log(
-      `SERVICE WORKER: Full cache reset complete (version ${sanitizeForLog(appVersion)}, ${files.length} files cached)`
-    );
+    console.log('SERVICE WORKER: Full cache reset complete', files.length, 'files cached');
     return manifest;
   } catch (error) {
     // Rollback: clean up the temporary cache so it doesn't linger.
@@ -192,7 +179,7 @@ export async function handleFetch(event: FetchEvent) {
         const indexUrl = scope + 'index.html';
         try {
           const networkResponse = await fetchWithTimeout(event.request.clone());
-          if (networkResponse && networkResponse.ok) {
+          if (networkResponse?.ok) {
             await cache.put(indexUrl, networkResponse.clone());
             return networkResponse;
           }
@@ -216,7 +203,7 @@ export async function handleFetch(event: FetchEvent) {
           try {
             const networkResponse = await fetchWithTimeout(event.request.clone(), NO_CACHE_INIT);
             // Only cache successful (2xx) responses — never cache 3xx redirects.
-            if (networkResponse && networkResponse.ok) {
+            if (networkResponse?.ok) {
               await cache.put(event.request, networkResponse.clone());
             }
             return networkResponse;

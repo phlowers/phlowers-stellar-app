@@ -19,7 +19,7 @@ describe('UpdateService', () => {
   };
   let mockCaches: { open: vi.Mock; delete: vi.Mock };
   let mockCache: { match: vi.Mock };
-  let mockFetch: vi.Mock;
+  let mockFetch: vi.Mock & typeof fetch;
   let originalServiceWorker: ServiceWorkerContainer;
   let originalCaches: CacheStorage;
   let originalFetch: typeof fetch;
@@ -61,7 +61,7 @@ describe('UpdateService', () => {
     });
 
     // Mock fetch
-    mockFetch = vi.fn();
+    mockFetch = vi.fn() as vi.Mock & typeof fetch;
     originalFetch = globalThis.fetch;
     globalThis.fetch = mockFetch;
 
@@ -102,8 +102,8 @@ describe('UpdateService', () => {
   });
 
   it('should NOT handle worker_ready message (listener removed in V2)', () => {
-    const messageHandler: (event: { data: Record<string, unknown> }) => void =
-      mockServiceWorker.addEventListener.mock.calls[0][1];
+    const messageHandler: (event: { data: Record<string, unknown> }) => void = mockServiceWorker.addEventListener.mock
+      .calls[0][1] as (event: { data: Record<string, unknown> }) => void;
     const checkAppVersionSpy = vi.spyOn(service, 'checkAppVersion');
 
     messageHandler({ data: { message: 'worker_ready' } });
@@ -425,7 +425,9 @@ describe('UpdateService', () => {
 
     beforeEach(() => {
       // Extract the message handler function
-      messageHandler = mockServiceWorker.addEventListener.mock.calls[0][1];
+      messageHandler = mockServiceWorker.addEventListener.mock.calls[0][1] as (event: {
+        data: Record<string, unknown>;
+      }) => void;
     });
 
     it('should handle update_complete message', async () => {

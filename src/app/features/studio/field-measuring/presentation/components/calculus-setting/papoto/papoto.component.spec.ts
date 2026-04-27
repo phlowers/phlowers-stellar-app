@@ -8,7 +8,7 @@ import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/presentation/mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, TaskOutputs, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs, GetSectionOutput, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 
@@ -106,7 +106,11 @@ describe('Papoto component', () => {
     });
 
     it('should be true during calculation and false after', async () => {
-      let resolveTask!: (value: { result: TaskOutputs[Task.calculatePapoto]; error: TaskError | null }) => void;
+      let resolveTask!: (value: {
+        result: TaskOutputs[Task.calculatePapoto];
+        error: TaskError | null;
+        pythonErrorCode: PythonErrorCode | null;
+      }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
           resolveTask = res;
@@ -139,7 +143,8 @@ describe('Papoto component', () => {
           checkValidity: true,
           uncertainty: 0
         },
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
       await calcPromise;
 
@@ -180,7 +185,8 @@ describe('Papoto component', () => {
 
     workerPythonServiceMock.runTask.mockResolvedValue({
       result: mockResult,
-      error: null
+      error: null,
+      pythonErrorCode: null
     });
 
     // Set all required fields
@@ -230,7 +236,8 @@ describe('Papoto component', () => {
         checkValidity: boolean;
         uncertainty: number;
       },
-      error: TaskError.CALCULATION_ERROR
+      error: TaskError.CALCULATION_ERROR,
+      pythonErrorCode: null
     });
 
     // Set all required fields

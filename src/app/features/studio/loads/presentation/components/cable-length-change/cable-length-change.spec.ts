@@ -32,7 +32,9 @@ const mockSection: Partial<Section> = {
     { uuid: 'support-uuid-2', number: 'PA2' } as Section['supports'][0]
   ],
   cable_modifications: [],
-  selected_cable_modification_uuid: null
+  selected_cable_modification_uuid: null,
+  cable_span_manipulations: [],
+  selected_cable_span_manipulation_uuid: null
 };
 
 describe('CableLengthChangeComponent', () => {

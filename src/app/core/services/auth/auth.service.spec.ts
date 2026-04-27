@@ -11,7 +11,7 @@ import { User } from '@shared/domain';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mockFetch: vi.Mock;
+  let mockFetch: vi.Mock & typeof fetch;
   let originalFetch: typeof fetch;
   let usersTableMock: {
     get: vi.Mock;
@@ -38,7 +38,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     originalFetch = globalThis.fetch;
-    mockFetch = vi.fn();
+    mockFetch = vi.fn() as vi.Mock & typeof fetch;
     globalThis.fetch = mockFetch;
 
     usersTableMock = {

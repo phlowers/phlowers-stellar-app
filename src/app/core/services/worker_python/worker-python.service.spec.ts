@@ -92,7 +92,11 @@ describe('WorkerService', () => {
     selected_charge_uuid: null,
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null,
+    cable_span_manipulations: [],
+    selected_cable_span_manipulation_uuid: null
   });
 
   const createMockCable = (): CatalogCable => ({
@@ -243,7 +247,7 @@ describe('WorkerService', () => {
       );
 
       // Simulate the response to resolve the promise
-      const messageCall = postMessageSpy.mock.calls[0][0];
+      const messageCall = postMessageSpy.mock.calls[0][0] as { id: string; task: string; inputs: unknown };
       const id = messageCall.id;
       mockWorker.onmessage!({ data: { id, result: undefined } });
 
@@ -272,7 +276,7 @@ describe('WorkerService', () => {
       );
 
       // Simulate the response to resolve the promise
-      const messageCall = postMessageSpy.mock.calls[0][0];
+      const messageCall = postMessageSpy.mock.calls[0][0] as { id: string; task: string; inputs: unknown };
       const id = messageCall.id;
       const mockResult = {
         x: {},
@@ -297,8 +301,8 @@ describe('WorkerService', () => {
       const promise1 = service.runTask(task, undefined);
       const promise2 = service.runTask(task, undefined);
 
-      const call1 = postMessageSpy.mock.calls[0][0];
-      const call2 = postMessageSpy.mock.calls[1][0];
+      const call1 = postMessageSpy.mock.calls[0][0] as { id: string };
+      const call2 = postMessageSpy.mock.calls[1][0] as { id: string };
 
       expect(call1.id).not.toBe(call2.id);
 

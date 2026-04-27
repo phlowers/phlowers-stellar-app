@@ -36,15 +36,15 @@ vi.mock('dexie', () => {
 
 interface MockDb {
   users: {
-    toArray: vi.Mock<() => Promise<{ email: string }[]>>;
+    toArray: vi.Mock;
   };
   studies: {
-    add: vi.Mock<(study: StudyEntity) => Promise<void>>;
-    toArray: vi.Mock<() => Promise<StudyEntity[]>>;
-    get: vi.Mock<(id: string) => Promise<StudyEntity | undefined>>;
-    delete: vi.Mock<(id: string) => Promise<void>>;
-    clear: vi.Mock<() => Promise<void>>;
-    update: vi.Mock<(id: string, changes: Partial<StudyEntity>) => Promise<number>>;
+    add: vi.Mock;
+    toArray: vi.Mock;
+    get: vi.Mock;
+    delete: vi.Mock;
+    clear: vi.Mock;
+    update: vi.Mock;
     orderBy: vi.Mock;
   };
 }
@@ -710,7 +710,7 @@ describe('StudiesService', () => {
   });
 
   it('returns live query observable for getStudyAsObservable', () => {
-    const liveQueryMock = liveQuery as vi.MockedFunction<typeof liveQuery>;
+    const liveQueryMock = vi.mocked(liveQuery);
     const fakeObservable = { subscribe: vi.fn() } as unknown as ReturnType<typeof liveQuery>;
 
     liveQueryMock.mockImplementation((query) => {
