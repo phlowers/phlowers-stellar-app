@@ -72,17 +72,49 @@ def test_import_lambert():
             6863612.38205321,
         ],
     }
-    import_lambert(inputs)
+    result = import_lambert(inputs)
+    expected_keys = {
+        "latitude",
+        "longitude",
+        "lambert_x",
+        "lambert_y",
+        "azimuth",
+    }
+    assert expected_keys == set(result.keys())
 
 
 def test_import_lambert_and_validate():
     inputs = {
-        "x": [],
-        "y": [],
+        "x": [
+            652469.02270914,
+            652471.48385573,
+            652405.05557107,
+            652196.85828404,
+            651774.86710069,
+        ],
+        "y": [
+            6862035.25942008,
+            6862335.24992367,
+            6862729.73314491,
+            6863184.61650681,
+            6863612.38205321,
+        ],
         "startLatitude": 48.8566,
         "startLongitude": 2.3522,
-        "startAzimuth": 90,
-        "spanLengths": [],
-        "lineAngles": [],
+        "startAzimuth": 0,
+        "spanLengths": [
+            300.0,
+            400.0,
+            500.0,
+            600.0,
+            np.nan,
+        ],  # last value not taken into account
+        "lineAngles": [0.0, 10.0, 15.0, 20.0, 0.0],
     }
-    import_lambert_and_validate(inputs)
+    result = import_lambert_and_validate(inputs)
+    expected_keys = {
+        "localization",
+        "mean_gps_diff",
+    }
+    assert expected_keys == set(result.keys())
+    assert result["mean_gps_diff"] < 1e-5
