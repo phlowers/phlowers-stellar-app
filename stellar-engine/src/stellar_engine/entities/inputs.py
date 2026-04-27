@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import datetime
+import inspect
 from dataclasses import dataclass
 from typing import Literal, Optional
 
@@ -159,3 +160,47 @@ class SpanLoad:
 class ChangeStateInput:
     climate: ClimateCharge
     spanLoads: list[SpanLoad]
+
+
+@dataclass
+class StartingGps:
+    startLatitude: float
+    startLongitude: float
+    startAzimuth: float
+
+
+@dataclass
+class Lambert93Data:
+    x: list  # easting
+    y: list  # northing
+
+    # allow extra arguments
+    @classmethod
+    def from_dict(cls, env: dict):
+        return cls(
+            **{
+                key: value
+                for key, value in env.items()
+                if key in inspect.signature(cls).parameters
+            }
+        )
+
+
+@dataclass
+class SectionGeoData:
+    startLatitude: float
+    startLongitude: float
+    startAzimuth: float
+    spanLengths: list
+    lineAngles: list
+
+    # allow extra arguments
+    @classmethod
+    def from_dict(cls, env: dict):
+        return cls(
+            **{
+                key: value
+                for key, value in env.items()
+                if key in inspect.signature(cls).parameters
+            }
+        )
