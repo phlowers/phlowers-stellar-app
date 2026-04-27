@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot, purgePlot } from './helpers/createPlot';
+import { createPlot } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { PlotOptions, SelectedDisplayOptions } from '@shared/types/plot.types';
@@ -29,7 +29,6 @@ vi.mock('./helpers/createShadowPlotData');
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 
 const mockCreatePlot = vi.mocked(createPlot);
-const mockPurgePlot = vi.mocked(purgePlot);
 const mockCreatePlotData = vi.mocked(createPlotData);
 const mockCreateShadowPlotData = vi.mocked(createShadowPlotData);
 
@@ -210,7 +209,8 @@ describe('SectionPlotComponent', () => {
     litData: litDataSignal,
     baseLitData: baseLitDataSignal,
     temporaryLoadData: null as ChargeData | null | undefined,
-    plotOptionsChange: noopMock
+    plotOptionsChange: noopMock,
+    purgePlot: vi.fn()
   };
 
   const mockSpanService = {
@@ -269,7 +269,6 @@ describe('SectionPlotComponent', () => {
     vi.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreatePlot.mockResolvedValue(mockPlotElement as unknown as PlotlyHTMLElement);
-    mockPurgePlot.mockImplementation(() => undefined);
     mockCreateShadowPlotData.mockReturnValue([]);
 
     litDataSignal.set(mockLitData);
@@ -973,13 +972,13 @@ describe('SectionPlotComponent', () => {
     it('should purge plot on component destroy', () => {
       fixture.destroy();
 
-      expect(mockPurgePlot).toHaveBeenCalledWith(expect.anything(), 'plotly-output');
+      expect(mockPlotService.purgePlot).toHaveBeenCalledTimes(1);
     });
 
     it('should keep destroy cleanup idempotent', () => {
       expect(() => component.ngOnDestroy()).not.toThrow();
       expect(() => component.ngOnDestroy()).not.toThrow();
-      expect(mockPurgePlot).toHaveBeenCalledTimes(2);
+      expect(mockPlotService.purgePlot).toHaveBeenCalledTimes(2);
     });
   });
 });

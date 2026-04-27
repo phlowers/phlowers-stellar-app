@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot, purgePlot } from './helpers/createPlot';
+import { createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -159,12 +159,12 @@ export class SectionPlotComponent implements OnDestroy {
       const obstacles = this.buildObstacleList();
       const supports = this.spanService.section()?.supports ?? [];
       const sectionPlotData = createPlotData(litData, plotOptions, supports);
-      let plotData = Array.isArray(sectionPlotData) ? sectionPlotData : [];
+      let plotData: Plotly.Data[] = Array.isArray(sectionPlotData) ? sectionPlotData : [];
 
       if (selectedDisplayOptions.baseState && this.plotService.baseLitData()) {
         const shadowData = createShadowPlotData(this.plotService.baseLitData()!, plotOptions);
-        const safeShadowData = Array.isArray(shadowData) ? shadowData : [];
-        plotData = [...(safeShadowData as typeof plotData), ...plotData];
+        const safeShadowData: Plotly.Data[] = Array.isArray(shadowData) ? shadowData : [];
+        plotData = [...safeShadowData, ...plotData];
       }
 
       const camera = this.plotOptionsService.camera();
@@ -243,6 +243,6 @@ export class SectionPlotComponent implements OnDestroy {
   };
 
   ngOnDestroy(): void {
-    purgePlot(this.documentRef, PLOT_ID);
+    this.plotService.purgePlot();
   }
 }
