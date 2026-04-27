@@ -8,7 +8,6 @@
 import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
 import { AxesNorms, View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { Dictionary } from 'lodash';
 
 /**
  * Available calculation tasks for the Python worker.
@@ -142,7 +141,7 @@ export interface GetSectionOutput {
   /** Cable displacement values */
   displacement: number[][];
   /** Coordinates of applied loads by support UUID */
-  loads_coords: Dictionary<number[]>;
+  loads_coords: Record<string, number[]>;
   /** Span lengths */
   span_length: number[];
   /** Elevation values at each support */

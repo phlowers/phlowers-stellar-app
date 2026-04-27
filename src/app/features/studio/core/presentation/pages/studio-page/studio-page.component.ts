@@ -150,7 +150,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       animateOnMove: false,
       disabled: this.plotService.loading() || this.plotOptionsService.isFreePositioningMode(),
       translate: (value: number) => {
-        const num = this.plotService.section()?.supports?.[value]?.number;
+        const num = this.spanService.section()?.supports?.[value]?.number;
         return num ? formatSupportNumber(num) : String(value + 1);
       },
       rightToLeft: this.plotOptionsService.plotOptions().invert

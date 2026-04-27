@@ -81,7 +81,7 @@ export class CableSpanManipComponent implements OnInit {
   private readonly selectedSupportData = computed(() => {
     const uuid = this.scopeValueSignal();
     if (!uuid) return null;
-    return this.plotService.section()?.supports?.find((s) => s.uuid === uuid) ?? null;
+    return this.spanService.section()?.supports?.find((s) => s.uuid === uuid) ?? null;
   });
 
   /** Dynamic min for distanceToRefSupport — reactive to section and scope changes. */
@@ -200,7 +200,7 @@ export class CableSpanManipComponent implements OnInit {
     this.supportRefOptions.set(this.spanService.getSupportOptions(uuid));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
 
-    const savedManip = this.plotService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === uuid);
+    const savedManip = this.spanService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === uuid);
 
     if (savedManip) {
       this.hasSavedManipulation.set(true);
@@ -280,7 +280,7 @@ export class CableSpanManipComponent implements OnInit {
   deleteForm(): void {
     const spanUuid = this.form.controls.scope.value;
     const uuid = spanUuid
-      ? (this.plotService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === spanUuid)?.uuid ?? null)
+      ? (this.spanService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === spanUuid)?.uuid ?? null)
       : null;
 
     if (uuid) {

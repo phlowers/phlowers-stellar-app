@@ -8,6 +8,7 @@ import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 @Component({
   selector: 'app-button',
@@ -50,12 +51,20 @@ describe('L0SumComponent', () => {
 
     const mockPlotService = {
       loading: vi.fn().mockReturnValue(false),
-      litData: vi.fn().mockReturnValue(mockLitData),
-      section: vi.fn().mockReturnValue(null)
+      litData: vi.fn().mockReturnValue(mockLitData)
     } as unknown as PlotService;
 
+    const mockPlotSpanService = {
+      section: vi.fn().mockReturnValue(null)
+    } as unknown as PlotSpanService;
+
     await TestBed.configureTestingModule({
-      providers: [ToolbarDialogService, provideHttpClientTesting(), { provide: PlotService, useValue: mockPlotService }]
+      providers: [
+        ToolbarDialogService,
+        provideHttpClientTesting(),
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockPlotSpanService }
+      ]
     })
       .overrideComponent(L0SumComponent, {
         set: {

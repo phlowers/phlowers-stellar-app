@@ -13,6 +13,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task } from '@services/worker_python/tasks/types';
 import { CommonModule } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
 @Component({
@@ -48,6 +49,7 @@ export class PapotoComponent {
   measureData = model.required<FieldMeasure>();
 
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly workerPythonService = inject(WorkerPythonService);
 
   // Compute the dynamic left support options based on selectedSpan
@@ -58,7 +60,7 @@ export class PapotoComponent {
     }
 
     const [leftIndex, rightIndex] = span;
-    const supports = this.plotService.section()?.supports ?? [];
+    const supports = this.spanService.section()?.supports ?? [];
     const leftNum = supports[leftIndex]?.number;
     const rightNum = supports[rightIndex]?.number;
     const leftLabel = leftNum ? formatSupportNumber(leftNum) : String(leftIndex + 1);

@@ -223,6 +223,11 @@ describe('PlotSpanService', () => {
       expect(service.getSupportOptions('non-existent')).toEqual([]);
     });
 
+    it('should return empty array for the last support (no right span)', () => {
+      service.section.set({ supports: mockSupports } as unknown as Section);
+      expect(service.getSupportOptions('support-uuid-3')).toEqual([]);
+    });
+
     it('should return empty array when section is null', () => {
       expect(service.getSupportOptions('support-uuid-1')).toEqual([]);
     });

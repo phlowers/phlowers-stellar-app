@@ -8,6 +8,7 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { CableSpanManipService } from './cableSpanManip.service';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { CableSpanManipulation } from '@shared/domain';
 import { Section } from '@shared/domain';
@@ -106,17 +107,21 @@ const mockStudy: StudyEntity = {
 describe('CableSpanManipService', () => {
   let service: CableSpanManipService;
   let mockPlotService: vi.Mocked<PlotService>;
+  let mockPlotSpanService: vi.Mocked<PlotSpanService>;
   let mockStudiesService: vi.Mocked<StudiesService>;
 
   beforeEach(() => {
     mockPlotService = {
-      section: createSignalMock<Section | null>(mockSectionBase),
       study: createSignalMock<Study | null>({ uuid: 'study-uuid-1' } as Study),
       loading: createSignalMock(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null)
     } as unknown as vi.Mocked<PlotService>;
+
+    mockPlotSpanService = {
+      section: createSignalMock<Section | null>(mockSectionBase)
+    } as unknown as vi.Mocked<PlotSpanService>;
 
     mockStudiesService = {
       getStudy: vi.fn().mockResolvedValue(mockStudy),
@@ -127,6 +132,7 @@ describe('CableSpanManipService', () => {
       providers: [
         CableSpanManipService,
         { provide: PlotService, useValue: mockPlotService },
+        { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: StudiesService, useValue: mockStudiesService }
       ]
     });
@@ -164,7 +170,7 @@ describe('CableSpanManipService', () => {
     });
 
     it('should return early when sectionUuid is missing', async () => {
-      mockPlotService.section.mockReturnValue(null);
+      mockPlotSpanService.section.mockReturnValue(null);
 
       await service.save({ ...mockManip });
 
@@ -273,7 +279,7 @@ describe('CableSpanManipService', () => {
     });
 
     it('should return early when sectionUuid is missing', async () => {
-      mockPlotService.section.mockReturnValue(null);
+      mockPlotSpanService.section.mockReturnValue(null);
 
       await service.delete('some-uuid');
 
@@ -395,17 +401,17 @@ describe('CableSpanManipService', () => {
     });
 
     it('should return early when sectionUuid is missing', async () => {
-      mockPlotService.section.mockReturnValue(null);
+      mockPlotSpanService.section.mockReturnValue(null);
 
       await service.reloadSection();
 
       expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
     });
 
-    it('should update plotService.section with the reloaded section', async () => {
+    it('should update spanService.section with the reloaded section', async () => {
       await service.reloadSection();
 
-      expect(mockPlotService.section.set).toHaveBeenCalledWith(mockSectionBase);
+      expect(mockPlotSpanService.section.set).toHaveBeenCalledWith(mockSectionBase);
     });
 
     it('should not update section when study is not found', async () => {
@@ -413,7 +419,7 @@ describe('CableSpanManipService', () => {
 
       await service.reloadSection();
 
-      expect(mockPlotService.section.set).not.toHaveBeenCalled();
+      expect(mockPlotSpanService.section.set).not.toHaveBeenCalled();
     });
   });
 });

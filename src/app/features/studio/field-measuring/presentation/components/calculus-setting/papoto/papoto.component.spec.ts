@@ -10,6 +10,7 @@ import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/pres
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError, TaskOutputs, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 describe('Papoto component', () => {
   let component: PapotoComponent;
@@ -17,6 +18,7 @@ describe('Papoto component', () => {
   let componentRef: ComponentRef<PapotoComponent>;
   let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
   let plotServiceMock: vi.Mocked<PlotService>;
+  let plotSpanServiceMock: vi.Mocked<PlotSpanService>;
 
   beforeEach(async () => {
     workerPythonServiceMock = {
@@ -27,9 +29,12 @@ describe('Papoto component', () => {
       litData: signal({
         span_length: [100, 150, 200],
         elevation: [5.5, 10.75, -3.25]
-      }),
-      section: signal(null)
+      })
     } as unknown as vi.Mocked<PlotService>;
+
+    plotSpanServiceMock = {
+      section: signal(null)
+    } as unknown as vi.Mocked<PlotSpanService>;
 
     await TestBed.configureTestingModule({
       imports: [PapotoComponent],
@@ -37,7 +42,8 @@ describe('Papoto component', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
-        { provide: PlotService, useValue: plotServiceMock }
+        { provide: PlotService, useValue: plotServiceMock },
+        { provide: PlotSpanService, useValue: plotSpanServiceMock }
       ]
     }).compileComponents();
 

@@ -15,6 +15,8 @@ import { PLOT_AXIS_CONFIG } from './plot.constants';
  * @category Studio
  */
 export interface CreatePlotParams {
+  /** Document reference injected by Angular for SSR-safe DOM access. */
+  documentRef: Document;
   /** The DOM element ID of the plot container. */
   plotId: string;
   /** Array of data objects to render in the plot. */
@@ -194,7 +196,7 @@ const layout2d = (
  */
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
-  if (!document.getElementById(plotParams.plotId)) {
+  if (!plotParams.documentRef.getElementById(plotParams.plotId)) {
     console.warn(`Plot element not found: ${plotParams.plotId}`);
     return;
   }

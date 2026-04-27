@@ -7,6 +7,7 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { CableSpanManipulation, Section } from '@shared/domain';
 
@@ -16,6 +17,7 @@ import { CableSpanManipulation, Section } from '@shared/domain';
 /** Service coordinating cable span manipulation persistence and deletion. */
 export class CableSpanManipService {
   private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
   private readonly studiesService = inject(StudiesService);
 
   /**
@@ -70,7 +72,7 @@ export class CableSpanManipService {
   async reloadSection(): Promise<void> {
     const current = await this.fetchCurrentSection();
     if (!current) return;
-    this.plotService.section.set(current.section);
+    this.spanService.section.set(current.section);
   }
 
   /** Apply a synchronous mutation to the current section and persist the updated study. */
@@ -85,7 +87,7 @@ export class CableSpanManipService {
   /** Fetch the active study and section from the database. Returns null if either is unavailable. */
   private async fetchCurrentSection() {
     const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.plotService.section()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) return null;
     const study = await this.studiesService.getStudy(studyUuid);
     if (!study) return null;

@@ -13,10 +13,10 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 const MIN_RESOLUTION = 25;
 const RESOLUTION_STORAGE_KEY = 'plotResolution';
 
+/** Service managing plot resolution state, localStorage persistence, and Python engine configuration. */
 @Injectable({
   providedIn: 'root'
 })
-/** Service managing plot resolution state, localStorage persistence, and Python engine configuration. */
 export class PlotResolutionService implements OnDestroy {
   readonly resolution = signal<number>(100);
   readonly appliedResolution = signal<number | null>(null);
@@ -66,7 +66,7 @@ export class PlotResolutionService implements OnDestroy {
   }
 
   async applyResolution(value: number): Promise<void> {
-    if (!this.workerPythonService.ready) {
+    if (!this.workerReady()) {
       return;
     }
     const normalizedResolution = this.normalizeResolution(value);

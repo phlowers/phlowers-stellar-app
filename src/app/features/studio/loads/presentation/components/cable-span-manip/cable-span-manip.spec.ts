@@ -41,7 +41,6 @@ describe('CableSpanManipComponent', () => {
 
   beforeEach(async () => {
     mockPlotService = {
-      section: createSignalMock<Partial<Section> | null>(mockSection),
       study: createSignalMock(null),
       loading: signal(false),
       plotOptions: createSignalMock({ startSupport: 0, endSupport: 1 }),
@@ -49,6 +48,7 @@ describe('CableSpanManipComponent', () => {
     } as unknown as vi.Mocked<PlotService>;
 
     mockPlotSpanService = {
+      section: createSignalMock<Partial<Section> | null>(mockSection),
       getSupportIndex: vi.fn().mockReturnValue(0),
       getSupportOptions: vi.fn().mockReturnValue([
         { label: 'PA1', value: 'LEFT' },
@@ -363,7 +363,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should set isDirtySinceLastSave to false when loading an existing manipulation', () => {
-      mockPlotService.section.set({
+      mockPlotSpanService.section.set({
         ...mockSection,
         cable_span_manipulations: [
           {
@@ -392,7 +392,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should load saved manipulation values when one exists for the span', () => {
-      mockPlotService.section.set({
+      mockPlotSpanService.section.set({
         ...mockSection,
         cable_span_manipulations: [
           {
@@ -546,7 +546,7 @@ describe('CableSpanManipComponent', () => {
   describe('deleteForm()', () => {
     it('should call delete service when a manipulation exists for the selected span', () => {
       component.form.controls.scope.setValue('support-uuid-1');
-      mockPlotService.section.set({
+      mockPlotSpanService.section.set({
         ...mockSection,
         cable_span_manipulations: [
           {
@@ -577,7 +577,7 @@ describe('CableSpanManipComponent', () => {
 
     it('should not call delete when no manipulation exists for the selected span', () => {
       component.form.controls.scope.setValue('support-uuid-1');
-      mockPlotService.section.set({ ...mockSection, cable_span_manipulations: [] } as unknown as Section);
+      mockPlotSpanService.section.set({ ...mockSection, cable_span_manipulations: [] } as unknown as Section);
 
       component.deleteForm();
 
