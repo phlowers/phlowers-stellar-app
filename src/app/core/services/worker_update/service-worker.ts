@@ -20,6 +20,14 @@ function fetchWithTimeout(
 }
 
 /**
+ * Sanitizes a value for safe logging by removing control characters
+ * (newlines, carriage returns, tabs, etc.) that could be used for log injection.
+ */
+function sanitizeForLog(value: unknown): string {
+  return String(value).replace(/[\n\r\t\v\f\x00-\x1f\x7f-\x9f]/g, '_');
+}
+
+/**
  * Fetches the latest asset manifest (`assets_list.json`) from the server.
  * @returns A `Response` promise for the manifest file.
  */
@@ -68,7 +76,9 @@ export async function installApp() {
       }
     })
   );
-  console.log(`SERVICE WORKER: App installed (version ${buildVersion}, ${filesToInstall.length} files)`);
+  console.log(
+    `SERVICE WORKER: App installed (version ${sanitizeForLog(buildVersion)}, ${filesToInstall.length} files)`
+  );
   return manifest;
 }
 
@@ -119,7 +129,9 @@ export async function updateApp() {
     }
     await caches.delete(TEMP_CACHE_NAME);
 
-    console.log(`SERVICE WORKER: Full cache reset complete (version ${appVersion}, ${files.length} files cached)`);
+    console.log(
+      `SERVICE WORKER: Full cache reset complete (version ${sanitizeForLog(appVersion)}, ${files.length} files cached)`
+    );
     return manifest;
   } catch (error) {
     // Rollback: clean up the temporary cache so it doesn't linger.
