@@ -24,6 +24,7 @@ function fetchWithTimeout(
  * (newlines, carriage returns, tabs, etc.) that could be used for log injection.
  */
 function sanitizeForLog(value: unknown): string {
+  // eslint-disable-next-line no-control-regex -- Intentional: removing control characters to prevent log injection
   return String(value).replace(/[\n\r\t\v\f\x00-\x1f\x7f-\x9f]/g, '_');
 }
 
