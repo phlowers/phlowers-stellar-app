@@ -233,5 +233,17 @@ export interface ImportContextConfig {
   readonly texts?: {
     readonly uploadPrompt?: string;
     readonly uploadHint?: string;
+    /** Optional description shown above the upload zone. */
+    readonly description?: string;
   };
+  /**
+   * If provided, renders a navigation link for each successfully imported entity.
+   * The function receives the entity UUID and must return the target route path.
+   *
+   * @example
+   * ```typescript
+   * navigationRoute: (uuid) => '/study/' + uuid
+   * ```
+   */
+  readonly navigationRoute?: (entityId: string) => string;
 }
