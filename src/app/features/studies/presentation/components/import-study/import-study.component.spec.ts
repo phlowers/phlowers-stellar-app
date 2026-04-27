@@ -5,6 +5,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import Papa from 'papaparse';
 import { Study } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
+import { StudyImportService } from '@features/studies/application/services/study-import.service';
 
 const waitFor = (ms = 0): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -49,6 +50,7 @@ describe('ImportStudyComponent', () => {
   let studiesServiceMock: vi.Mocked<StudiesService>;
   let mockConfirmationService: vi.Mocked<ConfirmationService>;
   let mockMessageService: vi.Mocked<MessageService>;
+  let studyImportService: StudyImportService;
 
   beforeEach(async () => {
     studiesServiceMock = {
@@ -124,6 +126,7 @@ describe('ImportStudyComponent', () => {
 
     fixture = TestBed.createComponent(ImportStudyComponent);
     component = fixture.componentInstance;
+    studyImportService = TestBed.inject(StudyImportService);
   });
 
   describe('loadProtoV4File', () => {
@@ -237,7 +240,7 @@ describe('ImportStudyComponent', () => {
     );
 
     it('should show error message and return early when cable does not exist in database', async () => {
-      vi.spyOn(component, 'findCableInDatabase').mockResolvedValue(null);
+      vi.spyOn(studyImportService, 'findCableInDatabase').mockResolvedValue(null);
 
       // Create CSV with a conductor that doesn't exist in the database
       // The conductor is extracted from rawParameters[3], which corresponds to the 5th data line
@@ -302,7 +305,7 @@ describe('ImportStudyComponent', () => {
     });
 
     it('should handle errors during file import and add to erroredFiles', async () => {
-      vi.spyOn(component, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
+      vi.spyOn(studyImportService, 'findCableInDatabase').mockRejectedValue(new Error('Database connection error'));
 
       const mockCsvContent = MOCK_CSV_CONTENT;
 
@@ -506,7 +509,7 @@ describe('ImportStudyComponent', () => {
       it(
         'should successfully decode using parseISO88591Base64',
         async () => {
-          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+          vi.spyOn(studyImportService, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
           const mockCsvContent = MOCK_CSV_CONTENT;
 
@@ -562,7 +565,7 @@ describe('ImportStudyComponent', () => {
       it(
         'should fallback to atob when parseISO88591Base64 fails',
         async () => {
-          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+          vi.spyOn(studyImportService, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
           // Create a base64 string that will cause parseISO88591Base64 to fail
           // but atob will succeed
@@ -685,7 +688,7 @@ describe('ImportStudyComponent', () => {
       it(
         'should execute reject path when parseError message is in errors',
         async () => {
-          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
+          vi.spyOn(studyImportService, 'findCableInDatabase').mockResolvedValue('câble par faisceau');
 
           const mockCsvContent = MOCK_CSV_CONTENT;
 
@@ -775,7 +778,7 @@ describe('ImportStudyComponent', () => {
       it(
         'should throw fileParseError when parseError is not a known error',
         async () => {
-          vi.spyOn(component, 'findCableInDatabase').mockResolvedValue('ASTER600');
+          vi.spyOn(studyImportService, 'findCableInDatabase').mockResolvedValue('ASTER600');
 
           const mockCsvContent = MOCK_CSV_CONTENT;
 
@@ -1814,115 +1817,6 @@ describe('ImportStudyComponent', () => {
       expect(createStudyCall.sections.length).toBe(1);
       expect(createStudyCall.sections[0].supports.length).toBe(2);
       expect(component.newStudies().length).toBe(1);
-    });
-  });
-
-  describe('promptIfStudyAlreadyExists', () => {
-    const testUuid = 'test-uuid-123';
-    const mockStudy: Study = {
-      uuid: testUuid,
-      title: 'Test Study',
-      author_email: 'test@example.com',
-      shareable: false,
-      created_at_offline: '2025-01-01T00:00:00Z',
-      updated_at_offline: '2025-01-01T00:00:00Z',
-      saved: true,
-      sections: []
-    } as Study;
-
-    it('should return true when study does not exist', async () => {
-      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
-
-      const result = await component.promptIfStudyAlreadyExists(testUuid);
-
-      expect(result).toBe(true);
-      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
-      expect(mockConfirmationService.confirm).not.toHaveBeenCalled();
-    });
-
-    it('should return true when study is undefined', async () => {
-      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(undefined);
-
-      const result = await component.promptIfStudyAlreadyExists(testUuid);
-
-      expect(result).toBe(true);
-      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
-      expect(mockConfirmationService.confirm).not.toHaveBeenCalled();
-    });
-
-    it('should show confirmation dialog and return true when user accepts', async () => {
-      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
-      studiesServiceMock.deleteStudy = vi.fn().mockResolvedValue(undefined);
-
-      // Mock the confirm method to call the accept callback
-      mockConfirmationService.confirm = vi
-        .fn()
-        .mockImplementation(async (options: { accept?: () => void | Promise<void>; reject?: () => void }) => {
-          // Simulate user accepting
-          if (options.accept) {
-            await options.accept();
-          }
-        });
-
-      const result = await component.promptIfStudyAlreadyExists(testUuid);
-
-      expect(result).toBe(true);
-      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
-      expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: 'positionDialog',
-          acceptLabel: expect.any(String),
-          rejectLabel: expect.any(String)
-        })
-      );
-      expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(testUuid);
-    });
-
-    it('should show confirmation dialog and return false when user rejects', async () => {
-      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
-
-      // Mock the confirm method to call the reject callback
-      mockConfirmationService.confirm = vi
-        .fn()
-        .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
-          // Simulate user rejecting
-          if (options.reject) {
-            options.reject();
-          }
-        });
-
-      const result = await component.promptIfStudyAlreadyExists(testUuid);
-
-      expect(result).toBe(false);
-      expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(testUuid);
-      expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: 'positionDialog',
-          acceptLabel: expect.any(String),
-          rejectLabel: expect.any(String)
-        })
-      );
-      expect(studiesServiceMock.deleteStudy).not.toHaveBeenCalled();
-    });
-
-    it('should include study title in confirmation message', async () => {
-      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockStudy);
-
-      mockConfirmationService.confirm = vi
-        .fn()
-        .mockImplementation((options: { accept?: () => void; reject?: () => void }) => {
-          if (options.reject) {
-            options.reject();
-          }
-        });
-
-      await component.promptIfStudyAlreadyExists(testUuid);
-
-      expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: expect.stringContaining('Test Study')
-        })
-      );
     });
   });
 

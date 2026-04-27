@@ -1,105 +1,33 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { ProtoV4Parameters, ProtoV4Support, Section, Support, Study } from '@shared/domain';
-import Papa from 'papaparse';
+import { Study } from '@shared/domain';
 import { StudiesService } from '@services/studies/studies.service';
 import { DividerModule } from 'primeng/divider';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ConfirmationService } from 'primeng/api';
-import { CablesService } from '@shared/catalog/services/cables.service';
-import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
-import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
-import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { StudyImportService, studyImportErrors } from '@features/studies/application/services/study-import.service';
+import { UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
+
+/** Localized error messages for import error reporting (mirrors service error catalog). */
+const errors = studyImportErrors;
 
 /**
- * Parse a ISO 8859-1 base64 string
- * @param str The base64 string to parse
- * @returns The parsed string
- */
-function parseISO88591Base64(str: string) {
-  return decodeURIComponent(
-    Array.prototype.map
-      .call(atob(str), function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join('')
-  );
-}
-
-/** Localized error messages for file import failures. */
-const errors = {
-  cableNotFound: $localize`Cable not found in database`,
-  fileTypeNotAllowed: $localize`File type not allowed`,
-  studyImportError: $localize`Error importing study`,
-  studyDeleteError: $localize`Error deleting study`,
-  fileDecodeError: $localize`Error decoding file`,
-  fileParseError: $localize`Error parsing file`,
-  fileReadError: $localize`Error reading file`
-};
-
-/**
- * Formats a raw Proto V4 support record into a typed `ProtoV4Support` object.
- * @param support - Raw CSV record with string values
- * @returns Formatted support with numeric and boolean fields converted
- */
-const formatProtoV4Support = (support: Record<string, string>) => {
-  return {
-    ...support,
-    nom: support.nom,
-    num: support.num,
-    portée: convertStringToNumber(support.portée),
-    angle_ligne: convertStringToNumber(support.angle_ligne),
-    ctr_poids: convertStringToNumber(support.ctr_poids),
-    long_bras: convertStringToNumber(support.long_bras),
-    long_ch: convertStringToNumber(support.long_ch),
-    pds_ch: convertStringToNumber(support.pds_ch),
-    surf_ch: convertStringToNumber(support.surf_ch),
-    alt_acc: convertStringToNumber(support.alt_acc),
-    suspension: support.suspension === 'FAUX' ? false : true,
-    ch_en_V: support.ch_en_V === 'FAUX' ? false : true
-  };
-};
-
-/**
- * Formats raw Proto V4 parameter strings into a typed `ProtoV4Parameters` object.
- * @param rawParameters - Array of raw parameter values extracted from CSV
- * @param fileName - Original file name used to derive the project name
- * @returns Typed Proto V4 parameters
- */
-const formatProtoV4Parameters = (rawParameters: string[], fileName: string): ProtoV4Parameters => {
-  return {
-    conductor: rawParameters[3],
-    cable_amount: convertStringToNumber(rawParameters[5]),
-    temperature_reference: convertStringToNumber(rawParameters[7]),
-    parameter: convertStringToNumber(rawParameters[9]),
-    cra: convertStringToNumber(rawParameters[11]),
-    temp_load: convertStringToNumber(rawParameters[13]),
-    wind_load: convertStringToNumber(rawParameters[15]),
-    frost_load: convertStringToNumber(rawParameters[17]),
-    section_name: rawParameters[19],
-    project_name: fileName.replace('.csv', '')
-  };
-};
-
-/**
- * Builds a PrimeNG toast message for a given import error type.
+ * Returns the localised error message for a given import error key.
  * @param type - Key identifying the error in the `errors` map
- * @returns Toast detail string for the error
+ * @returns Localised detail string for the error
  */
 const importErrorDetail = (type: keyof typeof errors): string => {
   return errors[type] || $localize`Error importing study`;
 };
 
-/** Detail message shown on successful study import. */
-const importSuccessDetail = $localize`Study imported successfully`;
-
 /**
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
  *
- * Handles file reading, decoding, parsing, validation, and study creation.
+ * Acts as a UI orchestration layer only: it delegates all business logic to
+ * {@link StudyImportService} and manages the local state signals for the template.
  */
 @Component({
   selector: 'app-import-study',
@@ -112,279 +40,54 @@ export class ImportStudyComponent {
   loading = signal<boolean>(false);
   newStudies = signal<Study[]>([]);
   erroredFiles = signal<string[]>([]);
+
+  private readonly studyImportService = inject(StudyImportService);
   private readonly studiesService = inject(StudiesService);
   private readonly notificationService = inject(NotificationService);
-  private readonly cablesService = inject(CablesService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly logger = inject(LoggerService);
 
-  async deleteStudy(uuid: string) {
+  async deleteStudy(uuid: string): Promise<void> {
     await this.studiesService.deleteStudy(uuid);
     this.newStudies.set(this.newStudies().filter((study) => study.uuid !== uuid));
   }
 
-  private decodeBase64FromText(textContent: string): string {
-    try {
-      return atob(textContent);
-    } catch (error: unknown) {
-      this.logger.error('Error decoding base64', error);
-      throw new Error('fileDecodeError');
-    }
-  }
-
-  private parseJsonContent(jsonContent: string): Record<string, unknown> {
-    try {
-      return JSON.parse(jsonContent) as Record<string, unknown>;
-    } catch (error: unknown) {
-      this.logger.error('Error parsing JSON', error);
-      throw new Error('fileParseError');
-    }
-  }
-
-  private transformSupports(supports: Support[]): Support[] {
-    return supports.map((support: Support) => ({
-      ...createEmptySupport(),
-      ...support
-    }));
-  }
-
-  private transformSections(sections: unknown[]): (Section & { supports: Support[] })[] {
-    return sections.map((section: unknown) => {
-      const sectionObj = section as Section;
-      return {
-        ...createEmptySection(),
-        ...sectionObj,
-        supports: Array.isArray(sectionObj.supports) ? this.transformSupports(sectionObj.supports) : []
-      };
-    });
-  }
-
-  private buildStudyFromParsedData(parsedResult: Record<string, unknown>): Study {
-    const sections = Array.isArray(parsedResult.sections) ? this.transformSections(parsedResult.sections) : [];
-
-    return {
-      ...createEmptyStudy(),
-      ...parsedResult,
-      sections
-    } as Study;
-  }
-
-  private async createAndAddStudy(study: Study): Promise<void> {
-    // Check if study with same UUID already exists
-    const hasValidUuid = study.uuid && study.uuid.trim() !== '';
-    if (hasValidUuid) {
-      const shouldReplace = await this.promptIfStudyAlreadyExists(study.uuid);
-      if (!shouldReplace) {
-        return;
-      }
-    }
-
-    // Only pass UUID if it's valid, otherwise let createStudy generate a new one
-    const uuid = await this.studiesService.createStudy(study, hasValidUuid ? study.uuid : undefined);
-    const createdStudy = await this.studiesService.getStudy(uuid);
-
-    if (!createdStudy) {
-      return;
-    }
-
-    this.newStudies.set([...this.newStudies(), createdStudy]);
-    this.notificationService.success(importSuccessDetail);
-  }
-
-  private async processAppFileContent(result: string, resolve: () => void): Promise<void> {
-    const decodedContent = this.decodeBase64FromText(result);
-    const parsedResult = this.parseJsonContent(decodedContent);
-    const newStudy = this.buildStudyFromParsedData(parsedResult);
-
-    await this.createAndAddStudy(newStudy);
-    resolve();
-  }
-
+  /**
+   * Public delegation for backward compatibility with tests.
+   * Loads and imports a `.clst` file, then updates `newStudies` on success.
+   */
   loadAppFile(file: File): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          const result = e.target?.result as string;
-          await this.processAppFileContent(result, resolve);
-        } catch (error: unknown) {
-          if (error instanceof Error && error.message in errors) {
-            reject(error);
-          } else {
-            this.logger.error('Error importing study', error);
-            reject(new Error('studyImportError'));
-          }
-        }
-      };
-
-      reader.onerror = (e) => {
-        this.logger.error('Error reading file', e);
-        reject(new Error('fileReadError'));
-      };
-
-      reader.readAsText(file);
-    });
-  }
-
-  findCableInDatabase(conductor: string): Promise<string | null> {
-    return this.cablesService.getCables().then((cables) => {
-      const cable = cables?.find((cable) => cable.name === conductor || cable.name.replace(' ', '') === conductor);
-      return cable?.name ?? null;
-    });
-  }
-
-  async promptIfStudyAlreadyExists(uuid: string): Promise<boolean> {
-    const study = await this.studiesService.getStudy(uuid);
-    if (!study) {
-      return true;
-    }
-    return await new Promise((resolve) =>
-      this.confirmationService.confirm({
-        key: 'positionDialog',
-        message: $localize`Study ${study.title} already exists. Do you want to replace it?`,
-        accept: async () => {
-          await this.studiesService.deleteStudy(uuid);
-          resolve(true);
-        },
-        reject: () => {
-          resolve(false);
-        },
-        acceptLabel: $localize`Yes`,
-        rejectLabel: $localize`No`
-      })
-    );
-  }
-
-  private decodeBase64Content(dataUrl: string): string {
-    const base64Content = dataUrl.replace('data:text/csv;base64,', '');
-
-    try {
-      return parseISO88591Base64(base64Content);
-    } catch {
-      try {
-        return atob(base64Content);
-      } catch (decodeError: unknown) {
-        this.logger.error('Error decoding base64', decodeError);
-        throw new Error('fileDecodeError');
-      }
-    }
-  }
-
-  private parseCsvContent(parsedContent: string): {
-    csvSupports: string;
-    rawParameters: string[];
-  } {
-    const rawParameters: string[] = [];
-
-    const csvSupports = parsedContent
-      .split('\n')
-      .map((line: string) => {
-        const parts = line.split(';');
-        rawParameters.push(parts.pop()?.replace('\r', '') ?? '');
-        parts.pop();
-        return parts.join(';');
-      })
-      .filter((line: string) => line.trim() !== '')
-      .join('\n');
-
-    return { csvSupports, rawParameters };
-  }
-
-  private async validateCable(conductor: string): Promise<string> {
-    const cable = await this.findCableInDatabase(conductor);
-    if (!cable) {
-      throw new Error('cableNotFound');
-    }
-    return cable;
-  }
-
-  private handlePapaParseComplete(
-    jsonResults: Papa.ParseResult<Record<string, string>>,
-    parameters: ProtoV4Parameters,
-    resolve: () => void,
-    reject: (error: Error) => void
-  ): void {
-    if (jsonResults.errors && jsonResults.errors.length > 0) {
-      this.logger.error('Error parsing file', jsonResults.errors);
-      reject(new Error('fileParseError'));
-      return;
-    }
-
-    const supports: ProtoV4Support[] = jsonResults.data.filter((support) => support.num).map(formatProtoV4Support);
-
-    this.studiesService
-      .createStudyFromProtoV4(supports, parameters)
-      .then((study) => {
+    return this.studyImportService.loadAppFile(file, this.makeCollisionResolver()).then((study) => {
+      if (study !== null) {
         this.newStudies.set([...this.newStudies(), study]);
-        this.notificationService.success(importSuccessDetail);
-        resolve();
-      })
-      .catch((parseError: unknown) => {
-        if (parseError instanceof Error && parseError.message in errors) {
-          reject(parseError);
-        } else {
-          reject(new Error('fileParseError'));
-        }
-      });
-  }
-
-  private async processProtoV4FileContent(
-    result: string,
-    fileName: string,
-    resolve: () => void,
-    reject: (error: Error) => void
-  ): Promise<void> {
-    if (!result) {
-      this.logger.error('Error reading file', fileName);
-      throw new Error('fileReadError');
-    }
-
-    const decodedContent = this.decodeBase64Content(result);
-    const { csvSupports, rawParameters } = this.parseCsvContent(decodedContent);
-    const parameters = formatProtoV4Parameters(rawParameters, fileName);
-
-    const cable = await this.validateCable(parameters.conductor);
-    parameters.conductor = cable;
-
-    Papa.parse(csvSupports, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (jsonResults: Papa.ParseResult<Record<string, string>>) => {
-        this.handlePapaParseComplete(jsonResults, parameters, resolve, reject);
       }
     });
   }
 
-  loadProtoV4File(file: File) {
-    return new Promise<void>((resolve, reject) => {
-      const fileName = file.name;
-      const reader = new FileReader();
+  /**
+   * Public delegation for backward compatibility with tests.
+   * Finds a cable by name in the cable catalog.
+   */
+  findCableInDatabase(conductor: string): Promise<string | null> {
+    return this.studyImportService.findCableInDatabase(conductor);
+  }
 
-      reader.onload = async (e) => {
-        try {
-          const result = e.target?.result as string;
-          await this.processProtoV4FileContent(result, fileName, resolve, reject);
-        } catch (error: unknown) {
-          if (error instanceof Error && error.message in errors) {
-            reject(error);
-          } else {
-            this.logger.error('Error importing study', error);
-            reject(new Error('studyImportError'));
-          }
-        }
-      };
-
-      reader.onerror = () => {
-        reject(new Error('fileReadError'));
-      };
-
-      reader.readAsDataURL(file);
-    });
+  private makeCollisionResolver(): UUIDCollisionResolver {
+    return (uuid, label) =>
+      new Promise((resolve) =>
+        this.confirmationService.confirm({
+          key: 'positionDialog',
+          message: $localize`Study ${label} already exists. Do you want to replace it?`,
+          accept: () => resolve(true),
+          reject: () => resolve(false),
+          acceptLabel: $localize`Yes`,
+          rejectLabel: $localize`No`
+        })
+      );
   }
 
   private isValidFileType(file: File): boolean {
-    return file.type === 'text/csv' || file.name.endsWith('.clst');
+    return this.studyImportService.accepts(file);
   }
 
   private separateValidAndInvalidFiles(files: FileList | null): {
@@ -402,7 +105,6 @@ export class ImportStudyComponent {
     if (invalidFiles.length === 0) {
       return;
     }
-
     this.notificationService.error(errors.fileTypeNotAllowed);
     this.erroredFiles.set([...this.erroredFiles(), ...invalidFiles.map((file) => file.name)]);
   }
@@ -421,18 +123,13 @@ export class ImportStudyComponent {
     this.erroredFiles.set([...this.erroredFiles(), fileName]);
   }
 
-  private async processFile(file: File): Promise<void> {
-    if (file.type === 'text/csv') {
-      await this.loadProtoV4File(file);
-    } else if (file.name.endsWith('.clst')) {
-      await this.loadAppFile(file);
-    }
-  }
-
   private async processValidFiles(files: File[]): Promise<void> {
     for (const file of files) {
       try {
-        await this.processFile(file);
+        const study = await this.studyImportService.processFile(file, this.makeCollisionResolver());
+        if (study !== null) {
+          this.newStudies.set([...this.newStudies(), study]);
+        }
       } catch (fileError: unknown) {
         this.handleFileError(fileError, file.name);
       }
@@ -446,7 +143,7 @@ export class ImportStudyComponent {
     this.notificationService.error(importErrorDetail(errorType));
   }
 
-  async loadFiles(event: Event) {
+  async loadFiles(event: Event): Promise<void> {
     try {
       this.loading.set(true);
       const files = (event.target as HTMLInputElement).files;
