@@ -67,6 +67,7 @@ describe('Service Worker Functions', () => {
     mockCaches.open.mockResolvedValue(mockCache);
     mockCaches.delete.mockResolvedValue(true);
     mockCache.addAll.mockResolvedValue(undefined);
+    mockCache.keys.mockResolvedValue([]);
     (global.caches.match as vi.Mock).mockResolvedValue(null);
   });
 

@@ -40,6 +40,8 @@ export class LoginPageComponent {
   }
 
   async onSubmit(): Promise<void> {
+    this.emailControl.setValue(this.emailControl.value.trim());
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -49,7 +51,7 @@ export class LoginPageComponent {
     this.submitError.set(null);
 
     try {
-      await this.authService.loginWithEmail(this.emailControl.value.trim());
+      await this.authService.loginWithEmail(this.emailControl.value);
       await this.router.navigate(['/']);
     } catch {
       this.submitError.set($localize`Login failed. Please try again.`);
