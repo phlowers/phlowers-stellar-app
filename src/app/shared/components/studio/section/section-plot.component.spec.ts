@@ -194,7 +194,7 @@ describe('SectionPlotComponent', () => {
     } as Data
   ];
 
-  const mockPlotElement = { on: vi.fn() };
+  const mockPlotElement = { on: vi.fn(), removeAllListeners: vi.fn() };
   const noopMock = vi.fn();
 
   const litDataSignal = signal<GetSectionOutput | null>(null);
@@ -209,7 +209,8 @@ describe('SectionPlotComponent', () => {
     litData: litDataSignal,
     baseLitData: baseLitDataSignal,
     temporaryLoadData: null as ChargeData | null | undefined,
-    plotOptionsChange: noopMock
+    plotOptionsChange: noopMock,
+    purgePlot: vi.fn()
   };
 
   const mockSpanService = {
@@ -382,6 +383,19 @@ describe('SectionPlotComponent', () => {
       );
     });
 
+    it('should fallback to empty plot data when createPlotData is not iterable', async () => {
+      mockCreatePlotData.mockReturnValueOnce(undefined as unknown as DataObject[]);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: []
+        })
+      );
+    });
+
     it('should handle missing section gracefully', async () => {
       sectionSignal.set(null);
       litDataSignal.set(mockLitData);
@@ -508,6 +522,26 @@ describe('SectionPlotComponent', () => {
       await component.refreshPlot();
 
       expect(mockCreateShadowPlotData).not.toHaveBeenCalled();
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: mockPlotData
+        })
+      );
+    });
+
+    it('should fallback to base plot data when shadow traces are not iterable', async () => {
+      const displayOptionsWithBase: SelectedDisplayOptions = {
+        loads: false,
+        baseState: true
+      };
+
+      baseLitDataSignal.set(mockLitData);
+      selectedDisplayOptionsSignal.set(displayOptionsWithBase);
+      mockCreateShadowPlotData.mockReturnValueOnce(undefined as unknown as Data[]);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
       expect(mockCreatePlot).toHaveBeenCalledWith(
         expect.objectContaining({
           data: mockPlotData
@@ -688,11 +722,18 @@ describe('SectionPlotComponent', () => {
 
     it('should handle multiple successive plot refreshes', async () => {
       litDataSignal.set(mockLitData);
+      mockPlotElement.on.mockClear();
+      mockPlotElement.removeAllListeners.mockClear();
 
       await component.refreshPlot();
       await component.refreshPlot();
 
       expect(mockCreatePlot).toHaveBeenCalledTimes(2);
+      expect(mockPlotElement.removeAllListeners).toHaveBeenCalledTimes(4);
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(1, 'plotly_clickannotation');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(2, 'plotly_relayout');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(3, 'plotly_clickannotation');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(4, 'plotly_relayout');
     });
 
     it('should preserve obstacle data across refreshes', async () => {
@@ -906,6 +947,38 @@ describe('SectionPlotComponent', () => {
 
       expect(mockSideTabsService.sideTabs()).toBeNull();
       expect(mockLoadFormsService.activeLoadTab()).toBe('0');
+    });
+  });
+
+  describe('addEventListenersToPlot — listener cleanup', () => {
+    it('should remove stale click and relayout listeners before reattaching', () => {
+      const removeAllListeners = vi.fn();
+      const on = vi.fn();
+      const plot = {
+        removeAllListeners,
+        on
+      } as unknown as PlotlyHTMLElement;
+
+      component.addEventListenersToPlot(plot);
+
+      expect(removeAllListeners).toHaveBeenCalledWith('plotly_clickannotation');
+      expect(removeAllListeners).toHaveBeenCalledWith('plotly_relayout');
+      expect(on).toHaveBeenCalledWith('plotly_clickannotation', expect.any(Function));
+      expect(on).toHaveBeenCalledWith('plotly_relayout', expect.any(Function));
+    });
+  });
+
+  describe('Lifecycle cleanup', () => {
+    it('should purge plot on component destroy', () => {
+      fixture.destroy();
+
+      expect(mockPlotService.purgePlot).toHaveBeenCalledTimes(1);
+    });
+
+    it('should keep destroy cleanup idempotent', () => {
+      expect(() => component.ngOnDestroy()).not.toThrow();
+      expect(() => component.ngOnDestroy()).not.toThrow();
+      expect(mockPlotService.purgePlot).toHaveBeenCalledTimes(2);
     });
   });
 });
