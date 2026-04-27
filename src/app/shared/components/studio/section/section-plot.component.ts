@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot } from './helpers/createPlot';
+import { createPlot, purgePlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -41,7 +41,7 @@ import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/he
  * Renders an interactive Plotly section plot for a transmission-line study.
  * Listens to display options, obstacle positions, and span loads to keep the plot in sync.
  */
-export class SectionPlotComponent {
+export class SectionPlotComponent implements OnDestroy {
   // Input
   /** Lit data output used to draw the section plot. `null` when no data is available. */
   litData = input<GetSectionOutput | null>(null);
@@ -158,11 +158,13 @@ export class SectionPlotComponent {
       const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
       const obstacles = this.buildObstacleList();
       const supports = this.spanService.section()?.supports ?? [];
-      let plotData = createPlotData(litData, plotOptions, supports);
+      const sectionPlotData = createPlotData(litData, plotOptions, supports);
+      let plotData = Array.isArray(sectionPlotData) ? sectionPlotData : [];
 
       if (selectedDisplayOptions.baseState && this.plotService.baseLitData()) {
         const shadowData = createShadowPlotData(this.plotService.baseLitData()!, plotOptions);
-        plotData = [...(shadowData as typeof plotData), ...plotData];
+        const safeShadowData = Array.isArray(shadowData) ? shadowData : [];
+        plotData = [...(safeShadowData as typeof plotData), ...plotData];
       }
 
       const camera = this.plotOptionsService.camera();
@@ -208,11 +210,13 @@ export class SectionPlotComponent {
     }
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
+      on(e: 'plotly_relayout', fn: () => void): void;
       removeAllListeners(e: string): void;
     };
     // Remove stale listeners before re-adding — the plot element is reused across refreshes,
     // and each refresh call would otherwise accumulate a new listener, causing a memory leak.
     plotEl.removeAllListeners('plotly_clickannotation');
+    plotEl.removeAllListeners('plotly_relayout');
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.spanService.section();
@@ -233,12 +237,12 @@ export class SectionPlotComponent {
       }
     });
 
-    (
-      plot as Plotly.PlotlyHTMLElement & {
-        on(e: 'plotly_relayout', fn: () => void): void;
-      }
-    ).on('plotly_relayout', () => {
+    plotEl.on('plotly_relayout', () => {
       this.plotOptionsService.refreshCamera();
     });
   };
+
+  ngOnDestroy(): void {
+    purgePlot(this.documentRef, PLOT_ID);
+  }
 }

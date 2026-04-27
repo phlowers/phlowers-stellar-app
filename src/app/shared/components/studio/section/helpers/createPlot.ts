@@ -209,3 +209,16 @@ export const createPlot = (plotParams: CreatePlotParams) => {
   // It will create the plot if it doesn't exist, or update it if it does
   return Plotly.react(plotParams.plotId, allData, baseLayout, config);
 };
+
+/**
+ * Purges a Plotly plot if the target element exists.
+ * Safe to call multiple times.
+ */
+export const purgePlot = (documentRef: Document, plotId: string): void => {
+  const plotElement = documentRef.getElementById(plotId);
+  if (!plotElement) {
+    return;
+  }
+
+  Plotly.purge(plotElement);
+};
