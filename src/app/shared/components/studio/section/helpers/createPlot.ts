@@ -1,10 +1,9 @@
-import Plotly, { Camera, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
+import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
 import { AxesNorms, Side, View } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { DataObject } from './createPlotDataObject';
 import { createDistanceVisuals } from './createDistanceTraces';
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
@@ -20,7 +19,7 @@ export interface CreatePlotParams {
   /** The DOM element ID of the plot container. */
   plotId: string;
   /** Array of data objects to render in the plot. */
-  data: DataObject[];
+  data: Data[];
   /** Raw section output data from the Python computation engine. */
   litData: GetSectionOutput;
   /** Whether to invert the plot axis direction. */
@@ -208,4 +207,17 @@ export const createPlot = (plotParams: CreatePlotParams) => {
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
   return Plotly.react(plotParams.plotId, allData, baseLayout, config);
+};
+
+/**
+ * Purges a Plotly plot if the target element exists.
+ * Safe to call multiple times.
+ */
+export const purgePlot = (documentRef: Document, plotId: string): void => {
+  const plotElement = documentRef.getElementById(plotId);
+  if (!plotElement) {
+    return;
+  }
+
+  Plotly.purge(plotElement);
 };
