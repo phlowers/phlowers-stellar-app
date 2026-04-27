@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
   <file id="ngi18n" original="ng.template">
-    <unit id="4768749765465246664">
+    <unit id="login.emailLabel">
       <segment>
-        <source>Email</source>
-        <target>Courriel</target>
+        <source> Email </source>
+        <target> Courriel </target>
       </segment>
     </unit>
     <unit id="7884682505577720946">
@@ -755,12 +755,6 @@
       <segment state="initial">
         <source>The application has been installed</source>
         <target>L&apos;application a été installée</target>
-      </segment>
-    </unit>
-    <unit id="2336550011721758066">
-      <segment state="initial">
-        <source>Log in</source>
-        <target>Se connecter</target>
       </segment>
     </unit>
     <unit id="5662040103831344720">
@@ -1533,18 +1527,6 @@
       <segment state="initial">
         <source>Face</source>
         <target>Ligne</target>
-      </segment>
-    </unit>
-    <unit id="3793363326863773180">
-      <segment state="initial">
-        <source>Error creating user</source>
-        <target>Erreur lors de la création de l&apos;utilisateur</target>
-      </segment>
-    </unit>
-    <unit id="4765388897418478416">
-      <segment state="initial">
-        <source>User info set</source>
-        <target>Informations utilisateur définies</target>
       </segment>
     </unit>
     <unit id="8293684133671200243">
@@ -3915,6 +3897,96 @@
       <segment state="initial">
         <source>No measures found</source>
         <target>Pas de mesure trouvée</target>
+      </segment>
+    </unit>
+    <unit id="1698187824840629244">
+      <segment state="initial">
+        <source>Install the application for offline use</source>
+        <target>Install the application for offline use</target>
+      </segment>
+    </unit>
+    <unit id="1434807535279157850">
+      <segment state="initial">
+        <source>Install now</source>
+        <target>Install now</target>
+      </segment>
+    </unit>
+    <unit id="2454050363478003966">
+      <segment state="initial">
+        <source>Login</source>
+        <target>Login</target>
+      </segment>
+    </unit>
+    <unit id="7073268649890100995">
+      <segment state="initial">
+        <source>Failed to delete obstacle</source>
+        <target>Failed to delete obstacle</target>
+      </segment>
+    </unit>
+    <unit id="8500778397889159938">
+      <segment state="initial">
+        <source>Calculation failed: <ph id="0" equiv="PH" disp="errorMessage"/></source>
+        <target>Calculation failed: <ph id="0" equiv="PH" disp="errorMessage"/></target>
+      </segment>
+    </unit>
+    <unit id="2617878852766152943">
+      <segment state="initial">
+        <source>Failed to calculate obstacle distances</source>
+        <target>Failed to calculate obstacle distances</target>
+      </segment>
+    </unit>
+    <unit id="6990481200579107766">
+      <segment state="initial">
+        <source>Update failed</source>
+        <target>Update failed</target>
+      </segment>
+    </unit>
+    <unit id="8882847090714354213">
+      <segment state="initial">
+        <source>An unknown error occurred during the update</source>
+        <target>An unknown error occurred during the update</target>
+      </segment>
+    </unit>
+    <unit id="login.logoAlt">
+      <segment state="initial">
+        <source>Stellar</source>
+        <target>Stellar</target>
+      </segment>
+    </unit>
+    <unit id="login.title">
+      <segment state="initial">
+        <source>Sign in</source>
+        <target>Sign in</target>
+      </segment>
+    </unit>
+    <unit id="login.subtitle">
+      <segment state="initial">
+        <source> Enter your email address to continue. </source>
+        <target> Enter your email address to continue. </target>
+      </segment>
+    </unit>
+    <unit id="login.emailRequired">
+      <segment state="initial">
+        <source> Email is required. </source>
+        <target> Email is required. </target>
+      </segment>
+    </unit>
+    <unit id="login.emailInvalid">
+      <segment state="initial">
+        <source> Please enter a valid email address. </source>
+        <target> Please enter a valid email address. </target>
+      </segment>
+    </unit>
+    <unit id="login.submitBtn">
+      <segment state="initial">
+        <source> Sign in </source>
+        <target> Sign in </target>
+      </segment>
+    </unit>
+    <unit id="6499981236058228396">
+      <segment state="initial">
+        <source>Login failed. Please try again.</source>
+        <target>Login failed. Please try again.</target>
       </segment>
     </unit>
   </file>
