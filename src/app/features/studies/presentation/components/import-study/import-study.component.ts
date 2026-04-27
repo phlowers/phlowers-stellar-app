@@ -8,21 +8,10 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { ConfirmationService } from 'primeng/api';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { StudyImportService, studyImportErrors } from '@features/studies/application/services/study-import.service';
+import { StudyImportService } from '@features/studies/application/services/study-import.service';
+import { errors, importErrorDetail } from './import-study.constants';
 import { IMPORT_ADAPTER_TOKEN, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
-
-/** Localized error messages for import error reporting (mirrors service error catalog). */
-const errors = studyImportErrors;
-
-/**
- * Returns the localised error message for a given import error key.
- * @param type - Key identifying the error in the `errors` map
- * @returns Localised detail string for the error
- */
-const importErrorDetail = (type: keyof typeof errors): string => {
-  return errors[type] || $localize`Error importing study`;
-};
 
 /**
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
