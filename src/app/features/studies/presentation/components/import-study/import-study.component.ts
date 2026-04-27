@@ -9,7 +9,8 @@ import { ConfirmationService } from 'primeng/api';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StudyImportService, studyImportErrors } from '@features/studies/application/services/study-import.service';
-import { UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
+import { IMPORT_ADAPTER_TOKEN, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
+import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
 
 /** Localized error messages for import error reporting (mirrors service error catalog). */
 const errors = studyImportErrors;
@@ -26,21 +27,24 @@ const importErrorDetail = (type: keyof typeof errors): string => {
 /**
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
  *
- * Acts as a UI orchestration layer only: it delegates all business logic to
- * {@link StudyImportService} and manages the local state signals for the template.
+ * Acts as a UI orchestration layer delegating all file processing to
+ * {@link GenericImportEngineService} via the {@link StudyImportService} adapter.
+ * HTML and SCSS are preserved for zero user-visible regression.
  */
 @Component({
   selector: 'app-import-study',
   imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
+  providers: [GenericImportEngineService, { provide: IMPORT_ADAPTER_TOKEN, useExisting: StudyImportService }],
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportStudyComponent {
-  loading = signal<boolean>(false);
-  newStudies = signal<Study[]>([]);
-  erroredFiles = signal<string[]>([]);
+  readonly loading = signal<boolean>(false);
+  readonly newStudies = signal<Study[]>([]);
+  readonly erroredFiles = signal<string[]>([]);
 
+  private readonly engine = inject(GenericImportEngineService);
   private readonly studyImportService = inject(StudyImportService);
   private readonly studiesService = inject(StudiesService);
   private readonly notificationService = inject(NotificationService);
@@ -72,6 +76,44 @@ export class ImportStudyComponent {
     return this.studyImportService.findCableInDatabase(conductor);
   }
 
+  async loadFiles(event: Event): Promise<void> {
+    try {
+      this.loading.set(true);
+      const files = Array.from((event.target as HTMLInputElement).files ?? []);
+
+      if (files.length === 0) {
+        this.loading.set(false);
+        return;
+      }
+
+      const outcomes = await this.engine.processFiles(files, this.makeCollisionResolver());
+
+      // Notify once if any files were rejected due to type mismatch (mirrors original behaviour).
+      const typeErrors = outcomes.filter((o) => o.status === 'error' && o.error?.code === 'FILE_TYPE_NOT_ALLOWED');
+      if (typeErrors.length > 0) {
+        this.notificationService.error(errors.fileTypeNotAllowed);
+        this.erroredFiles.update((prev) => [...prev, ...typeErrors.map((o) => o.fileName)]);
+      }
+
+      for (const outcome of outcomes) {
+        if (outcome.status === 'success' && outcome.entityId) {
+          this.newStudies.update((prev) => [
+            ...prev,
+            { uuid: outcome.entityId!, title: outcome.entityLabel ?? '' } as Study
+          ]);
+        } else if (outcome.status === 'error' && outcome.error?.code !== 'FILE_TYPE_NOT_ALLOWED') {
+          const errorKey = outcome.error?.code as keyof typeof errors;
+          this.notificationService.error(importErrorDetail(errorKey));
+          this.erroredFiles.update((prev) => [...prev, outcome.fileName]);
+        }
+      }
+
+      this.loading.set(false);
+    } catch (error: unknown) {
+      this.handleLoadFilesError(error);
+    }
+  }
+
   private makeCollisionResolver(): UUIDCollisionResolver {
     return (uuid, label) =>
       new Promise((resolve) =>
@@ -86,29 +128,6 @@ export class ImportStudyComponent {
       );
   }
 
-  private isValidFileType(file: File): boolean {
-    return this.studyImportService.accepts(file);
-  }
-
-  private separateValidAndInvalidFiles(files: FileList | null): {
-    valid: File[];
-    invalid: File[];
-  } {
-    const fileArray = Array.from(files ?? []);
-    return {
-      valid: fileArray.filter((file) => this.isValidFileType(file)),
-      invalid: fileArray.filter((file) => !this.isValidFileType(file))
-    };
-  }
-
-  private handleInvalidFiles(invalidFiles: File[]): void {
-    if (invalidFiles.length === 0) {
-      return;
-    }
-    this.notificationService.error(errors.fileTypeNotAllowed);
-    this.erroredFiles.set([...this.erroredFiles(), ...invalidFiles.map((file) => file.name)]);
-  }
-
   private getErrorType(error: unknown): keyof typeof errors {
     if (error instanceof Error && error.message in errors) {
       return error.message as keyof typeof errors;
@@ -116,48 +135,10 @@ export class ImportStudyComponent {
     return 'studyImportError';
   }
 
-  private handleFileError(fileError: unknown, fileName: string): void {
-    const errorType = this.getErrorType(fileError);
-    this.logger.error('Error importing file', fileError);
-    this.notificationService.error(importErrorDetail(errorType));
-    this.erroredFiles.set([...this.erroredFiles(), fileName]);
-  }
-
-  private async processValidFiles(files: File[]): Promise<void> {
-    for (const file of files) {
-      try {
-        const study = await this.studyImportService.processFile(file, this.makeCollisionResolver());
-        if (study !== null) {
-          this.newStudies.set([...this.newStudies(), study]);
-        }
-      } catch (fileError: unknown) {
-        this.handleFileError(fileError, file.name);
-      }
-    }
-  }
-
   private handleLoadFilesError(error: unknown): void {
     this.logger.error('Error in loadFiles', error);
     this.loading.set(false);
     const errorType = this.getErrorType(error);
     this.notificationService.error(importErrorDetail(errorType));
-  }
-
-  async loadFiles(event: Event): Promise<void> {
-    try {
-      this.loading.set(true);
-      const files = (event.target as HTMLInputElement).files;
-      const { valid, invalid } = this.separateValidAndInvalidFiles(files);
-
-      this.handleInvalidFiles(invalid);
-
-      if (valid.length > 0) {
-        await this.processValidFiles(valid);
-      }
-
-      this.loading.set(false);
-    } catch (error: unknown) {
-      this.handleLoadFilesError(error);
-    }
   }
 }

@@ -33,7 +33,7 @@
               name="source"
               value="manual"
               [ngModel]="source()"
-              (ngModelChange)="source.set($event)"
+              (onClick)="source.set('manual')"
               inputId="manual"
               data-testid="source-manual-radio"
             />
@@ -45,7 +45,6 @@
               name="source"
               value="referencial"
               [ngModel]="source()"
-              (ngModelChange)="source.set($event)"
               inputId="referencial"
               [disabled]="true"
               data-testid="source-referencial-radio"
@@ -58,7 +57,6 @@
               name="source"
               value="distantReferencial"
               [ngModel]="source()"
-              (ngModelChange)="source.set($event)"
               inputId="distantReferencial"
               [disabled]="true"
               data-testid="source-distant-referencial-radio"
@@ -71,9 +69,8 @@
               name="source"
               value="extraction"
               [ngModel]="source()"
-              (ngModelChange)="source.set($event)"
+              (onClick)="source.set('extraction')"
               inputId="extraction"
-              [disabled]="true"
               data-testid="source-extraction-radio"
             />
             <label for="extraction" class="ml-2" i18n>From a file</label>
@@ -88,6 +85,13 @@
         [mode]="mode()"
         [section]="section()"
         (sectionChange)="onSectionChange($event)"
+      />
+    }
+    @if (source() === 'extraction' && mode() === 'create') {
+      <app-import-section
+        [study]="study()"
+        (importCompleted)="onSectionImportCompleted($event)"
+        data-testid="import-section-container"
       />
     }
   </div>

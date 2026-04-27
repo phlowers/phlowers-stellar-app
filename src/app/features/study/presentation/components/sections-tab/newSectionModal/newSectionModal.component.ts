@@ -17,6 +17,11 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { isNil } from 'lodash';
 import { SectionService } from '@services/section/section.service';
 import { hasSupportsBoundsErrors } from './newSectionModal.constants';
+import { ImportSectionComponent } from './import-section/import-section.component';
+import { ImportOutcome } from '@shared/import/domain/import-contracts';
+
+/** Union of all available section source modes. */
+export type SectionSourceMode = 'manual' | 'referencial' | 'distantReferencial' | 'extraction';
 
 /**
  * Checks whether all mandatory fields in a section are filled.
@@ -70,7 +75,8 @@ const areAllRequiredFieldsFilled = (section: Section) => {
     ManualSectionComponent,
     CommonModule,
     IconComponent,
-    ButtonComponent
+    ButtonComponent,
+    ImportSectionComponent
   ],
   templateUrl: './newSectionModal.component.html',
   styleUrl: './newSectionModal.component.scss',
@@ -83,7 +89,8 @@ export class NewSectionModalComponent {
   isOpenChange = output<boolean>();
   /** Emits the validated section on save. */
   setSection = output<Section>();
-  source = signal('manual');
+  /** Active source mode for section creation. */
+  readonly source = signal<SectionSourceMode>('manual');
   /** The section being created or edited. */
   section = input.required<Section>();
   /** The parent study. */
@@ -155,5 +162,16 @@ export class NewSectionModalComponent {
   onDeleteSection() {
     this.sectionService.deleteSection(this.study()!, this.section());
     this.isOpenChange.emit(false);
+  }
+
+  /**
+   * Handles the `importCompleted` event emitted by `ImportSectionComponent`.
+   * Closes the modal after at least one section has been successfully imported.
+   */
+  onSectionImportCompleted(outcomes: ImportOutcome[]): void {
+    const hasSuccess = outcomes.some((o) => o.status === 'success');
+    if (hasSuccess) {
+      this.isOpenChange.emit(false);
+    }
   }
 }
