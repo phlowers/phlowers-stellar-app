@@ -43,9 +43,10 @@ export default function (req, res, next) {
   if (req.method === 'GET' && req.url === '/auth/userinfo') {
     const claims = loadClaims();
     if (!claims) {
-      res.statusCode = 401;
+      res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ error: 'no_claims', message: 'No OIDC claims file found' }));
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(JSON.stringify({ authenticated: false }));
       return;
     }
     res.setHeader('Content-Type', 'application/json');

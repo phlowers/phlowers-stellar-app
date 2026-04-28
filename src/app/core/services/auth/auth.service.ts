@@ -51,9 +51,13 @@ export class AuthService {
 
     if (cachedUser) {
       this.currentUser.set(cachedUser);
-      this.refreshFromNetwork().catch((err) => {
-        console.warn('AuthService: background network refresh failed', err);
-      });
+      // Only refresh from network if the user was authenticated via OIDC.
+      // Email-only users (from fallback login) don't have a server-side session.
+      if (cachedUser.sub) {
+        this.refreshFromNetwork().catch((err) => {
+          console.warn('AuthService: background network refresh failed', err);
+        });
+      }
       return;
     }
 
@@ -79,11 +83,19 @@ export class AuthService {
   private async fetchUserinfo(): Promise<OidcClaims | null> {
     try {
       const response = await fetch(USERINFO_URL, { cache: 'no-store' });
+      if (response.status === 401) {
+        // No OIDC session (legacy server response) — not an error.
+        return null;
+      }
       if (!response.ok) {
         console.warn(`AuthService: userinfo request failed (HTTP ${response.status})`);
         return null;
       }
-      const data = (await response.json()) as OidcClaims;
+      const data = (await response.json()) as OidcClaims & { authenticated?: boolean };
+      // Server returns { authenticated: false } when no OIDC session exists.
+      if (data.authenticated === false) {
+        return null;
+      }
       if (typeof data.email !== 'string' || !data.email.trim()) {
         console.warn('AuthService: userinfo response missing a valid email');
         return null;
