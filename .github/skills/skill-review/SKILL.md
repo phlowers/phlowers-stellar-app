@@ -48,6 +48,12 @@ Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WAS
 - [ ] `globalThis` instead of `window`
 - [ ] Path aliases used (no relative imports)
 
+### Logging & Notifications
+
+- [ ] No `console.log` / `console.warn` / `console.error` in DI-injectable code
+- [ ] `LoggerService` used for all technical logs
+- [ ] `NotificationService` used for user-facing error / warning / info / success messages
+
 ### SCSS / BEM
 
 - [ ] BEM naming respected
@@ -77,8 +83,10 @@ Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WAS
 
 ### i18n
 
-- [ ] No hardcoded text in templates
-- [ ] Translation keys in both `fr.json` and `en.json`
+- [ ] No hardcoded text in templates (use `i18n` attribute)
+- [ ] No hardcoded text in TypeScript (use `$localize`)
+- [ ] No `TranslateService` / `translate` pipe usage
+- [ ] `npm run extract-i18n` ran if new `i18n` / `$localize` were added (`messages.xlf` / `messages.fr.xlf`)
 
 ### Dead Code
 

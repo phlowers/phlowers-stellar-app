@@ -33,6 +33,7 @@ Act as a **Mediator** that resolves every conflict while preserving 100% of the 
 - **No refactoring**: resolve the conflict exactly — don't improve, rename, or reorganize code
 - **Flag ambiguity**: if both sides changed the same logic differently and auto-merge is unsafe, ask the user before proceeding
 - Maintain proper import order and path aliases after resolution
+- **NEVER run `git commit`, `git push`, `git rebase --continue`, or `git merge --continue`** — only stage with `git add` and ask the user to finalize manually
 
 ## Output
 

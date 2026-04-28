@@ -58,7 +58,7 @@ For each failing test:
 - **Vitest only** — `vi.fn()`, `vi.spyOn()`, never Jest
 - **Never reduce coverage** — fix tests, don't delete them
 - **Don't change source code** to make tests pass (unless the source has a genuine bug)
-- **Mock boundaries**: PyodideService, Dexie DB, fetch/HTTP, Web Workers
+- **Mock boundaries**: PyodideService, Dexie DB, fetch/HTTP, Web Workers, `LoggerService`, `NotificationService`
 - **Path aliases** for all imports
 
 ## Output

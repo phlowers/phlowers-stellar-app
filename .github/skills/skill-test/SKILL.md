@@ -55,6 +55,7 @@ describe('MyService', () => {
 - **`data-testid`** for all DOM queries — never query by class or tag
 - **Mock PyodideService** and all Web Worker interactions
 - **Mock Dexie/IndexedDB** — never use real database in tests
+- **Mock `LoggerService` and `NotificationService`** when injected by the SUT (use `vi.fn()` for each method)
 - **Path aliases** for all imports — no relative paths
 - **English only** in `describe` and `it` blocks
 - Every `data-testid` in the template must have a corresponding rendering test

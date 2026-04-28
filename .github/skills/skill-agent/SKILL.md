@@ -32,6 +32,8 @@ Act as a **Disciplined Executor** that implements exactly one step from `plan.md
 - **NO modifying** files not listed in the step
 - If the step requires a change to an unlisted file (e.g., a new import in `app.routes.ts`), flag it explicitly before making the change
 - Follow all project conventions: signals, `inject()`, OnPush, BEM, path aliases, English-only, no `any`, `globalThis` over `window`
+- **NO `console.log` / `console.warn` / `console.error`** — use `LoggerService` for technical logs, `NotificationService` for user-facing messages
+- **NEVER run `git commit` or `git push`** — ask the user to run them manually if needed
 
 ## Output
 
