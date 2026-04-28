@@ -162,17 +162,11 @@ class ChangeStateInput:
     spanLoads: list[SpanLoad]
 
 
-@dataclass
-class StartingGps:
-    startLatitude: float
-    startLongitude: float
-    startAzimuth: float
-
 
 @dataclass
 class Lambert93Data:
-    x: list  # easting
-    y: list  # northing
+    lambert_x: list[float]  # easting
+    lambert_y: list[float]  # northing
 
     # allow extra arguments
     @classmethod
@@ -191,8 +185,8 @@ class SectionGeoData:
     startLatitude: float
     startLongitude: float
     startAzimuth: float
-    spanLengths: list
-    lineAngles: list
+    spanLength: list[float]
+    lineAngle: list[float]
 
     # allow extra arguments
     @classmethod

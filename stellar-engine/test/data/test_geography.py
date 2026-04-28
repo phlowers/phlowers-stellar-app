@@ -17,31 +17,14 @@ from stellar_engine.data.geography import (
 
 
 def test_compute_localization():
-    section_array = SectionArray(
-        pd.DataFrame(
-            {
-                "name": ["1", "2", "3", "4"],
-                "suspension": [False, True, True, False],
-                "conductor_attachment_altitude": [50, 100, 50, 50],
-                "crossarm_length": [10, 10, 10, 10],
-                "line_angle": [0, 10, 0, 0],
-                "insulator_length": [3, 3, 3, 3],
-                "span_length": [500, 500, 500, np.nan],
-                "insulator_mass": [100.0, 50.0, 50.0, 100.0],
-                "load_mass": [0, 0, 0, 0],
-                "load_position": [0, 0, 0, 0],
-            }
-        ),
-        sagging_parameter=2000,
-        sagging_temperature=15,
-    )
-    section_array.add_units({"line_angle": "deg"})
     inputs = {
         "startLatitude": 48.8566,
         "startLongitude": 2.3522,
         "startAzimuth": 90,
+        "spanLength": [500, 500, 500, np.nan],
+        "lineAngle": [0, 10, 0, 0],
     }
-    result = compute_localization(inputs, section_array)
+    result = compute_localization(inputs)
     expected_keys = {
         "latitude",
         "longitude",
@@ -57,14 +40,14 @@ def test_compute_localization():
 
 def test_import_lambert():
     inputs = {
-        "x": [
+        "lambert_x": [
             652469.02270914,
             652471.48385573,
             652405.05557107,
             652196.85828404,
             651774.86710069,
         ],
-        "y": [
+        "lambert_y": [
             6862035.25942008,
             6862335.24992367,
             6862729.73314491,
@@ -85,14 +68,14 @@ def test_import_lambert():
 
 def test_import_lambert_and_validate():
     inputs = {
-        "x": [
+        "lambert_x": [
             652469.02270914,
             652471.48385573,
             652405.05557107,
             652196.85828404,
             651774.86710069,
         ],
-        "y": [
+        "lambert_y": [
             6862035.25942008,
             6862335.24992367,
             6862729.73314491,
@@ -102,19 +85,19 @@ def test_import_lambert_and_validate():
         "startLatitude": 48.8566,
         "startLongitude": 2.3522,
         "startAzimuth": 0,
-        "spanLengths": [
+        "spanLength": [
             300.0,
             400.0,
             500.0,
             600.0,
             np.nan,
         ],  # last value not taken into account
-        "lineAngles": [0.0, 10.0, 15.0, 20.0, 0.0],
+        "lineAngle": [0.0, 10.0, 15.0, 20.0, 0.0],
     }
     result = import_lambert_and_validate(inputs)
     expected_keys = {
         "localization",
-        "mean_gps_diff",
+        "meanGpsDiff",
     }
     assert expected_keys == set(result.keys())
-    assert result["mean_gps_diff"] < 1e-5
+    assert result["meanGpsDiff"] < 1e-5
