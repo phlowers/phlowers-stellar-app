@@ -95,7 +95,7 @@ export class HomeComponent {
     return !isOnline;
   }
 
-  private readonly needUpdate = toSignal(this.updateService.needUpdate$, { initialValue: false });
+  private readonly needUpdate = this.updateService.needUpdate;
   private readonly connectivity = toSignal(
     combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]),
     { initialValue: [false, ServerStatus.LOADING] as [boolean, ServerStatus] }

@@ -1,8 +1,7 @@
-<div
+<fieldset
   class="stepper"
   [class.stepper--error]="hasError()"
   [class.stepper--disabled]="disabled()"
-  role="group"
   [attr.aria-labelledby]="label() ? inputId + '-label' : null"
 >
   @if (label()) {
@@ -27,7 +26,7 @@
       (blur)="markTouched()"
     />
 
-    <div class="stepper__controls" role="presentation">
+    <div class="stepper__controls">
       <span class="stepper__divider" aria-hidden="true"></span>
 
       <button
@@ -71,4 +70,4 @@
       {{ displayedAssistiveText() }}
     </p>
   }
-</div>
+</fieldset>

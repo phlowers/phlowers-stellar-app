@@ -53,6 +53,11 @@ const makeLitDataWithObstacles = (): GetSectionOutput => ({
   horizontal_distance: [],
   arc_length: [],
   T_h: [],
+  slope_left: [],
+  slope_right: [],
+  sag: [],
+  sag_s2: [],
+  utilization_rate: [],
   obstacles: [
     {
       uuid: 'obstacle_mock',

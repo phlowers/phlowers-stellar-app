@@ -31,7 +31,12 @@ describe('createShadowPlotData', () => {
     tension_inf: [],
     horizontal_distance: [],
     arc_length: [],
-    T_h: []
+    T_h: [],
+    slope_left: [],
+    slope_right: [],
+    sag: [],
+    sag_s2: [],
+    utilization_rate: []
   };
 
   const defaultPlotOptions: PlotOptions = {

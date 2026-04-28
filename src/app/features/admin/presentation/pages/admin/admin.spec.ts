@@ -83,7 +83,7 @@ describe('AdminComponent', () => {
     } as unknown as vi.Mocked<OnlineService>;
 
     locationAssignMock = vi.fn();
-    windowMock = { location: { assign: locationAssignMock } as Location };
+    windowMock = { location: { assign: locationAssignMock } as unknown as Location };
 
     await TestBed.configureTestingModule({
       imports: [

@@ -3,17 +3,18 @@ import { TopbarComponent } from './topbar.component';
 import { PageTitleService } from '@shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { BehaviorSubject } from 'rxjs';
-import { UserService } from '@services/user/user.service';
+import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { signal } from '@angular/core';
 
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
   let fixture: ComponentFixture<TopbarComponent>;
   let mockPageTitleService: vi.Mocked<PageTitleService>;
-  let mockUserService: vi.Mocked<UserService>;
+  let mockAuthService: Partial<AuthService>;
   let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
   let pageTitleSubject: BehaviorSubject<string>;
-  let userSubject: BehaviorSubject<{ email: string } | null>;
+  let currentUserSignal: ReturnType<typeof signal<{ email: string } | null>>;
   let readySubject: BehaviorSubject<boolean>;
   let errorSubject: BehaviorSubject<boolean>;
 
@@ -22,7 +23,7 @@ describe('TopbarComponent', () => {
 
   beforeEach(async () => {
     pageTitleSubject = new BehaviorSubject<string>('');
-    userSubject = new BehaviorSubject<{ email: string } | null>(null);
+    currentUserSignal = signal<{ email: string } | null>(null);
     readySubject = new BehaviorSubject<boolean>(true);
     errorSubject = new BehaviorSubject<boolean>(false);
 
@@ -30,9 +31,9 @@ describe('TopbarComponent', () => {
       pageTitle$: pageTitleSubject.asObservable()
     } as vi.Mocked<PageTitleService>;
 
-    mockUserService = {
-      user$: userSubject.asObservable()
-    } as unknown as vi.Mocked<UserService>;
+    mockAuthService = {
+      currentUser: currentUserSignal as AuthService['currentUser']
+    };
 
     mockWorkerPythonService = {
       ready$: readySubject.asObservable(),
@@ -43,7 +44,7 @@ describe('TopbarComponent', () => {
       imports: [TopbarComponent, IconComponent],
       providers: [
         { provide: PageTitleService, useValue: mockPageTitleService },
-        { provide: UserService, useValue: mockUserService },
+        { provide: AuthService, useValue: mockAuthService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService }
       ]
     }).compileComponents();
@@ -108,7 +109,7 @@ describe('TopbarComponent', () => {
     it('UC-TOPBAR1: should render topbar with user info', () => {
       fixture.detectChanges();
 
-      userSubject.next({ email: 'user@example.com' });
+      currentUserSignal.set({ email: 'user@example.com' });
       fixture.detectChanges();
 
       const userInfo = getByTestId('user-info');
@@ -117,7 +118,7 @@ describe('TopbarComponent', () => {
     });
 
     it('should display "No user" when user is null', () => {
-      userSubject.next(null);
+      currentUserSignal.set(null);
       fixture.detectChanges();
 
       const userInfo = getByTestId('user-info');

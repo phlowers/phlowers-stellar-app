@@ -436,9 +436,9 @@ export class ObstacleFormService {
     const currentObstacles = section.obstacles ?? [];
     const existingIndex = currentObstacles.findIndex((o) => o.uuid === obstacle.uuid);
     const nextObstacles =
-      existingIndex !== -1
-        ? currentObstacles.map((existingObstacle, index) => (index === existingIndex ? obstacle : existingObstacle))
-        : [...currentObstacles, obstacle];
+      existingIndex === -1
+        ? [...currentObstacles, obstacle]
+        : currentObstacles.map((existingObstacle, index) => (index === existingIndex ? obstacle : existingObstacle));
     this.spanService.section.set({ ...section, obstacles: nextObstacles });
   }
 

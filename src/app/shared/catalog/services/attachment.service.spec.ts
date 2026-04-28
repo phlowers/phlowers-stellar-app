@@ -182,7 +182,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncatalog1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncatalog2,idr2,Support 2,tower2,Family 2,2,0,0,11.0,2.5';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -250,7 +250,7 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -329,7 +329,7 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncat2,idr2,,tower2,Family 2,2,0,0,11.0,2.5\ncat3,idr3,Support 3,tower3,Family 3,3,0,0,12.0,3.0';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -413,7 +413,7 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -502,7 +502,7 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -584,7 +584,7 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -623,7 +623,7 @@ describe('AttachmentService', () => {
 
     it('should handle HTTP errors gracefully', async () => {
       // Mock Papa Parse to call complete callback with empty data when HTTP error occurs
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -690,7 +690,7 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
             {

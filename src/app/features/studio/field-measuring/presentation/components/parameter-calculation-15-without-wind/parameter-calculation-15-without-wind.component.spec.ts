@@ -4,7 +4,7 @@ import { ComponentRef } from '@angular/core';
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -41,7 +41,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
   beforeEach(async () => {
     workerPythonServiceMock = {
-      runTask: vi.fn().mockResolvedValue({ result: null, error: null }),
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null, pythonErrorCode: null }),
       ready$: new BehaviorSubject<boolean>(true)
     } as unknown as vi.Mocked<WorkerPythonService>;
 
@@ -144,6 +144,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.calculateParameter15CWithoutWind];
         error: TaskError | null;
+        pythonErrorCode: PythonErrorCode | null;
       }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
@@ -162,7 +163,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
       resolveTask({
         result: { parameter15CMinusUncertainty: 0, parameter15C: 0, parameter15CPlusUncertainty: 0 },
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
       await calcPromise;
 
@@ -192,7 +194,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
     workerPythonServiceMock.runTask.mockResolvedValue({
       result: mockResult,
-      error: null
+      error: null,
+      pythonErrorCode: null
     });
 
     // Set all required fields for manual mode
@@ -269,7 +272,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
       workerPythonServiceMock.runTask.mockResolvedValue({
         result: mockResult,
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
 
       component.updateMeasureData('updateMode15C', 'manual');

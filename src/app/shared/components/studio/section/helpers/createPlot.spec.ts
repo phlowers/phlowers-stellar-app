@@ -56,7 +56,12 @@ describe('createPlot', () => {
     tension_inf: [1, 2, 3],
     horizontal_distance: [1, 2, 3],
     arc_length: [1, 2, 3],
-    T_h: [1, 2, 3]
+    T_h: [1, 2, 3],
+    slope_left: [1, 2, 3],
+    slope_right: [1, 2, 3],
+    sag: [1, 2, 3],
+    sag_s2: [1, 2, 3],
+    utilization_rate: [1, 2, 3]
   };
 
   const mockSpanLoads: (SpanLoad | null)[] = [];
@@ -295,14 +300,14 @@ describe('createPlot', () => {
     it('should set camera eye.y positive when invert is true and camera is null', () => {
       createPlot({ ...createDefaultParams(), view: '3d', invert: true, camera: null });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: { eye: { y: number } } } };
       expect(layoutArg.scene.camera.eye.y).toBeGreaterThan(0);
     });
 
     it('should set camera eye.y negative when invert is false and camera is null', () => {
       createPlot({ ...createDefaultParams(), view: '3d', invert: false, camera: null });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: { eye: { y: number } } } };
       expect(layoutArg.scene.camera.eye.y).toBeLessThan(0);
     });
 
@@ -314,7 +319,7 @@ describe('createPlot', () => {
       };
       createPlot({ ...createDefaultParams(), view: '3d', invert: true, camera: inputCamera });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: { eye: { y: number } } } };
       expect(layoutArg.scene.camera.eye.y).toBeGreaterThan(0);
     });
 
@@ -326,7 +331,7 @@ describe('createPlot', () => {
       };
       createPlot({ ...createDefaultParams(), view: '3d', invert: false, camera: inputCamera });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2];
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: { eye: { y: number } } } };
       expect(layoutArg.scene.camera.eye.y).toBeLessThan(0);
     });
 

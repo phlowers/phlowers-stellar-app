@@ -89,7 +89,7 @@ describe('Worker', () => {
       // Verify all packages are included
       const allPackages = Object.values(pythonPackages).map((pkg) => 'test/pyodide/' + pkg.file_name);
 
-      const callArgs = (loadPyodide as vi.Mock).mock.calls[0][0];
+      const callArgs = (loadPyodide as vi.Mock).mock.calls[0][0] as { packages: string[] };
       expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));
     });
 

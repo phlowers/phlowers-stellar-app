@@ -141,7 +141,8 @@
             "headers": {
               "Cross-Origin-Opener-Policy": "same-origin",
               "Cross-Origin-Embedder-Policy": "require-corp"
-            }
+            },
+            "middlewares": ["./dev-mock/oidc-middleware.mjs"]
           },
           "configurations": {
             "production": {

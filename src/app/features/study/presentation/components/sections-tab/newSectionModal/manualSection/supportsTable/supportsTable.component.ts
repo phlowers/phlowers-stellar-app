@@ -108,7 +108,7 @@ export class SupportsTableComponent implements OnInit {
 
   async getData() {
     const chains = (await this.chainsService.getChains()) || [];
-    this.chainsOptions.set(chains.sort((a, b) => a.chain_name.localeCompare(b.chain_name)));
+    this.chainsOptions.set(chains.toSorted((a, b) => a.chain_name.localeCompare(b.chain_name)));
     this.supplementaryChainsOptions.set(
       buildSupplementaryChains(
         getSupportFieldValues(this.supports(), 'chainName'),

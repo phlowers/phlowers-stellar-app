@@ -6,8 +6,15 @@
  */
 
 /**
- * Dexie schema for the users table
+ * Dexie schema for the users table (v1/v2 — kept for migration compatibility)
  */
 export const USER_SCHEMA = {
   users: `&email, first_name, last_name, created_at, updated_at`
+};
+
+/**
+ * Dexie schema for the users table (v3 — adds OIDC sub index)
+ */
+export const USER_SCHEMA_V3 = {
+  users: `&email, sub`
 };

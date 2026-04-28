@@ -1,4 +1,4 @@
-import { checkIfAppInstalled, installApp, updateApp, handleFetch, handleMessage } from './service-worker';
+import { installApp, updateApp, handleFetch, handleMessage } from './service-worker';
 
 // Mock browser APIs
 const mockCache = {
@@ -13,7 +13,8 @@ const mockCache = {
 
 const mockCaches = {
   open: vi.fn().mockResolvedValue(mockCache),
-  match: vi.fn()
+  match: vi.fn(),
+  delete: vi.fn().mockResolvedValue(true)
 };
 
 const mockFetch = vi.fn();
@@ -31,7 +32,8 @@ const mockSelf = {
 // Mock global objects
 global.caches = {
   ...mockCaches,
-  match: vi.fn()
+  match: vi.fn(),
+  delete: mockCaches.delete
 } as unknown as CacheStorage;
 global.fetch = mockFetch as unknown as typeof fetch;
 global.Response = class MockResponse {
@@ -63,34 +65,10 @@ describe('Service Worker Functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCaches.open.mockResolvedValue(mockCache);
+    mockCaches.delete.mockResolvedValue(true);
+    mockCache.addAll.mockResolvedValue(undefined);
+    mockCache.keys.mockResolvedValue([]);
     (global.caches.match as vi.Mock).mockResolvedValue(null);
-  });
-
-  describe('checkIfAppInstalled', () => {
-    it('should return true when app version exists in cache', async () => {
-      const mockResponse = new Response('{"version": "1.0.0"}');
-      mockCache.match.mockResolvedValue(mockResponse);
-
-      const result = await checkIfAppInstalled();
-
-      expect(result).toBe(true);
-      expect(mockCache.match).toHaveBeenCalledWith('/app_version');
-    });
-
-    it('should return false when app version does not exist in cache', async () => {
-      mockCache.match.mockResolvedValue(null);
-
-      const result = await checkIfAppInstalled();
-
-      expect(result).toBe(false);
-      expect(mockCache.match).toHaveBeenCalledWith('/app_version');
-    });
-
-    it('should handle cache open errors', async () => {
-      mockCaches.open.mockRejectedValue(new Error('Cache open failed'));
-
-      await expect(checkIfAppInstalled()).rejects.toThrow('Cache open failed');
-    });
   });
 
   describe('installApp', () => {
@@ -101,9 +79,9 @@ describe('Service Worker Functions', () => {
 
     beforeEach(() => {
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockClients.matchAll.mockResolvedValue([{ postMessage: vi.fn() }, { postMessage: vi.fn() }]);
     });
 
     it('should install app successfully', async () => {
@@ -126,15 +104,21 @@ describe('Service Worker Functions', () => {
           headers: { 'content-type': 'application/json' }
         })
       );
-      expect(mockClients.matchAll).toHaveBeenCalledWith({
-        includeUncontrolled: true,
-        type: 'window'
+    });
+
+    it('should throw when manifest response is not ok', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 404
       });
+
+      await expect(installApp()).rejects.toThrow('Manifest fetch failed with status 404');
     });
 
     it('should handle empty files array', async () => {
       const emptyManifest = { files: [], app_version: '1.0.0' };
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
@@ -158,30 +142,27 @@ describe('Service Worker Functions', () => {
 
   describe('updateApp', () => {
     const mockManifest = {
-      files: ['/index.html', '/app.js', '/pyodide/file1.py'],
+      files: ['/index.html', '/app.js', '/pyodide/file1.whl'],
       app_version: '1.1.0'
     };
 
     beforeEach(() => {
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.keys.mockResolvedValue([
-        { url: 'https://example.com/index.html' },
-        { url: 'https://example.com/old-file.js' },
-        { url: 'https://example.com/app_version' }
-      ]);
     });
 
-    it('should update app successfully', async () => {
-      mockCache.match.mockResolvedValue(null); // pyodide file not in cache
-
+    it('should perform a full cache reset and re-cache all files', async () => {
       const result = await updateApp();
 
       expect(result).toEqual(mockManifest);
-      expect(mockCache.add).toHaveBeenCalledWith('/index.html');
-      expect(mockCache.add).toHaveBeenCalledWith('/app.js');
-      expect(mockCache.add).toHaveBeenCalledWith('/pyodide/file1.py');
+      // Must delete the entire cache first
+      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
+      // Then reopen and addAll
+      expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
+      expect(mockCache.addAll).toHaveBeenCalledWith(mockManifest.files);
+      // Store new version
       expect(mockCache.put).toHaveBeenCalledWith(
         '/app_version',
         expect.objectContaining({
@@ -190,39 +171,178 @@ describe('Service Worker Functions', () => {
       );
     });
 
-    it('should skip pyodide files that are already cached', async () => {
-      mockCache.match.mockResolvedValue(new Response()); // pyodide file already in cache
+    it('should re-download Python wheels (no incremental caching)', async () => {
+      const manifestWithWheels = {
+        files: ['/index.html', '/pyodide/numpy.whl', '/pyodide/pandas.whl'],
+        app_version: '1.1.0'
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(manifestWithWheels)
+      });
 
       await updateApp();
 
-      expect(mockCache.add).not.toHaveBeenCalledWith('/pyodide/file1.whl');
-    });
-
-    it('should delete old files not in new manifest', async () => {
-      mockCache.match.mockResolvedValue(null);
-
-      await updateApp();
-
-      expect(mockCache.delete).toHaveBeenCalledWith('/old-file.js');
-      expect(mockCache.delete).not.toHaveBeenCalledWith('/app_version');
+      // All files including .whl should be in addAll (full reset)
+      expect(mockCache.addAll).toHaveBeenCalledWith(manifestWithWheels.files);
     });
 
     it('should handle empty files array', async () => {
       const emptyManifest = { files: [], app_version: '1.1.0' };
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
       const result = await updateApp();
 
       expect(result).toEqual(emptyManifest);
-      expect(mockCache.add).not.toHaveBeenCalled();
+      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
+      expect(mockCache.addAll).toHaveBeenCalledWith([]);
     });
 
     it('should handle fetch manifest errors', async () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await expect(updateApp()).rejects.toThrow('Network error');
+    });
+
+    it('should throw when manifest response is not ok', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500
+      });
+
+      await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
+    });
+  });
+
+  describe('handleFetch — bypass routes', () => {
+    let mockEvent: {
+      respondWith: ReturnType<typeof vi.fn>;
+      request: { url: string; clone: ReturnType<typeof vi.fn>; mode?: string };
+    };
+
+    beforeEach(() => {
+      mockEvent = {
+        request: {
+          url: 'https://example.com/',
+          clone: vi.fn().mockReturnThis()
+        },
+        respondWith: vi.fn()
+      };
+    });
+
+    it('should bypass /auth/userinfo completely (no cache access)', async () => {
+      mockEvent.request.url = 'https://example.com/auth/userinfo';
+      mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      // Cache must not be accessed for bypass routes
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should bypass /auth/callback completely', async () => {
+      mockEvent.request.url = 'https://example.com/auth/callback';
+      mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should bypass /assets_list.json completely (no cache access)', async () => {
+      mockEvent.request.url = 'https://example.com/assets_list.json';
+      mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleFetch — 3xx response not cached', () => {
+    let mockEvent: {
+      respondWith: ReturnType<typeof vi.fn>;
+      request: { url: string; clone: ReturnType<typeof vi.fn>; mode?: string };
+    };
+
+    beforeEach(() => {
+      mockEvent = {
+        request: {
+          url: 'https://example.com/app.js',
+          clone: vi.fn().mockReturnThis()
+        },
+        respondWith: vi.fn()
+      };
+    });
+
+    it('should not call cache.put when network returns a 302 redirect', async () => {
+      const redirectResponse = { ok: false, status: 302 };
+      mockFetch.mockResolvedValue(redirectResponse);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      await responsePromise;
+
+      expect(mockCache.put).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleFetch — home page network-first with 3xx passthrough', () => {
+    let mockEvent: { respondWith: ReturnType<typeof vi.fn>; request: { url: string; clone: ReturnType<typeof vi.fn> } };
+
+    beforeEach(() => {
+      mockEvent = {
+        request: {
+          url: 'https://example.com/',
+          clone: vi.fn().mockReturnThis()
+        },
+        respondWith: vi.fn()
+      };
+    });
+
+    it('should return 302 from network without caching (OIDC session expiry)', async () => {
+      const redirectResponse = { ok: false, status: 302 };
+      mockFetch.mockResolvedValue(redirectResponse);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(redirectResponse);
+      expect(mockCache.put).not.toHaveBeenCalled();
+    });
+
+    it('should cache 200 home page response', async () => {
+      const okResponse = { ok: true, status: 200, clone: vi.fn().mockReturnThis() };
+      mockFetch.mockResolvedValue(okResponse);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      await responsePromise;
+
+      expect(mockCache.put).toHaveBeenCalled();
+    });
+
+    it('should fall back to cache when network fails for home page', async () => {
+      mockFetch.mockRejectedValue(new Error('Network down'));
+      const cachedIndex = { ok: true, status: 200 };
+      mockCache.match.mockResolvedValue(cachedIndex);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(cachedIndex);
     });
   });
 
@@ -241,13 +361,15 @@ describe('Service Worker Functions', () => {
 
     it('should handle home page requests', async () => {
       mockEvent.request.url = 'https://example.com/';
-      const mockResponse = new Response('<html>Home</html>');
-      (global.caches.match as vi.Mock).mockResolvedValue(mockResponse);
+      const mockResponse = { ok: true, status: 200, clone: vi.fn().mockReturnThis() };
+      mockFetch.mockResolvedValue(mockResponse);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(global.caches.match as vi.Mock).toHaveBeenCalledWith('https://example.com/index.html');
       expect(mockEvent.respondWith).toHaveBeenCalled();
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+      expect(response).toBe(mockResponse);
     });
 
     it('should handle backend requests', async () => {
@@ -358,9 +480,9 @@ describe('Service Worker Functions', () => {
     it('should handle update message type', async () => {
       const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.keys.mockResolvedValue([]);
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
@@ -375,9 +497,9 @@ describe('Service Worker Functions', () => {
       mockEvent.data.type = 'install';
       const mockManifest = { files: ['/app.js'], app_version: '1.0.0' };
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockClients.matchAll.mockResolvedValue([]);
       mockCache.addAll.mockResolvedValue(undefined);
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
@@ -414,9 +536,9 @@ describe('Service Worker Functions', () => {
       mockEvent.data.type = 'update';
       const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
       mockFetch.mockResolvedValue({
+        ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.keys.mockResolvedValue([]);
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
