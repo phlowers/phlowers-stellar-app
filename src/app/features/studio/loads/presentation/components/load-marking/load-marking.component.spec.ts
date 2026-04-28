@@ -221,11 +221,11 @@ describe('LoadMarkingComponent', () => {
       fixture.detectChanges();
 
       const callOrder: string[] = [];
-      mockLoadFormsService['calculateLoad'].mockImplementation(() => {
+      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callOrder.push('calculate');
         return Promise.resolve();
       });
-      mockLoadFormsService['saveTemporaryLoadDataInSection'].mockImplementation(() => {
+      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callOrder.push('save');
         return Promise.resolve();
       });
@@ -242,7 +242,7 @@ describe('LoadMarkingComponent', () => {
       fixture.detectChanges();
 
       let savingDuring = false;
-      mockLoadFormsService['calculateLoad'].mockImplementation(() => {
+      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         savingDuring = component.isSaving();
         return Promise.resolve();
       });
@@ -279,7 +279,7 @@ describe('LoadMarkingComponent', () => {
       fixture.detectChanges();
 
       let calculatingDuring = false;
-      mockLoadFormsService['calculateLoad'].mockImplementation(() => {
+      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         calculatingDuring = component.isCalculatingLoad();
         return Promise.resolve();
       });

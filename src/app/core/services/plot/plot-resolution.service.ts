@@ -25,7 +25,7 @@ export class PlotResolutionService implements OnDestroy {
 
   private readonly workerReady = signal<boolean>(false);
   private readonly workerPythonService = inject(WorkerPythonService);
-  private subscription: Subscription | null = null;
+  private readonly subscription: Subscription | null = null;
 
   constructor() {
     const storedResolution = Number(globalThis.localStorage.getItem(RESOLUTION_STORAGE_KEY));

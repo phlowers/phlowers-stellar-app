@@ -422,7 +422,7 @@ export class ManualSectionComponent implements OnInit {
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
   //TODO: To put into the plot service
-  updateSliderOptions({ value, highValue }: { value?: number | undefined; highValue?: number | undefined }) {
+  updateSliderOptions({ value, highValue }: { value?: number; highValue?: number }) {
     const options = this.plotOptionsService.plotOptions();
     [
       { val: value, key: 'startSupport' as const, opt: options.startSupport },

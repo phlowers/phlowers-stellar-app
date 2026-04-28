@@ -165,7 +165,7 @@ describe('ObstaclesService', () => {
         'obstacle_type;obstacle_type_name;details\nordinary_ground;Ordinary ground;Ordinary ground (uncultivated, occasional presence of people)\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -211,7 +211,7 @@ describe('ObstaclesService', () => {
       const mockCsvContent = 'obstacle_type;obstacle_type_name;details\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -258,7 +258,7 @@ describe('ObstaclesService', () => {
       const mockCsvContent =
         'obstacle_type;obstacle_type_name;details\n;Invalid;Should be filtered out\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -296,7 +296,7 @@ describe('ObstaclesService', () => {
 
     it('should handle HTTP error gracefully', async () => {
       // Mock Papa Parse to call complete callback with empty data (from empty string)
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -355,7 +355,7 @@ describe('ObstaclesService', () => {
         { obstacle_type: 'vegetation', obstacle_type_name: 'Vegetation', details: 'Vegetation' }
       ];
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -397,7 +397,7 @@ describe('ObstaclesService', () => {
       const csvContent =
         'obstacle_type;obstacle_type_name;details\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         expect(options.delimiter).toBe(';');
         expect(options.header).toBe(true);
         expect(options.skipEmptyLines).toBe(true);
@@ -453,7 +453,7 @@ describe('ObstaclesService', () => {
         }
       ];
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
           options.complete(
             {

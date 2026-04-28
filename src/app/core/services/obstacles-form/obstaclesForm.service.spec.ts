@@ -576,6 +576,7 @@ describe('ObstacleFormService', () => {
         {
           uuid: 'obs-1',
           supportUuid: 'sup-1',
+          supportIndex: 0,
           name: 'Obstacle 1',
           type: 'House',
           altitudeType: 'absolute',
@@ -614,6 +615,7 @@ describe('ObstacleFormService', () => {
         {
           uuid: 'obs-1',
           supportUuid: 'sup-1',
+          supportIndex: 0,
           name: 'Obstacle 1',
           type: 'House',
           altitudeType: 'absolute',

@@ -147,7 +147,7 @@ export class SupportPlotComponent {
       return [];
     }
 
-    const attachmentSetIndex = textToDisplay.findIndex((number) => number === selectedAttachmentSetNumber);
+    const attachmentSetIndex = textToDisplay.indexOf(selectedAttachmentSetNumber);
 
     return attachmentSetIndex !== -1 ? textDisplayPoints[attachmentSetIndex] : [];
   }

@@ -83,7 +83,12 @@ describe('createPlotData', () => {
       L0: [],
       horizontal_distance: [],
       arc_length: [],
-      T_h: []
+      T_h: [],
+      slope_left: [],
+      slope_right: [],
+      sag: [],
+      sag_s2: [],
+      utilization_rate: []
     };
 
     mockOptions = {
@@ -247,7 +252,12 @@ describe('createPlotData', () => {
         L0: [],
         horizontal_distance: [],
         arc_length: [],
-        T_h: []
+        T_h: [],
+        slope_left: [],
+        slope_right: [],
+        sag: [],
+        sag_s2: [],
+        utilization_rate: []
       };
 
       const result = createPlotData(emptyParams, mockOptions, mockSupports);

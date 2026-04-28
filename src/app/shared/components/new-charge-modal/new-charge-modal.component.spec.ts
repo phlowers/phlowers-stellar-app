@@ -105,7 +105,11 @@ describe('NewChargeModalComponent (Jest)', () => {
     selected_charge_uuid: 'charge-uuid-1',
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null,
+    cable_span_manipulations: [],
+    selected_cable_span_manipulation_uuid: null
   };
 
   beforeEach(async () => {

@@ -205,7 +205,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -246,7 +246,7 @@ describe('LinesService', () => {
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -333,7 +333,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001\nLINK002,LIT002,LIT_ADR002,BRANCH002,BRANCH_ADR002,TENSION002,TENSION_ADR002';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -411,7 +411,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -474,7 +474,7 @@ describe('LinesService', () => {
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -516,7 +516,7 @@ describe('LinesService', () => {
       });
 
       // Mock Papa Parse to return empty data when HTTP error occurs
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -583,7 +583,7 @@ describe('LinesService', () => {
 
       const mockCsvContent =
         'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,,,BRANCH001,,,';
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
             {

@@ -163,7 +163,7 @@ describe('MaintenanceService', () => {
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
 
       // Mock Papa Parse to call complete callback
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -220,7 +220,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent = 'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -279,7 +279,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -341,7 +341,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -406,7 +406,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,,Team 2\nCM003,Maintenance Center 3,GMR003,Regional Center 3,EEL003,Team 3';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -474,7 +474,7 @@ describe('MaintenanceService', () => {
       const mockCsvContent =
         'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
 
-      (Papa.parse as vi.Mock).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
         if (options.complete) {
           options.complete(
             {

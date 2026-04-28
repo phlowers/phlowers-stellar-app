@@ -41,14 +41,9 @@
         <source>Update now</source>
       </segment>
     </unit>
-    <unit id="2336550011721758066">
+    <unit id="login.emailLabel">
       <segment>
-        <source>Log in</source>
-      </segment>
-    </unit>
-    <unit id="4768749765465246664">
-      <segment>
-        <source>Email</source>
+        <source> Email </source>
       </segment>
     </unit>
     <unit id="3768927257183755959">
@@ -61,19 +56,9 @@
         <source>Error</source>
       </segment>
     </unit>
-    <unit id="3793363326863773180">
-      <segment>
-        <source>Error creating user</source>
-      </segment>
-    </unit>
     <unit id="3521084103654700903">
       <segment>
         <source>Successful</source>
-      </segment>
-    </unit>
-    <unit id="4765388897418478416">
-      <segment>
-        <source>User info set</source>
       </segment>
     </unit>
     <unit id="2821179408673282599">
@@ -3241,6 +3226,81 @@
     <unit id="8878227880393471056">
       <segment>
         <source>No measures found</source>
+      </segment>
+    </unit>
+    <unit id="1434807535279157850">
+      <segment>
+        <source>Install now</source>
+      </segment>
+    </unit>
+    <unit id="1698187824840629244">
+      <segment>
+        <source>Install the application for offline use</source>
+      </segment>
+    </unit>
+    <unit id="2454050363478003966">
+      <segment>
+        <source>Login</source>
+      </segment>
+    </unit>
+    <unit id="2617878852766152943">
+      <segment>
+        <source>Failed to calculate obstacle distances</source>
+      </segment>
+    </unit>
+    <unit id="6499981236058228396">
+      <segment>
+        <source>Login failed. Please try again.</source>
+      </segment>
+    </unit>
+    <unit id="6990481200579107766">
+      <segment>
+        <source>Update failed</source>
+      </segment>
+    </unit>
+    <unit id="7073268649890100995">
+      <segment>
+        <source>Failed to delete obstacle</source>
+      </segment>
+    </unit>
+    <unit id="8500778397889159938">
+      <segment>
+        <source>Calculation failed: <ph id="0" equiv="PH" disp="errorMessage"/></source>
+      </segment>
+    </unit>
+    <unit id="8882847090714354213">
+      <segment>
+        <source>An unknown error occurred during the update</source>
+      </segment>
+    </unit>
+    <unit id="login.emailInvalid">
+      <segment>
+        <source> Please enter a valid email address. </source>
+      </segment>
+    </unit>
+    <unit id="login.emailRequired">
+      <segment>
+        <source> Email is required. </source>
+      </segment>
+    </unit>
+    <unit id="login.logoAlt">
+      <segment>
+        <source>Stellar</source>
+      </segment>
+    </unit>
+    <unit id="login.submitBtn">
+      <segment>
+        <source> Sign in </source>
+      </segment>
+    </unit>
+    <unit id="login.subtitle">
+      <segment>
+        <source> Enter your email address to continue. </source>
+      </segment>
+    </unit>
+    <unit id="login.title">
+      <segment>
+        <source>Sign in</source>
       </segment>
     </unit>
   </file>

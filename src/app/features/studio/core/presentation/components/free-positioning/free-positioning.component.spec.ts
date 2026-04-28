@@ -98,7 +98,12 @@ describe('FreePositioningComponent', () => {
         tension_inf: [],
         horizontal_distance: [],
         arc_length: [],
-        T_h: []
+        T_h: [],
+        slope_left: [],
+        slope_right: [],
+        sag: [],
+        sag_s2: [],
+        utilization_rate: []
       }
     })
   };
@@ -458,7 +463,12 @@ describe('FreePositioningComponent', () => {
       tension_inf: [],
       horizontal_distance: [],
       arc_length: [],
-      T_h: []
+      T_h: [],
+      slope_left: [],
+      slope_right: [],
+      sag: [],
+      sag_s2: [],
+      utilization_rate: []
     };
 
     it('should return early when litData is null', async () => {
@@ -599,7 +609,7 @@ describe('FreePositioningComponent', () => {
 
       // The annotations array in the relayout call should be empty
       const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
-      const layout = relayoutCall[1];
+      const layout = relayoutCall[1] as { annotations: unknown[] };
       expect(layout.annotations).toEqual([]);
     });
 
@@ -618,7 +628,7 @@ describe('FreePositioningComponent', () => {
 
       // Face view requires y — annotation should be skipped for face, but profile would have it
       const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
-      const layout = relayoutCall[1];
+      const layout = relayoutCall[1] as { annotations: unknown[] };
       expect(layout.annotations).toEqual([]);
     });
 
@@ -638,7 +648,7 @@ describe('FreePositioningComponent', () => {
       vi.advanceTimersByTime(200);
 
       const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
-      const annotations = relayoutCall[1].annotations;
+      const annotations = (relayoutCall[1] as { annotations: { font: { color: string } }[] }).annotations;
       expect(annotations[0].font.color).toBe('black');
       expect(annotations[1].font.color).toBe('red');
     });
@@ -657,7 +667,7 @@ describe('FreePositioningComponent', () => {
       vi.advanceTimersByTime(200);
 
       const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
-      const annotations = relayoutCall[1].annotations;
+      const annotations = (relayoutCall[1] as { annotations: { y: number }[] }).annotations;
       expect(annotations[0].y).toBe(3);
     });
 
@@ -680,7 +690,7 @@ describe('FreePositioningComponent', () => {
       vi.advanceTimersByTime(200);
 
       const relayoutCall = (Plotly.relayout as vi.Mock).mock.calls[0];
-      const annotations = relayoutCall[1].annotations;
+      const annotations = (relayoutCall[1] as { annotations: { y: number }[] }).annotations;
       expect(annotations[0].y).toBe(33);
     });
   });
@@ -710,7 +720,12 @@ describe('FreePositioningComponent', () => {
       tension_inf: [],
       horizontal_distance: [],
       arc_length: [],
-      T_h: []
+      T_h: [],
+      slope_left: [],
+      slope_right: [],
+      sag: [],
+      sag_s2: [],
+      utilization_rate: []
     };
 
     const flushDebounceAndMicrotasks = async () => {

@@ -71,7 +71,9 @@ const mockSectionBase: Section = {
   selected_field_measure_uuid: undefined,
   vtl_and_guying: undefined,
   cable_modifications: [],
-  selected_cable_modification_uuid: null
+  selected_cable_modification_uuid: null,
+  cable_span_manipulations: [],
+  selected_cable_span_manipulation_uuid: null
 };
 
 const mockStudy: StudyEntity = {

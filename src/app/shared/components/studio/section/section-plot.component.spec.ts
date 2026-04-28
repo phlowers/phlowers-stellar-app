@@ -119,7 +119,11 @@ const mockSection: Section = {
   selected_charge_uuid: null,
   field_measures: [],
   selected_field_measure_uuid: undefined,
-  vtl_and_guying: undefined
+  vtl_and_guying: undefined,
+  cable_modifications: [],
+  selected_cable_modification_uuid: null,
+  cable_span_manipulations: [],
+  selected_cable_span_manipulation_uuid: null
 };
 
 const mockObstacle: Obstacle = {
@@ -159,7 +163,12 @@ describe('SectionPlotComponent', () => {
     L0: [],
     horizontal_distance: [],
     arc_length: [],
-    T_h: []
+    T_h: [],
+    slope_left: [],
+    slope_right: [],
+    sag: [],
+    sag_s2: [],
+    utilization_rate: []
   };
 
   const mockPlotOptions: PlotOptions = {
@@ -789,7 +798,12 @@ describe('SectionPlotComponent', () => {
         L0: [],
         horizontal_distance: [],
         arc_length: [],
-        T_h: []
+        T_h: [],
+        slope_left: [],
+        slope_right: [],
+        sag: [],
+        sag_s2: [],
+        utilization_rate: []
       };
       litDataSignal.set(emptyData);
 

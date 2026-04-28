@@ -35,7 +35,7 @@
         <td>{{ updateService.latestVersion()?.version }}</td>
       </tr>
     </table>
-    @if (updateService.needUpdate$ | async) {
+    @if (updateService.needUpdate()) {
     <button
       app-btn
       [btnLoading]="updateService.updateLoading()"

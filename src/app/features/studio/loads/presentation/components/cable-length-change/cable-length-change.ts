@@ -254,11 +254,8 @@ export class CableLengthChangeComponent {
           this.cableModificationsService.clearPersistedFormData(spanUuid);
         }
       });
-    } else {
-      // Suppression des données persistées en mémoire pour ce span
-      if (spanUuid) {
-        this.cableModificationsService.clearPersistedFormData(spanUuid);
-      }
+    } else if (spanUuid) {
+      this.cableModificationsService.clearPersistedFormData(spanUuid);
     }
     this.form.patchValue(
       {

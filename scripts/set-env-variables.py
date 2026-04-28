@@ -4,6 +4,7 @@
 import datetime
 import json
 import os
+import subprocess
 
 # Read package.json file
 with open("package.json", "r") as file:
@@ -12,6 +13,20 @@ with open("package.json", "r") as file:
 
 # Get current time in ISO format
 build_time = datetime.datetime.now().isoformat()
+
+
+def get_git_revision_hash() -> str:
+    """Get the git revision hash from environment variable or git command"""
+    env_hash = os.environ.get("CI_COMMIT_SHA")
+    if env_hash:
+        return env_hash
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+    except Exception:
+        return "unknown"
+
+
+git_hash = get_git_revision_hash()
 
 env_variables = [
     "{API_URL}",
@@ -31,11 +46,13 @@ def replace_in_file(file_path):
             for placeholder in [
                 "{BUILD_VERSION}",
                 "{BUILD_TIME}",
+                "{GIT_HASH}",
                 *env_variables,
             ]
         ):
             content = content.replace("{BUILD_VERSION}", version)
             content = content.replace("{BUILD_TIME}", build_time)
+            content = content.replace("{GIT_HASH}", git_hash)
             for env_variable in env_variables:
                 variable_key = env_variable.replace("{", "").replace("}", "")
                 if os.getenv(variable_key):

@@ -16,6 +16,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "esnext",
+    "lib": ["ES2022", "ES2023.Array", "DOM", "DOM.Iterable"],
     "types": [
       "@angular/localize",
       "vitest/globals"

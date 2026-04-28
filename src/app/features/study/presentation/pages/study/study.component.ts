@@ -76,7 +76,7 @@ export class StudyComponent implements OnInit {
         if (study) {
           this.study.set({
             ...study,
-            sections: study.sections.sort((a, b) => -a.created_at.localeCompare(b.created_at))
+            sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
           });
         } else {
           this.router.navigate(['/studies']);
@@ -99,7 +99,7 @@ export class StudyComponent implements OnInit {
           if (study) {
             this.study.set({
               ...study,
-              sections: study.sections.sort((a, b) => -a.created_at.localeCompare(b.created_at))
+              sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
             });
           } else {
             this.router.navigate(['/studies']);

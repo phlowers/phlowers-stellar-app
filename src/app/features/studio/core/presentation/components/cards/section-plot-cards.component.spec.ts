@@ -58,7 +58,8 @@ const mockLitData: GetSectionOutput = {
   slope_left: [0.01, 0.02, 0.03, 0.04],
   slope_right: [0.05, 0.06, 0.07, 0.08],
   sag: [1.1, 1.2, 1.3, 1.4],
-  sag_s2: [2.1, 2.2, 2.3, 2.4]
+  sag_s2: [2.1, 2.2, 2.3, 2.4],
+  utilization_rate: [0.5, 0.6, 0.7, 0.8]
 };
 
 describe('SectionPlotCardsComponent', () => {

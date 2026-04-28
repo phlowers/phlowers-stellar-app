@@ -77,7 +77,8 @@ describe('PlotService', () => {
     slope_left: [],
     slope_right: [],
     sag: [],
-    sag_s2: []
+    sag_s2: [],
+    utilization_rate: []
   };
 
   const mockGetSectionWithBaseOutput: GetSectionWithBaseOutput = {
@@ -222,7 +223,9 @@ describe('PlotService', () => {
     selected_field_measure_uuid: undefined,
     vtl_and_guying: undefined,
     cable_modifications: [],
-    selected_cable_modification_uuid: null
+    selected_cable_modification_uuid: null,
+    cable_span_manipulations: [],
+    selected_cable_span_manipulation_uuid: null
   };
 
   beforeEach(() => {

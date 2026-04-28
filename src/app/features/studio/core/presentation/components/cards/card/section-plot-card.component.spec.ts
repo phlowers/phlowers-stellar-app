@@ -45,7 +45,8 @@ const mockLitData: GetSectionOutput = {
   slope_left: [0.01, 0.02, 0.03],
   slope_right: [0.04, 0.05, 0.06],
   sag: [1, 2, 3],
-  sag_s2: [4, 5, 6]
+  sag_s2: [4, 5, 6],
+  utilization_rate: [0.5, 0.6, 0.7]
 };
 
 @Component({

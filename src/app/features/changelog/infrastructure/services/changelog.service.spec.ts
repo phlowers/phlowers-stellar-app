@@ -28,13 +28,50 @@ describe('ChangelogService', () => {
   });
 
   it('should request changelog items from configured environment URL', async () => {
-    const expectedItems: ChangelogItem[] = [
+    const expectedItems = [
       {
-        version: '1.2.3',
-        date: '2026-03-17',
-        title: 'New release',
-        details: ['Fix regression in import flow']
-      }
+        url: 'https://api.github.com/repos/test/releases/1',
+        assets_url: '',
+        upload_url: '',
+        html_url: '',
+        id: 1,
+        author: {
+          login: 'test-user',
+          id: 1,
+          node_id: '',
+          avatar_url: '',
+          gravatar_id: '',
+          url: '',
+          html_url: '',
+          followers_url: '',
+          following_url: '',
+          gists_url: '',
+          starred_url: '',
+          subscriptions_url: '',
+          organizations_url: '',
+          repos_url: '',
+          events_url: '',
+          received_events_url: '',
+          type: 'User',
+          site_admin: false,
+          user_view_type: ''
+        },
+        node_id: '',
+        tag_name: 'v1.2.3',
+        target_commitish: 'main',
+        name: 'New release',
+        draft: false,
+        immutable: false,
+        prerelease: false,
+        created_at: '2026-03-17T00:00:00Z',
+        updated_at: '2026-03-17T00:00:00Z',
+        published_at: '2026-03-17T00:00:00Z',
+        assets: [],
+        tarball_url: '',
+        zipball_url: '',
+        body: 'Fix regression in import flow',
+        mentions_count: 0
+      } as ChangelogItem
     ];
 
     const requestPromise = firstValueFrom(service.getChangelogs());

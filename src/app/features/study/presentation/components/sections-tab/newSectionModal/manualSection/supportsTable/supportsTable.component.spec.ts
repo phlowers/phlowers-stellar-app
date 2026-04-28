@@ -6,6 +6,7 @@ import { Support, CatalogChain } from '@shared/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 
 // Mock child component
 @Component({
@@ -15,6 +16,7 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 class MockAttachmentSetModalComponent {
   isOpen = input(false);
   support = input<Support | undefined>(undefined);
+  section = input<unknown>(null);
   isOpenChange = output<boolean>();
   validateForm = output<Record<string, unknown>>();
 }
@@ -122,12 +124,17 @@ describe('SupportsTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule, SupportsTableComponent, MockAttachmentSetModalComponent, NoopAnimationsModule],
+      imports: [FormsModule, SupportsTableComponent, NoopAnimationsModule],
       providers: [
         { provide: ChainsService, useValue: mockChainsService },
         { provide: AttachmentService, useValue: mockAttachmentService }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(SupportsTableComponent, {
+        remove: { imports: [AttachmentSetModalComponent] },
+        add: { imports: [MockAttachmentSetModalComponent] }
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(SupportsTableComponent);
     component = fixture.componentInstance;

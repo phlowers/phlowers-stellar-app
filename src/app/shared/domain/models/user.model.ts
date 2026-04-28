@@ -28,8 +28,16 @@ import { Study } from './study.model';
 export interface User {
   /** Unique identifier (UUID v4) - optional for new users */
   uuid?: string;
-  /** Email address of the user (used as primary identifier) */
+  /** Email address of the user (used as primary identifier and Dexie primary key) */
   email: string;
   /** Array of studies owned by the user */
   studies?: Study[];
+  /** OIDC claim: given name */
+  given_name?: string;
+  /** OIDC claim: family name */
+  family_name?: string;
+  /** OIDC claim: subject identifier (unique per IdP) */
+  sub?: string;
+  /** OIDC claim: application roles */
+  roles?: string[];
 }

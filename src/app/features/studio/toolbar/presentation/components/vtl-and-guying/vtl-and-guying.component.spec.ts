@@ -6,7 +6,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
@@ -142,7 +142,11 @@ describe('VhlAndGuyingComponent', () => {
     });
 
     it('should be true during onCalculate and false after', async () => {
-      let resolveTask!: (value: { result: TaskOutputs[Task.calculateGuying]; error: TaskError | null }) => void;
+      let resolveTask!: (value: {
+        result: TaskOutputs[Task.calculateGuying];
+        error: TaskError | null;
+        pythonErrorCode: PythonErrorCode | null;
+      }) => void;
       mockWorkerPythonService.runTask.mockReturnValueOnce(
         new Promise((res) => {
           resolveTask = res;
@@ -159,7 +163,8 @@ describe('VhlAndGuyingComponent', () => {
 
       resolveTask({
         result: { tensionInGuy: 0, guyAngle: 0, chargeVUnderConsole: 0, chargeHUnderConsole: 0, chargeLIfPulley: 0 },
-        error: null
+        error: null,
+        pythonErrorCode: null
       });
       await calcPromise;
 
@@ -190,7 +195,8 @@ describe('VhlAndGuyingComponent', () => {
 
     mockWorkerPythonService.runTask.mockResolvedValue({
       result: mockResult,
-      error: null
+      error: null,
+      pythonErrorCode: null
     });
 
     component.form.controls.altitude.setValue(10);
@@ -233,7 +239,8 @@ describe('VhlAndGuyingComponent', () => {
         chargeHUnderConsole: 0,
         chargeLIfPulley: 0
       },
-      error: TaskError.CALCULATION_ERROR
+      error: TaskError.CALCULATION_ERROR,
+      pythonErrorCode: null
     });
 
     component.form.controls.altitude.setValue(10);

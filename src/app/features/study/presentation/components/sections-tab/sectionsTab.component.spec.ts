@@ -120,7 +120,11 @@ describe('SectionsTabComponent', () => {
     selected_charge_uuid: null,
     field_measures: [],
     selected_field_measure_uuid: undefined,
-    vtl_and_guying: undefined
+    vtl_and_guying: undefined,
+    cable_modifications: [],
+    selected_cable_modification_uuid: null,
+    cable_span_manipulations: [],
+    selected_cable_span_manipulation_uuid: null
   };
 
   const mockInitialCondition: InitialCondition = {
@@ -487,7 +491,11 @@ describe('SectionsTabComponent', () => {
       component.duplicateInitialConditionClick({ initialCondition: mockInitialCondition, section: mockSection });
 
       expect(component.duplicateInitialCondition.emit).toHaveBeenCalled();
-      const payload = (component.duplicateInitialCondition.emit as vi.Mock).mock.calls[0][0];
+      const payload = (component.duplicateInitialCondition.emit as vi.Mock).mock.calls[0][0] as {
+        section: Section;
+        initialCondition: InitialCondition;
+        newUuid: string;
+      };
       expect(payload.section).toEqual(mockSection);
       expect(payload.initialCondition).toEqual(mockInitialCondition);
       expect(typeof payload.newUuid).toBe('string');
