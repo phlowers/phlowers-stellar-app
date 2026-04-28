@@ -26,6 +26,7 @@
     <form class="login-page__form" [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="login-form">
       <div class="login-page__field">
         <label class="login-page__label" for="login-email" i18n="@@login.emailLabel"> Email </label>
+        @let showEmailErrors = emailControl.touched && emailControl.invalid;
         <input
           id="login-email"
           class="login-page__input"
@@ -34,10 +35,10 @@
           formControlName="email"
           autocomplete="email"
           data-testid="email-input"
-          [attr.aria-invalid]="emailControl.touched && emailControl.invalid"
-          [attr.aria-describedby]="emailControl.touched && emailControl.invalid ? 'login-email-error' : null"
+          [attr.aria-invalid]="showEmailErrors"
+          [attr.aria-describedby]="showEmailErrors ? 'login-email-error' : null"
         />
-        @if (emailControl.touched && emailControl.hasError('required')) {
+        @if (showEmailErrors && emailControl.hasError('required')) {
           <small
             id="login-email-error"
             class="login-page__error"
@@ -48,7 +49,7 @@
             Email is required.
           </small>
         }
-        @if (emailControl.touched && emailControl.hasError('email') && !emailControl.hasError('required')) {
+        @if (showEmailErrors && emailControl.hasError('email') && !emailControl.hasError('required')) {
           <small
             id="login-email-error"
             class="login-page__error"

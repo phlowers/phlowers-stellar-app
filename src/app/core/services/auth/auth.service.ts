@@ -5,23 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { LoggerService } from '@services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
 import { User } from '@shared/domain';
-
-/**
- * Claims returned by the OIDC `/auth/userinfo` CGI endpoint.
- * `email` is mandatory (used as IndexedDB primary key); all other fields are optional.
- */
-export interface OidcClaims {
-  email: string;
-  sub?: string;
-  given_name?: string;
-  family_name?: string;
-  roles?: string[];
-}
-
-/** URL of the Apache CGI endpoint that returns OIDC claims (PKCE-protected). */
-const USERINFO_URL = '/auth/userinfo';
+import { OidcClaims } from '@services/auth/oidc-claims.interface';
+import { USERINFO_URL } from '@services/auth/auth.constants';
 
 /**
  * AuthService — OIDC + PKCE authentication via Apache mod_auth_openidc.
@@ -34,6 +23,8 @@ const USERINFO_URL = '/auth/userinfo';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
 
   /** Currently authenticated user (null until resolved from cache or network). */
@@ -55,7 +46,10 @@ export class AuthService {
       // Email-only users (from fallback login) don't have a server-side session.
       if (cachedUser.sub) {
         this.refreshFromNetwork().catch((err) => {
-          console.warn('AuthService: background network refresh failed', err);
+          this.logger.warn('AuthService: background network refresh failed', err);
+          this.notificationService.warning(
+            $localize`Authentication refresh failed. You may be working with outdated user data.`
+          );
         });
       }
       return;
@@ -88,7 +82,7 @@ export class AuthService {
         return null;
       }
       if (!response.ok) {
-        console.warn(`AuthService: userinfo request failed (HTTP ${response.status})`);
+        this.logger.warn(`AuthService: userinfo request failed (HTTP ${response.status})`);
         return null;
       }
       const data = (await response.json()) as OidcClaims & { authenticated?: boolean };
@@ -97,12 +91,12 @@ export class AuthService {
         return null;
       }
       if (typeof data.email !== 'string' || !data.email.trim()) {
-        console.warn('AuthService: userinfo response missing a valid email');
+        this.logger.warn('AuthService: userinfo response missing a valid email');
         return null;
       }
       return data;
     } catch (err) {
-      console.warn('AuthService: userinfo fetch error', err);
+      this.logger.warn('AuthService: userinfo fetch error', err);
       return null;
     }
   }

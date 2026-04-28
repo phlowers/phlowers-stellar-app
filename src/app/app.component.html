@@ -1,5 +1,6 @@
 <router-outlet></router-outlet>
 <p-toast position="top-center" data-testid="app-toast"></p-toast>
+@let isFirstLaunch = updateService.isFirstLaunch();
 <p-dialog
   [visible]="isUpdateDialogOpen()"
   [style]="{ width: '43.75rem' }"
@@ -17,7 +18,7 @@
   </ng-template>
   <ng-template #content>
     @if (!updateService.updateLoading()) {
-      @if (updateService.isFirstLaunch()) {
+      @if (isFirstLaunch) {
         <p class="font-bold text-l-600 underline" i18n>Install the application for offline use</p>
       } @else {
         <p class="font-bold text-l-600 underline" i18n>The new version of your application is available!</p>
@@ -61,7 +62,7 @@
       </button>
       <button app-btn (click)="updateService.confirmUpdate()" data-testid="update-now-btn">
         <app-icon icon="sync" />
-        @if (updateService.isFirstLaunch()) {
+        @if (isFirstLaunch) {
           <span i18n>Install now</span>
         } @else {
           <span i18n>Update now</span>

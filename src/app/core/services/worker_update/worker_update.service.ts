@@ -31,6 +31,8 @@ import { environment } from '@src/environments/environment';
  */
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
+  private static readonly hasServiceWorker = 'serviceWorker' in navigator;
+
   /** Signal containing the currently installed application version (from build-time environment). */
   currentVersion = signal<AppVersion>({
     version: environment.version,
@@ -54,7 +56,7 @@ export class UpdateService {
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
 
   constructor() {
-    if (!('serviceWorker' in navigator)) {
+    if (!UpdateService.hasServiceWorker) {
       return;
     }
     navigator.serviceWorker.addEventListener('message', async (event) => {
@@ -293,7 +295,7 @@ export class UpdateService {
   }
 
   private async postMessageToSW(type: 'update' | 'install'): Promise<void> {
-    if (!('serviceWorker' in navigator)) {
+    if (!UpdateService.hasServiceWorker) {
       return;
     }
     this.updateLoading.set(true);
@@ -304,7 +306,11 @@ export class UpdateService {
         return;
       }
       const ready = await navigator.serviceWorker.ready;
-      ready.active?.postMessage({ type });
+      if (!ready.active) {
+        this.updateLoading.set(false);
+        return;
+      }
+      ready.active.postMessage({ type });
     } catch {
       this.updateLoading.set(false);
     }

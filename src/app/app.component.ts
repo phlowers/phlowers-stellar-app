@@ -140,13 +140,11 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Step 5: setup CSV catalogs — must not block step 6
     this.setupData()
       .catch((err) => {
-        console.error('Error during data setup', err);
+        this.logger.error('Error during data setup', err);
       })
       .finally(() => {
-        // Step 6: init Python worker — always runs, even if setupData fails
         this.workerService.setup();
       });
   }
