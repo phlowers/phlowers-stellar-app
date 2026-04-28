@@ -162,7 +162,6 @@ class ChangeStateInput:
     spanLoads: list[SpanLoad]
 
 
-
 @dataclass
 class Lambert93Data:
     lambert_x: list[float]  # easting

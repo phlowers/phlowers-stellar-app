@@ -341,24 +341,24 @@ export interface TaskInputs {
     view: View;
   };
   [Task.computeLocalization]: {
-    startLatitude: number
-    startLongitude: number
-    startAzimuth: number
-    spanLength: number[]
-    lineAngle: number[]
-  } ;
+    startLatitude: number;
+    startLongitude: number;
+    startAzimuth: number;
+    spanLength: number[];
+    lineAngle: number[];
+  };
   [Task.importLambert]: {
     lambert_x: number[];
     lambert_y: number[];
   };
   [Task.importLambertAndValidate]: {
-    lambert_x: number[]
-    lambert_y: number[]
-    startLatitude: number
-    startLongitude: number
-    startAzimuth: number
-    spanLength: number[]
-    lineAngle: number[]
+    lambert_x: number[];
+    lambert_y: number[];
+    startLatitude: number;
+    startLongitude: number;
+    startAzimuth: number;
+    spanLength: number[];
+    lineAngle: number[];
   };
 }
 
@@ -395,7 +395,7 @@ export interface Distance {
   points: DistancePoint[];
 }
 
-export interface Localization{
+export interface Localization {
   latitude: number[];
   longitude: number[];
   lambert_x: number[];

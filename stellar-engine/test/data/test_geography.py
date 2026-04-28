@@ -6,8 +6,6 @@
 
 
 import numpy as np
-import pandas as pd
-from mechaphlowers import SectionArray
 
 from stellar_engine.data.geography import (
     compute_localization,
