@@ -174,7 +174,7 @@ class Lambert93Data:
             **{
                 key: value
                 for key, value in env.items()
-                if key in inspect.signature(cls).parameters
+                if key in cls.__dataclass_fields__
             }
         )
 
