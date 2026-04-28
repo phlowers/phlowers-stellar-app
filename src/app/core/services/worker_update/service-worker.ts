@@ -50,7 +50,6 @@ function shouldUseNetworkFirst(request: Request): boolean {
  * @returns The installed asset manifest.
  */
 export async function installApp() {
-  console.log('SERVICE WORKER: Beginning app installation');
   const response = await fetchLatestManifest();
   if (!response.ok) {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
@@ -68,7 +67,6 @@ export async function installApp() {
       }
     })
   );
-  console.log('SERVICE WORKER: App installed', filesToInstall.length, 'files');
   return manifest;
 }
 
@@ -81,7 +79,6 @@ export async function installApp() {
  * @returns The updated asset manifest.
  */
 export async function updateApp() {
-  console.log('SERVICE WORKER: Update requested — performing full cache reset');
   const response = await fetchLatestManifest();
   if (!response.ok) {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
@@ -119,7 +116,6 @@ export async function updateApp() {
     }
     await caches.delete(TEMP_CACHE_NAME);
 
-    console.log('SERVICE WORKER: Full cache reset complete', files.length, 'files cached');
     return manifest;
   } catch (error) {
     // Rollback: clean up the temporary cache so it doesn't linger.
@@ -238,7 +234,6 @@ export async function handleFetch(event: FetchEvent) {
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('install', () => {
-  console.log('SERVICE WORKER: Installing service worker');
   (self as unknown as ServiceWorkerGlobalScope).skipWaiting();
 });
 
@@ -290,7 +285,6 @@ export async function handleMessage(event: ExtendableMessageEvent) {
  * from the Angular `APP_INITIALIZER`.
  */
 async function handleActivate() {
-  console.log('SERVICE WORKER: Activating service worker');
   await (self as unknown as ServiceWorkerGlobalScope).clients.claim();
 }
 
