@@ -41,6 +41,21 @@ Object.defineProperty(globalThis.URL, 'createObjectURL', {
   writable: true
 });
 
+// Ensure `'serviceWorker' in navigator` is truthy at module-load time so services
+// that capture this check in a static field (e.g. UpdateService) initialize
+// correctly under happy-dom. Individual tests may still override this property.
+if (!('serviceWorker' in navigator)) {
+  Object.defineProperty(navigator, 'serviceWorker', {
+    value: {
+      addEventListener: vi.fn(),
+      getRegistration: vi.fn().mockResolvedValue(null),
+      ready: Promise.resolve({})
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
 vi.mock('plotly.js-dist-min', () => {
   const plotlyMock = {
     newPlot: vi.fn().mockResolvedValue({}),

@@ -95,6 +95,7 @@ describe('AppComponent', () => {
       checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
       getLatestAssetList: vi.fn().mockResolvedValue(null),
       needUpdate: signal(false),
+      isFirstLaunch: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
       update: vi.fn()
@@ -266,6 +267,7 @@ describe('AppComponent - HTML rendering', () => {
         checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
         getLatestAssetList: vi.fn().mockResolvedValue(null),
         needUpdate: signal(false),
+        isFirstLaunch: signal(false),
         updateLoading: vi.fn().mockReturnValue(false),
         latestVersion: vi.fn().mockReturnValue(null),
         update: vi.fn()
