@@ -51,7 +51,10 @@ export const createEmptySupport = (): Support => {
     counterWeight: 0,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: 0
+    chainSurface: 0,
+    spanAzimut: null,
+    x_foot_lambert93: null,
+    y_foot_lambert93: null
   };
 };
 

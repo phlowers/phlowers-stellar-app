@@ -157,11 +157,51 @@ describe('ImportSectionComponent', () => {
 
   describe('config', () => {
     it('should have .json in accepted extensions', () => {
-      expect(component.config.acceptedFiles.extensions).toContain('.json');
+      expect(component.config().acceptedFiles.extensions).toContain('.json');
     });
 
     it('should not have a navigationRoute (sections do not navigate on import)', () => {
-      expect(component.config.navigationRoute).toBeUndefined();
+      expect(component.config().navigationRoute).toBeUndefined();
+    });
+
+    it('should have a successAction defined', () => {
+      expect(component.config().successAction).toBeDefined();
+    });
+
+    it('should have "Edit" as successAction label', () => {
+      expect(component.config().successAction?.label).toBe('Edit');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // editRequested output
+  // -------------------------------------------------------------------------
+
+  describe('editRequested output', () => {
+    it('should emit the entityId when onSuccessActionTriggered is called', () => {
+      const emitted: string[] = [];
+      component.editRequested.subscribe((id) => emitted.push(id));
+
+      component.onSuccessActionTriggered({ fileName: 'ok.json', status: 'success', entityId: 'section-uuid-1' });
+
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0]).toBe('section-uuid-1');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // importResetToken input
+  // -------------------------------------------------------------------------
+
+  describe('importResetToken input', () => {
+    it('should default to 0', () => {
+      expect(component.importResetToken()).toBe(0);
+    });
+
+    it('should reflect updated value when set from outside', () => {
+      fixture.componentRef.setInput('importResetToken', 3);
+      fixture.detectChanges();
+      expect(component.importResetToken()).toBe(3);
     });
   });
 });

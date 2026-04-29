@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
-import { isNil } from 'lodash';
 import { Section, Study, Support } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
@@ -13,41 +12,18 @@ import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/impor
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
+import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { sectionImportErrors, importSuccessDetail } from './section-import.constantes';
-
-// ---------------------------------------------------------------------------
-// Validation helpers (mirrors newSectionModal logic)
-// ---------------------------------------------------------------------------
-
-/**
- * Returns `true` if all mandatory fields of the section are filled.
- * Mirrors the `areAllRequiredFieldsFilled` logic in `NewSectionModalComponent`.
- */
-function areAllRequiredFieldsFilled(section: Section): boolean {
-  const nameCondition = !!section.name.trim();
-  const typeCondition = !!section.type;
-  const cablesAmountCondition = !!section.cables_amount;
-  const cableNameCondition = !!section.cable_name;
-  const supportsNumberCondition = section.supports.every((s) => !isNil(s.number));
-  const supportsSpanLengthCondition = section.supports.every(
-    (s, i) => !isNil(s.spanLength) || i === section.supports.length - 1
-  );
-  const supportsSpanAngleCondition = section.supports.every((s) => !isNil(s.spanAngle));
-  const supportsChainLengthCondition = section.supports.every((s) => !isNil(s.chainLength));
-  const supportsAttachmentHeightCondition = section.supports.every((s) => !isNil(s.attachmentHeight));
-
-  return (
-    nameCondition &&
-    typeCondition &&
-    cablesAmountCondition &&
-    cableNameCondition &&
-    supportsNumberCondition &&
-    supportsSpanLengthCondition &&
-    supportsSpanAngleCondition &&
-    supportsChainLengthCondition &&
-    supportsAttachmentHeightCondition
-  );
-}
+import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
+import {
+  buildSectionName,
+  extractAttachmentPosition,
+  extractBranchIdr,
+  getMissingRequiredFields,
+  parseBooleanOrNull,
+  parseFloatOrNull,
+  validateGeoLiaisonRawFields
+} from './section-import.helpers';
 
 // ---------------------------------------------------------------------------
 // Error catalog
@@ -64,7 +40,8 @@ export { sectionImportErrors } from './section-import.constantes';
  * Service responsible for all Section JSON import business logic.
  *
  * Implements {@link ImportAdapter} for `Section` entities.
- * Accepts `.json` files containing a single serialized section object.
+ * Accepts `.json` files containing a single serialized section object
+ * or a GeoLiaison canton export (structure `cantons > general + portee unitaire`).
  *
  * ### Study context
  * Before processing files, the host component **must** call
@@ -86,6 +63,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
+  private readonly maintenanceService = inject(MaintenanceService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -114,7 +92,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
   /**
    * Checks whether the UUID encoded in the JSON file collides with an existing
-   * section in the current study.
+   * section in the current study. Supports both legacy Section JSON and GeoLiaison format.
    *
    * @returns Collision info `{ uuid, label }` or `null` if no collision.
    */
@@ -125,7 +103,15 @@ export class SectionImportService implements ImportAdapter<Section> {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text) as Record<string, unknown>;
-      const uuid = typeof parsed['uuid'] === 'string' ? parsed['uuid'].trim() : '';
+
+      let uuid: string;
+      if (this.isGeoLiaisonFormat(parsed)) {
+        const cantons = parsed['cantons'] as GeoLiaisonCanton[];
+        uuid = cantons[0].general.CANTON_CUR.trim();
+      } else {
+        uuid = typeof parsed['uuid'] === 'string' ? parsed['uuid'].trim() : '';
+      }
+
       if (!uuid) return null;
       const existing = study.sections.find((s) => s.uuid === uuid);
       if (!existing) return null;
@@ -155,20 +141,53 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Stage: DECODING + PARSING
-    const section = await this.parseJsonFile(file);
+    const { section, isGeoLiaison, rawGeoLiaison } = await this.parseJsonFile(file);
 
     // Stage: VALIDATION
-    this.validateSection(section);
+    // GeoLiaison: validate on the raw JSON so error messages show original field names
+    // and values (e.g. "SUPPORT_NUMERO: null").
+    // Legacy Section: validate on the mapped model (JSON keys already match model names).
+    if (isGeoLiaison && rawGeoLiaison) {
+      this.validateGeoLiaisonSection(rawGeoLiaison);
+    } else {
+      this.validateSection(section);
+    }
 
     // Stage: COLLISION_CHECK + PERSISTENCE
     return this.persistSection(section, study, collisionResolver);
   }
 
   // ---------------------------------------------------------------------------
+  // Private — format detection
+  // ---------------------------------------------------------------------------
+
+  /** Returns `true` when the raw object has a `cantons` array with at least one entry. */
+  private hasCantons(raw: Record<string, unknown>): boolean {
+    return Array.isArray(raw['cantons']) && (raw['cantons'] as unknown[]).length > 0;
+  }
+
+  /**
+   * Returns `true` when the raw object is a valid GeoLiaison format
+   * (has `cantons[0].general.CANTON_CUR`).
+   */
+  private isGeoLiaisonFormat(raw: unknown): boolean {
+    if (typeof raw !== 'object' || raw === null) return false;
+    const r = raw as Record<string, unknown>;
+    if (!Array.isArray(r['cantons']) || (r['cantons'] as unknown[]).length === 0) return false;
+    const canton0 = (r['cantons'] as unknown[])[0];
+    if (typeof canton0 !== 'object' || canton0 === null) return false;
+    const general = (canton0 as Record<string, unknown>)['general'];
+    if (typeof general !== 'object' || general === null) return false;
+    return typeof (general as Record<string, unknown>)['CANTON_CUR'] === 'string';
+  }
+
+  // ---------------------------------------------------------------------------
   // Private — parsing
   // ---------------------------------------------------------------------------
 
-  private async parseJsonFile(file: File): Promise<Section> {
+  private async parseJsonFile(
+    file: File
+  ): Promise<{ section: Section; isGeoLiaison: boolean; rawGeoLiaison?: GeoLiaisonFormat }> {
     let text: string;
     try {
       text = await file.text();
@@ -197,11 +216,130 @@ export class SectionImportService implements ImportAdapter<Section> {
       throw error;
     }
 
-    return this.mapToSection(parsed);
+    // GeoLiaison format detection (RG.CAN.OUV-BTN.3)
+    if (this.hasCantons(parsed)) {
+      if (!this.isGeoLiaisonFormat(parsed)) {
+        const error: ImportError = {
+          code: 'VALIDATION_ERROR',
+          message: sectionImportErrors.geoLiaisonFormatError,
+          stage: 'VALIDATION'
+        };
+        throw error;
+      }
+      const rawGeoLiaison = parsed as unknown as GeoLiaisonFormat;
+      const section = await this.mapGeoLiaisonToSection(rawGeoLiaison);
+      return { section, isGeoLiaison: true, rawGeoLiaison };
+    }
+
+    return { section: this.mapToSection(parsed), isGeoLiaison: false };
   }
 
   // ---------------------------------------------------------------------------
-  // Private — mapping
+  // Private — GeoLiaison mapping
+  // ---------------------------------------------------------------------------
+
+  private async mapGeoLiaisonToSection(raw: GeoLiaisonFormat): Promise<Section> {
+    const canton = raw.cantons[0];
+    const general = canton.general;
+    const portees = canton['portee unitaire'] ?? [];
+
+    // Sort portees by PORTEE_UNITAIRE_ORDRE (ascending)
+    const sortedPortees = [...portees].sort(
+      (a, b) => parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
+    );
+
+    const firstPortee = sortedPortees[0];
+    const appartenance = general.appartenance?.[0];
+
+    // Maintenance lookups (RG.CAN.CEM / RG.CAN.EEL / RG.CAN.GMR)
+    const allMaintenance = (await this.maintenanceService.getMaintenance()) ?? [];
+
+    const cmDesignation = firstPortee?.CM_DESIGNATION ?? null;
+    const eelDesignation = firstPortee?.EEL_DESIGNATION ?? null;
+    const gmrDesignation = firstPortee?.GMR_DESIGNATION ?? null;
+
+    const maintenanceCenterEntry = cmDesignation
+      ? allMaintenance.find((m) => m.maintenance_center === cmDesignation)
+      : undefined;
+    const maintenanceTeamEntry = eelDesignation
+      ? allMaintenance.find((m) => m.maintenance_team === eelDesignation)
+      : undefined;
+    const regionalTeamEntry = gmrDesignation
+      ? allMaintenance.find((m) => m.regional_team === gmrDesignation)
+      : undefined;
+
+    const supports = this.mapGeoLiaisonSupports(sortedPortees);
+
+    return {
+      ...createEmptySection(),
+      uuid: general.CANTON_CUR,
+      name: buildSectionName(
+        appartenance?.BRANCHE_IDR ?? null,
+        general.CANTON_TYPE,
+        general.PHASE_ELECTRIQUE_NUMERO,
+        supports
+      ),
+      cable_name: general.CABLE_ADR ?? undefined,
+      type: general.CANTON_TYPE?.toLowerCase() ?? '',
+      cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
+      electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
+      lit_name: appartenance?.LIT_ADR ?? undefined,
+      lit_code: appartenance?.LIT_IDR ?? undefined,
+      branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
+      voltage_idr: appartenance?.TENSION_ELECTRIQUE_ADR ?? undefined,
+      maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
+      maintenance_center_names: cmDesignation ? [cmDesignation] : [],
+      maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
+      regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
+      regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
+      supports
+    };
+  }
+
+  private mapGeoLiaisonSupports(sortedPortees: GeoLiaisonPortee[]): Support[] {
+    if (sortedPortees.length === 0) return [];
+
+    const supports: Support[] = [];
+
+    for (const portee of sortedPortees) {
+      supports.push(this.mapAccrocheToSupport(portee['accroche depart'], portee));
+    }
+
+    // Last support comes from 'accroche arrivee' of the last portee
+    const lastPortee = sortedPortees[sortedPortees.length - 1];
+    supports.push(this.mapAccrocheToSupport(lastPortee['accroche arrivee'], lastPortee));
+
+    return supports;
+  }
+
+  private mapAccrocheToSupport(accroche: GeoLiaisonAccroche, portee: GeoLiaisonPortee): Support {
+    return {
+      ...createEmptySupport(),
+      spanLength: parseFloatOrNull(portee.PORTEE_LONGUEUR),
+      spanAzimut: parseFloatOrNull(portee.PORTEE_AZIMUT),
+      spanAngle: parseFloatOrNull(accroche.ANGLE_LIGNE),
+      attachmentSet: parseFloatOrNull(accroche.ACCROCHE_SET),
+      attachmentHeight: parseFloatOrNull(accroche.ACCROCHE_CABLE_Z_LAMBERT93),
+      heightBelowConsole: parseFloatOrNull(accroche.HAUTEUR_SOUS_CONSOLE),
+      armLength: parseFloatOrNull(accroche.LONGUEUR_BRAS),
+      chainName: accroche.CHAINE_INL_ADR ?? null,
+      chainLength: parseFloatOrNull(accroche.CHAINE_INL_LONGUEUR),
+      chainWeight: parseFloatOrNull(accroche.CHAINE_INL_POIDS),
+      chainV: parseBooleanOrNull(accroche.CHAINE_EN_V),
+      counterWeight: parseFloatOrNull(accroche.CONTREPOIDS),
+      chainSurface: parseFloatOrNull(accroche.CHAINE_INL_SURFACE),
+      supportFootAltitude: parseFloatOrNull(accroche.PIED_Z_LAMBERT93),
+      x_foot_lambert93: parseFloatOrNull(accroche.PIED_X_LAMBERT93),
+      y_foot_lambert93: parseFloatOrNull(accroche.PIED_Y_LAMBERT93),
+      name: accroche.SUPPORT_ADR ?? null,
+      number: accroche.SUPPORT_NUMERO ?? null,
+      towerModel: accroche.SUPPORT_TOWER ?? null,
+      attachmentPosition: extractAttachmentPosition(portee.PORTEE_UNITAIRE_DESIGNATION)
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private — legacy mapping
   // ---------------------------------------------------------------------------
 
   private mapToSection(raw: Record<string, unknown>): Section {
@@ -228,11 +366,25 @@ export class SectionImportService implements ImportAdapter<Section> {
   // Private — validation
   // ---------------------------------------------------------------------------
 
-  private validateSection(section: Section): void {
-    if (!areAllRequiredFieldsFilled(section)) {
+  private validateGeoLiaisonSection(raw: GeoLiaisonFormat): void {
+    const fieldErrors = validateGeoLiaisonRawFields(raw);
+    if (fieldErrors.length > 0) {
+      const detail = fieldErrors.map((e) => `${e.field}: ${String(e.value)}`).join('; ');
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: sectionImportErrors.validationErrorRequiredFields,
+        message: `${sectionImportErrors.validationErrorRequiredFields}: ${detail}`,
+        stage: 'VALIDATION'
+      };
+      throw error;
+    }
+  }
+
+  private validateSection(section: Section): void {
+    const missingFields = getMissingRequiredFields(section);
+    if (missingFields.length > 0) {
+      const error: ImportError = {
+        code: 'VALIDATION_ERROR',
+        message: `${sectionImportErrors.validationErrorRequiredFields}: ${missingFields.join(', ')}`,
         stage: 'VALIDATION'
       };
       throw error;

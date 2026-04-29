@@ -12,6 +12,8 @@ import { SectionService } from '@services/section/section.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { Section, Study } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { CatalogMaintenance } from '@shared/domain';
 
 // ---------------------------------------------------------------------------
 // Polyfill File.prototype.text — jsdom 26 does not implement it
@@ -71,6 +73,73 @@ const buildValidSectionPayload = (): Partial<Section> & Record<string, unknown> 
   ]
 });
 
+/** Builds a minimal accroche object for GeoLiaison tests. */
+const buildAccroche = (overrides: Record<string, string | null> = {}): Record<string, string | null> => ({
+  ANGLE_LIGNE: '5.0',
+  ACCROCHE_SET: '19',
+  ACCROCHE_CABLE_Z_LAMBERT93: '25.0',
+  HAUTEUR_SOUS_CONSOLE: '2.5',
+  LONGUEUR_BRAS: '3.0',
+  CHAINE_INL_ADR: 'ChainA',
+  CHAINE_INL_LONGUEUR: '5.0',
+  CHAINE_INL_POIDS: '50.0',
+  CHAINE_EN_V: 'false',
+  CONTREPOIDS: '0',
+  CHAINE_INL_SURFACE: '0.5',
+  PIED_Z_LAMBERT93: '100.0',
+  PIED_X_LAMBERT93: '123456.0',
+  PIED_Y_LAMBERT93: '789012.0',
+  SUPPORT_ADR: 'Support A',
+  SUPPORT_NUMERO: '1',
+  SUPPORT_TOWER: 'TowerX',
+  ...overrides
+});
+
+/** Builds a minimal portee object for GeoLiaison tests. */
+const buildPortee = (
+  ordre: string,
+  designation: string,
+  departOverrides: Record<string, string | null> = {},
+  arriveeOverrides: Record<string, string | null> = {}
+): Record<string, unknown> => ({
+  PORTEE_UNITAIRE_ORDRE: ordre,
+  PORTEE_LONGUEUR: '565.49',
+  PORTEE_AZIMUT: '180.5',
+  CM_DESIGNATION: 'CM_01',
+  EEL_DESIGNATION: 'EEL_01',
+  GMR_DESIGNATION: 'GMR_01',
+  PORTEE_UNITAIRE_DESIGNATION: designation,
+  'accroche depart': buildAccroche({ SUPPORT_NUMERO: ordre, ...departOverrides }),
+  'accroche arrivee': buildAccroche({ SUPPORT_NUMERO: String(Number(ordre) + 1), ...arriveeOverrides })
+});
+
+/** Builds a valid GeoLiaison payload with 2 portees. */
+const buildValidGeoLiaisonPayload = (): Record<string, unknown> => ({
+  cantons: [
+    {
+      general: {
+        CANTON_CUR: 'geo-uuid-1',
+        CABLE_ADR: 'GeoSection',
+        CANTON_TYPE: 'PHASE',
+        FAISCEAU_CABLES_NOMBRE: '2',
+        PHASE_ELECTRIQUE_NUMERO: '1',
+        appartenance: [
+          {
+            LIT_ADR: 'LitName',
+            LIT_IDR: 'LIT001',
+            BRANCHE_IDR: 'FLAMAL73MENUE01',
+            TENSION_ELECTRIQUE_ADR: '225kV'
+          }
+        ]
+      },
+      'portee unitaire': [
+        buildPortee('2', 'Position 2 - Phase A', { SUPPORT_NUMERO: '2' }, { SUPPORT_NUMERO: '3' }),
+        buildPortee('1', 'Position 1 - Phase A', { SUPPORT_NUMERO: '1' }, { SUPPORT_NUMERO: '2' })
+      ]
+    }
+  ]
+});
+
 /** Builds a minimal valid Study containing no sections. */
 const buildMockStudy = (sections: Section[] = []): Study => ({
   uuid: 'study-uuid-1',
@@ -92,6 +161,18 @@ describe('SectionImportService', () => {
   let sectionServiceMock: vi.Mocked<SectionService>;
   let messageServiceMock: vi.Mocked<MessageService>;
   let loggerSpy: vi.Mocked<LoggerService>;
+  let maintenanceServiceMock: { getMaintenance: ReturnType<typeof vi.fn> };
+
+  const mockMaintenanceData: CatalogMaintenance[] = [
+    {
+      maintenance_center: 'CM_01',
+      maintenance_center_id: 'MC_ID_01',
+      regional_team: 'GMR_01',
+      regional_team_id: 'GMR_ID_01',
+      maintenance_team: 'EEL_01',
+      maintenance_team_id: 'EEL_ID_01'
+    }
+  ];
 
   beforeEach(() => {
     sectionServiceMock = {
@@ -110,12 +191,17 @@ describe('SectionImportService', () => {
       info: vi.fn()
     } as unknown as vi.Mocked<LoggerService>;
 
+    maintenanceServiceMock = {
+      getMaintenance: vi.fn().mockResolvedValue(mockMaintenanceData)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         SectionImportService,
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
-        { provide: LoggerService, useValue: loggerSpy }
+        { provide: LoggerService, useValue: loggerSpy },
+        { provide: MaintenanceService, useValue: maintenanceServiceMock }
       ]
     });
     service = TestBed.inject(SectionImportService);
@@ -226,7 +312,8 @@ describe('SectionImportService', () => {
       const payload = { ...buildValidSectionPayload(), name: '' };
       await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
         code: 'VALIDATION_ERROR',
-        stage: 'VALIDATION'
+        stage: 'VALIDATION',
+        message: expect.stringContaining('name')
       });
     });
 
@@ -234,7 +321,8 @@ describe('SectionImportService', () => {
       const payload = { ...buildValidSectionPayload(), cable_name: undefined };
       await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
         code: 'VALIDATION_ERROR',
-        stage: 'VALIDATION'
+        stage: 'VALIDATION',
+        message: expect.stringContaining('cable_name')
       });
     });
 
@@ -242,7 +330,8 @@ describe('SectionImportService', () => {
       const payload = { ...buildValidSectionPayload(), cables_amount: 0 };
       await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
         code: 'VALIDATION_ERROR',
-        stage: 'VALIDATION'
+        stage: 'VALIDATION',
+        message: expect.stringContaining('cables_amount')
       });
     });
 
@@ -377,6 +466,343 @@ describe('SectionImportService', () => {
       const study = buildMockStudy();
       service.setStudyContext(study);
       expect(service.studyContext()).toBe(study);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // GeoLiaison format — checkCollision()
+  // -------------------------------------------------------------------------
+
+  describe('checkCollision() — GeoLiaison format', () => {
+    it('should detect UUID from CANTON_CUR in GeoLiaison format', async () => {
+      const existing = {
+        ...createEmptySection(),
+        uuid: 'geo-uuid-1',
+        name: 'Existing GeoSection'
+      } as Section;
+      service.setStudyContext(buildMockStudy([existing]));
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+
+      const result = await service.checkCollision(file);
+      expect(result).toEqual({ uuid: 'geo-uuid-1', label: 'Existing GeoSection' });
+    });
+
+    it('should return null for GeoLiaison file with no matching UUID in study', async () => {
+      service.setStudyContext(buildMockStudy());
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+
+      expect(await service.checkCollision(file)).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // GeoLiaison format — processFile()
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — GeoLiaison format', () => {
+    beforeEach(() => {
+      service.setStudyContext(buildMockStudy());
+    });
+
+    it('should map UUID from CANTON_CUR', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result).not.toBeNull();
+      expect(result?.uuid).toBe('geo-uuid-1');
+    });
+
+    it('should map section fields from general', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-POS1-3-POS2');
+      expect(result?.cable_name).toBe('GeoSection');
+      expect(result?.type).toBe('phase');
+      expect(result?.cables_amount).toBe(2);
+      expect(result?.electric_phase_number).toBe(1);
+    });
+
+    it('should map appartenance fields', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.lit_name).toBe('LitName');
+      expect(result?.lit_code).toBe('LIT001');
+      expect(result?.branch_idr).toBe('01');
+      expect(result?.voltage_idr).toBe('225kV');
+    });
+
+    it('should lookup maintenance IDs from MaintenanceService', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.maintenance_center_id).toBe('MC_ID_01');
+      expect(result?.maintenance_center_names).toEqual(['CM_01']);
+      expect(result?.maintenance_team_id).toBe('EEL_ID_01');
+      expect(result?.regional_team_id).toBe('GMR_ID_01');
+      expect(result?.regional_maintenance_center_names).toEqual(['GMR_01']);
+    });
+
+    it('should use CM_DESIGNATION/EEL_DESIGNATION/GMR_DESIGNATION from the first portee (sorted)', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      // Portee with ordre=1 has CM_DESIGNATION CM_01, ordre=2 also has CM_01 in default builder.
+      // Override ordre=1 portee to use a different CM to confirm first portee (ordre=1) is used.
+      const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+        string,
+        unknown
+      >[];
+      // portee at index 1 has ordre=1 (unsorted), override its CM to something else
+      portees[1] = { ...portees[1], CM_DESIGNATION: 'CM_FIRST' };
+      portees[0] = { ...portees[0], CM_DESIGNATION: 'CM_SECOND' };
+
+      maintenanceServiceMock.getMaintenance.mockResolvedValue([
+        { ...mockMaintenanceData[0], maintenance_center: 'CM_FIRST', maintenance_center_id: 'MC_FIRST_ID' }
+      ]);
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      // After sorting by ordre, portee with ordre=1 comes first → CM_FIRST
+      expect(result?.maintenance_center_names).toEqual(['CM_FIRST']);
+    });
+
+    it('should sort supports by PORTEE_UNITAIRE_ORDRE ascending', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      // Payload has ordre=2 first, ordre=1 second. After sort, support[0] comes from portee ordre=1.
+      expect(result?.supports[0].number).toBe('1'); // accroche depart of portee ordre=1
+    });
+
+    it('should create a support from accroche arrivee of the last portee', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      // 2 portees → 2 (depart) + 1 (arrivee of last) = 3 supports
+      expect(result?.supports.length).toBe(3);
+      // Last support is from arrivee of portee ordre=2
+      const lastSupport = result?.supports[result.supports.length - 1];
+      expect(lastSupport?.number).toBe('3'); // arrivee of portee ordre=2 has SUPPORT_NUMERO='3'
+    });
+
+    it('should parse numeric string fields to numbers', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      const firstSupport = result?.supports[0];
+      expect(firstSupport?.spanLength).toBe(565.49);
+      expect(firstSupport?.spanAzimut).toBe(180.5);
+      expect(firstSupport?.attachmentHeight).toBe(25.0);
+      expect(firstSupport?.x_foot_lambert93).toBe(123456.0);
+      expect(firstSupport?.y_foot_lambert93).toBe(789012.0);
+    });
+
+    it('should extract attachmentPosition from PORTEE_UNITAIRE_DESIGNATION', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      // First portee (ordre=1) has designation "Position 1 - Phase A"
+      expect(result?.supports[0].attachmentPosition).toBe('1');
+    });
+
+    it('should map cable_name from CABLE_ADR', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.cable_name).toBe('GeoSection');
+    });
+
+    it('should handle null maintenance lookup gracefully when no match found', async () => {
+      maintenanceServiceMock.getMaintenance.mockResolvedValue([]);
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.maintenance_center_id).toBeUndefined();
+      expect(result?.maintenance_team_id).toBeUndefined();
+      expect(result?.regional_team_id).toBeUndefined();
+    });
+
+    it('should fail with field names in the error when accroche fields are null (real-world GeoLiaison file)', async () => {
+      // Mimics a real CDG19 file where all accroche fields are null
+      const nullAccroche = () => ({
+        ANGLE_LIGNE: null,
+        ACCROCHE_SET: '19',
+        ACCROCHE_CABLE_Z_LAMBERT93: null,
+        HAUTEUR_SOUS_CONSOLE: null,
+        LONGUEUR_BRAS: null,
+        CHAINE_INL_ADR: null,
+        CHAINE_INL_LONGUEUR: null,
+        CHAINE_INL_POIDS: null,
+        CHAINE_EN_V: null,
+        CONTREPOIDS: null,
+        CHAINE_INL_SURFACE: null,
+        PIED_Z_LAMBERT93: null,
+        PIED_X_LAMBERT93: null,
+        PIED_Y_LAMBERT93: null,
+        SUPPORT_ADR: null,
+        SUPPORT_NUMERO: null,
+        SUPPORT_TOWER: null
+      });
+      const payload = {
+        cantons: [
+          {
+            general: {
+              CANTON_CUR: 'cdg19-uuid',
+              CABLE_ADR: 'Conducteur de phase',
+              CANTON_TYPE: 'PHASE',
+              FAISCEAU_CABLES_NOMBRE: '1.0',
+              PHASE_ELECTRIQUE_NUMERO: null,
+              appartenance: [
+                {
+                  LIT_ADR: 'LIT 400kV',
+                  LIT_IDR: 'FLAMAL73MENUE',
+                  BRANCHE_IDR: 'FLAMAL73MENUE01',
+                  TENSION_ELECTRIQUE_ADR: '400 KV'
+                }
+              ]
+            },
+            'portee unitaire': [
+              {
+                PORTEE_UNITAIRE_ORDRE: '7.5',
+                PORTEE_LONGUEUR: '444.1',
+                PORTEE_AZIMUT: '107.821',
+                CM_DESIGNATION: 'CM-NTR',
+                EEL_DESIGNATION: 'NORMANDIE',
+                GMR_DESIGNATION: 'GMR NORMANDIE',
+                PORTEE_UNITAIRE_DESIGNATION: 'Position 1',
+                'accroche depart': nullAccroche(),
+                'accroche arrivee': nullAccroche()
+              }
+            ]
+          }
+        ]
+      };
+      const file = makeJsonFile(payload);
+      await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        message: expect.stringContaining('ANGLE_LIGNE: null')
+      });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // GeoLiaison format — section name building (RG.CAN.NOM)
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — GeoLiaison section name (RG.CAN.NOM)', () => {
+    beforeEach(() => {
+      service.setStudyContext(buildMockStudy());
+    });
+
+    it('should build the name from all components: branche-type+phase-startNum-POS-endNum-POS', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      // BRANCHE_IDR='FLAMAL73MENUE01', CANTON_TYPE='PHASE', PHASE='1'
+      // supports[0].number='1', attachmentPosition='1'
+      // supports[2].number='3', attachmentPosition='2'
+      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-POS1-3-POS2');
+    });
+
+    it('should omit phase number when CANTON_TYPE is GARDE', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const general = (payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>;
+      general['CANTON_TYPE'] = 'GARDE';
+      general['PHASE_ELECTRIQUE_NUMERO'] = null;
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.name).toBe('FLAMAL73MENUE01-GARDE-1-POS1-3-POS2');
+    });
+
+    it('should omit the branch prefix when BRANCHE_IDR is null', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const appartenance = ((payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>)[
+        'appartenance'
+      ] as Record<string, unknown>[];
+      appartenance[0]['BRANCHE_IDR'] = null;
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.name).toBe('PHASE1-1-POS1-3-POS2');
+    });
+
+    it('should truncate support numbers to 5 characters', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+        string,
+        unknown
+      >[];
+      // Override SUPPORT_NUMERO on accroche depart of portee ordre=1 and arrivee of portee ordre=2
+      (portees[1]['accroche depart'] as Record<string, unknown>)['SUPPORT_NUMERO'] = 'ABCDE12345';
+      (portees[0]['accroche arrivee'] as Record<string, unknown>)['SUPPORT_NUMERO'] = 'ZYXWV99999';
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.name).toContain('ABCDE');
+      expect(result?.name).not.toContain('ABCDE12345');
+    });
+
+    it('should omit POS parts when PORTEE_UNITAIRE_DESIGNATION has no position number', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+        string,
+        unknown
+      >[];
+      portees[0]['PORTEE_UNITAIRE_DESIGNATION'] = 'No position here';
+      portees[1]['PORTEE_UNITAIRE_DESIGNATION'] = 'No position here';
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.name).not.toContain('POS');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // GeoLiaison format — invalid file (RG.CAN.OUV-BTN.3)
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — invalid GeoLiaison format', () => {
+    it('should throw VALIDATION_ERROR with GeoLiaison message when cantons present but CANTON_CUR missing', async () => {
+      service.setStudyContext(buildMockStudy());
+      const invalidPayload = {
+        cantons: [
+          {
+            general: {
+              CABLE_ADR: 'SomeName'
+              // CANTON_CUR intentionally absent
+            },
+            'portee unitaire': []
+          }
+        ]
+      };
+      const file = makeJsonFile(invalidPayload);
+      await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        message: 'Fichier de géoliaison à importer non conforme.',
+        stage: 'VALIDATION'
+      });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Legacy Section JSON — fallback intact
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — legacy Section JSON fallback', () => {
+    it('should still process a valid legacy section JSON (no cantons key)', async () => {
+      service.setStudyContext(buildMockStudy());
+      const payload = buildValidSectionPayload();
+      const file = makeJsonFile(payload);
+
+      const result = await service.processFile(file, neverAccept);
+      expect(result).not.toBeNull();
+      expect(result?.uuid).toBe('sec-uuid-1');
     });
   });
 });

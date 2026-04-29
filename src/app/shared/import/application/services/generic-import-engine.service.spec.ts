@@ -205,7 +205,7 @@ describe('GenericImportEngineService', () => {
       adapter.processFile.mockRejectedValue(new Error('boom'));
       await service.processFiles([makeFile('crash.json')], neverResolve);
 
-      expect(loggerSpy.error).toHaveBeenCalledWith('Import pipeline error for file', 'crash.json', expect.any(Error));
+      expect(loggerSpy.warn).toHaveBeenCalledWith('Import pipeline error for file', 'crash.json', expect.any(Error));
     });
   });
 

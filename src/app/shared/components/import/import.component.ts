@@ -4,13 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ConfirmationService } from 'primeng/api';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
 import { ImportContextConfig, ImportOutcome, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
+import { NotificationService } from '@core/services/notification/notification.service';
 
 /**
  * Generic import UI component shared across all import contexts (Study, Section, …).
@@ -50,8 +51,20 @@ export class ImportComponent {
   /** Configuration driving the accepted file types, texts, and optional navigation. */
   readonly config = input.required<ImportContextConfig>();
 
+  /**
+   * When this token changes value, the component resets its accumulated outcomes.
+   * Increment the value from the host to trigger a reset.
+   */
+  readonly resetToken = input<number>(0);
+
   /** Emitted after each file batch is processed with the full outcome list. */
   readonly importCompleted = output<ImportOutcome[]>();
+
+  /**
+   * Emitted when the user clicks the success action button (e.g. Edit).
+   * Carries the full {@link ImportOutcome} of the clicked item.
+   */
+  readonly successActionTriggered = output<ImportOutcome>();
 
   /** True while the engine is processing files. */
   readonly isLoading = signal(false);
@@ -73,6 +86,14 @@ export class ImportComponent {
 
   private readonly engine = inject(GenericImportEngineService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly notificationService = inject(NotificationService);
+
+  constructor() {
+    effect(() => {
+      this.resetToken();
+      this.outcomes.set([]);
+    });
+  }
 
   /**
    * Triggered by the file `<input>` change event.
@@ -87,6 +108,12 @@ export class ImportComponent {
       const results = await this.engine.processFiles(files, this.makeCollisionResolver());
       this.outcomes.update((prev) => [...prev, ...results]);
       this.importCompleted.emit(results);
+      for (const outcome of results) {
+        if (outcome.status === 'error') {
+          const detail = `${outcome.fileName}: ${outcome.error?.message ?? ''}`;
+          this.notificationService.error(detail, $localize`:@@importErrorFileSummary:Error reading the input file`);
+        }
+      }
     } finally {
       this.isLoading.set(false);
     }
@@ -98,11 +125,11 @@ export class ImportComponent {
       new Promise<boolean>((resolve) =>
         this.confirmationService.confirm({
           key: 'positionDialog',
-          message: $localize`${entityLabel} ${label} already exists. Do you want to replace it?`,
+          message: $localize`:@@importCollisionMessage:${entityLabel} ${label} already exists. Do you want to replace it?`,
           accept: () => resolve(true),
           reject: () => resolve(false),
-          acceptLabel: $localize`Yes`,
-          rejectLabel: $localize`No`
+          acceptLabel: $localize`:@@importYesLabel:Yes`,
+          rejectLabel: $localize`:@@importNoLabel:No`
         })
       );
   }

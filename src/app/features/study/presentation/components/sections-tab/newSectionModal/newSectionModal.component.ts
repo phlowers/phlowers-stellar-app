@@ -14,44 +14,12 @@ import { CommonModule } from '@angular/common';
 import { Section, Study } from '@shared/domain';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { isNil } from 'lodash';
 import { SectionService } from '@services/section/section.service';
-import { hasSupportsBoundsErrors } from './newSectionModal.constants';
+import { areAllRequiredFieldsFilled, hasSupportsBoundsErrors } from './newSectionModal.constants';
 import { ImportSectionComponent } from './import-section/import-section.component';
 import { ImportOutcome } from '@shared/import/domain/import-contracts';
-
-/** Union of all available section source modes. */
-export type SectionSourceMode = 'manual' | 'referencial' | 'distantReferencial' | 'extraction';
-
-/**
- * Checks whether all mandatory fields in a section are filled.
- * @param section - The section to validate
- * @returns `true` if all required fields have values
- */
-const areAllRequiredFieldsFilled = (section: Section) => {
-  const nameCondition = !!section.name.trim();
-  const typeCondition = !!section.type;
-  const cablesAmountCondition = !!section.cables_amount;
-  const cableNameCondition = !!section.cable_name;
-  const supportsNumberCondition = !!section.supports.every((support) => !isNil(support.number));
-  const supportsSpanLengthCondition = !!section.supports.every(
-    (support, index) => !isNil(support.spanLength) || index === section.supports.length - 1
-  );
-  const supportsSpanAngleCondition = !!section.supports.every((support) => !isNil(support.spanAngle));
-  const supportsChainLengthCondition = !!section.supports.every((support) => !isNil(support.chainLength));
-  const supportsAttachmentHeightCondition = !!section.supports.every((support) => !isNil(support.attachmentHeight));
-  return (
-    nameCondition &&
-    typeCondition &&
-    cablesAmountCondition &&
-    cableNameCondition &&
-    supportsNumberCondition &&
-    supportsSpanLengthCondition &&
-    supportsSpanAngleCondition &&
-    supportsChainLengthCondition &&
-    supportsAttachmentHeightCondition
-  );
-};
+import { NotificationService } from '@services/notification/notification.service';
+import { SectionSourceMode } from './newSectionModal.interfaces';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -104,8 +72,11 @@ export class NewSectionModalComponent {
   areAllRequiredFieldsFilled = signal<boolean>(false);
   isNameUnique = signal<boolean>(false);
   supportsBoundsErrors = signal<boolean>(false);
+  /** Incremented to trigger a reset of the import outcomes in the ImportSectionComponent. */
+  readonly importResetToken = signal<number>(0);
 
   private readonly sectionService = inject(SectionService);
+  private readonly notificationService = inject(NotificationService);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
@@ -166,12 +137,31 @@ export class NewSectionModalComponent {
 
   /**
    * Handles the `importCompleted` event emitted by `ImportSectionComponent`.
-   * Closes the modal after at least one section has been successfully imported.
+   * The modal stays open after import so the user can click Edit.
    */
   onSectionImportCompleted(outcomes: ImportOutcome[]): void {
-    const hasSuccess = outcomes.some((o) => o.status === 'success');
-    if (hasSuccess) {
-      this.isOpenChange.emit(false);
+    // Modal stays open — user will click Edit to proceed
+    // Suppress unused-variable warning: outcomes may be used for future extensions
+    void outcomes;
+  }
+
+  /**
+   * Handles the `editRequested` event emitted by `ImportSectionComponent`.
+   * Resets the import list, then reopens the modal in edit mode for the imported section.
+   */
+  onImportedSectionEditRequested(sectionUuid: string): void {
+    this.importResetToken.update((t) => t + 1);
+
+    const section = this.study()?.sections.find((s) => s.uuid === sectionUuid);
+    if (!section) {
+      this.notificationService.error($localize`The imported section could not be found. Please try again.`);
+      return;
     }
+
+    this.source.set('manual');
+    this.setSection.emit(section);
+    this.setMode.emit('edit');
+    this.isOpenChange.emit(false);
+    Promise.resolve().then(() => this.isOpenChange.emit(true));
   }
 }

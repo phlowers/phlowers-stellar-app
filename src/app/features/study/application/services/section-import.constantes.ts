@@ -13,7 +13,8 @@ export const sectionImportErrors = {
   validationErrorRequiredFields: $localize`Section is missing required fields`,
   validationErrorSupportsBounds: $localize`Section has supports with values out of bounds`,
   sectionImportError: $localize`Error importing section`,
-  sectionDeleteError: $localize`Error deleting section`
+  sectionDeleteError: $localize`Error deleting section`,
+  geoLiaisonFormatError: $localize`Fichier de géoliaison à importer non conforme.`
 };
 
 /** Localised success message shown after a successful section import. */

@@ -11,6 +11,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ImportComponent } from './import.component';
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
 import { IMPORT_ADAPTER_TOKEN, ImportContextConfig, ImportOutcome } from '@shared/import/domain/import-contracts';
+import { NotificationService } from '@core/services/notification/notification.service';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -45,6 +46,14 @@ const WITH_NAV_CONFIG: ImportContextConfig = {
   navigationRoute: (id) => '/section/' + id
 };
 
+const WITH_ACTION_CONFIG: ImportContextConfig = {
+  ...BASIC_CONFIG,
+  successAction: {
+    label: 'Edit',
+    action: vi.fn()
+  }
+};
+
 const WITH_TEXTS_CONFIG: ImportContextConfig = {
   ...BASIC_CONFIG,
   texts: {
@@ -77,6 +86,7 @@ describe('ImportComponent', () => {
   let fixture: ComponentFixture<ImportComponent>;
   let engineMock: vi.Mocked<GenericImportEngineService>;
   let confirmationServiceMock: vi.Mocked<ConfirmationService>;
+  let notificationServiceMock: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     engineMock = {
@@ -87,6 +97,8 @@ describe('ImportComponent', () => {
       confirm: vi.fn()
     } as unknown as vi.Mocked<ConfirmationService>;
 
+    notificationServiceMock = { error: vi.fn() };
+
     await TestBed.configureTestingModule({
       imports: [ImportComponent],
       providers: [
@@ -94,6 +106,7 @@ describe('ImportComponent', () => {
         { provide: GenericImportEngineService, useValue: engineMock },
         { provide: IMPORT_ADAPTER_TOKEN, useValue: {} },
         { provide: ConfirmationService, useValue: confirmationServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
         MessageService
       ]
     })
@@ -214,6 +227,85 @@ describe('ImportComponent', () => {
   });
 
   // -------------------------------------------------------------------------
+  // HTML rendering — edit action
+  // -------------------------------------------------------------------------
+
+  describe('HTML rendering — edit action', () => {
+    it('should NOT render edit-imported-btn when config has no successAction', () => {
+      component.outcomes.set([makeOutcomeSuccess()]);
+      fixture.detectChanges();
+      expect(getByTestId(fixture, 'edit-imported-btn')).toBeNull();
+    });
+
+    it('should render edit-imported-btn when config has successAction and entityId is present', () => {
+      fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
+      component.outcomes.set([makeOutcomeSuccess()]);
+      fixture.detectChanges();
+      const btn = getByTestId(fixture, 'edit-imported-btn');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('BUTTON');
+    });
+
+    it('should display the successAction label on the button', () => {
+      fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
+      component.outcomes.set([makeOutcomeSuccess()]);
+      fixture.detectChanges();
+      const btn = getByTestId(fixture, 'edit-imported-btn');
+      expect(btn?.textContent?.trim()).toBe('Edit');
+    });
+
+    it('should NOT render edit-imported-btn when entityId is absent', () => {
+      fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
+      component.outcomes.set([makeOutcomeSuccess({ entityId: undefined })]);
+      fixture.detectChanges();
+      expect(getByTestId(fixture, 'edit-imported-btn')).toBeNull();
+    });
+
+    it('should emit successActionTriggered with the outcome when Edit is clicked', () => {
+      fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
+      const outcome = makeOutcomeSuccess();
+      component.outcomes.set([outcome]);
+      fixture.detectChanges();
+
+      const emitted: ImportOutcome[] = [];
+      component.successActionTriggered.subscribe((o) => emitted.push(o));
+
+      const btn = getByTestId(fixture, 'edit-imported-btn') as HTMLButtonElement;
+      btn.click();
+
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0]).toEqual(outcome);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // reset behaviour
+  // -------------------------------------------------------------------------
+
+  describe('reset behaviour', () => {
+    it('should clear outcomes when resetToken changes', () => {
+      component.outcomes.set([makeOutcomeSuccess(), makeOutcomeError()]);
+      fixture.componentRef.setInput('resetToken', 1);
+      fixture.detectChanges();
+      expect(component.outcomes()).toHaveLength(0);
+    });
+
+    it('should clear successOutcomes after reset', () => {
+      component.outcomes.set([makeOutcomeSuccess()]);
+      fixture.componentRef.setInput('resetToken', 1);
+      fixture.detectChanges();
+      expect(component.successOutcomes()).toHaveLength(0);
+    });
+
+    it('should clear errorOutcomes after reset', () => {
+      component.outcomes.set([makeOutcomeError()]);
+      fixture.componentRef.setInput('resetToken', 1);
+      fixture.detectChanges();
+      expect(component.errorOutcomes()).toHaveLength(0);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // HTML rendering — error list
   // -------------------------------------------------------------------------
 
@@ -236,6 +328,26 @@ describe('ImportComponent', () => {
     it('should display the file name in the error item', () => {
       const item = getByTestId(fixture, 'imported-item-error');
       expect(item?.textContent).toContain('bad.json');
+    });
+
+    it('should render imported-item-error-detail when error has a message', () => {
+      const detail = getByTestId(fixture, 'imported-item-error-detail');
+      expect(detail).toBeTruthy();
+      expect(detail?.textContent?.trim()).toBe('Bad JSON');
+    });
+
+    it('should not render imported-item-error-detail when error message is absent', () => {
+      component.outcomes.set([
+        makeOutcomeError({ error: { code: 'FILE_PARSE_ERROR', message: '', stage: 'PARSING' } })
+      ]);
+      fixture.detectChanges();
+      expect(getByTestId(fixture, 'imported-item-error-detail')).toBeNull();
+    });
+
+    it('should not render imported-item-error-detail when error is undefined', () => {
+      component.outcomes.set([{ fileName: 'no-error.json', status: 'error' }]);
+      fixture.detectChanges();
+      expect(getByTestId(fixture, 'imported-item-error-detail')).toBeNull();
     });
   });
 
@@ -330,6 +442,71 @@ describe('ImportComponent', () => {
       }
 
       expect(component.isLoading()).toBe(false);
+    });
+
+    it('should call notificationService.error with filename and error message for each error outcome', async () => {
+      const error: ImportOutcome = {
+        fileName: 'bad.json',
+        status: 'error',
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Section is missing required fields: supports[0].number',
+          stage: 'VALIDATION'
+        }
+      };
+      engineMock.processFiles.mockResolvedValue([error]);
+
+      const event = { target: { files: createFileList(new File(['{}'], 'bad.json')) } } as unknown as Event;
+      await component.loadFiles(event);
+
+      expect(notificationServiceMock.error).toHaveBeenCalledOnce();
+      expect(notificationServiceMock.error).toHaveBeenCalledWith(
+        'bad.json: Section is missing required fields: supports[0].number',
+        expect.any(String)
+      );
+    });
+
+    it('should not call notificationService.error for success outcomes', async () => {
+      engineMock.processFiles.mockResolvedValue([makeOutcomeSuccess()]);
+
+      const event = { target: { files: createFileList(new File(['{}'], 'ok.json')) } } as unknown as Event;
+      await component.loadFiles(event);
+
+      expect(notificationServiceMock.error).not.toHaveBeenCalled();
+    });
+
+    it('should not call notificationService.error for skipped outcomes', async () => {
+      const skipped: ImportOutcome = { fileName: 'skipped.json', status: 'skipped' };
+      engineMock.processFiles.mockResolvedValue([skipped]);
+
+      const event = { target: { files: createFileList(new File(['{}'], 'skipped.json')) } } as unknown as Event;
+      await component.loadFiles(event);
+
+      expect(notificationServiceMock.error).not.toHaveBeenCalled();
+    });
+
+    it('should call notificationService.error once per error outcome when multiple files are processed', async () => {
+      const outcomes: ImportOutcome[] = [
+        {
+          fileName: 'a.json',
+          status: 'error',
+          error: { code: 'VALIDATION_ERROR', message: 'Missing: name', stage: 'VALIDATION' }
+        },
+        makeOutcomeSuccess(),
+        {
+          fileName: 'b.json',
+          status: 'error',
+          error: { code: 'FILE_PARSE_ERROR', message: 'Bad JSON', stage: 'PARSING' }
+        }
+      ];
+      engineMock.processFiles.mockResolvedValue(outcomes);
+
+      const event = { target: { files: createFileList(new File(['{}'], 'multi.json')) } } as unknown as Event;
+      await component.loadFiles(event);
+
+      expect(notificationServiceMock.error).toHaveBeenCalledTimes(2);
+      expect(notificationServiceMock.error).toHaveBeenCalledWith('a.json: Missing: name', expect.any(String));
+      expect(notificationServiceMock.error).toHaveBeenCalledWith('b.json: Bad JSON', expect.any(String));
     });
   });
 

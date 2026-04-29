@@ -108,7 +108,7 @@ export class GenericImportEngineService {
 
       return this.buildSuccessOutcome(file.name, entity);
     } catch (error: unknown) {
-      this.logger.error('Import pipeline error for file', file.name, error);
+      this.logger.warn('Import pipeline error for file', file.name, error);
       return {
         fileName: file.name,
         status: 'error',

@@ -39,7 +39,7 @@
         <li class="file-import__list__item" data-testid="imported-item-success">
           <p class="file-import__list__label">
             <app-icon icon="check" class="file-import__list__icon" aria-hidden="true" />
-            {{ outcome.entityLabel ?? outcome.fileName }}
+            {{ outcome.fileName }}
           </p>
 
           @if (config().navigationRoute && outcome.entityId) {
@@ -56,6 +56,21 @@
               </a>
             </div>
           }
+
+          @if (config().successAction && outcome.entityId) {
+            <div class="file-import__list__btns">
+              <button
+                app-btn
+                type="button"
+                btnStyle="base"
+                btnSize="s"
+                (click)="successActionTriggered.emit(outcome)"
+                data-testid="edit-imported-btn"
+              >
+                {{ config().successAction!.label }}
+              </button>
+            </div>
+          }
         </li>
       }
     </ul>
@@ -69,6 +84,11 @@
             <app-icon icon="close" class="file-import__list__icon file-import__list__icon--error" aria-hidden="true" />
             {{ outcome.fileName }}
           </p>
+          @if (outcome.error?.message) {
+            <p class="file-import__list__detail" data-testid="imported-item-error-detail">
+              {{ outcome.error!.message }}
+            </p>
+          }
         </li>
       }
     </ul>
