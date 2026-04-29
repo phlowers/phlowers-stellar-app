@@ -93,6 +93,18 @@ const tasks: Record<
   [Task.getWindIncidence]: {
     function: 'get_wind_incidence',
     externalPackages: []
+  },
+  [Task.computeLocalization]: {
+    function: 'compute_localization',
+    externalPackages: []
+  },
+  [Task.importLambert]: {
+    function: 'import_lambert',
+    externalPackages: []
+  },
+  [Task.importLambertAndValidate]: {
+    function: 'import_lambert_and_validate',
+    externalPackages: []
   }
 };
 
