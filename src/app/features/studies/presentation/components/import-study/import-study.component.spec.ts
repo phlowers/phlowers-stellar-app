@@ -54,7 +54,9 @@ describe('ImportStudyComponent', () => {
 
   beforeEach(async () => {
     studiesServiceMock = {
-      createStudyFromProtoV4: vi.fn().mockResolvedValue({} as Study),
+      createStudyFromProtoV4: vi
+        .fn()
+        .mockResolvedValue({ uuid: 'test-study-uuid', title: 'Test Study' } as unknown as Study),
       deleteStudy: vi.fn().mockResolvedValue(undefined),
       createStudy: vi.fn().mockResolvedValue('test-uuid'),
       getStudy: vi.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study)
@@ -185,6 +187,7 @@ describe('ImportStudyComponent', () => {
 
       component.loadFiles(mockEvent);
 
+      await waitFor(ASYNC_TICK); // wait for async checkCollision before FileReader is created
       expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
 
       // Simulate FileReader error

@@ -102,35 +102,32 @@ describe('ImportSectionComponent', () => {
   });
 
   // -------------------------------------------------------------------------
-  // ngOnInit — study context propagation
+  // study context propagation (effect)
   // -------------------------------------------------------------------------
 
-  describe('ngOnInit — study context propagation', () => {
-    it('should call setStudyContext with the provided study on init', () => {
+  describe('study context propagation', () => {
+    it('should call setStudyContext when study input is set to a non-null value', () => {
       const study = buildMockStudy();
       fixture.componentRef.setInput('study', study);
-      component.ngOnInit();
+      fixture.detectChanges();
       expect(sectionImportServiceMock.setStudyContext).toHaveBeenCalledWith(study);
     });
 
-    it('should not call setStudyContext when study is null', () => {
+    it('should not call setStudyContext when study input is null', () => {
       sectionImportServiceMock.setStudyContext.mockClear();
       fixture.componentRef.setInput('study', null);
-      component.ngOnInit();
+      fixture.detectChanges();
       expect(sectionImportServiceMock.setStudyContext).not.toHaveBeenCalled();
     });
-  });
 
-  // -------------------------------------------------------------------------
-  // syncStudyContext()
-  // -------------------------------------------------------------------------
-
-  describe('syncStudyContext()', () => {
-    it('should propagate a new study into the adapter when called directly', () => {
-      const newStudy = { ...buildMockStudy(), uuid: 'new-study' };
-      fixture.componentRef.setInput('study', newStudy);
-      component.syncStudyContext();
-      expect(sectionImportServiceMock.setStudyContext).toHaveBeenCalledWith(newStudy);
+    it('should call setStudyContext again when study input changes', () => {
+      const study1 = buildMockStudy();
+      const study2 = { ...buildMockStudy(), uuid: 'study-uuid-2' };
+      fixture.componentRef.setInput('study', study1);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('study', study2);
+      fixture.detectChanges();
+      expect(sectionImportServiceMock.setStudyContext).toHaveBeenCalledWith(study2);
     });
   });
 

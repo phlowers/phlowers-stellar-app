@@ -6,7 +6,7 @@
   }
 
   <label for="file-upload" class="file-import__tool">
-    <app-icon icon="upload" class="file-import__tool__icon" />
+    <app-icon icon="upload" class="file-import__tool__icon" aria-hidden="true" />
 
     <span class="file-import__tool__txt">
       @if (config().texts?.uploadPrompt; as prompt) {
@@ -20,11 +20,10 @@
 
     <input
       id="file-upload"
-      form="file"
       multiple
       name="file"
       type="file"
-      onclick="this.value = null"
+      (click)="clearFileInput($event)"
       (change)="loadFiles($event)"
       [accept]="acceptAttribute()"
       class="file-import__tool__input"
@@ -39,7 +38,7 @@
         <li class="file-import__list__item" data-testid="imported-item-success">
           <p class="file-import__list__label">
             <app-icon icon="check" class="file-import__list__icon" aria-hidden="true" />
-            {{ outcome.fileName }}
+            {{ outcome.entityLabel ?? outcome.fileName }}
           </p>
 
           @if (config().navigationRoute && outcome.entityId) {

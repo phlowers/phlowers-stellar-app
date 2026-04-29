@@ -191,6 +191,21 @@ describe('GenericImportEngineService', () => {
       expect(outcomes[0].error?.stage).toBe('PERSISTENCE');
     });
 
+    it.each([
+      ['FILE_READ_ERROR', 'DECODING'],
+      ['FILE_DECODE_ERROR', 'DECODING'],
+      ['FILE_PARSE_ERROR', 'PARSING'],
+      ['VALIDATION_ERROR', 'VALIDATION'],
+      ['MAPPING_ERROR', 'MAPPING'],
+      ['UUID_COLLISION_REJECTED', 'COLLISION_CHECK'],
+      ['PERSISTENCE_ERROR', 'PERSISTENCE']
+    ])('should map plain Error with code %s to stage %s', async (code, expectedStage) => {
+      adapter.processFile.mockRejectedValue(new Error(code));
+      const outcomes = await service.processFiles([makeFile('entity.json')], neverResolve);
+
+      expect(outcomes[0].error?.stage).toBe(expectedStage);
+    });
+
     it('should wrap a non-Error thrown value into PERSISTENCE_ERROR', async () => {
       adapter.processFile.mockRejectedValue('something weird');
       const file = makeFile('entity.json');

@@ -53,8 +53,8 @@ export const createEmptySupport = (): Support => {
     attachmentPosition: null,
     chainSurface: 0,
     spanAzimut: null,
-    x_foot_lambert93: null,
-    y_foot_lambert93: null
+    xFootLambert93: null,
+    yFootLambert93: null
   };
 };
 

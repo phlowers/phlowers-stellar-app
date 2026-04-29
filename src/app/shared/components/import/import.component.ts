@@ -95,6 +95,11 @@ export class ImportComponent {
     });
   }
 
+  /** Clears the file input value so the same file can be selected again. */
+  clearFileInput(event: Event): void {
+    (event.target as HTMLInputElement).value = '';
+  }
+
   /**
    * Triggered by the file `<input>` change event.
    * Delegates all file processing to the engine and accumulates outcomes.

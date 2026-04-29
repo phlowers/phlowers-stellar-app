@@ -68,7 +68,7 @@ export interface Support {
   /** Azimut of the span (degrees) */
   spanAzimut: number | null;
   /** X coordinate of the support foot in Lambert 93 projection */
-  x_foot_lambert93: number | null;
+  xFootLambert93: number | null;
   /** Y coordinate of the support foot in Lambert 93 projection */
-  y_foot_lambert93: number | null;
+  yFootLambert93: number | null;
 }

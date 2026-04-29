@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 import { Study } from '@shared/domain';
 import { ImportComponent } from '@shared/components/import/import.component';
 import { IMPORT_ADAPTER_TOKEN, ImportOutcome } from '@shared/import/domain/import-contracts';
@@ -32,19 +32,10 @@ import { SECTION_IMPORT_CONFIG } from './import-section.constantes';
     { provide: IMPORT_ADAPTER_TOKEN, useExisting: SectionImportService },
     ConfirmationService
   ],
-  template: `
-    <p-confirmdialog key="positionDialog" />
-    <app-import
-      [config]="config()"
-      [resetToken]="importResetToken()"
-      (importCompleted)="onImportCompleted($event)"
-      (successActionTriggered)="onSuccessActionTriggered($event)"
-      data-testid="section-import"
-    />
-  `,
+  templateUrl: './import-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImportSectionComponent implements OnInit {
+export class ImportSectionComponent {
   /** The active study — must be provided by the host modal. */
   readonly study = input.required<Study | null>();
 
@@ -74,19 +65,13 @@ export class ImportSectionComponent implements OnInit {
 
   private readonly sectionImportService = inject(SectionImportService);
 
-  ngOnInit(): void {
-    this.syncStudyContext();
-  }
-
-  /**
-   * Propagates the current study into the adapter so it can check collisions
-   * and persist the imported section.
-   */
-  syncStudyContext(): void {
-    const study = this.study();
-    if (study) {
-      this.sectionImportService.setStudyContext(study);
-    }
+  constructor() {
+    effect(() => {
+      const study = this.study();
+      if (study) {
+        this.sectionImportService.setStudyContext(study);
+      }
+    });
   }
 
   onImportCompleted(outcomes: ImportOutcome[]): void {

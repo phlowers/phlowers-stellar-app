@@ -594,8 +594,8 @@ describe('SectionImportService', () => {
       expect(firstSupport?.spanLength).toBe(565.49);
       expect(firstSupport?.spanAzimut).toBe(180.5);
       expect(firstSupport?.attachmentHeight).toBe(25.0);
-      expect(firstSupport?.x_foot_lambert93).toBe(123456.0);
-      expect(firstSupport?.y_foot_lambert93).toBe(789012.0);
+      expect(firstSupport?.xFootLambert93).toBe(123456.0);
+      expect(firstSupport?.yFootLambert93).toBe(789012.0);
     });
 
     it('should extract attachmentPosition from PORTEE_UNITAIRE_DESIGNATION', async () => {

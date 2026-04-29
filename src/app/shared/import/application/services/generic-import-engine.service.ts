@@ -11,6 +11,7 @@ import {
   ImportError,
   ImportErrorCode,
   ImportOutcome,
+  ImportPipelineStage,
   UUIDCollisionResolver
 } from '@shared/import/domain/import-contracts';
 
@@ -130,15 +131,29 @@ export class GenericImportEngineService {
     return { fileName, status: 'success', entityId, entityLabel };
   }
 
+  /** Maps well-known error codes to the pipeline stage where they originate. */
+  private static readonly ERROR_CODE_STAGE_MAP: Record<string, ImportPipelineStage> = {
+    FILE_TYPE_NOT_ALLOWED: 'FILE_VALIDATION',
+    FILE_READ_ERROR: 'DECODING',
+    FILE_DECODE_ERROR: 'DECODING',
+    FILE_PARSE_ERROR: 'PARSING',
+    VALIDATION_ERROR: 'VALIDATION',
+    MAPPING_ERROR: 'MAPPING',
+    UUID_COLLISION_REJECTED: 'COLLISION_CHECK',
+    PERSISTENCE_ERROR: 'PERSISTENCE'
+  };
+
   private toImportError(error: unknown): ImportError {
     if (this.isImportError(error)) {
       return error;
     }
     if (error instanceof Error) {
+      const stage: ImportPipelineStage =
+        GenericImportEngineService.ERROR_CODE_STAGE_MAP[error.message] ?? 'PERSISTENCE';
       return {
         code: error.message as ImportErrorCode,
         message: error.message,
-        stage: 'PERSISTENCE',
+        stage,
         cause: error
       };
     }

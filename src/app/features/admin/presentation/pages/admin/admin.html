@@ -21,17 +21,17 @@
       </thead>
       <tr>
         <td i18n>Build Hash</td>
-        <td>{{ updateService.currentVersion()?.git_hash }}</td>
+        <td>{{ updateService.currentVersion().git_hash }}</td>
         <td>{{ updateService.latestVersion()?.git_hash }}</td>
       </tr>
       <tr>
         <td i18n>Build datetime</td>
-        <td>{{ updateService.currentVersion()?.build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ updateService.currentVersion().build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
         <td>{{ updateService.latestVersion()?.build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
       </tr>
       <tr>
         <td i18n>Build version</td>
-        <td>{{ updateService.currentVersion()?.version }}</td>
+        <td>{{ updateService.currentVersion().version }}</td>
         <td>{{ updateService.latestVersion()?.version }}</td>
       </tr>
     </table>
