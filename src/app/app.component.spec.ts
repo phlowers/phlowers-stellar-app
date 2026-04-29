@@ -15,7 +15,9 @@ import { BehaviorSubject } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { UpdateService } from '@services/worker_update/worker_update.service';
+import { UpdateService, type PendingPwaAction } from '@services/worker_update/worker_update.service';
+import { AuthService } from '@services/auth/auth.service';
+import { User } from '@shared/domain';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -94,11 +96,13 @@ describe('AppComponent', () => {
     mockUpdateService = {
       checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
       getLatestAssetList: vi.fn().mockResolvedValue(null),
+      pendingAction: signal<PendingPwaAction>('none'),
       needUpdate: signal(false),
       isFirstLaunch: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
-      update: vi.fn()
+      update: vi.fn(),
+      install: vi.fn().mockResolvedValue(undefined)
     } as unknown as UpdateService;
 
     mockMaintenanceService = {
@@ -141,6 +145,7 @@ describe('AppComponent', () => {
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
     TestBed.overrideProvider(NotificationService, { useValue: mockNotificationService });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
+    TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
     TestBed.overrideProvider(MaintenanceService, { useValue: mockMaintenanceService });
     TestBed.overrideProvider(LinesService, { useValue: mockLinesService });
     TestBed.overrideProvider(CablesService, { useValue: mockCablesService });
@@ -266,13 +271,16 @@ describe('AppComponent - HTML rendering', () => {
       useValue: {
         checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
         getLatestAssetList: vi.fn().mockResolvedValue(null),
+        pendingAction: signal<PendingPwaAction>('none'),
         needUpdate: signal(false),
         isFirstLaunch: signal(false),
         updateLoading: vi.fn().mockReturnValue(false),
         latestVersion: vi.fn().mockReturnValue(null),
-        update: vi.fn()
+        update: vi.fn(),
+        install: vi.fn().mockResolvedValue(undefined)
       }
     });
+    TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
     TestBed.overrideProvider(MaintenanceService, {
       useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
     });
@@ -317,5 +325,146 @@ describe('AppComponent - HTML rendering', () => {
       const el = getByTestId('user-save-btn');
       expect(el).toBeNull();
     });
+  });
+});
+
+describe('AppComponent - auth-gated PWA flow', () => {
+  let fixture: ComponentFixture<AppComponent>;
+  let component: AppComponent;
+  let pendingAction: ReturnType<typeof signal<PendingPwaAction>>;
+  let currentUser: ReturnType<typeof signal<User | null>>;
+  let installSpy: ReturnType<typeof vi.fn>;
+
+  const setup = async () => {
+    pendingAction = signal<PendingPwaAction>('none');
+    currentUser = signal<User | null>(null);
+    installSpy = vi.fn().mockResolvedValue(undefined);
+
+    // @ts-expect-error worker
+    globalThis.Worker = Worker;
+
+    await TestBed.configureTestingModule({
+      imports: [NoopAnimationsModule, AppComponent],
+      providers: [provideRouter([]), provideHttpClient()]
+    }).compileComponents();
+
+    TestBed.overrideProvider(WorkerPythonService, { useValue: { setup: vi.fn() } });
+    TestBed.overrideProvider(StorageService, {
+      useValue: {
+        setPersistentStorage: vi.fn().mockResolvedValue(undefined),
+        createDatabase: vi.fn().mockResolvedValue(undefined),
+        ready$: new BehaviorSubject<boolean>(true),
+        db: {
+          users: {
+            toArray: vi.fn().mockResolvedValue([]),
+            get: vi.fn().mockResolvedValue(undefined),
+            put: vi.fn(),
+            clear: vi.fn()
+          },
+          metadata: { get: vi.fn().mockResolvedValue(null), put: vi.fn().mockResolvedValue(undefined) }
+        }
+      }
+    });
+    TestBed.overrideProvider(NotificationService, {
+      useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() }
+    });
+    TestBed.overrideProvider(UpdateService, {
+      useValue: {
+        checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
+        getLatestAssetList: vi.fn().mockResolvedValue(null),
+        pendingAction,
+        needUpdate: signal(false),
+        isFirstLaunch: signal(false),
+        updateLoading: () => false,
+        latestVersion: () => null,
+        update: vi.fn(),
+        install: installSpy
+      }
+    });
+    TestBed.overrideProvider(AuthService, { useValue: { currentUser } });
+    TestBed.overrideProvider(MaintenanceService, {
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(LinesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(AttachmentService, {
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(ObstaclesService, {
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideComponent(AppComponent, { set: { template: '' } });
+
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
+  beforeEach(async () => {
+    await setup();
+  });
+
+  it('should keep dialog closed and not auto-install when user is not authenticated (first-install pending)', async () => {
+    pendingAction.set('first-install');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.isUpdateDialogOpen()).toBe(false);
+    expect(installSpy).not.toHaveBeenCalled();
+  });
+
+  it('should keep dialog closed and not surface update when user is not authenticated (update-available pending)', async () => {
+    pendingAction.set('update-available');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.isUpdateDialogOpen()).toBe(false);
+    expect(installSpy).not.toHaveBeenCalled();
+  });
+
+  it('should auto-trigger install and keep dialog closed when authenticated user has first-install pending', async () => {
+    pendingAction.set('first-install');
+    currentUser.set({ email: 'user@example.com' } as User);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(installSpy).toHaveBeenCalledTimes(1);
+    expect(component.isUpdateDialogOpen()).toBe(false);
+  });
+
+  it('should auto-trigger install only once across re-renders', async () => {
+    pendingAction.set('first-install');
+    currentUser.set({ email: 'user@example.com' } as User);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(installSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should open the update dialog when authenticated user has update-available pending', async () => {
+    currentUser.set({ email: 'user@example.com' } as User);
+    pendingAction.set('update-available');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(installSpy).not.toHaveBeenCalled();
+    expect(component.isUpdateDialogOpen()).toBe(true);
+  });
+
+  it('should defer auto-install until authentication completes (delayed login)', async () => {
+    pendingAction.set('first-install');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(installSpy).not.toHaveBeenCalled();
+
+    currentUser.set({ email: 'user@example.com' } as User);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(installSpy).toHaveBeenCalledTimes(1);
+    expect(component.isUpdateDialogOpen()).toBe(false);
   });
 });
