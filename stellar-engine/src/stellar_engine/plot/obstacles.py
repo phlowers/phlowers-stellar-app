@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
-import time
 from typing import Literal
 
 import numpy as np
