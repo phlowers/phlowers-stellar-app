@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { MessageService } from 'primeng/api';
 import type { AssetManifest } from './service-worker.interfaces';
@@ -6,6 +6,15 @@ import type { AssetManifest } from './service-worker.interfaces';
 export type { AssetManifest } from './service-worker.interfaces';
 import type { AppVersion } from './service-worker.interfaces';
 import { environment } from '@src/environments/environment';
+
+/**
+ * Pending PWA action determined by `checkForUpdateOnce` or `checkAppVersion`.
+ *
+ * - `none`: nothing to do.
+ * - `first-install`: the Service Worker cache is empty and the app must be installed.
+ * - `update-available`: a newer application version is available on the server.
+ */
+export type PendingPwaAction = 'none' | 'first-install' | 'update-available';
 
 /**
  * Service for managing application updates via Service Worker.
@@ -45,12 +54,19 @@ export class UpdateService {
   updateLoading = signal(false);
 
   /**
-   * Signal that emits true when an update or install action is available.
+   * Pending PWA action computed at startup or by an explicit version check.
+   *
+   * The value remains stable until either the Service Worker reports completion
+   * or a new check overwrites it. The presentation layer is responsible for
+   * gating any user-facing behavior on the authenticated user state.
    */
-  readonly needUpdate = signal(false);
+  readonly pendingAction = signal<PendingPwaAction>('none');
+
+  /** True when an install or update action is pending. */
+  readonly needUpdate = computed(() => this.pendingAction() !== 'none');
 
   /** True when the pending action is a first-time install (no SW cache yet). */
-  readonly isFirstLaunch = signal(false);
+  readonly isFirstLaunch = computed(() => this.pendingAction() === 'first-install');
 
   private readonly messageService = inject(MessageService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
@@ -73,8 +89,7 @@ export class UpdateService {
             break;
           case 'install_complete':
             this.updateLoading.set(false);
-            this.needUpdate.set(false);
-            this.isFirstLaunch.set(false);
+            this.pendingAction.set('none');
             await this.loadCurrentVersion();
             this.messageService.add({
               severity: 'success',
@@ -173,7 +188,7 @@ export class UpdateService {
     try {
       latestVersion = await this.getLatestVersion();
     } catch {
-      this.needUpdate.set(false);
+      this.pendingAction.set('none');
       return;
     } finally {
       this.clearManifestCache();
@@ -182,13 +197,13 @@ export class UpdateService {
       this.latestVersion.set(latestVersion);
     }
     if (!latestVersion) {
-      this.needUpdate.set(false);
+      this.pendingAction.set('none');
       return;
     }
     if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
-      this.needUpdate.set(true);
+      this.pendingAction.set('update-available');
     } else {
-      this.needUpdate.set(false);
+      this.pendingAction.set('none');
     }
     if (!silent) {
       this.messageService.add({
@@ -226,15 +241,14 @@ export class UpdateService {
       }
 
       if (!cachePopulated) {
-        // First launch: nothing cached yet — signal the UI so the user can confirm.
-        this.isFirstLaunch.set(true);
-        this.needUpdate.set(true);
+        // First launch: nothing cached yet — record a pending first install.
+        this.pendingAction.set('first-install');
         return;
       }
 
       if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
         // An update is available — signal the UI.
-        this.needUpdate.set(true);
+        this.pendingAction.set('update-available');
       }
     } catch {
       // Non-blocking: startup must not fail because of an update-check failure.

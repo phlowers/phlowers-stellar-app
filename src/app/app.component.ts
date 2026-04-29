@@ -13,6 +13,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { AssetManifest, UpdateService } from '@services/worker_update/worker_update.service';
+import { AuthService } from '@services/auth/auth.service';
 import { StorageService } from '@services/storage/storage.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -58,6 +59,7 @@ export class AppComponent implements OnInit {
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
   readonly updateService = inject(UpdateService);
+  private readonly authService = inject(AuthService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
@@ -66,6 +68,9 @@ export class AppComponent implements OnInit {
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
+
+  /** Guard against repeated automatic install triggers from the reactive effect. */
+  private readonly autoInstallTriggered = signal(false);
 
   constructor() {
     this.csvImporters = {
@@ -78,7 +83,35 @@ export class AppComponent implements OnInit {
     };
 
     effect(() => {
-      this.isUpdateDialogOpen.set(this.updateService.needUpdate());
+      const action = this.updateService.pendingAction();
+      const user = this.authService.currentUser();
+
+      // Never surface install/update prompts for unauthenticated users.
+      if (!user) {
+        this.isUpdateDialogOpen.set(false);
+        return;
+      }
+
+      if (action === 'first-install') {
+        // First install runs automatically once the user is authenticated.
+        this.isUpdateDialogOpen.set(false);
+        if (!this.autoInstallTriggered()) {
+          this.autoInstallTriggered.set(true);
+          this.updateService.install().catch((err) => {
+            this.autoInstallTriggered.set(false);
+            this.logger.error('Automatic first-install failed', err);
+          });
+        }
+        return;
+      }
+
+      if (action === 'update-available') {
+        // Updates always require explicit user confirmation via the dialog.
+        this.isUpdateDialogOpen.set(true);
+        return;
+      }
+
+      this.isUpdateDialogOpen.set(false);
     });
   }
 

@@ -95,7 +95,7 @@ export class HomeComponent {
     return !isOnline;
   }
 
-  private readonly needUpdate = this.updateService.needUpdate;
+  private readonly pendingAction = this.updateService.pendingAction;
   private readonly connectivity = toSignal(
     combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]),
     { initialValue: [false, ServerStatus.LOADING] as [boolean, ServerStatus] }
@@ -104,9 +104,9 @@ export class HomeComponent {
 
   constructor() {
     effect(() => {
-      const needUpdate = this.needUpdate();
+      const updateAvailable = this.pendingAction() === 'update-available';
       // prettier-ignore
-      if (needUpdate) { //NOSONAR
+      if (updateAvailable) { //NOSONAR
         this.updateStatus.set('warning');
         this.updateText('updateTitle', $localize`Update available`); // i18n Mise à jour disponible !
         this.updateText(
