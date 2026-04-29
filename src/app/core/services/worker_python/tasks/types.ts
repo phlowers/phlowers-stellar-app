@@ -56,7 +56,13 @@ export enum Task {
   // get aspect ratio for plotting scale
   getAspectRatio = 'getAspectRatio',
   // get wind incidence angle for cable temperature calculation
-  getWindIncidence = 'getWindIncidence'
+  getWindIncidence = 'getWindIncidence',
+  // compute gps and lambert 93 coordinates using section data and starting gps point
+  computeLocalization = 'computeLocalization',
+  // compute gps coordinates using imported lambert data
+  importLambert = 'importLambert',
+  // lambert to gps and compare to gps coordinates using section data
+  importLambertAndValidate = 'importLambertAndValidate'
 }
 
 /**
@@ -333,6 +339,26 @@ export interface TaskInputs {
     endSupport: number;
     view: View;
   };
+  [Task.computeLocalization]: {
+    startLatitude: number;
+    startLongitude: number;
+    startAzimuth: number;
+    spanLength: number[];
+    lineAngle: number[];
+  };
+  [Task.importLambert]: {
+    lambert_x: number[];
+    lambert_y: number[];
+  };
+  [Task.importLambertAndValidate]: {
+    lambert_x: number[];
+    lambert_y: number[];
+    startLatitude: number;
+    startLongitude: number;
+    startAzimuth: number;
+    spanLength: number[];
+    lineAngle: number[];
+  };
 }
 
 /**
@@ -366,6 +392,14 @@ export interface DistancePoint {
 export interface Distance {
   obstacleUuid?: string;
   points: DistancePoint[];
+}
+
+export interface Localization {
+  latitude: number[];
+  longitude: number[];
+  lambert_x: number[];
+  lambert_y: number[];
+  azimuth: number[];
 }
 
 /**
@@ -446,5 +480,11 @@ export interface TaskOutputs {
   };
   [Task.getWindIncidence]: {
     windIncidence: number;
+  };
+  [Task.computeLocalization]: Localization;
+  [Task.importLambert]: Localization;
+  [Task.importLambertAndValidate]: {
+    localization: Localization;
+    meanGpsDiff: number;
   };
 }

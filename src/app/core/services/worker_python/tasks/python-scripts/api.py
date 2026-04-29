@@ -10,6 +10,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 LOG_INPUTS = True
 
+from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
     param_calibration,
@@ -154,3 +155,15 @@ def calculate_obstacles_distances(js_inputs):
 
     logger.debug(f"Distances result: {result}")
     return result
+
+
+def compute_localization(js_inputs):
+    return geography.compute_localization(js_to_python(js_inputs))
+
+
+def import_lambert(js_inputs):
+    return geography.import_lambert(js_to_python(js_inputs))
+
+
+def import_lambert_and_validate(js_inputs):
+    return geography.import_lambert_and_validate(js_to_python(js_inputs))
