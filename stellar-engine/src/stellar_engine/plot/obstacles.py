@@ -73,17 +73,17 @@ def get_current_obstacles(
 def delete_obstacle(
     uuid: str, plot_engine: PlotEngine, project: bool, support_index: int
 ) -> Literal["success"]:
-    logger.info(f"Deleting obstacle with uuid: {uuid}")
+    logger.debug(f"Deleting obstacle with uuid: {uuid}")
     try:
         del plot_engine.position_engine.obstacles_array._data[uuid]
-        logger.info("Successfully deleted obstacle.")
+        logger.debug("Successfully deleted obstacle.")
     except KeyError:
         logger.warning(f"Obstacle with uuid: {uuid} not found.")
     finally:
         result = get_current_obstacles(
             plot_engine, project=project, support_index=support_index
         )
-        logger.info(f"Current obstacles after deletion attempt: {result}")
+        logger.debug(f"Current obstacles after deletion attempt: {result}")
         return {"obstacles": result}
 
 
@@ -94,13 +94,8 @@ def add_obstacles(
     project: bool,
     support_index: int,
 ):
-    logger.info("Adding obstacles...")
-    ti = time.time()
-    print(ti)
-    print(f"Received obstacles: {inputs}")
-    print(
-        f"balance_engine.section_array.data: {balance_engine.section_array.data.to_dict()}"
-    )
+    logger.debug(f"Received obstacles: {inputs}")
+
     rows = []
     for obstacle in inputs:
         for i, pos in enumerate(obstacle['positions']):
@@ -120,30 +115,29 @@ def add_obstacles(
             )
 
     if not rows:
-        logger.info(
-            "No obstacle positions to register — clearing all obstacles."
-        )
-        plot_engine.position_engine.obstacles_array._data.clear()
+        # logger.debug(
+        #     "No obstacle positions to register — clearing all obstacles."
+        # )
+        # Bug: clear() is not a method of pd.DataFrame
+        # Don't know what was the expected behaviour here
+        # plot_engine.position_engine.obstacles_array._data.clear()
         return {"obstacles": []}
 
     df = pd.DataFrame(rows)
-    print(df.to_json())
     df = change_obstacles_coordinates(df, balance_engine)
     plot_engine.add_obstacles(ObstacleArray(df))
 
     result = get_current_obstacles(
         plot_engine, project=project, support_index=support_index
     )
-    print(f"Obstacles after addition: {result}")
-    print(f"Time taken to add obstacles: {time.time() - ti} seconds")
+    logger.debug(f"Obstacles after addition: {result}")
     return {"obstacles": result}
 
 
 def compute_distances(
     inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
 ):
-    logger.info("Computing distances for obstacles...")
-    print(f"Received inputs for distance computation: {inputs}")
+    logger.debug(f"Received inputs for distance computation: {inputs}")
     points_for_plot = plot_engine.position_engine.get_points_for_plot()
     result = []
 
