@@ -3899,18 +3899,6 @@
         <target>Pas de mesure trouvée</target>
       </segment>
     </unit>
-    <unit id="1698187824840629244">
-      <segment state="initial">
-        <source>Install the application for offline use</source>
-        <target>Install the application for offline use</target>
-      </segment>
-    </unit>
-    <unit id="1434807535279157850">
-      <segment state="initial">
-        <source>Install now</source>
-        <target>Install now</target>
-      </segment>
-    </unit>
     <unit id="2454050363478003966">
       <segment state="initial">
         <source>Login</source>
@@ -3987,6 +3975,18 @@
       <segment state="initial">
         <source>Login failed. Please try again.</source>
         <target>Login failed. Please try again.</target>
+      </segment>
+    </unit>
+    <unit id="5069054131546027931">
+      <segment state="initial">
+        <source>Initial application installation could not start. Please reload the page to try again.</source>
+        <target>L&apos;installation initiale de l&apos;application n&apos;a pas pu démarrer. Veuillez recharger la page pour réessayer.</target>
+      </segment>
+    </unit>
+    <unit id="6460521785131469521">
+      <segment state="initial">
+        <source>Authentication refresh failed. You may be working with outdated user data.</source>
+        <target>Authentication refresh failed. You may be working with outdated user data.</target>
       </segment>
     </unit>
   </file>

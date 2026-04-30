@@ -3228,16 +3228,6 @@
         <source>No measures found</source>
       </segment>
     </unit>
-    <unit id="1434807535279157850">
-      <segment>
-        <source>Install now</source>
-      </segment>
-    </unit>
-    <unit id="1698187824840629244">
-      <segment>
-        <source>Install the application for offline use</source>
-      </segment>
-    </unit>
     <unit id="2454050363478003966">
       <segment>
         <source>Login</source>
@@ -3301,6 +3291,16 @@
     <unit id="login.title">
       <segment>
         <source>Sign in</source>
+      </segment>
+    </unit>
+    <unit id="5069054131546027931">
+      <segment>
+        <source>Initial application installation could not start. Please reload the page to try again.</source>
+      </segment>
+    </unit>
+    <unit id="6460521785131469521">
+      <segment>
+        <source>Authentication refresh failed. You may be working with outdated user data.</source>
       </segment>
     </unit>
   </file>

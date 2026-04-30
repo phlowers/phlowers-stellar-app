@@ -50,6 +50,7 @@ describe('AdminComponent', () => {
     updateServiceMock = {
       currentVersion: mockCurrentVersion,
       latestVersion: mockLatestVersion,
+      pendingAction: () => 'none',
       needUpdate: false,
       update: vi.fn(),
       checkAppVersion: vi.fn().mockResolvedValue(undefined),

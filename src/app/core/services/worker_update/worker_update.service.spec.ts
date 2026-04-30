@@ -130,7 +130,7 @@ describe('UpdateService', () => {
         json: vi.fn().mockResolvedValueOnce(mockAssetList)
       });
 
-      service.needUpdate.set(false);
+      service.pendingAction.set('none');
 
       await service.checkAppVersion();
 
@@ -351,6 +351,7 @@ describe('UpdateService', () => {
 
       await service.checkForUpdateOnce();
 
+      expect(service.pendingAction()).toBe('first-install');
       expect(service.needUpdate()).toBe(true);
       expect(service.isFirstLaunch()).toBe(true);
       expect(mockPostMessage).not.toHaveBeenCalled();
@@ -366,7 +367,9 @@ describe('UpdateService', () => {
 
       await service.checkForUpdateOnce();
 
+      expect(service.pendingAction()).toBe('update-available');
       expect(service.needUpdate()).toBe(true);
+      expect(service.isFirstLaunch()).toBe(false);
     });
 
     it('should not set needUpdate when versions are equal', async () => {
@@ -379,7 +382,9 @@ describe('UpdateService', () => {
 
       await service.checkForUpdateOnce();
 
+      expect(service.pendingAction()).toBe('none');
       expect(service.needUpdate()).toBe(false);
+      expect(service.isFirstLaunch()).toBe(false);
     });
 
     it('should not throw when server is unreachable', async () => {
@@ -387,6 +392,23 @@ describe('UpdateService', () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await expect(service.checkForUpdateOnce()).resolves.toBeUndefined();
+    });
+
+    it('should reset a stale update-available pendingAction when versions become equal', async () => {
+      // Simulate a previous run that left pendingAction in 'update-available'.
+      service.pendingAction.set('update-available');
+
+      const version = { git_hash: 'env-hash-123', build_datetime_utc: '2024', version: '1.0.0' };
+      mockCache.match.mockResolvedValue(new Response('{}'));
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ app_version: version, files: [] })
+      });
+
+      await service.checkForUpdateOnce();
+
+      expect(service.pendingAction()).toBe('none');
+      expect(service.needUpdate()).toBe(false);
     });
   });
 
@@ -445,6 +467,7 @@ describe('UpdateService', () => {
 
     it('should handle install_complete message', async () => {
       service.updateLoading.set(true);
+      service.pendingAction.set('first-install');
 
       await messageHandler({
         data: {
@@ -453,6 +476,9 @@ describe('UpdateService', () => {
       });
 
       expect(service.updateLoading()).toBe(false);
+      expect(service.pendingAction()).toBe('none');
+      expect(service.isFirstLaunch()).toBe(false);
+      expect(service.needUpdate()).toBe(false);
       expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
     });
 

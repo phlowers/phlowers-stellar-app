@@ -49,8 +49,9 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     updateServiceMock = {
+      pendingAction: signal<'none' | 'first-install' | 'update-available'>('none'),
       needUpdate: signal(false)
-    } as vi.Mocked<UpdateService>;
+    } as unknown as vi.Mocked<UpdateService>;
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true),
@@ -97,7 +98,7 @@ describe('HomeComponent', () => {
 
   describe('Constructor Behavior', () => {
     it('should set update status to warning when update is needed', () => {
-      updateServiceMock.needUpdate.set(true);
+      (updateServiceMock.pendingAction as ReturnType<typeof signal>).set('update-available');
 
       const newFixture = TestBed.createComponent(HomeComponent);
       const newComponent = newFixture.componentInstance;
@@ -107,7 +108,7 @@ describe('HomeComponent', () => {
     });
 
     it('should not change update status when no update is needed', () => {
-      updateServiceMock.needUpdate.set(false);
+      (updateServiceMock.pendingAction as ReturnType<typeof signal>).set('none');
 
       expect(component.updateStatus()).toBe('unknown');
     });

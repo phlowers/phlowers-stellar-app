@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -13,6 +13,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { AssetManifest, UpdateService } from '@services/worker_update/worker_update.service';
+import { AuthService } from '@services/auth/auth.service';
 import { StorageService } from '@services/storage/storage.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -50,7 +51,7 @@ const modules = [
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
   readonly isUpdateDialogOpen = signal(false);
 
@@ -58,6 +59,7 @@ export class AppComponent implements OnInit {
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
   readonly updateService = inject(UpdateService);
+  private readonly authService = inject(AuthService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
@@ -66,6 +68,12 @@ export class AppComponent implements OnInit {
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
+
+  /** Guard against repeated automatic install triggers from the reactive effect. */
+  private readonly autoInstallTriggered = signal(false);
+
+  /** Set to true on destroy to abort any in-flight first-install retry. */
+  private destroyed = false;
 
   constructor() {
     this.csvImporters = {
@@ -78,7 +86,32 @@ export class AppComponent implements OnInit {
     };
 
     effect(() => {
-      this.isUpdateDialogOpen.set(this.updateService.needUpdate());
+      const action = this.updateService.pendingAction();
+      const user = this.authService.currentUser();
+
+      // Never surface install/update prompts for unauthenticated users.
+      if (!user) {
+        this.isUpdateDialogOpen.set(false);
+        return;
+      }
+
+      if (action === 'first-install') {
+        // First install runs automatically once the user is authenticated.
+        this.isUpdateDialogOpen.set(false);
+        if (!this.autoInstallTriggered()) {
+          this.autoInstallTriggered.set(true);
+          this.tryAutomaticFirstInstall();
+        }
+        return;
+      }
+
+      if (action === 'update-available') {
+        // Updates always require explicit user confirmation via the dialog.
+        this.isUpdateDialogOpen.set(true);
+        return;
+      }
+
+      this.isUpdateDialogOpen.set(false);
     });
   }
 
@@ -129,6 +162,62 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * Attempt to start the automatic first-install. If the Service Worker is not
+   * ready yet (no registration or no active worker), wait for `serviceWorker.ready`
+   * and retry once. The guard is reset on any failure path so the reactive effect
+   * can trigger another attempt on the next state change.
+   */
+  private tryAutomaticFirstInstall(): void {
+    const installFailedMessage = $localize`Initial application installation could not start. Please reload the page to try again.`;
+
+    this.updateService
+      .install()
+      .then(async (started) => {
+        if (started || this.destroyed) {
+          return;
+        }
+        this.logger.warn('Automatic first-install deferred: Service Worker not ready, awaiting registration');
+        if (!this.updateService.serviceWorkerSupported) {
+          this.autoInstallTriggered.set(false);
+          return;
+        }
+        try {
+          await navigator.serviceWorker.ready;
+        } catch (err) {
+          if (this.destroyed) {
+            return;
+          }
+          this.autoInstallTriggered.set(false);
+          this.logger.error('Service Worker never became ready for first-install', err);
+          this.notificationService.error(installFailedMessage);
+          return;
+        }
+        if (this.destroyed) {
+          return;
+        }
+        const retryStarted = await this.updateService.install().catch((err) => {
+          this.logger.error('Automatic first-install retry failed', err);
+          return false;
+        });
+        if (this.destroyed) {
+          return;
+        }
+        if (!retryStarted) {
+          this.autoInstallTriggered.set(false);
+          this.notificationService.error(installFailedMessage);
+        }
+      })
+      .catch((err) => {
+        if (this.destroyed) {
+          return;
+        }
+        this.autoInstallTriggered.set(false);
+        this.logger.error('Automatic first-install failed', err);
+        this.notificationService.error(installFailedMessage);
+      });
+  }
+
   async setupWorker() {
     try {
       this.workerService.setup();
@@ -147,5 +236,9 @@ export class AppComponent implements OnInit {
       .finally(() => {
         this.workerService.setup();
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
   }
 }

@@ -1,6 +1,6 @@
-# Installation
+# Authentication
 
-This section covers general application features and configuration.
+This section covers authentication features and configuration.
 
 ```{toctree}
 :titlesonly:
