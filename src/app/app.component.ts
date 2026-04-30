@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -12,7 +12,8 @@ import { NotificationService } from '@services/notification/notification.service
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { AssetManifest, UpdateService } from '@services/worker_update/worker_update.service';
+import { UpdateService } from '@services/worker_update/worker_update.service';
+import type { AssetManifest } from '@services/worker_update/service-worker.interfaces';
 import { AuthService } from '@services/auth/auth.service';
 import { StorageService } from '@services/storage/storage.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
@@ -51,7 +52,7 @@ const modules = [
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
   readonly isUpdateDialogOpen = signal(false);
 
@@ -67,6 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly csvImporters: Record<string, () => Promise<void>>;
 
   /** Guard against repeated automatic install triggers from the reactive effect. */
@@ -76,6 +78,9 @@ export class AppComponent implements OnInit, OnDestroy {
   private destroyed = false;
 
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+    });
     this.csvImporters = {
       'maintenance-teams.csv': () => this.maintenanceService.importFromFile(),
       'lines.csv': () => this.linesService.importFromFile(),
@@ -236,9 +241,5 @@ export class AppComponent implements OnInit, OnDestroy {
       .finally(() => {
         this.workerService.setup();
       });
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed = true;
   }
 }
