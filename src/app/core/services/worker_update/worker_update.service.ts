@@ -42,6 +42,13 @@ export type PendingPwaAction = 'none' | 'first-install' | 'update-available';
 export class UpdateService {
   private static readonly hasServiceWorker = 'serviceWorker' in navigator;
 
+  /**
+   * True when the current runtime exposes a Service Worker API.
+   * Centralizes the capability check so callers do not need to probe
+   * `navigator.serviceWorker` themselves.
+   */
+  readonly serviceWorkerSupported: boolean = UpdateService.hasServiceWorker;
+
   /** Signal containing the currently installed application version (from build-time environment). */
   currentVersion = signal<AppVersion>({
     version: environment.version,
@@ -249,6 +256,10 @@ export class UpdateService {
       if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
         // An update is available — signal the UI.
         this.pendingAction.set('update-available');
+      } else {
+        // Versions match — clear any stale pending action so repeated calls
+        // remain idempotent and a previous 'update-available' does not persist.
+        this.pendingAction.set('none');
       }
     } catch {
       // Non-blocking: startup must not fail because of an update-check failure.
@@ -263,22 +274,28 @@ export class UpdateService {
    * @remarks
    * Sends an update message to the Service Worker which will download
    * and cache the new version. A page reload is required after completion.
+   *
+   * @returns `true` if the message was successfully posted to an active
+   * Service Worker, `false` otherwise (e.g. SW unavailable, no registration,
+   * or no active worker yet). Rejects on unexpected errors.
    */
-  async update() {
-    await this.postMessageToSW('update');
+  async update(): Promise<boolean> {
+    return this.postMessageToSW('update');
   }
 
   /**
    * Confirm the pending action (install or update) after user validation.
    *
    * Must be called from a UI button — no automatic install/update is allowed.
+   *
+   * @returns `true` if the underlying install/update message was posted
+   * successfully, `false` otherwise.
    */
-  async confirmUpdate(): Promise<void> {
+  async confirmUpdate(): Promise<boolean> {
     if (this.isFirstLaunch()) {
-      await this.install();
-    } else {
-      await this.update();
+      return this.install();
     }
+    return this.update();
   }
 
   /**
@@ -286,9 +303,14 @@ export class UpdateService {
    *
    * @remarks
    * Used for first-time installations to cache all application assets.
+   *
+   * @returns `true` if the install message was successfully posted to an
+   * active Service Worker, `false` otherwise (e.g. SW unavailable, no
+   * registration returned yet, or no active worker). Rejects on unexpected
+   * errors so the caller can decide whether to retry.
    */
-  async install() {
-    await this.postMessageToSW('install');
+  async install(): Promise<boolean> {
+    return this.postMessageToSW('install');
   }
 
   /**
@@ -308,25 +330,35 @@ export class UpdateService {
     }
   }
 
-  private async postMessageToSW(type: 'update' | 'install'): Promise<void> {
+  /**
+   * Post a control message to the active Service Worker.
+   *
+   * @returns `true` when the message was successfully delivered to an active
+   * worker, `false` when the Service Worker stack was not in a usable state
+   * (no SW support, no registration yet, or no active worker). Rejects on
+   * unexpected errors raised by the Service Worker API.
+   */
+  private async postMessageToSW(type: 'update' | 'install'): Promise<boolean> {
     if (!UpdateService.hasServiceWorker) {
-      return;
+      return false;
     }
     this.updateLoading.set(true);
     try {
       const registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
         this.updateLoading.set(false);
-        return;
+        return false;
       }
       const ready = await navigator.serviceWorker.ready;
       if (!ready.active) {
         this.updateLoading.set(false);
-        return;
+        return false;
       }
       ready.active.postMessage({ type });
-    } catch {
+      return true;
+    } catch (error) {
       this.updateLoading.set(false);
+      throw error;
     }
   }
 

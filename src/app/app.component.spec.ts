@@ -102,7 +102,7 @@ describe('AppComponent', () => {
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
       update: vi.fn(),
-      install: vi.fn().mockResolvedValue(undefined)
+      install: vi.fn().mockResolvedValue(true)
     } as unknown as UpdateService;
 
     mockMaintenanceService = {
@@ -277,7 +277,7 @@ describe('AppComponent - HTML rendering', () => {
         updateLoading: vi.fn().mockReturnValue(false),
         latestVersion: vi.fn().mockReturnValue(null),
         update: vi.fn(),
-        install: vi.fn().mockResolvedValue(undefined)
+        install: vi.fn().mockResolvedValue(true)
       }
     });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
@@ -338,7 +338,7 @@ describe('AppComponent - auth-gated PWA flow', () => {
   const setup = async () => {
     pendingAction = signal<PendingPwaAction>('none');
     currentUser = signal<User | null>(null);
-    installSpy = vi.fn().mockResolvedValue(undefined);
+    installSpy = vi.fn().mockResolvedValue(true);
 
     // @ts-expect-error worker
     globalThis.Worker = Worker;
@@ -466,5 +466,205 @@ describe('AppComponent - auth-gated PWA flow', () => {
 
     expect(installSpy).toHaveBeenCalledTimes(1);
     expect(component.isUpdateDialogOpen()).toBe(false);
+  });
+});
+
+describe('AppComponent - automatic first-install resilience', () => {
+  let fixture: ComponentFixture<AppComponent>;
+  let component: AppComponent;
+  let pendingAction: ReturnType<typeof signal<PendingPwaAction>>;
+  let currentUser: ReturnType<typeof signal<User | null>>;
+  let installSpy: ReturnType<typeof vi.fn>;
+  let notificationError: ReturnType<typeof vi.fn>;
+  let loggerError: ReturnType<typeof vi.fn>;
+  let loggerWarn: ReturnType<typeof vi.fn>;
+  let originalServiceWorker: PropertyDescriptor | undefined;
+
+  interface ResilienceOptions {
+    serviceWorkerSupported?: boolean;
+    swReadyResult?: 'resolve' | 'reject';
+    install?: ReturnType<typeof vi.fn>;
+  }
+
+  const setup = async ({
+    serviceWorkerSupported = true,
+    swReadyResult = 'resolve',
+    install
+  }: ResilienceOptions = {}) => {
+    pendingAction = signal<PendingPwaAction>('first-install');
+    currentUser = signal<User | null>({ email: 'user@example.com' } as User);
+    installSpy = install ?? vi.fn().mockResolvedValue(true);
+    notificationError = vi.fn();
+    loggerError = vi.fn();
+    loggerWarn = vi.fn();
+
+    // @ts-expect-error worker
+    globalThis.Worker = Worker;
+
+    // Stub navigator.serviceWorker.ready to deterministically resolve/reject.
+    originalServiceWorker = Object.getOwnPropertyDescriptor(navigator, 'serviceWorker');
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        ready:
+          swReadyResult === 'resolve'
+            ? Promise.resolve({ active: { postMessage: vi.fn() } })
+            : Promise.reject(new Error('SW never ready')),
+        getRegistration: vi.fn(),
+        addEventListener: vi.fn()
+      }
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [NoopAnimationsModule, AppComponent],
+      providers: [provideRouter([]), provideHttpClient()]
+    }).compileComponents();
+
+    TestBed.overrideProvider(WorkerPythonService, { useValue: { setup: vi.fn() } });
+    TestBed.overrideProvider(StorageService, {
+      useValue: {
+        setPersistentStorage: vi.fn().mockResolvedValue(undefined),
+        createDatabase: vi.fn().mockResolvedValue(undefined),
+        ready$: new BehaviorSubject<boolean>(true),
+        db: {
+          users: { toArray: vi.fn().mockResolvedValue([]) },
+          metadata: { get: vi.fn().mockResolvedValue(null), put: vi.fn().mockResolvedValue(undefined) }
+        }
+      }
+    });
+    TestBed.overrideProvider(NotificationService, {
+      useValue: { success: vi.fn(), error: notificationError, info: vi.fn(), warning: vi.fn() }
+    });
+    TestBed.overrideProvider(UpdateService, {
+      useValue: {
+        checkForUpdateOnce: vi.fn().mockResolvedValue(undefined),
+        getLatestAssetList: vi.fn().mockResolvedValue(null),
+        pendingAction,
+        needUpdate: signal(false),
+        isFirstLaunch: signal(false),
+        updateLoading: () => false,
+        latestVersion: () => null,
+        update: vi.fn(),
+        install: installSpy,
+        serviceWorkerSupported
+      }
+    });
+    TestBed.overrideProvider(AuthService, { useValue: { currentUser } });
+    TestBed.overrideProvider(MaintenanceService, {
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(LinesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(AttachmentService, {
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    });
+    TestBed.overrideProvider(ObstaclesService, {
+      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    });
+
+    // Patch the LoggerService used by AppComponent via DI override.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { LoggerService } = await import('@core/services/logger/logger.service');
+    TestBed.overrideProvider(LoggerService, {
+      useValue: { error: loggerError, warn: loggerWarn, info: vi.fn(), debug: vi.fn() }
+    });
+
+    TestBed.overrideComponent(AppComponent, { set: { template: '' } });
+    fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
+  };
+
+  afterEach(() => {
+    if (originalServiceWorker) {
+      Object.defineProperty(navigator, 'serviceWorker', originalServiceWorker);
+    } else {
+      // @ts-expect-error cleanup
+      delete (navigator as { serviceWorker?: unknown }).serviceWorker;
+    }
+  });
+
+  it('should retry install once Service Worker becomes ready (deferred happy path)', async () => {
+    const install = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'resolve', install });
+
+    fixture.detectChanges();
+    // Allow chained microtasks (install → SW.ready → retry install) to settle.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(install).toHaveBeenCalledTimes(2);
+    expect(loggerWarn).toHaveBeenCalledWith(expect.stringContaining('deferred'));
+    expect(notificationError).not.toHaveBeenCalled();
+  });
+
+  it('should reset guard and notify user when retry install also fails to start', async () => {
+    const install = vi.fn().mockResolvedValue(false);
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'resolve', install });
+
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(install).toHaveBeenCalledTimes(2);
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(component['autoInstallTriggered']()).toBe(false);
+  });
+
+  it('should reset guard and notify user when serviceWorker.ready rejects', async () => {
+    const install = vi.fn().mockResolvedValue(false);
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'reject', install });
+
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(loggerError).toHaveBeenCalledWith(
+      expect.stringContaining('Service Worker never became ready'),
+      expect.any(Error)
+    );
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(component['autoInstallTriggered']()).toBe(false);
+  });
+
+  it('should reset guard and notify user when install rejects', async () => {
+    const install = vi.fn().mockRejectedValue(new Error('postMessage failed'));
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'resolve', install });
+
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(loggerError).toHaveBeenCalledWith(
+      expect.stringContaining('Automatic first-install failed'),
+      expect.any(Error)
+    );
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(component['autoInstallTriggered']()).toBe(false);
+  });
+
+  it('should reset guard without notifying when Service Worker API is unavailable', async () => {
+    const install = vi.fn().mockResolvedValue(false);
+    await setup({ serviceWorkerSupported: false, swReadyResult: 'resolve', install });
+
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(install).toHaveBeenCalledTimes(1);
+    expect(notificationError).not.toHaveBeenCalled();
+    expect(component['autoInstallTriggered']()).toBe(false);
+  });
+
+  it('should abort retry path on component destroy without notifying', async () => {
+    const install = vi.fn().mockResolvedValue(false);
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'resolve', install });
+
+    fixture.detectChanges();
+    fixture.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(notificationError).not.toHaveBeenCalled();
   });
 });
