@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Section, Support } from '@shared/domain';
+import { InitialCondition, Section, Support } from '@shared/domain';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -18,6 +18,24 @@ import { v4 as uuidv4 } from 'uuid';
  * @packageDocumentation
  * @category Helpers
  */
+
+/**
+ * Creates an empty initial condition with default values.
+ *
+ * @returns A new InitialCondition object with a generated UUID and sensible defaults
+ */
+export const createEmptyInitialCondition = (): InitialCondition => {
+  return {
+    uuid: uuidv4(),
+    name: $localize`IC 1`,
+    base_parameters: null,
+    base_temperature: 15,
+    cable_pretension: 0,
+    min_temperature: 0,
+    max_wind_pressure: 0,
+    max_frost_width: 0
+  };
+};
 
 /**
  * Creates an empty support with default values.

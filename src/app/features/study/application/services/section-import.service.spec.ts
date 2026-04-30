@@ -80,12 +80,12 @@ const buildAccroche = (overrides: Record<string, string | null> = {}): Record<st
   ACCROCHE_CABLE_Z_LAMBERT93: '25.0',
   HAUTEUR_SOUS_CONSOLE: '2.5',
   LONGUEUR_BRAS: '3.0',
-  CHAINE_INL_ADR: 'ChainA',
-  CHAINE_INL_LONGUEUR: '5.0',
-  CHAINE_INL_POIDS: '50.0',
+  CHAINE_DRN_ADR: 'ChainA',
+  CHAINE_DRN_LONGUEUR: '5.0',
+  CHAINE_DRN_POIDS: '50.0',
   CHAINE_EN_V: 'false',
   CONTREPOIDS: '0',
-  CHAINE_INL_SURFACE: '0.5',
+  CHAINE_DRN_SURFACE: '0.5',
   PIED_Z_LAMBERT93: '100.0',
   PIED_X_LAMBERT93: '123456.0',
   PIED_Y_LAMBERT93: '789012.0',
@@ -516,7 +516,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-POS1-3-POS2');
+      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-SET19-3-SET19');
       expect(result?.cable_name).toBe('GeoSection');
       expect(result?.type).toBe('phase');
       expect(result?.cables_amount).toBe(2);
@@ -623,6 +623,24 @@ describe('SectionImportService', () => {
       expect(result?.regional_team_id).toBeUndefined();
     });
 
+    it('should create a default initial condition with a matching selected_initial_condition_uuid', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.initial_conditions).toHaveLength(1);
+      expect(result?.selected_initial_condition_uuid).toBe(result?.initial_conditions[0].uuid);
+      expect(result?.initial_conditions[0].base_temperature).toBe(15);
+      expect(result?.initial_conditions[0].base_parameters).toBeNull();
+    });
+
+    it('should set spanLength to null on the last support', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      const lastSupport = result?.supports[result.supports.length - 1];
+      expect(lastSupport?.spanLength).toBeNull();
+    });
+
     it('should fail with field names in the error when accroche fields are null (real-world GeoLiaison file)', async () => {
       // Mimics a real CDG19 file where all accroche fields are null
       const nullAccroche = () => ({
@@ -631,12 +649,12 @@ describe('SectionImportService', () => {
         ACCROCHE_CABLE_Z_LAMBERT93: null,
         HAUTEUR_SOUS_CONSOLE: null,
         LONGUEUR_BRAS: null,
-        CHAINE_INL_ADR: null,
-        CHAINE_INL_LONGUEUR: null,
-        CHAINE_INL_POIDS: null,
+        CHAINE_DRN_ADR: null,
+        CHAINE_DRN_LONGUEUR: null,
+        CHAINE_DRN_POIDS: null,
         CHAINE_EN_V: null,
         CONTREPOIDS: null,
-        CHAINE_INL_SURFACE: null,
+        CHAINE_DRN_SURFACE: null,
         PIED_Z_LAMBERT93: null,
         PIED_X_LAMBERT93: null,
         PIED_Y_LAMBERT93: null,
@@ -695,14 +713,14 @@ describe('SectionImportService', () => {
       service.setStudyContext(buildMockStudy());
     });
 
-    it('should build the name from all components: branche-type+phase-startNum-POS-endNum-POS', async () => {
+    it('should build the name from all components: branche-type+phase-startNum-SET-endNum-SET', async () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
       // BRANCHE_IDR='FLAMAL73MENUE01', CANTON_TYPE='PHASE', PHASE='1'
-      // supports[0].number='1', attachmentPosition='1'
-      // supports[2].number='3', attachmentPosition='2'
-      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-POS1-3-POS2');
+      // supports[0].number='1', attachmentSet=19
+      // supports[2].number='3', attachmentSet=19
+      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-SET19-3-SET19');
     });
 
     it('should omit phase number when CANTON_TYPE is GARDE', async () => {
@@ -714,7 +732,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.name).toBe('FLAMAL73MENUE01-GARDE-1-POS1-3-POS2');
+      expect(result?.name).toBe('FLAMAL73MENUE01-GARDE-1-SET19-3-SET19');
     });
 
     it('should omit the branch prefix when BRANCHE_IDR is null', async () => {
@@ -727,7 +745,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.name).toBe('PHASE1-1-POS1-3-POS2');
+      expect(result?.name).toBe('PHASE1-1-SET19-3-SET19');
     });
 
     it('should truncate support numbers to 5 characters', async () => {
@@ -747,19 +765,20 @@ describe('SectionImportService', () => {
       expect(result?.name).not.toContain('ABCDE12345');
     });
 
-    it('should omit POS parts when PORTEE_UNITAIRE_DESIGNATION has no position number', async () => {
+    it('should omit SET parts when ACCROCHE_SET is null', async () => {
       const payload = buildValidGeoLiaisonPayload();
       const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
         string,
         unknown
       >[];
-      portees[0]['PORTEE_UNITAIRE_DESIGNATION'] = 'No position here';
-      portees[1]['PORTEE_UNITAIRE_DESIGNATION'] = 'No position here';
+      // Null out ACCROCHE_SET on the first departure and last arrival accroches
+      (portees[1]['accroche depart'] as Record<string, unknown>)['ACCROCHE_SET'] = null;
+      (portees[0]['accroche arrivee'] as Record<string, unknown>)['ACCROCHE_SET'] = null;
 
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.name).not.toContain('POS');
+      expect(result?.name).not.toContain('SET');
     });
   });
 

@@ -50,7 +50,7 @@ export function extractAttachmentPosition(value: string | null): string | null {
 /**
  * Builds the section name from GeoLiaison data components.
  * Rule RG.CAN.NOM:
- * {BRANCHE_IDR}-{CANTON_TYPE}{PHASE_ELECTRIQUE_NUMERO}-{startNum}-POS{startPos}-{endNum}-POS{endPos}
+ * {BRANCHE_IDR}-{CANTON_TYPE}{PHASE_ELECTRIQUE_NUMERO}-{startNum}-SET{startSet}-{endNum}-SET{endSet}
  * No separator between CANTON_TYPE and PHASE_ELECTRIQUE_NUMERO.
  * PHASE_ELECTRIQUE_NUMERO is omitted when CANTON_TYPE is GARDE.
  */
@@ -72,15 +72,15 @@ export function buildSectionName(
   const startNum = firstSupport?.number?.substring(0, 5) ?? null;
   if (startNum) parts.push(startNum);
 
-  const startPos = firstSupport?.attachmentPosition ? `POS${firstSupport.attachmentPosition}` : null;
-  if (startPos) parts.push(startPos);
+  const startSet = firstSupport?.attachmentSet != null ? `SET${firstSupport.attachmentSet}` : null;
+  if (startSet) parts.push(startSet);
 
   const lastSupport = supports.length > 0 ? supports[supports.length - 1] : undefined;
   const endNum = lastSupport?.number?.substring(0, 5) ?? null;
   if (endNum) parts.push(endNum);
 
-  const endPos = lastSupport?.attachmentPosition ? `POS${lastSupport.attachmentPosition}` : null;
-  if (endPos) parts.push(endPos);
+  const endSet = lastSupport?.attachmentSet != null ? `SET${lastSupport.attachmentSet}` : null;
+  if (endSet) parts.push(endSet);
 
   return parts.join('-');
 }
@@ -101,7 +101,7 @@ export function buildSectionName(
  * - general:               FAISCEAU_CABLES_NOMBRE
  * - portee unitaire:       PORTEE_LONGUEUR, PORTEE_AZIMUT
  * - accroche depart/arrivee: ACCROCHE_CABLE_Z_LAMBERT93, ANGLE_LIGNE,
- *                            CHAINE_INL_LONGUEUR, CHAINE_INL_POIDS,
+ *                            CHAINE_DRN_LONGUEUR, CHAINE_DRN_POIDS,
  *                            HAUTEUR_SOUS_CONSOLE, LONGUEUR_BRAS, PIED_Z_LAMBERT93
  */
 export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFieldError[] {
@@ -136,8 +136,8 @@ export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFi
   const acrocheRequired: readonly (keyof GeoLiaisonAccroche)[] = [
     'ACCROCHE_CABLE_Z_LAMBERT93',
     'ANGLE_LIGNE',
-    'CHAINE_INL_LONGUEUR',
-    'CHAINE_INL_POIDS',
+    'CHAINE_DRN_LONGUEUR',
+    'CHAINE_DRN_POIDS',
     'HAUTEUR_SOUS_CONSOLE',
     'LONGUEUR_BRAS',
     'PIED_Z_LAMBERT93',

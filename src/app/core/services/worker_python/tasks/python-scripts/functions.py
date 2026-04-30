@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from dataclasses import fields as dataclass_fields
 from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
@@ -339,6 +340,12 @@ def init_section(js_inputs: dict):
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
+
+    if not input_initial_conditions:
+        return {"error": "No initial conditions provided"}
+    if not input_section.get("selected_initial_condition_uuid"):
+        return {"error": "No initial condition selected"}
+
     input_initial_condition = next(
         condition
         for condition in input_initial_conditions
@@ -350,9 +357,8 @@ def init_section(js_inputs: dict):
         None
         if not input_charges
         else next(
-            charge
-            for charge in input_charges
-            if charge["uuid"] == input_section["selected_charge_uuid"]
+            (charge for charge in input_charges if charge["uuid"] == input_section["selected_charge_uuid"]),
+            None,
         )
     )
     initial_condition = InitialCondition(**input_initial_condition)
@@ -361,10 +367,15 @@ def init_section(js_inputs: dict):
     if not input_section["supports"]:
         return {"error": "No supports data provided"}
 
-    # Extract supports data from JavaScript inputs
+    # Extract supports data from JavaScript inputs.
+    # Filter out keys unknown to the Support dataclass (e.g. fields added in the
+    # TypeScript model that have no Python counterpart, such as spanAzimut or
+    # xFootLambert93).
+    support_fields = {f.name for f in dataclass_fields(Support)}
     supports_data = []
     for support_js in input_section["supports"]:
-        supports_data.append(Support(**support_js))
+        filtered = {k: v for k, v in support_js.items() if k in support_fields}
+        supports_data.append(Support(**filtered))
     df = generate_section_array(supports_data)
 
     section = SectionArray(

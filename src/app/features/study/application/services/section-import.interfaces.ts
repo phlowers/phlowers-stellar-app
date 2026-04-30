@@ -15,12 +15,12 @@ export interface GeoLiaisonAccroche {
   ACCROCHE_CABLE_Z_LAMBERT93: string | null;
   HAUTEUR_SOUS_CONSOLE: string | null;
   LONGUEUR_BRAS: string | null;
-  CHAINE_INL_ADR: string | null;
-  CHAINE_INL_LONGUEUR: string | null;
-  CHAINE_INL_POIDS: string | null;
+  CHAINE_DRN_ADR: string | null;
+  CHAINE_DRN_LONGUEUR: string | null;
+  CHAINE_DRN_POIDS: string | null;
   CHAINE_EN_V: string | null;
   CONTREPOIDS: string | null;
-  CHAINE_INL_SURFACE: string | null;
+  CHAINE_DRN_SURFACE: string | null;
   PIED_Z_LAMBERT93: string | null;
   PIED_X_LAMBERT93: string | null;
   PIED_Y_LAMBERT93: string | null;

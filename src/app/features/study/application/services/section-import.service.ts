@@ -7,7 +7,11 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Section, Study, Support } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
-import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import {
+  createEmptyInitialCondition,
+  createEmptySection,
+  createEmptySupport
+} from '@shared/domain/helpers/sections.helpers';
 import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/import/domain/import-contracts.interfaces';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -269,6 +273,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       : undefined;
 
     const supports = this.mapGeoLiaisonSupports(sortedPortees);
+    const defaultIc = createEmptyInitialCondition();
 
     return {
       ...createEmptySection(),
@@ -292,6 +297,8 @@ export class SectionImportService implements ImportAdapter<Section> {
       maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
       regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
       regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
+      initial_conditions: [defaultIc],
+      selected_initial_condition_uuid: defaultIc.uuid,
       supports
     };
   }
@@ -306,8 +313,11 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Last support comes from 'accroche arrivee' of the last portee
+    // spanLength must be null on the last support (no span after it)
     const lastPortee = sortedPortees[sortedPortees.length - 1];
-    supports.push(this.mapAccrocheToSupport(lastPortee['accroche arrivee'], lastPortee));
+    const lastSupport = this.mapAccrocheToSupport(lastPortee['accroche arrivee'], lastPortee);
+    lastSupport.spanLength = null;
+    supports.push(lastSupport);
 
     return supports;
   }
@@ -322,12 +332,12 @@ export class SectionImportService implements ImportAdapter<Section> {
       attachmentHeight: parseFloatOrNull(accroche.ACCROCHE_CABLE_Z_LAMBERT93),
       heightBelowConsole: parseFloatOrNull(accroche.HAUTEUR_SOUS_CONSOLE),
       armLength: parseFloatOrNull(accroche.LONGUEUR_BRAS),
-      chainName: accroche.CHAINE_INL_ADR ?? null,
-      chainLength: parseFloatOrNull(accroche.CHAINE_INL_LONGUEUR),
-      chainWeight: parseFloatOrNull(accroche.CHAINE_INL_POIDS),
+      chainName: accroche.CHAINE_DRN_ADR ?? null,
+      chainLength: parseFloatOrNull(accroche.CHAINE_DRN_LONGUEUR),
+      chainWeight: parseFloatOrNull(accroche.CHAINE_DRN_POIDS),
       chainV: parseBooleanOrNull(accroche.CHAINE_EN_V),
       counterWeight: parseFloatOrNull(accroche.CONTREPOIDS),
-      chainSurface: parseFloatOrNull(accroche.CHAINE_INL_SURFACE),
+      chainSurface: parseFloatOrNull(accroche.CHAINE_DRN_SURFACE),
       supportFootAltitude: parseFloatOrNull(accroche.PIED_Z_LAMBERT93),
       xFootLambert93: parseFloatOrNull(accroche.PIED_X_LAMBERT93),
       yFootLambert93: parseFloatOrNull(accroche.PIED_Y_LAMBERT93),
