@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -51,7 +51,7 @@ const modules = [
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'phlowers-stellar-app';
   readonly isUpdateDialogOpen = signal(false);
 
@@ -71,6 +71,9 @@ export class AppComponent implements OnInit {
 
   /** Guard against repeated automatic install triggers from the reactive effect. */
   private readonly autoInstallTriggered = signal(false);
+
+  /** Set to true on destroy to abort any in-flight first-install retry. */
+  private destroyed = false;
 
   constructor() {
     this.csvImporters = {
@@ -97,10 +100,7 @@ export class AppComponent implements OnInit {
         this.isUpdateDialogOpen.set(false);
         if (!this.autoInstallTriggered()) {
           this.autoInstallTriggered.set(true);
-          this.updateService.install().catch((err) => {
-            this.autoInstallTriggered.set(false);
-            this.logger.error('Automatic first-install failed', err);
-          });
+          this.tryAutomaticFirstInstall();
         }
         return;
       }
@@ -162,6 +162,62 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * Attempt to start the automatic first-install. If the Service Worker is not
+   * ready yet (no registration or no active worker), wait for `serviceWorker.ready`
+   * and retry once. The guard is reset on any failure path so the reactive effect
+   * can trigger another attempt on the next state change.
+   */
+  private tryAutomaticFirstInstall(): void {
+    const installFailedMessage = $localize`Initial application installation could not start. Please reload the page to try again.`;
+
+    this.updateService
+      .install()
+      .then(async (started) => {
+        if (started || this.destroyed) {
+          return;
+        }
+        this.logger.warn('Automatic first-install deferred: Service Worker not ready, awaiting registration');
+        if (!this.updateService.serviceWorkerSupported) {
+          this.autoInstallTriggered.set(false);
+          return;
+        }
+        try {
+          await navigator.serviceWorker.ready;
+        } catch (err) {
+          if (this.destroyed) {
+            return;
+          }
+          this.autoInstallTriggered.set(false);
+          this.logger.error('Service Worker never became ready for first-install', err);
+          this.notificationService.error(installFailedMessage);
+          return;
+        }
+        if (this.destroyed) {
+          return;
+        }
+        const retryStarted = await this.updateService.install().catch((err) => {
+          this.logger.error('Automatic first-install retry failed', err);
+          return false;
+        });
+        if (this.destroyed) {
+          return;
+        }
+        if (!retryStarted) {
+          this.autoInstallTriggered.set(false);
+          this.notificationService.error(installFailedMessage);
+        }
+      })
+      .catch((err) => {
+        if (this.destroyed) {
+          return;
+        }
+        this.autoInstallTriggered.set(false);
+        this.logger.error('Automatic first-install failed', err);
+        this.notificationService.error(installFailedMessage);
+      });
+  }
+
   async setupWorker() {
     try {
       this.workerService.setup();
@@ -180,5 +236,9 @@ export class AppComponent implements OnInit {
       .finally(() => {
         this.workerService.setup();
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
   }
 }

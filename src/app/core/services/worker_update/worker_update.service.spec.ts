@@ -393,6 +393,23 @@ describe('UpdateService', () => {
 
       await expect(service.checkForUpdateOnce()).resolves.toBeUndefined();
     });
+
+    it('should reset a stale update-available pendingAction when versions become equal', async () => {
+      // Simulate a previous run that left pendingAction in 'update-available'.
+      service.pendingAction.set('update-available');
+
+      const version = { git_hash: 'env-hash-123', build_datetime_utc: '2024', version: '1.0.0' };
+      mockCache.match.mockResolvedValue(new Response('{}'));
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ app_version: version, files: [] })
+      });
+
+      await service.checkForUpdateOnce();
+
+      expect(service.pendingAction()).toBe('none');
+      expect(service.needUpdate()).toBe(false);
+    });
   });
 
   describe('update', () => {
