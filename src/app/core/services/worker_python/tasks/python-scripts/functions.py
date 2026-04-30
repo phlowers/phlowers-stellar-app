@@ -466,8 +466,8 @@ def init_section(js_inputs: dict):
     )
 
     if initial_condition:
-        base_section.sagging_parameter = initial_condition.base_parameters
-    base_section.sagging_temperature = (
+        base_section.set_sagging_parameter(initial_condition.base_parameters)
+    base_section.set_sagging_temperature(
         initial_condition.base_temperature if initial_condition else 15
     )
     base_section.angles_sense = "clockwise"
