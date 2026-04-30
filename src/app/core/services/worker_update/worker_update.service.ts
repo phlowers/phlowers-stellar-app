@@ -1,10 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { MessageService } from 'primeng/api';
-import type { AssetManifest } from './service-worker.interfaces';
-
-export type { AssetManifest } from './service-worker.interfaces';
-import type { AppVersion } from './service-worker.interfaces';
+import type { AssetManifest, AppVersion } from './service-worker.interfaces';
 import { environment } from '@src/environments/environment';
 
 /**
@@ -27,8 +24,8 @@ export type PendingPwaAction = 'none' | 'first-install' | 'update-available';
  *
  * @example
  * ```typescript
- * // Check if update is needed
- * if (this.updateService.needUpdate()) {
+ * // Check if an action is pending
+ * if (this.updateService.pendingAction() !== 'none') {
  *   this.showUpdatePrompt();
  * }
  *
@@ -69,11 +66,17 @@ export class UpdateService {
    */
   readonly pendingAction = signal<PendingPwaAction>('none');
 
-  /** True when an install or update action is pending. */
-  readonly needUpdate = computed(() => this.pendingAction() !== 'none');
+  /**
+   * True when an action (first install or update) is pending.
+   * Derived from `pendingAction`.
+   */
+  readonly needUpdate = computed<boolean>(() => this.pendingAction() !== 'none');
 
-  /** True when the pending action is a first-time install (no SW cache yet). */
-  readonly isFirstLaunch = computed(() => this.pendingAction() === 'first-install');
+  /**
+   * True when the pending action corresponds to a first-time install
+   * (Service Worker cache empty). Derived from `pendingAction`.
+   */
+  readonly isFirstLaunch = computed<boolean>(() => this.pendingAction() === 'first-install');
 
   private readonly messageService = inject(MessageService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
@@ -226,9 +229,9 @@ export class UpdateService {
    *
    * @remarks
    * Called once from `APP_INITIALIZER`. If the SW cache is empty (first launch),
-   * sets `isFirstLaunch` and `needUpdate` so the UI can prompt the user to confirm
+   * sets `pendingAction` to `'first-install'` so the UI can prompt the user to confirm
    * installation via `confirmUpdate`. Otherwise compares build-time version
-   * with the server version and sets `needUpdate` if they differ.
+   * with the server version and sets `pendingAction` to `'update-available'` if they differ.
    */
   async checkForUpdateOnce(): Promise<void> {
     try {
@@ -277,7 +280,7 @@ export class UpdateService {
    *
    * @returns `true` if the message was successfully posted to an active
    * Service Worker, `false` otherwise (e.g. SW unavailable, no registration,
-   * or no active worker yet). Rejects on unexpected errors.
+   * no active worker yet, or an error occurred while posting).
    */
   async update(): Promise<boolean> {
     return this.postMessageToSW('update');
@@ -292,7 +295,7 @@ export class UpdateService {
    * successfully, `false` otherwise.
    */
   async confirmUpdate(): Promise<boolean> {
-    if (this.isFirstLaunch()) {
+    if (this.pendingAction() === 'first-install') {
       return this.install();
     }
     return this.update();
@@ -306,8 +309,8 @@ export class UpdateService {
    *
    * @returns `true` if the install message was successfully posted to an
    * active Service Worker, `false` otherwise (e.g. SW unavailable, no
-   * registration returned yet, or no active worker). Rejects on unexpected
-   * errors so the caller can decide whether to retry.
+   * registration returned yet, no active worker, or an error occurred while
+   * posting).
    */
   async install(): Promise<boolean> {
     return this.postMessageToSW('install');
@@ -334,9 +337,8 @@ export class UpdateService {
    * Post a control message to the active Service Worker.
    *
    * @returns `true` when the message was successfully delivered to an active
-   * worker, `false` when the Service Worker stack was not in a usable state
-   * (no SW support, no registration yet, or no active worker). Rejects on
-   * unexpected errors raised by the Service Worker API.
+   * worker, `false` otherwise (no SW support, no registration yet, no active
+   * worker, or an error raised by the Service Worker API).
    */
   private async postMessageToSW(type: 'update' | 'install'): Promise<boolean> {
     if (!UpdateService.hasServiceWorker) {
@@ -356,9 +358,9 @@ export class UpdateService {
       }
       ready.active.postMessage({ type });
       return true;
-    } catch (error) {
+    } catch {
       this.updateLoading.set(false);
-      throw error;
+      return false;
     }
   }
 
