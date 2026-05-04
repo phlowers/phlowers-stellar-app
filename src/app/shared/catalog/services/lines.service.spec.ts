@@ -276,6 +276,9 @@ describe('LinesService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
 
+      // Drain pending micro/macro tasks so the Papa.parse complete callback
+      // (which resolves the import promise) runs before we await it.
+      await new Promise((resolve) => setTimeout(resolve, 0));
       await importPromise;
 
       expect(mockLinesTable.clear).not.toHaveBeenCalled();
@@ -546,6 +549,9 @@ describe('LinesService', () => {
       expect(req.request.method).toBe('GET');
       req.error(mockError);
 
+      // Drain pending micro/macro tasks so the catchError + Papa.parse mock
+      // complete callback (which resolves the import promise) run before we await it.
+      await new Promise((resolve) => setTimeout(resolve, 0));
       await importPromise;
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing lines', expect.any(HttpErrorResponse));
