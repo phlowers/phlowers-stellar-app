@@ -12,10 +12,10 @@ import { LoggerService } from '@services/logger/logger.service';
 import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 
 /** Log levels accepted from worker `log` messages. */
-type WorkerLogLevel = 'log' | 'info' | 'warn' | 'error';
+export type WorkerLogLevel = 'log' | 'info' | 'warn' | 'error';
 
 /** Structured log entry forwarded by the Python worker to the main thread. */
-interface WorkerLogMessage {
+export interface WorkerLogMessage {
   level: WorkerLogLevel;
   message: string;
   details?: unknown;
@@ -227,7 +227,7 @@ export class WorkerPythonService {
 
   /**
    * Forward a structured log message emitted by the Python worker to the
-   * shared {@link LoggerService}, preserving the original log level.
+   * shared LoggerService, preserving the original log level.
    */
   private handleWorkerLog(log: WorkerLogMessage): void {
     const { level, message, details } = log;
