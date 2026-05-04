@@ -761,7 +761,9 @@ describe('AttachmentService', () => {
 
       const result = await service.getDistinctSupportNames();
 
-      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy']).toHaveBeenCalledWith('support_name');
+      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy']).toHaveBeenCalledWith(
+        'support_name'
+      );
       expect(orderByMock.uniqueKeys).toHaveBeenCalled();
       expect(result).toEqual(['Support A', 'Support B', 'Support C']);
     });
@@ -815,7 +817,9 @@ describe('AttachmentService', () => {
 
       const result = await service.getAttachmentsBySupportName('Support A');
 
-      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith('support_name');
+      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith(
+        'support_name'
+      );
       expect(whereMock.equals).toHaveBeenCalledWith('Support A');
       expect(sortByMock).toHaveBeenCalledWith('attachment_set');
       expect(result).toEqual(mockAttachments);
@@ -861,7 +865,9 @@ describe('AttachmentService', () => {
 
       const result = await service.getAttachmentDetails('Support A', 2);
 
-      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith('support_name');
+      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith(
+        'support_name'
+      );
       expect(whereMock.equals).toHaveBeenCalledWith('Support A');
       expect(equalsMock.and).toHaveBeenCalledWith(expect.any(Function));
       expect(firstMock).toHaveBeenCalled();

@@ -79,7 +79,10 @@ export class AttachmentService {
    * @returns Promise resolving to an array of matching attachment entities
    */
   async getAttachmentsBySupportName(supportName: string): Promise<CatalogAttachmentEntity[]> {
-    const result = await this.storageService.db?.catAttachments.where('support_name').equals(supportName).sortBy('attachment_set');
+    const result = await this.storageService.db?.catAttachments
+      .where('support_name')
+      .equals(supportName)
+      .sortBy('attachment_set');
     return result ?? [];
   }
 

@@ -165,12 +165,14 @@ describe('AttachmentSetModalComponent', () => {
   beforeEach(async () => {
     attachmentServiceMock = {
       getDistinctSupportNames: vi.fn().mockResolvedValue(['Support A', 'Support B']),
-      getAttachmentsBySupportName: vi.fn().mockImplementation((name: string) =>
-        Promise.resolve(mockAttachments.filter((a) => a.support_name === name))
-      ),
-      getAttachmentDetails: vi.fn().mockImplementation((name: string, set: number) =>
-        Promise.resolve(mockAttachments.find((a) => a.support_name === name && a.attachment_set === set))
-      )
+      getAttachmentsBySupportName: vi
+        .fn()
+        .mockImplementation((name: string) => Promise.resolve(mockAttachments.filter((a) => a.support_name === name))),
+      getAttachmentDetails: vi
+        .fn()
+        .mockImplementation((name: string, set: number) =>
+          Promise.resolve(mockAttachments.find((a) => a.support_name === name && a.attachment_set === set))
+        )
     } as unknown as vi.Mocked<AttachmentService>;
 
     workerPythonServiceMock = {
