@@ -41,8 +41,14 @@ try {
   const importEnd = performance.now();
   postMessage({ importTime: importEnd - loadEnd });
 } catch (error) {
-  console.error('Error loading pyodide', error);
-  postMessage({ error: TaskError.PYODIDE_LOAD_ERROR });
+  postMessage({
+    error: TaskError.PYODIDE_LOAD_ERROR,
+    log: {
+      level: 'error',
+      message: 'Error loading pyodide',
+      details: error instanceof Error ? error.message : String(error)
+    }
+  });
 }
 
 addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[Task]; id: string } }) => {
@@ -54,6 +60,15 @@ addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[
       });
     });
   } else {
-    console.error('pyodide is not loaded, cannot handle task ' + data.task);
+    postMessage({
+      id: data.id,
+      result: null,
+      error: TaskError.PYODIDE_LOAD_ERROR,
+      pythonErrorCode: null,
+      log: {
+        level: 'error',
+        message: `pyodide is not loaded, cannot handle task ${String(data.task)}`
+      }
+    });
   }
 });
