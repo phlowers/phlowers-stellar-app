@@ -15,8 +15,8 @@ import { GeoLiaisonAccroche, GeoLiaisonFieldError, GeoLiaisonFormat } from './se
 /** Converts a JSON string/null value to `number | null`. */
 export function parseFloatOrNull(value: unknown): number | null {
   if (value === null || value === undefined || value === '') return null;
-  const n = parseFloat(String(value));
-  return isNaN(n) ? null : n;
+  const n = Number.parseFloat(typeof value !== 'object' ? String(value) : '');
+  return Number.isNaN(n) ? null : n;
 }
 
 /** Converts a JSON string/boolean/null value to `boolean | null`. */
@@ -33,7 +33,7 @@ export function parseBooleanOrNull(value: unknown): boolean | null {
  * Rule RG.CAN.BRA — e.g. "FLAMAL73MENUE01" → "01".
  */
 export function extractBranchIdr(value: string): string {
-  const digits = value.replace(/\D/g, '');
+  const digits = value.replaceAll(/\D/g, '');
   return digits.slice(-2);
 }
 
@@ -72,15 +72,13 @@ export function buildSectionName(
   const startNum = firstSupport?.number?.substring(0, 5) ?? null;
   if (startNum) parts.push(startNum);
 
-  const startSet = firstSupport?.attachmentSet != null ? `SET${firstSupport.attachmentSet}` : null;
-  if (startSet) parts.push(startSet);
+  if (firstSupport?.attachmentSet != null) parts.push(`SET${firstSupport.attachmentSet}`);
 
-  const lastSupport = supports.length > 0 ? supports[supports.length - 1] : undefined;
+  const lastSupport = supports.at(-1);
   const endNum = lastSupport?.number?.substring(0, 5) ?? null;
   if (endNum) parts.push(endNum);
 
-  const endSet = lastSupport?.attachmentSet != null ? `SET${lastSupport.attachmentSet}` : null;
-  if (endSet) parts.push(endSet);
+  if (lastSupport?.attachmentSet != null) parts.push(`SET${lastSupport.attachmentSet}`);
 
   return parts.join('-');
 }
@@ -118,7 +116,7 @@ export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFi
   const canton = raw.cantons[0];
   const general = canton.general;
   const portees = [...(canton['portee unitaire'] ?? [])].sort(
-    (a, b) => parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
+    (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
   );
 
   // general — required fields

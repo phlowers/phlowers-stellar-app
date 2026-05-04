@@ -85,7 +85,11 @@ export class GenericImportEngineService {
       const collision = await this.adapter.checkCollision(file);
       let effectiveResolver: UUIDCollisionResolver;
 
-      if (collision !== null) {
+      if (collision === null) {
+        // No collision detected at check time; forward the real resolver in case
+        // the adapter encounters a late collision during persistence.
+        effectiveResolver = collisionResolver;
+      } else {
         const accepted = await collisionResolver(collision.uuid, collision.label);
         if (!accepted) {
           return { fileName: file.name, status: 'skipped' };
@@ -93,10 +97,6 @@ export class GenericImportEngineService {
         // The user already confirmed the replacement; pass a pre-approved resolver
         // so processFile does not prompt again for the same collision.
         effectiveResolver = () => Promise.resolve(true);
-      } else {
-        // No collision detected at check time; forward the real resolver in case
-        // the adapter encounters a late collision during persistence.
-        effectiveResolver = collisionResolver;
       }
 
       // Stages: DECODING → PARSING → VALIDATION → MAPPING → PERSISTENCE
@@ -125,8 +125,12 @@ export class GenericImportEngineService {
   private buildSuccessOutcome(fileName: string, entity: unknown): ImportOutcome {
     const meta = entity as Record<string, unknown>;
     const entityId = typeof meta['uuid'] === 'string' ? meta['uuid'] : undefined;
-    const entityLabel =
-      typeof meta['title'] === 'string' ? meta['title'] : typeof meta['name'] === 'string' ? meta['name'] : undefined;
+    let entityLabel: string | undefined;
+    if (typeof meta['title'] === 'string') {
+      entityLabel = meta['title'];
+    } else if (typeof meta['name'] === 'string') {
+      entityLabel = meta['name'];
+    }
 
     return { fileName, status: 'success', entityId, entityLabel };
   }

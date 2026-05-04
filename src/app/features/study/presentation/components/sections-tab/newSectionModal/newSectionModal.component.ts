@@ -17,7 +17,6 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { SectionService } from '@services/section/section.service';
 import { areAllRequiredFieldsFilled, hasSupportsBoundsErrors } from './newSectionModal.constants';
 import { ImportSectionComponent } from './import-section/import-section.component';
-import { ImportOutcome } from '@shared/import/domain/import-contracts';
 import { NotificationService } from '@services/notification/notification.service';
 import { SectionSourceMode } from './newSectionModal.interfaces';
 
@@ -133,16 +132,6 @@ export class NewSectionModalComponent {
   onDeleteSection() {
     this.sectionService.deleteSection(this.study()!, this.section());
     this.isOpenChange.emit(false);
-  }
-
-  /**
-   * Handles the `importCompleted` event emitted by `ImportSectionComponent`.
-   * The modal stays open after import so the user can click Edit.
-   */
-  onSectionImportCompleted(outcomes: ImportOutcome[]): void {
-    // Modal stays open — user will click Edit to proceed
-    // Suppress unused-variable warning: outcomes may be used for future extensions
-    void outcomes;
   }
 
   /**

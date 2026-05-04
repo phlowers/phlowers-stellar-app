@@ -397,26 +397,6 @@ describe('NewSectionModalComponent (Jest)', () => {
   });
 
   // -------------------------------------------------------------------------
-  // onSectionImportCompleted
-  // -------------------------------------------------------------------------
-
-  describe('onSectionImportCompleted', () => {
-    it('should NOT emit isOpenChange when a success outcome is received', () => {
-      const spy = vi.spyOn(component.isOpenChange, 'emit');
-      component.onSectionImportCompleted([{ fileName: 'ok.json', status: 'success', entityId: 'uuid1' }]);
-      expect(spy).not.toHaveBeenCalled();
-    });
-
-    it('should NOT emit isOpenChange when all outcomes are errors', () => {
-      const spy = vi.spyOn(component.isOpenChange, 'emit');
-      component.onSectionImportCompleted([
-        { fileName: 'bad.json', status: 'error', error: { code: 'FILE_PARSE_ERROR', message: 'err', stage: 'PARSING' } }
-      ]);
-      expect(spy).not.toHaveBeenCalled();
-    });
-  });
-
-  // -------------------------------------------------------------------------
   // onImportedSectionEditRequested
   // -------------------------------------------------------------------------
 

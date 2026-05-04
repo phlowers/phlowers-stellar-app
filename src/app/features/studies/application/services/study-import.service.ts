@@ -114,32 +114,18 @@ export class StudyImportService implements ImportAdapter<Study> {
    *   existing study when a UUID collision is detected.
    * @returns The created `Study`, or `null` if the user rejected the collision prompt.
    */
-  loadAppFile(file: File, collisionResolver: UUIDCollisionResolver): Promise<Study | null> {
-    return new Promise<Study | null>((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          const result = e.target?.result as string;
-          const study = await this.processAppFileContent(result, collisionResolver);
-          resolve(study);
-        } catch (error: unknown) {
-          if (error instanceof Error && error.message in studyImportErrors) {
-            reject(error);
-          } else {
-            this.logger.error('Error importing study', error);
-            reject(new Error('studyImportError'));
-          }
-        }
-      };
-
-      reader.onerror = (e) => {
-        this.logger.error('Error reading file', e);
-        reject(new Error('fileReadError'));
-      };
-
-      reader.readAsText(file);
-    });
+  async loadAppFile(file: File, collisionResolver: UUIDCollisionResolver): Promise<Study | null> {
+    try {
+      const result = await file.text();
+      return await this.processAppFileContent(result, collisionResolver);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message in studyImportErrors) {
+        throw error;
+      } else {
+        this.logger.error('Error importing study', error);
+        throw new Error('studyImportError');
+      }
+    }
   }
 
   /**
@@ -326,7 +312,7 @@ export class StudyImportService implements ImportAdapter<Study> {
       .createStudyFromProtoV4(supports, parameters)
       .then((study) => {
         this.notificationService.success(importSuccessDetail);
-        resolve(study as Study);
+        resolve(study);
       })
       .catch((parseError: unknown) => {
         if (parseError instanceof Error && parseError.message in studyImportErrors) {

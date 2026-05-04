@@ -16,7 +16,7 @@ export function parseISO88591Base64(str: string): string {
   return decodeURIComponent(
     Array.prototype.map
       .call(atob(str), function (c: string) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        return '%' + ('00' + (c.codePointAt(0) ?? 0).toString(16)).slice(-2);
       })
       .join('')
   );
@@ -40,8 +40,8 @@ export const formatProtoV4Support = (support: Record<string, string>): ProtoV4Su
     pds_ch: convertStringToNumber(support.pds_ch),
     surf_ch: convertStringToNumber(support.surf_ch),
     alt_acc: convertStringToNumber(support.alt_acc),
-    suspension: support.suspension === 'FAUX' ? false : true,
-    ch_en_V: support.ch_en_V === 'FAUX' ? false : true
+    suspension: support.suspension !== 'FAUX',
+    ch_en_V: support.ch_en_V !== 'FAUX'
   } as ProtoV4Support;
 };
 
