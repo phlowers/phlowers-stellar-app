@@ -72,7 +72,9 @@ export enum Task {
  */
 export enum DataError {
   /** Cable not found in catalog */
-  NO_CABLE_FOUND = 'NO_CABLE_FOUND'
+  NO_CABLE_FOUND = 'NO_CABLE_FOUND',
+  /** No initial condition configured or selected for this section */
+  NO_INITIAL_CONDITION = 'NO_INITIAL_CONDITION'
 }
 
 /**

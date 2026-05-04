@@ -1,0 +1,93 @@
+<div class="file-import" [attr.aria-busy]="isLoading()">
+  @if (config().texts?.description; as description) {
+    <p class="text-l-600 py-8">{{ description }}</p>
+  }
+
+  <label for="file-upload" class="file-import__tool">
+    <app-icon icon="upload" class="file-import__tool__icon" aria-hidden="true" />
+
+    <span class="file-import__tool__txt">
+      @if (config().texts?.uploadPrompt; as prompt) {
+        <span>{{ prompt }}</span>
+      } @else {
+        <span i18n="Upload zone prompt@@import.upload.prompt">Upload one or several files</span>
+      }
+      <br />
+      <span class="small-txt">{{ config().acceptedFiles.hint }}</span>
+    </span>
+
+    <input
+      id="file-upload"
+      multiple
+      name="file"
+      type="file"
+      (click)="clearFileInput($event)"
+      (change)="loadFiles($event)"
+      [accept]="acceptAttribute()"
+      class="file-import__tool__input"
+      data-testid="file-upload-input"
+      [attr.aria-label]="config().texts?.uploadPrompt"
+    />
+  </label>
+
+  @if (successOutcomes().length > 0) {
+    <ul class="file-import__list" data-testid="imported-items-list">
+      @for (outcome of successOutcomes(); track outcome.fileName) {
+        <li class="file-import__list__item" data-testid="imported-item-success">
+          <p class="file-import__list__label">
+            <app-icon icon="check" class="file-import__list__icon" aria-hidden="true" />
+            {{ outcome.entityLabel ?? outcome.fileName }}
+          </p>
+
+          @if (config().navigationRoute && outcome.entityId) {
+            <div class="file-import__list__btns">
+              <a
+                [routerLink]="config().navigationRoute!(outcome.entityId!)"
+                app-btn
+                btnStyle="base"
+                btnSize="s"
+                i18n="Open imported entity@@import.action.open"
+                data-testid="open-imported-btn"
+              >
+                Open
+              </a>
+            </div>
+          }
+
+          @if (config().successAction && outcome.entityId) {
+            <div class="file-import__list__btns">
+              <button
+                app-btn
+                type="button"
+                btnStyle="base"
+                btnSize="s"
+                (click)="onSuccessAction(outcome)"
+                data-testid="edit-imported-btn"
+              >
+                {{ config().successAction!.label }}
+              </button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  @if (errorOutcomes().length > 0) {
+    <ul class="file-import__list" data-testid="import-errors-list">
+      @for (outcome of errorOutcomes(); track outcome.fileName) {
+        <li class="file-import__list__item" data-testid="imported-item-error">
+          <p class="file-import__list__label">
+            <app-icon icon="close" class="file-import__list__icon file-import__list__icon--error" aria-hidden="true" />
+            {{ outcome.fileName }}
+          </p>
+          @if (outcome.error?.message) {
+            <p class="file-import__list__detail" data-testid="imported-item-error-detail">
+              {{ outcome.error!.message }}
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

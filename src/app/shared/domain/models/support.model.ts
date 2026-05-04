@@ -65,4 +65,10 @@ export interface Support {
   attachmentPosition: string | null;
   /** Surface area of the insulator chain (m²) */
   chainSurface: number | null;
+  /** Azimut of the span (degrees) */
+  spanAzimut: number | null;
+  /** X coordinate of the support foot in Lambert 93 projection */
+  xFootLambert93: number | null;
+  /** Y coordinate of the support foot in Lambert 93 projection */
+  yFootLambert93: number | null;
 }

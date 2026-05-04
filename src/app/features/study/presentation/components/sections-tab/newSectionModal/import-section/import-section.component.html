@@ -1,0 +1,8 @@
+<p-confirmdialog key="positionDialog" />
+<app-import
+  [config]="config()"
+  [resetToken]="importResetToken()"
+  (importCompleted)="onImportCompleted($event)"
+  (successActionTriggered)="onSuccessActionTriggered($event)"
+  data-testid="section-import"
+/>
