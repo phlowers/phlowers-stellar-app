@@ -752,4 +752,140 @@ describe('AttachmentService', () => {
       ]);
     });
   });
+
+  describe('getDistinctSupportNames', () => {
+    it('should return distinct support names ordered alphabetically', async () => {
+      const mockKeys = ['Support A', 'Support B', 'Support C'];
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(mockKeys) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      const result = await service.getDistinctSupportNames();
+
+      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy']).toHaveBeenCalledWith('support_name');
+      expect(orderByMock.uniqueKeys).toHaveBeenCalled();
+      expect(result).toEqual(['Support A', 'Support B', 'Support C']);
+    });
+
+    it('should return empty array when no attachments exist', async () => {
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue([]) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      const result = await service.getDistinctSupportNames();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when database is not available', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const result = await service.getDistinctSupportNames();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getAttachmentsBySupportName', () => {
+    it('should return attachments filtered and sorted by attachment_set for the given support name', async () => {
+      const mockAttachments: CatalogAttachmentEntity[] = [
+        {
+          uuid: 'uuid-1',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          created_at: '2025-01-01T00:00:00.000Z',
+          support_name: 'Support A',
+          attachment_set: 1,
+          attachment_altitude: 10.5,
+          cross_arm_length: 2.0,
+          support_tower: 'tower'
+        },
+        {
+          uuid: 'uuid-2',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          created_at: '2025-01-01T00:00:00.000Z',
+          support_name: 'Support A',
+          attachment_set: 2,
+          attachment_altitude: 12.0,
+          cross_arm_length: 3.0,
+          support_tower: 'tower'
+        }
+      ];
+      const sortByMock = vi.fn().mockResolvedValue(mockAttachments);
+      const equalsMock = { sortBy: sortByMock };
+      const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
+
+      const result = await service.getAttachmentsBySupportName('Support A');
+
+      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith('support_name');
+      expect(whereMock.equals).toHaveBeenCalledWith('Support A');
+      expect(sortByMock).toHaveBeenCalledWith('attachment_set');
+      expect(result).toEqual(mockAttachments);
+    });
+
+    it('should return empty array when no attachment matches', async () => {
+      const sortByMock = vi.fn().mockResolvedValue([]);
+      const equalsMock = { sortBy: sortByMock };
+      const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
+
+      const result = await service.getAttachmentsBySupportName('Unknown Support');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when database is not available', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const result = await service.getAttachmentsBySupportName('Support A');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getAttachmentDetails', () => {
+    it('should return the first attachment matching support name and attachment set', async () => {
+      const mockAttachment: CatalogAttachmentEntity = {
+        uuid: 'uuid-1',
+        updated_at: '2025-01-01T00:00:00.000Z',
+        created_at: '2025-01-01T00:00:00.000Z',
+        support_name: 'Support A',
+        attachment_set: 2,
+        attachment_altitude: 12.0,
+        cross_arm_length: 3.0,
+        support_tower: 'TowerModel'
+      };
+      const firstMock = vi.fn().mockResolvedValue(mockAttachment);
+      const andMock = { first: firstMock };
+      const equalsMock = { and: vi.fn().mockReturnValue(andMock) };
+      const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
+
+      const result = await service.getAttachmentDetails('Support A', 2);
+
+      expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith('support_name');
+      expect(whereMock.equals).toHaveBeenCalledWith('Support A');
+      expect(equalsMock.and).toHaveBeenCalledWith(expect.any(Function));
+      expect(firstMock).toHaveBeenCalled();
+      expect(result).toEqual(mockAttachment);
+    });
+
+    it('should return undefined when no matching attachment is found', async () => {
+      const firstMock = vi.fn().mockResolvedValue(undefined);
+      const andMock = { first: firstMock };
+      const equalsMock = { and: vi.fn().mockReturnValue(andMock) };
+      const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
+
+      const result = await service.getAttachmentDetails('Support A', 99);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when database is not available', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const result = await service.getAttachmentDetails('Support A', 1);
+
+      expect(result).toBeUndefined();
+    });
+  });
 });

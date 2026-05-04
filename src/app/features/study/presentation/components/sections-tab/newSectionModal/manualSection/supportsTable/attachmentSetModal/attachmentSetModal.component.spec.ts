@@ -164,7 +164,13 @@ describe('AttachmentSetModalComponent', () => {
 
   beforeEach(async () => {
     attachmentServiceMock = {
-      getAttachments: vi.fn().mockResolvedValue(mockAttachments)
+      getDistinctSupportNames: vi.fn().mockResolvedValue(['Support A', 'Support B']),
+      getAttachmentsBySupportName: vi.fn().mockImplementation((name: string) =>
+        Promise.resolve(mockAttachments.filter((a) => a.support_name === name))
+      ),
+      getAttachmentDetails: vi.fn().mockImplementation((name: string, set: number) =>
+        Promise.resolve(mockAttachments.find((a) => a.support_name === name && a.attachment_set === set))
+      )
     } as unknown as vi.Mocked<AttachmentService>;
 
     workerPythonServiceMock = {
@@ -206,10 +212,10 @@ describe('AttachmentSetModalComponent', () => {
     component.ngOnInit();
     await fixture.whenStable();
 
-    expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
-    expect(component.attachmentsFilterTable()).toEqual(
-      mockAttachments.sort((a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0))
-    );
+    expect(attachmentServiceMock.getDistinctSupportNames).toHaveBeenCalled();
+    expect(component.supportsFilterTable()).toEqual(['Support A', 'Support B']);
+    // No supportName selected yet — attachmentsFilterTable should be empty
+    expect(component.attachmentsFilterTable()).toEqual([]);
   });
 
   it('should reset values when modal opens', async () => {
@@ -245,11 +251,9 @@ describe('AttachmentSetModalComponent', () => {
     const event = { value: 'Support A' };
     await component.onAttachmentSelect(event, 'support_name');
 
-    const filteredAttachments = mockAttachments
-      .filter((item) => item.support_name === 'Support A')
-      .sort((a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0));
-
-    expect(component.attachmentsFilterTable()).toEqual(filteredAttachments);
+    expect(attachmentServiceMock.getAttachmentsBySupportName).toHaveBeenCalledWith('Support A');
+    const expected = mockAttachments.filter((item) => item.support_name === 'Support A');
+    expect(component.attachmentsFilterTable()).toEqual(expected);
   });
 
   it('should set arm length and height when attachment set is selected', async () => {
@@ -260,6 +264,7 @@ describe('AttachmentSetModalComponent', () => {
     const event = { value: 1 };
     await component.onAttachmentSelect(event, 'attachment_set');
 
+    expect(attachmentServiceMock.getAttachmentDetails).toHaveBeenCalledWith('Support A', 1);
     expect(component.armLength()).toBe(2.5);
     expect(component.heightBelowConsole()).toBe(10.5);
   });
@@ -332,9 +337,9 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should handle attachment service errors gracefully', async () => {
-    attachmentServiceMock.getAttachments.mockRejectedValue(new Error('Service error'));
+    attachmentServiceMock.getDistinctSupportNames.mockRejectedValue(new Error('Service error'));
 
-    // Should not throw error
+    // Should propagate error
     await expect(component.getData()).rejects.toThrow('Service error');
   });
 
@@ -359,7 +364,7 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
       expect(component.towerModel()).toBe('Tower Model');
-      expect(attachmentServiceMock.getAttachments).toHaveBeenCalled();
+      expect(attachmentServiceMock.getDistinctSupportNames).toHaveBeenCalled();
     });
 
     it('should reset values and set support name when modal opens with support without attachmentSet', async () => {

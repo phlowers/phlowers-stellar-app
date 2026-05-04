@@ -63,6 +63,42 @@ export class AttachmentService {
   }
 
   /**
+   * Retrieve the distinct support names from the catalog, sorted alphabetically.
+   *
+   * @returns Promise resolving to a sorted array of unique support name strings
+   */
+  async getDistinctSupportNames(): Promise<string[]> {
+    const keys = await this.storageService.db?.catAttachments.orderBy('support_name').uniqueKeys();
+    return (keys ?? []) as string[];
+  }
+
+  /**
+   * Retrieve all attachments for a given support name, sorted by attachment set number.
+   *
+   * @param supportName - The support name to filter by
+   * @returns Promise resolving to an array of matching attachment entities
+   */
+  async getAttachmentsBySupportName(supportName: string): Promise<CatalogAttachmentEntity[]> {
+    const result = await this.storageService.db?.catAttachments.where('support_name').equals(supportName).sortBy('attachment_set');
+    return result ?? [];
+  }
+
+  /**
+   * Retrieve the first attachment matching both a support name and an attachment set number.
+   *
+   * @param supportName - The support name to filter by
+   * @param attachmentSet - The attachment set number to filter by
+   * @returns Promise resolving to the matching attachment entity, or undefined if not found
+   */
+  async getAttachmentDetails(supportName: string, attachmentSet: number): Promise<CatalogAttachmentEntity | undefined> {
+    return this.storageService.db?.catAttachments
+      .where('support_name')
+      .equals(supportName)
+      .and((a) => a.attachment_set === attachmentSet)
+      .first();
+  }
+
+  /**
    * Import attachment catalog data from a CSV file.
    *
    * @remarks
