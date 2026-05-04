@@ -10,6 +10,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SectionService } from '@services/section/section.service';
+import { NotificationService } from '@services/notification/notification.service';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -39,6 +40,11 @@ class MockAttachmentService {
 class MockSectionService {
   duplicateSection = vi.fn().mockResolvedValue(undefined);
   deleteSection = vi.fn();
+}
+
+class MockNotificationService {
+  error = vi.fn();
+  success = vi.fn();
 }
 
 describe('NewSectionModalComponent (Jest)', () => {
@@ -116,6 +122,7 @@ describe('NewSectionModalComponent (Jest)', () => {
         { provide: ChainsService, useClass: MockChainsService },
         { provide: AttachmentService, useClass: MockAttachmentService },
         { provide: SectionService, useClass: MockSectionService },
+        { provide: NotificationService, useClass: MockNotificationService },
         provideHttpClient(),
         provideHttpClientTesting()
       ]
@@ -386,6 +393,61 @@ describe('NewSectionModalComponent (Jest)', () => {
       const el = getByTestId('edit-section-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // onImportedSectionEditRequested
+  // -------------------------------------------------------------------------
+
+  describe('onImportedSectionEditRequested', () => {
+    const importedSection: Section = { ...mockSection, uuid: 'imported-uuid', name: 'Imported Section' };
+
+    it('should increment importResetToken', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [importedSection] });
+      const before = component.importResetToken();
+      component.onImportedSectionEditRequested('imported-uuid');
+      expect(component.importResetToken()).toBe(before + 1);
+    });
+
+    it('should emit setSection with the found section', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [importedSection] });
+      const spy = vi.spyOn(component.setSection, 'emit');
+      component.onImportedSectionEditRequested('imported-uuid');
+      expect(spy).toHaveBeenCalledWith(importedSection);
+    });
+
+    it('should emit setMode("edit")', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [importedSection] });
+      const spy = vi.spyOn(component.setMode, 'emit');
+      component.onImportedSectionEditRequested('imported-uuid');
+      expect(spy).toHaveBeenCalledWith('edit');
+    });
+
+    it('should emit isOpenChange(false) then isOpenChange(true) via micro-task', async () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [importedSection] });
+      const emitted: boolean[] = [];
+      vi.spyOn(component.isOpenChange, 'emit').mockImplementation((v) => emitted.push(v as boolean));
+      component.onImportedSectionEditRequested('imported-uuid');
+      expect(emitted).toContain(false);
+      await Promise.resolve();
+      expect(emitted).toEqual([false, true]);
+    });
+
+    it('should call notificationService.error and NOT emit setSection when uuid is not found', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [] });
+      const notificationService = TestBed.inject(NotificationService) as unknown as MockNotificationService;
+      const setSectionSpy = vi.spyOn(component.setSection, 'emit');
+      component.onImportedSectionEditRequested('unknown-uuid');
+      expect(notificationService.error).toHaveBeenCalled();
+      expect(setSectionSpy).not.toHaveBeenCalled();
+    });
+
+    it('should NOT emit isOpenChange when uuid is not found', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [] });
+      const spy = vi.spyOn(component.isOpenChange, 'emit');
+      component.onImportedSectionEditRequested('unknown-uuid');
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });

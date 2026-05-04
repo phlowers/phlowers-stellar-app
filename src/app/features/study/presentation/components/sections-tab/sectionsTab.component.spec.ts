@@ -574,4 +574,46 @@ describe('SectionsTabComponent', () => {
       expect(openToolSpy).not.toHaveBeenCalled();
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Phase 5 — close/reopen cycle and import-section propagation
+  // -------------------------------------------------------------------------
+
+  describe('modal close/reopen cycle (import edit flow)', () => {
+    it('onModalOpenChange(false) should close the modal', () => {
+      component.isNewSectionModalOpen.set(true);
+      component.onModalOpenChange(false);
+      expect(component.isNewSectionModalOpen()).toBe(false);
+    });
+
+    it('onModalOpenChange(true) should reopen the modal', () => {
+      component.isNewSectionModalOpen.set(false);
+      component.onModalOpenChange(true);
+      expect(component.isNewSectionModalOpen()).toBe(true);
+    });
+
+    it('setting currentSection via setSection binding should update currentSection', () => {
+      const importedSection = { ...mockSection, uuid: 'imported-uuid', name: 'Imported' };
+      component.currentSection.set(importedSection);
+      expect(component.currentSection().uuid).toBe('imported-uuid');
+    });
+
+    it('setting newSectionModalMode via setMode binding should update the mode', () => {
+      component.newSectionModalMode.set('edit');
+      expect(component.newSectionModalMode()).toBe('edit');
+    });
+
+    it('editSection non-regression: sets currentSection, mode=edit and opens modal', () => {
+      component.editSection(mockSection);
+      expect(component.currentSection().uuid).toBe(mockSection.uuid);
+      expect(component.newSectionModalMode()).toBe('edit');
+      expect(component.isNewSectionModalOpen()).toBe(true);
+    });
+
+    it('openNewSectionModalCreate non-regression: resets section, mode=create and opens modal', () => {
+      component.openNewSectionModalCreate();
+      expect(component.newSectionModalMode()).toBe('create');
+      expect(component.isNewSectionModalOpen()).toBe(true);
+    });
+  });
 });

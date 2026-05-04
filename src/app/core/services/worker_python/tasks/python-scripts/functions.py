@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from dataclasses import fields as dataclass_fields
 from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
@@ -14,6 +15,23 @@ from stellar_engine.entities.inputs import Support, Cable, InitialCondition
 from stellar_engine.core.section import generate_section_array
 
 RESOLUTION = 100
+
+
+class _Errors:
+    NO_INITIAL_CONDITIONS = "No initial conditions provided"
+    NO_INITIAL_CONDITION_SELECTED = "No initial condition selected"
+    NO_SUPPORTS = "No supports data provided"
+
+    @staticmethod
+    def unsupported_symmetry_type(symmetry_type: str) -> str:
+        return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
+
+
+def _validate_initial_conditions(input_section: dict, input_initial_conditions: list) -> None:
+    if not input_initial_conditions:
+        raise ValueError(_Errors.NO_INITIAL_CONDITIONS)
+    if not input_section.get("selected_initial_condition_uuid"):
+        raise ValueError(_Errors.NO_INITIAL_CONDITION_SELECTED)
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
@@ -339,6 +357,9 @@ def init_section(js_inputs: dict):
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
+
+    _validate_initial_conditions(input_section, input_initial_conditions)
+
     input_initial_condition = next(
         condition
         for condition in input_initial_conditions
@@ -350,21 +371,25 @@ def init_section(js_inputs: dict):
         None
         if not input_charges
         else next(
-            charge
-            for charge in input_charges
-            if charge["uuid"] == input_section["selected_charge_uuid"]
+            (charge for charge in input_charges if charge["uuid"] == input_section["selected_charge_uuid"]),
+            None,
         )
     )
     initial_condition = InitialCondition(**input_initial_condition)
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
-        return {"error": "No supports data provided"}
+        raise ValueError(_Errors.NO_SUPPORTS)
 
-    # Extract supports data from JavaScript inputs
+    # Extract supports data from JavaScript inputs.
+    # Filter out keys unknown to the Support dataclass (e.g. fields added in the
+    # TypeScript model that have no Python counterpart, such as spanAzimut or
+    # xFootLambert93).
+    support_fields = {f.name for f in dataclass_fields(Support)}
     supports_data = []
     for support_js in input_section["supports"]:
-        supports_data.append(Support(**support_js))
+        filtered = {k: v for k, v in support_js.items() if k in support_fields}
+        supports_data.append(Support(**filtered))
     df = generate_section_array(supports_data)
 
     section = SectionArray(
@@ -510,9 +535,7 @@ def init_section(js_inputs: dict):
         elif climate_data.symmetryType == "symmetric":
             ice_thickness = climate_data.iceThickness
         else:
-            raise ValueError(
-                f"Unsupported symmetryType: {climate_data.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
-            )
+            raise ValueError(_Errors.unsupported_symmetry_type(climate_data.symmetryType))
         ice_thickness = (
             units(ice_thickness, "cm").to("m").magnitude
         )  # in meters in the engine

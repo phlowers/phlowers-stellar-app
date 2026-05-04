@@ -56,6 +56,24 @@ if (!('serviceWorker' in navigator)) {
   });
 }
 
+// jsdom does not implement Blob.prototype.text; capture the real FileReader before any test
+// can override globalThis.FileReader, then polyfill so file.text() works in tests.
+const _OriginalFileReader = (globalThis as unknown as { FileReader: typeof FileReader }).FileReader;
+if (typeof Blob !== 'undefined' && !('text' in Blob.prototype)) {
+  Object.defineProperty(Blob.prototype, 'text', {
+    value: function (this: Blob): Promise<string> {
+      return new Promise<string>((resolve, reject) => {
+        const reader = new _OriginalFileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(this);
+      });
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
 vi.mock('plotly.js-dist-min', () => {
   const plotlyMock = {
     newPlot: vi.fn().mockResolvedValue({}),

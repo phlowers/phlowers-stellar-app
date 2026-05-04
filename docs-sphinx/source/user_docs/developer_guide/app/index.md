@@ -12,4 +12,5 @@ offline_database
 plot_refresh_pipeline
 theme_styles
 angular_signals_pitfalls
+generic_import_pipeline
 ```

@@ -43,6 +43,24 @@ Control flow: `@if` / `@for` / `@switch` — never `*ngIf` / `*ngFor`.
 
 ---
 
+## Code organisation — externalize everything
+
+**Never declare interfaces, types, constants, or standalone functions directly inside a component or service file.**  
+Always extract them into dedicated co-located files:
+
+| What | File suffix | Example |
+|---|---|---|
+| Interfaces / types | `.interfaces.ts` | `section-import.interfaces.ts` |
+| Constants / error catalogs / i18n strings | `.constantes.ts` | `section-import.constantes.ts` |
+| Pure helper functions | `.helpers.ts` | `section-import.helpers.ts` |
+
+Rules:
+- A component or service file must **only** contain the class declaration and its Angular metadata.
+- Re-export from the feature's public entry point when consumers need access.
+- Helpers must be **pure functions** (no side effects, no DI) so they can be tested in isolation.
+
+---
+
 ## i18n — Angular native ONLY
 
 **`TranslateService` does not exist. `translate` pipe does not exist. Never use them.**
