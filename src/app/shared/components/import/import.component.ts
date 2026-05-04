@@ -100,6 +100,12 @@ export class ImportComponent {
     (event.target as HTMLInputElement).value = '';
   }
 
+  /** Handles the success action button click: invokes the config callback and emits the output. */
+  onSuccessAction(outcome: ImportOutcome): void {
+    this.config().successAction!.action(outcome);
+    this.successActionTriggered.emit(outcome);
+  }
+
   /**
    * Triggered by the file `<input>` change event.
    * Delegates all file processing to the engine and accumulates outcomes.

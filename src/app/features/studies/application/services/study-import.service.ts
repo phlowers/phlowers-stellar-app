@@ -203,9 +203,11 @@ export class StudyImportService implements ImportAdapter<Study> {
 
   private buildStudyFromParsedData(parsedResult: Record<string, unknown>): Study {
     const sections = Array.isArray(parsedResult.sections) ? this.transformSections(parsedResult.sections) : [];
+    const uuid = typeof parsedResult['uuid'] === 'string' ? parsedResult['uuid'].trim() : parsedResult['uuid'];
     return {
       ...createEmptyStudy(),
       ...parsedResult,
+      uuid,
       sections
     } as Study;
   }
@@ -226,6 +228,23 @@ export class StudyImportService implements ImportAdapter<Study> {
           return null;
         }
         await this.studiesService.deleteStudy(study.uuid);
+        try {
+          const uuid = await this.studiesService.createStudy(study, study.uuid);
+          const createdStudy = await this.studiesService.getStudy(uuid);
+          if (!createdStudy) {
+            await this.studiesService.createStudy(existingStudy, existingStudy.uuid).catch((restoreError: unknown) => {
+              this.logger.error('Failed to restore study after failed replacement', restoreError);
+            });
+            return null;
+          }
+          this.notificationService.success(importSuccessDetail);
+          return createdStudy;
+        } catch (error: unknown) {
+          await this.studiesService.createStudy(existingStudy, existingStudy.uuid).catch((restoreError: unknown) => {
+            this.logger.error('Failed to restore study after failed replacement', restoreError);
+          });
+          throw error;
+        }
       }
     }
 

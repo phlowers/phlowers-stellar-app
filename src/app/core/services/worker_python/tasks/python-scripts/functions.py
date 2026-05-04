@@ -16,6 +16,23 @@ from stellar_engine.core.section import generate_section_array
 
 RESOLUTION = 100
 
+
+class _Errors:
+    NO_INITIAL_CONDITIONS = "No initial conditions provided"
+    NO_INITIAL_CONDITION_SELECTED = "No initial condition selected"
+    NO_SUPPORTS = "No supports data provided"
+
+    @staticmethod
+    def unsupported_symmetry_type(symmetry_type: str) -> str:
+        return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
+
+
+def _validate_initial_conditions(input_section: dict, input_initial_conditions: list) -> None:
+    if not input_initial_conditions:
+        raise ValueError(_Errors.NO_INITIAL_CONDITIONS)
+    if not input_section.get("selected_initial_condition_uuid"):
+        raise ValueError(_Errors.NO_INITIAL_CONDITION_SELECTED)
+
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -341,10 +358,7 @@ def init_section(js_inputs: dict):
     input_cable = python_inputs["cable"]
     input_initial_conditions = input_section["initial_conditions"]
 
-    if not input_initial_conditions:
-        return {"error": "No initial conditions provided"}
-    if not input_section.get("selected_initial_condition_uuid"):
-        return {"error": "No initial condition selected"}
+    _validate_initial_conditions(input_section, input_initial_conditions)
 
     input_initial_condition = next(
         condition
@@ -365,7 +379,7 @@ def init_section(js_inputs: dict):
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
-        return {"error": "No supports data provided"}
+        raise ValueError(_Errors.NO_SUPPORTS)
 
     # Extract supports data from JavaScript inputs.
     # Filter out keys unknown to the Support dataclass (e.g. fields added in the
@@ -521,9 +535,7 @@ def init_section(js_inputs: dict):
         elif climate_data.symmetryType == "symmetric":
             ice_thickness = climate_data.iceThickness
         else:
-            raise ValueError(
-                f"Unsupported symmetryType: {climate_data.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
-            )
+            raise ValueError(_Errors.unsupported_symmetry_type(climate_data.symmetryType))
         ice_thickness = (
             units(ice_thickness, "cm").to("m").magnitude
         )  # in meters in the engine

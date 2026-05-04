@@ -120,31 +120,38 @@ export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFi
   );
 
   // general — required fields
-  if (!general.CABLE_ADR) {
+  if (typeof general.CABLE_ADR !== 'string' || !general.CABLE_ADR) {
     report('CABLE_ADR', general.CABLE_ADR ?? null);
   }
-  if (!general.CANTON_TYPE) {
+  if (typeof general.CANTON_TYPE !== 'string' || !general.CANTON_TYPE) {
     report('CANTON_TYPE', general.CANTON_TYPE ?? null);
   }
   if (parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) === null) {
     report('FAISCEAU_CABLES_NOMBRE', general.FAISCEAU_CABLES_NOMBRE ?? null);
   }
 
+  if (portees.length === 0) {
+    errors.push({ field: 'portee unitaire', value: null });
+    return errors;
+  }
+
   // Accroche-level required fields ("Oui" in US contract interface)
-  const acrocheRequired: readonly (keyof GeoLiaisonAccroche)[] = [
+  const acrocheNumericRequired: readonly (keyof GeoLiaisonAccroche)[] = [
     'ACCROCHE_CABLE_Z_LAMBERT93',
     'ANGLE_LIGNE',
     'CHAINE_DRN_LONGUEUR',
     'CHAINE_DRN_POIDS',
     'HAUTEUR_SOUS_CONSOLE',
     'LONGUEUR_BRAS',
-    'PIED_Z_LAMBERT93',
-    'SUPPORT_NUMERO'
+    'PIED_Z_LAMBERT93'
   ];
 
   const checkAccroche = (accroche: GeoLiaisonAccroche): void => {
-    for (const field of acrocheRequired) {
-      if (isNil(accroche[field])) report(field, accroche[field] ?? null);
+    for (const field of acrocheNumericRequired) {
+      if (parseFloatOrNull(accroche[field]) === null) report(field, accroche[field] ?? null);
+    }
+    if (typeof accroche.SUPPORT_NUMERO !== 'string' || !accroche.SUPPORT_NUMERO) {
+      report('SUPPORT_NUMERO', accroche.SUPPORT_NUMERO ?? null);
     }
   };
 

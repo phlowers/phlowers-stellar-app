@@ -277,7 +277,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     return {
       ...createEmptySection(),
-      uuid: general.CANTON_CUR,
+      uuid: general.CANTON_CUR.trim(),
       name: buildSectionName(
         appartenance?.BRANCHE_IDR ?? null,
         general.CANTON_TYPE,
@@ -354,9 +354,11 @@ export class SectionImportService implements ImportAdapter<Section> {
 
   private mapToSection(raw: Record<string, unknown>): Section {
     const supports = this.mapSupports(raw['supports']);
+    const uuid = typeof raw['uuid'] === 'string' ? raw['uuid'].trim() : raw['uuid'];
     return {
       ...createEmptySection(),
       ...raw,
+      uuid,
       supports
     } as Section;
   }
@@ -439,6 +441,25 @@ export class SectionImportService implements ImportAdapter<Section> {
         };
         throw error;
       }
+
+      try {
+        await this.sectionService.createOrUpdateSection(study, section);
+      } catch (err: unknown) {
+        this.logger.error('Error persisting section', err);
+        await this.sectionService.createOrUpdateSection(study, existingSection).catch((restoreErr: unknown) => {
+          this.logger.error('Failed to restore section after failed replacement', restoreErr);
+        });
+        const error: ImportError = {
+          code: 'PERSISTENCE_ERROR',
+          message: sectionImportErrors.sectionImportError,
+          stage: 'PERSISTENCE',
+          cause: err
+        };
+        throw error;
+      }
+
+      this.notificationService.success(importSuccessDetail);
+      return section;
     }
 
     try {

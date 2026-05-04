@@ -154,13 +154,13 @@ describe('ImportComponent', () => {
 
   describe('HTML rendering — description text', () => {
     it('should not render description when texts.description is absent', () => {
-      expect(fixture.nativeElement.querySelector('.my-8')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.text-l-600.py-8')).toBeNull();
     });
 
     it('should render description when texts.description is provided', () => {
       fixture.componentRef.setInput('config', WITH_TEXTS_CONFIG);
       fixture.detectChanges();
-      const desc = fixture.nativeElement.querySelector('.my-8 p');
+      const desc = fixture.nativeElement.querySelector('.text-l-600.py-8');
       expect(desc?.textContent).toContain('Import your file here.');
     });
   });
@@ -275,6 +275,8 @@ describe('ImportComponent', () => {
 
       expect(emitted).toHaveLength(1);
       expect(emitted[0]).toEqual(outcome);
+      expect(WITH_ACTION_CONFIG.successAction!.action).toHaveBeenCalledOnce();
+      expect(WITH_ACTION_CONFIG.successAction!.action).toHaveBeenCalledWith(outcome);
     });
   });
 

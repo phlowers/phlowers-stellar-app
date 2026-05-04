@@ -91,6 +91,10 @@ interface ImportContextConfig {
     description?: string;                  // optional paragraph shown above the upload zone
   };
   navigationRoute?: (entityId: string) => string;  // if set, renders an "Open" link on each success item
+  successAction?: {                         // if set, renders an action button on each success item
+    label: string;                          // button text
+    action: (outcome: ImportOutcome) => void; // callback invoked on click
+  };
 }
 ```
 
@@ -104,6 +108,7 @@ interface ImportContextConfig {
 | `texts.uploadPrompt` | Upload zone main text and `aria-label` on the input |
 | `entityLabel` | Inserted into the collision dialog: *"Section X already exists…"* |
 | `navigationRoute` | Renders a `<a [routerLink]="...">` button on each successfully imported item |
+| `successAction` | Renders an action button on each success item; clicking calls `action(outcome)` and emits `successActionTriggered` |
 
 ---
 

@@ -1,8 +1,6 @@
 <div class="file-import" [attr.aria-busy]="isLoading()">
   @if (config().texts?.description; as description) {
-    <div class="my-8">
-      <p class="text-l-600">{{ description }}</p>
-    </div>
+    <p class="text-l-600 py-8">{{ description }}</p>
   }
 
   <label for="file-upload" class="file-import__tool">
@@ -63,7 +61,7 @@
                 type="button"
                 btnStyle="base"
                 btnSize="s"
-                (click)="successActionTriggered.emit(outcome)"
+                (click)="onSuccessAction(outcome)"
                 data-testid="edit-imported-btn"
               >
                 {{ config().successAction!.label }}

@@ -1150,23 +1150,9 @@ describe('ImportStudyComponent', () => {
 
   describe('loadAppFile', () => {
     let mockFile: File;
-    let mockFileReader: {
-      readAsText: vi.Mock;
-      onload: ((e: ProgressEvent<FileReader>) => void) | null;
-    };
 
     beforeEach(() => {
-      // Mock FileReader
-      mockFileReader = {
-        readAsText: vi.fn(),
-        onload: null
-      };
-
-      // Mock global FileReader
-      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
-
-      // Create a mock file
-      mockFile = new File(['test content'], 'test.clst', {
+      mockFile = new File(['placeholder'], 'test.clst', {
         type: 'application/json'
       });
     });
@@ -1191,12 +1177,6 @@ describe('ImportStudyComponent', () => {
       };
 
       const base64Content = btoa(JSON.stringify(mockStudyData));
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
       const mockCreatedStudy = {
         uuid: 'test-uuid',
         title: 'Test Study',
@@ -1206,16 +1186,9 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
-      component.loadAppFile(mockFile);
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
       expect(component.newStudies()).toContainEqual(mockCreatedStudy);
@@ -1228,12 +1201,6 @@ describe('ImportStudyComponent', () => {
       };
 
       const base64Content = btoa(JSON.stringify(mockStudyData));
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
       const mockCreatedStudy = {
         uuid: 'test-uuid',
         title: 'Test Study'
@@ -1242,25 +1209,16 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
-      component.loadAppFile(mockFile);
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(component.newStudies()).toContainEqual(mockCreatedStudy);
     });
 
     it('should handle invalid JSON in file', async () => {
       const invalidBase64 = btoa('invalid json content');
-      const mockProgressEvent = {
-        target: {
-          result: invalidBase64
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([invalidBase64], 'test.clst', { type: 'application/json' });
 
       const mockEvent = {
         target: {
@@ -1271,11 +1229,6 @@ describe('ImportStudyComponent', () => {
       const mockMessageService = TestBed.inject(MessageService);
 
       component.loadFiles(mockEvent);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
 
       await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
@@ -1296,23 +1249,13 @@ describe('ImportStudyComponent', () => {
       };
 
       const base64Content = btoa(JSON.stringify(mockStudyData));
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
 
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
-      component.loadAppFile(mockFile);
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith('test-uuid');
       expect(component.newStudies()).not.toContainEqual(expect.objectContaining({ uuid: 'test-uuid' }));
@@ -1340,12 +1283,6 @@ describe('ImportStudyComponent', () => {
       };
 
       const base64Content = btoa(JSON.stringify(mockStudyData));
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
       const mockCreatedStudy = {
         uuid: 'test-uuid',
         title: 'Custom Title',
@@ -1355,14 +1292,9 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
 
-      component.loadAppFile(mockFile);
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await waitFor(ASYNC_TICK);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as unknown as {
         title: string;
@@ -1388,11 +1320,7 @@ describe('ImportStudyComponent', () => {
       };
 
       const base64Content = btoa(JSON.stringify(mockStudyData));
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
 
       const mockEvent = {
         target: {
@@ -1404,11 +1332,6 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockRejectedValue(new Error('Database error'));
 
       component.loadFiles(mockEvent);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
 
       await waitFor(ASYNC_WAIT);
       expect(mockMessageService.add).toHaveBeenCalledWith({
@@ -1424,25 +1347,9 @@ describe('ImportStudyComponent', () => {
 
   describe('loadAppFile', () => {
     let mockFile: File;
-    let mockFileReader: {
-      readAsText: vi.Mock;
-      onload: ((e: ProgressEvent<FileReader>) => void) | null;
-      onerror: ((e: ProgressEvent<FileReader>) => void) | null;
-    };
 
     beforeEach(() => {
-      // Mock FileReader
-      mockFileReader = {
-        readAsText: vi.fn(),
-        onload: null,
-        onerror: null
-      };
-
-      // Mock global FileReader
-      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
-
-      // Create a mock file
-      mockFile = new File(['test content'], 'test.clst', {
+      mockFile = new File(['placeholder'], 'test.clst', {
         type: 'application/json'
       });
     });
@@ -1493,22 +1400,9 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      const importPromise = component.loadAppFile(mockFile);
-
-      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await importPromise;
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
       expect(component.newStudies().length).toBe(1);
@@ -1559,20 +1453,9 @@ describe('ImportStudyComponent', () => {
           }
         });
 
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      const importPromise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await importPromise;
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
       expect(studiesServiceMock.deleteStudy).toHaveBeenCalledWith(existingUuid);
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
@@ -1604,20 +1487,9 @@ describe('ImportStudyComponent', () => {
           }
         });
 
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      const importPromise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await importPromise;
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(existingUuid);
       expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
       expect(component.newStudies().length).toBe(0);
@@ -1644,20 +1516,9 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      const importPromise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await importPromise;
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(component.newStudies().length).toBe(1);
     });
@@ -1665,20 +1526,8 @@ describe('ImportStudyComponent', () => {
     it('should handle invalid JSON in file', async () => {
       const invalidBase64 = btoa('invalid json content');
 
-      const mockProgressEvent = {
-        target: {
-          result: invalidBase64
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
-      const promise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await expect(promise).rejects.toMatchObject({ message: 'fileParseError' });
+      mockFile = new File([invalidBase64], 'test.clst', { type: 'application/json' });
+      await expect(component.loadAppFile(mockFile)).rejects.toMatchObject({ message: 'fileParseError' });
       expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
       expect(component.newStudies().length).toBe(0);
     });
@@ -1686,20 +1535,8 @@ describe('ImportStudyComponent', () => {
     it('should handle invalid base64 content', async () => {
       const invalidBase64 = 'not-valid-base64!!!';
 
-      const mockProgressEvent = {
-        target: {
-          result: invalidBase64
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
-      const promise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await expect(promise).rejects.toMatchObject({ message: 'fileDecodeError' });
+      mockFile = new File([invalidBase64], 'test.clst', { type: 'application/json' });
+      await expect(component.loadAppFile(mockFile)).rejects.toMatchObject({ message: 'fileDecodeError' });
       expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
     });
 
@@ -1711,50 +1548,24 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(null);
 
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      const importPromise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await importPromise;
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       expect(studiesServiceMock.getStudy).toHaveBeenCalledWith(newUuid);
       expect(component.newStudies().length).toBe(0);
     });
 
-    it('should handle FileReader error', () => {
-      component.loadAppFile(mockFile);
-
-      expect(mockFileReader.readAsText).toHaveBeenCalledWith(mockFile);
-
-      // Note: The current implementation doesn't have an onerror handler,
-      // but we test that readAsText is called correctly
-      expect(mockFileReader.readAsText).toHaveBeenCalled();
+    it('should handle file read error', async () => {
+      vi.spyOn(mockFile as unknown as { text: () => Promise<string> }, 'text').mockRejectedValue(
+        new Error('read error')
+      );
+      await expect(component.loadAppFile(mockFile)).rejects.toMatchObject({ message: 'studyImportError' });
     });
 
-    it('should handle null result from FileReader', async () => {
-      const mockProgressEvent = {
-        target: {
-          result: null
-        }
-      } as unknown as ProgressEvent<FileReader>;
-
-      const promise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await expect(promise).rejects.toMatchObject({ message: 'fileParseError' });
+    it('should throw fileParseError when decoded content is not valid JSON', async () => {
+      mockFile = new File([btoa('this is not json')], 'test.clst', { type: 'application/json' });
+      await expect(component.loadAppFile(mockFile)).rejects.toMatchObject({ message: 'fileParseError' });
       expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
     });
 
@@ -1798,20 +1609,9 @@ describe('ImportStudyComponent', () => {
       studiesServiceMock.createStudy = vi.fn().mockResolvedValue(newUuid);
       studiesServiceMock.getStudy = vi.fn().mockResolvedValue(createdStudy);
 
-      const mockProgressEvent = {
-        target: {
-          result: base64Content
-        }
-      } as unknown as ProgressEvent<FileReader>;
+      mockFile = new File([base64Content], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
 
-      const importPromise = component.loadAppFile(mockFile);
-
-      await waitFor(ASYNC_TICK);
-      if (mockFileReader.onload) {
-        mockFileReader.onload(mockProgressEvent);
-      }
-
-      await importPromise;
       expect(studiesServiceMock.createStudy).toHaveBeenCalled();
       const createStudyCall = studiesServiceMock.createStudy.mock.calls[0][0] as Record<string, unknown> & {
         sections: { supports: unknown[] }[];
