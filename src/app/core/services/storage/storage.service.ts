@@ -35,9 +35,9 @@ export class StorageService {
   async setPersistentStorage(): Promise<void> {
     // Request persistent storage for site
     if (navigator?.storage?.persist) {
-      let isPersisted = await navigator.storage.persisted();
+      const isPersisted = await navigator.storage.persisted();
       if (!isPersisted) {
-        isPersisted = await navigator.storage.persist();
+        await navigator.storage.persist();
       }
     }
   }

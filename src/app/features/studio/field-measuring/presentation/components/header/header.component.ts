@@ -57,7 +57,7 @@ export class HeaderComponent {
   selectedSpan = signal<number[] | null>(null);
 
   private hasCalculatedInitialAltitude = false;
-  private previousSpan = signal<number[] | null>(null);
+  private readonly previousSpan = signal<number[] | null>(null);
 
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);

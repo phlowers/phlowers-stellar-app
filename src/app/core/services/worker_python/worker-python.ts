@@ -26,25 +26,29 @@ let pyodide: PyodideAPI;
  * then executes the bundled Python source files.
  * Posts `loadTime` and `importTime` messages back to the main thread.
  */
-async function loadPyodideAndPackages() {
-  try {
-    const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
-    const start = performance.now();
-    pyodide = await loadPyodide({
-      indexURL: self.name + 'pyodide/',
-      packages: allPythonPackages
-    });
-    const loadEnd = performance.now();
-    postMessage({ loadTime: loadEnd - start });
-    for (const file of pythonFiles) {
-      await pyodide.runPython(file);
-    }
-    const importEnd = performance.now();
-    postMessage({ importTime: importEnd - loadEnd });
-  } catch (error) {
-    console.error('Error loading pyodide', error);
-    postMessage({ error: TaskError.PYODIDE_LOAD_ERROR });
+try {
+  const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
+  const start = performance.now();
+  pyodide = await loadPyodide({
+    indexURL: self.name + 'pyodide/',
+    packages: allPythonPackages
+  });
+  const loadEnd = performance.now();
+  postMessage({ loadTime: loadEnd - start });
+  for (const file of pythonFiles) {
+    await pyodide.runPython(file);
   }
+  const importEnd = performance.now();
+  postMessage({ importTime: importEnd - loadEnd });
+} catch (error) {
+  postMessage({
+    error: TaskError.PYODIDE_LOAD_ERROR,
+    log: {
+      level: 'error',
+      message: 'Error loading pyodide',
+      details: error instanceof Error ? error.message : String(error)
+    }
+  });
 }
 
 addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[Task]; id: string } }) => {
@@ -56,8 +60,15 @@ addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[
       });
     });
   } else {
-    console.error('pyodide is not loaded, cannot handle task ' + data.task);
+    postMessage({
+      id: data.id,
+      result: null,
+      error: TaskError.PYODIDE_LOAD_ERROR,
+      pythonErrorCode: null,
+      log: {
+        level: 'error',
+        message: `pyodide is not loaded, cannot handle task ${String(data.task)}`
+      }
+    });
   }
 });
-
-loadPyodideAndPackages();

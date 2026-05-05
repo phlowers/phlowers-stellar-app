@@ -5,10 +5,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { LoggerService } from '@services/logger/logger.service';
 import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
+
+/** Log levels accepted from worker `log` messages. */
+export type WorkerLogLevel = 'log' | 'info' | 'warn' | 'error';
+
+/** Structured log entry forwarded by the Python worker to the main thread. */
+export interface WorkerLogMessage {
+  level: WorkerLogLevel;
+  message: string;
+  details?: unknown;
+}
 
 /**
  * Service for managing the Python (Pyodide) web worker.
@@ -37,6 +48,7 @@ import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './tas
   providedIn: 'root'
 })
 export class WorkerPythonService {
+  private readonly logger = inject(LoggerService);
   private readonly _ready = new BehaviorSubject<boolean>(false);
   /** Observable indicating if Pyodide failed to load */
   readonly pyodideLoadError$ = new BehaviorSubject<boolean>(false);
@@ -92,7 +104,10 @@ export class WorkerPythonService {
   setup() {
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
     this.worker.onmessage = ({ data }) => {
-      if (data.error === TaskError.PYODIDE_LOAD_ERROR) {
+      if (data.log) {
+        this.handleWorkerLog(data.log as WorkerLogMessage);
+      }
+      if (data.error === TaskError.PYODIDE_LOAD_ERROR && !data.id) {
         this.pyodideLoadError$.next(true);
       } else if (data.loadTime) {
         this.times.set({ ...this.times(), loadTime: data.loadTime });
@@ -208,5 +223,28 @@ export class WorkerPythonService {
 
       worker.postMessage({ task, inputs, id });
     });
+  }
+
+  /**
+   * Forward a structured log message emitted by the Python worker to the
+   * shared LoggerService, preserving the original log level.
+   */
+  private handleWorkerLog(log: WorkerLogMessage): void {
+    const { level, message, details } = log;
+    const args: unknown[] = details === undefined ? [] : [details];
+    switch (level) {
+      case 'error':
+        this.logger.error(message, ...args);
+        break;
+      case 'warn':
+        this.logger.warn(message, ...args);
+        break;
+      case 'info':
+        this.logger.info(message, ...args);
+        break;
+      default:
+        this.logger.log(message, ...args);
+        break;
+    }
   }
 }
