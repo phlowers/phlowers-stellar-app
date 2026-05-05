@@ -128,6 +128,7 @@ export class LinesService {
       try {
         const data = jsonResults.data;
         if (!data || data.length === 0) {
+          resolve();
           return;
         }
         const table: CatalogLineEntity[] = mapData(data);
