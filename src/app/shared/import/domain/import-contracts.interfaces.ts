@@ -36,21 +36,30 @@ export type ImportPipelineStage =
 // ---------------------------------------------------------------------------
 
 /**
- * Standardized error codes for the import pipeline.
+ * Canonical error codes emitted by the generic import pipeline.
  *
- * Adapters may extend this union with context-specific string literals
- * (e.g. `'CABLE_NOT_FOUND'` for the Study adapter).
+ * Adapters may emit additional context-specific codes
+ * (e.g. `'CABLE_NOT_FOUND'` for the Study adapter), hence `ImportErrorCode`
+ * is typed as a plain `string`.
  */
-export type ImportErrorCode =
-  | 'FILE_TYPE_NOT_ALLOWED'
-  | 'FILE_READ_ERROR'
-  | 'FILE_DECODE_ERROR'
-  | 'FILE_PARSE_ERROR'
-  | 'VALIDATION_ERROR'
-  | 'MAPPING_ERROR'
-  | 'PERSISTENCE_ERROR'
-  | 'UUID_COLLISION_REJECTED'
-  | (string & NonNullable<unknown>);
+export const IMPORT_ERROR_CODES = {
+  FILE_TYPE_NOT_ALLOWED: 'FILE_TYPE_NOT_ALLOWED',
+  FILE_READ_ERROR: 'FILE_READ_ERROR',
+  FILE_DECODE_ERROR: 'FILE_DECODE_ERROR',
+  FILE_PARSE_ERROR: 'FILE_PARSE_ERROR',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  MAPPING_ERROR: 'MAPPING_ERROR',
+  PERSISTENCE_ERROR: 'PERSISTENCE_ERROR',
+  UUID_COLLISION_REJECTED: 'UUID_COLLISION_REJECTED'
+} as const;
+
+/**
+ * Standardized error code for the import pipeline.
+ *
+ * See {@link IMPORT_ERROR_CODES} for the canonical set of values.
+ * Adapters may emit context-specific codes as additional string literals.
+ */
+export type ImportErrorCode = string;
 
 /**
  * A structured import error carrying the pipeline stage it originated from.
