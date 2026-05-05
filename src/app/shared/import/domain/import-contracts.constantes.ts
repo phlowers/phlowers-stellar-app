@@ -6,7 +6,7 @@
  */
 
 import { InjectionToken } from '@angular/core';
-import { ImportAdapter } from './import-contracts.interfaces';
+import { AdapterImportErrorCode, CanonicalImportErrorCode, ImportAdapter } from './import-contracts.interfaces';
 
 /**
  * DI token used to provide a context-specific `ImportAdapter` to the generic
@@ -19,3 +19,30 @@ import { ImportAdapter } from './import-contracts.interfaces';
  * ```
  */
 export const IMPORT_ADAPTER_TOKEN = new InjectionToken<ImportAdapter>('IMPORT_ADAPTER_TOKEN');
+
+/**
+ * Canonical error codes emitted by the generic import pipeline.
+ *
+ * Source of truth for {@link CanonicalImportErrorCode}; adapters may emit
+ * additional context-specific codes via {@link adapterErrorCode}.
+ */
+export const IMPORT_ERROR_CODES = {
+  FILE_TYPE_NOT_ALLOWED: 'FILE_TYPE_NOT_ALLOWED',
+  FILE_READ_ERROR: 'FILE_READ_ERROR',
+  FILE_DECODE_ERROR: 'FILE_DECODE_ERROR',
+  FILE_PARSE_ERROR: 'FILE_PARSE_ERROR',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  MAPPING_ERROR: 'MAPPING_ERROR',
+  PERSISTENCE_ERROR: 'PERSISTENCE_ERROR',
+  UUID_COLLISION_REJECTED: 'UUID_COLLISION_REJECTED'
+} as const satisfies Record<string, CanonicalImportErrorCode>;
+
+/**
+ * Brands a raw string as an {@link AdapterImportErrorCode}.
+ *
+ * @example
+ * ```typescript
+ * throw { code: adapterErrorCode('CABLE_NOT_FOUND'), ... };
+ * ```
+ */
+export const adapterErrorCode = (code: string): AdapterImportErrorCode => code as AdapterImportErrorCode;

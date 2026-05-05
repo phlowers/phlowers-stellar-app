@@ -36,12 +36,14 @@ export type ImportPipelineStage =
 // ---------------------------------------------------------------------------
 
 /**
- * Standardized error codes for the import pipeline.
+ * Canonical error codes emitted by the generic import pipeline.
  *
- * Adapters may extend this union with context-specific string literals
- * (e.g. `'CABLE_NOT_FOUND'` for the Study adapter).
+ * The runtime constant `IMPORT_ERROR_CODES` lives in `import-contracts.constantes.ts`;
+ * this type is derived from it for compile-time checking and autocomplete.
+ * Adapters may emit additional context-specific codes via
+ * {@link AdapterImportErrorCode} (e.g. `'CABLE_NOT_FOUND'`).
  */
-export type ImportErrorCode =
+export type CanonicalImportErrorCode =
   | 'FILE_TYPE_NOT_ALLOWED'
   | 'FILE_READ_ERROR'
   | 'FILE_DECODE_ERROR'
@@ -49,8 +51,25 @@ export type ImportErrorCode =
   | 'VALIDATION_ERROR'
   | 'MAPPING_ERROR'
   | 'PERSISTENCE_ERROR'
-  | 'UUID_COLLISION_REJECTED'
-  | (string & NonNullable<unknown>);
+  | 'UUID_COLLISION_REJECTED';
+
+/**
+ * Branded string carrying an adapter-specific error code.
+ *
+ * Adapters opt into the open extensibility surface by tagging their code
+ * via the `adapterErrorCode` helper (see `import-contracts.constantes.ts`),
+ * which keeps autocomplete intact for canonical codes while still allowing
+ * arbitrary string literals from adapters.
+ */
+export type AdapterImportErrorCode = string & { readonly __adapterImportErrorCode: unique symbol };
+
+/**
+ * Standardized error code for the import pipeline.
+ *
+ * Either a {@link CanonicalImportErrorCode} (autocompleted, type-checked) or an
+ * {@link AdapterImportErrorCode} (branded string for adapter-specific codes).
+ */
+export type ImportErrorCode = CanonicalImportErrorCode | AdapterImportErrorCode;
 
 /**
  * A structured import error carrying the pipeline stage it originated from.

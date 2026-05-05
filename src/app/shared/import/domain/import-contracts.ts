@@ -8,6 +8,8 @@
 // Re-export all interfaces and types from the dedicated interfaces file.
 export type {
   ImportPipelineStage,
+  CanonicalImportErrorCode,
+  AdapterImportErrorCode,
   ImportErrorCode,
   ImportError,
   ImportOutcomeStatus,
@@ -18,5 +20,5 @@ export type {
   ImportContextConfig
 } from './import-contracts.interfaces';
 
-// Re-export the DI token constant.
-export { IMPORT_ADAPTER_TOKEN } from './import-contracts.constantes';
+// Re-export runtime constants and helpers.
+export { IMPORT_ADAPTER_TOKEN, IMPORT_ERROR_CODES, adapterErrorCode } from './import-contracts.constantes';
