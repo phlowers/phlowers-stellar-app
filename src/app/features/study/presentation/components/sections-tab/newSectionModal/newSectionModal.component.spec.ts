@@ -34,6 +34,9 @@ class MockChainsService {
 class MockAttachmentService {
   ready = { next: vi.fn() };
   getAttachments = vi.fn().mockResolvedValue([]);
+  getDistinctSupportNames = vi.fn().mockResolvedValue([]);
+  getAttachmentsBySupportName = vi.fn().mockResolvedValue([]);
+  getAttachmentDetails = vi.fn().mockResolvedValue(undefined);
   importFromFile = vi.fn().mockResolvedValue(undefined);
 }
 

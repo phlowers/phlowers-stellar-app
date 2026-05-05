@@ -15,6 +15,7 @@ import { AttachmentCsvDto } from '@infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
+import Dexie from 'dexie';
 
 /**
  * Service for managing attachment point catalog data.
@@ -69,20 +70,23 @@ export class AttachmentService {
    */
   async getDistinctSupportNames(): Promise<string[]> {
     const keys = await this.storageService.db?.catAttachments.orderBy('support_name').uniqueKeys();
-    return (keys ?? []) as string[];
+    return (keys ?? []).filter((key): key is string => typeof key === 'string' && key.length > 0);
   }
 
   /**
    * Retrieve all attachments for a given support name, sorted by attachment set number.
+   *
+   * Uses the compound index `[support_name+attachment_set]` so IndexedDB handles
+   * both filtering and ordering without an in-memory sort.
    *
    * @param supportName - The support name to filter by
    * @returns Promise resolving to an array of matching attachment entities
    */
   async getAttachmentsBySupportName(supportName: string): Promise<CatalogAttachmentEntity[]> {
     const result = await this.storageService.db?.catAttachments
-      .where('support_name')
-      .equals(supportName)
-      .sortBy('attachment_set');
+      .where('[support_name+attachment_set]')
+      .between([supportName, Dexie.minKey], [supportName, Dexie.maxKey])
+      .toArray();
     return result ?? [];
   }
 
@@ -95,9 +99,8 @@ export class AttachmentService {
    */
   async getAttachmentDetails(supportName: string, attachmentSet: number): Promise<CatalogAttachmentEntity | undefined> {
     return this.storageService.db?.catAttachments
-      .where('support_name')
-      .equals(supportName)
-      .and((a) => a.attachment_set === attachmentSet)
+      .where('[support_name+attachment_set]')
+      .equals([supportName, attachmentSet])
       .first();
   }
 

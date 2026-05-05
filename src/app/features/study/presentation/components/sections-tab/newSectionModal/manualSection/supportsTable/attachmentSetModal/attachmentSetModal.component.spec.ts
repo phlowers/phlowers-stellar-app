@@ -110,7 +110,10 @@ describe('AttachmentSetModalComponent', () => {
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
     attachmentPosition: 'Position 1',
-    towerModel: 'Tower Model'
+    towerModel: 'Tower Model',
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   };
 
   const mockSection: Section = {
@@ -338,10 +341,9 @@ describe('AttachmentSetModalComponent', () => {
     expect(component.heightBelowConsole()).toBeUndefined();
   });
 
-  it('should handle attachment service errors gracefully', async () => {
+  it('should propagate attachment service errors', async () => {
     attachmentServiceMock.getDistinctSupportNames.mockRejectedValue(new Error('Service error'));
 
-    // Should propagate error
     await expect(component.getData()).rejects.toThrow('Service error');
   });
 

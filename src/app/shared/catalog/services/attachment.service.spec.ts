@@ -784,6 +784,16 @@ describe('AttachmentService', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should filter out non-string and empty-string keys from mixed key results', async () => {
+      const mixedKeys = ['Support A', '', 42, null, undefined, 'Support B', ''];
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(mixedKeys) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      const result = await service.getDistinctSupportNames();
+
+      expect(result).toEqual(['Support A', 'Support B']);
+    });
   });
 
   describe('getAttachmentsBySupportName', () => {
@@ -810,25 +820,25 @@ describe('AttachmentService', () => {
           support_tower: 'tower'
         }
       ];
-      const sortByMock = vi.fn().mockResolvedValue(mockAttachments);
-      const equalsMock = { sortBy: sortByMock };
-      const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
+      const toArrayMock = vi.fn().mockResolvedValue(mockAttachments);
+      const betweenMock = vi.fn().mockReturnValue({ toArray: toArrayMock });
+      const whereMock = { between: betweenMock };
       (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
 
       const result = await service.getAttachmentsBySupportName('Support A');
 
       expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith(
-        'support_name'
+        '[support_name+attachment_set]'
       );
-      expect(whereMock.equals).toHaveBeenCalledWith('Support A');
-      expect(sortByMock).toHaveBeenCalledWith('attachment_set');
+      expect(betweenMock).toHaveBeenCalledWith(['Support A', expect.anything()], ['Support A', expect.anything()]);
+      expect(toArrayMock).toHaveBeenCalled();
       expect(result).toEqual(mockAttachments);
     });
 
     it('should return empty array when no attachment matches', async () => {
-      const sortByMock = vi.fn().mockResolvedValue([]);
-      const equalsMock = { sortBy: sortByMock };
-      const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
+      const toArrayMock = vi.fn().mockResolvedValue([]);
+      const betweenMock = vi.fn().mockReturnValue({ toArray: toArrayMock });
+      const whereMock = { between: betweenMock };
       (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
 
       const result = await service.getAttachmentsBySupportName('Unknown Support');
@@ -858,26 +868,23 @@ describe('AttachmentService', () => {
         support_tower: 'TowerModel'
       };
       const firstMock = vi.fn().mockResolvedValue(mockAttachment);
-      const andMock = { first: firstMock };
-      const equalsMock = { and: vi.fn().mockReturnValue(andMock) };
+      const equalsMock = { first: firstMock };
       const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
       (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
 
       const result = await service.getAttachmentDetails('Support A', 2);
 
       expect((mockDb.catAttachments as unknown as Record<string, unknown>)['where']).toHaveBeenCalledWith(
-        'support_name'
+        '[support_name+attachment_set]'
       );
-      expect(whereMock.equals).toHaveBeenCalledWith('Support A');
-      expect(equalsMock.and).toHaveBeenCalledWith(expect.any(Function));
+      expect(whereMock.equals).toHaveBeenCalledWith(['Support A', 2]);
       expect(firstMock).toHaveBeenCalled();
       expect(result).toEqual(mockAttachment);
     });
 
     it('should return undefined when no matching attachment is found', async () => {
       const firstMock = vi.fn().mockResolvedValue(undefined);
-      const andMock = { first: firstMock };
-      const equalsMock = { and: vi.fn().mockReturnValue(andMock) };
+      const equalsMock = { first: firstMock };
       const whereMock = { equals: vi.fn().mockReturnValue(equalsMock) };
       (mockDb.catAttachments as unknown as Record<string, unknown>)['where'] = vi.fn().mockReturnValue(whereMock);
 
