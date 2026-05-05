@@ -38,27 +38,28 @@
           [attr.aria-invalid]="showEmailErrors"
           [attr.aria-describedby]="showEmailErrors ? 'login-email-error' : null"
         />
-        @if (showEmailErrors && emailControl.hasError('required')) {
-          <small
-            id="login-email-error"
-            class="login-page__error"
-            data-testid="email-error"
-            role="alert"
-            i18n="@@login.emailRequired"
-          >
-            Email is required.
-          </small>
-        }
-        @if (showEmailErrors && emailControl.hasError('email') && !emailControl.hasError('required')) {
-          <small
-            id="login-email-error"
-            class="login-page__error"
-            data-testid="email-error"
-            role="alert"
-            i18n="@@login.emailInvalid"
-          >
-            Please enter a valid email address.
-          </small>
+        @if (showEmailErrors) {
+          @if (emailControl.hasError('required')) {
+            <small
+              id="login-email-error"
+              class="login-page__error"
+              data-testid="email-error"
+              role="alert"
+              i18n="@@login.emailRequired"
+            >
+              Email is required.
+            </small>
+          } @else if (emailControl.hasError('email')) {
+            <small
+              id="login-email-error"
+              class="login-page__error"
+              data-testid="email-error"
+              role="alert"
+              i18n="@@login.emailInvalid"
+            >
+              Please enter a valid email address.
+            </small>
+          }
         }
       </div>
 

@@ -135,14 +135,14 @@ export class SectionsTabComponent {
     this.isInitialConditionModalOpen.set(true);
   }
 
-  async duplicateInitialConditionFromModal({
+  duplicateInitialConditionFromModal({
     initialCondition,
     newUuid
   }: {
     initialCondition: InitialCondition;
     newUuid: string;
   }) {
-    await this.duplicateInitialCondition.emit({
+    this.duplicateInitialCondition.emit({
       section: this.currentSection(),
       initialCondition: initialCondition,
       newUuid

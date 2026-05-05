@@ -32,24 +32,24 @@ L'application **n'utilise aucune librairie OIDC côté client** (`angular-auth-o
 
 | Rôle | Fichier |
 |---|---|
-| Service principal | [src/app/core/services/auth/auth.service.ts](src/app/core/services/auth/auth.service.ts) |
-| Constantes | [src/app/core/services/auth/auth.constants.ts](src/app/core/services/auth/auth.constants.ts) |
-| Interface claims | [src/app/core/services/auth/oidc-claims.interface.ts](src/app/core/services/auth/oidc-claims.interface.ts) |
-| Route guard | [src/app/core/guards/auth.guard.ts](src/app/core/guards/auth.guard.ts) |
-| Page login fallback | [src/app/features/auth/presentation/pages/login-page/login-page.component.ts](src/app/features/auth/presentation/pages/login-page/login-page.component.ts) |
-| Modèle User | [src/app/shared/domain/models/user.model.ts](src/app/shared/domain/models/user.model.ts) |
-| Bootstrap | [src/app/app.config.ts](src/app/app.config.ts) |
-| Routes protégées | [src/app/app.routes.ts](src/app/app.routes.ts) |
-| Affichage user | [src/app/shared/components/layout/topbar/topbar.component.ts](src/app/shared/components/layout/topbar/topbar.component.ts) |
-| SW bypass | [src/app/core/services/worker_update/service-worker.ts](src/app/core/services/worker_update/service-worker.ts) |
-| Mock dev | [dev-mock/oidc-middleware.mjs](dev-mock/oidc-middleware.mjs) · [dev-mock/oidc-claims.example.json](dev-mock/oidc-claims.example.json) |
+| Service principal | [src/app/core/services/auth/auth.service.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/auth/auth.service.ts) |
+| Constantes | [src/app/core/services/auth/auth.constants.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/auth/auth.constants.ts) |
+| Interface claims | [src/app/core/services/auth/oidc-claims.interface.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/auth/oidc-claims.interface.ts) |
+| Route guard | [src/app/core/guards/auth.guard.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/guards/auth.guard.ts) |
+| Page login fallback | [src/app/features/auth/presentation/pages/login-page/login-page.component.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/features/auth/presentation/pages/login-page/login-page.component.ts) |
+| Modèle User | [src/app/shared/domain/models/user.model.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/shared/domain/models/user.model.ts) |
+| Bootstrap | [src/app/app.config.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.config.ts) |
+| Routes protégées | [src/app/app.routes.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.routes.ts) |
+| Affichage user | [src/app/shared/components/layout/topbar/topbar.component.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/shared/components/layout/topbar/topbar.component.ts) |
+| SW bypass | [src/app/core/services/worker_update/service-worker.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/worker_update/service-worker.ts) |
+| Mock dev | [dev-mock/oidc-middleware.mjs](https://github.com/phlowers/phlowers-stellar-app/blob/main/dev-mock/oidc-middleware.mjs) · [dev-mock/oidc-claims.example.json](https://github.com/phlowers/phlowers-stellar-app/blob/main/dev-mock/oidc-claims.example.json) |
 
 ---
 
 ## 3. Flux end-to-end
 
 ### Démarrage de l'app (`APP_INITIALIZER`)
-Dans [app.config.ts](src/app/app.config.ts), la séquence imposée est :
+Dans [app.config.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.config.ts), la séquence imposée est :
 1. `storageService.setPersistentStorage()`
 2. `storageService.createDatabase()`
 3. **`authService.initialize()`** ← le point d'auth
@@ -66,15 +66,15 @@ Dans [app.config.ts](src/app/app.config.ts), la séquence imposée est :
 - Sinon les claims sont *upserted* dans IndexedDB et le signal est mis à jour.
 
 ### Garde de routes
-[auth.guard.ts](src/app/core/guards/auth.guard.ts) :
+[auth.guard.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/guards/auth.guard.ts) :
 - Si `currentUser()` non nul → autorise.
 - Sinon tente une restauration depuis IndexedDB (`tryRestoreFromCache`).
 - Sinon redirige vers `/login`.
 
-Toutes les routes enfant de `LoggedLayoutComponent` portent `canActivate: [authGuard]` ([app.routes.ts](src/app/app.routes.ts)).
+Toutes les routes enfant de `LoggedLayoutComponent` portent `canActivate: [authGuard]` ([app.routes.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.routes.ts)).
 
 ### Page `/login` — fallback email uniquement
-Quand OIDC est indisponible (ex: dev sans mock claims), [login-page.component.ts](src/app/features/auth/presentation/pages/login-page/login-page.component.ts) propose un formulaire email. `loginWithEmail()` crée/retrouve un User dans IndexedDB et set le signal — **aucune vérification de mot de passe**, c'est purement un mode dégradé local.
+Quand OIDC est indisponible (ex: dev sans mock claims), [login-page.component.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/features/auth/presentation/pages/login-page/login-page.component.ts) propose un formulaire email. `loginWithEmail()` crée/retrouve un User dans IndexedDB et set le signal — **aucune vérification de mot de passe**, c'est purement un mode dégradé local.
 
 ---
 
@@ -109,7 +109,7 @@ Schéma Dexie : `users: '&email, sub'` (clé primaire = email, index secondaire 
 
 ## 6. Interactions PWA / Service Worker
 
-[service-worker.ts](src/app/core/services/worker_update/service-worker.ts) applique deux règles cruciales :
+[service-worker.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/worker_update/service-worker.ts) applique deux règles cruciales :
 
 1. **Bypass total de `/auth/*`** : `shouldBypassSW()` force `fetch(event.request)` sans interception. Sinon le SW pourrait servir une réponse cachée et masquer une expiration de session.
 2. **Home page en *network-first*** : permet à Apache d'envoyer ses redirections 302 vers l'IdP sans qu'elles soient mises en cache.
@@ -120,7 +120,7 @@ Sans ces précautions, un user déconnecté côté Apache resterait "connecté" 
 
 ## 7. Mock OIDC pour le dev
 
-- [dev-mock/oidc-middleware.mjs](dev-mock/oidc-middleware.mjs) est branché via `angular.json` (option `serve`).
+- [dev-mock/oidc-middleware.mjs](https://github.com/phlowers/phlowers-stellar-app/blob/main/dev-mock/oidc-middleware.mjs) est branché via `angular.json` (option `serve`).
 - Il intercepte `GET /auth/userinfo` et retourne le contenu de `dev-mock/oidc-claims.json` (gitignoré).
 - Si le fichier n'existe pas → `{ authenticated: false }` → l'app tombe sur la page `/login` fallback.
 

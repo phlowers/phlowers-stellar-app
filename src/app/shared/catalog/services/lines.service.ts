@@ -119,26 +119,43 @@ export class LinesService {
         })
         .filter((item) => item.link_idr);
     };
-    await new Promise<void>((resolve) => {
-      linesFile.subscribe(async (linesDataCsv) => {
-        Papa.parse(linesDataCsv, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<LineCsvDto>) => {
-            const data = jsonResults.data;
-            if (!data || data.length === 0) {
-              resolve();
-              return;
-            }
-            const table: CatalogLineEntity[] = mapData(data);
-            const uniqueTable = uniqBy(table, (element) =>
-              [element.voltage_idr, element.link_idr, element.lit_idr, element.branch_id, element.branch_idr].join('')
-            );
-            await replaceTableData(this.storageService.db?.catLines, sortBy(uniqueTable, 'voltage_adr'));
-            resolve();
-          }) as (jsonResults: Papa.ParseResult<LineCsvDto>) => void
-        });
+
+    const persistParsedData = async (
+      jsonResults: Papa.ParseResult<LineCsvDto>,
+      resolve: () => void,
+      reject: (reason: unknown) => void
+    ): Promise<void> => {
+      try {
+        const data = jsonResults.data;
+        if (!data || data.length === 0) {
+          resolve();
+          return;
+        }
+        const table: CatalogLineEntity[] = mapData(data);
+        const uniqueTable = uniqBy(table, (element) =>
+          [element.voltage_idr, element.link_idr, element.lit_idr, element.branch_id, element.branch_idr].join('')
+        );
+        await replaceTableData(this.storageService.db?.catLines, sortBy(uniqueTable, 'voltage_adr'));
+      } catch (error) {
+        this.logger.error('Error persisting lines catalog', error);
+        reject(error);
+        return;
+      }
+      resolve();
+    };
+
+    const parseCsv = (linesDataCsv: string, resolve: () => void, reject: (reason: unknown) => void) => {
+      Papa.parse(linesDataCsv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: ((jsonResults: Papa.ParseResult<LineCsvDto>) => {
+          void persistParsedData(jsonResults, resolve, reject);
+        }) as (jsonResults: Papa.ParseResult<LineCsvDto>) => void
       });
+    };
+
+    await new Promise<void>((resolve, reject) => {
+      linesFile.subscribe((linesDataCsv) => parseCsv(linesDataCsv, resolve, reject));
     });
   }
 }
