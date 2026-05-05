@@ -73,9 +73,12 @@
         Chain surface
       </th>
       @if (mode() === 'view') {
-        <th id="tower_model">
-          <ng-container i18n>Tower</ng-container>
-        </th>
+        <th id="tower_model" i18n>Tower</th>
+        <th id="latitude" i18n>Latitude</th>
+        <th id="longitude" i18n>Longitude</th>
+        <th id="azimuth" i18n>Azimuth</th>
+        <th id="xLambert93" i18n class="one-line-text">X Lambert 93</th>
+        <th id="yLambert93" i18n class="one-line-text">Y Lambert 93</th>
       }
 
       @if (mode() === 'create' || mode() === 'edit') {
@@ -621,6 +624,21 @@
       @if (mode() === 'view') {
         <td>
           <p class="one-line-text">{{ support.towerModel }}</p>
+        </td>
+        <td>
+          <p class="one-line-text">-</p>
+        </td>
+        <td>
+          <p class="one-line-text">-</p>
+        </td>
+        <td>
+          <p class="one-line-text">-</p>
+        </td>
+        <td>
+          <p class="one-line-text">-</p>
+        </td>
+        <td>
+          <p class="one-line-text">-</p>
         </td>
       }
       @if (mode() === 'edit' || mode() === 'create') {

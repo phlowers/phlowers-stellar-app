@@ -55,7 +55,6 @@ export class LocationComponent {
   onAzimuthInput(event: Event): void {
     truncateOneDecimal(event);
     this.azimuthValue.set(+(event.target as HTMLInputElement).value);
-    console.log((event.target as HTMLInputElement).value);
     this.emitChange();
   }
 }
