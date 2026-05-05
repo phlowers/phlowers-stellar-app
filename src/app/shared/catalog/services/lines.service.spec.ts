@@ -268,10 +268,7 @@ describe('LinesService', () => {
 
       const importPromise = service.importFromFile();
 
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
+      // HTTP request is issued synchronously by subscribe inside importFromFile
       const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.flush(mockCsvContent);
@@ -538,10 +535,7 @@ describe('LinesService', () => {
 
       const importPromise = service.importFromFile();
 
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request to fail
+      // HTTP request is issued synchronously by subscribe inside importFromFile
       const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
       expect(req.request.method).toBe('GET');
       req.error(mockError);
