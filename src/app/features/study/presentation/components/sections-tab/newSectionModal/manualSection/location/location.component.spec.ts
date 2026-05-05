@@ -47,6 +47,53 @@ describe('LocationComponent', () => {
     });
   });
 
+  describe('HTML rendering - initial displayed values', () => {
+    it('should display the default latitude value', () => {
+      const input = getByTestId('latitude-input') as HTMLInputElement;
+      expect(+input.value).toBe(LOCATION_CONFIG.latitude.default);
+    });
+
+    it('should display the default longitude value', () => {
+      const input = getByTestId('longitude-input') as HTMLInputElement;
+      expect(+input.value).toBe(LOCATION_CONFIG.longitude.default);
+    });
+
+    it('should display azimuth default as "0.0"', () => {
+      const input = getByTestId('azimuth-input') as HTMLInputElement;
+      expect(input.value).toBe('0.0');
+    });
+  });
+
+  describe('linkedSignal reactivity - initial inputs update the displayed value', () => {
+    it('should update displayed latitude when initialLatitude input changes', () => {
+      fixture.componentRef.setInput('initialLatitude', 45);
+      fixture.detectChanges();
+      const input = getByTestId('latitude-input') as HTMLInputElement;
+      expect(+input.value).toBe(45);
+    });
+
+    it('should update displayed longitude when initialLongitude input changes', () => {
+      fixture.componentRef.setInput('initialLongitude', 10);
+      fixture.detectChanges();
+      const input = getByTestId('longitude-input') as HTMLInputElement;
+      expect(+input.value).toBe(10);
+    });
+
+    it('should update displayed azimuth as "45.0" when initialAzimuth input changes to integer', () => {
+      fixture.componentRef.setInput('initialAzimuth', 45);
+      fixture.detectChanges();
+      const input = getByTestId('azimuth-input') as HTMLInputElement;
+      expect(input.value).toBe('45.0');
+    });
+
+    it('should update displayed azimuth without reformatting when initialAzimuth input changes to decimal', () => {
+      fixture.componentRef.setInput('initialAzimuth', 45.5);
+      fixture.detectChanges();
+      const input = getByTestId('azimuth-input') as HTMLInputElement;
+      expect(+input.value).toBe(45.5);
+    });
+  });
+
   describe('HTML rendering - initial attribute bindings', () => {
     it('should bind latitude min, max and step from config', () => {
       const input = getByTestId('latitude-input') as HTMLInputElement;
@@ -248,6 +295,53 @@ describe('LocationComponent', () => {
     it('should truncate azimuth to one decimal before emitting', () => {
       triggerInput('azimuth-input', '45.15');
       expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ azimuth: 45.1 }));
+    });
+
+    it('should not emit when latitude is cleared', () => {
+      triggerInput('latitude-input', '');
+      expect(component.locationChange.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not emit when longitude is cleared', () => {
+      triggerInput('longitude-input', '');
+      expect(component.locationChange.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not emit when azimuth is cleared', () => {
+      triggerInput('azimuth-input', '');
+      expect(component.locationChange.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not emit when latitude receives an invalid value', () => {
+      triggerInput('latitude-input', 'abc');
+      expect(component.locationChange.emit).not.toHaveBeenCalled();
+    });
+
+    it('should resume emitting after a valid value follows an empty field', () => {
+      triggerInput('latitude-input', '');
+      triggerInput('latitude-input', '45');
+      expect(component.locationChange.emit).toHaveBeenCalledTimes(1);
+      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ latitude: 45 }));
+    });
+  });
+
+  describe('HTML rendering - no error shown on empty field', () => {
+    it('should not show latitude error when field is cleared', () => {
+      triggerInput('latitude-input', '');
+      expect(getByTestId('latitude-max-error')).toBeNull();
+      expect(getByTestId('latitude-min-error')).toBeNull();
+    });
+
+    it('should not show longitude error when field is cleared', () => {
+      triggerInput('longitude-input', '');
+      expect(getByTestId('longitude-max-error')).toBeNull();
+      expect(getByTestId('longitude-min-error')).toBeNull();
+    });
+
+    it('should not show azimuth error when field is cleared', () => {
+      triggerInput('azimuth-input', '');
+      expect(getByTestId('azimuth-max-error')).toBeNull();
+      expect(getByTestId('azimuth-min-error')).toBeNull();
     });
   });
 });

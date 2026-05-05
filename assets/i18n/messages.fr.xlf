@@ -2096,7 +2096,7 @@
     <unit id="6738867123972990167">
       <segment state="initial">
         <source>Study <ph id="0" equiv="PH" disp="label"/> already exists. Do you want to replace it?</source>
-        <target>L&apos;étude <ph id="0" equiv="PH" disp="study.title"/> existe déjà. Souhaitez-vous la remplacer ?</target>
+        <target>L&apos;étude <ph id="0" equiv="PH" disp="label"/> existe déjà. Souhaitez-vous la remplacer ?</target>
       </segment>
     </unit>
     <unit id="1203647783433086430">

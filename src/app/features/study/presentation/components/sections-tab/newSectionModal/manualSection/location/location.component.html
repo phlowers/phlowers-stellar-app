@@ -10,7 +10,7 @@
     [attr.step]="config.latitude.step"
     [attr.min]="config.latitude.min"
     [attr.max]="config.latitude.max"
-    [value]="initialLatitude()"
+    [value]="latitudeValue()"
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isLatitudeOverMax() || isLatitudeUnderMin() ? true : null"
@@ -56,7 +56,7 @@
     [attr.step]="config.longitude.step"
     [attr.min]="config.longitude.min"
     [attr.max]="config.longitude.max"
-    [value]="initialLongitude()"
+    [value]="longitudeValue()"
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isLongitudeOverMax() || isLongitudeUnderMin() ? true : null"
@@ -106,7 +106,7 @@
     [attr.step]="config.azimuth.step"
     [attr.min]="config.azimuth.min"
     [attr.max]="config.azimuth.max"
-    [value]="initialAzimuth()"
+    [value]="azimuthDisplay()"
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isAzimuthOverMax() || isAzimuthUnderMin() ? true : null"
