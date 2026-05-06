@@ -15,18 +15,19 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
   styleUrl: './location.component.scss'
 })
 export class LocationComponent {
-  readonly initialLatitude = input<number>(LOCATION_CONFIG.latitude.default);
-  readonly initialLongitude = input<number>(LOCATION_CONFIG.longitude.default);
-  readonly initialAzimuth = input<number>(LOCATION_CONFIG.azimuth.default);
+  readonly initialLatitude = input<number | null>(null);
+  readonly initialLongitude = input<number | null>(null);
+  readonly initialAzimuth = input<number | null>(null);
+  readonly useDefaults = input<boolean>(false);
 
   readonly locationChange = output<LocationData>();
   readonly isValidChange = output<boolean>();
 
   protected readonly config = LOCATION_CONFIG;
 
-  protected readonly latitudeValue = linkedSignal<number | null>(() => this.initialLatitude());
-  protected readonly longitudeValue = linkedSignal<number | null>(() => this.initialLongitude());
-  protected readonly azimuthValue = linkedSignal<number | null>(() => this.initialAzimuth());
+  protected readonly latitudeValue = linkedSignal<number | null>(() => this.initialLatitude() ?? (this.useDefaults() ? LOCATION_CONFIG.latitude.default : null));
+  protected readonly longitudeValue = linkedSignal<number | null>(() => this.initialLongitude() ?? (this.useDefaults() ? LOCATION_CONFIG.longitude.default : null));
+  protected readonly azimuthValue = linkedSignal<number | null>(() => this.initialAzimuth() ?? (this.useDefaults() ? LOCATION_CONFIG.azimuth.default : null));
 
   /** Formats the azimuth for display: integers show one decimal (e.g. 0 → "0.0"). */
   protected readonly azimuthDisplay = computed(() => {

@@ -20,6 +20,7 @@ import { ImportSectionComponent } from './import-section/import-section.componen
 import { NotificationService } from '@services/notification/notification.service';
 import { SectionSourceMode } from './newSectionModal.interfaces';
 import { cloneDeep } from 'lodash';
+import { LocationData } from './manualSection/location/location.interfaces';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -72,6 +73,8 @@ export class NewSectionModalComponent {
   areAllRequiredFieldsFilled = signal<boolean>(false);
   isNameUnique = signal<boolean>(false);
   supportsBoundsErrors = signal<boolean>(false);
+  isLocationValid = signal<boolean>(true);
+  locationData = signal<LocationData | null>(null);
   /** Incremented to trigger a reset of the import outcomes in the ImportSectionComponent. */
   readonly importResetToken = signal<number>(0);
 
@@ -115,8 +118,21 @@ export class NewSectionModalComponent {
     this.checkFields();
   }
 
+  onLocationChange(location: LocationData) {
+    this.locationData.set(location);
+  }
+
   onValidate() {
-    this.outputSection.emit(this.section());
+    const location = this.locationData();
+    const updatedSection = location
+      ? {
+          ...this.section(),
+          startLatitude: location.latitude,
+          startLongitude: location.longitude,
+          startAzimuth: location.azimuth
+        }
+      : this.section();
+    this.outputSection.emit(updatedSection);
     this.isOpenChange.emit(false);
   }
 

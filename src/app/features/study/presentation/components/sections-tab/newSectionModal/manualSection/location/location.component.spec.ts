@@ -26,6 +26,7 @@ describe('LocationComponent', () => {
 
     fixture = TestBed.createComponent(LocationComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('useDefaults', true);
     fixture.detectChanges();
   });
 
