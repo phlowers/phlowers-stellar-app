@@ -23,8 +23,8 @@ export function parseFloatOrNull(value: unknown): number | null {
 export function parseBooleanOrNull(value: unknown): boolean | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean') return value;
-  if (value === 'true' || value === '1') return true;
-  if (value === 'false' || value === '0') return false;
+  if (value === 'true' || value === '1' || value === 'OUI') return true;
+  if (value === 'false' || value === '0' || value === 'NON') return false;
   return null;
 }
 

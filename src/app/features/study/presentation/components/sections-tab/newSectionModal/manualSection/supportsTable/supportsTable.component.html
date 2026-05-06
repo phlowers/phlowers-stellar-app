@@ -465,13 +465,17 @@
             [ngModel]="support.chainV"
             optionLabel="label"
             optionValue="value"
+            [showClear]="true"
+            placeholder="—"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
             [inputId]="'chainV' + rowIndex"
             data-testid="chain-v-select"
           />
         } @else {
           <p class="read-only_info">
-            {{ support.chainV ? optionsChainV[0].label : optionsChainV[1].label }}
+            {{
+              support.chainV === true ? optionsChainV[0].label : support.chainV === false ? optionsChainV[1].label : '—'
+            }}
           </p>
         }
       </td>
