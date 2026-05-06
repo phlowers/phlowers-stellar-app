@@ -115,7 +115,6 @@
               [max]="limits.spanLength.max"
               aria-label="span length"
               i18n-aria-label
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.spanLength"
               [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
@@ -270,7 +269,6 @@
               [max]="limits.chainLength.max"
               step="0.01"
               aria-label="chain length"
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.chainLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
@@ -312,7 +310,6 @@
               [max]="limits.chainWeight.max"
               step="0.01"
               aria-label="chain weight"
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               i18n-aria-label
               [ngModel]="support.chainWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
@@ -490,7 +487,6 @@
               step="0.01"
               aria-label="counter weight"
               i18n-aria-label
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.counterWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
               [id]="'counterWeight' + rowIndex"
@@ -594,7 +590,6 @@
               step="0.01"
               aria-label="chain surface"
               i18n-aria-label
-              [pKeyFilter]="onlyPositiveNumbersWithDecimal"
               [ngModel]="support.chainSurface"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
               [id]="'chainSurface' + rowIndex"

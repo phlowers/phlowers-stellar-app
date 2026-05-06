@@ -97,7 +97,6 @@ export class SupportsTableComponent implements OnInit {
   readonly limits = SUPPORT_FIELD_LIMITS;
 
   public onlyPositiveNumbers = /^\d*$/;
-  public onlyPositiveNumbersWithDecimal = /^\d*[,.]?\d{0,2}$/;
 
   readonly truncateTwoDecimals = truncateTwoDecimals;
 
