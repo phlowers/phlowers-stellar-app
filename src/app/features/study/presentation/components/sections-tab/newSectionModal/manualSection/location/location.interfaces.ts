@@ -1,5 +1,5 @@
 export interface LocationData {
-  latitude: number;
-  longitude: number;
-  azimuth: number;
+  latitude: number | null;
+  longitude: number | null;
+  azimuth: number | null;
 }

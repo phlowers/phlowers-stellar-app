@@ -10,20 +10,18 @@
     [attr.step]="config.latitude.step"
     [attr.min]="config.latitude.min"
     [attr.max]="config.latitude.max"
-    [value]="latitudeValue()"
+    [value]="latitudeValue() ?? ''"
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isLatitudeOverMax() || isLatitudeUnderMin() ? true : null"
-    [attr.aria-errormessage]="
-      isLatitudeOverMax() ? 'location-latitude-max-error' : isLatitudeUnderMin() ? 'location-latitude-min-error' : null
-    "
+    [attr.aria-errormessage]="latitudeErrorId()"
     (input)="onLatitudeInput($event)"
   />
   <p-inputgroup-addon>°</p-inputgroup-addon>
 </p-inputgroup>
 @if (isLatitudeOverMax()) {
   <p-message
-    id="location-latitude-max-error"
+    [id]="errorIds.latitude.max"
     data-testid="latitude-max-error"
     severity="error"
     size="small"
@@ -35,7 +33,7 @@
 }
 @if (isLatitudeUnderMin()) {
   <p-message
-    id="location-latitude-min-error"
+    [id]="errorIds.latitude.min"
     data-testid="latitude-min-error"
     severity="error"
     size="small"
@@ -56,24 +54,18 @@
     [attr.step]="config.longitude.step"
     [attr.min]="config.longitude.min"
     [attr.max]="config.longitude.max"
-    [value]="longitudeValue()"
+    [value]="longitudeValue() ?? ''"
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isLongitudeOverMax() || isLongitudeUnderMin() ? true : null"
-    [attr.aria-errormessage]="
-      isLongitudeOverMax()
-        ? 'location-longitude-max-error'
-        : isLongitudeUnderMin()
-          ? 'location-longitude-min-error'
-          : null
-    "
+    [attr.aria-errormessage]="longitudeErrorId()"
     (input)="onLongitudeInput($event)"
   />
   <p-inputgroup-addon>°</p-inputgroup-addon>
 </p-inputgroup>
 @if (isLongitudeOverMax()) {
   <p-message
-    id="location-longitude-max-error"
+    [id]="errorIds.longitude.max"
     data-testid="longitude-max-error"
     severity="error"
     size="small"
@@ -85,7 +77,7 @@
 }
 @if (isLongitudeUnderMin()) {
   <p-message
-    id="location-longitude-min-error"
+    [id]="errorIds.longitude.min"
     data-testid="longitude-min-error"
     severity="error"
     size="small"
@@ -110,16 +102,14 @@
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isAzimuthOverMax() || isAzimuthUnderMin() ? true : null"
-    [attr.aria-errormessage]="
-      isAzimuthOverMax() ? 'location-azimuth-max-error' : isAzimuthUnderMin() ? 'location-azimuth-min-error' : null
-    "
+    [attr.aria-errormessage]="azimuthErrorId()"
     (input)="onAzimuthInput($event)"
   />
   <p-inputgroup-addon>°</p-inputgroup-addon>
 </p-inputgroup>
 @if (isAzimuthOverMax()) {
   <p-message
-    id="location-azimuth-max-error"
+    [id]="errorIds.azimuth.max"
     data-testid="azimuth-max-error"
     severity="error"
     size="small"
@@ -131,7 +121,7 @@
 }
 @if (isAzimuthUnderMin()) {
   <p-message
-    id="location-azimuth-min-error"
+    [id]="errorIds.azimuth.min"
     data-testid="azimuth-min-error"
     severity="error"
     size="small"
