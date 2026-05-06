@@ -14,7 +14,7 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { CABLE_SPAN_MANIP_DEFAULTS, CableSpanManipFormControls } from './cable-span-manip.interfaces';
-import { truncateDecimals } from '@shared/helpers/truncateDecimals';
+import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 
 @Component({
   selector: 'app-cable-span-manip',
@@ -123,7 +123,7 @@ export class CableSpanManipComponent implements OnInit {
   readonly isWithChain = computed(() => this.anchoringSignal() === 'with_chain');
   readonly isWithSling = computed(() => this.anchoringSignal() === 'with_sling');
 
-  readonly truncateDecimals = truncateDecimals;
+  readonly truncateTwoDecimals = truncateTwoDecimals;
 
   constructor() {
     // Track dirty state whenever any enabled form field changes.

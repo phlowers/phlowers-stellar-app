@@ -1,0 +1,133 @@
+<p class="title" i18n="@@supportCoordinatesTitle" id="support1location">Support 1 coordinates:</p>
+
+<label class="label-lat" for="location-latitude" i18n>Latitude</label>
+<p-inputgroup class="input-lat">
+  <input
+    pInputText
+    type="number"
+    id="location-latitude"
+    data-testid="latitude-input"
+    [attr.step]="config.latitude.step"
+    [attr.min]="config.latitude.min"
+    [attr.max]="config.latitude.max"
+    [value]="latitudeValue() ?? ''"
+    fluid
+    aria-describedby="support1location"
+    [attr.aria-invalid]="isLatitudeOverMax() || isLatitudeUnderMin() ? true : null"
+    [attr.aria-errormessage]="latitudeErrorId()"
+    (input)="onLatitudeInput($event)"
+  />
+  <p-inputgroup-addon>°</p-inputgroup-addon>
+</p-inputgroup>
+@if (isLatitudeOverMax()) {
+  <p-message
+    [id]="errorIds.latitude.max"
+    data-testid="latitude-max-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-lat"
+  >
+    <ng-container i18n>Maximum value:</ng-container> {{ config.latitude.max }}
+  </p-message>
+}
+@if (isLatitudeUnderMin()) {
+  <p-message
+    [id]="errorIds.latitude.min"
+    data-testid="latitude-min-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-lat"
+  >
+    <ng-container i18n>Minimum value:</ng-container> {{ config.latitude.min }}
+  </p-message>
+}
+
+<label class="label-long" for="location-longitude" i18n>Longitude</label>
+<p-inputgroup class="input-long">
+  <input
+    pInputText
+    type="number"
+    id="location-longitude"
+    data-testid="longitude-input"
+    [attr.step]="config.longitude.step"
+    [attr.min]="config.longitude.min"
+    [attr.max]="config.longitude.max"
+    [value]="longitudeValue() ?? ''"
+    fluid
+    aria-describedby="support1location"
+    [attr.aria-invalid]="isLongitudeOverMax() || isLongitudeUnderMin() ? true : null"
+    [attr.aria-errormessage]="longitudeErrorId()"
+    (input)="onLongitudeInput($event)"
+  />
+  <p-inputgroup-addon>°</p-inputgroup-addon>
+</p-inputgroup>
+@if (isLongitudeOverMax()) {
+  <p-message
+    [id]="errorIds.longitude.max"
+    data-testid="longitude-max-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-long"
+  >
+    <ng-container i18n>Maximum value:</ng-container> {{ config.longitude.max }}
+  </p-message>
+}
+@if (isLongitudeUnderMin()) {
+  <p-message
+    [id]="errorIds.longitude.min"
+    data-testid="longitude-min-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-long"
+  >
+    <ng-container i18n>Minimum value:</ng-container> {{ config.longitude.min }}
+  </p-message>
+}
+
+<label class="label-az" for="location-azimuth" i18n>Azimuth</label>
+<p-inputgroup class="input-az">
+  <input
+    pInputText
+    type="number"
+    id="location-azimuth"
+    data-testid="azimuth-input"
+    [attr.step]="config.azimuth.step"
+    [attr.min]="config.azimuth.min"
+    [attr.max]="config.azimuth.max"
+    [value]="azimuthDisplay()"
+    fluid
+    aria-describedby="support1location"
+    [attr.aria-invalid]="isAzimuthOverMax() || isAzimuthUnderMin() ? true : null"
+    [attr.aria-errormessage]="azimuthErrorId()"
+    (input)="onAzimuthInput($event)"
+  />
+  <p-inputgroup-addon>°</p-inputgroup-addon>
+</p-inputgroup>
+@if (isAzimuthOverMax()) {
+  <p-message
+    [id]="errorIds.azimuth.max"
+    data-testid="azimuth-max-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-az"
+  >
+    <ng-container i18n>Maximum value:</ng-container> {{ config.azimuth.max }}
+  </p-message>
+}
+@if (isAzimuthUnderMin()) {
+  <p-message
+    [id]="errorIds.azimuth.min"
+    data-testid="azimuth-min-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-az"
+  >
+    <ng-container i18n>Minimum value:</ng-container> {{ config.azimuth.min }}
+  </p-message>
+}

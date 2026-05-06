@@ -5,18 +5,53 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+function truncateToDecimals(event: Event, decimals: number): void {
+  const input = event.target as HTMLInputElement;
+  const sepIndex = input.value.indexOf('.');
+  if (sepIndex !== -1 && input.value.substring(sepIndex + 1).length > decimals) {
+    input.value = input.value.substring(0, sepIndex + 1 + decimals);
+  }
+}
+
+/**
+ * Returns the string value truncated to at most `decimals` decimal places.
+ * Pure function — does not touch the DOM.
+ */
+function truncateStringToDecimals(value: string, decimals: number): string {
+  const sepIndex = value.indexOf('.');
+  if (sepIndex !== -1 && value.substring(sepIndex + 1).length > decimals) {
+    return value.substring(0, sepIndex + 1 + decimals);
+  }
+  return value;
+}
+
 /**
  * Truncates the value of a number input to at most 2 decimal places.
  * Intended as an `(input)` event handler on `<input type="number" step="0.01">` elements.
  *
- * Mutates `event.target.value` in place so Angular's form binding picks up the clamped value.
+ * @param event - The DOM input event fired by the number input element
+ */
+export function truncateTwoDecimals(event: Event): void {
+  truncateToDecimals(event, 2);
+}
+
+/**
+ * Truncates the value of a number input to at most 1 decimal place.
+ * Intended as an `(input)` event handler on `<input type="number" step="0.1">` elements.
  *
  * @param event - The DOM input event fired by the number input element
  */
-export function truncateDecimals(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  const sepIndex = input.value.indexOf('.');
-  if (sepIndex !== -1 && input.value.substring(sepIndex + 1).length > 2) {
-    input.value = input.value.substring(0, sepIndex + 3);
-  }
+export function truncateOneDecimal(event: Event): void {
+  truncateToDecimals(event, 1);
+}
+
+/**
+ * Returns the string `value` truncated to at most 1 decimal place.
+ * Pure function — does not touch the DOM. Use this when the caller controls the DOM mutation.
+ *
+ * @param value - The raw string value from a number input
+ * @returns The truncated string
+ */
+export function truncateOneDecimalValue(value: string): string {
+  return truncateStringToDecimals(value, 1);
 }

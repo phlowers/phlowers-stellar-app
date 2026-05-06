@@ -29,7 +29,7 @@ import {
   getSupportFieldValues,
   SUPPORT_FIELD_LIMITS
 } from './helpers';
-import { truncateDecimals } from '@shared/helpers/truncateDecimals';
+import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 
 /**
  * Editable table of supports within a section.
@@ -99,7 +99,7 @@ export class SupportsTableComponent implements OnInit {
   public onlyPositiveNumbers = /^\d*$/;
   public onlyPositiveNumbersWithDecimal = /^\d*[,.]?\d{0,2}$/;
 
-  readonly truncateDecimals = truncateDecimals;
+  readonly truncateTwoDecimals = truncateTwoDecimals;
 
   optionsChainV = [
     { label: $localize`Yes`, value: true },

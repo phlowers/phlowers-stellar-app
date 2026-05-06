@@ -1,0 +1,63 @@
+@use 'abstract.extracts' as app;
+
+:host {
+  @apply grid gap-x-4;
+  grid-template-columns: repeat(4, auto);
+  grid-template-areas:
+    '. labelLat labelLong labelAz'
+    'title inputLat inputLong inputAz'
+    '. errorLat errorLong errorAz';
+  align-items: end;
+}
+
+.title {
+  @apply mb-0;
+  @extend %text-l-600;
+  grid-area: title;
+}
+
+.label-lat {
+  grid-area: labelLat;
+}
+
+.label-long {
+  grid-area: labelLong;
+}
+
+.label-az {
+  grid-area: labelAz;
+}
+
+.input-lat {
+  grid-area: inputLat;
+}
+
+.input-long {
+  grid-area: inputLong;
+}
+
+.input-az {
+  grid-area: inputAz;
+}
+
+.error-lat {
+  grid-area: errorLat;
+}
+
+.error-long {
+  grid-area: errorLong;
+}
+
+.error-az {
+  grid-area: errorAz;
+}
+
+.error-lat,
+.error-long,
+.error-az {
+  align-self: start;
+}
+
+input {
+  min-width: 9.375rem;
+}

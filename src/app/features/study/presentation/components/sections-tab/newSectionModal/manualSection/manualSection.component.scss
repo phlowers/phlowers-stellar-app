@@ -1,5 +1,9 @@
 @use 'abstract.extracts' as app;
 
+:host {
+  flex-grow: 1;
+}
+
 .section-form-part {
   @apply mt-4;
 }
@@ -21,6 +25,11 @@ dt {
   @extend %label-style;
 }
 
-:host {
-  flex-grow: 1;
+.vertical-separator {
+  border-width: 0 0.0625rem 0 0;
+  border-color: var(--star-dust-300);
+  width: 0rem;
+  height: auto;
+  align-self: stretch;
+  margin: 0;
 }
