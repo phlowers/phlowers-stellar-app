@@ -19,6 +19,7 @@ import { areAllRequiredFieldsFilled, hasSupportsBoundsErrors } from './newSectio
 import { ImportSectionComponent } from './import-section/import-section.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { SectionSourceMode } from './newSectionModal.interfaces';
+import { cloneDeep } from 'lodash';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -148,7 +149,7 @@ export class NewSectionModalComponent {
     }
 
     this.source.set('manual');
-    this.setSection.emit(section);
+    this.setSection.emit(cloneDeep(section));
     this.setMode.emit('edit');
     this.isOpenChange.emit(false);
     Promise.resolve().then(() => this.isOpenChange.emit(true));
