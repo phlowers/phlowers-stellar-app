@@ -92,7 +92,7 @@ export class SupportsTableComponent implements OnInit {
   private readonly attachmentService = inject(AttachmentService);
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
-    value: index + 1
+    value: String(index + 1)
   }));
   readonly limits = SUPPORT_FIELD_LIMITS;
 
