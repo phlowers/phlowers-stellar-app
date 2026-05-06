@@ -112,6 +112,33 @@ export class AppDatabase extends Dexie {
       ...CATALOG_OBSTACLE_TYPE_SCHEMA,
       ...METADATA_SCHEMA
     });
+
+    // V4: adds support_name and attachment_set indexes on catAttachments for Dexie-side filtering.
+    this.version(4).stores({
+      ...USER_SCHEMA_V3,
+      ...STUDY_SCHEMA,
+      ...CATALOG_ATTACHMENT_SCHEMA,
+      ...CATALOG_CABLE_SCHEMA,
+      ...CATALOG_CHAIN_SCHEMA,
+      ...CATALOG_LINE_SCHEMA,
+      ...CATALOG_MAINTENANCE_SCHEMA,
+      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+      ...METADATA_SCHEMA
+    });
+
+    // V5: adds compound index [support_name+attachment_set] on catAttachments
+    // to allow IndexedDB to filter and order in a single indexed scan.
+    this.version(5).stores({
+      ...USER_SCHEMA_V3,
+      ...STUDY_SCHEMA,
+      ...CATALOG_ATTACHMENT_SCHEMA,
+      ...CATALOG_CABLE_SCHEMA,
+      ...CATALOG_CHAIN_SCHEMA,
+      ...CATALOG_LINE_SCHEMA,
+      ...CATALOG_MAINTENANCE_SCHEMA,
+      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+      ...METADATA_SCHEMA
+    });
   }
 }
 

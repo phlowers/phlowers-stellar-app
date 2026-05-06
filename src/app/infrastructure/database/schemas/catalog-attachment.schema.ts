@@ -9,5 +9,5 @@
  * Dexie schema for the catalog attachments table
  */
 export const CATALOG_ATTACHMENT_SCHEMA = {
-  catAttachments: `&uuid, support_id_catalog, support_idr, support_adr, support_tower, support_family, position, X, Y, Z, L`
+  catAttachments: `&uuid, support_id_catalog, support_idr, support_adr, support_tower, support_family, position, X, Y, Z, L, support_name, attachment_set, [support_name+attachment_set]`
 };
