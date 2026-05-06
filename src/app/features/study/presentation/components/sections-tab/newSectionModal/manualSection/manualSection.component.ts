@@ -210,7 +210,8 @@ export class ManualSectionComponent implements OnInit {
         table.find((item) => item.regional_team_id === this.section().regional_team_id)?.regional_team || ''
       );
     }
-    let linesTable = await this.linesService.getLines();
+    const allLinesTable = await this.linesService.getLines();
+    let linesTable = allLinesTable;
     orderedLineTableProperties.forEach((id) => {
       linesTable = linesTable.filter(
         (item) =>
@@ -218,6 +219,18 @@ export class ManualSectionComponent implements OnInit {
           item[id] === this.section()[lineTablePropertiesToSectionProperties[id]]
       );
     });
+    if (linesTable.length === 0) {
+      const linkName = this.section().link_name;
+      const litCode = this.section().lit_code;
+      if (linkName) {
+        linesTable = allLinesTable.filter((item) => item.link_idr === linkName);
+      } else if (litCode) {
+        linesTable = allLinesTable.filter((item) => item.lit_idr === litCode);
+      }
+      if (linesTable.length > 0) {
+        (this.section() as unknown as Record<string, unknown>)['voltage_idr'] = linesTable[0].voltage_idr;
+      }
+    }
     this.linesFilterTable.set(sortLines(linesTable));
     if (this.mode() === 'view') {
       const linkLine = linesTable.find((item) => item.link_idr === this.section().link_name);
@@ -389,7 +402,8 @@ export class ManualSectionComponent implements OnInit {
       });
     }
 
-    let linesTable = await this.linesService.getLines();
+    const allLinesTable = await this.linesService.getLines();
+    let linesTable = allLinesTable;
     orderedLineTableProperties.forEach((id) => {
       if (id === type) {
         linesTable = linesTable.filter((item) => !event.value || item[id] === event.value);
@@ -401,6 +415,18 @@ export class ManualSectionComponent implements OnInit {
         );
       }
     });
+    if (linesTable.length === 0) {
+      const linkName = this.section().link_name;
+      const litCode = this.section().lit_code;
+      if (linkName) {
+        linesTable = allLinesTable.filter((item) => item.link_idr === linkName);
+      } else if (litCode) {
+        linesTable = allLinesTable.filter((item) => item.lit_idr === litCode);
+      }
+      if (linesTable.length > 0) {
+        (this.section() as unknown as Record<string, unknown>)['voltage_idr'] = linesTable[0].voltage_idr;
+      }
+    }
     this.linesFilterTable.set(sortLines(linesTable));
     if (linesTable.length === 1) {
       orderedLineTableProperties.forEach((id) => {

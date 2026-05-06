@@ -81,6 +81,7 @@ const buildAccroche = (overrides: Record<string, string | null> = {}): Record<st
   HAUTEUR_SOUS_CONSOLE: '2.5',
   LONGUEUR_BRAS: '3.0',
   CHAINE_DRN_ADR: 'ChainA',
+  CHAINE_DRN_IDR: 'ChainA_IDR',
   CHAINE_DRN_LONGUEUR: '5.0',
   CHAINE_DRN_POIDS: '50.0',
   CHAINE_EN_V: 'false',
@@ -128,7 +129,10 @@ const buildValidGeoLiaisonPayload = (): Record<string, unknown> => ({
             LIT_ADR: 'LitName',
             LIT_IDR: 'LIT001',
             BRANCHE_IDR: 'FLAMAL73MENUE01',
-            TENSION_ELECTRIQUE_ADR: '225kV'
+            TENSION_ELECTRIQUE_IDR: '225kV',
+            TENSION_ELECTRIQUE_ADR: '225 KV',
+            LIAISON_IDR: 'LIA001',
+            LIAISON_ADR: 'Liaison 225kV Flamal-Menuet'
           }
         ]
       },
@@ -529,8 +533,9 @@ describe('SectionImportService', () => {
 
       expect(result?.lit_name).toBe('LitName');
       expect(result?.lit_code).toBe('LIT001');
+      expect(result?.link_name).toBe('LIA001');
       expect(result?.branch_idr).toBe('01');
-      expect(result?.voltage_idr).toBe('225kV');
+      expect(result?.voltage_idr).toBeUndefined();
     });
 
     it('should lookup maintenance IDs from MaintenanceService', async () => {
@@ -650,6 +655,7 @@ describe('SectionImportService', () => {
         HAUTEUR_SOUS_CONSOLE: null,
         LONGUEUR_BRAS: null,
         CHAINE_DRN_ADR: null,
+        CHAINE_DRN_IDR: null,
         CHAINE_DRN_LONGUEUR: null,
         CHAINE_DRN_POIDS: null,
         CHAINE_EN_V: null,
