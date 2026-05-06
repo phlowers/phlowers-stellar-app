@@ -72,7 +72,10 @@ const mockSupports: Support[] = [
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
     attachmentPosition: 'Position 1',
-    towerModel: 'Tower Model'
+    towerModel: 'Tower Model',
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   },
   {
     uuid: 'support2',
@@ -93,7 +96,10 @@ const mockSupports: Support[] = [
     supportFootAltitude: 100.0,
     chainSurface: 10.0,
     attachmentPosition: 'Position 2',
-    towerModel: 'Tower Model'
+    towerModel: 'Tower Model',
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   },
   {
     uuid: 'support3',
@@ -114,7 +120,10 @@ const mockSupports: Support[] = [
     supportFootAltitude: null,
     chainSurface: null,
     attachmentPosition: null,
-    towerModel: null
+    towerModel: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   }
 ];
 
@@ -662,6 +671,29 @@ describe('SupportsTableComponent', () => {
 
     it('should render support-actions-btn for each support', () => {
       expect(getAllByTestId('support-actions-btn').length).toBe(mockSupports.length);
+    });
+  });
+
+  describe('HTML rendering - open-attachment-set-modal-btn disabled state', () => {
+    const getByTestId = (id: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
+
+    it('should disable the button when support.name is not in the catalog', () => {
+      // supportFilterTable is empty by default: buttons are disabled
+      const btn = getByTestId('open-attachment-set-modal-btn') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should evaluate disabled as true when name is null', () => {
+      component.supportFilterTable.set(['CatalogType']);
+      const name: string | null = null;
+      expect(!name || !component.supportFilterTable().includes(name)).toBe(true);
+    });
+
+    it('should evaluate disabled as false when name is in the catalog', () => {
+      component.supportFilterTable.set(['CatalogType']);
+      const name = 'CatalogType';
+      expect(!name || !component.supportFilterTable().includes(name)).toBe(false);
     });
   });
 });

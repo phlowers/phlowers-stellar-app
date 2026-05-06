@@ -388,7 +388,7 @@
               <button
                 app-btn
                 btnSize="s"
-                [disabled]="supplementarySupportFilterTable().includes(support.name || '')"
+                [disabled]="!support.name || !supportFilterTable().includes(support.name)"
                 btnStyle="text"
                 aria-label="open attachment set modal"
                 i18n-aria-label
