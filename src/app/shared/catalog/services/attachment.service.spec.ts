@@ -220,7 +220,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 1',
+          support_name: 'idr1',
           support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -233,7 +233,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 2',
+          support_name: 'idr2',
           support_tower: 'tower2',
           attachment_set: 2,
           attachment_altitude: 11.0,
@@ -286,7 +286,7 @@ describe('AttachmentService', () => {
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
     });
 
-    it('should filter out attachments with missing support_adr', async () => {
+    it('should filter out attachments with missing support_idr and support_adr', async () => {
       const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
@@ -302,7 +302,7 @@ describe('AttachmentService', () => {
         },
         {
           support_id_catalog: 'cat2',
-          support_idr: 'idr2',
+          support_idr: '',
           support_adr: '',
           support_tower: 'tower2',
           support_family: 'Family 2',
@@ -361,13 +361,13 @@ describe('AttachmentService', () => {
 
       await importPromise;
 
-      // Should only add attachments with valid support_adr
+      // Should only add attachments with valid support_idr or support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 1',
+          support_name: 'idr1',
           support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -380,7 +380,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 3',
+          support_name: 'idr3',
           support_tower: 'tower3',
           attachment_set: 3,
           attachment_altitude: 12.0,
@@ -447,7 +447,7 @@ describe('AttachmentService', () => {
       await expect(importPromise).resolves.toBeUndefined();
     });
 
-    it('should handle CSV data with mixed valid and invalid support_adr values', async () => {
+    it('should handle CSV data with mixed valid, fallback and invalid support_idr values', async () => {
       const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
@@ -463,7 +463,7 @@ describe('AttachmentService', () => {
         },
         {
           support_id_catalog: 'cat2',
-          support_idr: 'idr2',
+          support_idr: '',
           support_adr: '',
           support_tower: 'tower2',
           support_family: 'Family 2',
@@ -487,8 +487,8 @@ describe('AttachmentService', () => {
         },
         {
           support_id_catalog: 'cat4',
-          support_idr: 'idr4',
-          support_adr: null as unknown as string,
+          support_idr: '',
+          support_adr: 'Support 4',
           support_tower: 'tower4',
           support_family: 'Family 4',
           position: '4',
@@ -534,13 +534,13 @@ describe('AttachmentService', () => {
 
       await importPromise;
 
-      // Should only add attachments with valid support_adr
+      // Should only add attachments with valid support_idr or support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 1',
+          support_name: 'idr1',
           support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -553,7 +553,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 3',
+          support_name: 'idr3',
           support_tower: 'tower3',
           attachment_set: 3,
           attachment_altitude: 12.0,
@@ -561,6 +561,19 @@ describe('AttachmentService', () => {
           attachment_set_x: 0,
           attachment_set_y: 0,
           attachment_set_z: 12.0
+        },
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 4',
+          support_tower: 'tower4',
+          attachment_set: 4,
+          attachment_altitude: 13.0,
+          cross_arm_length: 3.5,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 13.0
         }
       ]);
     });
@@ -728,7 +741,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_tower: 'tower1',
-          support_name: 'Support 1',
+          support_name: 'idr1',
           attachment_set: 1,
           attachment_altitude: 10.5,
           cross_arm_length: 2.0,
@@ -741,7 +754,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_tower: 'tower2',
-          support_name: 'Support 2',
+          support_name: 'idr2',
           attachment_set: 2,
           attachment_altitude: 11,
           cross_arm_length: 2.5,

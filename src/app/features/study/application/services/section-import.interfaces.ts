@@ -26,6 +26,7 @@ export interface GeoLiaisonAccroche {
   PIED_X_LAMBERT93: string | null;
   PIED_Y_LAMBERT93: string | null;
   SUPPORT_ADR: string | null;
+  SUPPORT_IDR: string | null;
   SUPPORT_NUMERO: string | null;
   SUPPORT_TOWER: string | null;
 }

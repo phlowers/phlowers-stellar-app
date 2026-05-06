@@ -132,12 +132,12 @@ export class AttachmentService {
 
     const mapData = (data: AttachmentCsvDto[]): CatalogAttachmentEntity[] => {
       return data
-        .filter((item) => item.support_adr)
+        .filter((item) => item.support_idr || item.support_adr)
         .map((item) => ({
           uuid: uuidv4(),
           updated_at: new Date().toISOString(),
           created_at: new Date().toISOString(),
-          support_name: item.support_adr,
+          support_name: item.support_idr || item.support_adr,
           attachment_set: toNumber(item.position),
           attachment_altitude: parseFloat(item.Z),
           cross_arm_length: parseFloat(item.L),

@@ -91,6 +91,7 @@ const buildAccroche = (overrides: Record<string, string | null> = {}): Record<st
   PIED_X_LAMBERT93: '123456.0',
   PIED_Y_LAMBERT93: '789012.0',
   SUPPORT_ADR: 'Support A',
+  SUPPORT_IDR: 'Support_IDR_A',
   SUPPORT_NUMERO: '1',
   SUPPORT_TOWER: 'TowerX',
   ...overrides
@@ -665,6 +666,7 @@ describe('SectionImportService', () => {
         PIED_X_LAMBERT93: null,
         PIED_Y_LAMBERT93: null,
         SUPPORT_ADR: null,
+        SUPPORT_IDR: null,
         SUPPORT_NUMERO: null,
         SUPPORT_TOWER: null
       });

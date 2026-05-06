@@ -342,7 +342,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       supportFootAltitude: parseFloatOrNull(accroche.PIED_Z_LAMBERT93),
       xFootLambert93: parseFloatOrNull(accroche.PIED_X_LAMBERT93),
       yFootLambert93: parseFloatOrNull(accroche.PIED_Y_LAMBERT93),
-      name: accroche.SUPPORT_ADR ?? null,
+      name: accroche.SUPPORT_IDR ?? null,
       number: accroche.SUPPORT_NUMERO ?? null,
       towerModel: accroche.SUPPORT_TOWER ?? null,
       attachmentPosition: extractAttachmentPosition(portee.PORTEE_UNITAIRE_DESIGNATION)
