@@ -5,38 +5,86 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { truncateDecimals } from './truncateDecimals';
+import { truncateTwoDecimals, truncateOneDecimal, truncateOneDecimalValue } from './truncateDecimals';
 
 const makeEvent = (value: string) => ({ target: { value } as HTMLInputElement }) as unknown as Event;
 
-describe('truncateDecimals', () => {
+describe('truncateTwoDecimals', () => {
   it('should do nothing when value has no decimal separator', () => {
     const event = makeEvent('123');
-    truncateDecimals(event);
+    truncateTwoDecimals(event);
     expect((event.target as HTMLInputElement).value).toBe('123');
   });
 
   it('should do nothing when value has exactly 2 decimal places', () => {
     const event = makeEvent('1.23');
-    truncateDecimals(event);
+    truncateTwoDecimals(event);
     expect((event.target as HTMLInputElement).value).toBe('1.23');
   });
 
   it('should do nothing when value has fewer than 2 decimal places', () => {
     const event = makeEvent('1.2');
-    truncateDecimals(event);
+    truncateTwoDecimals(event);
     expect((event.target as HTMLInputElement).value).toBe('1.2');
   });
 
   it('should truncate to 2 decimal places when value has more', () => {
     const event = makeEvent('1.234');
-    truncateDecimals(event);
+    truncateTwoDecimals(event);
     expect((event.target as HTMLInputElement).value).toBe('1.23');
   });
 
   it('should truncate negative numbers with more than 2 decimal places', () => {
     const event = makeEvent('-1.234');
-    truncateDecimals(event);
+    truncateTwoDecimals(event);
     expect((event.target as HTMLInputElement).value).toBe('-1.23');
+  });
+});
+
+describe('truncateOneDecimal', () => {
+  it('should do nothing when value has no decimal separator', () => {
+    const event = makeEvent('123');
+    truncateOneDecimal(event);
+    expect((event.target as HTMLInputElement).value).toBe('123');
+  });
+
+  it('should do nothing when value has fewer than 2 decimal places', () => {
+    const event = makeEvent('1.2');
+    truncateOneDecimal(event);
+    expect((event.target as HTMLInputElement).value).toBe('1.2');
+  });
+
+  it('should truncate to 1 decimal place when value has more', () => {
+    const event = makeEvent('1.23');
+    truncateOneDecimal(event);
+    expect((event.target as HTMLInputElement).value).toBe('1.2');
+  });
+
+  it('should truncate negative numbers with more than 1 decimal places', () => {
+    const event = makeEvent('-1.23');
+    truncateOneDecimal(event);
+    expect((event.target as HTMLInputElement).value).toBe('-1.2');
+  });
+});
+
+describe('truncateOneDecimalValue', () => {
+  it('should return the value unchanged when it has no decimal separator', () => {
+    expect(truncateOneDecimalValue('123')).toBe('123');
+  });
+
+  it('should return the value unchanged when it has exactly 1 decimal place', () => {
+    expect(truncateOneDecimalValue('1.2')).toBe('1.2');
+  });
+
+  it('should return the value unchanged when it has fewer than 1 decimal place', () => {
+    expect(truncateOneDecimalValue('1.')).toBe('1.');
+  });
+
+  it('should truncate to 1 decimal place when value has more', () => {
+    expect(truncateOneDecimalValue('1.23')).toBe('1.2');
+  });
+
+  it('should truncate negative numbers with more than 1 decimal place', () => {
+    expect(truncateOneDecimalValue('-1.23')).toBe('-1.2');
   });
 });

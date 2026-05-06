@@ -414,31 +414,37 @@
     <p-tabpanel value="supports">
       <div class="flex flex-col gap-4 mt-2">
         @if (mode() === 'create' || mode() === 'edit') {
-          <div class="flex flex-col">
-            <label for="supportsAmount" i18n>Supports amount</label>
-            <div class="flex flex-row gap-2 justify-between items-start w-[9.375rem]">
-              <p-inputnumber
-                min="2"
-                fluid
-                [ngModel]="section().supports.length || 0"
-                [showButtons]="true"
-                buttonLayout="horizontal"
-                inputId="supportsAmount"
-                spinnerMode="horizontal"
-                aria-label="supports amount"
-                i18n-aria-label
-                (onBlur)="onSupportsAmountChangeBlur($event)"
-                (onInput)="onSupportsAmountChangeInput($event)"
-                data-testid="supports-amount-input"
-              >
-                <ng-template #incrementbuttonicon>
-                  <app-icon icon="add" />
-                </ng-template>
-                <ng-template #decrementbuttonicon>
-                  <app-icon icon="remove" />
-                </ng-template>
-              </p-inputnumber>
+          <div class="flex gap-4 items-start">
+            <div class="flex flex-col">
+              <label for="supportsAmount" i18n>Supports amount</label>
+              <div class="flex flex-row gap-2 justify-between items-start w-[9.375rem]">
+                <p-inputnumber
+                  min="2"
+                  fluid
+                  [ngModel]="section().supports.length || 0"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputId="supportsAmount"
+                  spinnerMode="horizontal"
+                  aria-label="supports amount"
+                  i18n-aria-label
+                  (onBlur)="onSupportsAmountChangeBlur($event)"
+                  (onInput)="onSupportsAmountChangeInput($event)"
+                  data-testid="supports-amount-input"
+                >
+                  <ng-template #incrementbuttonicon>
+                    <app-icon icon="add" />
+                  </ng-template>
+                  <ng-template #decrementbuttonicon>
+                    <app-icon icon="remove" />
+                  </ng-template>
+                </p-inputnumber>
+              </div>
             </div>
+
+            <hr class="vertical-separator" />
+
+            <app-location />
           </div>
           <div class="flex flex-row justify-between items-center mt-[-1rem]">
             <p class="flex flex-row gap-2 items-center mb-0">
