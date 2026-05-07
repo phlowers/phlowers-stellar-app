@@ -470,9 +470,17 @@
           />
         } @else {
           <p class="read-only_info">
-            {{
-              support.chainV === true ? optionsChainV[0].label : support.chainV === false ? optionsChainV[1].label : '—'
-            }}
+            @switch (support.chainV) {
+              @case (true) {
+                {{ optionsChainV[0].label }}
+              }
+              @case (false) {
+                {{ optionsChainV[1].label }}
+              }
+              @default {
+                —
+              }
+            }
           </p>
         }
       </td>

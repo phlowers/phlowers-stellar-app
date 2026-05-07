@@ -39,59 +39,14 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import { LocationComponent } from './location/location.component';
-
-// debounce to make it more fluid when dragging the slider
-/** Debounce delay in ms for refreshing studio plot when dragging the slider. */
-const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
-
-/**
- * Sorts catalog lines by voltage, placing 'NO_VOLTAGE' entries first.
- * @param lines - Array of catalog lines to sort
- * @returns Sorted array of catalog lines
- */
-const sortLines = (lines: CatalogLine[]) => {
-  return lines.sort((a, b) => {
-    const aHasNoVoltage = a.voltage_adr === 'NO_VOLTAGE';
-    const bHasNoVoltage = b.voltage_adr === 'NO_VOLTAGE';
-    if (aHasNoVoltage) {
-      return -1;
-    }
-    if (bHasNoVoltage) {
-      return 1;
-    }
-    return a.voltage_adr.localeCompare(b.voltage_adr);
-  });
-};
-
-/** Mapping from line table property keys to their corresponding `Section` property keys. */
-const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof Section> = {
-  voltage_idr: 'voltage_idr',
-  link_idr: 'link_name',
-  lit_idr: 'lit_code',
-  lit_adr: 'lit_name',
-  branch_idr: 'branch_idr',
-  branch_adr: 'branch_name'
-};
-
-/** Ordered maintenance hierarchy for cascading filter: center -> regional team -> maintenance team. */
-const orderedMaintenanceTableProperties: ('maintenance_center_id' | 'regional_team_id' | 'maintenance_team_id')[] = [
-  'maintenance_center_id',
-  'regional_team_id',
-  'maintenance_team_id'
-];
-
-/** Property keys from the lines catalog table used for cascading filters. */
-type LineTableProperties = 'voltage_idr' | 'link_idr' | 'lit_idr' | 'lit_adr' | 'branch_idr' | 'branch_adr';
-
-/** Ordered line table properties for cascading filter logic. */
-const orderedLineTableProperties: LineTableProperties[] = [
-  'voltage_idr',
-  'link_idr',
-  'lit_idr',
-  'lit_adr',
-  'branch_idr',
-  'branch_adr'
-];
+import {
+  DEBOUNCED_REFRESH_STUDIO_DELAY,
+  lineTablePropertiesToSectionProperties,
+  orderedLineTableProperties,
+  orderedMaintenanceTableProperties
+} from './manualSection.constantes';
+import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
+import { LineTableProperties } from './manualSection.interfaces';
 
 /**
  * Manual section editor component.
@@ -196,48 +151,43 @@ export class ManualSectionComponent implements OnInit {
   );
 
   async setupFilterTables() {
+    await Promise.all([this.setupMaintenanceFilter(), this.setupLinesFilter(), this.setupCablesFilter()]);
+  }
+
+  private async setupMaintenanceFilter(): Promise<void> {
     const table = await this.maintenanceService.getMaintenance();
     this.maintenanceFilterTable.set(sortBy(table, 'maintenance_team'));
-    if (this.mode() === 'view') {
-      this.maintenanceTeamRead.set(
-        table.find((item) => item.maintenance_team_id === this.section().maintenance_team_id)?.maintenance_team || ''
-      );
-      this.maintenanceCenterRead.set(
-        table.find((item) => item.maintenance_center_id === this.section().maintenance_center_id)?.maintenance_center ||
-          ''
-      );
-      this.regionalTeamRead.set(
-        table.find((item) => item.regional_team_id === this.section().regional_team_id)?.regional_team || ''
-      );
-    }
+    if (this.mode() !== 'view') return;
+    this.maintenanceTeamRead.set(
+      table.find((item) => item.maintenance_team_id === this.section().maintenance_team_id)?.maintenance_team ?? ''
+    );
+    this.maintenanceCenterRead.set(
+      table.find((item) => item.maintenance_center_id === this.section().maintenance_center_id)?.maintenance_center ??
+        ''
+    );
+    this.regionalTeamRead.set(
+      table.find((item) => item.regional_team_id === this.section().regional_team_id)?.regional_team ?? ''
+    );
+  }
+
+  private async setupLinesFilter(): Promise<void> {
     const allLinesTable = await this.linesService.getLines();
-    let linesTable = allLinesTable;
-    orderedLineTableProperties.forEach((id) => {
-      linesTable = linesTable.filter(
-        (item) =>
-          !this.section()[lineTablePropertiesToSectionProperties[id]] ||
-          item[id] === this.section()[lineTablePropertiesToSectionProperties[id]]
-      );
-    });
-    if (linesTable.length === 0) {
-      const linkName = this.section().link_name;
-      const litCode = this.section().lit_code;
-      if (linkName) {
-        linesTable = allLinesTable.filter((item) => item.link_idr === linkName);
-      } else if (litCode) {
-        linesTable = allLinesTable.filter((item) => item.lit_idr === litCode);
-      }
-      if (linesTable.length > 0) {
-        (this.section() as unknown as Record<string, unknown>)['voltage_idr'] = linesTable[0].voltage_idr;
-      }
+    const filtered = applyLinesCascadeFilter(allLinesTable, this.section());
+    const { lines: linesTable, patchedVoltage } = applyLinesFallback(allLinesTable, filtered, this.section());
+    if (patchedVoltage !== undefined) {
+      // Local-only heuristic: auto-correct voltage_idr when a mismatch leaves the filter empty.
+      // Intentionally not calling onSectionChange() — this is a display correction, not a user edit.
+      (this.section() as unknown as Record<string, unknown>)['voltage_idr'] = patchedVoltage;
     }
-    this.linesFilterTable.set(sortLines(linesTable));
-    if (this.mode() === 'view') {
-      const linkLine = linesTable.find((item) => item.link_idr === this.section().link_name);
-      this.linkAdrRead.set(linkLine?.link_adr || '');
-      const litLine = linesTable.find((item) => item.lit_idr === this.section().lit_code);
-      this.litAdrRead.set(litLine?.lit_adr || '');
-    }
+    this.linesFilterTable.set(sortCatalogLines(linesTable));
+    if (this.mode() !== 'view') return;
+    const linkLine = linesTable.find((item) => item.link_idr === this.section().link_name);
+    this.linkAdrRead.set(linkLine?.link_adr ?? '');
+    const litLine = linesTable.find((item) => item.lit_idr === this.section().lit_code);
+    this.litAdrRead.set(litLine?.lit_adr ?? '');
+  }
+
+  private async setupCablesFilter(): Promise<void> {
     const cablesTable = await this.cablesService.getCables();
     this.cablesFilterTable.set(sortBy(cablesTable, 'name'));
   }
@@ -403,31 +353,12 @@ export class ManualSectionComponent implements OnInit {
     }
 
     const allLinesTable = await this.linesService.getLines();
-    let linesTable = allLinesTable;
-    orderedLineTableProperties.forEach((id) => {
-      if (id === type) {
-        linesTable = linesTable.filter((item) => !event.value || item[id] === event.value);
-      } else {
-        linesTable = linesTable.filter(
-          (item) =>
-            !this.section()[lineTablePropertiesToSectionProperties[id]] ||
-            item[id] === this.section()[lineTablePropertiesToSectionProperties[id]]
-        );
-      }
-    });
-    if (linesTable.length === 0) {
-      const linkName = this.section().link_name;
-      const litCode = this.section().lit_code;
-      if (linkName) {
-        linesTable = allLinesTable.filter((item) => item.link_idr === linkName);
-      } else if (litCode) {
-        linesTable = allLinesTable.filter((item) => item.lit_idr === litCode);
-      }
-      if (linesTable.length > 0) {
-        (this.section() as unknown as Record<string, unknown>)['voltage_idr'] = linesTable[0].voltage_idr;
-      }
+    const filtered = applyLinesCascadeFilter(allLinesTable, this.section(), type, event.value);
+    const { lines: linesTable, patchedVoltage } = applyLinesFallback(allLinesTable, filtered, this.section());
+    if (patchedVoltage !== undefined) {
+      (this.section() as unknown as Record<string, unknown>)['voltage_idr'] = patchedVoltage;
     }
-    this.linesFilterTable.set(sortLines(linesTable));
+    this.linesFilterTable.set(sortCatalogLines(linesTable));
     if (linesTable.length === 1) {
       orderedLineTableProperties.forEach((id) => {
         (this.section() as unknown as Record<string, unknown>)[lineTablePropertiesToSectionProperties[id]] =

@@ -13,10 +13,10 @@ import { HttpClient } from '@angular/common/http';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
 import { AttachmentCsvDto } from '@infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
-import { toNumber } from 'lodash';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 import Dexie from 'dexie';
 import { SupportNameEntry } from './attachment.interfaces';
+import { mapAttachmentCsvToEntities } from './attachment.helpers';
 
 /**
  * Service for managing attachment point catalog data.
@@ -136,52 +136,39 @@ export class AttachmentService {
    * @returns Promise that resolves when import is complete
    */
   async importFromFile() {
-    const attachments = this.http
-      .get(`${globalThis.location.origin}/data/attachments.csv`, {
-        responseType: 'text'
-      })
-      .pipe(
-        catchError((error) => {
-          this.logger.error('Error importing attachments', error);
-          return of('');
-        })
-      );
-
-    const mapData = (data: AttachmentCsvDto[]): CatalogAttachmentEntity[] => {
-      return data
-        .filter((item) => item.support_idr || item.support_adr)
-        .map((item) => ({
-          uuid: uuidv4(),
-          updated_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          support_name: item.support_idr || item.support_adr,
-          attachment_set: toNumber(item.position),
-          attachment_altitude: parseFloat(item.Z),
-          cross_arm_length: parseFloat(item.L),
-          attachment_set_x: parseFloat(item.X),
-          attachment_set_y: parseFloat(item.Y),
-          attachment_set_z: parseFloat(item.Z),
-          support_tower: item.support_tower
-        }));
-    };
-
     await new Promise<void>((resolve) => {
-      attachments.subscribe(async (attachments) => {
-        Papa.parse(attachments, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
-            const data = jsonResults.data;
-            if (!data || data.length === 0) {
-              resolve();
-              return;
-            }
-            const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
-            await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
-            this._refresh$.next();
+      this.fetchCsv().subscribe(async (csv) => {
+        await this.parseCsvAndStore(csv);
+        resolve();
+      });
+    });
+  }
+
+  private fetchCsv() {
+    return this.http.get(`${globalThis.location.origin}/data/attachments.csv`, { responseType: 'text' }).pipe(
+      catchError((error) => {
+        this.logger.error('Error importing attachments', error);
+        return of('');
+      })
+    );
+  }
+
+  private async parseCsvAndStore(csv: string): Promise<void> {
+    await new Promise<void>((resolve) => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
+          const data = jsonResults.data;
+          if (!data || data.length === 0) {
             resolve();
-          }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
-        });
+            return;
+          }
+          const attachmentsTable: CatalogAttachmentEntity[] = mapAttachmentCsvToEntities(data);
+          await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
+          this._refresh$.next();
+          resolve();
+        }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
       });
     });
   }

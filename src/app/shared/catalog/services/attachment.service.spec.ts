@@ -7,7 +7,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
@@ -1054,21 +1054,15 @@ describe('AttachmentService', () => {
         .mockResolvedValueOnce(initial)
         .mockResolvedValueOnce(updated);
 
-      const received: CatalogAttachmentEntity[][] = [];
-      const sub = service.allAttachments$.subscribe((val) => received.push(val));
+      const secondEmission = firstValueFrom(service.allAttachments$.pipe(skip(1)));
       (storageService.ready$ as BehaviorSubject<boolean>).next(true);
-
-      await new Promise((r) => setTimeout(r, 10));
 
       const entries: SupportNameEntry[] = [{ supportName: 'SupportX', supportTower: 'TX' }];
       await service.addSupportNamesIfAbsent(entries);
 
-      await new Promise((r) => setTimeout(r, 10));
-
+      const result = await secondEmission;
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
-      // _refresh$.next() triggers a re-read → 2nd emission
-      expect(received.length).toBeGreaterThanOrEqual(2);
-      sub.unsubscribe();
+      expect(result).toEqual(updated);
     });
   });
 });
