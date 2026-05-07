@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -30,6 +40,8 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { CatalogAttachmentEntity } from '@infrastructure/database';
 
 /**
  * Editable table of supports within a section.
@@ -90,6 +102,9 @@ export class SupportsTableComponent implements OnInit {
   allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
+  private readonly allCatalogAttachments = toSignal(this.attachmentService.allAttachments$, {
+    initialValue: [] as CatalogAttachmentEntity[]
+  });
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
     value: String(index + 1)
@@ -105,6 +120,21 @@ export class SupportsTableComponent implements OnInit {
     { label: $localize`No`, value: false }
   ];
 
+  constructor() {
+    effect(() => {
+      this.updateSupportFilterTables(this.allCatalogAttachments());
+    });
+  }
+
+  private updateSupportFilterTables(attachments: CatalogAttachmentEntity[]): void {
+    const { catalogSupportNames, supplementarySupportNames } = buildSupportNameFilterTables(
+      this.supports(),
+      attachments
+    );
+    this.supportFilterTable.set(catalogSupportNames);
+    this.supplementarySupportFilterTable.set(supplementarySupportNames);
+  }
+
   async getData() {
     const chains = (await this.chainsService.getChains()) || [];
     this.chainsOptions.set(chains.toSorted((a, b) => a.chain_name.localeCompare(b.chain_name)));
@@ -114,13 +144,6 @@ export class SupportsTableComponent implements OnInit {
         chains.map((c) => c.chain_name)
       )
     );
-    const attachments = (await this.attachmentService.getAttachments()) || [];
-    const { catalogSupportNames, supplementarySupportNames } = buildSupportNameFilterTables(
-      this.supports(),
-      attachments
-    );
-    this.supportFilterTable.set(catalogSupportNames);
-    this.supplementarySupportFilterTable.set(supplementarySupportNames);
   }
 
   ngOnInit() {

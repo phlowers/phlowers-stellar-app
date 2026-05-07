@@ -17,6 +17,8 @@ import { NotificationService } from '@services/notification/notification.service
 import { LoggerService } from '@core/services/logger/logger.service';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { sectionImportErrors, importSuccessDetail } from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
 import {
@@ -68,6 +70,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
   private readonly maintenanceService = inject(MaintenanceService);
+  private readonly attachmentService = inject(AttachmentService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -273,6 +276,20 @@ export class SectionImportService implements ImportAdapter<Section> {
       : undefined;
 
     const supports = this.mapGeoLiaisonSupports(sortedPortees);
+
+    // Persist new support names in the local catalog (RG.CAN.ATT)
+    const accroches =
+      sortedPortees.length === 0
+        ? []
+        : [
+            ...sortedPortees.map((p) => p['accroche depart']),
+            sortedPortees[sortedPortees.length - 1]['accroche arrivee']
+          ];
+    const supportNameEntries: SupportNameEntry[] = accroches
+      .map((a) => ({ supportName: a.SUPPORT_IDR || a.SUPPORT_ADR || '', supportTower: a.SUPPORT_TOWER ?? null }))
+      .filter((e) => !!e.supportName);
+    await this.attachmentService.addSupportNamesIfAbsent(supportNameEntries);
+
     const defaultIc = createEmptyInitialCondition();
 
     return {

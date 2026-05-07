@@ -7,6 +7,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
+import { Subject } from 'rxjs';
+import { CatalogAttachmentEntity } from '@infrastructure/database';
 
 // Mock child component
 @Component({
@@ -26,8 +28,12 @@ const mockChainsService = {
   getChains: vi.fn().mockResolvedValue([] as CatalogChain[])
 };
 
+let allAttachmentsSubject: Subject<CatalogAttachmentEntity[]>;
+
 const mockAttachmentService = {
-  getAttachments: vi.fn().mockResolvedValue([])
+  get allAttachments$() {
+    return allAttachmentsSubject;
+  }
 };
 
 // Mock data
@@ -132,6 +138,8 @@ describe('SupportsTableComponent', () => {
   let fixture: ComponentFixture<SupportsTableComponent>;
 
   beforeEach(async () => {
+    allAttachmentsSubject = new Subject<CatalogAttachmentEntity[]>();
+
     await TestBed.configureTestingModule({
       imports: [FormsModule, SupportsTableComponent, NoopAnimationsModule],
       providers: [
@@ -604,16 +612,36 @@ describe('SupportsTableComponent', () => {
   });
 
   describe('getData with attachments', () => {
-    it('should populate supportFilterTable and supplementarySupportFilterTable', async () => {
-      mockAttachmentService.getAttachments.mockResolvedValue([
+    it('should populate supportFilterTable when allAttachments$ emits', () => {
+      allAttachmentsSubject.next([
         { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
       ]);
-      (component.supports as unknown as () => Support[]) = () => [{ ...mockSupports[0], name: 'CustomType' }];
-
-      await component.getData();
+      fixture.detectChanges();
 
       expect(component.supportFilterTable()).toContain('CatalogType');
-      expect(component.supplementarySupportFilterTable()).toContain('CustomType');
+    });
+
+    it('should put support names not in catalog into supplementarySupportFilterTable', () => {
+      allAttachmentsSubject.next([
+        { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
+      ]);
+      fixture.detectChanges();
+
+      // mockSupports have names 'Support 1', 'Support 2', 'Support 3' — none are in catalog
+      expect(component.supplementarySupportFilterTable()).toContain('Support 2');
+    });
+
+    it('should update allSupportFilterTable when allAttachments$ emits new entries', () => {
+      allAttachmentsSubject.next([
+        { uuid: 'uuid-new', support_name: 'F4TD3_X', support_tower: 'Tower', created_at: '', updated_at: '' }
+      ]);
+      fixture.detectChanges();
+
+      expect(component.allSupportFilterTable()).toContain('F4TD3_X');
+    });
+
+    it('should start with empty supportFilterTable before any emission', () => {
+      expect(component.supportFilterTable()).toEqual([]);
     });
   });
 

@@ -13,7 +13,9 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { Section, Study } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { CatalogMaintenance } from '@shared/domain';
+import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 
 // ---------------------------------------------------------------------------
 // Polyfill File.prototype.text — jsdom 26 does not implement it
@@ -167,6 +169,7 @@ describe('SectionImportService', () => {
   let messageServiceMock: vi.Mocked<MessageService>;
   let loggerSpy: vi.Mocked<LoggerService>;
   let maintenanceServiceMock: { getMaintenance: ReturnType<typeof vi.fn> };
+  let attachmentServiceMock: { addSupportNamesIfAbsent: ReturnType<typeof vi.fn> };
 
   const mockMaintenanceData: CatalogMaintenance[] = [
     {
@@ -200,13 +203,18 @@ describe('SectionImportService', () => {
       getMaintenance: vi.fn().mockResolvedValue(mockMaintenanceData)
     };
 
+    attachmentServiceMock = {
+      addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         SectionImportService,
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
         { provide: LoggerService, useValue: loggerSpy },
-        { provide: MaintenanceService, useValue: maintenanceServiceMock }
+        { provide: MaintenanceService, useValue: maintenanceServiceMock },
+        { provide: AttachmentService, useValue: attachmentServiceMock }
       ]
     });
     service = TestBed.inject(SectionImportService);
@@ -830,6 +838,40 @@ describe('SectionImportService', () => {
       const result = await service.processFile(file, neverAccept);
       expect(result).not.toBeNull();
       expect(result?.uuid).toBe('sec-uuid-1');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // addSupportNamesIfAbsent integration (RG.CAN.ATT)
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — addSupportNamesIfAbsent integration', () => {
+    beforeEach(() => {
+      service.setStudyContext(buildMockStudy());
+    });
+
+    it('should call addSupportNamesIfAbsent with SupportNameEntry[] from GeoLiaison accroches', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      await service.processFile(file, neverAccept);
+
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).toHaveBeenCalledTimes(1);
+
+      // Payload has 2 portees:
+      // portee ordre=1: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='1')
+      // portee ordre=2: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='2')
+      // arrivee of last portee (ordre=2): SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='3')
+      // After sort by ordre: portee1 first, portee2 last
+      const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
+      expect(called.length).toBe(3);
+      expect(called.every((e: SupportNameEntry) => e.supportName === 'Support_IDR_A')).toBe(true);
+      expect(called.every((e: SupportNameEntry) => e.supportTower === 'TowerX')).toBe(true);
+    });
+
+    it('should not call addSupportNamesIfAbsent for legacy JSON import', async () => {
+      const file = makeJsonFile(buildValidSectionPayload());
+      await service.processFile(file, neverAccept);
+
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).not.toHaveBeenCalled();
     });
   });
 });

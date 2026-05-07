@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
+import { SupportNameEntry } from './attachment.interfaces';
 import { AttachmentCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
@@ -912,6 +913,162 @@ describe('AttachmentService', () => {
       const result = await service.getAttachmentDetails('Support A', 1);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('addSupportNamesIfAbsent()', () => {
+    it('should do nothing when entries array is empty', async () => {
+      await service.addSupportNamesIfAbsent([]);
+
+      expect(mockAttachmentsTable.toArray).not.toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when all support names already exist in DB', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([
+        { uuid: 'u1', created_at: '', updated_at: '', support_name: 'SupportA', support_tower: 'tower1' },
+        { uuid: 'u2', created_at: '', updated_at: '', support_name: 'SupportB', support_tower: 'tower2' }
+      ] as CatalogAttachmentEntity[]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: 'SupportA', supportTower: 'tower1' },
+        { supportName: 'SupportB', supportTower: 'tower2' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.toArray).toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should bulkAdd entries whose support name is absent', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([
+        { uuid: 'u1', created_at: '', updated_at: '', support_name: 'SupportA', support_tower: 'tower1' }
+      ] as CatalogAttachmentEntity[]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: 'SupportA', supportTower: 'tower1' },
+        { supportName: 'SupportNew', supportTower: 'towerNew' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          support_name: 'SupportNew',
+          support_tower: 'towerNew'
+        }
+      ]);
+    });
+
+    it('should deduplicate input entries with the same name and insert only once', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: 'SupportDup', supportTower: 'tower1' },
+        { supportName: 'SupportDup', supportTower: 'tower2' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          support_name: 'SupportDup',
+          support_tower: 'tower2'
+        }
+      ]);
+    });
+
+    it('should skip entries with empty supportName', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: '', supportTower: 'tower1' },
+        { supportName: 'ValidSupport', supportTower: 'tower2' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          support_name: 'ValidSupport',
+          support_tower: 'tower2'
+        }
+      ]);
+    });
+
+    it('should do nothing when db is undefined', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const entries: SupportNameEntry[] = [{ supportName: 'SupportA', supportTower: 'tower1' }];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.toArray).not.toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('allAttachments$', () => {
+    it('should emit list from catAttachments when ready$ emits true', () => {
+      const mockAttachments: CatalogAttachmentEntity[] = [
+        { uuid: 'uuid-a', support_name: 'SA', support_tower: 'TA', created_at: '', updated_at: '' }
+      ];
+      mockAttachmentsTable.toArray.mockResolvedValue(mockAttachments);
+
+      return new Promise<void>((resolve) => {
+        service.allAttachments$.subscribe((result) => {
+          expect(result).toEqual(mockAttachments);
+          resolve();
+        });
+        (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+      });
+    });
+
+    it('should not emit before ready$ emits true', () => {
+      const received: CatalogAttachmentEntity[][] = [];
+
+      service.allAttachments$.subscribe((val) => received.push(val));
+
+      // ready$ starts as false — no emission expected
+      expect(received).toHaveLength(0);
+    });
+
+    it('should re-emit after addSupportNamesIfAbsent adds new entries', async () => {
+      const initial: CatalogAttachmentEntity[] = [];
+      const updated: CatalogAttachmentEntity[] = [
+        { uuid: 'uuid-b', support_name: 'SupportX', support_tower: 'TX', created_at: '', updated_at: '' }
+      ];
+      // call order: allAttachments$ initial read → addSupportNamesIfAbsent existing check → allAttachments$ refresh read
+      mockAttachmentsTable.toArray
+        .mockResolvedValueOnce(initial)
+        .mockResolvedValueOnce(initial)
+        .mockResolvedValueOnce(updated);
+
+      const received: CatalogAttachmentEntity[][] = [];
+      const sub = service.allAttachments$.subscribe((val) => received.push(val));
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      const entries: SupportNameEntry[] = [{ supportName: 'SupportX', supportTower: 'TX' }];
+      await service.addSupportNamesIfAbsent(entries);
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
+      // _refresh$.next() triggers a re-read → 2nd emission
+      expect(received.length).toBeGreaterThanOrEqual(2);
+      sub.unsubscribe();
     });
   });
 });

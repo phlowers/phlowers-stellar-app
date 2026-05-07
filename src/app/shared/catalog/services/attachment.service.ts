@@ -7,7 +7,7 @@
 import { inject, Injectable } from '@angular/core';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, filter, merge, of, Subject, switchMap, take } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 import Dexie from 'dexie';
+import { SupportNameEntry } from './attachment.interfaces';
 
 /**
  * Service for managing attachment point catalog data.
@@ -47,6 +48,22 @@ export class AttachmentService {
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
+
+  /** Internal trigger to re-read catAttachments after any write. */
+  private readonly _refresh$ = new Subject<void>();
+
+  /**
+   * Observable of all attachment entities.
+   * Re-emits after any write to catAttachments via this service (addSupportNamesIfAbsent, importFromFile).
+   * Only starts emitting after the storage service signals readiness.
+   */
+  readonly allAttachments$ = this.storageService.ready$.pipe(
+    filter((ready): ready is true => ready),
+    take(1),
+    switchMap(() =>
+      merge(of(undefined as void), this._refresh$).pipe(switchMap(async () => (await this.getAttachments()) ?? []))
+    )
+  );
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -161,10 +178,56 @@ export class AttachmentService {
             }
             const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
             await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
+            this._refresh$.next();
             resolve();
           }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
         });
       });
     });
+  }
+
+  /**
+   * Adds support name entries to the catalog if they are not already present.
+   *
+   * @remarks
+   * Performs a full table scan (toArray) then inserts only the missing entries.
+   * The table is small (~500 rows), making this approach acceptable without schema changes.
+   * Entries with empty or missing supportName are silently ignored.
+   *
+   * @param entries - List of support name entries to persist if absent
+   * @returns Promise that resolves when all missing entries have been added
+   */
+  async addSupportNamesIfAbsent(entries: SupportNameEntry[]): Promise<void> {
+    const db = this.storageService.db;
+    if (!db || entries.length === 0) {
+      return;
+    }
+
+    // Deduplicate input by supportName
+    const validEntries = entries.filter((e) => !!e.supportName);
+    const uniqueEntries = [...new Map(validEntries.map((e) => [e.supportName, e])).values()];
+    if (uniqueEntries.length === 0) {
+      return;
+    }
+
+    const existing = await db.catAttachments.toArray();
+    const existingNames = new Set(existing.map((a) => a.support_name).filter((n): n is string => !!n));
+
+    const toAdd: CatalogAttachmentEntity[] = uniqueEntries
+      .filter((e) => !existingNames.has(e.supportName))
+      .map((e) => ({
+        uuid: uuidv4(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        support_name: e.supportName,
+        support_tower: e.supportTower ?? ''
+      }));
+
+    if (toAdd.length === 0) {
+      return;
+    }
+
+    await db.catAttachments.bulkAdd(toAdd);
+    this._refresh$.next();
   }
 }
