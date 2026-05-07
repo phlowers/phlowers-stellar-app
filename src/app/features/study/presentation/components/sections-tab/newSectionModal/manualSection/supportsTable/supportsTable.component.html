@@ -633,19 +633,49 @@
           <p class="one-line-text">{{ support.towerModel }}</p>
         </td>
         <td>
-          <p class="one-line-text">-</p>
+          <p class="one-line-text">
+            @if (localization(); as loc) {
+              {{ loc.latitude[rowIndex] }} °
+            } @else {
+              -
+            }
+          </p>
         </td>
         <td>
-          <p class="one-line-text">-</p>
+          <p class="one-line-text">
+            @if (localization(); as loc) {
+              {{ loc.longitude[rowIndex] }} °
+            } @else {
+              -
+            }
+          </p>
         </td>
         <td>
-          <p class="one-line-text">-</p>
+          <p class="one-line-text">
+            @if (localization(); as loc) {
+              {{ loc.azimuth[rowIndex] }} °
+            } @else {
+              -
+            }
+          </p>
         </td>
         <td>
-          <p class="one-line-text">-</p>
+          <p class="one-line-text">
+            @if (localization(); as loc) {
+              {{ loc.lambert_x[rowIndex] }} m
+            } @else {
+              -
+            }
+          </p>
         </td>
         <td>
-          <p class="one-line-text">-</p>
+          <p class="one-line-text">
+            @if (localization(); as loc) {
+              {{ loc.lambert_y[rowIndex] }} m
+            } @else {
+              -
+            }
+          </p>
         </td>
       }
       @if (mode() === 'edit' || mode() === 'create') {

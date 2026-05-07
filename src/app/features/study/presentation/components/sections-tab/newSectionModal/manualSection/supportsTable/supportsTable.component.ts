@@ -1,8 +1,9 @@
 import {
+  effect,
+  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   OnInit,
@@ -16,8 +17,10 @@ import { CreateEditView } from '@shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
-import { Support, CatalogChain } from '@shared/domain';
+import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Localization, Task } from '@core/services/worker_python/tasks/types';
 import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -72,11 +75,13 @@ import { CatalogAttachmentEntity } from '@infrastructure/database';
   styleUrls: ['./supportsTable.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SupportsTableComponent implements OnInit {
+export class SupportsTableComponent implements OnInit, AfterContentInit {
   /** List of supports to display in the table. */
   supports = input<Support[]>([]);
   /** Current mode: create, edit, or view. */
   mode = input.required<CreateEditView>();
+  /** Section containing geolocation starting values. */
+  section = input<Section | null>(null);
   /** Emits when a support should be added at a given index and position. */
   addSupport = output<{ index: number; position: 'before' | 'after' }>();
   /** Emits the UUID of a support to delete. */
@@ -105,6 +110,8 @@ export class SupportsTableComponent implements OnInit {
   private readonly allCatalogAttachments = toSignal(this.attachmentService.allAttachments$, {
     initialValue: [] as CatalogAttachmentEntity[]
   });
+  private readonly workerPythonService = inject(WorkerPythonService);
+  localization = signal<Localization | null>(null);
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
     value: String(index + 1)
@@ -148,6 +155,42 @@ export class SupportsTableComponent implements OnInit {
 
   ngOnInit() {
     this.getData();
+  }
+
+  ngAfterContentInit() {
+    void this.computeLocalization();
+  }
+
+  private async computeLocalization(): Promise<void> {
+    const section = this.section();
+    const supports = this.supports();
+
+    if (this.mode() !== 'view') return;
+    if (
+      !supports.length ||
+      section?.startLatitude == null ||
+      section.startLongitude == null ||
+      section.startAzimuth == null
+    )
+      return;
+
+    const lastIndex = supports.length - 1;
+    if (supports.slice(0, lastIndex).some((s) => s.spanLength == null || s.spanAngle == null)) return;
+
+    const spanLength = supports.map((s, i) => (i === lastIndex ? 0 : s.spanLength!));
+    const lineAngle = supports.map((s) => s.spanAngle!);
+
+    const { result, error } = await this.workerPythonService.runTask(Task.computeLocalization, {
+      startLatitude: section.startLatitude,
+      startLongitude: section.startLongitude,
+      startAzimuth: section.startAzimuth,
+      spanLength,
+      lineAngle
+    });
+
+    if (result && !error) {
+      this.localization.set(result);
+    }
   }
 
   onChainNameFilter(event: { filter: string }) {

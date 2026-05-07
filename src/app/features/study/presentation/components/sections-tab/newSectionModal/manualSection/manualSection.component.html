@@ -499,6 +499,7 @@
             [mode]="mode()"
             [first]="firstSupport()"
             [supports]="section().supports || []"
+            [section]="section()"
             (addSupport)="addSupport($event.index, $event.position)"
             (deleteSupport)="deleteSupport($event)"
             (duplicateSupport)="duplicateSupport($event)"
