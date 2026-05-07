@@ -21,7 +21,11 @@ def get_git_revision_hash() -> str:
     if env_hash:
         return env_hash
     try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+        return (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("ascii")
+            .strip()
+        )
     except Exception:
         return "unknown"
 

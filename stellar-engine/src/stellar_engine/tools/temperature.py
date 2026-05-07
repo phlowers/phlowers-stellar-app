@@ -24,17 +24,31 @@ DIRECTION_MAP = {
     'North-West': 315,
 }
 
+COVER_MAP = {
+    "N0": 0,
+    "N1": 1,
+    "N2": 2,
+    "N3": 3,
+    "N4": 4,
+    "N5": 5,
+    "N6": 6,
+    "N7": 7,
+    "N8": 8,
+}
+
+UNIT_MAP = {"kmh": "km/h", "ms": "m/s"}
+
 
 def temperature_calculation(inputs: dict, engine: BalanceEngine):
     temp_inputs = TemperatureCalculationInputs(**inputs)
     thermal_engine = ThermalEngine()
-    unit_map = {"kmh": "km/h", "ms": "m/s"}
     wind_speed = (
-        units(temp_inputs.windSpeed, unit_map[temp_inputs.windSpeedUnit])
+        units(temp_inputs.windSpeed, UNIT_MAP[temp_inputs.windSpeedUnit])
         .to("m/s")
         .m
     )
     wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
+    sky_cover = COVER_MAP[temp_inputs.skyCover]
     thermal_engine.set(
         cable_array=engine.cable_array,
         latitude=np.array([temp_inputs.latitude]),
@@ -48,11 +62,14 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         ambient_temp=np.array([temp_inputs.ambientTemperature]),
         wind_speed=np.array([wind_speed]),
         wind_angle=np.array([wind_angle]),
+        nebulosity=np.array([sky_cover]),
     )
     temperature_result = thermal_engine.steady_temperature()
     return {
         "cableSolarFlux": None,
-        "cableTemperature": temperature_result.data["t_core"].iloc[0],
+        "cableTemperature": temperature_result.data["core_temperature"].iloc[
+            0
+        ],
         "cableTemperatureUncertainty": 0,
     }
 

@@ -74,7 +74,7 @@ def delete_obstacle(
 ) -> Literal["success"]:
     logger.debug(f"Deleting obstacle with uuid: {uuid}")
     try:
-        del plot_engine.position_engine.obstacles_array._data[uuid]
+        del plot_engine.position_engine.obstacle_array._data[uuid]
         logger.debug("Successfully deleted obstacle.")
     except KeyError:
         logger.warning(f"Obstacle with uuid: {uuid} not found.")
@@ -119,12 +119,12 @@ def add_obstacles(
         # )
         # Bug: clear() is not a method of pd.DataFrame
         # Don't know what was the expected behaviour here
-        # plot_engine.position_engine.obstacles_array._data.clear()
+        # plot_engine.position_engine.obstacle_array._data.clear()
         return {"obstacles": []}
 
     df = pd.DataFrame(rows)
     df = change_obstacles_coordinates(df, balance_engine)
-    plot_engine.add_obstacles(ObstacleArray(df))
+    plot_engine.add_obstacle_array(ObstacleArray(df))
 
     result = get_current_obstacles(
         plot_engine, project=project, support_index=support_index
@@ -140,7 +140,7 @@ def compute_distances(
     points_for_plot = plot_engine.position_engine.get_points_for_plot()
     result = []
 
-    for obstacle in plot_engine.position_engine.obstacles_array.data.to_dict(
+    for obstacle in plot_engine.position_engine.obstacle_array.data.to_dict(
         orient="records"
     ):
         span_index = obstacle["span_index"]
