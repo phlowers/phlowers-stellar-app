@@ -873,5 +873,39 @@ describe('SectionImportService', () => {
 
       expect(attachmentServiceMock.addSupportNamesIfAbsent).not.toHaveBeenCalled();
     });
+
+    it('should use SUPPORT_ADR as fallback when SUPPORT_IDR is empty string', async () => {
+      // Override SUPPORT_IDR to empty string — ?? would not fall back, || does
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      portees.forEach((p) => {
+        (p['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+        (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+      });
+
+      const file = makeJsonFile(payload);
+      await service.processFile(file, neverAccept);
+
+      const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
+      expect(called.length).toBe(3);
+      expect(called.every((e: SupportNameEntry) => e.supportName === 'Support A')).toBe(true);
+    });
+
+    it('should filter out entries where both SUPPORT_IDR and SUPPORT_ADR are empty string', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      portees.forEach((p) => {
+        (p['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+        (p['accroche depart'] as Record<string, unknown>)['SUPPORT_ADR'] = '';
+        (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+        (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_ADR'] = '';
+      });
+
+      const file = makeJsonFile(payload);
+      await service.processFile(file, neverAccept);
+
+      const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
+      expect(called.length).toBe(0);
+    });
   });
 });
