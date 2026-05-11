@@ -543,7 +543,7 @@ describe('SectionImportService', () => {
       expect(result?.lit_name).toBe('LitName');
       expect(result?.lit_code).toBe('LIT001');
       expect(result?.link_name).toBe('LIA001');
-      expect(result?.branch_idr).toBe('01');
+      expect(result?.branch_idr).toBe('1');
       expect(result?.voltage_idr).toBeUndefined();
     });
 
