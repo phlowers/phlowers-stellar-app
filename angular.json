@@ -82,7 +82,10 @@
               "localize": ["fr"],
               "optimization": {
                   "scripts": true,
-                  "styles": true,
+                  "styles": {
+                      "minify": true,
+                      "inlineCritical": false
+                  },
                   "fonts": false
               }
             },
@@ -91,7 +94,10 @@
               "localize": ["en"],
               "optimization": {
                   "scripts": true,
-                  "styles": true,
+                  "styles": {
+                      "minify": true,
+                      "inlineCritical": false
+                  },
                   "fonts": false
               }
             },
@@ -102,7 +108,10 @@
               "sourceMap": true,
               "optimization": {
                   "scripts": true,
-                  "styles": true,
+                  "styles": {
+                      "minify": true,
+                      "inlineCritical": false
+                  },
                   "fonts": false
               },
               "budgets": [

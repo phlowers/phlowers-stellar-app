@@ -3265,12 +3265,12 @@
     </unit>
     <unit id="login.emailInvalid">
       <segment>
-        <source> Please enter a valid email address. </source>
+        <source>Please enter a valid email address.</source>
       </segment>
     </unit>
     <unit id="login.emailRequired">
       <segment>
-        <source> Email is required. </source>
+        <source>Email is required.</source>
       </segment>
     </unit>
     <unit id="login.logoAlt">
@@ -3298,9 +3298,130 @@
         <source>Initial application installation could not start. Please reload the page to try again.</source>
       </segment>
     </unit>
-    <unit id="6460521785131469521">
+    <unit id="1911326790644997133">
       <segment>
-        <source>Authentication refresh failed. You may be working with outdated user data.</source>
+        <source>Error importing section</source>
+      </segment>
+    </unit>
+    <unit id="2172610214999430505">
+      <segment>
+        <source>Y Lambert 93</source>
+      </segment>
+    </unit>
+    <unit id="2215857645557519259">
+      <segment>
+        <source>Upload a JSON file</source>
+      </segment>
+    </unit>
+    <unit id="2279888150182912604">
+      <segment>
+        <source>X Lambert 93</source>
+      </segment>
+    </unit>
+    <unit id="2779962555791931424">
+      <segment>
+        <source>Azimuth</source>
+      </segment>
+    </unit>
+    <unit id="3447823734089002407">
+      <segment>
+        <source>Error deleting section</source>
+      </segment>
+    </unit>
+    <unit id="4389171684327730334">
+      <segment>
+        <source>No valid initial condition selected</source>
+      </segment>
+    </unit>
+    <unit id="5767212846226629395">
+      <segment>
+        <source>Section has supports with values out of bounds</source>
+      </segment>
+    </unit>
+    <unit id="5970395764141361429">
+      <segment>
+        <source>Section is missing required fields</source>
+      </segment>
+    </unit>
+    <unit id="6213790290851863697">
+      <segment>
+        <source>Fichier de géoliaison à importer non conforme.</source>
+      </segment>
+    </unit>
+    <unit id="7094706461924776063">
+      <segment>
+        <source>Section imported successfully</source>
+      </segment>
+    </unit>
+    <unit id="7307836872490562477">
+      <segment>
+        <source>The imported section could not be found. Please try again.</source>
+      </segment>
+    </unit>
+    <unit id="8821243434003714932">
+      <segment>
+        <source>You can import a section from a JSON file. It will be added to the current study.</source>
+      </segment>
+    </unit>
+    <unit id="8961909561509234472">
+      <segment>
+        <source>File format: .json</source>
+      </segment>
+    </unit>
+    <unit id="import.action.open">
+      <notes>
+        <note category="description">Open imported entity</note>
+      </notes>
+      <segment>
+        <source> Open </source>
+      </segment>
+    </unit>
+    <unit id="import.upload.prompt">
+      <notes>
+        <note category="description">Upload zone prompt</note>
+      </notes>
+      <segment>
+        <source>Upload one or several files</source>
+      </segment>
+    </unit>
+    <unit id="importCollisionMessage">
+      <segment>
+        <source><ph id="0" equiv="PH" disp="entityLabel"/> <ph id="1" equiv="PH_1" disp="label"/> already exists. Do you want to replace it?</source>
+      </segment>
+    </unit>
+    <unit id="importErrorFileSummary">
+      <segment>
+        <source>Error reading the input file</source>
+      </segment>
+    </unit>
+    <unit id="importNoLabel">
+      <segment>
+        <source>No</source>
+      </segment>
+    </unit>
+    <unit id="importYesLabel">
+      <segment>
+        <source>Yes</source>
+      </segment>
+    </unit>
+    <unit id="supportCoordinatesTitle">
+      <segment>
+        <source>Support 1 coordinates:</source>
+      </segment>
+    </unit>
+    <unit id="login.redirectingToGaia">
+      <segment>
+        <source> Redirecting to G@IA for sign in… </source>
+      </segment>
+    </unit>
+    <unit id="1045464419985371300">
+      <segment>
+        <source>Email login is disabled because GAIA single sign-on is required.</source>
+      </segment>
+    </unit>
+    <unit id="login.resolvingMode">
+      <segment>
+        <source> Checking sign-in mode… </source>
       </segment>
     </unit>
   </file>
