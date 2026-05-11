@@ -27,11 +27,14 @@ class _Errors:
         return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
 
 
-def _validate_initial_conditions(input_section: dict, input_initial_conditions: list) -> None:
+def _validate_initial_conditions(
+    input_section: dict, input_initial_conditions: list
+) -> None:
     if not input_initial_conditions:
         raise ValueError(_Errors.NO_INITIAL_CONDITIONS)
     if not input_section.get("selected_initial_condition_uuid"):
         raise ValueError(_Errors.NO_INITIAL_CONDITION_SELECTED)
+
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
@@ -371,7 +374,11 @@ def init_section(js_inputs: dict):
         None
         if not input_charges
         else next(
-            (charge for charge in input_charges if charge["uuid"] == input_section["selected_charge_uuid"]),
+            (
+                charge
+                for charge in input_charges
+                if charge["uuid"] == input_section["selected_charge_uuid"]
+            ),
             None,
         )
     )
@@ -463,8 +470,8 @@ def init_section(js_inputs: dict):
     engine.solve_adjustment()
     engine.solve_change_state()
 
-    plt_line.position_engine.add_obstacles(
-        obstacles_array=ObstacleArray(
+    plt_line.position_engine.add_obstacle_array(
+        obstacle_array=ObstacleArray(
             pd.DataFrame(
                 {
                     "name": [],
@@ -535,7 +542,9 @@ def init_section(js_inputs: dict):
         elif climate_data.symmetryType == "symmetric":
             ice_thickness = climate_data.iceThickness
         else:
-            raise ValueError(_Errors.unsupported_symmetry_type(climate_data.symmetryType))
+            raise ValueError(
+                _Errors.unsupported_symmetry_type(climate_data.symmetryType)
+            )
         ice_thickness = (
             units(ice_thickness, "cm").to("m").magnitude
         )  # in meters in the engine
