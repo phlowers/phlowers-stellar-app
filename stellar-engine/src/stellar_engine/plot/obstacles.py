@@ -73,7 +73,7 @@ def delete_obstacle(
 ) -> dict:
     logger.debug(f"Deleting obstacle with uuid: {uuid}")
     try:
-        del plot_engine.position_engine.obstacle_array._data[uuid]
+        plot_engine.position_engine.delete_obstacle(uuid)
         logger.debug("Successfully deleted obstacle.")
     except KeyError:
         logger.warning(f"Obstacle with uuid: {uuid} not found.")
