@@ -12,6 +12,7 @@
   [rowsPerPageOptions]="rowsPerPageOptions()"
   [first]="first()"
   class="mb-4"
+  [tableStyleClass]="mode() === 'view' ? 'support-table--view' : ''"
   paginatorStyleClass="!hidden"
   data-testid="supports-table"
 >
@@ -636,6 +637,13 @@
           <p class="one-line-text">
             @if (localization(); as loc) {
               {{ loc.latitude[rowIndex] | number: '1.0-7' }} °
+            } @else if (localizationLoading()) {
+              <app-icon
+                ariaLabel="Waiting engine for calculation"
+                i18n-ariaLabel
+                icon="progress_activity"
+                class="calculation-loader"
+              />
             } @else {
               -
             }
@@ -645,6 +653,13 @@
           <p class="one-line-text">
             @if (localization(); as loc) {
               {{ loc.longitude[rowIndex] | number: '1.0-7' }} °
+            } @else if (localizationLoading()) {
+              <app-icon
+                ariaLabel="Waiting engine for calculation"
+                i18n-ariaLabel
+                icon="progress_activity"
+                class="calculation-loader"
+              />
             } @else {
               -
             }
@@ -654,6 +669,13 @@
           <p class="one-line-text">
             @if (localization(); as loc) {
               {{ loc.azimuth[rowIndex] | number: '1.0-1' }} °
+            } @else if (localizationLoading()) {
+              <app-icon
+                ariaLabel="Waiting engine for calculation"
+                i18n-ariaLabel
+                icon="progress_activity"
+                class="calculation-loader"
+              />
             } @else {
               -
             }
@@ -663,6 +685,13 @@
           <p class="one-line-text">
             @if (localization(); as loc) {
               {{ loc.lambert_x[rowIndex] | number: '1.0-2' }} m
+            } @else if (localizationLoading()) {
+              <app-icon
+                ariaLabel="Waiting engine for calculation"
+                i18n-ariaLabel
+                icon="progress_activity"
+                class="calculation-loader"
+              />
             } @else {
               -
             }
@@ -672,6 +701,13 @@
           <p class="one-line-text">
             @if (localization(); as loc) {
               {{ loc.lambert_y[rowIndex] | number: '1.0-2' }} m
+            } @else if (localizationLoading()) {
+              <app-icon
+                ariaLabel="Waiting engine for calculation"
+                i18n-ariaLabel
+                icon="progress_activity"
+                class="calculation-loader"
+              />
             } @else {
               -
             }

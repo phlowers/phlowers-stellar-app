@@ -38,9 +38,13 @@ input {
   min-width: 5rem;
 }
 
-td {
-  vertical-align: top;
+table:not(.support-table--view) {
+  td {
+    vertical-align: top;
+  }
+}
 
+td {
   > *:not(button) {
     width: 100%;
   }
@@ -50,6 +54,27 @@ td {
   }
 }
 
+p:has(> app-icon[icon='progress_activity']) {
+  line-height: 0.5rem;
+}
+
 .one-line-text {
   @apply mb-0 whitespace-nowrap;
+}
+
+.calculation-loader {
+  display: inline-block;
+  font-size: 1rem;
+  color: var(--grey-750);
+  transform-origin: 50%;
+  animation: calculation-localization-loader 0.5s linear infinite;
+}
+
+@keyframes calculation-localization-loader {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

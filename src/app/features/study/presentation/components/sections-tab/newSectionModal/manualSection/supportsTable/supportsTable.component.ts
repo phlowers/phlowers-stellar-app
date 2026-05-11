@@ -1,15 +1,16 @@
 import {
-  effect,
-  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   OnInit,
   output,
-  signal
+  signal,
+  untracked
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -44,7 +45,6 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
 
 /**
@@ -77,7 +77,7 @@ import { CatalogAttachmentEntity } from '@infrastructure/database';
   styleUrls: ['./supportsTable.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SupportsTableComponent implements OnInit, AfterContentInit {
+export class SupportsTableComponent implements OnInit {
   /** List of supports to display in the table. */
   supports = input<Support[]>([]);
   /** Current mode: create, edit, or view. */
@@ -113,7 +113,14 @@ export class SupportsTableComponent implements OnInit, AfterContentInit {
     initialValue: [] as CatalogAttachmentEntity[]
   });
   private readonly workerPythonService = inject(WorkerPythonService);
+  readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   localization = signal<Localization | null>(null);
+  localizationLoading = signal<boolean>(false);
+  private readonly _localizationEffect = effect(() => {
+    if (this.workerReady()) {
+      untracked(() => void this.computeLocalization());
+    }
+  });
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
     value: String(index + 1)
@@ -157,9 +164,6 @@ export class SupportsTableComponent implements OnInit, AfterContentInit {
 
   ngOnInit() {
     this.getData();
-  }
-
-  ngAfterContentInit() {
     void this.computeLocalization();
   }
 
@@ -179,6 +183,9 @@ export class SupportsTableComponent implements OnInit, AfterContentInit {
     const lastIndex = supports.length - 1;
     if (supports.slice(0, lastIndex).some((s) => s.spanLength == null || s.spanAngle == null)) return;
 
+    this.localizationLoading.set(true);
+    if (!this.workerReady()) return;
+
     const spanLength = supports.map((s, i) => (i === lastIndex ? 0 : s.spanLength!));
     const lineAngle = supports.map((s) => s.spanAngle!);
 
@@ -189,6 +196,8 @@ export class SupportsTableComponent implements OnInit, AfterContentInit {
       spanLength,
       lineAngle
     });
+
+    this.localizationLoading.set(false);
 
     if (result && !error) {
       this.localization.set(result);
