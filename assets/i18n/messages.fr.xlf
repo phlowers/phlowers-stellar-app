@@ -3983,7 +3983,7 @@
         <target>L&apos;installation initiale de l&apos;application n&apos;a pas pu démarrer. Veuillez recharger la page pour réessayer.</target>
       </segment>
     </unit>
-    <unit id="6460521785131469521">
+    <unit id="5970395764141361429">
       <segment state="initial">
         <source>Authentication refresh failed. You may be working with outdated user data.</source>
         <target>Échec de la mise à jour de l&apos;authentification. Vous pourriez travailler avec des données utilisateur obsolètes.</target>
