@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
-from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -71,10 +70,10 @@ def get_current_obstacles(
 
 def delete_obstacle(
     uuid: str, plot_engine: PlotEngine, project: bool, support_index: int
-) -> Literal["success"]:
+) -> dict:
     logger.debug(f"Deleting obstacle with uuid: {uuid}")
     try:
-        del plot_engine.position_engine.obstacles_array._data[uuid]
+        plot_engine.position_engine.delete_obstacle(uuid)
         logger.debug("Successfully deleted obstacle.")
     except KeyError:
         logger.warning(f"Obstacle with uuid: {uuid} not found.")
@@ -119,12 +118,12 @@ def add_obstacles(
         # )
         # Bug: clear() is not a method of pd.DataFrame
         # Don't know what was the expected behaviour here
-        # plot_engine.position_engine.obstacles_array._data.clear()
+        # plot_engine.position_engine.obstacle_array._data.clear()
         return {"obstacles": []}
 
     df = pd.DataFrame(rows)
     df = change_obstacles_coordinates(df, balance_engine)
-    plot_engine.add_obstacles(ObstacleArray(df))
+    plot_engine.add_obstacle_array(ObstacleArray(df))
 
     result = get_current_obstacles(
         plot_engine, project=project, support_index=support_index
@@ -140,7 +139,7 @@ def compute_distances(
     points_for_plot = plot_engine.position_engine.get_points_for_plot()
     result = []
 
-    for obstacle in plot_engine.position_engine.obstacles_array.data.to_dict(
+    for obstacle in plot_engine.position_engine.obstacle_array.data.to_dict(
         orient="records"
     ):
         span_index = obstacle["span_index"]

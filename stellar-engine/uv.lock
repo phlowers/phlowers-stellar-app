@@ -341,7 +341,7 @@ wheels = [
 
 [[package]]
 name = "mechaphlowers"
-version = "0.8.1"
+version = "0.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -354,9 +354,9 @@ dependencies = [
     { name = "thermohl" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cc/38/44482e24473204144d15cf55e8e621a01acbc5f1f58e57f84d3aa15156d2/mechaphlowers-0.8.1.tar.gz", hash = "sha256:1c8be2f5e927545dd12a8d205824f3e875c18aacfe6debdf90c3a30a8af6f9b8", size = 153018 }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/81/0975fb2bef8727ea24b6bf348bc42286a013c805e860361ef9d4edd43484/mechaphlowers-0.8.2.tar.gz", hash = "sha256:1f504645f715a2450fa4b2a4fce6de51b6255f95a75a36f078b701e3e383cb64", size = 158275 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0d/da/33b03a91651ddd7f237e81aaa736dac1ef2f96f0ed1d58ef4e4fdc42a0b7/mechaphlowers-0.8.1-py3-none-any.whl", hash = "sha256:0df1e6820af7f88a523fa02b9929acbe47760d860818e2b4896c4d5e0655bdde", size = 186385 },
+    { url = "https://files.pythonhosted.org/packages/a2/b9/d3014ddff8b79ba2c645b1d33fd0c679f84b8868bbe7bfa4eef2ae4c6c46/mechaphlowers-0.8.2-py3-none-any.whl", hash = "sha256:a24b47230e9240b11b864530ab653525c0ed0dda6a62d1f349f0ac40feb7c0e1", size = 190991 },
 ]
 
 [[package]]
@@ -892,7 +892,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mechaphlowers", specifier = "==0.8.1" }]
+requires-dist = [{ name = "mechaphlowers", specifier = "==0.8.2" }]
 
 [package.metadata.requires-dev]
 all = [
@@ -939,16 +939,16 @@ wheels = [
 
 [[package]]
 name = "thermohl"
-version = "1.4.0"
+version = "1.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/62/b0/c367fb0be190c428012aa512eacaea3af3ca0dbc63cf3195a1f7a9565e17/thermohl-1.4.0.tar.gz", hash = "sha256:cb780f8ddf36655e4b914857fe8e366728357be339baba597d51156d06a52ee5", size = 49347 }
+sdist = { url = "https://files.pythonhosted.org/packages/34/a5/847a7475acab6b6a5fbc80fb6deefd103c9347c05a76faec40f95f694d50/thermohl-1.5.1.tar.gz", hash = "sha256:e2781949ef04473000eac205a043ac664ac9cff64c02c5c1bcc272b731ade53b", size = 1395770 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0c/91/de0921738bc6fda426111ac9bd931a8080b80b52d231d6694f496ab3f307/thermohl-1.4.0-py3-none-any.whl", hash = "sha256:4a35b0bce8c0d5380690c118a97fac717c8f9f12ad0a2024e4903025e5d593b0", size = 68866 },
+    { url = "https://files.pythonhosted.org/packages/b7/66/d053667b8649d1672a67bee4006d032e69bda5d01389c291a71c10c4ed06/thermohl-1.5.1-py3-none-any.whl", hash = "sha256:bf86314341c9e9c37c6493dbf682aba68412a20eefa18ffc669078455d75f062", size = 75030 },
 ]
 
 [[package]]
