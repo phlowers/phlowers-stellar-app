@@ -10,6 +10,7 @@ import {
   output,
   signal
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -55,6 +56,7 @@ import { CatalogAttachmentEntity } from '@infrastructure/database';
 @Component({
   selector: 'app-supports-table',
   imports: [
+    DecimalPipe,
     FormsModule,
     TableModule,
     InputTextModule,

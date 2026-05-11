@@ -635,7 +635,7 @@
         <td>
           <p class="one-line-text">
             @if (localization(); as loc) {
-              {{ loc.latitude[rowIndex] }} °
+              {{ loc.latitude[rowIndex] | number: '1.0-7' }} °
             } @else {
               -
             }
@@ -644,7 +644,7 @@
         <td>
           <p class="one-line-text">
             @if (localization(); as loc) {
-              {{ loc.longitude[rowIndex] }} °
+              {{ loc.longitude[rowIndex] | number: '1.0-7' }} °
             } @else {
               -
             }
@@ -653,7 +653,7 @@
         <td>
           <p class="one-line-text">
             @if (localization(); as loc) {
-              {{ loc.azimuth[rowIndex] }} °
+              {{ loc.azimuth[rowIndex] | number: '1.0-1' }} °
             } @else {
               -
             }
@@ -662,7 +662,7 @@
         <td>
           <p class="one-line-text">
             @if (localization(); as loc) {
-              {{ loc.lambert_x[rowIndex] }} m
+              {{ loc.lambert_x[rowIndex] | number: '1.0-2' }} m
             } @else {
               -
             }
@@ -671,7 +671,7 @@
         <td>
           <p class="one-line-text">
             @if (localization(); as loc) {
-              {{ loc.lambert_y[rowIndex] }} m
+              {{ loc.lambert_y[rowIndex] | number: '1.0-2' }} m
             } @else {
               -
             }
