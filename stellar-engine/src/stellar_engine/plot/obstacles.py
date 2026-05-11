@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
-from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -71,7 +70,7 @@ def get_current_obstacles(
 
 def delete_obstacle(
     uuid: str, plot_engine: PlotEngine, project: bool, support_index: int
-) -> Literal["success"]:
+) -> dict:
     logger.debug(f"Deleting obstacle with uuid: {uuid}")
     try:
         del plot_engine.position_engine.obstacle_array._data[uuid]

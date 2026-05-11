@@ -40,6 +40,7 @@ UNIT_MAP = {"kmh": "km/h", "ms": "m/s"}
 
 
 def temperature_calculation(inputs: dict, engine: BalanceEngine):
+    # TODO: remove engine in inputs and use temp_inputs.cableName instead
     temp_inputs = TemperatureCalculationInputs(**inputs)
     thermal_engine = ThermalEngine()
     wind_speed = (
