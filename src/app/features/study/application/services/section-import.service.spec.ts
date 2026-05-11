@@ -637,14 +637,12 @@ describe('SectionImportService', () => {
       expect(result?.regional_team_id).toBeUndefined();
     });
 
-    it('should create a default initial condition with a matching selected_initial_condition_uuid', async () => {
+    it('should NOT create any initial condition on GeoLiaison import', async () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.initial_conditions).toHaveLength(1);
-      expect(result?.selected_initial_condition_uuid).toBe(result?.initial_conditions[0].uuid);
-      expect(result?.initial_conditions[0].base_temperature).toBe(15);
-      expect(result?.initial_conditions[0].base_parameters).toBeNull();
+      expect(result?.initial_conditions).toHaveLength(0);
+      expect(result?.selected_initial_condition_uuid).toBeUndefined();
     });
 
     it('should set spanLength to null on the last support', async () => {

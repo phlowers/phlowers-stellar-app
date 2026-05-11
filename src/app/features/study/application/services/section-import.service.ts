@@ -7,11 +7,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Section, Study, Support } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
-import {
-  createEmptyInitialCondition,
-  createEmptySection,
-  createEmptySupport
-} from '@shared/domain/helpers/sections.helpers';
+import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/import/domain/import-contracts.interfaces';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -290,8 +286,6 @@ export class SectionImportService implements ImportAdapter<Section> {
       .filter((e) => !!e.supportName);
     await this.attachmentService.addSupportNamesIfAbsent(supportNameEntries);
 
-    const defaultIc = createEmptyInitialCondition();
-
     return {
       ...createEmptySection(),
       uuid: general.CANTON_CUR.trim(),
@@ -315,8 +309,8 @@ export class SectionImportService implements ImportAdapter<Section> {
       maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
       regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
       regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
-      initial_conditions: [defaultIc],
-      selected_initial_condition_uuid: defaultIc.uuid,
+      initial_conditions: [],
+      selected_initial_condition_uuid: undefined,
       supports
     };
   }
