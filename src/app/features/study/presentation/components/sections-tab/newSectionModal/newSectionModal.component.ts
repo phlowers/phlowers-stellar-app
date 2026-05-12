@@ -21,6 +21,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { SectionSourceMode } from './newSectionModal.interfaces';
 import { cloneDeep } from 'lodash';
 import { LocationData } from './manualSection/location/location.interfaces';
+import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -99,8 +100,30 @@ export class NewSectionModalComponent {
     effect(() => {
       if (this.isOpen()) {
         this.checkFields();
+        this.initializeLocationData();
+      } else {
+        this.locationData.set(null);
       }
     });
+  }
+
+  /**
+   * Pre-seeds `locationData` from the current section, falling back to
+   * `LOCATION_CONFIG` defaults whenever a coordinate is null. This guarantees
+   * the defaults are persisted to IndexedDB even when the user validates
+   * without ever opening the lazily-mounted "supports" tab (where
+   * `<app-location>` lives). The child component overrides this as soon as
+   * the user interacts with the inputs.
+   */
+  private initializeLocationData(): void {
+    const section = this.section();
+    this.locationData.set({
+      latitude: section.start_latitude ?? LOCATION_CONFIG.latitude.default,
+      longitude: section.start_longitude ?? LOCATION_CONFIG.longitude.default,
+      azimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
+      isValid: true
+    });
+    this.isLocationValid.set(true);
   }
 
   checkFields = () => {
@@ -125,6 +148,7 @@ export class NewSectionModalComponent {
 
   onLocationChange(location: LocationData) {
     this.locationData.set(location);
+    this.isLocationValid.set(location.isValid);
   }
 
   onValidate() {
