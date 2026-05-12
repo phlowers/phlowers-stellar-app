@@ -329,6 +329,28 @@ describe('ManualSectionComponent', () => {
         ])
       );
     });
+
+    it('should fallback-filter without voltage_idr and auto-correct it when voltage mismatch leaves empty result', async () => {
+      mockSection.link_name = 'link1';
+      mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
+
+      await component.setupFilterTables();
+
+      expect(component.linesFilterTable()).toHaveLength(1);
+      expect(component.linesFilterTable()[0].link_idr).toBe('link1');
+      expect(mockSection.voltage_idr).toBe('tension1');
+    });
+
+    it('should not apply fallback when neither link_name nor lit_code is set', async () => {
+      mockSection.link_name = undefined;
+      mockSection.lit_code = undefined;
+      mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
+
+      await component.setupFilterTables();
+
+      expect(component.linesFilterTable()).toHaveLength(0);
+      expect(mockSection.voltage_idr).toBe('MISMATCH_VOLTAGE');
+    });
   });
 
   describe('onSupportsAmountChangeBlur', () => {
@@ -509,6 +531,44 @@ describe('ManualSectionComponent', () => {
       const el = getByTestId('next-tab-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+  });
+
+  describe('HTML rendering - view mode Link section', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    beforeEach(async () => {
+      mockMaintenanceService.getMaintenance.mockResolvedValue(mockMaintenanceData);
+      mockLinesService.getLines.mockResolvedValue(mockLinesData);
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      mockSection.lit_code = 'lit1';
+      mockSection.lit_name = 'LIT 1';
+      mockSection.link_name = 'link1';
+      mockSection.branch_idr = '1.0';
+      mockSection.voltage_idr = 'tension1';
+      component.linesFilterTable.set(mockLinesData);
+      component.litAdrRead.set('LIT 1');
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('should render LIT - ID with lit_code value', () => {
+      const el = getByTestId('lit-code-view');
+      expect(el).toBeTruthy();
+      expect(el?.textContent?.trim()).toBe('lit1');
+    });
+
+    it('should render LIT - Name with litAdrRead value', () => {
+      const el = getByTestId('lit-name-view');
+      expect(el).toBeTruthy();
+      expect(el?.textContent?.trim()).toBe('LIT 1');
+    });
+
+    it('should render Branch with branch_idr value', () => {
+      const el = getByTestId('branch-idr-view');
+      expect(el).toBeTruthy();
+      expect(el?.textContent?.trim()).toBe('1.0');
     });
   });
 });

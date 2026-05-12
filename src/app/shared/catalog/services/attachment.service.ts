@@ -7,15 +7,16 @@
 import { inject, Injectable } from '@angular/core';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, filter, merge, of, Subject, switchMap, take } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
 import { AttachmentCsvDto } from '@infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
-import { toNumber } from 'lodash';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 import Dexie from 'dexie';
+import { SupportNameEntry } from './attachment.interfaces';
+import { mapAttachmentCsvToEntities } from './attachment.helpers';
 
 /**
  * Service for managing attachment point catalog data.
@@ -47,6 +48,22 @@ export class AttachmentService {
   private readonly storageService = inject(StorageService);
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
+
+  /** Internal trigger to re-read catAttachments after any write. */
+  private readonly _refresh$ = new Subject<void>();
+
+  /**
+   * Observable of all attachment entities.
+   * Re-emits after any write to catAttachments via this service (addSupportNamesIfAbsent, importFromFile).
+   * Only starts emitting after the storage service signals readiness.
+   */
+  readonly allAttachments$ = this.storageService.ready$.pipe(
+    filter((ready): ready is true => ready),
+    take(1),
+    switchMap(() =>
+      merge(of(undefined as void), this._refresh$).pipe(switchMap(async () => (await this.getAttachments()) ?? []))
+    )
+  );
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -119,52 +136,85 @@ export class AttachmentService {
    * @returns Promise that resolves when import is complete
    */
   async importFromFile() {
-    const attachments = this.http
-      .get(`${globalThis.location.origin}/data/attachments.csv`, {
-        responseType: 'text'
-      })
-      .pipe(
-        catchError((error) => {
-          this.logger.error('Error importing attachments', error);
-          return of('');
-        })
-      );
-
-    const mapData = (data: AttachmentCsvDto[]): CatalogAttachmentEntity[] => {
-      return data
-        .filter((item) => item.support_adr)
-        .map((item) => ({
-          uuid: uuidv4(),
-          updated_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          support_name: item.support_adr,
-          attachment_set: toNumber(item.position),
-          attachment_altitude: parseFloat(item.Z),
-          cross_arm_length: parseFloat(item.L),
-          attachment_set_x: parseFloat(item.X),
-          attachment_set_y: parseFloat(item.Y),
-          attachment_set_z: parseFloat(item.Z),
-          support_tower: item.support_tower
-        }));
-    };
-
     await new Promise<void>((resolve) => {
-      attachments.subscribe(async (attachments) => {
-        Papa.parse(attachments, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
-            const data = jsonResults.data;
-            if (!data || data.length === 0) {
-              resolve();
-              return;
-            }
-            const attachmentsTable: CatalogAttachmentEntity[] = mapData(data);
-            await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
-            resolve();
-          }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
-        });
+      this.fetchCsv().subscribe(async (csv) => {
+        await this.parseCsvAndStore(csv);
+        resolve();
       });
     });
+  }
+
+  private fetchCsv() {
+    return this.http.get(`${globalThis.location.origin}/data/attachments.csv`, { responseType: 'text' }).pipe(
+      catchError((error) => {
+        this.logger.error('Error importing attachments', error);
+        return of('');
+      })
+    );
+  }
+
+  private async parseCsvAndStore(csv: string): Promise<void> {
+    await new Promise<void>((resolve) => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
+          const data = jsonResults.data;
+          if (!data || data.length === 0) {
+            resolve();
+            return;
+          }
+          const attachmentsTable: CatalogAttachmentEntity[] = mapAttachmentCsvToEntities(data);
+          await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
+          this._refresh$.next();
+          resolve();
+        }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
+      });
+    });
+  }
+
+  /**
+   * Adds support name entries to the catalog if they are not already present.
+   *
+   * @remarks
+   * Performs a full table scan (toArray) then inserts only the missing entries.
+   * The table is small (~500 rows), making this approach acceptable without schema changes.
+   * Entries with empty or missing supportName are silently ignored.
+   *
+   * @param entries - List of support name entries to persist if absent
+   * @returns Promise that resolves when all missing entries have been added
+   */
+  async addSupportNamesIfAbsent(entries: SupportNameEntry[]): Promise<void> {
+    const db = this.storageService.db;
+    if (!db || entries.length === 0) {
+      return;
+    }
+
+    // Deduplicate input by supportName
+    const validEntries = entries.filter((e) => !!e.supportName);
+    const uniqueEntries = [...new Map(validEntries.map((e) => [e.supportName, e])).values()];
+    if (uniqueEntries.length === 0) {
+      return;
+    }
+
+    const existing = await db.catAttachments.toArray();
+    const existingNames = new Set(existing.map((a) => a.support_name).filter((n): n is string => !!n));
+
+    const toAdd: CatalogAttachmentEntity[] = uniqueEntries
+      .filter((e) => !existingNames.has(e.supportName))
+      .map((e) => ({
+        uuid: uuidv4(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        support_name: e.supportName,
+        support_tower: e.supportTower ?? ''
+      }));
+
+    if (toAdd.length === 0) {
+      return;
+    }
+
+    await db.catAttachments.bulkAdd(toAdd);
+    this._refresh$.next();
   }
 }

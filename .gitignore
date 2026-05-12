@@ -50,6 +50,7 @@ public/service-worker.interfaces.js
 
 # Personal Copilot skills
 copilot-skills.md
+.github/personal-skills.md
 
 *.ipynb
 

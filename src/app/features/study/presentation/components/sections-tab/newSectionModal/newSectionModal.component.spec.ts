@@ -11,6 +11,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@services/notification/notification.service';
+import { Subject } from 'rxjs';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -32,6 +33,7 @@ class MockChainsService {
 }
 
 class MockAttachmentService {
+  allAttachments$ = new Subject<never[]>();
   ready = { next: vi.fn() };
   getAttachments = vi.fn().mockResolvedValue([]);
   getDistinctSupportNames = vi.fn().mockResolvedValue([]);

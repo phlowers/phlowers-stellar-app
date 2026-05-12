@@ -23,18 +23,18 @@ export function parseFloatOrNull(value: unknown): number | null {
 export function parseBooleanOrNull(value: unknown): boolean | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean') return value;
-  if (value === 'true' || value === '1') return true;
-  if (value === 'false' || value === '0') return false;
+  if (value === 'true' || value === '1' || value === 'OUI') return true;
+  if (value === 'false' || value === '0' || value === 'NON') return false;
   return null;
 }
 
 /**
- * Extracts the last 2 digit characters from a BRANCHE_IDR string.
- * Rule RG.CAN.BRA — e.g. "FLAMAL73MENUE01" → "01".
+ * Extracts the branch number from a BRANCHE_IDR string.
+ * Rule RG.CAN.BRA — takes the last 2 characters (always digits) and converts them to an integer string.
+ * e.g. "FLAMAL73MENUE01" → "1", "FLAMAL73MENUE08" → "8", "FLAMAL73MENUE10" → "10".
  */
 export function extractBranchIdr(value: string): string {
-  const digits = value.replaceAll(/\D/g, '');
-  return digits.slice(-2);
+  return String(parseInt(value.slice(-2), 10));
 }
 
 /**

@@ -13,7 +13,9 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { Section, Study } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { CatalogMaintenance } from '@shared/domain';
+import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 
 // ---------------------------------------------------------------------------
 // Polyfill File.prototype.text — jsdom 26 does not implement it
@@ -81,6 +83,7 @@ const buildAccroche = (overrides: Record<string, string | null> = {}): Record<st
   HAUTEUR_SOUS_CONSOLE: '2.5',
   LONGUEUR_BRAS: '3.0',
   CHAINE_DRN_ADR: 'ChainA',
+  CHAINE_DRN_IDR: 'ChainA_IDR',
   CHAINE_DRN_LONGUEUR: '5.0',
   CHAINE_DRN_POIDS: '50.0',
   CHAINE_EN_V: 'false',
@@ -90,6 +93,7 @@ const buildAccroche = (overrides: Record<string, string | null> = {}): Record<st
   PIED_X_LAMBERT93: '123456.0',
   PIED_Y_LAMBERT93: '789012.0',
   SUPPORT_ADR: 'Support A',
+  SUPPORT_IDR: 'Support_IDR_A',
   SUPPORT_NUMERO: '1',
   SUPPORT_TOWER: 'TowerX',
   ...overrides
@@ -128,7 +132,10 @@ const buildValidGeoLiaisonPayload = (): Record<string, unknown> => ({
             LIT_ADR: 'LitName',
             LIT_IDR: 'LIT001',
             BRANCHE_IDR: 'FLAMAL73MENUE01',
-            TENSION_ELECTRIQUE_ADR: '225kV'
+            TENSION_ELECTRIQUE_IDR: '225kV',
+            TENSION_ELECTRIQUE_ADR: '225 KV',
+            LIAISON_IDR: 'LIA001',
+            LIAISON_ADR: 'Liaison 225kV Flamal-Menuet'
           }
         ]
       },
@@ -162,6 +169,7 @@ describe('SectionImportService', () => {
   let messageServiceMock: vi.Mocked<MessageService>;
   let loggerSpy: vi.Mocked<LoggerService>;
   let maintenanceServiceMock: { getMaintenance: ReturnType<typeof vi.fn> };
+  let attachmentServiceMock: { addSupportNamesIfAbsent: ReturnType<typeof vi.fn> };
 
   const mockMaintenanceData: CatalogMaintenance[] = [
     {
@@ -195,13 +203,18 @@ describe('SectionImportService', () => {
       getMaintenance: vi.fn().mockResolvedValue(mockMaintenanceData)
     };
 
+    attachmentServiceMock = {
+      addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         SectionImportService,
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
         { provide: LoggerService, useValue: loggerSpy },
-        { provide: MaintenanceService, useValue: maintenanceServiceMock }
+        { provide: MaintenanceService, useValue: maintenanceServiceMock },
+        { provide: AttachmentService, useValue: attachmentServiceMock }
       ]
     });
     service = TestBed.inject(SectionImportService);
@@ -529,8 +542,9 @@ describe('SectionImportService', () => {
 
       expect(result?.lit_name).toBe('LitName');
       expect(result?.lit_code).toBe('LIT001');
-      expect(result?.branch_idr).toBe('01');
-      expect(result?.voltage_idr).toBe('225kV');
+      expect(result?.link_name).toBe('LIA001');
+      expect(result?.branch_idr).toBe('1');
+      expect(result?.voltage_idr).toBeUndefined();
     });
 
     it('should lookup maintenance IDs from MaintenanceService', async () => {
@@ -623,14 +637,12 @@ describe('SectionImportService', () => {
       expect(result?.regional_team_id).toBeUndefined();
     });
 
-    it('should create a default initial condition with a matching selected_initial_condition_uuid', async () => {
+    it('should NOT create any initial condition on GeoLiaison import', async () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.initial_conditions).toHaveLength(1);
-      expect(result?.selected_initial_condition_uuid).toBe(result?.initial_conditions[0].uuid);
-      expect(result?.initial_conditions[0].base_temperature).toBe(15);
-      expect(result?.initial_conditions[0].base_parameters).toBeNull();
+      expect(result?.initial_conditions).toHaveLength(0);
+      expect(result?.selected_initial_condition_uuid).toBeUndefined();
     });
 
     it('should set spanLength to null on the last support', async () => {
@@ -650,6 +662,7 @@ describe('SectionImportService', () => {
         HAUTEUR_SOUS_CONSOLE: null,
         LONGUEUR_BRAS: null,
         CHAINE_DRN_ADR: null,
+        CHAINE_DRN_IDR: null,
         CHAINE_DRN_LONGUEUR: null,
         CHAINE_DRN_POIDS: null,
         CHAINE_EN_V: null,
@@ -659,6 +672,7 @@ describe('SectionImportService', () => {
         PIED_X_LAMBERT93: null,
         PIED_Y_LAMBERT93: null,
         SUPPORT_ADR: null,
+        SUPPORT_IDR: null,
         SUPPORT_NUMERO: null,
         SUPPORT_TOWER: null
       });
@@ -822,6 +836,74 @@ describe('SectionImportService', () => {
       const result = await service.processFile(file, neverAccept);
       expect(result).not.toBeNull();
       expect(result?.uuid).toBe('sec-uuid-1');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // addSupportNamesIfAbsent integration (RG.CAN.ATT)
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — addSupportNamesIfAbsent integration', () => {
+    beforeEach(() => {
+      service.setStudyContext(buildMockStudy());
+    });
+
+    it('should call addSupportNamesIfAbsent with SupportNameEntry[] from GeoLiaison accroches', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      await service.processFile(file, neverAccept);
+
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).toHaveBeenCalledTimes(1);
+
+      // Payload has 2 portees:
+      // portee ordre=1: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='1')
+      // portee ordre=2: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='2')
+      // arrivee of last portee (ordre=2): SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='3')
+      // After sort by ordre: portee1 first, portee2 last
+      const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
+      expect(called.length).toBe(3);
+      expect(called.every((e: SupportNameEntry) => e.supportName === 'Support_IDR_A')).toBe(true);
+      expect(called.every((e: SupportNameEntry) => e.supportTower === 'TowerX')).toBe(true);
+    });
+
+    it('should not call addSupportNamesIfAbsent for legacy JSON import', async () => {
+      const file = makeJsonFile(buildValidSectionPayload());
+      await service.processFile(file, neverAccept);
+
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).not.toHaveBeenCalled();
+    });
+
+    it('should use SUPPORT_ADR as fallback when SUPPORT_IDR is empty string', async () => {
+      // Override SUPPORT_IDR to empty string — ?? would not fall back, || does
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      portees.forEach((p) => {
+        (p['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+        (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+      });
+
+      const file = makeJsonFile(payload);
+      await service.processFile(file, neverAccept);
+
+      const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
+      expect(called.length).toBe(3);
+      expect(called.every((e: SupportNameEntry) => e.supportName === 'Support A')).toBe(true);
+    });
+
+    it('should filter out entries where both SUPPORT_IDR and SUPPORT_ADR are empty string', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      portees.forEach((p) => {
+        (p['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+        (p['accroche depart'] as Record<string, unknown>)['SUPPORT_ADR'] = '';
+        (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
+        (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_ADR'] = '';
+      });
+
+      const file = makeJsonFile(payload);
+      await service.processFile(file, neverAccept);
+
+      const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
+      expect(called.length).toBe(0);
     });
   });
 });

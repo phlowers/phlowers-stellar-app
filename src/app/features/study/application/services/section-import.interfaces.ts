@@ -16,6 +16,7 @@ export interface GeoLiaisonAccroche {
   HAUTEUR_SOUS_CONSOLE: string | null;
   LONGUEUR_BRAS: string | null;
   CHAINE_DRN_ADR: string | null;
+  CHAINE_DRN_IDR: string | null;
   CHAINE_DRN_LONGUEUR: string | null;
   CHAINE_DRN_POIDS: string | null;
   CHAINE_EN_V: string | null;
@@ -25,6 +26,7 @@ export interface GeoLiaisonAccroche {
   PIED_X_LAMBERT93: string | null;
   PIED_Y_LAMBERT93: string | null;
   SUPPORT_ADR: string | null;
+  SUPPORT_IDR: string | null;
   SUPPORT_NUMERO: string | null;
   SUPPORT_TOWER: string | null;
 }
@@ -45,7 +47,10 @@ export interface GeoLiaisonAppartenance {
   LIT_ADR: string | null;
   LIT_IDR: string | null;
   BRANCHE_IDR: string | null;
+  TENSION_ELECTRIQUE_IDR: string | null;
   TENSION_ELECTRIQUE_ADR: string | null;
+  LIAISON_IDR: string | null;
+  LIAISON_ADR: string | null;
 }
 
 export interface GeoLiaisonGeneral {
