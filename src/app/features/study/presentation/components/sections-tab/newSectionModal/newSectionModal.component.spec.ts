@@ -102,7 +102,10 @@ describe('NewSectionModalComponent (Jest)', () => {
     cable_modifications: [],
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
-    selected_cable_span_manipulation_uuid: null
+    selected_cable_span_manipulation_uuid: null,
+    start_latitude: null,
+    start_longitude: null,
+    start_azimuth: null
   };
 
   const mockStudy: Study = {
@@ -187,14 +190,48 @@ describe('NewSectionModalComponent (Jest)', () => {
     expect(button.nativeElement.disabled).toBe(true);
   });
 
-  it('should emit outputSection and close modal on validate', () => {
-    const spyOutput = vi.spyOn(component.outputSection, 'emit');
-    const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
+  describe('onValidate', () => {
+    it('should emit section unchanged and close modal when no locationData was set', () => {
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+      const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
 
-    component.onValidate();
+      component.onValidate();
 
-    expect(spyOutput).toHaveBeenCalledWith(mockSection);
-    expect(spyOpen).toHaveBeenCalledWith(false);
+      expect(spyOutput).toHaveBeenCalledWith(mockSection);
+      expect(spyOpen).toHaveBeenCalledWith(false);
+    });
+
+    it('should merge locationData into section when locationData is set', () => {
+      component.onLocationChange({ latitude: 48.5, longitude: 2.3, azimuth: 90 });
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      component.onValidate();
+
+      expect(spyOutput).toHaveBeenCalledWith({
+        ...mockSection,
+        start_latitude: 48.5,
+        start_longitude: 2.3,
+        start_azimuth: 90
+      });
+    });
+
+    it('should preserve existing section location values when locationData is null', () => {
+      const sectionWithLocation: Section = {
+        ...mockSection,
+        start_latitude: 45,
+        start_longitude: 1,
+        start_azimuth: 45
+      };
+      fixture.componentRef.setInput('section', sectionWithLocation);
+      fixture.detectChanges();
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      component.onValidate();
+
+      expect(spyOutput).toHaveBeenCalledWith(sectionWithLocation);
+    });
   });
 
   it('should show "update section" when mode=edit', () => {
@@ -432,7 +469,7 @@ describe('NewSectionModalComponent (Jest)', () => {
     it('should emit isOpenChange(false) then isOpenChange(true) via micro-task', async () => {
       fixture.componentRef.setInput('study', { ...mockStudy, sections: [importedSection] });
       const emitted: boolean[] = [];
-      vi.spyOn(component.isOpenChange, 'emit').mockImplementation((v) => emitted.push(v as boolean));
+      vi.spyOn(component.isOpenChange, 'emit').mockImplementation((v) => emitted.push(v));
       component.onImportedSectionEditRequested('imported-uuid');
       expect(emitted).toContain(false);
       await Promise.resolve();

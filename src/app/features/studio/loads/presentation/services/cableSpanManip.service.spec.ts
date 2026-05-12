@@ -10,8 +10,7 @@ import { CableSpanManipService } from './cableSpanManip.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { CableSpanManipulation } from '@shared/domain';
-import { Section } from '@shared/domain';
+import { CableSpanManipulation, Section } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { StudyEntity } from '@infrastructure/database';
 
@@ -89,7 +88,10 @@ const mockSectionBase: Section = {
   cable_modifications: [],
   selected_cable_modification_uuid: null,
   cable_span_manipulations: [],
-  selected_cable_span_manipulation_uuid: null
+  selected_cable_span_manipulation_uuid: null,
+  start_latitude: null,
+  start_longitude: null,
+  start_azimuth: null
 };
 
 const mockStudy: StudyEntity = {

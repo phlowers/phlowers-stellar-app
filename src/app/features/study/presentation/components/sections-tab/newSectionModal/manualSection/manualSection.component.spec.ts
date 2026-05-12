@@ -178,7 +178,10 @@ describe('ManualSectionComponent', () => {
       cable_modifications: [],
       selected_cable_modification_uuid: null,
       cable_span_manipulations: [],
-      selected_cable_span_manipulation_uuid: null
+      selected_cable_span_manipulation_uuid: null,
+      start_latitude: null,
+      start_longitude: null,
+      start_azimuth: null
     };
 
     await TestBed.configureTestingModule({
@@ -571,6 +574,30 @@ describe('ManualSectionComponent', () => {
       expect(el?.textContent?.trim()).toBe('1.0');
     });
   });
+
+  describe('HTML rendering - supports_comment in view mode', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    beforeEach(() => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      component.tabValue.set('supports');
+    });
+
+    it('should show supports_comment paragraph when comment is non-empty', () => {
+      mockSection.supports_comment = 'A test comment';
+      fixture.detectChanges();
+      const el = getByTestId('supports-comment-text');
+      expect(el).toBeTruthy();
+      expect(el?.textContent?.trim()).toBe('A test comment');
+    });
+
+    it('should not show supports_comment paragraph when comment is empty', () => {
+      mockSection.supports_comment = '';
+      fixture.detectChanges();
+      expect(getByTestId('supports-comment-text')).toBeNull();
+    });
+  });
 });
 
 function createSupportMock(): Support {
@@ -593,6 +620,9 @@ function createSupportMock(): Support {
     supportFootAltitude: null,
     chainSurface: null,
     attachmentPosition: null,
-    towerModel: null
+    towerModel: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   };
 }

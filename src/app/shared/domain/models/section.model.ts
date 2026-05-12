@@ -132,4 +132,10 @@ export interface Section {
   cable_span_manipulations: CableSpanManipulation[];
   /** UUID of the currently selected cable span manipulation */
   selected_cable_span_manipulation_uuid: string | null;
+  /** Latitude of the first support */
+  start_latitude: number | null;
+  /** Longitude of the first support */
+  start_longitude: number | null;
+  /** Azimuth of the first support */
+  start_azimuth: number | null;
 }
