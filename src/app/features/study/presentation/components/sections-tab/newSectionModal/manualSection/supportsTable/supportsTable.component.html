@@ -5,6 +5,11 @@
   (validateForm)="onValidateFormAttachmentSetModal($event)"
   [section]="null"
 />
+<output class="sr-only">
+  @if (localizationLoading()) {
+    <ng-container i18n>Waiting engine for calculation</ng-container>
+  }
+</output>
 <p-table
   [value]="supports()"
   [paginator]="true"
@@ -639,8 +644,7 @@
               {{ loc.latitude[rowIndex] | number: '1.0-7' }} °
             } @else if (localizationLoading()) {
               <app-icon
-                ariaLabel="Waiting engine for calculation"
-                i18n-ariaLabel
+                aria-hidden="true"
                 icon="progress_activity"
                 class="calculation-loader"
               />
@@ -655,8 +659,7 @@
               {{ loc.longitude[rowIndex] | number: '1.0-7' }} °
             } @else if (localizationLoading()) {
               <app-icon
-                ariaLabel="Waiting engine for calculation"
-                i18n-ariaLabel
+                aria-hidden="true"
                 icon="progress_activity"
                 class="calculation-loader"
               />
@@ -671,8 +674,7 @@
               {{ loc.azimuth[rowIndex] | number: '1.0-1' }} °
             } @else if (localizationLoading()) {
               <app-icon
-                ariaLabel="Waiting engine for calculation"
-                i18n-ariaLabel
+                aria-hidden="true"
                 icon="progress_activity"
                 class="calculation-loader"
               />
@@ -687,8 +689,7 @@
               {{ loc.lambert_x[rowIndex] | number: '1.0-2' }} m
             } @else if (localizationLoading()) {
               <app-icon
-                ariaLabel="Waiting engine for calculation"
-                i18n-ariaLabel
+                aria-hidden="true"
                 icon="progress_activity"
                 class="calculation-loader"
               />
@@ -703,8 +704,7 @@
               {{ loc.lambert_y[rowIndex] | number: '1.0-2' }} m
             } @else if (localizationLoading()) {
               <app-icon
-                ariaLabel="Waiting engine for calculation"
-                i18n-ariaLabel
+                aria-hidden="true"
                 icon="progress_activity"
                 class="calculation-loader"
               />

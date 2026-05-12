@@ -167,40 +167,48 @@ export class SupportsTableComponent implements OnInit {
     void this.computeLocalization();
   }
 
+  private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
+    return (
+      supports.length > 0 &&
+      section?.startLatitude != null &&
+      section.startLongitude != null &&
+      section.startAzimuth != null &&
+      !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
+    );
+  }
+
+  private buildLocalizationPayload(section: Section, supports: Support[]) {
+    const lastIndex = supports.length - 1;
+    return {
+      startLatitude: section.startLatitude!,
+      startLongitude: section.startLongitude!,
+      startAzimuth: section.startAzimuth!,
+      spanLength: supports.map((s, i) => (i === lastIndex ? 0 : s.spanLength!)),
+      lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
+    };
+  }
+
   private async computeLocalization(): Promise<void> {
+    if (this.mode() !== 'view') return;
+
     const section = this.section();
     const supports = this.supports();
 
-    if (this.mode() !== 'view') return;
-    if (
-      !supports.length ||
-      section?.startLatitude == null ||
-      section.startLongitude == null ||
-      section.startAzimuth == null
-    )
-      return;
-
-    const lastIndex = supports.length - 1;
-    if (supports.slice(0, lastIndex).some((s) => s.spanLength == null || s.spanAngle == null)) return;
-
-    this.localizationLoading.set(true);
+    if (!this.hasLocalizationInputs(section, supports)) return;
     if (!this.workerReady()) return;
 
-    const spanLength = supports.map((s, i) => (i === lastIndex ? 0 : s.spanLength!));
-    const lineAngle = supports.map((s) => s.spanAngle!);
+    this.localizationLoading.set(true);
 
-    const { result, error } = await this.workerPythonService.runTask(Task.computeLocalization, {
-      startLatitude: section.startLatitude,
-      startLongitude: section.startLongitude,
-      startAzimuth: section.startAzimuth,
-      spanLength,
-      lineAngle
-    });
-
-    this.localizationLoading.set(false);
-
-    if (result && !error) {
-      this.localization.set(result);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(
+        Task.computeLocalization,
+        this.buildLocalizationPayload(section!, supports)
+      );
+      if (result && !error) {
+        this.localization.set(result);
+      }
+    } finally {
+      this.localizationLoading.set(false);
     }
   }
 

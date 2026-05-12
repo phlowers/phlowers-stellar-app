@@ -248,6 +248,56 @@ describe('LocationComponent', () => {
     });
   });
 
+  describe('initialization emissions', () => {
+    let initFixture: ComponentFixture<LocationComponent>;
+    let initComponent: LocationComponent;
+
+    beforeEach(() => {
+      initFixture = TestBed.createComponent(LocationComponent);
+      initComponent = initFixture.componentInstance;
+    });
+
+    it('should emit locationChange with defaults on first detectChanges when useDefaults is true', () => {
+      initFixture.componentRef.setInput('useDefaults', true);
+      vi.spyOn(initComponent.locationChange, 'emit');
+      initFixture.detectChanges();
+      expect(initComponent.locationChange.emit).toHaveBeenCalledWith({
+        latitude: LOCATION_CONFIG.latitude.default,
+        longitude: LOCATION_CONFIG.longitude.default,
+        azimuth: LOCATION_CONFIG.azimuth.default
+      });
+    });
+
+    it('should emit isValidChange(true) on first detectChanges when defaults are in range', () => {
+      initFixture.componentRef.setInput('useDefaults', true);
+      vi.spyOn(initComponent.isValidChange, 'emit');
+      initFixture.detectChanges();
+      expect(initComponent.isValidChange.emit).toHaveBeenCalledWith(true);
+    });
+
+    it('should emit locationChange with nulls on first detectChanges when useDefaults is false', () => {
+      initFixture.componentRef.setInput('useDefaults', false);
+      vi.spyOn(initComponent.locationChange, 'emit');
+      initFixture.detectChanges();
+      expect(initComponent.locationChange.emit).toHaveBeenCalledWith({
+        latitude: null,
+        longitude: null,
+        azimuth: null
+      });
+    });
+
+    it('should emit updated locationChange when initialLatitude input changes after init', () => {
+      initFixture.componentRef.setInput('useDefaults', true);
+      initFixture.detectChanges();
+      vi.spyOn(initComponent.locationChange, 'emit');
+      initFixture.componentRef.setInput('initialLatitude', 45);
+      initFixture.detectChanges();
+      expect(initComponent.locationChange.emit).toHaveBeenCalledWith(
+        expect.objectContaining({ latitude: 45 })
+      );
+    });
+  });
+
   describe('output - locationChange', () => {
     beforeEach(() => {
       vi.spyOn(component.locationChange, 'emit');

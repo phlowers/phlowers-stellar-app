@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, linkedSignal, output } from '@angular/core';
 import { truncateOneDecimalValue } from '@shared/helpers/truncateDecimals';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
@@ -25,9 +25,15 @@ export class LocationComponent {
 
   protected readonly config = LOCATION_CONFIG;
 
-  protected readonly latitudeValue = linkedSignal<number | null>(() => this.initialLatitude() ?? (this.useDefaults() ? LOCATION_CONFIG.latitude.default : null));
-  protected readonly longitudeValue = linkedSignal<number | null>(() => this.initialLongitude() ?? (this.useDefaults() ? LOCATION_CONFIG.longitude.default : null));
-  protected readonly azimuthValue = linkedSignal<number | null>(() => this.initialAzimuth() ?? (this.useDefaults() ? LOCATION_CONFIG.azimuth.default : null));
+  protected readonly latitudeValue = linkedSignal<number | null>(
+    () => this.initialLatitude() ?? (this.useDefaults() ? LOCATION_CONFIG.latitude.default : null)
+  );
+  protected readonly longitudeValue = linkedSignal<number | null>(
+    () => this.initialLongitude() ?? (this.useDefaults() ? LOCATION_CONFIG.longitude.default : null)
+  );
+  protected readonly azimuthValue = linkedSignal<number | null>(
+    () => this.initialAzimuth() ?? (this.useDefaults() ? LOCATION_CONFIG.azimuth.default : null)
+  );
 
   protected readonly isLatitudeOverMax = computed(() => {
     const v = this.latitudeValue();
@@ -84,6 +90,12 @@ export class LocationComponent {
     return null;
   });
 
+  constructor() {
+    effect(() => {
+      this.emitChange();
+    });
+  }
+
   private parseInputValue(raw: string): number | null {
     if (raw.trim() === '') return null;
     const parsed = Number(raw);
@@ -101,12 +113,10 @@ export class LocationComponent {
 
   onLatitudeInput(event: Event): void {
     this.latitudeValue.set(this.parseInputValue((event.target as HTMLInputElement).value));
-    this.emitChange();
   }
 
   onLongitudeInput(event: Event): void {
     this.longitudeValue.set(this.parseInputValue((event.target as HTMLInputElement).value));
-    this.emitChange();
   }
 
   onAzimuthInput(event: Event): void {
@@ -114,6 +124,5 @@ export class LocationComponent {
     const truncated = truncateOneDecimalValue(input.value);
     input.value = truncated;
     this.azimuthValue.set(this.parseInputValue(truncated));
-    this.emitChange();
   }
 }

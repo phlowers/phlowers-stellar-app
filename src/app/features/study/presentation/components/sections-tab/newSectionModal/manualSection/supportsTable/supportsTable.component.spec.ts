@@ -653,10 +653,10 @@ describe('SupportsTableComponent', () => {
       expect(component.localizationLoading()).toBe(false);
     });
 
-    it('should become true in view mode with valid section/supports when worker is not ready', async () => {
+    it('should stay false in view mode with valid section/supports when worker is not ready', async () => {
       component.ngOnInit();
       await fixture.whenStable();
-      expect(component.localizationLoading()).toBe(true);
+      expect(component.localizationLoading()).toBe(false);
     });
 
     it('should stay false when mode is not view', async () => {
@@ -696,7 +696,7 @@ describe('SupportsTableComponent', () => {
     it('should set localization and clear loading flag when worker becomes ready', async () => {
       component.ngOnInit();
       await fixture.whenStable();
-      expect(component.localizationLoading()).toBe(true);
+      expect(component.localizationLoading()).toBe(false);
 
       workerReadySubject.next(true);
       fixture.detectChanges();
@@ -704,6 +704,16 @@ describe('SupportsTableComponent', () => {
 
       expect(component.localizationLoading()).toBe(false);
       expect(component.localization()).toEqual(mockLocalizationResult);
+    });
+
+    it('should clear localizationLoading when runTask rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('worker crash'));
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      component.ngOnInit();
+      await fixture.whenStable();
+
+      expect(component.localizationLoading()).toBe(false);
     });
 
     it('should not set localization when runTask returns an error', async () => {
@@ -732,7 +742,9 @@ describe('SupportsTableComponent', () => {
         expect.objectContaining({
           startLatitude: 48.8566,
           startLongitude: 2.3522,
-          startAzimuth: 90
+          startAzimuth: 90,
+          spanLength: [50, 60, 0],
+          lineAngle: [90, 85, 0]
         })
       );
     });

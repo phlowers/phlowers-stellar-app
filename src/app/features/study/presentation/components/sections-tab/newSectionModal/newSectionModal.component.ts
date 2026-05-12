@@ -74,6 +74,14 @@ export class NewSectionModalComponent {
   isNameUnique = signal<boolean>(false);
   supportsBoundsErrors = signal<boolean>(false);
   isLocationValid = signal<boolean>(true);
+
+  readonly canValidate = computed(
+    () =>
+      this.areAllRequiredFieldsFilled() &&
+      this.isNameUnique() &&
+      !this.supportsBoundsErrors() &&
+      this.isLocationValid()
+  );
   locationData = signal<LocationData | null>(null);
   /** Incremented to trigger a reset of the import outcomes in the ImportSectionComponent. */
   readonly importResetToken = signal<number>(0);
@@ -123,15 +131,14 @@ export class NewSectionModalComponent {
   }
 
   onValidate() {
+    const section = this.section();
     const location = this.locationData();
-    const updatedSection = location
-      ? {
-          ...this.section(),
-          startLatitude: location.latitude,
-          startLongitude: location.longitude,
-          startAzimuth: location.azimuth
-        }
-      : this.section();
+    const updatedSection = {
+      ...section,
+      startLatitude: location?.latitude ?? section.startLatitude,
+      startLongitude: location?.longitude ?? section.startLongitude,
+      startAzimuth: location?.azimuth ?? section.startAzimuth
+    };
     this.outputSection.emit(updatedSection);
     this.isOpenChange.emit(false);
   }
