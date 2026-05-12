@@ -192,6 +192,8 @@ describe('NewSectionModalComponent (Jest)', () => {
 
   describe('onValidate', () => {
     it('should emit section unchanged and close modal when no locationData was set', () => {
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
       const spyOutput = vi.spyOn(component.outputSection, 'emit');
       const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
 

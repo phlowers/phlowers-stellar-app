@@ -206,6 +206,8 @@ export class SupportsTableComponent implements OnInit {
       if (result && !error) {
         this.localization.set(result);
       }
+    } catch {
+      // runTask failure — localizationLoading is cleared in finally
     } finally {
       this.localizationLoading.set(false);
     }
