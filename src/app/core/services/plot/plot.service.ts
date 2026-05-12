@@ -134,16 +134,6 @@ export class PlotService {
       this.loading.set(false);
       return;
     }
-    const hasValidInitialCondition =
-      section.initial_conditions.length > 0 &&
-      !!section.selected_initial_condition_uuid &&
-      section.initial_conditions.some((ic) => ic.uuid === section.selected_initial_condition_uuid);
-    if (!hasValidInitialCondition) {
-      this.logger.error('refreshSection error: no valid initial condition selected');
-      this.error.set(DataError.NO_INITIAL_CONDITION);
-      this.loading.set(false);
-      return;
-    }
     this.loading.set(true);
     const cable = await this.cableService.getCable(section.cable_name);
     if (!cable) {

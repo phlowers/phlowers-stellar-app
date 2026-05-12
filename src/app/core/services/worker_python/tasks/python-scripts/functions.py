@@ -27,15 +27,6 @@ class _Errors:
         return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
 
 
-def _validate_initial_conditions(
-    input_section: dict, input_initial_conditions: list
-) -> None:
-    if not input_initial_conditions:
-        raise ValueError(_Errors.NO_INITIAL_CONDITIONS)
-    if not input_section.get("selected_initial_condition_uuid"):
-        raise ValueError(_Errors.NO_INITIAL_CONDITION_SELECTED)
-
-
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -359,14 +350,16 @@ def init_section(js_inputs: dict):
     logger.debug(f"Initializing section with inputs: {python_inputs}")
     input_section = python_inputs["section"]
     input_cable = python_inputs["cable"]
-    input_initial_conditions = input_section["initial_conditions"]
+    input_initial_conditions: list = input_section["initial_conditions"]
 
-    _validate_initial_conditions(input_section, input_initial_conditions)
-
-    input_initial_condition = next(
-        condition
-        for condition in input_initial_conditions
-        if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+    input_initial_condition = (
+        None
+        if len(input_initial_conditions) == 0
+        else next(
+            condition
+            for condition in input_initial_conditions
+            if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+        )
     )
 
     input_charges = input_section["charges"] if "charges" in input_section else []
@@ -382,7 +375,19 @@ def init_section(js_inputs: dict):
             None,
         )
     )
-    initial_condition = InitialCondition(**input_initial_condition)
+    if input_initial_condition is None:
+        initial_condition = InitialCondition(
+            uuid="",
+            name="",
+            base_parameters=None,
+            base_temperature=None,
+            cable_pretension=0,
+            min_temperature=0,
+            max_wind_pressure=0,
+            max_frost_width=0,
+        )
+    else:
+        initial_condition = InitialCondition(**input_initial_condition)
     cable = Cable(**input_cable)
 
     if not input_section["supports"]:
@@ -405,6 +410,7 @@ def init_section(js_inputs: dict):
         sagging_temperature=initial_condition.base_temperature,
         bundle_number=input_section["cables_amount"],
     )
+
     section.angles_sense = "clockwise"
 
     cable_array = CableArray(
@@ -497,11 +503,6 @@ def init_section(js_inputs: dict):
         bundle_number=input_section["cables_amount"],
     )
 
-    if initial_condition:
-        base_section.set_sagging_parameter(initial_condition.base_parameters)
-    base_section.set_sagging_temperature(
-        initial_condition.base_temperature if initial_condition else 15
-    )
     base_section.angles_sense = "clockwise"
     base_engine = BalanceEngine(cable_array=cable_array, section_array=base_section)
     base_plt_line = PlotEngine(base_engine)
