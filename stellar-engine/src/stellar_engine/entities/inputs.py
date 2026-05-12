@@ -37,8 +37,8 @@ class Support:
 class InitialCondition:
     uuid: str
     name: str
-    base_parameters: float
-    base_temperature: float
+    base_parameters: float | None
+    base_temperature: float | None
     cable_pretension: float
     min_temperature: float
     max_wind_pressure: float

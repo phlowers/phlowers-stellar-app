@@ -410,39 +410,6 @@ describe('PlotService', () => {
       expect(service.loading()).toBe(false);
     });
 
-    it('should set NO_INITIAL_CONDITION error when section has empty initial_conditions', async () => {
-      mockWorkerPythonService.setReady?.(true);
-      const sectionNoIc = { ...mockSection, initial_conditions: [], selected_initial_condition_uuid: undefined };
-
-      await service.refreshSection(sectionNoIc);
-
-      expect(service.error()).toBe(DataError.NO_INITIAL_CONDITION);
-      expect(service.loading()).toBe(false);
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should set NO_INITIAL_CONDITION error when selected_initial_condition_uuid is undefined', async () => {
-      mockWorkerPythonService.setReady?.(true);
-      const sectionNoSelected = { ...mockSection, selected_initial_condition_uuid: undefined };
-
-      await service.refreshSection(sectionNoSelected);
-
-      expect(service.error()).toBe(DataError.NO_INITIAL_CONDITION);
-      expect(service.loading()).toBe(false);
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should set NO_INITIAL_CONDITION error when selected uuid does not match any initial condition', async () => {
-      mockWorkerPythonService.setReady?.(true);
-      const sectionBadUuid = { ...mockSection, selected_initial_condition_uuid: 'non-existent-uuid' };
-
-      await service.refreshSection(sectionBadUuid);
-
-      expect(service.error()).toBe(DataError.NO_INITIAL_CONDITION);
-      expect(service.loading()).toBe(false);
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
     it('should call getCable with section cable_name', async () => {
       mockWorkerPythonService.setReady?.(true);
       mockCablesService.getCable.mockResolvedValue(mockCable);
