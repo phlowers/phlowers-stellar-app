@@ -2,13 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportsTableComponent } from './supportsTable.component';
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Support, CatalogChain } from '@shared/domain';
+import { Support, CatalogChain, Section } from '@shared/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
-import { Subject } from 'rxjs';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { vi } from 'vitest';
 
 // Mock child component
 @Component({
@@ -35,6 +37,21 @@ const mockAttachmentService = {
     return allAttachmentsSubject;
   }
 };
+
+let workerReadySubject: BehaviorSubject<boolean>;
+const mockWorkerPythonService = {
+  get ready$() {
+    return workerReadySubject.asObservable();
+  },
+  pyodideLoadError$: new BehaviorSubject<boolean>(false),
+  runTask: vi.fn()
+};
+
+const mockSectionWithCoordinates = {
+  startLatitude: 48.8566,
+  startLongitude: 2.3522,
+  startAzimuth: 90
+} as unknown as Section;
 
 // Mock data
 const mockChains: CatalogChain[] = [
@@ -139,12 +156,15 @@ describe('SupportsTableComponent', () => {
 
   beforeEach(async () => {
     allAttachmentsSubject = new Subject<CatalogAttachmentEntity[]>();
+    workerReadySubject = new BehaviorSubject<boolean>(false);
+    mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, pythonErrorCode: null });
 
     await TestBed.configureTestingModule({
       imports: [FormsModule, SupportsTableComponent, NoopAnimationsModule],
       providers: [
         { provide: ChainsService, useValue: mockChainsService },
-        { provide: AttachmentService, useValue: mockAttachmentService }
+        { provide: AttachmentService, useValue: mockAttachmentService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
       ]
     })
       .overrideComponent(SupportsTableComponent, {
@@ -608,6 +628,113 @@ describe('SupportsTableComponent', () => {
       expect(component.isNumber(undefined)).toBe(false);
       expect(component.isNumber('')).toBe(false);
       expect(component.isNumber('42')).toBe(false);
+    });
+  });
+
+  describe('workerReady signal', () => {
+    it('should be false initially', () => {
+      expect(component.workerReady()).toBe(false);
+    });
+
+    it('should become true when ready$ emits true', () => {
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      expect(component.workerReady()).toBe(true);
+    });
+  });
+
+  describe('localizationLoading', () => {
+    beforeEach(() => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      (component.section as unknown as () => Section) = () => mockSectionWithCoordinates;
+    });
+
+    it('should be false initially', () => {
+      expect(component.localizationLoading()).toBe(false);
+    });
+
+    it('should become true in view mode with valid section/supports when worker is not ready', async () => {
+      component.ngOnInit();
+      await fixture.whenStable();
+      expect(component.localizationLoading()).toBe(true);
+    });
+
+    it('should stay false when mode is not view', async () => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'create';
+      component.ngOnInit();
+      await fixture.whenStable();
+      expect(component.localizationLoading()).toBe(false);
+    });
+
+    it('should stay false when section has no start coordinates', async () => {
+      (component.section as unknown as () => Section | null) = () => null;
+      component.ngOnInit();
+      await fixture.whenStable();
+      expect(component.localizationLoading()).toBe(false);
+    });
+  });
+
+  describe('localization computation', () => {
+    const mockLocalizationResult = {
+      latitude: [48.8566, 48.8567, 48.8568],
+      longitude: [2.3522, 2.3523, 2.3524],
+      azimuth: [90, 90.1, 90.2],
+      lambert_x: [652000, 652100, 652200],
+      lambert_y: [6862000, 6862100, 6862200]
+    };
+
+    beforeEach(() => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      (component.section as unknown as () => Section) = () => mockSectionWithCoordinates;
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: mockLocalizationResult,
+        error: null,
+        pythonErrorCode: null
+      });
+    });
+
+    it('should set localization and clear loading flag when worker becomes ready', async () => {
+      component.ngOnInit();
+      await fixture.whenStable();
+      expect(component.localizationLoading()).toBe(true);
+
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.localizationLoading()).toBe(false);
+      expect(component.localization()).toEqual(mockLocalizationResult);
+    });
+
+    it('should not set localization when runTask returns an error', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_ERROR',
+        pythonErrorCode: null
+      });
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      component.ngOnInit();
+      await fixture.whenStable();
+
+      expect(component.localization()).toBeNull();
+      expect(component.localizationLoading()).toBe(false);
+    });
+
+    it('should call runTask with correct localization parameters', async () => {
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+      component.ngOnInit();
+      await fixture.whenStable();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          startLatitude: 48.8566,
+          startLongitude: 2.3522,
+          startAzimuth: 90
+        })
+      );
     });
   });
 

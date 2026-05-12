@@ -29,13 +29,6 @@ export class LocationComponent {
   protected readonly longitudeValue = linkedSignal<number | null>(() => this.initialLongitude() ?? (this.useDefaults() ? LOCATION_CONFIG.longitude.default : null));
   protected readonly azimuthValue = linkedSignal<number | null>(() => this.initialAzimuth() ?? (this.useDefaults() ? LOCATION_CONFIG.azimuth.default : null));
 
-  /** Formats the azimuth for display: integers show one decimal (e.g. 0 → "0.0"). */
-  protected readonly azimuthDisplay = computed(() => {
-    const v = this.azimuthValue();
-    if (v === null) return '';
-    return Number.isInteger(v) ? v.toFixed(1) : v;
-  });
-
   protected readonly isLatitudeOverMax = computed(() => {
     const v = this.latitudeValue();
     return v !== null && v > this.config.latitude.max;

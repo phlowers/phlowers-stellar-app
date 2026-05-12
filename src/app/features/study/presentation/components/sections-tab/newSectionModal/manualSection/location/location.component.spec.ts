@@ -59,9 +59,9 @@ describe('LocationComponent', () => {
       expect(+input.value).toBe(LOCATION_CONFIG.longitude.default);
     });
 
-    it('should display azimuth default as "0.0"', () => {
+    it('should display azimuth default value', () => {
       const input = getByTestId('azimuth-input') as HTMLInputElement;
-      expect(input.value).toBe('0.0');
+      expect(+input.value).toBe(LOCATION_CONFIG.azimuth.default);
     });
   });
 
@@ -78,20 +78,6 @@ describe('LocationComponent', () => {
       fixture.detectChanges();
       const input = getByTestId('longitude-input') as HTMLInputElement;
       expect(+input.value).toBe(10);
-    });
-
-    it('should update displayed azimuth as "45.0" when initialAzimuth input changes to integer', () => {
-      fixture.componentRef.setInput('initialAzimuth', 45);
-      fixture.detectChanges();
-      const input = getByTestId('azimuth-input') as HTMLInputElement;
-      expect(input.value).toBe('45.0');
-    });
-
-    it('should update displayed azimuth without reformatting when initialAzimuth input changes to decimal', () => {
-      fixture.componentRef.setInput('initialAzimuth', 45.5);
-      fixture.detectChanges();
-      const input = getByTestId('azimuth-input') as HTMLInputElement;
-      expect(+input.value).toBe(45.5);
     });
   });
 
