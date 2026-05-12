@@ -52,7 +52,10 @@ const mockSupports: Support[] = [
     counterWeight: null,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: null
+    chainSurface: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   },
   {
     uuid: 's1',
@@ -73,7 +76,10 @@ const mockSupports: Support[] = [
     counterWeight: null,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: null
+    chainSurface: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   }
 ];
 
@@ -123,7 +129,10 @@ const mockSection: Section = {
   cable_modifications: [],
   selected_cable_modification_uuid: null,
   cable_span_manipulations: [],
-  selected_cable_span_manipulation_uuid: null
+  selected_cable_span_manipulation_uuid: null,
+  start_latitude: null,
+  start_longitude: null,
+  start_azimuth: null
 };
 
 const mockObstacle: Obstacle = {
@@ -186,7 +195,7 @@ describe('SectionPlotComponent', () => {
       y: [10, 20],
       z: [100, 200],
       supportUuid: 's0'
-    } as DataObject
+    }
   ];
 
   const mockSelectedDisplayOptions: SelectedDisplayOptions = {
@@ -200,7 +209,7 @@ describe('SectionPlotComponent', () => {
       y: [10, 20],
       z: [100, 200],
       line: { dash: 'solid' }
-    } as Data
+    }
   ];
 
   const mockPlotElement = { on: vi.fn(), removeAllListeners: vi.fn() };

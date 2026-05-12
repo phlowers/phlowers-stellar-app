@@ -32,7 +32,10 @@ describe('PlotSpanService', () => {
       supportFootAltitude: 100,
       attachmentPosition: 'top',
       chainSurface: 0.1,
-      towerModel: 'Tower Model'
+      towerModel: 'Tower Model',
+      spanAzimut: null,
+      xFootLambert93: null,
+      yFootLambert93: null
     },
     {
       uuid: 'support-uuid-2',
@@ -53,7 +56,10 @@ describe('PlotSpanService', () => {
       supportFootAltitude: 100,
       attachmentPosition: 'top',
       chainSurface: 0.1,
-      towerModel: 'Tower Model'
+      towerModel: 'Tower Model',
+      spanAzimut: null,
+      xFootLambert93: null,
+      yFootLambert93: null
     },
     {
       uuid: 'support-uuid-3',
@@ -74,7 +80,10 @@ describe('PlotSpanService', () => {
       supportFootAltitude: 100,
       attachmentPosition: 'top',
       chainSurface: 0.1,
-      towerModel: 'Tower Model'
+      towerModel: 'Tower Model',
+      spanAzimut: null,
+      xFootLambert93: null,
+      yFootLambert93: null
     }
   ];
 

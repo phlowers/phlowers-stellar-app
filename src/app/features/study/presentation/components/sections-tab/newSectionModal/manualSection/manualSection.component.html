@@ -450,9 +450,9 @@
             <hr class="vertical-separator" />
 
             <app-location
-              [initialLatitude]="section().startLatitude"
-              [initialLongitude]="section().startLongitude"
-              [initialAzimuth]="section().startAzimuth"
+              [initialLatitude]="section().start_latitude"
+              [initialLongitude]="section().start_longitude"
+              [initialAzimuth]="section().start_azimuth"
               [useDefaults]="mode() === 'create'"
               (isValidChange)="isValidChange.emit($event)"
               (locationChange)="locationChange.emit($event)"

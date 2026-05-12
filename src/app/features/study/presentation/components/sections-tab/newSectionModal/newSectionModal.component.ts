@@ -132,9 +132,9 @@ export class NewSectionModalComponent {
     const location = this.locationData();
     const updatedSection = {
       ...section,
-      startLatitude: location?.latitude ?? section.startLatitude,
-      startLongitude: location?.longitude ?? section.startLongitude,
-      startAzimuth: location?.azimuth ?? section.startAzimuth
+      start_latitude: location?.latitude ?? section.start_latitude,
+      start_longitude: location?.longitude ?? section.start_longitude,
+      start_azimuth: location?.azimuth ?? section.start_azimuth
     };
     this.outputSection.emit(updatedSection);
     this.isOpenChange.emit(false);

@@ -133,9 +133,9 @@ export interface Section {
   /** UUID of the currently selected cable span manipulation */
   selected_cable_span_manipulation_uuid: string | null;
   /** Latitude of the first support */
-  startLatitude: number | null;
+  start_latitude: number | null;
   /** Longitude of the first support */
-  startLongitude: number | null;
+  start_longitude: number | null;
   /** Azimuth of the first support */
-  startAzimuth: number | null;
+  start_azimuth: number | null;
 }

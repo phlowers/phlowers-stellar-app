@@ -48,9 +48,9 @@ const mockWorkerPythonService = {
 };
 
 const mockSectionWithCoordinates = {
-  startLatitude: 48.8566,
-  startLongitude: 2.3522,
-  startAzimuth: 90
+  start_latitude: 48.8566,
+  start_longitude: 2.3522,
+  start_azimuth: 90
 } as unknown as Section;
 
 // Mock data

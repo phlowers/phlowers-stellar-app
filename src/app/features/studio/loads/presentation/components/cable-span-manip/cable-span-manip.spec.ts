@@ -25,7 +25,10 @@ const mockSection: Partial<Section> = {
     { uuid: 'support-uuid-2', number: 'PA2', armLength: 3, spanLength: null } as Section['supports'][0]
   ],
   cable_span_manipulations: [],
-  selected_cable_span_manipulation_uuid: null
+  selected_cable_span_manipulation_uuid: null,
+  start_latitude: null,
+  start_longitude: null,
+  start_azimuth: null
 };
 
 describe('CableSpanManipComponent', () => {

@@ -169,9 +169,9 @@ export class SupportsTableComponent implements OnInit {
   private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
     return (
       supports.length > 0 &&
-      section?.startLatitude != null &&
-      section.startLongitude != null &&
-      section.startAzimuth != null &&
+      section?.start_latitude != null &&
+      section.start_longitude != null &&
+      section.start_azimuth != null &&
       !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
     );
   }
@@ -179,9 +179,9 @@ export class SupportsTableComponent implements OnInit {
   private buildLocalizationPayload(section: Section, supports: Support[]) {
     const lastIndex = supports.length - 1;
     return {
-      startLatitude: section.startLatitude!,
-      startLongitude: section.startLongitude!,
-      startAzimuth: section.startAzimuth!,
+      startLatitude: section.start_latitude!,
+      startLongitude: section.start_longitude!,
+      startAzimuth: section.start_azimuth!,
       spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
       lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
     };

@@ -179,9 +179,9 @@ describe('ManualSectionComponent', () => {
       selected_cable_modification_uuid: null,
       cable_span_manipulations: [],
       selected_cable_span_manipulation_uuid: null,
-      startLatitude: null,
-      startLongitude: null,
-      startAzimuth: null
+      start_latitude: null,
+      start_longitude: null,
+      start_azimuth: null
     };
 
     await TestBed.configureTestingModule({
