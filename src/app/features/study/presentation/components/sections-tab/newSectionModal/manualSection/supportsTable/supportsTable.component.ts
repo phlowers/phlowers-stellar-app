@@ -164,7 +164,6 @@ export class SupportsTableComponent implements OnInit {
 
   ngOnInit() {
     this.getData();
-    void this.computeLocalization();
   }
 
   private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
@@ -183,7 +182,7 @@ export class SupportsTableComponent implements OnInit {
       startLatitude: section.startLatitude!,
       startLongitude: section.startLongitude!,
       startAzimuth: section.startAzimuth!,
-      spanLength: supports.map((s, i) => (i === lastIndex ? 0 : s.spanLength!)),
+      spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
       lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
     };
   }

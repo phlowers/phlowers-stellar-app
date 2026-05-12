@@ -292,9 +292,7 @@ describe('LocationComponent', () => {
       vi.spyOn(initComponent.locationChange, 'emit');
       initFixture.componentRef.setInput('initialLatitude', 45);
       initFixture.detectChanges();
-      expect(initComponent.locationChange.emit).toHaveBeenCalledWith(
-        expect.objectContaining({ latitude: 45 })
-      );
+      expect(initComponent.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ latitude: 45 }));
     });
   });
 

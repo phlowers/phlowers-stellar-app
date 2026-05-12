@@ -743,7 +743,7 @@ describe('SupportsTableComponent', () => {
           startLatitude: 48.8566,
           startLongitude: 2.3522,
           startAzimuth: 90,
-          spanLength: [50, 60, 0],
+          spanLength: [50, 60, Number.NaN],
           lineAngle: [90, 85, 0]
         })
       );

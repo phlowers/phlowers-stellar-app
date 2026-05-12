@@ -5,11 +5,11 @@
   (validateForm)="onValidateFormAttachmentSetModal($event)"
   [section]="null"
 />
-<output class="sr-only">
-  @if (localizationLoading()) {
-    <ng-container i18n>Waiting engine for calculation</ng-container>
-  }
-</output>
+@if (localizationLoading()) {
+  <output id="localization-status" class="sr-only" aria-live="polite" i18n>
+    Waiting for the engine to finish the calculation
+  </output>
+}
 <p-table
   [value]="supports()"
   [paginator]="true"
@@ -17,8 +17,9 @@
   [rowsPerPageOptions]="rowsPerPageOptions()"
   [first]="first()"
   class="mb-4"
-  [tableStyleClass]="mode() === 'view' ? 'support-table--view' : ''"
+  [class.support-table--view]="mode() === 'view'"
   paginatorStyleClass="!hidden"
+  [attr.aria-describedby]="localizationLoading() ? 'localization-status' : null"
   data-testid="supports-table"
 >
   <ng-template pTemplate="header">
@@ -643,11 +644,7 @@
             @if (localization(); as loc) {
               {{ loc.latitude[rowIndex] | number: '1.0-7' }} °
             } @else if (localizationLoading()) {
-              <app-icon
-                aria-hidden="true"
-                icon="progress_activity"
-                class="calculation-loader"
-              />
+              <app-icon aria-hidden="true" icon="progress_activity" class="calculation-loader" />
             } @else {
               -
             }
@@ -658,11 +655,7 @@
             @if (localization(); as loc) {
               {{ loc.longitude[rowIndex] | number: '1.0-7' }} °
             } @else if (localizationLoading()) {
-              <app-icon
-                aria-hidden="true"
-                icon="progress_activity"
-                class="calculation-loader"
-              />
+              <app-icon aria-hidden="true" icon="progress_activity" class="calculation-loader" />
             } @else {
               -
             }
@@ -673,11 +666,7 @@
             @if (localization(); as loc) {
               {{ loc.azimuth[rowIndex] | number: '1.0-1' }} °
             } @else if (localizationLoading()) {
-              <app-icon
-                aria-hidden="true"
-                icon="progress_activity"
-                class="calculation-loader"
-              />
+              <app-icon aria-hidden="true" icon="progress_activity" class="calculation-loader" />
             } @else {
               -
             }
@@ -688,11 +677,7 @@
             @if (localization(); as loc) {
               {{ loc.lambert_x[rowIndex] | number: '1.0-2' }} m
             } @else if (localizationLoading()) {
-              <app-icon
-                aria-hidden="true"
-                icon="progress_activity"
-                class="calculation-loader"
-              />
+              <app-icon aria-hidden="true" icon="progress_activity" class="calculation-loader" />
             } @else {
               -
             }
@@ -703,11 +688,7 @@
             @if (localization(); as loc) {
               {{ loc.lambert_y[rowIndex] | number: '1.0-2' }} m
             } @else if (localizationLoading()) {
-              <app-icon
-                aria-hidden="true"
-                icon="progress_activity"
-                class="calculation-loader"
-              />
+              <app-icon aria-hidden="true" icon="progress_activity" class="calculation-loader" />
             } @else {
               -
             }

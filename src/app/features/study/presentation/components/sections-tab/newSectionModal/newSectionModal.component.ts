@@ -77,10 +77,7 @@ export class NewSectionModalComponent {
 
   readonly canValidate = computed(
     () =>
-      this.areAllRequiredFieldsFilled() &&
-      this.isNameUnique() &&
-      !this.supportsBoundsErrors() &&
-      this.isLocationValid()
+      this.areAllRequiredFieldsFilled() && this.isNameUnique() && !this.supportsBoundsErrors() && this.isLocationValid()
   );
   locationData = signal<LocationData | null>(null);
   /** Incremented to trigger a reset of the import outcomes in the ImportSectionComponent. */
