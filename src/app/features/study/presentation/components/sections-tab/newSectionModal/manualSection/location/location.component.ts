@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, linkedSignal, output } from '@angular/core';
 import { truncateOneDecimalValue } from '@shared/helpers/truncateDecimals';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
@@ -15,25 +15,25 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
   styleUrl: './location.component.scss'
 })
 export class LocationComponent {
-  readonly initialLatitude = input<number>(LOCATION_CONFIG.latitude.default);
-  readonly initialLongitude = input<number>(LOCATION_CONFIG.longitude.default);
-  readonly initialAzimuth = input<number>(LOCATION_CONFIG.azimuth.default);
+  readonly initialLatitude = input<number | null>(null);
+  readonly initialLongitude = input<number | null>(null);
+  readonly initialAzimuth = input<number | null>(null);
+  readonly useDefaults = input<boolean>(false);
 
   readonly locationChange = output<LocationData>();
   readonly isValidChange = output<boolean>();
 
   protected readonly config = LOCATION_CONFIG;
 
-  protected readonly latitudeValue = linkedSignal<number | null>(() => this.initialLatitude());
-  protected readonly longitudeValue = linkedSignal<number | null>(() => this.initialLongitude());
-  protected readonly azimuthValue = linkedSignal<number | null>(() => this.initialAzimuth());
-
-  /** Formats the azimuth for display: integers show one decimal (e.g. 0 → "0.0"). */
-  protected readonly azimuthDisplay = computed(() => {
-    const v = this.azimuthValue();
-    if (v === null) return '';
-    return Number.isInteger(v) ? v.toFixed(1) : v;
-  });
+  protected readonly latitudeValue = linkedSignal<number | null>(
+    () => this.initialLatitude() ?? (this.useDefaults() ? LOCATION_CONFIG.latitude.default : null)
+  );
+  protected readonly longitudeValue = linkedSignal<number | null>(
+    () => this.initialLongitude() ?? (this.useDefaults() ? LOCATION_CONFIG.longitude.default : null)
+  );
+  protected readonly azimuthValue = linkedSignal<number | null>(
+    () => this.initialAzimuth() ?? (this.useDefaults() ? LOCATION_CONFIG.azimuth.default : null)
+  );
 
   protected readonly isLatitudeOverMax = computed(() => {
     const v = this.latitudeValue();
@@ -90,6 +90,12 @@ export class LocationComponent {
     return null;
   });
 
+  constructor() {
+    effect(() => {
+      this.emitChange();
+    });
+  }
+
   private parseInputValue(raw: string): number | null {
     if (raw.trim() === '') return null;
     const parsed = Number(raw);
@@ -107,12 +113,10 @@ export class LocationComponent {
 
   onLatitudeInput(event: Event): void {
     this.latitudeValue.set(this.parseInputValue((event.target as HTMLInputElement).value));
-    this.emitChange();
   }
 
   onLongitudeInput(event: Event): void {
     this.longitudeValue.set(this.parseInputValue((event.target as HTMLInputElement).value));
-    this.emitChange();
   }
 
   onAzimuthInput(event: Event): void {
@@ -120,6 +124,5 @@ export class LocationComponent {
     const truncated = truncateOneDecimalValue(input.value);
     input.value = truncated;
     this.azimuthValue.set(this.parseInputValue(truncated));
-    this.emitChange();
   }
 }

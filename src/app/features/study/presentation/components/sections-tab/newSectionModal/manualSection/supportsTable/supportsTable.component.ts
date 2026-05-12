@@ -7,8 +7,11 @@ import {
   input,
   OnInit,
   output,
-  signal
+  signal,
+  untracked
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -16,8 +19,10 @@ import { CreateEditView } from '@shared/types';
 import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
-import { Support, CatalogChain } from '@shared/domain';
+import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Localization, Task } from '@core/services/worker_python/tasks/types';
 import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -40,7 +45,6 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
 
 /**
@@ -52,6 +56,7 @@ import { CatalogAttachmentEntity } from '@infrastructure/database';
 @Component({
   selector: 'app-supports-table',
   imports: [
+    DecimalPipe,
     FormsModule,
     TableModule,
     InputTextModule,
@@ -77,6 +82,8 @@ export class SupportsTableComponent implements OnInit {
   supports = input<Support[]>([]);
   /** Current mode: create, edit, or view. */
   mode = input.required<CreateEditView>();
+  /** Section containing geolocation starting values. */
+  section = input<Section | null>(null);
   /** Emits when a support should be added at a given index and position. */
   addSupport = output<{ index: number; position: 'before' | 'after' }>();
   /** Emits the UUID of a support to delete. */
@@ -104,6 +111,15 @@ export class SupportsTableComponent implements OnInit {
   private readonly attachmentService = inject(AttachmentService);
   private readonly allCatalogAttachments = toSignal(this.attachmentService.allAttachments$, {
     initialValue: [] as CatalogAttachmentEntity[]
+  });
+  private readonly workerPythonService = inject(WorkerPythonService);
+  readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
+  localization = signal<Localization | null>(null);
+  localizationLoading = signal<boolean>(false);
+  private readonly _localizationEffect = effect(() => {
+    if (this.workerReady()) {
+      untracked(() => void this.computeLocalization());
+    }
   });
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
@@ -148,6 +164,53 @@ export class SupportsTableComponent implements OnInit {
 
   ngOnInit() {
     this.getData();
+  }
+
+  private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
+    return (
+      supports.length > 0 &&
+      section?.start_latitude != null &&
+      section.start_longitude != null &&
+      section.start_azimuth != null &&
+      !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
+    );
+  }
+
+  private buildLocalizationPayload(section: Section, supports: Support[]) {
+    const lastIndex = supports.length - 1;
+    return {
+      startLatitude: section.start_latitude!,
+      startLongitude: section.start_longitude!,
+      startAzimuth: section.start_azimuth!,
+      spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
+      lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
+    };
+  }
+
+  private async computeLocalization(): Promise<void> {
+    if (this.mode() !== 'view') return;
+
+    const section = this.section();
+    const supports = this.supports();
+
+    if (!this.hasLocalizationInputs(section, supports)) return;
+    if (!this.workerReady()) return;
+
+    this.localizationLoading.set(true);
+
+    try {
+      const { result, error } = await this.workerPythonService.runTask(
+        Task.computeLocalization,
+        this.buildLocalizationPayload(section!, supports)
+      );
+      if (result && !error) {
+        this.localization.set(result);
+      }
+    } catch {
+      // runTask failure — localizationLoading is cleared in finally
+    } finally {
+      this.localizationLoading.set(false);
+    }
   }
 
   onChainNameFilter(event: { filter: string }) {

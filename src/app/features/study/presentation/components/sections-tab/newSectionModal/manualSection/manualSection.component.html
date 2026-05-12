@@ -449,7 +449,14 @@
 
             <hr class="vertical-separator" />
 
-            <app-location />
+            <app-location
+              [initialLatitude]="section().start_latitude"
+              [initialLongitude]="section().start_longitude"
+              [initialAzimuth]="section().start_azimuth"
+              [useDefaults]="mode() === 'create'"
+              (isValidChange)="isValidChange.emit($event)"
+              (locationChange)="locationChange.emit($event)"
+            />
           </div>
           <div class="flex flex-row justify-between items-center mt-[-1rem]">
             <p class="flex flex-row gap-2 items-center mb-0">
@@ -492,6 +499,7 @@
             [mode]="mode()"
             [first]="firstSupport()"
             [supports]="section().supports || []"
+            [section]="section()"
             (addSupport)="addSupport($event.index, $event.position)"
             (deleteSupport)="deleteSupport($event)"
             (duplicateSupport)="duplicateSupport($event)"
@@ -511,10 +519,10 @@
             [(ngModel)]="section().supports_comment"
             (ngModelChange)="onSectionChange()"
           ></textarea>
-        } @else if (mode() === 'view') {
-          <p class="read-only-info">{{ section().supports_comment }}</p>
+        } @else if (mode() === 'view' && section().supports_comment) {
+          <p class="read-only-info" data-testid="supports-comment-text">{{ section().supports_comment }}</p>
         }
-        <div class="flex justify-end pt-3">
+        <div class="flex justify-end pt-3 pb-4">
           <button app-btn btnSize="m" btnStyle="outlined" (click)="onPreviousTab()">
             <app-icon icon="chevron_left" />
             <ng-container i18n>Previous</ng-container>

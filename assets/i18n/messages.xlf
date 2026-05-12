@@ -3265,12 +3265,12 @@
     </unit>
     <unit id="login.emailInvalid">
       <segment>
-        <source> Please enter a valid email address. </source>
+        <source>Please enter a valid email address.</source>
       </segment>
     </unit>
     <unit id="login.emailRequired">
       <segment>
-        <source> Email is required. </source>
+        <source>Email is required.</source>
       </segment>
     </unit>
     <unit id="login.logoAlt">
@@ -3412,6 +3412,11 @@
     <unit id="supportCoordinatesTitle">
       <segment>
         <source>Support 1 coordinates:</source>
+      </segment>
+    </unit>
+    <unit id="1454338890290346264">
+      <segment>
+        <source> Waiting for the engine to finish the calculation </source>
       </segment>
     </unit>
   </file>

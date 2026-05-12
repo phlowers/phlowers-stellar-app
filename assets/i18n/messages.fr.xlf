@@ -3908,7 +3908,7 @@
     <unit id="7073268649890100995">
       <segment state="initial">
         <source>Failed to delete obstacle</source>
-        <target>Échec de la suppression de l'obstacle</target>
+        <target>Échec de la suppression de l&apos;obstacle</target>
       </segment>
     </unit>
     <unit id="8500778397889159938">
@@ -3932,7 +3932,7 @@
     <unit id="8882847090714354213">
       <segment state="initial">
         <source>An unknown error occurred during the update</source>
-        <target>Une erreur inconnue s'est produite lors de la mise à jour</target>
+        <target>Une erreur inconnue s&apos;est produite lors de la mise à jour</target>
       </segment>
     </unit>
     <unit id="login.logoAlt">
@@ -3955,14 +3955,14 @@
     </unit>
     <unit id="login.emailRequired">
       <segment state="initial">
-        <source> Email is required. </source>
-        <target> L'adresse e-mail est requise. </target>
+        <source>Email is required.</source>
+        <target>L&apos;adresse e-mail est requise.</target>
       </segment>
     </unit>
     <unit id="login.emailInvalid">
       <segment state="initial">
-        <source> Please enter a valid email address. </source>
-        <target> Veuillez entrer une adresse e-mail valide. </target>
+        <source>Please enter a valid email address.</source>
+        <target>Veuillez entrer une adresse e-mail valide.</target>
       </segment>
     </unit>
     <unit id="login.submitBtn">
@@ -3986,7 +3986,7 @@
     <unit id="6460521785131469521">
       <segment state="initial">
         <source>Authentication refresh failed. You may be working with outdated user data.</source>
-        <target>Échec de la mise à jour de l'authentification. Vous pourriez travailler avec des données utilisateur obsolètes.</target>
+        <target>Échec de la mise à jour de l&apos;authentification. Vous pourriez travailler avec des données utilisateur obsolètes.</target>
       </segment>
     </unit>
     <unit id="5970395764141361429">
@@ -4004,7 +4004,7 @@
     <unit id="1911326790644997133">
       <segment state="initial">
         <source>Error importing section</source>
-        <target>Erreur lors de l'importation du canton</target>
+        <target>Erreur lors de l&apos;importation du canton</target>
       </segment>
     </unit>
     <unit id="3447823734089002407">
@@ -4034,7 +4034,7 @@
     <unit id="8821243434003714932">
       <segment state="initial">
         <source>You can import a section from a JSON file. It will be added to the current study.</source>
-        <target>Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.</target>
+        <target>Vous pouvez importer un canton à partir d&apos;un fichier JSON. Il sera ajouté à l&apos;étude en cours.</target>
       </segment>
     </unit>
     <unit id="2215857645557519259">
@@ -4094,7 +4094,7 @@
     <unit id="importErrorFileSummary">
       <segment state="initial">
         <source>Error reading the input file</source>
-        <target>Erreur lors de la lecture du fichier d'entrée</target>
+        <target>Erreur lors de la lecture du fichier d&apos;entrée</target>
       </segment>
     </unit>
     <unit id="importCollisionMessage">
@@ -4119,6 +4119,12 @@
       <segment state="initial">
         <source>No valid initial condition selected</source>
         <target>Aucune condition initiale valide sélectionnée</target>
+      </segment>
+    </unit>
+    <unit id="1454338890290346264">
+      <segment state="initial">
+        <source> Waiting for the engine to finish the calculation </source>
+        <target> En attente du chargement du moteur pour afficher les résultats de calcul </target>
       </segment>
     </unit>
   </file>

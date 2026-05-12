@@ -98,7 +98,7 @@
     [attr.step]="config.azimuth.step"
     [attr.min]="config.azimuth.min"
     [attr.max]="config.azimuth.max"
-    [value]="azimuthDisplay()"
+    [value]="azimuthValue() ?? ''"
     fluid
     aria-describedby="support1location"
     [attr.aria-invalid]="isAzimuthOverMax() || isAzimuthUnderMin() ? true : null"

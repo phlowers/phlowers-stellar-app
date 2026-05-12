@@ -20,7 +20,10 @@ const validSupport: Support = {
   supportFootAltitude: 0,
   chainSurface: null,
   attachmentPosition: null,
-  towerModel: null
+  towerModel: null,
+  spanAzimut: null,
+  xFootLambert93: null,
+  yFootLambert93: null
 };
 
 const makeSection = (supports: Support[]): Section =>

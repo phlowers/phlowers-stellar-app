@@ -23,6 +23,9 @@ const createMockSupport = (overrides: Partial<Support> = {}): Support => ({
   supportFootAltitude: null,
   attachmentPosition: null,
   chainSurface: null,
+  spanAzimut: null,
+  xFootLambert93: null,
+  yFootLambert93: null,
   ...overrides
 });
 

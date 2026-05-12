@@ -49,7 +49,10 @@ const makeSupport = (uuid: string) =>
     counterWeight: null,
     supportFootAltitude: null,
     attachmentPosition: null,
-    chainSurface: null
+    chainSurface: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   }) satisfies Support;
 
 describe('getObstacleClickPayload', () => {

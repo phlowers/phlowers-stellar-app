@@ -34,7 +34,10 @@ const mockSection: Partial<Section> = {
   cable_modifications: [],
   selected_cable_modification_uuid: null,
   cable_span_manipulations: [],
-  selected_cable_span_manipulation_uuid: null
+  selected_cable_span_manipulation_uuid: null,
+  start_latitude: null,
+  start_longitude: null,
+  start_azimuth: null
 };
 
 describe('CableLengthChangeComponent', () => {
@@ -723,9 +726,11 @@ describe('CableLengthChangeComponent', () => {
 
     beforeEach(async () => {
       // Override section to return null before creating the component so the effect fires with null
-      mockSpanService.section = createSignalMock<Partial<Section> | null>(
-        null
-      ) as unknown as vi.Mocked<PlotSpanService>['section'];
+      Object.defineProperty(mockSpanService, 'section', {
+        value: createSignalMock<Partial<Section> | null>(null),
+        writable: true,
+        configurable: true
+      });
 
       nullSectionFixture = TestBed.createComponent(CableLengthChangeComponent);
       nullSectionComponent = nullSectionFixture.componentInstance;

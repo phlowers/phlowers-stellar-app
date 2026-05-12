@@ -38,7 +38,10 @@ describe('LoadsTableComponent', () => {
       counterWeight: null,
       supportFootAltitude: null,
       attachmentPosition: null,
-      chainSurface: null
+      chainSurface: null,
+      spanAzimut: null,
+      xFootLambert93: null,
+      yFootLambert93: null
     },
     {
       uuid: 'support-uuid-2',
@@ -59,7 +62,10 @@ describe('LoadsTableComponent', () => {
       counterWeight: null,
       supportFootAltitude: null,
       attachmentPosition: null,
-      chainSurface: null
+      chainSurface: null,
+      spanAzimut: null,
+      xFootLambert93: null,
+      yFootLambert93: null
     },
     {
       uuid: 'support-uuid-3',
@@ -80,7 +86,10 @@ describe('LoadsTableComponent', () => {
       counterWeight: null,
       supportFootAltitude: null,
       attachmentPosition: null,
-      chainSurface: null
+      chainSurface: null,
+      spanAzimut: null,
+      xFootLambert93: null,
+      yFootLambert93: null
     }
   ];
 
@@ -176,7 +185,10 @@ describe('LoadsTableComponent', () => {
     cable_modifications: [],
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
-    selected_cable_span_manipulation_uuid: null
+    selected_cable_span_manipulation_uuid: null,
+    start_latitude: null,
+    start_longitude: null,
+    start_azimuth: null
   };
 
   beforeEach(async () => {

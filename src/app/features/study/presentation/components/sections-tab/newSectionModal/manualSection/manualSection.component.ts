@@ -47,6 +47,7 @@ import {
 } from './manualSection.constantes';
 import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
 import { LineTableProperties } from './manualSection.interfaces';
+import { LocationData } from './location/location.interfaces';
 
 /**
  * Manual section editor component.
@@ -85,6 +86,8 @@ export class ManualSectionComponent implements OnInit {
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<Section>();
+  isValidChange = output<boolean>();
+  locationChange = output<LocationData>();
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<CatalogCable[]>([]);
   public sectionTypes = sectionTypes;

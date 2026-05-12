@@ -28,7 +28,10 @@ const mockSupports: Support[] = [
     supportFootAltitude: null,
     attachmentPosition: null,
     chainSurface: null,
-    towerModel: null
+    towerModel: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   },
   {
     uuid: 's1',
@@ -49,7 +52,10 @@ const mockSupports: Support[] = [
     supportFootAltitude: null,
     attachmentPosition: null,
     chainSurface: null,
-    towerModel: null
+    towerModel: null,
+    spanAzimut: null,
+    xFootLambert93: null,
+    yFootLambert93: null
   }
 ];
 

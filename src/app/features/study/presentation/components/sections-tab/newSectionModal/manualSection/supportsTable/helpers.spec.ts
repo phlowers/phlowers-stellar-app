@@ -34,17 +34,19 @@ const makeSupport = (uuid: string, overrides: Partial<Support> = {}): Support =>
   chainSurface: null,
   attachmentPosition: null,
   towerModel: null,
+  spanAzimut: null,
+  xFootLambert93: null,
+  yFootLambert93: null,
   ...overrides
 });
 
-const makeAttachment = (support_name?: string): CatalogAttachment =>
-  ({
-    uuid: 'a1',
-    updated_at: '',
-    created_at: '',
-    support_tower: '',
-    support_name
-  }) as CatalogAttachment;
+const makeAttachment = (support_name?: string): CatalogAttachment => ({
+  uuid: 'a1',
+  updated_at: '',
+  created_at: '',
+  support_tower: '',
+  support_name
+});
 
 describe('helpers', () => {
   describe('createEmptyChain', () => {

@@ -85,6 +85,8 @@
         [mode]="mode()"
         [section]="section()"
         (sectionChange)="onSectionChange($event)"
+        (isValidChange)="isLocationValid.set($event)"
+        (locationChange)="onLocationChange($event)"
       />
     }
     @if (source() === 'extraction' && mode() === 'create') {
@@ -114,7 +116,7 @@
         type="button"
         btnSize="m"
         (click)="onValidate()"
-        [disabled]="!areAllRequiredFieldsFilled() || !isNameUnique() || supportsBoundsErrors()"
+        [disabled]="!canValidate()"
         data-testid="validate-section-btn"
       >
         <app-icon icon="save" />
