@@ -7,16 +7,14 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Section, Study, Support } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
-import {
-  createEmptyInitialCondition,
-  createEmptySection,
-  createEmptySupport
-} from '@shared/domain/helpers/sections.helpers';
+import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/import/domain/import-contracts.interfaces';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { sectionImportErrors, importSuccessDetail } from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
 import {
@@ -68,6 +66,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
   private readonly maintenanceService = inject(MaintenanceService);
+  private readonly attachmentService = inject(AttachmentService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -273,7 +272,19 @@ export class SectionImportService implements ImportAdapter<Section> {
       : undefined;
 
     const supports = this.mapGeoLiaisonSupports(sortedPortees);
-    const defaultIc = createEmptyInitialCondition();
+
+    // Persist new support names in the local catalog (RG.CAN.ATT)
+    const accroches =
+      sortedPortees.length === 0
+        ? []
+        : [
+            ...sortedPortees.map((p) => p['accroche depart']),
+            sortedPortees[sortedPortees.length - 1]['accroche arrivee']
+          ];
+    const supportNameEntries: SupportNameEntry[] = accroches
+      .map((a) => ({ supportName: a.SUPPORT_IDR || a.SUPPORT_ADR || '', supportTower: a.SUPPORT_TOWER ?? null }))
+      .filter((e) => !!e.supportName);
+    await this.attachmentService.addSupportNamesIfAbsent(supportNameEntries);
 
     return {
       ...createEmptySection(),
@@ -290,15 +301,16 @@ export class SectionImportService implements ImportAdapter<Section> {
       electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
       lit_name: appartenance?.LIT_ADR ?? undefined,
       lit_code: appartenance?.LIT_IDR ?? undefined,
+      link_name: appartenance?.LIAISON_IDR ?? undefined,
       branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
-      voltage_idr: appartenance?.TENSION_ELECTRIQUE_ADR ?? undefined,
+      voltage_idr: undefined,
       maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
       maintenance_center_names: cmDesignation ? [cmDesignation] : [],
       maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
       regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
       regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
-      initial_conditions: [defaultIc],
-      selected_initial_condition_uuid: defaultIc.uuid,
+      initial_conditions: [],
+      selected_initial_condition_uuid: undefined,
       supports
     };
   }
@@ -332,7 +344,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       attachmentHeight: parseFloatOrNull(accroche.ACCROCHE_CABLE_Z_LAMBERT93),
       heightBelowConsole: parseFloatOrNull(accroche.HAUTEUR_SOUS_CONSOLE),
       armLength: parseFloatOrNull(accroche.LONGUEUR_BRAS),
-      chainName: accroche.CHAINE_DRN_ADR ?? null,
+      chainName: accroche.CHAINE_DRN_IDR ?? null,
       chainLength: parseFloatOrNull(accroche.CHAINE_DRN_LONGUEUR),
       chainWeight: parseFloatOrNull(accroche.CHAINE_DRN_POIDS),
       chainV: parseBooleanOrNull(accroche.CHAINE_EN_V),
@@ -341,7 +353,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       supportFootAltitude: parseFloatOrNull(accroche.PIED_Z_LAMBERT93),
       xFootLambert93: parseFloatOrNull(accroche.PIED_X_LAMBERT93),
       yFootLambert93: parseFloatOrNull(accroche.PIED_Y_LAMBERT93),
-      name: accroche.SUPPORT_ADR ?? null,
+      name: accroche.SUPPORT_IDR ?? null,
       number: accroche.SUPPORT_NUMERO ?? null,
       towerModel: accroche.SUPPORT_TOWER ?? null,
       attachmentPosition: extractAttachmentPosition(portee.PORTEE_UNITAIRE_DESIGNATION)

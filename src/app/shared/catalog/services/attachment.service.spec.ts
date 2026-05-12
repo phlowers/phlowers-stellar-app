@@ -7,10 +7,11 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
+import { SupportNameEntry } from './attachment.interfaces';
 import { AttachmentCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
 
@@ -220,7 +221,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 1',
+          support_name: 'idr1',
           support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -233,7 +234,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 2',
+          support_name: 'idr2',
           support_tower: 'tower2',
           attachment_set: 2,
           attachment_altitude: 11.0,
@@ -286,7 +287,7 @@ describe('AttachmentService', () => {
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
     });
 
-    it('should filter out attachments with missing support_adr', async () => {
+    it('should filter out attachments with missing support_idr and support_adr', async () => {
       const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
@@ -302,7 +303,7 @@ describe('AttachmentService', () => {
         },
         {
           support_id_catalog: 'cat2',
-          support_idr: 'idr2',
+          support_idr: '',
           support_adr: '',
           support_tower: 'tower2',
           support_family: 'Family 2',
@@ -361,13 +362,13 @@ describe('AttachmentService', () => {
 
       await importPromise;
 
-      // Should only add attachments with valid support_adr
+      // Should only add attachments with valid support_idr or support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 1',
+          support_name: 'idr1',
           support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -380,7 +381,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 3',
+          support_name: 'idr3',
           support_tower: 'tower3',
           attachment_set: 3,
           attachment_altitude: 12.0,
@@ -447,7 +448,7 @@ describe('AttachmentService', () => {
       await expect(importPromise).resolves.toBeUndefined();
     });
 
-    it('should handle CSV data with mixed valid and invalid support_adr values', async () => {
+    it('should handle CSV data with mixed valid, fallback and invalid support_idr values', async () => {
       const mockCsvData: AttachmentCsvDto[] = [
         {
           support_id_catalog: 'cat1',
@@ -463,7 +464,7 @@ describe('AttachmentService', () => {
         },
         {
           support_id_catalog: 'cat2',
-          support_idr: 'idr2',
+          support_idr: '',
           support_adr: '',
           support_tower: 'tower2',
           support_family: 'Family 2',
@@ -487,8 +488,8 @@ describe('AttachmentService', () => {
         },
         {
           support_id_catalog: 'cat4',
-          support_idr: 'idr4',
-          support_adr: null as unknown as string,
+          support_idr: '',
+          support_adr: 'Support 4',
           support_tower: 'tower4',
           support_family: 'Family 4',
           position: '4',
@@ -534,13 +535,13 @@ describe('AttachmentService', () => {
 
       await importPromise;
 
-      // Should only add attachments with valid support_adr
+      // Should only add attachments with valid support_idr or support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 1',
+          support_name: 'idr1',
           support_tower: 'tower1',
           attachment_set: 1,
           attachment_altitude: 10.5,
@@ -553,7 +554,7 @@ describe('AttachmentService', () => {
           uuid: 'mock-uuid-123',
           updated_at: expect.any(String),
           created_at: expect.any(String),
-          support_name: 'Support 3',
+          support_name: 'idr3',
           support_tower: 'tower3',
           attachment_set: 3,
           attachment_altitude: 12.0,
@@ -561,6 +562,19 @@ describe('AttachmentService', () => {
           attachment_set_x: 0,
           attachment_set_y: 0,
           attachment_set_z: 12.0
+        },
+        {
+          uuid: 'mock-uuid-123',
+          updated_at: expect.any(String),
+          created_at: expect.any(String),
+          support_name: 'Support 4',
+          support_tower: 'tower4',
+          attachment_set: 4,
+          attachment_altitude: 13.0,
+          cross_arm_length: 3.5,
+          attachment_set_x: 0,
+          attachment_set_y: 0,
+          attachment_set_z: 13.0
         }
       ]);
     });
@@ -728,7 +742,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_tower: 'tower1',
-          support_name: 'Support 1',
+          support_name: 'idr1',
           attachment_set: 1,
           attachment_altitude: 10.5,
           cross_arm_length: 2.0,
@@ -741,7 +755,7 @@ describe('AttachmentService', () => {
           updated_at: expect.any(String),
           created_at: expect.any(String),
           support_tower: 'tower2',
-          support_name: 'Support 2',
+          support_name: 'idr2',
           attachment_set: 2,
           attachment_altitude: 11,
           cross_arm_length: 2.5,
@@ -899,6 +913,156 @@ describe('AttachmentService', () => {
       const result = await service.getAttachmentDetails('Support A', 1);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('addSupportNamesIfAbsent()', () => {
+    it('should do nothing when entries array is empty', async () => {
+      await service.addSupportNamesIfAbsent([]);
+
+      expect(mockAttachmentsTable.toArray).not.toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when all support names already exist in DB', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([
+        { uuid: 'u1', created_at: '', updated_at: '', support_name: 'SupportA', support_tower: 'tower1' },
+        { uuid: 'u2', created_at: '', updated_at: '', support_name: 'SupportB', support_tower: 'tower2' }
+      ] as CatalogAttachmentEntity[]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: 'SupportA', supportTower: 'tower1' },
+        { supportName: 'SupportB', supportTower: 'tower2' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.toArray).toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should bulkAdd entries whose support name is absent', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([
+        { uuid: 'u1', created_at: '', updated_at: '', support_name: 'SupportA', support_tower: 'tower1' }
+      ] as CatalogAttachmentEntity[]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: 'SupportA', supportTower: 'tower1' },
+        { supportName: 'SupportNew', supportTower: 'towerNew' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          support_name: 'SupportNew',
+          support_tower: 'towerNew'
+        }
+      ]);
+    });
+
+    it('should deduplicate input entries with the same name and insert only once', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: 'SupportDup', supportTower: 'tower1' },
+        { supportName: 'SupportDup', supportTower: 'tower2' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          support_name: 'SupportDup',
+          support_tower: 'tower2'
+        }
+      ]);
+    });
+
+    it('should skip entries with empty supportName', async () => {
+      mockAttachmentsTable.toArray.mockResolvedValue([]);
+
+      const entries: SupportNameEntry[] = [
+        { supportName: '', supportTower: 'tower1' },
+        { supportName: 'ValidSupport', supportTower: 'tower2' }
+      ];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
+        {
+          uuid: 'mock-uuid-123',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          support_name: 'ValidSupport',
+          support_tower: 'tower2'
+        }
+      ]);
+    });
+
+    it('should do nothing when db is undefined', async () => {
+      (storageService as unknown as { db: undefined }).db = undefined;
+
+      const entries: SupportNameEntry[] = [{ supportName: 'SupportA', supportTower: 'tower1' }];
+
+      await service.addSupportNamesIfAbsent(entries);
+
+      expect(mockAttachmentsTable.toArray).not.toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('allAttachments$', () => {
+    it('should emit list from catAttachments when ready$ emits true', () => {
+      const mockAttachments: CatalogAttachmentEntity[] = [
+        { uuid: 'uuid-a', support_name: 'SA', support_tower: 'TA', created_at: '', updated_at: '' }
+      ];
+      mockAttachmentsTable.toArray.mockResolvedValue(mockAttachments);
+
+      return new Promise<void>((resolve) => {
+        service.allAttachments$.subscribe((result) => {
+          expect(result).toEqual(mockAttachments);
+          resolve();
+        });
+        (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+      });
+    });
+
+    it('should not emit before ready$ emits true', () => {
+      const received: CatalogAttachmentEntity[][] = [];
+
+      service.allAttachments$.subscribe((val) => received.push(val));
+
+      // ready$ starts as false — no emission expected
+      expect(received).toHaveLength(0);
+    });
+
+    it('should re-emit after addSupportNamesIfAbsent adds new entries', async () => {
+      const initial: CatalogAttachmentEntity[] = [];
+      const updated: CatalogAttachmentEntity[] = [
+        { uuid: 'uuid-b', support_name: 'SupportX', support_tower: 'TX', created_at: '', updated_at: '' }
+      ];
+      // call order: allAttachments$ initial read → addSupportNamesIfAbsent existing check → allAttachments$ refresh read
+      mockAttachmentsTable.toArray
+        .mockResolvedValueOnce(initial)
+        .mockResolvedValueOnce(initial)
+        .mockResolvedValueOnce(updated);
+
+      const secondEmission = firstValueFrom(service.allAttachments$.pipe(skip(1)));
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      const entries: SupportNameEntry[] = [{ supportName: 'SupportX', supportTower: 'TX' }];
+      await service.addSupportNamesIfAbsent(entries);
+
+      const result = await secondEmission;
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
+      expect(result).toEqual(updated);
     });
   });
 });

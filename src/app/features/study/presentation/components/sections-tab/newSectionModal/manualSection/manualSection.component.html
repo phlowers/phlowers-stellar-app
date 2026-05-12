@@ -376,12 +376,17 @@
 
             <div class="[grid-area:d]">
               <dt i18n>LIT - ID</dt>
-              <dd class="read-only-info">{{ section().lit_name }}</dd>
+              <dd class="read-only-info" data-testid="lit-code-view">{{ section().lit_code }}</dd>
             </div>
 
             <div class="[grid-area:e]">
+              <dt i18n>LIT - Name</dt>
+              <dd class="read-only-info" data-testid="lit-name-view">{{ litAdrRead() }}</dd>
+            </div>
+
+            <div class="[grid-area:f]">
               <dt i18n>Branch</dt>
-              <dd class="read-only-info">{{ section().branch_idr }}</dd>
+              <dd class="read-only-info" data-testid="branch-idr-view">{{ section().branch_idr }}</dd>
             </div>
           </dl>
         }
