@@ -217,8 +217,8 @@ describe('StudiesComponent', () => {
       expect(getByTestId('my-studies-tab')).toBeTruthy();
     });
 
-    it('should render search-study-tab', () => {
-      expect(getByTestId('search-study-tab')).toBeTruthy();
+    it('should not render search-study-tab (hidden via @if (false))', () => {
+      expect(getByTestId('search-study-tab')).toBeNull();
     });
 
     it('should render import-study-tab', () => {

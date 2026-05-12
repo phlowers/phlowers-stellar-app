@@ -13,7 +13,9 @@
 <p-tabs value="myStudies">
   <p-tablist>
     <p-tab value="myStudies" i18n data-testid="my-studies-tab">My last studies</p-tab>
-    <p-tab value="searchStudy" disabled="true" i18n data-testid="search-study-tab">Search a study</p-tab>
+    @if (false) {
+      <p-tab value="searchStudy" disabled="true" i18n data-testid="search-study-tab">Search a study</p-tab>
+    }
     <p-tab value="importStudy" i18n data-testid="import-study-tab">Import a study</p-tab>
   </p-tablist>
   <p-tabpanels>
