@@ -157,8 +157,12 @@ describe('SupportsTableComponent', () => {
     } as unknown as typeof component.supportChange;
 
     fixture.detectChanges();
-    await fixture.whenStable();
-  });
+    // Drain the microtask scheduled by ngOnInit -> getData() (mocked).
+    // Avoid `fixture.whenStable()` here: PrimeNG schedules background tasks
+    // that keep the zone busy and make this hook flaky under CI load,
+    // tripping the default 15 s hook timeout.
+    await Promise.resolve();
+  }, 30000);
 
   it('should create', () => {
     expect(component).toBeTruthy();

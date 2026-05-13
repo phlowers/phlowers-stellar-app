@@ -102,11 +102,31 @@ export class LoginPageComponent implements OnInit {
 
     try {
       await this.authService.loginWithEmail(this.emailControl.value);
-      await this.router.navigate(['/']);
     } catch {
       this.submitError.set($localize`Login failed. Please try again.`);
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    // Login succeeded — the user is now in IndexedDB and `currentUser` is set.
+    // A failure of `router.navigate` (typically a lazy-chunk load error) must
+    // NOT surface as "Login failed", because the user is actually authenticated.
+    // In that case fall back to a full page reload so the freshly-cached user
+    // is picked up cleanly by the auth guard.
+    try {
+      await this.router.navigate(['/']);
+    } catch {
+      this.reloadToHome();
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  /**
+   * Force a full top-level navigation to the home page. Extracted so it can
+   * be spied on in tests (jsdom's `location.assign` is not configurable).
+   */
+  protected reloadToHome(): void {
+    globalThis.location.assign('/');
   }
 }

@@ -211,6 +211,64 @@ describe('LoginPageComponent', () => {
         await component.onSubmit();
         expect(component.isSubmitting()).toBe(false);
       });
+
+      it('should NOT show "Login failed" when navigation fails after a successful login', async () => {
+        // Reproduces the bug: loginWithEmail succeeds, but router.navigate
+        // rejects (e.g. lazy-chunk load error). The user IS authenticated,
+        // so we must not display the login-error banner.
+        const reloadSpy = vi
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .spyOn(LoginPageComponent.prototype as any, 'reloadToHome')
+          .mockImplementation(() => undefined);
+        routerMock.navigate.mockRejectedValue(new Error('chunk load failed'));
+        component.emailControl.setValue('user@example.com');
+
+        await component.onSubmit();
+        fixture.detectChanges();
+
+        expect(authServiceMock.loginWithEmail).toHaveBeenCalledWith('user@example.com');
+        expect(component.submitError()).toBeNull();
+        expect(getByTestId('login-error')).toBeNull();
+        expect(reloadSpy).toHaveBeenCalledTimes(1);
+        expect(component.isSubmitting()).toBe(false);
+      });
+
+      it('should NOT attempt navigation when loginWithEmail fails', async () => {
+        // Regression guard: a failed auth must short-circuit before the
+        // router is touched, otherwise a chunk-load error could mask the
+        // real auth failure.
+        authServiceMock.loginWithEmail.mockRejectedValue(new Error('DB error'));
+        component.emailControl.setValue('user@example.com');
+
+        await component.onSubmit();
+
+        expect(routerMock.navigate).not.toHaveBeenCalled();
+      });
+
+      it('should NOT call reloadToHome when both login and navigation succeed', async () => {
+        const reloadSpy = vi
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .spyOn(LoginPageComponent.prototype as any, 'reloadToHome')
+          .mockImplementation(() => undefined);
+        component.emailControl.setValue('user@example.com');
+
+        await component.onSubmit();
+
+        expect(reloadSpy).not.toHaveBeenCalled();
+        expect(component.submitError()).toBeNull();
+      });
+
+      it('should clear a previous submitError on a new successful submit', async () => {
+        // First submit fails — error is shown.
+        authServiceMock.loginWithEmail.mockRejectedValueOnce(new Error('boom'));
+        component.emailControl.setValue('user@example.com');
+        await component.onSubmit();
+        expect(component.submitError()).toBeTruthy();
+
+        // Retry succeeds — banner must clear.
+        await component.onSubmit();
+        expect(component.submitError()).toBeNull();
+      });
     });
   });
 
