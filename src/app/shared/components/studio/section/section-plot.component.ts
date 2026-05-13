@@ -210,7 +210,7 @@ export class SectionPlotComponent implements OnDestroy {
     }
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
-      on(e: 'plotly_relayout', fn: () => void): void;
+      on(e: 'plotly_relayout', fn: (eventData: Record<string, unknown>) => void): void;
       removeAllListeners(e: string): void;
     };
     // Remove stale listeners before re-adding — the plot element is reused across refreshes,
@@ -237,8 +237,17 @@ export class SectionPlotComponent implements OnDestroy {
       }
     });
 
-    plotEl.on('plotly_relayout', () => {
-      this.plotOptionsService.refreshCamera();
+    plotEl.on('plotly_relayout', (eventData: Record<string, unknown>) => {
+      // Only synchronise the camera signal when the relayout event actually contains
+      // camera data. Clicking modebar buttons like "Orbital rotation", "Zoom", or "Pan"
+      // fires relayout with only { 'scene.dragmode': '...' }. Calling refreshCamera()
+      // on those events can read a transient or stale camera from the DOM and corrupt
+      // the camera signal, which would then change uirevision on the next react() call
+      // and cause an unwanted camera reset.
+      const hasCameraKey = Object.keys(eventData ?? {}).some((k) => k.includes('camera'));
+      if (hasCameraKey) {
+        this.plotOptionsService.refreshCamera();
+      }
     });
   };
 

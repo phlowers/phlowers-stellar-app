@@ -120,7 +120,10 @@ const config = {
     'hoverClosestCartesian',
     'hoverCompareCartesian',
     'resetLastSave',
-    'autoScale2d'
+    'autoScale2d',
+    'resetCameraDefault3d',
+    'resetCameraLastSave3d',
+    'resetScale2d'
   ] as ModeBarDefaultButtons[]
 };
 
@@ -130,6 +133,12 @@ const layout3d = (
 ): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
+  // uirevision controls whether Plotly preserves user-driven camera interactions.
+  // When a camera is set (user has moved it), keep uirevision stable so Plotly
+  // ignores the camera value in the layout and preserves the interactive position.
+  // When camera is null (initial render or explicit reset), use a unique value so
+  // Plotly applies normalCamera() from the layout.
+  uirevision: plotParams.camera === null ? String(Date.now()) : 'stable',
   margin: {
     l: 0,
     r: 0,
@@ -186,6 +195,21 @@ const layout2d = (
 };
 
 /**
+ * Reads the current 3D camera directly from the Plotly DOM element's internal state.
+ * This bypasses the Angular signal layer and always returns the live camera position
+ * as Plotly knows it, even after the user has interacted with the plot.
+ * Returns null if the element does not exist or has no camera data yet.
+ */
+const getLiveCamera = (documentRef: Document, plotId: string): Camera | null => {
+  const el = documentRef.getElementById(plotId) as
+    | (HTMLElement & {
+        _fullLayout?: { scene?: { camera?: Camera } };
+      })
+    | null;
+  return el?._fullLayout?.scene?.camera ?? null;
+};
+
+/**
  * Creates or updates a Plotly plot in the DOM element identified by `plotParams.plotId`.
  * Selects the appropriate 2D or 3D layout and uses `Plotly.react` for efficient updates
  * without resetting the camera or zoom.
@@ -196,13 +220,23 @@ const layout2d = (
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!plotParams.documentRef.getElementById(plotParams.plotId)) {
-    console.warn(`Plot element not found: ${plotParams.plotId}`);
     return;
   }
-  const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(plotParams);
+
+  // For 3D plots, always read the live camera from the DOM before re-rendering.
+  // This prevents Plotly's internal setViewport() from resetting the camera to a
+  // stale value when the user interacts with the modebar (e.g. switches dragmode).
+  // The DOM camera is the source of truth after the first render.
+  const resolvedParams =
+    plotParams.view === '3d'
+      ? { ...plotParams, camera: getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera }
+      : plotParams;
+  const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
   const baseLayout =
-    plotParams.view === '3d' ? layout3d(plotParams, distanceAnnotations) : layout2d(plotParams, distanceAnnotations);
-  const allData = [...plotParams.data, ...distanceTraces];
+    resolvedParams.view === '3d'
+      ? layout3d(resolvedParams, distanceAnnotations)
+      : layout2d(resolvedParams, distanceAnnotations);
+  const allData = [...resolvedParams.data, ...distanceTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
