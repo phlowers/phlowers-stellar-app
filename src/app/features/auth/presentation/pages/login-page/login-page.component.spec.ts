@@ -32,10 +32,12 @@ describe('LoginPageComponent', () => {
    * Build the component with the given resolved auth mode.
    * Default: mode resolved + fallback (email form rendered).
    */
-  async function setupFixture(opts: { oidcEnabled: boolean; modeResolved?: boolean } = {
-    oidcEnabled: false,
-    modeResolved: true
-  }): Promise<void> {
+  async function setupFixture(
+    opts: { oidcEnabled: boolean; modeResolved?: boolean } = {
+      oidcEnabled: false,
+      modeResolved: true
+    }
+  ): Promise<void> {
     authServiceMock = {
       oidcEnabled: signal(opts.oidcEnabled),
       modeResolved: signal(opts.modeResolved ?? true),
@@ -154,9 +156,7 @@ describe('LoginPageComponent', () => {
       it('should set aria-describedby when email has error', () => {
         component.emailControl.markAsTouched();
         fixture.detectChanges();
-        expect(getByTestId('email-input')?.getAttribute('aria-describedby')).toBe(
-          'login-email-error'
-        );
+        expect(getByTestId('email-input')?.getAttribute('aria-describedby')).toBe('login-email-error');
       });
 
       it('should have a label associated with the email input', () => {

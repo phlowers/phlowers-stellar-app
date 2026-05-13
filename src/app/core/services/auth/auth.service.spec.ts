@@ -110,9 +110,7 @@ describe('AuthService', () => {
 
   describe('initialize — server returns active OIDC session', () => {
     it('should set oidcEnabled=true, upsert user, and set currentUser', async () => {
-      mockFetch.mockResolvedValue(
-        userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims })
-      );
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims }));
 
       await service.initialize();
 
@@ -217,9 +215,7 @@ describe('AuthService', () => {
 
   describe('initialize — never deletes users', () => {
     it('should never call clear on the users table', async () => {
-      mockFetch.mockResolvedValue(
-        userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims })
-      );
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims }));
 
       await service.initialize();
 
@@ -245,9 +241,7 @@ describe('AuthService', () => {
     it('should preserve existing user fields when upserting OIDC claims', async () => {
       const existingUser: User = { email: 'user@example.com', uuid: 'uuid-1', studies: [] };
       usersTableMock.get.mockResolvedValue(existingUser);
-      mockFetch.mockResolvedValue(
-        userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims })
-      );
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims }));
 
       await service.refreshFromNetwork();
 
@@ -263,26 +257,20 @@ describe('AuthService', () => {
     });
 
     it('should return null when userinfo is authenticated but missing email', async () => {
-      mockFetch.mockResolvedValue(
-        userinfoOk({ authenticated: true, oidcEnabled: true, sub: 'sub-123' })
-      );
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, sub: 'sub-123' }));
       const result = await service.refreshFromNetwork();
       expect(result).toBeNull();
       expect(usersTableMock.put).not.toHaveBeenCalled();
     });
 
     it('should return null when userinfo email is whitespace-only', async () => {
-      mockFetch.mockResolvedValue(
-        userinfoOk({ authenticated: true, oidcEnabled: true, email: '   ', sub: 'sub-123' })
-      );
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, email: '   ', sub: 'sub-123' }));
       const result = await service.refreshFromNetwork();
       expect(result).toBeNull();
     });
 
     it('should return null when authenticated=false even with claims-shaped body', async () => {
-      mockFetch.mockResolvedValue(
-        userinfoOk({ authenticated: false, oidcEnabled: false, ...testClaims })
-      );
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: false, oidcEnabled: false, ...testClaims }));
       const result = await service.refreshFromNetwork();
       expect(result).toBeNull();
     });
@@ -307,9 +295,7 @@ describe('AuthService', () => {
     it('should create a user with the given email and set currentUser', async () => {
       usersTableMock.get.mockResolvedValue(undefined);
       const user = await service.loginWithEmail('new@example.com');
-      expect(usersTableMock.put).toHaveBeenCalledWith(
-        expect.objectContaining({ email: 'new@example.com' })
-      );
+      expect(usersTableMock.put).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@example.com' }));
       expect(service.currentUser()?.email).toBe('new@example.com');
       expect(user.email).toBe('new@example.com');
     });
