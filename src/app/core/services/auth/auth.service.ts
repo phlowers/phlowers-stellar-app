@@ -93,9 +93,7 @@ export class AuthService {
     // users that were created in fallback mode. Only previously-OIDC users
     // (those that have a `sub` claim) are accepted offline.
     if (this.oidcEnabled() && !cached.sub) {
-      this.logger.warn(
-        'AuthService: stale email-only cached user ignored because OIDC mode is required'
-      );
+      this.logger.warn('AuthService: stale email-only cached user ignored because OIDC mode is required');
       return;
     }
 
@@ -198,9 +196,7 @@ export class AuthService {
    */
   async loginWithEmail(email: string): Promise<User> {
     if (this.oidcEnabled()) {
-      this.notificationService.error(
-        $localize`Email login is disabled because GAIA single sign-on is required.`
-      );
+      this.notificationService.error($localize`Email login is disabled because GAIA single sign-on is required.`);
       throw new Error('Email login is disabled in OIDC mode');
     }
 
