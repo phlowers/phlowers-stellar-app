@@ -86,7 +86,6 @@ export class ManualSectionComponent implements OnInit {
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
   sectionChange = output<Section>();
-  isValidChange = output<boolean>();
   locationChange = output<LocationData>();
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<CatalogCable[]>([]);

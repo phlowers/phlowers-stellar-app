@@ -46,6 +46,7 @@ import {
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
+import { LOCATION_CONFIG } from '../location/location.constantes';
 
 /**
  * Editable table of supports within a section.
@@ -169,9 +170,7 @@ export class SupportsTableComponent implements OnInit {
   private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
     return (
       supports.length > 0 &&
-      section?.start_latitude != null &&
-      section.start_longitude != null &&
-      section.start_azimuth != null &&
+      !!section &&
       !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
     );
   }
@@ -179,9 +178,9 @@ export class SupportsTableComponent implements OnInit {
   private buildLocalizationPayload(section: Section, supports: Support[]) {
     const lastIndex = supports.length - 1;
     return {
-      startLatitude: section.start_latitude!,
-      startLongitude: section.start_longitude!,
-      startAzimuth: section.start_azimuth!,
+      startLatitude: section.start_latitude ?? LOCATION_CONFIG.latitude.default,
+      startLongitude: section.start_longitude ?? LOCATION_CONFIG.longitude.default,
+      startAzimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
       spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
       lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
     };

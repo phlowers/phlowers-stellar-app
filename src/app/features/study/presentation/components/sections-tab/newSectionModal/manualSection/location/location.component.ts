@@ -18,21 +18,19 @@ export class LocationComponent {
   readonly initialLatitude = input<number | null>(null);
   readonly initialLongitude = input<number | null>(null);
   readonly initialAzimuth = input<number | null>(null);
-  readonly useDefaults = input<boolean>(false);
 
   readonly locationChange = output<LocationData>();
-  readonly isValidChange = output<boolean>();
 
   protected readonly config = LOCATION_CONFIG;
 
   protected readonly latitudeValue = linkedSignal<number | null>(
-    () => this.initialLatitude() ?? (this.useDefaults() ? LOCATION_CONFIG.latitude.default : null)
+    () => this.initialLatitude() ?? LOCATION_CONFIG.latitude.default
   );
   protected readonly longitudeValue = linkedSignal<number | null>(
-    () => this.initialLongitude() ?? (this.useDefaults() ? LOCATION_CONFIG.longitude.default : null)
+    () => this.initialLongitude() ?? LOCATION_CONFIG.longitude.default
   );
   protected readonly azimuthValue = linkedSignal<number | null>(
-    () => this.initialAzimuth() ?? (this.useDefaults() ? LOCATION_CONFIG.azimuth.default : null)
+    () => this.initialAzimuth() ?? LOCATION_CONFIG.azimuth.default
   );
 
   protected readonly isLatitudeOverMax = computed(() => {
@@ -106,9 +104,9 @@ export class LocationComponent {
     this.locationChange.emit({
       latitude: this.latitudeValue(),
       longitude: this.longitudeValue(),
-      azimuth: this.azimuthValue()
+      azimuth: this.azimuthValue(),
+      isValid: this.isValid()
     });
-    this.isValidChange.emit(this.isValid());
   }
 
   onLatitudeInput(event: Event): void {

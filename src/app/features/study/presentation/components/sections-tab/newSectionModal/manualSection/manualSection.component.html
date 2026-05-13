@@ -453,8 +453,6 @@
               [initialLatitude]="section().start_latitude"
               [initialLongitude]="section().start_longitude"
               [initialAzimuth]="section().start_azimuth"
-              [useDefaults]="mode() === 'create'"
-              (isValidChange)="isValidChange.emit($event)"
               (locationChange)="locationChange.emit($event)"
             />
           </div>
