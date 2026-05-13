@@ -5,13 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CatalogChainEntity } from '@infrastructure/database';
 import { ChainCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
-import { HttpClient } from '@angular/common/http';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
@@ -41,11 +41,10 @@ export class ChainsService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
 
   constructor() {
-    this.storageService.ready$.subscribe((value) => {
+    this.storageService.ready$.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.ready.next(value);
     });
   }
@@ -72,17 +71,13 @@ export class ChainsService {
    *
    * @returns Promise that resolves when import is complete
    */
+  private static readonly CSV_PARSE_TIMEOUT_MS = 60_000;
+
   async importFromFile() {
-    const chains = this.http
-      .get(`${globalThis.location.origin}/data/chains.csv`, {
-        responseType: 'text'
-      })
-      .pipe(
-        catchError((error) => {
-          this.logger.error('Error importing chains', error);
-          return of('');
-        })
-      );
+    await this.parseCsvAndStore();
+  }
+
+  private async parseCsvAndStore(): Promise<void> {
     const mapData = (data: ChainCsvDto[]) => {
       return data
         .map((item) => ({
@@ -97,22 +92,36 @@ export class ChainsService {
         .filter((item) => item.chain_name);
     };
 
-    await new Promise<void>((resolve) => {
-      chains.subscribe(async (chains) => {
-        Papa.parse(chains, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<ChainCsvDto>) => {
-            const data = jsonResults.data;
-            if (!data || data.length === 0) {
-              resolve();
-              return;
-            }
-            const chainsTable: CatalogChainEntity[] = mapData(data);
-            await replaceTableData(this.storageService.db?.catChains, chainsTable);
-            resolve();
-          }) as (jsonResults: Papa.ParseResult<ChainCsvDto>) => void
-        });
+    let rawData: ChainCsvDto[];
+    try {
+      rawData = await this.parseCsvFromUrl(`${globalThis.location.origin}/data/chains.csv`);
+    } catch (error) {
+      this.logger.error('Error importing chains', error);
+      return;
+    }
+    if (!rawData.length) {
+      return;
+    }
+    const chainsTable: CatalogChainEntity[] = mapData(rawData);
+    await replaceTableData(this.storageService.db?.catChains, chainsTable);
+  }
+
+  private parseCsvFromUrl(url: string): Promise<ChainCsvDto[]> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => reject(new Error('CSV parse timeout')), ChainsService.CSV_PARSE_TIMEOUT_MS);
+      Papa.parse<ChainCsvDto>(url, {
+        download: true,
+        worker: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          clearTimeout(timeoutId);
+          resolve(results.data ?? []);
+        },
+        error: (err) => {
+          clearTimeout(timeoutId);
+          reject(new Error(String(err)));
+        }
       });
     });
   }

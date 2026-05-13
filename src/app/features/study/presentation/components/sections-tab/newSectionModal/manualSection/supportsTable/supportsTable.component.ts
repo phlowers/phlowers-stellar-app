@@ -45,7 +45,6 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
-import { CatalogAttachmentEntity } from '@infrastructure/database';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 
 /**
@@ -110,8 +109,8 @@ export class SupportsTableComponent implements OnInit {
   allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
-  private readonly allCatalogAttachments = toSignal(this.attachmentService.allAttachments$, {
-    initialValue: [] as CatalogAttachmentEntity[]
+  private readonly allCatalogSupportNames = toSignal(this.attachmentService.distinctSupportNames$, {
+    initialValue: [] as string[]
   });
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
@@ -139,14 +138,14 @@ export class SupportsTableComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      this.updateSupportFilterTables(this.allCatalogAttachments());
+      this.updateSupportFilterTables(this.allCatalogSupportNames());
     });
   }
 
-  private updateSupportFilterTables(attachments: CatalogAttachmentEntity[]): void {
+  private updateSupportFilterTables(catalogNames: string[]): void {
     const { catalogSupportNames, supplementarySupportNames } = buildSupportNameFilterTables(
       this.supports(),
-      attachments
+      catalogNames
     );
     this.supportFilterTable.set(catalogSupportNames);
     this.supplementarySupportFilterTable.set(supplementarySupportNames);

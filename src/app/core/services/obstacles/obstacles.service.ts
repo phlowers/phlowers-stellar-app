@@ -5,13 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CatalogObstacleTypeEntity } from '@infrastructure/database';
 import { ObstacleTypeCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
-import { HttpClient } from '@angular/common/http';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
@@ -48,11 +48,10 @@ export class ObstaclesService {
   activePointIndex = signal<number | null>(null);
 
   private readonly storageService = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
 
   constructor() {
-    this.storageService.ready$.subscribe((value) => {
+    this.storageService.ready$.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.ready.next(value);
     });
   }
@@ -104,53 +103,43 @@ export class ObstaclesService {
    *
    * @returns Promise that resolves when import is complete
    */
+  private static readonly CSV_PARSE_TIMEOUT_MS = 60_000;
+
   async importFromFile() {
-    const csvContent = await this.fetchCsvFile();
-    if (!csvContent) {
+    await this.parseCsvAndStore();
+  }
+
+  private async parseCsvAndStore(): Promise<void> {
+    let rawData: ObstacleTypeCsvDto[];
+    try {
+      rawData = await this.parseCsvFromUrl(`${globalThis.location.origin}/data/obstacle_type_rte.csv`);
+    } catch (error) {
+      this.logger.error('Error importing obstacle types', error);
       return;
     }
-    const parsedData = await this.parseCsv(csvContent);
-    if (!parsedData || parsedData.length === 0) {
+    if (!rawData.length) {
       return;
     }
-    const entities = this.mapToEntities(parsedData);
+    const entities = this.mapToEntities(rawData);
     await this.storeInDatabase(entities);
   }
 
-  /**
-   * Fetch the obstacle type CSV file from the server.
-   *
-   * @returns Promise resolving to the CSV content string, or empty string on error
-   */
-  private async fetchCsvFile(): Promise<string> {
-    return firstValueFrom(
-      this.http
-        .get(`${globalThis.location.origin}/data/obstacle_type_rte.csv`, {
-          responseType: 'text'
-        })
-        .pipe(
-          catchError((error) => {
-            this.logger.error('Error importing obstacle types', error);
-            return of('');
-          })
-        )
-    );
-  }
-
-  /**
-   * Parse CSV content into an array of ObstacleTypeCsvDto.
-   *
-   * @param csvContent - Raw CSV string with semicolon delimiters
-   * @returns Promise resolving to the parsed data array
-   */
-  private parseCsv(csvContent: string): Promise<ObstacleTypeCsvDto[]> {
-    return new Promise((resolve) => {
-      Papa.parse<ObstacleTypeCsvDto>(csvContent, {
+  private parseCsvFromUrl(url: string): Promise<ObstacleTypeCsvDto[]> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => reject(new Error('CSV parse timeout')), ObstaclesService.CSV_PARSE_TIMEOUT_MS);
+      Papa.parse<ObstacleTypeCsvDto>(url, {
+        download: true,
+        worker: true,
         header: true,
         delimiter: ';',
         skipEmptyLines: true,
         complete: (results) => {
-          resolve(results.data);
+          clearTimeout(timeoutId);
+          resolve(results.data ?? []);
+        },
+        error: (err) => {
+          clearTimeout(timeoutId);
+          reject(new Error(String(err)));
         }
       });
     });

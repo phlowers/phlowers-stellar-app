@@ -5,6 +5,7 @@ import { Task } from '@services/worker_python/tasks/types';
 
 const plotlyMocks = vi.hoisted(() => ({
   newPlot: vi.fn(),
+  react: vi.fn(),
   purge: vi.fn()
 }));
 
@@ -12,6 +13,7 @@ vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
   default: {
     newPlot: plotlyMocks.newPlot,
+    react: plotlyMocks.react,
     purge: plotlyMocks.purge
   }
 }));
@@ -26,6 +28,7 @@ describe('SupportPlotComponent', () => {
 
   beforeEach(async () => {
     plotlyMocks.newPlot.mockReset();
+    plotlyMocks.react.mockReset();
     plotlyMocks.purge.mockReset();
 
     workerPythonServiceMock = {
@@ -84,9 +87,9 @@ describe('SupportPlotComponent', () => {
       ],
       attachmentSetNumbers: [1, 2, 3]
     });
-    expect(plotlyMocks.newPlot).toHaveBeenCalledTimes(1);
+    expect(plotlyMocks.react).toHaveBeenCalledTimes(1);
 
-    const [plotId, plotData, layout] = plotlyMocks.newPlot.mock.calls[0];
+    const [plotId, plotData, layout] = plotlyMocks.react.mock.calls[0];
     expect(plotId).toBe('plotly-output-support');
     expect(layout).toEqual({
       autosize: true,
@@ -161,7 +164,7 @@ describe('SupportPlotComponent', () => {
       undefined
     );
 
-    const [, plotData] = plotlyMocks.newPlot.mock.calls[0];
+    const [, plotData] = plotlyMocks.react.mock.calls[0];
     expect(plotData).toHaveLength(2);
   });
 
@@ -180,7 +183,18 @@ describe('SupportPlotComponent', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error refreshing plot:', expect.any(Error));
     expect(plotlyMocks.purge).toHaveBeenCalledWith('plotly-output-support');
-    expect(plotlyMocks.newPlot).not.toHaveBeenCalled();
+    expect(plotlyMocks.react).not.toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should purge the plot on component destroy', () => {
+      fixture.detectChanges();
+      plotlyMocks.purge.mockReset();
+
+      fixture.destroy();
+
+      expect(plotlyMocks.purge).toHaveBeenCalledWith('plotly-output-support');
+    });
   });
 });

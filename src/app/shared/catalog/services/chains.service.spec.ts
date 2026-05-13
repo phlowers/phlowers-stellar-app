@@ -5,8 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -66,12 +65,7 @@ describe('ChainsService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        ChainsService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [ChainsService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(ChainsService);
@@ -131,16 +125,6 @@ describe('ChainsService', () => {
   });
 
   describe('importFromFile', () => {
-    let httpTestingController: HttpTestingController;
-
-    beforeEach(() => {
-      httpTestingController = TestBed.inject(HttpTestingController);
-    });
-
-    afterEach(() => {
-      httpTestingController.verify();
-    });
-
     it('should import chains from CSV file successfully', async () => {
       const mockCsvData: ChainCsvDto[] = [
         {
@@ -163,10 +147,8 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3\nChain 2,150,0,3,1';
-
       // Mock Papa Parse to call complete callback
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -186,17 +168,7 @@ describe('ChainsService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/chains.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockChainsTable.clear).toHaveBeenCalled();
       expect(mockChainsTable.bulkAdd).toHaveBeenCalledWith([
@@ -222,10 +194,8 @@ describe('ChainsService', () => {
     });
 
     it('should handle empty CSV data', async () => {
-      const mockCsvContent = 'name,length,weight\n';
-
       // Mock Papa Parse to call complete callback with empty data
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -245,17 +215,7 @@ describe('ChainsService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/chains.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockChainsTable.clear).not.toHaveBeenCalled();
       expect(mockChainsTable.bulkAdd).not.toHaveBeenCalled();
@@ -283,9 +243,7 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent = 'name,length,weight\n,100,5,2,3\nChain 2,150,0,3,1';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -305,17 +263,7 @@ describe('ChainsService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/chains.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Should only add the chain with valid name
       expect(mockChainsTable.bulkAdd).toHaveBeenCalledWith([
@@ -346,8 +294,6 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -368,18 +314,8 @@ describe('ChainsService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/chains.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
       // Should not throw error
-      await expect(importPromise).resolves.toBeUndefined();
+      await expect(service.importFromFile()).resolves.toBeUndefined();
     });
 
     it('should handle CSV data with mixed valid and invalid name values', async () => {
@@ -413,10 +349,7 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'name,length,weight,surface,v\nChain 1,100,5,2,3,false\n,150,0,3,1,true\nChain 3,200,0,4,2,false';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
             {
@@ -436,17 +369,7 @@ describe('ChainsService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/chains.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Should only add chains with valid name
       expect(mockChainsTable.bulkAdd).toHaveBeenCalledWith([
@@ -484,8 +407,6 @@ describe('ChainsService', () => {
         }
       ];
 
-      const mockCsvContent = 'name,length,weight\nChain 1,100,5,2,3';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ChainCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -506,21 +427,44 @@ describe('ChainsService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/chains.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Verify clear is called before bulkAdd
       expect(mockChainsTable.clear).toHaveBeenCalled();
       expect(mockChainsTable.bulkAdd).toHaveBeenCalled();
+    });
+
+    it('should call Papa.parse with download:true, worker:true and the chains URL', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        options.complete?.(
+          {
+            data: [],
+            errors: [],
+            meta: { delimiter: ',', linebreak: '\n', aborted: false, truncated: false, cursor: 0, fields: [] }
+          },
+          undefined
+        );
+      });
+
+      await service.importFromFile();
+
+      expect(Papa.parse).toHaveBeenCalledWith(
+        expect.stringContaining('/data/chains.csv'),
+        expect.objectContaining({ download: true, worker: true })
+      );
+    });
+
+    it('should not store data when Papa.parse calls error callback', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ChainCsvDto>) => {
+        if (options.error) {
+          options.error(new Error('Network error') as Papa.ParseError, undefined!);
+        }
+      });
+
+      await service.importFromFile();
+
+      expect(mockChainsTable.clear).not.toHaveBeenCalled();
+      expect(mockChainsTable.bulkAdd).not.toHaveBeenCalled();
     });
   });
 });

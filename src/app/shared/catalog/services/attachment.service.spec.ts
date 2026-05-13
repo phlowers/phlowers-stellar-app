@@ -5,8 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+
 import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -34,6 +33,7 @@ interface MockTable {
   toArray: vi.Mock;
   bulkAdd: vi.Mock;
   clear?: vi.Mock;
+  orderBy: vi.Mock;
 }
 
 interface MockDb {
@@ -46,14 +46,17 @@ describe('AttachmentService', () => {
   let storageService: StorageService;
   let mockDb: MockDb;
   let mockAttachmentsTable: MockTable;
+  let mockOrderByMock: { uniqueKeys: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     // Create mock database tables
+    mockOrderByMock = { uniqueKeys: vi.fn().mockResolvedValue([]) };
     mockAttachmentsTable = {
       count: vi.fn().mockResolvedValue(3),
       toArray: vi.fn().mockResolvedValue([]),
       bulkAdd: vi.fn().mockResolvedValue(undefined),
-      clear: vi.fn().mockResolvedValue(undefined)
+      clear: vi.fn().mockResolvedValue(undefined),
+      orderBy: vi.fn().mockReturnValue(mockOrderByMock)
     };
 
     mockDb = {
@@ -72,12 +75,7 @@ describe('AttachmentService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        AttachmentService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [AttachmentService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(AttachmentService);
@@ -141,16 +139,6 @@ describe('AttachmentService', () => {
   });
 
   describe('importFromFile', () => {
-    let httpTestingController: HttpTestingController;
-
-    beforeEach(() => {
-      httpTestingController = TestBed.inject(HttpTestingController);
-    });
-
-    afterEach(() => {
-      httpTestingController.verify();
-    });
-
     it('should import attachments from CSV file successfully', async () => {
       const mockCsvData: AttachmentCsvDto[] = [
         {
@@ -179,9 +167,6 @@ describe('AttachmentService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncatalog1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncatalog2,idr2,Support 2,tower2,Family 2,2,0,0,11.0,2.5';
-
       // Mock Papa Parse to call complete callback
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
@@ -203,17 +188,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockAttachmentsTable.clear).toHaveBeenCalled();
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
@@ -247,9 +222,6 @@ describe('AttachmentService', () => {
     });
 
     it('should handle empty CSV data', async () => {
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\n';
-
       // Mock Papa Parse to call complete callback with empty data
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
@@ -271,17 +243,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockAttachmentsTable.clear).not.toHaveBeenCalled();
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
@@ -327,9 +289,6 @@ describe('AttachmentService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncat2,idr2,,tower2,Family 2,2,0,0,11.0,2.5\ncat3,idr3,Support 3,tower3,Family 3,3,0,0,12.0,3.0';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -350,17 +309,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Should only add attachments with valid support_idr or support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
@@ -411,9 +360,6 @@ describe('AttachmentService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -434,18 +380,8 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
       // Should not throw error
-      await expect(importPromise).resolves.toBeUndefined();
+      await expect(service.importFromFile()).resolves.toBeUndefined();
     });
 
     it('should handle CSV data with mixed valid, fallback and invalid support_idr values', async () => {
@@ -500,9 +436,6 @@ describe('AttachmentService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -523,17 +456,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Should only add attachments with valid support_idr or support_adr
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
@@ -595,9 +518,6 @@ describe('AttachmentService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -618,17 +538,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Verify clear is called before bulkAdd
       expect(mockAttachmentsTable.clear).toHaveBeenCalled();
@@ -657,17 +567,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request to return an error
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush('Error', { status: 404, statusText: 'Not Found' });
-
-      await importPromise;
+      await service.importFromFile();
 
       // Should not throw error and not call bulkAdd (but clear may be called)
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
@@ -701,9 +601,6 @@ describe('AttachmentService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -724,17 +621,7 @@ describe('AttachmentService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/attachments.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalledWith([
         {
@@ -764,6 +651,39 @@ describe('AttachmentService', () => {
           attachment_set_z: 11
         }
       ]);
+    });
+
+    it('should call Papa.parse with download:true, worker:true and the attachments URL', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+        options.complete?.(
+          {
+            data: [],
+            errors: [],
+            meta: { delimiter: ',', linebreak: '\n', aborted: false, truncated: false, cursor: 0, fields: [] }
+          },
+          undefined
+        );
+      });
+
+      await service.importFromFile();
+
+      expect(Papa.parse).toHaveBeenCalledWith(
+        expect.stringContaining('/data/attachments.csv'),
+        expect.objectContaining({ download: true, worker: true })
+      );
+    });
+
+    it('should not store data when Papa.parse calls error callback', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+        if (options.error) {
+          options.error(new Error('Network error') as Papa.ParseError, undefined!);
+        }
+      });
+
+      await service.importFromFile();
+
+      expect(mockAttachmentsTable.clear).not.toHaveBeenCalled();
+      expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
     });
   });
 
@@ -925,10 +845,7 @@ describe('AttachmentService', () => {
     });
 
     it('should do nothing when all support names already exist in DB', async () => {
-      mockAttachmentsTable.toArray.mockResolvedValue([
-        { uuid: 'u1', created_at: '', updated_at: '', support_name: 'SupportA', support_tower: 'tower1' },
-        { uuid: 'u2', created_at: '', updated_at: '', support_name: 'SupportB', support_tower: 'tower2' }
-      ] as CatalogAttachmentEntity[]);
+      mockOrderByMock.uniqueKeys.mockResolvedValue(['SupportA', 'SupportB']);
 
       const entries: SupportNameEntry[] = [
         { supportName: 'SupportA', supportTower: 'tower1' },
@@ -937,14 +854,12 @@ describe('AttachmentService', () => {
 
       await service.addSupportNamesIfAbsent(entries);
 
-      expect(mockAttachmentsTable.toArray).toHaveBeenCalled();
+      expect(mockOrderByMock.uniqueKeys).toHaveBeenCalled();
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
     });
 
     it('should bulkAdd entries whose support name is absent', async () => {
-      mockAttachmentsTable.toArray.mockResolvedValue([
-        { uuid: 'u1', created_at: '', updated_at: '', support_name: 'SupportA', support_tower: 'tower1' }
-      ] as CatalogAttachmentEntity[]);
+      mockOrderByMock.uniqueKeys.mockResolvedValue(['SupportA']);
 
       const entries: SupportNameEntry[] = [
         { supportName: 'SupportA', supportTower: 'tower1' },
@@ -965,7 +880,7 @@ describe('AttachmentService', () => {
     });
 
     it('should deduplicate input entries with the same name and insert only once', async () => {
-      mockAttachmentsTable.toArray.mockResolvedValue([]);
+      // mockOrderByMock defaults to [] — no existing names
 
       const entries: SupportNameEntry[] = [
         { supportName: 'SupportDup', supportTower: 'tower1' },
@@ -986,7 +901,7 @@ describe('AttachmentService', () => {
     });
 
     it('should skip entries with empty supportName', async () => {
-      mockAttachmentsTable.toArray.mockResolvedValue([]);
+      // mockOrderByMock defaults to [] — no existing names
 
       const entries: SupportNameEntry[] = [
         { supportName: '', supportTower: 'tower1' },
@@ -1013,7 +928,6 @@ describe('AttachmentService', () => {
 
       await service.addSupportNamesIfAbsent(entries);
 
-      expect(mockAttachmentsTable.toArray).not.toHaveBeenCalled();
       expect(mockAttachmentsTable.bulkAdd).not.toHaveBeenCalled();
     });
   });
@@ -1048,13 +962,54 @@ describe('AttachmentService', () => {
       const updated: CatalogAttachmentEntity[] = [
         { uuid: 'uuid-b', support_name: 'SupportX', support_tower: 'TX', created_at: '', updated_at: '' }
       ];
-      // call order: allAttachments$ initial read → addSupportNamesIfAbsent existing check → allAttachments$ refresh read
-      mockAttachmentsTable.toArray
+      // call order: allAttachments$ initial read → allAttachments$ refresh read (addSupportNamesIfAbsent now uses uniqueKeys, not toArray)
+      mockAttachmentsTable.toArray.mockResolvedValueOnce(initial).mockResolvedValueOnce(updated);
+
+      const secondEmission = firstValueFrom(service.allAttachments$.pipe(skip(1)));
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      const entries: SupportNameEntry[] = [{ supportName: 'SupportX', supportTower: 'TX' }];
+      await service.addSupportNamesIfAbsent(entries);
+
+      const result = await secondEmission;
+      expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
+      expect(result).toEqual(updated);
+    });
+  });
+
+  describe('distinctSupportNames$', () => {
+    it('should emit distinct support names when ready$ emits true', () => {
+      const mockNames = ['Support A', 'Support B'];
+      mockOrderByMock.uniqueKeys.mockResolvedValue(mockNames);
+
+      return new Promise<void>((resolve) => {
+        service.distinctSupportNames$.subscribe((result) => {
+          expect(result).toEqual(mockNames);
+          resolve();
+        });
+        (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+      });
+    });
+
+    it('should not emit before ready$ emits true', () => {
+      const received: string[][] = [];
+
+      service.distinctSupportNames$.subscribe((val) => received.push(val));
+
+      // ready$ starts as false — no emission expected
+      expect(received).toHaveLength(0);
+    });
+
+    it('should re-emit after addSupportNamesIfAbsent adds new entries', async () => {
+      const initial: string[] = [];
+      const updated = ['SupportX'];
+      // call order: distinctSupportNames$ initial read → addSupportNamesIfAbsent existing check → distinctSupportNames$ refresh read
+      mockOrderByMock.uniqueKeys
         .mockResolvedValueOnce(initial)
         .mockResolvedValueOnce(initial)
         .mockResolvedValueOnce(updated);
 
-      const secondEmission = firstValueFrom(service.allAttachments$.pipe(skip(1)));
+      const secondEmission = firstValueFrom(service.distinctSupportNames$.pipe(skip(1)));
       (storageService.ready$ as BehaviorSubject<boolean>).next(true);
 
       const entries: SupportNameEntry[] = [{ supportName: 'SupportX', supportTower: 'TX' }];

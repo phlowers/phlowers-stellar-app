@@ -5,8 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -92,12 +90,7 @@ describe('LinesService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        LinesService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [LinesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(LinesService);
@@ -165,16 +158,6 @@ describe('LinesService', () => {
   });
 
   describe('importFromFile', () => {
-    let httpTestingController: HttpTestingController;
-
-    beforeEach(() => {
-      httpTestingController = TestBed.inject(HttpTestingController);
-    });
-
-    afterEach(() => {
-      httpTestingController.verify();
-    });
-
     it('should import lines from CSV file successfully', async () => {
       const mockCsvData: LineCsvDto[] = [
         {
@@ -201,9 +184,6 @@ describe('LinesService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
-
       // Mock Papa Parse to call complete callback
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
@@ -225,26 +205,13 @@ describe('LinesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockLinesTable.clear).toHaveBeenCalled();
       expect(mockLinesTable.bulkAdd).toHaveBeenCalled();
     });
 
     it('should handle empty CSV data', async () => {
-      const mockCsvContent =
-        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n';
-
       // Mock Papa Parse to call complete callback with empty data
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
@@ -266,17 +233,7 @@ describe('LinesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // HTTP request is issued synchronously by subscribe inside importFromFile
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      // Drain pending micro/macro tasks so the Papa.parse complete callback
-      // (which resolves the import promise) runs before we await it.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockLinesTable.clear).not.toHaveBeenCalled();
       expect(mockLinesTable.bulkAdd).not.toHaveBeenCalled();
@@ -330,9 +287,6 @@ describe('LinesService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\n,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001\nLINK002,LIT002,LIT_ADR002,BRANCH002,BRANCH_ADR002,TENSION002,TENSION_ADR002';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -353,17 +307,7 @@ describe('LinesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       // Should only add the line with valid LIAISON_IDR
       expect(mockLinesTable.bulkAdd).toHaveBeenCalledWith([
@@ -408,9 +352,6 @@ describe('LinesService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -431,18 +372,8 @@ describe('LinesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
       // Should not throw error
-      await expect(importPromise).resolves.toBeUndefined();
+      await expect(service.importFromFile()).resolves.toBeUndefined();
     });
 
     it('should sort lines by electric_tension_level_adr', async () => {
@@ -471,9 +402,6 @@ describe('LinesService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,LIT001,LIT_ADR001,BRANCH001,BRANCH_ADR001,TENSION001,TENSION_ADR001';
-
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -494,65 +422,23 @@ describe('LinesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(sortBy as vi.Mock).toHaveBeenCalledWith(expect.any(Array), 'voltage_adr');
     });
 
-    it('should handle HTTP error and return empty string', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
-      const mockError = new ErrorEvent('Network error', {
-        message: 'Failed to fetch'
-      });
-
-      // Mock Papa Parse to return empty data when HTTP error occurs
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: [],
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
+    it('should handle parse error gracefully', async () => {
+      // Mock Papa Parse to call error callback - simulates network/parse failure
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        if (options.error) {
+          options.error(new Error('Failed to fetch') as Papa.ParseError, undefined!);
         }
       });
 
-      const importPromise = service.importFromFile();
+      await service.importFromFile();
 
-      // HTTP request is issued synchronously by subscribe inside importFromFile
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.error(mockError);
-
-      // Drain pending micro/macro tasks so the catchError + Papa.parse mock
-      // complete callback (which resolves the import promise) run before we await it.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await importPromise;
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error importing lines', expect.any(HttpErrorResponse));
       expect(mockLinesTable.clear).not.toHaveBeenCalled();
       expect(mockLinesTable.bulkAdd).not.toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should apply default values for missing/null/undefined fields', async () => {
@@ -581,8 +467,6 @@ describe('LinesService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'LIAISON_IDR,LIT_IDR,LIT_ADR,BRANCHE_IDR,BRANCHE_ADR,TENSION_ELECTRIQUE_IDR,TENSION_ELECTRIQUE_ADR\nLINK001,,,BRANCH001,,,';
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<LineCsvDto>) => {
         if (options.complete) {
           options.complete(
@@ -603,17 +487,7 @@ describe('LinesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/lines.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockLinesTable.bulkAdd).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -629,6 +503,26 @@ describe('LinesService', () => {
           voltage_adr: 'NO_VOLTAGE'
         })
       ]);
+    });
+
+    it('should call Papa.parse with download:true, worker:true and the lines URL', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<LineCsvDto>) => {
+        options.complete?.(
+          {
+            data: [],
+            errors: [],
+            meta: { delimiter: ',', linebreak: '\n', aborted: false, truncated: false, cursor: 0, fields: [] }
+          },
+          undefined
+        );
+      });
+
+      await service.importFromFile();
+
+      expect(Papa.parse).toHaveBeenCalledWith(
+        expect.stringContaining('/data/lines.csv'),
+        expect.objectContaining({ download: true, worker: true })
+      );
     });
   });
 });

@@ -5,11 +5,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, filter, merge, of, Subject, switchMap, take } from 'rxjs';
+import { BehaviorSubject, filter, merge, of, Subject, switchMap, take } from 'rxjs';
 import Papa from 'papaparse';
-import { HttpClient } from '@angular/common/http';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
 import { AttachmentCsvDto } from '@infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
@@ -46,7 +46,6 @@ export class AttachmentService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
 
   /** Internal trigger to re-read catAttachments after any write. */
@@ -65,8 +64,22 @@ export class AttachmentService {
     )
   );
 
+  /**
+   * Observable of distinct support names from the catalog, sorted alphabetically.
+   * Re-emits after any write to catAttachments via this service.
+   * Only starts emitting after the storage service signals readiness.
+   * Uses `uniqueKeys()` on the `support_name` index — O(distinct values), not O(total rows).
+   */
+  readonly distinctSupportNames$ = this.storageService.ready$.pipe(
+    filter((ready): ready is true => ready),
+    take(1),
+    switchMap(() =>
+      merge(of(undefined as void), this._refresh$).pipe(switchMap(async () => await this.getDistinctSupportNames()))
+    )
+  );
+
   constructor() {
-    this.storageService.ready$.subscribe((value) => {
+    this.storageService.ready$.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.ready.next(value);
     });
   }
@@ -135,40 +148,47 @@ export class AttachmentService {
    *
    * @returns Promise that resolves when import is complete
    */
+  private static readonly CSV_PARSE_TIMEOUT_MS = 60_000;
+
   async importFromFile() {
-    await new Promise<void>((resolve) => {
-      this.fetchCsv().subscribe(async (csv) => {
-        await this.parseCsvAndStore(csv);
-        resolve();
-      });
-    });
+    await this.parseCsvAndStore();
   }
 
-  private fetchCsv() {
-    return this.http.get(`${globalThis.location.origin}/data/attachments.csv`, { responseType: 'text' }).pipe(
-      catchError((error) => {
-        this.logger.error('Error importing attachments', error);
-        return of('');
-      })
-    );
+  private async parseCsvAndStore(): Promise<void> {
+    let rawData: AttachmentCsvDto[];
+    try {
+      rawData = await this.parseCsvFromUrl(`${globalThis.location.origin}/data/attachments.csv`);
+    } catch (error) {
+      this.logger.error('Error importing attachments', error);
+      return;
+    }
+    if (!rawData.length) {
+      return;
+    }
+    const attachmentsTable: CatalogAttachmentEntity[] = mapAttachmentCsvToEntities(rawData);
+    await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
+    this._refresh$.next();
   }
 
-  private async parseCsvAndStore(csv: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      Papa.parse(csv, {
+  private parseCsvFromUrl(url: string): Promise<AttachmentCsvDto[]> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(
+        () => reject(new Error('CSV parse timeout')),
+        AttachmentService.CSV_PARSE_TIMEOUT_MS
+      );
+      Papa.parse<AttachmentCsvDto>(url, {
+        download: true,
+        worker: true,
         header: true,
         skipEmptyLines: true,
-        complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
-          const data = jsonResults.data;
-          if (!data || data.length === 0) {
-            resolve();
-            return;
-          }
-          const attachmentsTable: CatalogAttachmentEntity[] = mapAttachmentCsvToEntities(data);
-          await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
-          this._refresh$.next();
-          resolve();
-        }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
+        complete: (results) => {
+          clearTimeout(timeoutId);
+          resolve(results.data ?? []);
+        },
+        error: (err) => {
+          clearTimeout(timeoutId);
+          reject(new Error(String(err)));
+        }
       });
     });
   }
@@ -197,8 +217,7 @@ export class AttachmentService {
       return;
     }
 
-    const existing = await db.catAttachments.toArray();
-    const existingNames = new Set(existing.map((a) => a.support_name).filter((n): n is string => !!n));
+    const existingNames = new Set(await this.getDistinctSupportNames());
 
     const toAdd: CatalogAttachmentEntity[] = uniqueEntries
       .filter((e) => !existingNames.has(e.supportName))

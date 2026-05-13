@@ -51,6 +51,9 @@ function listFilesRecursively(baseDir) {
     if (path.basename(relativePath) === 'assets_list.json') {
       continue;
     }
+    if (relativePath.endsWith('.csv')) {
+      continue;
+    }
     files.push(relativePath);
   }
   return files.sort();

@@ -5,8 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+
 import { BehaviorSubject } from 'rxjs';
 import { ObstaclesService } from './obstacles.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -40,7 +39,6 @@ describe('ObstaclesService', () => {
   let storageService: StorageService;
   let mockDb: MockDb;
   let mockObstacleTypesTable: MockTable;
-  let httpTestingController: import('@angular/common/http/testing').HttpTestingController;
 
   beforeEach(() => {
     // Create mock database tables
@@ -67,17 +65,11 @@ describe('ObstaclesService', () => {
     } as unknown as StorageService;
 
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        ObstaclesService,
-        { provide: StorageService, useValue: storageServiceSpy }
-      ]
+      providers: [ObstaclesService, { provide: StorageService, useValue: storageServiceSpy }]
     });
 
     service = TestBed.inject(ObstaclesService);
     storageService = TestBed.inject(StorageService);
-    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
@@ -161,9 +153,6 @@ describe('ObstaclesService', () => {
         }
       ];
 
-      const mockCsvContent =
-        'obstacle_type;obstacle_type_name;details\nordinary_ground;Ordinary ground;Ordinary ground (uncultivated, occasional presence of people)\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
-
       // Mock Papa Parse to call complete callback
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
@@ -185,12 +174,8 @@ describe('ObstaclesService', () => {
         }
       });
 
-      // Lancer l'import et intercepter la requête HTTP
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-      await importPromise;
+      // Lancer l'import
+      await service.importFromFile();
 
       expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith([
@@ -208,8 +193,6 @@ describe('ObstaclesService', () => {
     });
 
     it('should handle empty CSV data', async () => {
-      const mockCsvContent = 'obstacle_type;obstacle_type_name;details\n';
-
       // Mock Papa Parse to call complete callback with empty data
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
@@ -231,11 +214,7 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
@@ -254,9 +233,6 @@ describe('ObstaclesService', () => {
           details: 'Vegetation (must also account for tree growth)'
         }
       ];
-
-      const mockCsvContent =
-        'obstacle_type;obstacle_type_name;details\n;Invalid;Should be filtered out\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
 
       vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         if (options.complete) {
@@ -278,11 +254,7 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-      await importPromise;
+      await service.importFromFile();
 
       // Should only add the entry with valid obstacle_type
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith([
@@ -316,11 +288,7 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush('', { status: 404, statusText: 'Not Found' });
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
@@ -375,11 +343,7 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush('csv-content');
-      await importPromise;
+      await service.importFromFile();
 
       expect(mockObstacleTypesTable.clear).toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).toHaveBeenCalledWith(
@@ -394,10 +358,7 @@ describe('ObstaclesService', () => {
     });
 
     it('should correctly parse CSV with semicolon delimiter', async () => {
-      const csvContent =
-        'obstacle_type;obstacle_type_name;details\nvegetation;Vegetation;Vegetation (must also account for tree growth)';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
         expect(options.delimiter).toBe(';');
         expect(options.header).toBe(true);
         expect(options.skipEmptyLines).toBe(true);
@@ -426,15 +387,13 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush(csvContent);
-      await importPromise;
+      await service.importFromFile();
 
       expect(Papa.parse).toHaveBeenCalledWith(
-        csvContent,
+        expect.stringContaining('/data/obstacle_type_rte.csv'),
         expect.objectContaining({
+          download: true,
+          worker: true,
           header: true,
           delimiter: ';',
           skipEmptyLines: true
@@ -473,13 +432,42 @@ describe('ObstaclesService', () => {
         }
       });
 
-      const importPromise = service.importFromFile();
-      const req = httpTestingController.expectOne((req) => req.url.includes('obstacle_type_rte.csv'));
-      expect(req.request.method).toBe('GET');
-      req.flush('csv-content');
-      await importPromise;
+      await service.importFromFile();
 
       // bulkAdd should NOT have been called since db is undefined
+      expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
+      expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    it('should call Papa.parse with download:true, worker:true and the obstacles URL', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+        options.complete?.(
+          {
+            data: [],
+            errors: [],
+            meta: { delimiter: ';', linebreak: '\n', aborted: false, truncated: false, cursor: 0, fields: [] }
+          },
+          undefined
+        );
+      });
+
+      await service.importFromFile();
+
+      expect(Papa.parse).toHaveBeenCalledWith(
+        expect.stringContaining('/data/obstacle_type_rte.csv'),
+        expect.objectContaining({ download: true, worker: true })
+      );
+    });
+
+    it('should not store data when Papa.parse calls error callback', async () => {
+      vi.mocked(Papa.parse).mockImplementation((_url: string, options: Papa.ParseConfig<ObstacleTypeCsvDto>) => {
+        if (options.error) {
+          options.error(new Error('Network error') as Papa.ParseError, undefined!);
+        }
+      });
+
+      await service.importFromFile();
+
       expect(mockObstacleTypesTable.clear).not.toHaveBeenCalled();
       expect(mockObstacleTypesTable.bulkAdd).not.toHaveBeenCalled();
     });

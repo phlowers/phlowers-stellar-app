@@ -40,14 +40,14 @@ export const getUniqueSortedSupportNamesFromAttachments = (attachments: CatalogA
 /**
  * Builds filter tables for support names, separating catalog names from supplementary (study-only) names.
  * @param supports - Supports currently in the study section
- * @param attachments - Catalog attachment records
+ * @param catalogNames - Distinct support names from the catalog (pre-filtered, pre-sorted)
  * @returns Object with `catalogSupportNames` and `supplementarySupportNames`
  */
 export const buildSupportNameFilterTables = (
   supports: Support[],
-  attachments: CatalogAttachment[]
+  catalogNames: string[]
 ): { catalogSupportNames: string[]; supplementarySupportNames: string[] } => {
-  const catalogSupportNames = getUniqueSortedSupportNamesFromAttachments(attachments || []);
+  const catalogSupportNames = catalogNames;
   const supportNamesInStudy = uniq((supports || []).map((s) => s.name || ''))
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));

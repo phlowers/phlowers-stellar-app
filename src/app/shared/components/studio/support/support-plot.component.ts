@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy } from '@angular/core';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -46,7 +46,7 @@ interface PlotData {
  * Renders an interactive 3D Plotly visualisation of a transmission-line support structure.
  * Reacts to coordinate and attachment-set input changes to refresh the plot.
  */
-export class SupportPlotComponent {
+export class SupportPlotComponent implements OnDestroy {
   private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
   private static readonly PLOT_LAYOUT = {
     autosize: true,
@@ -88,6 +88,10 @@ export class SupportPlotComponent {
         this.clearPlot();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    plotly.purge(SupportPlotComponent.PLOT_ELEMENT_ID);
   }
 
   /** Removes the current Plotly chart from the DOM element. */
@@ -182,7 +186,7 @@ export class SupportPlotComponent {
       plotData.push(selectedMarkerData);
     }
 
-    plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
+    plotly.react(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
   }
 
   private createShapeData(shapePoints: number[][]): Data {

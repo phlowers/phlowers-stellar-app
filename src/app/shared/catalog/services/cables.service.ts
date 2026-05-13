@@ -5,13 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CatalogCableEntity } from '@infrastructure/database';
 import { CableCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
-import { HttpClient } from '@angular/common/http';
 import { convertStringToNumber } from '@shared/helpers/convertStringToNumber';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
@@ -42,11 +42,10 @@ export class CablesService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
 
   constructor() {
-    this.storageService.ready$.subscribe((value) => {
+    this.storageService.ready$.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.ready.next(value);
     });
   }
@@ -84,18 +83,13 @@ export class CablesService {
    *
    * @returns Promise that resolves when import is complete
    */
-  async importFromFile() {
-    const cables = this.http
-      .get(`${globalThis.location.origin}/data/cables.csv`, {
-        responseType: 'text'
-      })
-      .pipe(
-        catchError((error) => {
-          this.logger.error('Error importing cables', error);
-          return of('');
-        })
-      );
+  private static readonly CSV_PARSE_TIMEOUT_MS = 60_000;
 
+  async importFromFile() {
+    await this.parseCsvAndStore();
+  }
+
+  private async parseCsvAndStore(): Promise<void> {
     const mapData = (data: CableCsvDto[]): CatalogCableEntity[] => {
       return data
         .map((item) => ({
@@ -154,22 +148,36 @@ export class CablesService {
         .filter((item) => item.name);
     };
 
-    await new Promise<void>((resolve) => {
-      cables.subscribe(async (cables) => {
-        Papa.parse(cables, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<CableCsvDto>) => {
-            const data = jsonResults.data;
-            if (!data || data.length === 0) {
-              resolve();
-              return;
-            }
-            const cablesTable: CatalogCableEntity[] = mapData(data);
-            await replaceTableData(this.storageService.db?.catCables, cablesTable);
-            resolve();
-          }) as (jsonResults: Papa.ParseResult<CableCsvDto>) => void
-        });
+    let rawData: CableCsvDto[];
+    try {
+      rawData = await this.parseCsvFromUrl(`${globalThis.location.origin}/data/cables.csv`);
+    } catch (error) {
+      this.logger.error('Error importing cables', error);
+      return;
+    }
+    if (!rawData.length) {
+      return;
+    }
+    const cablesTable: CatalogCableEntity[] = mapData(rawData);
+    await replaceTableData(this.storageService.db?.catCables, cablesTable);
+  }
+
+  private parseCsvFromUrl(url: string): Promise<CableCsvDto[]> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => reject(new Error('CSV parse timeout')), CablesService.CSV_PARSE_TIMEOUT_MS);
+      Papa.parse<CableCsvDto>(url, {
+        download: true,
+        worker: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          clearTimeout(timeoutId);
+          resolve(results.data ?? []);
+        },
+        error: (err) => {
+          clearTimeout(timeoutId);
+          reject(new Error(String(err)));
+        }
       });
     });
   }

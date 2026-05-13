@@ -47,7 +47,25 @@
 
 ---
 
-*Last updated: 2026-04-20 — Remove dead saveUser login flow*
+*Last updated: 2026-05-13 — distinctSupportNames$ refactor*
+
+---
+
+## 12. `getUniqueSortedSupportNamesFromAttachments` — `src/app/features/.../supportsTable/helpers.ts`
+
+- **Type**: exported function
+- **Reason**: `buildSupportNameFilterTables` now accepts `string[]` directly (fed by `distinctSupportNames$` which uses `uniqueKeys()` on the Dexie index). `getUniqueSortedSupportNamesFromAttachments` is no longer called by any production code. Still tested in `helpers.spec.ts`.
+- **Detected on**: 2026-05-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
+## 13. `allAttachments$` — `src/app/shared/catalog/services/attachment.service.ts`
+
+- **Type**: public observable
+- **Reason**: `SupportsTableComponent` was its only consumer; it now subscribes to `distinctSupportNames$` instead. `allAttachments$` loads all rows via `toArray()` — replaced for performance reasons with the index-based `distinctSupportNames$`.
+- **Detected on**: 2026-05-13
+- **Status**: ⏳ PENDING REVIEW
 
 ---
 
@@ -371,3 +389,17 @@
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Removed both constants, removed `isDevMode` and `environment` imports. Signals initialized to `null`. |
 | ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+
+---
+
+## 28. `AppComponent.setupWorker()` — `src/app/app.component.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/app.component.ts` line 226 |
+| Code | `async setupWorker()` contenant `workerService.setup()`, `storageService.setPersistentStorage()`, `storageService.createDatabase()` |
+| 🔍 Preuve | Méthode jamais appelée dans le composant. `setPersistentStorage()` et `createDatabase()` sont désormais dans `APP_INITIALIZER`. `workerService.setup()` est maintenant appelé directement dans `ngOnInit()`. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Supprimer la méthode entière (~8 lignes). |
+| Status | ⏳ PENDING REVIEW |
+| Detected on | 2026-05-13 |

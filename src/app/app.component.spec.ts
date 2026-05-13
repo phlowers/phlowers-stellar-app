@@ -201,9 +201,10 @@ describe('AppComponent', () => {
       });
     });
 
-    it('should import all catalogs when manifest has no data_hashes', async () => {
+    it('should import all catalogs when manifest has no data_hashes and fallback flag is absent', async () => {
       // @ts-expect-error vitest mock on service method
       mockUpdateService.getLatestAssetList.mockResolvedValue({});
+      mockDb.metadata.get.mockResolvedValue(null);
 
       await component.setupData();
 
@@ -213,17 +214,56 @@ describe('AppComponent', () => {
       expect(mockChainsService.importFromFile).toHaveBeenCalledTimes(1);
       expect(mockAttachmentService.importFromFile).toHaveBeenCalledTimes(1);
       expect(mockObstaclesService.importFromFile).toHaveBeenCalledTimes(1);
+      expect(mockDb.metadata.put).toHaveBeenCalledWith({
+        key: 'catalog:fallback_loaded',
+        value: '1',
+        updated_at: expect.any(String)
+      });
+    });
+
+    it('should skip import when fallback flag is already set', async () => {
+      // @ts-expect-error vitest mock on service method
+      mockUpdateService.getLatestAssetList.mockResolvedValue({});
+      mockDb.metadata.get.mockResolvedValue({ key: 'catalog:fallback_loaded', value: '1', updated_at: '2025-01-01' });
+
+      await component.setupData();
+
+      expect(mockMaintenanceService.importFromFile).not.toHaveBeenCalled();
+      expect(mockLinesService.importFromFile).not.toHaveBeenCalled();
+      expect(mockCablesService.importFromFile).not.toHaveBeenCalled();
+      expect(mockChainsService.importFromFile).not.toHaveBeenCalled();
+      expect(mockAttachmentService.importFromFile).not.toHaveBeenCalled();
+      expect(mockObstaclesService.importFromFile).not.toHaveBeenCalled();
+      expect(mockDb.metadata.put).not.toHaveBeenCalled();
     });
   });
 
   describe('ngOnInit — V2 startup sequence', () => {
-    it('should call workerService.setup() even if setupData() fails', async () => {
+    it('should call workerService.setup() synchronously at the start of ngOnInit', () => {
+      component.ngOnInit();
+
+      expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call workerService.setup() even when setupData() rejects', async () => {
       vi.spyOn(component, 'setupData').mockRejectedValue(new Error('setup failed'));
 
       component.ngOnInit();
       await fixture.whenStable();
 
-      expect(mockWorkerService.setup).toHaveBeenCalled();
+      expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call workerService.setup() before setupData() resolves', async () => {
+      let setupCalledBeforeData = false;
+      vi.spyOn(component, 'setupData').mockImplementation(async () => {
+        setupCalledBeforeData = (mockWorkerService.setup as ReturnType<typeof vi.fn>).mock.calls.length > 0;
+      });
+
+      component.ngOnInit();
+      await fixture.whenStable();
+
+      expect(setupCalledBeforeData).toBe(true);
     });
   });
 });

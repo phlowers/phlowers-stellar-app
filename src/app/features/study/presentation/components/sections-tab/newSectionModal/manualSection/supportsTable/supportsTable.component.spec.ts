@@ -7,7 +7,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
-import { CatalogAttachmentEntity } from '@infrastructure/database';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { vi } from 'vitest';
@@ -30,11 +29,11 @@ const mockChainsService = {
   getChains: vi.fn().mockResolvedValue([] as CatalogChain[])
 };
 
-let allAttachmentsSubject: Subject<CatalogAttachmentEntity[]>;
+let distinctSupportNamesSubject: Subject<string[]>;
 
 const mockAttachmentService = {
-  get allAttachments$() {
-    return allAttachmentsSubject;
+  get distinctSupportNames$() {
+    return distinctSupportNamesSubject;
   }
 };
 
@@ -155,7 +154,7 @@ describe('SupportsTableComponent', () => {
   let fixture: ComponentFixture<SupportsTableComponent>;
 
   beforeEach(async () => {
-    allAttachmentsSubject = new Subject<CatalogAttachmentEntity[]>();
+    distinctSupportNamesSubject = new Subject<string[]>();
     workerReadySubject = new BehaviorSubject<boolean>(false);
     mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, pythonErrorCode: null });
 
@@ -751,29 +750,23 @@ describe('SupportsTableComponent', () => {
   });
 
   describe('getData with attachments', () => {
-    it('should populate supportFilterTable when allAttachments$ emits', () => {
-      allAttachmentsSubject.next([
-        { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
-      ]);
+    it('should populate supportFilterTable when distinctSupportNames$ emits', () => {
+      distinctSupportNamesSubject.next(['CatalogType']);
       fixture.detectChanges();
 
       expect(component.supportFilterTable()).toContain('CatalogType');
     });
 
     it('should put support names not in catalog into supplementarySupportFilterTable', () => {
-      allAttachmentsSubject.next([
-        { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
-      ]);
+      distinctSupportNamesSubject.next(['CatalogType']);
       fixture.detectChanges();
 
       // mockSupports have names 'Support 1', 'Support 2', 'Support 3' — none are in catalog
       expect(component.supplementarySupportFilterTable()).toContain('Support 2');
     });
 
-    it('should update allSupportFilterTable when allAttachments$ emits new entries', () => {
-      allAttachmentsSubject.next([
-        { uuid: 'uuid-new', support_name: 'F4TD3_X', support_tower: 'Tower', created_at: '', updated_at: '' }
-      ]);
+    it('should update allSupportFilterTable when distinctSupportNames$ emits new entries', () => {
+      distinctSupportNamesSubject.next(['F4TD3_X']);
       fixture.detectChanges();
 
       expect(component.allSupportFilterTable()).toContain('F4TD3_X');

@@ -5,13 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CatalogMaintenanceEntity } from '@infrastructure/database';
 import { MaintenanceCsvDto } from '@infrastructure/dto';
 import Papa from 'papaparse';
-import { HttpClient } from '@angular/common/http';
 import { replaceTableData } from '@services/storage/replace-table-data.helper';
 
 /**
@@ -42,11 +42,10 @@ export class MaintenanceService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
 
   constructor() {
-    this.storageService.ready$.subscribe((value) => {
+    this.storageService.ready$.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.ready.next(value);
     });
   }
@@ -73,18 +72,13 @@ export class MaintenanceService {
    *
    * @returns Promise that resolves when import is complete
    */
-  async importFromFile() {
-    const maintenanceTeams = this.http
-      .get(`${globalThis.location.origin}/data/maintenance-teams.csv`, {
-        responseType: 'text'
-      })
-      .pipe(
-        catchError((error) => {
-          this.logger.error('Error importing maintenance teams', error);
-          return of('');
-        })
-      );
+  private static readonly CSV_PARSE_TIMEOUT_MS = 60_000;
 
+  async importFromFile() {
+    await this.parseCsvAndStore();
+  }
+
+  private async parseCsvAndStore(): Promise<void> {
     const mapData = (data: MaintenanceCsvDto[]) => {
       return data
         .map((item) => ({
@@ -98,22 +92,39 @@ export class MaintenanceService {
         .filter((item) => item.maintenance_team_id);
     };
 
-    await new Promise<void>((resolve) => {
-      maintenanceTeams.subscribe(async (maintenanceTeams) => {
-        Papa.parse(maintenanceTeams, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (async (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => {
-            const data = jsonResults.data;
-            if (!data || data.length === 0) {
-              resolve();
-              return;
-            }
-            const maintenanceTable: CatalogMaintenanceEntity[] = mapData(data);
-            await replaceTableData(this.storageService.db?.catMaintenance, maintenanceTable);
-            resolve();
-          }) as (jsonResults: Papa.ParseResult<MaintenanceCsvDto>) => void
-        });
+    let rawData: MaintenanceCsvDto[];
+    try {
+      rawData = await this.parseCsvFromUrl(`${globalThis.location.origin}/data/maintenance-teams.csv`);
+    } catch (error) {
+      this.logger.error('Error importing maintenance teams', error);
+      return;
+    }
+    if (!rawData.length) {
+      return;
+    }
+    const maintenanceTable: CatalogMaintenanceEntity[] = mapData(rawData);
+    await replaceTableData(this.storageService.db?.catMaintenance, maintenanceTable);
+  }
+
+  private parseCsvFromUrl(url: string): Promise<MaintenanceCsvDto[]> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(
+        () => reject(new Error('CSV parse timeout')),
+        MaintenanceService.CSV_PARSE_TIMEOUT_MS
+      );
+      Papa.parse<MaintenanceCsvDto>(url, {
+        download: true,
+        worker: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          clearTimeout(timeoutId);
+          resolve(results.data ?? []);
+        },
+        error: (err) => {
+          clearTimeout(timeoutId);
+          reject(new Error(String(err)));
+        }
       });
     });
   }

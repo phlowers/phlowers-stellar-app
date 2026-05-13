@@ -101,8 +101,7 @@ describe('helpers', () => {
   describe('buildSupportNameFilterTables', () => {
     it('should separate catalog names from supplementary names', () => {
       const supports = [makeSupport('s1', { name: 'TypeA' }), makeSupport('s2', { name: 'CustomType' })];
-      const attachments = [makeAttachment('TypeA')];
-      const result = buildSupportNameFilterTables(supports, attachments);
+      const result = buildSupportNameFilterTables(supports, ['TypeA']);
       expect(result.catalogSupportNames).toEqual(['TypeA']);
       expect(result.supplementarySupportNames).toEqual(['CustomType']);
     });
@@ -115,8 +114,7 @@ describe('helpers', () => {
 
     it('should ignore supports with no name', () => {
       const supports = [makeSupport('s1', { name: null }), makeSupport('s2', { name: 'KnownType' })];
-      const attachments = [makeAttachment('KnownType')];
-      const result = buildSupportNameFilterTables(supports, attachments);
+      const result = buildSupportNameFilterTables(supports, ['KnownType']);
       expect(result.supplementarySupportNames).toEqual([]);
     });
   });

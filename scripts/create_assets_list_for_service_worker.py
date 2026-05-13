@@ -35,6 +35,12 @@ def get_git_revision_hash() -> str:
 
 blacklist = [
     "service-worker.js",
+    "attachments.csv",
+    "cables.csv",
+    "chains.csv",
+    "lines.csv",
+    "maintenance-teams.csv",
+    "obstacle_type_rte.csv",
 ]
 
 

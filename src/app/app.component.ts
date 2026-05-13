@@ -126,8 +126,19 @@ export class AppComponent implements OnInit {
     const hashEntries = Object.entries(dataHashes);
 
     // Fallback for legacy builds without per-CSV hashes.
+    // Skip re-importing if we already loaded the catalog in a previous session
+    // to avoid re-downloading and re-writing large CSV files on every page refresh.
+    // In development, clear IndexedDB manually to force a fresh import after CSV changes.
     if (hashEntries.length === 0) {
-      await this.importAllCatalogs();
+      const fallbackFlag = await this.storageService.db?.metadata.get('catalog:fallback_loaded');
+      if (!fallbackFlag) {
+        await this.importAllCatalogs();
+        await this.storageService.db?.metadata.put({
+          key: 'catalog:fallback_loaded',
+          value: '1',
+          updated_at: new Date().toISOString()
+        });
+      }
       return;
     }
 
@@ -234,12 +245,9 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.setupData()
-      .catch((err) => {
-        this.logger.error('Error during data setup', err);
-      })
-      .finally(() => {
-        this.workerService.setup();
-      });
+    this.workerService.setup();
+    this.setupData().catch((err) => {
+      this.logger.error('Error during data setup', err);
+    });
   }
 }

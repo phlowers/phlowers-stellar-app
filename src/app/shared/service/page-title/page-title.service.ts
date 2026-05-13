@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { catchError, filter, map, mergeMap, startWith } from 'rxjs/operators';
@@ -29,7 +30,8 @@ export class PageTitleService {
           return route;
         }),
         filter((route) => route.outlet === 'primary'),
-        mergeMap((route) => route.title.pipe(catchError(() => EMPTY)))
+        mergeMap((route) => route.title.pipe(catchError(() => EMPTY))),
+        takeUntilDestroyed()
       )
       .subscribe((title) => {
         if (title) {
