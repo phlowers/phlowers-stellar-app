@@ -16,9 +16,15 @@ import { type Mock } from 'vitest';
 vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
   default: {
-    react: vi.fn()
+    react: vi.fn(),
+    relayout: vi.fn().mockResolvedValue(undefined),
+    Icons: {
+      '3d_rotate': { width: 1000, height: 1000, path: '' },
+      'z-axis': { width: 1000, height: 1000, path: '' }
+    }
   },
-  react: vi.fn()
+  react: vi.fn(),
+  relayout: vi.fn().mockResolvedValue(undefined)
 }));
 
 describe('createPlot', () => {
@@ -311,7 +317,7 @@ describe('createPlot', () => {
       expect(layoutArg.scene.camera.eye.y).toBeLessThan(0);
     });
 
-    it('should set camera eye.y positive when invert is true and camera is provided', () => {
+    it('should pass camera unmodified when invert is true and camera is provided', () => {
       const inputCamera = {
         center: { x: 0, y: 0, z: 0 },
         eye: { x: 0.02, y: -3.5, z: 0.2 },
@@ -319,11 +325,11 @@ describe('createPlot', () => {
       };
       createPlot({ ...createDefaultParams(), view: '3d', invert: true, camera: inputCamera });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: { eye: { y: number } } } };
-      expect(layoutArg.scene.camera.eye.y).toBeGreaterThan(0);
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: unknown } };
+      expect(layoutArg.scene.camera).toEqual(inputCamera);
     });
 
-    it('should set camera eye.y negative when invert is false and camera is provided', () => {
+    it('should pass camera unmodified when invert is false and camera is provided', () => {
       const inputCamera = {
         center: { x: 0, y: 0, z: 0 },
         eye: { x: 0.02, y: 3.5, z: 0.2 },
@@ -331,8 +337,8 @@ describe('createPlot', () => {
       };
       createPlot({ ...createDefaultParams(), view: '3d', invert: false, camera: inputCamera });
 
-      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: { eye: { y: number } } } };
-      expect(layoutArg.scene.camera.eye.y).toBeLessThan(0);
+      const layoutArg = (Plotly.react as vi.Mock).mock.calls[0][2] as { scene: { camera: unknown } };
+      expect(layoutArg.scene.camera).toEqual(inputCamera);
     });
 
     it('should not mutate the original camera object', () => {
@@ -349,16 +355,16 @@ describe('createPlot', () => {
   });
 
   describe('3D live camera from DOM', () => {
-    it('should use camera from plotParams when DOM element has no _fullLayout', () => {
+    it('should pass camera unmodified when DOM element has no _fullLayout but camera is provided', () => {
       const inputCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 0.02, y: -3.5, z: 0.2 }, up: { x: 0, y: 0, z: 1 } };
       createPlot({ ...createDefaultParams(), view: '3d', camera: inputCamera });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      // camera was provided and DOM has no _fullLayout, so inputCamera is used
-      expect(layoutArg.scene.camera).toBeDefined();
+      // Camera is always passed so Plotly has a valid reference for viewport operations.
+      expect(layoutArg.scene.camera).toEqual(inputCamera);
     });
 
-    it('should use live camera from DOM _fullLayout when available, ignoring plotParams camera', () => {
+    it('should pass live DOM camera unmodified when available', () => {
       const domCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 1, y: 2, z: 3 }, up: { x: 0, y: 0, z: 1 } };
       (mockElement as HTMLElement & { _fullLayout?: unknown })._fullLayout = { scene: { camera: domCamera } };
 
@@ -366,18 +372,19 @@ describe('createPlot', () => {
       createPlot({ ...createDefaultParams(), view: '3d', camera: staleCamera });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      // DOM camera eye.y is 2, after inversion (invert=false) → negated → -2
-      expect(layoutArg.scene.camera.eye.y).toBe(-2);
+      // Live DOM camera takes priority and is passed unmodified to layout.
+      expect(layoutArg.scene.camera).toEqual(domCamera);
     });
 
-    it('should fall back to plotParams camera when DOM _fullLayout has no camera', () => {
+    it('should pass plotParams camera when DOM _fullLayout has no camera', () => {
       (mockElement as HTMLElement & { _fullLayout?: unknown })._fullLayout = { scene: {} };
 
       const inputCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 0.02, y: -3.5, z: 0.2 }, up: { x: 0, y: 0, z: 1 } };
       createPlot({ ...createDefaultParams(), view: '3d', camera: inputCamera });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.scene.camera).toBeDefined();
+      // Fallback to plotParams camera, passed unmodified.
+      expect(layoutArg.scene.camera).toEqual(inputCamera);
     });
 
     it('should not read DOM camera in 2D mode', () => {
@@ -401,12 +408,11 @@ describe('createPlot', () => {
       expect(layoutArg.uirevision).toBe('stable');
     });
 
-    it('should set a unique non-stable string uirevision in 3D layout when camera is null', () => {
+    it('should always set uirevision to "stable" in 3D layout even when camera is null', () => {
       createPlot({ ...createDefaultParams(), view: '3d', camera: null });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.uirevision).not.toBe('stable');
-      expect(typeof layoutArg.uirevision).toBe('string');
+      expect(layoutArg.uirevision).toBe('stable');
     });
 
     it('should not have uirevision in 2D layout', () => {

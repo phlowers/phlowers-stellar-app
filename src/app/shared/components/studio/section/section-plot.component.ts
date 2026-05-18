@@ -239,11 +239,10 @@ export class SectionPlotComponent implements OnDestroy {
 
     plotEl.on('plotly_relayout', (eventData: Record<string, unknown>) => {
       // Only synchronise the camera signal when the relayout event actually contains
-      // camera data. Clicking modebar buttons like "Orbital rotation", "Zoom", or "Pan"
-      // fires relayout with only { 'scene.dragmode': '...' }. Calling refreshCamera()
-      // on those events can read a transient or stale camera from the DOM and corrupt
-      // the camera signal, which would then change uirevision on the next react() call
-      // and cause an unwanted camera reset.
+      // camera data. Clicking modebar buttons like "Zoom" or "Pan" fires relayout
+      // with only { 'scene.dragmode': '...' }. Calling refreshCamera() on those
+      // events can read a transient or stale camera from the DOM and corrupt the
+      // camera signal.
       const hasCameraKey = Object.keys(eventData ?? {}).some((k) => k.includes('camera'));
       if (hasCameraKey) {
         this.plotOptionsService.refreshCamera();

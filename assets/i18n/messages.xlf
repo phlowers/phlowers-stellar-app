@@ -3419,5 +3419,15 @@
         <source> Waiting for the engine to finish the calculation </source>
       </segment>
     </unit>
+    <unit id="2991274283822092243">
+      <segment>
+        <source>Orbital rotation</source>
+      </segment>
+    </unit>
+    <unit id="560248595006112521">
+      <segment>
+        <source>Turntable rotation</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
