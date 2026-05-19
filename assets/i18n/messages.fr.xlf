@@ -4151,5 +4151,59 @@
         <target> Redirecting to G@IA for sign in… </target>
       </segment>
     </unit>
+    <unit id="857595800568475491">
+      <segment state="initial">
+        <source>Equivalent span</source>
+        <target>Portée équivalente</target>
+      </segment>
+    </unit>
+    <unit id="3071962017771169016">
+      <segment state="initial">
+        <source>Lowest temperature</source>
+        <target>Température la plus basse</target>
+      </segment>
+    </unit>
+    <unit id="3084834714649714236">
+      <segment state="initial">
+        <source>Computing step</source>
+        <target>Pas de calcul</target>
+      </segment>
+    </unit>
+    <unit id="2592368582911584624">
+      <segment state="initial">
+        <source>Temperature</source>
+        <target>Température</target>
+      </segment>
+    </unit>
+    <unit id="3591668161648909105">
+      <segment state="initial">
+        <source>Pose parameter</source>
+        <target>Paramètre de pose</target>
+      </segment>
+    </unit>
+    <unit id="7309469661148049512">
+      <segment state="initial">
+        <source>Horizontal tension Th</source>
+        <target>Tension horizontale T0</target>
+      </segment>
+    </unit>
+    <unit id="5766174646934311301">
+      <segment state="initial">
+        <source>Pose table saved</source>
+        <target>Tableau de pose sauvegardé</target>
+      </segment>
+    </unit>
+    <unit id="7391227148273452593">
+      <segment state="initial">
+        <source>Failed to save pose table</source>
+        <target>Échec de la sauvegarde du tableau de pose</target>
+      </segment>
+    </unit>
+    <unit id="7045123878111147511">
+      <segment state="initial">
+        <source>Required</source>
+        <target>Requis</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

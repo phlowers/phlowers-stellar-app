@@ -3439,5 +3439,50 @@
         <source> Checking sign-in mode… </source>
       </segment>
     </unit>
+    <unit id="2592368582911584624">
+      <segment>
+        <source>Temperature</source>
+      </segment>
+    </unit>
+    <unit id="3071962017771169016">
+      <segment>
+        <source>Lowest temperature</source>
+      </segment>
+    </unit>
+    <unit id="3084834714649714236">
+      <segment>
+        <source>Computing step</source>
+      </segment>
+    </unit>
+    <unit id="3591668161648909105">
+      <segment>
+        <source>Pose parameter</source>
+      </segment>
+    </unit>
+    <unit id="5766174646934311301">
+      <segment>
+        <source>Pose table saved</source>
+      </segment>
+    </unit>
+    <unit id="7045123878111147511">
+      <segment>
+        <source>Required</source>
+      </segment>
+    </unit>
+    <unit id="7309469661148049512">
+      <segment>
+        <source>Horizontal tension Th</source>
+      </segment>
+    </unit>
+    <unit id="7391227148273452593">
+      <segment>
+        <source>Failed to save pose table</source>
+      </segment>
+    </unit>
+    <unit id="857595800568475491">
+      <segment>
+        <source>Equivalent span</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
