@@ -34,6 +34,7 @@ class MockChainsService {
 
 class MockAttachmentService {
   allAttachments$ = new Subject<never[]>();
+  distinctSupportNames$ = new Subject<string[]>();
   ready = { next: vi.fn() };
   getAttachments = vi.fn().mockResolvedValue([]);
   getDistinctSupportNames = vi.fn().mockResolvedValue([]);

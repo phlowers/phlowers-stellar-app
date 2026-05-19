@@ -1,5 +1,5 @@
 import { CatalogChain } from '@shared/domain/models/catalog/catalog-chain.model';
-import { CatalogAttachment, Support } from '@shared/domain';
+import { Support } from '@shared/domain';
 import { isNumber, uniq } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,36 +27,6 @@ export const createEmptyChain = (chainName?: string): CatalogChain => {
 };
 
 /**
- * Extracts unique, sorted support names from catalog attachments.
- * @param attachments - Catalog attachment records
- * @returns Sorted array of unique non-empty support names
- */
-export const getUniqueSortedSupportNamesFromAttachments = (attachments: CatalogAttachment[]): string[] => {
-  return uniq((attachments || []).map((a) => a.support_name || ''))
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b));
-};
-
-/**
- * Builds filter tables for support names, separating catalog names from supplementary (study-only) names.
- * @param supports - Supports currently in the study section
- * @param attachments - Catalog attachment records
- * @returns Object with `catalogSupportNames` and `supplementarySupportNames`
- */
-export const buildSupportNameFilterTables = (
-  supports: Support[],
-  attachments: CatalogAttachment[]
-): { catalogSupportNames: string[]; supplementarySupportNames: string[] } => {
-  const catalogSupportNames = getUniqueSortedSupportNamesFromAttachments(attachments || []);
-  const supportNamesInStudy = uniq((supports || []).map((s) => s.name || ''))
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b));
-  const supplementarySupportNames = supportNamesInStudy.filter((name) => !catalogSupportNames.includes(name));
-
-  return { catalogSupportNames, supplementarySupportNames };
-};
-
-/**
  * Extracts the trailing numeric portion of the first support's number field for auto-incrementing.
  * @param firstSupport - The first support in the list
  * @param header - The support field to inspect (only 'number' is processed)
@@ -77,7 +47,7 @@ export const calculateSupportNumber = (
   let restOfString = '';
   let isNumberField = false;
   let unit = 1;
-  while (/^[0-9]+$/.test(firstSupport['number']?.slice(-unit) || '') && unit <= (firstSupport['number']?.length || 0)) {
+  while (/^\d+$/.test(firstSupport['number']?.slice(-unit) || '') && unit <= (firstSupport['number']?.length || 0)) {
     unit++;
   }
   if (unit > 1) {
@@ -239,6 +209,28 @@ export const buildSupplementaryChains = (names: string[], catalogChainNames: str
  */
 export const getSupportFieldValues = (supports: Support[], field: 'chainName' | 'name'): string[] =>
   supports.map((s) => s[field] || '');
+
+/**
+ * Builds filtered support name lists from supports and catalog names.
+ * Separates catalog names (present in catalog) from supplementary names (not in catalog).
+ * @param supports - Array of supports
+ * @param catalogNames - Known support names from the catalog
+ * @returns Object with catalogSupportNames and supplementarySupportNames arrays
+ */
+export const buildSupportNameFilterTables = (
+  supports: Support[],
+  catalogNames: string[]
+): {
+  catalogSupportNames: string[];
+  supplementarySupportNames: string[];
+} => {
+  const supportNames = getSupportFieldValues(supports, 'name');
+  const supplementarySupportNames = findSupplementaryNames(supportNames, catalogNames);
+  return {
+    catalogSupportNames: catalogNames,
+    supplementarySupportNames
+  };
+};
 
 export const SUPPORT_FIELD_LIMITS = {
   spanLength: { min: 5, max: 5000 },
