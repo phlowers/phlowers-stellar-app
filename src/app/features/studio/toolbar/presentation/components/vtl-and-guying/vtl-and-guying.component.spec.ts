@@ -12,6 +12,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
+import { VtlGuyingReportService } from '../../services/vtl-guying-report/vtl-guying-report.service';
 
 @Component({
   selector: 'app-button',
@@ -43,6 +44,10 @@ describe('VhlAndGuyingComponent', () => {
   let mockWorkerPythonService: vi.Mocked<WorkerPythonService>;
   let mockSectionService: vi.Mocked<SectionService>;
   let mockMessageService: vi.Mocked<MessageService>;
+  let mockVtlGuyingReportService: {
+    generateReport: ReturnType<typeof vi.fn>;
+    getDiagramImageBase64: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     const mockLitData = {
@@ -92,6 +97,11 @@ describe('VhlAndGuyingComponent', () => {
       add: vi.fn()
     } as unknown as vi.Mocked<MessageService>;
 
+    mockVtlGuyingReportService = {
+      generateReport: vi.fn(),
+      getDiagramImageBase64: vi.fn().mockResolvedValue('data:image/png;base64,mock')
+    };
+
     await TestBed.configureTestingModule({
       imports: [VhlAndGuyingComponent],
       providers: [
@@ -101,7 +111,8 @@ describe('VhlAndGuyingComponent', () => {
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: SectionService, useValue: mockSectionService },
-        { provide: MessageService, useValue: mockMessageService }
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: VtlGuyingReportService, useValue: mockVtlGuyingReportService }
       ]
     })
       .overrideComponent(VhlAndGuyingComponent, {
@@ -739,6 +750,120 @@ describe('VhlAndGuyingComponent', () => {
         uuid: 'span-uuid-1'
       });
       expect(savedSection.vtl_and_guying?.inputs.selectedSpan?.uuid).toBe('span-uuid-1');
+    });
+  });
+
+  describe('onReport', () => {
+    it('should not generate report when results are null', async () => {
+      component.results.set(null);
+      await component.onReport();
+
+      expect(mockVtlGuyingReportService.generateReport).not.toHaveBeenCalled();
+    });
+
+    it('should not generate report when study is null', async () => {
+      Object.defineProperty(mockPlotService, 'study', {
+        value: signal(null),
+        writable: true,
+        configurable: true
+      });
+      component.results.set({
+        tensionInGuy: 100,
+        guyAngle: 45,
+        chargeVUnderConsole: 50,
+        chargeHUnderConsole: 30,
+        chargeLIfPulley: 20
+      });
+
+      await component.onReport();
+
+      expect(mockVtlGuyingReportService.generateReport).not.toHaveBeenCalled();
+    });
+
+    it('should not generate report when section is null', async () => {
+      Object.defineProperty(mockSpanService, 'section', {
+        value: signal(null),
+        writable: true,
+        configurable: true
+      });
+      component.results.set({
+        tensionInGuy: 100,
+        guyAngle: 45,
+        chargeVUnderConsole: 50,
+        chargeHUnderConsole: 30,
+        chargeLIfPulley: 20
+      });
+
+      await component.onReport();
+
+      expect(mockVtlGuyingReportService.generateReport).not.toHaveBeenCalled();
+    });
+
+    it('should generate report with correct data when all conditions are met', async () => {
+      const mockStudyForReport = {
+        uuid: 'test-study-uuid',
+        author_email: 'author@test.com',
+        title: 'Test Study',
+        description: 'Study description',
+        sections: []
+      };
+      const mockSectionForReport = {
+        uuid: 'test-section-uuid',
+        name: 'Section A-B',
+        comment: 'Section comment',
+        supports: [{ chainV: true }, { chainV: false }],
+        charges: [{ uuid: 'charge-uuid-1', name: 'Charge 1', description: 'Charge desc' }],
+        selected_charge_uuid: 'charge-uuid-1'
+      };
+      Object.defineProperty(mockPlotService, 'study', {
+        value: signal(mockStudyForReport),
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(mockSpanService, 'section', {
+        value: signal(mockSectionForReport),
+        writable: true,
+        configurable: true
+      });
+
+      component.form.controls.selectedSpan.setValue({ index: 0, uuid: 'span-uuid-1' });
+      component.form.controls.selectedSupport.setValue('LEFT');
+      component.form.controls.altitude.setValue(150);
+      component.form.controls.horizontalDistance.setValue(25);
+      component.form.controls.hasPulley.setValue(false);
+      component.form.controls.comment.setValue('Report comment');
+      component.results.set({
+        tensionInGuy: 2000,
+        guyAngle: 35,
+        chargeVUnderConsole: 1100,
+        chargeHUnderConsole: 800,
+        chargeLIfPulley: null
+      });
+
+      await component.onReport();
+
+      expect(mockVtlGuyingReportService.getDiagramImageBase64).toHaveBeenCalled();
+      expect(mockVtlGuyingReportService.generateReport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          author: 'author@test.com',
+          studyTitle: 'Test Study',
+          studyDescription: 'Study description',
+          sectionName: 'Section A-B',
+          sectionComment: 'Section comment',
+          chargeName: 'Charge 1',
+          chargeDescription: 'Charge desc',
+          altitude: 150,
+          horizontalDistance: 25,
+          hasPulley: false,
+          tensionInGuy: 2000,
+          guyAngle: 35,
+          chargeVUnderConsole: 1100,
+          chargeHUnderConsole: 800,
+          chargeLIfPulley: null,
+          comment: 'Report comment',
+          diagramImageBase64: 'data:image/png;base64,mock'
+        })
+      );
     });
   });
 });

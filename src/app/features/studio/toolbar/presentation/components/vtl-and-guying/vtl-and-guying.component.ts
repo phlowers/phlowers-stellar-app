@@ -33,6 +33,8 @@ import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { VtlGuyingReportService } from '../../services/vtl-guying-report/vtl-guying-report.service';
+import { VtlGuyingReportData } from '../../services/vtl-guying-report/vtl-guying-report.interfaces';
 
 /** Option for selecting a reference support direction. */
 interface SupportOption {
@@ -77,6 +79,7 @@ export class VhlAndGuyingComponent {
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly fb = inject(FormBuilder);
   private readonly logger = inject(LoggerService);
+  private readonly vtlGuyingReportService = inject(VtlGuyingReportService);
 
   form: FormGroup<{
     selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
@@ -270,6 +273,56 @@ export class VhlAndGuyingComponent {
 
   onExport(): void {
     // TODO: Implement export functionality
+  }
+
+  async onReport(): Promise<void> {
+    const study = this.plotService.study();
+    const section = this.spanService.section();
+    const formValue = this.form.value;
+    const results = this.results();
+
+    if (!study || !section || !results) {
+      return;
+    }
+
+    const selectedCharge = section.charges.find((c) => c.uuid === section.selected_charge_uuid);
+    const spanOptions = this.spanService.getSpanOptionsWithIndex();
+    const selectedSpanOption = spanOptions.find((opt) => opt.value?.uuid === formValue.selectedSpan?.uuid);
+
+    const diagramImageBase64 = await this.vtlGuyingReportService.getDiagramImageBase64();
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('fr-FR');
+
+    const data: VtlGuyingReportData = {
+      author: study.author_email ?? '-',
+      date: dateStr,
+      studyTitle: study.title ?? '-',
+      studyDescription: study.description ?? '',
+      sectionName: section.name ?? '-',
+      sectionComment: section.comment ?? '',
+      chargeName: selectedCharge?.name ?? '-',
+      chargeDescription: selectedCharge?.description ?? '',
+      guyingSpan: selectedSpanOption?.label ?? '-',
+      referenceSupport: this.supportOptions().find((o) => o.value === formValue.selectedSupport)?.label ?? '-',
+      supportType: this.supportType() ?? '-',
+      altitude: formValue.altitude ?? null,
+      horizontalDistance: formValue.horizontalDistance ?? null,
+      hasPulley: formValue.hasPulley ?? false,
+      vtlChargeV: this.vtlWithoutGuying()?.chargeV ?? null,
+      vtlChargeH: this.vtlWithoutGuying()?.chargeH ?? null,
+      vtlChargeL: this.vtlWithoutGuying()?.chargeL ?? null,
+      vtlResultant: this.vtlWithoutGuying()?.resultant ?? null,
+      tensionInGuy: results.tensionInGuy,
+      guyAngle: results.guyAngle,
+      chargeVUnderConsole: results.chargeVUnderConsole,
+      chargeHUnderConsole: results.chargeHUnderConsole,
+      chargeLIfPulley: results.chargeLIfPulley,
+      comment: formValue.comment ?? '',
+      diagramImageBase64
+    };
+
+    this.vtlGuyingReportService.generateReport(data);
   }
 
   onSave(): void {
