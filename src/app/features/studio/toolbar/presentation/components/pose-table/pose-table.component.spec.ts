@@ -131,6 +131,16 @@ describe('PoseTableComponent', () => {
       component.form.controls.lowestTemp.setValue(component.LOWEST_TEMP_MAX);
       expect(component.form.controls.lowestTemp.valid).toBe(true);
     });
+
+    it('is invalid when value has more than 2 decimal places', () => {
+      component.form.controls.lowestTemp.setValue(-10.123);
+      expect(component.form.controls.lowestTemp.hasError('maxTwoDecimals')).toBe(true);
+    });
+
+    it('is valid when value has exactly 2 decimal places', () => {
+      component.form.controls.lowestTemp.setValue(-10.12);
+      expect(component.form.controls.lowestTemp.valid).toBe(true);
+    });
   });
 
   // ─── Form validation – computingStep ──────────────────────────────────────
@@ -160,6 +170,16 @@ describe('PoseTableComponent', () => {
       component.form.controls.computingStep.setValue(component.COMPUTING_STEP_MAX);
       expect(component.form.controls.computingStep.valid).toBe(true);
     });
+
+    it('is invalid when value is decimal', () => {
+      component.form.controls.computingStep.setValue(3.5);
+      expect(component.form.controls.computingStep.hasError('integer')).toBe(true);
+    });
+
+    it('is valid when value is a whole number', () => {
+      component.form.controls.computingStep.setValue(3);
+      expect(component.form.controls.computingStep.valid).toBe(true);
+    });
   });
 
   // ─── getLowestTempError() ─────────────────────────────────────────────────
@@ -168,6 +188,11 @@ describe('PoseTableComponent', () => {
     it('returns "Required" when value is null', () => {
       component.form.controls.lowestTemp.setValue(null as unknown as number);
       expect(component.getLowestTempError()).toBe('Required');
+    });
+
+    it('returns decimal error message when value has more than 2 decimal places', () => {
+      component.form.controls.lowestTemp.setValue(-10.123);
+      expect(component.getLowestTempError()).toBe('Maximum 2 decimal places');
     });
 
     it('returns min error message when value is too low', () => {
@@ -192,6 +217,11 @@ describe('PoseTableComponent', () => {
     it('returns "Required" when value is null', () => {
       component.form.controls.computingStep.setValue(null as unknown as number);
       expect(component.getComputingStepError()).toBe('Required');
+    });
+
+    it('returns integer error message when value is decimal', () => {
+      component.form.controls.computingStep.setValue(3.5);
+      expect(component.getComputingStepError()).toBe('Value must be a whole number');
     });
 
     it('returns min error message when value is too low', () => {
@@ -442,6 +472,23 @@ describe('PoseTableComponent', () => {
     });
 
     it('does not change form or results when section has no pose_table', () => {
+      sectionSignal.set(makeSection({ pose_table: undefined }));
+      fixture.detectChanges();
+
+      expect(component.form.controls.lowestTemp.value).toBe(component.LOWEST_TEMP_DEFAULT);
+      expect(component.form.controls.computingStep.value).toBe(component.COMPUTING_STEP_DEFAULT);
+      expect(component.results()).toBeNull();
+    });
+
+    it('resets form to defaults and clears results when switching to a section without pose_table', () => {
+      const savedData: PoseTableData = {
+        lowestTemp: -30,
+        computingStep: 2,
+        results: { temperatures: [-35], poseParams: [2454], tensions: [5636] }
+      };
+      sectionSignal.set(makeSection({ pose_table: savedData }));
+      fixture.detectChanges();
+
       sectionSignal.set(makeSection({ pose_table: undefined }));
       fixture.detectChanges();
 

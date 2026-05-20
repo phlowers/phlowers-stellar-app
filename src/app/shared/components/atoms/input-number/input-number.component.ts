@@ -60,8 +60,12 @@ export class InputNumberComponent implements ControlValueAccessor {
 
   constructor() {
     this.pointsCountControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
-      this.pointsCountValue.set(this.clamp(value));
-      this.onChange(value);
+      const next = this.clamp(value);
+      if (value !== next) {
+        this.pointsCountControl.setValue(next, { emitEvent: false });
+      }
+      this.pointsCountValue.set(next);
+      this.onChange(next);
     });
   }
 

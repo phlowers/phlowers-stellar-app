@@ -9,7 +9,14 @@ import {
   TemplateRef,
   viewChild
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { SectionService } from '@services/section/section.service';
@@ -41,6 +48,7 @@ export class PoseTableComponent {
 
   readonly LOWEST_TEMP_MIN = -50;
   readonly LOWEST_TEMP_MAX = 250;
+  readonly LOWEST_TEMP_STEP = 0.01;
   readonly LOWEST_TEMP_DEFAULT = -10;
 
   readonly COMPUTING_STEP_MIN = 1;
@@ -65,14 +73,20 @@ export class PoseTableComponent {
   readonly form = new FormGroup({
     lowestTemp: new FormControl<number>(this.LOWEST_TEMP_DEFAULT, {
       nonNullable: true,
-      validators: [Validators.required, Validators.min(this.LOWEST_TEMP_MIN), Validators.max(this.LOWEST_TEMP_MAX)]
+      validators: [
+        Validators.required,
+        Validators.min(this.LOWEST_TEMP_MIN),
+        Validators.max(this.LOWEST_TEMP_MAX),
+        PoseTableComponent.maxTwoDecimalsValidator
+      ]
     }),
     computingStep: new FormControl<number>(this.COMPUTING_STEP_DEFAULT, {
       nonNullable: true,
       validators: [
         Validators.required,
         Validators.min(this.COMPUTING_STEP_MIN),
-        Validators.max(this.COMPUTING_STEP_MAX)
+        Validators.max(this.COMPUTING_STEP_MAX),
+        PoseTableComponent.integerValidator
       ]
     })
   });
@@ -93,6 +107,12 @@ export class PoseTableComponent {
       if (saved) {
         this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
         this.results.set(saved.results);
+      } else {
+        this.form.setValue({
+          lowestTemp: this.LOWEST_TEMP_DEFAULT,
+          computingStep: this.COMPUTING_STEP_DEFAULT
+        });
+        this.results.set(null);
       }
     });
   }
@@ -128,6 +148,7 @@ export class PoseTableComponent {
   getLowestTempError(): string {
     const e = this.form.controls.lowestTemp.errors;
     if (e?.['required']) return $localize`Required`;
+    if (e?.['maxTwoDecimals']) return $localize`Maximum 2 decimal places`;
     if (e?.['min']) return $localize`Minimum value:` + ' ' + this.LOWEST_TEMP_MIN + '°C';
     if (e?.['max']) return $localize`Maximum value:` + ' ' + this.LOWEST_TEMP_MAX + '°C';
     return '';
@@ -136,8 +157,20 @@ export class PoseTableComponent {
   getComputingStepError(): string {
     const e = this.form.controls.computingStep.errors;
     if (e?.['required']) return $localize`Required`;
+    if (e?.['integer']) return $localize`Value must be a whole number`;
     if (e?.['min']) return $localize`Minimum value:` + ' ' + this.COMPUTING_STEP_MIN;
     if (e?.['max']) return $localize`Maximum value:` + ' ' + this.COMPUTING_STEP_MAX;
     return '';
+  }
+
+  private static maxTwoDecimalsValidator(control: AbstractControl): ValidationErrors | null {
+    if (control.value === null) return null;
+    const str = control.value.toString();
+    const sep = str.indexOf('.');
+    return sep !== -1 && str.length - sep - 1 > 2 ? { maxTwoDecimals: true } : null;
+  }
+
+  private static integerValidator(control: AbstractControl): ValidationErrors | null {
+    return control.value !== null && !Number.isInteger(control.value) ? { integer: true } : null;
   }
 }
