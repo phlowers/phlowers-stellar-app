@@ -3444,16 +3444,6 @@
         <source>Temperature</source>
       </segment>
     </unit>
-    <unit id="3071962017771169016">
-      <segment>
-        <source>Lowest temperature</source>
-      </segment>
-    </unit>
-    <unit id="3084834714649714236">
-      <segment>
-        <source>Computing step</source>
-      </segment>
-    </unit>
     <unit id="3591668161648909105">
       <segment>
         <source>Pose parameter</source>
@@ -3482,6 +3472,26 @@
     <unit id="857595800568475491">
       <segment>
         <source>Equivalent span</source>
+      </segment>
+    </unit>
+    <unit id="3483082948592114240">
+      <segment>
+        <source>Value must be a whole number</source>
+      </segment>
+    </unit>
+    <unit id="7323621884957166471">
+      <segment>
+        <source>Lowest temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="7692794071516027083">
+      <segment>
+        <source>Computing step (°C)</source>
+      </segment>
+    </unit>
+    <unit id="793647796726231767">
+      <segment>
+        <source>Maximum 2 decimal places</source>
       </segment>
     </unit>
   </file>

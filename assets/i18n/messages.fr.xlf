@@ -4157,18 +4157,6 @@
         <target>Portée équivalente</target>
       </segment>
     </unit>
-    <unit id="3071962017771169016">
-      <segment state="initial">
-        <source>Lowest temperature</source>
-        <target>Température la plus basse</target>
-      </segment>
-    </unit>
-    <unit id="3084834714649714236">
-      <segment state="initial">
-        <source>Computing step</source>
-        <target>Pas de calcul</target>
-      </segment>
-    </unit>
     <unit id="2592368582911584624">
       <segment state="initial">
         <source>Temperature</source>
@@ -4203,6 +4191,30 @@
       <segment state="initial">
         <source>Required</source>
         <target>Requis</target>
+      </segment>
+    </unit>
+    <unit id="7323621884957166471">
+      <segment state="initial">
+        <source>Lowest temperature (°C)</source>
+        <target>Température la plus basse (°C)</target>
+      </segment>
+    </unit>
+    <unit id="7692794071516027083">
+      <segment state="initial">
+        <source>Computing step (°C)</source>
+        <target>Pas de calcul (°C)</target>
+      </segment>
+    </unit>
+    <unit id="793647796726231767">
+      <segment state="initial">
+        <source>Maximum 2 decimal places</source>
+        <target>Valeur à 2 décimales maximum</target>
+      </segment>
+    </unit>
+    <unit id="3483082948592114240">
+      <segment state="initial">
+        <source>Value must be a whole number</source>
+        <target>La valeur doit être un nombre entier</target>
       </segment>
     </unit>
   </file>

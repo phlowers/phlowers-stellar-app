@@ -24,8 +24,8 @@
     justify-content: space-between;
     background-color: var(--grey-white);
     border: 0.0625rem solid var(--star-dust-300);
-    border-radius: var(--content-border-radius);
-    height: 2.5rem;
+    border-radius: 0.25rem;
+    height: 2rem;
     padding: 0 0.25rem;
     transition:
       border-color var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1),

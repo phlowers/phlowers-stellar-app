@@ -19,7 +19,7 @@
 
   <app-input-number
     formControlName="lowestTemp"
-    label="Lowest temperature"
+    label="Lowest temperature (°C)"
     i18n-label
     [min]="LOWEST_TEMP_MIN"
     [max]="LOWEST_TEMP_MAX"
@@ -31,7 +31,7 @@
 
   <app-input-number
     formControlName="computingStep"
-    label="Computing step"
+    label="Computing step (°C)"
     i18n-label
     [min]="COMPUTING_STEP_MIN"
     [max]="COMPUTING_STEP_MAX"
@@ -40,7 +40,7 @@
     [errorMessage]="getComputingStepError()"
   />
 
-  <button type="submit" app-btn data-testid="calculate-btn" btnSize="l" [disabled]="form.invalid">
+  <button type="submit" app-btn data-testid="calculate-btn" [disabled]="form.invalid">
     <app-icon icon="rocket_launch" aria-hidden="true" />
     <ng-container i18n>Calculate</ng-container>
   </button>

@@ -56,7 +56,11 @@ app-input-number {
 
 app-input-number,
 form button {
-  align-self: end;
+  align-self: start;
+}
+
+form button {
+  margin-top: 1rem; // re-align input number from input-number component with button
 }
 
 hr {
@@ -72,12 +76,15 @@ h2 {
 
 table {
   margin-bottom: 1rem;
+  border-width: 1px;
+  width: 100%;
 }
 
 table,
 th,
 td {
-  border-bottom: 1px solid var(--star-dust-300);
+  border-color: var(--star-dust-300);
+  border-style: solid;
 }
 
 tr {
@@ -105,6 +112,7 @@ td {
   color: var(--star-dust-950);
   padding: 0.75rem 0.5rem;
   white-space: nowrap;
+  border-bottom-width: 1px;
 }
 
 th {
