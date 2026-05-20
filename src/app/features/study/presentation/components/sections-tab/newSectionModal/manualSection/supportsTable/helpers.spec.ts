@@ -1,16 +1,15 @@
-import { CatalogAttachment, Support } from '@shared/domain';
+import { Support } from '@shared/domain';
 import {
   buildChainFieldChanges,
   buildCopyColumnChanges,
   buildFieldChangeUpdates,
-  buildSupportNameFilterTables,
   buildSupplementaryChains,
+  buildSupportNameFilterTables,
   calculateSupportFootAltitude,
   calculateSupportNumber,
   createEmptyChain,
   findSupplementaryNames,
   getSupportFieldValues,
-  getUniqueSortedSupportNamesFromAttachments,
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 
@@ -40,14 +39,6 @@ const makeSupport = (uuid: string, overrides: Partial<Support> = {}): Support =>
   ...overrides
 });
 
-const makeAttachment = (support_name?: string): CatalogAttachment => ({
-  uuid: 'a1',
-  updated_at: '',
-  created_at: '',
-  support_tower: '',
-  support_name
-});
-
 describe('helpers', () => {
   describe('createEmptyChain', () => {
     it('should create a chain with the given name', () => {
@@ -70,54 +61,6 @@ describe('helpers', () => {
       const a = createEmptyChain();
       const b = createEmptyChain();
       expect(a.uuid).not.toBe(b.uuid);
-    });
-  });
-
-  describe('getUniqueSortedSupportNamesFromAttachments', () => {
-    it('should return unique, sorted names', () => {
-      const attachments = [
-        makeAttachment('Bravo'),
-        makeAttachment('Alpha'),
-        makeAttachment('Bravo'),
-        makeAttachment('Charlie')
-      ];
-      expect(getUniqueSortedSupportNamesFromAttachments(attachments)).toEqual(['Alpha', 'Bravo', 'Charlie']);
-    });
-
-    it('should filter out empty names', () => {
-      const attachments = [makeAttachment(''), makeAttachment('Alpha')];
-      expect(getUniqueSortedSupportNamesFromAttachments(attachments)).toEqual(['Alpha']);
-    });
-
-    it('should return an empty array for an empty input', () => {
-      expect(getUniqueSortedSupportNamesFromAttachments([])).toEqual([]);
-    });
-
-    it('should handle a null/undefined input gracefully', () => {
-      expect(getUniqueSortedSupportNamesFromAttachments(null as unknown as CatalogAttachment[])).toEqual([]);
-    });
-  });
-
-  describe('buildSupportNameFilterTables', () => {
-    it('should separate catalog names from supplementary names', () => {
-      const supports = [makeSupport('s1', { name: 'TypeA' }), makeSupport('s2', { name: 'CustomType' })];
-      const attachments = [makeAttachment('TypeA')];
-      const result = buildSupportNameFilterTables(supports, attachments);
-      expect(result.catalogSupportNames).toEqual(['TypeA']);
-      expect(result.supplementarySupportNames).toEqual(['CustomType']);
-    });
-
-    it('should return empty arrays for empty inputs', () => {
-      const result = buildSupportNameFilterTables([], []);
-      expect(result.catalogSupportNames).toEqual([]);
-      expect(result.supplementarySupportNames).toEqual([]);
-    });
-
-    it('should ignore supports with no name', () => {
-      const supports = [makeSupport('s1', { name: null }), makeSupport('s2', { name: 'KnownType' })];
-      const attachments = [makeAttachment('KnownType')];
-      const result = buildSupportNameFilterTables(supports, attachments);
-      expect(result.supplementarySupportNames).toEqual([]);
     });
   });
 
@@ -166,6 +109,64 @@ describe('helpers', () => {
 
     it('should return exactly -150 at the boundary', () => {
       expect(calculateSupportFootAltitude(-120)).toBe(-150);
+    });
+  });
+
+  describe('buildSupportNameFilterTables', () => {
+    it('should separate catalog names from supplementary names', () => {
+      const supports = [makeSupport('s1', { name: 'TypeA' }), makeSupport('s2', { name: 'CustomType' })];
+      const catalogNames = ['TypeA', 'TypeB'];
+      const result = buildSupportNameFilterTables(supports, catalogNames);
+
+      expect(result.catalogSupportNames).toEqual(['TypeA', 'TypeB']);
+      expect(result.supplementarySupportNames).toEqual(['CustomType']);
+    });
+
+    it('should return empty supplementary array when all support names are in catalog', () => {
+      const supports = [makeSupport('s1', { name: 'TypeA' }), makeSupport('s2', { name: 'TypeB' })];
+      const catalogNames = ['TypeA', 'TypeB', 'TypeC'];
+      const result = buildSupportNameFilterTables(supports, catalogNames);
+
+      expect(result.catalogSupportNames).toEqual(['TypeA', 'TypeB', 'TypeC']);
+      expect(result.supplementarySupportNames).toEqual([]);
+    });
+
+    it('should handle supports with null names', () => {
+      const supports = [makeSupport('s1', { name: null }), makeSupport('s2', { name: 'KnownType' })];
+      const catalogNames = ['KnownType', 'AnotherType'];
+      const result = buildSupportNameFilterTables(supports, catalogNames);
+
+      expect(result.catalogSupportNames).toEqual(['KnownType', 'AnotherType']);
+      expect(result.supplementarySupportNames).toEqual([]);
+    });
+
+    it('should return empty arrays for empty inputs', () => {
+      const result = buildSupportNameFilterTables([], []);
+      expect(result.catalogSupportNames).toEqual([]);
+      expect(result.supplementarySupportNames).toEqual([]);
+    });
+
+    it('should identify all supplementary names when catalog is empty', () => {
+      const supports = [makeSupport('s1', { name: 'Custom1' }), makeSupport('s2', { name: 'Custom2' })];
+      const catalogNames: string[] = [];
+      const result = buildSupportNameFilterTables(supports, catalogNames);
+
+      expect(result.catalogSupportNames).toEqual([]);
+      expect(result.supplementarySupportNames).toEqual(['Custom1', 'Custom2']);
+    });
+
+    it('should handle duplicate support names', () => {
+      const supports = [
+        makeSupport('s1', { name: 'TypeA' }),
+        makeSupport('s2', { name: 'TypeA' }),
+        makeSupport('s3', { name: 'Custom' })
+      ];
+      const catalogNames = ['TypeA'];
+      const result = buildSupportNameFilterTables(supports, catalogNames);
+
+      expect(result.catalogSupportNames).toEqual(['TypeA']);
+      // findSupplementaryNames should deduplicate, so only one 'Custom'
+      expect(result.supplementarySupportNames).toEqual(['Custom']);
     });
   });
 

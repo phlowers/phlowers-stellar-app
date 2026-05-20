@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DialogModule } from 'primeng/dialog';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -7,7 +8,6 @@ import { CatalogAttachment, Section, Support } from '@shared/domain';
 import { DividerModule } from 'primeng/divider';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { FormsModule } from '@angular/forms';
-import { UniquePipe } from '@shared/service/autocomplete/unique.pipe';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
@@ -28,7 +28,7 @@ import { uniq } from 'lodash';
     Select,
     DividerModule,
     FormsModule,
-    UniquePipe,
+
     IconFieldModule,
     InputIconModule,
     SupportPlotComponent
@@ -37,7 +37,7 @@ import { uniq } from 'lodash';
   templateUrl: './attachmentSetModal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AttachmentSetModalComponent implements OnInit {
+export class AttachmentSetModalComponent {
   /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
   /** The support being configured. */
@@ -62,9 +62,9 @@ export class AttachmentSetModalComponent implements OnInit {
   coordinates = signal<(number | undefined)[][]>([]);
   attachmentSetNumbers = signal<number[]>([]);
 
-  supportsFilterTable = signal<string[]>([]);
-  attachmentsFilterTable = signal<CatalogAttachment[]>([]);
   private readonly attachmentService = inject(AttachmentService);
+  readonly supportsFilterTable = toSignal(this.attachmentService.distinctSupportNames$);
+  readonly catalogLoading = computed(() => this.supportsFilterTable() === undefined);
 
   onVisibleChange() {
     this.isOpenChange.emit(false);
@@ -118,19 +118,6 @@ export class AttachmentSetModalComponent implements OnInit {
     this.onVisibleChange();
   }
 
-  async getData() {
-    const supportNames = await this.attachmentService.getDistinctSupportNames();
-    this.supportsFilterTable.set(supportNames);
-
-    const currentSupportName = this.supportName();
-    if (currentSupportName) {
-      const items = await this.attachmentService.getAttachmentsBySupportName(currentSupportName);
-      this.attachmentsFilterTable.set(items);
-    } else {
-      this.attachmentsFilterTable.set([]);
-    }
-  }
-
   resetAttachmentSetValues() {
     this.attachmentSet.set(undefined);
     this.armLength.set(undefined);
@@ -143,12 +130,8 @@ export class AttachmentSetModalComponent implements OnInit {
     if (resetSupportName) {
       this.supportName.set(undefined);
       this.coordinates.set([]);
+      this.attachmentSetNumbers.set([]);
     }
-    this.getData();
-  }
-
-  ngOnInit() {
-    this.getData();
   }
 
   async onAttachmentSelect(event: { value: string | number | null }, key: keyof CatalogAttachment) {
@@ -157,12 +140,12 @@ export class AttachmentSetModalComponent implements OnInit {
       return;
     }
     if (key === 'support_name') {
+      this.supportName.set(event.value as string);
       this.resetAttachmentSetValues();
-      const items = await this.attachmentService.getAttachmentsBySupportName(event.value as string);
-      this.attachmentsFilterTable.set(items);
     }
 
     if (key === 'attachment_set') {
+      this.attachmentSet.set(event.value as number);
       const currentSupportName = this.supportName();
       if (!currentSupportName) return;
       const item = await this.attachmentService.getAttachmentDetails(currentSupportName, event.value as number);

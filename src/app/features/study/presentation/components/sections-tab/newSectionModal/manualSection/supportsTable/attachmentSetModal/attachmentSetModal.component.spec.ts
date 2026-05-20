@@ -32,6 +32,7 @@ vi.mock('plotly.js-dist-min', () => {
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
+import { of } from 'rxjs';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
@@ -170,7 +171,7 @@ describe('AttachmentSetModalComponent', () => {
 
   beforeEach(async () => {
     attachmentServiceMock = {
-      getDistinctSupportNames: vi.fn().mockResolvedValue(['Support A', 'Support B']),
+      distinctSupportNames$: of(['Support A', 'Support B']),
       getAttachmentsBySupportName: vi
         .fn()
         .mockImplementation((name: string) => Promise.resolve(mockAttachments.filter((a) => a.support_name === name))),
@@ -217,13 +218,12 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should load attachments on initialization', async () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(attachmentServiceMock.getDistinctSupportNames).toHaveBeenCalled();
     expect(component.supportsFilterTable()).toEqual(['Support A', 'Support B']);
-    // No supportName selected yet — attachmentsFilterTable should be empty
-    expect(component.attachmentsFilterTable()).toEqual([]);
+    // attachmentSetNumbers is populated by findCoordinates (effect), not getData()
+    expect(component.attachmentSetNumbers()).toEqual([]);
   });
 
   it('should reset values when modal opens', async () => {
@@ -252,22 +252,24 @@ describe('AttachmentSetModalComponent', () => {
     expect(spy).toHaveBeenCalledWith(false);
   });
 
-  it('should filter attachments by support name', async () => {
-    component.ngOnInit();
-    await fixture.whenStable();
+  it('should reset attachment set numbers and coordinates when support name selection is cleared', async () => {
+    // Pre-populate coordinates and attachmentSetNumbers as if findCoordinates ran
+    component.coordinates.set([[1, 2, 3]]);
+    component.attachmentSetNumbers.set([1, 2]);
+    component.supportName.set('Support A');
 
     const event = { value: 'Support A' };
     await component.onAttachmentSelect(event, 'support_name');
 
-    expect(attachmentServiceMock.getAttachmentsBySupportName).toHaveBeenCalledWith('Support A');
-    const expected = mockAttachments.filter((item) => item.support_name === 'Support A');
-    expect(component.attachmentsFilterTable()).toEqual(expected);
+    // getAttachmentsBySupportName is no longer called in onAttachmentSelect;
+    // findCoordinates (triggered by the effect on supportName change) handles it
+    expect(attachmentServiceMock.getAttachmentsBySupportName).not.toHaveBeenCalled();
+    // attachmentSetValues are reset
+    expect(component.attachmentSet()).toBeUndefined();
   });
 
   it('should set arm length and height when attachment set is selected', async () => {
     component.supportName.set('Support A');
-    component.ngOnInit();
-    await fixture.whenStable();
 
     const event = { value: 1 };
     await component.onAttachmentSelect(event, 'attachment_set');
@@ -333,9 +335,6 @@ describe('AttachmentSetModalComponent', () => {
   });
 
   it('should not filter by attachment set if support name is not selected', async () => {
-    component.ngOnInit();
-    await fixture.whenStable();
-
     const event = { value: 'Set 1' };
     await component.onAttachmentSelect(event, 'attachment_set');
 
@@ -344,10 +343,21 @@ describe('AttachmentSetModalComponent', () => {
     expect(component.heightBelowConsole()).toBeUndefined();
   });
 
-  it('should propagate attachment service errors', async () => {
-    attachmentServiceMock.getDistinctSupportNames.mockRejectedValue(new Error('Service error'));
+  it('should set supportName signal when support name is selected', async () => {
+    const event = { value: 'Support A' };
+    await component.onAttachmentSelect(event, 'support_name');
 
-    await expect(component.getData()).rejects.toThrow('Service error');
+    expect(component.supportName()).toBe('Support A');
+    expect(component.attachmentSet()).toBeUndefined();
+  });
+
+  it('should set attachmentSet signal when attachment set is selected', async () => {
+    component.supportName.set('Support A');
+
+    const event = { value: 2 };
+    await component.onAttachmentSelect(event, 'attachment_set');
+
+    expect(component.attachmentSet()).toBe(2);
   });
 
   describe('Effect: isOpen changes', () => {
@@ -371,7 +381,6 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
       expect(component.towerModel()).toBe('Tower Model');
-      expect(attachmentServiceMock.getDistinctSupportNames).toHaveBeenCalled();
     });
 
     it('should reset values and set support name when modal opens with support without attachmentSet', async () => {

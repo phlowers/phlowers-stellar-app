@@ -7,7 +7,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, skip } from 'rxjs';
 import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
@@ -33,7 +33,8 @@ interface MockTable {
   count: vi.Mock;
   toArray: vi.Mock;
   bulkAdd: vi.Mock;
-  clear?: vi.Mock;
+  clear: vi.Mock;
+  orderBy: vi.Mock;
 }
 
 interface MockDb {
@@ -48,12 +49,15 @@ describe('AttachmentService', () => {
   let mockAttachmentsTable: MockTable;
 
   beforeEach(() => {
+    globalThis.localStorage.removeItem('catalog:distinct_support_names');
+
     // Create mock database tables
     mockAttachmentsTable = {
       count: vi.fn().mockResolvedValue(3),
       toArray: vi.fn().mockResolvedValue([]),
       bulkAdd: vi.fn().mockResolvedValue(undefined),
-      clear: vi.fn().mockResolvedValue(undefined)
+      clear: vi.fn().mockResolvedValue(undefined),
+      orderBy: vi.fn().mockReturnValue({ uniqueKeys: vi.fn().mockResolvedValue([]) })
     };
 
     mockDb = {
@@ -183,7 +187,8 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncatalog1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncatalog2,idr2,Support 2,tower2,Family 2,2,0,0,11.0,2.5';
 
       // Mock Papa Parse to call complete callback
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -251,7 +256,8 @@ describe('AttachmentService', () => {
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\n';
 
       // Mock Papa Parse to call complete callback with empty data
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -330,7 +336,8 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0\ncat2,idr2,,tower2,Family 2,2,0,0,11.0,2.5\ncat3,idr3,Support 3,tower3,Family 3,3,0,0,12.0,3.0';
 
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -414,7 +421,8 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\ncat1,idr1,Support 1,tower1,Family 1,1,0,0,10.5,2.0';
 
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -503,7 +511,8 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,,2,11.0,2.5\nFamily 3,Support 3,3,12.0,3.0\nFamily 4,,4,13.0,3.5';
 
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -598,7 +607,8 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0';
 
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -637,7 +647,8 @@ describe('AttachmentService', () => {
 
     it('should handle HTTP errors gracefully', async () => {
       // Mock Papa Parse to call complete callback with empty data when HTTP error occurs
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -704,7 +715,8 @@ describe('AttachmentService', () => {
       const mockCsvContent =
         'support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L\nFamily 1,Support 1,1,10.5,2.0\nFamily 2,Support 2,2,11,2.5';
 
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<AttachmentCsvDto>) => {
+      vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+        const options = args[1] as Papa.ParseConfig<AttachmentCsvDto>;
         if (options.complete) {
           options.complete(
             {
@@ -1063,6 +1075,194 @@ describe('AttachmentService', () => {
       const result = await secondEmission;
       expect(mockAttachmentsTable.bulkAdd).toHaveBeenCalled();
       expect(result).toEqual(updated);
+    });
+  });
+
+  describe('distinctSupportNames$', () => {
+    it('should emit distinct support names when ready$ emits true', () => {
+      const mockNames = ['Alpha', 'Bravo'];
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(mockNames) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      return new Promise<void>((resolve) => {
+        service.distinctSupportNames$.subscribe((result) => {
+          expect(result).toEqual(['Alpha', 'Bravo']);
+          resolve();
+        });
+        (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+      });
+    });
+
+    it('should not emit before ready$ emits true', async () => {
+      const received: string[][] = [];
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(['Type1']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      // Subscribe BEFORE ready$ emits
+      const sub = service.distinctSupportNames$.subscribe((val) => {
+        received.push(val);
+      });
+
+      // Before ready$, should not have emitted yet
+      expect(received).toHaveLength(0);
+
+      // Emit ready$ and wait for async operations
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      // Wait for the async operations to complete
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Verify emission happened AFTER ready$
+      expect(received.length).toBeGreaterThan(0);
+      sub.unsubscribe();
+    });
+
+    it('should re-emit after addSupportNamesIfAbsent triggers refresh', async () => {
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValueOnce([]).mockResolvedValueOnce(['NewSupport']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+      mockAttachmentsTable.toArray.mockResolvedValue([]);
+      mockAttachmentsTable.bulkAdd.mockResolvedValue(undefined);
+
+      const secondEmission = firstValueFrom(service.distinctSupportNames$.pipe(skip(1)));
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      const entries: SupportNameEntry[] = [{ supportName: 'NewSupport', supportTower: '' }];
+      await service.addSupportNamesIfAbsent(entries);
+
+      const result = await secondEmission;
+      expect(result).toEqual(['NewSupport']);
+    });
+
+    it('should replay last value to late subscribers (shareReplay)', async () => {
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(['Alpha', 'Bravo']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      // First subscriber triggers query
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+      const firstResult = await firstValueFrom(service.distinctSupportNames$);
+
+      expect(firstResult).toEqual(['Alpha', 'Bravo']);
+      expect(orderByMock.uniqueKeys).toHaveBeenCalledTimes(1);
+
+      // Second subscriber (late) should get cached value WITHOUT new query
+      const secondResult = await firstValueFrom(service.distinctSupportNames$);
+      expect(secondResult).toEqual(['Alpha', 'Bravo']);
+      expect(orderByMock.uniqueKeys).toHaveBeenCalledTimes(1); // No additional call
+    });
+
+    it('should re-emit after importFromFile triggers refresh', async () => {
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValueOnce([]).mockResolvedValueOnce(['Imported']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      mockAttachmentsTable.clear.mockResolvedValue(undefined);
+      mockAttachmentsTable.bulkAdd.mockResolvedValue(undefined);
+
+      const secondEmission = firstValueFrom(service.distinctSupportNames$.pipe(skip(1)));
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      // Mock HTTP response for CSV
+      const mockCsv = 'support_name,support_tower\nImported,Tower1';
+      vi.spyOn(service['http'], 'get').mockReturnValue(of(mockCsv));
+
+      await service.importFromFile();
+
+      const result = await secondEmission;
+      expect(result).toEqual(['Imported']);
+    });
+
+    it('should emit cached value first, then fresh DB value', async () => {
+      // Pre-populate cache BEFORE creating service
+      globalThis.localStorage.setItem('catalog:distinct_support_names', JSON.stringify(['Cached1', 'Cached2']));
+
+      // Reconfigure TestBed to create a new service instance
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          AttachmentService,
+          { provide: StorageService, useValue: storageService }
+        ]
+      });
+      const freshService = TestBed.inject(AttachmentService);
+
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(['Fresh1', 'Fresh2']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      const emissions: string[][] = [];
+      const sub = freshService.distinctSupportNames$.subscribe((val) => {
+        emissions.push(val);
+      });
+
+      // Wait for cache emission (synchronous)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Emit ready$ for DB value
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      // Wait for DB emission
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(emissions[0]).toEqual(['Cached1', 'Cached2']); // Cache first
+      expect(emissions[1]).toEqual(['Fresh1', 'Fresh2']); // DB second
+      sub.unsubscribe();
+    });
+
+    it('should handle corrupted cache gracefully', async () => {
+      // Set corrupted cache (not an array)
+      globalThis.localStorage.setItem('catalog:distinct_support_names', '{"not":"an array"}');
+
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(['Fresh1', 'Fresh2']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+      const result = await firstValueFrom(service.distinctSupportNames$);
+
+      // Should ignore corrupted cache and use DB value
+      expect(result).toEqual(['Fresh1', 'Fresh2']);
+    });
+
+    it('should filter out non-string values from cache', async () => {
+      // Set cache with mixed types BEFORE creating service
+      globalThis.localStorage.setItem(
+        'catalog:distinct_support_names',
+        JSON.stringify(['Valid', 123, null, 'Another', ''])
+      );
+
+      // Reconfigure TestBed to create a new service instance
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          AttachmentService,
+          { provide: StorageService, useValue: storageService }
+        ]
+      });
+      const freshService = TestBed.inject(AttachmentService);
+
+      const orderByMock = { uniqueKeys: vi.fn().mockResolvedValue(['Fresh1']) };
+      (mockDb.catAttachments as unknown as Record<string, unknown>)['orderBy'] = vi.fn().mockReturnValue(orderByMock);
+
+      const emissions: string[][] = [];
+      const sub = freshService.distinctSupportNames$.subscribe((val) => {
+        emissions.push(val);
+      });
+
+      // Wait for cache emission (synchronous)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Emit ready$ for DB value
+      (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+
+      // Wait for DB emission
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // First emission should have filtered cache (only valid strings, no empty strings)
+      expect(emissions[0]).toEqual(['Valid', 'Another']);
+      // Second emission from DB
+      expect(emissions[1]).toEqual(['Fresh1']);
+      sub.unsubscribe();
     });
   });
 });

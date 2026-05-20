@@ -358,6 +358,9 @@
             [showClear]="true"
             appendTo="body"
             [filter]="true"
+            [loading]="!catalogLoaded()"
+            [virtualScroll]="true"
+            [virtualScrollItemSize]="34"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
             [inputId]="'supportName' + rowIndex"
             data-testid="support-name-select"
@@ -392,7 +395,7 @@
               <button
                 app-btn
                 btnSize="s"
-                [disabled]="!support.name || !supportFilterTable().includes(support.name)"
+                [disabled]="!support.name || (catalogLoaded() && !supportFilterTable().includes(support.name))"
                 btnStyle="text"
                 aria-label="open attachment set modal"
                 i18n-aria-label

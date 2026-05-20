@@ -371,3 +371,16 @@
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Removed both constants, removed `isDevMode` and `environment` imports. Signals initialized to `null`. |
 | ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+
+---
+
+## 24. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/helpers.ts` |
+| Code | `getUniqueSortedSupportNamesFromAttachments()` and `buildSupportNameFilterTables()` |
+| 🔍 Preuve | Replaced by `AttachmentService.distinctSupportNames$` which uses Dexie `uniqueKeys()` index-level query instead of loading all entities. No remaining consumers after refactor. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | Removed both functions + `CatalogAttachment` import. Perf improvement: ~3s → ~100ms for support name dropdown. |
+| ✅ Validé | 🗑️ SUPPRIMÉ — 19/05/2026 |
