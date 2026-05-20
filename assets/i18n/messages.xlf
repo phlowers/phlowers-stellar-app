@@ -3298,16 +3298,6 @@
         <source>Initial application installation could not start. Please reload the page to try again.</source>
       </segment>
     </unit>
-    <unit id="login.redirectingToGaia">
-      <segment>
-        <source> Redirecting to G@IA for sign in… </source>
-      </segment>
-    </unit>
-    <unit id="login.resolvingMode">
-      <segment>
-        <source> Checking sign-in mode… </source>
-      </segment>
-    </unit>
     <unit id="1911326790644997133">
       <segment>
         <source>Error importing section</source>
@@ -3437,6 +3427,16 @@
     <unit id="1432622988514989319">
       <segment>
         <source>Email login is disabled because G@IA single sign-on is required.</source>
+      </segment>
+    </unit>
+    <unit id="login.redirectingToGaia">
+      <segment>
+        <source> Redirecting to G@IA for sign in… </source>
+      </segment>
+    </unit>
+    <unit id="login.resolvingMode">
+      <segment>
+        <source> Checking sign-in mode… </source>
       </segment>
     </unit>
   </file>
