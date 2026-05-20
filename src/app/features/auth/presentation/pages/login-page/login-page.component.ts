@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
@@ -32,7 +32,7 @@ import { LOGIN_URL } from '@services/auth/auth.constants';
   styleUrl: './login-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginPageComponent implements OnInit {
+export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -66,11 +66,6 @@ export class LoginPageComponent implements OnInit {
 
   get emailControl(): FormControl<string> {
     return this.form.controls.email;
-  }
-
-  ngOnInit(): void {
-    // No-op: the redirect effect above handles the OIDC navigation as soon
-    // as the mode is resolved. Kept for API stability and future hooks.
   }
 
   /**
