@@ -50,7 +50,6 @@ export class PlotOptionsService {
     const oldOptions = untracked(() => this.plotOptions());
     const newOptions = { ...oldOptions, ...values };
     this.plotOptions.set(newOptions);
-    this.refreshCamera();
     if (checkIfProjectionNeedRefresh(oldOptions, newOptions, untracked(loading))) {
       onProjectionNeeded?.();
     }
