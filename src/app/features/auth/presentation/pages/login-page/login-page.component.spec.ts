@@ -19,6 +19,16 @@ interface AuthServiceMock {
   loginWithEmail: vi.Mock;
 }
 
+/**
+ * Test-only view of `LoginPageComponent` exposing its `protected` methods so
+ * they can be spied on without resorting to `any`.
+ */
+type LoginPageTestable = LoginPageComponent & {
+  redirectToOidcLogin: () => void;
+  reloadToHome: () => void;
+};
+const loginPageProto = LoginPageComponent.prototype as unknown as LoginPageTestable;
+
 describe('LoginPageComponent', () => {
   let component: LoginPageComponent;
   let fixture: ComponentFixture<LoginPageComponent>;
@@ -216,10 +226,7 @@ describe('LoginPageComponent', () => {
         // Reproduces the bug: loginWithEmail succeeds, but router.navigate
         // rejects (e.g. lazy-chunk load error). The user IS authenticated,
         // so we must not display the login-error banner.
-        const reloadSpy = vi
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .spyOn(LoginPageComponent.prototype as any, 'reloadToHome')
-          .mockImplementation(() => undefined);
+        const reloadSpy = vi.spyOn(loginPageProto, 'reloadToHome').mockImplementation(() => undefined);
         routerMock.navigate.mockRejectedValue(new Error('chunk load failed'));
         component.emailControl.setValue('user@example.com');
 
@@ -246,10 +253,7 @@ describe('LoginPageComponent', () => {
       });
 
       it('should NOT call reloadToHome when both login and navigation succeed', async () => {
-        const reloadSpy = vi
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .spyOn(LoginPageComponent.prototype as any, 'reloadToHome')
-          .mockImplementation(() => undefined);
+        const reloadSpy = vi.spyOn(loginPageProto, 'reloadToHome').mockImplementation(() => undefined);
         component.emailControl.setValue('user@example.com');
 
         await component.onSubmit();
@@ -300,10 +304,7 @@ describe('LoginPageComponent', () => {
     let redirectSpy: vi.SpyInstance;
 
     beforeEach(async () => {
-      redirectSpy = vi
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .spyOn(LoginPageComponent.prototype as any, 'redirectToOidcLogin')
-        .mockImplementation(() => undefined);
+      redirectSpy = vi.spyOn(loginPageProto, 'redirectToOidcLogin').mockImplementation(() => undefined);
       await setupFixture({ oidcEnabled: true, modeResolved: true });
     });
 
@@ -330,10 +331,7 @@ describe('LoginPageComponent', () => {
     let redirectSpy: vi.SpyInstance;
 
     beforeEach(async () => {
-      redirectSpy = vi
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .spyOn(LoginPageComponent.prototype as any, 'redirectToOidcLogin')
-        .mockImplementation(() => undefined);
+      redirectSpy = vi.spyOn(loginPageProto, 'redirectToOidcLogin').mockImplementation(() => undefined);
       await setupFixture({ oidcEnabled: false, modeResolved: false });
     });
 

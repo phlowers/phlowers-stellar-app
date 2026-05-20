@@ -21,12 +21,6 @@ interface UserinfoResponse extends Partial<OidcClaims> {
   oidcEnabled: boolean;
 }
 
-/** Internal probe result. `unknown` is used when the network request failed. */
-interface ProbeResult {
-  oidcEnabled: boolean | 'unknown';
-  claims: OidcClaims | null;
-}
-
 /**
  * AuthService — OIDC + PKCE authentication via Apache mod_auth_openidc.
  *
@@ -74,11 +68,11 @@ export class AuthService {
    * `StorageService.createDatabase()`.
    */
   async initialize(): Promise<void> {
-    const probe = await this.probeUserinfo();
+    const claims = await this.probeUserinfo();
 
     // 1. Active OIDC session — authoritative path.
-    if (probe.claims) {
-      const user = await this.upsertUser(probe.claims);
+    if (claims) {
+      const user = await this.upsertUser(claims);
       this.currentUser.set(user);
       return;
     }
@@ -106,11 +100,11 @@ export class AuthService {
    * @returns The upserted `User`, or `null` if no session/claims were returned.
    */
   async refreshFromNetwork(): Promise<User | null> {
-    const probe = await this.probeUserinfo();
-    if (!probe.claims) {
+    const claims = await this.probeUserinfo();
+    if (!claims) {
       return null;
     }
-    const user = await this.upsertUser(probe.claims);
+    const user = await this.upsertUser(claims);
     this.currentUser.set(user);
     return user;
   }
@@ -118,27 +112,30 @@ export class AuthService {
   /**
    * Probe `/auth/userinfo` to discover the auth mode and any active session.
    * Updates `oidcEnabled` and `modeResolved` signals as a side effect.
+   *
+   * @returns The OIDC claims when an authenticated session is present,
+   *          otherwise `null` (anonymous, error, or fallback mode).
    */
-  private async probeUserinfo(): Promise<ProbeResult> {
+  private async probeUserinfo(): Promise<OidcClaims | null> {
     let response: Response;
     try {
       response = await fetch(USERINFO_URL, { cache: 'no-store' });
     } catch (err) {
       this.logger.warn('AuthService: userinfo fetch error', err);
       this.modeResolved.set(true);
-      return { oidcEnabled: 'unknown', claims: null };
+      return null;
     }
 
     if (response.status === 401) {
       // Legacy server contract — assume OIDC required.
       this.oidcEnabled.set(true);
       this.modeResolved.set(true);
-      return { oidcEnabled: true, claims: null };
+      return null;
     }
     if (!response.ok) {
       this.logger.warn(`AuthService: userinfo request failed (HTTP ${response.status})`);
       this.modeResolved.set(true);
-      return { oidcEnabled: 'unknown', claims: null };
+      return null;
     }
 
     let data: UserinfoResponse;
@@ -147,28 +144,26 @@ export class AuthService {
     } catch (err) {
       this.logger.warn('AuthService: userinfo response is not valid JSON', err);
       this.modeResolved.set(true);
-      return { oidcEnabled: 'unknown', claims: null };
+      return null;
     }
 
-    const oidcEnabled = data.oidcEnabled === true;
-    this.oidcEnabled.set(oidcEnabled);
+    this.oidcEnabled.set(data.oidcEnabled === true);
     this.modeResolved.set(true);
 
     if (data.authenticated !== true) {
-      return { oidcEnabled, claims: null };
+      return null;
     }
     if (typeof data.email !== 'string' || !data.email.trim()) {
       this.logger.warn('AuthService: userinfo response missing a valid email');
-      return { oidcEnabled, claims: null };
+      return null;
     }
-    const claims: OidcClaims = {
+    return {
       email: data.email,
       sub: data.sub,
       given_name: data.given_name,
       family_name: data.family_name,
       roles: data.roles
     };
-    return { oidcEnabled, claims };
   }
 
   private async upsertUser(claims: OidcClaims): Promise<User> {
@@ -196,7 +191,7 @@ export class AuthService {
    */
   async loginWithEmail(email: string): Promise<User> {
     if (this.oidcEnabled()) {
-      this.notificationService.error($localize`Email login is disabled because GAIA single sign-on is required.`);
+      this.notificationService.error($localize`Email login is disabled because G@IA single sign-on is required.`);
       throw new Error('Email login is disabled in OIDC mode');
     }
 

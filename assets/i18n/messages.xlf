@@ -3303,11 +3303,6 @@
         <source> Redirecting to G@IA for sign in… </source>
       </segment>
     </unit>
-    <unit id="1045464419985371300">
-      <segment>
-        <source>Email login is disabled because GAIA single sign-on is required.</source>
-      </segment>
-    </unit>
     <unit id="login.resolvingMode">
       <segment>
         <source> Checking sign-in mode… </source>
@@ -3437,6 +3432,11 @@
     <unit id="560248595006112521">
       <segment>
         <source>Turntable rotation</source>
+      </segment>
+    </unit>
+    <unit id="1432622988514989319">
+      <segment>
+        <source>Email login is disabled because G@IA single sign-on is required.</source>
       </segment>
     </unit>
   </file>
