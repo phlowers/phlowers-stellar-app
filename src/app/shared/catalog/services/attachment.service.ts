@@ -7,7 +7,7 @@
 import { inject, Injectable } from '@angular/core';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, filter, merge, of, Subject, switchMap, take } from 'rxjs';
+import { BehaviorSubject, catchError, filter, merge, of, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
 import Papa from 'papaparse';
 import { HttpClient } from '@angular/common/http';
 import { CatalogAttachmentEntity } from '@infrastructure/database';
@@ -65,6 +65,28 @@ export class AttachmentService {
     )
   );
 
+  private static readonly SUPPORT_NAMES_CACHE_KEY = 'catalog:distinct_support_names';
+
+  /**
+   * Observable of distinct support names from the catalog.
+   * Emits cached names from localStorage immediately (instant), then updates
+   * with fresh data from IndexedDB once available.
+   * Re-emits after any write to catAttachments via this service.
+   */
+  readonly distinctSupportNames$ = merge(
+    of(this.getCachedSupportNames()).pipe(filter((names) => names.length > 0)),
+    this.storageService.ready$.pipe(
+      filter((ready): ready is true => ready),
+      take(1),
+      switchMap(() =>
+        merge(of(undefined as void), this._refresh$).pipe(
+          switchMap(() => this.getDistinctSupportNames()),
+          tap((names) => this.cacheSupportNames(names))
+        )
+      )
+    )
+  ).pipe(shareReplay(1));
+
   constructor() {
     this.storageService.ready$.subscribe((value) => {
       this.ready.next(value);
@@ -88,6 +110,29 @@ export class AttachmentService {
   async getDistinctSupportNames(): Promise<string[]> {
     const keys = await this.storageService.db?.catAttachments.orderBy('support_name').uniqueKeys();
     return (keys ?? []).filter((key): key is string => typeof key === 'string' && key.length > 0);
+  }
+
+  private getCachedSupportNames(): string[] {
+    try {
+      const cached = globalThis.localStorage.getItem(AttachmentService.SUPPORT_NAMES_CACHE_KEY);
+      if (!cached) return [];
+
+      const parsed = JSON.parse(cached);
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed.filter((item): item is string => typeof item === 'string' && item.length > 0);
+    } catch (error) {
+      this.logger.warn('Failed to retrieve cached support names from localStorage', error);
+      return [];
+    }
+  }
+
+  private cacheSupportNames(names: string[]): void {
+    try {
+      globalThis.localStorage.setItem(AttachmentService.SUPPORT_NAMES_CACHE_KEY, JSON.stringify(names));
+    } catch (error) {
+      this.logger.warn('Failed to cache support names in localStorage', error);
+    }
   }
 
   /**
@@ -155,10 +200,10 @@ export class AttachmentService {
 
   private async parseCsvAndStore(csv: string): Promise<void> {
     await new Promise<void>((resolve) => {
-      Papa.parse(csv, {
+      Papa.parse<AttachmentCsvDto>(csv, {
         header: true,
         skipEmptyLines: true,
-        complete: (async (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => {
+        complete: async (jsonResults) => {
           const data = jsonResults.data;
           if (!data || data.length === 0) {
             resolve();
@@ -168,7 +213,7 @@ export class AttachmentService {
           await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
           this._refresh$.next();
           resolve();
-        }) as (jsonResults: Papa.ParseResult<AttachmentCsvDto>) => void
+        }
       });
     });
   }

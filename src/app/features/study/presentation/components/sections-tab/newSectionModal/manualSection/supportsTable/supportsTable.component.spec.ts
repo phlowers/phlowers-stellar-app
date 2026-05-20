@@ -4,10 +4,10 @@ import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Support, CatalogChain, Section } from '@shared/domain';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
-import { CatalogAttachmentEntity } from '@infrastructure/database';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { vi } from 'vitest';
@@ -30,11 +30,11 @@ const mockChainsService = {
   getChains: vi.fn().mockResolvedValue([] as CatalogChain[])
 };
 
-let allAttachmentsSubject: Subject<CatalogAttachmentEntity[]>;
+let distinctSupportNamesSubject: Subject<string[]>;
 
 const mockAttachmentService = {
-  get allAttachments$() {
-    return allAttachmentsSubject;
+  get distinctSupportNames$() {
+    return distinctSupportNamesSubject;
   }
 };
 
@@ -155,7 +155,7 @@ describe('SupportsTableComponent', () => {
   let fixture: ComponentFixture<SupportsTableComponent>;
 
   beforeEach(async () => {
-    allAttachmentsSubject = new Subject<CatalogAttachmentEntity[]>();
+    distinctSupportNamesSubject = new Subject<string[]>();
     workerReadySubject = new BehaviorSubject<boolean>(false);
     mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, pythonErrorCode: null });
 
@@ -751,29 +751,23 @@ describe('SupportsTableComponent', () => {
   });
 
   describe('getData with attachments', () => {
-    it('should populate supportFilterTable when allAttachments$ emits', () => {
-      allAttachmentsSubject.next([
-        { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
-      ]);
+    it('should populate supportFilterTable when distinctSupportNames$ emits', () => {
+      distinctSupportNamesSubject.next(['CatalogType']);
       fixture.detectChanges();
 
       expect(component.supportFilterTable()).toContain('CatalogType');
     });
 
     it('should put support names not in catalog into supplementarySupportFilterTable', () => {
-      allAttachmentsSubject.next([
-        { uuid: 'a1', updated_at: '', created_at: '', support_tower: '', support_name: 'CatalogType' }
-      ]);
+      distinctSupportNamesSubject.next(['CatalogType']);
       fixture.detectChanges();
 
       // mockSupports have names 'Support 1', 'Support 2', 'Support 3' — none are in catalog
       expect(component.supplementarySupportFilterTable()).toContain('Support 2');
     });
 
-    it('should update allSupportFilterTable when allAttachments$ emits new entries', () => {
-      allAttachmentsSubject.next([
-        { uuid: 'uuid-new', support_name: 'F4TD3_X', support_tower: 'Tower', created_at: '', updated_at: '' }
-      ]);
+    it('should update allSupportFilterTable when distinctSupportNames$ emits new entries', () => {
+      distinctSupportNamesSubject.next(['F4TD3_X']);
       fixture.detectChanges();
 
       expect(component.allSupportFilterTable()).toContain('F4TD3_X');
@@ -845,22 +839,68 @@ describe('SupportsTableComponent', () => {
     const getByTestId = (id: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
 
-    it('should disable the button when support.name is not in the catalog', () => {
-      // supportFilterTable is empty by default: buttons are disabled
+    it('should enable the button when catalog has not loaded yet but support has a name', () => {
+      // distinctSupportNamesSubject has not emitted → catalogLoaded() = false
+      // support[0].name = 'Support 1' → !name = false → disabled = false
+      fixture.detectChanges();
+      const btn = getByTestId('open-attachment-set-modal-btn') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
+    });
+
+    it('should evaluate button condition as false when catalog is loaded and support name is in catalog', () => {
+      distinctSupportNamesSubject.next(['Support 1', 'Support 2', 'Support 3']);
+      fixture.detectChanges();
+      // Verify signals: catalogLoaded = true, supportFilterTable contains name → disabled = false
+      expect(component.catalogLoaded()).toBe(true);
+      expect(component.supportFilterTable()).toContain('Support 1');
+      const name = 'Support 1';
+      const isDisabled = !name || (component.catalogLoaded() && !component.supportFilterTable().includes(name));
+      expect(isDisabled).toBe(false);
+    });
+
+    it('should disable the button when catalog is loaded and support name is not in catalog', () => {
+      distinctSupportNamesSubject.next(['CatalogType']);
+      fixture.detectChanges();
       const btn = getByTestId('open-attachment-set-modal-btn') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
-    it('should evaluate disabled as true when name is null', () => {
-      component.supportFilterTable.set(['CatalogType']);
+    it('should disable the button when support name is null regardless of catalog state', () => {
+      distinctSupportNamesSubject.next(['Support 1']);
+      fixture.detectChanges();
+      // Verify the condition: !null = true → always disabled
       const name: string | null = null;
-      expect(!name || !component.supportFilterTable().includes(name)).toBe(true);
+      expect(!name || (component.catalogLoaded() && !component.supportFilterTable().includes(name as string))).toBe(
+        true
+      );
+    });
+  });
+
+  describe('catalogLoaded signal', () => {
+    it('should show catalogLoaded as false initially, then true after emission', () => {
+      expect(component.catalogLoaded()).toBe(false);
+
+      distinctSupportNamesSubject.next(['Type1', 'Type2']);
+      fixture.detectChanges();
+
+      expect(component.catalogLoaded()).toBe(true);
+    });
+  });
+
+  describe('HTML rendering - support name select loading state', () => {
+    it('should pass [loading] prop to p-select when catalog not loaded', () => {
+      fixture.detectChanges();
+      const selectDebugElement = fixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
+      expect(selectDebugElement).toBeTruthy();
+      // Access componentInstance to check loading property
+      expect(selectDebugElement.componentInstance.loading).toBe(true);
     });
 
-    it('should evaluate disabled as false when name is in the catalog', () => {
-      component.supportFilterTable.set(['CatalogType']);
-      const name = 'CatalogType';
-      expect(!name || !component.supportFilterTable().includes(name)).toBe(false);
+    it('should enable virtualScroll on support name select', () => {
+      fixture.detectChanges();
+      const selectDebugElement = fixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
+      expect(selectDebugElement.componentInstance.virtualScroll).toBe(true);
+      expect(selectDebugElement.componentInstance.virtualScrollItemSize).toBe(34);
     });
   });
 });
