@@ -1,4 +1,4 @@
-import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons } from 'plotly.js-dist-min';
+import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Icon } from 'plotly.js-dist-min';
 import { AxesNorms, Side, View } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
@@ -74,15 +74,26 @@ const createScene = (
   plotParams: CreatePlotParams,
   distanceAnnotations: Partial<Plotly.Annotations>[]
 ): Partial<Layout['scene']> => {
-  const baseCamera = plotParams.camera ?? normalCamera();
-  const y = Math.abs(baseCamera.eye?.y || 0);
-  const camera: Partial<Camera> = {
-    ...baseCamera,
-    eye: {
-      ...baseCamera.eye,
-      y: plotParams.invert ? y : y * -1
-    }
-  };
+  // On initial render (camera === null), apply the default camera with the invert
+  // flip so the scene faces the correct direction. On subsequent renders, pass the
+  // live interactive camera UNMODIFIED so Plotly's stored layout camera always
+  // matches the user's current view. This prevents any modebar viewport operation
+  // from resetting to a stale or default camera value.
+  let sceneCamera: Partial<Camera>;
+  if (plotParams.camera === null) {
+    const base = normalCamera();
+    const y = Math.abs(base.eye?.y || 0);
+    sceneCamera = {
+      ...base,
+      eye: {
+        ...base.eye,
+        y: plotParams.invert ? y : y * -1
+      }
+    };
+  } else {
+    sceneCamera = plotParams.camera;
+  }
+
   return {
     aspectmode:
       plotParams.axesNorms?.aspectMode &&
@@ -104,24 +115,80 @@ const createScene = (
       ...createObstaclesAnnotations(plotParams),
       ...distanceAnnotations
     ],
-    camera
+    camera: sceneCamera
   };
 };
 
-const config = {
-  displayModeBar: true,
-  displaylogo: false,
-  fillFrame: false,
-  responsive: true,
-  modeBarButtonsToRemove: [
-    'lasso2d',
-    'select2d',
-    'sendDataToCloud',
-    'hoverClosestCartesian',
-    'hoverCompareCartesian',
-    'resetLastSave',
-    'autoScale2d'
-  ] as ModeBarDefaultButtons[]
+/**
+ * Builds the Plotly config including custom orbit/turntable modebar buttons.
+ * Defined as a function so that `Plotly.Icons` is accessed at call-time
+ * rather than at module-evaluation time (which breaks test mocks).
+ */
+const getConfig = () => {
+  /**
+   * Switches the 3D scene dragmode by directly setting the internal
+   * orbit-camera-controller mode. This bypasses Plotly.relayout and its
+   * updateFx() which forces camera.up = [0,0,1] on turntable switch,
+   * causing an unwanted camera/zoom reset.
+   */
+  const setDragmodeDirect = (gd: Plotly.PlotlyHTMLElement, mode: string): void => {
+    const gdInternal = gd as unknown as {
+      layout?: { scene?: { dragmode?: string } };
+      _fullLayout?: { scene?: { dragmode?: string; _scene?: { camera?: { mode?: string; keyBindingMode?: string } } } };
+    };
+    const scene = gdInternal._fullLayout?.scene;
+    if (scene?._scene?.camera) {
+      scene._scene.camera.mode = mode;
+      scene._scene.camera.keyBindingMode = 'rotate';
+    }
+    // Update layout objects so uirevision preserves the mode across Plotly.react calls
+    if (scene) {
+      scene.dragmode = mode;
+    }
+    if (gdInternal.layout?.scene) {
+      gdInternal.layout.scene.dragmode = mode;
+    }
+  };
+
+  const orbitButton: ModeBarButton = {
+    name: 'customOrbitRotation',
+    title: $localize`Orbital rotation`,
+    icon: Plotly.Icons['3d_rotate'] as Icon,
+    click: (gd) => {
+      setDragmodeDirect(gd, 'orbit');
+    }
+  };
+
+  const turntableButton: ModeBarButton = {
+    name: 'customTurntableRotation',
+    title: $localize`Turntable rotation`,
+    icon: Plotly.Icons['z-axis'] as Icon,
+    click: (gd) => {
+      setDragmodeDirect(gd, 'turntable');
+    }
+  };
+
+  return {
+    displayModeBar: true,
+    displaylogo: false,
+    fillFrame: false,
+    responsive: true,
+    modeBarButtonsToRemove: [
+      'lasso2d',
+      'select2d',
+      'sendDataToCloud',
+      'hoverClosestCartesian',
+      'hoverCompareCartesian',
+      'resetLastSave',
+      'autoScale2d',
+      'resetCameraDefault3d',
+      'resetCameraLastSave3d',
+      'resetScale2d',
+      'orbitRotation',
+      'tableRotation'
+    ] as ModeBarDefaultButtons[],
+    modeBarButtonsToAdd: [orbitButton, turntableButton]
+  };
 };
 
 const layout3d = (
@@ -130,6 +197,12 @@ const layout3d = (
 ): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
+  // Keep uirevision constant so Plotly never resets user-driven camera state.
+  // On the very first render the plot element doesn't exist yet, so Plotly creates
+  // it from scratch and applies the layout camera regardless of uirevision.
+  // On subsequent Plotly.react() calls (e.g. after a slider change), the same
+  // uirevision tells Plotly to preserve the interactive camera position.
+  uirevision: 'stable',
   margin: {
     l: 0,
     r: 0,
@@ -186,6 +259,21 @@ const layout2d = (
 };
 
 /**
+ * Reads the current 3D camera directly from the Plotly DOM element's internal state.
+ * This bypasses the Angular signal layer and always returns the live camera position
+ * as Plotly knows it, even after the user has interacted with the plot.
+ * Returns null if the element does not exist or has no camera data yet.
+ */
+const getLiveCamera = (documentRef: Document, plotId: string): Camera | null => {
+  const el = documentRef.getElementById(plotId) as
+    | (HTMLElement & {
+        _fullLayout?: { scene?: { camera?: Camera } };
+      })
+    | null;
+  return el?._fullLayout?.scene?.camera ?? null;
+};
+
+/**
  * Creates or updates a Plotly plot in the DOM element identified by `plotParams.plotId`.
  * Selects the appropriate 2D or 3D layout and uses `Plotly.react` for efficient updates
  * without resetting the camera or zoom.
@@ -196,17 +284,27 @@ const layout2d = (
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!plotParams.documentRef.getElementById(plotParams.plotId)) {
-    console.warn(`Plot element not found: ${plotParams.plotId}`);
     return;
   }
-  const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(plotParams);
+
+  // For 3D plots, always read the live camera from the DOM before re-rendering.
+  // This prevents Plotly's internal setViewport() from resetting the camera to a
+  // stale value when the user interacts with the modebar (e.g. switches dragmode).
+  // The DOM camera is the source of truth after the first render.
+  const resolvedParams =
+    plotParams.view === '3d'
+      ? { ...plotParams, camera: getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera }
+      : plotParams;
+  const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
   const baseLayout =
-    plotParams.view === '3d' ? layout3d(plotParams, distanceAnnotations) : layout2d(plotParams, distanceAnnotations);
-  const allData = [...plotParams.data, ...distanceTraces];
+    resolvedParams.view === '3d'
+      ? layout3d(resolvedParams, distanceAnnotations)
+      : layout2d(resolvedParams, distanceAnnotations);
+  const allData = [...resolvedParams.data, ...distanceTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
-  return Plotly.react(plotParams.plotId, allData, baseLayout, config);
+  return Plotly.react(plotParams.plotId, allData, baseLayout, getConfig());
 };
 
 /**

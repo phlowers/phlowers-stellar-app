@@ -973,6 +973,50 @@ describe('SectionPlotComponent', () => {
     });
   });
 
+  describe('addEventListenersToPlot — plotly_relayout camera filtering', () => {
+    let capturedRelayoutHandler: ((eventData: Record<string, unknown>) => void) | null = null;
+
+    const makePlotCapturingRelayout = () => {
+      capturedRelayoutHandler = null;
+      return {
+        removeAllListeners: vi.fn(),
+        on: (event: string, fn: (eventData: Record<string, unknown>) => void) => {
+          if (event === 'plotly_relayout') {
+            capturedRelayoutHandler = fn;
+          }
+        }
+      } as unknown as PlotlyHTMLElement;
+    };
+
+    it('should not call refreshCamera when relayout event has no camera key', () => {
+      component.addEventListenersToPlot(makePlotCapturingRelayout());
+      capturedRelayoutHandler!({ 'scene.dragmode': 'orbit' });
+
+      expect(plotOptionsServiceMock.refreshCamera).not.toHaveBeenCalled();
+    });
+
+    it('should call refreshCamera when relayout event contains a scene.camera key', () => {
+      component.addEventListenersToPlot(makePlotCapturingRelayout());
+      capturedRelayoutHandler!({ 'scene.camera': { eye: { x: 1, y: 2, z: 3 } } });
+
+      expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call refreshCamera when relayout event is empty', () => {
+      component.addEventListenersToPlot(makePlotCapturingRelayout());
+      capturedRelayoutHandler!({});
+
+      expect(plotOptionsServiceMock.refreshCamera).not.toHaveBeenCalled();
+    });
+
+    it('should call refreshCamera when relayout event contains a partial camera key', () => {
+      component.addEventListenersToPlot(makePlotCapturingRelayout());
+      capturedRelayoutHandler!({ 'scene.camera.eye.x': 1.5 });
+
+      expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('addEventListenersToPlot — listener cleanup', () => {
     it('should remove stale click and relayout listeners before reattaching', () => {
       const removeAllListeners = vi.fn();

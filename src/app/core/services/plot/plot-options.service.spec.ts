@@ -196,10 +196,10 @@ describe('PlotOptionsService', () => {
       expect(() => service.plotOptionsChange({ view: '2d' }, loadingFalse)).not.toThrow();
     });
 
-    it('should call refreshCamera on each change', () => {
+    it('should not call refreshCamera on plotOptionsChange', () => {
       const refreshCameraSpy = vi.spyOn(service, 'refreshCamera');
       service.plotOptionsChange({ view: '2d' }, loadingFalse);
-      expect(refreshCameraSpy).toHaveBeenCalledTimes(1);
+      expect(refreshCameraSpy).not.toHaveBeenCalled();
     });
   });
 

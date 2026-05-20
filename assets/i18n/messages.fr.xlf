@@ -4127,5 +4127,17 @@
         <target> En attente du chargement du moteur pour afficher les résultats de calcul </target>
       </segment>
     </unit>
+    <unit id="2991274283822092243">
+      <segment state="translated">
+        <source>Orbital rotation</source>
+        <target>Rotation orbitale</target>
+      </segment>
+    </unit>
+    <unit id="560248595006112521">
+      <segment state="translated">
+        <source>Turntable rotation</source>
+        <target>Rotation plateau</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
