@@ -63,6 +63,8 @@ export enum Task {
   importLambert = 'importLambert',
   // lambert to gps and compare to gps coordinates using section data
   importLambertAndValidate = 'importLambertAndValidate',
+  // get equivalent span/ruling span value
+  getEquivalentSpan = 'getEquivalentSpan',
   // compute pose table at different temperatures
   getPoseTable = 'getPoseTable'
 }
@@ -363,6 +365,8 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  // Inputs for clearObsgetEquivalentSpantacles task: no inputs
+  [Task.getEquivalentSpan]: undefined;
   [Task.getPoseTable]: {
     stepTemperature: number;
     baseTemperature: number;
@@ -496,6 +500,7 @@ export interface TaskOutputs {
     localization: Localization;
     meanGpsDiff: number;
   };
+  [Task.getEquivalentSpan]: number;
   [Task.getPoseTable]: {
     temperatures: number[];
     poseParams: number[];

@@ -169,7 +169,11 @@ def import_lambert(js_inputs):
 def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
+def get_equivalent_span():
+    global engine
+    return pose_table.get_equivalent_span(engine)
 
 def get_pose_table(js_inputs):
     global engine
     return pose_table.get_pose_table(js_to_python(js_inputs), engine)
+
