@@ -105,6 +105,10 @@ const tasks: Record<
   [Task.importLambertAndValidate]: {
     function: 'import_lambert_and_validate',
     externalPackages: []
+  },
+  [Task.getPoseTable]: {
+    function: 'get_pose_table',
+    externalPackages: []
   }
 };
 

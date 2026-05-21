@@ -62,7 +62,9 @@ export enum Task {
   // compute gps coordinates using imported lambert data
   importLambert = 'importLambert',
   // lambert to gps and compare to gps coordinates using section data
-  importLambertAndValidate = 'importLambertAndValidate'
+  importLambertAndValidate = 'importLambertAndValidate',
+  // compute pose table at different temperatures
+  getPoseTable = 'getPoseTable'
 }
 
 /**
@@ -361,6 +363,11 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  [Task.getPoseTable]: {
+    stepTemperature: number;
+    baseTemperature: number;
+    numberValues: number;
+  }
 }
 
 /**
@@ -488,5 +495,10 @@ export interface TaskOutputs {
   [Task.importLambertAndValidate]: {
     localization: Localization;
     meanGpsDiff: number;
+  };
+  [Task.getPoseTable]: {
+    temperatures: number[];
+    poseParams: number[];
+    horizontalTensions: number[];
   };
 }
