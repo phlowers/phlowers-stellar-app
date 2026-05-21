@@ -231,6 +231,36 @@ describe('InputNumberComponent', () => {
       fixture.detectChanges();
       expect(getByTestId('number-input')?.getAttribute('step')).toBe('10');
     });
+
+    it('should not produce floating-point artifacts when incrementing with a fractional step', () => {
+      fixture.componentRef.setInput('step', 0.01);
+      fixture.componentRef.setInput('min', 0);
+      fixture.componentRef.setInput('max', 1);
+      component.writeValue(0.02);
+      component.increment();
+      // 0.02 + 0.01 in raw JS = 0.030000000000000002
+      expect(component.pointsCountValue()).toBe(0.03);
+    });
+
+    it('should not produce floating-point artifacts when decrementing with a fractional step', () => {
+      fixture.componentRef.setInput('step', 0.1);
+      fixture.componentRef.setInput('min', 0);
+      fixture.componentRef.setInput('max', 1);
+      component.writeValue(0.3);
+      component.decrement();
+      // 0.3 - 0.1 in raw JS = 0.19999999999999998
+      expect(component.pointsCountValue()).toBe(0.2);
+    });
+
+    it('should stay precise across consecutive increments with a fractional step', () => {
+      fixture.componentRef.setInput('step', 0.01);
+      fixture.componentRef.setInput('min', 0);
+      fixture.componentRef.setInput('max', 1);
+      component.writeValue(0.01);
+      component.increment(); // → 0.02
+      component.increment(); // → 0.03
+      expect(component.pointsCountValue()).toBe(0.03);
+    });
   });
 
   describe('isReadonly input', () => {

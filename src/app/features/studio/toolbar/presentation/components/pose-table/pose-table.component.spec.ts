@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PoseTableComponent } from './pose-table.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -45,8 +45,8 @@ describe('PoseTableComponent', () => {
   let component: PoseTableComponent;
   let fixture: ComponentFixture<PoseTableComponent>;
 
-  let sectionSignal: ReturnType<typeof signal<Section | null>>;
-  let studySignal: ReturnType<typeof signal<unknown>>;
+  let sectionSignal: WritableSignal<Section | null>;
+  let studySignal: WritableSignal<unknown>;
   let mockSectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
   let mockToolbarDialogService: { setTemplates: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };

@@ -96,7 +96,7 @@ export class InputNumberComponent implements ControlValueAccessor {
     if (this.disabled()) return;
     const current = this.pointsCountControl.value ?? 0;
     if (current < this.max()) {
-      this.updateValue(current + this.step());
+      this.updateValue(this.roundToStep(current + this.step()));
     }
     this.onTouched();
   }
@@ -105,7 +105,7 @@ export class InputNumberComponent implements ControlValueAccessor {
     if (this.disabled()) return;
     const current = this.pointsCountControl.value ?? 0;
     if (current > this.min()) {
-      this.updateValue(current - this.step());
+      this.updateValue(this.roundToStep(current - this.step()));
     }
     this.onTouched();
   }
@@ -121,6 +121,11 @@ export class InputNumberComponent implements ControlValueAccessor {
     this.pointsCountControl.setValue(next, { emitEvent: false });
     this.pointsCountValue.set(next);
     this.onChange(next);
+  }
+
+  private roundToStep(value: number): number {
+    const decimals = this.step().toString().split('.')[1]?.length ?? 0;
+    return Number.parseFloat(value.toFixed(decimals));
   }
 
   private clamp(value: number | null): number | null {
