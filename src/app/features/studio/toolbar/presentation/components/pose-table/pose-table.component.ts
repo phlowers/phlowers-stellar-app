@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   TemplateRef,
+  untracked,
   viewChild
 } from '@angular/core';
 import {
@@ -93,29 +94,27 @@ export class PoseTableComponent {
 
   readonly results = signal<PoseResults | null>(null);
 
-  constructor() {
-    effect(() => {
-      const header = this.headerTemplate();
-      const footer = this.footerTemplate();
-      if (header && footer) {
-        this.toolbarDialogService.setTemplates({ header, footer });
-      }
-    });
+  protected readonly _templatesEffect = effect(() => {
+    const header = this.headerTemplate();
+    const footer = this.footerTemplate();
+    if (header && footer) {
+      this.toolbarDialogService.setTemplates({ header, footer });
+    }
+  });
 
-    effect(() => {
-      const saved = this.spanService.section()?.pose_table;
-      if (saved) {
-        this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
-        this.calculate();
-      } else {
-        this.form.setValue({
-          lowestTemp: this.LOWEST_TEMP_DEFAULT,
-          computingStep: this.COMPUTING_STEP_DEFAULT
-        });
-        this.results.set(null);
-      }
-    });
-  }
+  protected readonly _formSyncEffect = effect(() => {
+    const saved = this.spanService.section()?.pose_table;
+    if (saved) {
+      this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
+      untracked(() => this.calculate());
+    } else {
+      this.form.setValue({
+        lowestTemp: this.LOWEST_TEMP_DEFAULT,
+        computingStep: this.COMPUTING_STEP_DEFAULT
+      });
+      this.results.set(null);
+    }
+  });
 
   calculate(): void {
     if (this.form.invalid) return;
@@ -144,20 +143,20 @@ export class PoseTableComponent {
   }
 
   getLowestTempError(): string {
-    const e = this.form.controls.lowestTemp.errors;
-    if (e?.['required']) return $localize`Required`;
-    if (e?.['maxTwoDecimals']) return $localize`Maximum 2 decimal places`;
-    if (e?.['min']) return $localize`Minimum value:` + ' ' + this.LOWEST_TEMP_MIN + '°C';
-    if (e?.['max']) return $localize`Maximum value:` + ' ' + this.LOWEST_TEMP_MAX + '°C';
+    const errors = this.form.controls.lowestTemp.errors;
+    if (errors?.['required']) return $localize`Required`;
+    if (errors?.['maxTwoDecimals']) return $localize`Maximum 2 decimal places`;
+    if (errors?.['min']) return $localize`Minimum value:` + ' ' + this.LOWEST_TEMP_MIN + '°C';
+    if (errors?.['max']) return $localize`Maximum value:` + ' ' + this.LOWEST_TEMP_MAX + '°C';
     return '';
   }
 
   getComputingStepError(): string {
-    const e = this.form.controls.computingStep.errors;
-    if (e?.['required']) return $localize`Required`;
-    if (e?.['integer']) return $localize`Value must be a whole number`;
-    if (e?.['min']) return $localize`Minimum value:` + ' ' + this.COMPUTING_STEP_MIN;
-    if (e?.['max']) return $localize`Maximum value:` + ' ' + this.COMPUTING_STEP_MAX;
+    const errors = this.form.controls.computingStep.errors;
+    if (errors?.['required']) return $localize`Required`;
+    if (errors?.['integer']) return $localize`Value must be a whole number`;
+    if (errors?.['min']) return $localize`Minimum value:` + ' ' + this.COMPUTING_STEP_MIN;
+    if (errors?.['max']) return $localize`Maximum value:` + ' ' + this.COMPUTING_STEP_MAX;
     return '';
   }
 
