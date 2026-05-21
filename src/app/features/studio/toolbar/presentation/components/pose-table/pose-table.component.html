@@ -92,7 +92,7 @@
     <ng-container i18n>Save</ng-container>
   </button>
 
-  <button app-btn type="button" data-testid="report-btn" [disabled]="!results()">
+  <button app-btn type="button" data-testid="report-btn" [disabled]="!results() || form.invalid">
     <app-icon icon="description" aria-hidden="true" />
     <ng-container i18n>Report</ng-container>
   </button>

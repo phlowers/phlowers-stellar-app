@@ -8,7 +8,7 @@ import { SectionService } from '@services/section/section.service';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { Section } from '@shared/domain';
-import { PoseTableData, PoseResults } from '@shared/domain/models/section.model';
+import { PoseTableData } from '@shared/domain/models/section.model';
 import { InitialCondition } from '@shared/domain/models/initial-condition.model';
 
 function makeSection(overrides: Partial<Section> = {}): Section {
@@ -283,42 +283,37 @@ describe('PoseTableComponent', () => {
   // ─── save() ───────────────────────────────────────────────────────────────
 
   describe('save()', () => {
-    const mockResults: PoseResults = { temperatures: [-35], poseParams: [2454], tensions: [5636] };
-
     it('does not call service when study is null', async () => {
       sectionSignal.set(makeSection());
-      component.results.set(mockResults);
       await component.save();
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
     });
 
     it('does not call service when section is null', async () => {
       studySignal.set({ uuid: 'study-uuid', sections: [] });
-      component.results.set(mockResults);
       await component.save();
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
     });
 
-    it('does not call service when results are null', async () => {
+    it('does not call service when form is invalid', async () => {
       studySignal.set({ uuid: 'study-uuid', sections: [] });
       sectionSignal.set(makeSection());
+      component.form.controls.lowestTemp.setValue(null as unknown as number);
       await component.save();
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
     });
 
-    it('calls createOrUpdateSection with the correct PoseTableData', async () => {
+    it('calls createOrUpdateSection with lowestTemp and computingStep only', async () => {
       const study = { uuid: 'study-uuid', sections: [] };
       const section = makeSection();
-      const results: PoseResults = { temperatures: [-35, -25], poseParams: [2454, 2500], tensions: [5636, 5700] };
 
       studySignal.set(study);
       sectionSignal.set(section);
-      component.results.set(results);
       component.form.setValue({ lowestTemp: -20, computingStep: 3 });
 
       await component.save();
 
-      const expectedData: PoseTableData = { lowestTemp: -20, computingStep: 3, results };
+      const expectedData: PoseTableData = { lowestTemp: -20, computingStep: 3 };
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
         study,
         expect.objectContaining({ pose_table: expectedData })
@@ -331,7 +326,6 @@ describe('PoseTableComponent', () => {
 
       studySignal.set(study);
       sectionSignal.set(section);
-      component.results.set(mockResults);
 
       await component.save();
 
@@ -342,7 +336,6 @@ describe('PoseTableComponent', () => {
     it('shows a success notification on successful save', async () => {
       studySignal.set({ uuid: 'study-uuid', sections: [] });
       sectionSignal.set(makeSection());
-      component.results.set(mockResults);
 
       await component.save();
 
@@ -354,7 +347,6 @@ describe('PoseTableComponent', () => {
       mockSectionService.createOrUpdateSection.mockRejectedValue(new Error('DB error'));
       studySignal.set({ uuid: 'study-uuid', sections: [] });
       sectionSignal.set(makeSection());
-      component.results.set(mockResults);
 
       await component.save();
 
@@ -450,11 +442,7 @@ describe('PoseTableComponent', () => {
 
   describe('pose_table restoration', () => {
     it('restores form values from saved pose_table when section changes', () => {
-      const savedData: PoseTableData = {
-        lowestTemp: -30,
-        computingStep: 2,
-        results: { temperatures: [-35], poseParams: [2454], tensions: [5636] }
-      };
+      const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
       sectionSignal.set(makeSection({ pose_table: savedData }));
       fixture.detectChanges();
 
@@ -462,13 +450,12 @@ describe('PoseTableComponent', () => {
       expect(component.form.controls.computingStep.value).toBe(2);
     });
 
-    it('restores results from saved pose_table when section changes', () => {
-      const savedResults: PoseResults = { temperatures: [-35, -25], poseParams: [2454, 2500], tensions: [5636, 5700] };
-      const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2, results: savedResults };
+    it('auto-triggers calculation when section has saved pose_table params', () => {
+      const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
       sectionSignal.set(makeSection({ pose_table: savedData }));
       fixture.detectChanges();
 
-      expect(component.results()).toEqual(savedResults);
+      expect(component.results()).not.toBeNull();
     });
 
     it('does not change form or results when section has no pose_table', () => {
@@ -481,11 +468,7 @@ describe('PoseTableComponent', () => {
     });
 
     it('resets form to defaults and clears results when switching to a section without pose_table', () => {
-      const savedData: PoseTableData = {
-        lowestTemp: -30,
-        computingStep: 2,
-        results: { temperatures: [-35], poseParams: [2454], tensions: [5636] }
-      };
+      const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
       sectionSignal.set(makeSection({ pose_table: savedData }));
       fixture.detectChanges();
 

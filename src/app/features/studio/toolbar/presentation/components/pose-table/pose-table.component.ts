@@ -106,7 +106,7 @@ export class PoseTableComponent {
       const saved = this.spanService.section()?.pose_table;
       if (saved) {
         this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
-        this.results.set(saved.results);
+        this.calculate();
       } else {
         this.form.setValue({
           lowestTemp: this.LOWEST_TEMP_DEFAULT,
@@ -129,13 +129,11 @@ export class PoseTableComponent {
   async save(): Promise<void> {
     const study = this.plotService.study();
     const section = this.spanService.section();
-    const res = this.results();
-    if (!study || !section || !res || this.form.invalid) return;
+    if (!study || !section || this.form.invalid) return;
 
     const data: PoseTableData = {
       lowestTemp: this.form.controls.lowestTemp.value,
-      computingStep: this.form.controls.computingStep.value,
-      results: res
+      computingStep: this.form.controls.computingStep.value
     };
     try {
       await this.sectionService.createOrUpdateSection(study, { ...section, pose_table: data });

@@ -23,7 +23,6 @@ export interface PoseResults {
 export interface PoseTableData {
   lowestTemp: number;
   computingStep: number;
-  results: PoseResults;
 }
 
 /**
