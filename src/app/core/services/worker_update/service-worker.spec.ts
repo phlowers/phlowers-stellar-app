@@ -465,6 +465,67 @@ describe('Service Worker Functions', () => {
       expect(response).toBe(cachedResponse);
       expect(mockCache.match).toHaveBeenCalledWith(mockEvent.request);
     });
+
+    it('should NOT pass an AbortSignal to fetch when there is no cached fallback', async () => {
+      // Regression guard for the login-then-chunk-load bug: when the cache
+      // is empty (first install), the SW must not artificially abort the
+      // network request after 3s. It should issue a plain fetch that waits
+      // for the real network response.
+      mockEvent.request.url = 'https://example.com/chunk-KJVBLZQZ.js';
+      const clonedRequest = { url: 'https://example.com/chunk-KJVBLZQZ.js' };
+      const networkResponse = {
+        ok: true,
+        clone: vi.fn().mockReturnValue({ ok: true })
+      };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockCache.match.mockResolvedValue(undefined);
+      mockFetch.mockResolvedValue(networkResponse as unknown as globalThis.Response);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+      await mockEvent.respondWith.mock.calls[0][0];
+
+      const fetchInit = mockFetch.mock.calls[0][1] as RequestInit;
+      expect(fetchInit.signal).toBeUndefined();
+    });
+
+    it('should pass an AbortSignal to fetch when a cached fallback exists', async () => {
+      // The 3s timeout is still desirable when we have a safe cache fallback,
+      // because it lets offline users get a fast response.
+      mockEvent.request.url = 'https://example.com/styles.css';
+      const clonedRequest = { url: 'https://example.com/styles.css' };
+      const cachedResponse = { from: 'cache' };
+      const networkResponse = {
+        ok: true,
+        clone: vi.fn().mockReturnValue({ ok: true })
+      };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockCache.match.mockResolvedValue(cachedResponse as unknown as globalThis.Response);
+      mockFetch.mockResolvedValue(networkResponse as unknown as globalThis.Response);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+      await mockEvent.respondWith.mock.calls[0][0];
+
+      const fetchInit = mockFetch.mock.calls[0][1] as RequestInit;
+      expect(fetchInit.signal).toBeDefined();
+      expect(fetchInit.signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it('should return Response.error() when network fails and no cache exists', async () => {
+      // The original bug surfaced as ERR_FAILED for chunk loads; this confirms
+      // the SW does surface the error rather than hanging indefinitely.
+      mockEvent.request.url = 'https://example.com/chunk-4MWGN5E4.js';
+      const clonedRequest = { url: 'https://example.com/chunk-4MWGN5E4.js' };
+      mockEvent.request.clone.mockReturnValue(clonedRequest);
+      mockCache.match.mockResolvedValue(undefined);
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+      const response = await mockEvent.respondWith.mock.calls[0][0];
+
+      // Our MockResponse.error() returns a stub with status 500.
+      expect(response).toBeDefined();
+      expect((response as { status?: number }).status).toBe(500);
+    });
   });
 
   describe('handleMessage', () => {

@@ -42,18 +42,28 @@ function loadClaims() {
 export default function (req, res, next) {
   if (req.method === 'GET' && req.url === '/auth/userinfo') {
     const claims = loadClaims();
-    if (!claims) {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Cache-Control', 'no-store');
-      res.end(JSON.stringify({ authenticated: false }));
-      return;
-    }
+    // Mode parity with production:
+    //   oidc-claims.json present → simulates OIDC mode (oidcEnabled=true)
+    //   oidc-claims.json absent  → simulates fallback mode (oidcEnabled=false)
+    const oidcEnabled = claims !== null;
+    res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');
-    res.end(JSON.stringify(claims));
+    if (!claims) {
+      res.end(JSON.stringify({ authenticated: false, oidcEnabled }));
+      return;
+    }
+    res.end(JSON.stringify({ authenticated: true, oidcEnabled, ...claims }));
     console.log('[oidc-mock] GET /auth/userinfo →', claims.email);
-  } else {
-    next();
+    return;
   }
+  if (req.method === 'GET' && req.url === '/auth/login') {
+    // Simulates the Apache /auth/login CGI 302 → / behaviour.
+    res.statusCode = 302;
+    res.setHeader('Location', '/');
+    res.setHeader('Cache-Control', 'no-store');
+    res.end();
+    return;
+  }
+  next();
 }

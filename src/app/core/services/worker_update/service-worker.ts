@@ -196,19 +196,25 @@ export async function handleFetch(event: FetchEvent) {
       event.respondWith(
         (async () => {
           const cache = await caches.open(CACHE_NAME);
+          // Look up a cached fallback first. If we have one, the short network
+          // timeout is safe (we can serve cache on abort). If we DON'T have a
+          // cached copy, aborting at 3s would break the page (e.g. first-time
+          // lazy-chunk loads on a slow network), so we wait for the real fetch.
+          const cachedResponse = await cache.match(event.request);
           try {
-            const networkResponse = await fetchWithTimeout(event.request.clone(), NO_CACHE_INIT);
+            const networkResponse = cachedResponse
+              ? await fetchWithTimeout(event.request.clone(), NO_CACHE_INIT)
+              : await fetch(event.request.clone(), NO_CACHE_INIT);
             // Only cache successful (2xx) responses — never cache 3xx redirects.
             if (networkResponse?.ok) {
               await cache.put(event.request, networkResponse.clone());
             }
             return networkResponse;
           } catch (error) {
-            console.error('Network-first fetch failed, trying cache:', error);
-            const cachedResponse = await cache.match(event.request);
             if (cachedResponse) {
               return cachedResponse;
             }
+            console.error('Network-first fetch failed and no cache available:', error);
             return Response.error();
           }
         })()

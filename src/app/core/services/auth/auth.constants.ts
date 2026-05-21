@@ -7,3 +7,11 @@
 
 /** URL of the Apache CGI endpoint that returns OIDC claims (PKCE-protected). */
 export const USERINFO_URL = '/auth/userinfo';
+
+/**
+ * URL of the Apache CGI endpoint that forces the OIDC sign-in prompt with
+ * G@IA. A full top-level navigation to this URL triggers mod_auth_openidc:
+ * if no session exists the browser is redirected to the G@IA authorization
+ * endpoint, then back to "/" once authenticated.
+ */
+export const LOGIN_URL = '/auth/login';
