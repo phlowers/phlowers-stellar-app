@@ -124,7 +124,7 @@ describe('VtlGuyingReportService', () => {
 
       const result = await service.getDiagramImageBase64();
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('img/guying-help.png');
+      expect(globalThis.fetch).toHaveBeenCalledWith('img/VHL-Haubanage-Suspension-Droite.png');
       expect(result).toContain('data:');
     });
 

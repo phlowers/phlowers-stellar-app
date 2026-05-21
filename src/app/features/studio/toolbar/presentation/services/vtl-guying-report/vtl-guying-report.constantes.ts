@@ -17,14 +17,17 @@ export const CONTENT_WIDTH = PAGE_SIZE.width - PAGE_MARGIN.left - PAGE_MARGIN.ri
 /** Line height in mm. */
 export const LINE_HEIGHT = 6;
 
-/** Font sizes in pt. */
+/** Paragraph indent in mm (11 pt × 0.35 mm/pt). Applied as left-column offset from PAGE_MARGIN.left. */
+export const PARAGRAPH_INDENT = 3.85;
+
+/** Font sizes in pt (spec values in px converted at 96 dpi → pt = px × 72/96). */
 export const FONT_SIZES = {
-  title: 20,
-  sectionTitle: 12,
+  title: 11,
+  sectionTitle: 10,
   label: 9,
   value: 9,
   footer: 8,
-  appName: 10
+  appName: 8
 } as const;
 
 /** Application name displayed in the PDF header. */
@@ -44,10 +47,10 @@ export const PDF_LABELS = {
   date: $localize`Date`,
   study: $localize`Etude`,
   section: $localize`Canton`,
-  studyDescription: $localize`Description de l'étude`,
-  sectionComment: $localize`Commentaire du canton`,
+  studyDescription: $localize`Description`,
+  sectionComment: $localize`Commentaire`,
   chargeName: $localize`Cas de charge`,
-  chargeDescription: $localize`Description du cas de charge`,
+  chargeDescription: $localize`Description`,
   vtlWithoutGuyingTitle: $localize`VHL sans haubanage`,
   chargeV: $localize`Charge V`,
   chargeH: $localize`Charge H`,

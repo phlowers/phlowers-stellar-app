@@ -12,7 +12,7 @@ import {
   loadImageAsBase64
 } from './vtl-guying-report.helpers';
 import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
-import { APP_NAME, PDF_LABELS } from './vtl-guying-report.constantes';
+import { APP_NAME, PAGE_SIZE, PDF_LABELS } from './vtl-guying-report.constantes';
 
 function createMockDoc(): jsPDF {
   return {
@@ -88,9 +88,8 @@ describe('vtl-guying-report helpers', () => {
       const doc = createMockDoc();
       const nextY = drawHeader(doc);
 
-      expect(doc.setFont).toHaveBeenCalledWith('helvetica', 'normal');
+      expect(doc.setFont).toHaveBeenCalledWith('Nunito', 'bold');
       expect(doc.text).toHaveBeenCalledWith(APP_NAME, expect.any(Number), expect.any(Number), { align: 'right' });
-      expect(doc.setFont).toHaveBeenCalledWith('helvetica', 'bold');
       expect(doc.text).toHaveBeenCalledWith(PDF_LABELS.reportTitle, expect.any(Number), expect.any(Number));
       expect(doc.line).toHaveBeenCalled();
       expect(nextY).toBeGreaterThan(0);
@@ -108,7 +107,7 @@ describe('vtl-guying-report helpers', () => {
       const doc = createMockDoc();
       drawFooter(doc);
 
-      expect(doc.setFont).toHaveBeenCalledWith('helvetica', 'normal');
+      expect(doc.setFont).toHaveBeenCalledWith('Nunito', 'bold');
       expect(doc.text).toHaveBeenCalledWith(PDF_LABELS.pageFooter, expect.any(Number), expect.any(Number), {
         align: 'right'
       });
@@ -162,6 +161,22 @@ describe('vtl-guying-report helpers', () => {
       expect(doc.splitTextToSize).toHaveBeenCalled();
       expect(nextY).toBeGreaterThan(40);
     });
+
+    it('should compute date position from right margin (right-aligned)', () => {
+      const doc = createMockDoc();
+      const data = createMockReportData({ date: '20/05/2026' });
+      drawStudySection(doc, data, 40);
+
+      // getTextWidth is called with the date label to compute right-aligned X position
+      expect(doc.getTextWidth).toHaveBeenCalledWith(expect.stringContaining(PDF_LABELS.date));
+      // Date value is measured to contribute to the computed X position
+      expect(doc.getTextWidth).toHaveBeenCalledWith(data.date);
+      // Date value is drawn with positional args only (no { align: 'right' } option)
+      const textCalls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      const dateCalls = textCalls.filter((call) => call[0] === data.date);
+      expect(dateCalls).toHaveLength(1);
+      expect(dateCalls[0]).toHaveLength(3); // [text, x, y] — no options argument
+    });
   });
 
   describe('drawVtlWithoutGuyingSection', () => {
@@ -201,6 +216,18 @@ describe('vtl-guying-report helpers', () => {
 
       expect(nextY).toBeGreaterThan(80);
     });
+
+    it('should render Résultante value in bold', () => {
+      const doc = createMockDoc();
+      const data = createMockReportData();
+      drawVtlWithoutGuyingSection(doc, data, 80);
+
+      // chargeV, chargeH, chargeL each contribute 1 'normal' call for their value
+      // Résultante uses boldValue=true, so it contributes 0 'normal' calls
+      const calls = (doc.setFont as unknown as { mock: { calls: string[][] } }).mock.calls;
+      const normalCount = calls.filter(([, style]) => style === 'normal').length;
+      expect(normalCount).toBe(3);
+    });
   });
 
   describe('drawGuyingSection', () => {
@@ -235,20 +262,21 @@ describe('vtl-guying-report helpers', () => {
       expect(doc.addImage).not.toHaveBeenCalled();
     });
 
-    it('should draw a border rect with padding around the diagram image', () => {
+    it('should add diagram image centered on the page with width 52.5 mm', () => {
       const doc = createMockDoc();
       const data = createMockReportData();
       drawGuyingSection(doc, data, 110);
 
-      expect(doc.rect).toHaveBeenCalled();
-    });
-
-    it('should not draw a border rect when diagramImageBase64 is empty', () => {
-      const doc = createMockDoc();
-      const data = createMockReportData({ diagramImageBase64: '' });
-      drawGuyingSection(doc, data, 110);
-
-      expect(doc.rect).not.toHaveBeenCalled();
+      const expectedImgWidth = 52.5;
+      const expectedImgX = PAGE_SIZE.width / 2 - expectedImgWidth / 2;
+      expect(doc.addImage).toHaveBeenCalledWith(
+        data.diagramImageBase64,
+        'PNG',
+        expectedImgX,
+        expect.any(Number),
+        expectedImgWidth,
+        expect.any(Number)
+      );
     });
 
     it('should draw separator line at the end', () => {
@@ -274,7 +302,7 @@ describe('vtl-guying-report helpers', () => {
       const data = createMockReportData();
       drawVtlWithGuyingSection(doc, data, 180);
 
-      expect(doc.setFont).toHaveBeenCalledWith('helvetica', 'italic');
+      expect(doc.setFont).toHaveBeenCalledWith('Nunito', 'italic');
     });
 
     it('should use splitTextToSize for explanatory text', () => {
@@ -314,6 +342,17 @@ describe('vtl-guying-report helpers', () => {
       drawVtlWithGuyingSection(doc, data, 180);
 
       expect(doc.splitTextToSize).toHaveBeenCalledWith('-', expect.any(Number));
+    });
+
+    it('should render all result values (tension, angles, charges) in bold', () => {
+      const doc = createMockDoc();
+      const data = createMockReportData();
+      drawVtlWithGuyingSection(doc, data, 180);
+
+      // 5 result values use boldValue=true; only the comment wrapping helper uses 'normal' once
+      const calls = (doc.setFont as unknown as { mock: { calls: string[][] } }).mock.calls;
+      const normalCount = calls.filter(([, style]) => style === 'normal').length;
+      expect(normalCount).toBe(1);
     });
   });
 
