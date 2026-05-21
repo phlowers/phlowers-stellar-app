@@ -10,6 +10,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 LOG_INPUTS = True
 
+from stellar_engine.core import pose_table
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
@@ -167,3 +168,8 @@ def import_lambert(js_inputs):
 
 def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
+
+
+def get_pose_table(js_inputs):
+    global engine
+    return pose_table.get_pose_table(js_to_python(js_inputs), engine)
