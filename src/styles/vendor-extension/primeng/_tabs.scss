@@ -20,10 +20,10 @@
   --p-tabs-tab-background: var(--primary-100);
   --p-tabs-tab-hover-background: var(--primary-200);
   --p-tabs-tab-active-background: var(--grey-0);
-  --p-tabs-tab-color: var(--grey-750);
+  --p-tabs-tab-color: var(--star-dust-900);
   --p-tabs-tab-hover-color: var(--p-tabs-tab-color);
-  --p-tabs-tab-active-color: var(--grey-850);
-  --p-tabs-tab-padding: 0.625rem 0.75rem;
+  --p-tabs-tab-active-color: var(--primary-700);
+  --p-tabs-tab-padding: 0;
   --p-tabs-tab-margin: 0rem;
   --p-tabs-tabpanel-padding: 1rem;
   --p-tabs-tabpanel-background: rgb(255 255 255 / 0);
@@ -31,20 +31,24 @@
   height: calc(100% - #{app.$studio-sidetab-header-height});
 
   .p-tablist-tab-list {
-    @apply grid;
-    grid-template-columns: calc(50% - 0.0625rem) calc(50% - 0.0625rem);
-    grid-gap: 0.125rem;
+    @apply flex flex-nowrap;
+    gap: 0.25rem;
     padding: 0.5rem 1rem 0rem;
-    grid-template-areas:
-      'climate .'
-      'loadMarking cableLengthChange'
-      'cableSupportManip cableSpanManip';
   }
 
   .p-tab {
     @apply rounded-sm;
     @extend %text-s-600;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 2rem;
+    align-items: center;
     justify-content: center;
+
+    > i {
+      font-size: 1rem;
+      line-height: 1;
+    }
 
     &:focus-visible {
       @extend %focus-state;
@@ -84,25 +88,5 @@
         background-color: var(--star-dust-600);
       }
     }
-  }
-
-  .climate {
-    grid-area: climate;
-  }
-
-  .load-marking {
-    grid-area: loadMarking;
-  }
-
-  .cable-length {
-    grid-area: cableLengthChange;
-  }
-
-  .cable-support {
-    grid-area: cableSupportManip;
-  }
-
-  .cable-span {
-    grid-area: cableSpanManip;
   }
 }
