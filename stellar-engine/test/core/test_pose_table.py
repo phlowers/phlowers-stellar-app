@@ -7,13 +7,16 @@
 
 import numpy as np
 from mechaphlowers import BalanceEngine
-from stellar_engine.core.pose_table import build_engine_pose_table, get_pose_table
+
+from stellar_engine.core.pose_table import (
+    build_engine_pose_table,
+    get_pose_table,
+)
 
 
-
-def test_pose_table(balance_engine_base: BalanceEngine):
-    inputs = {"stepTemperature": 10, "baseTemperature": -25, "numberValues": 7}
-    result = get_pose_table(inputs, balance_engine_base)
+def test_pose_table(balance_engine_no_anchor: BalanceEngine):
+    inputs = {"stepTemperature": 5, "baseTemperature": -15, "numberValues": 7}
+    result = get_pose_table(inputs, balance_engine_no_anchor)
     expected_keys = {
         "temperatures",
         "poseParams",
@@ -22,11 +25,18 @@ def test_pose_table(balance_engine_base: BalanceEngine):
     assert expected_keys == set(result.keys())
     for output_key in result:
         assert len(result[output_key]) == inputs["numberValues"]
-    
-    expected_temperature_array = np.array([-25, -15, -5, 5, 15, 25, 35])
-    np.testing.assert_equal(result["temperatures"], expected_temperature_array)
 
-def test_build_new_balance_engine(balance_engine_base: BalanceEngine):
-    new_balance_engine = build_engine_pose_table(balance_engine_base)
-    assert new_balance_engine.cable_array == balance_engine_base.cable_array
-    assert new_balance_engine.section_array.data["span_length"].iloc[0] == balance_engine_base.get_ruling_span_length()
+    expected_temperature_array = np.array([-15, -10, -5, 0, 5, 10, 15])
+    np.testing.assert_equal(result["temperatures"], expected_temperature_array)
+    np.testing.assert_allclose(result["poseParams"][-1], 2000.0)
+
+
+def test_build_new_balance_engine(balance_engine_no_anchor: BalanceEngine):
+    new_balance_engine = build_engine_pose_table(balance_engine_no_anchor)
+    assert (
+        new_balance_engine.cable_array == balance_engine_no_anchor.cable_array
+    )
+    assert (
+        new_balance_engine.section_array.data["span_length"].iloc[0]
+        == balance_engine_no_anchor.get_ruling_span_length()
+    )
