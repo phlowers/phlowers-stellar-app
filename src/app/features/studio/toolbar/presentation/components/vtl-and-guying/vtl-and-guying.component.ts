@@ -322,7 +322,7 @@ export class VhlAndGuyingComponent {
       diagramImageBase64
     };
 
-    this.vtlGuyingReportService.generateReport(data);
+    await this.vtlGuyingReportService.generateReport(data);
   }
 
   onSave(): void {

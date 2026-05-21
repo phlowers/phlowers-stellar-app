@@ -41,6 +41,28 @@ import {
   UNITS
 } from './vtl-guying-report.constantes';
 
+/** Loads a file from a URL and returns its raw base64 encoding (no data URL prefix). */
+export async function loadFileAsBase64(url: string): Promise<string> {
+  const response = await globalThis.fetch(url);
+  const buffer = await response.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCodePoint(byte);
+  });
+  return globalThis.btoa(binary);
+}
+
+/** Registers Nunito font variants (normal, bold, italic) in a jsPDF document. */
+export function registerNunitoFont(doc: jsPDF, regularB64: string, boldB64: string, italicB64: string): void {
+  doc.addFileToVFS('Nunito-Regular.ttf', regularB64);
+  doc.addFont('Nunito-Regular.ttf', 'Nunito', 'normal');
+  doc.addFileToVFS('Nunito-Bold.ttf', boldB64);
+  doc.addFont('Nunito-Bold.ttf', 'Nunito', 'bold');
+  doc.addFileToVFS('Nunito-Italic.ttf', italicB64);
+  doc.addFont('Nunito-Italic.ttf', 'Nunito', 'italic');
+}
+
 /** Formats a numeric value to fixed decimals with unit, or returns "-" if null/undefined. */
 export function formatValue(value: number | null | undefined, unit: string): string {
   if (value === null || value === undefined) {
@@ -55,11 +77,11 @@ export function formatValue(value: number | null | undefined, unit: string): str
 /** Draws text with a bullet point prefix. Label is bold, value is normal. */
 function drawBulletItem(doc: jsPDF, label: string, value: string, x: number, y: number): void {
   const bulletText = `${BULLET} `;
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.label);
   doc.text(bulletText + label + ' : ', x, y);
   const labelWidth = doc.getTextWidth(bulletText + label + ' : ');
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.text(value, x + labelWidth, y);
 }
 
@@ -72,12 +94,12 @@ export function drawHeader(doc: jsPDF): number {
   let y = PAGE_MARGIN.top;
 
   // App name (top right) — size: FONT_SIZES.appName
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.appName);
   doc.text(APP_NAME, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
 
   // Report title (top left, bold) — size: FONT_SIZES.title
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.title);
   y += LINE_HEIGHT + 2; // vertical gap between app name baseline and title baseline
   doc.text(PDF_LABELS.reportTitle, PAGE_MARGIN.left, y);
@@ -96,7 +118,7 @@ export function drawHeader(doc: jsPDF): number {
 //  Font size: FONT_SIZES.footer (constantes.ts)
 /** Draws the page footer (page number). */
 export function drawFooter(doc: jsPDF): void {
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.footer);
   doc.text(PDF_LABELS.pageFooter, PAGE_SIZE.width - PAGE_MARGIN.right, PAGE_SIZE.height - 10, { align: 'right' });
 }
@@ -118,7 +140,7 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + 5; // right column X origin
 
   // Section title (underlined)
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.studySectionTitle, leftX, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.studySectionTitle);
@@ -133,11 +155,11 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
 
   // Row 2: Étude (wraps if long) / Canton aligned on first line
   const studyBulletLabel = `${BULLET} ${PDF_LABELS.study} : `;
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.label);
   doc.text(studyBulletLabel, leftX, y);
   const studyLabelW = doc.getTextWidth(studyBulletLabel);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   const studyTitleLines = doc.splitTextToSize(data.studyTitle || '-', CONTENT_WIDTH / 2 - studyLabelW - 5);
   doc.text(studyTitleLines, leftX + studyLabelW, y);
   drawBulletItem(doc, PDF_LABELS.section, data.sectionName || '-', rightX, y);
@@ -146,7 +168,7 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   // Row 3: Description de l'étude
   drawBulletItem(doc, PDF_LABELS.studyDescription, '', leftX, y);
   y += LINE_HEIGHT - 1;
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.value);
   const descLines = doc.splitTextToSize(data.studyDescription || '-', CONTENT_WIDTH / 2 - 15);
   doc.text(descLines, leftX + 8, y);
@@ -156,7 +178,7 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   // Row 4: Commentaire du canton
   drawBulletItem(doc, PDF_LABELS.sectionComment, '', leftX, y);
   y += LINE_HEIGHT - 1;
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.value);
   const commentLines = doc.splitTextToSize(data.sectionComment || '-', CONTENT_WIDTH / 2 - 15);
   doc.text(commentLines, leftX + 8, y);
@@ -166,7 +188,7 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   drawBulletItem(doc, PDF_LABELS.chargeName, data.chargeName || '-', leftX, y);
   drawBulletItem(doc, PDF_LABELS.chargeDescription, '', rightX, y);
   y += LINE_HEIGHT - 1;
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.value);
   const chargeDescLines = doc.splitTextToSize(data.chargeDescription || '-', CONTENT_WIDTH / 2 - 15);
   doc.text(chargeDescLines, rightX + 8, y);
@@ -192,7 +214,7 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
   const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + 5;
 
   // Section title (underlined)
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.vtlWithoutGuyingTitle, leftX, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.vtlWithoutGuyingTitle);
@@ -237,7 +259,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   const leftX = PAGE_MARGIN.left + 5;
 
   // Section title (underlined)
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.guyingTitle, leftX, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.guyingTitle);
@@ -320,7 +342,7 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + 5;
 
   // Section title (underlined)
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.vtlWithGuyingTitle, leftX, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.vtlWithGuyingTitle);
@@ -329,7 +351,7 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   y += LINE_HEIGHT + 2;
 
   // Explanatory text (italic)
-  doc.setFont('helvetica', 'italic');
+  doc.setFont('Nunito', 'italic');
   doc.setFontSize(FONT_SIZES.value);
   const explanation1Lines = doc.splitTextToSize(PDF_LABELS.vtlWithGuyingExplanation1, CONTENT_WIDTH - 10);
   doc.text(explanation1Lines, leftX, y);
@@ -355,7 +377,7 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   // Comment
   drawBulletItem(doc, PDF_LABELS.comment, '', leftX, y);
   y += LINE_HEIGHT - 1;
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.value);
   const commentLines = doc.splitTextToSize(data.comment || '-', CONTENT_WIDTH - 15);
   doc.text(commentLines, leftX + 8, y);

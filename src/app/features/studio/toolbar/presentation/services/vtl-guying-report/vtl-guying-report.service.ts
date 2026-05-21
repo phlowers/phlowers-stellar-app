@@ -19,7 +19,9 @@ import {
   drawStudySection,
   drawVtlWithGuyingSection,
   drawVtlWithoutGuyingSection,
-  loadImageAsBase64
+  loadFileAsBase64,
+  loadImageAsBase64,
+  registerNunitoFont
 } from './vtl-guying-report.helpers';
 
 /** Service responsible for generating the VHL & Guying PDF report. */
@@ -29,6 +31,7 @@ export class VtlGuyingReportService {
   private readonly notificationService = inject(NotificationService);
 
   private diagramImageCache: string | null = null;
+  private nunitoFontsCache: { regular: string; bold: string; italic: string } | null = null;
 
   /** Pre-loads the diagram image and caches it for future report generation. */
   async preloadDiagramImage(): Promise<void> {
@@ -50,10 +53,38 @@ export class VtlGuyingReportService {
     return this.diagramImageCache ?? '';
   }
 
-  /** Generates and downloads the VHL & Guying PDF report. */
-  generateReport(data: VtlGuyingReportData): void {
+  /** Pre-loads Nunito font variants and caches them for future report generation. */
+  async preloadFonts(): Promise<void> {
+    if (this.nunitoFontsCache) {
+      return;
+    }
     try {
+      const [regular, bold, italic] = await Promise.all([
+        loadFileAsBase64('fonts/Nunito-Regular.ttf'),
+        loadFileAsBase64('fonts/Nunito-Bold.ttf'),
+        loadFileAsBase64('fonts/Nunito-Italic.ttf')
+      ]);
+      this.nunitoFontsCache = { regular, bold, italic };
+    } catch (error) {
+      this.logger.error('Failed to preload Nunito fonts', error);
+    }
+  }
+
+  /** Generates and downloads the VHL & Guying PDF report. */
+  async generateReport(data: VtlGuyingReportData): Promise<void> {
+    try {
+      if (!this.nunitoFontsCache) {
+        await this.preloadFonts();
+      }
       const doc = new jsPDF('p', 'mm', 'a4');
+      if (this.nunitoFontsCache) {
+        registerNunitoFont(
+          doc,
+          this.nunitoFontsCache.regular,
+          this.nunitoFontsCache.bold,
+          this.nunitoFontsCache.italic
+        );
+      }
 
       let y = drawHeader(doc);
       y = drawStudySection(doc, data, y);
