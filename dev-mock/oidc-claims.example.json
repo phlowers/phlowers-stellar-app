@@ -1,7 +1,7 @@
 {
-  "email": "dev.user@example.com",
+  "email": "dev.user@rte-france.com",
   "sub": "sub-dev-00000000",
   "given_name": "Dev",
   "family_name": "User",
-  "roles": ["viewer", "editor"]
+  "roles": ["ROLE_USER", "ROLE_ADMIN"]
 }
