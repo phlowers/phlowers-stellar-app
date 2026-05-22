@@ -87,7 +87,6 @@ def get_aspect_ratio(js_inputs):
     py_inputs = js_inputs.to_py()
     logger.debug(f"js_inputs for aspect ratio: {py_inputs}")
     # middle_span = get_section_middle_span(py_inputs["startSupport"], py_inputs["endSupport"])
-    py_inputs["view"] == "2D"
     return plot_settings.get_aspect_ratio(
         py_inputs, plt_line, py_inputs["startSupport"], py_inputs["endSupport"]
     )
@@ -177,4 +176,5 @@ def get_equivalent_span():
 
 def get_pose_table(js_inputs):
     global engine
+    raise Exception()
     return pose_table.get_pose_table(js_to_python(js_inputs), engine)

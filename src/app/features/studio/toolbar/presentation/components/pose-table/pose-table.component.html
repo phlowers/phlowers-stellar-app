@@ -97,3 +97,9 @@
     <ng-container i18n>Report</ng-container>
   </button>
 </ng-template>
+
+@if (poseTableError()) {
+  <div class="pose-table__error">
+    <p i18n>An error occurred while calculating the pose table</p>
+  </div>
+}

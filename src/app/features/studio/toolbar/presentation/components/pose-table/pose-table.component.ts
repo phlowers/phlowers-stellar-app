@@ -28,8 +28,8 @@ import { InputNumberComponent } from '@shared/components/atoms/input-number/inpu
 import { PoseResults, PoseTableData } from '@shared/domain/models/section.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { NotificationService } from '@core/services/notification/notification.service';
-import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
-import { Task } from '@src/app/core/services/worker_python/tasks/types';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-pose-table',
@@ -47,6 +47,8 @@ import { Task } from '@src/app/core/services/worker_python/tasks/types';
   ]
 })
 export class PoseTableComponent {
+  poseTableError = signal<boolean>(false);
+
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
   readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
 
@@ -112,8 +114,9 @@ export class PoseTableComponent {
     const saved = this.spanService.section()?.pose_table;
     if (saved) {
       this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
-      // await here?
-      untracked(() => this.calculate());
+      untracked(() => {
+        void this.calculate();
+      });
     } else {
       this.form.setValue({
         lowestTemp: this.LOWEST_TEMP_DEFAULT,
@@ -125,11 +128,15 @@ export class PoseTableComponent {
 
   async calculate(): Promise<void> {
     if (this.form.invalid) return;
-    const { result } = await this.workerPythonService.runTask(Task.getPoseTable, {
+    this.poseTableError.set(false);
+    const { result, error } = await this.workerPythonService.runTask(Task.getPoseTable, {
       stepTemperature: this.form.controls.computingStep.value,
       baseTemperature: this.form.controls.lowestTemp.value,
       numberValues: this.TABLE_NUMBER_VALUES
     });
+    if (error) {
+      this.poseTableError.set(true);
+    }
 
     this.results.set(result);
   }

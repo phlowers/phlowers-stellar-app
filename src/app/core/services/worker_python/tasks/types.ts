@@ -8,7 +8,7 @@
 import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
 import { AxesNorms, View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { PoseResults } from '@src/app/shared/domain/models/section.model';
+import { PoseResults } from '@shared/domain/models/section.model';
 
 /**
  * Available calculation tasks for the Python worker.
@@ -366,7 +366,7 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
-  // Inputs for clearObsgetEquivalentSpantacles task: no inputs
+  // Inputs for getEquivalentSpan task: no inputs
   [Task.getEquivalentSpan]: undefined;
   [Task.getPoseTable]: {
     stepTemperature: number;

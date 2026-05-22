@@ -19,8 +19,8 @@ from stellar_engine.entities.inputs import (
 # Assumes studio is already open to work and get an balance_engine
 def get_pose_table(inputs: dict, balance_engine: BalanceEngine) -> dict:
     table_inputs = PoseTableInputs(**inputs)
-
     balance_engine_pose_table = build_engine_pose_table(balance_engine)
+    sagging_parameter = balance_engine.section_array.sagging_parameter[0]
 
     last_value = (
         table_inputs.baseTemperature
@@ -42,9 +42,10 @@ def get_pose_table(inputs: dict, balance_engine: BalanceEngine) -> dict:
         data_spans = balance_engine_pose_table.get_data_spans()
         parameter_array.append(data_spans["parameter"][0])
         Th_array.append(data_spans["T_h"][0])
+        # back to initial temperature to avoid memory effect
         # later, should use the properties of SectionStudy here
         balance_engine_pose_table.solve_change_state(
-            new_temperature=balance_engine.section_array.sagging_parameter[0]
+            new_temperature=sagging_parameter
         )
     return {
         "temperatures": temperature_array.tolist(),

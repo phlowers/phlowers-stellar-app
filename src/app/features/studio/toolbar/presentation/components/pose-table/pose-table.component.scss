@@ -118,3 +118,11 @@ td {
 th {
   text-align: left;
 }
+
+.pose-table{
+  &__error {
+    @apply flex items-center gap-1 my-4;
+    @extend %text-s-600;
+    color: var(--main-error);
+  }
+}
