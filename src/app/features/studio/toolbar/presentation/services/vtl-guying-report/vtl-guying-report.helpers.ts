@@ -33,8 +33,10 @@ import {
   BULLET,
   CONTENT_WIDTH,
   DECIMAL_PLACES,
+  DIAGRAM_WIDTH,
   FONT_SIZES,
   LINE_HEIGHT,
+  LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE,
   PARAGRAPH_INDENT,
@@ -115,25 +117,30 @@ function drawWrappingBulletItem(
 // ─── SECTION 0: HEADER ────────────────────────────────────────────────────────
 //  [TOP RIGHT]  App name          → FONT_SIZES.appName (constantes.ts)
 //  [TOP LEFT]   Report title      → FONT_SIZES.title   (constantes.ts) — bold
+//  [TOP RIGHT]  Date              → same line as report title, right-aligned
 //  [SEPARATOR]  Full-width line   → lineWidth 0.5 mm, gap before = 10 mm (↑ more space / ↓ less)
-/** Draws the PDF header: title + app name + separator line. Returns the next Y position. */
-export function drawHeader(doc: jsPDF): number {
+/** Draws the PDF header: title + app name + date + separator line. Returns the next Y position. */
+export function drawHeader(doc: jsPDF, date: string): number {
   let y = PAGE_MARGIN.top;
 
   // App name (top right) — size: FONT_SIZES.appName, bold
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.appName);
   doc.text(APP_NAME, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
+  y += 2;
 
   // Report title (top left, bold) — size: FONT_SIZES.title
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.title);
-  y += LINE_HEIGHT + 2; // vertical gap between app name baseline and title baseline
+  y += LINE_HEIGHT; // vertical gap between app name baseline and title baseline
   doc.text(PDF_LABELS.reportTitle, PAGE_MARGIN.left, y);
 
+  // Date (top right, same line as title) — size: FONT_SIZES.title
+  doc.text(date, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
+
   // Main separator line — gap of 10 mm below title text (adjust here to change spacing)
-  y += 10;
-  doc.setLineWidth(0.5); // thicker than section separators (0.2)
+  y += 3;
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
   y += LINE_HEIGHT;
 
@@ -147,14 +154,13 @@ export function drawHeader(doc: jsPDF): number {
 export function drawFooter(doc: jsPDF): void {
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.footer);
-  doc.text(PDF_LABELS.pageFooter, PAGE_SIZE.width - PAGE_MARGIN.right, PAGE_SIZE.height - 10, { align: 'right' });
+  doc.text(PDF_LABELS.pageFooter, PAGE_SIZE.width - PAGE_MARGIN.right, PAGE_SIZE.height - 8, { align: 'right' });
 }
 
 // ─── SECTION 1: ÉTUDE ET CANTON ───────────────────────────────────────────────
 //  Single-column layout: all items left-aligned at leftX
-//  Exception: "Date" is right-aligned on same row as "Auteur"
 //  Row layout:
-//    Row 1 — Auteur (left)  |  Date (right-aligned)
+//    Row 1 — Auteur (left)
 //    Row 2 — Etude (left, wraps full width)
 //    Row 3 — Description (left, wraps full width)
 //    Row 4 — Canton (left)
@@ -173,24 +179,12 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.studySectionTitle, PAGE_MARGIN.left, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.studySectionTitle);
-  doc.setLineWidth(0.3);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
   y += LINE_HEIGHT + 2;
 
-  // Row 1: Auteur (left) / Date (right-aligned at right margin)
+  // Row 1: Auteur (left)
   drawBulletItem(doc, PDF_LABELS.author, data.author || '-', leftX, y);
-  const dateValue = data.date || '-';
-  const dateLabelText = `${BULLET} ${PDF_LABELS.date} : `;
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.label);
-  const dateLabelW = doc.getTextWidth(dateLabelText);
-  doc.setFont('Nunito', 'normal');
-  const dateValueW = doc.getTextWidth(dateValue);
-  const dateStartX = PAGE_SIZE.width - PAGE_MARGIN.right - dateLabelW - dateValueW;
-  doc.setFont('Nunito', 'bold');
-  doc.text(dateLabelText, dateStartX, y);
-  doc.setFont('Nunito', 'normal');
-  doc.text(dateValue, dateStartX + dateLabelW, y);
   y += LINE_HEIGHT;
 
   // Row 2: Etude (wraps full width)
@@ -212,9 +206,10 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
 
   // Row 7: Description du cas de charge (wraps full width)
   y += drawWrappingBulletItem(doc, PDF_LABELS.chargeDescription, data.chargeDescription || '-', leftX, y, wrapWidth);
+  y -= 2; // tighten gap before separator
 
   // Separator line
-  doc.setLineWidth(0.2);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
   y += LINE_HEIGHT;
 
@@ -230,14 +225,14 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
 export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY: number): number {
   let y = startY;
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
-  const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT;
+  const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT; // aligned with right column // aligned with diagram left edge
 
   // Section title (underlined) — at page margin, no indent
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.vtlWithoutGuyingTitle, PAGE_MARGIN.left, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.vtlWithoutGuyingTitle);
-  doc.setLineWidth(0.3);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
   y += LINE_HEIGHT + 2;
 
@@ -253,7 +248,8 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
 
   // Charge L
   drawBulletItem(doc, PDF_LABELS.chargeL, formatValue(data.vtlChargeL, UNITS.daN), leftX, y);
-  y += LINE_HEIGHT + 2;
+  y += LINE_HEIGHT;
+  y -= 2; // tighten gap before separator
 
   // Separator
   doc.setLineWidth(0.2);
@@ -264,13 +260,14 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
 }
 
 // ─── SECTION 3: HAUBANAGE ─────────────────────────────────────────────────────
-//  Three-column layout (all three start at paramsStartY):
-//    Left   (leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT)             — Portée haubanée, Support de référence, Type de support
-//    Center (imgX = page center − imgWidth/2, imgWidth = 52.5 mm)     — Diagram image (height proportional)
-//    Right  (rightColX = imgX + imgWidth + DIAGRAM_PADDING + 2mm gap) — Altitude, Distance horizontale, Avec poulie
+//  Two-column layout:
+//    Left   (leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT) — Portée haubanée, Support de référence,
+//                                                           Type de support, Altitude,
+//                                                           Distance horizontale, Avec poulie
+//    Center (imgX = page center − imgWidth/2)             — Diagram image (square, ratio 1:1)
 //  Diagram border: DIAGRAM_PADDING=3mm white space between image edge and border rect
 //    Source file : public/img/VHL-Haubanage-Suspension-Droite.png  (must have white/transparent background)
-//    To resize: change imgWidth (imgHeight computed proportionally) — imgX and rightColX update automatically
+//    To resize: change imgWidth (imgHeight computed proportionally) — imgX updates automatically
 //  Bottom: full-width separator line (lineWidth 0.2)
 /** Draws the "Haubanage" section with parameters and diagram image. Returns the next Y position. */
 export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY: number): number {
@@ -288,7 +285,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
 
   const paramsStartY = y;
 
-  // ── Left column params (leftX = 20mm) ───────────────────────────────────────
+  // ── Left column params ───────────────────────────────────────────────────────
   let leftY = paramsStartY;
   drawBulletItem(doc, PDF_LABELS.guyingSpan, data.guyingSpan || '-', leftX, leftY);
   leftY += LINE_HEIGHT;
@@ -296,43 +293,37 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   leftY += LINE_HEIGHT;
   drawBulletItem(doc, PDF_LABELS.supportType, data.supportType || '-', leftX, leftY);
   leftY += LINE_HEIGHT;
+  drawBulletItem(doc, PDF_LABELS.altitude, formatValue(data.altitude, UNITS.meters), leftX, leftY);
+  leftY += LINE_HEIGHT;
+  drawBulletItem(doc, PDF_LABELS.horizontalDistance, formatValue(data.horizontalDistance, UNITS.meters), leftX, leftY);
+  leftY += LINE_HEIGHT;
+  const pulleyValue = data.hasPulley ? PDF_LABELS.yes : PDF_LABELS.no;
+  drawBulletItem(doc, PDF_LABELS.hasPulley, pulleyValue, leftX, leftY);
+  leftY += LINE_HEIGHT;
 
   // ── Center column: diagram image (starts at paramsStartY) ───────────────────
-  //   To resize: change imgWidth (imgHeight is computed proportionally from original 55×45 ratio)
+  //   To resize: change imgWidth (imgHeight = imgWidth — source image is 2248×2248 px, ratio 1:1)
   //   imgX is computed dynamically to center the image on the page
-  //   rightColX is computed dynamically from imgX + imgWidth + DIAGRAM_PADDING + gap
-  const imgWidth = 52.5; // mm — diagram width (150 pt × 0.35 mm/pt)
-  const imgHeight = 45 * (imgWidth / 55); // mm — diagram height, proportional to original 55×45
+  //   TEXT_ASCENDER_MM: jsPDF text Y = baseline; image Y = top-left corner.
+  //   Shift the image up by the approximate cap-height so its top aligns with the first text row.
+  const imgWidth = DIAGRAM_WIDTH; // mm — diagram width (shared with Résultante column via DIAGRAM_WIDTH constant)
+  const imgHeight = imgWidth; // mm — source image is square (2248×2248 px, ratio 1:1)
   const DIAGRAM_PADDING = 3; // mm — white space between image edge and border rect
-  const imgX = PAGE_SIZE.width / 2 - imgWidth / 2; // mm — centered on page
+  const TEXT_ASCENDER_MM = 2; // mm — approximate cap-height of FONT_SIZES.label (9 pt)
+  const imgX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT; // aligned with right column // mm — right-aligned
+  const imgY = paramsStartY - TEXT_ASCENDER_MM; // align image top with text cap-height
   let imgEndY = paramsStartY;
   if (data.diagramImageBase64) {
-    doc.addImage(data.diagramImageBase64, 'PNG', imgX, paramsStartY, imgWidth, imgHeight);
+    doc.addImage(data.diagramImageBase64, 'PNG', imgX, imgY, imgWidth, imgHeight);
     doc.setDrawColor(0);
-    imgEndY = paramsStartY + imgHeight + DIAGRAM_PADDING;
+    imgEndY = imgY + imgHeight + DIAGRAM_PADDING;
   }
 
-  // ── Right column params (dynamic, after centered diagram + padding) ──
-  const rightColX = imgX + imgWidth + DIAGRAM_PADDING + 2; // mm — 2mm gap after diagram border
-  let rightY = paramsStartY;
-  drawBulletItem(doc, PDF_LABELS.altitude, formatValue(data.altitude, UNITS.meters), rightColX, rightY);
-  rightY += LINE_HEIGHT;
-  drawBulletItem(
-    doc,
-    PDF_LABELS.horizontalDistance,
-    formatValue(data.horizontalDistance, UNITS.meters),
-    rightColX,
-    rightY
-  );
-  rightY += LINE_HEIGHT;
-  const pulleyValue = data.hasPulley ? PDF_LABELS.yes : PDF_LABELS.no;
-  drawBulletItem(doc, PDF_LABELS.hasPulley, pulleyValue, rightColX, rightY);
-  rightY += LINE_HEIGHT;
-
-  y = Math.max(leftY, imgEndY, rightY) + LINE_HEIGHT;
+  y = Math.max(leftY, imgEndY) + LINE_HEIGHT;
+  y -= 4; // tighten gap before separator
 
   // Separator
-  doc.setLineWidth(0.2);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
   y += LINE_HEIGHT;
 
@@ -358,20 +349,26 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.vtlWithGuyingTitle, PAGE_MARGIN.left, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.vtlWithGuyingTitle);
-  doc.setLineWidth(0.3);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
   y += LINE_HEIGHT + 2;
 
-  // Explanatory text (italic)
+  // Explanatory text (italic, with bullet — wrapped text indented past bullet)
   doc.setFont('Nunito', 'italic');
   doc.setFontSize(FONT_SIZES.value);
-  const explanation1Lines = doc.splitTextToSize(PDF_LABELS.vtlWithGuyingExplanation1, CONTENT_WIDTH - 10);
-  doc.text(explanation1Lines, leftX, y);
-  y += explanation1Lines.length * (LINE_HEIGHT - 1) + 2;
+  const noteBullet = `${BULLET} `;
+  const noteBulletW = doc.getTextWidth(noteBullet);
+  const noteWrapWidth = CONTENT_WIDTH - 10 - noteBulletW;
 
-  const explanation2Lines = doc.splitTextToSize(PDF_LABELS.vtlWithGuyingExplanation2, CONTENT_WIDTH - 10);
-  doc.text(explanation2Lines, leftX, y);
-  y += explanation2Lines.length * (LINE_HEIGHT - 1) + LINE_HEIGHT;
+  doc.text(noteBullet, leftX, y);
+  const explanation1Lines = doc.splitTextToSize(PDF_LABELS.vtlWithGuyingExplanation1, noteWrapWidth);
+  doc.text(explanation1Lines, leftX + noteBulletW, y);
+  y += explanation1Lines.length * (LINE_HEIGHT + 1); // reduced gap between the two notes
+
+  doc.text(noteBullet, leftX, y);
+  const explanation2Lines = doc.splitTextToSize(PDF_LABELS.vtlWithGuyingExplanation2, noteWrapWidth);
+  doc.text(explanation2Lines, leftX + noteBulletW, y);
+  y += explanation2Lines.length * LINE_HEIGHT;
 
   // Results - left column (all result values rendered in bold per spec)
   drawBulletItem(doc, PDF_LABELS.tensionInGuy, formatValue(data.tensionInGuy, UNITS.daN), leftX, y, true);
@@ -400,8 +397,22 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   drawBulletItem(doc, PDF_LABELS.chargeLIfPulley, formatValue(data.chargeLIfPulley, UNITS.daN), rightX, y, true);
   y += LINE_HEIGHT + 2;
 
-  // Comment (inline, wraps full width)
-  y += drawWrappingBulletItem(doc, PDF_LABELS.comment, data.comment || '-', leftX, y, CONTENT_WIDTH - PARAGRAPH_INDENT);
+  // Comment: label on its own line, value below indented and justified
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.label);
+  doc.text(`${BULLET} ${PDF_LABELS.comment} :`, leftX, y);
+  y += LINE_HEIGHT;
+
+  doc.setFont('Nunito', 'normal');
+  doc.setFontSize(FONT_SIZES.value);
+  const commentIndent = leftX;
+  const commentWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
+  const commentLines = doc.splitTextToSize(data.comment || '-', commentWidth);
+  commentLines.forEach((line: string, index: number) => {
+    const isLastLine = index === commentLines.length - 1;
+    doc.text(line, commentIndent, y, isLastLine ? {} : { align: 'justify', maxWidth: commentWidth });
+    y += LINE_HEIGHT - 1;
+  });
 
   return y;
 }

@@ -5,8 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { environment } from '@src/environments/environment';
+
 /** Page margins in mm. */
-export const PAGE_MARGIN = { top: 15, right: 15, bottom: 15, left: 15 } as const;
+export const PAGE_MARGIN = { top: 10, right: 15, bottom: 15, left: 15 } as const;
 
 /** A4 page dimensions in mm. */
 export const PAGE_SIZE = { width: 210, height: 297 } as const;
@@ -14,8 +16,14 @@ export const PAGE_SIZE = { width: 210, height: 297 } as const;
 /** Content area width (page width minus left and right margins). */
 export const CONTENT_WIDTH = PAGE_SIZE.width - PAGE_MARGIN.left - PAGE_MARGIN.right;
 
+/** Diagram image width in mm (square ratio 1:1 — source is 2248×2248 px). */
+export const DIAGRAM_WIDTH = 60;
+
 /** Line height in mm. */
-export const LINE_HEIGHT = 6;
+export const LINE_HEIGHT = 5;
+
+/** Thin line width in mm, used for title underlines and section separators. */
+export const LINE_WIDTH_THIN = 0.05;
 
 /** Paragraph indent in mm (11 pt × 0.35 mm/pt). Applied as left-column offset from PAGE_MARGIN.left. */
 export const PARAGRAPH_INDENT = 3.85;
@@ -31,7 +39,7 @@ export const FONT_SIZES = {
 } as const;
 
 /** Application name displayed in the PDF header. */
-export const APP_NAME = 'Stellar';
+export const APP_NAME = environment.appName;
 
 /** Bullet point character used in lists. */
 export const BULLET = '\u2022';

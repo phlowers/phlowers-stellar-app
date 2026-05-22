@@ -86,7 +86,7 @@ export class VtlGuyingReportService {
         );
       }
 
-      let y = drawHeader(doc);
+      let y = drawHeader(doc, data.date ?? '-');
       y = drawStudySection(doc, data, y);
       y = drawVtlWithoutGuyingSection(doc, data, y);
       y = drawGuyingSection(doc, data, y);
