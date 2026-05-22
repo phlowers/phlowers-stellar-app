@@ -59,7 +59,7 @@ export class PoseTableComponent {
   readonly COMPUTING_STEP_MAX = 10;
   readonly COMPUTING_STEP_DEFAULT = 5;
 
-  readonly TABLE_NUMBER_VALUES = 8
+  readonly TABLE_NUMBER_VALUES = 8;
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly spanService = inject(PlotSpanService);
