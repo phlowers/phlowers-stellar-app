@@ -8,6 +8,7 @@
 import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
 import { AxesNorms, View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
+import { PoseResults } from '@src/app/shared/domain/models/section.model';
 
 /**
  * Available calculation tasks for the Python worker.
@@ -371,7 +372,7 @@ export interface TaskInputs {
     stepTemperature: number;
     baseTemperature: number;
     numberValues: number;
-  }
+  };
 }
 
 /**
@@ -501,9 +502,5 @@ export interface TaskOutputs {
     meanGpsDiff: number;
   };
   [Task.getEquivalentSpan]: number;
-  [Task.getPoseTable]: {
-    temperatures: number[];
-    poseParams: number[];
-    horizontalTensions: number[];
-  };
+  [Task.getPoseTable]: PoseResults;
 }

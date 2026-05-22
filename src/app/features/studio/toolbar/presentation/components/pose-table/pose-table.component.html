@@ -64,14 +64,14 @@
         <tr>
           <th scope="row" i18n>Pose parameter</th>
           @for (param of res.poseParams; track $index) {
-            <td>{{ param }} m</td>
+            <td>{{ param | number: '1.0-2' }} m</td>
           }
         </tr>
 
         <tr>
           <th scope="row" i18n>Horizontal tension Th</th>
-          @for (tension of res.tensions; track $index) {
-            <td>{{ tension }} daN</td>
+          @for (tension of res.horizontalTensions; track $index) {
+            <td>{{ tension | number: '1.0-2' }} daN</td>
           }
         </tr>
       </tbody>

@@ -255,7 +255,7 @@ describe('PoseTableComponent', () => {
       expect(res).not.toBeNull();
       expect(res!.temperatures).toHaveLength(8);
       expect(res!.poseParams).toHaveLength(8);
-      expect(res!.tensions).toHaveLength(8);
+      expect(res!.horizontalTensions).toHaveLength(8);
     });
 
     it('fills temperatures with -35', () => {
@@ -270,11 +270,11 @@ describe('PoseTableComponent', () => {
 
     it('fills tensions with 5636', () => {
       component.calculate();
-      expect(component.results()!.tensions.every((t) => t === 5636)).toBe(true);
+      expect(component.results()!.horizontalTensions.every((t) => t === 5636)).toBe(true);
     });
 
     it('overwrites previous results on subsequent calls', () => {
-      component.results.set({ temperatures: [0], poseParams: [0], tensions: [0] });
+      component.results.set({ temperatures: [0], poseParams: [0], horizontalTensions: [0] });
       component.calculate();
       expect(component.results()!.temperatures).toHaveLength(8);
     });

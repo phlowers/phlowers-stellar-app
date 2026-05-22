@@ -18,6 +18,7 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { SectionService } from '@services/section/section.service';
@@ -27,10 +28,12 @@ import { InputNumberComponent } from '@shared/components/atoms/input-number/inpu
 import { PoseResults, PoseTableData } from '@shared/domain/models/section.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { WorkerPythonService } from '@src/app/core/services/worker_python/worker-python.service';
+import { Task } from '@src/app/core/services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-pose-table',
-  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule],
+  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule, DecimalPipe],
   templateUrl: './pose-table.component.html',
   styleUrl: './pose-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,18 +52,21 @@ export class PoseTableComponent {
 
   readonly LOWEST_TEMP_MIN = -50;
   readonly LOWEST_TEMP_MAX = 250;
-  readonly LOWEST_TEMP_STEP = 0.01;
+  readonly LOWEST_TEMP_STEP = 1;
   readonly LOWEST_TEMP_DEFAULT = -10;
 
   readonly COMPUTING_STEP_MIN = 1;
   readonly COMPUTING_STEP_MAX = 10;
   readonly COMPUTING_STEP_DEFAULT = 5;
 
+  readonly TABLE_NUMBER_VALUES = 8
+
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly spanService = inject(PlotSpanService);
   private readonly plotService = inject(PlotService);
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
+  private readonly workerPythonService = inject(WorkerPythonService);
 
   readonly selectedInitialCondition = computed(() => {
     const section = this.spanService.section();
@@ -106,6 +112,7 @@ export class PoseTableComponent {
     const saved = this.spanService.section()?.pose_table;
     if (saved) {
       this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
+      // await here?
       untracked(() => this.calculate());
     } else {
       this.form.setValue({
@@ -116,13 +123,15 @@ export class PoseTableComponent {
     }
   });
 
-  calculate(): void {
+  async calculate(): Promise<void> {
     if (this.form.invalid) return;
-    const temperatures = [-35, -35, -35, -35, -35, -35, -35, -35];
-    const poseParams = [2454, 2454, 2454, 2454, 2454, 2454, 2454, 2454];
-    const tensions = [5636, 5636, 5636, 5636, 5636, 5636, 5636, 5636];
+    const { result } = await this.workerPythonService.runTask(Task.getPoseTable, {
+      stepTemperature: this.form.controls.computingStep.value,
+      baseTemperature: this.form.controls.lowestTemp.value,
+      numberValues: this.TABLE_NUMBER_VALUES
+    });
 
-    this.results.set({ temperatures, poseParams, tensions });
+    this.results.set(result);
   }
 
   async save(): Promise<void> {

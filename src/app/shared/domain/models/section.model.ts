@@ -17,7 +17,7 @@ import { CableSpanManipulation } from './cable-span-manipulation.model';
 export interface PoseResults {
   temperatures: number[];
   poseParams: number[];
-  tensions: number[];
+  horizontalTensions: number[];
 }
 
 export interface PoseTableData {
