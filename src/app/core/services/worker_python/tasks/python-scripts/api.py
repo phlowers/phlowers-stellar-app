@@ -176,5 +176,4 @@ def get_equivalent_span():
 
 def get_pose_table(js_inputs):
     global engine
-    raise Exception()
     return pose_table.get_pose_table(js_to_python(js_inputs), engine)
