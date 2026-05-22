@@ -5,6 +5,7 @@ import { PoseTableComponent } from './pose-table.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
 import { SectionService } from '@services/section/section.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { Section } from '@shared/domain';
@@ -41,6 +42,14 @@ function makeInitialCondition(overrides: Partial<InitialCondition> = {}): Initia
   } as InitialCondition;
 }
 
+function makePoseResults() {
+  return {
+    temperatures: Array.from({ length: 8 }, () => -35),
+    poseParams: Array.from({ length: 8 }, () => 2454),
+    horizontalTensions: Array.from({ length: 8 }, () => 5636)
+  };
+}
+
 describe('PoseTableComponent', () => {
   let component: PoseTableComponent;
   let fixture: ComponentFixture<PoseTableComponent>;
@@ -48,6 +57,7 @@ describe('PoseTableComponent', () => {
   let sectionSignal: WritableSignal<Section | null>;
   let studySignal: WritableSignal<unknown>;
   let mockSectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
+  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
   let mockToolbarDialogService: { setTemplates: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
@@ -55,6 +65,9 @@ describe('PoseTableComponent', () => {
     sectionSignal = signal<Section | null>(null);
     studySignal = signal<unknown>(null);
     mockSectionService = { createOrUpdateSection: vi.fn().mockResolvedValue(undefined) };
+    mockWorkerPythonService = {
+      runTask: vi.fn().mockResolvedValue({ result: makePoseResults(), error: null, pythonErrorCode: null })
+    };
     mockToolbarDialogService = { setTemplates: vi.fn() };
     mockNotificationService = { success: vi.fn(), error: vi.fn() };
 
@@ -64,6 +77,7 @@ describe('PoseTableComponent', () => {
         { provide: PlotSpanService, useValue: { section: sectionSignal } },
         { provide: PlotService, useValue: { study: studySignal } },
         { provide: SectionService, useValue: mockSectionService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: NotificationService, useValue: mockNotificationService }
       ]
@@ -243,14 +257,14 @@ describe('PoseTableComponent', () => {
   // ─── calculate() ──────────────────────────────────────────────────────────
 
   describe('calculate()', () => {
-    it('does nothing when form is invalid', () => {
+    it('does nothing when form is invalid', async () => {
       component.form.controls.lowestTemp.setValue(null as unknown as number);
-      component.calculate();
+      await component.calculate();
       expect(component.results()).toBeNull();
     });
 
-    it('sets results with 8 entries when form is valid', () => {
-      component.calculate();
+    it('sets results with 8 entries when form is valid', async () => {
+      await component.calculate();
       const res = component.results();
       expect(res).not.toBeNull();
       expect(res!.temperatures).toHaveLength(8);
@@ -258,24 +272,24 @@ describe('PoseTableComponent', () => {
       expect(res!.horizontalTensions).toHaveLength(8);
     });
 
-    it('fills temperatures with -35', () => {
-      component.calculate();
+    it('fills temperatures with -35', async () => {
+      await component.calculate();
       expect(component.results()!.temperatures.every((t) => t === -35)).toBe(true);
     });
 
-    it('fills poseParams with 2454', () => {
-      component.calculate();
+    it('fills poseParams with 2454', async () => {
+      await component.calculate();
       expect(component.results()!.poseParams.every((p) => p === 2454)).toBe(true);
     });
 
-    it('fills tensions with 5636', () => {
-      component.calculate();
+    it('fills tensions with 5636', async () => {
+      await component.calculate();
       expect(component.results()!.horizontalTensions.every((t) => t === 5636)).toBe(true);
     });
 
-    it('overwrites previous results on subsequent calls', () => {
+    it('overwrites previous results on subsequent calls', async () => {
       component.results.set({ temperatures: [0], poseParams: [0], horizontalTensions: [0] });
-      component.calculate();
+      await component.calculate();
       expect(component.results()!.temperatures).toHaveLength(8);
     });
   });
@@ -450,10 +464,11 @@ describe('PoseTableComponent', () => {
       expect(component.form.controls.computingStep.value).toBe(2);
     });
 
-    it('auto-triggers calculation when section has saved pose_table params', () => {
+    it('auto-triggers calculation when section has saved pose_table params', async () => {
       const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
       sectionSignal.set(makeSection({ pose_table: savedData }));
       fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(component.results()).not.toBeNull();
     });
