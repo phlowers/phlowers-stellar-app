@@ -4205,5 +4205,17 @@
         <target>La valeur doit être un nombre entier</target>
       </segment>
     </unit>
+    <unit id="6184996295577577575">
+      <segment state="initial">
+        <source>waiting for calculation engine</source>
+        <target>En attente du moteur de calcul</target>
+      </segment>
+    </unit>
+    <unit id="3350117461161966226">
+      <segment state="initial">
+        <source> An error occurred while calculating the pose table </source>
+        <target> Une erreur s'est produite lors du calcul du tableau de pose </target>
+      </segment>
+    </unit>
   </file>
 </xliff>
