@@ -15,10 +15,10 @@
 
     <dt i18n>Equivalent span</dt>
     <dd>
-      @if (isPlotReady()) {
-        {{ equivalentSpan() !== null ? (equivalentSpan() | number: '1.0-1') + ' m' : '-' }}
-      } @else {
+      @if (!isPlotReady() || isCalculatingEquivalentSpan()) {
         <app-icon class="spinner" icon="progress_activity" ariaLabel="waiting for calculation engine" i18n-ariaLabel />
+      } @else {
+        {{ equivalentSpan() !== null ? (equivalentSpan() | number: '1.0-1') + ' m' : '-' }}
       }
     </dd>
   </dl>

@@ -104,6 +104,7 @@ export class PoseTableComponent {
   });
 
   readonly isCalculating = signal(false);
+  readonly isCalculatingEquivalentSpan = signal(false);
   readonly isBusy = computed(() => !this.isPlotReady() || this.isCalculating());
   readonly results = signal<PoseResults | null>(null);
   readonly equivalentSpan = signal<number | null>(null);
@@ -141,9 +142,13 @@ export class PoseTableComponent {
       return;
     }
     untracked(async () => {
-      const { result } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
-      this.equivalentSpan.set(result.equivalentSpan);
-      console.log('equivalent span has run with result: ', result);
+      this.isCalculatingEquivalentSpan.set(true);
+      try {
+        const { result } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
+        this.equivalentSpan.set(result.equivalentSpan);
+      } finally {
+        this.isCalculatingEquivalentSpan.set(false);
+      }
     });
   });
 
