@@ -354,7 +354,7 @@ describe('vtl-guying-report helpers', () => {
   describe('loadImageAsBase64', () => {
     it('should fetch the image and convert to base64', async () => {
       const mockBlob = new Blob(['fake-image-data'], { type: 'image/png' });
-      const mockResponse = { blob: vi.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as unknown as Response);
 
       const result = await loadImageAsBase64('img/test.png');

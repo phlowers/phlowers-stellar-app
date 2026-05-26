@@ -59,6 +59,7 @@ describe('pdf-primitives helpers', () => {
     it('should fetch and return base64 string without data URL prefix', async () => {
       const fakeBuffer = new Uint8Array([72, 101, 108, 108, 111]).buffer; // "Hello"
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
         arrayBuffer: vi.fn().mockResolvedValue(fakeBuffer)
       } as unknown as Response);
 
@@ -68,12 +69,22 @@ describe('pdf-primitives helpers', () => {
       expect(typeof result).toBe('string');
       expect(result).not.toContain('data:');
     });
+
+    it('should throw when fetch response is not ok', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 404
+      } as unknown as Response);
+
+      await expect(loadFileAsBase64('fonts/missing.ttf')).rejects.toThrow('HTTP error 404');
+    });
   });
 
   describe('loadImageAsBase64', () => {
     it('should fetch and return a data URL', async () => {
       const mockBlob = new Blob(['fake-image'], { type: 'image/png' });
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
         blob: vi.fn().mockResolvedValue(mockBlob)
       } as unknown as Response);
 
@@ -81,6 +92,15 @@ describe('pdf-primitives helpers', () => {
 
       expect(globalThis.fetch).toHaveBeenCalledWith('img/test.png');
       expect(result).toContain('data:');
+    });
+
+    it('should throw when fetch response is not ok', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500
+      } as unknown as Response);
+
+      await expect(loadImageAsBase64('img/error.png')).rejects.toThrow('HTTP error 500');
     });
   });
 

@@ -63,7 +63,8 @@ export class VtlGuyingReportService extends PdfBaseService {
       drawVtlWithGuyingSection(doc, data, y);
       drawFooter(doc, PDF_LABELS.pageFooter);
 
-      const filename = `rapport-vhl-haubanage-${data.date}.pdf`;
+      const safeDate = data.date.replace(/[/\\:*?"<>|]/g, '-');
+      const filename = `rapport-vhl-haubanage-${safeDate}.pdf`;
       doc.save(filename);
 
       this.notificationService.success($localize`Report generated successfully`);

@@ -42,18 +42,18 @@ import { drawBulletItem, drawWrappingBulletItem, formatValue } from '@shared/pdf
 import { DIAGRAM_WIDTH, PDF_LABELS, UNITS } from './vtl-guying-report.constantes';
 import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
 
-// ─── SECTION 1: ÉTUDE ET CANTON ───────────────────────────────────────────────
+// ─── SECTION 1: STUDY AND SECTION ───────────────────────────────────────────────
 //  Single-column layout: all items left-aligned at leftX
 //  Row layout:
-//    Row 1 — Auteur (left)
-//    Row 2 — Etude (left, wraps full width)
+//    Row 1 — Author (left)
+//    Row 2 — Study (left, wraps full width)
 //    Row 3 — Description (left, wraps full width)
-//    Row 4 — Canton (left)
-//    Row 5 — Commentaire (left, wraps full width)
-//    Row 6 — Cas de charge (left)
+//    Row 4 — Section (left)
+//    Row 5 — Comment (left, wraps full width)
+//    Row 6 — Load case (left)
 //    Row 7 — Description (left, wraps full width)
 //  Bottom: full-width separator line (lineWidth 0.2)
-/** Draws the "Étude et canton" section. Returns the next Y position. */
+/** Draws the study and section metadata section. Returns the next Y position. */
 export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: number): number {
   let y = startY;
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
@@ -68,28 +68,28 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
   y += LINE_HEIGHT + 2;
 
-  // Row 1: Auteur (left)
+  // Row 1: Author (left)
   drawBulletItem(doc, PDF_LABELS.author, data.author || '-', leftX, y);
   y += LINE_HEIGHT;
 
-  // Row 2: Etude (wraps full width)
+  // Row 2: Study (wraps full width)
   y += drawWrappingBulletItem(doc, PDF_LABELS.study, data.studyTitle || '-', leftX, y, wrapWidth);
 
   // Row 3: Description (wraps full width)
   y += drawWrappingBulletItem(doc, PDF_LABELS.studyDescription, data.studyDescription || '-', leftX, y, wrapWidth);
 
-  // Row 4: Canton
+  // Row 4: Section
   drawBulletItem(doc, PDF_LABELS.section, data.sectionName || '-', leftX, y);
   y += LINE_HEIGHT;
 
-  // Row 5: Commentaire (wraps full width)
+  // Row 5: Comment (wraps full width)
   y += drawWrappingBulletItem(doc, PDF_LABELS.sectionComment, data.sectionComment || '-', leftX, y, wrapWidth);
 
-  // Row 6: Cas de charge
+  // Row 6: Load case
   drawBulletItem(doc, PDF_LABELS.chargeName, data.chargeName || '-', leftX, y);
   y += LINE_HEIGHT;
 
-  // Row 7: Description du cas de charge (wraps full width)
+  // Row 7: Load case description (wraps full width)
   y += drawWrappingBulletItem(doc, PDF_LABELS.chargeDescription, data.chargeDescription || '-', leftX, y, wrapWidth);
   y -= 2; // tighten gap before separator
 
@@ -101,12 +101,12 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, startY: 
   return y;
 }
 
-// ─── SECTION 2: VHL SANS HAUBANAGE ────────────────────────────────────────────
+// ─── SECTION 2: VTL WITHOUT GUYING ────────────────────────────────────────────
 //  Two-column layout:
 //    Left  — Charge V, Charge H, Charge L
-//    Right — Résultante (same row as Charge V)
+//    Right — Resultant (same row as Charge V)
 //  Bottom: full-width separator line (lineWidth 0.2)
-/** Draws the "VHL sans haubanage" section. Returns the next Y position. */
+/** Draws the VTL without guying section. Returns the next Y position. */
 export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY: number): number {
   let y = startY;
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
@@ -123,7 +123,7 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
 
   // Charge V
   drawBulletItem(doc, PDF_LABELS.chargeV, formatValue(data.vtlChargeV, UNITS.daN), leftX, y);
-  // Résultante (right column)
+  // Resultant (right column)
   drawBulletItem(doc, PDF_LABELS.resultant, formatValue(data.vtlResultant, UNITS.daN), rightX, y, true);
   y += LINE_HEIGHT;
 
@@ -144,17 +144,17 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
   return y;
 }
 
-// ─── SECTION 3: HAUBANAGE ─────────────────────────────────────────────────────
+// ─── SECTION 3: GUYING ─────────────────────────────────────────────────────────
 //  Two-column layout:
-//    Left   (leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT) — Portée haubanée, Support de référence,
-//                                                           Type de support, Altitude,
-//                                                           Distance horizontale, Avec poulie
+//    Left   (leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT) — Guying span, Reference support,
+//                                                           Support type, Altitude,
+//                                                           Horizontal distance, With pulley
 //    Center (imgX = page center − imgWidth/2)             — Diagram image (square, ratio 1:1)
-//  Diagram border: DIAGRAM_PADDING=3mm white space between image edge and border rect
+//  Diagram bottom spacing: DIAGRAM_BOTTOM_SPACING=3mm vertical gap below the diagram image
 //    Source file : public/img/VHL-Haubanage-Suspension-Droite.png  (must have white/transparent background)
 //    To resize: change imgWidth (imgHeight computed proportionally) — imgX updates automatically
 //  Bottom: full-width separator line (lineWidth 0.2)
-/** Draws the "Haubanage" section with parameters and diagram image. Returns the next Y position. */
+/** Draws the guying section with parameters and diagram image. Returns the next Y position. */
 export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY: number): number {
   let y = startY;
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
@@ -193,7 +193,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   //   Shift the image up by the approximate cap-height so its top aligns with the first text row.
   const imgWidth = DIAGRAM_WIDTH; // mm — diagram width (shared with Résultante column via DIAGRAM_WIDTH constant)
   const imgHeight = imgWidth; // mm — source image is square (2248×2248 px, ratio 1:1)
-  const DIAGRAM_PADDING = 3; // mm — white space between image edge and border rect
+  const DIAGRAM_BOTTOM_SPACING = 3; // mm — vertical spacing below the diagram image before section end
   const TEXT_ASCENDER_MM = 2; // mm — approximate cap-height of FONT_SIZES.label (9 pt)
   const imgX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT; // aligned with right column // mm — right-aligned
   const imgY = paramsStartY - TEXT_ASCENDER_MM; // align image top with text cap-height
@@ -201,7 +201,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   if (data.diagramImageBase64) {
     doc.addImage(data.diagramImageBase64, 'PNG', imgX, imgY, imgWidth, imgHeight);
     doc.setDrawColor(0);
-    imgEndY = imgY + imgHeight + DIAGRAM_PADDING;
+    imgEndY = imgY + imgHeight + DIAGRAM_BOTTOM_SPACING;
   }
 
   y = Math.max(leftY, imgEndY) + LINE_HEIGHT;
@@ -215,15 +215,15 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   return y;
 }
 
-// ─── SECTION 4: VHL AVEC HAUBANAGE ────────────────────────────────────────────
+// ─── SECTION 4: VTL WITH GUYING ────────────────────────────────────────────────
 //  Explanatory text: 2 italic paragraphs, full width (CONTENT_WIDTH - 10)
 //  Results (two-column):
-//    Row 1 — Tension dans le hauban (left) | Charge V sous console (right)
-//    Row 2 — Angle hauban / horizon  (left) | Charge H sous console (right)
-//    Row 3 — (empty left)                   | Charge L si poulie    (right)
+//    Row 1 — Tension in the guy wire (left) | Charge V under console (right)
+//    Row 2 — Guy angle / horizon     (left) | Charge H under console (right)
+//    Row 3 — (empty left)                   | Charge L if pulley     (right)
 //  Comment: label on one line, indented value on next line (wraps to CONTENT_WIDTH - 15)
 //  No bottom separator — last section before footer
-/** Draws the "VHL avec haubanage" section with results and comment. Returns the next Y position. */
+/** Draws the VTL with guying section with results and comment. Returns the next Y position. */
 export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY: number): number {
   let y = startY;
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
@@ -278,7 +278,7 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   );
   y += LINE_HEIGHT;
 
-  // Charge L (si poulie) - only on right, bold per spec
+  // Charge L (if pulley) - only on right, bold per spec
   drawBulletItem(doc, PDF_LABELS.chargeLIfPulley, formatValue(data.chargeLIfPulley, UNITS.daN), rightX, y, true);
   y += LINE_HEIGHT + 2;
 

@@ -21,6 +21,9 @@ import {
 /** Loads a file from a URL and returns its raw base64 encoding (no data URL prefix). */
 export async function loadFileAsBase64(url: string): Promise<string> {
   const response = await globalThis.fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status} loading file: ${url}`);
+  }
   const buffer = await response.arrayBuffer();
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -33,6 +36,9 @@ export async function loadFileAsBase64(url: string): Promise<string> {
 /** Loads an image from a URL and returns it as a base64 data URL. */
 export async function loadImageAsBase64(url: string): Promise<string> {
   const response = await globalThis.fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status} loading image: ${url}`);
+  }
   const blob = await response.blob();
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

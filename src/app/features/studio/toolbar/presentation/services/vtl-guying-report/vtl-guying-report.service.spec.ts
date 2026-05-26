@@ -102,6 +102,14 @@ describe('VtlGuyingReportService', () => {
       expect(__mockDoc.save).toHaveBeenCalledWith('rapport-vhl-haubanage-2026-05-20.pdf');
     });
 
+    it('should sanitize localized date with slashes in filename', async () => {
+      const data = { ...createMockReportData(), date: '20/05/2026' };
+      await service.generateReport(data);
+
+      const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { save: ReturnType<typeof vi.fn> } };
+      expect(__mockDoc.save).toHaveBeenCalledWith('rapport-vhl-haubanage-20-05-2026.pdf');
+    });
+
     it('should notify error when PDF generation fails', async () => {
       const jsPDFModule = (await import('jspdf')) as unknown as { default: ReturnType<typeof vi.fn> };
       jsPDFModule.default.mockImplementationOnce(() => {
@@ -119,7 +127,7 @@ describe('VtlGuyingReportService', () => {
   describe('getDiagramImageBase64', () => {
     it('should fetch and cache the diagram image', async () => {
       const mockBlob = new Blob(['fake-image'], { type: 'image/png' });
-      const mockResponse = { blob: vi.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as unknown as Response);
 
       const result = await service.getDiagramImageBase64();
@@ -130,7 +138,7 @@ describe('VtlGuyingReportService', () => {
 
     it('should return cached image on second call without fetching again', async () => {
       const mockBlob = new Blob(['fake-image'], { type: 'image/png' });
-      const mockResponse = { blob: vi.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as unknown as Response);
 
       await service.getDiagramImageBase64();
@@ -154,7 +162,7 @@ describe('VtlGuyingReportService', () => {
   describe('preloadDiagramImage', () => {
     it('should not fetch again if image is already cached', async () => {
       const mockBlob = new Blob(['fake-image'], { type: 'image/png' });
-      const mockResponse = { blob: vi.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as unknown as Response);
 
       await service.preloadDiagramImage();
