@@ -111,18 +111,14 @@ td {
   @extend %text-m-400;
   color: var(--star-dust-950);
   padding: 0.75rem 0.5rem;
-  white-space: nowrap;
   border-bottom-width: 1px;
+  white-space: nowrap;
 }
 
 th {
   text-align: left;
 }
 
-.pose-table{
-  &__error {
-    @apply flex items-center gap-1 my-4;
-    @extend %text-s-600;
-    color: var(--main-error);
-  }
+.calculation-error {
+  @apply block mt-4;
 }

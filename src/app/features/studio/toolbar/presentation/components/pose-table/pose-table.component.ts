@@ -30,10 +30,11 @@ import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-pose-table',
-  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule, DecimalPipe],
+  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule, DecimalPipe, MessageModule],
   templateUrl: './pose-table.component.html',
   styleUrl: './pose-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

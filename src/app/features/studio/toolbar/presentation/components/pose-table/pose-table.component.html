@@ -99,7 +99,7 @@
 </ng-template>
 
 @if (poseTableError()) {
-  <div class="pose-table__error">
-    <p i18n>An error occurred while calculating the pose table</p>
-  </div>
+  <p-message severity="error" class="calculation-error" data-testid="pose-table-error" i18n>
+    An error occurred while calculating the pose table
+  </p-message>
 }
