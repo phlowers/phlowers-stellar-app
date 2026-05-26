@@ -177,6 +177,10 @@ export class PoseTableComponent {
         this.poseTableError.set(true);
       }
       this.results.set(result);
+    } catch {
+      this.poseTableError.set(true);
+      this.results.set(null);
+      this.notificationService.error($localize`Failed to compute pose table`);
     } finally {
       this.isCalculating.set(false);
     }

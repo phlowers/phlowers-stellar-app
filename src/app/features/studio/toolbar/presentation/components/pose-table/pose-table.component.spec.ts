@@ -327,6 +327,23 @@ describe('PoseTableComponent', () => {
       await component.calculate();
       expect(component.poseTableError()).toBe(false);
     });
+
+    it('sets poseTableError, clears results and shows error notification when runTask rejects', async () => {
+      component.results.set(makePoseResults());
+      mockWorkerPythonService.runTask.mockRejectedValueOnce(new Error('worker not initialized'));
+      await component.calculate();
+
+      expect(component.poseTableError()).toBe(true);
+      expect(component.results()).toBeNull();
+      expect(mockNotificationService.error).toHaveBeenCalled();
+    });
+
+    it('resets isCalculating to false when runTask rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValueOnce(new Error('worker not initialized'));
+      await component.calculate();
+
+      expect(component.isCalculating()).toBe(false);
+    });
   });
 
   // ─── save() ───────────────────────────────────────────────────────────────

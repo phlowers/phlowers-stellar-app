@@ -4214,7 +4214,19 @@
     <unit id="3350117461161966226">
       <segment state="initial">
         <source> An error occurred while calculating the pose table </source>
-        <target> Une erreur s'est produite lors du calcul du tableau de pose </target>
+        <target> Une erreur s&apos;est produite lors du calcul du tableau de pose </target>
+      </segment>
+    </unit>
+    <unit id="2773256594291059859">
+      <segment state="initial">
+        <source>Failed to compute equivalent span</source>
+        <target>Échec du calcul de la portée équivalente</target>
+      </segment>
+    </unit>
+    <unit id="4156596140595162440">
+      <segment state="initial">
+        <source>Failed to compute pose table</source>
+        <target>Échec du calcul du tableau de pose</target>
       </segment>
     </unit>
   </file>
