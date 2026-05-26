@@ -25,6 +25,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
+import { TooltipModule } from 'primeng/tooltip';
 import { StudioComponent } from '@shared/components/studio/studio.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -68,6 +69,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     SelectModule,
     SelectButtonModule,
     TabsModule,
+    TooltipModule,
     StudioComponent,
     ButtonComponent,
     IconComponent,

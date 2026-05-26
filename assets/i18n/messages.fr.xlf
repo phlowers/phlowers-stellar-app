@@ -3551,10 +3551,10 @@
         <target>Zoom</target>
       </segment>
     </unit>
-    <unit id="7283456687925421567">
+    <unit id="285378064919178685">
       <segment state="initial">
-        <source> Cable length change </source>
-        <target> Modif. longueur câble </target>
+        <source>Cable length change</source>
+        <target>Modif. longueur câble</target>
       </segment>
     </unit>
     <unit id="5507190015256557833">
@@ -3563,22 +3563,10 @@
         <target>Supprimer la modification de longueur du câble</target>
       </segment>
     </unit>
-    <unit id="5405643706975513454">
+    <unit id="1964106600703167330">
       <segment state="initial">
-        <source> Climate condition </source>
-        <target> Condition climatique </target>
-      </segment>
-    </unit>
-    <unit id="5574365677854298291">
-      <segment state="initial">
-        <source> Load / Marking </source>
-        <target> Charge / Marquage </target>
-      </segment>
-    </unit>
-    <unit id="361024812885364180">
-      <segment state="initial">
-        <source> Cable manip. at span </source>
-        <target> Manip. câble dans la portée </target>
+        <source>Cable manip. at span</source>
+        <target>Manip. câble dans la portée</target>
       </segment>
     </unit>
     <unit id="314315645942131479">
