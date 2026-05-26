@@ -25,15 +25,19 @@ def compute_localization(inputs: dict) -> dict:
     section_array = build_section_array_dist_angles(
         geo_inputs.spanLength, geo_inputs.lineAngle
     )
+    section_array.angle_direction = "clockwise"
 
     section_array.set_starting_gps(
         latitude_0=geo_inputs.startLatitude,
         longitude_0=geo_inputs.startLongitude,
         azimuth_0=geo_inputs.startAzimuth,
+        azimuth_direction="clockwise",
     )
     latitude, longitude = section_array.get_gps()
     lambert_x, lambert_y = section_array.get_lambert93()
-    azimuth = section_array.get_azimuth(unit="deg")
+    azimuth = section_array.get_azimuth(
+        unit="deg", output_direction="clockwise"
+    )
     return {
         "latitude": latitude.tolist(),
         "longitude": longitude.tolist(),

@@ -411,7 +411,7 @@ def init_section(js_inputs: dict):
         bundle_number=input_section["cables_amount"],
     )
 
-    section.angles_sense = "clockwise"
+    section.angle_direction = "clockwise"
 
     cable_array = CableArray(
         pd.DataFrame(
@@ -503,7 +503,7 @@ def init_section(js_inputs: dict):
         bundle_number=input_section["cables_amount"],
     )
 
-    base_section.angles_sense = "clockwise"
+    base_section.angle_direction = "clockwise"
     base_engine = BalanceEngine(cable_array=cable_array, section_array=base_section)
     base_plt_line = PlotEngine(base_engine)
     base_engine.solve_adjustment()
@@ -554,7 +554,7 @@ def init_section(js_inputs: dict):
             ice_thickness=ice_thickness,
             new_temperature=climate_data.cableTemperature,
             wind_pressure=climate_data.windPressure,
-            wind_sense="clockwise",
+            wind_direction="clockwise",
         )
     elif has_span_loads:
         engine.solve_change_state()

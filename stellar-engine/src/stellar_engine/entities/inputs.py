@@ -206,3 +206,10 @@ class SectionGeoData:
                 if key in inspect.signature(cls).parameters
             }
         )
+
+
+@dataclass
+class PoseTableInputs:
+    stepTemperature: float
+    baseTemperature: float
+    numberValues: int

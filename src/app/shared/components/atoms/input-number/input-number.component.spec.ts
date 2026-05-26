@@ -78,6 +78,40 @@ describe('InputNumberComponent', () => {
     });
   });
 
+  describe('valueChanges clamping', () => {
+    it('should propagate the clamped value via onChange when value exceeds max', () => {
+      const cb = vi.fn();
+      component.registerOnChange(cb);
+      component.pointsCountControl.setValue(9999);
+      expect(cb).toHaveBeenCalledWith(component.max());
+      expect(cb).not.toHaveBeenCalledWith(9999);
+    });
+
+    it('should propagate the clamped value via onChange when value is below min', () => {
+      const cb = vi.fn();
+      component.registerOnChange(cb);
+      component.pointsCountControl.setValue(0);
+      expect(cb).toHaveBeenCalledWith(component.min());
+    });
+
+    it('should correct the control value back to max when out of range', () => {
+      component.pointsCountControl.setValue(9999);
+      expect(component.pointsCountControl.value).toBe(component.max());
+    });
+
+    it('should set the signal to the clamped value', () => {
+      component.pointsCountControl.setValue(9999);
+      expect(component.pointsCountValue()).toBe(component.max());
+    });
+
+    it('should propagate an in-range value unchanged', () => {
+      const cb = vi.fn();
+      component.registerOnChange(cb);
+      component.pointsCountControl.setValue(100);
+      expect(cb).toHaveBeenCalledWith(100);
+    });
+  });
+
   describe('registerOnTouched', () => {
     it('should store and call the onTouched callback', () => {
       const cb = vi.fn();
@@ -174,6 +208,70 @@ describe('InputNumberComponent', () => {
       component.setDisabledState(true);
       component.markTouched();
       expect(cb).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('step input', () => {
+    it('should increment by the configured step', () => {
+      fixture.componentRef.setInput('step', 5);
+      component.writeValue(100);
+      component.increment();
+      expect(component.pointsCountValue()).toBe(105);
+    });
+
+    it('should decrement by the configured step', () => {
+      fixture.componentRef.setInput('step', 5);
+      component.writeValue(100);
+      component.decrement();
+      expect(component.pointsCountValue()).toBe(95);
+    });
+
+    it('should set the step attribute on the input element', () => {
+      fixture.componentRef.setInput('step', 10);
+      fixture.detectChanges();
+      expect(getByTestId('number-input')?.getAttribute('step')).toBe('10');
+    });
+
+    it('should not produce floating-point artifacts when incrementing with a fractional step', () => {
+      fixture.componentRef.setInput('step', 0.01);
+      fixture.componentRef.setInput('min', 0);
+      fixture.componentRef.setInput('max', 1);
+      component.writeValue(0.02);
+      component.increment();
+      // 0.02 + 0.01 in raw JS = 0.030000000000000002
+      expect(component.pointsCountValue()).toBe(0.03);
+    });
+
+    it('should not produce floating-point artifacts when decrementing with a fractional step', () => {
+      fixture.componentRef.setInput('step', 0.1);
+      fixture.componentRef.setInput('min', 0);
+      fixture.componentRef.setInput('max', 1);
+      component.writeValue(0.3);
+      component.decrement();
+      // 0.3 - 0.1 in raw JS = 0.19999999999999998
+      expect(component.pointsCountValue()).toBe(0.2);
+    });
+
+    it('should stay precise across consecutive increments with a fractional step', () => {
+      fixture.componentRef.setInput('step', 0.01);
+      fixture.componentRef.setInput('min', 0);
+      fixture.componentRef.setInput('max', 1);
+      component.writeValue(0.01);
+      component.increment(); // → 0.02
+      component.increment(); // → 0.03
+      expect(component.pointsCountValue()).toBe(0.03);
+    });
+  });
+
+  describe('isReadonly input', () => {
+    it('should have the readonly attribute by default', () => {
+      expect(getByTestId('number-input')?.hasAttribute('readonly')).toBe(true);
+    });
+
+    it('should remove the readonly attribute when isReadonly is false', () => {
+      fixture.componentRef.setInput('isReadonly', false);
+      fixture.detectChanges();
+      expect(getByTestId('number-input')?.hasAttribute('readonly')).toBe(false);
     });
   });
 
