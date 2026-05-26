@@ -1,18 +1,17 @@
 import { vi } from 'vitest';
 import jsPDF from 'jspdf';
 
+import { APP_NAME, CONTENT_WIDTH, PAGE_MARGIN, PARAGRAPH_INDENT } from '@shared/pdf/pdf-layout.constantes';
+import { drawFooter, drawHeader, formatValue, loadImageAsBase64 } from '@shared/pdf/pdf-primitives.helpers';
+
 import {
-  formatValue,
-  drawHeader,
-  drawFooter,
   drawStudySection,
   drawVtlWithoutGuyingSection,
   drawGuyingSection,
-  drawVtlWithGuyingSection,
-  loadImageAsBase64
+  drawVtlWithGuyingSection
 } from './vtl-guying-report.helpers';
 import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
-import { APP_NAME, PAGE_SIZE, PDF_LABELS } from './vtl-guying-report.constantes';
+import { PDF_LABELS, DIAGRAM_WIDTH } from './vtl-guying-report.constantes';
 
 function createMockDoc(): jsPDF {
   return {
@@ -86,7 +85,7 @@ describe('vtl-guying-report helpers', () => {
   describe('drawHeader', () => {
     it('should draw the app name and report title', () => {
       const doc = createMockDoc();
-      const nextY = drawHeader(doc);
+      const nextY = drawHeader(doc, '20/05/2026', PDF_LABELS.reportTitle);
 
       expect(doc.setFont).toHaveBeenCalledWith('Nunito', 'bold');
       expect(doc.text).toHaveBeenCalledWith(APP_NAME, expect.any(Number), expect.any(Number), { align: 'right' });
@@ -97,7 +96,7 @@ describe('vtl-guying-report helpers', () => {
 
     it('should return a Y position greater than the starting margin', () => {
       const doc = createMockDoc();
-      const nextY = drawHeader(doc);
+      const nextY = drawHeader(doc, '20/05/2026', PDF_LABELS.reportTitle);
       expect(nextY).toBeGreaterThan(15);
     });
   });
@@ -105,7 +104,7 @@ describe('vtl-guying-report helpers', () => {
   describe('drawFooter', () => {
     it('should draw the page number at bottom right', () => {
       const doc = createMockDoc();
-      drawFooter(doc);
+      drawFooter(doc, PDF_LABELS.pageFooter);
 
       expect(doc.setFont).toHaveBeenCalledWith('Nunito', 'bold');
       expect(doc.text).toHaveBeenCalledWith(PDF_LABELS.pageFooter, expect.any(Number), expect.any(Number), {
@@ -162,20 +161,17 @@ describe('vtl-guying-report helpers', () => {
       expect(nextY).toBeGreaterThan(40);
     });
 
-    it('should compute date position from right margin (right-aligned)', () => {
+    it('should draw the author bullet row', () => {
       const doc = createMockDoc();
-      const data = createMockReportData({ date: '20/05/2026' });
+      const data = createMockReportData({ author: 'alice@test.com' });
       drawStudySection(doc, data, 40);
 
-      // getTextWidth is called with the date label to compute right-aligned X position
-      expect(doc.getTextWidth).toHaveBeenCalledWith(expect.stringContaining(PDF_LABELS.date));
-      // Date value is measured to contribute to the computed X position
-      expect(doc.getTextWidth).toHaveBeenCalledWith(data.date);
-      // Date value is drawn with positional args only (no { align: 'right' } option)
       const textCalls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
-      const dateCalls = textCalls.filter((call) => call[0] === data.date);
-      expect(dateCalls).toHaveLength(1);
-      expect(dateCalls[0]).toHaveLength(3); // [text, x, y] — no options argument
+      const authorLabelCall = textCalls.find((call) => {
+        const text = call[0] as string;
+        return typeof text === 'string' && text.includes(PDF_LABELS.author);
+      });
+      expect(authorLabelCall).toBeDefined();
     });
   });
 
@@ -262,19 +258,18 @@ describe('vtl-guying-report helpers', () => {
       expect(doc.addImage).not.toHaveBeenCalled();
     });
 
-    it('should add diagram image centered on the page with width 52.5 mm', () => {
+    it('should add diagram image aligned with right column at DIAGRAM_WIDTH', () => {
       const doc = createMockDoc();
       const data = createMockReportData();
       drawGuyingSection(doc, data, 110);
 
-      const expectedImgWidth = 52.5;
-      const expectedImgX = PAGE_SIZE.width / 2 - expectedImgWidth / 2;
+      const expectedImgX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT;
       expect(doc.addImage).toHaveBeenCalledWith(
         data.diagramImageBase64,
         'PNG',
         expectedImgX,
         expect.any(Number),
-        expectedImgWidth,
+        DIAGRAM_WIDTH,
         expect.any(Number)
       );
     });

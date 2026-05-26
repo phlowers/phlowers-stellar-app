@@ -6,32 +6,27 @@
  */
 
 import { inject, Injectable } from '@angular/core';
-import jsPDF from 'jspdf';
 
-import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 
-import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
+import { PdfBaseService } from '@shared/pdf/pdf-base.service';
+import { drawFooter, drawHeader, loadImageAsBase64 } from '@shared/pdf/pdf-primitives.helpers';
+
+import { PDF_LABELS } from './vtl-guying-report.constantes';
 import {
-  drawFooter,
   drawGuyingSection,
-  drawHeader,
   drawStudySection,
   drawVtlWithGuyingSection,
-  drawVtlWithoutGuyingSection,
-  loadFileAsBase64,
-  loadImageAsBase64,
-  registerNunitoFont
+  drawVtlWithoutGuyingSection
 } from './vtl-guying-report.helpers';
+import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
 
 /** Service responsible for generating the VHL & Guying PDF report. */
 @Injectable({ providedIn: 'root' })
-export class VtlGuyingReportService {
-  private readonly logger = inject(LoggerService);
+export class VtlGuyingReportService extends PdfBaseService {
   private readonly notificationService = inject(NotificationService);
 
   private diagramImageCache: string | null = null;
-  private nunitoFontsCache: { regular: string; bold: string; italic: string } | null = null;
 
   /** Pre-loads the diagram image and caches it for future report generation. */
   async preloadDiagramImage(): Promise<void> {
@@ -54,44 +49,19 @@ export class VtlGuyingReportService {
   }
 
   /** Pre-loads Nunito font variants and caches them for future report generation. */
-  async preloadFonts(): Promise<void> {
-    if (this.nunitoFontsCache) {
-      return;
-    }
-    try {
-      const [regular, bold, italic] = await Promise.all([
-        loadFileAsBase64('fonts/Nunito-Regular.ttf'),
-        loadFileAsBase64('fonts/Nunito-Bold.ttf'),
-        loadFileAsBase64('fonts/Nunito-Italic.ttf')
-      ]);
-      this.nunitoFontsCache = { regular, bold, italic };
-    } catch (error) {
-      this.logger.error('Failed to preload Nunito fonts', error);
-    }
-  }
+  // Inherited from PdfBaseService: preloadFonts()
 
   /** Generates and downloads the VHL & Guying PDF report. */
   async generateReport(data: VtlGuyingReportData): Promise<void> {
     try {
-      if (!this.nunitoFontsCache) {
-        await this.preloadFonts();
-      }
-      const doc = new jsPDF('p', 'mm', 'a4');
-      if (this.nunitoFontsCache) {
-        registerNunitoFont(
-          doc,
-          this.nunitoFontsCache.regular,
-          this.nunitoFontsCache.bold,
-          this.nunitoFontsCache.italic
-        );
-      }
+      const doc = await this.createDoc();
 
-      let y = drawHeader(doc, data.date ?? '-');
+      let y = drawHeader(doc, data.date ?? '-', PDF_LABELS.reportTitle);
       y = drawStudySection(doc, data, y);
       y = drawVtlWithoutGuyingSection(doc, data, y);
       y = drawGuyingSection(doc, data, y);
       drawVtlWithGuyingSection(doc, data, y);
-      drawFooter(doc);
+      drawFooter(doc, PDF_LABELS.pageFooter);
 
       const filename = `rapport-vhl-haubanage-${data.date}.pdf`;
       doc.save(filename);

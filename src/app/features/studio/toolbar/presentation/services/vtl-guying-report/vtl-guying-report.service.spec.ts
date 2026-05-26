@@ -89,14 +89,14 @@ describe('VtlGuyingReportService', () => {
   describe('generateReport', () => {
     it('should generate and save a PDF with the given data', async () => {
       const data = createMockReportData();
-      service.generateReport(data);
+      await service.generateReport(data);
 
       expect(mockNotificationService.success).toHaveBeenCalled();
     });
 
     it('should name the file with the report date', async () => {
       const data = createMockReportData();
-      service.generateReport(data);
+      await service.generateReport(data);
 
       const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { save: ReturnType<typeof vi.fn> } };
       expect(__mockDoc.save).toHaveBeenCalledWith('rapport-vhl-haubanage-2026-05-20.pdf');
@@ -109,7 +109,7 @@ describe('VtlGuyingReportService', () => {
       });
 
       const data = createMockReportData();
-      service.generateReport(data);
+      await service.generateReport(data);
 
       expect(mockLogger.error).toHaveBeenCalled();
       expect(mockNotificationService.error).toHaveBeenCalled();

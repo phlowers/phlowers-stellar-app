@@ -6,10 +6,10 @@
  */
 
 // ─── PDF LAYOUT OVERVIEW ─────────────────────────────────────────────────────
-//  Page A4 portrait (210 × 297 mm) — all sizes/margins in vtl-guying-report.constantes.ts
+//  Page A4 portrait (210 × 297 mm) — shared layout constants in @shared/pdf/pdf-layout.constantes.ts
 //
 //  ┌──────────────────────────────────────────┐
-//  │  drawHeader()       → title + separator  │  ~33 mm
+//  │  drawHeader()       → title + separator  │  ~33 mm  (shared primitive)
 //  ├──────────────────────────────────────────┤
 //  │  drawStudySection() → study metadata     │  ~50–65 mm (varies with content)
 //  ├──────────────────────────────────────────┤
@@ -18,7 +18,7 @@
 //  │  drawGuyingSection() → params + diagram  │  ~60 mm (3-col: left|diagram|right)
 //  ├──────────────────────────────────────────┤
 //  │  drawVtlWithGuyingSection() → results    │  ~65 mm
-//  │  drawFooter()       → "Page 1 / 1"       │  fixed at y = 287 mm
+//  │  drawFooter()       → "Page 1 / 1"       │  fixed at y = 287 mm  (shared primitive)
 //  └──────────────────────────────────────────┘
 //
 //  Two-column layout: leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT
@@ -27,135 +27,20 @@
 
 import jsPDF from 'jspdf';
 
-import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
 import {
-  APP_NAME,
   BULLET,
   CONTENT_WIDTH,
-  DECIMAL_PLACES,
-  DIAGRAM_WIDTH,
   FONT_SIZES,
   LINE_HEIGHT,
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE,
-  PARAGRAPH_INDENT,
-  PDF_LABELS,
-  UNITS
-} from './vtl-guying-report.constantes';
+  PARAGRAPH_INDENT
+} from '@shared/pdf/pdf-layout.constantes';
+import { drawBulletItem, drawWrappingBulletItem, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 
-/** Loads a file from a URL and returns its raw base64 encoding (no data URL prefix). */
-export async function loadFileAsBase64(url: string): Promise<string> {
-  const response = await globalThis.fetch(url);
-  const buffer = await response.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCodePoint(byte);
-  });
-  return globalThis.btoa(binary);
-}
-
-/** Registers Nunito font variants (normal, bold, italic) in a jsPDF document. */
-export function registerNunitoFont(doc: jsPDF, regularB64: string, boldB64: string, italicB64: string): void {
-  doc.addFileToVFS('Nunito-Regular.ttf', regularB64);
-  doc.addFont('Nunito-Regular.ttf', 'Nunito', 'normal');
-  doc.addFileToVFS('Nunito-Bold.ttf', boldB64);
-  doc.addFont('Nunito-Bold.ttf', 'Nunito', 'bold');
-  doc.addFileToVFS('Nunito-Italic.ttf', italicB64);
-  doc.addFont('Nunito-Italic.ttf', 'Nunito', 'italic');
-}
-
-/** Formats a numeric value to fixed decimals with unit, or returns "-" if null/undefined. */
-export function formatValue(value: number | null | undefined, unit: string): string {
-  if (value === null || value === undefined) {
-    return '-';
-  }
-  return `${value.toFixed(DECIMAL_PLACES)} ${unit}`;
-}
-
-// ─── PRIMITIVE: bullet item (• Label : value) ────────────────────────────────
-//  Font size controlled by FONT_SIZES.label (constantes.ts)
-//  Label = bold Nunito, value = normal Nunito (bold if boldValue = true) — inline on same Y
-/** Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true). */
-function drawBulletItem(doc: jsPDF, label: string, value: string, x: number, y: number, boldValue = false): void {
-  const bulletText = `${BULLET} `;
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.label);
-  doc.text(bulletText + label + ' : ', x, y);
-  const labelWidth = doc.getTextWidth(bulletText + label + ' : ');
-  doc.setFont('Nunito', boldValue ? 'bold' : 'normal');
-  doc.text(value, x + labelWidth, y);
-}
-
-/**
- * Draws a bullet item where the value can wrap to multiple lines.
- * Returns the total height consumed (number of lines × LINE_HEIGHT).
- */
-function drawWrappingBulletItem(
-  doc: jsPDF,
-  label: string,
-  value: string,
-  x: number,
-  y: number,
-  maxWidth: number
-): number {
-  const bulletText = `${BULLET} `;
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.label);
-  const fullLabel = bulletText + label + ' : ';
-  doc.text(fullLabel, x, y);
-  const labelWidth = doc.getTextWidth(fullLabel);
-  doc.setFont('Nunito', 'normal');
-  doc.setFontSize(FONT_SIZES.value);
-  const availableWidth = maxWidth - labelWidth;
-  const lines = doc.splitTextToSize(value || '-', availableWidth);
-  doc.text(lines, x + labelWidth, y);
-  return Math.max(lines.length, 1) * LINE_HEIGHT;
-}
-
-// ─── SECTION 0: HEADER ────────────────────────────────────────────────────────
-//  [TOP RIGHT]  App name          → FONT_SIZES.appName (constantes.ts)
-//  [TOP LEFT]   Report title      → FONT_SIZES.title   (constantes.ts) — bold
-//  [TOP RIGHT]  Date              → same line as report title, right-aligned
-//  [SEPARATOR]  Full-width line   → lineWidth 0.5 mm, gap before = 10 mm (↑ more space / ↓ less)
-/** Draws the PDF header: title + app name + date + separator line. Returns the next Y position. */
-export function drawHeader(doc: jsPDF, date: string): number {
-  let y = PAGE_MARGIN.top;
-
-  // App name (top right) — size: FONT_SIZES.appName, bold
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.appName);
-  doc.text(APP_NAME, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
-  y += 2;
-
-  // Report title (top left, bold) — size: FONT_SIZES.title
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.title);
-  y += LINE_HEIGHT; // vertical gap between app name baseline and title baseline
-  doc.text(PDF_LABELS.reportTitle, PAGE_MARGIN.left, y);
-
-  // Date (top right, same line as title) — size: FONT_SIZES.title
-  doc.text(date, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
-
-  // Main separator line — gap of 10 mm below title text (adjust here to change spacing)
-  y += 3;
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
-  y += LINE_HEIGHT;
-
-  return y;
-}
-
-// ─── SECTION FOOTER ───────────────────────────────────────────────────────────
-//  [BOTTOM RIGHT]  "Page 1 / 1"  — fixed at PAGE_SIZE.height - 10 mm (287 mm on A4)
-//  Font size: FONT_SIZES.footer (constantes.ts)
-/** Draws the page footer (page number). */
-export function drawFooter(doc: jsPDF): void {
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.footer);
-  doc.text(PDF_LABELS.pageFooter, PAGE_SIZE.width - PAGE_MARGIN.right, PAGE_SIZE.height - 8, { align: 'right' });
-}
+import { DIAGRAM_WIDTH, PDF_LABELS, UNITS } from './vtl-guying-report.constantes';
+import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
 
 // ─── SECTION 1: ÉTUDE ET CANTON ───────────────────────────────────────────────
 //  Single-column layout: all items left-aligned at leftX
@@ -415,16 +300,4 @@ export function drawVtlWithGuyingSection(doc: jsPDF, data: VtlGuyingReportData, 
   });
 
   return y;
-}
-
-/** Loads an image from a URL and returns it as a base64 data URL. */
-export async function loadImageAsBase64(url: string): Promise<string> {
-  const response = await globalThis.fetch(url);
-  const blob = await response.blob();
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 }
