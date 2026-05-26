@@ -125,6 +125,9 @@ export class PoseTableComponent {
         untracked(() => {
           void this.calculate();
         });
+      } else {
+        this.results.set(null);
+        this.poseTableError.set(false);
       }
     } else {
       this.form.setValue({

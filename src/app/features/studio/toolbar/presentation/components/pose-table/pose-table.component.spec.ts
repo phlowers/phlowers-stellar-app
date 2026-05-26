@@ -518,6 +518,19 @@ describe('PoseTableComponent', () => {
       expect(component.results()).toBeNull();
     });
 
+    it('clears stale results and poseTableError when switching to a section with saved params but plot not ready', async () => {
+      component.results.set(makePoseResults());
+      component.poseTableError.set(true);
+
+      const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
+      sectionSignal.set(makeSection({ pose_table: savedData }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.results()).toBeNull();
+      expect(component.poseTableError()).toBe(false);
+    });
+
     it('does not change form or results when section has no pose_table', () => {
       sectionSignal.set(makeSection({ pose_table: undefined }));
       fixture.detectChanges();
