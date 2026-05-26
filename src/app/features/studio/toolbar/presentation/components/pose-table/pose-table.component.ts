@@ -142,7 +142,7 @@ export class PoseTableComponent {
     }
     untracked(async () => {
       const { result } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
-      this.equivalentSpan.set(result);
+      this.equivalentSpan.set(result.equivalentSpan);
       console.log('equivalent span has run with result: ', result);
     });
   });
