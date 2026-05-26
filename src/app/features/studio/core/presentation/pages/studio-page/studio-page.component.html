@@ -249,18 +249,65 @@
           data-testid="load-tabs"
         >
           <p-tablist>
-            <p-tab value="0" [disabled]="!spanService.section()?.selected_charge_uuid" class="climate" i18n>
-              Climate condition
+            <p-tab
+              value="0"
+              [disabled]="!spanService.section()?.selected_charge_uuid"
+              class="climate"
+              pTooltip="Climate condition"
+              i18n-pTooltip
+              tooltipPosition="bottom"
+              data-testid="load-tab-climate"
+            >
+              <i class="fa-solid fa-cloud-sun" aria-hidden="true"></i>
+              <span class="sr-only" i18n>Climate condition</span>
             </p-tab>
-            <p-tab value="1" [disabled]="!spanService.section()?.selected_charge_uuid" class="load-marking" i18n>
-              Load / Marking
+            <p-tab
+              value="1"
+              [disabled]="!spanService.section()?.selected_charge_uuid"
+              class="load-marking"
+              pTooltip="Load / Marking"
+              i18n-pTooltip
+              tooltipPosition="bottom"
+              data-testid="load-tab-load-marking"
+            >
+              <i class="fa-solid fa-weight-hanging" aria-hidden="true"></i>
+              <span class="sr-only" i18n>Load / Marking</span>
             </p-tab>
-            <p-tab value="2" [disabled]="!spanService.section()?.selected_charge_uuid" class="cable-length" i18n>
-              Cable length change
+            <p-tab
+              value="2"
+              [disabled]="!spanService.section()?.selected_charge_uuid"
+              class="cable-length"
+              pTooltip="Cable length change"
+              i18n-pTooltip
+              tooltipPosition="bottom"
+              data-testid="load-tab-cable-length"
+            >
+              <i class="fa-solid fa-arrows-left-right-to-line" aria-hidden="true"></i>
+              <span class="sr-only" i18n>Cable length change</span>
             </p-tab>
-            <p-tab value="3" [disabled]="true" class="cable-support" i18n>Cable manip. at support</p-tab>
-            <p-tab value="4" [disabled]="!spanService.section()?.selected_charge_uuid" class="cable-span" i18n>
-              Cable manip. at span
+            <p-tab
+              value="3"
+              [disabled]="true"
+              class="cable-support"
+              pTooltip="Cable manip. at support"
+              i18n-pTooltip
+              tooltipPosition="bottom"
+              data-testid="load-tab-cable-support"
+            >
+              <i class="fa-solid fa-hand-back-fist" aria-hidden="true"></i>
+              <span class="sr-only" i18n>Cable manip. at support</span>
+            </p-tab>
+            <p-tab
+              value="4"
+              [disabled]="!spanService.section()?.selected_charge_uuid"
+              class="cable-span"
+              pTooltip="Cable manip. at span"
+              i18n-pTooltip
+              tooltipPosition="bottom"
+              data-testid="load-tab-cable-span"
+            >
+              <i class="fa-solid fa-arrows-up-down-left-right" aria-hidden="true"></i>
+              <span class="sr-only" i18n>Cable manip. at span</span>
             </p-tab>
           </p-tablist>
 
