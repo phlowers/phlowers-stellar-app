@@ -166,8 +166,6 @@ export class PoseTableComponent {
         this.poseTableError.set(true);
       }
       this.results.set(result);
-    } catch {
-      // handled via error signal
     } finally {
       this.isCalculating.set(false);
     }

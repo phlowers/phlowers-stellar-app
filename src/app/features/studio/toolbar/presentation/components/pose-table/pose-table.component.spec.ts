@@ -11,6 +11,7 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { Section } from '@shared/domain';
 import { PoseTableData } from '@shared/domain/models/section.model';
 import { InitialCondition } from '@shared/domain/models/initial-condition.model';
+import { Task } from '@services/worker_python/tasks/types';
 
 function makeSection(overrides: Partial<Section> = {}): Section {
   return {
@@ -56,6 +57,7 @@ describe('PoseTableComponent', () => {
 
   let sectionSignal: WritableSignal<Section | null>;
   let studySignal: WritableSignal<unknown>;
+  let litDataSignal: WritableSignal<object | null>;
   let mockSectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
   let mockToolbarDialogService: { setTemplates: ReturnType<typeof vi.fn> };
@@ -64,9 +66,15 @@ describe('PoseTableComponent', () => {
   beforeEach(async () => {
     sectionSignal = signal<Section | null>(null);
     studySignal = signal<unknown>(null);
+    litDataSignal = signal<object | null>(null);
     mockSectionService = { createOrUpdateSection: vi.fn().mockResolvedValue(undefined) };
     mockWorkerPythonService = {
-      runTask: vi.fn().mockResolvedValue({ result: makePoseResults(), error: null, pythonErrorCode: null })
+      runTask: vi.fn().mockImplementation((task: string) => {
+        if (task === Task.getEquivalentSpan) {
+          return Promise.resolve({ result: { equivalentSpan: 250 }, error: null });
+        }
+        return Promise.resolve({ result: makePoseResults(), error: null });
+      })
     };
     mockToolbarDialogService = { setTemplates: vi.fn() };
     mockNotificationService = { success: vi.fn(), error: vi.fn() };
@@ -75,7 +83,7 @@ describe('PoseTableComponent', () => {
       imports: [PoseTableComponent, NoopAnimationsModule],
       providers: [
         { provide: PlotSpanService, useValue: { section: sectionSignal } },
-        { provide: PlotService, useValue: { study: studySignal } },
+        { provide: PlotService, useValue: { study: studySignal, litData: litDataSignal } },
         { provide: SectionService, useValue: mockSectionService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
@@ -115,6 +123,18 @@ describe('PoseTableComponent', () => {
 
     it('starts with no results', () => {
       expect(component.results()).toBeNull();
+    });
+
+    it('starts with poseTableError false', () => {
+      expect(component.poseTableError()).toBe(false);
+    });
+
+    it('starts with equivalentSpan null', () => {
+      expect(component.equivalentSpan()).toBeNull();
+    });
+
+    it('starts with isCalculatingEquivalentSpan false', () => {
+      expect(component.isCalculatingEquivalentSpan()).toBe(false);
     });
   });
 
@@ -292,6 +312,21 @@ describe('PoseTableComponent', () => {
       await component.calculate();
       expect(component.results()!.temperatures).toHaveLength(8);
     });
+
+    it('sets poseTableError to true when worker returns an error', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'python error' });
+      await component.calculate();
+      expect(component.poseTableError()).toBe(true);
+    });
+
+    it('resets poseTableError to false at the start of each call', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'python error' });
+      await component.calculate();
+      expect(component.poseTableError()).toBe(true);
+
+      await component.calculate();
+      expect(component.poseTableError()).toBe(false);
+    });
   });
 
   // ─── save() ───────────────────────────────────────────────────────────────
@@ -464,13 +499,23 @@ describe('PoseTableComponent', () => {
       expect(component.form.controls.computingStep.value).toBe(2);
     });
 
-    it('auto-triggers calculation when section has saved pose_table params', async () => {
+    it('auto-triggers calculation when plot is ready and section has saved pose_table params', async () => {
+      litDataSignal.set({});
       const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
       sectionSignal.set(makeSection({ pose_table: savedData }));
       fixture.detectChanges();
       await fixture.whenStable();
 
       expect(component.results()).not.toBeNull();
+    });
+
+    it('does not auto-trigger calculation when plot is not ready', async () => {
+      const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
+      sectionSignal.set(makeSection({ pose_table: savedData }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.results()).toBeNull();
     });
 
     it('does not change form or results when section has no pose_table', () => {
@@ -493,6 +538,57 @@ describe('PoseTableComponent', () => {
       expect(component.form.controls.lowestTemp.value).toBe(component.LOWEST_TEMP_DEFAULT);
       expect(component.form.controls.computingStep.value).toBe(component.COMPUTING_STEP_DEFAULT);
       expect(component.results()).toBeNull();
+    });
+  });
+
+  // ─── equivalentSpan effect ────────────────────────────────────────────────
+
+  describe('equivalentSpan', () => {
+    it('remains null when plot is not ready', async () => {
+      sectionSignal.set(makeSection());
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBeNull();
+    });
+
+    it('remains null when section is null', async () => {
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBeNull();
+    });
+
+    it('is set when both plot and section are available', async () => {
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBe(250);
+    });
+
+    it('resets to null when plot becomes not ready', async () => {
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      litDataSignal.set(null);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBeNull();
+    });
+
+    it('is false after equivalent span task completes', async () => {
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.isCalculatingEquivalentSpan()).toBe(false);
     });
   });
 });
