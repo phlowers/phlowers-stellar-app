@@ -1,0 +1,27 @@
+@use 'abstract.extracts' as app;
+
+p-select,
+p-inputgroup {
+  @apply mb-3;
+}
+
+p-message {
+  @apply relative bottom-3;
+}
+
+.header-btns {
+  @apply flex justify-between items-center mb-3;
+}
+
+.legend {
+  @extend %heading-2xs;
+  @apply mb-3;
+}
+
+.manip2-header {
+  @apply flex justify-between items-center mb-1;
+}
+
+.footer-btns {
+  @apply flex justify-end items-center gap-4 pt-5 pr-2;
+}
