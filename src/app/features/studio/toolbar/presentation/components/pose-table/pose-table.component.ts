@@ -71,6 +71,8 @@ export class PoseTableComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly workerPythonService = inject(WorkerPythonService);
 
+  readonly isPlotReady = computed(() => this.plotService.litData() !== null);
+
   readonly selectedInitialCondition = computed(() => {
     const section = this.spanService.section();
     if (!section) return null;
@@ -101,7 +103,10 @@ export class PoseTableComponent {
     })
   });
 
+  readonly isCalculating = signal(false);
+  readonly isBusy = computed(() => !this.isPlotReady() || this.isCalculating());
   readonly results = signal<PoseResults | null>(null);
+  readonly equivalentSpan = signal<number | null>(null);
 
   protected readonly _templatesEffect = effect(() => {
     const header = this.headerTemplate();
@@ -115,9 +120,11 @@ export class PoseTableComponent {
     const saved = this.spanService.section()?.pose_table;
     if (saved) {
       this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
-      untracked(() => {
-        void this.calculate();
-      });
+      if (this.isPlotReady()) {
+        untracked(() => {
+          void this.calculate();
+        });
+      }
     } else {
       this.form.setValue({
         lowestTemp: this.LOWEST_TEMP_DEFAULT,
@@ -127,19 +134,37 @@ export class PoseTableComponent {
     }
   });
 
+  protected readonly _equivalentSpanEffect = effect(() => {
+    const section = this.spanService.section();
+    if (!this.isPlotReady() || !section) {
+      untracked(() => this.equivalentSpan.set(null));
+      return;
+    }
+    untracked(async () => {
+      const { result } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
+      this.equivalentSpan.set(result);
+    });
+  });
+
   async calculate(): Promise<void> {
     if (this.form.invalid) return;
     this.poseTableError.set(false);
-    const { result, error } = await this.workerPythonService.runTask(Task.getPoseTable, {
-      stepTemperature: this.form.controls.computingStep.value,
-      baseTemperature: this.form.controls.lowestTemp.value,
-      numberValues: this.TABLE_NUMBER_VALUES
-    });
-    if (error) {
-      this.poseTableError.set(true);
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.getPoseTable, {
+        stepTemperature: this.form.controls.computingStep.value,
+        baseTemperature: this.form.controls.lowestTemp.value,
+        numberValues: this.TABLE_NUMBER_VALUES
+      });
+      if (error) {
+        this.poseTableError.set(true);
+      }
+      this.results.set(result);
+    } catch {
+      // handled via error signal
+    } finally {
+      this.isCalculating.set(false);
     }
-
-    this.results.set(result);
   }
 
   async save(): Promise<void> {

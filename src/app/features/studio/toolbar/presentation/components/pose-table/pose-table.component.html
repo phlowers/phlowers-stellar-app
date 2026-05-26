@@ -14,7 +14,13 @@
     <dd>{{ baseTemp() !== null ? baseTemp() + ' °C' : '-' }}</dd>
 
     <dt i18n>Equivalent span</dt>
-    <dd>-</dd>
+    <dd>
+      @if (isPlotReady()) {
+        {{ equivalentSpan() !== null ? (equivalentSpan() | number: '1.0-1') + ' m' : '-' }}
+      } @else {
+        <app-icon class="spinner" icon="progress_activity" ariaLabel="waiting for calculation engine" i18n-ariaLabel />
+      }
+    </dd>
   </dl>
 
   <app-input-number
@@ -40,7 +46,13 @@
     [errorMessage]="getComputingStepError()"
   />
 
-  <button type="submit" app-btn data-testid="calculate-btn" [disabled]="form.invalid">
+  <button
+    type="submit"
+    app-btn
+    data-testid="calculate-btn"
+    [disabled]="form.invalid || isBusy()"
+    [btnLoading]="isBusy()"
+  >
     <app-icon icon="rocket_launch" aria-hidden="true" />
     <ng-container i18n>Calculate</ng-container>
   </button>
@@ -77,6 +89,10 @@
       </tbody>
     </table>
   </div>
+} @else if (poseTableError()) {
+  <p-message severity="error" class="calculation-error" data-testid="pose-table-error" i18n>
+    An error occurred while calculating the pose table
+  </p-message>
 }
 
 <ng-template #footer>
@@ -92,14 +108,14 @@
     <ng-container i18n>Save</ng-container>
   </button>
 
-  <button app-btn type="button" data-testid="report-btn" [disabled]="!results() || form.invalid">
+  <button
+    app-btn
+    type="button"
+    data-testid="report-btn"
+    [disabled]="!results() || form.invalid || isBusy()"
+    [btnLoading]="isBusy()"
+  >
     <app-icon icon="description" aria-hidden="true" />
     <ng-container i18n>Report</ng-container>
   </button>
 </ng-template>
-
-@if (poseTableError()) {
-  <p-message severity="error" class="calculation-error" data-testid="pose-table-error" i18n>
-    An error occurred while calculating the pose table
-  </p-message>
-}
