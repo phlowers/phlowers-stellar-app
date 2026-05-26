@@ -99,7 +99,7 @@ def change_state(
         ice_thickness=ice_thickness,
         new_temperature=cable_temperature,
         wind_pressure=wind_pressure,
-        wind_sense="clockwise",
+        wind_direction="clockwise",
     )
     section_length = len(engine.section_array.data)
     base_section_length = (

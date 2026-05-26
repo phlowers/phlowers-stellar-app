@@ -14,6 +14,17 @@ import { Obstacle } from './obstacle.model';
 import { CableModification } from './cable-modification.model';
 import { CableSpanManipulation } from './cable-span-manipulation.model';
 
+export interface PoseResults {
+  temperatures: number[];
+  poseParams: number[];
+  horizontalTensions: number[];
+}
+
+export interface PoseTableData {
+  lowestTemp: number;
+  computingStep: number;
+}
+
 /**
  * Section domain model - represents a power line section.
  *
@@ -124,6 +135,8 @@ export interface Section {
   selected_field_measure_uuid: string | undefined;
   /** VTL and guying calculation data */
   vtl_and_guying: VtlAndGuying | undefined;
+  /** Pose table calculation data */
+  pose_table?: PoseTableData;
   /** Array of cable length modifications on this section's spans */
   cable_modifications: CableModification[];
   /** UUID of the currently selected cable modification */

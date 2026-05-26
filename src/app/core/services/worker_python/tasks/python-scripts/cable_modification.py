@@ -46,7 +46,7 @@ def cable_modification(js_inputs: dict):
         new_temperature=simulated_temperature,
         ice_thickness=0.0,
         wind_pressure=0.0,
-        wind_sense="clockwise",
+        wind_direction="clockwise",
     )
 
     section_length = len(engine.section_array.data)

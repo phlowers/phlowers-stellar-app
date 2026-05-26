@@ -147,7 +147,7 @@ describe('StudioTopToolbarComponent', () => {
 
   describe('ngOnInit', () => {
     it('should call loadToolsItemsState on init', () => {
-      const loadSpy = vi.spyOn(component as StudioTopToolbarComponent, 'loadToolsItemsState' as never);
+      const loadSpy = vi.spyOn(component, 'loadToolsItemsState' as never);
       component.ngOnInit();
       expect(loadSpy).toHaveBeenCalled();
     });
@@ -194,13 +194,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Pose table', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[2].command?.({});
-      expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
-
-      consoleSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('pose-table');
     });
 
     it('should execute tablesDropdown command for Obstacles table', () => {

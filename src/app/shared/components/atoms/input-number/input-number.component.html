@@ -19,10 +19,11 @@
       data-testid="number-input"
       [attr.min]="min()"
       [attr.max]="max()"
+      [attr.step]="step()"
       [placeholder]="placeholder()"
       [attr.aria-errormessage]="assistiveId()"
       [attr.aria-invalid]="hasError()"
-      readonly
+      [attr.readonly]="isReadonly() || null"
       (blur)="markTouched()"
     />
 
@@ -39,7 +40,7 @@
         data-testid="decrement-btn"
         (click)="decrement()"
       >
-        <span class="pi pi-minus" aria-hidden="true"></span>
+        <app-icon icon="remove" aria-hidden="true" />
       </button>
 
       <span class="stepper__divider" aria-hidden="true"></span>
@@ -54,7 +55,7 @@
         data-testid="increment-btn"
         (click)="increment()"
       >
-        <span class="pi pi-plus" aria-hidden="true"></span>
+        <app-icon icon="add" aria-hidden="true" />
       </button>
     </div>
   </div>

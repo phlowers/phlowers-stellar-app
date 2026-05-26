@@ -4,9 +4,10 @@ import { InitComponent } from '@features/studio/field-measuring/presentation/com
 import { L0SumComponent } from '../components/l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from '../components/vtl-and-guying/vtl-and-guying.component';
 import { LoadsTableComponent } from '../components/loads-table/loads-table.component';
+import { PoseTableComponent } from '../components/pose-table/pose-table.component';
 
 /** Identifier for a toolbar tool. */
-export type Tool = 'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'other-tool';
+export type Tool = 'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'pose-table' | 'other-tool';
 
 /** Phase of the toolbar dialog lifecycle. */
 export type DialogPhase = 'init' | 'main';
@@ -68,6 +69,10 @@ export class ToolbarDialogService {
     'load-table': {
       component: LoadsTableComponent,
       dialogStyle: { width: '83.125rem', 'max-width': '90%' }
+    },
+    'pose-table': {
+      component: PoseTableComponent,
+      dialogStyle: { width: '52.1875rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!

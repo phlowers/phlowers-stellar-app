@@ -6,7 +6,7 @@
 
 // ─── Block: .stepper ───
 .stepper {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   gap: 0.125rem;
 
@@ -19,14 +19,13 @@
 
   // ── Element: Field (input + controls row) ──
   &__field {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: var(--grey-white);
     border: 0.0625rem solid var(--star-dust-300);
-    border-radius: var(--content-border-radius);
-    height: 2.5rem;
-    width: 8.75rem;
+    border-radius: 0.25rem;
+    height: 2rem;
     padding: 0 0.25rem;
     transition:
       border-color var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1),
@@ -39,9 +38,7 @@
 
     // ── 2. Focus / Typing ──
     &:focus-within {
-      border-color: var(--primary-600);
-      outline: 0.0625rem solid var(--primary-600);
-      outline-offset: 0.0625rem;
+      @extend %focus-state;
     }
   }
 
@@ -52,9 +49,10 @@
     background: transparent;
     text-align: left;
     padding-left: 0.75rem;
-    font: 400 1rem/1.5 var(--p-font-family, 'Nunito', Arial, sans-serif);
+    padding-right: 1rem;
+    @extend %text-l-400;
     color: var(--star-dust-950);
-    width: 2.5rem;
+    min-width: 3.5rem;
     outline: none;
 
     &::placeholder {
@@ -97,12 +95,10 @@
     height: 100%;
     border: none;
     background: transparent;
-    cursor: pointer;
     color: var(--star-dust-600);
     transition: color var(--transition-duration);
     &--disabled {
       color: var(--star-dust-300);
-      cursor: not-allowed;
     }
 
     &:hover:not(:disabled) {
@@ -111,7 +107,6 @@
 
     &:disabled {
       color: var(--star-dust-300);
-      cursor: not-allowed;
     }
 
     .pi {
@@ -149,7 +144,7 @@
     }
 
     &:focus-within {
-      outline-color: var(--error-600);
+      @extend %focus-state;
     }
   }
 
@@ -157,7 +152,6 @@
   &--disabled &__field {
     background-color: var(--star-dust-50);
     border-color: var(--star-dust-200);
-    cursor: not-allowed;
 
     &:hover {
       border-color: var(--star-dust-200);

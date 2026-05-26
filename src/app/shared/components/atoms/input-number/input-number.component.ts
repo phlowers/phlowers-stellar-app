@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
+import { IconComponent } from '../icon/icon.component';
 
 let nextId = 0;
 
 @Component({
   selector: 'app-input-number',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, IconComponent],
   templateUrl: './input-number.component.html',
   styleUrl: './input-number.component.scss',
   host: {
@@ -25,9 +27,11 @@ export class InputNumberComponent implements ControlValueAccessor {
   readonly max = input(250);
   readonly label = input('');
   readonly placeholder = input('');
+  readonly step = input(1);
   /** Assistive text displayed below the field */
   readonly assistiveText = input('');
   readonly errorMessage = input('');
+  readonly isReadonly = input(true);
   /** Indicates whether the field is in an error state */
   readonly hasError = input(false);
 
@@ -53,6 +57,17 @@ export class InputNumberComponent implements ControlValueAccessor {
   private onTouched: () => void = () => {
     // Callback will be set by registerOnTouched
   };
+
+  constructor() {
+    this.pointsCountControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      const next = this.clamp(value);
+      if (value !== next) {
+        this.pointsCountControl.setValue(next, { emitEvent: false });
+      }
+      this.pointsCountValue.set(next);
+      this.onChange(next);
+    });
+  }
 
   writeValue(value: number | null): void {
     const next = this.clamp(value);
@@ -81,7 +96,7 @@ export class InputNumberComponent implements ControlValueAccessor {
     if (this.disabled()) return;
     const current = this.pointsCountControl.value ?? 0;
     if (current < this.max()) {
-      this.updateValue(current + 1);
+      this.updateValue(this.roundToStep(current + this.step()));
     }
     this.onTouched();
   }
@@ -90,7 +105,7 @@ export class InputNumberComponent implements ControlValueAccessor {
     if (this.disabled()) return;
     const current = this.pointsCountControl.value ?? 0;
     if (current > this.min()) {
-      this.updateValue(current - 1);
+      this.updateValue(this.roundToStep(current - this.step()));
     }
     this.onTouched();
   }
@@ -103,9 +118,14 @@ export class InputNumberComponent implements ControlValueAccessor {
 
   private updateValue(value: number | null): void {
     const next = this.clamp(value);
-    this.pointsCountControl.setValue(next);
+    this.pointsCountControl.setValue(next, { emitEvent: false });
     this.pointsCountValue.set(next);
     this.onChange(next);
+  }
+
+  private roundToStep(value: number): number {
+    const decimals = this.step().toString().split('.')[1]?.length ?? 0;
+    return Number.parseFloat(value.toFixed(decimals));
   }
 
   private clamp(value: number | null): number | null {

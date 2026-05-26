@@ -66,9 +66,9 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       label: $localize`Pose table`, // Tableau de pose
-      disabled: true,
+      disabled: false,
       command: () => {
-        this.logger.log('Add action triggered');
+        this.toolbarDialogService.openTool('pose-table');
       }
     },
     {
