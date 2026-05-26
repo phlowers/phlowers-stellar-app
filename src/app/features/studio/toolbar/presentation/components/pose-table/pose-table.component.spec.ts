@@ -603,5 +603,48 @@ describe('PoseTableComponent', () => {
 
       expect(component.isCalculatingEquivalentSpan()).toBe(false);
     });
+
+    it('keeps equivalentSpan null and shows error notification when worker returns an error', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'worker error' });
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBeNull();
+      expect(mockNotificationService.error).toHaveBeenCalled();
+    });
+
+    it('keeps equivalentSpan null and shows error notification when worker returns null result', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: null });
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBeNull();
+      expect(mockNotificationService.error).toHaveBeenCalled();
+    });
+
+    it('keeps equivalentSpan null and shows error notification when runTask rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValueOnce(new Error('worker not initialized'));
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.equivalentSpan()).toBeNull();
+      expect(mockNotificationService.error).toHaveBeenCalled();
+    });
+
+    it('resets isCalculatingEquivalentSpan to false when runTask rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValueOnce(new Error('worker not initialized'));
+      sectionSignal.set(makeSection());
+      litDataSignal.set({});
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.isCalculatingEquivalentSpan()).toBe(false);
+    });
   });
 });

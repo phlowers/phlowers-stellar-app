@@ -144,11 +144,19 @@ export class PoseTableComponent {
       untracked(() => this.equivalentSpan.set(null));
       return;
     }
-    untracked(async () => {
+    void untracked(async () => {
       this.isCalculatingEquivalentSpan.set(true);
       try {
-        const { result } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
-        this.equivalentSpan.set(result.equivalentSpan);
+        const { result, error } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
+        if (error || result === null) {
+          this.equivalentSpan.set(null);
+          this.notificationService.error($localize`Failed to compute equivalent span`);
+        } else {
+          this.equivalentSpan.set(result.equivalentSpan);
+        }
+      } catch {
+        this.equivalentSpan.set(null);
+        this.notificationService.error($localize`Failed to compute equivalent span`);
       } finally {
         this.isCalculatingEquivalentSpan.set(false);
       }
