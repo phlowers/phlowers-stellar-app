@@ -2,7 +2,8 @@ import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Ico
 import { AxesNorms, Side, View } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
-import { SpanLoad } from '@shared/domain';
+import { createCableModificationAnnotations } from './createCableModificationAnnotations';
+import { CableModification, SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
 import { createObstaclesAnnotations } from './obstacles';
@@ -50,6 +51,10 @@ export interface CreatePlotParams {
   distances: Distance[];
   /** Which distance type is currently selected for visualization. */
   distanceType: 'oblique' | 'vertical' | 'horizontal' | null;
+  /** Persisted cable length modifications to display as clickable annotations. */
+  cableModifications?: readonly CableModification[];
+  /** Lookup mapping a span uuid (left support uuid) to its absolute support index. */
+  spanUuidToIndex?: ReadonlyMap<string, number>;
 }
 
 const normalCamera = () => ({
@@ -112,6 +117,11 @@ const createScene = (
     },
     annotations: [
       ...createLoadAnnotations(plotParams),
+      ...createCableModificationAnnotations(
+        plotParams,
+        plotParams.cableModifications ?? [],
+        plotParams.spanUuidToIndex ?? new Map()
+      ),
       ...createObstaclesAnnotations(plotParams),
       ...distanceAnnotations
     ],
@@ -252,6 +262,11 @@ const layout2d = (
     },
     annotations: [
       ...createLoadAnnotations(plotParams),
+      ...createCableModificationAnnotations(
+        plotParams,
+        plotParams.cableModifications ?? [],
+        plotParams.spanUuidToIndex ?? new Map()
+      ),
       ...createObstaclesAnnotations(plotParams),
       ...distanceAnnotations
     ]

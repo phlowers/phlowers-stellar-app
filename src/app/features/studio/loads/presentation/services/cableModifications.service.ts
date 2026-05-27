@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -22,6 +22,46 @@ export type { CableModificationParams };
 })
 /** Service coordinating cable modification calculations, persistence, and deletion. */
 export class CableModificationsService {
+  /**
+   * UUID of the span to pre-select in `CableLengthChangeComponent`.
+   *
+   * @remarks
+   * Set when the user clicks the cable modification annotation on the section
+   * plot. The form component watches this signal, patches its `scope` control
+   * and triggers `onScopeChange()` to pre-fill from the saved modification.
+   * Consumers must call {@link clearSelectedSpan} after consuming the value so
+   * the signal can be re-triggered for the same span later.
+   */
+  readonly selectedSpanUuid = signal<string | null>(null);
+
+  /** Pre-select a span in the cable length change form (called from the plot click handler). */
+  selectSpan = (spanUuid: string): void => {
+    this.selectedSpanUuid.set(spanUuid);
+  };
+
+  /** Clear the pre-selection signal so the same span can be re-selected later. */
+  clearSelectedSpan = (): void => {
+    this.selectedSpanUuid.set(null);
+  };
+
+  /**
+   * Transient cable modification used to position the section plot icon while
+   * the user is previewing a calculation (Calculate button) but has not yet
+   * persisted it (Save button).
+   *
+   * @remarks
+   * The section plot overlays this preview on top of `section.cable_modifications`
+   * so the icon's arc-length anchor reflects the form values shown to the user
+   * instead of the previously saved ones. Consumers should clear it on save,
+   * delete, scope change, or when the form is reset.
+   */
+  readonly previewCableModification = signal<CableModification | null>(null);
+
+  /** Clear the preview so the section plot falls back to the saved modification. */
+  clearPreview = (): void => {
+    this.previewCableModification.set(null);
+  };
+
   /**
    * Clear any persisted form data in memory for a given span (if such logic is needed).
    * This is a placeholder: adapt if you avez une logique de cache ou de persistance locale.
@@ -51,6 +91,18 @@ export class CableModificationsService {
     if (spanIndex < 0) {
       return;
     }
+
+    // Overlay a preview modification so the section plot icon moves to the
+    // arc-length point matching the form values being calculated, even though
+    // nothing has been persisted yet.
+    this.previewCableModification.set({
+      uuid: this.previewCableModification()?.uuid ?? uuidv4(),
+      spanUuid: params.spanUuid,
+      supportRef: params.supportRef,
+      widthCable: params.widthCable,
+      sizeCable: params.sizeCable,
+      distanceSupportRef: params.distanceSupportRef
+    });
 
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
@@ -109,6 +161,8 @@ export class CableModificationsService {
     section.selected_cable_modification_uuid = toSave.uuid;
 
     await this.studiesService.updateStudy(study);
+    // The saved modification now drives the icon position; drop the preview.
+    this.previewCableModification.set(null);
   };
 
   /**
@@ -139,5 +193,8 @@ export class CableModificationsService {
     }
 
     await this.studiesService.updateStudy(study);
+    if (this.previewCableModification()?.uuid === uuid) {
+      this.previewCableModification.set(null);
+    }
   };
 }
