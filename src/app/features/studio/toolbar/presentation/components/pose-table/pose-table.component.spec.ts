@@ -55,6 +55,9 @@ describe('PoseTableComponent', () => {
   let component: PoseTableComponent;
   let fixture: ComponentFixture<PoseTableComponent>;
 
+  const getByTestId = (testId: string): HTMLElement | null =>
+    fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
   let sectionSignal: WritableSignal<Section | null>;
   let studySignal: WritableSignal<unknown>;
   let litDataSignal: WritableSignal<object | null>;
@@ -489,6 +492,46 @@ describe('PoseTableComponent', () => {
       fixture.detectChanges();
       expect(component.baseParam()).toBeNull();
     });
+
+    it('renders "-" when base_parameters is null', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_parameters: null });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-param-value');
+      expect(dd!.textContent.trim()).toBe('-');
+    });
+
+    it('renders integer value with no decimals', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_parameters: 1500 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-param-value');
+      expect(dd!.textContent.trim()).toBe('1,500 m');
+    });
+
+    it('renders value with 1 decimal place unchanged', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_parameters: 1500.5 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-param-value');
+      expect(dd!.textContent.trim()).toBe('1,500.5 m');
+    });
+
+    it('renders value with exactly 2 decimal places unchanged', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_parameters: 1500.56 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-param-value');
+      expect(dd!.textContent.trim()).toBe('1,500.56 m');
+    });
+
+    it('renders value rounded to 2 decimal places when more are provided', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_parameters: 1500.567 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-param-value');
+      expect(dd!.textContent.trim()).toBe('1,500.57 m');
+    });
   });
 
   describe('baseTemp', () => {
@@ -501,6 +544,38 @@ describe('PoseTableComponent', () => {
       sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
       fixture.detectChanges();
       expect(component.baseTemp()).toBe(25);
+    });
+
+    it('renders "-" when base_temperature is null', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_temperature: null as unknown as number });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-temp-value');
+      expect(dd!.textContent.trim()).toBe('-');
+    });
+
+    it('renders integer value with no decimals', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_temperature: 15 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-temp-value');
+      expect(dd!.textContent.trim()).toBe('15 °C');
+    });
+
+    it('renders value with exactly 1 decimal place unchanged', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_temperature: 15.5 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-temp-value');
+      expect(dd!.textContent.trim()).toBe('15.5 °C');
+    });
+
+    it('renders value rounded to 1 decimal place when more are provided', () => {
+      const ic = makeInitialCondition({ uuid: 'ic-1', base_temperature: 15.67 });
+      sectionSignal.set(makeSection({ initial_conditions: [ic], selected_initial_condition_uuid: 'ic-1' }));
+      fixture.detectChanges();
+      const dd = getByTestId('base-temp-value');
+      expect(dd!.textContent.trim()).toBe('15.7 °C');
     });
   });
 

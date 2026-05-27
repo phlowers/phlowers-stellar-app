@@ -8,10 +8,10 @@
 <form [formGroup]="form" (ngSubmit)="calculate()">
   <dl>
     <dt i18n>Base parameter</dt>
-    <dd>{{ baseParam() !== null ? baseParam() + ' m' : '-' }}</dd>
+    <dd data-testid="base-param-value">{{ baseParam() !== null ? (baseParam() | number: '1.0-2') + ' m' : '-' }}</dd>
 
     <dt i18n>Base temperature</dt>
-    <dd>{{ baseTemp() !== null ? baseTemp() + ' °C' : '-' }}</dd>
+    <dd data-testid="base-temp-value">{{ baseTemp() !== null ? (baseTemp() | number: '1.0-1') + ' °C' : '-' }}</dd>
 
     <dt i18n>Equivalent span</dt>
     <dd>
