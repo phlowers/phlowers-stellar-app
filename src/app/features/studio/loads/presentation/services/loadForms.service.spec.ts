@@ -386,6 +386,72 @@ describe('LoadFormsService', () => {
 
       expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
+
+    it('should re-apply saved cable modifications after changeState so lengthening/shortening is not lost', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        cable_modifications: [
+          {
+            uuid: 'mod-1',
+            spanUuid: 'support-uuid-1',
+            supportRef: 'LEFT',
+            widthCable: 'lengthening',
+            sizeCable: 0.5,
+            distanceSupportRef: 100
+          }
+        ]
+      } as Section);
+      mockWorkerPythonService.runTask
+        .mockResolvedValueOnce({ result: { current: { id: 'after-change-state' }, base: null }, error: null })
+        .mockResolvedValueOnce({ result: { current: { id: 'after-cable-mod' }, base: null }, error: null });
+
+      await service.calculateLoad();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        Task.cableModification,
+        expect.objectContaining({
+          spanIndex: 0,
+          widthCable: 'lengthening',
+          sizeCable: 0.5,
+          distanceSupportRef: 100,
+          supportRef: 'LEFT'
+        })
+      );
+      // Final litData reflects the cable modification, not the bare change-state.
+      expect(mockPlotService.litData.set).toHaveBeenLastCalledWith({ id: 'after-cable-mod' });
+    });
+
+    it('should not run any cable modification task when the section has none', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue(mockSection);
+
+      await service.calculateLoad();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
+    });
+
+    it('should skip cable modifications whose span uuid is not in the support list', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        cable_modifications: [
+          {
+            uuid: 'mod-orphan',
+            spanUuid: 'unknown-support',
+            supportRef: 'LEFT',
+            widthCable: 'lengthening',
+            sizeCable: 0.5,
+            distanceSupportRef: 100
+          }
+        ]
+      } as Section);
+
+      await service.calculateLoad();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
+    });
   });
 
   describe('deleteLoad', () => {
