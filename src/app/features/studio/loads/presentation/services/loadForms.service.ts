@@ -113,8 +113,48 @@ export class LoadFormsService {
       }
     }
 
+    // Re-apply any saved cable length modifications on top of the change-state
+    // result. `Task.changeState` resets the engine to the climate state without
+    // knowing about cable_modifications, which would otherwise be silently
+    // dropped from the recomputed geometry.
+    await this.reapplyCableModifications(currentSection);
+
     this.plotService.loading.set(false);
   };
+
+  /**
+   * Re-runs `Task.cableModification` for each saved modification of the
+   * current section so the lengthening/shortening effect survives a load
+   * recalculation. The last applied modification wins (the Python task uses
+   * a single simulated temperature on the whole engine), which matches the
+   * current single-modification-per-section product constraint.
+   */
+  private async reapplyCableModifications(currentSection: ReturnType<PlotSpanService['section']>): Promise<void> {
+    const modifications = currentSection?.cable_modifications ?? [];
+    if (modifications.length === 0) return;
+
+    const supportUuidToIndex = new Map<string, number>();
+    (currentSection?.supports ?? []).forEach((support, index) => {
+      supportUuidToIndex.set(support.uuid, index);
+    });
+
+    for (const modification of modifications) {
+      const spanIndex = supportUuidToIndex.get(modification.spanUuid);
+      if (spanIndex === undefined) continue;
+
+      const { result } = await this.workerPythonService.runTask(Task.cableModification, {
+        spanIndex,
+        widthCable: modification.widthCable,
+        sizeCable: modification.sizeCable,
+        distanceSupportRef: modification.distanceSupportRef,
+        supportRef: modification.supportRef
+      });
+      if (result) {
+        this.plotService.litData.set(result.current);
+        this.plotService.baseLitData.set(result.base);
+      }
+    }
+  }
 
   /**
    * Reset the span load for the given support UUID to its empty state.

@@ -5,12 +5,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { describe, it, expect } from 'vitest';
+import type * as Plotly from 'plotly.js-dist-min';
 import { CableModification } from '@shared/domain';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
 import {
   CABLE_MOD_AX_OFFSET,
   CABLE_MOD_AY_OFFSET,
-  CABLE_MOD_ICON
+  CABLE_MOD_ICON,
+  CABLE_MOD_LABEL_Y_SHIFT,
+  getCableModificationLabel
 } from './createCableModificationAnnotations.constantes';
 import { CreatePlotParams } from './createPlot';
 
@@ -42,7 +45,7 @@ const makePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotPa
   invert: false,
   view: '3d',
   camera: null,
-  side: 'top',
+  side: 'profile',
   spanLoads: [],
   startSupport: 0,
   endSupport: 5,
@@ -114,36 +117,36 @@ describe('createCableModificationAnnotations', () => {
 
   describe('arc-length anchor (LEFT supportRef)', () => {
     it('should return the first polyline point when distanceSupportRef is 0', () => {
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 0 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.x).toBe(0);
-      expect(annotation.y).toBe(0);
-      expect(annotation.z).toBe(0);
+      expect(icon.x).toBe(0);
+      expect(icon.y).toBe(0);
+      expect(icon.z).toBe(0);
     });
 
     it('should interpolate linearly inside a segment', () => {
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 3 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.x).toBeCloseTo(3, 10);
-      expect(annotation.y).toBeCloseTo(0, 10);
-      expect(annotation.z).toBeCloseTo(0, 10);
+      expect(icon.x).toBeCloseTo(3, 10);
+      expect(icon.y).toBeCloseTo(0, 10);
+      expect(icon.z).toBeCloseTo(0, 10);
     });
 
     it('should clamp to the last polyline point when distance exceeds span length', () => {
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 999 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.x).toBe(10);
-      expect(annotation.y).toBe(0);
-      expect(annotation.z).toBe(0);
+      expect(icon.x).toBe(10);
+      expect(icon.y).toBe(0);
+      expect(icon.z).toBe(0);
     });
 
     it('should return the only point of a single-point polyline', () => {
@@ -154,38 +157,38 @@ describe('createCableModificationAnnotations', () => {
           loads_coords: {}
         } as unknown as CreatePlotParams['litData']
       });
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         params,
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 5 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.x).toBe(42);
-      expect(annotation.y).toBe(43);
-      expect(annotation.z).toBe(44);
+      expect(icon.x).toBe(42);
+      expect(icon.y).toBe(43);
+      expect(icon.z).toBe(44);
     });
   });
 
   describe('arc-length anchor (RIGHT supportRef)', () => {
     it('should measure distance from the end of the polyline', () => {
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'RIGHT', distanceSupportRef: 3 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
       // span_length=10, RIGHT, distance=3 → arc = 10-3 = 7 → [7, 0, 0]
-      expect(annotation.x).toBeCloseTo(7, 10);
-      expect(annotation.y).toBeCloseTo(0, 10);
+      expect(icon.x).toBeCloseTo(7, 10);
+      expect(icon.y).toBeCloseTo(0, 10);
     });
 
     it('should clamp to the first polyline point when distance exceeds span length', () => {
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'RIGHT', distanceSupportRef: 999 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
       // arc = max(0, 10 - 999) = 0 → first point
-      expect(annotation.x).toBe(0);
-      expect(annotation.y).toBe(0);
+      expect(icon.x).toBe(0);
+      expect(icon.y).toBe(0);
     });
   });
 
@@ -200,59 +203,167 @@ describe('createCableModificationAnnotations', () => {
           loads_coords: {}
         } as unknown as CreatePlotParams['litData']
       });
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         params,
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 0 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.x).toBe(6);
-      expect(annotation.y).toBe(7);
+      expect(icon.x).toBe(6);
+      expect(icon.y).toBe(7);
     });
 
-    it('should use coord[0] as x and coord[2] as y for 2d top view', () => {
+    it('should use coord[0] as x and coord[2] as y for 2d profile view', () => {
       const params = makePlotParams({
         view: '2d',
-        side: 'top',
+        side: 'profile',
         litData: {
           spans: [[[5, 6, 7]]],
           span_length: [0],
           loads_coords: {}
         } as unknown as CreatePlotParams['litData']
       });
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         params,
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 0 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.x).toBe(5);
-      expect(annotation.y).toBe(7);
+      expect(icon.x).toBe(5);
+      expect(icon.y).toBe(7);
     });
   });
 
-  describe('annotation payload', () => {
+  describe('icon annotation (load-like display)', () => {
+    it('should use the same arrow style as the load annotation (showarrow, no head, arrowwidth 1)', () => {
+      const [icon] = createCableModificationAnnotations(
+        makePlotParams(),
+        [makeModification()],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      expect(icon.showarrow).toBe(true);
+      expect(icon.arrowhead).toBe(0);
+      expect(icon.arrowwidth).toBe(1);
+      expect(icon.ax).toBe(CABLE_MOD_AX_OFFSET);
+      expect(icon.ay).toBe(CABLE_MOD_AY_OFFSET);
+      expect(icon.captureevents).toBe(true);
+    });
+
+    it('should apply the configured icon glyph', () => {
+      const [icon] = createCableModificationAnnotations(
+        makePlotParams(),
+        [makeModification()],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      expect(icon.text).toBe(CABLE_MOD_ICON);
+    });
+
     it('should attach the click discriminator with span and modification uuids', () => {
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ uuid: 'mod-abc', spanUuid: 'span-1' })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.data).toEqual({
+      expect(icon.data).toEqual({
         type: 'cableModification',
         spanUuid: 'span-1',
         cableModificationUuid: 'mod-abc'
       });
     });
+  });
 
-    it('should apply the configured icon and pixel offsets', () => {
-      const [annotation] = createCableModificationAnnotations(
+  describe('label annotation', () => {
+    it('should emit a label annotation per modification with the right text', () => {
+      const lengthening = createCableModificationAnnotations(
+        makePlotParams(),
+        [makeModification({ widthCable: 'lengthening' })],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      expect(lengthening).toHaveLength(2);
+      expect(lengthening[1].text).toBe(getCableModificationLabel('lengthening'));
+
+      const shortening = createCableModificationAnnotations(
+        makePlotParams(),
+        [makeModification({ widthCable: 'shortening' })],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      expect(shortening[1].text).toBe(getCableModificationLabel('shortening'));
+    });
+
+    it('should not capture click events and sit above the icon (yshift > |ay|)', () => {
+      const [, label] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification()],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.text).toBe(CABLE_MOD_ICON);
-      expect(annotation.ax).toBe(CABLE_MOD_AX_OFFSET);
-      expect(annotation.ay).toBe(CABLE_MOD_AY_OFFSET);
-      expect(annotation.captureevents).toBe(true);
+      expect(label.showarrow).toBe(false);
+      expect(label.captureevents).toBe(false);
+      expect(label.yshift).toBe(CABLE_MOD_LABEL_Y_SHIFT);
+      // |ay| = 90, label yshift = 110 → label sits above the icon.
+      expect((label.yshift as number) > Math.abs(CABLE_MOD_AY_OFFSET)).toBe(true);
+    });
+
+    it('should anchor the label on the same data point as the icon', () => {
+      const [icon, label] = createCableModificationAnnotations(
+        makePlotParams(),
+        [makeModification({ supportRef: 'LEFT', distanceSupportRef: 3 })],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      expect(label.x).toBe(icon.x);
+      expect(label.y).toBe(icon.y);
+      expect(label.z).toBe(icon.z);
+    });
+  });
+
+  describe('horizontal abscissa interpolation (matches load placement)', () => {
+    it('should interpolate by x-distance from left support on a sagging cable, not by arc length', () => {
+      // Sagging cable: x goes 0 → 100 in 3 samples, z dips at mid-span.
+      // Arc-length interpolation at distance=50 would land short of x=50 because
+      // the curve is longer than the chord. Horizontal interpolation at
+      // distanceSupportRef=50 must land exactly on the midpoint sample (x=50).
+      const params = makePlotParams({
+        litData: {
+          spans: [
+            [
+              [0, 0, 100],
+              [50, 0, 90],
+              [100, 0, 100]
+            ]
+          ],
+          span_length: [100],
+          loads_coords: {}
+        } as unknown as CreatePlotParams['litData']
+      });
+      const [icon] = createCableModificationAnnotations(
+        params,
+        [makeModification({ supportRef: 'LEFT', distanceSupportRef: 50 })],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      expect(icon.x).toBe(50);
+      expect(icon.z).toBe(90); // sag depth at mid-span
+    });
+
+    it('should still anchor on the polyline when the line direction is reversed (x decreasing)', () => {
+      const params = makePlotParams({
+        litData: {
+          spans: [
+            [
+              [100, 0, 0],
+              [50, 0, -10],
+              [0, 0, 0]
+            ]
+          ],
+          span_length: [100],
+          loads_coords: {}
+        } as unknown as CreatePlotParams['litData']
+      });
+      const [icon] = createCableModificationAnnotations(
+        params,
+        [makeModification({ supportRef: 'LEFT', distanceSupportRef: 50 })],
+        new Map([['span-1', 0]])
+      ) as AnnotationWithData[];
+      // LEFT support is the first polyline point (x=100); distance 50 toward
+      // the right support (x=0) → target x = 50, sample z = -10.
+      expect(icon.x).toBe(50);
+      expect(icon.z).toBe(-10);
     });
   });
 
@@ -262,13 +373,13 @@ describe('createCableModificationAnnotations', () => {
       // keeps ax: 0 (so the icon stays on its anchor point along the cable)
       // and uses a smaller ay so it sits clearly above the load icon when both
       // happen to anchor at the same data point.
-      const [annotation] = createCableModificationAnnotations(
+      const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification()],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(annotation.ax).toBe(0);
-      expect((annotation.ay as number) < -50).toBe(true);
+      expect(icon.ax).toBe(0);
+      expect((icon.ay as number) < -50).toBe(true);
     });
   });
 });

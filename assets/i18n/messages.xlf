@@ -3484,5 +3484,20 @@
         <source>Maximum 2 decimal places</source>
       </segment>
     </unit>
+    <unit id="1311567880462908443">
+      <segment>
+        <source>An error occurred while calculating the pose table</source>
+      </segment>
+    </unit>
+    <unit id="studio.cable-modification.lengthening">
+      <segment>
+        <source>Lengthening</source>
+      </segment>
+    </unit>
+    <unit id="studio.cable-modification.shortening">
+      <segment>
+        <source>Shortening</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
