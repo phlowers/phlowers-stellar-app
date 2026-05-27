@@ -14,6 +14,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SpanLoad } from '@shared/domain';
 import { LoadType, SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
+import { CableModificationAnnotationData } from './helpers/createCableModificationAnnotations.interfaces';
+import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -54,12 +56,16 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly loadFormsService = inject(LoadFormsService);
+  private readonly cableModificationsService = inject(CableModificationsService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly documentRef = inject(DOCUMENT);
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
+
+  /** True when at least one cable length modification is persisted on the current section. */
+  readonly hasCableModifications = computed(() => (this.spanService.section()?.cable_modifications?.length ?? 0) > 0);
 
   // Form values as signals
   private readonly currentObstaclePositions = toSignal(this.obstacleFormService.form.get('positions')!.valueChanges, {
@@ -94,7 +100,9 @@ export class SectionPlotComponent implements OnDestroy {
     altitudeType: this.currentAltitudeType(),
     referenceSupport: this.currentReferenceSupport(),
     distances: this.obstacleStateService.distances(),
-    distanceType: this.obstacleStateService.distanceType()
+    distanceType: this.obstacleStateService.distanceType(),
+    cableModifications: this.spanService.section()?.cable_modifications ?? [],
+    previewCableModification: this.cableModificationsService.previewCableModification()
   }));
 
   // Debounced plot refresh with signal
@@ -174,6 +182,18 @@ export class SectionPlotComponent implements OnDestroy {
 
       const distances = this.obstacleStateService.distances();
       const distanceType = this.obstacleStateService.distanceType();
+      const section = this.spanService.section();
+      const savedCableModifications = section?.cable_modifications ?? [];
+      const preview = this.cableModificationsService.previewCableModification();
+      // The preview (current Calculate input) takes precedence over the saved
+      // modification on the same span so the icon reflects what the user is
+      // currently looking at, even before pressing Save.
+      const cableModifications = preview
+        ? [preview, ...savedCableModifications.filter((m) => m.spanUuid !== preview.spanUuid)]
+        : savedCableModifications;
+      const spanUuidToIndex = new Map<string, number>(
+        (section?.supports ?? []).map((support, index) => [support.uuid, index])
+      );
       const plot = await createPlot({
         documentRef: this.documentRef,
         plotId: PLOT_ID,
@@ -192,7 +212,9 @@ export class SectionPlotComponent implements OnDestroy {
         supports,
         axesNorms,
         distances,
-        distanceType
+        distanceType,
+        cableModifications,
+        spanUuidToIndex
       });
       if (plot) {
         this.addEventListenersToPlot(plot);
@@ -206,7 +228,7 @@ export class SectionPlotComponent implements OnDestroy {
 
   addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
     interface ClickAnnotationEvent {
-      annotation?: { data?: ObstacleAnnotationData | SpanLoadAnnotationData };
+      annotation?: { data?: ObstacleAnnotationData | SpanLoadAnnotationData | CableModificationAnnotationData };
     }
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
@@ -234,6 +256,11 @@ export class SectionPlotComponent implements OnDestroy {
         this.sideTabsService.sideTabs.set(0);
         this.loadFormsService.activeLoadTab.set('1');
         this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
+      } else if (event?.annotation?.data?.type === 'cableModification') {
+        const data = event.annotation.data;
+        this.sideTabsService.sideTabs.set(0);
+        this.loadFormsService.activeLoadTab.set('2');
+        this.cableModificationsService.selectSpan(data.spanUuid);
       }
     });
 
