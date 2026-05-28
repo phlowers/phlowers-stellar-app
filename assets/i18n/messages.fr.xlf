@@ -4229,12 +4229,6 @@
         <target>Échec du calcul du tableau de pose</target>
       </segment>
     </unit>
-    <unit id="1311567880462908443">
-      <segment state="initial">
-        <source>An error occurred while calculating the pose table</source>
-        <target>An error occurred while calculating the pose table</target>
-      </segment>
-    </unit>
     <unit id="studio.cable-modification.lengthening">
       <segment state="translated">
         <source>Lengthening</source>
