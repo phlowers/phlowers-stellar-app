@@ -30,10 +30,11 @@ import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+import { MessageModule } from 'primeng/message';
 
 @Component({
   selector: 'app-pose-table',
-  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule, DecimalPipe],
+  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule, DecimalPipe, MessageModule],
   templateUrl: './pose-table.component.html',
   styleUrl: './pose-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +71,8 @@ export class PoseTableComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly workerPythonService = inject(WorkerPythonService);
 
+  readonly isPlotReady = computed(() => this.plotService.litData() !== null);
+
   readonly selectedInitialCondition = computed(() => {
     const section = this.spanService.section();
     if (!section) return null;
@@ -100,7 +103,11 @@ export class PoseTableComponent {
     })
   });
 
+  readonly isCalculating = signal(false);
+  readonly isCalculatingEquivalentSpan = signal(false);
+  readonly isBusy = computed(() => !this.isPlotReady() || this.isCalculating());
   readonly results = signal<PoseResults | null>(null);
+  readonly equivalentSpan = signal<number | null>(null);
 
   protected readonly _templatesEffect = effect(() => {
     const header = this.headerTemplate();
@@ -114,9 +121,14 @@ export class PoseTableComponent {
     const saved = this.spanService.section()?.pose_table;
     if (saved) {
       this.form.setValue({ lowestTemp: saved.lowestTemp, computingStep: saved.computingStep });
-      untracked(() => {
-        void this.calculate();
-      });
+      if (this.isPlotReady()) {
+        untracked(() => {
+          void this.calculate();
+        });
+      } else {
+        this.results.set(null);
+        this.poseTableError.set(false);
+      }
     } else {
       this.form.setValue({
         lowestTemp: this.LOWEST_TEMP_DEFAULT,
@@ -126,19 +138,52 @@ export class PoseTableComponent {
     }
   });
 
+  protected readonly _equivalentSpanEffect = effect(() => {
+    const section = this.spanService.section();
+    if (!this.isPlotReady() || !section) {
+      untracked(() => this.equivalentSpan.set(null));
+      return;
+    }
+    void untracked(async () => {
+      this.isCalculatingEquivalentSpan.set(true);
+      try {
+        const { result, error } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
+        if (error || result === null) {
+          this.equivalentSpan.set(null);
+          this.notificationService.error($localize`Failed to compute equivalent span`);
+        } else {
+          this.equivalentSpan.set(result.equivalentSpan);
+        }
+      } catch {
+        this.equivalentSpan.set(null);
+        this.notificationService.error($localize`Failed to compute equivalent span`);
+      } finally {
+        this.isCalculatingEquivalentSpan.set(false);
+      }
+    });
+  });
+
   async calculate(): Promise<void> {
     if (this.form.invalid) return;
     this.poseTableError.set(false);
-    const { result, error } = await this.workerPythonService.runTask(Task.getPoseTable, {
-      stepTemperature: this.form.controls.computingStep.value,
-      baseTemperature: this.form.controls.lowestTemp.value,
-      numberValues: this.TABLE_NUMBER_VALUES
-    });
-    if (error) {
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.getPoseTable, {
+        stepTemperature: this.form.controls.computingStep.value,
+        baseTemperature: this.form.controls.lowestTemp.value,
+        numberValues: this.TABLE_NUMBER_VALUES
+      });
+      if (error) {
+        this.poseTableError.set(true);
+      }
+      this.results.set(result);
+    } catch {
       this.poseTableError.set(true);
+      this.results.set(null);
+      this.notificationService.error($localize`Failed to compute pose table`);
+    } finally {
+      this.isCalculating.set(false);
     }
-
-    this.results.set(result);
   }
 
   async save(): Promise<void> {

@@ -72,7 +72,7 @@ export class ToolbarDialogService {
     },
     'pose-table': {
       component: PoseTableComponent,
-      dialogStyle: { width: '52.1875rem', 'max-width': '90%' }
+      dialogStyle: { width: '64.375rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!
