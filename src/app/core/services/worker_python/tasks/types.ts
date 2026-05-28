@@ -501,6 +501,6 @@ export interface TaskOutputs {
     localization: Localization;
     meanGpsDiff: number;
   };
-  [Task.getEquivalentSpan]: number;
+  [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;
 }

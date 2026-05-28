@@ -1,5 +1,11 @@
 .p-message.p-message {
-  --p-message-error-simple-color: var(--main-error);
-  --p-message-warn-simple-color: var(--main-warning);
+  --p-message-error-color: var(--main-error);
+  --p-message-warn-color: var(--main-warning);
+  --p-message-error-simple-color: var(--p-message-error-color);
+  --p-message-warn-simple-color: var(--p-message-warn-color);
   --p-message-text-sm-font-size: 0.75rem;
+  --p-message-text-font-weight: 400;
+  --p-message-error-background: var(--error-50);
+  --p-message-error-border-color: var(--error-300);
+  --p-message-content-padding: 0.25rem 0.5rem;
 }

@@ -3484,5 +3484,25 @@
         <source>Maximum 2 decimal places</source>
       </segment>
     </unit>
+    <unit id="3350117461161966226">
+      <segment>
+        <source> An error occurred while calculating the pose table </source>
+      </segment>
+    </unit>
+    <unit id="6184996295577577575">
+      <segment>
+        <source>waiting for calculation engine</source>
+      </segment>
+    </unit>
+    <unit id="2773256594291059859">
+      <segment>
+        <source>Failed to compute equivalent span</source>
+      </segment>
+    </unit>
+    <unit id="4156596140595162440">
+      <segment>
+        <source>Failed to compute pose table</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
