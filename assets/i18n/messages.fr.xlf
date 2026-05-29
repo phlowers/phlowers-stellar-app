@@ -4211,6 +4211,102 @@
         <target>En attente du moteur de calcul</target>
       </segment>
     </unit>
+    <unit id="3853854766252837104">
+      <segment state="initial">
+        <source>Manipulation 1</source>
+        <target>Manipulation 1</target>
+      </segment>
+    </unit>
+    <unit id="6812864257142349567">
+      <segment state="initial">
+        <source>Vert. displacement cable</source>
+        <target>Déplace. verticale câble</target>
+      </segment>
+    </unit>
+    <unit id="2872097738404332614">
+      <segment state="initial">
+        <source>displac. manip. type</source>
+        <target>Type de déplace. manip.</target>
+      </segment>
+    </unit>
+    <unit id="1462805781680349874">
+      <segment state="initial">
+        <source>Lateral distance</source>
+        <target>Écartement latéral</target>
+      </segment>
+    </unit>
+    <unit id="7264037638321886448">
+      <segment state="initial">
+        <source>Automatic descent</source>
+        <target>Descente automatique</target>
+      </segment>
+    </unit>
+    <unit id="2827233633791350200">
+      <segment state="initial">
+        <source>Length</source>
+        <target>Longueur</target>
+      </segment>
+    </unit>
+    <unit id="2853790489768628311">
+      <segment state="initial">
+        <source>Rope length</source>
+        <target>Longueur de corde</target>
+      </segment>
+    </unit>
+    <unit id="8749123360857368229">
+      <segment state="initial">
+        <source>Shifting clamp length</source>
+        <target>L. ripage de la pince</target>
+      </segment>
+    </unit>
+    <unit id="3714697696770128443">
+      <segment state="initial">
+        <source>Add a manipulation</source>
+        <target>Ajouter une manipulation</target>
+      </segment>
+    </unit>
+    <unit id="5957382203761880934">
+      <segment state="initial">
+        <source>Manipulation 2</source>
+        <target>Manipulation 2</target>
+      </segment>
+    </unit>
+    <unit id="2123171795960509943">
+      <segment state="initial">
+        <source>remove</source>
+        <target>Supprimer</target>
+      </segment>
+    </unit>
+    <unit id="8406636195144238829">
+      <segment state="initial">
+        <source>erase cable manipulation at support</source>
+        <target>supprimer la manipumation de câble au support</target>
+      </segment>
+    </unit>
+    <unit id="2520878950143363220">
+      <segment state="initial">
+        <source>Crane handling</source>
+        <target>Manipulation à la grue</target>
+      </segment>
+    </unit>
+    <unit id="1920846361866578565">
+      <segment state="initial">
+        <source>Rope handling</source>
+        <target>Manipulation à la corde</target>
+      </segment>
+    </unit>
+    <unit id="5038647223347561047">
+      <segment state="initial">
+        <source>Shifting</source>
+        <target>Ripage</target>
+      </segment>
+    </unit>
+    <unit id="6294716411736188677">
+      <segment state="initial">
+        <source>Without chain</source>
+        <target>Sans chaîne</target>
+      </segment>
+    </unit>
     <unit id="1311567880462908443">
       <segment state="initial">
         <source>An error occurred while calculating the pose table</source>
@@ -4239,6 +4335,12 @@
       <segment state="translated">
         <source>Shortening</source>
         <target>Raccourcissement</target>
+      </segment>
+    </unit>
+    <unit id="1878041670267859136">
+      <segment state="initial">
+        <source>Manipulation type</source>
+        <target>Type de manipulation</target>
       </segment>
     </unit>
   </file>

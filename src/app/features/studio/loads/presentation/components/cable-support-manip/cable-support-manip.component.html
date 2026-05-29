@@ -27,7 +27,7 @@
     </button>
   </div>
 
-  <label for="support" i18n>Support</label>
+  <label for="support" i18n>Reference support</label>
   <p-select
     inputId="support"
     fluid
@@ -43,7 +43,7 @@
     <div class="bypass-anonymous-box">
       <legend i18n>Manipulation 1</legend>
 
-      <label for="manip1Type" i18n>Type</label>
+      <label for="manip1Type" i18n>Manipulation type</label>
       <p-select
         inputId="manip1Type"
         fluid
@@ -231,6 +231,7 @@
         (click)="addManip2()"
         data-testid="cable-support-manip-add-manip2"
       >
+        <app-icon icon="add_circle" aria-hidden="true" />
         <ng-container i18n>Add a manipulation</ng-container>
       </button>
     </div>
@@ -255,7 +256,7 @@
           </button>
         </div>
 
-        <label for="manip2Type" i18n>Type</label>
+        <label for="manip2Type" i18n>Manipulation type</label>
 
         <p-select
           inputId="manip2Type"

@@ -3514,5 +3514,90 @@
         <source>Shortening</source>
       </segment>
     </unit>
+    <unit id="1462805781680349874">
+      <segment>
+        <source>Lateral distance</source>
+      </segment>
+    </unit>
+    <unit id="1920846361866578565">
+      <segment>
+        <source>Rope handling</source>
+      </segment>
+    </unit>
+    <unit id="2123171795960509943">
+      <segment>
+        <source>remove</source>
+      </segment>
+    </unit>
+    <unit id="2520878950143363220">
+      <segment>
+        <source>Crane handling</source>
+      </segment>
+    </unit>
+    <unit id="2827233633791350200">
+      <segment>
+        <source>Length</source>
+      </segment>
+    </unit>
+    <unit id="2853790489768628311">
+      <segment>
+        <source>Rope length</source>
+      </segment>
+    </unit>
+    <unit id="2872097738404332614">
+      <segment>
+        <source>displac. manip. type</source>
+      </segment>
+    </unit>
+    <unit id="3714697696770128443">
+      <segment>
+        <source>Add a manipulation</source>
+      </segment>
+    </unit>
+    <unit id="3853854766252837104">
+      <segment>
+        <source>Manipulation 1</source>
+      </segment>
+    </unit>
+    <unit id="5038647223347561047">
+      <segment>
+        <source>Shifting</source>
+      </segment>
+    </unit>
+    <unit id="5957382203761880934">
+      <segment>
+        <source>Manipulation 2</source>
+      </segment>
+    </unit>
+    <unit id="6294716411736188677">
+      <segment>
+        <source>Without chain</source>
+      </segment>
+    </unit>
+    <unit id="6812864257142349567">
+      <segment>
+        <source>Vert. displacement cable</source>
+      </segment>
+    </unit>
+    <unit id="7264037638321886448">
+      <segment>
+        <source>Automatic descent</source>
+      </segment>
+    </unit>
+    <unit id="8406636195144238829">
+      <segment>
+        <source>erase cable manipulation at support</source>
+      </segment>
+    </unit>
+    <unit id="8749123360857368229">
+      <segment>
+        <source>Shifting clamp length</source>
+      </segment>
+    </unit>
+    <unit id="1878041670267859136">
+      <segment>
+        <source>Manipulation type</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
