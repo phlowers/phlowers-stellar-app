@@ -36,249 +36,287 @@
     optionLabel="label"
     optionValue="value"
     data-testid="cable-support-manip-support"
+    appendTo="body"
   />
 
   <fieldset>
-    <legend i18n class="legend">Manipulation 1</legend>
+    <div class="bypass-anonymous-box">
+      <legend i18n>Manipulation 1</legend>
 
-    <label for="manip1Type" i18n>Type</label>
-    <p-select
-      inputId="manip1Type"
-      fluid
-      [options]="manip1TypeOptions"
-      formControlName="manip1Type"
-      optionLabel="label"
-      optionValue="value"
-      data-testid="cable-support-manip-manip1-type"
-    />
-
-    @if (isCrane()) {
-    <div @expandCollapse>
-      <label for="vertDisplacement" i18n>Vert. displacement cable</label>
-      <p-inputgroup>
-        <input
-          id="vertDisplacement"
-          type="number"
-          pInputText
-          step="0.01"
-          min="-150"
-          max="50"
-          (input)="truncateTwoDecimals($event)"
-          formControlName="vertDisplacement"
-          data-testid="cable-support-manip-vert-displacement"
-          [attr.aria-invalid]="form.controls.vertDisplacement.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('vertDisplacement', ['min', 'max'])"
-        />
-        <p-inputgroup-addon>m</p-inputgroup-addon>
-      </p-inputgroup>
-      @if (form.controls.vertDisplacement.errors?.['min']) {
-      <p-message id="vertDisplacement-error-min" severity="error" size="small" variant="simple">
-        <ng-container i18n>Minimum value:</ng-container>
-        -150
-      </p-message>
-      } @else if (form.controls.vertDisplacement.errors?.['max']) {
-      <p-message id="vertDisplacement-error-max" severity="error" size="small" variant="simple">
-        <ng-container i18n>Maximum value:</ng-container>
-        50
-      </p-message>
-      }
-
-      <label for="anchoring" i18n>Anchoring</label>
+      <label for="manip1Type" i18n>Type</label>
       <p-select
-        inputId="anchoring"
+        inputId="manip1Type"
         fluid
-        [options]="anchoringOptions"
-        formControlName="anchoring"
+        [options]="manip1TypeOptions"
+        formControlName="manip1Type"
         optionLabel="label"
         optionValue="value"
-        optionDisabled="disabled"
-        data-testid="cable-support-manip-anchoring"
+        data-testid="cable-support-manip-manip1-type"
+        appendTo="body"
       />
 
-      <label for="lateralDistance" i18n>Lateral distance</label>
-      <p-inputgroup>
-        <input
-          id="lateralDistance"
-          type="number"
-          pInputText
-          step="0.01"
-          min="-50"
-          max="50"
-          (input)="truncateTwoDecimals($event)"
-          formControlName="lateralDistance"
-          data-testid="cable-support-manip-lateral-distance"
-          [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max'])"
-        />
-        <p-inputgroup-addon>m</p-inputgroup-addon>
-      </p-inputgroup>
-      @if (form.controls.lateralDistance.errors?.['min']) {
-      <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple">
-        <ng-container i18n>Minimum value:</ng-container>
-        -50
-      </p-message>
-      } @else if (form.controls.lateralDistance.errors?.['max']) {
-      <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple">
-        <ng-container i18n>Maximum value:</ng-container>
-        50
-      </p-message>
-      }
-    </div>
-    } @else if (isRope()) {
-    <div @expandCollapse>
-      <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-support-manip-auto-descent">
-        <ng-container i18n>Automatic descent</ng-container>
-      </button>
+      @if (isCrane()) {
+        <div @expandCollapse>
+          <div class="crane-divide">
+            <label for="vertDisplacement" i18n class="crane-divide__label1">Vert. displacement cable</label>
+            <p-inputgroup class="crane-divide__input1">
+              <input
+                id="vertDisplacement"
+                type="number"
+                pInputText
+                step="0.01"
+                min="-150"
+                max="50"
+                (input)="truncateTwoDecimals($event)"
+                formControlName="vertDisplacement"
+                data-testid="cable-support-manip-vert-displacement"
+                [attr.aria-invalid]="form.controls.vertDisplacement.invalid || null"
+                [attr.aria-errormessage]="getErrorIds('vertDisplacement', ['min', 'max'])"
+              />
+              <p-inputgroup-addon>m</p-inputgroup-addon>
+            </p-inputgroup>
+            @if (form.controls.vertDisplacement.errors?.['min']) {
+              <p-message
+                id="vertDisplacement-error-min"
+                severity="error"
+                size="small"
+                variant="simple"
+                class="crane-divide__error1"
+              >
+                <ng-container i18n>Minimum value:</ng-container>
+                -150
+              </p-message>
+            } @else if (form.controls.vertDisplacement.errors?.['max']) {
+              <p-message
+                id="vertDisplacement-error-max"
+                severity="error"
+                size="small"
+                variant="simple"
+                class="crane-divide__error1"
+              >
+                <ng-container i18n>Maximum value:</ng-container>
+                50
+              </p-message>
+            }
 
-      <dl>
-        <dt class="label" i18n>Length</dt>
-        <dd class="read-only-info" data-testid="cable-support-manip-rope-length-readonly">- m</dd>
-      </dl>
+            <label for="anchoring" i18n class="crane-divide__label2">displac. manip. type</label>
+            <p-select
+              inputId="anchoring"
+              fluid
+              [options]="anchoringOptions"
+              formControlName="anchoring"
+              optionLabel="label"
+              optionValue="value"
+              optionDisabled="disabled"
+              data-testid="cable-support-manip-anchoring"
+              appendTo="body"
+              class="crane-divide__input2"
+            />
+          </div>
 
-      <label for="ropeLength" i18n>Rope length</label>
-      <p-inputgroup>
-        <input
-          id="ropeLength"
-          type="number"
-          pInputText
-          step="0.01"
-          min="0"
-          max="50"
-          (input)="truncateTwoDecimals($event)"
-          formControlName="ropeLength"
-          data-testid="cable-support-manip-rope-length"
-          [attr.aria-invalid]="form.controls.ropeLength.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('ropeLength', ['min', 'max'])"
-        />
-        <p-inputgroup-addon>m</p-inputgroup-addon>
-      </p-inputgroup>
-      @if (form.controls.ropeLength.errors?.['min']) {
-      <p-message id="ropeLength-error-min" severity="error" size="small" variant="simple">
-        <ng-container i18n>Minimum value:</ng-container>
-        0
-      </p-message>
-      } @else if (form.controls.ropeLength.errors?.['max']) {
-      <p-message id="ropeLength-error-max" severity="error" size="small" variant="simple">
-        <ng-container i18n>Maximum value:</ng-container>
-        50
-      </p-message>
+          <label for="lateralDistance" i18n>Lateral distance</label>
+          <p-inputgroup>
+            <input
+              id="lateralDistance"
+              type="number"
+              pInputText
+              step="0.01"
+              min="-50"
+              max="50"
+              (input)="truncateTwoDecimals($event)"
+              formControlName="lateralDistance"
+              data-testid="cable-support-manip-lateral-distance"
+              [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
+              [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max'])"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (form.controls.lateralDistance.errors?.['min']) {
+            <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple">
+              <ng-container i18n>Minimum value:</ng-container>
+              -50
+            </p-message>
+          } @else if (form.controls.lateralDistance.errors?.['max']) {
+            <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple">
+              <ng-container i18n>Maximum value:</ng-container>
+              50
+            </p-message>
+          }
+        </div>
+      } @else if (isRope()) {
+        <div @expandCollapse>
+          <div class="rope-divide">
+            <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-support-manip-auto-descent">
+              <app-icon icon="rocket_launch" aria-hidden="true" />
+              <ng-container i18n>Automatic descent</ng-container>
+            </button>
+
+            <dl>
+              <dt class="label" i18n>Length</dt>
+              <dd class="read-only-info" data-testid="cable-support-manip-rope-length-readonly">- m</dd>
+            </dl>
+          </div>
+
+          <label for="ropeLength" i18n>Rope length</label>
+          <p-inputgroup>
+            <input
+              id="ropeLength"
+              type="number"
+              pInputText
+              step="0.01"
+              min="0"
+              max="50"
+              (input)="truncateTwoDecimals($event)"
+              formControlName="ropeLength"
+              data-testid="cable-support-manip-rope-length"
+              [attr.aria-invalid]="form.controls.ropeLength.invalid || null"
+              [attr.aria-errormessage]="getErrorIds('ropeLength', ['min', 'max'])"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (form.controls.ropeLength.errors?.['min']) {
+            <p-message id="ropeLength-error-min" severity="error" size="small" variant="simple">
+              <ng-container i18n>Minimum value:</ng-container>
+              0
+            </p-message>
+          } @else if (form.controls.ropeLength.errors?.['max']) {
+            <p-message id="ropeLength-error-max" severity="error" size="small" variant="simple">
+              <ng-container i18n>Maximum value:</ng-container>
+              50
+            </p-message>
+          }
+        </div>
+      } @else if (isShifting()) {
+        <div @expandCollapse>
+          <label for="shiftingClampLength" i18n>Shifting clamp length</label>
+          <p-inputgroup>
+            <input
+              id="shiftingClampLength"
+              type="number"
+              pInputText
+              step="0.01"
+              min="-10"
+              max="10"
+              (input)="truncateTwoDecimals($event)"
+              formControlName="shiftingClampLength"
+              data-testid="cable-support-manip-shifting-clamp-length"
+              [attr.aria-invalid]="form.controls.shiftingClampLength.invalid || null"
+              [attr.aria-errormessage]="getErrorIds('shiftingClampLength', ['min', 'max'])"
+            />
+            <p-inputgroup-addon>m</p-inputgroup-addon>
+          </p-inputgroup>
+          @if (form.controls.shiftingClampLength.errors?.['min']) {
+            <p-message id="shiftingClampLength-error-min" severity="error" size="small" variant="simple">
+              <ng-container i18n>Minimum value:</ng-container>
+              -10
+            </p-message>
+          } @else if (form.controls.shiftingClampLength.errors?.['max']) {
+            <p-message id="shiftingClampLength-error-max" severity="error" size="small" variant="simple">
+              <ng-container i18n>Maximum value:</ng-container>
+              10
+            </p-message>
+          }
+        </div>
       }
     </div>
-    } @else if (isShifting()) {
-    <div @expandCollapse>
-      <label for="shiftingClampLength" i18n>Shifting clamp length</label>
-      <p-inputgroup>
-        <input
-          id="shiftingClampLength"
-          type="number"
-          pInputText
-          step="0.01"
-          min="-10"
-          max="10"
-          (input)="truncateTwoDecimals($event)"
-          formControlName="shiftingClampLength"
-          data-testid="cable-support-manip-shifting-clamp-length"
-          [attr.aria-invalid]="form.controls.shiftingClampLength.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('shiftingClampLength', ['min', 'max'])"
-        />
-        <p-inputgroup-addon>m</p-inputgroup-addon>
-      </p-inputgroup>
-      @if (form.controls.shiftingClampLength.errors?.['min']) {
-      <p-message id="shiftingClampLength-error-min" severity="error" size="small" variant="simple">
-        <ng-container i18n>Minimum value:</ng-container>
-        -10
-      </p-message>
-      } @else if (form.controls.shiftingClampLength.errors?.['max']) {
-      <p-message id="shiftingClampLength-error-max" severity="error" size="small" variant="simple">
-        <ng-container i18n>Maximum value:</ng-container>
-        10
-      </p-message>
-      }
-    </div>
-    }
   </fieldset>
 
   @if (!showManip2()) {
-  <div @expandCollapse>
-    <button
-      app-btn
-      type="button"
-      btnStyle="outlined"
-      [disabled]="!isManip2Available()"
-      (click)="addManip2()"
-      data-testid="cable-support-manip-add-manip2"
-    >
-      <ng-container i18n>Add a manipulation</ng-container>
-    </button>
-  </div>
-  }
-
-  @if (showManip2()) {
-  <fieldset @expandCollapse>
-    <legend i18n class="legend">Manipulation 2</legend>
-
-    <div class="manip2-header">
-      <label for="manip2Type" i18n>Type</label>
+    <div @expandCollapse>
       <button
         app-btn
         type="button"
-        btnStyle="danger"
-        btnSize="s"
-        aria-label="remove manipulation 2"
-        i18n-aria-label
-        (click)="removeManip2()"
-        data-testid="cable-support-manip-remove-manip2"
+        btnStyle="outlined"
+        [disabled]="!isManip2Available()"
+        (click)="addManip2()"
+        data-testid="cable-support-manip-add-manip2"
       >
-        <app-icon icon="delete" />
+        <ng-container i18n>Add a manipulation</ng-container>
       </button>
     </div>
+  }
 
-    <p-select
-      inputId="manip2Type"
-      fluid
-      [options]="manip2TypeOptions"
-      formControlName="manip2Type"
-      optionLabel="label"
-      optionValue="value"
-      data-testid="cable-support-manip-manip2-type"
-    />
+  @if (showManip2()) {
+    <fieldset @expandCollapse>
+      <div class="bypass-anonymous-box">
+        <div class="manip2-header">
+          <legend i18n>Manipulation 2</legend>
 
-    @if (isManip2Shifting()) {
-    <div @expandCollapse>
-      <label for="manip2ShiftingClampLength" i18n>Shifting clamp length</label>
-      <p-inputgroup>
-        <input
-          id="manip2ShiftingClampLength"
-          type="number"
-          pInputText
-          step="0.01"
-          min="-10"
-          max="10"
-          (input)="truncateTwoDecimals($event)"
-          formControlName="manip2ShiftingClampLength"
-          data-testid="cable-support-manip-manip2-shifting-clamp-length"
-          [attr.aria-invalid]="form.controls.manip2ShiftingClampLength.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max'])"
+          <button
+            app-btn
+            type="button"
+            btnStyle="danger"
+            btnSize="s"
+            (click)="removeManip2()"
+            data-testid="cable-support-manip-remove-manip2"
+          >
+            <ng-container i18n>remove</ng-container>
+            <app-icon icon="delete" />
+          </button>
+        </div>
+
+        <label for="manip2Type" i18n>Type</label>
+
+        <p-select
+          inputId="manip2Type"
+          fluid
+          [options]="manip2TypeOptions"
+          formControlName="manip2Type"
+          optionLabel="label"
+          optionValue="value"
+          data-testid="cable-support-manip-manip2-type"
+          appendTo="body"
         />
-        <p-inputgroup-addon>m</p-inputgroup-addon>
-      </p-inputgroup>
-      @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
-      <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
-        <ng-container i18n>Minimum value:</ng-container>
-        -10
-      </p-message>
-      } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
-      <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
-        <ng-container i18n>Maximum value:</ng-container>
-        10
-      </p-message>
-      }
-    </div>
-    }
-  </fieldset>
+
+        @if (isManip2Shifting()) {
+          <div @expandCollapse>
+            <label for="manip2ShiftingClampLength" i18n>Shifting clamp length</label>
+            <p-inputgroup>
+              <input
+                id="manip2ShiftingClampLength"
+                type="number"
+                pInputText
+                step="0.01"
+                min="-10"
+                max="10"
+                (input)="truncateTwoDecimals($event)"
+                formControlName="manip2ShiftingClampLength"
+                data-testid="cable-support-manip-manip2-shifting-clamp-length"
+                [attr.aria-invalid]="form.controls.manip2ShiftingClampLength.invalid || null"
+                [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max'])"
+              />
+              <p-inputgroup-addon>m</p-inputgroup-addon>
+            </p-inputgroup>
+            @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
+              <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
+                <ng-container i18n>Minimum value:</ng-container>
+                -10
+              </p-message>
+            } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
+              <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
+                <ng-container i18n>Maximum value:</ng-container>
+                10
+              </p-message>
+            }
+          </div>
+        }
+      </div>
+    </fieldset>
   }
 
   <div class="footer-btns">
+    <button
+      app-btn
+      type="button"
+      btnStyle="danger"
+      disabled
+      data-testid="cable-support-manip-erase"
+      aria-label="erase cable manipulation at support"
+      i18n-aria-label
+    >
+      <app-icon icon="delete" aria-hidden="true"></app-icon>
+    </button>
+
     <button
       app-btn
       type="submit"

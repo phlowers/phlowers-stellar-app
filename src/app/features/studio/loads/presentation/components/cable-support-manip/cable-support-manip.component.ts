@@ -79,8 +79,8 @@ export class CableSupportManipComponent {
   });
 
   readonly manip1TypeOptions = [
-    { label: $localize`Crane`, value: 'crane' as SupportManipType },
-    { label: $localize`Rope`, value: 'rope' as SupportManipType },
+    { label: $localize`Crane handling`, value: 'crane' as SupportManipType },
+    { label: $localize`Rope handling`, value: 'rope' as SupportManipType },
     { label: $localize`Shifting`, value: 'shifting' as SupportManipType }
   ];
 
