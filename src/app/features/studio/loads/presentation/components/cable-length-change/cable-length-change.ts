@@ -108,9 +108,25 @@ export class CableLengthChangeComponent {
         if (defaultUuid) this.onScopeChange(defaultUuid);
       });
     });
+
+    // React to a span pre-selection triggered by clicking the cable modification
+    // annotation on the section plot. Patches the scope control and re-runs the
+    // existing pre-fill flow, then clears the signal so it can fire again.
+    effect(() => {
+      const spanUuid = this.cableModificationsService.selectedSpanUuid();
+      if (!spanUuid) return;
+      untracked(() => {
+        this.form.controls.scope.setValue(spanUuid, { emitEvent: false });
+        this.onScopeChange(spanUuid);
+        this.cableModificationsService.clearSelectedSpan();
+      });
+    });
   }
 
   onScopeChange(uuid: string | null): void {
+    // The preview belongs to the previously-edited span; drop it so the icon
+    // falls back to whatever (if anything) was saved for the new scope.
+    this.cableModificationsService.clearPreview();
     if (!uuid) {
       this.supportRefOptions.set([]);
       this.form.controls.supportRef.reset();
@@ -150,6 +166,7 @@ export class CableLengthChangeComponent {
   }
 
   resetForm(): void {
+    this.cableModificationsService.clearPreview();
     const currentScope = this.form.controls.scope.value;
     this.form.patchValue(
       {

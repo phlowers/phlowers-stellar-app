@@ -138,16 +138,25 @@ export class PoseTableComponent {
     }
   });
 
+  private equivalentSpanRunId = 0;
+
   protected readonly _equivalentSpanEffect = effect(() => {
     const section = this.spanService.section();
     if (!this.isPlotReady() || !section) {
-      untracked(() => this.equivalentSpan.set(null));
+      untracked(() => {
+        // Invalidate any in-flight run so its result is ignored.
+        this.equivalentSpanRunId++;
+        this.equivalentSpan.set(null);
+        this.isCalculatingEquivalentSpan.set(false);
+      });
       return;
     }
     void untracked(async () => {
+      const runId = ++this.equivalentSpanRunId;
       this.isCalculatingEquivalentSpan.set(true);
       try {
         const { result, error } = await this.workerPythonService.runTask(Task.getEquivalentSpan, undefined);
+        if (runId !== this.equivalentSpanRunId) return;
         if (error || result === null) {
           this.equivalentSpan.set(null);
           this.notificationService.error($localize`Failed to compute equivalent span`);
@@ -155,10 +164,13 @@ export class PoseTableComponent {
           this.equivalentSpan.set(result.equivalentSpan);
         }
       } catch {
+        if (runId !== this.equivalentSpanRunId) return;
         this.equivalentSpan.set(null);
         this.notificationService.error($localize`Failed to compute equivalent span`);
       } finally {
-        this.isCalculatingEquivalentSpan.set(false);
+        if (runId === this.equivalentSpanRunId) {
+          this.isCalculatingEquivalentSpan.set(false);
+        }
       }
     });
   });

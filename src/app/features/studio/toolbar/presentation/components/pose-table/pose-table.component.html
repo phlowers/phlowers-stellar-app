@@ -90,9 +90,13 @@
     </table>
   </div>
 } @else if (poseTableError()) {
-  <p-message severity="error" class="calculation-error" data-testid="pose-table-error" i18n>
-    An error occurred while calculating the pose table
-  </p-message>
+  <p-message
+    severity="error"
+    class="calculation-error"
+    data-testid="pose-table-error"
+    text="An error occurred while calculating the pose table"
+    i18n-text
+  />
 }
 
 <ng-template #footer>

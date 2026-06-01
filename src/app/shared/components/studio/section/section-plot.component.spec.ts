@@ -19,6 +19,7 @@ import { ChargeData } from '@shared/domain/models/charge.model';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
+import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -253,6 +254,14 @@ describe('SectionPlotComponent', () => {
     selectedSpanSupportUuid: signal<string | null>(null)
   };
 
+  const mockCableModificationsService = {
+    selectedSpanUuid: signal<string | null>(null),
+    selectSpan: vi.fn((uuid: string) => mockCableModificationsService.selectedSpanUuid.set(uuid)),
+    clearSelectedSpan: vi.fn(() => mockCableModificationsService.selectedSpanUuid.set(null)),
+    previewCableModification: signal(null),
+    clearPreview: vi.fn(() => mockCableModificationsService.previewCableModification.set(null))
+  };
+
   const mockObstaclesService = {
     selectedObstacleUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
@@ -307,7 +316,8 @@ describe('SectionPlotComponent', () => {
         { provide: SideTabsService, useValue: mockSideTabsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: ObstaclesService, useValue: mockObstaclesService },
-        { provide: LoadFormsService, useValue: mockLoadFormsService }
+        { provide: LoadFormsService, useValue: mockLoadFormsService },
+        { provide: CableModificationsService, useValue: mockCableModificationsService }
       ]
     }).compileComponents();
 
@@ -970,6 +980,55 @@ describe('SectionPlotComponent', () => {
 
       expect(mockSideTabsService.sideTabs()).toBeNull();
       expect(mockLoadFormsService.activeLoadTab()).toBe('0');
+    });
+  });
+
+  describe('addEventListenersToPlot — cable modification click', () => {
+    let capturedHandler: ((event: { annotation?: { data?: unknown } }) => void) | null = null;
+
+    beforeEach(() => {
+      capturedHandler = null;
+      mockLoadFormsService.activeLoadTab.set('0');
+      mockSideTabsService.sideTabs.set(null);
+      mockCableModificationsService.selectedSpanUuid.set(null);
+      mockCableModificationsService.selectSpan.mockClear();
+    });
+
+    const makePlotWithCapture = () => {
+      const self = {
+        removeAllListeners: vi.fn(),
+        on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
+          if (event === 'plotly_clickannotation') {
+            capturedHandler = fn;
+          }
+          return self;
+        }
+      } as unknown as PlotlyHTMLElement;
+      return self;
+    };
+
+    it('should open Charges side tab, switch to cable length change tab and pre-select the span', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({
+        annotation: {
+          data: { type: 'cableModification', spanUuid: 's0', cableModificationUuid: 'mod-1' }
+        }
+      });
+
+      expect(mockSideTabsService.sideTabs()).toBe(0);
+      expect(mockLoadFormsService.activeLoadTab()).toBe('2');
+      expect(mockCableModificationsService.selectSpan).toHaveBeenCalledWith('s0');
+    });
+
+    it('should not trigger selection for other annotation types', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
+
+      expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
     });
   });
 

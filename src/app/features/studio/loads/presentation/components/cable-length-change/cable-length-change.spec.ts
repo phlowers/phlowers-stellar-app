@@ -79,7 +79,12 @@ describe('CableLengthChangeComponent', () => {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
       clearPersistedFormData: vi.fn(),
-      getStudy: vi.fn().mockResolvedValue(null)
+      getStudy: vi.fn().mockResolvedValue(null),
+      selectedSpanUuid: signal<string | null>(null),
+      selectSpan: vi.fn(),
+      clearSelectedSpan: vi.fn(),
+      previewCableModification: signal(null),
+      clearPreview: vi.fn()
     } as unknown as vi.Mocked<CableModificationsService>;
 
     await TestBed.configureTestingModule({
@@ -744,6 +749,29 @@ describe('CableLengthChangeComponent', () => {
 
     it('should have form in reset state when section is null', () => {
       expect(nullSectionComponent.isDirtySinceLastSave()).toBe(false);
+    });
+  });
+
+  describe('selectedSpanUuid reaction (plot annotation click)', () => {
+    it('should patch the scope control and run onScopeChange when the service signals a selection', async () => {
+      const onScopeChangeSpy = vi.spyOn(component, 'onScopeChange');
+      (mockCableModificationsService.selectedSpanUuid as unknown as ReturnType<typeof signal<string | null>>).set(
+        'support-uuid-1'
+      );
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.form.controls.scope.value).toBe('support-uuid-1');
+      expect(onScopeChangeSpy).toHaveBeenCalledWith('support-uuid-1');
+      expect(mockCableModificationsService.clearSelectedSpan).toHaveBeenCalled();
+    });
+
+    it('should not run when the selection signal is null', async () => {
+      const onScopeChangeSpy = vi.spyOn(component, 'onScopeChange');
+      (mockCableModificationsService.selectedSpanUuid as unknown as ReturnType<typeof signal<string | null>>).set(null);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(onScopeChangeSpy).not.toHaveBeenCalled();
+      expect(mockCableModificationsService.clearSelectedSpan).not.toHaveBeenCalled();
     });
   });
 });

@@ -533,4 +533,24 @@ describe('CableModificationsService', () => {
       expect(() => service.clearPersistedFormData('some-span-uuid')).not.toThrow();
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // selectSpan() / clearSelectedSpan()
+  // ---------------------------------------------------------------------------
+  describe('selectSpan() / clearSelectedSpan()', () => {
+    it('should expose a null selectedSpanUuid signal by default', () => {
+      expect(service.selectedSpanUuid()).toBeNull();
+    });
+
+    it('should update the signal when selectSpan is called', () => {
+      service.selectSpan('span-xyz');
+      expect(service.selectedSpanUuid()).toBe('span-xyz');
+    });
+
+    it('should reset the signal to null when clearSelectedSpan is called', () => {
+      service.selectSpan('span-xyz');
+      service.clearSelectedSpan();
+      expect(service.selectedSpanUuid()).toBeNull();
+    });
+  });
 });
