@@ -199,7 +199,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   const imgY = paramsStartY - TEXT_ASCENDER_MM; // align image top with text cap-height
   let imgEndY = paramsStartY;
   if (data.diagramImageBase64) {
-    doc.addImage(data.diagramImageBase64, 'PNG', imgX, imgY, imgWidth, imgHeight);
+    doc.addImage(data.diagramImageBase64, 'SVG', imgX, imgY, imgWidth, imgHeight, undefined, 'FAST');
     doc.setDrawColor(0);
     imgEndY = imgY + imgHeight + DIAGRAM_BOTTOM_SPACING;
   }
