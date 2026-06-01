@@ -374,7 +374,7 @@
 
 ---
 
-## 24. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
+## 28. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
 
 | | |
 |---|---|
@@ -385,16 +385,3 @@
 | Impact suppression | Removed both functions + `CatalogAttachment` import. Perf improvement: ~3s → ~100ms for support name dropdown. |
 | ✅ Validé | 🗑️ SUPPRIMÉ — 19/05/2026 |
 
----
-
-## 25. `hasCableModifications` computed + `data-has-cable-modification` attribute — `section-plot.component`
-
-| | |
-|---|---|
-| 📍 Source | `src/app/shared/components/studio/section/section-plot.component.ts` line 68 and `section-plot.component.html` line 5 |
-| Code | `readonly hasCableModifications = computed(() => (this.spanService.section()?.cable_modifications?.length ?? 0) > 0);` and `[attr.data-has-cable-modification]="hasCableModifications()"` |
-| 🔍 Preuve | No SCSS selector targets `[data-has-cable-modification]`, no spec reads the attribute, no JS/TS queries the DOM for it. Not a `data-testid` and not consumed anywhere in the codebase. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Remove the `computed` from the component and the `[attr.data-has-cable-modification]` binding from the template. |
-| Status | 🗑️ SUPPRIMÉ — 01/06/2026 |
-| Detected on | 2026-06-01 |
