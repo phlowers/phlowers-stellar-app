@@ -584,7 +584,7 @@ def refresh_projection(js_inputs: dict):
     )
     middle_span = get_section_middle_span(start_support, end_support)
     obstacles = obst.get_current_obstacles(
-        plt_line, project=False, support_index=middle_span
+        plt_line, project=project, support_index=middle_span
     )
 
     return {
