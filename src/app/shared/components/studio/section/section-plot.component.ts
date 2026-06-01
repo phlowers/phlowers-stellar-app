@@ -13,8 +13,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SpanLoad } from '@shared/domain';
-import { LoadType, SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
-import { CableModificationAnnotationData } from './helpers/createCableModificationAnnotations.interfaces';
+import { LoadType } from './helpers/createLoadAnnotations';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
@@ -32,6 +31,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
+import { ClickAnnotationEvent } from './section-plot.interfaces';
 
 @Component({
   selector: 'app-section-plot',
@@ -63,9 +63,6 @@ export class SectionPlotComponent implements OnDestroy {
 
   // Signals
   private readonly isPlotRefreshing = signal(false);
-
-  /** True when at least one cable length modification is persisted on the current section. */
-  readonly hasCableModifications = computed(() => (this.spanService.section()?.cable_modifications?.length ?? 0) > 0);
 
   // Form values as signals
   private readonly currentObstaclePositions = toSignal(this.obstacleFormService.form.get('positions')!.valueChanges, {
@@ -227,9 +224,6 @@ export class SectionPlotComponent implements OnDestroy {
   }
 
   addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
-    interface ClickAnnotationEvent {
-      annotation?: { data?: ObstacleAnnotationData | SpanLoadAnnotationData | CableModificationAnnotationData };
-    }
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
       on(e: 'plotly_relayout', fn: (eventData: Record<string, unknown>) => void): void;

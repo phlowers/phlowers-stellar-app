@@ -51,9 +51,10 @@ export class CableModificationsService {
    *
    * @remarks
    * The section plot overlays this preview on top of `section.cable_modifications`
-   * so the icon's arc-length anchor reflects the form values shown to the user
-   * instead of the previously saved ones. Consumers should clear it on save,
-   * delete, scope change, or when the form is reset.
+   * so the icon's horizontal-abscissa anchor (x-distance from the reference
+   * support) reflects the form values shown to the user instead of the
+   * previously saved ones. Consumers should clear it on save, delete, scope
+   * change, or when the form is reset.
    */
   readonly previewCableModification = signal<CableModification | null>(null);
 
@@ -63,15 +64,18 @@ export class CableModificationsService {
   };
 
   /**
-   * Clear any persisted form data in memory for a given span (if such logic is needed).
-   * This is a placeholder: adapt if you avez une logique de cache ou de persistance locale.
-   * @param spanUuid UUID of the span whose form data should be cleared
+   * Hook for clearing any persisted in-memory form data associated with a span.
+   *
+   * @remarks
+   * Currently a no-op placeholder kept because consumers
+   * (`CableLengthChangeComponent.deleteForm`) already call it on the delete /
+   * scope-change paths. Implement here if a per-span form cache is ever
+   * introduced. Tracked as pending review in `deadcode.md` (#12).
+   *
+   * @param _spanUuid UUID of the span whose form data should be cleared.
    */
   clearPersistedFormData(_spanUuid: string): void {
-    // If you have a cache or local storage for form data, clear it here.
-    // Example for localStorage:
-    // localStorage.removeItem(`cable-span-form-${spanUuid}`);
-    // If not used, this is a no-op.
+    // No-op. See TSDoc above.
   }
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
@@ -93,8 +97,9 @@ export class CableModificationsService {
     }
 
     // Overlay a preview modification so the section plot icon moves to the
-    // arc-length point matching the form values being calculated, even though
-    // nothing has been persisted yet.
+    // horizontal-abscissa point (x-distance from the reference support)
+    // matching the form values being calculated, even though nothing has been
+    // persisted yet.
     this.previewCableModification.set({
       uuid: this.previewCableModification()?.uuid ?? uuidv4(),
       spanUuid: params.spanUuid,

@@ -33,10 +33,10 @@ const makeModification = (overrides: Partial<CableModification> = {}): CableModi
 });
 
 /**
- * Default polyline is a straight horizontal segment of length 10 with a
- * midpoint sample, which makes arc-length math trivial:
- * arc 0 → [0,0,0], arc 3 → [3,0,0], arc 5 → [5,0,0],
- * arc 7 → [7,0,0], arc 10 → [10,0,0].
+ * Default polyline is a straight horizontal segment from x = 0 to x = 10
+ * with a midpoint sample, so horizontal x-abscissa lookups are trivial:
+ * x 0 → [0,0,0], x 3 → [3,0,0], x 5 → [5,0,0],
+ * x 7 → [7,0,0], x 10 → [10,0,0].
  */
 const makePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotParams => ({
   documentRef: globalThis.document,
@@ -115,7 +115,7 @@ describe('createCableModificationAnnotations', () => {
     });
   });
 
-  describe('arc-length anchor (LEFT supportRef)', () => {
+  describe('x-abscissa anchor (LEFT supportRef)', () => {
     it('should return the first polyline point when distanceSupportRef is 0', () => {
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
@@ -127,7 +127,7 @@ describe('createCableModificationAnnotations', () => {
       expect(icon.z).toBe(0);
     });
 
-    it('should interpolate linearly inside a segment', () => {
+    it('should interpolate linearly inside a segment by x-distance', () => {
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 3 })],
@@ -138,7 +138,7 @@ describe('createCableModificationAnnotations', () => {
       expect(icon.z).toBeCloseTo(0, 10);
     });
 
-    it('should clamp to the last polyline point when distance exceeds span length', () => {
+    it('should clamp to the last polyline point when x-distance exceeds span length', () => {
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'LEFT', distanceSupportRef: 999 })],
@@ -168,25 +168,25 @@ describe('createCableModificationAnnotations', () => {
     });
   });
 
-  describe('arc-length anchor (RIGHT supportRef)', () => {
-    it('should measure distance from the end of the polyline', () => {
+  describe('x-abscissa anchor (RIGHT supportRef)', () => {
+    it('should measure x-distance from the end of the polyline', () => {
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'RIGHT', distanceSupportRef: 3 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      // span_length=10, RIGHT, distance=3 → arc = 10-3 = 7 → [7, 0, 0]
+      // span_length=10, RIGHT, distance=3 → target x = 10-3 = 7 → [7, 0, 0]
       expect(icon.x).toBeCloseTo(7, 10);
       expect(icon.y).toBeCloseTo(0, 10);
     });
 
-    it('should clamp to the first polyline point when distance exceeds span length', () => {
+    it('should clamp to the first polyline point when x-distance exceeds span length', () => {
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification({ supportRef: 'RIGHT', distanceSupportRef: 999 })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      // arc = max(0, 10 - 999) = 0 → first point
+      // target x = max(0, 10 - 999) = 0 → first point
       expect(icon.x).toBe(0);
       expect(icon.y).toBe(0);
     });

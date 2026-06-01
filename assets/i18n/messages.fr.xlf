@@ -4211,10 +4211,10 @@
         <target>En attente du moteur de calcul</target>
       </segment>
     </unit>
-    <unit id="3350117461161966226">
+    <unit id="1311567880462908443">
       <segment state="initial">
-        <source> An error occurred while calculating the pose table </source>
-        <target> Une erreur s&apos;est produite lors du calcul du tableau de pose </target>
+        <source>An error occurred while calculating the pose table</source>
+        <target>Une erreur s&apos;est produite lors du calcul du tableau de pose</target>
       </segment>
     </unit>
     <unit id="2773256594291059859">

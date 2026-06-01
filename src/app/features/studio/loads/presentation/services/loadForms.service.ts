@@ -83,43 +83,45 @@ export class LoadFormsService {
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
 
-    const currentSection = this.spanService.section();
-    const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
-    this.plotService.temporaryLoadData = {
-      ...temporaryLoadData,
-      spanLoads: checkedSpanLoads
-    };
+    try {
+      const currentSection = this.spanService.section();
+      const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
+      this.plotService.temporaryLoadData = {
+        ...temporaryLoadData,
+        spanLoads: checkedSpanLoads
+      };
 
-    const { result: changeResult } = await this.workerPythonService.runTask(Task.changeState, {
-      climate: temporaryLoadData.climate,
-      spanLoads: checkedSpanLoads
-    });
-    if (changeResult) {
-      this.plotService.litData.set(changeResult.current);
-      this.plotService.baseLitData.set(changeResult.base);
-    }
+      const { result: changeResult } = await this.workerPythonService.runTask(Task.changeState, {
+        climate: temporaryLoadData.climate,
+        spanLoads: checkedSpanLoads
+      });
+      if (changeResult) {
+        this.plotService.litData.set(changeResult.current);
+        this.plotService.baseLitData.set(changeResult.base);
+      }
 
-    const obstacles = currentSection?.obstacles ?? [];
-    if (obstacles.length > 0) {
-      const syncedOutput = await this.obstacleStateService.syncObstacles(
-        obstacles,
-        this.plotOptionsService.plotOptions()
-      );
-      if (syncedOutput) {
-        const current = this.plotService.litData();
-        if (current) {
-          this.plotService.litData.set({ ...current, obstacles: syncedOutput.obstacles });
+      const obstacles = currentSection?.obstacles ?? [];
+      if (obstacles.length > 0) {
+        const syncedOutput = await this.obstacleStateService.syncObstacles(
+          obstacles,
+          this.plotOptionsService.plotOptions()
+        );
+        if (syncedOutput) {
+          const current = this.plotService.litData();
+          if (current) {
+            this.plotService.litData.set({ ...current, obstacles: syncedOutput.obstacles });
+          }
         }
       }
+
+      // Re-apply any saved cable length modifications on top of the change-state
+      // result. `Task.changeState` resets the engine to the climate state without
+      // knowing about cable_modifications, which would otherwise be silently
+      // dropped from the recomputed geometry.
+      await this.reapplyCableModifications(currentSection);
+    } finally {
+      this.plotService.loading.set(false);
     }
-
-    // Re-apply any saved cable length modifications on top of the change-state
-    // result. `Task.changeState` resets the engine to the climate state without
-    // knowing about cable_modifications, which would otherwise be silently
-    // dropped from the recomputed geometry.
-    await this.reapplyCableModifications(currentSection);
-
-    this.plotService.loading.set(false);
   };
 
   /**
