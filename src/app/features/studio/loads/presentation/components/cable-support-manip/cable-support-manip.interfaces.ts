@@ -1,7 +1,7 @@
 import { FormControl } from '@angular/forms';
+import type { SupportAnchoringType, SupportManipType } from '@shared/domain';
 
-export type SupportManipType = 'crane' | 'rope' | 'shifting';
-export type SupportAnchoringType = 'with_chain' | 'without_chain';
+export type { SupportAnchoringType, SupportManipType };
 
 export const CABLE_SUPPORT_MANIP_DEFAULTS = {
   manip1Type: null as SupportManipType | null,
@@ -10,7 +10,7 @@ export const CABLE_SUPPORT_MANIP_DEFAULTS = {
   lateralDistance: 0,
   ropeLength: 0,
   shiftingClampLength: 0,
-  manip2Type: null as SupportManipType | null,
+  manip2Type: 'shifting' as SupportManipType | null,
   manip2ShiftingClampLength: 0
 };
 

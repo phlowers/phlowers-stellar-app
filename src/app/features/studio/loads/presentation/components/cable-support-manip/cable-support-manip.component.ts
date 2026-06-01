@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { afterRender, ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -11,8 +11,10 @@ import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { CableSupportManipService } from '../../services/cableSupportManip.service';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
   CableSupportManipFormControls,
@@ -53,9 +55,14 @@ export class CableSupportManipComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly cableSupportManipService = inject(CableSupportManipService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly isLoading = signal(false);
   readonly isCalculating = computed(() => this.plotService.loading());
+  readonly hasSavedManipulation = signal(false);
+  /** Disables manip2 animations for one render cycle during programmatic load-case changes. */
+  readonly disableManip2Anim = signal(false);
 
   readonly form = this.fb.group<CableSupportManipFormControls>({
     support: new FormControl<string | null>(null, { validators: [Validators.required] }),
@@ -65,7 +72,7 @@ export class CableSupportManipComponent {
     lateralDistance: new FormControl<number | null>(0),
     ropeLength: new FormControl<number | null>(0),
     shiftingClampLength: new FormControl<number | null>(0),
-    manip2Type: new FormControl<SupportManipType | null>(null),
+    manip2Type: new FormControl<SupportManipType | null>('shifting'),
     manip2ShiftingClampLength: new FormControl<number | null>(0)
   });
 
@@ -171,6 +178,27 @@ export class CableSupportManipComponent {
       this.isManip2Shifting();
       untracked(() => this.form.controls.manip2ShiftingClampLength.updateValueAndValidity({ emitEvent: false }));
     });
+
+    // Re-populate the form when the active load case changes so that each
+    // (support, charge) pair shows its own saved manipulation.
+    let previousChargeUuid: string | null | undefined = undefined;
+    effect(() => {
+      const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+      if (chargeUuid === previousChargeUuid) return;
+      previousChargeUuid = chargeUuid;
+      // Suppress manip2 animations for this render to prevent overlapping
+      // enter/leave transitions when switching load cases rapidly.
+      this.disableManip2Anim.set(true);
+      untracked(() => this.onSupportChange(this.form.controls.support.value));
+    });
+
+    // Re-enable manip2 animations after each render cycle so that
+    // user-triggered add/remove interactions still animate normally.
+    afterRender(() => {
+      if (untracked(() => this.disableManip2Anim())) {
+        this.disableManip2Anim.set(false);
+      }
+    });
   }
 
   zoomToSupport(): void {
@@ -194,32 +222,124 @@ export class CableSupportManipComponent {
 
   private clearManip2(): void {
     this.showManip2.set(false);
-    this.form.controls.manip2Type.reset(null, { emitEvent: false });
+    this.form.controls.manip2Type.reset('shifting', { emitEvent: false });
     this.form.controls.manip2ShiftingClampLength.reset(0, { emitEvent: false });
     this.form.controls.manip2ShiftingClampLength.updateValueAndValidity({ emitEvent: false });
   }
 
+  onSupportChange(uuid: string | null): void {
+    if (!uuid) {
+      this.hasSavedManipulation.set(false);
+      return;
+    }
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    const saved = this.spanService
+      .section()
+      ?.cable_support_manipulations?.find((m) => m.supportUuid === uuid && m.chargeUuid === chargeUuid);
+
+    if (saved) {
+      this.hasSavedManipulation.set(true);
+      this.showManip2.set(saved.manip2 != null);
+      this.form.reset({
+        ...CABLE_SUPPORT_MANIP_DEFAULTS,
+        support: uuid,
+        manip1Type: saved.manip1.type,
+        vertDisplacement: saved.manip1.vertDisplacement ?? 0,
+        anchoring: saved.manip1.anchoring ?? 'without_chain',
+        lateralDistance: saved.manip1.lateralDistance ?? 0,
+        ropeLength: saved.manip1.ropeLength ?? 0,
+        shiftingClampLength: saved.manip1.shiftingClampLength ?? 0,
+        manip2Type: saved.manip2?.type ?? 'shifting',
+        manip2ShiftingClampLength: saved.manip2?.shiftingClampLength ?? 0
+      });
+    } else {
+      this.hasSavedManipulation.set(false);
+      this.clearManip2();
+      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: uuid });
+    }
+  }
+
   resetForm(): void {
     this.clearManip2();
-    this.form.reset(
-      { ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value },
-      { emitEvent: false }
-    );
+    this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value });
   }
 
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
+    const raw = this.form.getRawValue();
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    if (!chargeUuid) return;
     this.isLoading.set(true);
     try {
-      // Service call placeholder — to be wired once the backend API is defined.
+      await this.cableSupportManipService.save({
+        supportUuid: raw.support!,
+        chargeUuid,
+        manip1: {
+          type: raw.manip1Type!,
+          vertDisplacement: raw.vertDisplacement,
+          anchoring: raw.anchoring,
+          lateralDistance: raw.lateralDistance,
+          ropeLength: raw.ropeLength,
+          shiftingClampLength: raw.shiftingClampLength
+        },
+        manip2: this.showManip2()
+          ? {
+              type: raw.manip2Type!,
+              vertDisplacement: null,
+              anchoring: null,
+              lateralDistance: null,
+              ropeLength: null,
+              shiftingClampLength: raw.manip2ShiftingClampLength
+            }
+          : null
+      });
+      this.hasSavedManipulation.set(true);
+      await this.cableSupportManipService.reloadSection();
+      this.notificationService.success($localize`Cable support manipulation saved`);
+    } catch {
+      this.notificationService.error($localize`Failed to save cable support manipulation`);
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  calculate(): void {
+  async deleteForm(): Promise<void> {
+    const supportUuid = this.form.controls.support.value;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    const uuid =
+      supportUuid && chargeUuid
+        ? (this.spanService
+            .section()
+            ?.cable_support_manipulations?.find(
+              (m) => m.supportUuid === supportUuid && m.chargeUuid === chargeUuid
+            )?.uuid ?? null)
+        : null;
+
+    this.isLoading.set(true);
+    try {
+      if (uuid) {
+        await this.cableSupportManipService.delete(uuid);
+        await this.cableSupportManipService.reloadSection();
+      }
+      this.clearManip2();
+      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value });
+      this.hasSavedManipulation.set(false);
+      this.notificationService.success($localize`Cable support manipulation deleted`);
+    } catch {
+      this.notificationService.error($localize`Failed to delete cable support manipulation`);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async calculate(): Promise<void> {
     if (this.isFormInvalid()) return;
-    // Python task placeholder — to be wired once the calculation API is defined.
+    this.isLoading.set(true);
+    try {
+      // Python task placeholder — to be wired once the calculation API is defined.
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   isFormInvalid(): boolean {

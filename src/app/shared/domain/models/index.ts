@@ -18,6 +18,12 @@ export type {
   CableManipMethod,
   AnchoringType
 } from './cable-span-manipulation.model';
+export type {
+  CableSupportManipulation,
+  CableSupportManipItem,
+  SupportManipType,
+  SupportAnchoringType
+} from './cable-support-manipulation.model';
 export type { Support } from './support.model';
 export type { Charge, ClimateCharge, SpanLoad } from './charge.model';
 export { SymmetryType } from './charge.model';

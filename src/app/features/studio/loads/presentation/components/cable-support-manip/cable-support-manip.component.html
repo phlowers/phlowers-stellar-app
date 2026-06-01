@@ -35,6 +35,7 @@
     formControlName="support"
     optionLabel="label"
     optionValue="value"
+    (onChange)="onSupportChange($event.value)"
     data-testid="cable-support-manip-support"
     appendTo="body"
   />
@@ -221,96 +222,100 @@
     </div>
   </fieldset>
 
-  @if (!showManip2()) {
-    <div @expandCollapse>
-      <button
-        app-btn
-        type="button"
-        btnStyle="outlined"
-        [disabled]="!isManip2Available()"
-        (click)="addManip2()"
-        data-testid="cable-support-manip-add-manip2"
-      >
-        <app-icon icon="add_circle" aria-hidden="true" />
-        <ng-container i18n>Add a manipulation</ng-container>
-      </button>
-    </div>
-  }
-
-  @if (showManip2()) {
-    <fieldset @expandCollapse>
-      <div class="bypass-anonymous-box">
-        <div class="manip2-header">
-          <legend i18n>Manipulation 2</legend>
-
-          <button
-            app-btn
-            type="button"
-            btnStyle="danger"
-            btnSize="s"
-            (click)="removeManip2()"
-            data-testid="cable-support-manip-remove-manip2"
-          >
-            <ng-container i18n>remove</ng-container>
-            <app-icon icon="delete" />
-          </button>
-        </div>
-
-        <label for="manip2Type" i18n>Manipulation type</label>
-
-        <p-select
-          inputId="manip2Type"
-          fluid
-          [options]="manip2TypeOptions"
-          formControlName="manip2Type"
-          optionLabel="label"
-          optionValue="value"
-          data-testid="cable-support-manip-manip2-type"
-          appendTo="body"
-        />
-
-        @if (isManip2Shifting()) {
-          <div @expandCollapse>
-            <label for="manip2ShiftingClampLength" i18n>Shifting clamp length</label>
-            <p-inputgroup>
-              <input
-                id="manip2ShiftingClampLength"
-                type="number"
-                pInputText
-                step="0.01"
-                min="-10"
-                max="10"
-                (input)="truncateTwoDecimals($event)"
-                formControlName="manip2ShiftingClampLength"
-                data-testid="cable-support-manip-manip2-shifting-clamp-length"
-                [attr.aria-invalid]="form.controls.manip2ShiftingClampLength.invalid || null"
-                [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max'])"
-              />
-              <p-inputgroup-addon>m</p-inputgroup-addon>
-            </p-inputgroup>
-            @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
-              <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
-                <ng-container i18n>Minimum value:</ng-container>
-                -10
-              </p-message>
-            } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
-              <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
-                <ng-container i18n>Maximum value:</ng-container>
-                10
-              </p-message>
-            }
-          </div>
-        }
+  <div [@.disabled]="disableManip2Anim()">
+    @if (!showManip2()) {
+      <div @expandCollapse>
+        <button
+          app-btn
+          type="button"
+          btnStyle="outlined"
+          [disabled]="!isManip2Available()"
+          (click)="addManip2()"
+          data-testid="cable-support-manip-add-manip2"
+        >
+          <app-icon icon="add_circle" aria-hidden="true" />
+          <ng-container i18n>Add a manipulation</ng-container>
+        </button>
       </div>
-    </fieldset>
-  }
+    }
+
+    @if (showManip2()) {
+      <fieldset @expandCollapse>
+        <div class="bypass-anonymous-box">
+          <div class="manip2-header">
+            <legend i18n>Manipulation 2</legend>
+
+            <button
+              app-btn
+              type="button"
+              btnStyle="danger"
+              btnSize="s"
+              (click)="removeManip2()"
+              data-testid="cable-support-manip-remove-manip2"
+            >
+              <ng-container i18n>remove</ng-container>
+              <app-icon icon="delete" />
+            </button>
+          </div>
+
+          <label for="manip2Type" i18n>Manipulation type</label>
+
+          <p-select
+            inputId="manip2Type"
+            fluid
+            [options]="manip2TypeOptions"
+            formControlName="manip2Type"
+            optionLabel="label"
+            optionValue="value"
+            data-testid="cable-support-manip-manip2-type"
+            appendTo="body"
+          />
+
+          @if (isManip2Shifting()) {
+            <div @expandCollapse>
+              <label for="manip2ShiftingClampLength" i18n>Shifting clamp length</label>
+              <p-inputgroup>
+                <input
+                  id="manip2ShiftingClampLength"
+                  type="number"
+                  pInputText
+                  step="0.01"
+                  min="-10"
+                  max="10"
+                  (input)="truncateTwoDecimals($event)"
+                  formControlName="manip2ShiftingClampLength"
+                  data-testid="cable-support-manip-manip2-shifting-clamp-length"
+                  [attr.aria-invalid]="form.controls.manip2ShiftingClampLength.invalid || null"
+                  [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max'])"
+                />
+                <p-inputgroup-addon>m</p-inputgroup-addon>
+              </p-inputgroup>
+              @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
+                <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
+                  <ng-container i18n>Minimum value:</ng-container>
+                  -10
+                </p-message>
+              } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
+                <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
+                  <ng-container i18n>Maximum value:</ng-container>
+                  10
+                </p-message>
+              }
+            </div>
+          }
+        </div>
+      </fieldset>
+    }
+  </div>
 
   <div class="footer-btns">
     <button
       app-btn
       type="button"
       btnStyle="danger"
-      disabled
+      [disabled]="!hasSavedManipulation() || isLoading()"
+      [btnLoading]="isLoading()"
+      (click)="deleteForm()"
       data-testid="cable-support-manip-erase"
       aria-label="erase cable manipulation at support"
       i18n-aria-label

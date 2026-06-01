@@ -13,6 +13,7 @@ import { VtlAndGuying } from './vtl-and-guying.model';
 import { Obstacle } from './obstacle.model';
 import { CableModification } from './cable-modification.model';
 import { CableSpanManipulation } from './cable-span-manipulation.model';
+import { CableSupportManipulation } from './cable-support-manipulation.model';
 
 export interface PoseResults {
   temperatures: number[];
@@ -145,6 +146,10 @@ export interface Section {
   cable_span_manipulations: CableSpanManipulation[];
   /** UUID of the currently selected cable span manipulation */
   selected_cable_span_manipulation_uuid: string | null;
+  /** Array of cable support manipulations on this section's supports */
+  cable_support_manipulations: CableSupportManipulation[];
+  /** UUID of the currently selected cable support manipulation */
+  selected_cable_support_manipulation_uuid: string | null;
   /** Latitude of the first support */
   start_latitude: number | null;
   /** Longitude of the first support */
