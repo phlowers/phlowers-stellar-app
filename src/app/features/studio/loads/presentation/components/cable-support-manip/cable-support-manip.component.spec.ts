@@ -498,6 +498,103 @@ describe('CableSupportManipComponent', () => {
       component.onSupportChange('support-uuid-1');
       expect(component.showManip2()).toBe(false);
     });
+
+    it('should reset isCrane/isRope/isShifting to false when uuid is null', () => {
+      component.form.controls.manip1Type.setValue('crane');
+      component.onSupportChange(null);
+      expect(component.isCrane()).toBe(false);
+      expect(component.isRope()).toBe(false);
+      expect(component.isShifting()).toBe(false);
+    });
+
+    it('should update isCrane after loading a saved crane manipulation', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        cable_support_manipulations: [
+          {
+            uuid: 'manip-uuid-1',
+            supportUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            manip1: {
+              type: 'crane',
+              vertDisplacement: 5,
+              anchoring: 'without_chain',
+              lateralDistance: 0,
+              ropeLength: null,
+              shiftingClampLength: null
+            },
+            manip2: null
+          }
+        ]
+      } as unknown as Section);
+      component.onSupportChange('support-uuid-1');
+      expect(component.isCrane()).toBe(true);
+      expect(component.isRope()).toBe(false);
+      expect(component.isShifting()).toBe(false);
+    });
+
+    it('should update isRope after loading a saved rope manipulation', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        cable_support_manipulations: [
+          {
+            uuid: 'manip-uuid-1',
+            supportUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            manip1: {
+              type: 'rope',
+              vertDisplacement: null,
+              anchoring: null,
+              lateralDistance: null,
+              ropeLength: 8,
+              shiftingClampLength: null
+            },
+            manip2: null
+          }
+        ]
+      } as unknown as Section);
+      component.onSupportChange('support-uuid-1');
+      expect(component.isRope()).toBe(true);
+      expect(component.isCrane()).toBe(false);
+      expect(component.isShifting()).toBe(false);
+    });
+
+    it('should update isShifting after loading a saved shifting manipulation', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        cable_support_manipulations: [
+          {
+            uuid: 'manip-uuid-1',
+            supportUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            manip1: {
+              type: 'shifting',
+              vertDisplacement: null,
+              anchoring: null,
+              lateralDistance: null,
+              ropeLength: null,
+              shiftingClampLength: 2
+            },
+            manip2: null
+          }
+        ]
+      } as unknown as Section);
+      component.onSupportChange('support-uuid-1');
+      expect(component.isShifting()).toBe(true);
+      expect(component.isCrane()).toBe(false);
+      expect(component.isRope()).toBe(false);
+    });
+
+    it('should reset isCrane/isRope/isShifting to false when no saved manipulation for the support', () => {
+      component.form.controls.manip1Type.setValue('crane');
+      component.onSupportChange('support-uuid-1'); // no matching manip in mockSection
+      expect(component.isCrane()).toBe(false);
+      expect(component.isRope()).toBe(false);
+      expect(component.isShifting()).toBe(false);
+    });
   });
 
   // ---------------------------------------------------------------------------

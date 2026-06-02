@@ -242,6 +242,7 @@ export class CableSupportManipComponent {
       this.hasSavedManipulation.set(false);
       this.clearManip2();
       this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: null }, { emitEvent: false });
+      this.form.controls.manip1Type.updateValueAndValidity();
       return;
     }
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
@@ -267,10 +268,12 @@ export class CableSupportManipComponent {
         },
         { emitEvent: false }
       );
+      this.form.controls.manip1Type.updateValueAndValidity();
     } else {
       this.hasSavedManipulation.set(false);
       this.clearManip2();
       this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: uuid }, { emitEvent: false });
+      this.form.controls.manip1Type.updateValueAndValidity();
     }
   }
 
