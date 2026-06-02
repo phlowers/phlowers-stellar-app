@@ -147,9 +147,9 @@ export interface Section {
   /** UUID of the currently selected cable span manipulation */
   selected_cable_span_manipulation_uuid: string | null;
   /** Array of cable support manipulations on this section's supports */
-  cable_support_manipulations: CableSupportManipulation[];
+  cable_support_manipulations?: CableSupportManipulation[];
   /** UUID of the currently selected cable support manipulation */
-  selected_cable_support_manipulation_uuid: string | null;
+  selected_cable_support_manipulation_uuid?: string | null;
   /** Latitude of the first support */
   start_latitude: number | null;
   /** Longitude of the first support */

@@ -239,6 +239,8 @@ export class CableSupportManipComponent {
   onSupportChange(uuid: string | null): void {
     if (!uuid) {
       this.hasSavedManipulation.set(false);
+      this.clearManip2();
+      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: null }, { emitEvent: false });
       return;
     }
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
@@ -328,11 +330,11 @@ export class CableSupportManipComponent {
       if (uuid) {
         await this.cableSupportManipService.delete(uuid);
         await this.cableSupportManipService.reloadSection();
+        this.notificationService.success($localize`Cable support manipulation deleted`);
       }
       this.clearManip2();
       this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value });
       this.hasSavedManipulation.set(false);
-      this.notificationService.success($localize`Cable support manipulation deleted`);
     } catch {
       this.notificationService.error($localize`Failed to delete cable support manipulation`);
     } finally {

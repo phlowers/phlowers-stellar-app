@@ -178,15 +178,15 @@ describe('CableSupportManipService', () => {
       const updated = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updated.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_support_manipulations).toHaveLength(1);
-      expect(section?.cable_support_manipulations[0].supportUuid).toBe('support-uuid-1');
-      expect(section?.cable_support_manipulations[0].chargeUuid).toBe('charge-uuid-1');
+      expect(section?.cable_support_manipulations![0].supportUuid).toBe('support-uuid-1');
+      expect(section?.cable_support_manipulations![0].chargeUuid).toBe('charge-uuid-1');
     });
 
     it('should assign a uuid to the new manipulation', async () => {
       await service.save(newManip);
       const updated = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updated.sections.find((s) => s?.uuid === 'section-uuid-1');
-      expect(section?.cable_support_manipulations[0].uuid).toBeTruthy();
+      expect(section?.cable_support_manipulations![0].uuid).toBeTruthy();
     });
 
     it('should set selected_cable_support_manipulation_uuid after save', async () => {
@@ -228,8 +228,8 @@ describe('CableSupportManipService', () => {
       const updated = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updated.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_support_manipulations).toHaveLength(1);
-      expect(section?.cable_support_manipulations[0].uuid).toBe(existingUuid);
-      expect(section?.cable_support_manipulations[0].manip1.shiftingClampLength).toBe(9);
+      expect(section?.cable_support_manipulations![0].uuid).toBe(existingUuid);
+      expect(section?.cable_support_manipulations![0].manip1.shiftingClampLength).toBe(9);
     });
 
     it('should keep each (supportUuid, chargeUuid) pair independent', async () => {

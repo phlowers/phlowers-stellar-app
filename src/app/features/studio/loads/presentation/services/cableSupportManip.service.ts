@@ -35,7 +35,7 @@ export class CableSupportManipService {
         uuid: existing?.uuid ?? manip.uuid ?? uuidv4()
       };
       if (existing) {
-        section.cable_support_manipulations = section.cable_support_manipulations.map((m) =>
+        section.cable_support_manipulations = (section.cable_support_manipulations ?? []).map((m) =>
           m.uuid === toSave.uuid ? toSave : m
         );
       } else {

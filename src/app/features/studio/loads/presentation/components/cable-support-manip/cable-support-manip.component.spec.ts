@@ -383,6 +383,16 @@ describe('CableSupportManipComponent', () => {
       expect(component.hasSavedManipulation()).toBe(false);
     });
 
+    it('should hide manip2 and reset form to defaults when uuid is null', () => {
+      component.form.controls.manip1Type.setValue('crane');
+      component.addManip2();
+      component.form.controls.vertDisplacement.setValue(42);
+      component.onSupportChange(null);
+      expect(component.showManip2()).toBe(false);
+      expect(component.form.controls.vertDisplacement.value).toBe(0);
+      expect(component.form.controls.support.value).toBeNull();
+    });
+
     it('should set hasSavedManipulation to false when no saved manipulation exists', () => {
       component.onSupportChange('support-uuid-1');
       expect(component.hasSavedManipulation()).toBe(false);
@@ -712,9 +722,40 @@ describe('CableSupportManipComponent', () => {
       expect(mockCableSupportManipService.reloadSection).toHaveBeenCalled();
     });
 
-    it('should call notificationService.success after deletion', async () => {
+    it('should call notificationService.success when a manipulation is actually deleted', async () => {
+      const manipUuid = 'manip-uuid-1';
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        cable_support_manipulations: [
+          {
+            uuid: manipUuid,
+            supportUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            manip1: {
+              type: 'crane',
+              vertDisplacement: 5,
+              anchoring: 'without_chain',
+              lateralDistance: 0,
+              ropeLength: null,
+              shiftingClampLength: null
+            },
+            manip2: null
+          }
+        ]
+      } as unknown as Section);
+      component.form.controls.support.setValue('support-uuid-1');
+
       await component.deleteForm();
+
       expect(mockNotificationService.success).toHaveBeenCalled();
+    });
+
+    it('should NOT call notificationService.success when no manipulation exists for the selected support', async () => {
+      component.form.controls.support.setValue('support-uuid-1');
+      // mockSection has empty cable_support_manipulations — no uuid will be found
+      await component.deleteForm();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
     });
 
     it('should call notificationService.error and clear isLoading when delete rejects', async () => {
