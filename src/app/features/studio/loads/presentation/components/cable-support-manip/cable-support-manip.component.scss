@@ -24,8 +24,7 @@ p-message {
 }
 
 .crane-divide {
-  @apply grid gap-x-2;
-  grid-template-columns: repeat(1fr, 1fr);
+  @apply grid grid-cols-2 gap-x-2;
   grid-template-areas:
     'label1 label2'
     'input1 input2'

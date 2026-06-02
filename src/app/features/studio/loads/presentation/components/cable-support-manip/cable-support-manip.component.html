@@ -9,7 +9,7 @@
       [disabled]="isLoading()"
       data-testid="cable-support-manip-zoom"
     >
-      <app-icon icon="filter_center_focus" />
+      <app-icon icon="filter_center_focus" aria-hidden="true" />
       <ng-container i18n>Zoom</ng-container>
     </button>
 
@@ -22,7 +22,7 @@
       [disabled]="isLoading()"
       data-testid="cable-support-manip-reset"
     >
-      <app-icon icon="refresh" />
+      <app-icon icon="refresh" aria-hidden="true" />
       <ng-container i18n>Reset</ng-container>
     </button>
   </div>
@@ -254,7 +254,7 @@
               data-testid="cable-support-manip-remove-manip2"
             >
               <ng-container i18n>remove</ng-container>
-              <app-icon icon="delete" />
+              <app-icon icon="delete" aria-hidden="true" />
             </button>
           </div>
 
@@ -331,7 +331,7 @@
       [btnLoading]="isLoading()"
       data-testid="cable-support-manip-save"
     >
-      <app-icon icon="save" />
+      <app-icon icon="save" aria-hidden="true" />
       <ng-container i18n>Save</ng-container>
     </button>
 
@@ -343,7 +343,7 @@
       (click)="calculate()"
       data-testid="cable-support-manip-calculate"
     >
-      <app-icon icon="rocket_launch" />
+      <app-icon icon="rocket_launch" aria-hidden="true" />
       <ng-container i18n>Calculate</ng-container>
     </button>
   </div>
