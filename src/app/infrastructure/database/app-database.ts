@@ -11,6 +11,7 @@ import {
   UserEntity,
   StudyEntity,
   CatalogAttachmentEntity,
+  CatalogSupportAttachmentEntity,
   CatalogCableEntity,
   CatalogChainEntity,
   CatalogLineEntity,
@@ -24,6 +25,7 @@ import {
   USER_SCHEMA_V3,
   STUDY_SCHEMA,
   CATALOG_ATTACHMENT_SCHEMA,
+  CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
   CATALOG_CABLE_SCHEMA,
   CATALOG_CHAIN_SCHEMA,
   CATALOG_LINE_SCHEMA,
@@ -55,8 +57,10 @@ export class AppDatabase extends Dexie {
   /** Table storing power line studies */
   studies!: Table<StudyEntity, string>;
 
-  /** Table storing attachment catalog data */
+  /** Table storing attachment catalog data (legacy flat schema, removed in V6) */
   catAttachments!: Table<CatalogAttachmentEntity, string>;
+  /** Table storing attachment catalog data grouped by support_name (V6+) */
+  catSupportAttachments!: Table<CatalogSupportAttachmentEntity, string>;
   /** Table storing cable/conductor catalog data */
   catCables!: Table<CatalogCableEntity, string>;
   /** Table storing insulator chain catalog data */
@@ -132,6 +136,22 @@ export class AppDatabase extends Dexie {
       ...USER_SCHEMA_V3,
       ...STUDY_SCHEMA,
       ...CATALOG_ATTACHMENT_SCHEMA,
+      ...CATALOG_CABLE_SCHEMA,
+      ...CATALOG_CHAIN_SCHEMA,
+      ...CATALOG_LINE_SCHEMA,
+      ...CATALOG_MAINTENANCE_SCHEMA,
+      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+      ...METADATA_SCHEMA
+    });
+
+    // V6: replaces flat catAttachments with grouped catSupportAttachments
+    // (one row per support_name instead of one row per attachment set).
+    // Drastically reduces IndexedDB write/read cost for large attachments.csv imports.
+    this.version(6).stores({
+      ...USER_SCHEMA_V3,
+      ...STUDY_SCHEMA,
+      catAttachments: null,
+      ...CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
       ...CATALOG_CABLE_SCHEMA,
       ...CATALOG_CHAIN_SCHEMA,
       ...CATALOG_LINE_SCHEMA,

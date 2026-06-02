@@ -385,3 +385,16 @@
 | Impact suppression | Removed both functions + `CatalogAttachment` import. Perf improvement: ~3s → ~100ms for support name dropdown. |
 | ✅ Validé | 🗑️ SUPPRIMÉ — 19/05/2026 |
 
+
+---
+
+## 29. Legacy attachments flat-table API — `AttachmentService` + `catAttachments`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/catalog/services/attachment.service.ts` (avant refactor V6), `src/app/infrastructure/database/schemas/catalog-attachment.schema.ts`, `src/app/shared/catalog/services/attachment.helpers.ts::mapAttachmentCsvToEntities` |
+| Code | `getAttachments()` + `allAttachments$` exposés par `AttachmentService`, ainsi que le pipeline `parseCsvAndStore` + `replaceTableData(catAttachments)`. La fonction `mapAttachmentCsvToEntities` (helper plat) reste exportée temporairement pour compat. La table Dexie `catAttachments` est supprimée en V6 (remplacée par `catSupportAttachments` groupée par `support_name`). Le schéma `CATALOG_ATTACHMENT_SCHEMA` n'est plus utilisé que par les versions historiques V1–V5 d'`AppDatabase`. |
+| 🔍 Preuve | Aucun consommateur externe ne référence plus `getAttachments()`/`allAttachments$` après bascule en streaming via Web Worker (`attachment-import.worker.ts`). Le mapping plat n'est utilisé que par les tests legacy (helper de compat). Le pipeline `Papa.parse complete` + `bulkAdd` plat causait un pic mémoire ~278 MB pour un CSV de 25 MB. |
+| ⚠️ Confiance | **MEDIUM** (`getAttachments`/`allAttachments$` ⇒ HIGH ; suppression complète du symbole `CATALOG_ATTACHMENT_SCHEMA` et de la déclaration `catAttachments!: Table<...>` impossible tant qu'on garde les versions V1–V5 dans `AppDatabase`) |
+| Impact suppression | Supprimer `getAttachments()`, `allAttachments$`, le helper `mapAttachmentCsvToEntities` (et son spec) après une release sans régression. Conserver `CATALOG_ATTACHMENT_SCHEMA` et la déclaration `catAttachments` pour la migration Dexie. |
+| ✅ Validé | ⏳ EN ATTENTE — proposé le 2 juin 2026 |

@@ -7,31 +7,22 @@
 import { inject, Injectable } from '@angular/core';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject, catchError, filter, merge, of, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
-import Papa from 'papaparse';
-import { HttpClient } from '@angular/common/http';
-import { CatalogAttachmentEntity } from '@infrastructure/database';
-import { AttachmentCsvDto } from '@infrastructure/dto';
+import { BehaviorSubject, filter, merge, of, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
+import { CatalogAttachmentEntity, CatalogSupportAttachmentEntity } from '@infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
-import { replaceTableData } from '@services/storage/replace-table-data.helper';
-import Dexie from 'dexie';
 import { SupportNameEntry } from './attachment.interfaces';
-import { mapAttachmentCsvToEntities } from './attachment.helpers';
+import { toLegacyEntity } from './attachment.helpers';
+import { AttachmentImportWorkerRequest, AttachmentImportWorkerResponse } from './attachment-import.worker.interfaces';
 
 /**
  * Service for managing attachment point catalog data.
  *
  * @remarks
- * The AttachmentService handles loading, storing, and querying attachment
- * point data from CSV files into the IndexedDB database. Attachments
- * represent the physical connection points on support structures where
- * conductors are attached.
- *
- * @example
- * ```typescript
- * // Get all available attachments
- * const attachments = await this.attachmentService.getAttachments();
- * ```
+ * The AttachmentService stores and queries attachment-point catalog data
+ * grouped by `support_name` (one IndexedDB row per support). The heavy CSV
+ * import runs in a dedicated Web Worker that streams the file through
+ * PapaParse and writes grouped entities chunk-by-chunk, keeping main-thread
+ * memory and CPU usage negligible.
  *
  * @category Services
  */
@@ -39,39 +30,20 @@ import { mapAttachmentCsvToEntities } from './attachment.helpers';
   providedIn: 'root'
 })
 export class AttachmentService {
-  /**
-   * BehaviorSubject indicating whether the service is ready to use.
-   * Becomes true when the storage service is initialized.
-   */
+  /** BehaviorSubject indicating whether the service is ready to use. */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
 
-  /** Internal trigger to re-read catAttachments after any write. */
+  /** Internal trigger to re-read catSupportAttachments after any write. */
   private readonly _refresh$ = new Subject<void>();
-
-  /**
-   * Observable of all attachment entities.
-   * Re-emits after any write to catAttachments via this service (addSupportNamesIfAbsent, importFromFile).
-   * Only starts emitting after the storage service signals readiness.
-   */
-  readonly allAttachments$ = this.storageService.ready$.pipe(
-    filter((ready): ready is true => ready),
-    take(1),
-    switchMap(() =>
-      merge(of(undefined as void), this._refresh$).pipe(switchMap(async () => (await this.getAttachments()) ?? []))
-    )
-  );
 
   private static readonly SUPPORT_NAMES_CACHE_KEY = 'catalog:distinct_support_names';
 
   /**
    * Observable of distinct support names from the catalog.
-   * Emits cached names from localStorage immediately (instant), then updates
-   * with fresh data from IndexedDB once available.
-   * Re-emits after any write to catAttachments via this service.
+   * Emits cached names from localStorage immediately, then refreshes from IndexedDB.
    */
   readonly distinctSupportNames$ = merge(
     of(this.getCachedSupportNames()).pipe(filter((names) => names.length > 0)),
@@ -94,21 +66,12 @@ export class AttachmentService {
   }
 
   /**
-   * Retrieve all attachment points from the catalog.
-   *
-   * @returns Promise resolving to an array of all attachment entities
-   */
-  async getAttachments() {
-    return this.storageService.db?.catAttachments.toArray();
-  }
-
-  /**
    * Retrieve the distinct support names from the catalog, sorted alphabetically.
    *
    * @returns Promise resolving to a sorted array of unique support name strings
    */
   async getDistinctSupportNames(): Promise<string[]> {
-    const keys = await this.storageService.db?.catAttachments.orderBy('support_name').uniqueKeys();
+    const keys = await this.storageService.db?.catSupportAttachments.orderBy('support_name').primaryKeys();
     return (keys ?? []).filter((key): key is string => typeof key === 'string' && key.length > 0);
   }
 
@@ -138,18 +101,15 @@ export class AttachmentService {
   /**
    * Retrieve all attachments for a given support name, sorted by attachment set number.
    *
-   * Uses the compound index `[support_name+attachment_set]` so IndexedDB handles
-   * both filtering and ordering without an in-memory sort.
-   *
    * @param supportName - The support name to filter by
-   * @returns Promise resolving to an array of matching attachment entities
+   * @returns Promise resolving to an array of matching attachment entities (legacy flat shape)
    */
   async getAttachmentsBySupportName(supportName: string): Promise<CatalogAttachmentEntity[]> {
-    const result = await this.storageService.db?.catAttachments
-      .where('[support_name+attachment_set]')
-      .between([supportName, Dexie.minKey], [supportName, Dexie.maxKey])
-      .toArray();
-    return result ?? [];
+    const group = await this.storageService.db?.catSupportAttachments.get(supportName);
+    if (!group) return [];
+    return [...group.attachments]
+      .sort((a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0))
+      .map((item) => toLegacyEntity(group, item));
   }
 
   /**
@@ -160,61 +120,44 @@ export class AttachmentService {
    * @returns Promise resolving to the matching attachment entity, or undefined if not found
    */
   async getAttachmentDetails(supportName: string, attachmentSet: number): Promise<CatalogAttachmentEntity | undefined> {
-    return this.storageService.db?.catAttachments
-      .where('[support_name+attachment_set]')
-      .equals([supportName, attachmentSet])
-      .first();
+    const group = await this.storageService.db?.catSupportAttachments.get(supportName);
+    const item = group?.attachments.find((a) => a.attachment_set === attachmentSet);
+    return item && group ? toLegacyEntity(group, item) : undefined;
   }
 
   /**
-   * Import attachment catalog data from a CSV file.
+   * Import attachment catalog data from the `/data/attachments.csv` file.
    *
    * @remarks
-   * This method fetches the attachments.csv file from the server, parses it,
-   * transforms the data into the appropriate entity format, and stores
-   * the results in the IndexedDB database.
-   *
-   * The CSV should contain columns: support_adr, position, X, Y, Z, L,
-   * support_tower representing the 3D coordinates and physical properties
-   * of each attachment point.
+   * Spawns a dedicated Web Worker that streams the CSV through PapaParse and
+   * writes grouped `CatalogSupportAttachmentEntity` rows to IndexedDB
+   * incrementally. The main thread never holds the raw CSV in memory.
    *
    * @returns Promise that resolves when import is complete
    */
-  async importFromFile() {
-    await new Promise<void>((resolve) => {
-      this.fetchCsv().subscribe(async (csv) => {
-        await this.parseCsvAndStore(csv);
-        resolve();
-      });
-    });
-  }
-
-  private fetchCsv() {
-    return this.http.get(`${globalThis.location.origin}/data/attachments.csv`, { responseType: 'text' }).pipe(
-      catchError((error) => {
-        this.logger.error('Error importing attachments', error);
-        return of('');
-      })
-    );
-  }
-
-  private async parseCsvAndStore(csv: string): Promise<void> {
-    await new Promise<void>((resolve) => {
-      Papa.parse<AttachmentCsvDto>(csv, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async (jsonResults) => {
-          const data = jsonResults.data;
-          if (!data || data.length === 0) {
-            resolve();
-            return;
-          }
-          const attachmentsTable: CatalogAttachmentEntity[] = mapAttachmentCsvToEntities(data);
-          await replaceTableData(this.storageService.db?.catAttachments, attachmentsTable);
+  async importFromFile(): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      const worker = new Worker(new URL('./attachment-import.worker', import.meta.url), { type: 'module' });
+      worker.onmessage = ({ data }: MessageEvent<AttachmentImportWorkerResponse>) => {
+        if (data.type === 'done') {
+          worker.terminate();
           this._refresh$.next();
           resolve();
+        } else if (data.type === 'error') {
+          worker.terminate();
+          this.logger.error('Attachment import worker failed', data.message);
+          reject(new Error(data.message));
         }
-      });
+      };
+      worker.onerror = (event) => {
+        worker.terminate();
+        this.logger.error('Attachment import worker crashed', event.message);
+        reject(new Error(event.message));
+      };
+      const request: AttachmentImportWorkerRequest = {
+        url: `${globalThis.location.origin}/data/attachments.csv`
+      };
+      worker.postMessage(request);
     });
   }
 
@@ -222,12 +165,11 @@ export class AttachmentService {
    * Adds support name entries to the catalog if they are not already present.
    *
    * @remarks
-   * Performs a full table scan (toArray) then inserts only the missing entries.
-   * The table is small (~500 rows), making this approach acceptable without schema changes.
-   * Entries with empty or missing supportName are silently ignored.
+   * Reads only the candidate keys via `bulkGet` (no full-table scan) and inserts
+   * only the missing entries with an empty attachment list. Entries with empty
+   * or missing supportName are silently ignored.
    *
    * @param entries - List of support name entries to persist if absent
-   * @returns Promise that resolves when all missing entries have been added
    */
   async addSupportNamesIfAbsent(entries: SupportNameEntry[]): Promise<void> {
     const db = this.storageService.db;
@@ -235,31 +177,33 @@ export class AttachmentService {
       return;
     }
 
-    // Deduplicate input by supportName
     const validEntries = entries.filter((e) => !!e.supportName);
     const uniqueEntries = [...new Map(validEntries.map((e) => [e.supportName, e])).values()];
     if (uniqueEntries.length === 0) {
       return;
     }
 
-    const existing = await db.catAttachments.toArray();
-    const existingNames = new Set(existing.map((a) => a.support_name).filter((n): n is string => !!n));
+    const keys = uniqueEntries.map((e) => e.supportName);
+    const existing = await db.catSupportAttachments.bulkGet(keys);
 
-    const toAdd: CatalogAttachmentEntity[] = uniqueEntries
-      .filter((e) => !existingNames.has(e.supportName))
-      .map((e) => ({
+    const now = new Date().toISOString();
+    const toAdd: CatalogSupportAttachmentEntity[] = uniqueEntries
+      .map((e, i) => ({ entry: e, exists: !!existing[i] }))
+      .filter((x) => !x.exists)
+      .map((x) => ({
         uuid: uuidv4(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        support_name: e.supportName,
-        support_tower: e.supportTower ?? ''
+        created_at: now,
+        updated_at: now,
+        support_name: x.entry.supportName,
+        support_tower: x.entry.supportTower ?? '',
+        attachments: []
       }));
 
     if (toAdd.length === 0) {
       return;
     }
 
-    await db.catAttachments.bulkAdd(toAdd);
+    await db.catSupportAttachments.bulkAdd(toAdd);
     this._refresh$.next();
   }
 }
