@@ -1,5 +1,14 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { afterRender, ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  afterRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked
+} from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -310,9 +319,8 @@ export class CableSupportManipComponent {
       supportUuid && chargeUuid
         ? (this.spanService
             .section()
-            ?.cable_support_manipulations?.find(
-              (m) => m.supportUuid === supportUuid && m.chargeUuid === chargeUuid
-            )?.uuid ?? null)
+            ?.cable_support_manipulations?.find((m) => m.supportUuid === supportUuid && m.chargeUuid === chargeUuid)
+            ?.uuid ?? null)
         : null;
 
     this.isLoading.set(true);

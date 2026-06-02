@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { createEmptyInitialCondition } from './sections.helpers';
+import { createEmptyInitialCondition, createEmptySection } from './sections.helpers';
 
 describe('createEmptyInitialCondition', () => {
   it('should create an initial condition with a non-empty uuid', () => {
@@ -47,5 +47,28 @@ describe('createEmptyInitialCondition', () => {
     const ic1 = createEmptyInitialCondition();
     const ic2 = createEmptyInitialCondition();
     expect(ic1.uuid).not.toBe(ic2.uuid);
+  });
+});
+
+describe('createEmptySection', () => {
+  it('should create a section with a non-empty uuid', () => {
+    const section = createEmptySection();
+    expect(section.uuid).toBeTruthy();
+  });
+
+  it('should generate a unique uuid on each call', () => {
+    const s1 = createEmptySection();
+    const s2 = createEmptySection();
+    expect(s1.uuid).not.toBe(s2.uuid);
+  });
+
+  it('should initialise cable_support_manipulations as an empty array', () => {
+    const section = createEmptySection();
+    expect(section.cable_support_manipulations).toEqual([]);
+  });
+
+  it('should initialise selected_cable_support_manipulation_uuid as null', () => {
+    const section = createEmptySection();
+    expect(section.selected_cable_support_manipulation_uuid).toBeNull();
   });
 });

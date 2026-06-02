@@ -51,12 +51,9 @@ export class CableSupportManipService {
    */
   delete = async (uuid: string): Promise<void> => {
     await this.mutateCurrentSection((section) => {
-      section.cable_support_manipulations = (section.cable_support_manipulations ?? []).filter(
-        (m) => m.uuid !== uuid
-      );
+      section.cable_support_manipulations = (section.cable_support_manipulations ?? []).filter((m) => m.uuid !== uuid);
       if (section.selected_cable_support_manipulation_uuid === uuid) {
-        section.selected_cable_support_manipulation_uuid =
-          section.cable_support_manipulations[0]?.uuid ?? null;
+        section.selected_cable_support_manipulation_uuid = section.cable_support_manipulations[0]?.uuid ?? null;
       }
     });
   };
