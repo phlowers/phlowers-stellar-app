@@ -3599,5 +3599,25 @@
         <source>Manipulation type</source>
       </segment>
     </unit>
+    <unit id="3504482516346230693">
+      <segment>
+        <source>Failed to delete cable support manipulation</source>
+      </segment>
+    </unit>
+    <unit id="4119734138637628207">
+      <segment>
+        <source>Cable support manipulation saved</source>
+      </segment>
+    </unit>
+    <unit id="6089677328484597418">
+      <segment>
+        <source>Cable support manipulation deleted</source>
+      </segment>
+    </unit>
+    <unit id="6311801288162258647">
+      <segment>
+        <source>Failed to save cable support manipulation</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

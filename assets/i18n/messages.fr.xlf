@@ -4343,5 +4343,29 @@
         <target>Type de manipulation</target>
       </segment>
     </unit>
+    <unit id="4119734138637628207">
+      <segment state="initial">
+        <source>Cable support manipulation saved</source>
+        <target>Manipulation de câble au support enregistrée</target>
+      </segment>
+    </unit>
+    <unit id="6311801288162258647">
+      <segment state="initial">
+        <source>Failed to save cable support manipulation</source>
+        <target>Échec de l'enregistrement de la manipulation de câble au support</target>
+      </segment>
+    </unit>
+    <unit id="6089677328484597418">
+      <segment state="initial">
+        <source>Cable support manipulation deleted</source>
+        <target>Manipulation de câble au support supprimée</target>
+      </segment>
+    </unit>
+    <unit id="3504482516346230693">
+      <segment state="initial">
+        <source>Failed to delete cable support manipulation</source>
+        <target>Échec de la suppression de la manipulation de câble au support</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
