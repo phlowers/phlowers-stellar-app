@@ -266,6 +266,56 @@ describe('CableSupportManipService', () => {
       const section = updated.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_support_manipulations).toHaveLength(2);
     });
+
+    it('should deduplicate legacy entries with the same (supportUuid, chargeUuid) pair', async () => {
+      const firstUuid = 'first-duplicate-uuid';
+      mockStudiesService.getStudy.mockResolvedValue({
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSectionBase,
+            cable_support_manipulations: [
+              {
+                uuid: firstUuid,
+                supportUuid: 'support-uuid-1',
+                chargeUuid: 'charge-uuid-1',
+                manip1: {
+                  type: 'shifting' as const,
+                  vertDisplacement: null,
+                  anchoring: null,
+                  lateralDistance: null,
+                  ropeLength: null,
+                  shiftingClampLength: 1
+                },
+                manip2: null
+              },
+              {
+                uuid: 'second-duplicate-uuid',
+                supportUuid: 'support-uuid-1',
+                chargeUuid: 'charge-uuid-1',
+                manip1: {
+                  type: 'shifting' as const,
+                  vertDisplacement: null,
+                  anchoring: null,
+                  lateralDistance: null,
+                  ropeLength: null,
+                  shiftingClampLength: 2
+                },
+                manip2: null
+              }
+            ]
+          }
+        ]
+      });
+
+      await service.save({ ...newManip, manip1: { ...newManip.manip1, shiftingClampLength: 9 } });
+
+      const updated = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updated.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.cable_support_manipulations).toHaveLength(1);
+      expect(section?.cable_support_manipulations![0].uuid).toBe(firstUuid);
+      expect(section?.cable_support_manipulations![0].manip1.shiftingClampLength).toBe(9);
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -27,27 +27,24 @@ export class CableSupportManipService {
    */
   save = async (manip: Omit<CableSupportManipulation, 'uuid'> & { uuid?: string }): Promise<void> => {
     await this.mutateCurrentSection((section) => {
-      const existing = section.cable_support_manipulations?.find(
-        (m) => m.supportUuid === manip.supportUuid && m.chargeUuid === manip.chargeUuid
-      );
+      const keyMatches = (m: CableSupportManipulation) =>
+        m.supportUuid === manip.supportUuid && m.chargeUuid === manip.chargeUuid;
+      const existing = section.cable_support_manipulations?.find(keyMatches);
       const toSave: CableSupportManipulation = {
         ...manip,
         uuid: existing?.uuid ?? manip.uuid ?? uuidv4()
       };
-      if (existing) {
-        section.cable_support_manipulations = (section.cable_support_manipulations ?? []).map((m) =>
-          m.uuid === toSave.uuid ? toSave : m
-        );
-      } else {
-        section.cable_support_manipulations = [toSave, ...(section.cable_support_manipulations ?? [])];
-      }
+      section.cable_support_manipulations = [
+        toSave,
+        ...(section.cable_support_manipulations ?? []).filter((m) => !keyMatches(m))
+      ];
       section.selected_cable_support_manipulation_uuid = toSave.uuid;
     });
   };
 
   /**
    * Remove a cable support manipulation from the current section.
-   * If the deleted manipulation was selected, the selection is cleared.
+   * If the deleted manipulation was selected, the selection falls back to the first remaining entry, or null.
    */
   delete = async (uuid: string): Promise<void> => {
     await this.mutateCurrentSection((section) => {
