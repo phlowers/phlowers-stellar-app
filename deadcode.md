@@ -1,11 +1,11 @@
 # Dead Code Inventory — phlowers-stellar-app
 
-> Ce fichier liste tout le code mort identifié dans le projet. Chaque entrée nécessite une validation avant suppression.
+> This file lists all dead code identified in the project. Each entry requires validation before deletion.
 
-## Légende
-- **📍 Source** : fichier et numéro de ligne
-- **🔍 Preuve** : pourquoi c'est considéré comme mort
-- **⚠️ Confiance** : HIGH (certain), MEDIUM (probable), LOW (à vérifier)
+## Legend
+- **📍 Source**: file and line number
+- **🔍 Evidence**: why it is considered dead
+- **⚠️ Confidence**: HIGH (certain), MEDIUM (likely), LOW (needs verification)
 
 ---
 
@@ -13,12 +13,12 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/shared/components/layout/logged-layout/logged-layout.component.ts` lignes 25, 28-32 |
-| Code | `currentRoute = window.location.pathname;` + `ngOnInit()` avec `router.events.subscribe()` qui met à jour `this.currentRoute = event.url` |
-| 🔍 Preuve | `currentRoute` n'est référencé nulle part dans le template (`logged-layout.component.html`). Aucune autre référence dans le codebase hors de ce fichier. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Supprimer la propriété, la méthode `ngOnInit`, l'interface `OnInit`, et les imports `NavigationEnd`, `filter` devenus inutiles |
-| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
+| 📍 Source | `src/app/shared/components/layout/logged-layout/logged-layout.component.ts` lines 25, 28-32 |
+| Code | `currentRoute = window.location.pathname;` + `ngOnInit()` with `router.events.subscribe()` updating `this.currentRoute = event.url` |
+| 🔍 Evidence | `currentRoute` is not referenced anywhere in the template (`logged-layout.component.html`). No other reference in the codebase outside this file. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the property, the `ngOnInit` method, the `OnInit` interface, and the now-unused `NavigationEnd`, `filter` imports |
+| ✅ Validated | 🗑️ REMOVED (Phase 6) — 2026-03-13 |
 
 ---
 
@@ -26,12 +26,12 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` lignes 106-116 |
-| Code | `spanData = [{ label: 'Span 1-2', ... }, ...]` et `supportData = [{ label: 'Support 1', ... }, ...]` |
-| 🔍 Preuve | Aucune référence dans `studio-page.component.html`. Données mock jamais consommées. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Supprimer les 2 propriétés (11 lignes) |
-| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
+| 📍 Source | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` lines 106-116 |
+| Code | `spanData = [{ label: 'Span 1-2', ... }, ...]` and `supportData = [{ label: 'Support 1', ... }, ...]` |
+| 🔍 Evidence | No reference in `studio-page.component.html`. Mock data never consumed. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the 2 properties (11 lines) |
+| ✅ Validated | 🗑️ REMOVED (Phase 6) — 2026-03-13 |
 
 ---
 
@@ -39,11 +39,11 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` ligne 75 |
-| Code | `subscription: Subscription | null = null;` — utilisée dans `ngOnInit()` et `ngOnDestroy()` pour gérer le cycle de vie d'un abonnement Dexie |
-| 🔍 Preuve | N'est PAS du code mort — c'est du code interne de gestion de cycle de vie. Non référencé dans le template mais nécessaire. |
-| ⚠️ Confiance | **NOT DEAD** — à ne pas supprimer |
-| ✅ Validé | N/A |
+| 📍 Source | `src/app/features/studio/core/presentation/pages/studio-page/studio-page.component.ts` line 75 |
+| Code | `subscription: Subscription | null = null;` — used in `ngOnInit()` and `ngOnDestroy()` to manage the lifecycle of a Dexie subscription |
+| 🔍 Evidence | NOT dead code — internal lifecycle management. Not referenced in the template but required. |
+| ⚠️ Confidence | **NOT DEAD** — do not remove |
+| ✅ Validated | N/A |
 
 ---
 
@@ -57,10 +57,10 @@
 |---|---|
 | 📍 Source | `src/app/app.component.ts` lines 134-145 (`saveUser`), line 57 (`submitted`) |
 | Code | `saveUser()` method referencing `this.form`, `this.userService`, `this.userDialog` — none of which existed on the component. `submitted` signal only used inside `saveUser()`. |
-| 🔍 Preuve | Build errors (TS2339). Test at line 165 confirmed: "should not have userDialog or saveUser (login flow removed)". No references in template. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed method, signal, and related dead tests (user dialog, email validation, saveUser calls). |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 2026-04-20 |
+| 🔍 Evidence | Build errors (TS2339). Test at line 165 confirmed: "should not have userDialog or saveUser (login flow removed)". No references in template. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed method, signal, and related dead tests (user dialog, email validation, saveUser calls). |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-20 |
 
 ---
 
@@ -79,10 +79,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/news/news.service.ts` |
 | Code | `export enum ServerStatus { LOADING, ONLINE, OFFLINE }` |
-| 🔍 Preuve | Duplicate of `ServerStatus` in `online.service.ts`, never imported by any file |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Enum removed during DDD migration |
-| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 3A) |
+| 🔍 Evidence | Duplicate of `ServerStatus` in `online.service.ts`, never imported by any file |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Enum removed during DDD migration |
+| ✅ Validated | 🗑️ REMOVED (Phase 3A) |
 
 ---
 
@@ -92,10 +92,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/changelog/changelog.service.ts` |
 | Code | `export enum ServerStatus { LOADING, ONLINE, OFFLINE }` |
-| 🔍 Preuve | Duplicate of `ServerStatus` in `online.service.ts`, never imported by any file |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Enum removed during DDD migration |
-| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 3A) |
+| 🔍 Evidence | Duplicate of `ServerStatus` in `online.service.ts`, never imported by any file |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Enum removed during DDD migration |
+| ✅ Validated | 🗑️ REMOVED (Phase 3A) |
 
 ---
 
@@ -106,20 +106,20 @@
 | | |
 |---|---|
 | 📍 Source | `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (stale copy — already migrated) |
-| 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/field-measuring/`. Missing `.html` and `.scss` template files. Not imported by any file. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Delete file — the real component lives in `features/` |
-| Status | 🗑️ SUPPRIMÉ (Phase 3D) — fichier n'existe plus |
+| 🔍 Evidence | Stale copy after migration to `features/studio/field-measuring/presentation/components/field-measuring/`. Missing `.html` and `.scss` template files. Not imported by any file. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete file — the real component lives in `features/` |
+| Status | 🗑️ REMOVED (Phase 3D) — file no longer exists |
 
 ### `InitComponent` — `ui/pages/studio/toolbar-dialog/field-measuring/components/init/init.component.ts`
 
 | | |
 |---|---|
 | 📍 Source | `src/app/features/studio/field-measuring/presentation/components/init/init.component.ts` (stale copy — already migrated) |
-| 🔍 Preuve | Stale copy after migration to `features/studio/field-measuring/presentation/components/init/`. Missing `.html` and `.scss` template files. Not imported by any file. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Delete file — the real component lives in `features/` |
-| Status | 🗑️ SUPPRIMÉ (Phase 3D) — fichier n'existe plus |
+| 🔍 Evidence | Stale copy after migration to `features/studio/field-measuring/presentation/components/init/`. Missing `.html` and `.scss` template files. Not imported by any file. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete file — the real component lives in `features/` |
+| Status | 🗑️ REMOVED (Phase 3D) — file no longer exists |
 
 ---
 
@@ -128,10 +128,10 @@
 | | |
 |---|---|
 | 📍 Source | `src/app/core/services/obstacles/obstacles.service.ts` |
-| Code | Re-export bridge vers `@features/studio/obstacles/infrastructure/services/obstacles.service` |
-| 🔍 Preuve | 0 consommateurs — tous les imports migrent directement vers `@features/studio/obstacles/` |
-| ⚠️ Confiance | **HIGH** |
-| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
+| Code | Re-export bridge to `@features/studio/obstacles/infrastructure/services/obstacles.service` |
+| 🔍 Evidence | 0 consumers — all imports migrate directly to `@features/studio/obstacles/` |
+| ⚠️ Confidence | **HIGH** |
+| ✅ Validated | 🗑️ REMOVED (Phase 6) — 2026-03-13 |
 
 ---
 
@@ -140,10 +140,10 @@
 | | |
 |---|---|
 | 📍 Source | `src/app/core/infrastructure/index.ts` |
-| Code | Re-export bridge vers `@infrastructure/` |
-| 🔍 Preuve | 0 consommateurs production — seul `plan.md` le mentionne |
-| ⚠️ Confiance | **HIGH** |
-| ✅ Validé | 🗑️ SUPPRIMÉ (Phase 6) — 13/03/2026 |
+| Code | Re-export bridge to `@infrastructure/` |
+| 🔍 Evidence | 0 production consumers — only `plan.md` mentions it |
+| ⚠️ Confidence | **HIGH** |
+| ✅ Validated | 🗑️ REMOVED (Phase 6) — 2026-03-13 |
 
 ---
 
@@ -168,9 +168,9 @@
 |---|---|
 | 📍 Source | `jest.config.ts` (project root) |
 | Code | Full Jest configuration file (`JestConfigWithTsJest`) |
-| 🔍 Preuve | Project uses Vitest as test runner (`vitest.config.ts`, `npm run test` → `vitest run`). Jest config is unused. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Delete `jest.config.ts` and `fileTransformer.js` (Jest-specific transform) |
+| 🔍 Evidence | Project uses Vitest as test runner (`vitest.config.ts`, `npm run test` → `vitest run`). Jest config is unused. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete `jest.config.ts` and `fileTransformer.js` (Jest-specific transform) |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-03-18 |
 
@@ -186,9 +186,9 @@
 
 ## 13. `loadObstacle` / `patchFormFromObstacle` / `findObstacle` — `src/app/core/services/obstacles-form/obstaclesForm.service.ts`
 | Code | Public `loadObstacle(uuid)` + private helpers `patchFormFromObstacle` and `findObstacle` |
-| 🔍 Preuve | `loadObstacle` is never called from any component or service — only referenced in its own spec file. Its logic partially duplicates `setExistingObstacle`. The two private helpers are only reachable via `loadObstacle`. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Remove `loadObstacle`, `patchFormFromObstacle`, `findSupportForObstacle`, and `findObstacle` (~30 lines) and their spec coverage |
+| 🔍 Evidence | `loadObstacle` is never called from any component or service — only referenced in its own spec file. Its logic partially duplicates `setExistingObstacle`. The two private helpers are only reachable via `loadObstacle`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove `loadObstacle`, `patchFormFromObstacle`, `findSupportForObstacle`, and `findObstacle` (~30 lines) and their spec coverage |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-03-26 |
 
@@ -200,9 +200,9 @@
 |---|---|
 | 📍 Source | `src/app/features/studio/loads/presentation/helpers.ts` |
 | **Type** | function |
-| 🔍 Preuve | Removed in PR `feat/694/base-form--cable-span-manipulation` as unused/duplicate. No remaining references in the codebase after removal. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Function deleted from `helpers.ts`; confirm no callers exist before closing the PR |
+| 🔍 Evidence | Removed in PR `feat/694/base-form--cable-span-manipulation` as unused/duplicate. No remaining references in the codebase after removal. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Function deleted from `helpers.ts`; confirm no callers exist before closing the PR |
 | Status | ⏳ PENDING REVIEW |
 | Detected on | 2026-04-13 |
 
@@ -223,10 +223,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
 | Code | Private functions `getCachedAppVersion()`, `areVersionsEqual()`, `getOrMigrateAppVersionCacheEntry()`, and constant `LEGACY_APP_VERSION_CACHE_KEY` |
-| 🔍 Preuve | All were only used by the V1 activate logic removed in V2 (OIDC migration). No remaining callers. Also removed unused `AppVersion` type import. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed ~50 lines of dead code and the legacy cache migration path. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 02/04/2026 |
+| 🔍 Evidence | All were only used by the V1 activate logic removed in V2 (OIDC migration). No remaining callers. Also removed unused `AppVersion` type import. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed ~50 lines of dead code and the legacy cache migration path. |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-02 |
 
 ---
 
@@ -236,10 +236,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
 | Code | `async function postMessageToAllClients(message, payload)` |
-| 🔍 Preuve | Only used by the removed V1 activate logic (`activateWhenAppInstalled`, `activateWhenAppNotInstalled`). No remaining callers after V2 migration. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed ~10 lines. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 02/04/2026 |
+| 🔍 Evidence | Only used by the removed V1 activate logic (`activateWhenAppInstalled`, `activateWhenAppNotInstalled`). No remaining callers after V2 migration. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed ~10 lines. |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-02 |
 
 ---
 
@@ -249,9 +249,9 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
 | Code | `export async function checkIfAppInstalled()` |
-| 🔍 Preuve | Exported function never called in production code. Only referenced in `service-worker.spec.ts`. Was part of V1 activate logic. In V2, the update check is driven by `UpdateService.checkForUpdateOnce()` which reads cache directly via `getCurrentVersion()`. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Remove ~5 lines + update spec to remove corresponding tests. |
+| 🔍 Evidence | Exported function never called in production code. Only referenced in `service-worker.spec.ts`. Was part of V1 activate logic. In V2, the update check is driven by `UpdateService.checkForUpdateOnce()` which reads cache directly via `getCurrentVersion()`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove ~5 lines + update spec to remove corresponding tests. |
 | Status | ✅ INTERNALIZED — export removed, function kept private, tests removed (2026-04-03) |
 | Detected on | 2026-04-02 |
 
@@ -263,10 +263,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
 | Code | `installApp()` contained `clients.matchAll()` + `client.postMessage({ message: 'install_complete' })` |
-| 🔍 Preuve | `handleMessage()` already sends `install_complete` to `event.source` after `installApp()` returns. The internal broadcast in `installApp()` caused duplicate messages to the triggering client. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed ~8 lines of duplicate client notification from `installApp()`. `handleMessage()` is now the single source of client notification. |
-| ✅ Validé | 🐛 FIXED — 02/04/2026 |
+| 🔍 Evidence | `handleMessage()` already sends `install_complete` to `event.source` after `installApp()` returns. The internal broadcast in `installApp()` caused duplicate messages to the triggering client. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed ~8 lines of duplicate client notification from `installApp()`. `handleMessage()` is now the single source of client notification. |
+| ✅ Validated | 🐛 FIXED — 2026-04-02 |
 
 ---
 
@@ -276,10 +276,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/worker_update.service.ts` |
 | Code | `import { isEqual } from 'lodash'` used for comparing two `AppVersion` objects (3 string fields) |
-| 🔍 Preuve | Deep equality via lodash is unnecessary for a flat object with 3 string properties. Replaced with a dedicated `areVersionsEqual()` method. Reduces bundle size by removing the lodash dependency from this service. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Replaced with inline `areVersionsEqual()` — 3 string comparisons. |
-| ✅ Validé | 🔧 REPLACED — 02/04/2026 |
+| 🔍 Evidence | Deep equality via lodash is unnecessary for a flat object with 3 string properties. Replaced with a dedicated `areVersionsEqual()` method. Reduces bundle size by removing the lodash dependency from this service. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Replaced with inline `areVersionsEqual()` — 3 string comparisons. |
+| ✅ Validated | 🔧 REPLACED — 2026-04-02 |
 
 ---
 
@@ -289,10 +289,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/auth/auth.service.ts` |
 | Code | `readonly isFirstUseOffline = signal(false);` |
-| 🔍 Preuve | Signal defined in AuthService but never consumed by any component, template, or other service. Only referenced in `auth.service.spec.ts`. No UI ever reads this signal. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed signal and simplified `initialize()` (no longer sets the flag on first-use offline). Simplified OIDC+PKCE auth simplification. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+| 🔍 Evidence | Signal defined in AuthService but never consumed by any component, template, or other service. Only referenced in `auth.service.spec.ts`. No UI ever reads this signal. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed signal and simplified `initialize()` (no longer sets the flag on first-use offline). Simplified OIDC+PKCE auth simplification. |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-03 |
 
 ---
 
@@ -302,10 +302,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/auth/auth.service.ts` |
 | Code | `export type OidcClaims = Required<Pick<User, 'email'>> & Pick<User, 'sub' \| 'given_name' \| 'family_name' \| 'roles'>;` |
-| 🔍 Preuve | Overly complex type-level gymnastics (`Required<Pick<>>`) for what is a simple flat interface with 5 fields. Replaced with a plain `interface OidcClaims { email: string; sub?: string; ... }` — clearer and self-contained. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Replaced type alias with explicit interface — no behavioral change. |
-| ✅ Validé | 🔧 REPLACED — 03/04/2026 |
+| 🔍 Evidence | Overly complex type-level gymnastics (`Required<Pick<>>`) for what is a simple flat interface with 5 fields. Replaced with a plain `interface OidcClaims { email: string; sub?: string; ... }` — clearer and self-contained. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Replaced type alias with explicit interface — no behavioral change. |
+| ✅ Validated | 🔧 REPLACED — 2026-04-03 |
 
 ---
 
@@ -315,10 +315,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
 | Code | `async function checkIfAppInstalled()` — checks for `app_version` entry in cache |
-| 🔍 Preuve | Was previously exported, internalized in Phase 6 but kept "for testability". No runtime caller, no test references it. Dead code with no justification to keep. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed function entirely. No callers affected. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+| 🔍 Evidence | Was previously exported, internalized in Phase 6 but kept "for testability". No runtime caller, no test references it. Dead code with no justification to keep. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed function entirely. No callers affected. |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-03 |
 
 ---
 
@@ -328,10 +328,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/service-worker.ts` |
 | Code | `const noCacheHeaders = () => { ... }` — arrow function recreating `Headers` object on every call |
-| 🔍 Preuve | Unnecessary allocation per fetch call. Replaced with immutable `NO_CACHE_INIT` constant — same semantics, zero overhead. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Replaced with `const NO_CACHE_INIT: RequestInit` constant. |
-| ✅ Validé | 🔧 REPLACED — 03/04/2026 |
+| 🔍 Evidence | Unnecessary allocation per fetch call. Replaced with immutable `NO_CACHE_INIT` constant — same semantics, zero overhead. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Replaced with `const NO_CACHE_INIT: RequestInit` constant. |
+| ✅ Validated | 🔧 REPLACED — 2026-04-03 |
 
 ---
 
@@ -341,10 +341,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/worker_update.service.ts` line 8 |
 | Code | `export type { AppVersion } from './service-worker.interfaces';` |
-| 🔍 Preuve | `AppVersion` is only used internally within `worker_update.service.ts` (local type annotations). No other file in the codebase imports `AppVersion` from this service. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Changed to a plain `import type` — no external consumers affected. |
-| ✅ Validé | 🔧 REPLACED — 03/04/2026 |
+| 🔍 Evidence | `AppVersion` is only used internally within `worker_update.service.ts` (local type annotations). No other file in the codebase imports `AppVersion` from this service. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Changed to a plain `import type` — no external consumers affected. |
+| ✅ Validated | 🔧 REPLACED — 2026-04-03 |
 
 ---
 
@@ -354,10 +354,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/user/user.service.ts` |
 | Code | `async createUser(user)`, `const validateEmail`, `private readonly userSubject`, `public user$`, constructor `ready$.subscribe(...)` |
-| 🔍 Preuve | `createUser()` had no runtime callers (only in tests). `user$` was consumed only by TopbarComponent, which now reads `AuthService.currentUser` signal directly. `validateEmail` was only used inside `createUser`. The `ready$` subscription in the constructor was an unmanaged leak. AuthService is the canonical write path for the `users` table. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed `createUser`, `validateEmail`, `userSubject`, `user$`, constructor subscription, and `BehaviorSubject`/`Observable` imports. UserService simplified to read-only `getUser()`. TopbarComponent now uses `AuthService.currentUser` signal. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+| 🔍 Evidence | `createUser()` had no runtime callers (only in tests). `user$` was consumed only by TopbarComponent, which now reads `AuthService.currentUser` signal directly. `validateEmail` was only used inside `createUser`. The `ready$` subscription in the constructor was an unmanaged leak. AuthService is the canonical write path for the `users` table. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed `createUser`, `validateEmail`, `userSubject`, `user$`, constructor subscription, and `BehaviorSubject`/`Observable` imports. UserService simplified to read-only `getUser()`. TopbarComponent now uses `AuthService.currentUser` signal. |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-03 |
 
 ---
 
@@ -367,10 +367,10 @@
 |---|---|
 | 📍 Source | `src/app/core/services/worker_update/worker_update.service.ts` lines 10-20 |
 | Code | `const mockCurrentVersion` and `const mockLatestVersion` used to initialize signals in `isDevMode()` |
-| 🔍 Preuve | Dev-only mock versions with hardcoded hashes (`0000...`, `1111...`) always caused `needUpdate=true` in dev mode. This created confusing false-positive update prompts during development. Signals now start as `null` in all modes, consistent with production behavior. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed both constants, removed `isDevMode` and `environment` imports. Signals initialized to `null`. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 03/04/2026 |
+| 🔍 Evidence | Dev-only mock versions with hardcoded hashes (`0000...`, `1111...`) always caused `needUpdate=true` in dev mode. This created confusing false-positive update prompts during development. Signals now start as `null` in all modes, consistent with production behavior. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed both constants, removed `isDevMode` and `environment` imports. Signals initialized to `null`. |
+| ✅ Validated | 🗑️ REMOVED — 2026-04-03 |
 
 ---
 
@@ -380,10 +380,10 @@
 |---|---|
 | 📍 Source | `src/app/features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/helpers.ts` |
 | Code | `getUniqueSortedSupportNamesFromAttachments()` and `buildSupportNameFilterTables()` |
-| 🔍 Preuve | Replaced by `AttachmentService.distinctSupportNames$` which uses Dexie `uniqueKeys()` index-level query instead of loading all entities. No remaining consumers after refactor. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | Removed both functions + `CatalogAttachment` import. Perf improvement: ~3s → ~100ms for support name dropdown. |
-| ✅ Validé | 🗑️ SUPPRIMÉ — 19/05/2026 |
+| 🔍 Evidence | Replaced by `AttachmentService.distinctSupportNames$` which uses Dexie `uniqueKeys()` index-level query instead of loading all entities. No remaining consumers after refactor. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Removed both functions + `CatalogAttachment` import. Perf improvement: ~3s → ~100ms for support name dropdown. |
+| ✅ Validated | 🗑️ REMOVED — 2026-05-19 |
 
 
 ---
@@ -392,12 +392,12 @@
 
 | | |
 |---|---|
-| 📍 Source | `src/app/shared/catalog/services/attachment.service.ts` (avant refactor V6), `src/app/infrastructure/database/schemas/catalog-attachment.schema.ts`, `src/app/shared/catalog/services/attachment.helpers.ts::mapAttachmentCsvToEntities` |
-| Code | `getAttachments()` + `allAttachments$` exposés par `AttachmentService`, ainsi que le pipeline `parseCsvAndStore` + `replaceTableData(catAttachments)`. La fonction `mapAttachmentCsvToEntities` (helper plat) reste exportée temporairement pour compat. La table Dexie `catAttachments` est supprimée en V6 (remplacée par `catSupportAttachments` groupée par `support_name`). Le schéma `CATALOG_ATTACHMENT_SCHEMA` n'est plus utilisé que par les versions historiques V1–V5 d'`AppDatabase`. |
-| 🔍 Preuve | Aucun consommateur externe ne référence plus `getAttachments()`/`allAttachments$` après bascule en streaming via Web Worker (`attachment-import.worker.ts`). Le mapping plat n'est utilisé que par les tests legacy (helper de compat). Le pipeline `Papa.parse complete` + `bulkAdd` plat causait un pic mémoire ~278 MB pour un CSV de 25 MB. |
-| ⚠️ Confiance | **MEDIUM** (`getAttachments`/`allAttachments$` ⇒ HIGH ; suppression complète du symbole `CATALOG_ATTACHMENT_SCHEMA` et de la déclaration `catAttachments!: Table<...>` impossible tant qu'on garde les versions V1–V5 dans `AppDatabase`) |
-| Impact suppression | Supprimer `getAttachments()`, `allAttachments$`, le helper `mapAttachmentCsvToEntities` (et son spec) après une release sans régression. Conserver `CATALOG_ATTACHMENT_SCHEMA` et la déclaration `catAttachments` pour la migration Dexie. |
-| ✅ Validé | ⏳ EN ATTENTE — proposé le 2 juin 2026 |
+| 📍 Source | `src/app/shared/catalog/services/attachment.service.ts` (pre-V6 refactor), `src/app/infrastructure/database/schemas/catalog-attachment.schema.ts`, `src/app/shared/catalog/services/attachment.helpers.ts::mapAttachmentCsvToEntities` |
+| Code | `getAttachments()` + `allAttachments$` exposed by `AttachmentService`, along with the `parseCsvAndStore` + `replaceTableData(catAttachments)` pipeline. The `mapAttachmentCsvToEntities` helper (flat shape) is still exported temporarily for backward compatibility. The Dexie `catAttachments` table is removed in V6 (replaced by `catSupportAttachments` grouped by `support_name`). The `CATALOG_ATTACHMENT_SCHEMA` schema is now only referenced by the historical V1–V5 versions of `AppDatabase`. |
+| 🔍 Evidence | No external consumer references `getAttachments()`/`allAttachments$` anymore after switching to streaming via Web Worker (`attachment-import.worker.ts`). The flat mapping is only used by legacy tests (compat helper). The `Papa.parse complete` + flat `bulkAdd` pipeline caused a ~278 MB memory peak for a 25 MB CSV. |
+| ⚠️ Confidence | **MEDIUM** (`getAttachments`/`allAttachments$` ⇒ HIGH; full removal of the `CATALOG_ATTACHMENT_SCHEMA` symbol and of the `catAttachments!: Table<...>` declaration is not possible while V1–V5 versions remain in `AppDatabase`) |
+| Removal impact | Remove `getAttachments()`, `allAttachments$`, and the `mapAttachmentCsvToEntities` helper (and its spec) after a release without regression. Keep `CATALOG_ATTACHMENT_SCHEMA` and the `catAttachments` declaration for the Dexie migration. |
+| ✅ Validated | ⏳ PENDING — proposed on 2026-06-02 |
 
 
 ---
@@ -407,8 +407,8 @@
 | | |
 |---|---|
 | 📍 Source | `src/app/shared/catalog/services/attachment-import.worker.ts`, `attachment-import.worker.interfaces.ts`, `attachment-import.worker.spec.ts` |
-| Code | Worker dédié uniquement à `attachments.csv` (request/response types `AttachmentImportWorkerRequest`/`AttachmentImportWorkerResponse`, function `runImport`). |
-| 🔍 Preuve | Remplacé par le pipeline générique `src/app/shared/catalog/csv-import/` (engine + worker + client + 6 configs) qui mutualise le streaming PapaParse + IndexedDB pour les 6 CSV catalogues. `AttachmentService.importFromFile()` délègue désormais à `CsvImportClientService.importCsv('attachments')`. Aucun consommateur résiduel. |
-| ⚠️ Confiance | **HIGH** |
-| Impact suppression | 3 fichiers supprimés. Code mutualisé pour les 6 catalogues (cables/chains/lines/maintenance/obstacles/attachments). |
-| ✅ Validé | 🗑️ SUPPRIMÉ — mutualisation du pipeline CSV |
+| Code | Worker dedicated solely to `attachments.csv` (request/response types `AttachmentImportWorkerRequest`/`AttachmentImportWorkerResponse`, function `runImport`). |
+| 🔍 Evidence | Replaced by the generic pipeline `src/app/shared/catalog/csv-import/` (engine + worker + client + 6 configs) that shares PapaParse + IndexedDB streaming across all 6 catalog CSVs. `AttachmentService.importFromFile()` now delegates to `CsvImportClientService.importCsv('attachments')`. No remaining consumers. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | 3 files removed. Code shared across the 6 catalogs (cables/chains/lines/maintenance/obstacles/attachments). |
+| ✅ Validated | 🗑️ REMOVED — CSV pipeline consolidation |

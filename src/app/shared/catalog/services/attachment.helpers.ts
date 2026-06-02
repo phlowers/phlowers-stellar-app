@@ -21,15 +21,19 @@ const toOptionalNumber = (value: string | number | undefined | null): number | u
 
 /**
  * Groups a streamed CSV chunk into one entry per `support_name`.
- * Pure function. Discards rows missing both `support_idr` and `support_adr`.
+ * Pure function. Discards rows missing both `support_idr` and `support_adr`,
+ * as well as rows whose `position` is empty or not a finite number (which
+ * would otherwise produce `0`/`NaN` and break sort/lookup by `attachment_set`).
  */
 export const groupChunkBySupport = (rows: AttachmentCsvDto[]): SupportAttachmentGroupChunk[] => {
   const map = new Map<string, SupportAttachmentGroupChunk>();
   for (const row of rows) {
     const supportName = row.support_idr || row.support_adr;
     if (!supportName) continue;
+    const attachmentSet = toOptionalNumber(row.position);
+    if (attachmentSet === undefined) continue;
     const item: AttachmentSetItem = {
-      attachment_set: toNumber(row.position),
+      attachment_set: attachmentSet,
       attachment_altitude: toOptionalNumber(row.Z),
       cross_arm_length: toOptionalNumber(row.L),
       attachment_set_x: toOptionalNumber(row.X),
@@ -53,12 +57,16 @@ export const groupChunkBySupport = (rows: AttachmentCsvDto[]): SupportAttachment
 /**
  * Merges a streamed chunk-group into an existing stored entity (or creates a new one).
  * Pure function: returns a new entity, never mutates inputs.
+ * Preserves the `CatalogSupportAttachmentEntity.attachments` invariant of being
+ * sorted ascending by `attachment_set`.
  */
 export const mergeSupportAttachmentGroup = (
   existing: CatalogSupportAttachmentEntity | undefined,
   chunk: SupportAttachmentGroupChunk,
   now: string = new Date().toISOString()
 ): CatalogSupportAttachmentEntity => {
+  const bySet = (a: AttachmentSetItem, b: AttachmentSetItem): number =>
+    (a.attachment_set ?? 0) - (b.attachment_set ?? 0);
   if (!existing) {
     return {
       uuid: uuidv4(),
@@ -66,14 +74,14 @@ export const mergeSupportAttachmentGroup = (
       updated_at: now,
       support_name: chunk.support_name,
       support_tower: chunk.support_tower,
-      attachments: [...chunk.attachments]
+      attachments: [...chunk.attachments].sort(bySet)
     };
   }
   return {
     ...existing,
     support_tower: chunk.support_tower || existing.support_tower,
     updated_at: now,
-    attachments: [...existing.attachments, ...chunk.attachments]
+    attachments: [...existing.attachments, ...chunk.attachments].sort(bySet)
   };
 };
 

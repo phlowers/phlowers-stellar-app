@@ -6,10 +6,10 @@
  */
 import Papa from 'papaparse';
 import type { Table } from 'dexie';
-import { runCsvImport } from './csv-import.engine';
-import { openWorkerDb } from './csv-import.worker-db';
-import { resolveCsvImportConfig } from './configs';
-import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from './csv-import.worker.interfaces';
+import { runCsvImport } from '../csv-import.engine';
+import { openWorkerDb } from '../csv-import.worker-db';
+import { resolveCsvImportConfig } from '../configs';
+import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-import.worker.interfaces';
 
 /**
  * Handles one CSV import request inside the worker. Opens Dexie, resolves the

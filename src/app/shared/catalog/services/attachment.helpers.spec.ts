@@ -71,6 +71,16 @@ describe('groupChunkBySupport', () => {
   it('returns empty array when given empty input', () => {
     expect(groupChunkBySupport([])).toEqual([]);
   });
+
+  it('skips rows whose position is empty or not a finite number', () => {
+    const result = groupChunkBySupport([
+      makeDto({ support_idr: 'A', position: '' }),
+      makeDto({ support_idr: 'A', position: 'NaN' }),
+      makeDto({ support_idr: 'A', position: '3' })
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].attachments.map((a) => a.attachment_set)).toEqual([3]);
+  });
 });
 
 describe('mergeSupportAttachmentGroup', () => {

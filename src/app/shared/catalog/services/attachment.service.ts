@@ -108,9 +108,7 @@ export class AttachmentService {
   async getAttachmentsBySupportName(supportName: string): Promise<CatalogAttachmentEntity[]> {
     const group = await this.storageService.db?.catSupportAttachments.get(supportName);
     if (!group) return [];
-    return [...group.attachments]
-      .sort((a, b) => (a.attachment_set ?? 0) - (b.attachment_set ?? 0))
-      .map((item) => toLegacyEntity(group, item));
+    return group.attachments.map((item) => toLegacyEntity(group, item));
   }
 
   /**
@@ -135,15 +133,20 @@ export class AttachmentService {
    * writes grouped `CatalogSupportAttachmentEntity` rows to IndexedDB
    * incrementally. The main thread never holds the raw CSV in memory.
    *
-   * @returns Promise that resolves when import is complete
+   * Errors are logged via `LoggerService` but **not** rethrown: this method
+   * is invoked at app bootstrap from `AppComponent` (not by an explicit user
+   * action), so a rejection would abort the whole catalog import flow.
+   * Consumers that trigger imports interactively must catch failures
+   * themselves and notify the user.
+   *
+   * @returns Promise that resolves when import is complete (or has failed)
    */
   async importFromFile(): Promise<void> {
     try {
       await this.csvImportClient.importCsv('attachments');
       this._refresh$.next();
     } catch (error) {
-      this.logger.error('Attachment import failed', error);
-      throw error;
+      this.logger.error('Error importing attachments', error);
     }
   }
 

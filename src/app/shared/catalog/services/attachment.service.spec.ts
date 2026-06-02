@@ -11,6 +11,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { CatalogSupportAttachmentEntity } from '@infrastructure/database';
 import { SupportNameEntry } from './attachment.interfaces';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
@@ -33,6 +34,7 @@ describe('AttachmentService', () => {
   let csvImportClient: { importCsv: vi.Mock };
   let mockDb: MockDb;
   let mockTable: MockSupportTable;
+  let logger: { error: vi.Mock; warn: vi.Mock; info: vi.Mock; debug: vi.Mock };
 
   beforeEach(() => {
     globalThis.localStorage.removeItem('catalog:distinct_support_names');
@@ -55,11 +57,19 @@ describe('AttachmentService', () => {
       importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'attachments', totalRows: 0, totalKeys: 0 })
     };
 
+    logger = {
+      error: vi.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         AttachmentService,
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: CsvImportClientService, useValue: csvImportClient }
+        { provide: CsvImportClientService, useValue: csvImportClient },
+        { provide: LoggerService, useValue: logger }
       ]
     });
 
@@ -99,7 +109,7 @@ describe('AttachmentService', () => {
   });
 
   describe('getAttachmentsBySupportName', () => {
-    it('returns flat entities sorted by attachment_set', async () => {
+    it('returns flat entities preserving the stored attachment order', async () => {
       const group: CatalogSupportAttachmentEntity = {
         uuid: 'grp-uuid',
         created_at: 'c',
@@ -107,8 +117,8 @@ describe('AttachmentService', () => {
         support_name: 'S1',
         support_tower: 'T1',
         attachments: [
-          { attachment_set: 2, attachment_altitude: 12, cross_arm_length: 3 },
-          { attachment_set: 1, attachment_altitude: 10, cross_arm_length: 2 }
+          { attachment_set: 1, attachment_altitude: 10, cross_arm_length: 2 },
+          { attachment_set: 2, attachment_altitude: 12, cross_arm_length: 3 }
         ]
       };
       mockTable.get.mockResolvedValue(group);
@@ -235,9 +245,10 @@ describe('AttachmentService', () => {
       sub.unsubscribe();
     });
 
-    it('rejects when the client throws', async () => {
+    it('logs and swallows when the client throws', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('boom'));
-      await expect(service.importFromFile()).rejects.toThrow('boom');
+      await expect(service.importFromFile()).resolves.toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith('Error importing attachments', expect.any(Error));
     });
   });
 
