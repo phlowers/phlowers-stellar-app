@@ -4271,9 +4271,9 @@
         <target>Manipulation 2</target>
       </segment>
     </unit>
-    <unit id="2123171795960509943">
+    <unit id="4814285799071780083">
       <segment state="initial">
-        <source>remove</source>
+        <source>Remove</source>
         <target>Supprimer</target>
       </segment>
     </unit>
@@ -4352,7 +4352,7 @@
     <unit id="6311801288162258647">
       <segment state="initial">
         <source>Failed to save cable support manipulation</source>
-        <target>Échec de l'enregistrement de la manipulation de câble au support</target>
+        <target>Échec de l&apos;enregistrement de la manipulation de câble au support</target>
       </segment>
     </unit>
     <unit id="6089677328484597418">

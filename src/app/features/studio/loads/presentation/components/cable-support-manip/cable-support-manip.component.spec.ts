@@ -584,6 +584,51 @@ describe('CableSupportManipComponent', () => {
       );
     });
 
+    it('should null out non-crane fields when manip1Type is crane', async () => {
+      component.form.controls.manip1Type.setValue('crane');
+      component.form.controls.vertDisplacement.setValue(10);
+      component.form.controls.lateralDistance.setValue(2);
+      component.form.controls.ropeLength.setValue(5);
+      component.form.controls.shiftingClampLength.setValue(3);
+      await component.saveForm();
+      const call = mockCableSupportManipService.save.mock.calls[0][0];
+      expect(call.manip1.type).toBe('crane');
+      expect(call.manip1.vertDisplacement).toBe(10);
+      expect(call.manip1.lateralDistance).toBe(2);
+      expect(call.manip1.ropeLength).toBeNull();
+      expect(call.manip1.shiftingClampLength).toBeNull();
+    });
+
+    it('should null out non-rope fields when manip1Type is rope', async () => {
+      component.form.controls.manip1Type.setValue('rope');
+      component.form.controls.ropeLength.setValue(8);
+      component.form.controls.vertDisplacement.setValue(10);
+      component.form.controls.shiftingClampLength.setValue(3);
+      await component.saveForm();
+      const call = mockCableSupportManipService.save.mock.calls[0][0];
+      expect(call.manip1.type).toBe('rope');
+      expect(call.manip1.ropeLength).toBe(8);
+      expect(call.manip1.vertDisplacement).toBeNull();
+      expect(call.manip1.anchoring).toBeNull();
+      expect(call.manip1.lateralDistance).toBeNull();
+      expect(call.manip1.shiftingClampLength).toBeNull();
+    });
+
+    it('should null out non-shifting fields when manip1Type is shifting', async () => {
+      component.form.controls.manip1Type.setValue('shifting');
+      component.form.controls.shiftingClampLength.setValue(2);
+      component.form.controls.vertDisplacement.setValue(10);
+      component.form.controls.ropeLength.setValue(5);
+      await component.saveForm();
+      const call = mockCableSupportManipService.save.mock.calls[0][0];
+      expect(call.manip1.type).toBe('shifting');
+      expect(call.manip1.shiftingClampLength).toBe(2);
+      expect(call.manip1.vertDisplacement).toBeNull();
+      expect(call.manip1.anchoring).toBeNull();
+      expect(call.manip1.lateralDistance).toBeNull();
+      expect(call.manip1.ropeLength).toBeNull();
+    });
+
     it('should pass manip2 as null when showManip2 is false', async () => {
       await component.saveForm();
       expect(mockCableSupportManipService.save).toHaveBeenCalledWith(expect.objectContaining({ manip2: null }));

@@ -24,6 +24,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
+import { CableSupportManipItem } from '@shared/domain/models/cable-support-manipulation.model';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
   CableSupportManipFormControls,
@@ -251,22 +252,25 @@ export class CableSupportManipComponent {
     if (saved) {
       this.hasSavedManipulation.set(true);
       this.showManip2.set(saved.manip2 != null);
-      this.form.reset({
-        ...CABLE_SUPPORT_MANIP_DEFAULTS,
-        support: uuid,
-        manip1Type: saved.manip1.type,
-        vertDisplacement: saved.manip1.vertDisplacement ?? 0,
-        anchoring: saved.manip1.anchoring ?? 'without_chain',
-        lateralDistance: saved.manip1.lateralDistance ?? 0,
-        ropeLength: saved.manip1.ropeLength ?? 0,
-        shiftingClampLength: saved.manip1.shiftingClampLength ?? 0,
-        manip2Type: saved.manip2?.type ?? 'shifting',
-        manip2ShiftingClampLength: saved.manip2?.shiftingClampLength ?? 0
-      });
+      this.form.reset(
+        {
+          ...CABLE_SUPPORT_MANIP_DEFAULTS,
+          support: uuid,
+          manip1Type: saved.manip1.type,
+          vertDisplacement: saved.manip1.vertDisplacement ?? 0,
+          anchoring: saved.manip1.anchoring ?? 'without_chain',
+          lateralDistance: saved.manip1.lateralDistance ?? 0,
+          ropeLength: saved.manip1.ropeLength ?? 0,
+          shiftingClampLength: saved.manip1.shiftingClampLength ?? 0,
+          manip2Type: saved.manip2?.type ?? 'shifting',
+          manip2ShiftingClampLength: saved.manip2?.shiftingClampLength ?? 0
+        },
+        { emitEvent: false }
+      );
     } else {
       this.hasSavedManipulation.set(false);
       this.clearManip2();
-      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: uuid });
+      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: uuid }, { emitEvent: false });
     }
   }
 
@@ -282,17 +286,11 @@ export class CableSupportManipComponent {
     if (!chargeUuid) return;
     this.isLoading.set(true);
     try {
+      const manip1 = this.buildManip1(raw);
       await this.cableSupportManipService.save({
         supportUuid: raw.support!,
         chargeUuid,
-        manip1: {
-          type: raw.manip1Type!,
-          vertDisplacement: raw.vertDisplacement,
-          anchoring: raw.anchoring,
-          lateralDistance: raw.lateralDistance,
-          ropeLength: raw.ropeLength,
-          shiftingClampLength: raw.shiftingClampLength
-        },
+        manip1,
         manip2: this.showManip2()
           ? {
               type: raw.manip2Type!,
@@ -354,6 +352,37 @@ export class CableSupportManipComponent {
 
   isFormInvalid(): boolean {
     return this.form.invalid;
+  }
+
+  private buildManip1(raw: ReturnType<typeof this.form.getRawValue>): CableSupportManipItem {
+    if (raw.manip1Type === 'crane') {
+      return {
+        type: 'crane',
+        vertDisplacement: raw.vertDisplacement,
+        anchoring: raw.anchoring,
+        lateralDistance: raw.lateralDistance,
+        ropeLength: null,
+        shiftingClampLength: null
+      };
+    }
+    if (raw.manip1Type === 'rope') {
+      return {
+        type: 'rope',
+        vertDisplacement: null,
+        anchoring: null,
+        lateralDistance: null,
+        ropeLength: raw.ropeLength,
+        shiftingClampLength: null
+      };
+    }
+    return {
+      type: 'shifting',
+      vertDisplacement: null,
+      anchoring: null,
+      lateralDistance: null,
+      ropeLength: null,
+      shiftingClampLength: raw.shiftingClampLength
+    };
   }
 
   getErrorIds(controlName: keyof CableSupportManipFormControls, errorTypes: string[]): string | null {
