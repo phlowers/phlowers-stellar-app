@@ -9,6 +9,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { CableSupportManipComponent } from './cable-support-manip.component';
+import { CABLE_SUPPORT_MANIP_BOUNDS } from './cable-support-manip.constantes';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
@@ -963,7 +964,7 @@ describe('CableSupportManipComponent', () => {
 
     it('should return the aria error id when control has a matching error', () => {
       component.form.controls.manip1Type.setValue('crane');
-      component.form.controls.vertDisplacement.setValue(-200);
+      component.form.controls.vertDisplacement.setValue(CABLE_SUPPORT_MANIP_BOUNDS.vertDisplacement.min - 1);
       component.form.controls.vertDisplacement.updateValueAndValidity();
       const result = component.getErrorIds('vertDisplacement', ['min', 'max']);
       expect(result).toContain('vertDisplacement-error-min');
@@ -971,7 +972,7 @@ describe('CableSupportManipComponent', () => {
 
     it('should return null when error type does not match any present error', () => {
       component.form.controls.manip1Type.setValue('crane');
-      component.form.controls.vertDisplacement.setValue(-200);
+      component.form.controls.vertDisplacement.setValue(CABLE_SUPPORT_MANIP_BOUNDS.vertDisplacement.min - 1);
       component.form.controls.vertDisplacement.updateValueAndValidity();
       expect(component.getErrorIds('vertDisplacement', ['max'])).toBeNull();
     });

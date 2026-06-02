@@ -7,9 +7,10 @@ import {
   effect,
   inject,
   signal,
+  Signal,
   untracked
 } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -31,6 +32,7 @@ import {
   SupportAnchoringType,
   SupportManipType
 } from './cable-support-manip.interfaces';
+import { CABLE_SUPPORT_MANIP_BOUNDS, conditionalRangeValidators } from './cable-support-manip.constantes';
 
 @Component({
   selector: 'app-cable-support-manip',
@@ -74,16 +76,45 @@ export class CableSupportManipComponent {
   /** Disables manip2 animations for one render cycle during programmatic load-case changes. */
   readonly disableManip2Anim = signal(false);
 
-  readonly form = this.fb.group<CableSupportManipFormControls>({
+  readonly form: FormGroup<CableSupportManipFormControls> = this.fb.group<CableSupportManipFormControls>({
     support: new FormControl<string | null>(null, { validators: [Validators.required] }),
     manip1Type: new FormControl<SupportManipType | null>(null, { validators: [Validators.required] }),
-    vertDisplacement: new FormControl<number | null>(0),
-    anchoring: new FormControl<SupportAnchoringType | null>('without_chain'),
-    lateralDistance: new FormControl<number | null>(0),
-    ropeLength: new FormControl<number | null>(0),
-    shiftingClampLength: new FormControl<number | null>(0),
+    vertDisplacement: new FormControl<number | null>(0, {
+      validators: conditionalRangeValidators(
+        () => this.manip1TypeSignal?.() === 'crane',
+        CABLE_SUPPORT_MANIP_BOUNDS.vertDisplacement
+      )
+    }),
+    anchoring: new FormControl<SupportAnchoringType | null>('without_chain', {
+      validators: [
+        (ctrl): ValidationErrors | null => (this.manip1TypeSignal?.() === 'crane' ? Validators.required(ctrl) : null)
+      ]
+    }),
+    lateralDistance: new FormControl<number | null>(0, {
+      validators: conditionalRangeValidators(
+        () => this.manip1TypeSignal?.() === 'crane',
+        CABLE_SUPPORT_MANIP_BOUNDS.lateralDistance
+      )
+    }),
+    ropeLength: new FormControl<number | null>(0, {
+      validators: conditionalRangeValidators(
+        () => this.manip1TypeSignal?.() === 'rope',
+        CABLE_SUPPORT_MANIP_BOUNDS.ropeLength
+      )
+    }),
+    shiftingClampLength: new FormControl<number | null>(0, {
+      validators: conditionalRangeValidators(
+        () => this.manip1TypeSignal?.() === 'shifting',
+        CABLE_SUPPORT_MANIP_BOUNDS.shiftingClampLength
+      )
+    }),
     manip2Type: new FormControl<SupportManipType | null>('shifting'),
-    manip2ShiftingClampLength: new FormControl<number | null>(0)
+    manip2ShiftingClampLength: new FormControl<number | null>(0, {
+      validators: conditionalRangeValidators(
+        () => this.isManip2Shifting?.(),
+        CABLE_SUPPORT_MANIP_BOUNDS.shiftingClampLength
+      )
+    })
   });
 
   /** All supports from the current section as select options. */
@@ -106,9 +137,12 @@ export class CableSupportManipComponent {
     { label: $localize`With chain`, value: 'with_chain' as SupportAnchoringType, disabled: true }
   ];
 
-  private readonly manip1TypeSignal = toSignal(this.form.controls.manip1Type.valueChanges, {
-    initialValue: this.form.controls.manip1Type.value
-  });
+  private readonly manip1TypeSignal: Signal<SupportManipType | null> = toSignal(
+    this.form.controls.manip1Type.valueChanges,
+    {
+      initialValue: this.form.controls.manip1Type.value
+    }
+  );
 
   readonly isCrane = computed(() => this.manip1TypeSignal() === 'crane');
   readonly isRope = computed(() => this.manip1TypeSignal() === 'rope');
@@ -123,93 +157,64 @@ export class CableSupportManipComponent {
 
   readonly manip2TypeOptions = [{ label: $localize`Shifting`, value: 'shifting' as SupportManipType }];
 
-  private readonly manip2TypeSignal = toSignal(this.form.controls.manip2Type.valueChanges, {
-    initialValue: this.form.controls.manip2Type.value
-  });
+  private readonly manip2TypeSignal: Signal<SupportManipType | null> = toSignal(
+    this.form.controls.manip2Type.valueChanges,
+    {
+      initialValue: this.form.controls.manip2Type.value
+    }
+  );
 
-  readonly isManip2Shifting = computed(() => this.showManip2() && this.manip2TypeSignal() === 'shifting');
+  readonly isManip2Shifting: Signal<boolean> = computed(
+    () => this.showManip2() && this.manip2TypeSignal() === 'shifting'
+  );
 
   readonly truncateTwoDecimals = truncateTwoDecimals;
+  readonly BOUNDS = CABLE_SUPPORT_MANIP_BOUNDS;
 
-  constructor() {
-    this.form.controls.vertDisplacement.setValidators([
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.min(-150)(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.max(50)(ctrl) : null)
-    ]);
-
-    this.form.controls.anchoring.setValidators([
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.required(ctrl) : null)
-    ]);
-
-    this.form.controls.lateralDistance.setValidators([
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.min(-50)(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'crane' ? Validators.max(50)(ctrl) : null)
-    ]);
-
-    this.form.controls.ropeLength.setValidators([
-      (ctrl) => (this.manip1TypeSignal() === 'rope' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'rope' ? Validators.min(0)(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'rope' ? Validators.max(50)(ctrl) : null)
-    ]);
-
-    this.form.controls.shiftingClampLength.setValidators([
-      (ctrl) => (this.manip1TypeSignal() === 'shifting' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'shifting' ? Validators.min(-10)(ctrl) : null),
-      (ctrl) => (this.manip1TypeSignal() === 'shifting' ? Validators.max(10)(ctrl) : null)
-    ]);
-
-    this.form.controls.manip2ShiftingClampLength.setValidators([
-      (ctrl) => (this.isManip2Shifting() ? Validators.required(ctrl) : null),
-      (ctrl) => (this.isManip2Shifting() ? Validators.min(-10)(ctrl) : null),
-      (ctrl) => (this.isManip2Shifting() ? Validators.max(10)(ctrl) : null)
-    ]);
-
-    effect(() => {
-      this.manip1TypeSignal();
-      untracked(() => {
-        this.form.controls.vertDisplacement.updateValueAndValidity({ emitEvent: false });
-        this.form.controls.anchoring.updateValueAndValidity({ emitEvent: false });
-        this.form.controls.lateralDistance.updateValueAndValidity({ emitEvent: false });
-        this.form.controls.ropeLength.updateValueAndValidity({ emitEvent: false });
-        this.form.controls.shiftingClampLength.updateValueAndValidity({ emitEvent: false });
-      });
+  private readonly _revalidateOnManip1Change = effect(() => {
+    this.manip1TypeSignal();
+    untracked(() => {
+      this.form.controls.vertDisplacement.updateValueAndValidity({ emitEvent: false });
+      this.form.controls.anchoring.updateValueAndValidity({ emitEvent: false });
+      this.form.controls.lateralDistance.updateValueAndValidity({ emitEvent: false });
+      this.form.controls.ropeLength.updateValueAndValidity({ emitEvent: false });
+      this.form.controls.shiftingClampLength.updateValueAndValidity({ emitEvent: false });
     });
+  });
 
-    // Hide and reset manip2 when manip1 type no longer allows it.
-    effect(() => {
-      if (!this.isManip2Available()) {
-        untracked(() => this.clearManip2());
-      }
-    });
+  /** Hides and resets manip2 when manip1 type no longer allows it. */
+  private readonly _clearManip2WhenUnavailable = effect(() => {
+    if (!this.isManip2Available()) {
+      untracked(() => this.clearManip2());
+    }
+  });
 
-    effect(() => {
-      this.isManip2Shifting();
-      untracked(() => this.form.controls.manip2ShiftingClampLength.updateValueAndValidity({ emitEvent: false }));
-    });
+  private readonly _revalidateManip2ShiftingClamp = effect(() => {
+    this.isManip2Shifting();
+    untracked(() => this.form.controls.manip2ShiftingClampLength.updateValueAndValidity({ emitEvent: false }));
+  });
 
-    // Re-populate the form when the active load case changes so that each
-    // (support, charge) pair shows its own saved manipulation.
-    let previousChargeUuid: string | null | undefined = undefined;
-    effect(() => {
-      const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-      if (chargeUuid === previousChargeUuid) return;
-      previousChargeUuid = chargeUuid;
-      // Suppress manip2 animations for this render to prevent overlapping
-      // enter/leave transitions when switching load cases rapidly.
-      this.disableManip2Anim.set(true);
-      untracked(() => this.onSupportChange(this.form.controls.support.value));
-    });
+  private _previousChargeUuid: string | null | undefined = undefined;
 
-    // Re-enable manip2 animations after each render cycle so that
-    // user-triggered add/remove interactions still animate normally.
-    afterRender(() => {
-      if (untracked(() => this.disableManip2Anim())) {
-        this.disableManip2Anim.set(false);
-      }
-    });
-  }
+  // Re-populate the form when the active load case changes so that each
+  // (support, charge) pair shows its own saved manipulation.
+  private readonly _reloadOnChargeChange = effect(() => {
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    if (chargeUuid === this._previousChargeUuid) return;
+    this._previousChargeUuid = chargeUuid;
+    // Suppress manip2 animations for this render to prevent overlapping
+    // enter/leave transitions when switching load cases rapidly.
+    this.disableManip2Anim.set(true);
+    untracked(() => this.onSupportChange(this.form.controls.support.value));
+  });
+
+  // Re-enable manip2 animations after each render cycle so that
+  // user-triggered add/remove interactions still animate normally.
+  private readonly _reenableManip2Anim = afterRender(() => {
+    if (untracked(() => this.disableManip2Anim())) {
+      this.disableManip2Anim.set(false);
+    }
+  });
 
   zoomToSupport(): void {
     const uuid = this.form.controls.support.value;

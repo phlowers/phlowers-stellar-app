@@ -65,9 +65,9 @@
                 id="vertDisplacement"
                 type="number"
                 pInputText
-                step="0.01"
-                min="-150"
-                max="50"
+                [attr.step]="BOUNDS.vertDisplacement.step"
+                [attr.min]="BOUNDS.vertDisplacement.min"
+                [attr.max]="BOUNDS.vertDisplacement.max"
                 (input)="truncateTwoDecimals($event)"
                 formControlName="vertDisplacement"
                 data-testid="cable-support-manip-vert-displacement"
@@ -85,7 +85,7 @@
                 class="crane-divide__error1"
               >
                 <ng-container i18n>Minimum value:</ng-container>
-                -150
+                {{ BOUNDS.vertDisplacement.min }}
               </p-message>
             } @else if (form.controls.vertDisplacement.errors?.['max']) {
               <p-message
@@ -96,7 +96,7 @@
                 class="crane-divide__error1"
               >
                 <ng-container i18n>Maximum value:</ng-container>
-                50
+                {{ BOUNDS.vertDisplacement.max }}
               </p-message>
             }
 
@@ -121,9 +121,9 @@
               id="lateralDistance"
               type="number"
               pInputText
-              step="0.01"
-              min="-50"
-              max="50"
+              [attr.step]="BOUNDS.lateralDistance.step"
+              [attr.min]="BOUNDS.lateralDistance.min"
+              [attr.max]="BOUNDS.lateralDistance.max"
               (input)="truncateTwoDecimals($event)"
               formControlName="lateralDistance"
               data-testid="cable-support-manip-lateral-distance"
@@ -135,12 +135,12 @@
           @if (form.controls.lateralDistance.errors?.['min']) {
             <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple">
               <ng-container i18n>Minimum value:</ng-container>
-              -50
+              {{ BOUNDS.lateralDistance.min }}
             </p-message>
           } @else if (form.controls.lateralDistance.errors?.['max']) {
             <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple">
               <ng-container i18n>Maximum value:</ng-container>
-              50
+              {{ BOUNDS.lateralDistance.max }}
             </p-message>
           }
         </div>
@@ -164,9 +164,9 @@
               id="ropeLength"
               type="number"
               pInputText
-              step="0.01"
-              min="0"
-              max="50"
+              [attr.step]="BOUNDS.ropeLength.step"
+              [attr.min]="BOUNDS.ropeLength.min"
+              [attr.max]="BOUNDS.ropeLength.max"
               (input)="truncateTwoDecimals($event)"
               formControlName="ropeLength"
               data-testid="cable-support-manip-rope-length"
@@ -178,12 +178,12 @@
           @if (form.controls.ropeLength.errors?.['min']) {
             <p-message id="ropeLength-error-min" severity="error" size="small" variant="simple">
               <ng-container i18n>Minimum value:</ng-container>
-              0
+              {{ BOUNDS.ropeLength.min }}
             </p-message>
           } @else if (form.controls.ropeLength.errors?.['max']) {
             <p-message id="ropeLength-error-max" severity="error" size="small" variant="simple">
               <ng-container i18n>Maximum value:</ng-container>
-              50
+              {{ BOUNDS.ropeLength.max }}
             </p-message>
           }
         </div>
@@ -195,9 +195,9 @@
               id="shiftingClampLength"
               type="number"
               pInputText
-              step="0.01"
-              min="-10"
-              max="10"
+              [attr.step]="BOUNDS.shiftingClampLength.step"
+              [attr.min]="BOUNDS.shiftingClampLength.min"
+              [attr.max]="BOUNDS.shiftingClampLength.max"
               (input)="truncateTwoDecimals($event)"
               formControlName="shiftingClampLength"
               data-testid="cable-support-manip-shifting-clamp-length"
@@ -209,12 +209,12 @@
           @if (form.controls.shiftingClampLength.errors?.['min']) {
             <p-message id="shiftingClampLength-error-min" severity="error" size="small" variant="simple">
               <ng-container i18n>Minimum value:</ng-container>
-              -10
+              {{ BOUNDS.shiftingClampLength.min }}
             </p-message>
           } @else if (form.controls.shiftingClampLength.errors?.['max']) {
             <p-message id="shiftingClampLength-error-max" severity="error" size="small" variant="simple">
               <ng-container i18n>Maximum value:</ng-container>
-              10
+              {{ BOUNDS.shiftingClampLength.max }}
             </p-message>
           }
         </div>
@@ -278,9 +278,9 @@
                   id="manip2ShiftingClampLength"
                   type="number"
                   pInputText
-                  step="0.01"
-                  min="-10"
-                  max="10"
+                  [attr.step]="BOUNDS.shiftingClampLength.step"
+                  [attr.min]="BOUNDS.shiftingClampLength.min"
+                  [attr.max]="BOUNDS.shiftingClampLength.max"
                   (input)="truncateTwoDecimals($event)"
                   formControlName="manip2ShiftingClampLength"
                   data-testid="cable-support-manip-manip2-shifting-clamp-length"
@@ -292,12 +292,12 @@
               @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
                 <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
                   <ng-container i18n>Minimum value:</ng-container>
-                  -10
+                  {{ BOUNDS.shiftingClampLength.min }}
                 </p-message>
               } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
                 <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
                   <ng-container i18n>Maximum value:</ng-container>
-                  10
+                  {{ BOUNDS.shiftingClampLength.max }}
                 </p-message>
               }
             </div>
