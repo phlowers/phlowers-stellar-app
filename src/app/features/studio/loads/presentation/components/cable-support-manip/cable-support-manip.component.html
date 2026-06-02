@@ -40,8 +40,8 @@
     appendTo="body"
   />
 
-  <fieldset>
-    <div class="bypass-anonymous-box">
+  <div class="bypass-anonymous-box">
+    <fieldset>
       <legend i18n>Manipulation 1</legend>
 
       <label for="manip1Type" i18n>Manipulation type</label>
@@ -219,8 +219,8 @@
           }
         </div>
       }
-    </div>
-  </fieldset>
+    </fieldset>
+  </div>
 
   <div [@.disabled]="disableManip2Anim()">
     @if (!showManip2()) {
@@ -240,23 +240,22 @@
     }
 
     @if (showManip2()) {
-      <fieldset @expandCollapse>
-        <div class="bypass-anonymous-box">
-          <div class="manip2-header">
-            <legend i18n>Manipulation 2</legend>
+      <div class="bypass-anonymous-box" @expandCollapse>
+        <fieldset class="manip2">
+          <legend i18n>Manipulation 2</legend>
 
-            <button
-              app-btn
-              type="button"
-              btnStyle="danger"
-              btnSize="s"
-              (click)="removeManip2()"
-              data-testid="cable-support-manip-remove-manip2"
-            >
-              <ng-container i18n>Remove</ng-container>
-              <app-icon icon="delete" aria-hidden="true" />
-            </button>
-          </div>
+          <button
+            app-btn
+            type="button"
+            btnStyle="danger"
+            btnSize="s"
+            (click)="removeManip2()"
+            data-testid="cable-support-manip-remove-manip2"
+            class="manip2__erase-btn"
+          >
+            <ng-container i18n>Remove</ng-container>
+            <app-icon icon="delete" aria-hidden="true" />
+          </button>
 
           <label for="manip2Type" i18n>Manipulation type</label>
 
@@ -303,8 +302,8 @@
               }
             </div>
           }
-        </div>
-      </fieldset>
+        </fieldset>
+      </div>
     }
   </div>
 

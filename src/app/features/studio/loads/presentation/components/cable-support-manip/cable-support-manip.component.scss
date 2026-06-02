@@ -55,10 +55,19 @@ p-message {
   @apply flex gap-3 items-start mb-2;
 }
 
-.manip2-header {
-  @apply flex justify-between items-start;
-}
-
 .footer-btns {
   @apply flex justify-end items-center gap-4 pt-5 pr-2;
+}
+
+.manip2 {
+  @apply relative;
+
+  legend {
+    @apply pr-28;
+  }
+
+  &__erase-btn {
+    @apply absolute right-0;
+    top: -2.1875rem;
+  }
 }
