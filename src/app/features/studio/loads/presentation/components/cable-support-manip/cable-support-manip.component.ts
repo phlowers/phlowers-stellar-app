@@ -24,7 +24,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
-import { CableSupportManipItem } from '@shared/domain/models/cable-support-manipulation.model';
+import type { CableSupportManipItem } from '@shared/domain';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
   CableSupportManipFormControls,
@@ -232,7 +232,7 @@ export class CableSupportManipComponent {
 
   private clearManip2(): void {
     this.showManip2.set(false);
-    this.form.controls.manip2Type.reset('shifting', { emitEvent: false });
+    this.form.controls.manip2Type.reset('shifting');
     this.form.controls.manip2ShiftingClampLength.reset(0, { emitEvent: false });
     this.form.controls.manip2ShiftingClampLength.updateValueAndValidity({ emitEvent: false });
   }
@@ -241,7 +241,7 @@ export class CableSupportManipComponent {
     if (!uuid) {
       this.hasSavedManipulation.set(false);
       this.clearManip2();
-      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: null }, { emitEvent: false });
+      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: null });
       this.form.controls.manip1Type.updateValueAndValidity();
       return;
     }
@@ -253,26 +253,23 @@ export class CableSupportManipComponent {
     if (saved) {
       this.hasSavedManipulation.set(true);
       this.showManip2.set(saved.manip2 != null);
-      this.form.reset(
-        {
-          ...CABLE_SUPPORT_MANIP_DEFAULTS,
-          support: uuid,
-          manip1Type: saved.manip1.type,
-          vertDisplacement: saved.manip1.vertDisplacement ?? 0,
-          anchoring: saved.manip1.anchoring ?? 'without_chain',
-          lateralDistance: saved.manip1.lateralDistance ?? 0,
-          ropeLength: saved.manip1.ropeLength ?? 0,
-          shiftingClampLength: saved.manip1.shiftingClampLength ?? 0,
-          manip2Type: saved.manip2?.type ?? 'shifting',
-          manip2ShiftingClampLength: saved.manip2?.shiftingClampLength ?? 0
-        },
-        { emitEvent: false }
-      );
+      this.form.reset({
+        ...CABLE_SUPPORT_MANIP_DEFAULTS,
+        support: uuid,
+        manip1Type: saved.manip1.type,
+        vertDisplacement: saved.manip1.vertDisplacement ?? 0,
+        anchoring: saved.manip1.anchoring ?? 'without_chain',
+        lateralDistance: saved.manip1.lateralDistance ?? 0,
+        ropeLength: saved.manip1.ropeLength ?? 0,
+        shiftingClampLength: saved.manip1.shiftingClampLength ?? 0,
+        manip2Type: saved.manip2?.type ?? 'shifting',
+        manip2ShiftingClampLength: saved.manip2?.shiftingClampLength ?? 0
+      });
       this.form.controls.manip1Type.updateValueAndValidity();
     } else {
       this.hasSavedManipulation.set(false);
       this.clearManip2();
-      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: uuid }, { emitEvent: false });
+      this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: uuid });
       this.form.controls.manip1Type.updateValueAndValidity();
     }
   }
