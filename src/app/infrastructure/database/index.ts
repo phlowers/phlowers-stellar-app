@@ -7,5 +7,6 @@
 
 // Database layer barrel export
 export { AppDatabase, AppDB } from './app-database';
+export { applyStellarDbVersions } from './app-database.versions';
 export * from './entities';
 export * from './schemas';

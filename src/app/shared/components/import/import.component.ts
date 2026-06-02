@@ -32,11 +32,11 @@ import { NotificationService } from '@core/services/notification/notification.se
  * The `GenericImportEngineService` is provided internally (scoped to each instance).
  *
  * ### Inputs
- * - `config` — {@link ImportContextConfig} describing accepted files, labels, and texts.
+ * - `config` — `ImportContextConfig` describing accepted files, labels, and texts.
  *
  * ### Outputs
  * - `importCompleted` — emitted after each batch of files is processed, carrying
- *   the full list of {@link ImportOutcome} results.
+ *   the full list of `ImportOutcome` results.
  */
 @Component({
   selector: 'app-import',
@@ -62,7 +62,7 @@ export class ImportComponent {
 
   /**
    * Emitted when the user clicks the success action button (e.g. Edit).
-   * Carries the full {@link ImportOutcome} of the clicked item.
+   * Carries the full `ImportOutcome` of the clicked item.
    */
   readonly successActionTriggered = output<ImportOutcome>();
 

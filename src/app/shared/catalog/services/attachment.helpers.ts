@@ -5,7 +5,7 @@ import { toNumber } from 'lodash';
 
 /**
  * Partial group emitted while streaming a CSV chunk.
- * Transient value passed between {@link groupChunkBySupport} and the storage upsert.
+ * Transient value passed between `groupChunkBySupport` and the storage upsert.
  */
 export interface SupportAttachmentGroupChunk {
   support_name: string;
@@ -78,7 +78,7 @@ export const mergeSupportAttachmentGroup = (
 };
 
 /**
- * Reconstructs a flat {@link CatalogAttachmentEntity} from a grouped entity row
+ * Reconstructs a flat `CatalogAttachmentEntity` from a grouped entity row
  * and one of its attachment sets, for backward-compatible reads from the legacy API.
  */
 export const toLegacyEntity = (
@@ -99,7 +99,7 @@ export const toLegacyEntity = (
 });
 
 /**
- * @deprecated Replaced by {@link groupChunkBySupport} + {@link mergeSupportAttachmentGroup}.
+ * @deprecated Replaced by `groupChunkBySupport` + `mergeSupportAttachmentGroup`.
  * Kept temporarily for backwards compatibility while consumers are migrated.
  * Maps raw CSV attachment DTOs to flat catalog attachment entities.
  */

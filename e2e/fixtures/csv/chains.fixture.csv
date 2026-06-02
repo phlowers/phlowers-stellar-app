@@ -1,0 +1,6 @@
+uuid,chain_name,mean_length,mean_mass,v_chain,chain_type,chain_surface
+chain-uuid-001,FAKE_CHAIN_A,"3,250","12,5",false,Standard,"0,150"
+chain-uuid-002,FAKE_CHAIN_B,"4,000","18,0",true,Standard,"0,200"
+chain-uuid-003,FAKE_CHAIN_C,"2,750","9,8",false,Suspension,"0,120"
+chain-uuid-004,FAKE_CHAIN_D,"5,000","22,4",true,Anchor,"0,280"
+chain-uuid-005,,3,10,false,Skipped,"0,1"

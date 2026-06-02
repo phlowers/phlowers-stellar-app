@@ -12,7 +12,7 @@ import { CatalogAttachmentEntity, CatalogSupportAttachmentEntity } from '@infras
 import { v4 as uuidv4 } from 'uuid';
 import { SupportNameEntry } from './attachment.interfaces';
 import { toLegacyEntity } from './attachment.helpers';
-import { AttachmentImportWorkerRequest, AttachmentImportWorkerResponse } from './attachment-import.worker.interfaces';
+import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 /**
  * Service for managing attachment point catalog data.
@@ -35,6 +35,7 @@ export class AttachmentService {
 
   private readonly storageService = inject(StorageService);
   private readonly logger = inject(LoggerService);
+  private readonly csvImportClient = inject(CsvImportClientService);
 
   /** Internal trigger to re-read catSupportAttachments after any write. */
   private readonly _refresh$ = new Subject<void>();
@@ -129,36 +130,21 @@ export class AttachmentService {
    * Import attachment catalog data from the `/data/attachments.csv` file.
    *
    * @remarks
-   * Spawns a dedicated Web Worker that streams the CSV through PapaParse and
+   * Delegates to `CsvImportClientService`, which spawns the generic
+   * CSV import Web Worker. The worker streams the CSV through PapaParse and
    * writes grouped `CatalogSupportAttachmentEntity` rows to IndexedDB
    * incrementally. The main thread never holds the raw CSV in memory.
    *
    * @returns Promise that resolves when import is complete
    */
   async importFromFile(): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      const worker = new Worker(new URL('./attachment-import.worker', import.meta.url), { type: 'module' });
-      worker.onmessage = ({ data }: MessageEvent<AttachmentImportWorkerResponse>) => {
-        if (data.type === 'done') {
-          worker.terminate();
-          this._refresh$.next();
-          resolve();
-        } else if (data.type === 'error') {
-          worker.terminate();
-          this.logger.error('Attachment import worker failed', data.message);
-          reject(new Error(data.message));
-        }
-      };
-      worker.onerror = (event) => {
-        worker.terminate();
-        this.logger.error('Attachment import worker crashed', event.message);
-        reject(new Error(event.message));
-      };
-      const request: AttachmentImportWorkerRequest = {
-        url: `${globalThis.location.origin}/data/attachments.csv`
-      };
-      worker.postMessage(request);
-    });
+    try {
+      await this.csvImportClient.importCsv('attachments');
+      this._refresh$.next();
+    } catch (error) {
+      this.logger.error('Attachment import failed', error);
+      throw error;
+    }
   }
 
   /**

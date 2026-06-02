@@ -398,3 +398,17 @@
 | ⚠️ Confiance | **MEDIUM** (`getAttachments`/`allAttachments$` ⇒ HIGH ; suppression complète du symbole `CATALOG_ATTACHMENT_SCHEMA` et de la déclaration `catAttachments!: Table<...>` impossible tant qu'on garde les versions V1–V5 dans `AppDatabase`) |
 | Impact suppression | Supprimer `getAttachments()`, `allAttachments$`, le helper `mapAttachmentCsvToEntities` (et son spec) après une release sans régression. Conserver `CATALOG_ATTACHMENT_SCHEMA` et la déclaration `catAttachments` pour la migration Dexie. |
 | ✅ Validé | ⏳ EN ATTENTE — proposé le 2 juin 2026 |
+
+
+---
+
+## 30. Legacy `attachment-import.worker` (attachment-only Web Worker)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/catalog/services/attachment-import.worker.ts`, `attachment-import.worker.interfaces.ts`, `attachment-import.worker.spec.ts` |
+| Code | Worker dédié uniquement à `attachments.csv` (request/response types `AttachmentImportWorkerRequest`/`AttachmentImportWorkerResponse`, function `runImport`). |
+| 🔍 Preuve | Remplacé par le pipeline générique `src/app/shared/catalog/csv-import/` (engine + worker + client + 6 configs) qui mutualise le streaming PapaParse + IndexedDB pour les 6 CSV catalogues. `AttachmentService.importFromFile()` délègue désormais à `CsvImportClientService.importCsv('attachments')`. Aucun consommateur résiduel. |
+| ⚠️ Confiance | **HIGH** |
+| Impact suppression | 3 fichiers supprimés. Code mutualisé pour les 6 catalogues (cables/chains/lines/maintenance/obstacles/attachments). |
+| ✅ Validé | 🗑️ SUPPRIMÉ — mutualisation du pipeline CSV |

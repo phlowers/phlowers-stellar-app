@@ -1,0 +1,8 @@
+maintenance_center,regional_team,maintenance_team,maintenance_center_id,maintenance_id,regional_team_id,maintenance_team_id
+Center North,Region North-A,Team N-A-1,CTR-N,,REG-N-A,TEAM-NA1
+Center North,Region North-A,Team N-A-2,CTR-N,,REG-N-A,TEAM-NA2
+Center North,Region North-B,Team N-B-1,CTR-N,,REG-N-B,TEAM-NB1
+Center South,Region South-A,Team S-A-1,CTR-S,,REG-S-A,TEAM-SA1
+Center South,Region South-A,Team S-A-2,,FALLBACK-CTR,REG-S-A,TEAM-SA2
+Center South,Region South-B,Team S-B-1,CTR-S,,REG-S-B,TEAM-SB1
+Center West,Region West-A,Team SKIPPED,CTR-W,,REG-W-A,

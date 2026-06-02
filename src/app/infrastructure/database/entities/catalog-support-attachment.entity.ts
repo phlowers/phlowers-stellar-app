@@ -9,7 +9,7 @@
  * A single attachment set carried by a support.
  *
  * @remarks
- * Lightweight value object stored inside the parent {@link CatalogSupportAttachmentEntity}.
+ * Lightweight value object stored inside the parent `CatalogSupportAttachmentEntity`.
  * Mirrors the geometric columns of the legacy attachments CSV without the support-level metadata.
  */
 export interface AttachmentSetItem {

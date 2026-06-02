@@ -10,7 +10,7 @@ import { AttachmentService } from './attachment.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogSupportAttachmentEntity } from '@infrastructure/database';
 import { SupportNameEntry } from './attachment.interfaces';
-import { AttachmentImportWorkerResponse } from './attachment-import.worker.interfaces';
+import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
@@ -27,35 +27,15 @@ interface MockDb {
   catSupportAttachments: MockSupportTable;
 }
 
-class FakeWorker {
-  static instances: FakeWorker[] = [];
-  onmessage: ((ev: MessageEvent<AttachmentImportWorkerResponse>) => void) | null = null;
-  onerror: ((ev: ErrorEvent) => void) | null = null;
-  postMessage = vi.fn();
-  terminate = vi.fn();
-  constructor(
-    public url: URL,
-    public options: WorkerOptions
-  ) {
-    FakeWorker.instances.push(this);
-  }
-  emit(msg: AttachmentImportWorkerResponse): void {
-    this.onmessage?.(new MessageEvent('message', { data: msg }));
-  }
-}
-
 describe('AttachmentService', () => {
   let service: AttachmentService;
   let storageService: StorageService;
+  let csvImportClient: { importCsv: vi.Mock };
   let mockDb: MockDb;
   let mockTable: MockSupportTable;
-  let originalWorker: typeof Worker;
 
   beforeEach(() => {
     globalThis.localStorage.removeItem('catalog:distinct_support_names');
-    FakeWorker.instances = [];
-    originalWorker = globalThis.Worker;
-    (globalThis as unknown as { Worker: typeof Worker }).Worker = FakeWorker as unknown as typeof Worker;
 
     mockTable = {
       get: vi.fn().mockResolvedValue(undefined),
@@ -71,16 +51,20 @@ describe('AttachmentService', () => {
       db: mockDb
     } as unknown as StorageService;
 
+    csvImportClient = {
+      importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'attachments', totalRows: 0, totalKeys: 0 })
+    };
+
     TestBed.configureTestingModule({
-      providers: [AttachmentService, { provide: StorageService, useValue: storageServiceSpy }]
+      providers: [
+        AttachmentService,
+        { provide: StorageService, useValue: storageServiceSpy },
+        { provide: CsvImportClientService, useValue: csvImportClient }
+      ]
     });
 
     service = TestBed.inject(AttachmentService);
     storageService = TestBed.inject(StorageService);
-  });
-
-  afterEach(() => {
-    (globalThis as unknown as { Worker: typeof Worker }).Worker = originalWorker;
   });
 
   it('should be created', () => {
@@ -238,57 +222,39 @@ describe('AttachmentService', () => {
   });
 
   describe('importFromFile', () => {
-    it('spawns a worker, posts the CSV URL request, resolves on done and refreshes', async () => {
+    it('delegates to CsvImportClientService with the attachments key and refreshes', async () => {
       const namesSpy = vi.spyOn(service, 'getDistinctSupportNames').mockResolvedValue(['A']);
       (storageService.ready$ as BehaviorSubject<boolean>).next(true);
-      // Subscribe to ensure refresh propagates
       const observed: string[][] = [];
       const sub = service.distinctSupportNames$.subscribe((v) => observed.push(v));
 
-      const promise = service.importFromFile();
-      const worker = FakeWorker.instances[0];
-      expect(worker.options).toEqual({ type: 'module' });
-      expect(worker.postMessage).toHaveBeenCalledWith({
-        url: `${globalThis.location.origin}/data/attachments.csv`
-      });
+      await service.importFromFile();
 
-      worker.emit({ type: 'progress', processedRows: 100 });
-      worker.emit({ type: 'done', totalRows: 100, totalSupports: 2 });
-      await promise;
-
-      expect(worker.terminate).toHaveBeenCalled();
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('attachments');
       expect(namesSpy).toHaveBeenCalled();
       sub.unsubscribe();
     });
 
-    it('rejects when the worker emits an error message', async () => {
-      const promise = service.importFromFile();
-      const worker = FakeWorker.instances[0];
-      worker.emit({ type: 'error', message: 'boom' });
-      await expect(promise).rejects.toThrow('boom');
-      expect(worker.terminate).toHaveBeenCalled();
-    });
-
-    it('rejects when the worker crashes', async () => {
-      const promise = service.importFromFile();
-      const worker = FakeWorker.instances[0];
-      worker.onerror?.(new ErrorEvent('error', { message: 'crashed' }));
-      await expect(promise).rejects.toThrow('crashed');
-      expect(worker.terminate).toHaveBeenCalled();
+    it('rejects when the client throws', async () => {
+      csvImportClient.importCsv.mockRejectedValue(new Error('boom'));
+      await expect(service.importFromFile()).rejects.toThrow('boom');
     });
   });
 
   describe('distinctSupportNames$ cache', () => {
     it('emits cached names immediately', async () => {
       globalThis.localStorage.setItem('catalog:distinct_support_names', JSON.stringify(['Cached']));
-      // Re-create the service to read the fresh cache
       TestBed.resetTestingModule();
       const spy = {
         ready$: new BehaviorSubject<boolean>(false),
         db: mockDb
       } as unknown as StorageService;
       TestBed.configureTestingModule({
-        providers: [AttachmentService, { provide: StorageService, useValue: spy }]
+        providers: [
+          AttachmentService,
+          { provide: StorageService, useValue: spy },
+          { provide: CsvImportClientService, useValue: csvImportClient }
+        ]
       });
       const fresh = TestBed.inject(AttachmentService);
       const emitted: string[][] = [];
