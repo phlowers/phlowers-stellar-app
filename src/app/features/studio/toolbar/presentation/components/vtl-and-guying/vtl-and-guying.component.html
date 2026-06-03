@@ -210,7 +210,7 @@
     <div class="vtl-guying__right">
       <app-card role="generic">
         <img
-          src="img/guying-help.png"
+          src="img/VHL-Haubanage-Suspension-Droite.webp"
           alt="Diagram showing guying configuration with altitude (a) and horizontal distance (d) parameters"
         />
       </app-card>
@@ -224,12 +224,23 @@
 }
 <ng-template #footer>
   <div class="vtl-guying__dialog-footer">
+    <button
+      [disabled]="!results()"
+      app-btn
+      type="button"
+      btnSize="m"
+      (click)="onReport()"
+      data-testid="report-dialog-btn"
+    >
+      <app-icon icon="picture_as_pdf" aria-hidden="true" />
+      <ng-container i18n>Rapport</ng-container>
+    </button>
     <button [disabled]="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="export-dialog-btn">
-      <app-icon icon="download" />
+      <app-icon icon="download" aria-hidden="true" />
       <span i18n>Export</span>
     </button>
     <button app-btn type="button" btnSize="m" (click)="onSave()" data-testid="save-results-btn">
-      <app-icon icon="save" />
+      <app-icon icon="save" aria-hidden="true" />
       <span i18n>Save</span>
     </button>
   </div>

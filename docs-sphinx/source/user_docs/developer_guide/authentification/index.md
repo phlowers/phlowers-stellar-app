@@ -6,4 +6,5 @@ This section covers authentication features and configuration.
 :titlesonly:
 
 authentification
+authentification-fr
 ```

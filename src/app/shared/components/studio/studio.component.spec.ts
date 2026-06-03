@@ -327,7 +327,7 @@ describe('StudioComponent', () => {
       const errorImg = fixture.nativeElement.querySelector('[data-testid="studio-error-image"]') as HTMLImageElement;
       expect(errorImg).toBeTruthy();
       expect(errorImg.tagName).toBe('IMG');
-      expect(errorImg.src).toContain('rocket.png');
+      expect(errorImg.src).toContain('rocket.webp');
     });
 
     it('should not show rocket image when no error', () => {

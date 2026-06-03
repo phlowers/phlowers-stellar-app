@@ -10,7 +10,7 @@ Technical documentation for developers contributing to Stellar.
 installation/index
 app/index
 plot/index
-bugfixes/index
+authentification/index
 ```
 
 

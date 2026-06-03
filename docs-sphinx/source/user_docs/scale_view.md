@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # Scale View Component
 
 ## Summary
