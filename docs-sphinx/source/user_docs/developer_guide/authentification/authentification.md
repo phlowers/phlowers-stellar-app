@@ -74,7 +74,7 @@ Defence in depth: a user document cached in fallback mode (no `sub` claim) is **
 
 ### 4.1 App startup (`provideAppInitializer`)
 
-The enforced sequence in [app.config.ts](src/app/app.config.ts) is:
+The enforced sequence in [app.config.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.config.ts) is:
 
 ### App startup (`APP_INITIALIZER`)
 In [app.config.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.config.ts) the enforced sequence is:
@@ -176,8 +176,8 @@ Dexie schema: `users: '&email, sub'` (primary key = `email`, secondary index = `
 
 ### 7.2 CGI scripts
 
-- [docker/cgi-bin/userinfo.sh](docker/cgi-bin/userinfo.sh) — always returns `200 OK` with `{ authenticated, oidcEnabled, … }`. The `oidcEnabled` flag comes from the `OIDC_ENABLED` env var injected by the entrypoint. Claims are JSON-encoded with `jq` (no string interpolation, no injection risk).
-- [docker/cgi-bin/login.sh](docker/cgi-bin/login.sh) — runs only after a successful G@IA callback; emits `302 Location: /`. Returning here (instead of directly to `/`) guarantees a known landing URL that the Service Worker bypasses.
+- [docker/cgi-bin/userinfo.sh](https://github.com/phlowers/phlowers-stellar-app/blob/main/docker/cgi-bin/userinfo.sh) — always returns `200 OK` with `{ authenticated, oidcEnabled, … }`. The `oidcEnabled` flag comes from the `OIDC_ENABLED` env var injected by the entrypoint. Claims are JSON-encoded with `jq` (no string interpolation, no injection risk).
+- [docker/cgi-bin/login.sh](https://github.com/phlowers/phlowers-stellar-app/blob/main/docker/cgi-bin/login.sh) — runs only after a successful G@IA callback; emits `302 Location: /`. Returning here (instead of directly to `/`) guarantees a known landing URL that the Service Worker bypasses.
 
 ---
 
