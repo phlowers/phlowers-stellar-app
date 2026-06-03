@@ -80,6 +80,7 @@
     "esbuild-plugins-node-modules-polyfill": "1.7.0",
     "font-awesome": "4.7.0",
     "javascript-time-ago": "2.5.11",
+    "jspdf": "4.2.1",
     "lodash": "4.18.1",
     "marked": "15.0.0",
     "ngx-markdown": "19.1.1",

@@ -190,7 +190,7 @@ export const YOUR_IMPORT_CONFIG: ImportContextConfig = {
 
 **4. Use the wrapper in your parent template:**
 
-```html
+```text
 <app-import-your-context
   (importCompleted)="onImportCompleted($event)"
 />
