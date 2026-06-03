@@ -287,7 +287,7 @@
             </p-tab>
             <p-tab
               value="3"
-              [disabled]="true"
+              [disabled]="!spanService.section()?.selected_charge_uuid"
               class="cable-support"
               pTooltip="Cable manip. at support"
               i18n-pTooltip
@@ -345,11 +345,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="3">
-                <p class="m-0">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, praesentium eveniet quisquam numquam
-                  maiores cum vel perferendis minus explicabo? Laudantium voluptas facere nobis tenetur ipsum quis et in
-                  quibusdam ea.
-                </p>
+                <app-cable-support-manip />
               </p-tabpanel>
 
               <p-tabpanel value="4">

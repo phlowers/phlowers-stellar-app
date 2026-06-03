@@ -50,6 +50,7 @@ import { CableLengthChangeComponent } from '@features/studio/loads/presentation/
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
+import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -85,7 +86,8 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     ToolbarDialogComponent,
     ObstaclesFormComponent,
     FreePositioningComponent,
-    CableSpanManipComponent
+    CableSpanManipComponent,
+    CableSupportManipComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',
