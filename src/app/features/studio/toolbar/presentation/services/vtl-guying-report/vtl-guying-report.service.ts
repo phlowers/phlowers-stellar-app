@@ -34,7 +34,7 @@ export class VtlGuyingReportService extends PdfBaseService {
       return;
     }
     try {
-      this.diagramImageCache = await loadImageAsBase64('img/VHL-Haubanage-Suspension-Droite.png');
+      this.diagramImageCache = await loadImageAsBase64('img/VHL-Haubanage-Suspension-Droite.webp');
     } catch (error) {
       this.logger.error('Failed to preload guying diagram image', error);
     }

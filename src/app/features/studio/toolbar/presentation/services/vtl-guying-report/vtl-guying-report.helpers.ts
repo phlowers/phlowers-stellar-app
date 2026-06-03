@@ -137,7 +137,7 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
   y -= 2; // tighten gap before separator
 
   // Separator
-  doc.setLineWidth(0.2);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
   y += LINE_HEIGHT;
 
@@ -151,7 +151,7 @@ export function drawVtlWithoutGuyingSection(doc: jsPDF, data: VtlGuyingReportDat
 //                                                           Horizontal distance, With pulley
 //    Center (imgX = page center − imgWidth/2)             — Diagram image (square, ratio 1:1)
 //  Diagram bottom spacing: DIAGRAM_BOTTOM_SPACING=3mm vertical gap below the diagram image
-//    Source file : public/img/VHL-Haubanage-Suspension-Droite.png  (must have white/transparent background)
+//    Source file : public/img/VHL-Haubanage-Suspension-Droite.webp  (must have white/transparent background)
 //    To resize: change imgWidth (imgHeight computed proportionally) — imgX updates automatically
 //  Bottom: full-width separator line (lineWidth 0.2)
 /** Draws the guying section with parameters and diagram image. Returns the next Y position. */
@@ -164,7 +164,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, startY:
   doc.setFontSize(FONT_SIZES.sectionTitle);
   doc.text(PDF_LABELS.guyingTitle, PAGE_MARGIN.left, y);
   const titleWidth = doc.getTextWidth(PDF_LABELS.guyingTitle);
-  doc.setLineWidth(0.3);
+  doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
   y += LINE_HEIGHT + 2;
 

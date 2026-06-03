@@ -37,6 +37,10 @@ function createMockDoc(): jsPDF {
 }
 
 describe('pdf-primitives helpers', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('formatValue', () => {
     it('should format a number with decimals and unit', () => {
       expect(formatValue(1234.5678, 'daN')).toBe('1234.568 daN');

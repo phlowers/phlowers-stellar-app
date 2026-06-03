@@ -60,6 +60,10 @@ function createMockReportData(overrides: Partial<VtlGuyingReportData> = {}): Vtl
 }
 
 describe('vtl-guying-report helpers', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('formatValue', () => {
     it('should format a positive number with 3 decimals and unit', () => {
       expect(formatValue(123.456789, 'daN')).toBe('123.457 daN');
@@ -242,11 +246,13 @@ describe('vtl-guying-report helpers', () => {
 
       expect(doc.addImage).toHaveBeenCalledWith(
         data.diagramImageBase64,
-        'PNG',
+        'SVG',
         expect.any(Number),
         expect.any(Number),
         expect.any(Number),
-        expect.any(Number)
+        expect.any(Number),
+        undefined,
+        'FAST'
       );
     });
 
@@ -266,11 +272,13 @@ describe('vtl-guying-report helpers', () => {
       const expectedImgX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT;
       expect(doc.addImage).toHaveBeenCalledWith(
         data.diagramImageBase64,
-        'PNG',
+        'SVG',
         expectedImgX,
         expect.any(Number),
         DIAGRAM_WIDTH,
-        expect.any(Number)
+        expect.any(Number),
+        undefined,
+        'FAST'
       );
     });
 

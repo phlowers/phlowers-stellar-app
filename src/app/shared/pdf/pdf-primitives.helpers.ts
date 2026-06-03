@@ -18,6 +18,13 @@ import {
   PAGE_SIZE
 } from '@shared/pdf/pdf-layout.constantes';
 
+/**
+ * Chunk size used when converting binary data to a latin1 string before base64 encoding.
+ * Keeping it well under the JS engine argument-count limit avoids `RangeError: Maximum call stack size exceeded`
+ * while remaining large enough to keep the number of `String.fromCharCode` calls (and intermediate strings) low.
+ */
+const BASE64_CHUNK_SIZE = 0x8000;
+
 /** Loads a file from a URL and returns its raw base64 encoding (no data URL prefix). */
 export async function loadFileAsBase64(url: string): Promise<string> {
   const response = await globalThis.fetch(url);
@@ -26,11 +33,12 @@ export async function loadFileAsBase64(url: string): Promise<string> {
   }
   const buffer = await response.arrayBuffer();
   const bytes = new Uint8Array(buffer);
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCodePoint(byte);
-  });
-  return globalThis.btoa(binary);
+  const chunks: string[] = [];
+  for (let offset = 0; offset < bytes.length; offset += BASE64_CHUNK_SIZE) {
+    const chunk = bytes.subarray(offset, offset + BASE64_CHUNK_SIZE);
+    chunks.push(String.fromCharCode(...chunk));
+  }
+  return globalThis.btoa(chunks.join(''));
 }
 
 /** Loads an image from a URL and returns it as a base64 data URL. */

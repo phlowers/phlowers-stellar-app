@@ -86,6 +86,14 @@ describe('VtlGuyingReportService', () => {
     service = TestBed.inject(VtlGuyingReportService);
   });
 
+  afterEach(() => {
+    // Restore only the fetch spy to avoid resetting the module-level jsPDF mock factory.
+    const fetchMock = vi.mocked(globalThis.fetch);
+    if (typeof fetchMock?.mockRestore === 'function') {
+      fetchMock.mockRestore();
+    }
+  });
+
   describe('generateReport', () => {
     it('should generate and save a PDF with the given data', async () => {
       const data = createMockReportData();
@@ -132,7 +140,7 @@ describe('VtlGuyingReportService', () => {
 
       const result = await service.getDiagramImageBase64();
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('img/VHL-Haubanage-Suspension-Droite.png');
+      expect(globalThis.fetch).toHaveBeenCalledWith('img/VHL-Haubanage-Suspension-Droite.webp');
       expect(result).toContain('data:');
     });
 
