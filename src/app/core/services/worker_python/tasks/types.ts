@@ -8,6 +8,7 @@
 import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
 import { AxesNorms, View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
+import { PoseResults } from '@shared/domain/models/section.model';
 
 /**
  * Available calculation tasks for the Python worker.
@@ -62,7 +63,11 @@ export enum Task {
   // compute gps coordinates using imported lambert data
   importLambert = 'importLambert',
   // lambert to gps and compare to gps coordinates using section data
-  importLambertAndValidate = 'importLambertAndValidate'
+  importLambertAndValidate = 'importLambertAndValidate',
+  // get equivalent span/ruling span value
+  getEquivalentSpan = 'getEquivalentSpan',
+  // compute pose table at different temperatures
+  getPoseTable = 'getPoseTable'
 }
 
 /**
@@ -361,6 +366,13 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  // Inputs for getEquivalentSpan task: no inputs
+  [Task.getEquivalentSpan]: undefined;
+  [Task.getPoseTable]: {
+    stepTemperature: number;
+    baseTemperature: number;
+    numberValues: number;
+  };
 }
 
 /**
@@ -489,4 +501,6 @@ export interface TaskOutputs {
     localization: Localization;
     meanGpsDiff: number;
   };
+  [Task.getEquivalentSpan]: { equivalentSpan: number };
+  [Task.getPoseTable]: PoseResults;
 }

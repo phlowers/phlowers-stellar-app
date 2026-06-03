@@ -25,6 +25,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
+import { TooltipModule } from 'primeng/tooltip';
 import { StudioComponent } from '@shared/components/studio/studio.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -49,6 +50,7 @@ import { CableLengthChangeComponent } from '@features/studio/loads/presentation/
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
+import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -68,6 +70,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     SelectModule,
     SelectButtonModule,
     TabsModule,
+    TooltipModule,
     StudioComponent,
     ButtonComponent,
     IconComponent,
@@ -83,7 +86,8 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     ToolbarDialogComponent,
     ObstaclesFormComponent,
     FreePositioningComponent,
-    CableSpanManipComponent
+    CableSpanManipComponent,
+    CableSupportManipComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',

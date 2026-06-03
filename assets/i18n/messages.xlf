@@ -1003,9 +1003,9 @@
         <source>Cable manip. at support</source>
       </segment>
     </unit>
-    <unit id="7283456687925421567">
+    <unit id="285378064919178685">
       <segment>
-        <source> Cable length change </source>
+        <source>Cable length change</source>
       </segment>
     </unit>
     <unit id="8033045192563886902">
@@ -2943,24 +2943,14 @@
         <source>Copy</source>
       </segment>
     </unit>
-    <unit id="361024812885364180">
+    <unit id="1964106600703167330">
       <segment>
-        <source> Cable manip. at span </source>
+        <source>Cable manip. at span</source>
       </segment>
     </unit>
     <unit id="2033387769986799452">
       <segment>
         <source>Add a description to the charge case</source>
-      </segment>
-    </unit>
-    <unit id="5405643706975513454">
-      <segment>
-        <source> Climate condition </source>
-      </segment>
-    </unit>
-    <unit id="5574365677854298291">
-      <segment>
-        <source> Load / Marking </source>
       </segment>
     </unit>
     <unit id="314315645942131479">
@@ -3437,6 +3427,196 @@
     <unit id="login.resolvingMode">
       <segment>
         <source> Checking sign-in mode… </source>
+      </segment>
+    </unit>
+    <unit id="2592368582911584624">
+      <segment>
+        <source>Temperature</source>
+      </segment>
+    </unit>
+    <unit id="3591668161648909105">
+      <segment>
+        <source>Pose parameter</source>
+      </segment>
+    </unit>
+    <unit id="5766174646934311301">
+      <segment>
+        <source>Pose table saved</source>
+      </segment>
+    </unit>
+    <unit id="7045123878111147511">
+      <segment>
+        <source>Required</source>
+      </segment>
+    </unit>
+    <unit id="7309469661148049512">
+      <segment>
+        <source>Horizontal tension Th</source>
+      </segment>
+    </unit>
+    <unit id="7391227148273452593">
+      <segment>
+        <source>Failed to save pose table</source>
+      </segment>
+    </unit>
+    <unit id="857595800568475491">
+      <segment>
+        <source>Equivalent span</source>
+      </segment>
+    </unit>
+    <unit id="3483082948592114240">
+      <segment>
+        <source>Value must be a whole number</source>
+      </segment>
+    </unit>
+    <unit id="7323621884957166471">
+      <segment>
+        <source>Lowest temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="7692794071516027083">
+      <segment>
+        <source>Computing step (°C)</source>
+      </segment>
+    </unit>
+    <unit id="793647796726231767">
+      <segment>
+        <source>Maximum 2 decimal places</source>
+      </segment>
+    </unit>
+    <unit id="1311567880462908443">
+      <segment>
+        <source>An error occurred while calculating the pose table</source>
+      </segment>
+    </unit>
+    <unit id="6184996295577577575">
+      <segment>
+        <source>waiting for calculation engine</source>
+      </segment>
+    </unit>
+    <unit id="2773256594291059859">
+      <segment>
+        <source>Failed to compute equivalent span</source>
+      </segment>
+    </unit>
+    <unit id="4156596140595162440">
+      <segment>
+        <source>Failed to compute pose table</source>
+      </segment>
+    </unit>
+    <unit id="studio.cable-modification.lengthening">
+      <segment>
+        <source>Lengthening</source>
+      </segment>
+    </unit>
+    <unit id="studio.cable-modification.shortening">
+      <segment>
+        <source>Shortening</source>
+      </segment>
+    </unit>
+    <unit id="1462805781680349874">
+      <segment>
+        <source>Lateral distance</source>
+      </segment>
+    </unit>
+    <unit id="1920846361866578565">
+      <segment>
+        <source>Rope handling</source>
+      </segment>
+    </unit>
+    <unit id="4814285799071780083">
+      <segment>
+        <source>Remove</source>
+      </segment>
+    </unit>
+    <unit id="2520878950143363220">
+      <segment>
+        <source>Crane handling</source>
+      </segment>
+    </unit>
+    <unit id="2827233633791350200">
+      <segment>
+        <source>Length</source>
+      </segment>
+    </unit>
+    <unit id="2853790489768628311">
+      <segment>
+        <source>Rope length</source>
+      </segment>
+    </unit>
+    <unit id="2872097738404332614">
+      <segment>
+        <source>displac. manip. type</source>
+      </segment>
+    </unit>
+    <unit id="3714697696770128443">
+      <segment>
+        <source>Add a manipulation</source>
+      </segment>
+    </unit>
+    <unit id="3853854766252837104">
+      <segment>
+        <source>Manipulation 1</source>
+      </segment>
+    </unit>
+    <unit id="5038647223347561047">
+      <segment>
+        <source>Shifting</source>
+      </segment>
+    </unit>
+    <unit id="5957382203761880934">
+      <segment>
+        <source>Manipulation 2</source>
+      </segment>
+    </unit>
+    <unit id="6294716411736188677">
+      <segment>
+        <source>Without chain</source>
+      </segment>
+    </unit>
+    <unit id="6812864257142349567">
+      <segment>
+        <source>Vert. displacement cable</source>
+      </segment>
+    </unit>
+    <unit id="7264037638321886448">
+      <segment>
+        <source>Automatic descent</source>
+      </segment>
+    </unit>
+    <unit id="8406636195144238829">
+      <segment>
+        <source>erase cable manipulation at support</source>
+      </segment>
+    </unit>
+    <unit id="8749123360857368229">
+      <segment>
+        <source>Shifting clamp length</source>
+      </segment>
+    </unit>
+    <unit id="1878041670267859136">
+      <segment>
+        <source>Manipulation type</source>
+      </segment>
+    </unit>
+    <unit id="3504482516346230693">
+      <segment>
+        <source>Failed to delete cable support manipulation</source>
+      </segment>
+    </unit>
+    <unit id="4119734138637628207">
+      <segment>
+        <source>Cable support manipulation saved</source>
+      </segment>
+    </unit>
+    <unit id="6089677328484597418">
+      <segment>
+        <source>Cable support manipulation deleted</source>
+      </segment>
+    </unit>
+    <unit id="6311801288162258647">
+      <segment>
+        <source>Failed to save cable support manipulation</source>
       </segment>
     </unit>
   </file>

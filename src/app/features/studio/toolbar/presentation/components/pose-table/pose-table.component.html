@@ -1,0 +1,125 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="table_chart" aria-hidden="true" />
+    <span i18n>Pose table</span>
+  </p>
+</ng-template>
+
+<form [formGroup]="form" (ngSubmit)="calculate()">
+  <dl>
+    <dt i18n>Base parameter</dt>
+    <dd data-testid="base-param-value">{{ baseParam() !== null ? (baseParam() | number: '1.0-2') + ' m' : '-' }}</dd>
+
+    <dt i18n>Base temperature</dt>
+    <dd data-testid="base-temp-value">{{ baseTemp() !== null ? (baseTemp() | number: '1.0-1') + ' °C' : '-' }}</dd>
+
+    <dt i18n>Equivalent span</dt>
+    <dd>
+      @if (!isPlotReady() || isCalculatingEquivalentSpan()) {
+        <app-icon class="spinner" icon="progress_activity" ariaLabel="waiting for calculation engine" i18n-ariaLabel />
+      } @else {
+        {{ equivalentSpan() !== null ? (equivalentSpan() | number: '1.0-1') + ' m' : '-' }}
+      }
+    </dd>
+  </dl>
+
+  <app-input-number
+    formControlName="lowestTemp"
+    label="Lowest temperature (°C)"
+    i18n-label
+    [min]="LOWEST_TEMP_MIN"
+    [max]="LOWEST_TEMP_MAX"
+    [step]="LOWEST_TEMP_STEP"
+    [isReadonly]="false"
+    [hasError]="form.controls.lowestTemp.invalid && form.controls.lowestTemp.touched"
+    [errorMessage]="getLowestTempError()"
+  />
+
+  <app-input-number
+    formControlName="computingStep"
+    label="Computing step (°C)"
+    i18n-label
+    [min]="COMPUTING_STEP_MIN"
+    [max]="COMPUTING_STEP_MAX"
+    [isReadonly]="false"
+    [hasError]="form.controls.computingStep.invalid && form.controls.computingStep.touched"
+    [errorMessage]="getComputingStepError()"
+  />
+
+  <button
+    type="submit"
+    app-btn
+    data-testid="calculate-btn"
+    [disabled]="form.invalid || isBusy()"
+    [btnLoading]="isBusy()"
+  >
+    <app-icon icon="rocket_launch" aria-hidden="true" />
+    <ng-container i18n>Calculate</ng-container>
+  </button>
+</form>
+
+@if (results(); as res) {
+  <div @expand>
+    <hr />
+
+    <h2 i18n>Results:</h2>
+
+    <table>
+      <tbody>
+        <tr>
+          <th scope="row" i18n>Temperature</th>
+          @for (temp of res.temperatures; track $index) {
+            <td>{{ temp }} °C</td>
+          }
+        </tr>
+
+        <tr>
+          <th scope="row" i18n>Pose parameter</th>
+          @for (param of res.poseParams; track $index) {
+            <td>{{ param | number: '1.0-2' }} m</td>
+          }
+        </tr>
+
+        <tr>
+          <th scope="row" i18n>Horizontal tension Th</th>
+          @for (tension of res.horizontalTensions; track $index) {
+            <td>{{ tension | number: '1.0-2' }} daN</td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+} @else if (poseTableError()) {
+  <p-message
+    severity="error"
+    class="calculation-error"
+    data-testid="pose-table-error"
+    text="An error occurred while calculating the pose table"
+    i18n-text
+  />
+}
+
+<ng-template #footer>
+  <button
+    app-btn
+    btnStyle="outlined"
+    type="button"
+    data-testid="save-btn"
+    [disabled]="!results() || form.invalid"
+    (click)="save()"
+  >
+    <app-icon icon="save" aria-hidden="true" />
+    <ng-container i18n>Save</ng-container>
+  </button>
+
+  <button
+    app-btn
+    type="button"
+    data-testid="report-btn"
+    [disabled]="!results() || form.invalid || isBusy()"
+    [btnLoading]="isBusy()"
+  >
+    <app-icon icon="description" aria-hidden="true" />
+    <ng-container i18n>Report</ng-container>
+  </button>
+</ng-template>

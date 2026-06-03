@@ -374,7 +374,7 @@
 
 ---
 
-## 24. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
+## 28. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
 
 | | |
 |---|---|
@@ -384,3 +384,4 @@
 | ⚠️ Confiance | **HIGH** |
 | Impact suppression | Removed both functions + `CatalogAttachment` import. Perf improvement: ~3s → ~100ms for support name dropdown. |
 | ✅ Validé | 🗑️ SUPPRIMÉ — 19/05/2026 |
+

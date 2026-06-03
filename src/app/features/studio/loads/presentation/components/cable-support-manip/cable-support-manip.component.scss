@@ -1,0 +1,73 @@
+@use 'abstract.extracts' as app;
+
+.header-btns {
+  @apply flex justify-between items-center mb-3;
+}
+
+.bypass-anonymous-box {
+  @apply pt-2 px-2 mb-3 rounded border;
+  border-color: var(--primary-700);
+}
+
+legend {
+  @apply mb-3;
+  @extend %heading-xs;
+}
+
+p-select,
+p-inputgroup {
+  @apply mb-3;
+}
+
+p-message {
+  @apply relative bottom-3;
+}
+
+.crane-divide {
+  @apply grid grid-cols-2 gap-x-2;
+  grid-template-areas:
+    'label1 label2'
+    'input1 input2'
+    'error1 .';
+
+  &__label1 {
+    grid-area: label1;
+  }
+
+  &__label2 {
+    grid-area: label2;
+  }
+
+  &__input1 {
+    grid-area: input1;
+  }
+
+  &__input2 {
+    grid-area: input2;
+  }
+
+  &__error1 {
+    grid-area: error1;
+  }
+}
+
+.rope-divide {
+  @apply flex gap-3 items-start mb-2;
+}
+
+.footer-btns {
+  @apply flex justify-end items-center gap-4 pt-5 pr-2;
+}
+
+.manip2 {
+  @apply relative;
+
+  legend {
+    @apply pr-28;
+  }
+
+  &__erase-btn {
+    @apply absolute right-0;
+    top: -2.1875rem;
+  }
+}

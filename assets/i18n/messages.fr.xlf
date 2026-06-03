@@ -3551,10 +3551,10 @@
         <target>Zoom</target>
       </segment>
     </unit>
-    <unit id="7283456687925421567">
+    <unit id="285378064919178685">
       <segment state="initial">
-        <source> Cable length change </source>
-        <target> Modif. longueur câble </target>
+        <source>Cable length change</source>
+        <target>Modif. longueur câble</target>
       </segment>
     </unit>
     <unit id="5507190015256557833">
@@ -3563,22 +3563,10 @@
         <target>Supprimer la modification de longueur du câble</target>
       </segment>
     </unit>
-    <unit id="5405643706975513454">
+    <unit id="1964106600703167330">
       <segment state="initial">
-        <source> Climate condition </source>
-        <target> Condition climatique </target>
-      </segment>
-    </unit>
-    <unit id="5574365677854298291">
-      <segment state="initial">
-        <source> Load / Marking </source>
-        <target> Charge / Marquage </target>
-      </segment>
-    </unit>
-    <unit id="361024812885364180">
-      <segment state="initial">
-        <source> Cable manip. at span </source>
-        <target> Manip. câble dans la portée </target>
+        <source>Cable manip. at span</source>
+        <target>Manip. câble dans la portée</target>
       </segment>
     </unit>
     <unit id="314315645942131479">
@@ -4149,6 +4137,234 @@
       <segment state="initial">
         <source> Redirecting to G@IA for sign in… </source>
         <target> Redirecting to G@IA for sign in… </target>
+      </segment>
+    </unit>
+    <unit id="857595800568475491">
+      <segment state="initial">
+        <source>Equivalent span</source>
+        <target>Portée équivalente</target>
+      </segment>
+    </unit>
+    <unit id="2592368582911584624">
+      <segment state="initial">
+        <source>Temperature</source>
+        <target>Température</target>
+      </segment>
+    </unit>
+    <unit id="3591668161648909105">
+      <segment state="initial">
+        <source>Pose parameter</source>
+        <target>Paramètre de pose</target>
+      </segment>
+    </unit>
+    <unit id="7309469661148049512">
+      <segment state="initial">
+        <source>Horizontal tension Th</source>
+        <target>Tension horizontale T0</target>
+      </segment>
+    </unit>
+    <unit id="5766174646934311301">
+      <segment state="initial">
+        <source>Pose table saved</source>
+        <target>Tableau de pose sauvegardé</target>
+      </segment>
+    </unit>
+    <unit id="7391227148273452593">
+      <segment state="initial">
+        <source>Failed to save pose table</source>
+        <target>Échec de la sauvegarde du tableau de pose</target>
+      </segment>
+    </unit>
+    <unit id="7045123878111147511">
+      <segment state="initial">
+        <source>Required</source>
+        <target>Requis</target>
+      </segment>
+    </unit>
+    <unit id="7323621884957166471">
+      <segment state="initial">
+        <source>Lowest temperature (°C)</source>
+        <target>Température la plus basse (°C)</target>
+      </segment>
+    </unit>
+    <unit id="7692794071516027083">
+      <segment state="initial">
+        <source>Computing step (°C)</source>
+        <target>Pas de calcul (°C)</target>
+      </segment>
+    </unit>
+    <unit id="793647796726231767">
+      <segment state="initial">
+        <source>Maximum 2 decimal places</source>
+        <target>Valeur à 2 décimales maximum</target>
+      </segment>
+    </unit>
+    <unit id="3483082948592114240">
+      <segment state="initial">
+        <source>Value must be a whole number</source>
+        <target>La valeur doit être un nombre entier</target>
+      </segment>
+    </unit>
+    <unit id="6184996295577577575">
+      <segment state="initial">
+        <source>waiting for calculation engine</source>
+        <target>En attente du moteur de calcul</target>
+      </segment>
+    </unit>
+    <unit id="3853854766252837104">
+      <segment state="initial">
+        <source>Manipulation 1</source>
+        <target>Manipulation 1</target>
+      </segment>
+    </unit>
+    <unit id="6812864257142349567">
+      <segment state="initial">
+        <source>Vert. displacement cable</source>
+        <target>Déplace. verticale câble</target>
+      </segment>
+    </unit>
+    <unit id="2872097738404332614">
+      <segment state="initial">
+        <source>displac. manip. type</source>
+        <target>Type de déplace. manip.</target>
+      </segment>
+    </unit>
+    <unit id="1462805781680349874">
+      <segment state="initial">
+        <source>Lateral distance</source>
+        <target>Écartement latéral</target>
+      </segment>
+    </unit>
+    <unit id="7264037638321886448">
+      <segment state="initial">
+        <source>Automatic descent</source>
+        <target>Descente automatique</target>
+      </segment>
+    </unit>
+    <unit id="2827233633791350200">
+      <segment state="initial">
+        <source>Length</source>
+        <target>Longueur</target>
+      </segment>
+    </unit>
+    <unit id="2853790489768628311">
+      <segment state="initial">
+        <source>Rope length</source>
+        <target>Longueur de corde</target>
+      </segment>
+    </unit>
+    <unit id="8749123360857368229">
+      <segment state="initial">
+        <source>Shifting clamp length</source>
+        <target>L. ripage de la pince</target>
+      </segment>
+    </unit>
+    <unit id="3714697696770128443">
+      <segment state="initial">
+        <source>Add a manipulation</source>
+        <target>Ajouter une manipulation</target>
+      </segment>
+    </unit>
+    <unit id="5957382203761880934">
+      <segment state="initial">
+        <source>Manipulation 2</source>
+        <target>Manipulation 2</target>
+      </segment>
+    </unit>
+    <unit id="4814285799071780083">
+      <segment state="initial">
+        <source>Remove</source>
+        <target>Supprimer</target>
+      </segment>
+    </unit>
+    <unit id="8406636195144238829">
+      <segment state="initial">
+        <source>erase cable manipulation at support</source>
+        <target>supprimer la manipulation de câble au support</target>
+      </segment>
+    </unit>
+    <unit id="2520878950143363220">
+      <segment state="initial">
+        <source>Crane handling</source>
+        <target>Manipulation à la grue</target>
+      </segment>
+    </unit>
+    <unit id="1920846361866578565">
+      <segment state="initial">
+        <source>Rope handling</source>
+        <target>Manipulation à la corde</target>
+      </segment>
+    </unit>
+    <unit id="5038647223347561047">
+      <segment state="initial">
+        <source>Shifting</source>
+        <target>Ripage</target>
+      </segment>
+    </unit>
+    <unit id="6294716411736188677">
+      <segment state="initial">
+        <source>Without chain</source>
+        <target>Sans chaîne</target>
+      </segment>
+    </unit>
+    <unit id="1311567880462908443">
+      <segment state="initial">
+        <source>An error occurred while calculating the pose table</source>
+        <target>Une erreur s&apos;est produite lors du calcul du tableau de pose</target>
+      </segment>
+    </unit>
+    <unit id="2773256594291059859">
+      <segment state="initial">
+        <source>Failed to compute equivalent span</source>
+        <target>Échec du calcul de la portée équivalente</target>
+      </segment>
+    </unit>
+    <unit id="4156596140595162440">
+      <segment state="initial">
+        <source>Failed to compute pose table</source>
+        <target>Échec du calcul du tableau de pose</target>
+      </segment>
+    </unit>
+    <unit id="studio.cable-modification.lengthening">
+      <segment state="translated">
+        <source>Lengthening</source>
+        <target>Allongement</target>
+      </segment>
+    </unit>
+    <unit id="studio.cable-modification.shortening">
+      <segment state="translated">
+        <source>Shortening</source>
+        <target>Raccourcissement</target>
+      </segment>
+    </unit>
+    <unit id="1878041670267859136">
+      <segment state="initial">
+        <source>Manipulation type</source>
+        <target>Type de manipulation</target>
+      </segment>
+    </unit>
+    <unit id="4119734138637628207">
+      <segment state="initial">
+        <source>Cable support manipulation saved</source>
+        <target>Manipulation de câble au support enregistrée</target>
+      </segment>
+    </unit>
+    <unit id="6311801288162258647">
+      <segment state="initial">
+        <source>Failed to save cable support manipulation</source>
+        <target>Échec de l&apos;enregistrement de la manipulation de câble au support</target>
+      </segment>
+    </unit>
+    <unit id="6089677328484597418">
+      <segment state="initial">
+        <source>Cable support manipulation deleted</source>
+        <target>Manipulation de câble au support supprimée</target>
+      </segment>
+    </unit>
+    <unit id="3504482516346230693">
+      <segment state="initial">
+        <source>Failed to delete cable support manipulation</source>
+        <target>Échec de la suppression de la manipulation de câble au support</target>
       </segment>
     </unit>
   </file>

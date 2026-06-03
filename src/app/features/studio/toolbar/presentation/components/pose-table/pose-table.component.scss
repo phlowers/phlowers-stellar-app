@@ -1,0 +1,137 @@
+@use 'sass:map';
+@use 'abstract.extracts' as app;
+
+form {
+  display: inline-grid;
+  column-gap: 2rem;
+  grid-template-areas:
+    'term1 term2 term3'
+    'value1 value2 value3'
+    'input1 input2 button';
+}
+
+dl {
+  display: contents;
+}
+
+dt {
+  @extend %label-style;
+  align-self: end;
+
+  &:nth-of-type(1) {
+    grid-area: term1;
+  }
+
+  &:nth-of-type(2) {
+    grid-area: term2;
+  }
+
+  &:nth-of-type(3) {
+    grid-area: term3;
+  }
+}
+
+dd {
+  @extend %text-m-400;
+  padding: 0.375rem 0.5rem;
+  margin-bottom: 0.75rem;
+  align-self: start;
+
+  &:nth-of-type(1) {
+    grid-area: value1;
+  }
+
+  &:nth-of-type(2) {
+    grid-area: value2;
+  }
+
+  &:nth-of-type(3) {
+    grid-area: value3;
+  }
+}
+
+app-input-number {
+  width: 12.5rem;
+}
+
+app-input-number,
+form button {
+  align-self: start;
+}
+
+form button {
+  margin-top: 1rem; // re-align input number from input-number component with button
+}
+
+hr {
+  margin: 0.75rem 0;
+  border-top-color: var(--star-dust-300);
+}
+
+h2 {
+  @extend %heading-s;
+  color: var(--star-dust-950);
+  margin: 0 0 0.75rem;
+}
+
+table {
+  margin-bottom: 1rem;
+  border-width: 1px;
+  width: 100%;
+}
+
+table,
+th,
+td {
+  border-color: var(--star-dust-300);
+  border-style: solid;
+}
+
+tr {
+  &:nth-child(even) {
+    th,
+    td {
+      background-color: var(--star-dust-50);
+    }
+  }
+
+  &:nth-child(odd) {
+    th {
+      background-color: var(--primary-0);
+    }
+
+    td {
+      background-color: var(--grey-white);
+    }
+  }
+}
+
+th,
+td {
+  @extend %text-m-400;
+  color: var(--star-dust-950);
+  padding: 0.75rem 0.5rem;
+  border-bottom-width: 1px;
+  white-space: nowrap;
+}
+
+th {
+  text-align: left;
+}
+
+.calculation-error {
+  @apply block mt-4;
+}
+
+.spinner {
+  animation: poseTableSpin 0.6s linear infinite;
+}
+
+@keyframes poseTableSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

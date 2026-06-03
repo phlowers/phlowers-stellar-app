@@ -341,7 +341,7 @@ wheels = [
 
 [[package]]
 name = "mechaphlowers"
-version = "0.8.2"
+version = "0.8.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -354,9 +354,9 @@ dependencies = [
     { name = "thermohl" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/81/0975fb2bef8727ea24b6bf348bc42286a013c805e860361ef9d4edd43484/mechaphlowers-0.8.2.tar.gz", hash = "sha256:1f504645f715a2450fa4b2a4fce6de51b6255f95a75a36f078b701e3e383cb64", size = 158275 }
+sdist = { url = "https://files.pythonhosted.org/packages/57/64/9fb1a998fc0dc7f6c6807141ede8e53b03fba0b7e380408680a767f67465/mechaphlowers-0.8.3.tar.gz", hash = "sha256:8e39e6810ad19c958cef090f31ecd9d97ef2fa485741bc63747babaee6f996c3", size = 159350 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/b9/d3014ddff8b79ba2c645b1d33fd0c679f84b8868bbe7bfa4eef2ae4c6c46/mechaphlowers-0.8.2-py3-none-any.whl", hash = "sha256:a24b47230e9240b11b864530ab653525c0ed0dda6a62d1f349f0ac40feb7c0e1", size = 190991 },
+    { url = "https://files.pythonhosted.org/packages/b8/dc/dc4ea1cfb1bf256abf6a7c58f2c4ccb795370c1633d02c5115403174f571/mechaphlowers-0.8.3-py3-none-any.whl", hash = "sha256:6486a767eb09fb733418952a42087bfd0695186ee96b206790301e39175a7d7e", size = 192116 },
 ]
 
 [[package]]
@@ -892,7 +892,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mechaphlowers", specifier = "==0.8.2" }]
+requires-dist = [{ name = "mechaphlowers", specifier = "==0.8.3" }]
 
 [package.metadata.requires-dev]
 all = [
