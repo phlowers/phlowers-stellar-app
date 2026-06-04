@@ -9,6 +9,7 @@
 export { USER_SCHEMA, USER_SCHEMA_V3 } from './user.schema';
 export { STUDY_SCHEMA } from './study.schema';
 export { CATALOG_ATTACHMENT_SCHEMA } from './catalog-attachment.schema';
+export { CATALOG_SUPPORT_ATTACHMENT_SCHEMA } from './catalog-support-attachment.schema';
 export { CATALOG_CABLE_SCHEMA } from './catalog-cable.schema';
 export { CATALOG_CHAIN_SCHEMA } from './catalog-chain.schema';
 export { CATALOG_LINE_SCHEMA } from './catalog-line.schema';

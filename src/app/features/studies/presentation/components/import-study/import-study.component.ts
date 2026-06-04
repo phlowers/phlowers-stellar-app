@@ -17,7 +17,7 @@ import { GenericImportEngineService } from '@shared/import/application/services/
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
  *
  * Acts as a UI orchestration layer delegating all file processing to
- * {@link GenericImportEngineService} via the {@link StudyImportService} adapter.
+ * `GenericImportEngineService` via the `StudyImportService` adapter.
  * HTML and SCSS are preserved for zero user-visible regression.
  */
 @Component({

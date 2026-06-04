@@ -7,7 +7,7 @@
 
 /**
  * Bridge interface for passing support name data to AttachmentService
- * without creating a circular dependency between @shared and @features.
+ * without creating a circular dependency between `@shared` and `@features`.
  */
 export interface SupportNameEntry {
   /** Short display name of the support (from SUPPORT_IDR or SUPPORT_ADR) */

@@ -11,6 +11,7 @@ import {
   UserEntity,
   StudyEntity,
   CatalogAttachmentEntity,
+  CatalogSupportAttachmentEntity,
   CatalogCableEntity,
   CatalogChainEntity,
   CatalogLineEntity,
@@ -19,18 +20,7 @@ import {
   MetadataEntity
 } from './entities';
 
-import {
-  USER_SCHEMA,
-  USER_SCHEMA_V3,
-  STUDY_SCHEMA,
-  CATALOG_ATTACHMENT_SCHEMA,
-  CATALOG_CABLE_SCHEMA,
-  CATALOG_CHAIN_SCHEMA,
-  CATALOG_LINE_SCHEMA,
-  CATALOG_MAINTENANCE_SCHEMA,
-  CATALOG_OBSTACLE_TYPE_SCHEMA,
-  METADATA_SCHEMA
-} from './schemas';
+import { applyStellarDbVersions } from './app-database.versions';
 
 /**
  * Application database class using Dexie (IndexedDB wrapper).
@@ -55,8 +45,10 @@ export class AppDatabase extends Dexie {
   /** Table storing power line studies */
   studies!: Table<StudyEntity, string>;
 
-  /** Table storing attachment catalog data */
+  /** Table storing attachment catalog data (legacy flat schema, removed in V6) */
   catAttachments!: Table<CatalogAttachmentEntity, string>;
+  /** Table storing attachment catalog data grouped by support_name (V6+) */
+  catSupportAttachments!: Table<CatalogSupportAttachmentEntity, string>;
   /** Table storing cable/conductor catalog data */
   catCables!: Table<CatalogCableEntity, string>;
   /** Table storing insulator chain catalog data */
@@ -76,69 +68,7 @@ export class AppDatabase extends Dexie {
    */
   constructor() {
     super('stellar-db');
-
-    this.version(1).stores({
-      ...USER_SCHEMA,
-      ...STUDY_SCHEMA,
-      ...CATALOG_ATTACHMENT_SCHEMA,
-      ...CATALOG_CABLE_SCHEMA,
-      ...CATALOG_CHAIN_SCHEMA,
-      ...CATALOG_LINE_SCHEMA,
-      ...CATALOG_MAINTENANCE_SCHEMA,
-      ...CATALOG_OBSTACLE_TYPE_SCHEMA
-    });
-
-    this.version(2).stores({
-      ...USER_SCHEMA,
-      ...STUDY_SCHEMA,
-      ...CATALOG_ATTACHMENT_SCHEMA,
-      ...CATALOG_CABLE_SCHEMA,
-      ...CATALOG_CHAIN_SCHEMA,
-      ...CATALOG_LINE_SCHEMA,
-      ...CATALOG_MAINTENANCE_SCHEMA,
-      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
-      ...METADATA_SCHEMA
-    });
-
-    // V3: adds OIDC claims fields and sub index on users table.
-    this.version(3).stores({
-      ...USER_SCHEMA_V3,
-      ...STUDY_SCHEMA,
-      ...CATALOG_ATTACHMENT_SCHEMA,
-      ...CATALOG_CABLE_SCHEMA,
-      ...CATALOG_CHAIN_SCHEMA,
-      ...CATALOG_LINE_SCHEMA,
-      ...CATALOG_MAINTENANCE_SCHEMA,
-      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
-      ...METADATA_SCHEMA
-    });
-
-    // V4: adds support_name and attachment_set indexes on catAttachments for Dexie-side filtering.
-    this.version(4).stores({
-      ...USER_SCHEMA_V3,
-      ...STUDY_SCHEMA,
-      ...CATALOG_ATTACHMENT_SCHEMA,
-      ...CATALOG_CABLE_SCHEMA,
-      ...CATALOG_CHAIN_SCHEMA,
-      ...CATALOG_LINE_SCHEMA,
-      ...CATALOG_MAINTENANCE_SCHEMA,
-      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
-      ...METADATA_SCHEMA
-    });
-
-    // V5: adds compound index [support_name+attachment_set] on catAttachments
-    // to allow IndexedDB to filter and order in a single indexed scan.
-    this.version(5).stores({
-      ...USER_SCHEMA_V3,
-      ...STUDY_SCHEMA,
-      ...CATALOG_ATTACHMENT_SCHEMA,
-      ...CATALOG_CABLE_SCHEMA,
-      ...CATALOG_CHAIN_SCHEMA,
-      ...CATALOG_LINE_SCHEMA,
-      ...CATALOG_MAINTENANCE_SCHEMA,
-      ...CATALOG_OBSTACLE_TYPE_SCHEMA,
-      ...METADATA_SCHEMA
-    });
+    applyStellarDbVersions(this);
   }
 }
 

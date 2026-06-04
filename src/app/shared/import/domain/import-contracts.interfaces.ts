@@ -41,7 +41,7 @@ export type ImportPipelineStage =
  * The runtime constant `IMPORT_ERROR_CODES` lives in `import-contracts.constantes.ts`;
  * this type is derived from it for compile-time checking and autocomplete.
  * Adapters may emit additional context-specific codes via
- * {@link AdapterImportErrorCode} (e.g. `'CABLE_NOT_FOUND'`).
+ * `AdapterImportErrorCode` (e.g. `'CABLE_NOT_FOUND'`).
  */
 export type CanonicalImportErrorCode =
   | 'FILE_TYPE_NOT_ALLOWED'
@@ -66,8 +66,8 @@ export type AdapterImportErrorCode = string & { readonly __adapterImportErrorCod
 /**
  * Standardized error code for the import pipeline.
  *
- * Either a {@link CanonicalImportErrorCode} (autocompleted, type-checked) or an
- * {@link AdapterImportErrorCode} (branded string for adapter-specific codes).
+ * Either a `CanonicalImportErrorCode` (autocompleted, type-checked) or an
+ * `AdapterImportErrorCode` (branded string for adapter-specific codes).
  */
 export type ImportErrorCode = CanonicalImportErrorCode | AdapterImportErrorCode;
 

@@ -1,0 +1,9 @@
+support_id_catalog,support_idr,support_adr,support_tower,support_family,position,X,Y,Z,L
+CAT-001,SUP-A,Support Alpha,TOW-1,Lattice,1,0.0,0.0,12.5,4.0
+CAT-001,SUP-A,Support Alpha,TOW-1,Lattice,2,3.5,0.0,12.5,4.0
+CAT-001,SUP-A,Support Alpha,TOW-1,Lattice,3,7.0,0.0,12.5,4.0
+CAT-002,SUP-B,Support Bravo,TOW-2,Tubular,1,0.0,0.0,18.0,3.5
+CAT-002,SUP-B,Support Bravo,TOW-2,Tubular,2,0.0,4.0,18.0,3.5
+CAT-003,,Support Charlie,TOW-3,Lattice,1,1.0,2.0,15.0,
+CAT-003,,Support Charlie,TOW-3,Lattice,2,1.0,2.0,,3.0
+CAT-XXX,,,SKIPPED,,1,0,0,0,0

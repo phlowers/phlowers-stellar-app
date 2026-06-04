@@ -5,75 +5,37 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { MaintenanceService } from './maintenance.service';
 import { StorageService } from '@services/storage/storage.service';
-import { CatalogMaintenanceEntity } from '@infrastructure/database';
-import { MaintenanceCsvDto } from '@infrastructure/dto';
-import Papa from 'papaparse';
-
-// Mock Papa Parse
-vi.mock('papaparse', () => ({
-  __esModule: true,
-  default: {
-    parse: vi.fn()
-  },
-  parse: vi.fn()
-}));
-
-interface MockTable {
-  count: vi.Mock;
-  toArray: vi.Mock;
-  bulkAdd: vi.Mock;
-  clear?: vi.Mock;
-}
-
-interface MockDb {
-  catLines: MockTable;
-  catMaintenance: MockTable;
-}
+import { LoggerService } from '@core/services/logger/logger.service';
+import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 describe('MaintenanceService', () => {
   let service: MaintenanceService;
   let storageService: StorageService;
-  let mockDb: MockDb;
-  let mockMaintenanceTable: MockTable;
+  let csvImportClient: { importCsv: vi.Mock };
+  let logger: { error: vi.Mock };
+  let table: { toArray: vi.Mock };
 
   beforeEach(() => {
-    // Create mock database tables
-    mockMaintenanceTable = {
-      count: vi.fn().mockResolvedValue(3),
-      toArray: vi.fn().mockResolvedValue([]),
-      bulkAdd: vi.fn().mockResolvedValue(undefined),
-      clear: vi.fn().mockResolvedValue(undefined)
-    };
-
-    mockDb = {
-      catLines: {
-        count: vi.fn().mockResolvedValue(0),
-        toArray: vi.fn().mockResolvedValue([]),
-        bulkAdd: vi.fn().mockResolvedValue(undefined)
-      },
-      catMaintenance: mockMaintenanceTable
-    };
-
-    // Create spy for StorageService
+    table = { toArray: vi.fn().mockResolvedValue([]) };
     const storageServiceSpy = {
       ready$: new BehaviorSubject<boolean>(false),
-      db: mockDb
+      db: { catMaintenance: table }
     } as unknown as StorageService;
-
+    csvImportClient = {
+      importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'maintenance', totalRows: 0, totalKeys: 0 })
+    };
+    logger = { error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
         MaintenanceService,
-        { provide: StorageService, useValue: storageServiceSpy }
+        { provide: StorageService, useValue: storageServiceSpy },
+        { provide: CsvImportClientService, useValue: csvImportClient },
+        { provide: LoggerService, useValue: logger }
       ]
     });
-
     service = TestBed.inject(MaintenanceService);
     storageService = TestBed.inject(StorageService);
   });
@@ -82,433 +44,32 @@ describe('MaintenanceService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('constructor', () => {
-    it('should initialize ready state as false', () => {
-      expect(service.ready.value).toBe(false);
-    });
-
-    it('should subscribe to storage service ready state', () => {
-      const readySubject = storageService.ready$ as BehaviorSubject<boolean>;
-      readySubject.next(true);
-      expect(service.ready.value).toBe(true);
-    });
+  it('mirrors StorageService ready state', () => {
+    expect(service.ready.value).toBe(false);
+    (storageService.ready$ as BehaviorSubject<boolean>).next(true);
+    expect(service.ready.value).toBe(true);
   });
 
   describe('getMaintenance', () => {
-    it('should return maintenance array from database', async () => {
-      const mockMaintenance: CatalogMaintenanceEntity[] = [
-        {
-          maintenance_center: 'Maintenance Center 1',
-          maintenance_center_id: 'CM001',
-          regional_team: 'Regional Center 1',
-          regional_team_id: 'GMR001',
-          maintenance_team: 'Team 1',
-          maintenance_team_id: 'EEL001'
-        },
-        {
-          maintenance_center: 'Maintenance Center 2',
-          maintenance_center_id: 'CM002',
-          regional_team: 'Regional Center 2',
-          regional_team_id: 'GMR002',
-          maintenance_team: 'Team 2',
-          maintenance_team_id: 'EEL002'
-        }
-      ];
-      mockMaintenanceTable.toArray.mockResolvedValue(mockMaintenance);
-
-      const result = await service.getMaintenance();
-      expect(mockMaintenanceTable.toArray).toHaveBeenCalled();
-      expect(result).toEqual(mockMaintenance);
+    it('forwards toArray', async () => {
+      table.toArray.mockResolvedValue([{ maintenance_team_id: 'T1' }]);
+      expect(await service.getMaintenance()).toEqual([{ maintenance_team_id: 'T1' }]);
     });
-
-    it('should return undefined if database is not available', async () => {
+    it('returns undefined when db is missing', async () => {
       (storageService as unknown as { db: undefined }).db = undefined;
-      const result = await service.getMaintenance();
-      expect(result).toBeUndefined();
+      expect(await service.getMaintenance()).toBeUndefined();
     });
   });
 
   describe('importFromFile', () => {
-    let httpTestingController: HttpTestingController;
-
-    beforeEach(() => {
-      httpTestingController = TestBed.inject(HttpTestingController);
+    it('delegates to CsvImportClientService with the maintenance key', async () => {
+      await service.importFromFile();
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('maintenance');
     });
-
-    afterEach(() => {
-      httpTestingController.verify();
-    });
-
-    it('should import maintenance teams from CSV file successfully', async () => {
-      const mockCsvData: MaintenanceCsvDto[] = [
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: 'EEL001',
-          maintenance_team: 'Team 1'
-        },
-        {
-          maintenance_center_id: 'CM002',
-          maintenance_center: 'Maintenance Center 2',
-          regional_team_id: 'GMR002',
-          regional_team: 'Regional Center 2',
-          maintenance_team_id: 'EEL002',
-          maintenance_team: 'Team 2'
-        }
-      ];
-
-      const mockCsvContent =
-        'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
-
-      // Mock Papa Parse to call complete callback
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: mockCsvData,
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
-        }
-      });
-
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
-
-      expect(mockMaintenanceTable.clear).toHaveBeenCalled();
-      expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalledWith([
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: 'EEL001',
-          maintenance_team: 'Team 1'
-        },
-        {
-          maintenance_center_id: 'CM002',
-          maintenance_center: 'Maintenance Center 2',
-          regional_team_id: 'GMR002',
-          regional_team: 'Regional Center 2',
-          maintenance_team_id: 'EEL002',
-          maintenance_team: 'Team 2'
-        }
-      ]);
-    });
-
-    it('should handle empty CSV data', async () => {
-      const mockCsvContent = 'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\n';
-
-      // Mock Papa Parse to call complete callback with empty data
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: [],
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
-        }
-      });
-
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
-
-      expect(mockMaintenanceTable.clear).not.toHaveBeenCalled();
-      expect(mockMaintenanceTable.bulkAdd).not.toHaveBeenCalled();
-    });
-
-    it('should handle CSV data with null/undefined EEL_CUR', async () => {
-      const mockCsvData: MaintenanceCsvDto[] = [
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: '',
-          maintenance_team: 'Team 1'
-        },
-        {
-          maintenance_center_id: 'CM002',
-          maintenance_center: 'Maintenance Center 2',
-          regional_team_id: 'GMR002',
-          regional_team: 'Regional Center 2',
-          maintenance_team_id: 'EEL002',
-          maintenance_team: 'Team 2'
-        }
-      ];
-
-      const mockCsvContent =
-        'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,EEL002,Team 2';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: mockCsvData,
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
-        }
-      });
-
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
-
-      // Should only add the maintenance team with valid maintenance_team_id
-      expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalledWith([
-        {
-          maintenance_center_id: 'CM002',
-          maintenance_center: 'Maintenance Center 2',
-          regional_team_id: 'GMR002',
-          regional_team: 'Regional Center 2',
-          maintenance_team_id: 'EEL002',
-          maintenance_team: 'Team 2'
-        }
-      ]);
-    });
-
-    it('should handle missing database gracefully', async () => {
-      (storageService as unknown as { db: undefined }).db = undefined;
-
-      const mockCsvData: MaintenanceCsvDto[] = [
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: 'EEL001',
-          maintenance_team: 'Team 1'
-        }
-      ];
-
-      const mockCsvContent =
-        'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: mockCsvData,
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
-        }
-      });
-
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      // Should not throw error
-      await expect(importPromise).resolves.toBeUndefined();
-    });
-
-    it('should handle CSV data with mixed valid and invalid EEL_CUR values', async () => {
-      const mockCsvData: MaintenanceCsvDto[] = [
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: 'EEL001',
-          maintenance_team: 'Team 1'
-        },
-        {
-          maintenance_center_id: 'CM002',
-          maintenance_center: 'Maintenance Center 2',
-          regional_team_id: 'GMR002',
-          regional_team: 'Regional Center 2',
-          maintenance_team_id: '',
-          maintenance_team: 'Team 2'
-        },
-        {
-          maintenance_center_id: 'CM003',
-          maintenance_center: 'Maintenance Center 3',
-          regional_team_id: 'GMR003',
-          regional_team: 'Regional Center 3',
-          maintenance_team_id: 'EEL003',
-          maintenance_team: 'Team 3'
-        }
-      ];
-
-      const mockCsvContent =
-        'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1\nCM002,Maintenance Center 2,GMR002,Regional Center 2,,Team 2\nCM003,Maintenance Center 3,GMR003,Regional Center 3,EEL003,Team 3';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: mockCsvData,
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
-        }
-      });
-
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
-
-      // Should only add maintenance teams with valid maintenance_team_id
-      expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalledWith([
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: 'EEL001',
-          maintenance_team: 'Team 1'
-        },
-        {
-          maintenance_center_id: 'CM003',
-          maintenance_center: 'Maintenance Center 3',
-          regional_team_id: 'GMR003',
-          regional_team: 'Regional Center 3',
-          maintenance_team_id: 'EEL003',
-          maintenance_team: 'Team 3'
-        }
-      ]);
-    });
-
-    it('should clear maintenance table before adding new data', async () => {
-      const mockCsvData: MaintenanceCsvDto[] = [
-        {
-          maintenance_center_id: 'CM001',
-          maintenance_center: 'Maintenance Center 1',
-          regional_team_id: 'GMR001',
-          regional_team: 'Regional Center 1',
-          maintenance_team_id: 'EEL001',
-          maintenance_team: 'Team 1'
-        }
-      ];
-
-      const mockCsvContent =
-        'CM_CUR,CM_DESIGNATION,GMR_CUR,GMR_DESIGNATION,EEL_CUR,EEL_DESIGNATION\nCM001,Maintenance Center 1,GMR001,Regional Center 1,EEL001,Team 1';
-
-      vi.mocked(Papa.parse).mockImplementation((data: string, options: Papa.ParseConfig<MaintenanceCsvDto>) => {
-        if (options.complete) {
-          options.complete(
-            {
-              data: mockCsvData,
-              errors: [],
-              meta: {
-                delimiter: ',',
-                linebreak: '\n',
-                aborted: false,
-                truncated: false,
-                cursor: 0,
-                fields: []
-              }
-            },
-            undefined
-          );
-        }
-      });
-
-      const importPromise = service.importFromFile();
-
-      // Wait for the HTTP request to be made
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Mock the HTTP request
-      const req = httpTestingController.expectOne(`${globalThis.location.origin}/data/maintenance-teams.csv`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockCsvContent);
-
-      await importPromise;
-
-      // Verify clear is called before bulkAdd
-      expect(mockMaintenanceTable.clear).toHaveBeenCalled();
-      expect(mockMaintenanceTable.bulkAdd).toHaveBeenCalled();
+    it('logs and swallows errors from the client', async () => {
+      csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
+      await expect(service.importFromFile()).resolves.toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith('Error importing maintenance teams', expect.any(Error));
     });
   });
 });

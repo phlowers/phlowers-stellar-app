@@ -23,8 +23,8 @@ export const IMPORT_ADAPTER_TOKEN = new InjectionToken<ImportAdapter>('IMPORT_AD
 /**
  * Canonical error codes emitted by the generic import pipeline.
  *
- * Source of truth for {@link CanonicalImportErrorCode}; adapters may emit
- * additional context-specific codes via {@link adapterErrorCode}.
+ * Source of truth for `CanonicalImportErrorCode`; adapters may emit
+ * additional context-specific codes via `adapterErrorCode`.
  */
 export const IMPORT_ERROR_CODES = {
   FILE_TYPE_NOT_ALLOWED: 'FILE_TYPE_NOT_ALLOWED',
@@ -38,7 +38,7 @@ export const IMPORT_ERROR_CODES = {
 } as const satisfies Record<string, CanonicalImportErrorCode>;
 
 /**
- * Brands a raw string as an {@link AdapterImportErrorCode}.
+ * Brands a raw string as an `AdapterImportErrorCode`.
  *
  * @example
  * ```typescript

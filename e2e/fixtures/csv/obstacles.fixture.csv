@@ -1,0 +1,5 @@
+obstacle_type;obstacle_type_name;details
+fake_type_1;Fake Type 1;First anonymized obstacle type
+fake_type_2;Fake Type 2;Second anonymized obstacle type
+fake_type_3;Fake Type 3;Third anonymized obstacle type
+;Skipped row;Row with empty obstacle_type that must be filtered

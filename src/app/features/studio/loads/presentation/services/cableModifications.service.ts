@@ -29,7 +29,7 @@ export class CableModificationsService {
    * Set when the user clicks the cable modification annotation on the section
    * plot. The form component watches this signal, patches its `scope` control
    * and triggers `onScopeChange()` to pre-fill from the saved modification.
-   * Consumers must call {@link clearSelectedSpan} after consuming the value so
+   * Consumers must call `clearSelectedSpan` after consuming the value so
    * the signal can be re-triggered for the same span later.
    */
   readonly selectedSpanUuid = signal<string | null>(null);

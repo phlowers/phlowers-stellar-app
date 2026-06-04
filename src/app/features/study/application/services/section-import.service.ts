@@ -41,13 +41,13 @@ export { sectionImportErrors } from './section-import.constantes';
 /**
  * Service responsible for all Section JSON import business logic.
  *
- * Implements {@link ImportAdapter} for `Section` entities.
+ * Implements `ImportAdapter` for `Section` entities.
  * Accepts `.json` files containing a single serialized section object
  * or a GeoLiaison canton export (structure `cantons > general + portee unitaire`).
  *
  * ### Study context
  * Before processing files, the host component **must** call
- * {@link SectionImportService.setStudyContext} with the active study so the
+ * `SectionImportService.setStudyContext` with the active study so the
  * service can check collisions and persist the imported section.
  *
  * ### Pipeline stages performed internally
@@ -55,7 +55,7 @@ export { sectionImportErrors } from './section-import.constantes';
  * - **DECODING/PARSING**: reads raw text and parses JSON.
  * - **VALIDATION**: required fields + supports bounds (mirrors modal validation).
  * - **COLLISION_CHECK**: detects whether the UUID already exists in the study.
- * - **PERSISTENCE**: calls {@link SectionService.createOrUpdateSection}.
+ * - **PERSISTENCE**: calls `SectionService.createOrUpdateSection`.
  */
 @Injectable()
 export class SectionImportService implements ImportAdapter<Section> {
@@ -130,7 +130,7 @@ export class SectionImportService implements ImportAdapter<Section> {
    *
    * @returns The created or updated `Section`, or `null` if the user rejected a
    *   UUID collision prompt.
-   * @throws An {@link ImportError}-shaped object on any unrecoverable failure.
+   * @throws An `ImportError`-shaped object on any unrecoverable failure.
    */
   async processFile(file: File, collisionResolver: UUIDCollisionResolver): Promise<Section | null> {
     const study = this.studyContext();

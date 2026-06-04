@@ -1,7 +1,9 @@
 import {
   USER_SCHEMA,
+  USER_SCHEMA_V3,
   STUDY_SCHEMA,
   CATALOG_ATTACHMENT_SCHEMA,
+  CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
   CATALOG_CABLE_SCHEMA,
   CATALOG_CHAIN_SCHEMA,
   CATALOG_LINE_SCHEMA,
@@ -104,5 +106,27 @@ describe('AppDatabase', () => {
     const { AppDatabase, AppDB } = await import('@infrastructure/database/app-database');
 
     expect(AppDB).toBe(AppDatabase);
+  });
+
+  it('should register version 6 schema with catSupportAttachments and remove catAttachments', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    expect(dexieState.instances[0].versionCalls[5]).toEqual({
+      version: 6,
+      schema: {
+        ...USER_SCHEMA_V3,
+        ...STUDY_SCHEMA,
+        catAttachments: null,
+        ...CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
+        ...CATALOG_CABLE_SCHEMA,
+        ...CATALOG_CHAIN_SCHEMA,
+        ...CATALOG_LINE_SCHEMA,
+        ...CATALOG_MAINTENANCE_SCHEMA,
+        ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+        ...METADATA_SCHEMA
+      }
+    });
   });
 });
