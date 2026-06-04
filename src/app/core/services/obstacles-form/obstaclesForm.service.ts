@@ -120,15 +120,17 @@ export class ObstacleFormService {
    */
   readonly results = computed(() => {
     const distances = this.obstacleStateService.distances();
-    const obstacleUuid = this.formValue().uuid;
+    const obstacleUuid = this.obstaclesService.selectedObstacleUuid();
     const pointIndex = this.obstaclesService.activePointIndex();
 
     if (!distances.length || !obstacleUuid || pointIndex === null) {
       return { oblique: null, vertical: null, horizontal: null };
     }
 
-    const obstacleDistances = distances.find((d) => d.obstacleUuid === obstacleUuid);
-    const pointDistances = obstacleDistances?.points?.find((p) => p.pointIndex === pointIndex);
+    const pointDistances = distances
+      .filter((d) => d.obstacleUuid === obstacleUuid)
+      .flatMap((d) => d.points)
+      .find((p) => p.pointIndex === pointIndex);
 
     return {
       oblique: pointDistances?.distanceDiagonal ?? null,
