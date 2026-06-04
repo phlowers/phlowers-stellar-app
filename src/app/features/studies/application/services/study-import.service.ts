@@ -20,7 +20,7 @@ import { parseISO88591Base64, formatProtoV4Support, formatProtoV4Parameters } fr
 /**
  * Service responsible for all Study import business logic.
  *
- * Implements {@link ImportAdapter} for `Study` entities, supporting two file formats:
+ * Implements `ImportAdapter` for `Study` entities, supporting two file formats:
  * - `.clst` — proprietary app format (base64-encoded JSON)
  * - `.csv`  — Proto V4 format (semicolon-delimited CSV with extra parameter columns)
  *
@@ -30,7 +30,7 @@ import { parseISO88591Base64, formatProtoV4Support, formatProtoV4Parameters } fr
  * - CSV/JSON parsing
  * - domain entity construction
  * - UUID collision detection and resolution
- * - persistence via {@link StudiesService}
+ * - persistence via `StudiesService`
  * - success notifications
  */
 @Injectable({
@@ -81,7 +81,7 @@ export class StudyImportService implements ImportAdapter<Study> {
    * Runs the full import pipeline for the given file.
    *
    * @returns The imported `Study`, or `null` if the user rejected a UUID collision prompt.
-   * @throws An error with a key from {@link studyImportErrors} on any unrecoverable failure.
+   * @throws An error with a key from `studyImportErrors` on any unrecoverable failure.
    */
   async processFile(file: File, collisionResolver: UUIDCollisionResolver): Promise<Study | null> {
     if (file.type === 'text/csv') {

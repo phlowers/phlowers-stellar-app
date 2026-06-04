@@ -17,14 +17,14 @@ import {
 
 /**
  * Generic import engine that orchestrates the import pipeline for any context
- * (Study, Section, …) by delegating to a context-specific {@link ImportAdapter}.
+ * (Study, Section, …) by delegating to a context-specific `ImportAdapter`.
  *
  * ### Pipeline stages per file (in order)
  * 1. **FILE_VALIDATION** — `adapter.accepts(file)`
  * 2. **COLLISION_CHECK** — `adapter.checkCollision(file)` + `collisionResolver`
  * 3. **DECODING → PARSING → VALIDATION → MAPPING → PERSISTENCE**
  *    — `adapter.processFile(file, effectiveResolver)`
- * 4. **RESULT_REPORTING** — returns an {@link ImportOutcome} per file
+ * 4. **RESULT_REPORTING** — returns an `ImportOutcome` per file
  *
  * Files are processed **sequentially** to ensure predictable UX and correct
  * collision handling (one confirmation dialog at a time).
@@ -50,7 +50,7 @@ export class GenericImportEngineService {
    * @param collisionResolver - UI callback invoked when a UUID collision is
    *   detected. Resolves to `true` if the user accepts replacement, `false`
    *   to skip the file.
-   * @returns One {@link ImportOutcome} per file, in the same order.
+   * @returns One `ImportOutcome` per file, in the same order.
    */
   async processFiles(files: readonly File[], collisionResolver: UUIDCollisionResolver): Promise<ImportOutcome[]> {
     const outcomes: ImportOutcome[] = [];

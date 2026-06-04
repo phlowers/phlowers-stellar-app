@@ -9,6 +9,7 @@
 export type { UserEntity } from './user.entity';
 export type { StudyEntity } from './study.entity';
 export type { CatalogAttachmentEntity } from './catalog-attachment.entity';
+export type { CatalogSupportAttachmentEntity, AttachmentSetItem } from './catalog-support-attachment.entity';
 export type { CatalogCableEntity } from './catalog-cable.entity';
 export type { CatalogChainEntity } from './catalog-chain.entity';
 export type { CatalogLineEntity } from './catalog-line.entity';
