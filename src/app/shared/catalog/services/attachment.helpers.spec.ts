@@ -40,6 +40,11 @@ describe('groupChunkBySupport', () => {
     expect(result[0].attachments.map((a) => a.attachment_set)).toEqual([1, 2]);
   });
 
+  it('assigns a uuid to each grouped attachment item', () => {
+    const result = groupChunkBySupport([makeDto({ support_idr: 'A', position: '1' })]);
+    expect(result[0].attachments[0].uuid).toBe('mock-uuid');
+  });
+
   it('falls back to support_adr when support_idr is empty', () => {
     const result = groupChunkBySupport([makeDto({ support_idr: '', support_adr: 'Fallback' })]);
     expect(result[0].support_name).toBe('Fallback');
@@ -135,7 +140,7 @@ describe('mergeSupportAttachmentGroup', () => {
 });
 
 describe('toLegacyEntity', () => {
-  it('flattens a grouped entity + attachment into the legacy shape', () => {
+  it('flattens a grouped entity + attachment into the legacy shape, using the per-item uuid', () => {
     const result = toLegacyEntity(
       {
         uuid: 'g',
@@ -145,10 +150,10 @@ describe('toLegacyEntity', () => {
         support_tower: 'T1',
         attachments: []
       },
-      { attachment_set: 3, attachment_altitude: 9, cross_arm_length: 1, attachment_set_x: 2 }
+      { uuid: 'item-uuid', attachment_set: 3, attachment_altitude: 9, cross_arm_length: 1, attachment_set_x: 2 }
     );
     expect(result).toEqual({
-      uuid: 'g',
+      uuid: 'item-uuid',
       created_at: 'c',
       updated_at: 'u',
       support_name: 'S1',
@@ -160,6 +165,35 @@ describe('toLegacyEntity', () => {
       attachment_set_y: undefined,
       attachment_set_z: undefined
     });
+  });
+
+  it('falls back to a generated uuid for legacy items that lack one', () => {
+    const result = toLegacyEntity(
+      {
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: []
+      },
+      { attachment_set: 1 }
+    );
+    expect(result.uuid).toBe('mock-uuid');
+  });
+
+  it('produces distinct uuids for two attachment sets of the same support', () => {
+    const group = {
+      uuid: 'g',
+      created_at: 'c',
+      updated_at: 'u',
+      support_name: 'S1',
+      support_tower: 'T1',
+      attachments: []
+    };
+    const a = toLegacyEntity(group, { uuid: 'a', attachment_set: 1 });
+    const b = toLegacyEntity(group, { uuid: 'b', attachment_set: 2 });
+    expect(a.uuid).not.toBe(b.uuid);
   });
 });
 

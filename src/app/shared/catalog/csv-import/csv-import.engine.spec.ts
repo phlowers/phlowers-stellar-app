@@ -370,7 +370,7 @@ describe('runCsvImport (engine)', () => {
       const rows = parseFixtureCsv('maintenance');
       const papa = makePapaSingleChunkDriver(rows);
       await runCsvImport('http://x', createMaintenanceConfig(), { papa, resolveTable: () => table }, () => undefined);
-      const entities = recorder.bulkAddCalls[0] as { maintenance_team_id: string; maintenance_center_id: string }[];
+      const entities = recorder.bulkPutCalls[0] as { maintenance_team_id: string; maintenance_center_id: string }[];
       // One row has empty maintenance_team_id → filtered
       expect(entities).toHaveLength(6);
       // Fallback maintenance_center_id ← maintenance_id when empty

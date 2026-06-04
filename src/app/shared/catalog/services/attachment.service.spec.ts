@@ -128,7 +128,7 @@ describe('AttachmentService', () => {
       expect(mockTable.get).toHaveBeenCalledWith('S1');
       expect(result.map((a) => a.attachment_set)).toEqual([1, 2]);
       expect(result[0]).toMatchObject({
-        uuid: 'grp-uuid',
+        uuid: 'mock-uuid-123',
         support_name: 'S1',
         support_tower: 'T1',
         attachment_set: 1,

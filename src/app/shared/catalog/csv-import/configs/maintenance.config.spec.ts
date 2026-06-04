@@ -43,24 +43,24 @@ describe('maintenance.config - mapMaintenanceRow', () => {
 });
 
 describe('maintenance.config - createMaintenanceConfig', () => {
-  it('uses bulkAdd and returns team ids as keys', async () => {
+  it('uses bulkPut and returns team ids as keys', async () => {
     const config = createMaintenanceConfig();
-    const bulkAdd = vi.fn().mockResolvedValue(undefined);
+    const bulkPut = vi.fn().mockResolvedValue(undefined);
     const rows = parseFixtureCsv<MaintenanceCsvDto>('maintenance');
-    const r = await config.processChunk(rows, { table: { bulkAdd } as never, now: '2026-01-01' });
-    expect(bulkAdd).toHaveBeenCalledTimes(1);
+    const r = await config.processChunk(rows, { table: { bulkPut } as never, now: '2026-01-01' });
+    expect(bulkPut).toHaveBeenCalledTimes(1);
     expect(r.processedRows).toBe(rows.length);
     expect(r.keys).toEqual(['TEAM-NA1', 'TEAM-NA2', 'TEAM-NB1', 'TEAM-SA1', 'TEAM-SA2', 'TEAM-SB1']);
   });
 
   it('skips empty chunks', async () => {
     const config = createMaintenanceConfig();
-    const bulkAdd = vi.fn();
+    const bulkPut = vi.fn();
     const r = await config.processChunk([{ maintenance_team_id: '' } as MaintenanceCsvDto], {
-      table: { bulkAdd } as never,
+      table: { bulkPut } as never,
       now: '2026-01-01'
     });
-    expect(bulkAdd).not.toHaveBeenCalled();
+    expect(bulkPut).not.toHaveBeenCalled();
     expect(r.keys).toBeUndefined();
   });
 });

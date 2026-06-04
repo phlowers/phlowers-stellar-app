@@ -33,6 +33,7 @@ export const groupChunkBySupport = (rows: AttachmentCsvDto[]): SupportAttachment
     const attachmentSet = toOptionalNumber(row.position);
     if (attachmentSet === undefined) continue;
     const item: AttachmentSetItem = {
+      uuid: uuidv4(),
       attachment_set: attachmentSet,
       attachment_altitude: toOptionalNumber(row.Z),
       cross_arm_length: toOptionalNumber(row.L),
@@ -93,7 +94,10 @@ export const toLegacyEntity = (
   group: CatalogSupportAttachmentEntity,
   item: AttachmentSetItem
 ): CatalogAttachmentEntity => ({
-  uuid: group.uuid,
+  // Use the per-attachment-set uuid to preserve the `CatalogAttachmentEntity.uuid`
+  // uniqueness contract. Fall back to a freshly generated uuid for legacy rows
+  // persisted before `AttachmentSetItem.uuid` existed.
+  uuid: item.uuid ?? uuidv4(),
   created_at: group.created_at,
   updated_at: group.updated_at,
   support_name: group.support_name,

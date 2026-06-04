@@ -26,10 +26,9 @@ export const mapMaintenanceRow = (item: MaintenanceCsvDto): CatalogMaintenanceEn
  * Replace-mode config for `maintenance-teams.csv`.
  *
  * @remarks
- * Uses `bulkAdd` because the entity has no primary-key index in the Dexie
- * schema. This is safe only because the engine clears the table once before
- * streaming (default `clearBeforeImport: true`); flipping that flag would
- * cause unbounded duplicate rows on every re-import.
+ * `catMaintenance` uses `maintenance_team_id` as its primary key (see `CATALOG_MAINTENANCE_SCHEMA`).
+ * Prefer `bulkPut` (upsert) so imports tolerate duplicate keys and repeated runs,
+ * regardless of whether the engine clears the table before streaming.
  */
 export const createMaintenanceConfig = (): CsvImportConfig<MaintenanceCsvDto> => ({
   csvKey: 'maintenance',
@@ -40,7 +39,7 @@ export const createMaintenanceConfig = (): CsvImportConfig<MaintenanceCsvDto> =>
     if (entities.length === 0) {
       return { processedRows: rows.length };
     }
-    await (table as Table<CatalogMaintenanceEntity, unknown>).bulkAdd(entities);
+    await (table as Table<CatalogMaintenanceEntity, string>).bulkPut(entities);
     return { processedRows: rows.length, keys: entities.map((e) => e.maintenance_team_id) };
   }
 });

@@ -13,6 +13,11 @@
  * Mirrors the geometric columns of the legacy attachments CSV without the support-level metadata.
  */
 export interface AttachmentSetItem {
+  /** Unique identifier of this attachment set (UUID v4). Required to preserve the
+   * `CatalogAttachmentEntity.uuid` uniqueness contract when projecting back to the
+   * legacy flat shape via `toLegacyEntity`. Optional only to stay backward-compatible
+   * with rows persisted by previous versions; new rows always set it. */
+  uuid?: string;
   /** Attachment set number (CSV `position`) */
   attachment_set: number;
   /** Altitude of the attachment point (meters, CSV `Z`) */
