@@ -47,23 +47,132 @@ function asPressure(value: unknown): ObstacleRulePressure {
   throw new Error(`Invalid rule pressure value: ${String(value)}`);
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function assertObstacleDistanceEntry(value: unknown, obstacleIndex: number, distanceIndex: number): void {
+  if (!isObject(value)) {
+    throw new Error(
+      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}] must be an object`
+    );
+  }
+  if (typeof value['ruleType'] !== 'string') {
+    throw new Error(
+      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].ruleType must be a string`
+    );
+  }
+  if (typeof value['active'] !== 'boolean') {
+    throw new Error(
+      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].active must be a boolean`
+    );
+  }
+  if (value['overhang'] !== null && !isObject(value['overhang'])) {
+    throw new Error(
+      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].overhang must be an object or null`
+    );
+  }
+  if (value['lateral'] !== null && !isObject(value['lateral'])) {
+    throw new Error(
+      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].lateral must be an object or null`
+    );
+  }
+}
+
+function assertObstacleEntry(value: unknown, index: number): void {
+  if (!isObject(value)) {
+    throw new Error(`Obstacle configuration: obstacles[${index}] must be an object`);
+  }
+  if (typeof value['obstacleType'] !== 'string') {
+    throw new Error(`Obstacle configuration: obstacles[${index}].obstacleType must be a string`);
+  }
+  if (typeof value['obstacleName'] !== 'string') {
+    throw new Error(`Obstacle configuration: obstacles[${index}].obstacleName must be a string`);
+  }
+  if (typeof value['details'] !== 'string') {
+    throw new Error(`Obstacle configuration: obstacles[${index}].details must be a string`);
+  }
+  if (typeof value['redZone'] !== 'boolean') {
+    throw new Error(`Obstacle configuration: obstacles[${index}].redZone must be a boolean`);
+  }
+  asConformity(value['conformity']);
+  if (!Array.isArray(value['distances'])) {
+    throw new Error(`Obstacle configuration: obstacles[${index}].distances must be an array`);
+  }
+
+  value['distances'].forEach((distance, distanceIndex) => {
+    assertObstacleDistanceEntry(distance, index, distanceIndex);
+  });
+}
+
+function assertRulePointEntry(value: unknown, ruleIndex: number, pointName: 'lateralPoint' | 'overhangPoint'): void {
+  if (!isObject(value)) {
+    throw new Error(`Obstacle configuration: rules[${ruleIndex}].${pointName} must be an object`);
+  }
+  if (value['temperature'] !== null && !isFiniteNumber(value['temperature'])) {
+    throw new Error(
+      `Obstacle configuration: rules[${ruleIndex}].${pointName}.temperature must be a finite number or null`
+    );
+  }
+  asPressure(value['pressure']);
+  if (typeof value['redZone'] !== 'boolean') {
+    throw new Error(`Obstacle configuration: rules[${ruleIndex}].${pointName}.redZone must be a boolean`);
+  }
+}
+
+function assertRuleEntry(value: unknown, index: number): void {
+  if (!isObject(value)) {
+    throw new Error(`Obstacle configuration: rules[${index}] must be an object`);
+  }
+  if (typeof value['ruleType'] !== 'string') {
+    throw new Error(`Obstacle configuration: rules[${index}].ruleType must be a string`);
+  }
+  if (typeof value['ruleName'] !== 'string') {
+    throw new Error(`Obstacle configuration: rules[${index}].ruleName must be a string`);
+  }
+  if (typeof value['color'] !== 'string') {
+    throw new Error(`Obstacle configuration: rules[${index}].color must be a string`);
+  }
+  assertRulePointEntry(value['lateralPoint'], index, 'lateralPoint');
+  assertRulePointEntry(value['overhangPoint'], index, 'overhangPoint');
+}
+
+function assertWindZoneValueEntry(value: unknown, index: number): void {
+  if (!isObject(value)) {
+    throw new Error(`Obstacle configuration: windZone.values[${index}] must be an object`);
+  }
+  if (typeof value['label'] !== 'string') {
+    throw new Error(`Obstacle configuration: windZone.values[${index}].label must be a string`);
+  }
+  if (!isFiniteNumber(value['normal'])) {
+    throw new Error(`Obstacle configuration: windZone.values[${index}].normal must be a finite number`);
+  }
+  if (!isFiniteNumber(value['redZone'])) {
+    throw new Error(`Obstacle configuration: windZone.values[${index}].redZone must be a finite number`);
+  }
+}
+
 /**
- * Type guard validating that the parsed payload matches the expected
- * top-level shape of `obstacle_configuration.json`. Throws a descriptive
- * error when the payload is malformed.
+ * Type guard validating the expected top-level shape and the basic
+ * nested-entry shape of `obstacle_configuration.json`. Throws a
+ * descriptive error when the payload is malformed.
  */
 export function assertObstacleConfigurationJson(value: unknown): asserts value is ObstacleConfigurationJsonDto {
   if (!isObject(value)) throw new Error('Obstacle configuration: root must be an object');
-  if (!Array.isArray(value['obstacles'])) {
+  const obstacles = value['obstacles'];
+  if (!Array.isArray(obstacles)) {
     throw new Error('Obstacle configuration: `obstacles` must be an array');
   }
-  if (!Array.isArray(value['rules'])) {
+  const rules = value['rules'];
+  if (!Array.isArray(rules)) {
     throw new Error('Obstacle configuration: `rules` must be an array');
   }
-  if (!isObject(value['windZone'])) {
+  const windZone = value['windZone'];
+  if (!isObject(windZone)) {
     throw new Error('Obstacle configuration: `windZone` must be an object');
   }
-  if (!Array.isArray((value['windZone'] as Record<string, unknown>)['values'])) {
+  const windZoneValues = windZone['values'];
+  if (!Array.isArray(windZoneValues)) {
     throw new Error('Obstacle configuration: `windZone.values` must be an array');
   }
   if (!isObject(value['repartitionTemperatureFields'])) {
@@ -75,6 +184,16 @@ export function assertObstacleConfigurationJson(value: unknown): asserts value i
   if (!Array.isArray(value['intermediatePointPositions'])) {
     throw new Error('Obstacle configuration: `intermediatePointPositions` must be an array');
   }
+
+  obstacles.forEach((obstacle, index) => {
+    assertObstacleEntry(obstacle, index);
+  });
+  rules.forEach((rule, index) => {
+    assertRuleEntry(rule, index);
+  });
+  windZoneValues.forEach((entry, index) => {
+    assertWindZoneValueEntry(entry, index);
+  });
 }
 
 /**

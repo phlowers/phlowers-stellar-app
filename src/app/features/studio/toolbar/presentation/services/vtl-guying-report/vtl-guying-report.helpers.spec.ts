@@ -108,10 +108,10 @@ describe('vtl-guying-report helpers', () => {
   describe('drawFooter', () => {
     it('should draw the page number at bottom right', () => {
       const doc = createMockDoc();
-      drawFooter(doc, PDF_LABELS.pageFooter);
+      drawFooter(doc, `${PDF_LABELS.pageLabel} 1 / 1`);
 
       expect(doc.setFont).toHaveBeenCalledWith('Nunito', 'bold');
-      expect(doc.text).toHaveBeenCalledWith(PDF_LABELS.pageFooter, expect.any(Number), expect.any(Number), {
+      expect(doc.text).toHaveBeenCalledWith(`${PDF_LABELS.pageLabel} 1 / 1`, expect.any(Number), expect.any(Number), {
         align: 'right'
       });
     });

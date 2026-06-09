@@ -25,11 +25,10 @@ export interface JsonImportEngineDeps {
  * worker messages mirroring the CSV pipeline's protocol.
  *
  * @remarks
- * - Pure function: takes deps explicitly, does not touch globals.
+ * - Deterministic when `deps.fetcher` and `deps.now` are injected; otherwise falls back to the global `fetch`/`Date`.
  * - Posts a single `progress` message (1 chunk = whole file) and a `done`
  *   message at the end. Errors abort and bubble up as a rejected promise.
- * - The config owns transactional multi-table writes; the engine only
- *   handles I/O and message framing.
+ * - The config owns transactional multi-table writes
  *
  * @param url - Absolute URL to the JSON file (downloaded via the injected fetcher).
  * @param config - Catalog-specific JSON validation & persistence logic.
@@ -43,7 +42,7 @@ export async function runJsonImport(
   deps: JsonImportEngineDeps,
   post: (msg: CsvImportWorkerResponse) => void
 ): Promise<JsonImportApplyResult> {
-  const fetcher: JsonImportFetcher = deps.fetcher ?? ((u) => fetch(u));
+  const fetcher: JsonImportFetcher = deps.fetcher ?? ((u) => globalThis.fetch(u));
   const response = await fetcher(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);

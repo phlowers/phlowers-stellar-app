@@ -3619,49 +3619,9 @@
         <source>Failed to save cable support manipulation</source>
       </segment>
     </unit>
-    <unit id="1078813770547297527">
-      <segment>
-        <source>Résultante</source>
-      </segment>
-    </unit>
-    <unit id="1225687802189606898">
-      <segment>
-        <source>Charge H sous console</source>
-      </segment>
-    </unit>
-    <unit id="1373558341839680102">
-      <segment>
-        <source>Avec poulie</source>
-      </segment>
-    </unit>
-    <unit id="1967793000034640948">
-      <segment>
-        <source>Etude</source>
-      </segment>
-    </unit>
-    <unit id="2108971113934313507">
-      <segment>
-        <source>Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</source>
-      </segment>
-    </unit>
-    <unit id="2297298360520077567">
-      <segment>
-        <source>Tension dans le hauban</source>
-      </segment>
-    </unit>
-    <unit id="2948985903068648848">
-      <segment>
-        <source>Page 1 / 1</source>
-      </segment>
-    </unit>
     <unit id="2976977471041301829">
       <segment>
         <source>Report generated successfully</source>
-      </segment>
-    </unit>
-    <unit id="3744939183447379984">
-      <segment>
-        <source>VHL sans haubanage</source>
       </segment>
     </unit>
     <unit id="393970063236011083">
@@ -3669,104 +3629,99 @@
         <source>Failed to generate report</source>
       </segment>
     </unit>
-    <unit id="4023125088020504718">
-      <segment>
-        <source>Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d&apos;équilibrer les charges longitudinales au niveau de la console (pas de L).</source>
-      </segment>
-    </unit>
-    <unit id="4597855385036057201">
-      <segment>
-        <source>Auteur</source>
-      </segment>
-    </unit>
-    <unit id="4709450557795328287">
-      <segment>
-        <source>Non</source>
-      </segment>
-    </unit>
-    <unit id="4952719776065687721">
-      <segment>
-        <source>Commentaire</source>
-      </segment>
-    </unit>
-    <unit id="5304589874249649294">
-      <segment>
-        <source>Portée haubanée</source>
-      </segment>
-    </unit>
-    <unit id="5390238114494534960">
-      <segment>
-        <source>Support de référence</source>
-      </segment>
-    </unit>
-    <unit id="5410010428695219404">
-      <segment>
-        <source>VHL avec haubanage</source>
-      </segment>
-    </unit>
-    <unit id="545711764167857702">
-      <segment>
-        <source>Canton</source>
-      </segment>
-    </unit>
-    <unit id="5613125121792043739">
-      <segment>
-        <source>Angle hauban / horizon</source>
-      </segment>
-    </unit>
     <unit id="6360657045945199389">
       <segment>
         <source>Rapport</source>
       </segment>
     </unit>
-    <unit id="6479976207741742917">
+    <unit id="1863797323581703233">
       <segment>
-        <source>Distance horizontale</source>
+        <source>Load case</source>
       </segment>
     </unit>
-    <unit id="6725331613346636570">
+    <unit id="2845289325710007757">
       <segment>
-        <source>Charge L (si poulie)</source>
+        <source>V load</source>
       </segment>
     </unit>
-    <unit id="7007768098200834523">
+    <unit id="3259800647228467027">
       <segment>
-        <source>Charge V sous console</source>
+        <source>Tension in the guy wire</source>
       </segment>
     </unit>
-    <unit id="7150542092401191360">
+    <unit id="3274143162040061472">
       <segment>
-        <source>Haubanage</source>
+        <source>For a suspension with pulley, the tension in the guy wire equals the maximum tension across all bundle cables and a longitudinal load appears.</source>
       </segment>
     </unit>
-    <unit id="7180575964287205441">
+    <unit id="4294131164406016639">
       <segment>
-        <source>Oui</source>
+        <source>H load under cantilever</source>
       </segment>
     </unit>
-    <unit id="8215589265208701541">
+    <unit id="4747775226520170684">
       <segment>
-        <source>Etude et canton</source>
+        <source>Study and section</source>
       </segment>
     </unit>
-    <unit id="8286309815317428139">
+    <unit id="4802489672433261455">
       <segment>
-        <source>Type de support</source>
+        <source>Support type</source>
       </segment>
     </unit>
-    <unit id="8806646983185856986">
+    <unit id="5995597069170495090">
       <segment>
-        <source>Charge H</source>
+        <source>VTL &amp; Guying report</source>
       </segment>
     </unit>
-    <unit id="8932945560736990894">
+    <unit id="612601999167303469">
       <segment>
-        <source>Rapport VHL &amp; Haubanage</source>
+        <source>Guyed span</source>
       </segment>
     </unit>
-    <unit id="932373172594030347">
+    <unit id="6283335323447648051">
       <segment>
-        <source>Cas de charge</source>
+        <source>For a dead-end or a suspension without pulley, the tension in the guy wire balances longitudinal loads at cantilever level (no L).</source>
+      </segment>
+    </unit>
+    <unit id="6567765078388229836">
+      <segment>
+        <source>VTL with guying</source>
+      </segment>
+    </unit>
+    <unit id="7071470734400948493">
+      <segment>
+        <source>Author</source>
+      </segment>
+    </unit>
+    <unit id="7360567731477796149">
+      <segment>
+        <source>L load (if pulley)</source>
+      </segment>
+    </unit>
+    <unit id="7910219309489777827">
+      <segment>
+        <source>V load under cantilever</source>
+      </segment>
+    </unit>
+    <unit id="8139669233247727692">
+      <segment>
+        <source>Guy wire angle / horizon</source>
+      </segment>
+    </unit>
+    <unit id="9021969522172484243">
+      <segment>
+        <source>L load</source>
+      </segment>
+    </unit>
+    <unit id="998968190734068335">
+      <segment>
+        <source>H load</source>
+      </segment>
+    </unit>
+    <unit id="1407560924967345762">
+      <segment>
+        <source>Page</source>
       </segment>
     </unit>
   </file>
