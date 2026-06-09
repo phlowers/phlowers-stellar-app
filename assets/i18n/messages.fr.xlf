@@ -4367,5 +4367,185 @@
         <target>Échec de la suppression de la manipulation de câble au support</target>
       </segment>
     </unit>
+    <unit id="6360657045945199389">
+      <segment state="initial">
+        <source>Rapport</source>
+        <target>Rapport</target>
+      </segment>
+    </unit>
+    <unit id="8932945560736990894">
+      <segment state="initial">
+        <source>Rapport VHL &amp; Haubanage</source>
+        <target>Rapport VHL &amp; Haubanage</target>
+      </segment>
+    </unit>
+    <unit id="8215589265208701541">
+      <segment state="initial">
+        <source>Etude et canton</source>
+        <target>Etude et canton</target>
+      </segment>
+    </unit>
+    <unit id="4597855385036057201">
+      <segment state="initial">
+        <source>Auteur</source>
+        <target>Auteur</target>
+      </segment>
+    </unit>
+    <unit id="1967793000034640948">
+      <segment state="initial">
+        <source>Etude</source>
+        <target>Etude</target>
+      </segment>
+    </unit>
+    <unit id="545711764167857702">
+      <segment state="initial">
+        <source>Canton</source>
+        <target>Canton</target>
+      </segment>
+    </unit>
+    <unit id="4952719776065687721">
+      <segment state="initial">
+        <source>Commentaire</source>
+        <target>Commentaire</target>
+      </segment>
+    </unit>
+    <unit id="932373172594030347">
+      <segment state="initial">
+        <source>Cas de charge</source>
+        <target>Cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="3744939183447379984">
+      <segment state="initial">
+        <source>VHL sans haubanage</source>
+        <target>VHL sans haubanage</target>
+      </segment>
+    </unit>
+    <unit id="8806646983185856986">
+      <segment state="initial">
+        <source>Charge H</source>
+        <target>Charge H</target>
+      </segment>
+    </unit>
+    <unit id="1078813770547297527">
+      <segment state="initial">
+        <source>Résultante</source>
+        <target>Résultante</target>
+      </segment>
+    </unit>
+    <unit id="7150542092401191360">
+      <segment state="initial">
+        <source>Haubanage</source>
+        <target>Haubanage</target>
+      </segment>
+    </unit>
+    <unit id="5304589874249649294">
+      <segment state="initial">
+        <source>Portée haubanée</source>
+        <target>Portée haubanée</target>
+      </segment>
+    </unit>
+    <unit id="5390238114494534960">
+      <segment state="initial">
+        <source>Support de référence</source>
+        <target>Support de référence</target>
+      </segment>
+    </unit>
+    <unit id="8286309815317428139">
+      <segment state="initial">
+        <source>Type de support</source>
+        <target>Type de support</target>
+      </segment>
+    </unit>
+    <unit id="6479976207741742917">
+      <segment state="initial">
+        <source>Distance horizontale</source>
+        <target>Distance horizontale</target>
+      </segment>
+    </unit>
+    <unit id="1373558341839680102">
+      <segment state="initial">
+        <source>Avec poulie</source>
+        <target>Avec poulie</target>
+      </segment>
+    </unit>
+    <unit id="7180575964287205441">
+      <segment state="initial">
+        <source>Oui</source>
+        <target>Oui</target>
+      </segment>
+    </unit>
+    <unit id="4709450557795328287">
+      <segment state="initial">
+        <source>Non</source>
+        <target>Non</target>
+      </segment>
+    </unit>
+    <unit id="5410010428695219404">
+      <segment state="initial">
+        <source>VHL avec haubanage</source>
+        <target>VHL avec haubanage</target>
+      </segment>
+    </unit>
+    <unit id="2297298360520077567">
+      <segment state="initial">
+        <source>Tension dans le hauban</source>
+        <target>Tension dans le hauban</target>
+      </segment>
+    </unit>
+    <unit id="5613125121792043739">
+      <segment state="initial">
+        <source>Angle hauban / horizon</source>
+        <target>Angle hauban / horizon</target>
+      </segment>
+    </unit>
+    <unit id="7007768098200834523">
+      <segment state="initial">
+        <source>Charge V sous console</source>
+        <target>Charge V sous console</target>
+      </segment>
+    </unit>
+    <unit id="1225687802189606898">
+      <segment state="initial">
+        <source>Charge H sous console</source>
+        <target>Charge H sous console</target>
+      </segment>
+    </unit>
+    <unit id="6725331613346636570">
+      <segment state="initial">
+        <source>Charge L (si poulie)</source>
+        <target>Charge L (si poulie)</target>
+      </segment>
+    </unit>
+    <unit id="4023125088020504718">
+      <segment state="initial">
+        <source>Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d&apos;équilibrer les charges longitudinales au niveau de la console (pas de L).</source>
+        <target>Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d&apos;équilibrer les charges longitudinales au niveau de la console (pas de L).</target>
+      </segment>
+    </unit>
+    <unit id="2108971113934313507">
+      <segment state="initial">
+        <source>Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</source>
+        <target>Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</target>
+      </segment>
+    </unit>
+    <unit id="2948985903068648848">
+      <segment state="initial">
+        <source>Page 1 / 1</source>
+        <target>Page 1 / 1</target>
+      </segment>
+    </unit>
+    <unit id="2976977471041301829">
+      <segment state="initial">
+        <source>Report generated successfully</source>
+        <target>Report generated successfully</target>
+      </segment>
+    </unit>
+    <unit id="393970063236011083">
+      <segment state="initial">
+        <source>Failed to generate report</source>
+        <target>Failed to generate report</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

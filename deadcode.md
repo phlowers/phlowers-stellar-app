@@ -412,3 +412,29 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | 3 files removed. Code shared across the 6 catalogs (cables/chains/lines/maintenance/obstacles/attachments). |
 | ✅ Validated | 🗑️ REMOVED — CSV pipeline consolidation |
+
+---
+
+## 31. `obstacle_type_rte.csv` (legacy obstacle CSV catalog)
+
+| | |
+|---|---|
+| 📍 Source | `public/data/obstacle_type_rte.csv` |
+| Code | 3-column CSV (`obstacle_type;obstacle_type_name;details`) historically imported by `ObstaclesService.importFromFile()`. |
+| 🔍 Evidence | Superseded by `public/data/obstacle_configuration.json` which carries the same 3 fields plus per-obstacle `redZone`/`conformity`, regulatory rules, conformity distances, wind zones and scalar config. The CSV file is no longer fetched by any worker config (`obstacles.config.ts` now points at `obstacle_configuration.json`). |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete the CSV file. The Python asset-hash script ignores extensions other than `.csv`/`.json` automatically. |
+| ✅ Validated | ⏳ PENDING — proposed on 2026-06-05 |
+
+---
+
+## 32. `ObstacleTypeCsvDto` interface
+
+| | |
+|---|---|
+| 📍 Source | `src/app/infrastructure/dto/obstacle-type-csv.dto.ts`, re-export in `src/app/infrastructure/dto/index.ts` line 14 |
+| Code | `export interface ObstacleTypeCsvDto { obstacle_type, obstacle_type_name, details }` |
+| 🔍 Evidence | Only consumed by the legacy CSV-based `obstacles.config.ts` and its spec file. After the JSON pivot, the obstacle import path uses `ObstacleConfigurationJsonDto` (co-located in `configs/obstacles.config.interfaces.ts`). The DTO and its re-export become orphan. The spec file `obstacles.config.spec.ts` is rewritten in Phase 5 to drop the import. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete `obstacle-type-csv.dto.ts` and remove the re-export line in `infrastructure/dto/index.ts`. |
+| ✅ Validated | ⏳ PENDING — proposed on 2026-06-05 |

@@ -107,15 +107,10 @@ describe('SectionService', () => {
     });
 
     service = TestBed.inject(SectionService);
-
-    // Mock Date to have predictable timestamps
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-01-15T12:00:00.000Z'));
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    vi.useRealTimers();
   });
 
   it('should be created', () => {
@@ -124,6 +119,7 @@ describe('SectionService', () => {
 
   describe('createOrUpdateSection', () => {
     it('should create a new section when it does not exist', async () => {
+      const beforeCall = new Date().toISOString();
       const newSection: Section = {
         uuid: 'new-section-uuid',
         internal_id: 'INT-002',
@@ -182,22 +178,26 @@ describe('SectionService', () => {
 
       await service.createOrUpdateSection(studyWithoutNewSection, newSection);
 
+      const afterCall = new Date().toISOString();
+
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
         expect.objectContaining({
           sections: expect.arrayContaining([
             mockSection,
             expect.objectContaining({
               uuid: newSection.uuid,
-              name: newSection.name,
-              created_at: '2025-01-15T12:00:00.000Z',
-              updated_at: '2025-01-15T12:00:00.000Z'
+              name: newSection.name
             })
           ])
         })
       );
+      expect(newSection.created_at).toBe(newSection.updated_at);
+      expect(newSection.created_at >= beforeCall).toBe(true);
+      expect(newSection.created_at <= afterCall).toBe(true);
     });
 
     it('should update an existing section', async () => {
+      const previousUpdatedAt = mockSection.updated_at;
       const updatedSection: Section = {
         ...mockSection,
         name: 'Updated Section Name'
@@ -210,12 +210,12 @@ describe('SectionService', () => {
           sections: expect.arrayContaining([
             expect.objectContaining({
               uuid: mockSection.uuid,
-              name: 'Updated Section Name',
-              updated_at: '2025-01-15T12:00:00.000Z'
+              name: 'Updated Section Name'
             })
           ])
         })
       );
+      expect(updatedSection.updated_at).not.toBe(previousUpdatedAt);
     });
 
     it('should not modify created_at when updating existing section', async () => {

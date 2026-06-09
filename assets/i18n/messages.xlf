@@ -3619,5 +3619,155 @@
         <source>Failed to save cable support manipulation</source>
       </segment>
     </unit>
+    <unit id="1078813770547297527">
+      <segment>
+        <source>Résultante</source>
+      </segment>
+    </unit>
+    <unit id="1225687802189606898">
+      <segment>
+        <source>Charge H sous console</source>
+      </segment>
+    </unit>
+    <unit id="1373558341839680102">
+      <segment>
+        <source>Avec poulie</source>
+      </segment>
+    </unit>
+    <unit id="1967793000034640948">
+      <segment>
+        <source>Etude</source>
+      </segment>
+    </unit>
+    <unit id="2108971113934313507">
+      <segment>
+        <source>Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</source>
+      </segment>
+    </unit>
+    <unit id="2297298360520077567">
+      <segment>
+        <source>Tension dans le hauban</source>
+      </segment>
+    </unit>
+    <unit id="2948985903068648848">
+      <segment>
+        <source>Page 1 / 1</source>
+      </segment>
+    </unit>
+    <unit id="2976977471041301829">
+      <segment>
+        <source>Report generated successfully</source>
+      </segment>
+    </unit>
+    <unit id="3744939183447379984">
+      <segment>
+        <source>VHL sans haubanage</source>
+      </segment>
+    </unit>
+    <unit id="393970063236011083">
+      <segment>
+        <source>Failed to generate report</source>
+      </segment>
+    </unit>
+    <unit id="4023125088020504718">
+      <segment>
+        <source>Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d&apos;équilibrer les charges longitudinales au niveau de la console (pas de L).</source>
+      </segment>
+    </unit>
+    <unit id="4597855385036057201">
+      <segment>
+        <source>Auteur</source>
+      </segment>
+    </unit>
+    <unit id="4709450557795328287">
+      <segment>
+        <source>Non</source>
+      </segment>
+    </unit>
+    <unit id="4952719776065687721">
+      <segment>
+        <source>Commentaire</source>
+      </segment>
+    </unit>
+    <unit id="5304589874249649294">
+      <segment>
+        <source>Portée haubanée</source>
+      </segment>
+    </unit>
+    <unit id="5390238114494534960">
+      <segment>
+        <source>Support de référence</source>
+      </segment>
+    </unit>
+    <unit id="5410010428695219404">
+      <segment>
+        <source>VHL avec haubanage</source>
+      </segment>
+    </unit>
+    <unit id="545711764167857702">
+      <segment>
+        <source>Canton</source>
+      </segment>
+    </unit>
+    <unit id="5613125121792043739">
+      <segment>
+        <source>Angle hauban / horizon</source>
+      </segment>
+    </unit>
+    <unit id="6360657045945199389">
+      <segment>
+        <source>Rapport</source>
+      </segment>
+    </unit>
+    <unit id="6479976207741742917">
+      <segment>
+        <source>Distance horizontale</source>
+      </segment>
+    </unit>
+    <unit id="6725331613346636570">
+      <segment>
+        <source>Charge L (si poulie)</source>
+      </segment>
+    </unit>
+    <unit id="7007768098200834523">
+      <segment>
+        <source>Charge V sous console</source>
+      </segment>
+    </unit>
+    <unit id="7150542092401191360">
+      <segment>
+        <source>Haubanage</source>
+      </segment>
+    </unit>
+    <unit id="7180575964287205441">
+      <segment>
+        <source>Oui</source>
+      </segment>
+    </unit>
+    <unit id="8215589265208701541">
+      <segment>
+        <source>Etude et canton</source>
+      </segment>
+    </unit>
+    <unit id="8286309815317428139">
+      <segment>
+        <source>Type de support</source>
+      </segment>
+    </unit>
+    <unit id="8806646983185856986">
+      <segment>
+        <source>Charge H</source>
+      </segment>
+    </unit>
+    <unit id="8932945560736990894">
+      <segment>
+        <source>Rapport VHL &amp; Haubanage</source>
+      </segment>
+    </unit>
+    <unit id="932373172594030347">
+      <segment>
+        <source>Cas de charge</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

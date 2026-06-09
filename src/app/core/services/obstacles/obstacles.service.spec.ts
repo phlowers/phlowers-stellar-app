@@ -119,7 +119,7 @@ describe('ObstaclesService', () => {
     it('logs and swallows errors from the client', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
       await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing obstacle types', expect.any(Error));
+      expect(logger.error).toHaveBeenCalledWith('Error importing obstacle configuration', expect.any(Error));
     });
   });
 });

@@ -7,13 +7,16 @@
 import Papa from 'papaparse';
 import type { Table } from 'dexie';
 import { runCsvImport } from '../csv-import.engine';
+import { runJsonImport } from '../json-import.engine';
 import { openWorkerDb } from '../csv-import.worker-db';
-import { resolveCsvImportConfig } from '../configs';
+import { isJsonImportConfig, resolveCsvImportConfig } from '../configs';
+import type { StellarDexieHandle } from '../json-import.engine.interfaces';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-import.worker.interfaces';
 
 /**
- * Handles one CSV import request inside the worker. Opens Dexie, resolves the
- * config for the requested catalog, runs the engine, then closes the database.
+ * Handles one catalog import request inside the worker. Opens Dexie, resolves
+ * the config for the requested catalog, dispatches to the CSV or JSON engine
+ * depending on the config kind, then closes the database.
  *
  * @remarks
  * Exported so unit tests can drive it without spawning a real Web Worker.
@@ -29,6 +32,10 @@ export async function runWorkerImport(
   await db.open();
   try {
     const config = resolveCsvImportConfig(request.csvKey);
+    if (isJsonImportConfig(config)) {
+      await runJsonImport(request.url, config, { db: db as unknown as StellarDexieHandle }, post);
+      return;
+    }
     await runCsvImport(
       request.url,
       config,
