@@ -567,36 +567,36 @@ def init_section(js_inputs: dict):
     }
 
 
-def refresh_projection(js_inputs: dict):
-    logger.debug("===> refresh_projection triggered")
-    global plt_line, base_plt_line
-    python_inputs = js_to_python(js_inputs)
-    start_support = python_inputs["startSupport"]
-    end_support = python_inputs["endSupport"]
-    view = python_inputs["view"]
-    project = view == "2d"
+# def refresh_projection(js_inputs: dict):
+#     logger.debug("===> refresh_projection triggered")
+#     global plt_line, base_plt_line
+#     python_inputs = js_to_python(js_inputs)
+#     start_support = python_inputs["startSupport"]
+#     end_support = python_inputs["endSupport"]
+#     view = python_inputs["view"]
+#     project = view == "2d"
 
-    current_coords = get_coordinates(plt_line, project, start_support, end_support)
-    base_coords = (
-        get_coordinates(base_plt_line, project, start_support, end_support)
-        if base_plt_line
-        else None
-    )
-    middle_span = get_section_middle_span(start_support, end_support)
-    obstacles = obst.get_current_obstacles(
-        plt_line, project=project, support_index=middle_span
-    )
+#     current_coords = get_coordinates(plt_line, project, start_support, end_support)
+#     base_coords = (
+#         get_coordinates(base_plt_line, project, start_support, end_support)
+#         if base_plt_line
+#         else None
+#     )
+#     middle_span = get_section_middle_span(start_support, end_support)
+#     obstacles = obst.get_current_obstacles(
+#         plt_line, project=project, support_index=middle_span
+#     )
 
-    return {
-        "sectionOutput": {"current": current_coords, "base": base_coords},
-        "obstacles": obstacles,
-        "distances": obst.compute_distances(
-            inputs=obstacles,
-            project=project,
-            plot_engine=plt_line,
-            support_index=get_section_middle_span(start_support, end_support),
-        ),
-    }
+#     return {
+#         "sectionOutput": {"current": current_coords, "base": base_coords},
+#         "obstacles": obstacles,
+#         "distances": obst.compute_distances(
+#             inputs=obstacles,
+#             project=project,
+#             plot_engine=plt_line,
+#             support_index=get_section_middle_span(start_support, end_support),
+#         ),
+#     }
 
 
 init_config()

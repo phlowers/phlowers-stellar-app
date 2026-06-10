@@ -37,12 +37,12 @@ def get_coordinates(
     line_angle_rad = balance_engine.section_array.data.line_angle.to_numpy()
     tension_max, _ = balance_engine.span_model.tensions_sup_inf()
     utilization_rate = balance_engine.cable_array.utilization_rate(tension_max)
-    logger.debug(f"utilization rate: {utilization_rate}")
+    logger.debug("utilization rate: %s", utilization_rate)
     result = {
         "spans": span.coords,
         "insulators": insulators.coords,
         "supports": supports.coords,
-        "line_angle": units(line_angle_rad, 'rad').to('grad').m.tolist(),
+        "line_angle": units(line_angle_rad, "rad").to("grad").m.tolist(),
         "vtl_under_chain": [v.value().tolist() for v in vtl_under_chain],
         "vtl_under_console": [v.value().tolist() for v in vtl_under_console],
         "r_under_chain": balance_engine.balance_model.vhl_under_chain()
