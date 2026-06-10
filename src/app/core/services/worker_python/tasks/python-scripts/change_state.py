@@ -3,6 +3,7 @@ from mechaphlowers import units
 import logging
 
 import numpy as np
+from stellar_engine.entities import output
 
 logger = logging.getLogger("mechaphlowers")
 # Set logger level to WARNING so info messages are shown
@@ -85,8 +86,12 @@ def change_state(js_inputs: dict):
         len(base_engine.section_array.data) if base_engine else section_length
     )
     return {
-        "current": get_coordinates(plt_line, False, 0, section_length - 1),
-        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
+        "current": output.get_coordinates(
+            engine, plt_line, False, 0, section_length - 1
+        ),
+        "base": output.get_coordinates(
+            engine, base_plt_line, False, 0, base_section_length - 1
+        )
         if base_plt_line
         else None,
     }

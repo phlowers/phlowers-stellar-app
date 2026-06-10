@@ -1,3 +1,6 @@
+from stellar_engine.entities import output
+
+
 def cable_modification(js_inputs: dict):
     """Apply a cable length modification on a span and return the updated coordinates.
 
@@ -55,8 +58,12 @@ def cable_modification(js_inputs: dict):
     )
 
     return {
-        "current": get_coordinates(plt_line, False, 0, section_length - 1),
-        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1)
+        "current": output.get_coordinates(
+            engine, plt_line, False, 0, section_length - 1
+        ),
+        "base": output.get_coordinates(
+            engine, base_plt_line, False, 0, base_section_length - 1
+        )
         if base_plt_line
         else None,
     }
