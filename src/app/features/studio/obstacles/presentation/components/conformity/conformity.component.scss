@@ -1,0 +1,94 @@
+@use 'abstract.extracts' as app;
+
+dl,
+fieldset {
+  @apply contents;
+}
+
+dt {
+  @extend %label-style;
+}
+
+dd {
+  @extend %read-only-info;
+}
+
+legend {
+  @extend %heading-xs;
+}
+
+.form {
+  @apply grid gap-x-8 gap-y-3 grid-cols-5 mb-3;
+
+  grid-template-areas:
+    'titleObs titleObs titleObs titleObs titleObs'
+    'obsName obsSelect obsType obsSpan obsSupport'
+    'obsAltType obsLatDistType obsAltPt obsRefSuppDist obsDistLineAxis'
+    'titleForm titleForm titleForm titleForm titleForm'
+    'tension wind distribTemp latTemp conformitySelect'
+    'submit submit submit submit submit';
+
+  &__title-obstacle {
+    @apply justify-self-start;
+    grid-area: titleObs;
+  }
+  &__select-obstacle {
+    grid-area: obsSelect;
+  }
+  &__name-obstacle {
+    grid-area: obsName;
+  }
+  &__type-obstacle {
+    grid-area: obsType;
+  }
+  &__span-obstacle {
+    grid-area: obsSpan;
+  }
+  &__ref-supp-obstacle {
+    grid-area: obsSupport;
+  }
+  &__alt-type-obstacle {
+    grid-area: obsAltType;
+  }
+  &__lat-dist-type-obstacle {
+    grid-area: obsLatDistType;
+  }
+  &__alt-pt-obstacle {
+    grid-area: obsAltPt;
+  }
+  &__ref-supp-distance-obstacle {
+    grid-area: obsRefSuppDist;
+  }
+  &__dist-line-axis-obstacle {
+    grid-area: obsDistLineAxis;
+  }
+  &__title-form {
+    @apply justify-self-start;
+    grid-area: titleForm;
+  }
+  &__electric-tension {
+    @apply block;
+    grid-area: tension;
+  }
+  &__wind {
+    grid-area: wind;
+
+    &__checkboxes {
+      @apply grid gap-x-1 gap-y-3 items-center mt-3;
+      grid-template-columns: repeat(2, max-content);
+    }
+  }
+  &__distrib-temp {
+    grid-area: distribTemp;
+  }
+  &__lat-temp {
+    grid-area: latTemp;
+  }
+  &__conformity-select {
+    grid-area: conformitySelect;
+  }
+  &__submit {
+    @apply justify-self-end;
+    grid-area: submit;
+  }
+}

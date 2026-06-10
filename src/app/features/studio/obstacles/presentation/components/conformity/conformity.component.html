@@ -1,1 +1,191 @@
-<p>conformity works!</p>
+<form [formGroup]="form" class="form">
+  <fieldset>
+    <legend class="form__title-obstacle underline-text" i18n>Obstacle</legend>
+
+    @if (hasMultiplePoints()) {
+      <div class="form__select-obstacle">
+        <label for="selectedPoint" i18n>Obstacle's point</label>
+        <p-select
+          inputId="selectedPoint"
+          formControlName="selectedPoint"
+          [options]="pointOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+        />
+      </div>
+    }
+
+    <dl>
+      <div class="form__name-obstacle">
+        <dt i18n>Name</dt>
+        <dd>{{ obstacleData().name || '-' }}</dd>
+      </div>
+
+      <div class="form__type-obstacle">
+        <dt i18n>Type</dt>
+        <dd>{{ obstacleData().type || '-' }}</dd>
+      </div>
+
+      <div class="form__span-obstacle">
+        <dt i18n>Span</dt>
+        <dd>{{ spanLabel() }}</dd>
+      </div>
+
+      <div class="form__ref-supp-obstacle">
+        <dt i18n>Reference support</dt>
+        <dd>{{ referenceSupportLabel() }}</dd>
+      </div>
+
+      <div class="form__alt-type-obstacle">
+        <dt i18n>Altitude type</dt>
+        <dd>{{ altitudeTypeLabel() }}</dd>
+      </div>
+
+      <div class="form__lat-dist-type-obstacle">
+        <dt i18n>Lateral distance type</dt>
+        <dd>{{ lateralDistanceTypeLabel() }}</dd>
+      </div>
+
+      <div class="form__alt-pt-obstacle">
+        <dt i18n>Altitude point</dt>
+        <dd aria-live="polite">
+          {{ activePoint()?.z !== null && activePoint()?.z !== undefined ? activePoint()!.z + ' m' : '-' }}
+        </dd>
+      </div>
+
+      <div class="form__ref-supp-distance-obstacle">
+        <dt i18n>Reference support distance</dt>
+        <dd aria-live="polite">
+          {{ activePoint()?.x !== null && activePoint()?.x !== undefined ? activePoint()!.x + ' m' : '-' }}
+        </dd>
+      </div>
+
+      <div class="form__dist-line-axis-obstacle">
+        <dt i18n>Distance to line axis</dt>
+        <dd aria-live="polite">
+          {{ activePoint()?.y !== null && activePoint()?.y !== undefined ? activePoint()!.y + ' m' : '-' }}
+        </dd>
+      </div>
+    </dl>
+  </fieldset>
+
+  <fieldset>
+    <legend class="form__title-form underline-text" i18n>Form</legend>
+
+    <dl class="form__electric-tension">
+      <dt i18n>Electric tension</dt>
+      <dd>{{ electricTensionLabel() }}</dd>
+    </dl>
+
+    <div class="form__wind">
+      <label for="windZone" i18n>Wind zone</label>
+      <p-select
+        inputId="windZone"
+        formControlName="windZone"
+        [options]="windZoneOptions"
+        optionLabel="label"
+        optionValue="value"
+        fluid
+      />
+
+      <div class="form__wind__checkboxes">
+        <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" />
+        <label for="windMinus" i18n>Wind -</label>
+
+        <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" />
+        <label for="redZonePresence" i18n>Red zone presence</label>
+      </div>
+    </div>
+
+    <div class="form__distrib-temp">
+      <label for="distributedTemperature" i18n>Distributed temperature</label>
+      <input
+        id="distributedTemperature"
+        type="number"
+        pInputText
+        [attr.step]="BOUNDS.distributedTemperature.step"
+        [attr.min]="BOUNDS.distributedTemperature.min"
+        [attr.max]="BOUNDS.distributedTemperature.max"
+        formControlName="distributedTemperature"
+        [attr.aria-invalid]="form.controls.distributedTemperature.invalid ? 'true' : null"
+        [attr.aria-errormessage]="distributedTemperatureErrorId()"
+        (input)="truncateTwoDecimals($event)"
+        fluid
+      />
+      @if (form.controls.distributedTemperature.errors?.['min']) {
+        <p-message id="distributed-temperature-min-error" severity="error" size="small" variant="simple">
+          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.distributedTemperature.min }}
+        </p-message>
+      } @else if (form.controls.distributedTemperature.errors?.['max']) {
+        <p-message id="distributed-temperature-max-error" severity="error" size="small" variant="simple">
+          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.distributedTemperature.max }}
+        </p-message>
+      }
+    </div>
+
+    <div class="form__lat-temp">
+      <label for="lateralDistanceTemperature" i18n>Lateral distance temperature</label>
+      <input
+        id="lateralDistanceTemperature"
+        type="number"
+        pInputText
+        [attr.step]="BOUNDS.lateralDistanceTemperature.step"
+        [attr.min]="BOUNDS.lateralDistanceTemperature.min"
+        [attr.max]="BOUNDS.lateralDistanceTemperature.max"
+        formControlName="lateralDistanceTemperature"
+        aria-describedby="lateral-distance-hint"
+        [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
+        [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
+        (input)="truncateTwoDecimals($event)"
+        fluid
+      />
+      <small id="lateral-distance-hint" i18n>Descriptive text — will be dynamic</small>
+      @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
+        <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
+          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.min }}
+        </p-message>
+      } @else if (form.controls.lateralDistanceTemperature.errors?.['max']) {
+        <p-message id="lateral-distance-temperature-max-error" severity="error" size="small" variant="simple">
+          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.max }}
+        </p-message>
+      }
+    </div>
+
+    <div class="form__conformity-select">
+      <label for="conformityMultiselect" i18n>Conformity</label>
+      <p-multiselect
+        inputId="conformityMultiselect"
+        formControlName="conformity"
+        [options]="conformityOptions"
+        optionLabel="label"
+        optionValue="value"
+        [filter]="false"
+        fluid
+      />
+    </div>
+  </fieldset>
+
+  <button class="form__submit" app-btn type="submit" [disabled]="!canCalculate()" i18n>Calculate</button>
+</form>
+
+<div class="results">
+  <figure class="results__figure">
+    <div id="conformity-plot"></div>
+    <figcaption i18n>Conformity visualisation graph</figcaption>
+  </figure>
+
+  <table class="results__table">
+    <thead>
+      <tr>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row"></th>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

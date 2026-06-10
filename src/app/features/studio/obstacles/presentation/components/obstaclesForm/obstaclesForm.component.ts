@@ -25,6 +25,8 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { PlotService } from '@services/plot/plot.service';
+import { DialogModule } from 'primeng/dialog';
+import { ConformityComponent } from '../conformity/conformity.component';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -41,7 +43,9 @@ import { PlotService } from '@services/plot/plot.service';
     IconComponent,
     ToggleSwitchModule,
     FormsModule,
-    DecimalPipe
+    DecimalPipe,
+    DialogModule,
+    ConformityComponent
   ],
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss',
@@ -55,6 +59,7 @@ export class ObstaclesFormComponent {
   private readonly plotService = inject(PlotService);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly isConformityModalOpen = signal(false);
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
   readonly isCalculating = computed(
     () => this.obstacleFormService.isCalculatingObstacle() || this.plotService.loading()

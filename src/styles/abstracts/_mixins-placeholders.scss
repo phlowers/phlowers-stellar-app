@@ -77,3 +77,10 @@
     calc(20% - math.div($_column-gap, 1.25))
   ); // force grids cell width to 5 cols minus a quarter of gaps (5 columns, 4 gaps)
 }
+
+// For texts that need same typo and alignment with input fields. Mostly used in definition lists.
+%read-only-info {
+  @extend %text-m-400;
+  color: var(--grey-900);
+  padding: 0.4375rem 0.5rem 0.4375rem 0.625rem;
+}
