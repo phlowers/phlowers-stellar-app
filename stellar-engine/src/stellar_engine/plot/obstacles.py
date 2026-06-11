@@ -85,6 +85,8 @@ def delete_obstacle(
         return {"obstacles": result}
 
 
+# TODO: refaco the way it is called in typoescript
+# use PositionEngine.add_obstacle instead of PositionEngine.add_obstacle_array
 def add_obstacles(
     inputs: list,
     balance_engine: BalanceEngine,
@@ -124,7 +126,8 @@ def add_obstacles(
     df = pd.DataFrame(rows)
     df = change_obstacles_coordinates(df, balance_engine)
     plot_engine.add_obstacle_array(ObstacleArray(df))
-
+    # TODO: to get obstacles, use GroupPoints.obstacles or GroupPoints.obstacle_dict(),
+    # for better handling of frame change
     result = get_current_obstacles(
         plot_engine, project=project, support_index=support_index
     )
@@ -132,6 +135,8 @@ def add_obstacles(
     return {"obstacles": result}
 
 
+# TODO: use PositionEngine.get_distances_from_obstacles() for helping creating the dict result
+# In the long run: even use GroupPoints.distances to get distances
 def compute_distances(
     inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
 ):
