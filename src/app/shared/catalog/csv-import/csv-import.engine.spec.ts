@@ -9,14 +9,13 @@ import type { Table } from 'dexie';
 import { runCsvImport } from './csv-import.engine';
 import type { CsvImportConfig } from './csv-import.engine.interfaces';
 import type { CsvImportWorkerResponse } from './csv-import.worker.interfaces';
-import { parseFixtureCsv, readFixtureCsv } from './__tests__/csv-fixture.helpers';
+import { parseFixtureCsv } from './__tests__/csv-fixture.helpers';
 import type { CableCsvDto, ChainCsvDto, LineCsvDto, AttachmentCsvDto } from '@infrastructure/dto';
 import { createAttachmentsConfig } from './configs/attachments.config';
 import { createCablesConfig } from './configs/cables.config';
 import { createChainsConfig } from './configs/chains.config';
 import { createLinesConfig } from './configs/lines.config';
 import { createMaintenanceConfig } from './configs/maintenance.config';
-import { createObstaclesConfig } from './configs/obstacles.config';
 
 vi.mock('uuid', () => {
   let i = 0;
@@ -219,29 +218,6 @@ describe('runCsvImport (engine)', () => {
     });
   });
 
-  describe('semicolon delimiter (obstacles fixture)', () => {
-    it('forwards config.delimiter to Papa.parse', async () => {
-      const { table } = makeFakeTable();
-      const papa = {
-        parse: vi.fn((_url, opts: Papa.ParseConfig<unknown>) => {
-          expect(opts.delimiter).toBe(';');
-          const parser = { pause: vi.fn(), resume: vi.fn(), abort: vi.fn() } as unknown as Papa.Parser;
-          void (async () => {
-            await opts.chunk?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, parser);
-            opts.complete?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, undefined);
-          })();
-        })
-      } as unknown as typeof Papa;
-      await runCsvImport('http://x', createObstaclesConfig(), { papa, resolveTable: () => table }, () => undefined);
-      expect(papa.parse).toHaveBeenCalled();
-    });
-
-    it('parses the obstacles fixture correctly with `;` delimiter', () => {
-      const rows = parseFixtureCsv<{ obstacle_type: string }>('obstacles', ';');
-      expect(rows.map((r) => r.obstacle_type)).toEqual(['fake_type_1', 'fake_type_2', 'fake_type_3', '']);
-    });
-  });
-
   describe('chunkSize override', () => {
     it('forwards override.chunkSize over config.chunkSize', async () => {
       const { table } = makeFakeTable();
@@ -376,20 +352,6 @@ describe('runCsvImport (engine)', () => {
       // Fallback maintenance_center_id ← maintenance_id when empty
       const fallback = entities.find((e) => e.maintenance_team_id === 'TEAM-SA2');
       expect(fallback?.maintenance_center_id).toBe('FALLBACK-CTR');
-    });
-
-    it('obstacles fixture (semicolon) parses through createObstaclesConfig', async () => {
-      const { table, recorder } = makeFakeTable();
-      const csv = readFixtureCsv('obstacles');
-      const rows = Papa.parse<{ obstacle_type: string; obstacle_type_name: string; details: string }>(csv, {
-        header: true,
-        delimiter: ';',
-        skipEmptyLines: true
-      }).data;
-      const papa = makePapaSingleChunkDriver(rows);
-      await runCsvImport('http://x', createObstaclesConfig(), { papa, resolveTable: () => table }, () => undefined);
-      const entities = recorder.bulkPutCalls[0] as { obstacle_type: string }[];
-      expect(entities.map((e) => e.obstacle_type)).toEqual(['fake_type_1', 'fake_type_2', 'fake_type_3']);
     });
   });
 });

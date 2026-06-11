@@ -3691,8 +3691,8 @@
     </unit>
     <unit id="longitudinalDistance">
       <segment state="initial">
-        <source> Longitudinal dist. </source>
-        <target> Dist. longitudinale </target>
+        <source>Longitudinal dist.</source>
+        <target>Dist. longitudinale</target>
       </segment>
     </unit>
     <unit id="lateralDistance">
@@ -3995,9 +3995,9 @@
         <target>Erreur lors de la suppression du canton</target>
       </segment>
     </unit>
-    <unit id="6213790290851863697">
+    <unit id="477981869744681149">
       <segment state="initial">
-        <source>Fichier de géoliaison à importer non conforme.</source>
+        <source>The geolink file to import is invalid.</source>
         <target>Fichier de géoliaison à importer non conforme.</target>
       </segment>
     </unit>
@@ -4365,6 +4365,132 @@
       <segment state="initial">
         <source>Failed to delete cable support manipulation</source>
         <target>Échec de la suppression de la manipulation de câble au support</target>
+      </segment>
+    </unit>
+    <unit id="login.offlineWaitingForGaia">
+      <segment state="initial">
+        <source> You are offline. Reconnect to continue with G@IA sign in. </source>
+        <target> Vous êtes hors ligne. Reconnectez-vous pour continuer la connexion G@IA. </target>
+      </segment>
+    </unit>
+    <unit id="2976977471041301829">
+      <segment state="initial">
+        <source>Report generated successfully</source>
+        <target>Rapport généré avec succès</target>
+      </segment>
+    </unit>
+    <unit id="393970063236011083">
+      <segment state="initial">
+        <source>Failed to generate report</source>
+        <target>Échec de la génération du rapport</target>
+      </segment>
+    </unit>
+    <unit id="5995597069170495090">
+      <segment state="initial">
+        <source>VTL &amp; Guying report</source>
+        <target>Rapport VHL &amp; Haubanage</target>
+      </segment>
+    </unit>
+    <unit id="4747775226520170684">
+      <segment state="initial">
+        <source>Study and section</source>
+        <target>Etude et canton</target>
+      </segment>
+    </unit>
+    <unit id="7071470734400948493">
+      <segment state="initial">
+        <source>Author</source>
+        <target>Auteur</target>
+      </segment>
+    </unit>
+    <unit id="1863797323581703233">
+      <segment state="initial">
+        <source>Load case</source>
+        <target>Cas de charge</target>
+      </segment>
+    </unit>
+    <unit id="998968190734068335">
+      <segment state="initial">
+        <source>H load</source>
+        <target>Charge H</target>
+      </segment>
+    </unit>
+    <unit id="9021969522172484243">
+      <segment state="initial">
+        <source>L load</source>
+        <target>Charge L</target>
+      </segment>
+    </unit>
+    <unit id="612601999167303469">
+      <segment state="initial">
+        <source>Guyed span</source>
+        <target>Portée haubanée</target>
+      </segment>
+    </unit>
+    <unit id="4802489672433261455">
+      <segment state="initial">
+        <source>Support type</source>
+        <target>Type de support</target>
+      </segment>
+    </unit>
+    <unit id="6567765078388229836">
+      <segment state="initial">
+        <source>VTL with guying</source>
+        <target>VHL avec haubanage</target>
+      </segment>
+    </unit>
+    <unit id="7360567731477796149">
+      <segment state="initial">
+        <source>L load (if pulley)</source>
+        <target>Charge L (si poulie)</target>
+      </segment>
+    </unit>
+    <unit id="6283335323447648051">
+      <segment state="initial">
+        <source>For a dead-end or a suspension without pulley, the tension in the guy wire balances longitudinal loads at cantilever level (no L).</source>
+        <target>Pour un arrêt ou une suspension sans poulie, la tension dans le hauban permet d&apos;équilibrer les charges longitudinales au niveau de la console (pas de L).</target>
+      </segment>
+    </unit>
+    <unit id="3274143162040061472">
+      <segment state="initial">
+        <source>For a suspension with pulley, the tension in the guy wire equals the maximum tension across all bundle cables and a longitudinal load appears.</source>
+        <target>Pour une suspension avec poulie, la tension dans le hauban vaut la tension max dans tous les câbles du faisceau et une charge longitudinale apparaît.</target>
+      </segment>
+    </unit>
+    <unit id="2845289325710007757">
+      <segment state="initial">
+        <source>V load</source>
+        <target>Charge V</target>
+      </segment>
+    </unit>
+    <unit id="3259800647228467027">
+      <segment state="initial">
+        <source>Tension in the guy wire</source>
+        <target>Tension dans le hauban</target>
+      </segment>
+    </unit>
+    <unit id="8139669233247727692">
+      <segment state="initial">
+        <source>Guy wire angle / horizon</source>
+        <target>Angle du hauban / Horizon</target>
+      </segment>
+    </unit>
+    <unit id="7910219309489777827">
+      <segment state="initial">
+        <source>V load under cantilever</source>
+        <target>Charge V sous console</target>
+      </segment>
+    </unit>
+    <unit id="4294131164406016639">
+      <segment state="initial">
+        <source>H load under cantilever</source>
+        <target>Charge H sous console</target>
+      </segment>
+    </unit>
+    <unit id="1407560924967345762">
+      <segment state="initial">
+        <source>Page</source>
+        <target>Page</target>
       </segment>
     </unit>
   </file>

@@ -72,14 +72,16 @@ export class ObstaclesService {
   }
 
   /**
-   * Import obstacle type catalog data from `obstacle_type_rte.csv` via the
-   * generic Web Worker.
+   * Import obstacle configuration catalog from `obstacle_configuration.json`
+   * via the generic catalog import Web Worker. Persists obstacle types,
+   * per-obstacle configuration, regulatory rules, conformity distances and
+   * wind zones atomically.
    */
   async importFromFile(): Promise<void> {
     try {
       await this.csvImportClient.importCsv('obstacles');
     } catch (error) {
-      this.logger.error('Error importing obstacle types', error);
+      this.logger.error('Error importing obstacle configuration', error);
     }
   }
 }

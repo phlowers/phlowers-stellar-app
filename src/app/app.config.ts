@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -15,6 +15,7 @@ import { primengPreset } from '../styles/primeng-preset';
 import { provideMarkdown } from 'ngx-markdown';
 import { StorageService } from '@services/storage/storage.service';
 import { AuthService } from '@services/auth/auth.service';
+import { authSessionInterceptor } from '@services/auth/auth-session.interceptor';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 
 /** Root Angular application configuration with routing, HTTP, animations, PrimeNG theme, and markdown support. */
@@ -28,7 +29,7 @@ export const appConfig: ApplicationConfig = {
       }),
       withEnabledBlockingInitialNavigation()
     ),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([authSessionInterceptor])),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {

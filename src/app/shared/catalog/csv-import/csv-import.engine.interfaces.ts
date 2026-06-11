@@ -36,6 +36,8 @@ export interface CsvProcessChunkResult {
  * generically; the config only owns row mapping & merge semantics.
  */
 export interface CsvImportConfig<TRow = Record<string, string>> {
+  /** Discriminator — distinguishes streamed CSV configs from JSON configs in the registry. */
+  kind?: 'csv';
   /** Catalog key used to dispatch the worker. */
   csvKey: CsvKey;
   /** Filename under `/data/` (no leading slash). */

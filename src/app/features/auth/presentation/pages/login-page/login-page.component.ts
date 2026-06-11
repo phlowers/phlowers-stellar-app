@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
@@ -35,6 +35,7 @@ import { LOGIN_URL } from '@services/auth/auth.constants';
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -45,6 +46,7 @@ export class LoginPageComponent {
 
   readonly isSubmitting = signal(false);
   readonly submitError = signal<string | null>(null);
+  readonly isOnline = signal<boolean>(globalThis.navigator?.onLine !== false);
 
   /** Mirrors AuthService for template binding. */
   readonly modeResolved = this.authService.modeResolved;
@@ -52,6 +54,27 @@ export class LoginPageComponent {
   readonly showEmailFallback = computed(() => this.modeResolved() && !this.authService.oidcEnabled());
   /** True while we still wait for the server-side mode probe. */
   readonly isResolvingMode = computed(() => !this.modeResolved());
+  /** True when OIDC is required and the browser can reach the server. */
+  readonly showOidcRedirecting = computed(
+    () => this.modeResolved() && this.authService.oidcEnabled() && this.isOnline()
+  );
+  /** True when OIDC is required but the browser is currently offline. */
+  readonly showOfflineOidcWaiting = computed(
+    () => this.modeResolved() && this.authService.oidcEnabled() && !this.isOnline()
+  );
+
+  constructor() {
+    const handleOnline = () => this.isOnline.set(true);
+    const handleOffline = () => this.isOnline.set(false);
+
+    globalThis.addEventListener('online', handleOnline);
+    globalThis.addEventListener('offline', handleOffline);
+
+    this.destroyRef.onDestroy(() => {
+      globalThis.removeEventListener('online', handleOnline);
+      globalThis.removeEventListener('offline', handleOffline);
+    });
+  }
 
   /**
    * Whenever the resolved mode is OIDC, fire the G@IA prompt redirect.
@@ -59,7 +82,7 @@ export class LoginPageComponent {
    * the mode flips after a late probe response.
    */
   private readonly redirectEffect = effect(() => {
-    if (this.modeResolved() && this.authService.oidcEnabled()) {
+    if (this.showOidcRedirecting()) {
       this.redirectToOidcLogin();
     }
   });

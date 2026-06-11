@@ -66,6 +66,10 @@ describe('AuthService', () => {
     originalFetch = globalThis.fetch;
     mockFetch = vi.fn() as vi.Mock & typeof fetch;
     globalThis.fetch = mockFetch;
+    Object.defineProperty(globalThis.navigator, 'onLine', {
+      configurable: true,
+      value: true
+    });
 
     usersTableMock = {
       get: vi.fn().mockResolvedValue(undefined),
@@ -210,6 +214,35 @@ describe('AuthService', () => {
 
       expect(service.oidcEnabled()).toBe(true);
       expect(service.modeResolved()).toBe(true);
+      expect(service.serverSessionInvalid()).toBe(true);
+    });
+  });
+
+  describe('initialize — server mismatch blocks cache restore while online', () => {
+    it('should keep currentUser null even with cached OIDC user', async () => {
+      mockFetch.mockResolvedValue(userinfoStatus(501));
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+
+      await service.initialize();
+
+      expect(service.serverSessionInvalid()).toBe(true);
+      expect(service.currentUser()).toBeNull();
+    });
+  });
+
+  describe('initialize — offline keeps cache restore despite previous mismatch', () => {
+    it('should restore cached OIDC user when browser is offline', async () => {
+      service.serverSessionInvalid.set(true);
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        configurable: true,
+        value: false
+      });
+      mockFetch.mockRejectedValue(new Error('Offline'));
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+
+      await service.initialize();
+
+      expect(service.currentUser()).toEqual(testOidcUser);
     });
   });
 
@@ -347,6 +380,42 @@ describe('AuthService', () => {
       const result = await service.tryRestoreFromCache();
       expect(result).toBe(true);
       expect(service.currentUser()).toEqual(testEmailOnlyUser);
+    });
+
+    it('should refuse cache restore when server mismatch is explicit and browser is online', async () => {
+      service.serverSessionInvalid.set(true);
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+
+      const result = await service.tryRestoreFromCache();
+
+      expect(result).toBe(false);
+      expect(service.currentUser()).toBeNull();
+    });
+
+    it('should allow cache restore when server mismatch is set but browser is offline', async () => {
+      service.serverSessionInvalid.set(true);
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        configurable: true,
+        value: false
+      });
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+
+      const result = await service.tryRestoreFromCache();
+
+      expect(result).toBe(true);
+      expect(service.currentUser()).toEqual(testOidcUser);
+    });
+  });
+
+  describe('markServerMismatchFromStatus', () => {
+    it('should set mismatch for explicit auth status', () => {
+      service.markServerMismatchFromStatus(403);
+      expect(service.serverSessionInvalid()).toBe(true);
+    });
+
+    it('should ignore non-auth status', () => {
+      service.markServerMismatchFromStatus(500);
+      expect(service.serverSessionInvalid()).toBe(false);
     });
   });
 });

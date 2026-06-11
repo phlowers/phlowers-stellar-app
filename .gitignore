@@ -87,3 +87,4 @@ test-results/
 # OIDC dev mock — personal claims file (contains user-specific test data)
 dev-mock/oidc-claims.json
 plan.md
+public/data/obstacle_configuration.json

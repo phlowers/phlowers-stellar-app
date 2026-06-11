@@ -87,7 +87,7 @@ export class AppComponent implements OnInit {
       'cables.csv': () => this.cablesService.importFromFile(),
       'chains.csv': () => this.chainsService.importFromFile(),
       'attachments.csv': () => this.attachmentService.importFromFile(),
-      'obstacle_type_rte.csv': () => this.obstacleTypesService.importFromFile()
+      'obstacle_configuration.json': () => this.obstacleTypesService.importFromFile()
     };
 
     effect(() => {

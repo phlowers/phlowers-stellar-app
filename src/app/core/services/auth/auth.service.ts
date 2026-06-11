@@ -37,6 +37,8 @@ interface UserinfoResponse extends Partial<OidcClaims> {
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403, 501]);
+
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
@@ -56,6 +58,9 @@ export class AuthService {
 
   /** True once the first network probe has completed (success or failure). */
   readonly modeResolved = signal<boolean>(false);
+
+  /** True when the server explicitly reported an auth/session mismatch while reachable. */
+  readonly serverSessionInvalid = signal<boolean>(false);
 
   /** Convenience: true when the email fallback form may be displayed. */
   readonly emailFallbackAllowed = computed(() => this.modeResolved() && !this.oidcEnabled());
@@ -78,6 +83,11 @@ export class AuthService {
     }
 
     // 2. No active session — fall back to IndexedDB cache.
+    if (this.shouldForceServerResync()) {
+      this.currentUser.set(null);
+      return;
+    }
+
     const cached = await this.loadCachedUser();
     if (!cached) {
       return;
@@ -105,8 +115,24 @@ export class AuthService {
       return null;
     }
     const user = await this.upsertUser(claims);
+    this.serverSessionInvalid.set(false);
     this.currentUser.set(user);
     return user;
+  }
+
+  /** Returns true when online and a previous server response proved the local session is stale. */
+  shouldForceServerResync(): boolean {
+    return this.serverSessionInvalid() && this.isBrowserOnline();
+  }
+
+  /**
+   * Mark a server mismatch from an explicit HTTP status observed on a protected endpoint.
+   * Network failures must not call this method.
+   */
+  markServerMismatchFromStatus(status: number): void {
+    if (AuthService.SERVER_MISMATCH_STATUS_CODES.has(status)) {
+      this.serverSessionInvalid.set(true);
+    }
   }
 
   /**
@@ -129,11 +155,13 @@ export class AuthService {
     if (response.status === 401) {
       // Legacy server contract — assume OIDC required.
       this.oidcEnabled.set(true);
+      this.markServerMismatchFromStatus(response.status);
       this.modeResolved.set(true);
       return null;
     }
     if (!response.ok) {
       this.logger.warn(`AuthService: userinfo request failed (HTTP ${response.status})`);
+      this.markServerMismatchFromStatus(response.status);
       this.modeResolved.set(true);
       return null;
     }
@@ -148,6 +176,7 @@ export class AuthService {
     }
 
     this.oidcEnabled.set(data.oidcEnabled === true);
+    this.serverSessionInvalid.set(false);
     this.modeResolved.set(true);
 
     if (data.authenticated !== true) {
@@ -217,6 +246,10 @@ export class AuthService {
    * @returns `true` if a cached user was found and restored.
    */
   async tryRestoreFromCache(): Promise<boolean> {
+    if (this.shouldForceServerResync()) {
+      return false;
+    }
+
     const cachedUser = await this.loadCachedUser();
     if (!cachedUser) {
       return false;
@@ -231,5 +264,9 @@ export class AuthService {
   private async loadCachedUser(): Promise<User | null> {
     const users = await this.storageService.db.users.toArray();
     return users.length > 0 ? users[0] : null;
+  }
+
+  private isBrowserOnline(): boolean {
+    return globalThis.navigator?.onLine !== false;
   }
 }

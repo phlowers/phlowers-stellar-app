@@ -84,7 +84,7 @@ function currentManifest() {
       'chains.csv': readStaticCsvHash('chains.csv'),
       'lines.csv': readStaticCsvHash('lines.csv'),
       'maintenance-teams.csv': readStaticCsvHash('maintenance-teams.csv'),
-      'obstacle_type_rte.csv': readStaticCsvHash('obstacle_type_rte.csv')
+      'obstacle_configuration.json': readStaticCsvHash('obstacle_configuration.json')
     },
     files
   };

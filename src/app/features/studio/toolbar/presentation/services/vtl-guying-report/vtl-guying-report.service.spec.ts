@@ -11,12 +11,14 @@ vi.mock('jspdf', () => {
   const mockDoc = {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
+    setPage: vi.fn(),
     setLineWidth: vi.fn(),
     setDrawColor: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
     rect: vi.fn(),
     addImage: vi.fn(),
+    getNumberOfPages: vi.fn().mockReturnValue(1),
     getTextWidth: vi.fn().mockReturnValue(30),
     splitTextToSize: vi.fn().mockImplementation((text: string) => [text]),
     save: mockSave
@@ -100,6 +102,31 @@ describe('VtlGuyingReportService', () => {
       await service.generateReport(data);
 
       expect(mockNotificationService.success).toHaveBeenCalled();
+    });
+
+    it('should add a computed footer based on actual page count', async () => {
+      const data = createMockReportData();
+      const { __mockDoc } = (await import('jspdf')) as unknown as {
+        __mockDoc: {
+          getNumberOfPages: ReturnType<typeof vi.fn>;
+          setPage: ReturnType<typeof vi.fn>;
+          text: ReturnType<typeof vi.fn>;
+        };
+      };
+      __mockDoc.setPage.mockClear();
+      __mockDoc.text.mockClear();
+      __mockDoc.getNumberOfPages.mockReturnValue(2);
+
+      await service.generateReport(data);
+
+      expect(__mockDoc.setPage).toHaveBeenNthCalledWith(1, 1);
+      expect(__mockDoc.setPage).toHaveBeenNthCalledWith(2, 2);
+      expect(__mockDoc.text).toHaveBeenCalledWith('Page 1 / 2', expect.any(Number), expect.any(Number), {
+        align: 'right'
+      });
+      expect(__mockDoc.text).toHaveBeenCalledWith('Page 2 / 2', expect.any(Number), expect.any(Number), {
+        align: 'right'
+      });
     });
 
     it('should name the file with the report date', async () => {

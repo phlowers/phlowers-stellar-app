@@ -11,7 +11,12 @@ import { AuthService } from '@services/auth/auth.service';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 describe('authGuard', () => {
-  let authServiceMock: { currentUser: vi.Mock; tryRestoreFromCache: vi.Mock };
+  let authServiceMock: {
+    currentUser: vi.Mock;
+    tryRestoreFromCache: vi.Mock;
+    shouldForceServerResync: vi.Mock;
+    refreshFromNetwork: vi.Mock;
+  };
   let routerMock: { createUrlTree: vi.Mock };
 
   const dummyRoute = {} as ActivatedRouteSnapshot;
@@ -20,7 +25,9 @@ describe('authGuard', () => {
   beforeEach(() => {
     authServiceMock = {
       currentUser: vi.fn(),
-      tryRestoreFromCache: vi.fn().mockResolvedValue(false)
+      tryRestoreFromCache: vi.fn().mockResolvedValue(false),
+      shouldForceServerResync: vi.fn().mockReturnValue(false),
+      refreshFromNetwork: vi.fn().mockResolvedValue(null)
     };
 
     routerMock = {
@@ -41,6 +48,27 @@ describe('authGuard', () => {
     const result = await TestBed.runInInjectionContext(() => authGuard(dummyRoute, dummyState));
 
     expect(result).toBe(true);
+    expect(authServiceMock.shouldForceServerResync).toHaveBeenCalledTimes(1);
+    expect(authServiceMock.tryRestoreFromCache).not.toHaveBeenCalled();
+  });
+
+  it('should refresh from network when server mismatch is flagged', async () => {
+    authServiceMock.shouldForceServerResync.mockReturnValue(true);
+    authServiceMock.refreshFromNetwork.mockResolvedValue({ email: 'recovered@example.com' });
+
+    const result = await TestBed.runInInjectionContext(() => authGuard(dummyRoute, dummyState));
+
+    expect(authServiceMock.refreshFromNetwork).toHaveBeenCalledTimes(1);
+    expect(result).toBe(true);
+  });
+
+  it('should redirect to /login when resync fails after mismatch', async () => {
+    authServiceMock.shouldForceServerResync.mockReturnValue(true);
+    authServiceMock.refreshFromNetwork.mockResolvedValue(null);
+
+    await TestBed.runInInjectionContext(() => authGuard(dummyRoute, dummyState));
+
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(authServiceMock.tryRestoreFromCache).not.toHaveBeenCalled();
   });
 
