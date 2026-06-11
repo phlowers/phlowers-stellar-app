@@ -48,7 +48,8 @@ def refresh_projection(
         "sectionOutput": {"current": current_coords, "base": base_coords},
         "obstacles": obstacles,
         "distances": obst.compute_distances(
-            inputs=obstacles,
+            # inputs=obstacles,
+            inputs={},  # currently unused
             project=project,
             plot_engine=plot_engine,
             support_index=get_section_middle_span(start_support, end_support),
