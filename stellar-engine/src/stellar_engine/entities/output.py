@@ -13,7 +13,6 @@ from mechaphlowers.utils import ArrayTools
 logger = logging.getLogger("mechaphlowers")
 
 
-# dead code for now
 def get_coordinates(
     balance_engine: BalanceEngine,
     plt_line: PlotEngine,
@@ -29,7 +28,6 @@ def get_coordinates(
     vtl_under_console = list(
         balance_engine.balance_model.vhl_under_console().vhl
     )
-    # vtl = vtl_under_chain.vtl)
 
     loads_coords = plt_line.get_loads_coords(
         project=project, frame_index=middle_span
