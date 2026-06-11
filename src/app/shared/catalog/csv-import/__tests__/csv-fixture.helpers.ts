@@ -15,8 +15,7 @@ const FIXTURE_FILES = {
   cables: 'cables.fixture.csv',
   chains: 'chains.fixture.csv',
   lines: 'lines.fixture.csv',
-  maintenance: 'maintenance.fixture.csv',
-  obstacles: 'obstacles.fixture.csv'
+  maintenance: 'maintenance.fixture.csv'
 } as const;
 
 /** Loads the raw CSV string of an anonymized fixture. */

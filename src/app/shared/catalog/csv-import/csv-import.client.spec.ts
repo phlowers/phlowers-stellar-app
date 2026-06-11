@@ -64,7 +64,7 @@ describe('CsvImportClientService', () => {
       chains: 'chains.csv',
       lines: 'lines.csv',
       maintenance: 'maintenance-teams.csv',
-      obstacles: 'obstacle_type_rte.csv'
+      obstacles: 'obstacle_configuration.json'
     };
     for (const [key, filename] of Object.entries(cases)) {
       FakeWorker.instances = [];

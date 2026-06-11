@@ -17,6 +17,11 @@ import {
   CatalogLineEntity,
   CatalogMaintenanceEntity,
   CatalogObstacleTypeEntity,
+  CatalogObstacleConfigurationEntity,
+  CatalogObstacleRuleDefinitionEntity,
+  CatalogObstacleDistanceEntity,
+  CatalogObstacleWindZoneEntity,
+  CatalogObstacleConformityConfigEntity,
   MetadataEntity
 } from './entities';
 
@@ -59,6 +64,16 @@ export class AppDatabase extends Dexie {
   catMaintenance!: Table<CatalogMaintenanceEntity, string>;
   /** Table storing obstacle type catalog data */
   catObstacleTypes!: Table<CatalogObstacleTypeEntity, string>;
+  /** Table storing per-obstacle configuration (redZone, conformity graph type) from obstacle_configuration.json (V7+) */
+  catObstacleConfigurations!: Table<CatalogObstacleConfigurationEntity, string>;
+  /** Table storing regulatory rule definitions (AT, CCG-LA, CDT) from obstacle_configuration.json (V7+) */
+  catObstacleRuleDefinitions!: Table<CatalogObstacleRuleDefinitionEntity, string>;
+  /** Table storing conformity distances keyed by [obstacle_type+rule_type] (V7+) */
+  catObstacleDistances!: Table<CatalogObstacleDistanceEntity, [string, string]>;
+  /** Table storing wind zone pressure values (V7+) */
+  catObstacleWindZones!: Table<CatalogObstacleWindZoneEntity, string>;
+  /** Singleton table holding the obstacle conformity configuration defaults (V7+) */
+  catObstacleConformityConfig!: Table<CatalogObstacleConformityConfigEntity, string>;
   /** Table storing metadata such as CSV hashes for incremental sync */
   metadata!: Table<MetadataEntity, string>;
 

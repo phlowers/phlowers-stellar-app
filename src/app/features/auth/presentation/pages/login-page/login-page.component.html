@@ -19,7 +19,7 @@
       >
         Checking sign-in mode…
       </p>
-    } @else if (!showEmailFallback()) {
+    } @else if (showOidcRedirecting()) {
       <p
         class="login-page__subtitle"
         role="status"
@@ -28,6 +28,16 @@
         i18n="@@login.redirectingToGaia"
       >
         Redirecting to G&#64;IA for sign in…
+      </p>
+    } @else if (showOfflineOidcWaiting()) {
+      <p
+        class="login-page__subtitle"
+        role="status"
+        aria-live="polite"
+        data-testid="login-offline-waiting"
+        i18n="@@login.offlineWaitingForGaia"
+      >
+        You are offline. Reconnect to continue with G&#64;IA sign in.
       </p>
     } @else {
       <p class="login-page__subtitle" i18n="@@login.subtitle" data-testid="login-subtitle">

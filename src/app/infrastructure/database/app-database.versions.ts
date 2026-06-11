@@ -16,6 +16,11 @@ import {
   CATALOG_LINE_SCHEMA,
   CATALOG_MAINTENANCE_SCHEMA,
   CATALOG_OBSTACLE_TYPE_SCHEMA,
+  CATALOG_OBSTACLE_CONFIGURATION_SCHEMA,
+  CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA,
+  CATALOG_OBSTACLE_DISTANCE_SCHEMA,
+  CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
+  CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
   METADATA_SCHEMA
 } from './schemas';
 
@@ -105,6 +110,29 @@ export function applyStellarDbVersions(db: Dexie): void {
     ...CATALOG_LINE_SCHEMA,
     ...CATALOG_MAINTENANCE_SCHEMA,
     ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+    ...METADATA_SCHEMA
+  });
+
+  // V7: introduces obstacle conformity configuration tables loaded from
+  // obstacle_configuration.json. Adds per-obstacle configuration, regulatory
+  // rule definitions, conformity distances by (obstacle, rule), wind zones and
+  // a singleton conformity-config row. The legacy catObstacleTypes table is
+  // preserved to keep the obstacle type dropdown strictly iso-functional.
+  db.version(7).stores({
+    ...USER_SCHEMA_V3,
+    ...STUDY_SCHEMA,
+    catAttachments: null,
+    ...CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
+    ...CATALOG_CABLE_SCHEMA,
+    ...CATALOG_CHAIN_SCHEMA,
+    ...CATALOG_LINE_SCHEMA,
+    ...CATALOG_MAINTENANCE_SCHEMA,
+    ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+    ...CATALOG_OBSTACLE_CONFIGURATION_SCHEMA,
+    ...CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA,
+    ...CATALOG_OBSTACLE_DISTANCE_SCHEMA,
+    ...CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
+    ...CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
     ...METADATA_SCHEMA
   });
 }

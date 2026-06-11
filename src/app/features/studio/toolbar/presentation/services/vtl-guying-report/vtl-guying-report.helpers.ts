@@ -18,7 +18,7 @@
 //  │  drawGuyingSection() → params + diagram  │  ~60 mm (3-col: left|diagram|right)
 //  ├──────────────────────────────────────────┤
 //  │  drawVtlWithGuyingSection() → results    │  ~65 mm
-//  │  drawFooter()       → "Page 1 / 1"       │  fixed at y = 287 mm  (shared primitive)
+//  │  drawFooter()       → "Page X / Y"       │  fixed at y = 287 mm  (shared primitive)
 //  └──────────────────────────────────────────┘
 //
 //  Two-column layout: leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT

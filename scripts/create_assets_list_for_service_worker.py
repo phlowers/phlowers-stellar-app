@@ -80,15 +80,17 @@ def compute_sha256(filepath):
     return digest.hexdigest()
 
 
-def collect_csv_hashes(directory):
-    """Return a mapping of CSV basename to SHA-256 hash."""
+def collect_data_file_hashes(directory):
+    """Return a mapping of data CSV basename to SHA-256 hash."""
     hashes = {}
     data_dir = Path(directory) / "data"
     if not data_dir.exists() or not data_dir.is_dir():
         return hashes
 
-    for csv_path in sorted(data_dir.glob("*.csv")):
-        hashes[csv_path.name] = compute_sha256(csv_path)
+    for catalog_path in sorted(
+        list(data_dir.glob("*.csv")) + list(data_dir.glob("*.json"))
+    ):
+        hashes[catalog_path.name] = compute_sha256(catalog_path)
     return hashes
 
 
@@ -134,7 +136,7 @@ def main(language):
     print("-" * 50)
     print(f"Total files: {len(files)}")
     output_file = f"dist/{language}/assets_list.json"
-    csv_hashes = collect_csv_hashes(target_dir)
+    csv_hashes = collect_data_file_hashes(target_dir)
     res = {
         "app_version": app_version,
         "data_hashes": csv_hashes,

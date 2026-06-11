@@ -38,6 +38,13 @@ describe('LoginPageComponent', () => {
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
 
+  beforeEach(() => {
+    Object.defineProperty(globalThis.navigator, 'onLine', {
+      configurable: true,
+      value: true
+    });
+  });
+
   /**
    * Build the component with the given resolved auth mode.
    * Default: mode resolved + fallback (email form rendered).
@@ -80,6 +87,10 @@ describe('LoginPageComponent', () => {
         const title = getByTestId('login-title');
         expect(title).toBeTruthy();
         expect(title?.tagName).toBe('H1');
+      });
+
+      it('should not render the offline waiting status', () => {
+        expect(getByTestId('login-offline-waiting')).toBeNull();
       });
 
       it('should render the subtitle', () => {
@@ -285,6 +296,10 @@ describe('LoginPageComponent', () => {
       expect(getByTestId('login-resolving')).toBeTruthy();
     });
 
+    it('should not render the offline waiting status while mode is unknown', () => {
+      expect(getByTestId('login-offline-waiting')).toBeNull();
+    });
+
     it('should not render the email form while mode is unknown', () => {
       expect(getByTestId('login-form')).toBeNull();
     });
@@ -312,6 +327,10 @@ describe('LoginPageComponent', () => {
       expect(redirectSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('should not render the offline waiting status', () => {
+      expect(getByTestId('login-offline-waiting')).toBeNull();
+    });
+
     it('should render the GAIA redirecting status', () => {
       expect(getByTestId('login-redirecting')).toBeTruthy();
     });
@@ -324,6 +343,35 @@ describe('LoginPageComponent', () => {
       component.emailControl.setValue('user@example.com');
       await component.onSubmit();
       expect(authServiceMock.loginWithEmail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('OIDC mode while offline', () => {
+    let redirectSpy: vi.SpyInstance;
+
+    beforeEach(async () => {
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        configurable: true,
+        value: false
+      });
+      redirectSpy = vi.spyOn(loginPageProto, 'redirectToOidcLogin').mockImplementation(() => undefined);
+      await setupFixture({ oidcEnabled: true, modeResolved: true });
+    });
+
+    it('should not trigger redirect while offline', () => {
+      expect(redirectSpy).not.toHaveBeenCalled();
+    });
+
+    it('should render offline waiting status', () => {
+      expect(getByTestId('login-offline-waiting')).toBeTruthy();
+    });
+
+    it('should not render GAIA redirecting status while offline', () => {
+      expect(getByTestId('login-redirecting')).toBeNull();
+    });
+
+    it('should keep the email fallback hidden', () => {
+      expect(getByTestId('login-form')).toBeNull();
     });
   });
 

@@ -6,6 +6,7 @@
  */
 
 import { inject, Injectable } from '@angular/core';
+import type jsPDF from 'jspdf';
 
 import { NotificationService } from '@core/services/notification/notification.service';
 
@@ -27,6 +28,15 @@ export class VtlGuyingReportService extends PdfBaseService {
   private readonly notificationService = inject(NotificationService);
 
   private diagramImageCache: string | null = null;
+
+  private addPageFooters(doc: jsPDF): void {
+    const totalPages = doc.getNumberOfPages();
+
+    for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+      doc.setPage(pageNumber);
+      drawFooter(doc, `${PDF_LABELS.pageLabel} ${pageNumber} / ${totalPages}`);
+    }
+  }
 
   /** Pre-loads the diagram image and caches it for future report generation. */
   async preloadDiagramImage(): Promise<void> {
@@ -61,7 +71,7 @@ export class VtlGuyingReportService extends PdfBaseService {
       y = drawVtlWithoutGuyingSection(doc, data, y);
       y = drawGuyingSection(doc, data, y);
       drawVtlWithGuyingSection(doc, data, y);
-      drawFooter(doc, PDF_LABELS.pageFooter);
+      this.addPageFooters(doc);
 
       const safeDate = data.date.replace(/[/\\:*?"<>|]/g, '-');
       const filename = `rapport-vhl-haubanage-${safeDate}.pdf`;

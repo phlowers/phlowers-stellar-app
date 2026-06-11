@@ -9,6 +9,11 @@ import {
   CATALOG_LINE_SCHEMA,
   CATALOG_MAINTENANCE_SCHEMA,
   CATALOG_OBSTACLE_TYPE_SCHEMA,
+  CATALOG_OBSTACLE_CONFIGURATION_SCHEMA,
+  CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA,
+  CATALOG_OBSTACLE_DISTANCE_SCHEMA,
+  CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
+  CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
   METADATA_SCHEMA
 } from '@infrastructure/database/schemas';
 
@@ -125,6 +130,33 @@ describe('AppDatabase', () => {
         ...CATALOG_LINE_SCHEMA,
         ...CATALOG_MAINTENANCE_SCHEMA,
         ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+        ...METADATA_SCHEMA
+      }
+    });
+  });
+
+  it('should register version 7 schema with obstacle conformity configuration tables', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    expect(dexieState.instances[0].versionCalls[6]).toEqual({
+      version: 7,
+      schema: {
+        ...USER_SCHEMA_V3,
+        ...STUDY_SCHEMA,
+        catAttachments: null,
+        ...CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
+        ...CATALOG_CABLE_SCHEMA,
+        ...CATALOG_CHAIN_SCHEMA,
+        ...CATALOG_LINE_SCHEMA,
+        ...CATALOG_MAINTENANCE_SCHEMA,
+        ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+        ...CATALOG_OBSTACLE_CONFIGURATION_SCHEMA,
+        ...CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA,
+        ...CATALOG_OBSTACLE_DISTANCE_SCHEMA,
+        ...CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
+        ...CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
         ...METADATA_SCHEMA
       }
     });
