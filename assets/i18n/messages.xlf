@@ -3619,11 +3619,6 @@
         <source>Failed to save cable support manipulation</source>
       </segment>
     </unit>
-    <unit id="2948985903068648848">
-      <segment>
-        <source>Page 1 / 1</source>
-      </segment>
-    </unit>
     <unit id="2976977471041301829">
       <segment>
         <source>Report generated successfully</source>
@@ -3639,29 +3634,19 @@
         <source> You are offline. Reconnect to continue with G@IA sign in. </source>
       </segment>
     </unit>
-    <unit id="1370499216902676579">
-      <segment>
-        <source>VHL without guying</source>
-      </segment>
-    </unit>
     <unit id="1863797323581703233">
       <segment>
         <source>Load case</source>
       </segment>
     </unit>
-    <unit id="2094970082101183358">
+    <unit id="3274143162040061472">
       <segment>
-        <source>For a suspension with pulley, tension in the guy wire equals the maximum tension across all cables in the bundle and a longitudinal load appears.</source>
+        <source>For a suspension with pulley, the tension in the guy wire equals the maximum tension across all bundle cables and a longitudinal load appears.</source>
       </segment>
     </unit>
-    <unit id="265073756999466751">
+    <unit id="5995597069170495090">
       <segment>
-        <source>VHL &amp; Guying Report</source>
-      </segment>
-    </unit>
-    <unit id="461925024420928376">
-      <segment>
-        <source>Guy wire tension</source>
+        <source>VTL &amp; Guying report</source>
       </segment>
     </unit>
     <unit id="4747775226520170684">
@@ -3674,14 +3659,14 @@
         <source>Support type</source>
       </segment>
     </unit>
-    <unit id="5492948416346707277">
+    <unit id="6567765078388229836">
       <segment>
-        <source>VHL with guying</source>
+        <source>VTL with guying</source>
       </segment>
     </unit>
-    <unit id="5958867713462861877">
+    <unit id="6283335323447648051">
       <segment>
-        <source>For a termination or suspension without pulley, tension in the guy wire balances longitudinal loads at bracket level (no L).</source>
+        <source>For a dead-end or a suspension without pulley, the tension in the guy wire balances longitudinal loads at cantilever level (no L).</source>
       </segment>
     </unit>
     <unit id="612601999167303469">
@@ -3699,29 +3684,44 @@
         <source>L load (if pulley)</source>
       </segment>
     </unit>
-    <unit id="8008508268185845463">
-      <segment>
-        <source>V load under bracket</source>
-      </segment>
-    </unit>
-    <unit id="8067102077287396284">
-      <segment>
-        <source>H load under bracket</source>
-      </segment>
-    </unit>
     <unit id="9021969522172484243">
       <segment>
         <source>L load</source>
       </segment>
     </unit>
-    <unit id="937866561441836397">
-      <segment>
-        <source>Guy wire / horizontal angle</source>
-      </segment>
-    </unit>
     <unit id="998968190734068335">
       <segment>
         <source>H load</source>
+      </segment>
+    </unit>
+    <unit id="1407560924967345762">
+      <segment>
+        <source>Page</source>
+      </segment>
+    </unit>
+    <unit id="2845289325710007757">
+      <segment>
+        <source>V load</source>
+      </segment>
+    </unit>
+    <unit id="3259800647228467027">
+      <segment>
+        <source>Tension in the guy wire</source>
+      </segment>
+    </unit>
+    <unit id="4294131164406016639">
+      <segment>
+        <source>H load under cantilever</source>
+      </segment>
+    </unit>
+    <unit id="7910219309489777827">
+      <segment>
+        <source>V load under cantilever</source>
+      </segment>
+    </unit>
+    <unit id="8139669233247727692">
+      <segment>
+        <source>Guy wire angle / horizon</source>
       </segment>
     </unit>
   </file>
