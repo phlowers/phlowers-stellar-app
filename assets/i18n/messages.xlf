@@ -3335,7 +3335,7 @@
     </unit>
     <unit id="6213790290851863697">
       <segment>
-        <source>Fichier de géoliaison à importer non conforme.</source>
+        <source>The geolink file to import is invalid.</source>
       </segment>
     </unit>
     <unit id="7094706461924776063">

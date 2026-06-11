@@ -817,7 +817,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(invalidPayload);
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
         code: 'VALIDATION_ERROR',
-        message: 'Fichier de géoliaison à importer non conforme.',
+        message: 'The geolink file to import is invalid.',
         stage: 'VALIDATION'
       });
     });

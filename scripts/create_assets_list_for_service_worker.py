@@ -80,13 +80,8 @@ def compute_sha256(filepath):
     return digest.hexdigest()
 
 
-def collect_csv_hashes(directory):
-    """Return a mapping of catalog filename (CSV or JSON) to SHA-256 hash.
-
-    Both ``*.csv`` and ``*.json`` files under ``data/`` are hashed so the
-    service-worker incremental sync can detect changes for any catalog
-    regardless of its on-disk format.
-    """
+def collect_data_file_hashes(directory):
+    """Return a mapping of data CSV basename to SHA-256 hash."""
     hashes = {}
     data_dir = Path(directory) / "data"
     if not data_dir.exists() or not data_dir.is_dir():
@@ -141,7 +136,7 @@ def main(language):
     print("-" * 50)
     print(f"Total files: {len(files)}")
     output_file = f"dist/{language}/assets_list.json"
-    csv_hashes = collect_csv_hashes(target_dir)
+    csv_hashes = collect_data_file_hashes(target_dir)
     res = {
         "app_version": app_version,
         "data_hashes": csv_hashes,
