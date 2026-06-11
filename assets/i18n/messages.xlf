@@ -3120,7 +3120,7 @@
     </unit>
     <unit id="longitudinalDistance">
       <segment>
-        <source> Longitudinal dist. </source>
+        <source>Longitudinal dist.</source>
       </segment>
     </unit>
     <unit id="manipFixedPointPosition">
@@ -3333,7 +3333,7 @@
         <source>Section is missing required fields</source>
       </segment>
     </unit>
-    <unit id="6213790290851863697">
+    <unit id="477981869744681149">
       <segment>
         <source>The geolink file to import is invalid.</source>
       </segment>
@@ -3619,6 +3619,11 @@
         <source>Failed to save cable support manipulation</source>
       </segment>
     </unit>
+    <unit id="2948985903068648848">
+      <segment>
+        <source>Page 1 / 1</source>
+      </segment>
+    </unit>
     <unit id="2976977471041301829">
       <segment>
         <source>Report generated successfully</source>
@@ -3629,9 +3634,14 @@
         <source>Failed to generate report</source>
       </segment>
     </unit>
-    <unit id="6360657045945199389">
+    <unit id="login.offlineWaitingForGaia">
       <segment>
-        <source>Rapport</source>
+        <source> You are offline. Reconnect to continue with G@IA sign in. </source>
+      </segment>
+    </unit>
+    <unit id="1370499216902676579">
+      <segment>
+        <source>VHL without guying</source>
       </segment>
     </unit>
     <unit id="1863797323581703233">
@@ -3639,24 +3649,19 @@
         <source>Load case</source>
       </segment>
     </unit>
-    <unit id="2845289325710007757">
+    <unit id="2094970082101183358">
       <segment>
-        <source>V load</source>
+        <source>For a suspension with pulley, tension in the guy wire equals the maximum tension across all cables in the bundle and a longitudinal load appears.</source>
       </segment>
     </unit>
-    <unit id="3259800647228467027">
+    <unit id="265073756999466751">
       <segment>
-        <source>Tension in the guy wire</source>
+        <source>VHL &amp; Guying Report</source>
       </segment>
     </unit>
-    <unit id="3274143162040061472">
+    <unit id="461925024420928376">
       <segment>
-        <source>For a suspension with pulley, the tension in the guy wire equals the maximum tension across all bundle cables and a longitudinal load appears.</source>
-      </segment>
-    </unit>
-    <unit id="4294131164406016639">
-      <segment>
-        <source>H load under cantilever</source>
+        <source>Guy wire tension</source>
       </segment>
     </unit>
     <unit id="4747775226520170684">
@@ -3669,24 +3674,19 @@
         <source>Support type</source>
       </segment>
     </unit>
-    <unit id="5995597069170495090">
+    <unit id="5492948416346707277">
       <segment>
-        <source>VTL &amp; Guying report</source>
+        <source>VHL with guying</source>
+      </segment>
+    </unit>
+    <unit id="5958867713462861877">
+      <segment>
+        <source>For a termination or suspension without pulley, tension in the guy wire balances longitudinal loads at bracket level (no L).</source>
       </segment>
     </unit>
     <unit id="612601999167303469">
       <segment>
         <source>Guyed span</source>
-      </segment>
-    </unit>
-    <unit id="6283335323447648051">
-      <segment>
-        <source>For a dead-end or a suspension without pulley, the tension in the guy wire balances longitudinal loads at cantilever level (no L).</source>
-      </segment>
-    </unit>
-    <unit id="6567765078388229836">
-      <segment>
-        <source>VTL with guying</source>
       </segment>
     </unit>
     <unit id="7071470734400948493">
@@ -3699,14 +3699,14 @@
         <source>L load (if pulley)</source>
       </segment>
     </unit>
-    <unit id="7910219309489777827">
+    <unit id="8008508268185845463">
       <segment>
-        <source>V load under cantilever</source>
+        <source>V load under bracket</source>
       </segment>
     </unit>
-    <unit id="8139669233247727692">
+    <unit id="8067102077287396284">
       <segment>
-        <source>Guy wire angle / horizon</source>
+        <source>H load under bracket</source>
       </segment>
     </unit>
     <unit id="9021969522172484243">
@@ -3714,14 +3714,14 @@
         <source>L load</source>
       </segment>
     </unit>
+    <unit id="937866561441836397">
+      <segment>
+        <source>Guy wire / horizontal angle</source>
+      </segment>
+    </unit>
     <unit id="998968190734068335">
       <segment>
         <source>H load</source>
-      </segment>
-    </unit>
-    <unit id="1407560924967345762">
-      <segment>
-        <source>Page</source>
       </segment>
     </unit>
   </file>
