@@ -90,8 +90,8 @@ def change_state(js_inputs: dict):
             engine, plt_line, False, 0, section_length - 1
         ),
         "base": output.get_coordinates(
-            engine, base_plt_line, False, 0, base_section_length - 1
+            base_engine, base_plt_line, False, 0, base_section_length - 1
         )
-        if base_plt_line
+        if base_engine and base_plt_line
         else None,
     }
