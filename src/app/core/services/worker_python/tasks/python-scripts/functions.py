@@ -4,14 +4,12 @@ from dataclasses import fields as dataclass_fields
 from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
-from mechaphlowers.utils import ArrayTools
 import logging
 from importlib.metadata import version
 import sys
 
 from stellar_engine.entities import output
 from stellar_engine.entities.inputs import ClimateCharge
-import stellar_engine.plot.obstacles as obst
 from stellar_engine.entities.inputs import Support, Cable, InitialCondition
 from stellar_engine.core.section import generate_section_array
 

@@ -77,7 +77,6 @@ def get_support_coordinates(js_inputs):
 
 
 def refresh_projection(js_inputs: dict):
-    print("AAAAAAAAAAAA")
     global plt_line, base_plt_line
     python_inputs = js_to_python(js_inputs)
     return plot_2d.refresh_projection(python_inputs, engine, plt_line, base_plt_line)
