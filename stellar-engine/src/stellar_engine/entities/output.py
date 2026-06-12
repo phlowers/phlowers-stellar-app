@@ -12,7 +12,7 @@ from mechaphlowers.utils import ArrayTools
 
 logger = logging.getLogger("mechaphlowers")
 
-
+# TODO: ideally, we want to separate [generating GroupPoints] and [change frame/fetch data]
 def get_coordinates(
     balance_engine: BalanceEngine,
     plt_line: PlotEngine,
@@ -20,10 +20,18 @@ def get_coordinates(
     start_support: int = 0,
     end_support: int = 0,
 ):
+    base_group_points = plt_line.position_engine.get_group_points()
+    # maybe split this in other functions
+    #-------function 1: project and invert axis-----------
     middle_span = get_section_middle_span(start_support, end_support)
-    span, supports, insulators = plt_line.section_pts.get_points_for_plot(
-        project=project, frame_index=middle_span
-    )
+
+    if project:
+        projected_group_points = base_group_points.change_frame(frame_index=middle_span)
+        coord_dict = projected_group_points.get_all_objects_dict(reversed_y_axis=project)
+        span, supports, insulators = coord_dict["spans"], coord_dict["supports"], coord_dict["insulators"]
+    else:
+        span, supports, insulators = base_group_points.spans, base_group_points.supports, base_group_points.insulators
+    #-------function 2: get data-----------
     vtl_under_chain = list(balance_engine.balance_model.vhl_under_chain().vhl)
     vtl_under_console = list(
         balance_engine.balance_model.vhl_under_console().vhl

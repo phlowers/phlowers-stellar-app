@@ -57,12 +57,18 @@ def change_obstacles_coordinates(
     return df
 
 
+# TODO: probably more to have GroupPoints as argument instead of plot_engine
 def get_current_obstacles(
     plot_engine: PlotEngine, project: bool, support_index: int
 ) -> list:
-    obs = plot_engine.obstacles_dict(
-        project=project, frame_index=support_index
-    )
+    # duplicated code with get_coordinates
+    base_group_points = plot_engine.position_engine.get_group_points()
+    if project:
+        projected_group_points = base_group_points.change_frame(frame_index=support_index)
+        coord_dict = projected_group_points.get_all_objects_dict(reversed_y_axis=project)
+        obs = coord_dict["obstacles"].dict_coords()
+    else:
+        obs = base_group_points.obstacles.dict_coords()
     return [
         {"uuid": key, "points": value.tolist()} for key, value in obs.items()
     ]
@@ -135,8 +141,12 @@ def add_obstacles(
     return {"obstacles": result}
 
 
-# TODO: use PositionEngine.get_distances_from_obstacles() for helping creating the dict result
-# In the long run: even use GroupPoints.distances to get distances
+# TODO: 
+# generate the new GroupPoints (ideally this would already be generated before)
+# eventually change frame and inverse y axis
+# extract distances dict
+# recreate stellar format of distances dict
+
 def compute_distances(
     inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
 ):
@@ -153,12 +163,12 @@ def compute_distances(
         )
         points_for_plot[1].coords[obstacle["span_index"]]
         sea_level_groud_coords_start = (
-            plot_engine.position_engine.section_pts.supports_ground_coords[
+            plot_engine.position_engine.coords_calculator.supports_ground_coords[
                 span_index
             ].copy()
         )
         sea_level_groud_coords_end = (
-            plot_engine.position_engine.section_pts.supports_ground_coords[
+            plot_engine.position_engine.coords_calculator.supports_ground_coords[
                 span_index + 1
             ].copy()
         )
