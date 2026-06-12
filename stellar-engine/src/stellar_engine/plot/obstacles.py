@@ -64,8 +64,12 @@ def get_current_obstacles(
     # duplicated code with get_coordinates
     base_group_points = plot_engine.position_engine.get_group_points()
     if project:
-        projected_group_points = base_group_points.change_frame(frame_index=support_index)
-        coord_dict = projected_group_points.get_all_objects_dict(reversed_y_axis=project)
+        projected_group_points = base_group_points.change_frame(
+            frame_index=support_index
+        )
+        coord_dict = projected_group_points.get_all_objects_dict(
+            reversed_y_axis=project
+        )
         obs = coord_dict["obstacles"].dict_coords()
     else:
         obs = base_group_points.obstacles.dict_coords()
@@ -141,11 +145,12 @@ def add_obstacles(
     return {"obstacles": result}
 
 
-# TODO: 
+# TODO:
 # generate the new GroupPoints (ideally this would already be generated before)
 # eventually change frame and inverse y axis
 # extract distances dict
 # recreate stellar format of distances dict
+
 
 def compute_distances(
     inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
@@ -162,16 +167,12 @@ def compute_distances(
             curve_points=points_for_plot[0].coords[span_index]
         )
         points_for_plot[1].coords[obstacle["span_index"]]
-        sea_level_groud_coords_start = (
-            plot_engine.position_engine.coords_calculator.supports_ground_coords[
-                span_index
-            ].copy()
-        )
-        sea_level_groud_coords_end = (
-            plot_engine.position_engine.coords_calculator.supports_ground_coords[
-                span_index + 1
-            ].copy()
-        )
+        sea_level_groud_coords_start = plot_engine.position_engine.coords_calculator.supports_ground_coords[
+            span_index
+        ].copy()
+        sea_level_groud_coords_end = plot_engine.position_engine.coords_calculator.supports_ground_coords[
+            span_index + 1
+        ].copy()
         sea_level_groud_coords_start[2] = 0.0
         sea_level_groud_coords_end[2] = 0.0
 

@@ -16,6 +16,7 @@ from stellar_engine.entities.output import (
 
 logger = logging.getLogger("mechaphlowers")
 
+
 # ideally refresh_projection should only return the new coordinates,
 # not the whole sectionOutput, that also contains vhl and other data that do not change
 def refresh_projection(
