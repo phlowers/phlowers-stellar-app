@@ -357,14 +357,20 @@
 
   <ng-template #footer>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-report-btn">
-      <app-icon icon="summarize" />
+      <app-icon icon="description" />
       <ng-container i18n>Report</ng-container>
     </button>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn">
       <app-icon icon="download" />
       <ng-container i18n>Export</ng-container>
     </button>
-    <button app-btn type="button" data-testid="conformity-save-btn">
+    <button
+      app-btn
+      type="button"
+      data-testid="conformity-save-btn"
+      [disabled]="!conformityRef()?.canCalculate()"
+      (click)="conformityRef()!.saveConformityData()"
+    >
       <app-icon icon="save" />
       <ng-container i18n>Save</ng-container>
     </button>

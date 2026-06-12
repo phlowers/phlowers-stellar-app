@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map, startWith } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { from, map, of, startWith, switchMap } from 'rxjs';
+import { CatalogObstacleWindZoneEntity } from '@infrastructure/database/entities/catalog-obstacle-wind-zone.entity';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -12,6 +13,7 @@ import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { CONFORMITY_BOUNDS } from './conformity.constantes';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { StorageService } from '@services/storage/storage.service';
 
 @Component({
   selector: 'app-conformity',
@@ -33,6 +35,7 @@ export class ConformityComponent {
   private readonly fb = inject(FormBuilder);
   readonly obstacleFormService = inject(ObstacleFormService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly storageService = inject(StorageService);
 
   readonly form = this.fb.group({
     selectedPoint: [null as number | null],
@@ -54,6 +57,23 @@ export class ConformityComponent {
   );
 
   readonly obstacleData = computed(() => this.obstacleFormService.formValue());
+
+  private readonly obstacleType = computed(() => this.obstacleData().type ?? null);
+
+  readonly showRedZonePresence = toSignal(
+    toObservable(this.obstacleType).pipe(
+      switchMap((type) => {
+        if (!type) return of(false);
+        const query = this.storageService.db?.catObstacleConfigurations
+          .where('obstacle_type')
+          .equals(type)
+          .first();
+        if (!query) return of(false);
+        return from(query).pipe(map((config) => config?.red_zone ?? false));
+      })
+    ),
+    { initialValue: false }
+  );
 
   readonly positions = computed(() => this.obstacleFormService.formValue().positions ?? []);
 
@@ -139,12 +159,67 @@ export class ConformityComponent {
     return null;
   });
 
-  // Placeholder option arrays — will be replaced with dynamic data after rebase
-  readonly windZoneOptions: { label: string; value: string }[] = [];
-  readonly conformityOptions: { label: string; value: string }[] = [];
+  private readonly windZones = toSignal(
+    from(this.storageService.db?.catObstacleWindZones.toArray() ?? Promise.resolve([])),
+    { initialValue: [] as CatalogObstacleWindZoneEntity[] }
+  );
+
+  private readonly redZonePresenceValue = toSignal(
+    this.form.controls.redZonePresence.valueChanges.pipe(
+      startWith(this.form.controls.redZonePresence.value)
+    ),
+    { initialValue: false }
+  );
+
+  readonly windZoneOptions = computed(() =>
+    this.windZones().map((z) => ({ label: z.label, value: z.label }))
+  );
+
+  readonly effectiveWindPressure = computed(() => {
+    const label = this.form.controls.windZone.value;
+    const zone = this.windZones().find((z) => z.label === label);
+    if (!zone) return null;
+    return this.redZonePresenceValue() ? zone.red_zone : zone.normal;
+  });
+
+  readonly conformityOptions = toSignal(
+    toObservable(this.obstacleType).pipe(
+      switchMap((type) => {
+        const db = this.storageService.db;
+        if (!type || !db) return of([] as { label: string; value: string }[]);
+        return from(db.catObstacleDistances.where('obstacle_type').equals(type).filter((d) => d.active).toArray()).pipe(
+          switchMap((distances) => {
+            const ruleTypes = distances.map((d) => d.rule_type);
+            return from(db.catObstacleRuleDefinitions.where('rule_type').anyOf(ruleTypes).toArray()).pipe(
+              map((rules) => {
+                const nameByType = new Map(rules.map((r) => [r.rule_type, r.rule_name]));
+                return distances.map((d) => ({ label: nameByType.get(d.rule_type) ?? d.rule_type, value: d.rule_type }));
+              })
+            );
+          })
+        );
+      })
+    ),
+    { initialValue: [] as { label: string; value: string }[] }
+  );
 
   readonly canCalculate = computed(() => {
     if (this.formStatus() !== 'VALID') return false;
     return !this.hasMultiplePoints() || this.selectedPointValue() !== null;
   });
+
+  async saveConformityData(): Promise<void> {
+    if (!this.canCalculate()) return;
+    const uuid = this.obstacleFormService.form.value.uuid;
+    if (!uuid) return;
+    const v = this.form.value;
+    await this.obstacleFormService.saveConformityData(uuid, {
+      windZone: v.windZone ?? null,
+      windMinus: v.windMinus ?? false,
+      redZonePresence: v.redZonePresence ?? false,
+      distributedTemperature: v.distributedTemperature ?? null,
+      lateralDistanceTemperature: v.lateralDistanceTemperature ?? null,
+      conformity: (v.conformity as string[] | null) ?? null
+    });
+  }
 }

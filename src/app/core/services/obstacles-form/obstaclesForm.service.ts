@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { ConformityFormData, LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
@@ -346,6 +346,26 @@ export class ObstacleFormService {
     const obstacle = this.buildObstacleFromForm();
     this.upsertObstacleInSection(obstacle);
     await this.saveSection();
+  }
+
+  async saveConformityData(uuid: string, data: ConformityFormData): Promise<void> {
+    const section = this.spanService.section();
+    const study = this.plotService.study();
+    if (!section || !study) return;
+    const obstacles = section.obstacles ?? [];
+    const existingIndex = obstacles.findIndex((o) => o.uuid === uuid);
+    if (existingIndex === -1) return;
+    const updatedObstacles = obstacles.map((o, i) =>
+      i === existingIndex ? { ...o, conformityData: data } : o
+    );
+    const updatedSection = { ...section, obstacles: updatedObstacles };
+    await this.sectionService.createOrUpdateSection(study, updatedSection);
+    this.spanService.section.set(updatedSection);
+    this.messageService.add({
+      severity: 'success',
+      summary: $localize`Success`,
+      detail: $localize`Conformity data saved`
+    });
   }
 
   async calculateAndSave(): Promise<void> {

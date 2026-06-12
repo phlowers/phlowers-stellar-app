@@ -83,7 +83,7 @@
       <p-select
         inputId="windZone"
         formControlName="windZone"
-        [options]="windZoneOptions"
+        [options]="windZoneOptions()"
         optionLabel="label"
         optionValue="value"
         fluid
@@ -93,8 +93,10 @@
         <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" />
         <label for="windMinus" i18n>Wind -</label>
 
-        <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" />
-        <label for="redZonePresence" i18n>Red zone presence</label>
+        @if (showRedZonePresence()) {
+          <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" />
+          <label for="redZonePresence" i18n>Red zone presence</label>
+        }
       </div>
     </div>
 
@@ -157,10 +159,11 @@
       <p-multiselect
         inputId="conformityMultiselect"
         formControlName="conformity"
-        [options]="conformityOptions"
+        [options]="conformityOptions()"
         optionLabel="label"
         optionValue="value"
         [filter]="false"
+        [showToggleAll]="false"
         fluid
       />
     </div>

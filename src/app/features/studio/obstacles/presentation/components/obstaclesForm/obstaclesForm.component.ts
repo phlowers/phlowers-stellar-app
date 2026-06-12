@@ -7,7 +7,8 @@ import {
   effect,
   inject,
   signal,
-  untracked
+  untracked,
+  viewChild
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -60,6 +61,7 @@ export class ObstaclesFormComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly isConformityModalOpen = signal(false);
+  readonly conformityRef = viewChild(ConformityComponent);
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
   readonly isCalculating = computed(
     () => this.obstacleFormService.isCalculatingObstacle() || this.plotService.loading()
