@@ -54,6 +54,6 @@ def refresh_projection(
             inputs={},  # currently unused
             project=project,
             plot_engine=plot_engine,
-            support_index=get_section_middle_span(start_support, end_support),
+            support_index=middle_span,
         ),
     }

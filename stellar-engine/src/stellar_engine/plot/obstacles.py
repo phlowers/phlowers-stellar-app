@@ -95,7 +95,7 @@ def delete_obstacle(
         return {"obstacles": result}
 
 
-# TODO: refaco the way it is called in typoescript
+# TODO: refactor the way it is called in typescript
 # use PositionEngine.add_obstacle instead of PositionEngine.add_obstacle_array
 def add_obstacles(
     inputs: list,
@@ -167,18 +167,18 @@ def compute_distances(
             curve_points=points_for_plot[0].coords[span_index]
         )
         points_for_plot[1].coords[obstacle["span_index"]]
-        sea_level_groud_coords_start = plot_engine.position_engine.coords_calculator.supports_ground_coords[
+        sea_level_ground_coords_start = plot_engine.position_engine.coords_calculator.supports_ground_coords[
             span_index
         ].copy()
-        sea_level_groud_coords_end = plot_engine.position_engine.coords_calculator.supports_ground_coords[
+        sea_level_ground_coords_end = plot_engine.position_engine.coords_calculator.supports_ground_coords[
             span_index + 1
         ].copy()
-        sea_level_groud_coords_start[2] = 0.0
-        sea_level_groud_coords_end[2] = 0.0
+        sea_level_ground_coords_start[2] = 0.0
+        sea_level_ground_coords_end[2] = 0.0
 
         plot_engine.position_engine.distance_engine.add_span_frame(
-            x_axis_start=sea_level_groud_coords_start,
-            x_axis_end=sea_level_groud_coords_end,
+            x_axis_start=sea_level_ground_coords_start,
+            x_axis_end=sea_level_ground_coords_end,
         )
         # Compute the distance from a point to the curve
         try:
