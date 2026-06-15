@@ -4,13 +4,12 @@ from dataclasses import fields as dataclass_fields
 from mechaphlowers.entities.arrays import SectionArray, CableArray, ObstacleArray
 import mechaphlowers as mph
 from mechaphlowers import BalanceEngine, PlotEngine, units
-from mechaphlowers.utils import ArrayTools
 import logging
 from importlib.metadata import version
 import sys
 
+from stellar_engine.entities import output
 from stellar_engine.entities.inputs import ClimateCharge
-import stellar_engine.plot.obstacles as obst
 from stellar_engine.entities.inputs import Support, Cable, InitialCondition
 from stellar_engine.core.section import generate_section_array
 
@@ -102,120 +101,6 @@ def get_config():
     return {"resolution": RESOLUTION}
 
 
-# @dataclass
-# class Support:
-#     uuid: str
-#     number: Optional[float] = None
-#     name: Optional[str] = None
-#     spanLength: Optional[float] = None
-#     spanAngle: Optional[float] = None
-#     attachmentSet: Optional[str] = None
-#     attachmentHeight: Optional[float] = None
-#     heightBelowConsole: Optional[float] = None
-#     cableType: Optional[str] = None
-#     armLength: Optional[float] = None
-#     chainName: Optional[str] = None
-#     towerModel: Optional[str] = None
-#     chainLength: Optional[float] = None
-#     chainWeight: Optional[float] = None
-#     chainV: Optional[bool] = None
-#     counterWeight: Optional[float] = None
-#     supportFootAltitude: Optional[float] = None
-#     attachmentPosition: Optional[str] = None
-#     chainSurface: Optional[float] = None
-
-
-# @dataclass
-# class InitialCondition:
-#     uuid: str
-#     name: str
-#     base_parameters: float
-#     base_temperature: float
-#     cable_pretension: float
-#     min_temperature: float
-#     max_wind_pressure: float
-#     max_frost_width: float
-
-
-# @dataclass
-# class Cable:
-#     id: str
-#     name: str
-#     data_source: str
-#     section: float
-#     diameter: float
-#     young_modulus: float
-#     linear_mass: float
-#     dilatation_coefficient: float
-#     temperature_reference: float
-#     stress_strain_a0: float
-#     stress_strain_a1: float
-#     stress_strain_a2: float
-#     stress_strain_a3: float
-#     stress_strain_a4: float
-#     stress_strain_b0: float
-#     stress_strain_b1: float
-#     stress_strain_b2: float
-#     stress_strain_b3: float
-#     stress_strain_b4: float
-#     is_polynomial: bool
-#     diameter_heart: float
-#     section_conductor: float
-#     section_heart: float
-#     solar_absorption: float
-#     emissivity: float
-#     electric_resistance_20: float
-#     linear_resistance_temperature_coef: float
-#     radial_thermal_conductivity: float
-#     has_magnetic_heart: bool
-
-
-# def generate_section_array(supports: list[Support]):
-#     # Generate a SectionArray
-#     name = []
-#     suspension = []
-#     altitude = []
-#     crossarm_length = []
-#     line_angle = []
-#     insulator_length = []
-#     span_length = []
-#     insulator_mass = []
-#     load_mass = []
-#     load_position = []
-#     ground_altitude = []
-
-#     for index, support in enumerate(supports):
-#         name.append(support.name or f"Support {index}")
-#         if index == 0 or index == len(supports) - 1:
-#             suspension.append(False)
-#         else:
-#             suspension.append(True)
-#         altitude.append(support.attachmentHeight)
-#         crossarm_length.append(support.armLength or 0)
-#         insulator_length.append(support.chainLength or 1)
-#         span_length.append(support.spanLength)
-#         line_angle.append(support.spanAngle)
-#         insulator_mass.append(support.chainWeight or 0)
-#         load_mass.append(0)
-#         load_position.append(0)
-#         ground_altitude.append(support.supportFootAltitude)
-
-#     section_data = {
-#         "name": name,
-#         "suspension": suspension,
-#         "conductor_attachment_altitude": altitude,
-#         "crossarm_length": crossarm_length,
-#         "insulator_length": insulator_length,
-#         "insulator_mass": insulator_mass,
-#         "load_mass": load_mass,
-#         "load_position": load_position,
-#         "span_length": span_length,
-#         "line_angle": line_angle,
-#         "ground_altitude": ground_altitude,
-#     }
-#     return pd.DataFrame(section_data)
-
-
 engine: BalanceEngine
 plt_line: PlotEngine
 base_engine: BalanceEngine
@@ -300,46 +185,6 @@ def apply_span_loads(span_loads: list):
 
 def get_section_middle_span(start_support: int, end_support: int):
     return (start_support + end_support) // 2
-
-
-def get_coordinates(
-    plt_line: PlotEngine,
-    project: bool = False,
-    start_support: int = 0,
-    end_support: int = 0,
-):
-    middle_span = get_section_middle_span(start_support, end_support)
-    span, supports, insulators = plt_line.section_pts.get_points_for_plot(
-        project=project, frame_index=middle_span
-    )
-    vtl_under_chain = list(engine.balance_model.vhl_under_chain().vhl)
-    vtl_under_console = list(engine.balance_model.vhl_under_console().vhl)
-    # vtl = vtl_under_chain.vtl)
-
-    loads_coords = plt_line.get_loads_coords(project=project, frame_index=middle_span)
-    line_angle_rad = engine.section_array.data.line_angle.to_numpy()
-    tension_max, _ = engine.span_model.tensions_sup_inf()
-    utilization_rate = engine.cable_array.utilization_rate(tension_max)
-    logger.debug("utilization rate: %s", utilization_rate)
-    result = {
-        "spans": span.coords,
-        "insulators": insulators.coords,
-        "supports": supports.coords,
-        "line_angle": units(line_angle_rad, "rad").to("grad").m.tolist(),
-        "vtl_under_chain": [v.value().tolist() for v in vtl_under_chain],
-        "vtl_under_console": [v.value().tolist() for v in vtl_under_console],
-        "r_under_chain": engine.balance_model.vhl_under_chain().R.value().tolist(),
-        "r_under_console": engine.balance_model.vhl_under_console().R.value().tolist(),
-        "ground_altitude": engine.section_array.data.ground_altitude.tolist(),
-        "displacement": engine.get_displacement().T.tolist(),
-        "load_angle": engine.cable_loads.load_angle.tolist(),
-        "span_length": engine.section_array.data.span_length.tolist(),
-        "loads_coords": loads_coords,
-        "utilization_rate": ArrayTools.decr(utilization_rate.tolist()),
-    }
-    result_spans = engine.get_data_spans()
-    result.update(result_spans)
-    return result
 
 
 def init_section(js_inputs: dict):
@@ -562,39 +407,11 @@ def init_section(js_inputs: dict):
     section_length = len(engine.section_array.data)
     base_section_length = len(base_engine.section_array.data)
     return {
-        "current": get_coordinates(plt_line, False, 0, section_length - 1),
-        "base": get_coordinates(base_plt_line, False, 0, base_section_length - 1),
-    }
-
-
-def refresh_projection(js_inputs: dict):
-    logger.debug("===> refresh_projection triggered")
-    global plt_line, base_plt_line
-    python_inputs = js_to_python(js_inputs)
-    start_support = python_inputs["startSupport"]
-    end_support = python_inputs["endSupport"]
-    view = python_inputs["view"]
-    project = view == "2d"
-
-    current_coords = get_coordinates(plt_line, project, start_support, end_support)
-    base_coords = (
-        get_coordinates(base_plt_line, project, start_support, end_support)
-        if base_plt_line
-        else None
-    )
-    middle_span = get_section_middle_span(start_support, end_support)
-    obstacles = obst.get_current_obstacles(
-        plt_line, project=project, support_index=middle_span
-    )
-
-    return {
-        "sectionOutput": {"current": current_coords, "base": base_coords},
-        "obstacles": obstacles,
-        "distances": obst.compute_distances(
-            inputs=obstacles,
-            project=project,
-            plot_engine=plt_line,
-            support_index=get_section_middle_span(start_support, end_support),
+        "current": output.get_coordinates(
+            engine, plt_line, False, 0, section_length - 1
+        ),
+        "base": output.get_coordinates(
+            base_engine, base_plt_line, False, 0, base_section_length - 1
         ),
     }
 
