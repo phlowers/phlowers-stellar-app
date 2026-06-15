@@ -57,12 +57,22 @@ def change_obstacles_coordinates(
     return df
 
 
+# TODO: probably more to have GroupPoints as argument instead of plot_engine
 def get_current_obstacles(
     plot_engine: PlotEngine, project: bool, support_index: int
 ) -> list:
-    obs = plot_engine.obstacles_dict(
-        project=project, frame_index=support_index
-    )
+    # duplicated code with get_coordinates
+    base_group_points = plot_engine.position_engine.get_group_points()
+    if project:
+        projected_group_points = base_group_points.change_frame(
+            frame_index=support_index
+        )
+        coord_dict = projected_group_points.get_all_objects_dict(
+            reversed_y_axis=project
+        )
+        obs = coord_dict["obstacles"].dict_coords()
+    else:
+        obs = base_group_points.obstacles.dict_coords()
     return [
         {"uuid": key, "points": value.tolist()} for key, value in obs.items()
     ]
@@ -85,7 +95,7 @@ def delete_obstacle(
         return {"obstacles": result}
 
 
-# TODO: refaco the way it is called in typoescript
+# TODO: refactor the way it is called in typescript
 # use PositionEngine.add_obstacle instead of PositionEngine.add_obstacle_array
 def add_obstacles(
     inputs: list,
@@ -135,8 +145,13 @@ def add_obstacles(
     return {"obstacles": result}
 
 
-# TODO: use PositionEngine.get_distances_from_obstacles() for helping creating the dict result
-# In the long run: even use GroupPoints.distances to get distances
+# TODO:
+# generate the new GroupPoints (ideally this would already be generated before)
+# eventually change frame and inverse y axis
+# extract distances dict
+# recreate stellar format of distances dict
+
+
 def compute_distances(
     inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
 ):
@@ -152,22 +167,18 @@ def compute_distances(
             curve_points=points_for_plot[0].coords[span_index]
         )
         points_for_plot[1].coords[obstacle["span_index"]]
-        sea_level_groud_coords_start = (
-            plot_engine.position_engine.section_pts.supports_ground_coords[
-                span_index
-            ].copy()
-        )
-        sea_level_groud_coords_end = (
-            plot_engine.position_engine.section_pts.supports_ground_coords[
-                span_index + 1
-            ].copy()
-        )
-        sea_level_groud_coords_start[2] = 0.0
-        sea_level_groud_coords_end[2] = 0.0
+        sea_level_ground_coords_start = plot_engine.position_engine.coords_calculator.supports_ground_coords[
+            span_index
+        ].copy()
+        sea_level_ground_coords_end = plot_engine.position_engine.coords_calculator.supports_ground_coords[
+            span_index + 1
+        ].copy()
+        sea_level_ground_coords_start[2] = 0.0
+        sea_level_ground_coords_end[2] = 0.0
 
         plot_engine.position_engine.distance_engine.add_span_frame(
-            x_axis_start=sea_level_groud_coords_start,
-            x_axis_end=sea_level_groud_coords_end,
+            x_axis_start=sea_level_ground_coords_start,
+            x_axis_end=sea_level_ground_coords_end,
         )
         # Compute the distance from a point to the curve
         try:
