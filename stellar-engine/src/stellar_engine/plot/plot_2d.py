@@ -4,9 +4,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
+
 from mechaphlowers import BalanceEngine, PlotEngine
 
-from stellar_engine.entities.output import get_coordinates
+import stellar_engine.plot.obstacles as obst
+from stellar_engine.entities.output import (
+    get_coordinates,
+    get_section_middle_span,
+)
+
+logger = logging.getLogger("mechaphlowers")
 
 
 def refresh_projection(
@@ -15,6 +23,7 @@ def refresh_projection(
     plot_engine: PlotEngine,
     base_plt_line: PlotEngine,
 ):
+    logger.debug("===> refresh_projection triggered")
     start_support = inputs["startSupport"]
     end_support = inputs["endSupport"]
     view = inputs["view"]
@@ -23,7 +32,6 @@ def refresh_projection(
     current_coords = get_coordinates(
         balance_engine, plot_engine, project, start_support, end_support
     )
-    # TODO: weird consistency base/current engine
     base_coords = (
         get_coordinates(
             balance_engine, base_plt_line, project, start_support, end_support
@@ -31,11 +39,19 @@ def refresh_projection(
         if base_plt_line
         else None
     )
+    middle_span = get_section_middle_span(start_support, end_support)
+    obstacles = obst.get_current_obstacles(
+        plot_engine, project=project, support_index=middle_span
+    )
 
-    obs = plot_engine.obstacles_dict()
-    obstacles = [
-        {"uuid": key, "points": value.tolist()} for key, value in obs.items()
-    ]
-    current_coords["obstacles"] = obstacles
-
-    return {"current": current_coords, "base": base_coords}
+    return {
+        "sectionOutput": {"current": current_coords, "base": base_coords},
+        "obstacles": obstacles,
+        "distances": obst.compute_distances(
+            # inputs=obstacles,
+            inputs={},  # currently unused
+            project=project,
+            plot_engine=plot_engine,
+            support_index=get_section_middle_span(start_support, end_support),
+        ),
+    }
