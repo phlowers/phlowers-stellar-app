@@ -874,7 +874,7 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
-all = [
+dev = [
     { name = "idna" },
     { name = "ipykernel" },
     { name = "ipython" },
@@ -886,22 +886,6 @@ all = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "requests" },
-    { name = "ruff" },
-    { name = "scipy" },
-    { name = "tornado" },
-    { name = "types-pyyaml" },
-    { name = "types-requests" },
-    { name = "unittest-xml-reporting" },
-]
-dev = [
-    { name = "idna" },
-    { name = "ipykernel" },
-    { name = "ipython" },
-    { name = "lxml" },
-    { name = "mypy" },
-    { name = "pandas-stubs" },
-    { name = "plotly-stubs" },
-    { name = "pygments" },
     { name = "ruff" },
     { name = "scipy" },
     { name = "tornado" },
@@ -919,7 +903,7 @@ test = [
 requires-dist = [{ name = "mechaphlowers", specifier = "==0.9.0" }]
 
 [package.metadata.requires-dev]
-all = [
+dev = [
     { name = "idna", specifier = ">=3.15" },
     { name = "ipykernel", specifier = "==7.3.0" },
     { name = "ipython", specifier = "==9.14.1" },
@@ -931,22 +915,6 @@ all = [
     { name = "pytest", specifier = "==9.1.0" },
     { name = "pytest-cov", specifier = "==5.0.0" },
     { name = "requests", specifier = "==2.33.1" },
-    { name = "ruff", specifier = "==0.6.1" },
-    { name = "scipy", specifier = "==1.14.1" },
-    { name = "tornado", specifier = ">=6.5.6" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },
-    { name = "types-requests", specifier = "==2.33.0.20260518" },
-    { name = "unittest-xml-reporting", specifier = "==3.2.0" },
-]
-dev = [
-    { name = "idna", specifier = ">=3.15" },
-    { name = "ipykernel", specifier = "==7.3.0" },
-    { name = "ipython", specifier = "==9.14.1" },
-    { name = "lxml", specifier = ">=6.1.0" },
-    { name = "mypy", specifier = "==1.11.2" },
-    { name = "pandas-stubs", specifier = "==2.2.3.241009" },
-    { name = "plotly-stubs", specifier = "==0.0.5" },
-    { name = "pygments", specifier = ">=2.20.0" },
     { name = "ruff", specifier = "==0.6.1" },
     { name = "scipy", specifier = "==1.14.1" },
     { name = "tornado", specifier = ">=6.5.6" },
