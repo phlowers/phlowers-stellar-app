@@ -102,6 +102,10 @@ export class WorkerPythonService {
    * ```
    */
   setup() {
+    if (this.worker) {
+      return;
+    }
+
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
     this.worker.onmessage = ({ data }) => {
       if (data.log) {

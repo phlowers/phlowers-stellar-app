@@ -191,6 +191,13 @@ describe('WorkerService', () => {
       expect(service.worker).toBeDefined();
     });
 
+    it('should not create a second worker when setup is called twice', () => {
+      service.setup();
+      service.setup();
+
+      expect(global.Worker).toHaveBeenCalledTimes(1);
+    });
+
     it('should set up onmessage handler', () => {
       service.setup();
       expect(mockWorker.onmessage).toBeDefined();

@@ -217,13 +217,22 @@ describe('AppComponent', () => {
   });
 
   describe('ngOnInit — V2 startup sequence', () => {
+    it('should call workerService.setup() immediately on ngOnInit', () => {
+      const setupDataSpy = vi.spyOn(component, 'setupData').mockResolvedValue(undefined);
+
+      component.ngOnInit();
+
+      expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
+      expect(setupDataSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('should call workerService.setup() even if setupData() fails', async () => {
       vi.spyOn(component, 'setupData').mockRejectedValue(new Error('setup failed'));
 
       component.ngOnInit();
       await fixture.whenStable();
 
-      expect(mockWorkerService.setup).toHaveBeenCalled();
+      expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
     });
   });
 });
