@@ -7,6 +7,7 @@
 """Core package: core calculations."""
 
 from stellar_engine.core.pose_table import get_equivalent_span, get_pose_table
+from stellar_engine.core.study import initialize_study
 from stellar_engine.core.section import (
     generate_section_array,
 )
@@ -15,4 +16,5 @@ __all__ = [
     "generate_section_array",
     "get_pose_table",
     "get_equivalent_span",
+    "initialize_study",
 ]

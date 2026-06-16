@@ -6,7 +6,7 @@
 
 import logging
 
-from mechaphlowers import BalanceEngine, PlotEngine
+from mechaphlowers import BalanceEngine, PlotEngine, PositionEngine, SectionStudy
 
 import stellar_engine.plot.obstacles as obst
 from stellar_engine.entities.output import (
@@ -21,10 +21,13 @@ logger = logging.getLogger("mechaphlowers")
 # not the whole sectionOutput, that also contains vhl and other data that do not change
 def refresh_projection(
     inputs: dict,
-    balance_engine: BalanceEngine,
-    plot_engine: PlotEngine,
-    base_plt_line: PlotEngine,
+    study: SectionStudy,
+    base_study: SectionStudy | None = None,
 ):
+    
+    balance_engine: BalanceEngine = study.balance_engine
+    plot_engine: PositionEngine = study.position_engine 
+    # base_plt_line: PositionEngine = base_study.position_engine if base_study else None
     logger.debug("===> refresh_projection triggered")
     start_support = inputs["startSupport"]
     end_support = inputs["endSupport"]
@@ -32,18 +35,18 @@ def refresh_projection(
     project = view == "2d"
 
     current_coords = get_coordinates(
-        balance_engine, plot_engine, project, start_support, end_support
+        study, project, start_support, end_support
     )
     base_coords = (
         get_coordinates(
-            balance_engine, base_plt_line, project, start_support, end_support
+            base_study, project, start_support, end_support
         )
-        if base_plt_line
+        if base_study
         else None
     )
     middle_span = get_section_middle_span(start_support, end_support)
     obstacles = obst.get_current_obstacles(
-        plot_engine, project=project, support_index=middle_span
+        study.position_engine, project=project, support_index=middle_span
     )
 
     return {
@@ -53,7 +56,7 @@ def refresh_projection(
             # inputs=obstacles,
             inputs={},  # currently unused
             project=project,
-            plot_engine=plot_engine,
+            plot_engine=study.position_engine,
             support_index=middle_span,
         ),
     }

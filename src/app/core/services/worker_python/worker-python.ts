@@ -8,14 +8,14 @@
 
 import { loadPyodide } from 'pyodide';
 import functions from './tasks/python-scripts/functions.py';
-import tools from './tasks/python-scripts/api.py';
+import api from './tasks/python-scripts/api.py';
 import change_state from './tasks/python-scripts/change_state.py';
 import cable_modification from './tasks/python-scripts/cable_modification.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, change_state, tools, cable_modification];
+const pythonFiles = [functions, change_state, api, cable_modification];
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -26,6 +26,7 @@ let pyodide: PyodideAPI;
  * then executes the bundled Python source files.
  * Posts `loadTime` and `importTime` messages back to the main thread.
  */
+console.debug('Loading pyodide...');
 try {
   const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
   const start = performance.now();
@@ -33,10 +34,13 @@ try {
     indexURL: self.name + 'pyodide/',
     packages: allPythonPackages
   });
+  console.debug('===> Pyodide loaded');
   const loadEnd = performance.now();
   postMessage({ loadTime: loadEnd - start });
   for (const file of pythonFiles) {
+    console.debug(`===> Running Python file: ${file}`);
     await pyodide.runPython(file);
+    console.debug(`===> Finished running Python file: ${file}`);
   }
   const importEnd = performance.now();
   postMessage({ importTime: importEnd - loadEnd });

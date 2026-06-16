@@ -9,7 +9,7 @@
 import logging
 
 import numpy as np
-from mechaphlowers import BalanceEngine, PlotEngine, units
+from mechaphlowers import BalanceEngine, PlotEngine, SectionStudy, units
 
 from stellar_engine.entities.inputs import ClimateCharge
 from stellar_engine.entities.output import get_coordinates
@@ -20,22 +20,23 @@ logger.setLevel(logging.WARNING)
 
 
 def apply_span_loads(
-    engine: BalanceEngine, plot_engine: PlotEngine, span_loads: list
+    study: SectionStudy, span_loads: list
 ):
     """Parse span loads and add them to the engine if any are non-zero."""
-    load_position_meters, load_mass = parse_span_loads(engine, span_loads)
+    load_position_meters, load_mass = parse_span_loads(study, span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
-        engine.add_loads(load_position_meters, load_mass)
-        # Bug here: plot_engine is not correctly reset
-        plot_engine.reset(engine)
+        study.add_loads(load_position_meters, load_mass)
+        # # Bug here: plot_engine is not correctly reset
+        # plot_engine.reset(engine)
 
 
 def parse_span_loads(
-    engine: BalanceEngine, span_loads: list
+    study: SectionStudy, span_loads: list
 ) -> tuple[np.ndarray, np.ndarray]:
     """Convert raw span load dicts into position and mass arrays."""
     load_position_list = []
     load_weight_list_daN = []
+    engine = study.balance_engine
     span_lengths = engine.section_array.data["span_length"].to_numpy()
     for index, span in enumerate(span_loads):
         try:

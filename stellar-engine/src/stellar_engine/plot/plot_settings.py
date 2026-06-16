@@ -6,7 +6,7 @@
 
 import logging
 
-from mechaphlowers import PlotEngine
+from mechaphlowers import SectionStudy
 from mechaphlowers.core.geometry.points import Points
 from mechaphlowers.plotting.utils import compute_aspect_ratio
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_aspect_ratio(
-    inputs: dict, plot_engine: PlotEngine, start_support: int, end_support: int
+    inputs: dict, study: SectionStudy, start_support: int, end_support: int
 ) -> dict[str, float]:
     logger.debug(
         f"Calculating aspect ratio with inputs: {inputs}, start_support: {start_support}, end_support: {end_support}"
@@ -22,15 +22,12 @@ def get_aspect_ratio(
     x_scale = inputs["x"]
     y_scale = inputs["y"]
     z_scale = inputs["z"]
-    span, supports, insulators = plot_engine.get_points_for_plot()
-    obstacles = plot_engine.position_engine.obstacles_dict()
-    logger.debug(f"Obstacles: {obstacles}")
+    # span, supports, insulators = study.position_engine.get_group_points().get_points_for_plot()
+    # obstacles = study.position_engine.obstacles_dict()
+    # logger.debug(f"Obstacles: {obstacles}")
 
     try:
-        result = compute_aspect_ratio(
-            Points(span.coords[start_support:end_support]),
-            Points(supports.coords[start_support:end_support]),
-            Points(insulators.coords[start_support:end_support]),
+        result = study.position_engine.get_group_points().get_aspect_ratio(
             x_scale=x_scale,
             y_scale=y_scale,
             z_scale=z_scale,

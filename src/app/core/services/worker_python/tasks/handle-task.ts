@@ -23,7 +23,7 @@ const tasks: Record<
     externalPackages: ['pytest']
   },
   [Task.getLit]: {
-    function: 'init_section',
+    function: 'load_initialize_study',
     externalPackages: []
   },
   [Task.changeState]: {
@@ -150,6 +150,7 @@ export async function handleTask(
     }
     pyodide.globals.set('js_inputs', inputs);
 
+    console.debug(`Executing task: ${task}, triggering Python function: ${tasks[task].function}`);
     const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[Task]) => PyProxy;
     const result = inputs ? functionToRun(inputs) : functionToRun();
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
