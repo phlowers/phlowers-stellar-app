@@ -7,45 +7,15 @@
 import * as Plotly from 'plotly.js-dist-min';
 import { CableModification } from '@shared/domain';
 import { CreatePlotParams } from './createPlot';
-import { CableModificationAnnotationData } from './createCableModificationAnnotations.interfaces';
 import {
-  CABLE_MOD_AX_OFFSET,
-  CABLE_MOD_AY_OFFSET,
+  CABLE_MOD_ARROW_X_OFFSET,
+  CABLE_MOD_ARROW_Y_OFFSET,
   CABLE_MOD_COLOR,
   CABLE_MOD_ICON,
   CABLE_MOD_LABEL_Y_SHIFT,
   getCableModificationLabel
 } from './createCableModificationAnnotations.constantes';
-
-/**
- * Base Plotly annotation shape for the cable modification icon.
- *
- * @remarks
- * Mirrors `createLoadAnnotations`' base annotation (same `xref`, `yref`,
- * `arrowhead`, `arrowcolor`, `borderpad`, `bgcolor`, `font`, `arrowwidth`)
- * for visual consistency. Only `ay` differs (`-90` vs `-50`) so the icon
- * sits clearly above the load icon when both anchor on the same point.
- */
-const BASE_ICON_ANNOTATION: Partial<Plotly.Annotations> = {
-  xref: 'x' as const,
-  yref: 'y' as const,
-  ax: CABLE_MOD_AX_OFFSET,
-  ay: CABLE_MOD_AY_OFFSET,
-  showarrow: true,
-  arrowhead: 0,
-  startarrowhead: 6,
-  arrowcolor: CABLE_MOD_COLOR,
-  captureevents: true,
-  bordercolor: CABLE_MOD_COLOR,
-  borderpad: 6,
-  bgcolor: 'rgba(0,0,0,0)',
-  font: {
-    family: 'FontAwesome',
-    color: CABLE_MOD_COLOR,
-    size: 8
-  },
-  arrowwidth: 1
-};
+import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
 
 /**
  * Returns the 3D point on a span polyline whose horizontal abscissa
@@ -84,7 +54,7 @@ const findPointAtAbscissa = (polyline: number[][] | undefined, targetX: number):
   }
   // Clamp: pick the endpoint whose x is closest to targetX.
   const first = polyline[0];
-  const last = polyline[polyline.length - 1];
+  const last = polyline.at(-1)!;
   return Math.abs(targetX - first[0]) <= Math.abs(targetX - last[0]) ? first : last;
 };
 
@@ -112,7 +82,7 @@ const resolveAnchorCoord = (
 
   const distance = Math.max(0, modification.distanceSupportRef);
   const leftX = polyline[0][0];
-  const rightX = polyline[polyline.length - 1][0];
+  const rightX = polyline.at(-1)![0];
   // Line direction sign: +1 when x increases from left to right, -1 otherwise.
   const direction = rightX >= leftX ? 1 : -1;
   const targetX = modification.supportRef === 'LEFT' ? leftX + direction * distance : rightX - direction * distance;
@@ -143,19 +113,20 @@ const buildIconAnnotation = (
   side: CreatePlotParams['side']
 ): Partial<Plotly.Annotations> => {
   const mapped = mapAnchorToAxes(anchor, view, side);
-  return {
-    ...BASE_ICON_ANNOTATION,
-    x: mapped.x,
-    y: mapped.y,
-    // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
-    z: mapped.z,
-    text: CABLE_MOD_ICON,
+  return buildClickableIconAnnotation({
+    arrowTipX: mapped.x,
+    arrowTipY: mapped.y,
+    arrowTipZ: mapped.z,
+    icon: CABLE_MOD_ICON,
+    color: CABLE_MOD_COLOR,
+    arrowYOffset: CABLE_MOD_ARROW_Y_OFFSET,
+    arrowXOffset: CABLE_MOD_ARROW_X_OFFSET,
     data: {
       type: 'cableModification',
       spanUuid: modification.spanUuid,
       cableModificationUuid: modification.uuid
-    } as CableModificationAnnotationData
-  } as Partial<Plotly.Annotations>;
+    }
+  });
 };
 
 /**
@@ -179,7 +150,7 @@ const buildLabelAnnotation = (
     // z is a non-standard Plotly annotation property used for 3D rendering
     z: mapped.z,
     showarrow: false,
-    xshift: CABLE_MOD_AX_OFFSET,
+    xshift: CABLE_MOD_ARROW_X_OFFSET,
     yshift: CABLE_MOD_LABEL_Y_SHIFT,
     text: getCableModificationLabel(modification.widthCable),
     captureevents: false,
@@ -234,8 +205,10 @@ export const createCableModificationAnnotations = (
     const anchor = resolveAnchorCoord(plotParams, absoluteSpanIndex, modification);
     if (!anchor) return;
 
-    annotations.push(buildIconAnnotation(anchor, modification, view, side));
-    annotations.push(buildLabelAnnotation(anchor, modification, view, side));
+    annotations.push(
+      buildIconAnnotation(anchor, modification, view, side),
+      buildLabelAnnotation(anchor, modification, view, side)
+    );
   });
 
   return annotations;
