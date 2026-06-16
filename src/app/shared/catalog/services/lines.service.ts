@@ -7,7 +7,7 @@
 import { inject, Injectable } from '@angular/core';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 /**
@@ -26,6 +26,10 @@ import { CsvImportClientService } from '@shared/catalog/csv-import';
 export class LinesService {
   /** BehaviorSubject indicating whether the service is ready to use. */
   public readonly ready = new BehaviorSubject<boolean>(false);
+
+  /** Emits after each successful `importFromFile()` call. */
+  private readonly _imported$ = new Subject<void>();
+  readonly imported$ = this._imported$.asObservable();
 
   private readonly storageService = inject(StorageService);
   private readonly logger = inject(LoggerService);
@@ -53,6 +57,7 @@ export class LinesService {
   async importFromFile(): Promise<void> {
     try {
       await this.csvImportClient.importCsv('lines');
+      this._imported$.next();
     } catch (error) {
       this.logger.error('Error importing lines', error);
     }

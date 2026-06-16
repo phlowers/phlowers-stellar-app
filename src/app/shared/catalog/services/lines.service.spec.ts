@@ -79,5 +79,18 @@ describe('LinesService', () => {
       await expect(service.importFromFile()).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith('Error importing lines', expect.any(Error));
     });
+    it('emits on imported$ after a successful import', async () => {
+      const emissions: void[] = [];
+      service.imported$.subscribe(() => emissions.push());
+      await service.importFromFile();
+      expect(emissions.length).toBe(1);
+    });
+    it('does not emit on imported$ when the import fails', async () => {
+      csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
+      const emissions: void[] = [];
+      service.imported$.subscribe(() => emissions.push());
+      await service.importFromFile();
+      expect(emissions.length).toBe(0);
+    });
   });
 });
