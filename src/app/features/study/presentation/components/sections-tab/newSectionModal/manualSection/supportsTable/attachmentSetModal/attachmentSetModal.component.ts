@@ -150,7 +150,7 @@ export class AttachmentSetModalComponent {
       if (!currentSupportName) return;
       const item = await this.attachmentService.getAttachmentDetails(currentSupportName, event.value as number);
       if (item) {
-        this.armLength.set(item.cross_arm_length);
+        this.armLength.set(item.cross_arm_length != null ? Math.round(item.cross_arm_length * 100) / 100 : undefined);
         this.heightBelowConsole.set(item.attachment_altitude);
         this.towerModel.set(item.support_tower);
       }

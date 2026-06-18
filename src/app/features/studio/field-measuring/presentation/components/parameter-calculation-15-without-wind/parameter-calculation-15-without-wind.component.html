@@ -104,7 +104,7 @@
       <div class="parameterPapoto">
         <dt id="parameterPapoto-display" i18n>Parameter (Papoto, etc.)</dt>
         <dd>
-          {{ (measureData().outputs.papoto?.parameter | number: '1.0-2') ?? '-' }}
+          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
@@ -159,21 +159,21 @@
       <div class="parameter15CMinusUncertainty">
         <dt i18n>Parameter at 15°C - uncertainty</dt>
         <dd>
-          {{ (measureData().outputs.parameter15C?.parameter15CMinusUncertainty | number: '1.0-3') ?? '-' }}
+          {{ (truncate1Decimal(measureData().outputs.parameter15C?.parameter15CMinusUncertainty) | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15C">
         <dt i18n>Parameter at 15°C</dt>
         <dd>
-          {{ (measureData().outputs.parameter15C?.parameter15C | number: '1.0-3') ?? '-' }}
+          {{ (truncate1Decimal(measureData().outputs.parameter15C?.parameter15C) | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15CPlusUncertainty">
         <dt i18n>Parameter at 15°C + uncertainty</dt>
         <dd>
-          {{ (measureData().outputs.parameter15C?.parameter15CPlusUncertainty | number: '1.0-3') ?? '-' }}
+          {{ (truncate1Decimal(measureData().outputs.parameter15C?.parameter15CPlusUncertainty) | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
