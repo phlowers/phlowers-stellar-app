@@ -20,7 +20,9 @@ vi.mock('plotly.js-dist-min', () => ({
     relayout: vi.fn().mockResolvedValue(undefined),
     Icons: {
       '3d_rotate': { width: 1000, height: 1000, path: '' },
-      'z-axis': { width: 1000, height: 1000, path: '' }
+      'z-axis': { width: 1000, height: 1000, path: '' },
+      zoombox: { width: 1000, height: 1000, path: '' },
+      pan: { width: 1000, height: 1000, path: '' }
     }
   },
   react: vi.fn(),
@@ -443,6 +445,122 @@ describe('createPlot', () => {
 
       const configArg = (Plotly.react as Mock).mock.calls[0][3];
       expect(configArg.modeBarButtonsToRemove).toContain('resetScale2d');
+    });
+
+    it('should include zoom3d in modeBarButtonsToRemove', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      expect(configArg.modeBarButtonsToRemove).toContain('zoom3d');
+    });
+
+    it('should include pan3d in modeBarButtonsToRemove', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      expect(configArg.modeBarButtonsToRemove).toContain('pan3d');
+    });
+  });
+
+  describe('custom zoom/pan modebar buttons', () => {
+    it('should include a custom zoom3d button in modeBarButtonsToAdd', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string }[];
+      expect(addedButtons.some((btn) => btn.name === 'customZoom3d')).toBe(true);
+    });
+
+    it('should include a custom pan3d button in modeBarButtonsToAdd', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string }[];
+      expect(addedButtons.some((btn) => btn.name === 'customPan3d')).toBe(true);
+    });
+
+    it('should set attr=scene.dragmode and val=zoom on the custom zoom3d button', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string; attr?: string; val?: string }[];
+      const zoom3dBtn = addedButtons.find((btn) => btn.name === 'customZoom3d');
+      expect(zoom3dBtn?.attr).toBe('scene.dragmode');
+      expect(zoom3dBtn?.val).toBe('zoom');
+    });
+
+    it('should set attr=scene.dragmode and val=pan on the custom pan3d button', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string; attr?: string; val?: string }[];
+      const pan3dBtn = addedButtons.find((btn) => btn.name === 'customPan3d');
+      expect(pan3dBtn?.attr).toBe('scene.dragmode');
+      expect(pan3dBtn?.val).toBe('pan');
+    });
+
+    it('should set attr=scene.dragmode and val=orbit on the custom orbit button', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string; attr?: string; val?: string }[];
+      const orbitBtn = addedButtons.find((btn) => btn.name === 'customOrbitRotation');
+      expect(orbitBtn?.attr).toBe('scene.dragmode');
+      expect(orbitBtn?.val).toBe('orbit');
+    });
+
+    it('should set attr=scene.dragmode and val=turntable on the custom turntable button', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string; attr?: string; val?: string }[];
+      const turntableBtn = addedButtons.find((btn) => btn.name === 'customTurntableRotation');
+      expect(turntableBtn?.attr).toBe('scene.dragmode');
+      expect(turntableBtn?.val).toBe('turntable');
+    });
+
+    it('should call setDragmodeDirect with zoom mode when custom zoom button is clicked', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string; click: (gd: unknown) => void }[];
+      const zoom3dBtn = addedButtons.find((btn) => btn.name === 'customZoom3d');
+
+      const updateActiveButton = vi.fn();
+      const mockGd = {
+        layout: { scene: { dragmode: 'orbit' } },
+        _fullLayout: { scene: { dragmode: 'orbit', _scene: { camera: { mode: 'orbit', keyBindingMode: 'rotate' } } } },
+        _modeBar: { updateActiveButton }
+      };
+      zoom3dBtn!.click(mockGd);
+
+      expect(mockGd._fullLayout.scene._scene.camera.mode).toBe('zoom');
+      expect(mockGd._fullLayout.scene._scene.camera.keyBindingMode).toBe('zoom');
+      expect(mockGd._fullLayout.scene.dragmode).toBe('zoom');
+      expect(mockGd.layout.scene.dragmode).toBe('zoom');
+      expect(updateActiveButton).toHaveBeenCalledOnce();
+    });
+
+    it('should call setDragmodeDirect with pan mode when custom pan button is clicked', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const configArg = (Plotly.react as Mock).mock.calls[0][3];
+      const addedButtons = configArg.modeBarButtonsToAdd as { name: string; click: (gd: unknown) => void }[];
+      const pan3dBtn = addedButtons.find((btn) => btn.name === 'customPan3d');
+
+      const updateActiveButton = vi.fn();
+      const mockGd = {
+        layout: { scene: { dragmode: 'orbit' } },
+        _fullLayout: { scene: { dragmode: 'orbit', _scene: { camera: { mode: 'orbit', keyBindingMode: 'rotate' } } } },
+        _modeBar: { updateActiveButton }
+      };
+      pan3dBtn!.click(mockGd);
+
+      expect(mockGd._fullLayout.scene._scene.camera.mode).toBe('pan');
+      expect(mockGd._fullLayout.scene._scene.camera.keyBindingMode).toBe('pan');
+      expect(mockGd._fullLayout.scene.dragmode).toBe('pan');
+      expect(mockGd.layout.scene.dragmode).toBe('pan');
+      expect(updateActiveButton).toHaveBeenCalledOnce();
     });
   });
 });
