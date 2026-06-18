@@ -6,7 +6,7 @@
  */
 
 import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
-import { AxesNorms, View } from '@shared/types/plot.types';
+import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PoseResults } from '@shared/domain/models/section.model';
 
@@ -379,7 +379,10 @@ export interface TaskInputs {
     azimuth: number;
     windDirection: string;
   };
-  [Task.getAspectRatio]: AxesNorms & {
+  [Task.getAspectRatio]: {
+    x: number;
+    y: number;
+    z: number;
     startSupport: number;
     endSupport: number;
     view: View;

@@ -88,7 +88,8 @@ export class SectionPlotComponent implements OnDestroy {
     baseLitData: this.plotService.baseLitData(),
     plotOptions: this.plotOptionsService.plotOptions(),
     displayOptions: this.plotOptionsService.selectedDisplayOptions(),
-    axesNorms: this.plotOptionsService.axesNorms(),
+    scalingFactors: this.plotOptionsService.scalingFactors(),
+    aspectRatio: this.plotOptionsService.aspectRatio(),
     selectedObstacleUuid: this.obstaclesService.selectedObstacleUuid(),
     activePointIndex: this.obstaclesService.activePointIndex(),
     sideTabs: this.sideTabsService.sideTabs(),
@@ -175,7 +176,8 @@ export class SectionPlotComponent implements OnDestroy {
       const camera = this.plotOptionsService.camera();
       const currentObstacleUuid = this.obstaclesService.selectedObstacleUuid();
       const currentObstaclePointIndex = this.obstaclesService.activePointIndex() ?? 0;
-      const axesNorms = this.plotOptionsService.axesNorms();
+      const aspectRatio = this.plotOptionsService.aspectRatio();
+      const scalingFactors = this.plotOptionsService.scalingFactors();
 
       const distances = this.obstacleStateService.distances();
       const distanceType = this.obstacleStateService.distanceType();
@@ -207,7 +209,8 @@ export class SectionPlotComponent implements OnDestroy {
         currentObstaclePointIndex,
         obstacles,
         supports,
-        axesNorms,
+        aspectRatio,
+        scalingFactors,
         distances,
         distanceType,
         cableModifications,

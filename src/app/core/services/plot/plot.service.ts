@@ -1,6 +1,6 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { AxesNorms, PlotOptions, PLOT_ID } from '@shared/types/plot.types';
+import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
 import {
   DataError,
@@ -53,7 +53,7 @@ export class PlotService {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly document = inject(DOCUMENT);
 
-  /** UUID of the section currently loaded in the Python engine — used to skip redundant refreshSection calls. */
+  /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
   private currentSectionUuid: string | null = null;
 
   constructor() {
@@ -128,7 +128,7 @@ export class PlotService {
     this.baseLitData.set(null);
     this.spanService.section.set(section);
     if (!this.workerPythonService.ready || !section?.cable_name) {
-      this.logger.error('initSectionStudio error');
+      this.logger.error('refreshSection error');
       this.error.set(DataError.NO_CABLE_FOUND);
       this.loading.set(false);
       return;
@@ -141,31 +141,25 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-    const obstacles = section.obstacles ?? [];
-    const { error, pythonErrorCode } = await this.workerPythonService.runTask(Task.initLit, {
-      section,
-      cable,
-      ...(obstacles.length > 0 ? { obstacles } : {})
-    });
+    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.initLit, { section, cable });
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
 
-    if (error) {
+    if (error || !result?.success) {
       this.obstacleStateService.reset();
       this.loading.set(false);
       return;
     }
 
-    this.plotOptionsChange({
-      startSupport: 0,
-      endSupport: Math.max(section.supports.length - 1, 1),
-      invert: false
-    });
+    const obstacles = section.obstacles ?? [];
+    if (obstacles.length > 0) {
+      await this.obstacleStateService.syncObstacles(
+        obstacles,
+        untracked(() => this.plotOptionsService.plotOptions())
+      );
+    }
 
-    await this.refreshSection(section);
-  };
-
-  refreshSection = async (_section: Section) => {
+    // initLit initializes the study — refreshProjection gets the actual render data
     await this.refreshProjection();
   };
 
@@ -188,8 +182,8 @@ export class PlotService {
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
 
-    const currentNorms = untracked(() => this.plotOptionsService.axesNorms());
-    await this.updateAxesNorms(currentNorms, plotOptions);
+    const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
+    await this.updateAspectRatio(scalingFactors, plotOptions);
 
     this.loading.set(false);
   };
@@ -206,15 +200,36 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  private async updateAxesNorms(currentNorms: AxesNorms, plotOptions: PlotOptions): Promise<void> {
+  private async updateAspectRatio(scalingFactors: { x: number; y: number; z: number }, plotOptions: PlotOptions): Promise<void> {
     const { result } = await this.workerPythonService.runTask(Task.getAspectRatio, {
-      ...currentNorms,
+      ...scalingFactors,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
     });
     if (result) {
-      this.plotOptionsService.setAxesNorms({ ...result, aspectMode: currentNorms.aspectMode });
+      this.plotOptionsService.setAspectRatio(result);
     }
+  }
+
+  async reapplyObstacles(): Promise<void> {
+    const section = untracked(() => this.spanService.section());
+    const obstacles = section?.obstacles ?? [];
+    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
+
+    // Restore the load-applied base state before re-adding obstacles
+    if (this.temporaryLoadData) {
+      await this.workerPythonService.runTask(Task.changeState, {
+        climate: this.temporaryLoadData.climate,
+        spanLoads: this.temporaryLoadData.spanLoads
+      });
+    }
+
+    if (obstacles.length) {
+      await this.obstacleStateService.addBulkObstacles(obstacles, plotOptions);
+    }
+
+    // refreshProjection gets all data including obstacles and distances
+    await this.refreshProjection();
   }
 }

@@ -7,7 +7,7 @@
 
 import { inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { AxesNorms, PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
+import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 import { checkIfProjectionNeedRefresh } from './plot-options.utils';
@@ -33,8 +33,8 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
 export class PlotOptionsService {
   readonly plotOptions = signal<PlotOptions>({ ...defaultPlotOptions });
   readonly selectedDisplayOptions = signal<SelectedDisplayOptions>({ ...defaultSelectedDisplayOptions });
-  readonly axesNorms = signal<AxesNorms>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-  readonly baseScaleFactors = signal<AxesNorms>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+  readonly scalingFactors = signal<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+  readonly aspectRatio = signal<AspectRatio>({ x: 1, y: 1, z: 1 });
   readonly camera = signal<Camera | null>(null);
   readonly isFreePositioningMode = signal<boolean>(false);
 
@@ -85,14 +85,14 @@ export class PlotOptionsService {
     return camera;
   }
 
-  /** Update the axes norms signal. */
-  setAxesNorms(norms: AxesNorms): void {
-    this.axesNorms.set(norms);
+  /** Update the scaling factors signal (user-controlled input from scale-view). */
+  setScalingFactors(factors: ScalingFactors): void {
+    this.scalingFactors.set(factors);
   }
 
-  /** Update the base scale factors used as input for aspect ratio computation. */
-  setBaseScaleFactors(norms: AxesNorms): void {
-    this.baseScaleFactors.set(norms);
+  /** Update the aspect ratio signal (computed output from Python's getAspectRatio). */
+  setAspectRatio(ratio: AspectRatio): void {
+    this.aspectRatio.set(ratio);
   }
 
   /** Reset all view options and camera state to their initial defaults. */
@@ -100,7 +100,7 @@ export class PlotOptionsService {
     this.plotOptions.set({ ...defaultPlotOptions });
     this.camera.set(null);
     this.isFreePositioningMode.set(false);
-    this.axesNorms.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-    this.baseScaleFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    this.scalingFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    this.aspectRatio.set({ x: 1, y: 1, z: 1 });
   }
 }

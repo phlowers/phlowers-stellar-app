@@ -142,8 +142,7 @@ describe('LoadFormsService', () => {
       loading: createSignalMock(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
-      error: createSignalMock(null),
-      refreshProjection: vi.fn().mockResolvedValue(undefined)
+      error: createSignalMock(null)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
       section: createSignalMock<Section | null>(null)
@@ -335,7 +334,7 @@ describe('LoadFormsService', () => {
       expect(plotOptionsServiceMock.refreshCamera).not.toHaveBeenCalled();
     });
 
-    it('should call refreshCamera and runTask(changeState) followed by refreshProjection when temporaryLoadData is set', async () => {
+    it('should call refreshCamera and runTask(changeState) when temporaryLoadData is set', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
 
@@ -343,7 +342,6 @@ describe('LoadFormsService', () => {
 
       expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
-      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
     });
 
     it('should update temporaryLoadData spanLoads with rechecked values before delegating', async () => {
@@ -405,8 +403,8 @@ describe('LoadFormsService', () => {
         ]
       } as Section);
       mockWorkerPythonService.runTask
-        .mockResolvedValueOnce({ result: { success: true }, error: null })
-        .mockResolvedValueOnce({ result: { success: true }, error: null });
+        .mockResolvedValueOnce({ result: { current: { id: 'after-change-state' }, base: null }, error: null })
+        .mockResolvedValueOnce({ result: { current: { id: 'after-cable-mod' }, base: null }, error: null });
 
       await service.calculateLoad();
 
@@ -421,8 +419,8 @@ describe('LoadFormsService', () => {
           supportRef: 'LEFT'
         })
       );
-      // refreshProjection is called at the end to get the final plot with obstacles and distances
-      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
+      // Final litData reflects the cable modification, not the bare change-state.
+      expect(mockPlotService.litData.set).toHaveBeenLastCalledWith({ id: 'after-cable-mod' });
     });
 
     it('should not run any cable modification task when the section has none', async () => {

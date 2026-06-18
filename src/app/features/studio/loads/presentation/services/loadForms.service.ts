@@ -44,7 +44,7 @@ export class LoadFormsService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
-  private readonly obstacleStateService = inject(ObstacleStateService);
+  // private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
@@ -73,8 +73,7 @@ export class LoadFormsService {
   };
 
   /**
-   * Calculate the load by running the changeState task, then delegate to refreshProjection
-   * so obstacles and distances are included in the plot output.
+   * Calculate the load by running the changeState task, then re-sync all saved obstacles on top.
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -92,29 +91,32 @@ export class LoadFormsService {
         spanLoads: checkedSpanLoads
       };
 
-      // 1. Change the engine state (climate + loads) — no coordinates returned
-      await this.workerPythonService.runTask(Task.changeState, {
+      const { result: changeResult } = await this.workerPythonService.runTask(Task.changeState, {
         climate: temporaryLoadData.climate,
         spanLoads: checkedSpanLoads
       });
 
-      // 2. Re-sync saved obstacles so the engine knows about them
-      const obstacles = currentSection?.obstacles ?? [];
-      if (obstacles.length > 0) {
-        await this.obstacleStateService.syncObstacles(
-          obstacles,
-          this.plotOptionsService.plotOptions()
-        );
+      if (!changeResult?.success) {
+        return;
       }
 
-      // 3. Re-apply any saved cable length modifications on top of the change-state
+      // For me no need to re-sync obstacles here because the obstacles have already been updated before.
+      // const obstacles = currentSection?.obstacles ?? [];
+      // if (obstacles.length > 0) {
+      //   await this.obstacleStateService.syncObstacles(
+      //     obstacles,
+      //     this.plotOptionsService.plotOptions()
+      //   );
+      // }
+
+      // refreshProjection gets all data (litData, baseLitData, obstacles, distances)
+      await this.plotService.refreshProjection();
+
+      // Re-apply any saved cable length modifications on top of the change-state
       // result. `Task.changeState` resets the engine to the climate state without
       // knowing about cable_modifications, which would otherwise be silently
       // dropped from the recomputed geometry.
       await this.reapplyCableModifications(currentSection);
-
-      // 4. Refresh projection to get updated coordinates with obstacles and distances
-      await this.plotService.refreshProjection();
     } finally {
       this.plotService.loading.set(false);
     }
@@ -140,13 +142,17 @@ export class LoadFormsService {
       const spanIndex = supportUuidToIndex.get(modification.spanUuid);
       if (spanIndex === undefined) continue;
 
-      await this.workerPythonService.runTask(Task.cableModification, {
+      const { result } = await this.workerPythonService.runTask(Task.cableModification, {
         spanIndex,
         widthCable: modification.widthCable,
         sizeCable: modification.sizeCable,
         distanceSupportRef: modification.distanceSupportRef,
         supportRef: modification.supportRef
       });
+      if (result) {
+        this.plotService.litData.set(result.current);
+        this.plotService.baseLitData.set(result.base);
+      }
     }
   }
 
