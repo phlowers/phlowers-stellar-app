@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
@@ -81,6 +82,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ParameterCalculation15WithoutWindComponent],
       providers: [
+        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
@@ -493,6 +495,47 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       const el = getByTestId('cable-temperature-input');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('INPUT');
+    });
+
+    describe('HTML rendering - result values truncation', () => {
+      beforeEach(async () => {
+        workerPythonServiceMock.runTask.mockResolvedValue({
+          result: {
+            parameter15CMinusUncertainty: 1885.17,
+            parameter15C: 1900.99,
+            parameter15CPlusUncertainty: 1915.35
+          },
+          error: null,
+          pythonErrorCode: null
+        });
+
+        component.updateMeasureData('updateMode15C', 'manual');
+        component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+        component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+        component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+        component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+
+        await component.calculateParameter15C();
+        fixture.detectChanges();
+      });
+
+      it('should display parameter15CMinusUncertainty truncated to 1 decimal, not rounded (1885.17 → 1885.1)', () => {
+        const text = getByTestId('parameter-15c-minus')?.textContent?.trim();
+        expect(text).toContain('1,885.1');
+        expect(text).not.toContain('1,885.2');
+      });
+
+      it('should display parameter15C truncated to 1 decimal, not rounded (1900.99 → 1900.9)', () => {
+        const text = getByTestId('parameter-15c')?.textContent?.trim();
+        expect(text).toContain('1,900.9');
+        expect(text).not.toContain('1,901.0');
+      });
+
+      it('should display parameter15CPlusUncertainty truncated to 1 decimal, not rounded (1915.35 → 1915.3)', () => {
+        const text = getByTestId('parameter-15c-plus')?.textContent?.trim();
+        expect(text).toContain('1,915.3');
+        expect(text).not.toContain('1,915.4');
+      });
     });
   });
 });

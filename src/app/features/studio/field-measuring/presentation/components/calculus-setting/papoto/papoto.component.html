@@ -269,7 +269,9 @@
     <dl class="papoto__results__list">
       <div class="param">
         <dt i18n>Parameter</dt>
-        <dd>{{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }} m</dd>
+        <dd data-testid="papoto-parameter">
+          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }} m
+        </dd>
       </div>
 
       <div class="incertainParam">
@@ -279,17 +281,23 @@
 
       <div class="param12">
         <dt i18n>Parameter 1-2</dt>
-        <dd>{{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_2) | number: '1.0-1') ?? '-' }} m</dd>
+        <dd data-testid="papoto-parameter-1-2">
+          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_2) | number: '1.0-1') ?? '-' }} m
+        </dd>
       </div>
 
       <div class="param23">
         <dt i18n>Parameter 2-3</dt>
-        <dd>{{ (truncate1Decimal(measureData().outputs.papoto?.parameter_2_3) | number: '1.0-1') ?? '-' }} m</dd>
+        <dd data-testid="papoto-parameter-2-3">
+          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_2_3) | number: '1.0-1') ?? '-' }} m
+        </dd>
       </div>
 
       <div class="param13">
         <dt i18n>Parameter 1-3</dt>
-        <dd>{{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_3) | number: '1.0-1') ?? '-' }} m</dd>
+        <dd data-testid="papoto-parameter-1-3">
+          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_3) | number: '1.0-1') ?? '-' }} m
+        </dd>
       </div>
 
       <div class="crit">

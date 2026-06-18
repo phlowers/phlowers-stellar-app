@@ -5,7 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { truncateTwoDecimals, truncateOneDecimal, truncateOneDecimalValue, truncateNumberToOneDecimal } from './truncateDecimals';
+import {
+  truncateTwoDecimals,
+  truncateOneDecimal,
+  truncateOneDecimalValue,
+  truncateNumberToOneDecimal
+} from './truncateDecimals';
 
 const makeEvent = (value: string) => ({ target: { value } as HTMLInputElement }) as unknown as Event;
 
