@@ -356,11 +356,11 @@
   <app-conformity [isOpen]="isConformityModalOpen()" />
 
   <ng-template #footer>
-    <button app-btn btnStyle="outlined" type="button" data-testid="conformity-report-btn">
+    <button app-btn btnStyle="outlined" type="button" data-testid="conformity-report-btn" disabled>
       <app-icon icon="description" aria-hidden="true" />
       <ng-container i18n>Report</ng-container>
     </button>
-    <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn">
+    <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn" disabled>
       <app-icon icon="download" aria-hidden="true" />
       <ng-container i18n>Export</ng-container>
     </button>
