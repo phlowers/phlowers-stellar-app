@@ -127,7 +127,6 @@ describe('ConformityComponent', () => {
     form: { value: { uuid: string | null } };
     supportsOptions: ReturnType<typeof signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>>;
     saveConformityData: ReturnType<typeof vi.fn>;
-    clearConformityData: ReturnType<typeof vi.fn>;
   };
   let mockSpanService: { section: typeof sectionSignal; getSpanOptions: ReturnType<typeof vi.fn> };
   let mockNotification: { error: ReturnType<typeof vi.fn> };
@@ -151,8 +150,7 @@ describe('ConformityComponent', () => {
       supportsOptions: signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([
         { label: 'Support 1', value: ReferenceSupport.LEFT }
       ]),
-      saveConformityData: vi.fn().mockResolvedValue(undefined),
-      clearConformityData: vi.fn().mockResolvedValue(undefined)
+      saveConformityData: vi.fn().mockResolvedValue(undefined)
     };
     mockSpanService = {
       section: sectionSignal,
@@ -546,21 +544,6 @@ describe('ConformityComponent', () => {
 
       await component.saveConformityData();
       expect(mockFormService.saveConformityData).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('clearSavedConformityData', () => {
-    it('should clear conformity data for the current obstacle', async () => {
-      await createComponent();
-      await component.clearSavedConformityData();
-      expect(mockFormService.clearConformityData).toHaveBeenCalledWith('o1');
-    });
-
-    it('should do nothing when there is no obstacle uuid', async () => {
-      await createComponent();
-      mockFormService.form.value.uuid = null;
-      await component.clearSavedConformityData();
-      expect(mockFormService.clearConformityData).not.toHaveBeenCalled();
     });
   });
 

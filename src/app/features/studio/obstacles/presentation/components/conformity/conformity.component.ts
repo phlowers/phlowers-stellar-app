@@ -439,12 +439,6 @@ export class ConformityComponent {
     });
   }
 
-  async clearSavedConformityData(): Promise<void> {
-    const uuid = this.obstacleFormService.form.value.uuid;
-    if (!uuid) return;
-    await this.obstacleFormService.clearConformityData(uuid);
-  }
-
   async calculate(): Promise<void> {
     if (!this.canCalculate()) return;
     const obstacle = this.obstacleData();

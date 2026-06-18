@@ -356,17 +356,6 @@
   <app-conformity [isOpen]="isConformityModalOpen()" />
 
   <ng-template #footer>
-    <button
-      app-btn
-      btnStyle="danger"
-      type="button"
-      data-testid="conformity-clear-btn"
-      (click)="conformityRef()!.clearSavedConformityData()"
-      aria-label="clear conformity data"
-      i18n-aria-label
-    >
-      <app-icon icon="delete" aria-hidden="true" />
-    </button>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-report-btn">
       <app-icon icon="description" aria-hidden="true" />
       <ng-container i18n>Report</ng-container>

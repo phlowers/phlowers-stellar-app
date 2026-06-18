@@ -372,22 +372,6 @@ export class ObstacleFormService {
     });
   }
 
-  async clearConformityData(uuid: string): Promise<void> {
-    const section = this.spanService.section();
-    const study = this.plotService.study();
-    if (!section || !study) return;
-    const obstacles = section.obstacles ?? [];
-    const existingIndex = obstacles.findIndex((o) => o.uuid === uuid);
-    if (existingIndex === -1) return;
-    const updatedObstacles = obstacles.map((o, i) => {
-      if (i !== existingIndex) return o;
-      const { conformityData: _, ...rest } = o;
-      return rest;
-    });
-    const updatedSection = { ...section, obstacles: updatedObstacles };
-    await this.sectionService.createOrUpdateSection(study, updatedSection);
-    this.spanService.section.set(updatedSection);
-  }
 
   async calculateAndSave(): Promise<void> {
     if (this.form.invalid || !this.form.value?.supportUuid) {

@@ -41,7 +41,6 @@ class MockObstacleFormService {
   calculateAndSave = vi.fn();
   canCalculateAndSave = vi.fn(() => true);
   saveConformityData = vi.fn().mockResolvedValue(undefined);
-  clearConformityData = vi.fn().mockResolvedValue(undefined);
 
   constructor() {
     const fb = new FormBuilder();
