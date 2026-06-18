@@ -139,7 +139,8 @@ export class AuthService {
 
   /**
    * Mark a server mismatch from an explicit HTTP status observed on a protected endpoint.
-   * Network failures and transient backend errors (such as 501) must not call this method.
+   * Safe to call with any HTTP status: only known mismatch statuses set the flag.
+   * Transient backend errors (such as 501) are intentionally ignored as a no-op.
    */
   markServerMismatchFromStatus(status: number): void {
     if (AuthService.SERVER_MISMATCH_STATUS_CODES.has(status)) {
