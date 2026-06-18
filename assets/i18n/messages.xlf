@@ -3759,9 +3759,9 @@
         <source>Conformity verifications</source>
       </segment>
     </unit>
-    <unit id="2257222865176490920">
+    <unit id="1342903161953298166">
       <segment>
-        <source>obstacle type &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; is not eligible to conformity control</source>
+        <source>obstacle type &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; is not eligible for conformity control</source>
       </segment>
     </unit>
     <unit id="2297575749787201338">
@@ -3907,6 +3907,11 @@
     <unit id="9118051921649505065">
       <segment>
         <source>Red zone presence</source>
+      </segment>
+    </unit>
+    <unit id="9128067536654850026">
+      <segment>
+        <source>Pan</source>
       </segment>
     </unit>
   </file>

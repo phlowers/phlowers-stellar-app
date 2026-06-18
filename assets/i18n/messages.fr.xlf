@@ -4526,7 +4526,7 @@
     <unit id="137059924767188115">
       <segment state="initial">
         <source>Altitude type</source>
-        <target>Type d'altitude d'obstacle</target>
+        <target>Type d&apos;altitude d&apos;obstacle</target>
       </segment>
     </unit>
     <unit id="8061924564097350443">
@@ -4688,13 +4688,13 @@
     <unit id="3193184981487915181">
       <segment state="initial">
         <source>obstacle must be saved</source>
-        <target>L'obstacle doit être enregistré</target>
+        <target>L&apos;obstacle doit être enregistré</target>
       </segment>
     </unit>
-    <unit id="2257222865176490920">
+    <unit id="1342903161953298166">
       <segment state="initial">
-        <source>obstacle type &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; is not eligible to conformity control</source>
-        <target>Le type d'obstacle &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; n'est pas éligible au contrôle de conformité</target>
+        <source>obstacle type &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; is not eligible for conformity control</source>
+        <target>Le type d&apos;obstacle &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; n&apos;est pas éligible au contrôle de conformité</target>
       </segment>
     </unit>
     <unit id="7590070052008368937">
@@ -4706,13 +4706,19 @@
     <unit id="1575196422905958981">
       <segment state="initial">
         <source>You cannot open conformity control because this condition is not met:</source>
-        <target>Vous ne pouvez pas ouvrir le contrôle de conformité car cette condition n'est pas remplie :</target>
+        <target>Vous ne pouvez pas ouvrir le contrôle de conformité car cette condition n&apos;est pas remplie :</target>
       </segment>
     </unit>
     <unit id="7661959058031019968">
       <segment state="initial">
         <source>You cannot open conformity control because these conditions are not met:</source>
         <target>Vous ne pouvez pas ouvrir le contrôle de conformité car ces conditions ne sont pas remplies :</target>
+      </segment>
+    </unit>
+    <unit id="9128067536654850026">
+      <segment state="initial">
+        <source>Pan</source>
+        <target>Pan</target>
       </segment>
     </unit>
   </file>

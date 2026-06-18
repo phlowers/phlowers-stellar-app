@@ -163,7 +163,7 @@ export class ObstaclesFormComponent {
       const distanceCount = db ? await db.catObstacleDistances.where('obstacle_type').equals(obstacleType).count() : 0;
       if (distanceCount === 0) {
         const typeLabel = this.obstacleTypeOptions().find((o) => o.value === obstacleType)?.label ?? obstacleType;
-        warnings.push($localize`obstacle type '${typeLabel}' is not eligible to conformity control`);
+        warnings.push($localize`obstacle type '${typeLabel}' is not eligible for conformity control`);
       }
     }
 

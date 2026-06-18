@@ -1,4 +1,4 @@
-<form [formGroup]="form" class="form" (ngSubmit)="calculate()">
+<form [formGroup]="form" class="form" (ngSubmit)="calculate()" data-testid="conformity-form">
   <fieldset>
     <legend class="form__title-obstacle underline-text" i18n>Obstacle</legend>
 
@@ -173,7 +173,15 @@
     </div>
   </fieldset>
 
-  <button class="form__submit" app-btn type="submit" [disabled]="!canCalculate()" [btnLoading]="isCalculating()" i18n>
+  <button
+    class="form__submit"
+    app-btn
+    type="submit"
+    [disabled]="!canCalculate()"
+    [btnLoading]="isCalculating()"
+    data-testid="conformity-calculate-btn"
+    i18n
+  >
     Calculate
   </button>
 </form>

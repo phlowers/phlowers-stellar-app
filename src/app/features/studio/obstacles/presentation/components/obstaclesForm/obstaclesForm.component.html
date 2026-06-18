@@ -369,7 +369,7 @@
       type="button"
       data-testid="conformity-save-btn"
       [disabled]="!conformityRef()?.canCalculate()"
-      (click)="conformityRef()!.saveConformityData()"
+      (click)="conformityRef()?.saveConformityData()"
     >
       <app-icon icon="save" aria-hidden="true" />
       <ng-container i18n>Save</ng-container>
