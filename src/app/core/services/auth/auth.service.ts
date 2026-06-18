@@ -4,13 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
 import { User } from '@shared/domain';
 import { OidcClaims } from '@services/auth/oidc-claims.interface';
 import { USERINFO_URL } from '@services/auth/auth.constants';
+import { fromEvent } from 'rxjs';
 
 /**
  * Shape of the JSON returned by `/auth/userinfo`. Always contains the two
@@ -37,11 +39,13 @@ interface UserinfoResponse extends Partial<OidcClaims> {
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403, 501]);
+  private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403]);
 
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
+  private readonly destroyRef = inject(DestroyRef);
+  private refreshOnReconnectInFlight = false;
 
   /** Currently authenticated user (null until resolved from cache or network). */
   readonly currentUser = signal<User | null>(null);
@@ -64,6 +68,14 @@ export class AuthService {
 
   /** Convenience: true when the email fallback form may be displayed. */
   readonly emailFallbackAllowed = computed(() => this.modeResolved() && !this.oidcEnabled());
+
+  constructor() {
+    fromEvent(globalThis, 'online')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        void this.handleBrowserReconnected();
+      });
+  }
 
   /**
    * Initialise authentication.
@@ -127,7 +139,7 @@ export class AuthService {
 
   /**
    * Mark a server mismatch from an explicit HTTP status observed on a protected endpoint.
-   * Network failures must not call this method.
+   * Network failures and transient backend errors (such as 501) must not call this method.
    */
   markServerMismatchFromStatus(status: number): void {
     if (AuthService.SERVER_MISMATCH_STATUS_CODES.has(status)) {
@@ -268,5 +280,29 @@ export class AuthService {
 
   private isBrowserOnline(): boolean {
     return globalThis.navigator?.onLine !== false;
+  }
+
+  /**
+   * Best-effort reconnect sync.
+   *
+   * When connectivity returns, silently probe `/auth/userinfo` to refresh claims.
+   * Never raises UI errors and does nothing for anonymous first launches.
+   */
+  private async handleBrowserReconnected(): Promise<void> {
+    if (this.refreshOnReconnectInFlight) {
+      return;
+    }
+    if (!this.currentUser() && !this.serverSessionInvalid()) {
+      return;
+    }
+
+    this.refreshOnReconnectInFlight = true;
+    try {
+      await this.refreshFromNetwork();
+    } catch (err) {
+      this.logger.warn('AuthService: reconnect refresh failed', err);
+    } finally {
+      this.refreshOnReconnectInFlight = false;
+    }
   }
 }
