@@ -130,9 +130,15 @@ const createScene = (
 };
 
 /**
- * Builds the Plotly config including custom orbit/turntable modebar buttons.
+ * Builds the Plotly config including custom orbit/turntable/zoom/pan modebar buttons.
  * Defined as a function so that `Plotly.Icons` is accessed at call-time
  * rather than at module-evaluation time (which breaks test mocks).
+ *
+ * ⚠️ DO NOT restore `zoom3d`, `pan3d`, `orbitRotation` or `tableRotation` to their native
+ * Plotly behaviour. The native buttons call `Plotly.relayout({"scene.dragmode": ...})`
+ * which triggers `updateFx()` and resets the 3D camera (POV, angle, zoom) — bug #703.
+ * The custom replacements use `setDragmodeDirect()` to bypass `relayout` and preserve
+ * the camera. Tests in `createPlot.spec.ts` guard against this regression.
  */
 const getConfig = () => {
   /**
@@ -140,16 +146,19 @@ const getConfig = () => {
    * orbit-camera-controller mode. This bypasses Plotly.relayout and its
    * updateFx() which forces camera.up = [0,0,1] on turntable switch,
    * causing an unwanted camera/zoom reset.
+   * @param keyBindingMode - Controls what the primary mouse drag action does.
+   *   Use 'rotate' for orbit/turntable, 'zoom' for zoom, 'pan' for pan.
    */
-  const setDragmodeDirect = (gd: Plotly.PlotlyHTMLElement, mode: string): void => {
+  const setDragmodeDirect = (gd: Plotly.PlotlyHTMLElement, mode: string, keyBindingMode = 'rotate'): void => {
     const gdInternal = gd as unknown as {
       layout?: { scene?: { dragmode?: string } };
       _fullLayout?: { scene?: { dragmode?: string; _scene?: { camera?: { mode?: string; keyBindingMode?: string } } } };
+      _modeBar?: { updateActiveButton?: () => void };
     };
     const scene = gdInternal._fullLayout?.scene;
     if (scene?._scene?.camera) {
       scene._scene.camera.mode = mode;
-      scene._scene.camera.keyBindingMode = 'rotate';
+      scene._scene.camera.keyBindingMode = keyBindingMode;
     }
     // Update layout objects so uirevision preserves the mode across Plotly.react calls
     if (scene) {
@@ -158,12 +167,16 @@ const getConfig = () => {
     if (gdInternal.layout?.scene) {
       gdInternal.layout.scene.dragmode = mode;
     }
+    // Refresh modebar active-button highlighting without triggering a full relayout
+    gdInternal._modeBar?.updateActiveButton?.();
   };
 
   const orbitButton: ModeBarButton = {
     name: 'customOrbitRotation',
     title: $localize`Orbital rotation`,
     icon: Plotly.Icons['3d_rotate'] as Icon,
+    attr: 'scene.dragmode',
+    val: 'orbit',
     click: (gd) => {
       setDragmodeDirect(gd, 'orbit');
     }
@@ -173,8 +186,32 @@ const getConfig = () => {
     name: 'customTurntableRotation',
     title: $localize`Turntable rotation`,
     icon: Plotly.Icons['z-axis'] as Icon,
+    attr: 'scene.dragmode',
+    val: 'turntable',
     click: (gd) => {
       setDragmodeDirect(gd, 'turntable');
+    }
+  };
+
+  const zoom3dButton: ModeBarButton = {
+    name: 'customZoom3d',
+    title: $localize`Zoom`,
+    icon: Plotly.Icons['zoombox'] as Icon,
+    attr: 'scene.dragmode',
+    val: 'zoom',
+    click: (gd) => {
+      setDragmodeDirect(gd, 'zoom', 'zoom');
+    }
+  };
+
+  const pan3dButton: ModeBarButton = {
+    name: 'customPan3d',
+    title: $localize`Pan`,
+    icon: Plotly.Icons['pan'] as Icon,
+    attr: 'scene.dragmode',
+    val: 'pan',
+    click: (gd) => {
+      setDragmodeDirect(gd, 'pan', 'pan');
     }
   };
 
@@ -195,9 +232,11 @@ const getConfig = () => {
       'resetCameraLastSave3d',
       'resetScale2d',
       'orbitRotation',
-      'tableRotation'
+      'tableRotation',
+      'zoom3d',
+      'pan3d'
     ] as ModeBarDefaultButtons[],
-    modeBarButtonsToAdd: [orbitButton, turntableButton]
+    modeBarButtonsToAdd: [orbitButton, turntableButton, zoom3dButton, pan3dButton]
   };
 };
 

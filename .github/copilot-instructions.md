@@ -120,6 +120,25 @@ ngOnDestroy(): void { Plotly.purge(this.chartContainer.nativeElement); }
 
 Chart container: `role="img"` + descriptive `aria-label`.
 
+### Studio 3D section plot — modebar camera buttons
+
+**`zoom3d` and `pan3d` MUST remain in `modeBarButtonsToRemove` and replaced by custom buttons.**
+
+Native `zoom3d`/`pan3d` call `Plotly.relayout` → `updateFx()` internally, which resets the 3D camera (POV, angle, zoom) — regression bug #703.  
+The custom replacements (`customZoom3d`, `customPan3d`) use `setDragmodeDirect()` which bypasses `relayout` and preserves the camera.  
+Same applies to `orbitRotation` / `tableRotation` → `customOrbitRotation` / `customTurntableRotation`.
+
+**Never revert these to native Plotly buttons. Never call `Plotly.relayout` with `scene.dragmode` in the section plot.**
+
+File: `src/app/shared/components/studio/section/helpers/createPlot.ts` — `getConfig()`.
+
+### Studio section plot — annotations
+
+For clickable icon annotations (FontAwesome icon + arrow), **never build the annotation object manually**.  
+Always use `buildClickableIconAnnotation` from `@shared/components/studio/section/helpers/createClickableIconAnnotation`.
+
+Exception: obstacle annotations (`obstacles.ts`) use a different model (no arrow, Unicode symbols, dynamic colors) and must **not** use this helper.
+
 ---
 
 ## Pyodide
