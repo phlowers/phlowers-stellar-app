@@ -88,9 +88,9 @@ export class SectionPlotCardComponent {
 
   // Data structure for support type
   supportData = computed((): DataSection[] => {
-    const vtl_under_chain = this.litData()?.vtl_under_chain;
-    const r_under_chain = this.litData()?.r_under_chain;
-    const lineAngle = this.litData()?.line_angle;
+    const vtl_under_chain = this.litData()?.output_parameters.vtl_under_chain;
+    const r_under_chain = this.litData()?.output_parameters.r_under_chain;
+    const lineAngle = this.litData()?.output_parameters.line_angle;
 
     return [
       {
@@ -133,11 +133,11 @@ export class SectionPlotCardComponent {
 
   // Expanded data for support type
   supportExpandedData = computed((): DataSection[] => {
-    const vtl_under_console = this.litData()?.vtl_under_console;
-    const r_under_console = this.litData()?.r_under_console;
-    const groundAltitude = this.litData()?.ground_altitude;
-    const displacement = this.litData()?.displacement;
-    const loadAngle = this.litData()?.load_angle;
+    const vtl_under_console = this.litData()?.output_parameters.vtl_under_console;
+    const r_under_console = this.litData()?.output_parameters.r_under_console;
+    const groundAltitude = this.litData()?.output_parameters.ground_altitude;
+    const displacement = this.litData()?.output_parameters.displacement;
+    const loadAngle = this.litData()?.output_parameters.load_angle;
 
     return [
       {
@@ -211,11 +211,11 @@ export class SectionPlotCardComponent {
   // Data structure for span type
   spanData = computed((): DataField[] => {
     const litData = this.litData();
-    const spanLength = litData?.span_length;
-    const elevation = litData?.elevation;
-    const L0 = litData?.L0;
-    const parameter = litData?.parameter;
-    const tensionSup = litData?.tension_sup;
+    const spanLength = litData?.output_parameters.span_length;
+    const elevation = litData?.output_parameters.elevation;
+    const L0 = litData?.output_parameters.L0;
+    const parameter = litData?.output_parameters.parameter;
+    const tensionSup = litData?.output_parameters.tension_sup;
     return [
       {
         label: $localize`Span length:`,
@@ -248,14 +248,14 @@ export class SectionPlotCardComponent {
   // Expanded data for span type
   spanExpandedData = computed((): DataField[] => {
     const litData = this.litData();
-    const sag = litData?.sag;
-    const sagS2 = litData?.sag_s2;
-    const horizontalDistance = litData?.horizontal_distance;
-    const arcLength = litData?.arc_length;
-    const th = litData?.T_h;
-    const tensionInf = litData?.tension_inf;
-    const slopeLeft = litData?.slope_left;
-    const slopeRight = litData?.slope_right;
+    const sag = litData?.output_parameters.sag;
+    const sagS2 = litData?.output_parameters.sag_s2;
+    const horizontalDistance = litData?.output_parameters.horizontal_distance;
+    const arcLength = litData?.output_parameters.arc_length;
+    const th = litData?.output_parameters.T_h;
+    const tensionInf = litData?.output_parameters.tension_inf;
+    const slopeLeft = litData?.output_parameters.slope_left;
+    const slopeRight = litData?.output_parameters.slope_right;
     return [
       { label: $localize`Arrow F1:`, value: this.getFormatedNumberIndex(sag), unit: 'm' },
       { label: $localize`Arrow F2:`, value: this.getFormatedNumberIndex(sagS2), unit: 'm' },

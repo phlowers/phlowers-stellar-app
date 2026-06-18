@@ -9,19 +9,16 @@
 import logging
 
 import numpy as np
-from mechaphlowers import BalanceEngine, PlotEngine, SectionStudy, units
+from mechaphlowers import SectionStudy, units
 
-from stellar_engine.entities.inputs import ClimateCharge
-from stellar_engine.entities.output import get_coordinates
+from stellar_engine.entities.inputs import ClimateCharge, compute_ice_thickness
 
-logger = logging.getLogger("mechaphlowers")
+logger = logging.getLogger("stellar_engine")
 # Set logger level to WARNING so info messages are shown
 logger.setLevel(logging.WARNING)
 
 
-def apply_span_loads(
-    study: SectionStudy, span_loads: list
-):
+def apply_span_loads(study: SectionStudy, span_loads: list):
     """Parse span loads and add them to the engine if any are non-zero."""
     load_position_meters, load_mass = parse_span_loads(study, span_loads)
     if (load_position_meters != 0).any() and (load_mass != 0).any():
@@ -50,7 +47,7 @@ def parse_span_loads(
                     )
                 else:
                     # use logger instead?
-                    logging.warning(
+                    logger.warning(
                         "Span load index %s is out of bounds for span_length array (size %s). "
                         "Defaulting load position to 0.",
                         index,
@@ -65,7 +62,7 @@ def parse_span_loads(
             else:
                 load_weight_list_daN.append(0.01)
         except KeyError as e:
-            logging.warning(
+            logger.warning(
                 "Span load at index %s is missing required key %s. "
                 "Skipping with defaults (position=0, weight=0.01).",
                 index,
@@ -79,41 +76,26 @@ def parse_span_loads(
 
 def change_state(
     change_state_inputs: dict,
-    engine: BalanceEngine,
-    plot_engine: PlotEngine,
-    base_engine: BalanceEngine,
-    base_plt_line: PlotEngine,
+    study: SectionStudy,
+    base_study: SectionStudy,
 ):
-    # logger.debug("python_inputs: ", str(js_inputs))
-    # print("change_state_inputs", change_state_inputs)
+
     climate = ClimateCharge(**change_state_inputs["climate"])
     # print(change_state_inputs)
-    logger.debug("python_inputs: ", change_state_inputs)
+    logger.debug("python_inputs: %s", change_state_inputs)
     wind_pressure = climate.windPressure
     cable_temperature = climate.cableTemperature
-    ice_thickness = climate.iceThickness / 100  # in meters in the engine
+    ice_thickness = compute_ice_thickness(climate, len(study.balance_engine))
 
-    apply_span_loads(engine, plot_engine, change_state_inputs["spanLoads"])
+    apply_span_loads(study, change_state_inputs["spanLoads"])
 
-    engine.solve_adjustment()
-    engine.solve_change_state(
+    study.solve_adjustment()
+    study.solve_change_state(
         ice_thickness=ice_thickness,
         new_temperature=cable_temperature,
         wind_pressure=wind_pressure,
         wind_direction="clockwise",
     )
-    section_length = len(engine.section_array.data)
-    base_section_length = (
-        len(base_engine.section_array.data) if base_engine else section_length
-    )
+
     # TODO: weird consistency base/current engine
-    return {
-        "current": get_coordinates(
-            engine, plot_engine, False, 0, section_length - 1
-        ),
-        "base": get_coordinates(
-            engine, base_plt_line, False, 0, base_section_length - 1
-        )
-        if base_plt_line
-        else None,
-    }
+    return {"success": True}

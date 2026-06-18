@@ -55,20 +55,24 @@ const makePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotPa
   distances: [],
   distanceType: null,
   litData: {
-    spans: [
-      [
-        [0, 0, 0],
-        [5, 0, 0],
-        [10, 0, 0]
-      ],
-      [
-        [100, 200, 300],
-        [105, 200, 300],
-        [110, 200, 300]
+    coords: {
+      spans: [
+        [
+          [0, 0, 0],
+          [5, 0, 0],
+          [10, 0, 0]
+        ],
+        [
+          [100, 200, 300],
+          [105, 200, 300],
+          [110, 200, 300]
+        ]
       ]
-    ],
-    span_length: [10, 10],
-    loads_coords: {}
+    },
+    output_parameters: {
+      span_length: [10, 10],
+      loads_coords: {}
+    }
   } as unknown as CreatePlotParams['litData'],
   ...overrides
 });
@@ -100,7 +104,7 @@ describe('createCableModificationAnnotations', () => {
 
     it('should ignore a modification whose span has no polyline', () => {
       const params = makePlotParams({
-        litData: { spans: [], span_length: [], loads_coords: {} } as unknown as CreatePlotParams['litData']
+        litData: { coords: { spans: [] }, output_parameters: { span_length: [], loads_coords: {} } } as unknown as CreatePlotParams['litData']
       });
       const annotations = createCableModificationAnnotations(params, [makeModification()], new Map([['span-1', 0]]));
       expect(annotations).toEqual([]);
@@ -108,7 +112,7 @@ describe('createCableModificationAnnotations', () => {
 
     it('should ignore a modification whose span polyline is empty', () => {
       const params = makePlotParams({
-        litData: { spans: [[]], span_length: [0], loads_coords: {} } as unknown as CreatePlotParams['litData']
+        litData: { coords: { spans: [[]] }, output_parameters: { span_length: [0], loads_coords: {} } } as unknown as CreatePlotParams['litData']
       });
       const annotations = createCableModificationAnnotations(params, [makeModification()], new Map([['span-1', 0]]));
       expect(annotations).toEqual([]);
@@ -152,9 +156,8 @@ describe('createCableModificationAnnotations', () => {
     it('should return the only point of a single-point polyline', () => {
       const params = makePlotParams({
         litData: {
-          spans: [[[42, 43, 44]]],
-          span_length: [0],
-          loads_coords: {}
+          coords: { spans: [[[42, 43, 44]]] },
+          output_parameters: { span_length: [0], loads_coords: {} }
         } as unknown as CreatePlotParams['litData']
       });
       const [icon] = createCableModificationAnnotations(
@@ -198,9 +201,8 @@ describe('createCableModificationAnnotations', () => {
         view: '2d',
         side: 'face',
         litData: {
-          spans: [[[5, 6, 7]]],
-          span_length: [0],
-          loads_coords: {}
+          coords: { spans: [[[5, 6, 7]]] },
+          output_parameters: { span_length: [0], loads_coords: {} }
         } as unknown as CreatePlotParams['litData']
       });
       const [icon] = createCableModificationAnnotations(
@@ -217,9 +219,8 @@ describe('createCableModificationAnnotations', () => {
         view: '2d',
         side: 'profile',
         litData: {
-          spans: [[[5, 6, 7]]],
-          span_length: [0],
-          loads_coords: {}
+          coords: { spans: [[[5, 6, 7]]] },
+          output_parameters: { span_length: [0], loads_coords: {} }
         } as unknown as CreatePlotParams['litData']
       });
       const [icon] = createCableModificationAnnotations(
@@ -321,15 +322,19 @@ describe('createCableModificationAnnotations', () => {
       // distanceSupportRef=50 must land exactly on the midpoint sample (x=50).
       const params = makePlotParams({
         litData: {
-          spans: [
-            [
-              [0, 0, 100],
-              [50, 0, 90],
-              [100, 0, 100]
+          coords: {
+            spans: [
+              [
+                [0, 0, 100],
+                [50, 0, 90],
+                [100, 0, 100]
+              ]
             ]
-          ],
-          span_length: [100],
-          loads_coords: {}
+          },
+          output_parameters: {
+            span_length: [100],
+            loads_coords: {}
+          }
         } as unknown as CreatePlotParams['litData']
       });
       const [icon] = createCableModificationAnnotations(
@@ -344,15 +349,19 @@ describe('createCableModificationAnnotations', () => {
     it('should still anchor on the polyline when the line direction is reversed (x decreasing)', () => {
       const params = makePlotParams({
         litData: {
-          spans: [
-            [
-              [100, 0, 0],
-              [50, 0, -10],
-              [0, 0, 0]
+          coords: {
+            spans: [
+              [
+                [100, 0, 0],
+                [50, 0, -10],
+                [0, 0, 0]
+              ]
             ]
-          ],
-          span_length: [100],
-          loads_coords: {}
+          },
+          output_parameters: {
+            span_length: [100],
+            loads_coords: {}
+          }
         } as unknown as CreatePlotParams['litData']
       });
       const [icon] = createCableModificationAnnotations(

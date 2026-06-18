@@ -6,7 +6,9 @@
 
 import logging
 
-from mechaphlowers import BalanceEngine, PlotEngine, PositionEngine, SectionStudy
+from mechaphlowers import (
+    SectionStudy,
+)
 
 import stellar_engine.plot.obstacles as obst
 from stellar_engine.entities.output import (
@@ -14,7 +16,7 @@ from stellar_engine.entities.output import (
     get_section_middle_span,
 )
 
-logger = logging.getLogger("mechaphlowers")
+logger = logging.getLogger("stellar_engine")
 
 
 # ideally refresh_projection should only return the new coordinates,
@@ -24,9 +26,7 @@ def refresh_projection(
     study: SectionStudy,
     base_study: SectionStudy | None = None,
 ):
-    
-    balance_engine: BalanceEngine = study.balance_engine
-    plot_engine: PositionEngine = study.position_engine 
+
     # base_plt_line: PositionEngine = base_study.position_engine if base_study else None
     logger.debug("===> refresh_projection triggered")
     start_support = inputs["startSupport"]
@@ -34,29 +34,24 @@ def refresh_projection(
     view = inputs["view"]
     project = view == "2d"
 
+    return get_states_coordinates(study, base_study, start_support, end_support, project)
+
+def get_states_coordinates(study, base_study, start_support, end_support, project):
     current_coords = get_coordinates(
         study, project, start_support, end_support
     )
     base_coords = (
-        get_coordinates(
-            base_study, project, start_support, end_support
-        )
+        get_coordinates(base_study, project, start_support, end_support)
         if base_study
         else None
     )
-    middle_span = get_section_middle_span(start_support, end_support)
-    obstacles = obst.get_current_obstacles(
-        study.position_engine, project=project, support_index=middle_span
-    )
+
+    # Extract formatted obstacles/distances computed before serialization
+    obstacles = current_coords.pop("obstacles_formatted", [])
+    distances = current_coords.pop("distances_formatted", [])
 
     return {
         "sectionOutput": {"current": current_coords, "base": base_coords},
         "obstacles": obstacles,
-        "distances": obst.compute_distances(
-            # inputs=obstacles,
-            inputs={},  # currently unused
-            project=project,
-            plot_engine=study.position_engine,
-            support_index=middle_span,
-        ),
+        "distances": distances,
     }

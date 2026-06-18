@@ -84,11 +84,11 @@ describe('ObstacleStateService', () => {
     });
   });
 
-  describe('addObstacle', () => {
-    it('should dispatch Task.addObstacle with obstacles and plotOptions', async () => {
-      await service.addObstacle([mockObstacle], mockPlotOptions);
+  describe('addBulkObstacles', () => {
+    it('should dispatch Task.addBulkObstacles with obstacles and plotOptions', async () => {
+      await service.addBulkObstacles([mockObstacle], mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.addObstacle, {
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.addBulkObstacles, {
         obstacles: [mockObstacle],
         startSupport: 0,
         endSupport: 1,
@@ -96,11 +96,11 @@ describe('ObstacleStateService', () => {
       });
     });
 
-    it('should dispatch Task.addObstacle with multiple obstacles and plotOptions', async () => {
+    it('should dispatch Task.addBulkObstacles with multiple obstacles and plotOptions', async () => {
       const secondObstacle = { ...mockObstacle, uuid: 'obs-2' };
-      await service.addObstacle([mockObstacle, secondObstacle], mockPlotOptions);
+      await service.addBulkObstacles([mockObstacle, secondObstacle], mockPlotOptions);
 
-      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.addObstacle, {
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.addBulkObstacles, {
         obstacles: [mockObstacle, secondObstacle],
         startSupport: 0,
         endSupport: 1,
@@ -108,18 +108,10 @@ describe('ObstacleStateService', () => {
       });
     });
 
-    it('should return the obstacle output on success', async () => {
-      const result = await service.addObstacle([mockObstacle], mockPlotOptions);
+    it('should not return a value', async () => {
+      const result = await service.addBulkObstacles([mockObstacle], mockPlotOptions);
 
-      expect(result).toEqual(mockObstacleOutput);
-    });
-
-    it('should return null when task returns null result', async () => {
-      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: null, error: null });
-
-      const result = await service.addObstacle([mockObstacle], mockPlotOptions);
-
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
   });
 
@@ -135,18 +127,10 @@ describe('ObstacleStateService', () => {
       });
     });
 
-    it('should return the obstacle output on success', async () => {
+    it('should not return a value', async () => {
       const result = await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
 
-      expect(result).toEqual(mockObstacleOutput);
-    });
-
-    it('should return null when task returns null result', async () => {
-      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: null, error: null });
-
-      const result = await service.deleteObstacle('obs-uuid-1', mockPlotOptions);
-
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
   });
 
@@ -165,70 +149,16 @@ describe('ObstacleStateService', () => {
       expect(service.distances()).toEqual([]);
     });
 
-    it('should return the obstacle output on success', async () => {
+    it('should not return a value', async () => {
       const result = await service.clearAllObstacles();
 
-      expect(result).toEqual(mockObstacleOutput);
-    });
-  });
-
-  describe('calculateDistances', () => {
-    it('should dispatch Task.calculateObstaclesDistances with plot options', async () => {
-      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: [mockDistance], error: null });
-      const plotOptions = {
-        startSupport: 0,
-        endSupport: 2,
-        view: '3d' as const,
-        side: 'profile' as const,
-        invert: false
-      };
-
-      await service.calculateDistances([mockObstacle], plotOptions);
-
-      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(Task.calculateObstaclesDistances, {
-        obstacles: [mockObstacle],
-        startSupport: 0,
-        endSupport: 2,
-        view: '3d'
-      });
-    });
-
-    it('should update the distances signal with the result', async () => {
-      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: [mockDistance], error: null });
-      const plotOptions = {
-        startSupport: 0,
-        endSupport: 1,
-        view: '3d' as const,
-        side: 'profile' as const,
-        invert: false
-      };
-
-      await service.calculateDistances([mockObstacle], plotOptions);
-
-      expect(service.distances()).toEqual([mockDistance]);
-    });
-
-    it('should set distances to empty array when result is null', async () => {
-      service.distances.set([mockDistance]);
-      mockWorkerPythonService.runTaskWithTimeout.mockResolvedValue({ result: null, error: null });
-      const plotOptions = {
-        startSupport: 0,
-        endSupport: 1,
-        view: '3d' as const,
-        side: 'profile' as const,
-        invert: false
-      };
-
-      await service.calculateDistances([mockObstacle], plotOptions);
-
-      expect(service.distances()).toEqual([]);
+      expect(result).toBeUndefined();
     });
   });
 
   describe('syncObstacles', () => {
-    it('should call addObstacle once with all obstacles and plotOptions', async () => {
-      const addSpy = vi.spyOn(service, 'addObstacle').mockResolvedValue(mockObstacleOutput);
-      vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
+    it('should call addBulkObstacles once with all obstacles and plotOptions', async () => {
+      const addSpy = vi.spyOn(service, 'addBulkObstacles').mockResolvedValue(undefined);
       const secondObstacle = { ...mockObstacle, uuid: 'obs-2' };
       const plotOptions = {
         startSupport: 0,
@@ -244,35 +174,15 @@ describe('ObstacleStateService', () => {
       expect(addSpy).toHaveBeenCalledWith([mockObstacle, secondObstacle], plotOptions);
     });
 
-    it('should call calculateDistances when obstacles are present', async () => {
-      vi.spyOn(service, 'addObstacle').mockResolvedValue(mockObstacleOutput);
-      const calcSpy = vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
-      const plotOptions = {
-        startSupport: 0,
-        endSupport: 1,
-        view: '3d' as const,
-        side: 'profile' as const,
-        invert: false
-      };
-
-      await service.syncObstacles([mockObstacle], plotOptions);
-
-      expect(calcSpy).toHaveBeenCalledWith([mockObstacle], plotOptions);
-    });
-
-    it('should NOT call addObstacle or calculateDistances when obstacles array is empty', async () => {
-      const addSpy = vi.spyOn(service, 'addObstacle').mockResolvedValue(mockObstacleOutput);
-      const calcSpy = vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
+    it('should NOT call addBulkObstacles when obstacles array is empty', async () => {
+      const addSpy = vi.spyOn(service, 'addBulkObstacles').mockResolvedValue(undefined);
 
       await service.syncObstacles([], { startSupport: 0, endSupport: 1, view: '3d', side: 'profile', invert: false });
 
       expect(addSpy).not.toHaveBeenCalled();
-      expect(calcSpy).not.toHaveBeenCalled();
     });
 
-    it('should return null when obstacles array is empty', async () => {
-      vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
-
+    it('should return undefined when obstacles array is empty', async () => {
       const result = await service.syncObstacles([], {
         startSupport: 0,
         endSupport: 1,
@@ -281,18 +191,11 @@ describe('ObstacleStateService', () => {
         invert: false
       });
 
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
-    it('should return the addObstacle result', async () => {
-      const allOutput: ObstacleOutput = {
-        obstacles: [
-          { uuid: 'obs-1', points: [[10, 5, 8]] },
-          { uuid: 'obs-2', points: [[1, 2, 3]] }
-        ]
-      };
-      vi.spyOn(service, 'addObstacle').mockResolvedValue(allOutput);
-      vi.spyOn(service, 'calculateDistances').mockResolvedValue(undefined);
+    it('should not return a value', async () => {
+      vi.spyOn(service, 'addBulkObstacles').mockResolvedValue(undefined);
 
       const result = await service.syncObstacles([mockObstacle, { ...mockObstacle, uuid: 'obs-2' }], {
         startSupport: 0,
@@ -302,7 +205,7 @@ describe('ObstacleStateService', () => {
         invert: false
       });
 
-      expect(result).toEqual(allOutput);
+      expect(result).toBeUndefined();
     });
   });
 

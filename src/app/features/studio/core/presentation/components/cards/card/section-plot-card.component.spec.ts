@@ -9,44 +9,51 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 
 const mockLitData: GetSectionOutput = {
-  supports: [[[1, 2, 3]]],
-  insulators: [[[4, 5, 6]]],
-  spans: [[[7, 8, 9]]],
-  line_angle: [0.1, 0.2, 0.3],
-  vtl_under_chain: [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-  ],
-  r_under_chain: [10, 20, 30],
-  vtl_under_console: [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-  ],
-  r_under_console: [10, 20, 30],
-  ground_altitude: [100, 200, 300],
-  load_angle: [0.1, 0.2, 0.3],
-  displacement: [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-  ],
-  loads_coords: { 0: [1, 2, 3] },
-  span_length: [100, 200, 300],
-  elevation: [10, 20, 30],
-  parameter: [1900, 2000, 2100],
-  tension_sup: [5000, 4000, 3000],
-  tension_inf: [4000, 3000, 2000],
-  L0: [100, 200, 300],
-  horizontal_distance: [99, 199, 299],
-  arc_length: [101, 201, 301],
-  T_h: [3000, 2000, 1000],
-  slope_left: [0.01, 0.02, 0.03],
-  slope_right: [0.04, 0.05, 0.06],
-  sag: [1, 2, 3],
-  sag_s2: [4, 5, 6],
-  utilization_rate: [0.5, 0.6, 0.7]
+  coords: {
+    supports: [[[1, 2, 3]]],
+    insulators: [[[4, 5, 6]]],
+    spans: [[[7, 8, 9]]],
+    obstacles: null,
+    distances: null,
+    loads: { 0: [1, 2, 3] }
+  },
+  output_parameters: {
+    line_angle: [0.1, 0.2, 0.3],
+    vtl_under_chain: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ],
+    vtl_under_console: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ],
+    r_under_chain: [10, 20, 30],
+    r_under_console: [10, 20, 30],
+    ground_altitude: [100, 200, 300],
+    displacement: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ],
+    load_angle: [0.1, 0.2, 0.3],
+    span_length: [100, 200, 300],
+    loads_coords: { 0: [1, 2, 3] },
+    utilization_rate: [0.5, 0.6, 0.7],
+    elevation: [10, 20, 30],
+    parameter: [1900, 2000, 2100],
+    slope_left: [0.01, 0.02, 0.03],
+    slope_right: [0.04, 0.05, 0.06],
+    tension_sup: [5000, 4000, 3000],
+    tension_inf: [4000, 3000, 2000],
+    L0: [100, 200, 300],
+    horizontal_distance: [99, 199, 299],
+    arc_length: [101, 201, 301],
+    T_h: [3000, 2000, 1000],
+    sag: [1, 2, 3],
+    sag_s2: [4, 5, 6]
+  }
 };
 
 @Component({

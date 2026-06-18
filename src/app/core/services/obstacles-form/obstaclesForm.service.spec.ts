@@ -147,15 +147,15 @@ describe('ObstacleFormService', () => {
   let mockObstacleStateService: {
     distances: ReturnType<typeof signal<Distance[]>>;
     distanceType: ReturnType<typeof signal<'oblique' | 'vertical' | 'horizontal' | null>>;
-    addObstacle: ReturnType<typeof vi.fn>;
+    addSingleObstacle: ReturnType<typeof vi.fn>;
     deleteObstacle: ReturnType<typeof vi.fn>;
     clearAllObstacles: ReturnType<typeof vi.fn>;
-    calculateDistances: ReturnType<typeof vi.fn>;
     syncObstacles: ReturnType<typeof vi.fn>;
     reset: ReturnType<typeof vi.fn>;
   };
   let mockPlotService: {
     plotOptionsChange: vi.Mock;
+    refreshProjection: vi.Mock;
     temporaryLoadData: ChargeData | null;
     study: ReturnType<typeof signal<Study | null>>;
     litData: ReturnType<typeof signal<unknown>>;
@@ -188,15 +188,15 @@ describe('ObstacleFormService', () => {
     mockObstacleStateService = {
       distances: signal<Distance[]>([]),
       distanceType: signal<'oblique' | 'vertical' | 'horizontal' | null>(null),
-      addObstacle: vi.fn().mockResolvedValue(null),
+      addSingleObstacle: vi.fn().mockResolvedValue(null),
       deleteObstacle: vi.fn().mockResolvedValue(null),
       clearAllObstacles: vi.fn().mockResolvedValue(null),
-      calculateDistances: vi.fn().mockResolvedValue(undefined),
       syncObstacles: vi.fn().mockResolvedValue(null),
       reset: vi.fn()
     };
     mockPlotService = {
       plotOptionsChange: vi.fn(),
+      refreshProjection: vi.fn().mockResolvedValue(undefined),
       temporaryLoadData: null,
       study: signal<Study | null>(mockStudy),
       litData: signal(null),
@@ -553,7 +553,7 @@ describe('ObstacleFormService', () => {
         'obs-1',
         plotOptionsServiceMock.plotOptions()
       );
-      expect(mockObstacleStateService.addObstacle).toHaveBeenCalledWith([], plotOptionsServiceMock.plotOptions());
+      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
       expect(mockMessageService.add).toHaveBeenCalledWith(
         expect.objectContaining({
           severity: 'success',
@@ -564,20 +564,16 @@ describe('ObstacleFormService', () => {
       expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith(null, null);
     });
 
-    it('should clear litData.obstacles when addObstacle returns null after deletion', async () => {
+    it('should call refreshProjection after successful deletion', async () => {
       const obstacles: Obstacle[] = [{ ...baseObstacle }];
       const section = { ...mockSection, obstacles: [...obstacles] } as Section;
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
-      mockPlotService.litData.set({
-        obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3] as [number, number, number]] }]
-      });
-      mockObstacleStateService.addObstacle.mockResolvedValue(null);
       service.form.patchValue({ uuid: 'obs-1' });
 
       await service.deleteObstacle();
 
-      expect((mockPlotService.litData() as { obstacles: unknown[] }).obstacles).toEqual([]);
+      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
     });
 
     it('should rollback section and avoid persistence when worker deletion fails', async () => {
@@ -619,7 +615,7 @@ describe('ObstacleFormService', () => {
       );
     });
 
-    it('should rollback section and litData when re-registering remaining obstacles fails', async () => {
+    it('should rollback section and litData when refreshProjection fails after deletion', async () => {
       const obstacles: Obstacle[] = [
         {
           uuid: 'obs-1',
@@ -641,7 +637,7 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       mockPlotService.litData.set(initialLitData);
       service.form.patchValue({ uuid: 'obs-1' });
-      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('re-registration failure'));
+      mockPlotService.refreshProjection.mockRejectedValue(new Error('projection failure'));
 
       await service.deleteObstacle();
 
@@ -662,7 +658,7 @@ describe('ObstacleFormService', () => {
       );
     });
 
-    it('should refresh litData from worker output when rollback resynchronization succeeds', async () => {
+    it('should call refreshProjection during rollback resynchronization', async () => {
       const obstacles: Obstacle[] = [{ ...baseObstacle }];
       const section = { ...mockSection, obstacles: [...obstacles] } as Section;
       mockSpanService.section.set(section);
@@ -671,16 +667,16 @@ describe('ObstacleFormService', () => {
         obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3] as [number, number, number]] }]
       });
       service.form.patchValue({ uuid: 'obs-1' });
-      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('re-registration failure'));
-      mockObstacleStateService.syncObstacles.mockResolvedValue({
-        obstacles: [{ uuid: 'obs-1', points: [[10, 20, 30] as [number, number, number]] }]
-      });
+      mockPlotService.refreshProjection.mockRejectedValueOnce(new Error('projection failure'));
+      mockPlotService.refreshProjection.mockResolvedValueOnce(undefined);
 
       await service.deleteObstacle();
 
-      expect((mockPlotService.litData() as { obstacles: [number, number, number][][] }).obstacles).toEqual([
-        { uuid: 'obs-1', points: [[10, 20, 30]] }
-      ]);
+      expect(mockObstacleStateService.syncObstacles).toHaveBeenCalledWith(
+        obstacles,
+        plotOptionsServiceMock.plotOptions()
+      );
+      expect(mockPlotService.refreshProjection).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -751,12 +747,13 @@ describe('ObstacleFormService', () => {
       expect(updatedSection?.obstacles.length).toBe(1);
       expect(updatedSection?.obstacles[0].uuid).toBe('new-uuid');
       expect(updatedSection?.obstacles[0].positions).toHaveLength(1);
+      expect(mockObstacleStateService.addSingleObstacle).toHaveBeenCalled();
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
         mockStudy,
         expect.objectContaining({ obstacles: updatedSection?.obstacles })
       );
+      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
       expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('new-uuid', 0);
-      expect(mockMessageService.add).toHaveBeenCalled();
     });
 
     it('should update existing obstacle and save when obstacle exists for support', async () => {
@@ -785,10 +782,12 @@ describe('ObstacleFormService', () => {
       expect(updated.name).toBe('Updated Name');
       expect(updated.type).toBe('Tree');
       expect(updated.positions.length).toBe(1);
+      expect(mockObstacleStateService.addSingleObstacle).toHaveBeenCalled();
       expect(mockSectionService.createOrUpdateSection).toHaveBeenCalledWith(
         mockStudy,
         expect.objectContaining({ obstacles: expect.any(Array) })
       );
+      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
       expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('obs-1', 0);
     });
 
@@ -809,8 +808,8 @@ describe('ObstacleFormService', () => {
           ]
         }
       ];
-      // Simulate calculateDistances setting distances (its internal responsibility)
-      mockObstacleStateService.calculateDistances.mockImplementation(async () => {
+      // Simulate refreshProjection setting distances (its internal responsibility)
+      mockPlotService.refreshProjection.mockImplementation(async () => {
         mockObstacleStateService.distances.set(mockDistances);
       });
 
@@ -872,7 +871,7 @@ describe('ObstacleFormService', () => {
       expect(service.results().vertical).toBe(30);
     });
 
-    it('should call obstacleStateService.addObstacle to update plot state after saving', async () => {
+    it('should call obstacleStateService.addSingleObstacle to register obstacle in Python worker', async () => {
       service.form.patchValue({ ...validFormBase, uuid: 'obs-store' });
       service.addPosition({ x: 1, y: 2, z: 3 });
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
@@ -881,10 +880,10 @@ describe('ObstacleFormService', () => {
 
       await service.calculateAndSave();
 
-      expect(mockObstacleStateService.addObstacle).toHaveBeenCalled();
+      expect(mockObstacleStateService.addSingleObstacle).toHaveBeenCalled();
     });
 
-    it('should call obstacleStateService.addObstacle with temporaryLoadData present', async () => {
+    it('should call obstacleStateService.addSingleObstacle with temporaryLoadData present', async () => {
       const mockChargeData: ChargeData = {
         climate: {
           windPressure: 100,
@@ -906,8 +905,8 @@ describe('ObstacleFormService', () => {
 
       await service.calculateAndSave();
 
-      // addObstacle is responsible for adding the obstacle to the middleware
-      expect(mockObstacleStateService.addObstacle).toHaveBeenCalled();
+      // addSingleObstacle is responsible for registering the obstacle in the Python worker
+      expect(mockObstacleStateService.addSingleObstacle).toHaveBeenCalled();
     });
 
     it('should set isCalculatingObstacle to false after calculateAndSave', async () => {
@@ -930,7 +929,7 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
       service.isCalculatingObstacle.set(false);
       let loadingDuringExecution = false;
-      mockObstacleStateService.addObstacle.mockImplementation(async () => {
+      mockObstacleStateService.addSingleObstacle.mockImplementation(async () => {
         loadingDuringExecution = service.isCalculatingObstacle();
         return null;
       });
@@ -946,7 +945,7 @@ describe('ObstacleFormService', () => {
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
-      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('worker failure'));
+      mockObstacleStateService.addSingleObstacle.mockRejectedValue(new Error('worker failure'));
 
       try {
         await service.calculateAndSave();
@@ -965,11 +964,11 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
 
       // Create a slow async operation
-      let resolveAddObstacle: (() => void) | undefined;
+      let resolveAddSingleObstacle: (() => void) | undefined;
       const slowPromise = new Promise<null>((resolve) => {
-        resolveAddObstacle = () => resolve(null);
+        resolveAddSingleObstacle = () => resolve(null);
       });
-      mockObstacleStateService.addObstacle.mockReturnValue(slowPromise);
+      mockObstacleStateService.addSingleObstacle.mockReturnValue(slowPromise);
 
       // Start first call (should proceed)
       const firstCall = service.calculateAndSave();
@@ -978,13 +977,13 @@ describe('ObstacleFormService', () => {
       const secondCall = service.calculateAndSave();
 
       // Resolve the slow operation
-      resolveAddObstacle!();
+      resolveAddSingleObstacle!();
 
       await firstCall;
       await secondCall;
 
-      // addObstacle should only be called once (from first call)
-      expect(mockObstacleStateService.addObstacle).toHaveBeenCalledTimes(1);
+      // addSingleObstacle should only be called once (from first call)
+      expect(mockObstacleStateService.addSingleObstacle).toHaveBeenCalledTimes(1);
     });
 
     it('should set calculationError signal when operation fails', async () => {
@@ -993,7 +992,7 @@ describe('ObstacleFormService', () => {
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
-      mockObstacleStateService.addObstacle.mockRejectedValue(new Error('Calculation failed'));
+      mockObstacleStateService.addSingleObstacle.mockRejectedValue(new Error('Calculation failed'));
 
       try {
         await service.calculateAndSave();

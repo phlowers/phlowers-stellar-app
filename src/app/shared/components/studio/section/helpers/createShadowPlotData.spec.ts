@@ -11,32 +11,39 @@ import { PlotOptions } from '@shared/types/plot.types';
 
 describe('createShadowPlotData', () => {
   const mockSectionOutput: GetSectionOutput = {
-    spans: [[[1, 2, 3]], [[4, 5, 6]]],
-    supports: [[[7, 8, 9]], [[10, 11, 12]], [[13, 14, 15]]],
-    insulators: [[[16, 17, 18]], [[19, 20, 21]], [[22, 23, 24]]],
-    L0: [],
-    elevation: [],
-    line_angle: [],
-    vtl_under_chain: [],
-    vtl_under_console: [],
-    r_under_chain: [],
-    r_under_console: [],
-    ground_altitude: [],
-    load_angle: [],
-    displacement: [],
-    span_length: [],
-    loads_coords: {},
-    parameter: [],
-    tension_sup: [],
-    tension_inf: [],
-    horizontal_distance: [],
-    arc_length: [],
-    T_h: [],
-    slope_left: [],
-    slope_right: [],
-    sag: [],
-    sag_s2: [],
-    utilization_rate: []
+    coords: {
+      spans: [[[1, 2, 3]], [[4, 5, 6]]],
+      supports: [[[7, 8, 9]], [[10, 11, 12]], [[13, 14, 15]]],
+      insulators: [[[16, 17, 18]], [[19, 20, 21]], [[22, 23, 24]]],
+      obstacles: null,
+      distances: null,
+      loads: {}
+    },
+    output_parameters: {
+      line_angle: [],
+      vtl_under_chain: [],
+      vtl_under_console: [],
+      r_under_chain: [],
+      r_under_console: [],
+      ground_altitude: [],
+      load_angle: [],
+      displacement: [],
+      loads_coords: {},
+      span_length: [],
+      utilization_rate: [],
+      elevation: [],
+      parameter: [],
+      tension_sup: [],
+      tension_inf: [],
+      L0: [],
+      horizontal_distance: [],
+      arc_length: [],
+      T_h: [],
+      slope_left: [],
+      slope_right: [],
+      sag: [],
+      sag_s2: []
+    }
   };
 
   const defaultPlotOptions: PlotOptions = {

@@ -8,11 +8,11 @@ import logging
 
 import numpy as np
 import pandas as pd
-from mechaphlowers import BalanceEngine, PlotEngine
+from mechaphlowers import BalanceEngine, PlotEngine, SectionStudy
 from mechaphlowers.core.geometry.distances import DistanceResult
 from mechaphlowers.entities.arrays import ObstacleArray
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("stellar_engine")
 
 
 def change_obstacles_coordinates(
@@ -97,6 +97,138 @@ def delete_obstacle(
 
 # TODO: refactor the way it is called in typescript
 # use PositionEngine.add_obstacle instead of PositionEngine.add_obstacle_array
+
+# {
+#     'obstacles': [
+#         {
+#             'uuid': 'ba7f38bd-daf3-43c6-80db-1720e54adfd5',
+#             'supportUuid': '48a5c129-c9bd-4f93-95df-144686f96916',
+#             'supportIndex': 0,
+#             'name': 'aaa',
+#             'type': 'accessible_building',
+#             'altitudeType': 'absolute',
+#             'lateralDistanceType': 'SPAN_AXIS',
+#             'referenceSupport': 'LEFT',
+#             'positions': [{'x': 10, 'y': 10, 'z': 10}],
+#         },
+#         {
+#             'uuid': 'ba7f38bd-daf3-43c6-80db-1720e54adfd5',
+#             'supportUuid': '48a5c129-c9bd-4f93-95df-144686f96916',
+#             'supportIndex': 0,
+#             'name': 'aaa',
+#             'type': 'accessible_building',
+#             'altitudeType': 'absolute',
+#             'lateralDistanceType': 'SPAN_AXIS',
+#             'referenceSupport': 'LEFT',
+#             'positions': [{'x': 10, 'y': 10, 'z': 10}],
+#         }
+#     ],
+#     ],
+#     'startSupport': 0,
+#     'endSupport': 1,
+#     'view': '3d',
+# }
+
+def get_single_obstacle_coords(altitude_type: str, lateral_distance_type: str, coords: np.ndarray, ground_altitude: float, attachment_altitude: float) -> np.ndarray:
+
+    logger.debug(f"Calculating coordinates for single obstacle with altitude_type: {altitude_type}, lateral_distance_type: {lateral_distance_type}, positions: {coords}")
+    logger.debug("No lateral distance adjustment is applied for single obstacles in this implementation.")
+
+    if altitude_type == "attachment_relative":
+        # Assuming attachment_altitude is available in the context
+        attachment_altitude = 20  # Placeholder value; replace with actual attachment altitude
+        coords[:, 2] += attachment_altitude
+
+    elif altitude_type == "support_relative":
+        # Assuming ground_altitude is available in the context
+        coords[:, 2] += ground_altitude
+    elif altitude_type == "absolute":
+        # No adjustment needed for absolute altitude
+        pass
+    else:
+        logger.warning(f"Altitude type '{altitude_type}' is not recognized. Using absolute altitude.")
+
+
+    logger.debug(f"Calculated coordinates for single obstacle: {coords}")
+    return coords
+
+
+
+SUPPORT_REFERENCE_MAPPING = {
+    "LEFT": "left",
+    "RIGHT": "right",
+}
+
+LATERAL_DISTANCE_MAPPING = {
+    "SPAN_AXIS": "span_axis",
+    "LINE_AXIS": "line_axis",
+}
+
+ALTITUDE_TYPE_MAPPING = {
+    "absolute": "absolute",
+    "relative": "support_relative",
+    "relative_cable": "attachment_relative",
+}
+
+
+
+
+def add_single_obstacle(
+    inputs: dict,
+    study: SectionStudy,
+    support_index: int,
+):
+    
+    # check there is a single obstacle
+    if len(inputs['obstacles']) != 1:
+        logger.error("Expected a single obstacle, but received multiple.")
+        raise ValueError("Expected a single obstacle, but received multiple.")
+    
+    my_obstacle = inputs['obstacles'][0]
+    logger.debug(f"Received single obstacle: {my_obstacle}")
+    logger.debug(f"Adding single obstacle with support index: {support_index}")
+    logger.debug(f"Obstacle coordinates: {my_obstacle['positions']}")
+    logger.debug("Overwrite is set to True for adding the obstacle.")
+    logger.debug("attachment_altitude is taken from the section's conductor attachment altitude, not moving with state changes.")
+    logger.debug("and ground_altitude is taken from the section's ground altitude.")
+
+    coords = np.array([[pos['x'], pos['y'], pos['z']] for pos in my_obstacle['positions']], dtype=np.float64)
+
+    coords = get_single_obstacle_coords(
+        altitude_type=ALTITUDE_TYPE_MAPPING[my_obstacle['altitudeType']],
+        lateral_distance_type=LATERAL_DISTANCE_MAPPING[my_obstacle['lateralDistanceType']],
+        coords=coords,
+        ground_altitude=float(study.balance_engine.section_array.data.ground_altitude.to_numpy()[support_index]),
+        attachment_altitude=float(study.balance_engine.section_array.data.conductor_attachment_altitude.to_numpy()[support_index])
+    )
+
+    study.position_engine.add_obstacle(
+        name=my_obstacle['uuid'],
+        span_index=my_obstacle['supportIndex'],
+        coords=coords,
+        object_type=my_obstacle['type'],
+        support_reference=SUPPORT_REFERENCE_MAPPING[my_obstacle['referenceSupport']],
+        span_length=study.balance_engine.section_array.data.span_length.to_numpy(),
+    )
+    return True
+
+# {'obstacles': [{'uuid': 'ba7f38bd-daf3-43c6-80db-1720e54adfd5', 'supportUuid': '48a5c129-c9bd-4f93-95df-144686f96916', 'supportIndex': 0, 'name': 'aaa', 'type': 'accessible_building', 'altitudeType': 'absolute', 'lateralDistanceType': 'SPAN_AXIS', 'referenceSupport': 'LEFT', 'positions': [{'x': 10, 'y': 10, 'z': 10}]}, {'uuid': '92b4d347-2577-4a83-b747-f292356c99ed', 'supportUuid': '48a5c129-c9bd-4f93-95df-144686f96916', 'supportIndex': 0, 'name': 'zzz', 'type': 'accessible_building', 'altitudeType': 'relative_cable', 'lateralDistanceType': 'SPAN_AXIS', 'referenceSupport': 'LEFT', 'positions': [{'x': 1, 'y': 1, 'z': 1}, {'x': 2, 'y': 2, 'z': 2}]}], 'startSupport': 0, 'endSupport': 1, 'view': '3d'}
+
+def add_bulk_obstacles(
+    inputs: dict,
+    study: SectionStudy,
+):
+    for o in inputs['obstacles']:
+        add_single_obstacle(
+            inputs={'obstacles': [o]},
+            study=study,
+            support_index=o['supportIndex'],
+        )
+    return True
+
+
+
+
 def add_obstacles(
     inputs: list,
     balance_engine: BalanceEngine,

@@ -60,7 +60,7 @@ describe('Task handlers', () => {
       expect(result).toEqual({ result: mockResult, runTime: 500, error: null, pythonErrorCode: null });
     });
 
-    it('should handle getLit task', async () => {
+    it('should handle initLit task', async () => {
       // Setup
       const mockResult = {
         x: { key1: 1, key2: 2 },
@@ -81,12 +81,12 @@ describe('Task handlers', () => {
         .mockReturnValueOnce(undefined as never);
 
       // Execute
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       // Verify
       expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
       // script is loaded at worker boot time; here we only call the exposed function
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('init_section');
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('load_initialize_study');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
@@ -118,7 +118,7 @@ describe('Task handlers', () => {
         throw new Error('mechaphlowers.SolverError: mechanical equilibrium failed');
       });
 
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       expect(result.result).toBeNull();
       expect(result.error).toBe('CALCULATION_ERROR');
@@ -131,7 +131,7 @@ describe('Task handlers', () => {
         throw new Error('ConvergenceError: optimizer reached maximum iterations');
       });
 
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       expect(result.pythonErrorCode).toBe('ConvergenceError');
     });
@@ -142,7 +142,7 @@ describe('Task handlers', () => {
         throw new Error('ValueError: unexpected input shape');
       });
 
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       expect(result.pythonErrorCode).toBeNull();
     });

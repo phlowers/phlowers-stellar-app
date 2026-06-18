@@ -207,8 +207,8 @@ export class VhlAndGuyingComponent {
       this.vtlWithoutGuying.set(null);
       return;
     }
-    const vtlUnderChain = this.plotService.litData()?.vtl_under_chain;
-    const rUnderChain = this.plotService.litData()?.r_under_chain;
+    const vtlUnderChain = this.plotService.litData()?.output_parameters.vtl_under_chain;
+    const rUnderChain = this.plotService.litData()?.output_parameters.r_under_chain;
     this.vtlWithoutGuying.set({
       chargeV: vtlUnderChain?.[0][supportIndex],
       chargeH: vtlUnderChain?.[1][supportIndex],

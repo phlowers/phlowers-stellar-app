@@ -15,7 +15,12 @@ import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, change_state, api, cable_modification];
+const pythonFiles = [functions, api, cable_modification];
+
+const getFirstLinePreview = (content: string): string => {
+  const firstLine = content.split(/\r?\n/, 1)[0]?.trim() ?? '';
+  return firstLine.length > 0 ? firstLine : '<empty>';
+};
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -38,9 +43,13 @@ try {
   const loadEnd = performance.now();
   postMessage({ loadTime: loadEnd - start });
   for (const file of pythonFiles) {
-    console.debug(`===> Running Python file: ${file}`);
+    const start = performance.now();
+    const preview = getFirstLinePreview(file);
+    console.debug(`===> Running Python file: ${preview}`);
     await pyodide.runPython(file);
-    console.debug(`===> Finished running Python file: ${file}`);
+    console.debug(`===> Finished running Python file: ${preview}`);
+    const end = performance.now();
+    console.debug(`===> Time to run ${preview}: ${end - start} ms`);
   }
   const importEnd = performance.now();
   postMessage({ importTime: importEnd - loadEnd });

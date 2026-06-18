@@ -125,9 +125,9 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ];
 
   globalState = signal<GlobalStateMode>('max_section');
-  globalParameter = computed<number | null>(() => this.resolveGlobalValue(this.plotService.litData()?.parameter));
+  globalParameter = computed<number | null>(() => this.resolveGlobalValue(this.plotService.litData()?.output_parameters.parameter));
   globalStressRate = computed<number | null>(() =>
-    this.resolveGlobalValue(this.plotService.litData()?.utilization_rate)
+    this.resolveGlobalValue(this.plotService.litData()?.output_parameters.utilization_rate)
   );
   isGlobalCutStrand = signal<boolean>(false);
 

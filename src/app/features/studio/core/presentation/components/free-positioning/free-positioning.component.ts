@@ -185,7 +185,7 @@ export class FreePositioningComponent implements OnDestroy {
       return;
     }
 
-    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.addObstacle, {
+    const { error, pythonErrorCode } = await this.workerPythonService.runTask(Task.addBulkObstacles, {
       obstacles: filteredObstacles,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
@@ -201,9 +201,15 @@ export class FreePositioningComponent implements OnDestroy {
       return;
     }
 
+    const { result: projectionResult } = await this.workerPythonService.runTask(Task.refreshProjection, {
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
+
     const updatedLitData: GetSectionOutput = {
       ...currentLitData,
-      obstacles: result?.obstacles ?? []
+      obstacles: projectionResult?.obstacles ?? []
     };
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
@@ -221,7 +227,7 @@ export class FreePositioningComponent implements OnDestroy {
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
   private getSupportAltitudeNgf(litData: GetSectionOutput, supportIndex: number): number {
-    const supportPoints = litData?.supports?.[supportIndex];
+    const supportPoints = litData?.coords.supports?.[supportIndex];
     const firstPoint = supportPoints?.[0];
     const altitude = Array.isArray(firstPoint) ? firstPoint[2] : undefined;
     return typeof altitude === 'number' && !Number.isNaN(altitude) ? altitude : 0;

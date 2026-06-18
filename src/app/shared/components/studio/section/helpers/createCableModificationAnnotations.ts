@@ -107,7 +107,7 @@ const resolveAnchorCoord = (
   absoluteSpanIndex: number,
   modification: CableModification
 ): number[] | null => {
-  const polyline = plotParams.litData.spans?.[absoluteSpanIndex];
+  const polyline = plotParams.litData.coords.spans?.[absoluteSpanIndex];
   if (!polyline || polyline.length === 0) return null;
 
   const distance = Math.max(0, modification.distanceSupportRef);

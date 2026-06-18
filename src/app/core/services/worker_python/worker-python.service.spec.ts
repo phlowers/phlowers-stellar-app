@@ -269,10 +269,10 @@ describe('WorkerService', () => {
       expect(response.error).toBeNull();
     });
 
-    it('should post message to worker with getLit task', async () => {
+    it('should post message to worker with initLit task', async () => {
       service.setup();
 
-      const task = Task.getLit;
+      const task = Task.initLit;
       const inputs = {
         section: createMockSection(),
         cable: createMockCable()
@@ -338,7 +338,7 @@ describe('WorkerService', () => {
       const mockSection = createMockSection();
       const mockCable = createMockCable();
 
-      const promise = service.runTaskWithTimeout(Task.getLit, {
+      const promise = service.runTaskWithTimeout(Task.initLit, {
         section: mockSection,
         cable: mockCable
       });
@@ -364,7 +364,7 @@ describe('WorkerService', () => {
 
       try {
         const promise = service.runTaskWithTimeout(
-          Task.getLit,
+          Task.initLit,
           {
             section: mockSection,
             cable: mockCable
@@ -374,7 +374,7 @@ describe('WorkerService', () => {
 
         await vi.advanceTimersByTimeAsync(1000);
 
-        await expect(promise).rejects.toThrow('Task getLit timed out after 1000ms');
+        await expect(promise).rejects.toThrow('Task initLit timed out after 1000ms');
       } finally {
         vi.useRealTimers();
       }
@@ -386,7 +386,7 @@ describe('WorkerService', () => {
       const mockSection = createMockSection();
       const mockCable = createMockCable();
 
-      const promise = service.runTaskWithTimeout(Task.getLit, {
+      const promise = service.runTaskWithTimeout(Task.initLit, {
         section: mockSection,
         cable: mockCable
       });

@@ -36,7 +36,7 @@ export interface WorkerLogMessage {
  *   workerService.ready$.subscribe(ready => {
  *     if (ready) {
  *       // Run a calculation task
- *       workerService.runTask(Task.getLit, { section, cable });
+ *       workerService.runTask(Task.initLit, { section, cable });
  *     }
  *   });
  * }
@@ -142,7 +142,7 @@ export class WorkerPythonService {
    * @example
    * ```typescript
    * const { result, error } = await workerService.runTask(
-   *   Task.getLit,
+   *   Task.initLit,
    *   { section: mySection, cable: myCable }
    * );
    * if (!error) {

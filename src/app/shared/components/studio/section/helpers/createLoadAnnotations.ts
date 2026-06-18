@@ -59,7 +59,7 @@ const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
 export const createLoadAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
   const { side, view } = plotParams;
   const annotations: Partial<Plotly.Annotations>[] = [];
-  const load_coords = cloneDeep(plotParams.litData.loads_coords);
+  const load_coords = cloneDeep(plotParams.litData.output_parameters.loads_coords);
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
     if (spanLoad && spanIndex + plotParams.startSupport in load_coords) {
       const current_load_coord = load_coords[spanIndex + plotParams.startSupport];

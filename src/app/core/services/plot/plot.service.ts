@@ -5,7 +5,6 @@ import { Section, Study } from '@shared/domain';
 import {
   DataError,
   GetSectionOutput,
-  ObstacleOutput,
   PythonErrorCode,
   Task,
   TaskError
@@ -65,7 +64,7 @@ export class PlotService {
       const section = this.spanService.section();
       if (this.isStudioActive() && this.workerReady() && section) {
         if (section.uuid !== this.currentSectionUuid) {
-          this.refreshSection(section);
+          this.initSectionStudio(section);
         }
       }
     });
@@ -121,7 +120,7 @@ export class PlotService {
     );
   }
 
-  refreshSection = async (section: Section) => {
+  initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
     this.error.set(null);
     this.pythonErrorCode.set(null);
@@ -129,7 +128,7 @@ export class PlotService {
     this.baseLitData.set(null);
     this.spanService.section.set(section);
     if (!this.workerPythonService.ready || !section?.cable_name) {
-      this.logger.error('refreshSection error');
+      this.logger.error('initSectionStudio error');
       this.error.set(DataError.NO_CABLE_FOUND);
       this.loading.set(false);
       return;
@@ -142,8 +141,12 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.getLit, { section, cable });
-    this.baseLitData.set(result?.base ?? null);
+    const obstacles = section.obstacles ?? [];
+    const { error, pythonErrorCode } = await this.workerPythonService.runTask(Task.initLit, {
+      section,
+      cable,
+      ...(obstacles.length > 0 ? { obstacles } : {})
+    });
     this.error.set(error);
     this.pythonErrorCode.set(pythonErrorCode ?? null);
 
@@ -153,23 +156,17 @@ export class PlotService {
       return;
     }
 
-    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
-    const currentNorms = untracked(() => this.plotOptionsService.axesNorms());
-    await this.updateAxesNorms(currentNorms, plotOptions);
+    this.plotOptionsChange({
+      startSupport: 0,
+      endSupport: Math.max(section.supports.length - 1, 1),
+      invert: false
+    });
 
-    const sectionLitData = result?.current ?? null;
-    const obstacles = section.obstacles ?? [];
-    if (obstacles.length > 0 && sectionLitData) {
-      const syncedOutput = await this.obstacleStateService.syncObstacles(
-        obstacles,
-        untracked(() => this.plotOptionsService.plotOptions())
-      );
-      this.litData.set({ ...sectionLitData, obstacles: syncedOutput?.obstacles ?? [] });
-    } else {
-      this.obstacleStateService.reset();
-      this.litData.set(sectionLitData);
-    }
-    this.loading.set(false);
+    await this.refreshSection(section);
+  };
+
+  refreshSection = async (_section: Section) => {
+    await this.refreshProjection();
   };
 
   refreshProjection = async () => {
@@ -218,41 +215,6 @@ export class PlotService {
     });
     if (result) {
       this.plotOptionsService.setAxesNorms({ ...result, aspectMode: currentNorms.aspectMode });
-    }
-  }
-
-  async reapplyObstacles(): Promise<void> {
-    const section = untracked(() => this.spanService.section());
-    const obstacles = section?.obstacles ?? [];
-    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
-
-    let currentLitData = untracked(() => this.litData());
-
-    // Restore the load-applied base state before re-adding obstacles
-    if (this.temporaryLoadData) {
-      const { result: loadResult } = await this.workerPythonService.runTask(Task.changeState, {
-        climate: this.temporaryLoadData.climate,
-        spanLoads: this.temporaryLoadData.spanLoads
-      });
-      if (loadResult?.current) {
-        currentLitData = loadResult.current;
-        this.baseLitData.set(loadResult.base ?? null);
-      }
-    }
-    let currentObstacles: ObstacleOutput['obstacles'] = [];
-
-    if (obstacles.length) {
-      const obstacleResult = await this.obstacleStateService.addObstacle(obstacles, plotOptions);
-      if (obstacleResult?.obstacles) {
-        currentObstacles = obstacleResult.obstacles;
-      }
-      await this.obstacleStateService.calculateDistances(obstacles, plotOptions);
-    }
-
-    if (currentLitData && currentObstacles.length > 0) {
-      this.litData.set({ ...currentLitData, obstacles: currentObstacles });
-    } else {
-      this.litData.set(currentLitData);
     }
   }
 }

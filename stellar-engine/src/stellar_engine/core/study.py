@@ -7,13 +7,25 @@
 from copy import deepcopy
 import logging
 
-from mechaphlowers import BalanceEngine, CableArray, PlotEngine, SectionArray, SectionStudy, units
+from mechaphlowers import (
+    BalanceEngine,
+    CableArray,
+    PlotEngine,
+    SectionArray,
+    SectionStudy,
+    units,
+)
 from mechaphlowers.entities.arrays import ObstacleArray
 import numpy as np
 import pandas as pd
 from stellar_engine.core.section import generate_section_array
 from stellar_engine.entities import output
-from stellar_engine.entities.inputs import Cable, ClimateCharge, InitialCondition, Support
+from stellar_engine.entities.inputs import (
+    Cable,
+    ClimateCharge,
+    InitialCondition,
+    Support,
+)
 
 from stellar_engine.entities.errors import _Errors
 
@@ -21,8 +33,11 @@ from dataclasses import fields as dataclass_fields
 
 from stellar_engine.plot.run_solver import apply_span_loads
 
+from stellar_engine.plot import obstacles as obst
+
 
 logger = logging.getLogger(__name__)
+
 
 def extract_initial_condition(input_section: dict) -> InitialCondition:
     input_initial_conditions: list = input_section["initial_conditions"]
@@ -32,7 +47,8 @@ def extract_initial_condition(input_section: dict) -> InitialCondition:
         else next(
             condition
             for condition in input_initial_conditions
-            if condition["uuid"] == input_section["selected_initial_condition_uuid"]
+            if condition["uuid"]
+            == input_section["selected_initial_condition_uuid"]
         )
     )
     if input_initial_condition is None:
@@ -50,7 +66,9 @@ def extract_initial_condition(input_section: dict) -> InitialCondition:
 
 
 def extract_selected_charge(input_section: dict) -> dict | None:
-    input_charges = input_section["charges"] if "charges" in input_section else []
+    input_charges = (
+        input_section["charges"] if "charges" in input_section else []
+    )
     return (
         None
         if not input_charges
@@ -108,7 +126,9 @@ def build_cable_array(cable: Cable) -> CableArray:
                 "linear_resistance_temperature_coef": [
                     cable.linear_resistance_temperature_coef
                 ],
-                "radial_thermal_conductivity": [cable.radial_thermal_conductivity],
+                "radial_thermal_conductivity": [
+                    cable.radial_thermal_conductivity
+                ],
                 "has_magnetic_heart": [cable.has_magnetic_heart],
                 "is_polynomial": [cable.is_polynomial],
                 "rts_cable": [cable.rts_cable],
@@ -183,6 +203,7 @@ def initialize_study(python_inputs: dict):
     input_charge = extract_selected_charge(input_section)
     df = build_supports_dataframe(input_section)
     cable_array = build_cable_array(Cable(**python_inputs["cable"]))
+    obstacles: dict | None = python_inputs.get("obstacles", None)
 
     section = SectionArray(
         df,
@@ -192,53 +213,22 @@ def initialize_study(python_inputs: dict):
     )
     section.angle_direction = "clockwise"
 
-
     study = SectionStudy(
         cable_array=cable_array,
         section_array=section,
     )
-    # engine = BalanceEngine(cable_array=cable_array, section_array=section)
-    # plt_line = PlotEngine(engine)
+
     study.solve_adjustment()
     study.solve_change_state()
 
-    # study.position_engine.add_obstacle_array(
-    #     obstacle_array=ObstacleArray(
-    #         pd.DataFrame(
-    #             {
-    #                 "name": [],
-    #                 "point_index": [],
-    #                 "span_index": [],
-    #                 "x": [],
-    #                 "y": [],
-    #                 "z": [],
-    #                 "object_type": [],
-    #             }
-    #         )
-    #     )
-    # )
-
-    # Create base engine state (before any climate changes)
-    # TODO: replace this by section.copy() later
-    # base_section = SectionArray(
-    #     df.copy(),
-    #     sagging_parameter=initial_condition.base_parameters,
-    #     sagging_temperature=initial_condition.base_temperature,
-    #     bundle_number=input_section["cables_amount"],
-    # )
-    # base_section.angle_direction = "clockwise"
-    # base_study = SectionStudy(
-    #     cable_array=cable_array,
-    #     section_array=base_section,
-    #     initial_condition=initial_condition,
-    #     charge=input_charge,
-    # )
-    # base_study.solve_adjustment()
-    # base_study.solve_change_state()
     base_study = deepcopy(study)
 
     climate = None
-    if input_charge and "data" in input_charge and "climate" in input_charge["data"]:
+    if (
+        input_charge
+        and "data" in input_charge
+        and "climate" in input_charge["data"]
+    ):
         climate = input_charge["data"]["climate"]
 
     has_span_loads = (
@@ -256,6 +246,12 @@ def initialize_study(python_inputs: dict):
         apply_climate_to_engine(study, climate, len(study.balance_engine))
     elif has_span_loads:
         study.balance_engine.solve_change_state()
+
+    if obstacles:
+        obst.add_bulk_obstacles(
+            inputs={"obstacles": obstacles},
+            study=study,
+        )
 
     section_length = len(study.balance_engine)
     base_section_length = len(base_study.balance_engine)

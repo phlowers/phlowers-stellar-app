@@ -22,7 +22,7 @@ const tasks: Record<
     function: 'run_tests',
     externalPackages: ['pytest']
   },
-  [Task.getLit]: {
+  [Task.initLit]: {
     function: 'load_initialize_study',
     externalPackages: []
   },
@@ -66,8 +66,12 @@ const tasks: Record<
     function: 'get_config',
     externalPackages: []
   },
-  [Task.addObstacle]: {
-    function: 'add_obstacles',
+  [Task.addBulkObstacles]: {
+    function: 'add_bulk_obstacles',
+    externalPackages: []
+  },
+  [Task.addSingleObstacle]: {
+    function: 'add_single_obstacle',
     externalPackages: []
   },
   [Task.deleteObstacle]: {
@@ -153,6 +157,7 @@ export async function handleTask(
     console.debug(`Executing task: ${task}, triggering Python function: ${tasks[task].function}`);
     const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[Task]) => PyProxy;
     const result = inputs ? functionToRun(inputs) : functionToRun();
+    console.debug(`Task ${task} executed successfully, converting result to JS object`);
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
     result.destroy();
     return {

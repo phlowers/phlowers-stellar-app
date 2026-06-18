@@ -42,32 +42,39 @@ describe('createPlot', () => {
   ];
 
   const mockLitData: GetSectionOutput = {
-    spans: [[[1, 2, 3]]],
-    insulators: [[[1, 2, 3]]],
-    supports: [[[1, 2, 3]]],
-    L0: [1, 2, 3],
-    elevation: [1, 2, 3],
-    line_angle: [1, 2, 3],
-    vtl_under_chain: [[1, 2, 3]],
-    vtl_under_console: [[1, 2, 3]],
-    r_under_chain: [1, 2, 3],
-    r_under_console: [1, 2, 3],
-    ground_altitude: [1, 2, 3],
-    load_angle: [1, 2, 3],
-    displacement: [[1, 2, 3]],
-    span_length: [1, 2, 3],
-    loads_coords: { 0: [1, 2, 3] },
-    parameter: [1, 2, 3],
-    tension_sup: [1, 2, 3],
-    tension_inf: [1, 2, 3],
-    horizontal_distance: [1, 2, 3],
-    arc_length: [1, 2, 3],
-    T_h: [1, 2, 3],
-    slope_left: [1, 2, 3],
-    slope_right: [1, 2, 3],
-    sag: [1, 2, 3],
-    sag_s2: [1, 2, 3],
-    utilization_rate: [1, 2, 3]
+    coords: {
+      spans: [[[1, 2, 3]]],
+      supports: [[[1, 2, 3]]],
+      insulators: [[[1, 2, 3]]],
+      obstacles: null,
+      distances: null,
+      loads: { 0: [1, 2, 3] }
+    },
+    output_parameters: {
+      line_angle: [1, 2, 3],
+      vtl_under_chain: [[1, 2, 3]],
+      vtl_under_console: [[1, 2, 3]],
+      r_under_chain: [1, 2, 3],
+      r_under_console: [1, 2, 3],
+      ground_altitude: [1, 2, 3],
+      displacement: [[1, 2, 3]],
+      load_angle: [1, 2, 3],
+      span_length: [1, 2, 3],
+      loads_coords: { 0: [1, 2, 3] },
+      utilization_rate: [1, 2, 3],
+      elevation: [1, 2, 3],
+      parameter: [1, 2, 3],
+      slope_left: [1, 2, 3],
+      slope_right: [1, 2, 3],
+      tension_sup: [1, 2, 3],
+      tension_inf: [1, 2, 3],
+      L0: [1, 2, 3],
+      horizontal_distance: [1, 2, 3],
+      arc_length: [1, 2, 3],
+      T_h: [1, 2, 3],
+      sag: [1, 2, 3],
+      sag_s2: [1, 2, 3]
+    }
   };
 
   const mockSpanLoads: (SpanLoad | null)[] = [];

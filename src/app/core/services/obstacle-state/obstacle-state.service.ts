@@ -6,7 +6,7 @@
  */
 import { inject, Injectable, signal } from '@angular/core';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Distance, ObstacleOutput, Task } from '@services/worker_python/tasks/types';
+import { Distance, Task } from '@services/worker_python/tasks/types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PlotOptions } from '@shared/types/plot.types';
 
@@ -21,7 +21,7 @@ import { PlotOptions } from '@shared/types/plot.types';
  *
  * Typical lifecycle:
  * 1. After section loads: call `syncObstacles()` to restore all saved obstacles.
- * 2. After calculateAndSave: call `addObstacle()` + `calculateDistances()`.
+ * 2. After calculateAndSave: call `addSingleObstacle()` + `refreshProjection()`.
  * 3. After deleteObstacle: call `deleteObstacle()`.
  * 4. When leaving studio: call `reset()`.
  */
@@ -38,89 +38,75 @@ export class ObstacleStateService {
   readonly distanceType = signal<'oblique' | 'vertical' | 'horizontal' | null>(null);
 
   /**
-   * Register obstacles in the middleware state for the current view range.
-   *
-   * Filters `obstacles` to only those whose `supportIndex` falls within the
-   * selected span (`startSupport` ≤ supportIndex < `endSupport`), then
-   * passes the filtered list to Python in a single call.
+   * Register obstacles in bulk in the middleware state for the current view range.
    *
    * @param obstacles - All obstacles from the section (unfiltered).
    * @param plotOptions - Current view options used to filter by span range.
-   * @returns Rendered obstacle positions after the operation, or `null` on error.
    */
-  async addObstacle(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.addObstacle, {
+  async addBulkObstacles(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
+    await this.workerPythonService.runTaskWithTimeout(Task.addBulkObstacles, {
       obstacles,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
     });
-    return result ?? null;
   }
+
+  /**
+   * Register a single obstacle in the middleware state for the current view range.
+   *
+   * @param obstacle - The single obstacle to register (from the form).
+   * @param plotOptions - Current view options used to filter by span range.
+   */
+  async addSingleObstacle(obstacle: Obstacle, plotOptions: PlotOptions): Promise<void> {
+    await this.workerPythonService.runTaskWithTimeout(Task.addSingleObstacle, {
+      obstacle,
+      startSupport: plotOptions.startSupport,
+      endSupport: plotOptions.endSupport,
+      view: plotOptions.view
+    });
+  }
+
+
 
   /**
    * Remove a single obstacle from the middleware state by UUID.
    *
    * @param uuid - UUID of the obstacle to remove.
-   * @returns Rendered obstacle positions after the removal, or `null` on error.
+   * @param plotOptions - Current view options.
    */
-  async deleteObstacle(uuid: string, plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.deleteObstacle, {
+  async deleteObstacle(uuid: string, plotOptions: PlotOptions): Promise<void> {
+    await this.workerPythonService.runTaskWithTimeout(Task.deleteObstacle, {
       uuid,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
     });
-    return result ?? null;
   }
 
   /**
    * Clear all obstacles from the middleware state and reset distance signals.
-   *
-   * @returns Rendered obstacle positions after the clear (empty list), or `null` on error.
    */
-  async clearAllObstacles(): Promise<ObstacleOutput | null> {
-    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.clearObstacles, undefined);
+  async clearAllObstacles(): Promise<void> {
+    await this.workerPythonService.runTaskWithTimeout(Task.clearObstacles, undefined);
     this.distances.set([]);
-    return result ?? null;
   }
 
   /**
    * Sync all obstacles from the section to the middleware state.
    *
-   * Passes the full obstacle list to the middleware in a single call,
-   * then recalculates distances.
+   * Passes the full obstacle list to the middleware in a single call.
+   * Distances are computed by the subsequent refreshProjection call.
    *
    * @param obstacles - All obstacles from the section.
    * @param plotOptions - Current view options for distance calculation.
-   * @returns `ObstacleOutput` with all obstacles applied, or `null` on error.
    */
-  async syncObstacles(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<ObstacleOutput | null> {
+  async syncObstacles(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
     if (obstacles.length === 0) {
-      return null;
+      return;
     }
 
-    const result = await this.addObstacle(obstacles, plotOptions);
-    await this.calculateDistances(obstacles, plotOptions);
-    return result;
-  }
-
-  /**
-   * Recalculate distances for all currently registered obstacles.
-   *
-   * Updates the `distances` signal on success.
-   *
-   * @param obstacles - All obstacles from the section.
-   * @param plotOptions - Current view options (startSupport, endSupport, view).
-   */
-  async calculateDistances(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
-    const { result } = await this.workerPythonService.runTaskWithTimeout(Task.calculateObstaclesDistances, {
-      obstacles,
-      startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport,
-      view: plotOptions.view
-    });
-    this.distances.set(result ?? []);
+    await this.addBulkObstacles(obstacles, plotOptions);
   }
 
   /** Reset all obstacle state signals to their defaults. */

@@ -9,6 +9,37 @@ import inspect
 from dataclasses import dataclass
 from typing import Literal, Optional
 
+from mechaphlowers import units
+import numpy as np
+
+
+
+
+def compute_ice_thickness(climate, section_length):
+    ice_thickness: float | np.ndarray
+    if climate.symmetryType == "dis_symmetric":
+        support_frontier = (
+            climate.frontierSupportNumber - 1
+        )  # indexation in js starts at 1
+        ice_before = climate.iceThicknessBefore
+        ice_after = climate.iceThicknessAfter
+        ice_thickness = np.empty(section_length)
+        ice_thickness[:support_frontier] = ice_before
+        ice_thickness[support_frontier:-1] = ice_after
+        ice_thickness[-1] = np.nan
+    elif climate.symmetryType == "symmetric":
+        ice_thickness = climate.iceThickness
+    else:
+        raise ValueError(
+            f"Unsupported symmetryType: {climate.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
+        )
+    ice_thickness = (
+        units(ice_thickness, "cm").to("m").magnitude
+    )
+    
+    return ice_thickness
+
+
 
 @dataclass
 class Support:
