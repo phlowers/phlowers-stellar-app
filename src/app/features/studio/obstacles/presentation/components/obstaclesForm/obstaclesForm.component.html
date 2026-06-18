@@ -20,7 +20,7 @@
       (click)="obstacleFormService.resetFormForNewObstacle(null)"
       data-testid="create-new-obstacle"
     >
-      <app-icon icon="add_circle" />
+      <app-icon icon="add_circle" aria-hidden="true" />
       <ng-container i18n>Create new obstacle</ng-container>
     </button>
   </div>
@@ -125,7 +125,7 @@
       (click)="obstacleFormService.addPosition()"
       data-testid="add-point"
     >
-      <app-icon icon="add_circle" />
+      <app-icon icon="add_circle" aria-hidden="true" />
       <ng-container i18n>Add point</ng-container>
     </button>
   </div>
@@ -160,7 +160,7 @@
             i18n-aria-label
             data-testid="delete-point"
           >
-            <app-icon icon="delete" />
+            <app-icon icon="delete" aria-hidden="true" />
           </button>
         </div>
 
@@ -253,7 +253,7 @@
         i18n-aria-label
         data-testid="delete-obstacle"
       >
-        <app-icon icon="delete" />
+        <app-icon icon="delete" aria-hidden="true" />
       </button>
 
       <button
@@ -261,7 +261,7 @@
         btnStyle="outlined"
         type="button"
         class="p-0"
-        (click)="isConformityModalOpen.set(true)"
+        (click)="openConformityModal()"
         data-testid="save-obstacle"
       >
         <ng-container i18n>AT-CCGLA</ng-container>
@@ -275,7 +275,7 @@
         [btnLoading]="isCalculating()"
         data-testid="calculate-save"
       >
-        <app-icon icon="rocket_launch" />
+        <app-icon icon="rocket_launch" aria-hidden="true" />
         <ng-container i18n>Calculate and save</ng-container>
       </button>
     </div>
@@ -348,20 +348,31 @@
 >
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
-      <app-icon icon="assignment_turned_in" />
+      <app-icon icon="assignment_turned_in" aria-hidden="true" />
       <span i18n>Conformity verifications</span>
     </p>
   </ng-template>
 
-  <app-conformity />
+  <app-conformity [isOpen]="isConformityModalOpen()" />
 
   <ng-template #footer>
+    <button
+      app-btn
+      btnStyle="danger"
+      type="button"
+      data-testid="conformity-clear-btn"
+      (click)="conformityRef()!.clearSavedConformityData()"
+      aria-label="clear conformity data"
+      i18n-aria-label
+    >
+      <app-icon icon="delete" aria-hidden="true" />
+    </button>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-report-btn">
-      <app-icon icon="description" />
+      <app-icon icon="description" aria-hidden="true" />
       <ng-container i18n>Report</ng-container>
     </button>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn">
-      <app-icon icon="download" />
+      <app-icon icon="download" aria-hidden="true" />
       <ng-container i18n>Export</ng-container>
     </button>
     <button
@@ -371,7 +382,7 @@
       [disabled]="!conformityRef()?.canCalculate()"
       (click)="conformityRef()!.saveConformityData()"
     >
-      <app-icon icon="save" />
+      <app-icon icon="save" aria-hidden="true" />
       <ng-container i18n>Save</ng-container>
     </button>
   </ng-template>

@@ -28,6 +28,8 @@ import { distinctUntilChanged, filter } from 'rxjs';
 import { PlotService } from '@services/plot/plot.service';
 import { DialogModule } from 'primeng/dialog';
 import { ConformityComponent } from '../conformity/conformity.component';
+import { NotificationService } from '@services/notification/notification.service';
+import { StorageService } from '@services/storage/storage.service';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -58,6 +60,8 @@ export class ObstaclesFormComponent {
   public readonly obstaclesService = inject(ObstaclesService);
   public readonly obstacleFormService = inject(ObstacleFormService);
   private readonly plotService = inject(PlotService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly storageService = inject(StorageService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly isConformityModalOpen = signal(false);
@@ -143,5 +147,39 @@ export class ObstaclesFormComponent {
 
   setCurrentObstaclePoint(index: number) {
     this.obstaclesService.setCurrentPointIndex(index);
+  }
+
+  async openConformityModal(): Promise<void> {
+    const warnings: string[] = [];
+
+    const uuid = this.obstacleFormService.form.value.uuid;
+    if (!uuid) {
+      warnings.push($localize`obstacle must be saved`);
+    }
+
+    const obstacleType = this.obstacleFormService.form.value.type;
+    if (uuid && obstacleType) {
+      const db = this.storageService.db;
+      const distanceCount = db ? await db.catObstacleDistances.where('obstacle_type').equals(obstacleType).count() : 0;
+      if (distanceCount === 0) {
+        const typeLabel = this.obstacleTypeOptions().find((o) => o.value === obstacleType)?.label ?? obstacleType;
+        warnings.push($localize`obstacle type '${typeLabel}' is not eligible to conformity control`);
+      }
+    }
+
+    if (!this.spanService.section()?.voltage_idr) {
+      warnings.push($localize`study must have an electric tension level`);
+    }
+
+    if (warnings.length > 0) {
+      const summary =
+        warnings.length === 1
+          ? $localize`You cannot open conformity control because this condition is not met:`
+          : $localize`You cannot open conformity control because these conditions are not met:`;
+      this.notificationService.warningList(warnings, summary);
+      return;
+    }
+
+    this.isConformityModalOpen.set(true);
   }
 }

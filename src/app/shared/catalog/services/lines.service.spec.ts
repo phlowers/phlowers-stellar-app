@@ -81,14 +81,14 @@ describe('LinesService', () => {
     });
     it('emits on imported$ after a successful import', async () => {
       const emissions: void[] = [];
-      service.imported$.subscribe(() => emissions.push());
+      service.imported$.subscribe(() => emissions.push(undefined));
       await service.importFromFile();
       expect(emissions.length).toBe(1);
     });
     it('does not emit on imported$ when the import fails', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
       const emissions: void[] = [];
-      service.imported$.subscribe(() => emissions.push());
+      service.imported$.subscribe(() => emissions.push(undefined));
       await service.importFromFile();
       expect(emissions.length).toBe(0);
     });

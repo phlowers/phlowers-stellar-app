@@ -13,10 +13,12 @@
  * @category Domain Models
  */
 export interface ConformityFormData {
+  /** Index of the obstacle point the conformity was computed for (null when the obstacle has a single point). */
+  selectedPoint: number | null;
   windZone: string | null;
   windMinus: boolean;
   redZonePresence: boolean;
-  distributedTemperature: number | null;
+  repartitionTemperature: number | null;
   lateralDistanceTemperature: number | null;
   conformity: string[] | null;
 }

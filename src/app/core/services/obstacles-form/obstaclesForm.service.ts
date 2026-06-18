@@ -3,7 +3,13 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { ConformityFormData, LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import {
+  ConformityFormData,
+  LateralDistanceType,
+  Obstacle,
+  Position3D,
+  ReferenceSupport
+} from '@shared/domain/models/obstacle.model';
 import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
@@ -355,9 +361,7 @@ export class ObstacleFormService {
     const obstacles = section.obstacles ?? [];
     const existingIndex = obstacles.findIndex((o) => o.uuid === uuid);
     if (existingIndex === -1) return;
-    const updatedObstacles = obstacles.map((o, i) =>
-      i === existingIndex ? { ...o, conformityData: data } : o
-    );
+    const updatedObstacles = obstacles.map((o, i) => (i === existingIndex ? { ...o, conformityData: data } : o));
     const updatedSection = { ...section, obstacles: updatedObstacles };
     await this.sectionService.createOrUpdateSection(study, updatedSection);
     this.spanService.section.set(updatedSection);
@@ -366,6 +370,23 @@ export class ObstacleFormService {
       summary: $localize`Success`,
       detail: $localize`Conformity data saved`
     });
+  }
+
+  async clearConformityData(uuid: string): Promise<void> {
+    const section = this.spanService.section();
+    const study = this.plotService.study();
+    if (!section || !study) return;
+    const obstacles = section.obstacles ?? [];
+    const existingIndex = obstacles.findIndex((o) => o.uuid === uuid);
+    if (existingIndex === -1) return;
+    const updatedObstacles = obstacles.map((o, i) => {
+      if (i !== existingIndex) return o;
+      const { conformityData: _, ...rest } = o;
+      return rest;
+    });
+    const updatedSection = { ...section, obstacles: updatedObstacles };
+    await this.sectionService.createOrUpdateSection(study, updatedSection);
+    this.spanService.section.set(updatedSection);
   }
 
   async calculateAndSave(): Promise<void> {

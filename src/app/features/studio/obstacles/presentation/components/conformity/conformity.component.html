@@ -1,4 +1,4 @@
-<form [formGroup]="form" class="form">
+<form [formGroup]="form" class="form" (ngSubmit)="calculate()">
   <fieldset>
     <legend class="form__title-obstacle underline-text" i18n>Obstacle</legend>
 
@@ -19,12 +19,12 @@
     <dl>
       <div class="form__name-obstacle">
         <dt i18n>Name</dt>
-        <dd>{{ obstacleData().name || '-' }}</dd>
+        <dd>{{ obstacleData()?.name || '-' }}</dd>
       </div>
 
       <div class="form__type-obstacle">
         <dt i18n>Type</dt>
-        <dd>{{ obstacleData().type || '-' }}</dd>
+        <dd>{{ obstacleData()?.type || '-' }}</dd>
       </div>
 
       <div class="form__span-obstacle">
@@ -101,47 +101,51 @@
     </div>
 
     <div class="form__distrib-temp">
-      <label for="distributedTemperature" i18n>Distributed temperature</label>
-      <input
-        id="distributedTemperature"
-        type="number"
-        pInputText
-        [attr.step]="BOUNDS.distributedTemperature.step"
-        [attr.min]="BOUNDS.distributedTemperature.min"
-        [attr.max]="BOUNDS.distributedTemperature.max"
-        formControlName="distributedTemperature"
-        [attr.aria-invalid]="form.controls.distributedTemperature.invalid ? 'true' : null"
-        [attr.aria-errormessage]="distributedTemperatureErrorId()"
-        (input)="truncateTwoDecimals($event)"
-        fluid
-      />
-      @if (form.controls.distributedTemperature.errors?.['min']) {
-        <p-message id="distributed-temperature-min-error" severity="error" size="small" variant="simple">
-          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.distributedTemperature.min }}
+      <label for="repartitionTemperature" i18n>Repartition temperature</label>
+      <p-inputgroup>
+        <input
+          id="repartitionTemperature"
+          type="number"
+          pInputText
+          [attr.step]="BOUNDS.repartitionTemperature.step"
+          [attr.min]="BOUNDS.repartitionTemperature.min"
+          [attr.max]="BOUNDS.repartitionTemperature.max"
+          formControlName="repartitionTemperature"
+          [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
+          [attr.aria-errormessage]="repartitionTemperatureErrorId()"
+          (input)="truncateTwoDecimals($event)"
+        />
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (form.controls.repartitionTemperature.errors?.['min']) {
+        <p-message id="repartition-temperature-min-error" severity="error" size="small" variant="simple">
+          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.repartitionTemperature.min }}
         </p-message>
-      } @else if (form.controls.distributedTemperature.errors?.['max']) {
-        <p-message id="distributed-temperature-max-error" severity="error" size="small" variant="simple">
-          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.distributedTemperature.max }}
+      } @else if (form.controls.repartitionTemperature.errors?.['max']) {
+        <p-message id="repartition-temperature-max-error" severity="error" size="small" variant="simple">
+          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.repartitionTemperature.max }}
         </p-message>
       }
     </div>
 
     <div class="form__lat-temp">
       <label for="lateralDistanceTemperature" i18n>Lateral distance temperature</label>
-      <input
-        id="lateralDistanceTemperature"
-        type="number"
-        pInputText
-        [attr.step]="BOUNDS.lateralDistanceTemperature.step"
-        [attr.min]="BOUNDS.lateralDistanceTemperature.min"
-        [attr.max]="BOUNDS.lateralDistanceTemperature.max"
-        formControlName="lateralDistanceTemperature"
-        aria-describedby="lateral-distance-hint"
-        [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
-        [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
-        (input)="truncateTwoDecimals($event)"
-        fluid
-      />
+      <p-inputgroup>
+        <input
+          id="lateralDistanceTemperature"
+          type="number"
+          pInputText
+          [attr.step]="BOUNDS.lateralDistanceTemperature.step"
+          [attr.min]="BOUNDS.lateralDistanceTemperature.min"
+          [attr.max]="BOUNDS.lateralDistanceTemperature.max"
+          formControlName="lateralDistanceTemperature"
+          aria-describedby="lateral-distance-hint"
+          [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
+          [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
+          (input)="truncateTwoDecimals($event)"
+        />
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
+      </p-inputgroup>
       <small id="lateral-distance-hint" i18n>Descriptive text — will be dynamic</small>
       @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
         <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
@@ -169,26 +173,107 @@
     </div>
   </fieldset>
 
-  <button class="form__submit" app-btn type="submit" [disabled]="!canCalculate()" i18n>Calculate</button>
+  <button class="form__submit" app-btn type="submit" [disabled]="!canCalculate()" [btnLoading]="isCalculating()" i18n>
+    Calculate
+  </button>
 </form>
 
-<div class="results">
-  <figure class="results__figure">
-    <div id="conformity-plot"></div>
-    <figcaption i18n>Conformity visualisation graph</figcaption>
-  </figure>
+@if (conformityResults()) {
+  <div class="results" @expandHeight>
+    <hr class="results__separator" />
 
-  <table class="results__table">
-    <thead>
-      <tr>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th scope="row"></th>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <h2 class="results__title" i18n>Results:</h2>
+
+    <figure class="results__figure">
+      <div id="conformity-plot"></div>
+      <figcaption i18n>Conformity visualisation graph</figcaption>
+    </figure>
+
+    <table class="results__table">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          @for (col of selectedConformityColumns(); track col.value) {
+            <th scope="col">{{ col.label }} <ng-container i18n>overhang</ng-container></th>
+            @if (showLateralColumn()) {
+              <th scope="col">{{ col.label }} <ng-container i18n>lateral</ng-container></th>
+            }
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: commonRows }" />
+
+        <tr>
+          <th scope="row" i18n>Conformity compliance</th>
+          @for (col of selectedConformityColumns(); track col.value) {
+            <td [attr.colspan]="showLateralColumn() ? 2 : null">
+              @switch (getConformityCompliance(col.value)) {
+                @case (null) {
+                  <div class="compliance">
+                    <span class="compliance__text" i18n>Unknown</span>
+                    <app-icon
+                      icon="shield_question"
+                      class="compliance__icon compliance__icon--unknown"
+                      aria-hidden="true"
+                    />
+                  </div>
+                }
+                @case (true) {
+                  <div class="compliance">
+                    <span class="compliance__text" i18n>Yes</span>
+                    <app-icon icon="check" class="compliance__icon compliance__icon--yes" aria-hidden="true" />
+                  </div>
+                }
+                @default {
+                  <div class="compliance">
+                    <span class="compliance__text" i18n>No</span>
+                    <app-icon icon="close" class="compliance__icon compliance__icon--no" aria-hidden="true" />
+                  </div>
+                }
+              }
+            </td>
+          }
+        </tr>
+
+        @if (conformityType() === 'cable_track') {
+          <tr>
+            <th scope="colgroup" [attr.colspan]="totalColSpan()" i18n>Minimum distance case</th>
+          </tr>
+          <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: cableTrackRows }" />
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- One result value cell: formatted number + unit, blank when the value is null. -->
+<ng-template #valueCell let-rule="rule" let-key="key" let-unit="unit">
+  @let value = getValue(rule, key);
+  <td>
+    @if (value !== null) {
+      {{ value | number: '1.2-2' }} {{ unit }}
+    }
+  </td>
+</ng-template>
+
+<!-- A block of data rows (reused for common rows and cable-track rows). -->
+<ng-template #dataRows let-rows>
+  @for (row of rows; track row.label) {
+    <tr>
+      <th scope="row">{{ row.label }}</th>
+      @for (col of selectedConformityColumns(); track col.value) {
+        <ng-container
+          [ngTemplateOutlet]="valueCell"
+          [ngTemplateOutletContext]="{ rule: col.value, key: row.overhangKey, unit: row.unit }"
+        />
+        @if (showLateralColumn()) {
+          <ng-container
+            [ngTemplateOutlet]="valueCell"
+            [ngTemplateOutletContext]="{ rule: col.value, key: row.lateralKey, unit: row.unit }"
+          />
+        }
+      }
+    </tr>
+  }
+</ng-template>
