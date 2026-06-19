@@ -40,7 +40,7 @@
             <dt class="global-params__list__title" i18n>Working load</dt>
             <dd class="global-params__list__value global-params__list__value--items-center">
               @let stressRate = globalStressRate();
-              {{ stressRate !== null ? stressRate : '-' }}&nbsp;%
+              {{ stressRate !== null ? (stressRate | number: '1.0-1') : '-' }}&nbsp;%
               @if (stressRate !== null && stressRate <= 75) {
                 <app-icon
                   icon="check"

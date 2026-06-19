@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 
 @Component({
   selector: 'app-papoto',
@@ -118,6 +119,11 @@ export class PapotoComponent {
 
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
+  }
+
+  truncate1Decimal(value: number | undefined | null): number | null {
+    if (value == null) return null;
+    return truncateNumberToOneDecimal(value);
   }
 
   openHelp() {
