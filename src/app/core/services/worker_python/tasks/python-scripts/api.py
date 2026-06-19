@@ -31,8 +31,6 @@ study: SectionStudy
 base_study: SectionStudy
 
 
-
-
 @debug_log
 def calculate_guying(js_inputs):
     global study
@@ -55,7 +53,8 @@ def parameter_15_without_wind(js_inputs):
 def temperature_calculation(js_inputs):
     global study
     return temperature.temperature_calculation(
-        inputs=js_inputs.to_py(default_converter=default_converter), engine=study.balance_engine
+        inputs=js_inputs.to_py(default_converter=default_converter),
+        engine=study.balance_engine,
     )
 
 
@@ -67,6 +66,7 @@ def calculate_papoto(js_inputs):
 @debug_log
 def get_support_coordinates(js_inputs):
     return supports_coords.get_support_coordinates(js_to_python(js_inputs))
+
 
 @debug_log
 def change_state(js_inputs):
@@ -121,6 +121,7 @@ def add_bulk_obstacles(js_inputs):
     )
     return {"success": True}
 
+
 @debug_log
 def add_single_obstacle(js_inputs):
     py_inputs = js_inputs.to_py()
@@ -131,9 +132,7 @@ def add_single_obstacle(js_inputs):
     )
     global study
 
-    obst.add_single_obstacle(
-        {"obstacles": [obstacle]}, study, middle_span
-    )
+    obst.add_single_obstacle({"obstacles": [obstacle]}, study, middle_span)
     return {"success": True}
 
 
@@ -146,9 +145,7 @@ def delete_obstacle(js_inputs):
     )
     project = py_inputs["view"] == "2D"
     global study
-    obst.delete_obstacle(
-        uuid, study, project=project, support_index=middle_span
-    )
+    obst.delete_obstacle(uuid, study, project=project, support_index=middle_span)
     return {"success": True}
 
 
@@ -158,7 +155,6 @@ def clear_obstacles():
     obst.clear_obstacles(study, project=True, support_index=0)
 
     return {"success": True}
-
 
 
 @debug_log
@@ -187,6 +183,7 @@ def get_pose_table(js_inputs):
     global study
     return pose_table.get_pose_table(js_to_python(js_inputs), study.balance_engine)
 
+
 @debug_log
 def load_initialize_study(js_inputs):
     global study, base_study
@@ -198,10 +195,10 @@ def load_initialize_study(js_inputs):
     return {"success": True}
 
 
-    
 @debug_log
 def get_config():
     return {"resolution": options.graphics.resolution}
+
 
 @debug_log
 def set_resolution(js_inputs):
@@ -209,6 +206,3 @@ def set_resolution(js_inputs):
     resolution = python_inputs["resolution"]
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
-
-
-
