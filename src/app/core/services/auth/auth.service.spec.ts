@@ -218,15 +218,27 @@ describe('AuthService', () => {
     });
   });
 
-  describe('initialize — server mismatch blocks cache restore while online', () => {
+  describe('initialize — explicit auth mismatch blocks cache restore while online', () => {
     it('should keep currentUser null even with cached OIDC user', async () => {
-      mockFetch.mockResolvedValue(userinfoStatus(501));
+      mockFetch.mockResolvedValue(userinfoStatus(403));
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
 
       expect(service.serverSessionInvalid()).toBe(true);
       expect(service.currentUser()).toBeNull();
+    });
+  });
+
+  describe('initialize — backend 501 keeps offline cache usable', () => {
+    it('should restore cached OIDC user when server returns 501', async () => {
+      mockFetch.mockResolvedValue(userinfoStatus(501));
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+
+      await service.initialize();
+
+      expect(service.serverSessionInvalid()).toBe(false);
+      expect(service.currentUser()).toEqual(testOidcUser);
     });
   });
 
@@ -243,6 +255,49 @@ describe('AuthService', () => {
       await service.initialize();
 
       expect(service.currentUser()).toEqual(testOidcUser);
+    });
+  });
+
+  describe('reconnect sync', () => {
+    it('should refresh claims on browser online event when a cached user is active', async () => {
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+      mockFetch
+        .mockRejectedValueOnce(new Error('Offline'))
+        .mockResolvedValueOnce(
+          userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims, given_name: 'Updated' })
+        );
+
+      await service.initialize();
+      expect(service.currentUser()?.given_name).toBe('Jane');
+
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        configurable: true,
+        value: true
+      });
+      globalThis.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(service.currentUser()?.given_name).toBe('Updated');
+    });
+
+    it('should not refresh on browser online event when no cached user exists', async () => {
+      usersTableMock.toArray.mockResolvedValue([]);
+      mockFetch.mockRejectedValueOnce(new Error('Offline'));
+
+      await service.initialize();
+      expect(service.currentUser()).toBeNull();
+
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        configurable: true,
+        value: true
+      });
+      globalThis.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -415,6 +470,11 @@ describe('AuthService', () => {
 
     it('should ignore non-auth status', () => {
       service.markServerMismatchFromStatus(500);
+      expect(service.serverSessionInvalid()).toBe(false);
+    });
+
+    it('should ignore 501 status', () => {
+      service.markServerMismatchFromStatus(501);
       expect(service.serverSessionInvalid()).toBe(false);
     });
   });

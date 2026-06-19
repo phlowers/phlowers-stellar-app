@@ -66,6 +66,16 @@ describe('authSessionInterceptor', () => {
     expect(authResyncServiceMock.triggerImmediateRedirect).not.toHaveBeenCalled();
   });
 
+  it('should ignore same-origin 501 responses', () => {
+    httpClient.get('/api/protected').subscribe({ error: () => undefined });
+
+    const request = httpController.expectOne('/api/protected');
+    request.flush({}, { status: 501, statusText: 'Not Implemented' });
+
+    expect(authServiceMock.markServerMismatchFromStatus).not.toHaveBeenCalled();
+    expect(authResyncServiceMock.triggerImmediateRedirect).not.toHaveBeenCalled();
+  });
+
   it('should ignore cross-origin responses', () => {
     httpClient
       .get('https://api.github.com/repos/phlowers/mechaphlowers/releases')

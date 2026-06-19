@@ -4,7 +4,7 @@ import { AuthResyncService } from '@services/auth/auth-resync.service';
 import { AuthService } from '@services/auth/auth.service';
 import { catchError, throwError } from 'rxjs';
 
-const TRACKED_STATUS_CODES = new Set([401, 403, 501]);
+const TRACKED_STATUS_CODES = new Set([401, 403]);
 
 const isSameOriginRequest = (requestUrl: string): boolean => {
   try {
