@@ -1,0 +1,256 @@
+{
+  "obstacles": [
+    {
+      "obstacleType": "ordinary_ground",
+      "obstacleName": "Ordinary ground",
+      "details": "Ordinary ground (uncultivated land, occasional presence of people)",
+      "redZone": false,
+      "conformity": "overhang",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": null
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": null
+        }
+      ]
+    },
+    {
+      "obstacleType": "agricultural_land",
+      "obstacleName": "Agricultural land",
+      "details": "Agricultural land and occupied or mixed-use land (...)",
+      "redZone": false,
+      "conformity": "overhang",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": null
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": null
+        }
+      ]
+    },
+    {
+      "obstacleType": "traffic_lane",
+      "obstacleName": "Traffic lane",
+      "details": "Traffic lane (...)",
+      "redZone": false,
+      "conformity": "overhang",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": null
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": null
+        }
+      ]
+    },
+    {
+      "obstacleType": "high_clearance_equipment_area",
+      "obstacleName": "High-clearance equipment area",
+      "details": "Operating area for high-clearance agricultural or industrial equipment H (>5m)",
+      "redZone": false,
+      "conformity": null,
+      "distances": []
+    },
+    {
+      "obstacleType": "high_clearance_vehicle_route",
+      "obstacleName": "High-clearance vehicle route",
+      "details": "Route for high-clearance vehicles H (>5m)",
+      "redZone": false,
+      "conformity": null,
+      "distances": []
+    },
+    {
+      "obstacleType": "silo_proximity",
+      "obstacleName": "Silo proximity",
+      "details": "Proximity to silo (H = height of the upper part of the filling opening)",
+      "redZone": false,
+      "conformity": null,
+      "distances": []
+    },
+    {
+      "obstacleType": "accessible_building",
+      "obstacleName": "Accessible building",
+      "details": "Building accessible to people (...)",
+      "redZone": false,
+      "conformity": "cable_track",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": { "63": 0.6, "90": 0.7, "150": 0.8, "225": 0.9, "400": 1.0 }
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": { "63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2.0 }
+        },
+        {
+          "ruleType": "RULE_3",
+          "active": false,
+          "overhang": { "63": 3.1, "90": 3.2, "150": 3.3, "225": 3.4, "400": 3.5 },
+          "lateral": { "63": 2.6, "90": 2.7, "150": 2.8, "225": 2.9, "400": 3.0 }
+        }
+      ]
+    },
+    {
+      "obstacleType": "non_accessible_structure",
+      "obstacleName": "Non-accessible structure",
+      "details": "Ground-level structure (...)",
+      "redZone": false,
+      "conformity": "cable_track",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": { "63": 0.6, "90": 0.7, "150": 0.8, "225": 0.9, "400": 1.0 }
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": { "63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2.0 }
+        },
+        {
+          "ruleType": "RULE_3",
+          "active": false,
+          "overhang": { "63": 3.1, "90": 3.2, "150": 3.3, "225": 3.4, "400": 3.5 },
+          "lateral": { "63": 2.6, "90": 2.7, "150": 2.8, "225": 2.9, "400": 3.0 }
+        }
+      ]
+    },
+    {
+      "obstacleType": "maintained_structure",
+      "obstacleName": "Maintained structure",
+      "details": "Structure not normally accessible (...)",
+      "redZone": false,
+      "conformity": "cable_track",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": { "63": 0.6, "90": 0.7, "150": 0.8, "225": 0.9, "400": 1.0 }
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": { "63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2.0 }
+        },
+        {
+          "ruleType": "RULE_3",
+          "active": false,
+          "overhang": { "63": 3.1, "90": 3.2, "150": 3.3, "225": 3.4, "400": 3.5 },
+          "lateral": { "63": 2.6, "90": 2.7, "150": 2.8, "225": 2.9, "400": 3.0 }
+        }
+      ]
+    },
+    {
+      "obstacleType": "vegetation",
+      "obstacleName": "Vegetation",
+      "details": "Isolated tree or vegetation (...)",
+      "redZone": true,
+      "conformity": "vegetation",
+      "distances": [
+        {
+          "ruleType": "RULE_1",
+          "active": true,
+          "overhang": { "63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5 },
+          "lateral": { "63": 0.6, "90": 0.7, "150": 0.8, "225": 0.9, "400": 1.0 }
+        },
+        {
+          "ruleType": "RULE_2",
+          "active": true,
+          "overhang": { "63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5 },
+          "lateral": { "63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2.0 }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "ruleType": "RULE_1",
+      "ruleName": "RULE_1",
+      "color": "#FF0000",
+      "lateralPoint": {
+        "temperature": 17,
+        "pressure": "WindZoneInput",
+        "redZone": false
+      },
+      "overhangPoint": {
+        "temperature": null,
+        "pressure": 0,
+        "redZone": false
+      }
+    },
+    {
+      "ruleType": "RULE_2",
+      "ruleName": "RULE_2",
+      "color": "#FFA500",
+      "lateralPoint": {
+        "temperature": 68,
+        "pressure": "WindZoneInput",
+        "redZone": true
+      },
+      "overhangPoint": {
+        "temperature": null,
+        "pressure": 0,
+        "redZone": false
+      }
+    },
+    {
+      "ruleType": "RULE_3",
+      "ruleName": "RULE_3",
+      "color": "#0000FF",
+      "lateralPoint": {
+        "temperature": 17,
+        "pressure": "WindZoneInput",
+        "redZone": false
+      },
+      "overhangPoint": {
+        "temperature": null,
+        "pressure": 0,
+        "redZone": false
+      }
+    }
+  ],
+  "repartitionTemperatureFields": {
+    "defaultValue": 70
+  },
+  "lateralTemperatureFields": {
+    "ruleType": "RULE_2",
+    "message": "Value of 65°C in RULE_2 (2023) or the equivalent 2024 setting"
+  },
+  "windZone": {
+    "default": "200",
+    "values": [
+      { "label": "200", "normal": 200, "redZone": 300 },
+      { "label": "300", "normal": 300, "redZone": 400 },
+      { "label": "300-400", "normal": 300, "redZone": 400 }
+    ]
+  },
+  "intermediatePointPositions": [0.33, 0.66]
+}
