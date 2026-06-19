@@ -9,10 +9,8 @@ import inspect
 from dataclasses import dataclass
 from typing import Literal, Optional
 
-from mechaphlowers import units
 import numpy as np
-
-
+from mechaphlowers import units
 
 
 def compute_ice_thickness(climate, section_length):
@@ -33,12 +31,9 @@ def compute_ice_thickness(climate, section_length):
         raise ValueError(
             f"Unsupported symmetryType: {climate.symmetryType}. Expected 'dis_symmetric' or 'symmetric'"
         )
-    ice_thickness = (
-        units(ice_thickness, "cm").to("m").magnitude
-    )
-    
-    return ice_thickness
+    ice_thickness = units(ice_thickness, "cm").to("m").magnitude
 
+    return ice_thickness
 
 
 @dataclass

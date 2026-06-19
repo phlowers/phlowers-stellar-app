@@ -7,8 +7,6 @@
 import logging
 
 from mechaphlowers import SectionStudy
-from mechaphlowers.core.geometry.points import Points
-from mechaphlowers.plotting.utils import compute_aspect_ratio
 
 logger = logging.getLogger(__name__)
 

@@ -10,10 +10,8 @@ from mechaphlowers import (
     SectionStudy,
 )
 
-import stellar_engine.plot.obstacles as obst
 from stellar_engine.entities.output import (
     get_coordinates,
-    get_section_middle_span,
 )
 
 logger = logging.getLogger("stellar_engine")
@@ -26,7 +24,6 @@ def refresh_projection(
     study: SectionStudy,
     base_study: SectionStudy | None = None,
 ):
-
     # base_plt_line: PositionEngine = base_study.position_engine if base_study else None
     logger.debug("===> refresh_projection triggered")
     start_support = inputs["startSupport"]
@@ -34,9 +31,14 @@ def refresh_projection(
     view = inputs["view"]
     project = view == "2d"
 
-    return get_states_coordinates(study, base_study, start_support, end_support, project)
+    return get_states_coordinates(
+        study, base_study, start_support, end_support, project
+    )
 
-def get_states_coordinates(study, base_study, start_support, end_support, project):
+
+def get_states_coordinates(
+    study, base_study, start_support, end_support, project
+):
     current_coords = get_coordinates(
         study, project, start_support, end_support
     )

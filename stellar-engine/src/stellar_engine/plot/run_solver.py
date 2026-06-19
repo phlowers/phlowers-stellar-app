@@ -79,7 +79,6 @@ def change_state(
     study: SectionStudy,
     base_study: SectionStudy,
 ):
-
     climate = ClimateCharge(**change_state_inputs["climate"])
     # print(change_state_inputs)
     logger.debug("python_inputs: %s", change_state_inputs)

@@ -4,37 +4,29 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from copy import deepcopy
 import logging
+from copy import deepcopy
+from dataclasses import fields as dataclass_fields
 
+import numpy as np
+import pandas as pd
 from mechaphlowers import (
-    BalanceEngine,
     CableArray,
-    PlotEngine,
     SectionArray,
     SectionStudy,
     units,
 )
-from mechaphlowers.entities.arrays import ObstacleArray
-import numpy as np
-import pandas as pd
+
 from stellar_engine.core.section import generate_section_array
-from stellar_engine.entities import output
+from stellar_engine.entities.errors import _Errors
 from stellar_engine.entities.inputs import (
     Cable,
     ClimateCharge,
     InitialCondition,
     Support,
 )
-
-from stellar_engine.entities.errors import _Errors
-
-from dataclasses import fields as dataclass_fields
-
-from stellar_engine.plot.run_solver import apply_span_loads
-
 from stellar_engine.plot import obstacles as obst
-
+from stellar_engine.plot.run_solver import apply_span_loads
 
 logger = logging.getLogger(__name__)
 
@@ -253,8 +245,8 @@ def initialize_study(python_inputs: dict):
             study=study,
         )
 
-    section_length = len(study.balance_engine)
-    base_section_length = len(base_study.balance_engine)
-    print(f"Study initialized. Study: {study}, Base Study: {base_study}")
+    logger.debug(
+        "Study initialized. Study: %s, Base Study: %s", study, base_study
+    )
 
     return study, base_study

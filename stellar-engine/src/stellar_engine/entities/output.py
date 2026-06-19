@@ -8,12 +8,12 @@
 import logging
 
 import numpy as np
-from mechaphlowers.core.geometry.points import SparsePoints
 from mechaphlowers import SectionStudy, units
 from mechaphlowers.core.geometry.distances import DistanceResult
+from mechaphlowers.core.geometry.points import SparsePoints
 from mechaphlowers.utils import ArrayTools
-from stellar_engine.entities.errors import GeneratedPointsNoneError
 
+from stellar_engine.entities.errors import GeneratedPointsNoneError
 from stellar_engine.utils import get_section_middle_span
 
 logger = logging.getLogger("stellar_engine")
@@ -34,12 +34,16 @@ def to_serializable(obj):
             "v_plane": obj.v_plane.tolist(),
         }
     elif isinstance(obj, dict):
-        return {int(k) if hasattr(k, 'item') else k: to_serializable(v) for k, v in obj.items()}
+        return {
+            int(k) if hasattr(k, 'item') else k: to_serializable(v)
+            for k, v in obj.items()
+        }
     elif isinstance(obj, list):
         return [to_serializable(item) for item in obj]
     elif hasattr(obj, 'item'):
         return obj.item()
     return obj
+
 
 # TODO: ideally, we want to separate [generating GroupPoints] and [change frame/fetch data]
 def get_coordinates(
@@ -65,8 +69,10 @@ def get_coordinates(
             coord_dict["supports"],
             coord_dict["insulators"],
         )
-        obstacles: SparsePoints  = coord_dict.get("obstacles", None)
-        distances: dict[str, dict[int, DistanceResult]] = coord_dict.get("distances", None)
+        obstacles: SparsePoints = coord_dict.get("obstacles", None)
+        distances: dict[str, dict[int, DistanceResult]] = coord_dict.get(
+            "distances", None
+        )
     else:
         span, supports, insulators = (
             base_group_points.spans,
@@ -95,7 +101,19 @@ def get_coordinates(
     )
     logger.debug("utilization rate: %s", utilization_rate)
 
-    result = get_exchange_studio(study, span, supports, insulators, obstacles, distances, vtl_under_chain, vtl_under_console, loads_coords, line_angle_rad, utilization_rate)
+    result = get_exchange_studio(
+        study,
+        span,
+        supports,
+        insulators,
+        obstacles,
+        distances,
+        vtl_under_chain,
+        vtl_under_console,
+        loads_coords,
+        line_angle_rad,
+        utilization_rate,
+    )
 
     # Build structured obstacles and distances for the frontend renderer
     result["obstacles_formatted"] = format_obstacles_for_plot(obstacles)
@@ -128,30 +146,54 @@ def format_distances_for_plot(distances):
         points = []
         for point_index, dist_result in point_distances.items():
             try:
-                u_proj, v_proj = dist_result.projection_points(dist_result.point_base)
-                points.append({
-                    "pointIndex": int(point_index),
-                    "linePoint": dist_result.point_target.tolist(),
-                    "virtualPointHorizontal": u_proj.tolist(),
-                    "virtualPointVertical": v_proj.tolist(),
-                    "distanceDiagonal": float(dist_result.distance_3d),
-                    "distanceHorizontal": float(dist_result.distance_projection_u),
-                    "distanceVertical": float(dist_result.distance_projection_v),
-                })
+                u_proj, v_proj = dist_result.projection_points(
+                    dist_result.point_base
+                )
+                points.append(
+                    {
+                        "pointIndex": int(point_index),
+                        "linePoint": dist_result.point_target.tolist(),
+                        "virtualPointHorizontal": u_proj.tolist(),
+                        "virtualPointVertical": v_proj.tolist(),
+                        "distanceDiagonal": float(dist_result.distance_3d),
+                        "distanceHorizontal": float(
+                            dist_result.distance_projection_u
+                        ),
+                        "distanceVertical": float(
+                            dist_result.distance_projection_v
+                        ),
+                    }
+                )
             except (ValueError, AttributeError) as e:
                 logger.error(
                     "Error formatting distance for obstacle %s point %s: %s",
-                    obstacle_name, point_index, e
+                    obstacle_name,
+                    point_index,
+                    e,
                 )
         if points:
-            result.append({
-                "obstacleUuid": obstacle_name,
-                "points": points,
-            })
+            result.append(
+                {
+                    "obstacleUuid": obstacle_name,
+                    "points": points,
+                }
+            )
     return result
 
 
-def get_exchange_studio(study, span, supports, insulators, obstacles, distances, vtl_under_chain, vtl_under_console, loads_coords, line_angle_rad, utilization_rate):
+def get_exchange_studio(
+    study,
+    span,
+    supports,
+    insulators,
+    obstacles,
+    distances,
+    vtl_under_chain,
+    vtl_under_console,
+    loads_coords,
+    line_angle_rad,
+    utilization_rate,
+):
     if span is None:
         raise GeneratedPointsNoneError(
             "Span data is None. Cannot proceed with coordinate extraction."
@@ -178,14 +220,20 @@ def get_exchange_studio(study, span, supports, insulators, obstacles, distances,
             "spans": to_serializable(span.coords),
             "supports": to_serializable(supports.coords),
             "insulators": to_serializable(insulators.coords),
-            "obstacles": to_serializable(obstacles.dict_coords()) if obstacles is not None else None,
-            "distances": to_serializable(distances) if distances is not None else None,
+            "obstacles": to_serializable(obstacles.dict_coords())
+            if obstacles is not None
+            else None,
+            "distances": to_serializable(distances)
+            if distances is not None
+            else None,
             "loads": to_serializable(loads_coords),
         },
         "output_parameters": {
             "line_angle": units(line_angle_rad, "rad").to("grad").m.tolist(),
             "vtl_under_chain": [v.value().tolist() for v in vtl_under_chain],
-            "vtl_under_console": [v.value().tolist() for v in vtl_under_console],
+            "vtl_under_console": [
+                v.value().tolist() for v in vtl_under_console
+            ],
             "r_under_chain": study.balance_engine.balance_model.vhl_under_chain()
             .R.value()
             .tolist(),
@@ -203,6 +251,3 @@ def get_exchange_studio(study, span, supports, insulators, obstacles, distances,
     result_spans = study.balance_engine.get_data_spans()
     result["output_parameters"].update(result_spans)
     return result
-
-
-
