@@ -780,8 +780,8 @@ describe('StudioPageComponent', () => {
 
     it('should truncate to 1 decimal place', () => {
       component.globalState.set('max_section');
-          plotService.litData.set({ output_parameters: { parameter: [123.4567] } });
-          expect(component.globalParameter()).toBe(123.4);
+      plotService.litData.set({ output_parameters: { parameter: [123.4567] } });
+      expect(component.globalParameter()).toBe(123.4);
     });
 
     it('should recompute when globalState changes', () => {
