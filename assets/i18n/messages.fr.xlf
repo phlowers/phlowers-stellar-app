@@ -4589,12 +4589,6 @@
         <target>Temp. de distance latérale</target>
       </segment>
     </unit>
-    <unit id="2317316038318402663">
-      <segment state="initial">
-        <source>Descriptive text — will be dynamic</source>
-        <target>Texte descriptif — sera dynamique</target>
-      </segment>
-    </unit>
     <unit id="2339143591612952577">
       <segment state="initial">
         <source>Conformity</source>

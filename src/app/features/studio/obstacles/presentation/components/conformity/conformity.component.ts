@@ -28,7 +28,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
-import { IconComponent } from '@src/app/shared/components/atoms/icon/icon.component';
+import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 
 @Component({
   selector: 'app-conformity',
@@ -233,25 +233,35 @@ export class ConformityComponent {
     { initialValue: null as number | null }
   );
 
-  private readonly lateralDistanceTemperatureDefault = toSignal(
+  private readonly lateralTemperatureConfig = toSignal(
     from(
-      (async (): Promise<number | null> => {
+      (async (): Promise<{ defaultTemp: number | null; message: string | null; ruleName: string | null }> => {
         const db = this.storageService.db;
-        if (!db) return null;
+        if (!db) return { defaultTemp: null, message: null, ruleName: null };
         const config = await db.catObstacleConformityConfig.get(OBSTACLE_CONFORMITY_CONFIG_KEY);
-        if (!config?.lateral_temperature_rule_type) return null;
+        const message = config?.lateral_temperature_message ?? null;
+        if (!config?.lateral_temperature_rule_type) return { defaultTemp: null, message, ruleName: null };
         const rule = await db.catObstacleRuleDefinitions.get(config.lateral_temperature_rule_type);
-        return rule?.lateral_point.temperature ?? null;
+        return { defaultTemp: rule?.lateral_point.temperature ?? null, message, ruleName: rule?.rule_name ?? null };
       })()
     ),
-    { initialValue: null as number | null }
+    {
+      initialValue: { defaultTemp: null, message: null, ruleName: null } as {
+        defaultTemp: number | null;
+        message: string | null;
+        ruleName: string | null;
+      }
+    }
   );
+
+  readonly lateralTemperatureHint = computed(() => this.lateralTemperatureConfig().message);
+  readonly lateralTemperatureRuleName = computed(() => this.lateralTemperatureConfig().ruleName);
 
   /** Async-loaded default values for the editable form fields. */
   private readonly defaults = computed(() => ({
     windZone: this.windZoneDefault(),
     repartitionTemperature: this.repartitionTemperatureDefault(),
-    lateralDistanceTemperature: this.lateralDistanceTemperatureDefault()
+    lateralDistanceTemperature: this.lateralTemperatureConfig().defaultTemp
   }));
 
   readonly windZoneOptions = computed(() => this.windZones().map((z) => ({ label: z.label, value: z.label })));

@@ -17,6 +17,7 @@ interface DbData {
     wind_zone_default: string | null;
     repartition_temperature_default: number | null;
     lateral_temperature_rule_type: string | null;
+    lateral_temperature_message: string | null;
   } | null;
   ruleDefinitions: {
     rule_type: string;
@@ -36,7 +37,8 @@ const defaultDbData = (): DbData => ({
   conformityConfig: {
     wind_zone_default: 'Z1',
     repartition_temperature_default: 15,
-    lateral_temperature_rule_type: 'rule_lat'
+    lateral_temperature_rule_type: 'rule_lat',
+    lateral_temperature_message: 'Temperature from lateral rule'
   },
   ruleDefinitions: [
     {
@@ -284,6 +286,62 @@ describe('ConformityComponent', () => {
       obstacle = { ...defaultObstacle(), referenceSupport: ReferenceSupport.LEFT };
       await createComponent();
       expect(component.referenceSupportLabel()).toBe('Support 1');
+    });
+  });
+
+  describe('lateral temperature config', () => {
+    it('should expose the rule name for the configured lateral temperature rule type', async () => {
+      await createComponent();
+      expect(component.lateralTemperatureRuleName()).toBe('Lat');
+    });
+
+    it('should expose null rule name when no lateral_temperature_rule_type is configured', async () => {
+      dbData.conformityConfig = { ...dbData.conformityConfig!, lateral_temperature_rule_type: null };
+      await createComponent();
+      expect(component.lateralTemperatureRuleName()).toBeNull();
+    });
+
+    it('should expose null rule name when no db is available', async () => {
+      dbData.conformityConfig = null;
+      await createComponent();
+      expect(component.lateralTemperatureRuleName()).toBeNull();
+    });
+
+    it('should expose the hint message from the conformity config', async () => {
+      await createComponent();
+      expect(component.lateralTemperatureHint()).toBe('Temperature from lateral rule');
+    });
+
+    it('should expose null hint when the config has no message', async () => {
+      dbData.conformityConfig = { ...dbData.conformityConfig!, lateral_temperature_message: null };
+      await createComponent();
+      expect(component.lateralTemperatureHint()).toBeNull();
+    });
+
+    it('should render the hint element with the config message', async () => {
+      await createComponent();
+      const hint = fixture.nativeElement.querySelector('#lateral-distance-hint') as HTMLElement | null;
+      expect(hint).toBeTruthy();
+      expect(hint!.textContent?.trim()).toBe('Temperature from lateral rule');
+    });
+
+    it('should not render the hint element when there is no message', async () => {
+      dbData.conformityConfig = { ...dbData.conformityConfig!, lateral_temperature_message: null };
+      await createComponent();
+      expect(fixture.nativeElement.querySelector('#lateral-distance-hint')).toBeNull();
+    });
+
+    it('should prefix the lateral temperature label with the rule name', async () => {
+      await createComponent();
+      const label = fixture.nativeElement.querySelector('label[for="lateralDistanceTemperature"]') as HTMLElement;
+      expect(label.textContent?.trim()).toContain('Lat');
+    });
+
+    it('should not add a prefix when no rule name is available', async () => {
+      dbData.conformityConfig = { ...dbData.conformityConfig!, lateral_temperature_rule_type: null };
+      await createComponent();
+      const label = fixture.nativeElement.querySelector('label[for="lateralDistanceTemperature"]') as HTMLElement;
+      expect(label.textContent?.trim()).not.toContain(' —');
     });
   });
 

@@ -142,7 +142,12 @@
     </div>
 
     <div class="form__lat-temp">
-      <label for="lateralDistanceTemperature" i18n>Lateral distance temperature</label>
+      <label for="lateralDistanceTemperature">
+        @if (lateralTemperatureRuleName()) {
+          {{ lateralTemperatureRuleName() }} —
+        }
+        <ng-container i18n>Lateral distance temperature</ng-container>
+      </label>
       <p-inputgroup>
         <input
           id="lateralDistanceTemperature"
@@ -152,7 +157,7 @@
           [attr.min]="BOUNDS.lateralDistanceTemperature.min"
           [attr.max]="BOUNDS.lateralDistanceTemperature.max"
           formControlName="lateralDistanceTemperature"
-          aria-describedby="lateral-distance-hint"
+          [attr.aria-describedby]="lateralTemperatureHint() ? 'lateral-distance-hint' : null"
           [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
           (input)="truncateTwoDecimals($event)"
@@ -160,7 +165,9 @@
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
-      <small id="lateral-distance-hint" i18n>Descriptive text — will be dynamic</small>
+      @if (lateralTemperatureHint()) {
+        <small id="lateral-distance-hint">{{ lateralTemperatureHint() }}</small>
+      }
       @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
         <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
           <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.min }}
