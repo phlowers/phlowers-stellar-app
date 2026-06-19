@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -100,6 +101,11 @@ export class ParameterCalculation15WithoutWindComponent {
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty)
     );
   });
+
+  truncate1Decimal(value: number | undefined | null): number | null {
+    if (value == null) return null;
+    return truncateNumberToOneDecimal(value);
+  }
 
   updateMeasureData<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     if (field === 'updateMode15C') {
@@ -191,7 +197,7 @@ export class ParameterCalculation15WithoutWindComponent {
     }
     this.initialConditionInput.update((d) => ({
       ...d,
-      base_parameters: baseParameter
+      base_parameters: truncateNumberToOneDecimal(baseParameter)
     }));
     this.initialConditionModalOpen.set(true);
   }

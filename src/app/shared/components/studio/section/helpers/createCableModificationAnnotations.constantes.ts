@@ -4,9 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { ANNOTATION_COLOR } from './studio-annotations.tokens';
 
-/** Color of the cable modification annotation (matches the loads palette). */
-export const CABLE_MOD_COLOR = '#4A355A';
+export { ANNOTATION_COLOR as CABLE_MOD_COLOR };
 
 /**
  * FontAwesome glyph for the cable modification annotation.
@@ -21,7 +21,7 @@ export const CABLE_MOD_ICON = '&#xe4ba;';
  * Kept at `0` (same as the load annotation) so the icon stays vertically
  * aligned with its anchor point on the cable polyline.
  */
-export const CABLE_MOD_AX_OFFSET = 0;
+export const CABLE_MOD_ARROW_X_OFFSET = 0;
 
 /**
  * Vertical pixel offset applied to the annotation's arrow tail (`ay`).
@@ -34,7 +34,7 @@ export const CABLE_MOD_AX_OFFSET = 0;
  * drawn by Plotly exactly like for the load annotation, giving a coherent
  * visual style.
  */
-export const CABLE_MOD_AY_OFFSET = -90;
+export const CABLE_MOD_ARROW_Y_OFFSET = -90;
 
 /**
  * Vertical pixel offset applied to the modification label

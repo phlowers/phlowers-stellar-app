@@ -42,7 +42,7 @@ jobs:
       - name: ⚙️ Install dependencies
         working-directory: stellar-engine
         run: |
-          uv sync --group all
+          uv sync --all-groups
 
       - name: ✔️ Check code style
         working-directory: stellar-engine

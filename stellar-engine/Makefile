@@ -7,7 +7,7 @@ sources = src test
 
 .PHONY: install  ## Install the package and dependencies for local development
 install: .uv
-	uv sync --frozen --group all --all-extras
+	uv sync --frozen --all-groups --all-extras
 
 .PHONY: rebuild-lockfiles  ## Rebuild lockfiles from scratch, updating all dependencies
 rebuild-lockfiles: .uv

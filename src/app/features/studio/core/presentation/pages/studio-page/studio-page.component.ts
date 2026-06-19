@@ -17,6 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { debounce, round } from 'lodash';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 import { StudiesService } from '@services/studies/studies.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
@@ -125,9 +126,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   ];
 
   globalState = signal<GlobalStateMode>('max_section');
-  globalParameter = computed<number | null>(() =>
-    this.resolveGlobalValue(this.plotService.litData()?.output_parameters.parameter)
-  );
+  globalParameter = computed<number | null>(() => {
+    const raw = this.resolveGlobalValue(this.plotService.litData()?.output_parameters.parameter);
+    return raw !== null ? truncateNumberToOneDecimal(raw) : null;
+  });
   globalStressRate = computed<number | null>(() =>
     this.resolveGlobalValue(this.plotService.litData()?.output_parameters.utilization_rate)
   );

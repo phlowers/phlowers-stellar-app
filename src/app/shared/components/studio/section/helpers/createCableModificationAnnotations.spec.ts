@@ -9,8 +9,8 @@ import type * as Plotly from 'plotly.js-dist-min';
 import { CableModification } from '@shared/domain';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
 import {
-  CABLE_MOD_AX_OFFSET,
-  CABLE_MOD_AY_OFFSET,
+  CABLE_MOD_ARROW_X_OFFSET,
+  CABLE_MOD_ARROW_Y_OFFSET,
   CABLE_MOD_ICON,
   CABLE_MOD_LABEL_Y_SHIFT,
   getCableModificationLabel
@@ -249,8 +249,8 @@ describe('createCableModificationAnnotations', () => {
       expect(icon.showarrow).toBe(true);
       expect(icon.arrowhead).toBe(0);
       expect(icon.arrowwidth).toBe(1);
-      expect(icon.ax).toBe(CABLE_MOD_AX_OFFSET);
-      expect(icon.ay).toBe(CABLE_MOD_AY_OFFSET);
+      expect(icon.ax).toBe(CABLE_MOD_ARROW_X_OFFSET);
+      expect(icon.ay).toBe(CABLE_MOD_ARROW_Y_OFFSET);
       expect(icon.captureevents).toBe(true);
     });
 
@@ -305,7 +305,7 @@ describe('createCableModificationAnnotations', () => {
       expect(label.captureevents).toBe(false);
       expect(label.yshift).toBe(CABLE_MOD_LABEL_Y_SHIFT);
       // |ay| = 90, label yshift = 110 → label sits above the icon.
-      expect((label.yshift as number) > Math.abs(CABLE_MOD_AY_OFFSET)).toBe(true);
+      expect((label.yshift as number) > Math.abs(CABLE_MOD_ARROW_Y_OFFSET)).toBe(true);
     });
 
     it('should anchor the label on the same data point as the icon', () => {

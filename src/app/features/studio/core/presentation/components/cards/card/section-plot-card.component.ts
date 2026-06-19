@@ -4,6 +4,7 @@ import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { round } from 'lodash';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 
@@ -84,6 +85,12 @@ export class SectionPlotCardComponent {
       return '-';
     }
     return round(value?.[this.index()], 2);
+  };
+
+  private readonly getParameterValue = (value: number[] | undefined): number | string => {
+    if (value === undefined) return '-';
+    const v = value[this.index()];
+    return v !== undefined ? truncateNumberToOneDecimal(v) : '-';
   };
 
   // Data structure for support type
@@ -229,7 +236,7 @@ export class SectionPlotCardComponent {
       },
       {
         label: $localize`Parameter:`,
-        value: this.getFormatedNumberIndex(parameter),
+        value: this.getParameterValue(parameter),
         unit: 'm'
       },
       {

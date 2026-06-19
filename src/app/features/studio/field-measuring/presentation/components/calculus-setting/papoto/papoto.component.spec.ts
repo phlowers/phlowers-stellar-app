@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -41,6 +42,7 @@ describe('Papoto component', () => {
     await TestBed.configureTestingModule({
       imports: [PapotoComponent],
       providers: [
+        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
@@ -527,6 +529,64 @@ describe('Papoto component', () => {
       const el = getByTestId('calculate-papoto-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+
+    describe('HTML rendering - result values truncation', () => {
+      beforeEach(async () => {
+        workerPythonServiceMock.runTask.mockResolvedValue({
+          result: {
+            parameter: 1.59,
+            parameter_1_2: 2.99,
+            parameter_2_3: 3.17,
+            parameter_1_3: 4.85,
+            checkValidity: true,
+            uncertainty: 0.5
+          },
+          error: null,
+          pythonErrorCode: null
+        });
+
+        component.updateField('leftSupport', '12');
+        component.updateField('spanLength', 100);
+        component.updateField('measuredElevationDifference', 5);
+        component.updateField('HL', 10);
+        component.updateField('H1', 20);
+        component.updateField('H2', 30);
+        component.updateField('H3', 40);
+        component.updateField('HR', 50);
+        component.updateField('VL', 15);
+        component.updateField('V1', 25);
+        component.updateField('V2', 35);
+        component.updateField('V3', 45);
+        component.updateField('VR', 55);
+
+        await component.calculatePapoto();
+        fixture.detectChanges();
+      });
+
+      it('should display parameter truncated to 1 decimal, not rounded (1.59 → 1.5)', () => {
+        const text = getByTestId('papoto-parameter')?.textContent?.trim();
+        expect(text).toContain('1.5');
+        expect(text).not.toContain('1.6');
+      });
+
+      it('should display parameter-1-2 truncated to 1 decimal, not rounded (2.99 → 2.9)', () => {
+        const text = getByTestId('papoto-parameter-1-2')?.textContent?.trim();
+        expect(text).toContain('2.9');
+        expect(text).not.toContain('3.0');
+      });
+
+      it('should display parameter-2-3 truncated to 1 decimal, not rounded (3.17 → 3.1)', () => {
+        const text = getByTestId('papoto-parameter-2-3')?.textContent?.trim();
+        expect(text).toContain('3.1');
+        expect(text).not.toContain('3.2');
+      });
+
+      it('should display parameter-1-3 truncated to 1 decimal, not rounded (4.85 → 4.8)', () => {
+        const text = getByTestId('papoto-parameter-1-3')?.textContent?.trim();
+        expect(text).toContain('4.8');
+        expect(text).not.toContain('4.9');
+      });
     });
   });
 });
