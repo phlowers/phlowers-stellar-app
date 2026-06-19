@@ -60,4 +60,8 @@ export class NotificationService {
   warning(detail: string, summary: string = $localize`Warning`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'warn', summary, detail, life });
   }
+
+  warningList(warnings: string[], summary: string = $localize`Warning`, life: number = DEFAULT_LIFE): void {
+    this.messageService.add({ key: 'warning-list', severity: 'warn', summary, data: { warnings }, life });
+  }
 }

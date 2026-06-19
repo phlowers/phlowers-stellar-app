@@ -1,11 +1,40 @@
+@use 'sass:map';
 @use 'abstract.extracts' as app;
 
 $_select-bgc: var(--primary-50);
 
 .p-multiselect.p-multiselect {
-  &:not(.p-disabled).p-focus {
-    @extend %focus-state;
-  }
+  --p-multiselect-disabled-background: var(--grey-0);
+
+  --p-multiselect-border-color: var(--grey-400);
+  --p-multiselect-hover-border-color: var(--grey-600);
+  --p-multiselect-invalid-border-color: var(--error-600);
+  --p-multiselect-focus-border-color: var(--primary-600);
+
+  --p-multiselect-color: var(--grey-900);
+  --p-multiselect-disabled-color: var(--grey-300);
+  --p-multiselect-placeholder-color: var(--grey-500);
+
+  --p-multiselect-shadow: #{map.get(app.$elevation, neutral-inner)};
+
+  --p-multiselect-padding-y: 0.375rem;
+  --p-multiselect-padding-x: 1rem;
+
+  --p-multiselect-border-radius: 0.25rem;
+
+  --p-multiselect-focus-ring-width: 0.0625rem;
+  --p-multiselect-focus-ring-style: solid;
+  --p-multiselect-focus-ring-color: var(--p-multiselect-focus-border-color);
+
+  --p-multiselect-option-focus-background: var(--primary-50);
+  --p-multiselect-option-selected-background: var(--secondary-50);
+  --p-multiselect-option-selected-focus-background: var(--tertiary-50);
+  --p-multiselect-option-color: var(--grey-900);
+  --p-multiselect-option-focus-color: var(--p-multiselect-option-color);
+  --p-multiselect-option-selected-color: var(--p-multiselect-option-color);
+  --p-multiselect-option-selected-focus-color: var(--p-multiselect-option-color);
+
+  @extend %text-m-400;
 
   // specif for studio top toolbar "display" multiselect
   &.toolbar-multiselect {
@@ -27,6 +56,10 @@ $_select-bgc: var(--primary-50);
 
     &:not(.p-focus):hover {
       background-color: var(--primary-50);
+    }
+
+    &:not(.p-disabled).p-focus {
+      @extend %focus-state;
     }
 
     .p-multiselect-label {
@@ -69,9 +102,7 @@ $_select-bgc: var(--primary-50);
     --p-multiselect-option-color: var(--star-dust-950);
     --p-multiselect-option-focus-color: var(--p-multiselect-option-color);
     --p-multiselect-option-selected-color: var(--p-multiselect-option-color);
-    --p-multiselect-option-selected-focus-color: var(
-      --p-multiselect-option-color
-    );
+    --p-multiselect-option-selected-focus-color: var(--p-multiselect-option-color);
     --p-multiselect-option-padding: 0.6875rem 0.625rem;
     --p-multiselect-option-border-radius: 0rem;
     --p-multiselect-option-gap: 0.625rem;

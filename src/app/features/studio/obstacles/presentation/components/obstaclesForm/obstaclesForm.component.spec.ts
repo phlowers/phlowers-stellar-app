@@ -7,6 +7,8 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { PlotService } from '@services/plot/plot.service';
+import { StorageService } from '@services/storage/storage.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { BehaviorSubject } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
@@ -27,6 +29,8 @@ class MockObstacleFormService {
   });
   isCalculatingObstacle = signal(false);
   calculationError = signal<string | null>(null);
+  // Consumed by the ConformityComponent rendered inside the conformity dialog.
+  formValue = signal<{ uuid: string | null; type: string | null }>({ uuid: null, type: 'House' });
 
   returnToSpan = vi.fn();
   resetFormForNewObstacle = vi.fn();
@@ -36,6 +40,7 @@ class MockObstacleFormService {
   saveObstacle = vi.fn();
   calculateAndSave = vi.fn();
   canCalculateAndSave = vi.fn(() => true);
+  saveConformityData = vi.fn().mockResolvedValue(undefined);
 
   constructor() {
     const fb = new FormBuilder();
@@ -71,6 +76,10 @@ describe('ObstaclesFormComponent', () => {
     setCurrentPointIndex: vi.Mock;
     resetCurrentPointIndex: vi.Mock;
   };
+  let mockStorageService: { db: unknown };
+  let mockNotificationService: { warningList: ReturnType<typeof vi.fn> };
+  /** Configurable count returned by the conformity-distance lookup in openConformityModal. */
+  let distanceCount: number;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -97,6 +106,31 @@ describe('ObstaclesFormComponent', () => {
       resetCurrentPointIndex: vi.fn()
     };
 
+    distanceCount = 0;
+    mockStorageService = {
+      db: {
+        catObstacleDistances: {
+          where: () => ({
+            equals: () => ({
+              count: () => Promise.resolve(distanceCount),
+              toArray: () => Promise.resolve([]),
+              filter: () => ({ toArray: () => Promise.resolve([]) })
+            })
+          })
+        },
+        catObstacleConfigurations: {
+          where: () => ({ equals: () => ({ first: () => Promise.resolve(null) }) })
+        },
+        catObstacleWindZones: { toArray: () => Promise.resolve([]) },
+        catObstacleConformityConfig: { get: () => Promise.resolve(null) },
+        catObstacleRuleDefinitions: {
+          get: () => Promise.resolve(null),
+          where: () => ({ anyOf: () => ({ toArray: () => Promise.resolve([]) }) })
+        }
+      }
+    };
+    mockNotificationService = { warningList: vi.fn() };
+
     await TestBed.configureTestingModule({
       imports: [ObstaclesFormComponent],
       providers: [
@@ -105,6 +139,8 @@ describe('ObstaclesFormComponent', () => {
         { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: PlotService, useValue: mockPlotService },
+        { provide: StorageService, useValue: mockStorageService },
+        { provide: NotificationService, useValue: mockNotificationService },
         {
           provide: ObstaclesService,
           useValue: {
@@ -232,10 +268,10 @@ describe('ObstaclesFormComponent', () => {
       expect(button?.tagName).toBe('BUTTON');
     });
 
-    it('should render the save-obstacle button as disabled', () => {
-      const button = getByTestId('save-obstacle') as HTMLButtonElement;
+    it('should render the open-conformity-modal (AT-CCGLA) button as enabled', () => {
+      const button = getByTestId('open-conformity-modal') as HTMLButtonElement;
       expect(button).toBeTruthy();
-      expect(button.disabled).toBe(true);
+      expect(button.disabled).toBe(false);
     });
 
     it('should render the calculate-save button', () => {
@@ -448,6 +484,8 @@ describe('ObstaclesFormComponent', () => {
             { provide: PlotOptionsService, useValue: mockPlotOptionsService },
             { provide: ObstacleFormService, useValue: mockObstacleFormService },
             { provide: PlotService, useValue: mockPlotService },
+            { provide: StorageService, useValue: mockStorageService },
+            { provide: NotificationService, useValue: mockNotificationService },
             {
               provide: ObstaclesService,
               useValue: {
@@ -858,18 +896,79 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
-  describe('save obstacle button (AT-CCGLA)', () => {
-    it('should always be disabled', () => {
-      const saveButton = getByTestId('save-obstacle') as HTMLButtonElement;
-      expect(saveButton.disabled).toBe(true);
+  describe('conformity modal (AT-CCGLA button)', () => {
+    /** Sets up the form/section so every openConformityModal precondition is satisfied. */
+    const satisfyAllConditions = () => {
+      mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
+      mockObstacleFormService.form.controls.type.setValue('House');
+      distanceCount = 1;
+      mockSpanService.section.mockReturnValue({ voltage_idr: '400 kV' });
+    };
+
+    it('should warn and keep the modal closed when the obstacle is not saved', async () => {
+      mockObstacleFormService.form.controls.uuid.setValue(null);
+      mockSpanService.section.mockReturnValue({ voltage_idr: '400 kV' });
+
+      await component.openConformityModal();
+
+      expect(mockNotificationService.warningList).toHaveBeenCalled();
+      const warnings = mockNotificationService.warningList.mock.calls[0][0] as string[];
+      expect(warnings.some((w) => w.includes('obstacle must be saved'))).toBe(true);
+      expect(component.isConformityModalOpen()).toBe(false);
     });
 
-    it('should call saveObstacle on click', () => {
-      const saveButton = getByTestId('save-obstacle') as HTMLButtonElement;
-      saveButton.disabled = false;
-      saveButton.click();
+    it('should warn when the obstacle type is not eligible for conformity control', async () => {
+      mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
+      mockObstacleFormService.form.controls.type.setValue('House');
+      distanceCount = 0;
+      mockSpanService.section.mockReturnValue({ voltage_idr: '400 kV' });
 
-      expect(mockObstacleFormService.saveObstacle).toHaveBeenCalled();
+      await component.openConformityModal();
+
+      const warnings = mockNotificationService.warningList.mock.calls[0][0] as string[];
+      expect(warnings.some((w) => w.includes('not eligible for conformity control'))).toBe(true);
+      expect(component.isConformityModalOpen()).toBe(false);
+    });
+
+    it('should warn when the study has no electric tension level', async () => {
+      mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
+      mockObstacleFormService.form.controls.type.setValue('House');
+      distanceCount = 1;
+      mockSpanService.section.mockReturnValue({ voltage_idr: null });
+
+      await component.openConformityModal();
+
+      const warnings = mockNotificationService.warningList.mock.calls[0][0] as string[];
+      expect(warnings.some((w) => w.includes('electric tension'))).toBe(true);
+      expect(component.isConformityModalOpen()).toBe(false);
+    });
+
+    it('should open the modal when every condition is met', async () => {
+      satisfyAllConditions();
+
+      await component.openConformityModal();
+
+      expect(mockNotificationService.warningList).not.toHaveBeenCalled();
+      expect(component.isConformityModalOpen()).toBe(true);
+    });
+
+    it('should call openConformityModal when the AT-CCGLA button is clicked', () => {
+      const spy = vi.spyOn(component, 'openConformityModal').mockResolvedValue();
+
+      (getByTestId('open-conformity-modal') as HTMLButtonElement).click();
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should render the conformity dialog with the embedded conformity component when open', async () => {
+      satisfyAllConditions();
+      await component.openConformityModal();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // The dialog uses appendTo="body", so its content is portalled onto the document body.
+      expect(document.body.querySelector('app-conformity')).toBeTruthy();
     });
   });
 
