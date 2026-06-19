@@ -8,6 +8,21 @@
  *
  * @category Domain Models
  */
+/**
+ * Conformity form inputs saved per obstacle.
+ * @category Domain Models
+ */
+export interface ConformityFormData {
+  /** Index of the obstacle point the conformity was computed for (null when the obstacle has a single point). */
+  selectedPoint: number | null;
+  windZone: string | null;
+  windMinus: boolean;
+  redZonePresence: boolean;
+  repartitionTemperature: number | null;
+  lateralDistanceTemperature: number | null;
+  conformity: string[] | null;
+}
+
 export interface Obstacle {
   /** Unique identifier (UUID v4) */
   uuid: string;
@@ -27,6 +42,8 @@ export interface Obstacle {
   lateralDistanceType: LateralDistanceType;
   /** Array of 3D positions defining the obstacle geometry */
   positions: Position3D[];
+  /** Conformity form inputs saved by the user, if any */
+  conformityData?: ConformityFormData;
 }
 
 /**

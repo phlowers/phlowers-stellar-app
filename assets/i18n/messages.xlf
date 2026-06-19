@@ -3724,5 +3724,190 @@
         <source>Guy wire angle / horizon</source>
       </segment>
     </unit>
+    <unit id="1201414142892298405">
+      <segment>
+        <source>Compliance altitude</source>
+      </segment>
+    </unit>
+    <unit id="1229787039708181341">
+      <segment>
+        <source>Repartition temperature</source>
+      </segment>
+    </unit>
+    <unit id="137059924767188115">
+      <segment>
+        <source>Altitude type</source>
+      </segment>
+    </unit>
+    <unit id="1568396875995490973">
+      <segment>
+        <source>Compliance line axis distance</source>
+      </segment>
+    </unit>
+    <unit id="1575196422905958981">
+      <segment>
+        <source>You cannot open conformity control because this condition is not met:</source>
+      </segment>
+    </unit>
+    <unit id="1785492126026495597">
+      <segment>
+        <source>Conformity data saved</source>
+      </segment>
+    </unit>
+    <unit id="1807809063557241428">
+      <segment>
+        <source>Conformity verifications</source>
+      </segment>
+    </unit>
+    <unit id="1342903161953298166">
+      <segment>
+        <source>obstacle type &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; is not eligible for conformity control</source>
+      </segment>
+    </unit>
+    <unit id="2297575749787201338">
+      <segment>
+        <source>Minimal distance</source>
+      </segment>
+    </unit>
+    <unit id="2339143591612952577">
+      <segment>
+        <source>Conformity</source>
+      </segment>
+    </unit>
+    <unit id="2399442081311807058">
+      <segment>
+        <source>Minimum distance case</source>
+      </segment>
+    </unit>
+    <unit id="2419808958151983208">
+      <segment>
+        <source>Conformity visualisation graph</source>
+      </segment>
+    </unit>
+    <unit id="3047963220990248978">
+      <segment>
+        <source>Cable altitude</source>
+      </segment>
+    </unit>
+    <unit id="3193184981487915181">
+      <segment>
+        <source>obstacle must be saved</source>
+      </segment>
+    </unit>
+    <unit id="3668170719391179933">
+      <segment>
+        <source>lateral</source>
+      </segment>
+    </unit>
+    <unit id="3670682073398879652">
+      <segment>
+        <source>Obstacle</source>
+      </segment>
+    </unit>
+    <unit id="4435527043283877614">
+      <segment>
+        <source> Calculate </source>
+      </segment>
+    </unit>
+    <unit id="4467323362722952678">
+      <segment>
+        <source>Unknown</source>
+      </segment>
+    </unit>
+    <unit id="5421185570364856791">
+      <segment>
+        <source>Conformity compliance</source>
+      </segment>
+    </unit>
+    <unit id="5898320484097450267">
+      <segment>
+        <source>Lateral distance temperature</source>
+      </segment>
+    </unit>
+    <unit id="6893187693198278087">
+      <segment>
+        <source>Wind -</source>
+      </segment>
+    </unit>
+    <unit id="6907807228975360219">
+      <segment>
+        <source>Form</source>
+      </segment>
+    </unit>
+    <unit id="70265843712811398">
+      <segment>
+        <source>Electric tension</source>
+      </segment>
+    </unit>
+    <unit id="7225473081974365390">
+      <segment>
+        <source>Wind zone</source>
+      </segment>
+    </unit>
+    <unit id="7590070052008368937">
+      <segment>
+        <source>study must have an electric tension level</source>
+      </segment>
+    </unit>
+    <unit id="7599650928095783912">
+      <segment>
+        <source>Reference support distance</source>
+      </segment>
+    </unit>
+    <unit id="7661959058031019968">
+      <segment>
+        <source>You cannot open conformity control because these conditions are not met:</source>
+      </segment>
+    </unit>
+    <unit id="7679521433679311585">
+      <segment>
+        <source>Cable line axis distance</source>
+      </segment>
+    </unit>
+    <unit id="7925563647330631528">
+      <segment>
+        <source>Distance to line axis</source>
+      </segment>
+    </unit>
+    <unit id="801483797442907700">
+      <segment>
+        <source>Obstacle&apos;s point</source>
+      </segment>
+    </unit>
+    <unit id="8061924564097350443">
+      <segment>
+        <source>Altitude point</source>
+      </segment>
+    </unit>
+    <unit id="8192548526458221470">
+      <segment>
+        <source>overhang</source>
+      </segment>
+    </unit>
+    <unit id="8650499415827640724">
+      <segment>
+        <source>Type</source>
+      </segment>
+    </unit>
+    <unit id="8661831245467238363">
+      <segment>
+        <source>Distance to comply</source>
+      </segment>
+    </unit>
+    <unit id="8953033926734869941">
+      <segment>
+        <source>Name</source>
+      </segment>
+    </unit>
+    <unit id="9118051921649505065">
+      <segment>
+        <source>Red zone presence</source>
+      </segment>
+    </unit>
+    <unit id="9128067536654850026">
+      <segment>
+        <source>Pan</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
