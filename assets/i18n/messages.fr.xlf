@@ -4493,5 +4493,227 @@
         <target>Page</target>
       </segment>
     </unit>
+    <unit id="1785492126026495597">
+      <segment state="initial">
+        <source>Conformity data saved</source>
+        <target>Données de conformité enregistrées</target>
+      </segment>
+    </unit>
+    <unit id="3670682073398879652">
+      <segment state="initial">
+        <source>Obstacle</source>
+        <target>Obstacle</target>
+      </segment>
+    </unit>
+    <unit id="801483797442907700">
+      <segment state="initial">
+        <source>Obstacle&apos;s point</source>
+        <target>Point de l&apos;obstacle</target>
+      </segment>
+    </unit>
+    <unit id="8953033926734869941">
+      <segment state="initial">
+        <source>Name</source>
+        <target>Nom</target>
+      </segment>
+    </unit>
+    <unit id="8650499415827640724">
+      <segment state="initial">
+        <source>Type</source>
+        <target>Type</target>
+      </segment>
+    </unit>
+    <unit id="137059924767188115">
+      <segment state="initial">
+        <source>Altitude type</source>
+        <target>Type d&apos;altitude d&apos;obstacle</target>
+      </segment>
+    </unit>
+    <unit id="8061924564097350443">
+      <segment state="initial">
+        <source>Altitude point</source>
+        <target>Altitude point</target>
+      </segment>
+    </unit>
+    <unit id="7599650928095783912">
+      <segment state="initial">
+        <source>Reference support distance</source>
+        <target>Distance au support référence</target>
+      </segment>
+    </unit>
+    <unit id="7925563647330631528">
+      <segment state="initial">
+        <source>Distance to line axis</source>
+        <target>Distance axe ligne</target>
+      </segment>
+    </unit>
+    <unit id="6907807228975360219">
+      <segment state="initial">
+        <source>Form</source>
+        <target>Formulaire</target>
+      </segment>
+    </unit>
+    <unit id="70265843712811398">
+      <segment state="initial">
+        <source>Electric tension</source>
+        <target>Tension électrique</target>
+      </segment>
+    </unit>
+    <unit id="7225473081974365390">
+      <segment state="initial">
+        <source>Wind zone</source>
+        <target>Zone de vent</target>
+      </segment>
+    </unit>
+    <unit id="6893187693198278087">
+      <segment state="initial">
+        <source>Wind -</source>
+        <target>Vent -</target>
+      </segment>
+    </unit>
+    <unit id="9118051921649505065">
+      <segment state="initial">
+        <source>Red zone presence</source>
+        <target>Présence de zone rouge</target>
+      </segment>
+    </unit>
+    <unit id="1229787039708181341">
+      <segment state="initial">
+        <source>Repartition temperature</source>
+        <target>Température de répartition</target>
+      </segment>
+    </unit>
+    <unit id="5898320484097450267">
+      <segment state="initial">
+        <source>Lateral distance temperature</source>
+        <target>Temp. de distance latérale</target>
+      </segment>
+    </unit>
+    <unit id="2339143591612952577">
+      <segment state="initial">
+        <source>Conformity</source>
+        <target>Conformité</target>
+      </segment>
+    </unit>
+    <unit id="4435527043283877614">
+      <segment state="initial">
+        <source> Calculate </source>
+        <target> Calculer </target>
+      </segment>
+    </unit>
+    <unit id="2419808958151983208">
+      <segment state="initial">
+        <source>Conformity visualisation graph</source>
+        <target>Graphique de visualisation de la conformité</target>
+      </segment>
+    </unit>
+    <unit id="8192548526458221470">
+      <segment state="initial">
+        <source>overhang</source>
+        <target>Surplomb</target>
+      </segment>
+    </unit>
+    <unit id="3668170719391179933">
+      <segment state="initial">
+        <source>lateral</source>
+        <target>Latéral</target>
+      </segment>
+    </unit>
+    <unit id="5421185570364856791">
+      <segment state="initial">
+        <source>Conformity compliance</source>
+        <target>Respect conformité</target>
+      </segment>
+    </unit>
+    <unit id="4467323362722952678">
+      <segment state="initial">
+        <source>Unknown</source>
+        <target>Inconnu</target>
+      </segment>
+    </unit>
+    <unit id="2399442081311807058">
+      <segment state="initial">
+        <source>Minimum distance case</source>
+        <target>Cas distance minimale</target>
+      </segment>
+    </unit>
+    <unit id="3047963220990248978">
+      <segment state="initial">
+        <source>Cable altitude</source>
+        <target>Altitude câble</target>
+      </segment>
+    </unit>
+    <unit id="7679521433679311585">
+      <segment state="initial">
+        <source>Cable line axis distance</source>
+        <target>Distance axe ligne câble</target>
+      </segment>
+    </unit>
+    <unit id="8661831245467238363">
+      <segment state="initial">
+        <source>Distance to comply</source>
+        <target>Distance à respecter</target>
+      </segment>
+    </unit>
+    <unit id="1201414142892298405">
+      <segment state="initial">
+        <source>Compliance altitude</source>
+        <target>Altitude à respecter</target>
+      </segment>
+    </unit>
+    <unit id="1568396875995490973">
+      <segment state="initial">
+        <source>Compliance line axis distance</source>
+        <target>Distance axe ligne respect</target>
+      </segment>
+    </unit>
+    <unit id="2297575749787201338">
+      <segment state="initial">
+        <source>Minimal distance</source>
+        <target>Distance mini</target>
+      </segment>
+    </unit>
+    <unit id="1807809063557241428">
+      <segment state="initial">
+        <source>Conformity verifications</source>
+        <target>Respect conformité</target>
+      </segment>
+    </unit>
+    <unit id="3193184981487915181">
+      <segment state="initial">
+        <source>obstacle must be saved</source>
+        <target>L&apos;obstacle doit être enregistré</target>
+      </segment>
+    </unit>
+    <unit id="1342903161953298166">
+      <segment state="initial">
+        <source>obstacle type &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; is not eligible for conformity control</source>
+        <target>Le type d&apos;obstacle &apos;<ph id="0" equiv="PH" disp="typeLabel"/>&apos; n&apos;est pas éligible au contrôle de conformité</target>
+      </segment>
+    </unit>
+    <unit id="7590070052008368937">
+      <segment state="initial">
+        <source>study must have an electric tension level</source>
+        <target>Le canton doit avoir un niveau de tension électrique</target>
+      </segment>
+    </unit>
+    <unit id="1575196422905958981">
+      <segment state="initial">
+        <source>You cannot open conformity control because this condition is not met:</source>
+        <target>Vous ne pouvez pas ouvrir le contrôle de conformité car cette condition n&apos;est pas remplie :</target>
+      </segment>
+    </unit>
+    <unit id="7661959058031019968">
+      <segment state="initial">
+        <source>You cannot open conformity control because these conditions are not met:</source>
+        <target>Vous ne pouvez pas ouvrir le contrôle de conformité car ces conditions ne sont pas remplies :</target>
+      </segment>
+    </unit>
+    <unit id="9128067536654850026">
+      <segment state="initial">
+        <source>Pan</source>
+        <target>Pan</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
