@@ -37,6 +37,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { MessageService } from 'primeng/api';
+import { Subject } from 'rxjs';
 
 // Mock child component
 @Component({
@@ -72,6 +73,7 @@ const mockMaintenanceService = {
 };
 
 const mockLinesService = {
+  imported$: new Subject<void>(),
   getLines: vi.fn().mockResolvedValue([] as CatalogLine[])
 };
 

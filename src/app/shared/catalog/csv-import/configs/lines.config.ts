@@ -24,7 +24,7 @@ export const mapLineRow = (item: LineCsvDto): CatalogLineEntity | null => {
     branch_id: item.branch_id || '',
     branch_idr: item.branch_idr || '',
     branch_adr: item.branch_adr || '',
-    voltage_idr: hasNoVoltage ? $localize`NO VOLTAGE` : item.voltage_idr,
+    voltage_idr: hasNoVoltage ? 'NO VOLTAGE' : item.voltage_idr,
     voltage_adr: hasNoVoltage ? 'NO_VOLTAGE' : item.voltage_adr
   };
 };

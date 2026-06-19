@@ -21,6 +21,7 @@ class MockMaintenanceService {
 
 class MockLinesService {
   ready = { next: vi.fn() };
+  imported$ = new Subject<void>();
   getLinesCount = vi.fn().mockResolvedValue(0);
   getLines = vi.fn().mockResolvedValue([]);
   importFromFile = vi.fn().mockResolvedValue(undefined);

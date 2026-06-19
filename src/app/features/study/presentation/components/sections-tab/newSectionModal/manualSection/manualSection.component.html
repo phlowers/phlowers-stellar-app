@@ -254,7 +254,14 @@
                 [filter]="true"
                 filterBy="voltage_idr"
                 data-testid="voltage-idr-select"
-              />
+              >
+                <ng-template pTemplate="item" let-opt>
+                  {{ opt.voltage_idr === 'NO VOLTAGE' ? noVoltageLabel : opt.voltage_idr }}
+                </ng-template>
+                <ng-template pTemplate="selectedItem" let-opt>
+                  {{ opt.voltage_idr === 'NO VOLTAGE' ? noVoltageLabel : opt.voltage_idr }}
+                </ng-template>
+              </p-select>
             </div>
             <div class="flex flex-col [grid-area:b]">
               <label for="linkName" i18n>Link - ID</label>
@@ -360,7 +367,7 @@
             <div class="[grid-area:a]">
               <dt i18n>Electric tension level</dt>
               <dd class="read-only-info">
-                {{ section().voltage_idr }}
+                {{ section().voltage_idr === 'NO VOLTAGE' ? noVoltageLabel : section().voltage_idr }}
               </dd>
             </div>
 

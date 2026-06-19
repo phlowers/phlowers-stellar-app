@@ -221,7 +221,10 @@ describe('ObstacleFormService', () => {
       activePointIndex: signal<number | null>(null),
       setCurrentPointIndex: vi.fn(),
       selectedObstacleUuid: signal<string | null>(null),
-      setSelectedObstacle: vi.fn()
+      setSelectedObstacle: vi.fn().mockImplementation((uuid: string | null, pointIndex: number | null) => {
+        mockObstaclesService.selectedObstacleUuid.set(uuid);
+        mockObstaclesService.activePointIndex.set(pointIndex);
+      })
     };
     mockSectionService = {
       createOrUpdateSection: vi.fn().mockResolvedValue(undefined)
@@ -819,8 +822,6 @@ describe('ObstacleFormService', () => {
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
-      // results is a computed — activePointIndex must be set so the lookup finds pointIndex 0
-      mockObstaclesService.activePointIndex.set(0);
 
       await service.calculateAndSave();
 
@@ -835,7 +836,6 @@ describe('ObstacleFormService', () => {
       const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
       mockSpanService.section.set(section);
       mockPlotService.study.set(mockStudy);
-      mockObstaclesService.activePointIndex.set(0);
 
       await service.calculateAndSave();
 
@@ -864,12 +864,66 @@ describe('ObstacleFormService', () => {
       ];
 
       mockObstacleStateService.distances.set(mockDistances);
-      service.form.patchValue({ uuid: 'existing-obs-uuid', name: 'Existing Obstacle' });
+      mockObstaclesService.selectedObstacleUuid.set('existing-obs-uuid');
       mockObstaclesService.activePointIndex.set(0);
 
       expect(service.results().oblique).toBe(100);
       expect(service.results().horizontal).toBe(50);
       expect(service.results().vertical).toBe(30);
+    });
+
+    it('should return distances for the second point of a multi-point obstacle', async () => {
+      // Python returns one Distance entry per point (not one entry with all points grouped),
+      // so results must search across all entries for the obstacle UUID.
+      const mockDistances: Distance[] = [
+        {
+          obstacleUuid: 'obs-multi',
+          points: [
+            {
+              pointIndex: 0,
+              linePoint: [1, 0, 0],
+              virtualPointHorizontal: [1, 1, 0],
+              virtualPointVertical: [1, 0, 1],
+              distanceDiagonal: 10,
+              distanceHorizontal: 3,
+              distanceVertical: 4
+            }
+          ]
+        },
+        {
+          obstacleUuid: 'obs-multi',
+          points: [
+            {
+              pointIndex: 1,
+              linePoint: [2, 0, 0],
+              virtualPointHorizontal: [2, 1, 0],
+              virtualPointVertical: [2, 0, 1],
+              distanceDiagonal: 20,
+              distanceHorizontal: 6,
+              distanceVertical: 8
+            }
+          ]
+        }
+      ];
+
+      mockObstacleStateService.calculateDistances.mockImplementation(async () => {
+        mockObstacleStateService.distances.set(mockDistances);
+      });
+
+      service.form.patchValue({ ...validFormBase, uuid: 'obs-multi', name: 'Multi Point' });
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      service.addPosition({ x: 4, y: 5, z: 6 });
+      const section = { ...mockSection, obstacles: [] as Obstacle[] } as Section;
+      mockSpanService.section.set(section);
+      mockPlotService.study.set(mockStudy);
+
+      await service.calculateAndSave();
+      // calculateAndSave calls setSelectedObstacle(uuid, lastPointIndex=1)
+      // the mock updates selectedObstacleUuid and activePointIndex accordingly
+
+      expect(service.results().oblique).toBe(20);
+      expect(service.results().horizontal).toBe(6);
+      expect(service.results().vertical).toBe(8);
     });
 
     it('should call obstacleStateService.addObstacle to update plot state after saving', async () => {

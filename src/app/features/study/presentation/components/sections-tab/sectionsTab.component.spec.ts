@@ -13,6 +13,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { Subject } from 'rxjs';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -22,6 +23,7 @@ class MockMaintenanceService {
 
 class MockLinesService {
   ready = { next: vi.fn() };
+  imported$ = new Subject<void>();
   getLinesCount = vi.fn().mockResolvedValue(0);
   getLines = vi.fn().mockResolvedValue([]);
   importFromFile = vi.fn().mockResolvedValue(undefined);
