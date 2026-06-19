@@ -86,6 +86,7 @@ interface PlotAnnotation {
   showarrow: boolean;
   arrowhead?: number;
   standoff?: number;
+  yshift?: number;
   font?: {
     color?: string;
     size?: number;
@@ -488,6 +489,7 @@ export class FreePositioningComponent implements OnDestroy {
           y: py,
           text: obstacleName,
           showarrow: false,
+          yshift: 12,
           font: { size: 10, color: 'black' }
         };
 
