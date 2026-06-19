@@ -19,7 +19,7 @@ describe('ScaleViewComponent', () => {
     setResolution: ReturnType<typeof vi.fn>;
     applyResolution: ReturnType<typeof vi.fn>;
   };
-  let plotOptionsServiceMock: { setAxesNorms: ReturnType<typeof vi.fn>; setBaseScaleFactors: ReturnType<typeof vi.fn> };
+  let plotOptionsServiceMock: { setScalingFactors: ReturnType<typeof vi.fn> };
   let mockPopover: { toggle: vi.Mock };
 
   beforeEach(async () => {
@@ -35,8 +35,7 @@ describe('ScaleViewComponent', () => {
       applyResolution: vi.fn().mockResolvedValue(undefined)
     };
     plotOptionsServiceMock = {
-      setAxesNorms: vi.fn(),
-      setBaseScaleFactors: vi.fn()
+      setScalingFactors: vi.fn()
     };
 
     mockPopover = { toggle: vi.fn() };
@@ -227,12 +226,12 @@ describe('ScaleViewComponent', () => {
     });
 
     describe('getScaleNorms — scale axis mapping', () => {
-      it('should call setAxesNorms with plan norms when scale is "plan"', async () => {
+      it('should call setScalingFactors with plan norms when scale is "plan"', async () => {
         component.formScaleView.get('scale')?.setValue('plan');
 
         await component.onValidate();
 
-        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith({
           x: 0.2,
           y: 1,
           z: 1,
@@ -240,25 +239,12 @@ describe('ScaleViewComponent', () => {
         });
       });
 
-      it('should call setBaseScaleFactors with plan norms when scale is "plan"', async () => {
-        component.formScaleView.get('scale')?.setValue('plan');
-
-        await component.onValidate();
-
-        expect(plotOptionsServiceMock.setBaseScaleFactors).toHaveBeenCalledWith({
-          x: 0.2,
-          y: 1,
-          z: 1,
-          aspectMode: 'manual'
-        });
-      });
-
-      it('should call setAxesNorms with geo norms when scale is "geo"', async () => {
+      it('should call setScalingFactors with geo norms when scale is "geo"', async () => {
         component.formScaleView.get('scale')?.setValue('geo');
 
         await component.onValidate();
 
-        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 1,
@@ -266,12 +252,12 @@ describe('ScaleViewComponent', () => {
         });
       });
 
-      it('should call setAxesNorms with celeste norms when scale is "celeste"', async () => {
+      it('should call setScalingFactors with celeste norms when scale is "celeste"', async () => {
         component.formScaleView.get('scale')?.setValue('celeste');
 
         await component.onValidate();
 
-        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 0.5,
@@ -279,12 +265,12 @@ describe('ScaleViewComponent', () => {
         });
       });
 
-      it('should call setAxesNorms with auto norms when scale is "auto"', async () => {
+      it('should call setScalingFactors with auto norms when scale is "auto"', async () => {
         component.formScaleView.get('scale')?.setValue('auto');
 
         await component.onValidate();
 
-        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 1,
@@ -297,7 +283,7 @@ describe('ScaleViewComponent', () => {
 
         await component.onValidate();
 
-        expect(plotOptionsServiceMock.setAxesNorms).toHaveBeenCalledWith({
+        expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith({
           x: 1,
           y: 1,
           z: 1,

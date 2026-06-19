@@ -11,7 +11,7 @@ import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.serv
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
-import { PythonErrorCode, TaskError } from '@core/services/worker_python/tasks/types';
+
 import Plotly from 'plotly.js-dist-min';
 
 vi.mock('@shared/components/studio/section/helpers/createPlotData');

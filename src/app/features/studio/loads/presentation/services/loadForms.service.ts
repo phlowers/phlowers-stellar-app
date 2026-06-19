@@ -8,7 +8,6 @@ import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { emptySpanLoad } from '../helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
-import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 @Injectable({
   providedIn: 'root'

@@ -404,8 +404,8 @@ describe('LoadFormsService', () => {
         ]
       } as Section);
       mockWorkerPythonService.runTask
-        .mockResolvedValueOnce({ result: { current: { id: 'after-change-state' }, base: null }, error: null })
-        .mockResolvedValueOnce({ result: { current: { id: 'after-cable-mod' }, base: null }, error: null });
+        .mockResolvedValueOnce({ result: { success: true }, error: null }) // changeState
+        .mockResolvedValueOnce({ result: { current: { id: 'after-cable-mod' }, base: null }, error: null }); // cableModification
 
       await service.calculateLoad();
 

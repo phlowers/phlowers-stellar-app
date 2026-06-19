@@ -67,8 +67,6 @@ export class ObstacleStateService {
     });
   }
 
-
-
   /**
    * Remove a single obstacle from the middleware state by UUID.
    *

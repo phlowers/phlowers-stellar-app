@@ -248,7 +248,8 @@ describe('SectionPlotComponent', () => {
     selectedDisplayOptions: selectedDisplayOptionsSignal,
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
-    axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
+    scalingFactors: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
+    aspectRatio: signal({ x: 1, y: 1, z: 1 }),
     refreshCamera: noopMock
   };
 

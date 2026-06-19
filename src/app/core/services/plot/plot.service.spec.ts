@@ -386,10 +386,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -434,10 +437,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -452,10 +458,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -466,11 +475,14 @@ describe('PlotService', () => {
         section: mockSection,
         cable: mockCable
       });
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.objectContaining({
-        startSupport: expect.any(Number),
-        endSupport: expect.any(Number),
-        view: expect.any(String)
-      }));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        Task.refreshProjection,
+        expect.objectContaining({
+          startSupport: expect.any(Number),
+          endSupport: expect.any(Number),
+          view: expect.any(String)
+        })
+      );
     });
 
     it('should set error when initLit task fails', async () => {
@@ -496,10 +508,13 @@ describe('PlotService', () => {
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
           loadingState = service.loading();
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -514,10 +529,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -528,34 +546,40 @@ describe('PlotService', () => {
     });
   });
 
-  describe('refreshSection', () => {
+  describe('refreshProjection', () => {
     beforeEach(() => {
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
     });
 
     it('should delegate to refreshProjection', async () => {
-      await service.refreshSection(mockSection);
+      await service.refreshProjection();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.objectContaining({
-        startSupport: expect.any(Number),
-        endSupport: expect.any(Number),
-        view: expect.any(String)
-      }));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        Task.refreshProjection,
+        expect.objectContaining({
+          startSupport: expect.any(Number),
+          endSupport: expect.any(Number),
+          view: expect.any(String)
+        })
+      );
     });
 
     it('should set litData with result when successful', async () => {
-      await service.refreshSection(mockSection);
+      await service.refreshProjection();
 
       expect(service.litData()).toEqual(mockGetSectionOutput);
     });
 
     it('should set loading to false after completion', async () => {
-      await service.refreshSection(mockSection);
+      await service.refreshProjection();
 
       expect(service.loading()).toBe(false);
     });
@@ -565,10 +589,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -589,10 +616,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -613,10 +643,13 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: null });
+          return Promise.resolve({ result: { success: true }, error: null });
         }
         if (task === Task.refreshProjection) {
-          return Promise.resolve({ result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] }, error: null });
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
         }
         return Promise.resolve({ result: null, error: null });
       });
@@ -1286,7 +1319,10 @@ describe('PlotService', () => {
 
       await service.refreshProjection();
 
-      expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalledWith(Task.addBulkObstacles, expect.anything());
+      expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalledWith(
+        Task.addBulkObstacles,
+        expect.anything()
+      );
     });
   });
 });

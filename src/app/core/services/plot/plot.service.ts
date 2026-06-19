@@ -2,13 +2,7 @@ import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
-import {
-  DataError,
-  GetSectionOutput,
-  PythonErrorCode,
-  Task,
-  TaskError
-} from '@services/worker_python/tasks/types';
+import { DataError, GetSectionOutput, PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
@@ -200,7 +194,10 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  private async updateAspectRatio(scalingFactors: { x: number; y: number; z: number }, plotOptions: PlotOptions): Promise<void> {
+  private async updateAspectRatio(
+    scalingFactors: { x: number; y: number; z: number },
+    plotOptions: PlotOptions
+  ): Promise<void> {
     const { result } = await this.workerPythonService.runTask(Task.getAspectRatio, {
       ...scalingFactors,
       startSupport: plotOptions.startSupport,

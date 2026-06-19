@@ -104,7 +104,10 @@ describe('createCableModificationAnnotations', () => {
 
     it('should ignore a modification whose span has no polyline', () => {
       const params = makePlotParams({
-        litData: { coords: { spans: [] }, output_parameters: { span_length: [], loads_coords: {} } } as unknown as CreatePlotParams['litData']
+        litData: {
+          coords: { spans: [] },
+          output_parameters: { span_length: [], loads_coords: {} }
+        } as unknown as CreatePlotParams['litData']
       });
       const annotations = createCableModificationAnnotations(params, [makeModification()], new Map([['span-1', 0]]));
       expect(annotations).toEqual([]);
@@ -112,7 +115,10 @@ describe('createCableModificationAnnotations', () => {
 
     it('should ignore a modification whose span polyline is empty', () => {
       const params = makePlotParams({
-        litData: { coords: { spans: [[]] }, output_parameters: { span_length: [0], loads_coords: {} } } as unknown as CreatePlotParams['litData']
+        litData: {
+          coords: { spans: [[]] },
+          output_parameters: { span_length: [0], loads_coords: {} }
+        } as unknown as CreatePlotParams['litData']
       });
       const annotations = createCableModificationAnnotations(params, [makeModification()], new Map([['span-1', 0]]));
       expect(annotations).toEqual([]);

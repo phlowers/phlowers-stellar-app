@@ -211,16 +211,16 @@ describe('createPlot', () => {
       createPlot({ ...createDefaultParams(), view: '2d', side: 'face' });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.yaxis.scaleratio).toBe(0.2);
+      expect(layoutArg.yaxis.scaleratio).toBe(1);
       expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
 
-    it('should configure yaxis with scaleratio from axesNorms for face side', () => {
+    it('should configure yaxis with scaleratio from scalingFactors for face side', () => {
       createPlot({
         ...createDefaultParams(),
         view: '2d',
         side: 'face',
-        axesNorms: { x: 1, y: 2, z: 4, aspectMode: 'manual' }
+        scalingFactors: { x: 1, y: 2, z: 4, aspectMode: 'manual' }
       });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
@@ -228,25 +228,25 @@ describe('createPlot', () => {
       expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
 
-    it('should configure yaxis without scaleratio and scaleanchor for profile side', () => {
+    it('should configure yaxis with scaleratio for profile side', () => {
       createPlot({ ...createDefaultParams(), view: '2d' });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.yaxis.scaleratio).toBeUndefined();
-      expect(layoutArg.yaxis.scaleanchor).toBeUndefined();
+      expect(layoutArg.yaxis.scaleratio).toBe(1);
+      expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
 
-    it('should configure yaxis without scaleratio and scaleanchor for profile side even when axesNorms is provided', () => {
+    it('should configure yaxis with scaleratio from scalingFactors for profile side', () => {
       createPlot({
         ...createDefaultParams(),
         view: '2d',
         side: 'profile',
-        axesNorms: { x: 1, y: 1, z: 30, aspectMode: 'manual' }
+        scalingFactors: { x: 1, y: 1, z: 30, aspectMode: 'manual' }
       });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.yaxis.scaleratio).toBeUndefined();
-      expect(layoutArg.yaxis.scaleanchor).toBeUndefined();
+      expect(layoutArg.yaxis.scaleratio).toBe(30);
+      expect(layoutArg.yaxis.scaleanchor).toBe('x');
     });
 
     it('should configure yaxis with common properties', () => {
@@ -289,7 +289,7 @@ describe('createPlot', () => {
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.xaxis.autorange).toBe(true);
-      expect(layoutArg.yaxis.scaleratio).toBe(0.2);
+      expect(layoutArg.yaxis.scaleratio).toBe(1);
     });
 
     it('should work with invert parameter set to true', () => {

@@ -361,10 +361,7 @@ export class ObstacleFormService {
       this.upsertObstacleInSection(obstacle);
 
       // 2. Register the current obstacle in Python worker
-      await this.obstacleStateService.addSingleObstacle(
-        obstacle,
-        this.plotOptionsService.plotOptions()
-      );
+      await this.obstacleStateService.addSingleObstacle(obstacle, this.plotOptionsService.plotOptions());
 
       // 3. Persist domain object to IndexedDB
       await this.saveSection();
