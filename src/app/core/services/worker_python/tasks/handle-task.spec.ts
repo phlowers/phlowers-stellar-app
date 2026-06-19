@@ -35,31 +35,6 @@ describe('Task handlers', () => {
   });
 
   describe('handleTask', () => {
-    it('should handle runTests task', async () => {
-      // Setup
-      const mockResult = { passed: 5, failed: 0 };
-      vi.spyOn(performance, 'now')
-        .mockReturnValueOnce(1000) // Start time
-        .mockReturnValueOnce(1500); // End time
-
-      const mockToJs = vi.fn().mockReturnValue(mockResult);
-      (mockPyodide.globals.get as vi.Mock)
-        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }))
-        .mockReturnValueOnce(undefined as never);
-
-      // Execute
-      const result = await handleTask(mockPyodide, Task.runTests, undefined);
-
-      // Verify
-      expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
-      expect(mockPyodide.loadPackage).toHaveBeenCalledWith(['pytest']);
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('run_tests');
-      expect(mockToJs).toHaveBeenCalledWith({
-        dict_converter: Object.fromEntries
-      });
-      expect(result).toEqual({ result: mockResult, runTime: 500, error: null, pythonErrorCode: null });
-    });
-
     it('should handle initLit task', async () => {
       // Setup
       const mockResult = {
@@ -95,14 +70,13 @@ describe('Task handlers', () => {
 
     it('should handle unknown task', async () => {
       // Setup
-      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
       const unknownTask = 'unknownTask' as Task;
 
       // Execute
       const result = await handleTask(mockPyodide, unknownTask, undefined);
 
       // Verify
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
       expect(result).toEqual({
         result: null,
         runTime: expect.any(Number),

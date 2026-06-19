@@ -7,11 +7,9 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
-from datetime import datetime
 
 from stellar_engine.core import pose_table, initialize_study
 from stellar_engine.data import geography
-from stellar_engine.entities import output
 from stellar_engine.tools import (
     guying,
     param_calibration,
@@ -30,7 +28,7 @@ from stellar_engine.pyodide_utils import js_to_python, default_converter
 
 # duplicate from functions.py
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("stellar-engine")
 LOG_INPUTS = True
 
 study: SectionStudy
@@ -98,11 +96,6 @@ def refresh_projection(js_inputs: dict):
     python_inputs = js_to_python(js_inputs)
     return plot_2d.refresh_projection(python_inputs, study, base_study)
 
-# @debug_log
-# def refresh_obstacles(js_inputs: dict):
-#     global study, base_study
-#     python_inputs = js_to_python(js_inputs)
-#     return plot_2d.refresh_obstacles(python_inputs, study, base_study)
 
 @debug_log
 def get_aspect_ratio(js_inputs):
@@ -122,7 +115,7 @@ def extract_obstacles_inputs(js_inputs):
     middle_span = get_section_middle_span(
         py_inputs["startSupport"], py_inputs["endSupport"]
     )
-    project = py_inputs["view"] == "2D"
+    project = py_inputs["view"] == "2d"
     return py_inputs["obstacles"], project, middle_span
 
 
@@ -131,17 +124,6 @@ def get_wind_incidence(js_inputs):
     python_inputs = js_to_python(js_inputs)
     return temperature.get_wind_attack_angle(python_inputs)
 
-
-@debug_log
-def add_obstacles(js_inputs):
-    logger.debug(f"js_inputs: {js_inputs.to_py()}")
-    obstacles, project, middle_span = extract_obstacles_inputs(js_inputs)
-    global study
-
-    study.position_engine.add_obstacles()
-    return obst.add_obstacles(
-        obstacles, study, support_index=middle_span
-    )
 
 @debug_log
 def add_bulk_obstacles(js_inputs):
@@ -188,28 +170,11 @@ def delete_obstacle(js_inputs):
 
 @debug_log
 def clear_obstacles():
-    # TODO: clear_obstacles currently has no inputs — it cannot determine view/span.
-    # This function needs to be refactored to accept inputs (startSupport, endSupport, view).
     global study
-    obst.add_obstacles([], study, project=True, support_index=0)
+    obst.clear_obstacles(study, project=True, support_index=0)
+
     return {"success": True}
 
-
-@debug_log
-def calculate_obstacles_distances(js_inputs):
-    global study
-    obstacles, project, middle_span = extract_obstacles_inputs(js_inputs)
-
-    logger.debug(f"js_inputs for distance calculation: {js_inputs.to_py()}")
-    result = obst.compute_distances(
-        inputs=obstacles,
-        project=project,
-        study=study,
-        support_index=middle_span,
-    )
-
-    logger.debug(f"Distances result: {result}")
-    return result
 
 
 @debug_log
@@ -245,7 +210,7 @@ def load_initialize_study(js_inputs):
     python_inputs = js_to_python(js_inputs)
 
     study, base_study = initialize_study(python_inputs)
-    print(f"Study initialized. Study: {study}, Base Study: {base_study}")
+    logger.debug(f"Study initialized. Study: {study}, Base Study: {base_study}")
     return {"success": True}
 
 

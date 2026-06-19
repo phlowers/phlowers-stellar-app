@@ -245,7 +245,7 @@ describe('WorkerService', () => {
     it('should post message to worker with task, inputs and id', async () => {
       service.setup();
 
-      const task = Task.runTests;
+      const task = Task.initLit;
       const inputs = undefined;
 
       const promise = service.runTask(task, inputs);
@@ -310,7 +310,7 @@ describe('WorkerService', () => {
     it('should generate unique id for each task', async () => {
       service.setup();
 
-      const task = Task.runTests;
+      const task = Task.initLit;
       const promise1 = service.runTask(task, undefined);
       const promise2 = service.runTask(task, undefined);
 

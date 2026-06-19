@@ -30,7 +30,11 @@ let pyodide: PyodideAPI;
  * then executes the bundled Python source files.
  * Posts `loadTime` and `importTime` messages back to the main thread.
  */
-console.debug('Loading pyodide...');
+const log = (level: 'debug' | 'error', message: string, details?: unknown): void => {
+  postMessage({ log: { level, message, details } });
+};
+
+log('debug', 'Loading pyodide...');
 try {
   const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
   const start = performance.now();
@@ -38,20 +42,21 @@ try {
     indexURL: self.name + 'pyodide/',
     packages: allPythonPackages
   });
-  console.debug('===> Pyodide loaded');
   const loadEnd = performance.now();
-  postMessage({ loadTime: loadEnd - start });
+  const loadTime = loadEnd - start;
+  postMessage({ loadTime });
+  log('debug', 'Pyodide loaded', loadTime);
   for (const file of pythonFiles) {
     const start = performance.now();
     const preview = getFirstLinePreview(file);
-    console.debug(`===> Running Python file: ${preview}`);
+    log('debug', `Running Python file: ${preview}`);
     await pyodide.runPython(file);
-    console.debug(`===> Finished running Python file: ${preview}`);
-    const end = performance.now();
-    console.debug(`===> Time to run ${preview}: ${end - start} ms`);
+    log('debug', `Finished running Python file: ${preview}`);
   }
   const importEnd = performance.now();
-  postMessage({ importTime: importEnd - loadEnd });
+  const importTime = importEnd - loadEnd;
+  log('debug', 'Python packages imported', importTime);
+  postMessage({ importTime });
 } catch (error) {
   postMessage({
     error: TaskError.PYODIDE_LOAD_ERROR,
@@ -65,7 +70,7 @@ try {
 
 addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[Task]; id: string } }) => {
   if (pyodide) {
-    handleTask(pyodide, data.task, data.inputs).then((result) => {
+    handleTask(pyodide, data.task, data.inputs, log).then((result) => {
       postMessage({
         ...result,
         id: data.id

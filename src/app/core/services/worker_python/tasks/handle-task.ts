@@ -18,10 +18,7 @@ const tasks: Record<
     externalPackages: string[];
   }
 > = {
-  [Task.runTests]: {
-    function: 'run_tests',
-    externalPackages: ['pytest']
-  },
+
   [Task.initLit]: {
     function: 'load_initialize_study',
     externalPackages: []
@@ -82,10 +79,6 @@ const tasks: Record<
     function: 'clear_obstacles',
     externalPackages: []
   },
-  [Task.calculateObstaclesDistances]: {
-    function: 'calculate_obstacles_distances',
-    externalPackages: []
-  },
   [Task.cableModification]: {
     function: 'cable_modification',
     externalPackages: []
@@ -134,7 +127,8 @@ const tasks: Record<
 export async function handleTask(
   pyodide: PyodideAPI,
   task: Task,
-  inputs: TaskInputs[Task]
+  inputs: TaskInputs[Task],
+  log?: (level: 'debug' | 'error', message: string, details?: unknown) => void
 ): Promise<{
   result: TaskOutputs[Task] | null;
   runTime: number;
@@ -154,10 +148,10 @@ export async function handleTask(
     }
     pyodide.globals.set('js_inputs', inputs);
 
-    console.debug(`Executing task: ${task}, triggering Python function: ${tasks[task].function}`);
+    log?.('debug', `Executing task: ${task}, triggering Python function: ${tasks[task].function}`);
     const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[Task]) => PyProxy;
     const result = inputs ? functionToRun(inputs) : functionToRun();
-    console.debug(`Task ${task} executed successfully, converting result to JS object`);
+    log?.('debug', `Task ${task} executed successfully, converting result to JS object`);
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
     result.destroy();
     return {
@@ -167,7 +161,7 @@ export async function handleTask(
       pythonErrorCode: null
     };
   } catch (error: unknown) {
-    console.error(error);
+    log?.('error', 'Task execution failed', error instanceof Error ? error.message : String(error));
     let errorType = TaskError.CALCULATION_ERROR;
     const errorMessage = error instanceof Error ? error.message : String(error);
     if (errorMessage.toLowerCase().includes('did not converge')) {

@@ -172,8 +172,8 @@ export class WorkerPythonService {
    * ```typescript
    * try {
    *   const { result, error } = await workerService.runTaskWithTimeout(
-   *     Task.calculateObstaclesDistances,
-   *     { obstacles, startSupport, endSupport, view },
+   *     Task.changeState,
+   *     { state: 'myState' },
    *     30000
    *   );
    *   if (!error) {

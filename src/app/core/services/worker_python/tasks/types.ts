@@ -20,8 +20,6 @@ import { PoseResults } from '@shared/domain/models/section.model';
  * @category Worker Types
  */
 export enum Task {
-  //  Run unit tests in Python environment
-  runTests = 'runTests',
   //  Initialize line geometry (LIT - Ligne Informatisée de Transport)
   initLit = 'initLit',
   // Change climate/load state and recalculate
@@ -52,8 +50,6 @@ export enum Task {
   deleteObstacle = 'deleteObstacle',
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
-  // calculate obstacles distances
-  calculateObstaclesDistances = 'calculateObstaclesDistances',
   /** Apply a cable length modification (lengthen or shorten) on a span */
   cableModification = 'cableModification',
   // get aspect ratio for plotting scale
@@ -262,8 +258,6 @@ export enum LogLevel {
 export interface TaskInputs {
   /** Inputs for initLit task: initialize the section study in the engine */
   [Task.initLit]: { section: Section; cable: CatalogCable; obstacles?: Obstacle[] };
-  /** Inputs for runTests task */
-  [Task.runTests]: undefined;
   /** Inputs for changeState task */
   [Task.changeState]: {
     climate: ClimateCharge;
@@ -360,13 +354,6 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  // Inputs for calculateObstaclesDistances task
-  [Task.calculateObstaclesDistances]: {
-    obstacles: Obstacle[];
-    startSupport: number;
-    endSupport: number;
-    view: View;
-  };
   /** Inputs for cableModification task */
   [Task.cableModification]: {
     spanIndex: number;
@@ -468,8 +455,6 @@ export interface Localization {
 export interface TaskOutputs {
   /** Output from initLit task: initialization acknowledgement */
   [Task.initLit]: { success: boolean };
-  /** Output from runTests task: test execution acknowledgement */
-  [Task.runTests]: { success: boolean };
   /** Output from changeState task: acknowledgement that state was changed in the engine */
   [Task.changeState]: { success: boolean };
   /** Output from refreshProjection task: reprojected geometry with optional base state */
@@ -526,8 +511,6 @@ export interface TaskOutputs {
   [Task.deleteObstacle]: { success: boolean };
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
-  // Output from calculateObstaclesDistances task
-  [Task.calculateObstaclesDistances]: Distance[];
   /** Output from cableModification task: recalculated geometry with optional base state */
   [Task.cableModification]: GetSectionWithBaseOutput;
   [Task.getAspectRatio]: {

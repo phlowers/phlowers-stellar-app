@@ -491,7 +491,7 @@ describe('PlotService', () => {
       mockCablesService.getCable.mockResolvedValue(mockCable);
       mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
         if (task === Task.initLit) {
-          return Promise.resolve({ result: undefined, error: taskError });
+          return Promise.resolve({ result: null, error: taskError });
         }
         return Promise.resolve({ result: null, error: null });
       });
