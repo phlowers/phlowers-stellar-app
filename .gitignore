@@ -54,11 +54,6 @@ copilot-skills.md
 
 *.ipynb
 
-public/data/chains.csv
-public/data/cables.csv
-public/data/maintenance-teams.csv
-public/data/lines.csv
-public/data/attachments.csv
 report-task.txt
 scripts/__pycache__/
 scripts/requirements-resolved.txt
@@ -87,4 +82,3 @@ test-results/
 # OIDC dev mock — personal claims file (contains user-specific test data)
 dev-mock/oidc-claims.json
 plan.md
-public/data/obstacle_configuration.json
