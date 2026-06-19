@@ -153,12 +153,13 @@ export class ObstaclesFormComponent {
     const warnings: string[] = [];
 
     const uuid = this.obstacleFormService.form.value.uuid;
-    if (!uuid) {
+    const isSaved = !!this.spanService.section()?.obstacles?.some((o) => o.uuid === uuid);
+    if (!isSaved) {
       warnings.push($localize`obstacle must be saved`);
     }
 
     const obstacleType = this.obstacleFormService.form.value.type;
-    if (uuid && obstacleType) {
+    if (isSaved && obstacleType) {
       const db = this.storageService.db;
       const distanceCount = db ? await db.catObstacleDistances.where('obstacle_type').equals(obstacleType).count() : 0;
       if (distanceCount === 0) {

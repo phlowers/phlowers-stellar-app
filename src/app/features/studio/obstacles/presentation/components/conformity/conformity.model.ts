@@ -4,6 +4,12 @@
  * only has one side). Drives the table rendering so the four near-identical value accessors and the
  * parallel units array can be replaced by a single `getValue(rule, key)` lookup.
  */
+export interface ConformityOption {
+  label: string;
+  value: string;
+  active: boolean;
+}
+
 export interface ResultRow {
   label: string;
   overhangKey: keyof ConformityRuleResult | null;

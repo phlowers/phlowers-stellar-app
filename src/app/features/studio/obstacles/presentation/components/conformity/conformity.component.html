@@ -12,6 +12,7 @@
           optionLabel="label"
           optionValue="value"
           fluid
+          data-testid="conformity-point-select"
         />
       </div>
     }
@@ -87,14 +88,15 @@
         optionLabel="label"
         optionValue="value"
         fluid
+        data-testid="conformity-wind-zone-select"
       />
 
       <div class="form__wind__checkboxes">
-        <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" />
+        <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" data-testid="conformity-wind-minus-checkbox" />
         <label for="windMinus" i18n>Wind -</label>
 
         @if (showRedZonePresence()) {
-          <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" />
+          <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" data-testid="conformity-red-zone-checkbox" />
           <label for="redZonePresence" i18n>Red zone presence</label>
         }
       </div>
@@ -114,6 +116,7 @@
           [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="repartitionTemperatureErrorId()"
           (input)="truncateTwoDecimals($event)"
+          data-testid="conformity-repartition-temperature-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
@@ -143,6 +146,7 @@
           [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
           (input)="truncateTwoDecimals($event)"
+          data-testid="conformity-lateral-temperature-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
@@ -169,6 +173,7 @@
         [filter]="false"
         [showToggleAll]="false"
         fluid
+        data-testid="conformity-type-multiselect"
       />
     </div>
   </fieldset>

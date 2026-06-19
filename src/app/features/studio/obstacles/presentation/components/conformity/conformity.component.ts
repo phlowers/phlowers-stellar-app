@@ -17,18 +17,12 @@ import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { CONFORMITY_BOUNDS } from './conformity.constantes';
-import { ConformityRuleResult, ResultRow } from './conformity.model';
+import { ConformityOption, ConformityRuleResult, ResultRow } from './conformity.model';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { IconComponent } from '@src/app/shared/components/atoms/icon/icon.component';
-
-interface ConformityOption {
-  label: string;
-  value: string;
-  active: boolean;
-}
 
 @Component({
   selector: 'app-conformity',
