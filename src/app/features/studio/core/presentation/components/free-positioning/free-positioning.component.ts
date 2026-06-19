@@ -25,8 +25,7 @@ import Plotly, { ModeBarButtonAny, PlotlyHTMLElement } from 'plotly.js-dist-min'
 import { Options } from '@angular-slider/ngx-slider';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
 import { Side } from '@shared/types/plot.types';
-import { GetSectionOutput, Task } from '@core/services/worker_python/tasks/types';
-import { WorkerPythonService } from '@core/services/worker_python/worker-python.service';
+import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -123,7 +122,6 @@ export class FreePositioningComponent implements OnDestroy {
   });
 
   // Dependencies
-  private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
@@ -170,58 +168,23 @@ export class FreePositioningComponent implements OnDestroy {
     this.destroyAllPlots();
     const startSupport = this.plotOptionsService.plotOptions().startSupport;
     this.isLoading.set(true);
-    const obstacle = this.obstacleFormService.buildObstacleFromForm();
-    const sectionObstacles = this.spanService.section()?.obstacles ?? [];
-    const allObstacles = sectionObstacles.some((o) => o.uuid === obstacle.uuid)
-      ? sectionObstacles.map((o) => (o.uuid === obstacle.uuid ? obstacle : o))
-      : [...sectionObstacles, obstacle];
-    const plotOptions = this.plotOptionsService.plotOptions();
-    const filteredObstacles = allObstacles.filter(
-      (o) => o.supportIndex >= plotOptions.startSupport && o.supportIndex < plotOptions.endSupport
-    );
+
     const currentLitData = this.plotService.litData();
     if (!currentLitData) {
       this.isLoading.set(false);
       return;
     }
 
-    const { error, pythonErrorCode } = await this.workerPythonService.runTask(Task.addBulkObstacles, {
-      obstacles: filteredObstacles,
-      startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport,
-      view: plotOptions.view
-    });
-
-    this.plotService.error.set(error);
-    this.plotService.pythonErrorCode.set(pythonErrorCode ?? null);
-
-    if (error) {
-      this.logger.warn('Unable to refresh free positioning plots after obstacle update.');
-      this.isLoading.set(false);
-      return;
-    }
-
-    const { result: projectionResult } = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport,
-      view: plotOptions.view
-    });
-
-    const updatedLitData: GetSectionOutput = {
-      ...currentLitData,
-      obstacles: projectionResult?.obstacles ?? []
-    };
-
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
       | ReferenceSupport
       | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
-    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(updatedLitData, referenceSupportIndex));
+    this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(currentLitData, referenceSupportIndex));
 
     const supports = this.spanService.section()?.supports ?? [];
     this.sharedYRange.set(null);
-    await this.createPlot(updatedLitData, startSupport, 'face', supports);
-    await this.createPlot(updatedLitData, startSupport, 'profile', supports);
+    await this.createPlot(currentLitData, startSupport, 'face', supports);
+    await this.createPlot(currentLitData, startSupport, 'profile', supports);
     this.synchronizeYAxisRanges();
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
@@ -458,6 +421,12 @@ export class FreePositioningComponent implements OnDestroy {
   }
 
   private getAnnotations(obstaclesPoints: Position3D[], side: Side): PlotAnnotation[] {
+    const formAnnotations = this.getFormPositionAnnotations(obstaclesPoints, side);
+    const existingAnnotations = this.getExistingObstacleAnnotations(side);
+    return [...existingAnnotations, ...formAnnotations];
+  }
+
+  private getFormPositionAnnotations(obstaclesPoints: Position3D[], side: Side): PlotAnnotation[] {
     const annotations: PlotAnnotation[] = [];
     obstaclesPoints.forEach((position, index) => {
       if (position.x === null || position.z === null) {
@@ -483,6 +452,48 @@ export class FreePositioningComponent implements OnDestroy {
       });
     });
     return annotations;
+  }
+
+  /**
+   * Creates annotations for existing obstacles from litData.obstacles.
+   * Renders each obstacle point as a marker with its name label.
+   * Coordinate mapping: profile → (x, z), face → (y, z).
+   */
+  private getExistingObstacleAnnotations(side: Side): PlotAnnotation[] {
+    const litData = this.plotService.litData();
+    if (!litData?.obstacles?.length) {
+      return [];
+    }
+
+    const sectionObstacles = this.spanService.section()?.obstacles ?? [];
+
+    return litData.obstacles.flatMap((litObstacle) => {
+      const domainObstacle = sectionObstacles.find((o) => o.uuid === litObstacle.uuid);
+      const obstacleName = domainObstacle?.name ?? litObstacle.uuid;
+
+      return litObstacle.points.flatMap(([cx, cy, cz]) => {
+        const px = side === 'face' ? cy : cx;
+        const py = cz;
+
+        const marker: PlotAnnotation = {
+          x: px,
+          y: py,
+          text: '\u25cf',
+          showarrow: false,
+          font: { size: 14, color: 'black' }
+        };
+
+        const label: PlotAnnotation = {
+          x: px,
+          y: py,
+          text: obstacleName,
+          showarrow: false,
+          font: { size: 10, color: 'black' }
+        };
+
+        return [marker, label];
+      });
+    });
   }
 
   /**

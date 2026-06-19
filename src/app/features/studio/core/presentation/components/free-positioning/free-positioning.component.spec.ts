@@ -736,15 +736,6 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should use left support altitude when referenceSupport is null', async () => {
-      const obstacleOutput = { obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3]] }] };
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: undefined,
-        error: null
-      });
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: obstacleOutput,
-        error: null
-      });
       litDataSignal.set(litDataWithTwoSupports);
       mockObstacleFormService.form.get('referenceSupport')?.setValue(null);
 
@@ -752,23 +743,11 @@ describe('FreePositioningComponent', () => {
       await flushDebounceAndMicrotasks();
 
       expect(component.referenceSupportAltitudeNgf()).toBe(100);
-      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
       expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(mockCreatePlotData.mock.calls[0][0]).toEqual({
-        ...litDataWithTwoSupports,
-        obstacles: obstacleOutput.obstacles
-      });
+      expect(mockCreatePlotData.mock.calls[0][0]).toEqual(litDataWithTwoSupports);
     });
 
     it('should use left support altitude when referenceSupport is LEFT', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: undefined,
-        error: null
-      });
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
-        error: null
-      });
       litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.LEFT
@@ -781,14 +760,6 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should use right support altitude when referenceSupport is RIGHT', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: undefined,
-        error: null
-      });
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
-        error: null
-      });
       litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
@@ -805,14 +776,6 @@ describe('FreePositioningComponent', () => {
         ...litDataWithTwoSupports,
         coords: { ...litDataWithTwoSupports.coords, supports: [[[10, 20, 100]]] }
       };
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: undefined,
-        error: null
-      });
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
-        error: null
-      });
       litDataSignal.set(litDataOnlyOneSupport);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
@@ -825,21 +788,14 @@ describe('FreePositioningComponent', () => {
       expect(component.referenceSupportAltitudeNgf()).toBe(0);
     });
 
-    it('should stop and expose worker errors without clearing litData', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: null,
-        error: TaskError.CALCULATION_ERROR,
-        pythonErrorCode: PythonErrorCode.SolverError
-      });
+    it('should not call worker tasks directly — uses litData from PlotService', async () => {
       litDataSignal.set(litDataWithTwoSupports);
 
       component.recreatePlots();
       await flushDebounceAndMicrotasks();
 
-      expect(mockPlotService.error()).toBe(TaskError.CALCULATION_ERROR);
-      expect(mockPlotService.pythonErrorCode()).toBe(PythonErrorCode.SolverError);
-      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
-      expect(mockCreatePlotData).not.toHaveBeenCalled();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      expect(mockCreatePlotData).toHaveBeenCalled();
       expect(component.isLoading()).toBe(false);
     });
   });

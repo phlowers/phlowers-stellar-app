@@ -159,7 +159,7 @@ export class LoadFormsService {
   /**
    * Reset the span load for the given support UUID to its empty state.
    */
-  deleteSpanLoad(supportUuid: string): void {
+  async deleteSpanLoad(supportUuid: string): Promise<void> {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     if (!temporaryLoadData) return;
 
@@ -168,16 +168,18 @@ export class LoadFormsService {
 
     const reset = { ...emptySpanLoad, supportUuid };
     Object.assign(spanLoad, reset);
+    await this.plotService.refreshProjection();
   }
 
   /**
    * Delete the load by deleting the charge case
    */
-  deleteLoad() {
+  async deleteLoad(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
     const chargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!studyUuid || !sectionUuid || !chargeUuid) return;
-    this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
+    await this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
+    await this.plotService.refreshProjection();
   }
 }
