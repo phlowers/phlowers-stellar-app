@@ -18,7 +18,6 @@ const tasks: Record<
     externalPackages: string[];
   }
 > = {
-
   [Task.initLit]: {
     function: 'load_initialize_study',
     externalPackages: []
