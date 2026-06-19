@@ -69,32 +69,39 @@ describe('createPlotData', () => {
 
     // Setup default mock parameters
     mockParams = {
-      supports: [[[1, 2, 3, 4, 5]]],
-      insulators: [[[10, 20, 30, 40, 50]]],
-      spans: [[[100, 200, 300, 400, 500]]],
-      line_angle: [],
-      vtl_under_chain: [],
-      vtl_under_console: [],
-      r_under_chain: [],
-      r_under_console: [],
-      ground_altitude: [],
-      load_angle: [],
-      displacement: [],
-      loads_coords: {},
-      span_length: [],
-      elevation: [],
-      parameter: [],
-      tension_sup: [],
-      tension_inf: [],
-      L0: [],
-      horizontal_distance: [],
-      arc_length: [],
-      T_h: [],
-      slope_left: [],
-      slope_right: [],
-      sag: [],
-      sag_s2: [],
-      utilization_rate: []
+      coords: {
+        supports: [[[1, 2, 3, 4, 5]]],
+        insulators: [[[10, 20, 30, 40, 50]]],
+        spans: [[[100, 200, 300, 400, 500]]],
+        obstacles: null,
+        distances: null,
+        loads: {}
+      },
+      output_parameters: {
+        line_angle: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
+        r_under_chain: [],
+        r_under_console: [],
+        ground_altitude: [],
+        load_angle: [],
+        displacement: [],
+        loads_coords: {},
+        span_length: [],
+        utilization_rate: [],
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: [],
+        slope_left: [],
+        slope_right: [],
+        sag: [],
+        sag_s2: []
+      }
     };
 
     mockOptions = {
@@ -152,7 +159,7 @@ describe('createPlotData', () => {
       const spansCall = calls.find((call) => call[3] === 'spans');
 
       expect(spansCall).toBeDefined();
-      expect(spansCall![0]).toEqual(mockParams.spans);
+      expect(spansCall![0]).toEqual(mockParams.coords.spans);
       expect(spansCall![1]).toBe(mockOptions.startSupport);
       expect(spansCall![2]).toBe(mockOptions.endSupport);
       expect(spansCall![4]).toBe(mockOptions.view);
@@ -166,7 +173,7 @@ describe('createPlotData', () => {
       const insulatorsCall = calls.find((call) => call[3] === 'insulators');
 
       expect(insulatorsCall).toBeDefined();
-      expect(insulatorsCall![0]).toEqual(mockParams.insulators);
+      expect(insulatorsCall![0]).toEqual(mockParams.coords.insulators);
       expect(insulatorsCall![1]).toBe(mockOptions.startSupport);
       expect(insulatorsCall![2]).toBe(mockOptions.endSupport);
       expect(insulatorsCall![4]).toBe(mockOptions.view);
@@ -180,7 +187,7 @@ describe('createPlotData', () => {
       const supportsCall = calls.find((call) => call[3] === 'supports');
 
       expect(supportsCall).toBeDefined();
-      expect(supportsCall![0]).toEqual(mockParams.supports);
+      expect(supportsCall![0]).toEqual(mockParams.coords.supports);
       expect(supportsCall![1]).toBe(mockOptions.startSupport);
       expect(supportsCall![2]).toBe(mockOptions.endSupport);
       expect(supportsCall![4]).toBe(mockOptions.view);
@@ -196,7 +203,7 @@ describe('createPlotData', () => {
       const spansCall = calls.find((call) => call[3] === 'spans');
 
       expect(spansCall).toBeDefined();
-      expect(spansCall![0]).toBe(mockParams.spans);
+      expect(spansCall![0]).toBe(mockParams.coords.spans);
       expect(spansCall![1]).toBe(mockOptions.startSupport);
       expect(spansCall![2]).toBe(mockOptions.endSupport);
       expect(spansCall![3]).toBe('spans');
@@ -211,7 +218,7 @@ describe('createPlotData', () => {
       const insulatorsCall = calls.find((call) => call[3] === 'insulators');
 
       expect(insulatorsCall).toBeDefined();
-      expect(insulatorsCall![0]).toBe(mockParams.insulators);
+      expect(insulatorsCall![0]).toBe(mockParams.coords.insulators);
       expect(insulatorsCall![1]).toBe(mockOptions.startSupport);
       expect(insulatorsCall![2]).toBe(mockOptions.endSupport);
       expect(insulatorsCall![3]).toBe('insulators');
@@ -226,7 +233,7 @@ describe('createPlotData', () => {
       const supportsCall = calls.find((call) => call[3] === 'supports');
 
       expect(supportsCall).toBeDefined();
-      expect(supportsCall![0]).toBe(mockParams.supports);
+      expect(supportsCall![0]).toBe(mockParams.coords.supports);
       expect(supportsCall![1]).toBe(mockOptions.startSupport);
       expect(supportsCall![2]).toBe(mockOptions.endSupport);
       expect(supportsCall![3]).toBe('supports');
@@ -238,32 +245,39 @@ describe('createPlotData', () => {
   describe('edge cases', () => {
     it('should handle empty arrays in input parameters', () => {
       const emptyParams: GetSectionOutput = {
-        supports: [],
-        insulators: [],
-        spans: [],
-        line_angle: [],
-        vtl_under_chain: [],
-        vtl_under_console: [],
-        r_under_chain: [],
-        r_under_console: [],
-        ground_altitude: [],
-        load_angle: [],
-        displacement: [],
-        loads_coords: {},
-        span_length: [],
-        elevation: [],
-        parameter: [],
-        tension_sup: [],
-        tension_inf: [],
-        L0: [],
-        horizontal_distance: [],
-        arc_length: [],
-        T_h: [],
-        slope_left: [],
-        slope_right: [],
-        sag: [],
-        sag_s2: [],
-        utilization_rate: []
+        coords: {
+          supports: [],
+          insulators: [],
+          spans: [],
+          obstacles: null,
+          distances: null,
+          loads: {}
+        },
+        output_parameters: {
+          line_angle: [],
+          vtl_under_chain: [],
+          vtl_under_console: [],
+          r_under_chain: [],
+          r_under_console: [],
+          ground_altitude: [],
+          load_angle: [],
+          displacement: [],
+          loads_coords: {},
+          span_length: [],
+          utilization_rate: [],
+          elevation: [],
+          parameter: [],
+          tension_sup: [],
+          tension_inf: [],
+          L0: [],
+          horizontal_distance: [],
+          arc_length: [],
+          T_h: [],
+          slope_left: [],
+          slope_right: [],
+          sag: [],
+          sag_s2: []
+        }
       };
 
       const result = createPlotData(emptyParams, mockOptions, mockSupports);

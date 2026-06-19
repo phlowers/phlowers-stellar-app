@@ -72,32 +72,39 @@ const mockSection: Section = {
 };
 
 const mockLitData: GetSectionOutput = {
-  supports: [],
-  insulators: [],
-  spans: [],
-  L0: [],
-  elevation: [],
-  line_angle: [],
-  vtl_under_chain: [],
-  vtl_under_console: [],
-  r_under_chain: [],
-  r_under_console: [],
-  ground_altitude: [],
-  load_angle: [],
-  displacement: [],
-  span_length: [],
-  loads_coords: {},
-  parameter: [],
-  tension_sup: [],
-  tension_inf: [],
-  horizontal_distance: [],
-  arc_length: [],
-  T_h: [],
-  slope_left: [],
-  slope_right: [],
-  sag: [],
-  sag_s2: [],
-  utilization_rate: []
+  coords: {
+    supports: [],
+    insulators: [],
+    spans: [],
+    obstacles: null,
+    distances: null,
+    loads: {}
+  },
+  output_parameters: {
+    line_angle: [],
+    vtl_under_chain: [],
+    vtl_under_console: [],
+    r_under_chain: [],
+    r_under_console: [],
+    ground_altitude: [],
+    load_angle: [],
+    displacement: [],
+    loads_coords: {},
+    span_length: [],
+    utilization_rate: [],
+    elevation: [],
+    parameter: [],
+    tension_sup: [],
+    tension_inf: [],
+    L0: [],
+    horizontal_distance: [],
+    arc_length: [],
+    T_h: [],
+    slope_left: [],
+    slope_right: [],
+    sag: [],
+    sag_s2: []
+  }
 };
 
 describe('StudioComponent', () => {
@@ -110,6 +117,7 @@ describe('StudioComponent', () => {
     loading: WritableSignal<boolean>;
     workerReady: WritableSignal<boolean>;
     refreshSection: ReturnType<typeof vi.fn>;
+    initSectionStudio: ReturnType<typeof vi.fn>;
   };
   let mockNotificationService: { error: ReturnType<typeof vi.fn> };
   let mockSpanService: {
@@ -123,7 +131,8 @@ describe('StudioComponent', () => {
       litData: signal<GetSectionOutput | null>(null),
       loading: signal<boolean>(false),
       workerReady: signal<boolean>(false),
-      refreshSection: vi.fn()
+      refreshSection: vi.fn(),
+      initSectionStudio: vi.fn()
     };
     mockNotificationService = { error: vi.fn() };
     mockSpanService = {
@@ -210,55 +219,55 @@ describe('StudioComponent', () => {
   });
 
   describe('Effect – preview refresh', () => {
-    it('should not call refreshSection when isPreview is false', () => {
+    it('should not call initSectionStudio when isPreview is false', () => {
       mockPlotService.workerReady.set(true);
       mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', false);
       fixture.detectChanges();
 
-      expect(mockPlotService.refreshSection).not.toHaveBeenCalled();
+      expect(mockPlotService.initSectionStudio).not.toHaveBeenCalled();
     });
 
-    it('should not call refreshSection when worker is not ready', () => {
+    it('should not call initSectionStudio when worker is not ready', () => {
       mockPlotService.workerReady.set(false);
       mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
-      expect(mockPlotService.refreshSection).not.toHaveBeenCalled();
+      expect(mockPlotService.initSectionStudio).not.toHaveBeenCalled();
     });
 
-    it('should not call refreshSection when section is null', () => {
+    it('should not call initSectionStudio when section is null', () => {
       mockPlotService.workerReady.set(true);
       mockSpanService.section.set(null);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
-      expect(mockPlotService.refreshSection).not.toHaveBeenCalled();
+      expect(mockPlotService.initSectionStudio).not.toHaveBeenCalled();
     });
 
-    it('should call refreshSection when all conditions are met', () => {
+    it('should call initSectionStudio when all conditions are met', () => {
       mockPlotService.workerReady.set(true);
       mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
-      expect(mockPlotService.refreshSection).toHaveBeenCalledWith(mockSection);
+      expect(mockPlotService.initSectionStudio).toHaveBeenCalledWith(mockSection);
     });
 
-    it('should call refreshSection again when section changes', () => {
+    it('should call initSectionStudio again when section changes', () => {
       mockPlotService.workerReady.set(true);
       mockSpanService.section.set(mockSection);
       fixture.componentRef.setInput('isPreview', true);
       fixture.detectChanges();
 
-      mockPlotService.refreshSection.mockClear();
+      mockPlotService.initSectionStudio.mockClear();
 
       const anotherSection = { ...mockSection, uuid: 'sec-2', name: 'Section 2' };
       mockSpanService.section.set(anotherSection);
       fixture.detectChanges();
 
-      expect(mockPlotService.refreshSection).toHaveBeenCalledWith(anotherSection);
+      expect(mockPlotService.initSectionStudio).toHaveBeenCalledWith(anotherSection);
     });
   });
 

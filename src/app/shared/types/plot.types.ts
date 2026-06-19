@@ -59,10 +59,17 @@ export interface SelectedDisplayOptions {
   baseState: boolean;
 }
 
-/** Normalization factors for the plot axes and Plotly aspect mode. */
-export interface AxesNorms {
+/** User-controlled scaling factors per axis and Plotly aspect mode. Used as input to getAspectRatio and for 2D scaleratio. */
+export interface ScalingFactors {
   x: number;
   y: number;
   z: number;
   aspectMode: string;
+}
+
+/** Computed aspect ratio from Python's compute_aspect_ratio. Used for 3D Plotly aspectratio/aspectmode. */
+export interface AspectRatio {
+  x: number;
+  y: number;
+  z: number;
 }

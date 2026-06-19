@@ -6,54 +6,58 @@
 
 import logging
 
-from mechaphlowers import BalanceEngine, PlotEngine
-
-import stellar_engine.plot.obstacles as obst
-from stellar_engine.entities.output import (
-    get_coordinates,
-    get_section_middle_span,
+from mechaphlowers import (
+    SectionStudy,
 )
 
-logger = logging.getLogger("mechaphlowers")
+from stellar_engine.entities.output import (
+    get_coordinates,
+)
+from stellar_engine.utils import make_debug_log
+
+logger = logging.getLogger("stellar_engine")
+
+debug_log = make_debug_log(logger, prefix="refresh")
 
 
 # ideally refresh_projection should only return the new coordinates,
 # not the whole sectionOutput, that also contains vhl and other data that do not change
+
+
+@debug_log
 def refresh_projection(
     inputs: dict,
-    balance_engine: BalanceEngine,
-    plot_engine: PlotEngine,
-    base_plt_line: PlotEngine,
+    study: SectionStudy,
+    base_study: SectionStudy | None = None,
 ):
-    logger.debug("===> refresh_projection triggered")
     start_support = inputs["startSupport"]
     end_support = inputs["endSupport"]
     view = inputs["view"]
     project = view == "2d"
 
+    return get_states_coordinates(
+        study, base_study, start_support, end_support, project
+    )
+
+
+def get_states_coordinates(
+    study, base_study, start_support, end_support, project
+):
     current_coords = get_coordinates(
-        balance_engine, plot_engine, project, start_support, end_support
+        study, project, start_support, end_support
     )
     base_coords = (
-        get_coordinates(
-            balance_engine, base_plt_line, project, start_support, end_support
-        )
-        if base_plt_line
+        get_coordinates(base_study, project, start_support, end_support)
+        if base_study
         else None
     )
-    middle_span = get_section_middle_span(start_support, end_support)
-    obstacles = obst.get_current_obstacles(
-        plot_engine, project=project, support_index=middle_span
-    )
+
+    # Extract formatted obstacles/distances computed before serialization
+    obstacles = current_coords.pop("obstacles_formatted", [])
+    distances = current_coords.pop("distances_formatted", [])
 
     return {
         "sectionOutput": {"current": current_coords, "base": base_coords},
         "obstacles": obstacles,
-        "distances": obst.compute_distances(
-            # inputs=obstacles,
-            inputs={},  # currently unused
-            project=project,
-            plot_engine=plot_engine,
-            support_index=middle_span,
-        ),
+        "distances": distances,
     }

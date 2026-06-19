@@ -438,3 +438,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Delete `obstacle-type-csv.dto.ts` and remove the re-export line in `infrastructure/dto/index.ts`. |
 | ✅ Validated | ⏳ PENDING — proposed on 2026-06-05 |
+
+---
+
+## 33. `applyObstacleOutputToLitData` + obstacle rendering from registration tasks
+
+| | |
+|---|---|
+| 📍 Source | `obstaclesForm.service.ts` (method removed), `plot.service.ts` (syncedOutput usage removed), `loadForms.service.ts` (syncedOutput usage removed) |
+| Code | `applyObstacleOutputToLitData(obstacleOutput)` — merged `ObstacleOutput.obstacles` into `litData` after `addBulkObstacles`/`addSingleObstacle`/`syncObstacles` calls |
+| 🔍 Evidence | Obstacle registration tasks (`addBulkObstacles`, `addSingleObstacle`, `deleteObstacle`, `clearObstacles`) now return `undefined` — they only register in the engine. Obstacle 3D rendering coordinates are obtained via `refreshProjection` instead. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Already removed. `ObstacleOutput` interface kept for `refreshProjection` output. |
+| ✅ Validated | 🗑️ REMOVED — 2026-06-17 |

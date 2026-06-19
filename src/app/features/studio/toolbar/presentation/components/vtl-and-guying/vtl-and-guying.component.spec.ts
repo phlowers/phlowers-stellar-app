@@ -51,12 +51,14 @@ describe('VhlAndGuyingComponent', () => {
 
   beforeEach(async () => {
     const mockLitData = {
-      vtl_under_chain: [
-        [10, 20],
-        [15, 25],
-        [5, 10]
-      ],
-      r_under_chain: [30, 40, 20]
+      output_parameters: {
+        vtl_under_chain: [
+          [10, 20],
+          [15, 25],
+          [5, 10]
+        ],
+        r_under_chain: [30, 40, 20]
+      }
     };
 
     const mockSection = {

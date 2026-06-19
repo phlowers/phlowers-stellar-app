@@ -11,7 +11,7 @@ import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.serv
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
-import { PythonErrorCode, TaskError } from '@core/services/worker_python/tasks/types';
+
 import Plotly from 'plotly.js-dist-min';
 
 vi.mock('@shared/components/studio/section/helpers/createPlotData');
@@ -77,34 +77,8 @@ describe('FreePositioningComponent', () => {
 
   const mockWorkerPythonService = {
     runTask: vi.fn().mockResolvedValue({
-      result: {
-        supports: [[[1, 2, 3]]],
-        insulators: [[[10, 20, 30]]],
-        spans: [[[100, 200, 300]]],
-        L0: [],
-        elevation: [],
-        line_angle: [],
-        vtl_under_chain: [],
-        vtl_under_console: [],
-        r_under_chain: [],
-        r_under_console: [],
-        ground_altitude: [],
-        load_angle: [],
-        displacement: [],
-        span_length: [],
-        loads_coords: {},
-        parameter: [],
-        tension_sup: [],
-        tension_inf: [],
-        horizontal_distance: [],
-        arc_length: [],
-        T_h: [],
-        slope_left: [],
-        slope_right: [],
-        sag: [],
-        sag_s2: [],
-        utilization_rate: []
-      }
+      result: { obstacles: [] },
+      error: null
     })
   };
 
@@ -443,32 +417,39 @@ describe('FreePositioningComponent', () => {
 
   describe('createPlot', () => {
     const mockLitData = {
-      supports: [[[1, 2, 3]]],
-      insulators: [[[10, 20, 30]]],
-      spans: [[[100, 200, 300]]],
-      L0: [],
-      elevation: [],
-      line_angle: [],
-      vtl_under_chain: [],
-      vtl_under_console: [],
-      r_under_chain: [],
-      r_under_console: [],
-      ground_altitude: [],
-      load_angle: [],
-      displacement: [],
-      span_length: [],
-      loads_coords: {},
-      parameter: [],
-      tension_sup: [],
-      tension_inf: [],
-      horizontal_distance: [],
-      arc_length: [],
-      T_h: [],
-      slope_left: [],
-      slope_right: [],
-      sag: [],
-      sag_s2: [],
-      utilization_rate: []
+      coords: {
+        supports: [[[1, 2, 3]]],
+        insulators: [[[10, 20, 30]]],
+        spans: [[[100, 200, 300]]],
+        obstacles: null,
+        distances: null,
+        loads: {}
+      },
+      output_parameters: {
+        line_angle: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
+        r_under_chain: [],
+        r_under_console: [],
+        ground_altitude: [],
+        load_angle: [],
+        displacement: [],
+        loads_coords: {},
+        span_length: [],
+        utilization_rate: [],
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: [],
+        slope_left: [],
+        slope_right: [],
+        sag: [],
+        sag_s2: []
+      }
     };
 
     it('should return early when litData is null', async () => {
@@ -700,32 +681,39 @@ describe('FreePositioningComponent', () => {
     //   support 0 (left)  → altitude 100  (first point [x, y, z=100])
     //   support 1 (right) → altitude 250  (first point [x, y, z=250])
     const litDataWithTwoSupports = {
-      supports: [[[10, 20, 100]], [[30, 40, 250]]],
-      insulators: [[[0, 0, 0]]],
-      spans: [[[0, 0, 0]]],
-      L0: [],
-      elevation: [],
-      line_angle: [],
-      vtl_under_chain: [],
-      vtl_under_console: [],
-      r_under_chain: [],
-      r_under_console: [],
-      ground_altitude: [],
-      load_angle: [],
-      displacement: [],
-      span_length: [],
-      loads_coords: {},
-      parameter: [],
-      tension_sup: [],
-      tension_inf: [],
-      horizontal_distance: [],
-      arc_length: [],
-      T_h: [],
-      slope_left: [],
-      slope_right: [],
-      sag: [],
-      sag_s2: [],
-      utilization_rate: []
+      coords: {
+        supports: [[[10, 20, 100]], [[30, 40, 250]]],
+        insulators: [[[0, 0, 0]]],
+        spans: [[[0, 0, 0]]],
+        obstacles: null,
+        distances: null,
+        loads: {}
+      },
+      output_parameters: {
+        line_angle: [],
+        vtl_under_chain: [],
+        vtl_under_console: [],
+        r_under_chain: [],
+        r_under_console: [],
+        ground_altitude: [],
+        load_angle: [],
+        displacement: [],
+        loads_coords: {},
+        span_length: [],
+        utilization_rate: [],
+        elevation: [],
+        parameter: [],
+        tension_sup: [],
+        tension_inf: [],
+        L0: [],
+        horizontal_distance: [],
+        arc_length: [],
+        T_h: [],
+        slope_left: [],
+        slope_right: [],
+        sag: [],
+        sag_s2: []
+      }
     };
 
     const flushDebounceAndMicrotasks = async () => {
@@ -748,11 +736,6 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should use left support altitude when referenceSupport is null', async () => {
-      const obstacleOutput = { obstacles: [{ uuid: 'obs-1', points: [[1, 2, 3]] }] };
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: obstacleOutput,
-        error: null
-      });
       litDataSignal.set(litDataWithTwoSupports);
       mockObstacleFormService.form.get('referenceSupport')?.setValue(null);
 
@@ -760,19 +743,11 @@ describe('FreePositioningComponent', () => {
       await flushDebounceAndMicrotasks();
 
       expect(component.referenceSupportAltitudeNgf()).toBe(100);
-      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
       expect(mockCreatePlotData).toHaveBeenCalled();
-      expect(mockCreatePlotData.mock.calls[0][0]).toEqual({
-        ...litDataWithTwoSupports,
-        obstacles: obstacleOutput.obstacles
-      });
+      expect(mockCreatePlotData.mock.calls[0][0]).toEqual(litDataWithTwoSupports);
     });
 
     it('should use left support altitude when referenceSupport is LEFT', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
-        error: null
-      });
       litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.LEFT
@@ -785,10 +760,6 @@ describe('FreePositioningComponent', () => {
     });
 
     it('should use right support altitude when referenceSupport is RIGHT', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
-        error: null
-      });
       litDataSignal.set(litDataWithTwoSupports);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
@@ -803,12 +774,8 @@ describe('FreePositioningComponent', () => {
     it('should fall back to 0 when right support data is missing', async () => {
       const litDataOnlyOneSupport = {
         ...litDataWithTwoSupports,
-        supports: [[[10, 20, 100]]]
+        coords: { ...litDataWithTwoSupports.coords, supports: [[[10, 20, 100]]] }
       };
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: { obstacles: [] },
-        error: null
-      });
       litDataSignal.set(litDataOnlyOneSupport);
       (mockObstacleFormService.form.get('referenceSupport') as { setValue: (v: ReferenceSupport) => void }).setValue(
         ReferenceSupport.RIGHT
@@ -821,21 +788,14 @@ describe('FreePositioningComponent', () => {
       expect(component.referenceSupportAltitudeNgf()).toBe(0);
     });
 
-    it('should stop and expose worker errors without clearing litData', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({
-        result: null,
-        error: TaskError.CALCULATION_ERROR,
-        pythonErrorCode: PythonErrorCode.SolverError
-      });
+    it('should not call worker tasks directly — uses litData from PlotService', async () => {
       litDataSignal.set(litDataWithTwoSupports);
 
       component.recreatePlots();
       await flushDebounceAndMicrotasks();
 
-      expect(mockPlotService.error()).toBe(TaskError.CALCULATION_ERROR);
-      expect(mockPlotService.pythonErrorCode()).toBe(PythonErrorCode.SolverError);
-      expect(mockPlotService.litData()).toEqual(litDataWithTwoSupports);
-      expect(mockCreatePlotData).not.toHaveBeenCalled();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      expect(mockCreatePlotData).toHaveBeenCalled();
       expect(component.isLoading()).toBe(false);
     });
   });

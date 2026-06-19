@@ -1,6 +1,6 @@
 import { PlotObjectsType, PlotOptions } from '@shared/types/plot.types';
 import { createDataObject, DataObject } from './createPlotDataObject';
-import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { GetSectionOutput, SectionCoords } from '@services/worker_python/tasks/types';
 import { Support } from '@shared/domain/models/support.model';
 
 /**
@@ -18,10 +18,10 @@ export const createPlotData = (
   supports: Support[] = []
 ): DataObject[] => {
   const dataObjects: DataObject[] = [];
-  (['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]).forEach((type) => {
+  (['spans', 'supports', 'insulators'] as (keyof SectionCoords)[]).forEach((type) => {
     dataObjects.push(
       ...(createDataObject(
-        params[type as keyof GetSectionOutput] as number[][][],
+        params.coords[type] as number[][][],
         options.startSupport,
         options.endSupport,
         type as PlotObjectsType,

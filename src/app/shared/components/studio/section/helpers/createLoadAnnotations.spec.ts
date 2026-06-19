@@ -37,8 +37,10 @@ const makePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotPa
   distances: [],
   distanceType: null,
   litData: {
-    loads_coords: {
-      0: [5, 3, 10]
+    output_parameters: {
+      loads_coords: {
+        0: [5, 3, 10]
+      }
     }
   } as unknown as CreatePlotParams['litData'],
   ...overrides
@@ -61,7 +63,7 @@ describe('createLoadAnnotations', () => {
         makePlotParams({
           spanLoads: [makeSpanLoad()],
           startSupport: 5,
-          litData: { loads_coords: {} } as unknown as CreatePlotParams['litData']
+          litData: { output_parameters: { loads_coords: {} } } as unknown as CreatePlotParams['litData']
         })
       );
       expect(result).toEqual([]);
@@ -177,8 +179,10 @@ describe('createLoadAnnotations', () => {
           startSupport: 2,
           spanLoads: [makeSpanLoad()],
           litData: {
-            loads_coords: {
-              2: [99, 88, 77]
+            output_parameters: {
+              loads_coords: {
+                2: [99, 88, 77]
+              }
             }
           } as unknown as CreatePlotParams['litData']
         })
@@ -194,9 +198,11 @@ describe('createLoadAnnotations', () => {
         makePlotParams({
           spanLoads: [makeSpanLoad({ supportUuid: 'a' }), null, makeSpanLoad({ supportUuid: 'b' })],
           litData: {
-            loads_coords: {
-              0: [1, 2, 3],
-              2: [4, 5, 6]
+            output_parameters: {
+              loads_coords: {
+                0: [1, 2, 3],
+                2: [4, 5, 6]
+              }
             }
           } as unknown as CreatePlotParams['litData']
         })
