@@ -1,5 +1,3 @@
-# api.py file
-
 # Copyright (c) 2026, RTE (http://www.rte-france.com)
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,30 +19,16 @@ import stellar_engine.plot.obstacles as obst
 
 from mechaphlowers import SectionStudy
 from mechaphlowers.config import options
-from stellar_engine.utils import get_section_middle_span
-from functools import wraps
+from stellar_engine.utils import get_section_middle_span, make_debug_log
 
 from stellar_engine.pyodide_utils import js_to_python, default_converter
 
-# duplicate from functions.py
-
-logger = logging.getLogger("stellar-engine")
+logger = logging.getLogger("stellar_engine")
+debug_log = make_debug_log(logger, prefix="API")
 LOG_INPUTS = True
 
 study: SectionStudy
 base_study: SectionStudy
-
-
-def debug_log(func):
-    """Decorator that logs function entry and completion with debug level."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        func_name = func.__name__
-        logger.debug(f"===> {func_name} triggered")
-        result = func(*args, **kwargs)
-        logger.debug(f"===> {func_name} completed")
-        return result
-    return wrapper
 
 
 
@@ -87,7 +71,7 @@ def get_support_coordinates(js_inputs):
 @debug_log
 def change_state(js_inputs):
     change_state_inputs: dict = js_to_python(js_inputs)  # type: ignore
-    return run_solver.change_state(change_state_inputs, study, base_study)
+    return run_solver.change_state(change_state_inputs, study)
 
 
 @debug_log
@@ -128,7 +112,7 @@ def get_wind_incidence(js_inputs):
 @debug_log
 def add_bulk_obstacles(js_inputs):
     logger.debug(f"js_inputs: {js_inputs.to_py()}")
-    obstacles, project, middle_span = extract_obstacles_inputs(js_inputs)
+    obstacles, _, _ = extract_obstacles_inputs(js_inputs)
     global study
 
     obst.add_bulk_obstacles(

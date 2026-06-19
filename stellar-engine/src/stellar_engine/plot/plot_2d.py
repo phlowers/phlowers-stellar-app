@@ -13,19 +13,23 @@ from mechaphlowers import (
 from stellar_engine.entities.output import (
     get_coordinates,
 )
+from stellar_engine.utils import make_debug_log
 
 logger = logging.getLogger("stellar_engine")
+
+debug_log = make_debug_log(logger, prefix="refresh")
 
 
 # ideally refresh_projection should only return the new coordinates,
 # not the whole sectionOutput, that also contains vhl and other data that do not change
+
+
+@debug_log
 def refresh_projection(
     inputs: dict,
     study: SectionStudy,
     base_study: SectionStudy | None = None,
 ):
-    # base_plt_line: PositionEngine = base_study.position_engine if base_study else None
-    logger.debug("===> refresh_projection triggered")
     start_support = inputs["startSupport"]
     end_support = inputs["endSupport"]
     view = inputs["view"]

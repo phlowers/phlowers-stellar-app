@@ -13,18 +13,19 @@ from mechaphlowers import SectionStudy, units
 
 from stellar_engine.entities.inputs import ClimateCharge, compute_ice_thickness
 
-logger = logging.getLogger("stellar-engine")
+logger = logging.getLogger("stellar_engine")
 # Set logger level to WARNING so info messages are shown
-logger.setLevel(logging.WARNING) # TODO: not sure about the effect of this, but it seems to be necessary to see info messages in the console
+# logger.setLevel(logging.WARNING) # TODO: not sure about the effect of this, but it seems to be necessary to see info messages in the console
 
 
 def apply_span_loads(study: SectionStudy, span_loads: list):
-    """Parse span loads and add them to the engine if any are non-zero."""
+    """Parse span loads and apply them to the engine, clearing previous loads when needed."""
+    n_spans = len(study.balance_engine)
+    if not span_loads:
+        study.add_loads(np.zeros(n_spans), np.zeros(n_spans))
+        return
     load_position_meters, load_mass = parse_span_loads(study, span_loads)
-    if (load_position_meters != 0).any() and (load_mass != 0).any():
-        study.add_loads(load_position_meters, load_mass)
-        # # Bug here: plot_engine is not correctly reset
-        # plot_engine.reset(engine)
+    study.add_loads(load_position_meters, load_mass)
 
 
 def parse_span_loads(

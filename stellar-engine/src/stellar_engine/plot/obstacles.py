@@ -9,13 +9,10 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from mechaphlowers import BalanceEngine, PlotEngine, SectionStudy
-from mechaphlowers.core.geometry.distances import DistanceResult
-from mechaphlowers.entities.arrays import ObstacleArray
+from mechaphlowers import BalanceEngine, SectionStudy
 from mechaphlowers.core.geometry.group_points import GroupPoints
 
 logger = logging.getLogger("stellar_engine")
-
 
 
 SUPPORT_REFERENCE_MAPPING: dict[str, Literal["left", "right"]] = {
@@ -28,14 +25,17 @@ LATERAL_DISTANCE_MAPPING: dict[str, Literal["span_axis", "line_axis"]] = {
     "LINE_AXIS": "line_axis",
 }
 
-ALTITUDE_TYPE_MAPPING: dict[str, Literal["absolute", "support_relative", "attachment_relative"]] = {
+ALTITUDE_TYPE_MAPPING: dict[
+    str, Literal["absolute", "support_relative", "attachment_relative"]
+] = {
     "absolute": "absolute",
     "relative": "support_relative",
     "relative_cable": "attachment_relative",
 }
 
 
-#-----------Helpers for obstacles management----------------
+# -----------Helpers for obstacles management----------------
+
 
 def get_single_obstacle_coords(
     altitude_type: str,
@@ -53,9 +53,6 @@ def get_single_obstacle_coords(
 
     if altitude_type == "attachment_relative":
         # Assuming attachment_altitude is available in the context
-        attachment_altitude = (
-            20  # Placeholder value; replace with actual attachment altitude
-        )
         coords[:, 2] += attachment_altitude
 
     elif altitude_type == "support_relative":
@@ -81,11 +78,10 @@ def change_obstacles_coordinates(
         return df
 
     span_index = df['span_index'].to_numpy(copy=True, dtype=np.int64)
-    # span_length = balance_engine.section_array.data.span_length
 
     x = df['x'].to_numpy(copy=True, dtype=np.float64)
     z = df['z'].to_numpy(copy=True, dtype=np.float64)
-    # lat = df['lateral_distance_type'].to_numpy()
+
     alt = df['altitude_type'].to_numpy()
     ref_support = df['ref_support'].to_numpy()
 
@@ -136,9 +132,8 @@ def get_current_obstacles(
     ]
 
 
+# ---------------------------Obstacles management----------------
 
-
-#---------------------------Obstacles management----------------
 
 def delete_obstacle(
     uuid: str, study: SectionStudy, project: bool, support_index: int
@@ -151,7 +146,9 @@ def delete_obstacle(
         logger.warning(f"Obstacle with uuid: {uuid} not found.")
     finally:
         result = get_current_obstacles(
-            study.position_engine.get_group_points(), project=project, support_index=support_index
+            study.position_engine.get_group_points(),
+            project=project,
+            support_index=support_index,
         )
         logger.debug(f"Current obstacles after deletion attempt: {result}")
         return {"obstacles": result}
@@ -192,8 +189,6 @@ def delete_obstacle(
 # }
 
 
-
-
 def add_single_obstacle(
     inputs: dict,
     study: SectionStudy,
@@ -201,8 +196,12 @@ def add_single_obstacle(
 ):
     # check there is a single obstacle
     if len(inputs['obstacles']) != 1:
-        logger.error("Expected a single obstacle, but received multiple.")
-        raise ValueError("Expected a single obstacle, but received multiple.")
+        logger.error(
+            f"Expected a single obstacle, but received {len(inputs['obstacles'])}."
+        )
+        raise ValueError(
+            f"Expected a single obstacle, but received {len(inputs['obstacles'])}."
+        )
 
     my_obstacle = inputs['obstacles'][0]
     logger.debug(f"Received single obstacle: {my_obstacle}")
@@ -221,6 +220,10 @@ def add_single_obstacle(
         dtype=np.float64,
     )
 
+    altitude_index = support_index
+    if my_obstacle['referenceSupport'] == 'RIGHT':
+        altitude_index = support_index + 1
+
     coords = get_single_obstacle_coords(
         altitude_type=ALTITUDE_TYPE_MAPPING[my_obstacle['altitudeType']],
         lateral_distance_type=LATERAL_DISTANCE_MAPPING[
@@ -229,12 +232,12 @@ def add_single_obstacle(
         coords=coords,
         ground_altitude=float(
             study.balance_engine.section_array.data.ground_altitude.to_numpy()[
-                support_index
+                altitude_index
             ]
         ),
         attachment_altitude=float(
             study.balance_engine.section_array.data.conductor_attachment_altitude.to_numpy()[
-                support_index
+                altitude_index
             ]
         ),
     )
@@ -275,18 +278,23 @@ def clear_obstacles(
 ):
     logger.debug("Clearing all obstacles.")
 
-    for o in study.position_engine.get_group_points().obstacles.dict_coords().keys():
+    for o in (
+        study.position_engine.get_group_points().obstacles.dict_coords().keys()
+    ):
         study.position_engine.delete_obstacle(o)
 
-    logger.debug("All obstacles cleared. Obstacles after clearing: {}".format(
-        get_current_obstacles(
-            study.position_engine.get_group_points(),
-            project=project,
-            support_index=support_index,
+    logger.debug(
+        "All obstacles cleared. Obstacles after clearing: {}".format(
+            get_current_obstacles(
+                study.position_engine.get_group_points(),
+                project=project,
+                support_index=support_index,
+            )
         )
-    ))
+    )
 
     return {"success": True}
+
 
 # Not used anymore with refactoring
 # def add_obstacles(

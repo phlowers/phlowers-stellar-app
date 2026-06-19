@@ -1,7 +1,11 @@
 import logging
 from datetime import datetime
 
+from stellar_engine.utils import make_debug_log
+
 logger = logging.getLogger("stellar_engine")
+
+debug_log = make_debug_log(logger, prefix="pyodideUtils")
 
 
 def convert_jsnull(obj) -> object:
@@ -29,11 +33,9 @@ def js_to_python(js_inputs) -> dict:
     return convert_jsnull(js_inputs.to_py())
 
 
+@debug_log
 def default_converter(value, _ignored1, _ignored2):
     """Convert js Date object into python Datetime object"""
-    logger.debug("===> default_converter triggered")
-
     if value.constructor.name == "Date":
         return datetime.fromtimestamp(value.valueOf() / 1000)
-    logger.debug("===> default_converter returning finished")
     return value

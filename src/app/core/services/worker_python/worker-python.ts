@@ -14,12 +14,11 @@ import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
-const pythonFiles = [functions, api, cable_modification];
-
-const getFirstLinePreview = (content: string): string => {
-  const firstLine = content.split(/\r?\n/, 1)[0]?.trim() ?? '';
-  return firstLine.length > 0 ? firstLine : '<empty>';
-};
+const pythonFiles = [
+  { name: 'functions', content: functions },
+  { name: 'api', content: api },
+  { name: 'cable_modification', content: cable_modification }
+];
 
 /** Type alias for the initialised Pyodide runtime API. */
 export type PyodideAPI = Awaited<ReturnType<typeof loadPyodide>>;
@@ -47,10 +46,9 @@ try {
   postMessage({ loadTime });
   log('debug', 'Pyodide loaded', loadTime);
   for (const file of pythonFiles) {
-    const preview = getFirstLinePreview(file);
-    log('debug', `Running Python file: ${preview}`);
-    await pyodide.runPython(file);
-    log('debug', `Finished running Python file: ${preview}`);
+    log('debug', `Running Python file: ${file.name}`);
+    await pyodide.runPython(file.content);
+    log('debug', `Finished running Python file: ${file.name}`);
   }
   const importEnd = performance.now();
   const importTime = importEnd - loadEnd;
