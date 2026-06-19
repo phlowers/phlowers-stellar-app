@@ -92,11 +92,21 @@
       />
 
       <div class="form__wind__checkboxes">
-        <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" data-testid="conformity-wind-minus-checkbox" />
+        <p-checkbox
+          formControlName="windMinus"
+          inputId="windMinus"
+          [binary]="true"
+          data-testid="conformity-wind-minus-checkbox"
+        />
         <label for="windMinus" i18n>Wind -</label>
 
         @if (showRedZonePresence()) {
-          <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" data-testid="conformity-red-zone-checkbox" />
+          <p-checkbox
+            formControlName="redZonePresence"
+            inputId="redZonePresence"
+            [binary]="true"
+            data-testid="conformity-red-zone-checkbox"
+          />
           <label for="redZonePresence" i18n>Red zone presence</label>
         }
       </div>

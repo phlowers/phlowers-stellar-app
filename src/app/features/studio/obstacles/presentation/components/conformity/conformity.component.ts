@@ -16,8 +16,14 @@ import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
-import { CONFORMITY_BOUNDS } from './conformity.constantes';
-import { ConformityOption, ConformityRuleResult, ResultRow } from './conformity.model';
+import {
+  ALTITUDE_TYPE_LABELS,
+  CONFORMITY_BOUNDS,
+  CONFORMITY_CABLE_TRACK_ROWS,
+  CONFORMITY_COMMON_ROWS,
+  LATERAL_DISTANCE_TYPE_LABELS
+} from './conformity.constantes';
+import { ConformityOption, ConformityRuleResult } from './conformity.model';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
@@ -166,24 +172,14 @@ export class ConformityComponent {
     return voltage ?? '-';
   });
 
-  private readonly altitudeTypeLabels: Record<string, string> = {
-    absolute: $localize`Absolute (NGF)`,
-    relative: $localize`Relative to support`,
-    relative_cable: $localize`Relative to cable attachment`
-  };
-
-  private readonly lateralDistanceTypeLabels: Record<string, string> = {
-    SPAN_AXIS: $localize`Span axis`
-  };
-
   readonly altitudeTypeLabel = computed(() => {
     const type = this.obstacleData()?.altitudeType;
-    return type ? (this.altitudeTypeLabels[type] ?? type) : '-';
+    return type ? (ALTITUDE_TYPE_LABELS[type] ?? type) : '-';
   });
 
   readonly lateralDistanceTypeLabel = computed(() => {
     const type = this.obstacleData()?.lateralDistanceType;
-    return type ? (this.lateralDistanceTypeLabels[type] ?? type) : '-';
+    return type ? (LATERAL_DISTANCE_TYPE_LABELS[type] ?? type) : '-';
   });
 
   readonly referenceSupportLabel = computed(() => {
@@ -192,51 +188,8 @@ export class ConformityComponent {
     return this.obstacleFormService.supportsOptions().find((o) => o.value === ref)?.label ?? ref;
   });
 
-  /** Common result rows shown for every conformity type, mapped to their overhang/lateral fields. */
-  readonly commonRows: ResultRow[] = [
-    {
-      label: $localize`Cable altitude`,
-      overhangKey: 'overhangCableAltitude',
-      lateralKey: 'lateralCableAltitude',
-      unit: 'm'
-    },
-    {
-      label: $localize`Cable line axis distance`,
-      overhangKey: 'overhangCableLineAxisDistance',
-      lateralKey: 'lateralCableLineAxisDistance',
-      unit: 'm'
-    },
-    {
-      label: $localize`Distance to comply`,
-      overhangKey: 'overhangDistanceToComply',
-      lateralKey: 'lateralDistanceToComply',
-      unit: 'm'
-    },
-    { label: $localize`Compliance altitude`, overhangKey: 'overhangComplianceAltitude', lateralKey: null, unit: 'm' },
-    {
-      label: $localize`Compliance line axis distance`,
-      overhangKey: null,
-      lateralKey: 'lateralComplianceLineAxisDistance',
-      unit: 'm'
-    }
-  ];
-
-  /** Extra "minimum distance case" rows shown only for the `cable_track` conformity type. */
-  readonly cableTrackRows: ResultRow[] = [
-    { label: $localize`Temperature`, overhangKey: 'overhangTemperature', lateralKey: 'lateralTemperature', unit: '°C' },
-    {
-      label: $localize`Wind pressure`,
-      overhangKey: 'overhangWindPressure',
-      lateralKey: 'lateralWindPressure',
-      unit: 'Pa'
-    },
-    {
-      label: $localize`Minimal distance`,
-      overhangKey: 'overhangMinimalDistance',
-      lateralKey: 'lateralMinimalDistance',
-      unit: 'm'
-    }
-  ];
+  readonly commonRows = CONFORMITY_COMMON_ROWS;
+  readonly cableTrackRows = CONFORMITY_CABLE_TRACK_ROWS;
 
   readonly BOUNDS = CONFORMITY_BOUNDS;
   readonly truncateTwoDecimals = truncateTwoDecimals;

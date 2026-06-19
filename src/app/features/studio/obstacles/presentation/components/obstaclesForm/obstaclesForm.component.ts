@@ -153,7 +153,7 @@ export class ObstaclesFormComponent {
     const warnings: string[] = [];
 
     const uuid = this.obstacleFormService.form.value.uuid;
-    const isSaved = !!this.spanService.section()?.obstacles?.some((o) => o.uuid === uuid);
+    const isSaved = !!uuid;
     if (!isSaved) {
       warnings.push($localize`obstacle must be saved`);
     }

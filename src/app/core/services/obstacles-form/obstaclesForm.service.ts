@@ -372,7 +372,6 @@ export class ObstacleFormService {
     });
   }
 
-
   async calculateAndSave(): Promise<void> {
     if (this.form.invalid || !this.form.value?.supportUuid) {
       return;
