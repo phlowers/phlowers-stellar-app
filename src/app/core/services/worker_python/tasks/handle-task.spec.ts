@@ -61,7 +61,7 @@ describe('Task handlers', () => {
       // Verify
       expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
       // script is loaded at worker boot time; here we only call the exposed function
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('load_initialize_study');
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('initialize_study');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });

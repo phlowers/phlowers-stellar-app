@@ -19,7 +19,7 @@ const tasks: Record<
   }
 > = {
   [Task.initLit]: {
-    function: 'load_initialize_study',
+    function: 'initialize_study',
     externalPackages: []
   },
   [Task.changeState]: {

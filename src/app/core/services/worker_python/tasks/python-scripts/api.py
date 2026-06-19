@@ -6,7 +6,8 @@
 
 import logging
 
-from stellar_engine.core import pose_table, initialize_study
+from stellar_engine.core import pose_table
+from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
@@ -25,7 +26,6 @@ from stellar_engine.pyodide_utils import js_to_python, default_converter
 
 logger = logging.getLogger("stellar_engine")
 debug_log = make_debug_log(logger, prefix="API")
-LOG_INPUTS = True
 
 study: SectionStudy
 base_study: SectionStudy
@@ -185,12 +185,12 @@ def get_pose_table(js_inputs):
 
 
 @debug_log
-def load_initialize_study(js_inputs):
+def initialize_study(js_inputs):
     global study, base_study
 
     python_inputs = js_to_python(js_inputs)
 
-    study, base_study = initialize_study(python_inputs)
+    study, base_study = stellar_initialize_study(python_inputs)
     logger.debug(f"Study initialized. Study: {study}, Base Study: {base_study}")
     return {"success": True}
 

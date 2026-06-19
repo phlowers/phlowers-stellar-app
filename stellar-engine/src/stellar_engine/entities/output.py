@@ -155,13 +155,9 @@ def format_distances_for_plot(distances):
                         "linePoint": dist_result.point_target.tolist(),
                         "virtualPointHorizontal": u_proj.tolist(),
                         "virtualPointVertical": v_proj.tolist(),
-                        "distanceDiagonal": float(dist_result.distance_3d),
-                        "distanceHorizontal": float(
-                            dist_result.distance_projection_u
-                        ),
-                        "distanceVertical": float(
-                            dist_result.distance_projection_v
-                        ),
+                        "distanceDiagonal": dist_result.distance_3d,
+                        "distanceHorizontal": dist_result.distance_projection_u,
+                        "distanceVertical": dist_result.distance_projection_v,
                     }
                 )
             except (ValueError, AttributeError) as e:
