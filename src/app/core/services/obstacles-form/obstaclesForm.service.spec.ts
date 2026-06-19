@@ -905,7 +905,7 @@ describe('ObstacleFormService', () => {
         }
       ];
 
-      mockObstacleStateService.calculateDistances.mockImplementation(async () => {
+      mockPlotService.refreshProjection.mockImplementation(async () => {
         mockObstacleStateService.distances.set(mockDistances);
       });
 
