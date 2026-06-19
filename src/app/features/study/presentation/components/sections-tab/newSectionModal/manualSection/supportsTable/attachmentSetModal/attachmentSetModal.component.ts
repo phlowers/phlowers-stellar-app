@@ -12,6 +12,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
 import { uniq } from 'lodash';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 
 /**
  * Modal dialog for selecting and configuring an attachment set for a support.
@@ -150,7 +151,9 @@ export class AttachmentSetModalComponent {
       if (!currentSupportName) return;
       const item = await this.attachmentService.getAttachmentDetails(currentSupportName, event.value as number);
       if (item) {
-        this.armLength.set(item.cross_arm_length);
+        this.armLength.set(
+          item.cross_arm_length != null ? truncateNumberToOneDecimal(item.cross_arm_length) : undefined
+        );
         this.heightBelowConsole.set(item.attachment_altitude);
         this.towerModel.set(item.support_tower);
       }

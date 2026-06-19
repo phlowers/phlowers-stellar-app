@@ -751,7 +751,7 @@ describe('StudioPageComponent', () => {
     it('should return the max value across all spans in max_section mode', () => {
       component.globalState.set('max_section');
       plotService.litData.set({ parameter: [100, 250.789, 180] });
-      expect(component.globalParameter()).toBe(250.79);
+      expect(component.globalParameter()).toBe(250.7);
     });
 
     it('should return the middle span value in span mode', () => {
@@ -778,10 +778,10 @@ describe('StudioPageComponent', () => {
       expect(component.globalParameter()).toBe(200);
     });
 
-    it('should round to 2 decimal places', () => {
+    it('should truncate to 1 decimal place', () => {
       component.globalState.set('max_section');
       plotService.litData.set({ parameter: [123.4567] });
-      expect(component.globalParameter()).toBe(123.46);
+      expect(component.globalParameter()).toBe(123.4);
     });
 
     it('should recompute when globalState changes', () => {

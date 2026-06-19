@@ -55,3 +55,14 @@ export function truncateOneDecimal(event: Event): void {
 export function truncateOneDecimalValue(value: string): string {
   return truncateStringToDecimals(value, 1);
 }
+
+/**
+ * Truncates a numeric value to 1 decimal place without rounding.
+ * Example: 2200.17 → 2200.1, 2200.99 → 2200.9
+ *
+ * @param value - The numeric value to truncate
+ * @returns The truncated numeric value
+ */
+export function truncateNumberToOneDecimal(value: number): number {
+  return Math.trunc(value * 10) / 10;
+}
