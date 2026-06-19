@@ -18,12 +18,8 @@ const tasks: Record<
     externalPackages: string[];
   }
 > = {
-  [Task.runTests]: {
-    function: 'run_tests',
-    externalPackages: ['pytest']
-  },
-  [Task.getLit]: {
-    function: 'init_section',
+  [Task.initLit]: {
+    function: 'initialize_study',
     externalPackages: []
   },
   [Task.changeState]: {
@@ -66,8 +62,12 @@ const tasks: Record<
     function: 'get_config',
     externalPackages: []
   },
-  [Task.addObstacle]: {
-    function: 'add_obstacles',
+  [Task.addBulkObstacles]: {
+    function: 'add_bulk_obstacles',
+    externalPackages: []
+  },
+  [Task.addSingleObstacle]: {
+    function: 'add_single_obstacle',
     externalPackages: []
   },
   [Task.deleteObstacle]: {
@@ -76,10 +76,6 @@ const tasks: Record<
   },
   [Task.clearObstacles]: {
     function: 'clear_obstacles',
-    externalPackages: []
-  },
-  [Task.calculateObstaclesDistances]: {
-    function: 'calculate_obstacles_distances',
     externalPackages: []
   },
   [Task.cableModification]: {
@@ -130,7 +126,8 @@ const tasks: Record<
 export async function handleTask(
   pyodide: PyodideAPI,
   task: Task,
-  inputs: TaskInputs[Task]
+  inputs: TaskInputs[Task],
+  log?: (level: 'debug' | 'error', message: string, details?: unknown) => void
 ): Promise<{
   result: TaskOutputs[Task] | null;
   runTime: number;
@@ -150,8 +147,10 @@ export async function handleTask(
     }
     pyodide.globals.set('js_inputs', inputs);
 
+    log?.('debug', `Executing task: ${task}, triggering Python function: ${tasks[task].function}`);
     const functionToRun = pyodide.globals.get(tasks[task].function) as (inputs?: TaskInputs[Task]) => PyProxy;
     const result = inputs ? functionToRun(inputs) : functionToRun();
+    log?.('debug', `Task ${task} executed successfully, converting result to JS object`);
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
     result.destroy();
     return {
@@ -161,7 +160,7 @@ export async function handleTask(
       pythonErrorCode: null
     };
   } catch (error: unknown) {
-    console.error(error);
+    log?.('error', 'Task execution failed', error instanceof Error ? error.message : String(error));
     let errorType = TaskError.CALCULATION_ERROR;
     const errorMessage = error instanceof Error ? error.message : String(error);
     if (errorMessage.toLowerCase().includes('did not converge')) {

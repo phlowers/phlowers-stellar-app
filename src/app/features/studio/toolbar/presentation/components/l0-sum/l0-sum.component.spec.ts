@@ -33,20 +33,9 @@ describe('L0SumComponent', () => {
 
   beforeEach(async () => {
     const mockLitData = {
-      L0: [100, 200, 150, 300, 250],
-      spans: [],
-      insulators: [],
-      supports: [],
-      elevation: [],
-      line_angle: [],
-      vtl_under_chain: [],
-      vtl_under_console: [],
-      r_under_chain: [],
-      r_under_console: [],
-      ground_altitude: [],
-      load_angle: [],
-      displacement: [],
-      span_length: []
+      output_parameters: {
+        L0: [100, 200, 150, 300, 250]
+      }
     };
 
     const mockPlotService = {

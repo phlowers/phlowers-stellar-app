@@ -20,7 +20,6 @@ import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacl
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable, startWith } from 'rxjs';
-import { ObstacleOutput } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotOptions } from '@shared/types/plot.types';
 
@@ -300,10 +299,8 @@ export class ObstacleFormService {
     try {
       await this.obstacleStateService.deleteObstacle(obstacleUuid, plotOptions);
 
-      // Re-register remaining obstacles to get accurate render positions.
-      const obstacleOutput = await this.obstacleStateService.addObstacle(updatedObstacles, plotOptions);
-      this.applyObstacleOutputToLitData(obstacleOutput);
-      await this.obstacleStateService.calculateDistances(updatedObstacles, plotOptions);
+      // Refresh projection to update plot with remaining obstacles and distances
+      await this.plotService.refreshProjection();
 
       await this.sectionService.createOrUpdateSection(study, updatedSection);
       this.spanService.section.set(updatedSection);
@@ -336,10 +333,8 @@ export class ObstacleFormService {
         return;
       }
 
-      const obstacleOutput = await this.obstacleStateService.syncObstacles(obstacles, plotOptions);
-      if (obstacleOutput) {
-        this.applyObstacleOutputToLitData(obstacleOutput);
-      }
+      await this.obstacleStateService.syncObstacles(obstacles, plotOptions);
+      await this.plotService.refreshProjection();
     } catch (error) {
       this.logger.warn('Failed to resynchronize obstacle worker state after rollback', error);
     }
@@ -390,24 +385,17 @@ export class ObstacleFormService {
     try {
       // 1. Merge new/updated obstacle into the in-memory section
       this.upsertObstacleInSection(obstacle);
-      const allObstacles = this.spanService.section()?.obstacles ?? [obstacle];
 
-      // 2. Register all obstacles in Python worker — get computed render positions for current span
-      const obstacleOutput = await this.obstacleStateService.addObstacle(
-        allObstacles,
-        this.plotOptionsService.plotOptions()
-      );
+      // 2. Register the current obstacle in Python worker
+      await this.obstacleStateService.addSingleObstacle(obstacle, this.plotOptionsService.plotOptions());
 
-      // 3. Update rendering (litData.obstacles)
-      this.applyObstacleOutputToLitData(obstacleOutput);
-
-      // 4. Persist domain object to IndexedDB
+      // 3. Persist domain object to IndexedDB
       await this.saveSection();
 
-      // 5. Recalculate distances
-      await this.obstacleStateService.calculateDistances(allObstacles, this.plotOptionsService.plotOptions());
+      // 4. Refresh projection (updates plot with new obstacle coords and distances)
+      await this.plotService.refreshProjection();
 
-      // 6. Update UI selection
+      // 5. Update UI selection
       const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
       this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
     } catch (error) {
@@ -421,15 +409,6 @@ export class ObstacleFormService {
     } finally {
       this.isCalculatingObstacle.set(false);
     }
-  }
-
-  private applyObstacleOutputToLitData(obstacleOutput: ObstacleOutput | null): void {
-    const current = this.plotService.litData();
-    if (!current) return;
-    this.plotService.litData.set({
-      ...current,
-      obstacles: obstacleOutput?.obstacles ?? []
-    });
   }
 
   buildObstacleFromForm(): Obstacle {

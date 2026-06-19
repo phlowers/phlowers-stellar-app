@@ -74,13 +74,13 @@ export class L0SumComponent {
 
     effect(() => {
       const litData: GetSectionOutput | null = this.plotService.litData();
-      if (!litData?.L0) {
+      if (!litData?.output_parameters.L0) {
         this.l0Rows.set([]);
         return;
       }
 
       const supports = this.spanService.section()?.supports ?? [];
-      const spans: L0Row[] = litData.L0.map((value, index) => {
+      const spans: L0Row[] = litData.output_parameters.L0.map((value, index) => {
         const leftNum = supports[index]?.number;
         const rightNum = supports[index + 1]?.number;
         const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);

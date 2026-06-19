@@ -191,6 +191,13 @@ describe('WorkerService', () => {
       expect(service.worker).toBeDefined();
     });
 
+    it('should not create a second worker when setup is called twice', () => {
+      service.setup();
+      service.setup();
+
+      expect(global.Worker).toHaveBeenCalledTimes(1);
+    });
+
     it('should set up onmessage handler', () => {
       service.setup();
       expect(mockWorker.onmessage).toBeDefined();
@@ -238,7 +245,7 @@ describe('WorkerService', () => {
     it('should post message to worker with task, inputs and id', async () => {
       service.setup();
 
-      const task = Task.runTests;
+      const task = Task.initLit;
       const inputs = undefined;
 
       const promise = service.runTask(task, inputs);
@@ -262,10 +269,10 @@ describe('WorkerService', () => {
       expect(response.error).toBeNull();
     });
 
-    it('should post message to worker with getLit task', async () => {
+    it('should post message to worker with initLit task', async () => {
       service.setup();
 
-      const task = Task.getLit;
+      const task = Task.initLit;
       const inputs = {
         section: createMockSection(),
         cable: createMockCable()
@@ -303,7 +310,7 @@ describe('WorkerService', () => {
     it('should generate unique id for each task', async () => {
       service.setup();
 
-      const task = Task.runTests;
+      const task = Task.initLit;
       const promise1 = service.runTask(task, undefined);
       const promise2 = service.runTask(task, undefined);
 
@@ -331,7 +338,7 @@ describe('WorkerService', () => {
       const mockSection = createMockSection();
       const mockCable = createMockCable();
 
-      const promise = service.runTaskWithTimeout(Task.getLit, {
+      const promise = service.runTaskWithTimeout(Task.initLit, {
         section: mockSection,
         cable: mockCable
       });
@@ -357,7 +364,7 @@ describe('WorkerService', () => {
 
       try {
         const promise = service.runTaskWithTimeout(
-          Task.getLit,
+          Task.initLit,
           {
             section: mockSection,
             cable: mockCable
@@ -367,7 +374,7 @@ describe('WorkerService', () => {
 
         await vi.advanceTimersByTimeAsync(1000);
 
-        await expect(promise).rejects.toThrow('Task getLit timed out after 1000ms');
+        await expect(promise).rejects.toThrow('Task initLit timed out after 1000ms');
       } finally {
         vi.useRealTimers();
       }
@@ -379,7 +386,7 @@ describe('WorkerService', () => {
       const mockSection = createMockSection();
       const mockCable = createMockCable();
 
-      const promise = service.runTaskWithTimeout(Task.getLit, {
+      const promise = service.runTaskWithTimeout(Task.initLit, {
         section: mockSection,
         cable: mockCable
       });

@@ -1,5 +1,5 @@
 import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Icon } from 'plotly.js-dist-min';
-import { AxesNorms, Side, View } from '@shared/types/plot.types';
+import { AspectRatio, ScalingFactors, Side, View } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
@@ -45,8 +45,10 @@ export interface CreatePlotParams {
   currentObstaclePointIndex: number;
   /** Domain support models for altitude lookups. */
   supports?: Support[];
-  /** Normalization factors for the axes and Plotly aspect mode. */
-  axesNorms?: AxesNorms;
+  /** Computed aspect ratio from Python's getAspectRatio. Used for 3D scene aspectratio/aspectmode. */
+  aspectRatio?: AspectRatio;
+  /** User-controlled scaling factors. Used for 2D scaleratio computation. */
+  scalingFactors?: ScalingFactors;
   /** Distance data from Python calculation for drawing distance lines. */
   distances: Distance[];
   /** Which distance type is currently selected for visualization. */
@@ -101,19 +103,19 @@ const createScene = (
 
   return {
     aspectmode:
-      plotParams.axesNorms?.aspectMode &&
+      plotParams.scalingFactors?.aspectMode &&
       (['auto', 'data', 'cube', 'manual'] as const).includes(
-        plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual'
+        plotParams.scalingFactors.aspectMode as 'auto' | 'data' | 'cube' | 'manual'
       )
-        ? (plotParams.axesNorms.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
+        ? (plotParams.scalingFactors.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
         : 'manual',
     xaxis: PLOT_AXIS_CONFIG,
     yaxis: PLOT_AXIS_CONFIG,
     zaxis: PLOT_AXIS_CONFIG,
     aspectratio: {
-      x: plotParams.axesNorms?.x ?? 3,
-      y: plotParams.axesNorms?.y ?? 0.2,
-      z: plotParams.axesNorms?.z ?? 0.5
+      x: plotParams.aspectRatio?.x ?? 3,
+      y: plotParams.aspectRatio?.y ?? 0.2,
+      z: plotParams.aspectRatio?.z ?? 0.5
     },
     annotations: [
       ...createLoadAnnotations(plotParams),
@@ -265,13 +267,18 @@ const layout2d = (
   plotParams: CreatePlotParams,
   distanceAnnotations: Partial<Plotly.Annotations>[]
 ): Partial<Layout> => {
-  // For the profile view, do not constrain the Y axis — let Plotly autorange both axes
-  // independently so the actual cable altitude is displayed at a realistic scale.
-  // The axesNorms from compute_aspect_ratio are calibrated for 3D rendering and would
-  // exaggerate the vertical axis (e.g. ±10k) in 2D profile.
+  // Apply the user's scaling factors to constrain the Y axis relative to X.
+  // Profile view (x,z plane): scaleratio = z_scale / x_scale
+  // Face view (y,z plane):    scaleratio = z_scale / y_scale
+  // When no scaling factors are provided, default to 1 (isometric 1:1).
   let scaleratio: number | undefined;
-  if (plotParams.side === 'face') {
-    scaleratio = plotParams.axesNorms ? plotParams.axesNorms.z / plotParams.axesNorms.y : 0.2;
+  if (plotParams.scalingFactors) {
+    scaleratio =
+      plotParams.side === 'face'
+        ? plotParams.scalingFactors.z / plotParams.scalingFactors.y
+        : plotParams.scalingFactors.z / plotParams.scalingFactors.x;
+  } else {
+    scaleratio = 1;
   }
 
   return {
