@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   OnInit,
@@ -9,6 +10,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -92,9 +94,11 @@ export class ManualSectionComponent implements OnInit {
   public sectionTypes = sectionTypes;
   isNameUnique = input<boolean>();
   currentPageReportTemplate = $localize`Support ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
+  readonly noVoltageLabel = $localize`NO VOLTAGE`;
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly plotOptionsService = inject(PlotOptionsService);
@@ -196,6 +200,10 @@ export class ManualSectionComponent implements OnInit {
 
   ngOnInit() {
     this.setupFilterTables();
+    // Re-populate line dropdowns if the catalog import completes after this component opens.
+    this.linesService.imported$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.setupLinesFilter();
+    });
   }
 
   tabValueChange = (event: string | number) => {

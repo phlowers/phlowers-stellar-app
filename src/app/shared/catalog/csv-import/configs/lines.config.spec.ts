@@ -55,6 +55,23 @@ describe('lines.config - mapLineRow', () => {
     expect(e?.voltage_adr).toBe('NO_VOLTAGE');
   });
 
+  it('substitutes voltage_idr with plain-string "NO VOLTAGE" when hasNoVoltage', () => {
+    const row: LineCsvDto = {
+      link_idr: 'L',
+      voltage_idr: '',
+      voltage_adr: '225.0',
+      link_adr: '',
+      lit_idr: '',
+      lit_adr: '',
+      branch_id: '',
+      branch_idr: '',
+      branch_adr: ''
+    } as unknown as LineCsvDto;
+    const e = mapLineRow(row);
+    expect(e?.voltage_idr).toBe('NO VOLTAGE');
+    expect(e?.voltage_adr).toBe('NO_VOLTAGE');
+  });
+
   it('keeps voltage values intact when both are present and non-zero', () => {
     const row: LineCsvDto = {
       link_idr: 'L',
@@ -77,6 +94,58 @@ describe('lines.config - mapLineRow', () => {
     const entities = rows.map(mapLineRow);
     const uuids = entities.map((e) => e?.uuid);
     expect(new Set(uuids).size).toBe(uuids.length);
+  });
+});
+
+describe('lines.config - mapLineRow - worker context safety', () => {
+  // Regression guard: before the fix, mapLineRow called $localize`NO VOLTAGE` for rows
+  // with missing voltage data. @angular/localize/init is only loaded in the main thread;
+  // the Web Worker has no access to it. That ReferenceError/TypeError aborted the PapaParse
+  // stream, finalize() never ran, and catLines stayed empty — all p-select dropdowns
+  // showed no options. The fix replaces the tagged-template call with a plain string literal.
+  let savedLocalize: unknown;
+
+  beforeEach(() => {
+    savedLocalize = (globalThis as Record<string, unknown>)['$localize'];
+    vi.stubGlobal('$localize', undefined);
+  });
+
+  afterEach(() => {
+    vi.stubGlobal('$localize', savedLocalize);
+  });
+
+  it('does not throw when $localize is unavailable (simulates Web Worker environment)', () => {
+    const row: LineCsvDto = {
+      link_idr: 'L',
+      voltage_idr: '',
+      voltage_adr: '225.0',
+      link_adr: '',
+      lit_idr: '',
+      lit_adr: '',
+      branch_id: '',
+      branch_idr: '',
+      branch_adr: ''
+    } as unknown as LineCsvDto;
+    expect(() => mapLineRow(row)).not.toThrow();
+    const e = mapLineRow(row);
+    expect(e?.voltage_idr).toBe('NO VOLTAGE');
+    expect(e?.voltage_adr).toBe('NO_VOLTAGE');
+  });
+
+  it('handles voltage_adr "0.0" no-voltage path without $localize', () => {
+    const row: LineCsvDto = {
+      link_idr: 'L',
+      voltage_idr: 'V',
+      voltage_adr: '0.0',
+      link_adr: '',
+      lit_idr: '',
+      lit_adr: '',
+      branch_id: '',
+      branch_idr: '',
+      branch_adr: ''
+    } as unknown as LineCsvDto;
+    expect(() => mapLineRow(row)).not.toThrow();
+    expect(mapLineRow(row)?.voltage_idr).toBe('NO VOLTAGE');
   });
 });
 

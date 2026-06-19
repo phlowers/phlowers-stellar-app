@@ -1,0 +1,196 @@
+@use 'abstract.extracts' as app;
+
+dl,
+fieldset {
+  @apply contents;
+}
+
+dt {
+  @extend %label-style;
+}
+
+dd {
+  @extend %read-only-info;
+}
+
+legend {
+  @extend %heading-xs;
+}
+
+.form {
+  @apply grid gap-x-8 gap-y-3 grid-cols-5 mb-3;
+
+  grid-template-areas:
+    'titleObs titleObs titleObs titleObs titleObs'
+    'obsName obsSelect obsType obsSpan obsSupport'
+    'obsAltType obsLatDistType obsAltPt obsRefSuppDist obsDistLineAxis'
+    'titleForm titleForm titleForm titleForm titleForm'
+    'tension wind distribTemp latTemp conformitySelect'
+    'submit submit submit submit submit';
+
+  &__title-obstacle {
+    @apply justify-self-start;
+    grid-area: titleObs;
+  }
+  &__select-obstacle {
+    grid-area: obsSelect;
+  }
+  &__name-obstacle {
+    grid-area: obsName;
+  }
+  &__type-obstacle {
+    grid-area: obsType;
+  }
+  &__span-obstacle {
+    grid-area: obsSpan;
+  }
+  &__ref-supp-obstacle {
+    grid-area: obsSupport;
+  }
+  &__alt-type-obstacle {
+    grid-area: obsAltType;
+  }
+  &__lat-dist-type-obstacle {
+    grid-area: obsLatDistType;
+  }
+  &__alt-pt-obstacle {
+    grid-area: obsAltPt;
+  }
+  &__ref-supp-distance-obstacle {
+    grid-area: obsRefSuppDist;
+  }
+  &__dist-line-axis-obstacle {
+    grid-area: obsDistLineAxis;
+  }
+  &__title-form {
+    @apply justify-self-start;
+    grid-area: titleForm;
+  }
+  &__electric-tension {
+    @apply block;
+    grid-area: tension;
+  }
+  &__wind {
+    grid-area: wind;
+
+    &__checkboxes {
+      @apply grid gap-x-1 gap-y-3 items-center mt-3;
+      grid-template-columns: repeat(2, max-content);
+    }
+  }
+  &__distrib-temp {
+    grid-area: distribTemp;
+  }
+  &__lat-temp {
+    grid-area: latTemp;
+  }
+  &__conformity-select {
+    grid-area: conformitySelect;
+  }
+  &__submit {
+    @apply justify-self-end;
+    grid-area: submit;
+  }
+}
+
+.results {
+  @apply flex flex-wrap gap-x-8;
+
+  &__separator {
+    @apply flex-1 min-w-full border-t my-3;
+    border-top-color: var(--star-dust-300);
+  }
+
+  &__title {
+    @apply flex-1 min-w-full mt-0 mb-3;
+    @extend %heading-s;
+    color: var(--star-dust-950);
+  }
+
+  &__figure {
+    flex: 1 1 27rem;
+  }
+
+  &__table {
+    flex: 1 1 41.5rem;
+    color: var(--star-dust-950);
+    border: 1px solid var(--star-dust-300);
+  }
+}
+
+th {
+  @apply text-left;
+  @extend %text-m-600;
+  background-color: var(--primary-50);
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  &[scope='col'] {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  &[scope='row'] {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  &[scope='colgroup'] {
+    @apply text-center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--star-dust-300);
+}
+
+td {
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  &[colspan='2'] {
+    @apply text-center;
+  }
+}
+
+tr:has(td) {
+  &:nth-child(even) {
+    td {
+      background-color: var(--grey-white);
+    }
+  }
+
+  &:nth-child(odd) {
+    td {
+      background-color: var(--star-dust-50);
+    }
+  }
+}
+
+.compliance {
+  $_size: 1.25rem;
+
+  @apply flex items-center justify-center gap-2;
+
+  &__icon {
+    @apply text-center;
+    font-size: $_size;
+    border-radius: $_size;
+    color: var(--grey-white);
+
+    &--unknown {
+      background-color: var(--star-dust-500);
+    }
+
+    &--yes {
+      background-color: var(--success-600);
+    }
+
+    &--no {
+      background-color: var(--error-600);
+    }
+  }
+}

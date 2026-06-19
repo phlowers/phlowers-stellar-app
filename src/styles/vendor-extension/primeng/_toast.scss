@@ -1,6 +1,6 @@
 @use 'abstract.extracts' as app;
 
-.p-toast {
+.p-toast.p-toast {
   --p-button-rounded-border-radius: 0;
 
   .p-toast-message-content .p-toast-close-button {
@@ -12,5 +12,9 @@
     &:focus-visible {
       @extend %focus-state;
     }
+  }
+
+  .p-toast-detail {
+    list-style: outside;
   }
 }

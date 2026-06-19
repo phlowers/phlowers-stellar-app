@@ -1,5 +1,18 @@
 <router-outlet></router-outlet>
 <p-toast position="top-center" data-testid="app-toast"></p-toast>
+<p-toast key="warning-list" position="top-center">
+  <ng-template pTemplate="message" let-message>
+    <app-icon icon="warning" aria-hidden="true" />
+    <div class="p-toast-message-text">
+      <span class="p-toast-summary">{{ message.summary }}</span>
+      <ul class="p-toast-detail m-0">
+        @for (warning of message.data.warnings; track warning) {
+          <li>{{ warning }}</li>
+        }
+      </ul>
+    </div>
+  </ng-template>
+</p-toast>
 <p-dialog
   [visible]="isUpdateDialogOpen()"
   [style]="{ width: '43.75rem' }"
