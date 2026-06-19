@@ -8,7 +8,7 @@
 import { TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
 import { PlotOptionsService } from './plot-options.service';
-import { AxesNorms, PlotOptions } from '@shared/types/plot.types';
+import { ScalingFactors, PlotOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { vi } from 'vitest';
 
@@ -46,13 +46,8 @@ describe('PlotOptionsService', () => {
       expect(opts.baseState).toBe(false);
     });
 
-    it('should initialize axesNorms with default values', () => {
-      const norms = service.axesNorms();
-      expect(norms).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-    });
-
-    it('should initialize baseScaleFactors with default values', () => {
-      const factors = service.baseScaleFactors();
+    it('should initialize scalingFactors with default values', () => {
+      const factors = service.scalingFactors();
       expect(factors).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     });
 
@@ -65,30 +60,17 @@ describe('PlotOptionsService', () => {
     });
   });
 
-  describe('setAxesNorms', () => {
-    it('should update the axesNorms signal', () => {
-      const newNorms: AxesNorms = { x: 2, y: 3, z: 4, aspectMode: 'cube' };
-      service.setAxesNorms(newNorms);
-      expect(service.axesNorms()).toEqual(newNorms);
+  describe('setScalingFactors', () => {
+    it('should update the scalingFactors signal', () => {
+      const newFactors: ScalingFactors = { x: 2, y: 3, z: 4, aspectMode: 'cube' };
+      service.setScalingFactors(newFactors);
+      expect(service.scalingFactors()).toEqual(newFactors);
     });
 
-    it('should replace previous norms entirely', () => {
-      service.setAxesNorms({ x: 5, y: 5, z: 5, aspectMode: 'cube' });
-      service.setAxesNorms({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-      expect(service.axesNorms()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-    });
-  });
-
-  describe('setBaseScaleFactors', () => {
-    it('should update the baseScaleFactors signal', () => {
-      const newFactors: AxesNorms = { x: 0.2, y: 1, z: 1, aspectMode: 'manual' };
-      service.setBaseScaleFactors(newFactors);
-      expect(service.baseScaleFactors()).toEqual(newFactors);
-    });
-
-    it('should not affect axesNorms', () => {
-      service.setBaseScaleFactors({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
-      expect(service.axesNorms()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+    it('should replace previous factors entirely', () => {
+      service.setScalingFactors({ x: 5, y: 5, z: 5, aspectMode: 'cube' });
+      service.setScalingFactors({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+      expect(service.scalingFactors()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     });
   });
 
@@ -228,16 +210,10 @@ describe('PlotOptionsService', () => {
       expect(service.isFreePositioningMode()).toBe(false);
     });
 
-    it('should reset axesNorms to defaults', () => {
-      service.axesNorms.set({ x: 5, y: 5, z: 5, aspectMode: 'cube' });
+    it('should reset scalingFactors to defaults', () => {
+      service.setScalingFactors({ x: 5, y: 5, z: 5, aspectMode: 'cube' });
       service.reset();
-      expect(service.axesNorms()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
-    });
-
-    it('should reset baseScaleFactors to defaults', () => {
-      service.setBaseScaleFactors({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
-      service.reset();
-      expect(service.baseScaleFactors()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+      expect(service.scalingFactors()).toEqual({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     });
 
     it('should reset plotOptions even when called multiple times', () => {

@@ -8,7 +8,6 @@ import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { emptySpanLoad } from '../helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
-import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +43,7 @@ export class LoadFormsService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
-  private readonly obstacleStateService = inject(ObstacleStateService);
+  // private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
@@ -95,24 +94,22 @@ export class LoadFormsService {
         climate: temporaryLoadData.climate,
         spanLoads: checkedSpanLoads
       });
-      if (changeResult) {
-        this.plotService.litData.set(changeResult.current);
-        this.plotService.baseLitData.set(changeResult.base);
+
+      if (!changeResult?.success) {
+        return;
       }
 
-      const obstacles = currentSection?.obstacles ?? [];
-      if (obstacles.length > 0) {
-        const syncedOutput = await this.obstacleStateService.syncObstacles(
-          obstacles,
-          this.plotOptionsService.plotOptions()
-        );
-        if (syncedOutput) {
-          const current = this.plotService.litData();
-          if (current) {
-            this.plotService.litData.set({ ...current, obstacles: syncedOutput.obstacles });
-          }
-        }
-      }
+      // For me no need to re-sync obstacles here because the obstacles have already been updated before.
+      // const obstacles = currentSection?.obstacles ?? [];
+      // if (obstacles.length > 0) {
+      //   await this.obstacleStateService.syncObstacles(
+      //     obstacles,
+      //     this.plotOptionsService.plotOptions()
+      //   );
+      // }
+
+      // refreshProjection gets all data (litData, baseLitData, obstacles, distances)
+      await this.plotService.refreshProjection();
 
       // Re-apply any saved cable length modifications on top of the change-state
       // result. `Task.changeState` resets the engine to the climate state without
@@ -161,7 +158,7 @@ export class LoadFormsService {
   /**
    * Reset the span load for the given support UUID to its empty state.
    */
-  deleteSpanLoad(supportUuid: string): void {
+  async deleteSpanLoad(supportUuid: string): Promise<void> {
     const temporaryLoadData = this.plotService.temporaryLoadData;
     if (!temporaryLoadData) return;
 
@@ -170,16 +167,18 @@ export class LoadFormsService {
 
     const reset = { ...emptySpanLoad, supportUuid };
     Object.assign(spanLoad, reset);
+    await this.plotService.refreshProjection();
   }
 
   /**
    * Delete the load by deleting the charge case
    */
-  deleteLoad() {
+  async deleteLoad(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
     const chargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!studyUuid || !sectionUuid || !chargeUuid) return;
-    this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
+    await this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
+    await this.plotService.refreshProjection();
   }
 }

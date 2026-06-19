@@ -7,7 +7,7 @@
 import { Data } from 'plotly.js-dist-min';
 import { PlotObjectsType, PlotOptions } from '@shared/types/plot.types';
 import { createShadowDataObject } from './createShadowDataObject';
-import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { GetSectionOutput, SectionCoords } from '@services/worker_python/tasks/types';
 
 /**
  * Builds an array of shadow (background/overlay) Plotly data objects for all section object types.
@@ -19,9 +19,9 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
  * @returns A flat array of Plotly `Data` entries for shadow traces.
  */
 export const createShadowPlotData = (params: GetSectionOutput, options: PlotOptions): Data[] => {
-  const data = (['spans', 'supports', 'insulators'] as (keyof GetSectionOutput)[]).map((type) => {
+  const data = (['spans', 'supports', 'insulators'] as (keyof SectionCoords)[]).map((type) => {
     return createShadowDataObject(
-      params[type as keyof GetSectionOutput] as number[][][],
+      params.coords[type] as number[][][],
       options.startSupport,
       options.endSupport,
       type as PlotObjectsType,

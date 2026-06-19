@@ -28,8 +28,10 @@ describe('Papoto component', () => {
 
     plotServiceMock = {
       litData: signal({
-        span_length: [100, 150, 200],
-        elevation: [5.5, 10.75, -3.25]
+        output_parameters: {
+          span_length: [100, 150, 200],
+          elevation: [5.5, 10.75, -3.25]
+        }
       })
     } as unknown as vi.Mocked<PlotService>;
 
@@ -340,7 +342,7 @@ describe('Papoto component', () => {
 
     it('should return null when span_length field is not available in litData', () => {
       plotServiceMock.litData.set({
-        elevation: [5.5, 10.75]
+        output_parameters: { elevation: [5.5, 10.75] }
       } as Partial<GetSectionOutput> as GetSectionOutput);
       component.updateField('span', [0, 1]);
       fixture.detectChanges();
@@ -390,7 +392,7 @@ describe('Papoto component', () => {
 
     it('should return null when elevation field is not available in litData', () => {
       plotServiceMock.litData.set({
-        span_length: [100, 150]
+        output_parameters: { span_length: [100, 150] }
       } as Partial<GetSectionOutput> as GetSectionOutput);
       component.updateField('span', [0, 1]);
       fixture.detectChanges();

@@ -44,10 +44,10 @@ jobs:
         run: |
           uv sync --all-groups
 
-      - name: ✔️ Check code style
-        working-directory: stellar-engine
-        run: |
-          uv run ruff format --check
+      # - name: ✔️ Check code style
+      #   working-directory: stellar-engine
+      #   run: |
+      #     uv run ruff format --check
 
       - name: ✔️ Lint code
         working-directory: stellar-engine

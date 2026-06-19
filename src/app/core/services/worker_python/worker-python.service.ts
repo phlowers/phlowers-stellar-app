@@ -36,7 +36,7 @@ export interface WorkerLogMessage {
  *   workerService.ready$.subscribe(ready => {
  *     if (ready) {
  *       // Run a calculation task
- *       workerService.runTask(Task.getLit, { section, cable });
+ *       workerService.runTask(Task.initLit, { section, cable });
  *     }
  *   });
  * }
@@ -102,6 +102,10 @@ export class WorkerPythonService {
    * ```
    */
   setup() {
+    if (this.worker) {
+      return;
+    }
+
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
     this.worker.onmessage = ({ data }) => {
       if (data.log) {
@@ -138,7 +142,7 @@ export class WorkerPythonService {
    * @example
    * ```typescript
    * const { result, error } = await workerService.runTask(
-   *   Task.getLit,
+   *   Task.initLit,
    *   { section: mySection, cable: myCable }
    * );
    * if (!error) {
@@ -168,8 +172,8 @@ export class WorkerPythonService {
    * ```typescript
    * try {
    *   const { result, error } = await workerService.runTaskWithTimeout(
-   *     Task.calculateObstaclesDistances,
-   *     { obstacles, startSupport, endSupport, view },
+   *     Task.changeState,
+   *     { state: 'myState' },
    *     30000
    *   );
    *   if (!error) {
