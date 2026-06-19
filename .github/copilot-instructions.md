@@ -134,10 +134,24 @@ File: `src/app/shared/components/studio/section/helpers/createPlot.ts` — `getC
 
 ### Studio section plot — annotations
 
-For clickable icon annotations (FontAwesome icon + arrow), **never build the annotation object manually**.  
+**Never build a clickable icon annotation (FontAwesome icon + arrow) manually.**  
 Always use `buildClickableIconAnnotation` from `@shared/components/studio/section/helpers/createClickableIconAnnotation`.
 
-Exception: obstacle annotations (`obstacles.ts`) use a different model (no arrow, Unicode symbols, dynamic colors) and must **not** use this helper.
+```typescript
+import { buildClickableIconAnnotation } from '@shared/components/studio/section/helpers/createClickableIconAnnotation';
+
+buildClickableIconAnnotation({
+  x, y, z,
+  icon: '&#xf5cd;',   // FontAwesome HTML entity
+  color: '#4A355A',
+  arrowYOffset: -50,
+  arrowXOffset: 0,        // optional, defaults to 0
+  data: { type: 'myType', uuid: '...' }  // payload for plotly_clickannotation
+});
+```
+
+Applies to: span load annotations, cable modification annotations, and any new clickable icon annotation on the studio section plot.  
+**Exception:** obstacle annotations use a different rendering model (Unicode markers + label, `showarrow: false`) and must NOT use this helper.
 
 ---
 

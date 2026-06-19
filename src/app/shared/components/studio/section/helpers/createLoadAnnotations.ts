@@ -1,10 +1,8 @@
 import * as Plotly from 'plotly.js-dist-min';
 import { CreatePlotParams } from './createPlot';
 import { cloneDeep } from 'lodash';
-
-const LOAD_COLOR = '#4A355A';
-const LOAD_ICON = '&#xf5cd;';
-const MARKING_ICON = '&#xf08d;';
+import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
+import { LOAD_ARROW_Y_OFFSET, LOAD_COLOR, LOAD_ICON, MARKING_ICON } from './createLoadAnnotations.constantes';
 
 /**
  * Data payload attached to a Plotly span load annotation for click event handling.
@@ -28,27 +26,6 @@ export enum LoadType {
   MARKING = 'marking'
 }
 
-const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
-  xref: 'x' as const,
-  yref: 'y' as const,
-  ax: 0,
-  ay: -50,
-  showarrow: true,
-  arrowhead: 0,
-  startarrowhead: 6,
-  arrowcolor: LOAD_COLOR,
-  captureevents: true,
-  bordercolor: LOAD_COLOR,
-  borderpad: 6,
-  bgcolor: 'rgba(0,0,0,0)',
-  font: {
-    family: 'FontAwesome',
-    color: LOAD_COLOR,
-    size: 8
-  },
-  arrowwidth: 1
-};
-
 /**
  * Creates Plotly annotation objects representing span loads on the section plot.
  * Each annotation displays an icon (load or marking) positioned at the load coordinates.
@@ -63,15 +40,17 @@ export const createLoadAnnotations = (plotParams: CreatePlotParams): Partial<Plo
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
     if (spanLoad && spanIndex + plotParams.startSupport in load_coords) {
       const current_load_coord = load_coords[spanIndex + plotParams.startSupport];
-      annotations.push({
-        ...BASE_ANNOTATION,
-        x: side === 'face' && view === '2d' ? current_load_coord[1] : current_load_coord[0],
-        y: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
-        // z and data are non-standard Plotly annotation properties used for 3D rendering and event handling
-        z: current_load_coord[2],
-        text: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON,
-        data: { type: 'spanLoad', supportUuid: spanLoad.supportUuid } as SpanLoadAnnotationData
-      } as Partial<Plotly.Annotations>);
+      annotations.push(
+        buildClickableIconAnnotation({
+          arrowTipX: side === 'face' && view === '2d' ? current_load_coord[1] : current_load_coord[0],
+          arrowTipY: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
+          arrowTipZ: current_load_coord[2],
+          icon: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON,
+          color: LOAD_COLOR,
+          arrowYOffset: LOAD_ARROW_Y_OFFSET,
+          data: { type: 'spanLoad', supportUuid: spanLoad.supportUuid }
+        })
+      );
     }
   });
   return annotations;
