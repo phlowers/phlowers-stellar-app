@@ -77,12 +77,12 @@ export class PapotoComponent {
     const span = this.measureData().span;
     const litData = this.plotService.litData();
 
-    if (span?.length !== 2 || !litData?.[field]) {
+    if (span?.length !== 2 || !litData?.output_parameters[field]) {
       return null;
     }
 
     const [leftIndex] = span;
-    const value = litData[field][leftIndex];
+    const value = litData.output_parameters[field][leftIndex];
 
     return value ?? null;
   }

@@ -12,7 +12,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { AxesNorms } from '@shared/types/plot.types';
+import { ScalingFactors } from '@shared/types/plot.types';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 
 @Component({
@@ -104,14 +104,14 @@ export class ScaleViewComponent {
     this.popover()?.toggle(event);
   }
 
-  private readonly scaleNormsMap: Record<string, AxesNorms> = {
+  private readonly scaleNormsMap: Record<string, ScalingFactors> = {
     plan: { x: 0.2, y: 1, z: 1, aspectMode: 'manual' },
     geo: { x: 1, y: 1, z: 1, aspectMode: 'manual' },
     celeste: { x: 1, y: 1, z: 0.5, aspectMode: 'manual' },
     auto: { x: 1, y: 1, z: 1, aspectMode: 'data' }
   };
 
-  private getScaleNorms(scale: string): AxesNorms {
+  private getScaleNorms(scale: string): ScalingFactors {
     return this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
   }
 
@@ -123,9 +123,8 @@ export class ScaleViewComponent {
     this.resolutionService.setResolution(resolution);
     await this.resolutionService.applyResolution(resolution);
 
-    const norms = this.getScaleNorms(scale);
-    this.plotOptionsService.setBaseScaleFactors(norms);
-    this.plotOptionsService.setAxesNorms(norms);
+    const factors = this.getScaleNorms(scale);
+    this.plotOptionsService.setScalingFactors(factors);
 
     await this.plotService.refreshProjection();
     this.popoverOpen.set(false);

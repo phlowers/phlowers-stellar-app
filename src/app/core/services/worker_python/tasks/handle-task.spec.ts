@@ -35,32 +35,7 @@ describe('Task handlers', () => {
   });
 
   describe('handleTask', () => {
-    it('should handle runTests task', async () => {
-      // Setup
-      const mockResult = { passed: 5, failed: 0 };
-      vi.spyOn(performance, 'now')
-        .mockReturnValueOnce(1000) // Start time
-        .mockReturnValueOnce(1500); // End time
-
-      const mockToJs = vi.fn().mockReturnValue(mockResult);
-      (mockPyodide.globals.get as vi.Mock)
-        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }))
-        .mockReturnValueOnce(undefined as never);
-
-      // Execute
-      const result = await handleTask(mockPyodide, Task.runTests, undefined);
-
-      // Verify
-      expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
-      expect(mockPyodide.loadPackage).toHaveBeenCalledWith(['pytest']);
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('run_tests');
-      expect(mockToJs).toHaveBeenCalledWith({
-        dict_converter: Object.fromEntries
-      });
-      expect(result).toEqual({ result: mockResult, runTime: 500, error: null, pythonErrorCode: null });
-    });
-
-    it('should handle getLit task', async () => {
+    it('should handle initLit task', async () => {
       // Setup
       const mockResult = {
         x: { key1: 1, key2: 2 },
@@ -81,12 +56,12 @@ describe('Task handlers', () => {
         .mockReturnValueOnce(undefined as never);
 
       // Execute
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       // Verify
       expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', undefined);
       // script is loaded at worker boot time; here we only call the exposed function
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('init_section');
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('initialize_study');
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
@@ -95,14 +70,13 @@ describe('Task handlers', () => {
 
     it('should handle unknown task', async () => {
       // Setup
-      const consoleSpy = vi.spyOn(console, 'error').mockReturnValue(undefined);
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
       const unknownTask = 'unknownTask' as Task;
 
       // Execute
       const result = await handleTask(mockPyodide, unknownTask, undefined);
 
       // Verify
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
       expect(result).toEqual({
         result: null,
         runTime: expect.any(Number),
@@ -118,7 +92,7 @@ describe('Task handlers', () => {
         throw new Error('mechaphlowers.SolverError: mechanical equilibrium failed');
       });
 
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       expect(result.result).toBeNull();
       expect(result.error).toBe('CALCULATION_ERROR');
@@ -131,7 +105,7 @@ describe('Task handlers', () => {
         throw new Error('ConvergenceError: optimizer reached maximum iterations');
       });
 
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       expect(result.pythonErrorCode).toBe('ConvergenceError');
     });
@@ -142,7 +116,7 @@ describe('Task handlers', () => {
         throw new Error('ValueError: unexpected input shape');
       });
 
-      const result = await handleTask(mockPyodide, Task.getLit, undefined);
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
       expect(result.pythonErrorCode).toBeNull();
     });

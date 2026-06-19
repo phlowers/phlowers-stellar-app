@@ -153,32 +153,39 @@ describe('SectionPlotComponent', () => {
   let fixture: ComponentFixture<SectionPlotComponent>;
 
   const mockLitData: GetSectionOutput = {
-    supports: [[[1, 2, 3, 4, 5]]],
-    insulators: [[[10, 20, 30, 40, 50]]],
-    spans: [[[100, 200, 300, 400, 500]]],
-    line_angle: [],
-    vtl_under_chain: [],
-    vtl_under_console: [],
-    r_under_chain: [],
-    r_under_console: [],
-    ground_altitude: [],
-    load_angle: [],
-    displacement: [],
-    loads_coords: {},
-    span_length: [],
-    elevation: [],
-    parameter: [],
-    tension_sup: [],
-    tension_inf: [],
-    L0: [],
-    horizontal_distance: [],
-    arc_length: [],
-    T_h: [],
-    slope_left: [],
-    slope_right: [],
-    sag: [],
-    sag_s2: [],
-    utilization_rate: []
+    coords: {
+      supports: [[[1, 2, 3, 4, 5]]],
+      insulators: [[[10, 20, 30, 40, 50]]],
+      spans: [[[100, 200, 300, 400, 500]]],
+      obstacles: null,
+      distances: null,
+      loads: {}
+    },
+    output_parameters: {
+      line_angle: [],
+      vtl_under_chain: [],
+      vtl_under_console: [],
+      r_under_chain: [],
+      r_under_console: [],
+      ground_altitude: [],
+      load_angle: [],
+      displacement: [],
+      loads_coords: {},
+      span_length: [],
+      utilization_rate: [],
+      elevation: [],
+      parameter: [],
+      tension_sup: [],
+      tension_inf: [],
+      L0: [],
+      horizontal_distance: [],
+      arc_length: [],
+      T_h: [],
+      slope_left: [],
+      slope_right: [],
+      sag: [],
+      sag_s2: []
+    }
   };
 
   const mockPlotOptions: PlotOptions = {
@@ -241,7 +248,8 @@ describe('SectionPlotComponent', () => {
     selectedDisplayOptions: selectedDisplayOptionsSignal,
     camera: cameraSignal,
     isFreePositioningMode: isFreePositioningModeSignal,
-    axesNorms: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
+    scalingFactors: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
+    aspectRatio: signal({ x: 1, y: 1, z: 1 }),
     refreshCamera: noopMock
   };
 
@@ -797,32 +805,39 @@ describe('SectionPlotComponent', () => {
   describe('Edge Cases', () => {
     it('should handle empty litData', async () => {
       const emptyData: GetSectionOutput = {
-        supports: [],
-        insulators: [],
-        spans: [],
-        line_angle: [],
-        vtl_under_chain: [],
-        vtl_under_console: [],
-        r_under_chain: [],
-        r_under_console: [],
-        ground_altitude: [],
-        load_angle: [],
-        displacement: [],
-        loads_coords: {},
-        span_length: [],
-        elevation: [],
-        parameter: [],
-        tension_sup: [],
-        tension_inf: [],
-        L0: [],
-        horizontal_distance: [],
-        arc_length: [],
-        T_h: [],
-        slope_left: [],
-        slope_right: [],
-        sag: [],
-        sag_s2: [],
-        utilization_rate: []
+        coords: {
+          supports: [],
+          insulators: [],
+          spans: [],
+          obstacles: null,
+          distances: null,
+          loads: {}
+        },
+        output_parameters: {
+          line_angle: [],
+          vtl_under_chain: [],
+          vtl_under_console: [],
+          r_under_chain: [],
+          r_under_console: [],
+          ground_altitude: [],
+          load_angle: [],
+          displacement: [],
+          loads_coords: {},
+          span_length: [],
+          utilization_rate: [],
+          elevation: [],
+          parameter: [],
+          tension_sup: [],
+          tension_inf: [],
+          L0: [],
+          horizontal_distance: [],
+          arc_length: [],
+          T_h: [],
+          slope_left: [],
+          slope_right: [],
+          sag: [],
+          sag_s2: []
+        }
       };
       litDataSignal.set(emptyData);
 

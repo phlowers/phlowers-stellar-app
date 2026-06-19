@@ -6,7 +6,7 @@
  */
 
 import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
-import { AxesNorms, View } from '@shared/types/plot.types';
+import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PoseResults } from '@shared/domain/models/section.model';
 
@@ -20,10 +20,8 @@ import { PoseResults } from '@shared/domain/models/section.model';
  * @category Worker Types
  */
 export enum Task {
-  //  Run unit tests in Python environment
-  runTests = 'runTests',
-  //  Calculate line geometry (LIT - Ligne Informatisée de Transport)
-  getLit = 'getLit',
+  //  Initialize line geometry (LIT - Ligne Informatisée de Transport)
+  initLit = 'initLit',
   // Change climate/load state and recalculate
   changeState = 'changeState',
   // Refresh the projection view
@@ -44,14 +42,14 @@ export enum Task {
   setResolution = 'setResolution',
   // Get Python-side configuration constants
   getConfig = 'getConfig',
-  // Add obstacles coordinates
-  addObstacle = 'addObstacle',
+  // Add obstacles in bulk
+  addBulkObstacles = 'addBulkObstacles',
+  // Add a single obstacle
+  addSingleObstacle = 'addSingleObstacle',
   // Delete a single obstacle from the middleware state by UUID
   deleteObstacle = 'deleteObstacle',
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
-  // calculate obstacles distances
-  calculateObstaclesDistances = 'calculateObstaclesDistances',
   /** Apply a cable length modification (lengthen or shorten) on a span */
   cableModification = 'cableModification',
   // get aspect ratio for plotting scale
@@ -122,22 +120,32 @@ export enum TaskError {
 }
 
 /**
- * Output structure from section geometry calculations.
- *
- * @remarks
- * Contains all geometric data needed to display the power line section,
- * including span curves, support positions, and calculated forces.
+ * Coordinate data from the position engine's get_coordinates output.
  *
  * @category Worker Types
  */
-export interface GetSectionOutput {
+export interface SectionCoords {
   /** 3D coordinates of span catenary curves */
   spans: number[][][];
-  /** 3D coordinates of insulator chains */
-  insulators: number[][][];
   /** 3D coordinates of support structures */
   supports: number[][][];
-  /** Line angle at each support (degrees) */
+  /** 3D coordinates of insulator chains */
+  insulators: number[][][];
+  /** Obstacle coordinate arrays keyed by UUID from position engine (null if none registered) */
+  obstacles: Record<string, number[][]> | null;
+  /** Distance data from position engine keyed by obstacle UUID (null if none computed) */
+  distances: Record<string, unknown> | null;
+  /** Coordinates of applied loads by support UUID */
+  loads: Record<string, number[]>;
+}
+
+/**
+ * Computed output parameters from the balance engine.
+ *
+ * @category Worker Types
+ */
+export interface SectionOutputParameters {
+  /** Line angle at each support (grad) */
   line_angle: number[];
   /** VTL under chain for each support */
   vtl_under_chain: number[][];
@@ -149,21 +157,23 @@ export interface GetSectionOutput {
   r_under_console: number[];
   /** Ground altitude at each support */
   ground_altitude: number[];
-  /** Load angle at each support */
-  load_angle: number[];
   /** Cable displacement values */
   displacement: number[][];
-  /** Coordinates of applied loads by support UUID */
-  loads_coords: Record<string, number[]>;
+  /** Load angle at each support */
+  load_angle: number[];
   /** Span lengths */
   span_length: number[];
+  /** Coordinates of applied loads by support UUID */
+  loads_coords: Record<string, number[]>;
+  /** Utilization rate per span (descending order) */
+  utilization_rate: number[];
   /** Elevation values at each support */
   elevation: number[];
   /** Cable sag parameter (unitless) at each span */
   parameter: number[];
-  // Slope angle of the left support of the span
+  /** Slope angle of the left support of the span */
   slope_left: number[];
-  // Slope angle of the right support of the span
+  /** Slope angle of the right support of the span */
   slope_right: number[];
   /** Superior (upper) tension at each support (daN) */
   tension_sup: number[];
@@ -177,15 +187,32 @@ export interface GetSectionOutput {
   arc_length: number[];
   /** Horizontal component of cable tension at each span (daN) */
   T_h: number[];
-  // sag S1 and S2
+  /** Sag S1 */
   sag: number[];
+  /** Sag S2 */
   sag_s2: number[];
-  // obstacles coordinates (merged from obstacle tasks or refreshProjection)
+}
+
+/**
+ * Output structure from section geometry calculations (get_coordinates).
+ *
+ * @remarks
+ * Contains nested coords (geometry) and output_parameters (computed values).
+ * The optional `obstacles` field holds structured annotation data merged by
+ * TypeScript from refreshProjection — it is NOT part of the Python output.
+ *
+ * @category Worker Types
+ */
+export interface GetSectionOutput {
+  /** Coordinate arrays for rendering section geometry */
+  coords: SectionCoords;
+  /** Computed parameters from the balance/span engine */
+  output_parameters: SectionOutputParameters;
+  /** Structured obstacle annotations (merged from refreshProjection, not from Python directly) */
   obstacles?: {
     uuid: string;
     points: [number, number, number][];
   }[];
-  utilization_rate: number[];
 }
 
 /**
@@ -229,10 +256,8 @@ export enum LogLevel {
  * @category Worker Types
  */
 export interface TaskInputs {
-  /** Inputs for getLit task */
-  [Task.getLit]: { section: Section; cable: CatalogCable };
-  /** Inputs for runTests task */
-  [Task.runTests]: undefined;
+  /** Inputs for initLit task: initialize the section study in the engine */
+  [Task.initLit]: { section: Section; cable: CatalogCable; obstacles?: Obstacle[] };
   /** Inputs for changeState task */
   [Task.changeState]: {
     climate: ClimateCharge;
@@ -306,9 +331,16 @@ export interface TaskInputs {
   };
   /** Inputs for getConfig task: no inputs */
   [Task.getConfig]: undefined;
-  // Inputs for addObstacle task: all current obstacles to register at once
-  [Task.addObstacle]: {
+  // Inputs for addBulkObstacles task: all current obstacles to register at once
+  [Task.addBulkObstacles]: {
     obstacles: Obstacle[];
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  // Inputs for addSingleObstacle task: one obstacle from the form
+  [Task.addSingleObstacle]: {
+    obstacle: Obstacle;
     startSupport: number;
     endSupport: number;
     view: View;
@@ -322,13 +354,6 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  // Inputs for calculateObstaclesDistances task
-  [Task.calculateObstaclesDistances]: {
-    obstacles: Obstacle[];
-    startSupport: number;
-    endSupport: number;
-    view: View;
-  };
   /** Inputs for cableModification task */
   [Task.cableModification]: {
     spanIndex: number;
@@ -341,7 +366,10 @@ export interface TaskInputs {
     azimuth: number;
     windDirection: string;
   };
-  [Task.getAspectRatio]: AxesNorms & {
+  [Task.getAspectRatio]: {
+    x: number;
+    y: number;
+    z: number;
     startSupport: number;
     endSupport: number;
     view: View;
@@ -379,9 +407,9 @@ export interface TaskInputs {
  * Obstacle-specific output from Python obstacle registration tasks.
  *
  * @remarks
- * Returned by `addObstacle`, `deleteObstacle`, and `clearObstacles` tasks.
+ * Returned by `refreshProjection` task.
  * Contains only the rendered 3D positions of the registered obstacles — not the full
- * section geometry. Use `getLit` when full `GetSectionOutput` is needed.
+ * section geometry. Use `initLit` + `refreshProjection` when full `GetSectionOutput` is needed.
  *
  * @category Worker Types
  */
@@ -425,12 +453,10 @@ export interface Localization {
  * @category Worker Types
  */
 export interface TaskOutputs {
-  /** Output from getLit task: section geometry with optional base state comparison */
-  [Task.getLit]: GetSectionWithBaseOutput;
-  /** Output from runTests task: no output data */
-  [Task.runTests]: undefined;
-  /** Output from changeState task: recalculated geometry with optional base state */
-  [Task.changeState]: GetSectionWithBaseOutput;
+  /** Output from initLit task: initialization acknowledgement */
+  [Task.initLit]: { success: boolean };
+  /** Output from changeState task: acknowledgement that state was changed in the engine */
+  [Task.changeState]: { success: boolean };
   /** Output from refreshProjection task: reprojected geometry with optional base state */
   [Task.refreshProjection]: {
     sectionOutput: GetSectionWithBaseOutput;
@@ -455,7 +481,7 @@ export interface TaskOutputs {
     chargeLIfPulley: number;
   };
   /** Output from setLogLevel task */
-  [Task.setLogLevel]: undefined;
+  [Task.setLogLevel]: { success: boolean };
   /** Output from temperatureCalculation task */
   [Task.temperatureCalculation]: {
     cableSolarFlux: number;
@@ -477,14 +503,14 @@ export interface TaskOutputs {
   [Task.getConfig]: {
     resolution: number;
   };
-  // Output from addObstacle task: rendered positions of all currently registered obstacles
-  [Task.addObstacle]: ObstacleOutput;
-  // Output from deleteObstacle task: rendered positions of remaining registered obstacles
-  [Task.deleteObstacle]: ObstacleOutput;
-  // Output from clearObstacles task: empty obstacle list
-  [Task.clearObstacles]: ObstacleOutput;
-  // Output from calculateObstaclesDistances task
-  [Task.calculateObstaclesDistances]: Distance[];
+  // Output from addBulkObstacles task: registration acknowledgement
+  [Task.addBulkObstacles]: { success: boolean };
+  // Output from addSingleObstacle task: registration acknowledgement
+  [Task.addSingleObstacle]: { success: boolean };
+  // Output from deleteObstacle task: registration acknowledgement
+  [Task.deleteObstacle]: { success: boolean };
+  // Output from clearObstacles task: registration acknowledgement
+  [Task.clearObstacles]: { success: boolean };
   /** Output from cableModification task: recalculated geometry with optional base state */
   [Task.cableModification]: GetSectionWithBaseOutput;
   [Task.getAspectRatio]: {

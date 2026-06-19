@@ -8,7 +8,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from mechaphlowers import BalanceEngine, CableArray, PlotEngine, SectionArray
+from mechaphlowers import CableArray, SectionArray, SectionStudy
 from mechaphlowers.data.catalog.catalog import (
     sample_cable_catalog,
 )
@@ -46,7 +46,7 @@ def section_array_arm() -> SectionArray:
 
 
 @pytest.fixture
-def balance_engine_simple(cable_array_AM600: CableArray) -> BalanceEngine:
+def section_study_simple(cable_array_AM600: CableArray) -> SectionStudy:
     section_array = SectionArray(
         pd.DataFrame(
             {
@@ -66,26 +66,15 @@ def balance_engine_simple(cable_array_AM600: CableArray) -> BalanceEngine:
         sagging_temperature=15,
     )
     section_array.add_units({"line_angle": "grad"})
-    return BalanceEngine(
+    return SectionStudy(
         cable_array=cable_array_AM600, section_array=section_array
     )
 
 
-@pytest.fixture
-def plot_engine_base_test(
-    balance_engine_simple: BalanceEngine,
-) -> PlotEngine:
-    return PlotEngine(engine=balance_engine_simple)
-
-
-def test_refresh_projection(
-    balance_engine_simple: BalanceEngine, plot_engine_base_test: PlotEngine
-):
+def test_refresh_projection(section_study_simple: SectionStudy):
     inputs = {'startSupport': 1, 'endSupport': 2, 'view': '3d'}
-    balance_engine_simple.solve_adjustment()
+    section_study_simple.balance_engine.solve_adjustment()
     refresh_projection(
         inputs,
-        balance_engine_simple,
-        plot_engine_base_test,
-        plot_engine_base_test,
+        section_study_simple,
     )

@@ -234,12 +234,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.setupData()
-      .catch((err) => {
-        this.logger.error('Error during data setup', err);
-      })
-      .finally(() => {
-        this.workerService.setup();
-      });
+    this.workerService.setup();
+
+    this.setupData().catch((err) => {
+      this.logger.error('Error during data setup', err);
+    });
   }
 }
