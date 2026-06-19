@@ -13,9 +13,9 @@ from mechaphlowers import SectionStudy, units
 
 from stellar_engine.entities.inputs import ClimateCharge, compute_ice_thickness
 
-logger = logging.getLogger("stellar_engine")
+logger = logging.getLogger("stellar-engine")
 # Set logger level to WARNING so info messages are shown
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.WARNING) # TODO: not sure about the effect of this, but it seems to be necessary to see info messages in the console
 
 
 def apply_span_loads(study: SectionStudy, span_loads: list):
@@ -46,7 +46,6 @@ def parse_span_loads(
                         span_length - span["loadPosition"]
                     )
                 else:
-                    # use logger instead?
                     logger.warning(
                         "Span load index %s is out of bounds for span_length array (size %s). "
                         "Defaulting load position to 0.",
@@ -77,10 +76,8 @@ def parse_span_loads(
 def change_state(
     change_state_inputs: dict,
     study: SectionStudy,
-    base_study: SectionStudy,
 ):
     climate = ClimateCharge(**change_state_inputs["climate"])
-    # print(change_state_inputs)
     logger.debug("python_inputs: %s", change_state_inputs)
     wind_pressure = climate.windPressure
     cable_temperature = climate.cableTemperature
@@ -96,5 +93,4 @@ def change_state(
         wind_direction="clockwise",
     )
 
-    # TODO: weird consistency base/current engine
     return {"success": True}

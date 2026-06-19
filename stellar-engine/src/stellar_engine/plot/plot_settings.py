@@ -31,7 +31,8 @@ def get_aspect_ratio(
             z_scale=z_scale,
         )
         logger.debug(f"Aspect ratio result: {result}")
-    except Exception as e:
-        logger.error(f"Error computing aspect ratio: {e}")
+    except Exception:
+        logger.exception("Error computing aspect ratio")
+        raise
 
     return result

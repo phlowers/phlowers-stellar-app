@@ -47,7 +47,6 @@ try {
   postMessage({ loadTime });
   log('debug', 'Pyodide loaded', loadTime);
   for (const file of pythonFiles) {
-    const start = performance.now();
     const preview = getFirstLinePreview(file);
     log('debug', `Running Python file: ${preview}`);
     await pyodide.runPython(file);
