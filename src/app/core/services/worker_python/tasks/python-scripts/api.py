@@ -206,3 +206,11 @@ def set_resolution(js_inputs):
     resolution = python_inputs["resolution"]
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
+
+@debug_log
+def add_single_load(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+
+    
+    return run_solver.add_loading(python_inputs, study)
