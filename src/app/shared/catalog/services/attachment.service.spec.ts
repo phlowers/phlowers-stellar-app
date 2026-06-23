@@ -204,7 +204,7 @@ describe('AttachmentService', () => {
       });
     });
 
-    it('returns an undefined arm length when cross_arm_length is missing', async () => {
+    it('returns a null arm length when cross_arm_length is missing', async () => {
       mockTable.get.mockResolvedValue({
         uuid: 'g',
         created_at: 'c',
@@ -218,7 +218,7 @@ describe('AttachmentService', () => {
 
       expect(result).toEqual({
         towerModel: 'T1',
-        armLength: undefined,
+        armLength: null,
         heightBelowConsole: 12
       });
     });

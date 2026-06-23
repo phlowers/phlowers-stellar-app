@@ -34,7 +34,7 @@ import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
-import type { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.service';
+import type { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,

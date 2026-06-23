@@ -63,6 +63,8 @@ export class AttachmentSetModalComponent {
   attachmentSetNumbers = signal<number[]>([]);
 
   private readonly attachmentService = inject(AttachmentService);
+  /** Monotonic id used to discard stale derived-field backfills (modal reopened/closed mid-await). */
+  private backfillRequestId = 0;
   readonly supportsFilterTable = toSignal(this.attachmentService.distinctSupportNames$);
   readonly catalogLoading = computed(() => this.supportsFilterTable() === undefined);
 
@@ -86,24 +88,26 @@ export class AttachmentSetModalComponent {
     effect(() => {
       if (this.isOpen()) {
         this.resetValues(true);
-        const name = this.support()?.name;
+        const support = this.support();
+        const name = support?.name;
         if (name) {
           this.supportName.set(name);
         }
-        const attachmentSet = this.support()?.attachmentSet;
+        const attachmentSet = support?.attachmentSet;
         if (attachmentSet) {
           this.attachmentSet.set(attachmentSet);
-          this.armLength.set(this.support()?.armLength ?? undefined);
-          this.heightBelowConsole.set(this.support()?.heightBelowConsole ?? undefined);
-          const existingTowerModel = this.support()?.towerModel;
-          if (existingTowerModel) {
-            this.towerModel.set(existingTowerModel);
-          } else if (name) {
-            void this.attachmentService.getAttachmentDetails(name, attachmentSet).then((attachmentDetails) => {
-              if (attachmentDetails) {
-                this.towerModel.set(attachmentDetails.support_tower);
-              }
-            });
+          const armLength = support?.armLength ?? undefined;
+          const heightBelowConsole = support?.heightBelowConsole ?? undefined;
+          const towerModel = support?.towerModel ?? undefined;
+          this.armLength.set(armLength);
+          this.heightBelowConsole.set(heightBelowConsole);
+          this.towerModel.set(towerModel);
+          // Backfill any catalog-derived field the support is missing (e.g. an attachment set
+          // assigned via inline edit / column copy before these fields were resolved). Resolving
+          // them all together keeps arm length / height / tower consistent — a tower-only backfill
+          // would leave the others undefined and validate() would emit 0.
+          if (name && (armLength == null || heightBelowConsole == null || !towerModel)) {
+            void this.backfillDerivedFields(name, attachmentSet);
           }
         }
       }
@@ -113,6 +117,29 @@ export class AttachmentSetModalComponent {
         this.findCoordinates(this.supportName()!);
       }
     });
+  }
+
+  /**
+   * Fills the catalog-derived fields (tower model, arm length, height below console) that the
+   * support does not already carry. Only empty signals are set, so user-edited values are kept.
+   * A request id guards against stale resolutions when the modal is reopened for another support
+   * (or closed) while the lookup is in flight.
+   */
+  private async backfillDerivedFields(supportName: string, attachmentSet: number): Promise<void> {
+    const requestId = ++this.backfillRequestId;
+    const derivedFields = await this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
+    if (requestId !== this.backfillRequestId || !this.isOpen() || !derivedFields) {
+      return;
+    }
+    if (this.armLength() == null) {
+      this.armLength.set(derivedFields.armLength ?? undefined);
+    }
+    if (this.heightBelowConsole() == null) {
+      this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
+    }
+    if (!this.towerModel()) {
+      this.towerModel.set(derivedFields.towerModel ?? undefined);
+    }
   }
 
   validate() {
@@ -162,9 +189,9 @@ export class AttachmentSetModalComponent {
           event.value as number
         );
         if (derivedFields) {
-          this.armLength.set(derivedFields.armLength);
-          this.heightBelowConsole.set(derivedFields.heightBelowConsole);
-          this.towerModel.set(derivedFields.towerModel);
+          this.armLength.set(derivedFields.armLength ?? undefined);
+          this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
+          this.towerModel.set(derivedFields.towerModel ?? undefined);
         }
       }
     }

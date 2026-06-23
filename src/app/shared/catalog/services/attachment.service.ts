@@ -10,22 +10,10 @@ import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, filter, merge, of, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
 import { CatalogAttachmentEntity, CatalogSupportAttachmentEntity } from '@infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
-import { SupportNameEntry } from './attachment.interfaces';
+import { DerivedSupportAttachmentFields, SupportNameEntry } from './attachment.interfaces';
 import { toLegacyEntity } from './attachment.helpers';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
-
-/**
- * Support fields derived from a catalog attachment, shared by the supports
- * table (inline attachment-set edit / copy column) and the attachment-set
- * modal. Centralizes the mapping rules — notably truncating the arm length to
- * one decimal — so both call sites stay consistent.
- */
-export interface DerivedSupportAttachmentFields {
-  towerModel: string | undefined;
-  armLength: number | undefined;
-  heightBelowConsole: number | undefined;
-}
 
 /**
  * Service for managing attachment point catalog data.
@@ -153,8 +141,8 @@ export class AttachmentService {
     if (!details) return undefined;
     return {
       towerModel: details.support_tower,
-      armLength: details.cross_arm_length == null ? undefined : truncateNumberToOneDecimal(details.cross_arm_length),
-      heightBelowConsole: details.attachment_altitude
+      armLength: details.cross_arm_length == null ? null : truncateNumberToOneDecimal(details.cross_arm_length),
+      heightBelowConsole: details.attachment_altitude ?? null
     };
   }
 
