@@ -450,6 +450,36 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.towerModel()).toBeUndefined();
     });
 
+    it('fetches the tower from the catalog when the support has an attachment set but no tower (regression #657)', async () => {
+      // A support whose name + set exist in the catalog, but whose tower was never
+      // resolved (e.g. set via inline edit / column copy before this fix).
+      const supportMissingTower: Support = {
+        ...mockSupport,
+        name: 'Support A',
+        attachmentSet: 1,
+        towerModel: null
+      };
+
+      fixture.componentRef.setInput('support', supportMissingTower);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(attachmentServiceMock.getAttachmentDetails).toHaveBeenCalledWith('Support A', 1);
+      expect(component.towerModel()).toBe('Tower Model');
+    });
+
+    it('keeps the existing tower without a catalog lookup when the support already has one', async () => {
+      // mockSupport already carries towerModel 'Tower Model'.
+      fixture.componentRef.setInput('support', mockSupport);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(attachmentServiceMock.getAttachmentDetails).not.toHaveBeenCalled();
+      expect(component.towerModel()).toBe('Tower Model');
+    });
+
     it('should not run effect when modal is closed', async () => {
       // Set initial values
       component.armLength.set(5);

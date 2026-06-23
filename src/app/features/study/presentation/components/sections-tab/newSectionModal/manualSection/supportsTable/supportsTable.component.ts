@@ -230,13 +230,52 @@ export class SupportsTableComponent implements OnInit {
     }
   }
 
-  onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
-    const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
-    changes.forEach((change) => this.supportChange.emit(change));
+  /**
+   * Resolves the tower model for a (support name, attachment set) pair from the
+   * attachment catalog. The tower model lives on the catalog support, not the
+   * attachment set, so a tower exists for any valid support name regardless of
+   * which attachment set is chosen.
+   * @returns the catalog tower model, or `undefined` when the pair has no catalog match.
+   */
+  private async resolveTowerModel(
+    supportName: string | null | undefined,
+    attachmentSet: number | null | undefined
+  ): Promise<string | undefined> {
+    if (!supportName || attachmentSet == null) {
+      return undefined;
+    }
+    const attachmentDetails = await this.attachmentService.getAttachmentDetails(supportName, attachmentSet);
+    return attachmentDetails?.support_tower;
   }
 
-  copyColumn(header: keyof Support) {
+  async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
+    const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
+    changes.forEach((change) => this.supportChange.emit(change));
+    if (field === 'attachmentSet') {
+      const supportName = this.supports().find((support) => support.uuid === uuid)?.name;
+      const towerModel = await this.resolveTowerModel(supportName, value as number | null);
+      if (towerModel !== undefined) {
+        this.supportChange.emit({ uuid, support: { towerModel } });
+      }
+    }
+  }
+
+  async copyColumn(header: keyof Support) {
     const changes = buildCopyColumnChanges(this.supports(), header);
+    if (header === 'attachmentSet') {
+      const copiedAttachmentSet = this.supports()[0]?.attachmentSet;
+      const towerModels = await Promise.all(
+        // Resolve each support's tower from its OWN name (the copy only spreads the
+        // attachment set number), so rows with different support names get their own tower.
+        this.supports().map((support) => this.resolveTowerModel(support.name, copiedAttachmentSet))
+      );
+      this.supports().forEach((support, index) => {
+        const towerModel = towerModels[index];
+        if (towerModel !== undefined) {
+          changes.push({ uuid: support.uuid, support: { towerModel } });
+        }
+      });
+    }
     changes.forEach((change) => this.supportChange.emit(change));
   }
 
@@ -244,7 +283,7 @@ export class SupportsTableComponent implements OnInit {
     if (this.mode() === 'view') {
       return;
     }
-    this.copyColumn(header);
+    void this.copyColumn(header);
   }
 
   openAttachmentSetModal(uuid: string) {

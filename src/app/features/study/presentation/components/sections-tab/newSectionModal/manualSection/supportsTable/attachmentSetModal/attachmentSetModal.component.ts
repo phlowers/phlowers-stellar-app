@@ -96,7 +96,16 @@ export class AttachmentSetModalComponent {
           this.attachmentSet.set(attachmentSet);
           this.armLength.set(this.support()?.armLength ?? undefined);
           this.heightBelowConsole.set(this.support()?.heightBelowConsole ?? undefined);
-          this.towerModel.set(this.support()?.towerModel ?? undefined);
+          const existingTowerModel = this.support()?.towerModel;
+          if (existingTowerModel) {
+            this.towerModel.set(existingTowerModel);
+          } else if (name) {
+            void this.attachmentService.getAttachmentDetails(name, attachmentSet).then((attachmentDetails) => {
+              if (attachmentDetails) {
+                this.towerModel.set(attachmentDetails.support_tower);
+              }
+            });
+          }
         }
       }
     });
@@ -148,14 +157,20 @@ export class AttachmentSetModalComponent {
     if (key === 'attachment_set') {
       this.attachmentSet.set(event.value as number);
       const currentSupportName = this.supportName();
-      if (!currentSupportName) return;
-      const item = await this.attachmentService.getAttachmentDetails(currentSupportName, event.value as number);
-      if (item) {
-        this.armLength.set(
-          item.cross_arm_length != null ? truncateNumberToOneDecimal(item.cross_arm_length) : undefined
+      if (currentSupportName) {
+        const attachmentDetails = await this.attachmentService.getAttachmentDetails(
+          currentSupportName,
+          event.value as number
         );
-        this.heightBelowConsole.set(item.attachment_altitude);
-        this.towerModel.set(item.support_tower);
+        if (attachmentDetails) {
+          this.armLength.set(
+            attachmentDetails.cross_arm_length == null
+              ? undefined
+              : truncateNumberToOneDecimal(attachmentDetails.cross_arm_length)
+          );
+          this.heightBelowConsole.set(attachmentDetails.attachment_altitude);
+          this.towerModel.set(attachmentDetails.support_tower);
+        }
       }
     }
   }

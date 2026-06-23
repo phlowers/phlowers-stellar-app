@@ -35,7 +35,8 @@ let distinctSupportNamesSubject: Subject<string[]>;
 const mockAttachmentService = {
   get distinctSupportNames$() {
     return distinctSupportNamesSubject;
-  }
+  },
+  getAttachmentDetails: vi.fn().mockResolvedValue(undefined)
 };
 
 let workerReadySubject: BehaviorSubject<boolean>;
@@ -291,10 +292,9 @@ describe('SupportsTableComponent', () => {
       });
     });
 
-    it("should copy the first support's attachmentSet to all supports", () => {
-      component.onSupportNumberDoubleClick('attachmentSet');
+    it("should copy the first support's attachmentSet to all supports", async () => {
+      await component.copyColumn('attachmentSet');
 
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         support: { attachmentSet: 1 }
@@ -532,6 +532,80 @@ describe('SupportsTableComponent', () => {
         uuid: 'support1',
         support: { chainName: 'Non-existent Chain' }
       });
+    });
+  });
+
+  // Regression tests for #657: the tower model must follow the attachment set
+  // through inline edits and column copy, resolving from each support's OWN name.
+  describe('tower model resolution (regression #657)', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      // Catalog returns a tower derived from the support name so we can assert
+      // that each row resolves its own tower, not the first support's.
+      mockAttachmentService.getAttachmentDetails.mockImplementation((supportName: string) =>
+        Promise.resolve({ support_tower: `tower-of-${supportName}` })
+      );
+    });
+
+    it('copies the attachment set AND resolves each tower from its own support name', async () => {
+      await component.copyColumn('attachmentSet');
+
+      // First support's attachment set (1) is copied to every row...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { attachmentSet: 1 }
+      });
+      // ...and each row's tower is looked up with that set under its OWN name.
+      expect(mockAttachmentService.getAttachmentDetails).toHaveBeenCalledWith('Support 1', 1);
+      expect(mockAttachmentService.getAttachmentDetails).toHaveBeenCalledWith('Support 2', 1);
+      expect(mockAttachmentService.getAttachmentDetails).toHaveBeenCalledWith('Support 3', 1);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { towerModel: 'tower-of-Support 1' }
+      });
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support 2' }
+      });
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support3',
+        support: { towerModel: 'tower-of-Support 3' }
+      });
+    });
+
+    it('resolves and emits the tower when the attachment set is edited inline', async () => {
+      await component.onSupportFieldChange('support2', 'attachmentSet', 7);
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { attachmentSet: 7 }
+      });
+      // The tower is fetched for the row's own support name + the new set.
+      expect(mockAttachmentService.getAttachmentDetails).toHaveBeenCalledWith('Support 2', 7);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support 2' }
+      });
+    });
+
+    it('does not look up a tower for non-attachmentSet field edits', async () => {
+      await component.onSupportFieldChange('support1', 'number', 5);
+
+      expect(mockAttachmentService.getAttachmentDetails).not.toHaveBeenCalled();
+    });
+
+    it('does not emit a tower change when the catalog has no match', async () => {
+      mockAttachmentService.getAttachmentDetails.mockResolvedValue(undefined);
+
+      await component.onSupportFieldChange('support1', 'attachmentSet', 99);
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { attachmentSet: 99 }
+      });
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith(
+        expect.objectContaining({ support: expect.objectContaining({ towerModel: expect.anything() }) })
+      );
     });
   });
 
