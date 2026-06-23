@@ -184,6 +184,59 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('getDerivedSupportFields', () => {
+    it('maps the matching attachment to tower, arm length and height, truncating arm length to one decimal', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1, attachment_altitude: 25.5, cross_arm_length: 3.456 }]
+      });
+
+      const result = await service.getDerivedSupportFields('S1', 1);
+
+      expect(result).toEqual({
+        towerModel: 'T1',
+        armLength: 3.4,
+        heightBelowConsole: 25.5
+      });
+    });
+
+    it('returns an undefined arm length when cross_arm_length is missing', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1, attachment_altitude: 12 }]
+      });
+
+      const result = await service.getDerivedSupportFields('S1', 1);
+
+      expect(result).toEqual({
+        towerModel: 'T1',
+        armLength: undefined,
+        heightBelowConsole: 12
+      });
+    });
+
+    it('returns undefined when no attachment matches', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1 }]
+      });
+
+      expect(await service.getDerivedSupportFields('S1', 99)).toBeUndefined();
+    });
+  });
+
   describe('addSupportNamesIfAbsent', () => {
     it('does nothing when entries are empty', async () => {
       await service.addSupportNamesIfAbsent([]);

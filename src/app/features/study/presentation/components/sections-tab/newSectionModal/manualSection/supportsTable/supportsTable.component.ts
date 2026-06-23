@@ -34,6 +34,7 @@ import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import type { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.service';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,
@@ -230,22 +231,14 @@ export class SupportsTableComponent implements OnInit {
     }
   }
 
-  /**
-   * Resolves the tower model for a (support name, attachment set) pair from the
-   * attachment catalog. The tower model lives on the catalog support, not the
-   * attachment set, so a tower exists for any valid support name regardless of
-   * which attachment set is chosen.
-   * @returns the catalog tower model, or `undefined` when the pair has no catalog match.
-   */
-  private async resolveTowerModel(
+  private async resolveAttachmentFields(
     supportName: string | null | undefined,
     attachmentSet: number | null | undefined
-  ): Promise<string | undefined> {
+  ): Promise<DerivedSupportAttachmentFields | undefined> {
     if (!supportName || attachmentSet == null) {
       return undefined;
     }
-    const attachmentDetails = await this.attachmentService.getAttachmentDetails(supportName, attachmentSet);
-    return attachmentDetails?.support_tower;
+    return this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
   }
 
   async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
@@ -253,9 +246,9 @@ export class SupportsTableComponent implements OnInit {
     changes.forEach((change) => this.supportChange.emit(change));
     if (field === 'attachmentSet') {
       const supportName = this.supports().find((support) => support.uuid === uuid)?.name;
-      const towerModel = await this.resolveTowerModel(supportName, value as number | null);
-      if (towerModel !== undefined) {
-        this.supportChange.emit({ uuid, support: { towerModel } });
+      const catalogFields = await this.resolveAttachmentFields(supportName, value as number | null);
+      if (catalogFields) {
+        this.supportChange.emit({ uuid, support: catalogFields });
       }
     }
   }
@@ -264,15 +257,15 @@ export class SupportsTableComponent implements OnInit {
     const changes = buildCopyColumnChanges(this.supports(), header);
     if (header === 'attachmentSet') {
       const copiedAttachmentSet = this.supports()[0]?.attachmentSet;
-      const towerModels = await Promise.all(
-        // Resolve each support's tower from its OWN name (the copy only spreads the
-        // attachment set number), so rows with different support names get their own tower.
-        this.supports().map((support) => this.resolveTowerModel(support.name, copiedAttachmentSet))
+      const catalogFieldsList = await Promise.all(
+        // Resolve each support's catalog fields from its OWN name (the copy only spreads the
+        // attachment set number), so rows with different support names get their own values.
+        this.supports().map((support) => this.resolveAttachmentFields(support.name, copiedAttachmentSet))
       );
       this.supports().forEach((support, index) => {
-        const towerModel = towerModels[index];
-        if (towerModel !== undefined) {
-          changes.push({ uuid: support.uuid, support: { towerModel } });
+        const catalogFields = catalogFieldsList[index];
+        if (catalogFields) {
+          changes.push({ uuid: support.uuid, support: catalogFields });
         }
       });
     }

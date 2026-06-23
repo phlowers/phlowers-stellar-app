@@ -179,7 +179,19 @@ describe('AttachmentSetModalComponent', () => {
         .fn()
         .mockImplementation((name: string, set: number) =>
           Promise.resolve(mockAttachments.find((a) => a.support_name === name && a.attachment_set === set))
-        )
+        ),
+      getDerivedSupportFields: vi.fn().mockImplementation((name: string, set: number) => {
+        const detail = mockAttachments.find((a) => a.support_name === name && a.attachment_set === set);
+        return Promise.resolve(
+          detail
+            ? {
+                towerModel: detail.support_tower,
+                armLength: detail.cross_arm_length,
+                heightBelowConsole: detail.attachment_altitude
+              }
+            : undefined
+        );
+      })
     } as unknown as vi.Mocked<AttachmentService>;
 
     workerPythonServiceMock = {
@@ -274,7 +286,7 @@ describe('AttachmentSetModalComponent', () => {
     const event = { value: 1 };
     await component.onAttachmentSelect(event, 'attachment_set');
 
-    expect(attachmentServiceMock.getAttachmentDetails).toHaveBeenCalledWith('Support A', 1);
+    expect(attachmentServiceMock.getDerivedSupportFields).toHaveBeenCalledWith('Support A', 1);
     expect(component.armLength()).toBe(2.5);
     expect(component.heightBelowConsole()).toBe(10.5);
   });
