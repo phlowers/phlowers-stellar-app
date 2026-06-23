@@ -244,9 +244,13 @@ export class SupportsTableComponent implements OnInit {
   async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
     const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
     changes.forEach((change) => this.supportChange.emit(change));
-    if (field === 'attachmentSet') {
-      const supportName = this.supports().find((support) => support.uuid === uuid)?.name;
-      const catalogFields = await this.resolveAttachmentFields(supportName, value as number | null);
+    // The catalog-derived fields (tower model, arm length, height below console) depend on the
+    // (support name, attachment set) pair, so re-resolve them whenever either side changes.
+    if (field === 'name' || field === 'attachmentSet') {
+      const support = this.supports().find((support) => support.uuid === uuid);
+      const supportName = field === 'name' ? (value as string | null) : support?.name;
+      const attachmentSet = field === 'attachmentSet' ? (value as number | null) : support?.attachmentSet;
+      const catalogFields = await this.resolveAttachmentFields(supportName, attachmentSet);
       if (catalogFields) {
         this.supportChange.emit({ uuid, support: catalogFields });
       }
@@ -254,15 +258,22 @@ export class SupportsTableComponent implements OnInit {
   }
 
   async copyColumn(header: keyof Support) {
-    const changes = buildCopyColumnChanges(this.supports(), header);
-    if (header === 'attachmentSet') {
-      const copiedAttachmentSet = this.supports()[0]?.attachmentSet;
+    // Snapshot the supports once: the list is read again after the await below, so a
+    // reference captured up front keeps the resolved fields aligned to the same rows.
+    const supports = this.supports();
+    const changes = buildCopyColumnChanges(supports, header);
+    if (header === 'attachmentSet' || header === 'name') {
+      const firstSupport = supports[0];
+      // The copied column is taken from the first support; the other half of the
+      // (support name, attachment set) pair stays per-row, so each row's derived
+      // fields (tower model, arm length, height below console) resolve correctly.
+      const resolveName = (support: Support) => (header === 'name' ? firstSupport?.name : support.name);
+      const resolveSet = (support: Support) =>
+        header === 'attachmentSet' ? firstSupport?.attachmentSet : support.attachmentSet;
       const catalogFieldsList = await Promise.all(
-        // Resolve each support's catalog fields from its OWN name (the copy only spreads the
-        // attachment set number), so rows with different support names get their own values.
-        this.supports().map((support) => this.resolveAttachmentFields(support.name, copiedAttachmentSet))
+        supports.map((support) => this.resolveAttachmentFields(resolveName(support), resolveSet(support)))
       );
-      this.supports().forEach((support, index) => {
+      supports.forEach((support, index) => {
         const catalogFields = catalogFieldsList[index];
         if (catalogFields) {
           changes.push({ uuid: support.uuid, support: catalogFields });

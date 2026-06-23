@@ -328,8 +328,8 @@ describe('SupportsTableComponent', () => {
       });
     });
 
-    it("should copy the first support's name to all supports", () => {
-      component.onSupportNumberDoubleClick('name');
+    it("should copy the first support's name to all supports", async () => {
+      await component.copyColumn('name');
 
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
@@ -579,6 +579,24 @@ describe('SupportsTableComponent', () => {
       });
     });
 
+    it('copies the support name AND resolves each row derived fields from the copied name + its own set', async () => {
+      await component.copyColumn('name');
+
+      // First support's name ('Support 1') is copied to every row...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { name: 'Support 1' }
+      });
+      // ...and each row's fields are looked up with the copied name under its OWN attachment set,
+      // so towers follow the name-clone workflow (#657).
+      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 1', 1);
+      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 1', 2);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support 1', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+    });
+
     it('resolves and emits the derived fields when the attachment set is edited inline', async () => {
       await component.onSupportFieldChange('support2', 'attachmentSet', 7);
 
@@ -595,7 +613,23 @@ describe('SupportsTableComponent', () => {
       });
     });
 
-    it('does not look up derived fields for non-attachmentSet field edits', async () => {
+    it('resolves and emits the derived fields when the support name is edited inline', async () => {
+      await component.onSupportFieldChange('support2', 'name', 'Support X');
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { name: 'Support X' }
+      });
+      // The new name is resolved against the row's current attachment set (2),
+      // so the tower / arm length / height follow support-name edits (#657).
+      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support X', 2);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support X', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+    });
+
+    it('does not look up derived fields for non-name/attachmentSet field edits', async () => {
       await component.onSupportFieldChange('support1', 'number', 5);
 
       expect(mockAttachmentService.getDerivedSupportFields).not.toHaveBeenCalled();
