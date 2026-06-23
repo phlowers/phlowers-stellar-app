@@ -208,25 +208,4 @@ export class PlotService {
       this.plotOptionsService.setAspectRatio(result);
     }
   }
-
-  async reapplyObstacles(): Promise<void> {
-    const section = untracked(() => this.spanService.section());
-    const obstacles = section?.obstacles ?? [];
-    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
-
-    // Restore the load-applied base state before re-adding obstacles
-    if (this.temporaryLoadData) {
-      await this.workerPythonService.runTask(Task.changeState, {
-        climate: this.temporaryLoadData.climate,
-        spanLoads: this.temporaryLoadData.spanLoads
-      });
-    }
-
-    if (obstacles.length) {
-      await this.obstacleStateService.addBulkObstacles(obstacles, plotOptions);
-    }
-
-    // refreshProjection gets all data including obstacles and distances
-    await this.refreshProjection();
-  }
 }
