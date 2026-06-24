@@ -38,6 +38,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
+import { PlotSpanService } from '@services/plot/plot-span.service';
 
 // Mock child component
 @Component({
@@ -305,6 +306,17 @@ describe('ManualSectionComponent', () => {
       component.ngOnInit();
       expect(setupFilterTablesSpy).toHaveBeenCalled();
     });
+
+    it('re-runs the lines filter when the lines catalog import completes', () => {
+      const setupLinesFilterSpy = vi
+        .spyOn(component as unknown as { setupLinesFilter: () => Promise<void> }, 'setupLinesFilter')
+        .mockResolvedValue();
+      component.ngOnInit();
+
+      mockLinesService.imported$.next();
+
+      expect(setupLinesFilterSpy).toHaveBeenCalled();
+    });
   });
 
   describe('setupFilterTables', () => {
@@ -437,6 +449,18 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.maintenance_center_id).toBe('cm1');
       expect(mockSection.regional_team_id).toBe('gmr1');
     });
+
+    it('also constrains other columns by the section values already selected', async () => {
+      mockMaintenanceService.getMaintenance.mockResolvedValue(mockMaintenanceData);
+      // A different column is already set on the section, so the non-selected
+      // columns are filtered by that existing value (the else branch).
+      mockSection.regional_team_id = 'gmr1';
+
+      await component.onMaintenanceSelect({ value: 'cm1' }, 'maintenance_center_id');
+
+      expect(component.maintenanceFilterTable()).toHaveLength(1);
+      expect(component.maintenanceFilterTable()[0].maintenance_center_id).toBe('cm1');
+    });
   });
 
   describe('onLinesSelect', () => {
@@ -489,6 +513,202 @@ describe('ManualSectionComponent', () => {
       await component.onLinesSelect(event, 'voltage_idr');
 
       expect(mockSection.voltage_idr).toBeUndefined();
+    });
+
+    it('auto-corrects the voltage via fallback when selecting a value leaves an empty filtered result', async () => {
+      // link_name is already set, but the chosen voltage matches no line, so the
+      // cascade empties and the fallback recovers line1 by link_name + patches voltage.
+      mockSection.link_name = 'link1';
+      mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
+
+      await component.onLinesSelect({ value: 'MISMATCH_VOLTAGE' }, 'voltage_idr');
+
+      expect(component.linesFilterTable()).toHaveLength(1);
+      expect(component.linesFilterTable()[0].link_idr).toBe('link1');
+      expect(mockSection.voltage_idr).toBe('tension1');
+    });
+  });
+
+  describe('setupFilterTables in view mode', () => {
+    beforeEach(() => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      mockMaintenanceService.getMaintenance.mockResolvedValue(mockMaintenanceData);
+      mockLinesService.getLines.mockResolvedValue(mockLinesData);
+    });
+
+    it('populates the maintenance read-only labels from the section ids', async () => {
+      mockSection.maintenance_team_id = 'maintenance_team1';
+      mockSection.maintenance_center_id = 'cm1';
+      mockSection.regional_team_id = 'gmr1';
+
+      await component.setupFilterTables();
+
+      expect(component.maintenanceTeamRead()).toBe('MAINTENANCE TEAM 1');
+      expect(component.maintenanceCenterRead()).toBe('CM 1');
+      expect(component.regionalTeamRead()).toBe('GMR 1');
+    });
+
+    it('leaves the maintenance read-only labels empty when the section ids do not match', async () => {
+      mockSection.maintenance_team_id = 'unknown';
+      mockSection.maintenance_center_id = 'unknown';
+      mockSection.regional_team_id = 'unknown';
+
+      await component.setupFilterTables();
+
+      expect(component.maintenanceTeamRead()).toBe('');
+      expect(component.maintenanceCenterRead()).toBe('');
+      expect(component.regionalTeamRead()).toBe('');
+    });
+
+    it('populates the link/lit read-only labels from the matching lines', async () => {
+      mockSection.link_name = 'link1';
+      mockSection.lit_code = 'lit1';
+      mockSection.voltage_idr = 'tension1';
+
+      await component.setupFilterTables();
+
+      expect(component.linkAdrRead()).toBe('LINK 1');
+      expect(component.litAdrRead()).toBe('LIT 1');
+    });
+  });
+
+  describe('tab navigation', () => {
+    it('onNextTab switches to the supports tab', () => {
+      component.onNextTab();
+      expect(component.tabValue()).toBe('supports');
+    });
+
+    it('onPreviousTab switches back to the general tab', () => {
+      component.onPreviousTab();
+      expect(component.tabValue()).toBe('general');
+    });
+
+    it('tabValueChange updates the tab value for a non-graphical tab', () => {
+      component.tabValueChange('supports');
+      expect(component.tabValue()).toBe('supports');
+    });
+
+    it('tabValueChange wires the span service and plot options when entering the graphical tab', () => {
+      mockSection.supports = [createSupportMock(), createSupportMock()];
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSetSpy = vi.spyOn(spanService.section, 'set');
+      const plotOptionsChangeSpy = vi
+        .spyOn(component.plotService, 'plotOptionsChange')
+        .mockImplementation(() => undefined);
+
+      component.tabValueChange('graphical');
+
+      expect(component.tabValue()).toBe('graphical');
+      expect(sectionSetSpy).toHaveBeenCalledWith(mockSection);
+      expect(plotOptionsChangeSpy).toHaveBeenCalledWith({ startSupport: 0, endSupport: 2 });
+    });
+  });
+
+  describe('duplicateSupport', () => {
+    it('inserts a copy with a new uuid right after the original', () => {
+      const s1 = createSupportMock();
+      s1.name = 'Original';
+      const s2 = createSupportMock();
+      mockSection.supports = [s1, s2];
+
+      component.duplicateSupport(s1.uuid);
+
+      expect(mockSection.supports.length).toBe(3);
+      expect(mockSection.supports[1].name).toBe('Original');
+      expect(mockSection.supports[1].uuid).not.toBe(s1.uuid);
+      expect(component.sectionChange.emit).toHaveBeenCalled();
+    });
+
+    it('does not insert anything when the uuid is unknown', () => {
+      const s1 = createSupportMock();
+      mockSection.supports = [s1];
+
+      component.duplicateSupport('unknown');
+
+      expect(mockSection.supports.length).toBe(1);
+    });
+  });
+
+  describe('onSectionTypeChange', () => {
+    it('forces the electric phase number to 0 and emits when type is guard', () => {
+      mockSection.electric_phase_number = 3;
+
+      component.onSectionTypeChange({ value: 'guard' });
+
+      expect(mockSection.electric_phase_number).toBe(0);
+      expect(component.sectionChange.emit).toHaveBeenCalled();
+    });
+
+    it('does nothing for a non-guard type', () => {
+      mockSection.electric_phase_number = 3;
+
+      component.onSectionTypeChange({ value: 'conductor' });
+
+      expect(mockSection.electric_phase_number).toBe(3);
+    });
+  });
+
+  describe('onSupportsPageChange', () => {
+    it('updates rows and first index from the page event', () => {
+      component.onSupportsPageChange({ rows: 10, page: 2 });
+
+      expect(component.rowsSupport()).toBe(10);
+      expect(component.firstSupport()).toBe(20);
+    });
+
+    it('falls back to defaults when the event is empty', () => {
+      component.onSupportsPageChange({});
+
+      expect(component.rowsSupport()).toBe(5);
+      expect(component.firstSupport()).toBe(0);
+    });
+  });
+
+  describe('sliderOptions', () => {
+    it('exposes a 1-based translate and a floor/step config', () => {
+      const options = component.sliderOptions();
+
+      expect(options.floor).toBe(0);
+      expect(options.step).toBe(1);
+      expect(options.showTicks).toBe(true);
+      expect(options.translate?.(4, undefined as never)).toBe('5');
+    });
+  });
+
+  describe('updateSliderOptions', () => {
+    it('debounces a change to the plot service for a changed value', () => {
+      vi.useFakeTimers();
+      try {
+        vi.spyOn(component.plotOptionsService, 'plotOptions').mockReturnValue({
+          startSupport: 0,
+          endSupport: 0
+        } as ReturnType<typeof component.plotOptionsService.plotOptions>);
+        const plotOptionsChangeSpy = vi
+          .spyOn(component.plotService, 'plotOptionsChange')
+          .mockImplementation(() => undefined);
+
+        component.updateSliderOptions({ value: 2, highValue: 5 });
+        vi.advanceTimersByTime(2000);
+
+        // The shared lodash-debounced fn collapses to the last call within the window.
+        expect(plotOptionsChangeSpy).toHaveBeenCalledTimes(1);
+        expect(plotOptionsChangeSpy).toHaveBeenCalledWith({ endSupport: 5 });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('does not schedule a change when the values are unchanged or undefined', () => {
+      vi.spyOn(component.plotOptionsService, 'plotOptions').mockReturnValue({
+        startSupport: 0,
+        endSupport: 0
+      } as ReturnType<typeof component.plotOptionsService.plotOptions>);
+      const debounceSpy = vi.fn();
+      component.debounceUpdateSliderOptions = debounceSpy as unknown as typeof component.debounceUpdateSliderOptions;
+
+      component.updateSliderOptions({ value: 0, highValue: undefined });
+
+      expect(debounceSpy).not.toHaveBeenCalled();
     });
   });
 

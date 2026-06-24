@@ -45,6 +45,7 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 
 /**
@@ -139,6 +140,9 @@ export class SupportsTableComponent implements OnInit {
     effect(() => {
       this.updateSupportFilterTables(this.allCatalogSupportNames() ?? []);
     });
+    // Drop derived-field request tokens for supports that no longer exist so the tracker
+    // cannot grow unbounded across a long editing session (e.g. rows added then deleted).
+    effect(() => this.derivedFieldsRequests.retain(this.supports().map((support) => support.uuid)));
   }
 
   private updateSupportFilterTables(catalogNames: string[]): void {
@@ -230,13 +234,68 @@ export class SupportsTableComponent implements OnInit {
     }
   }
 
-  onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
+  /** Latest derived-field resolution per support UUID, used to drop stale async results. */
+  private readonly derivedFieldsRequests = new KeyedLatestRequestTracker<string>();
+
+  async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
     const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
     changes.forEach((change) => this.supportChange.emit(change));
+    // The catalog-derived fields (tower model, arm length, height below console) depend on the
+    // (support name, attachment set) pair, so re-resolve them whenever either side changes.
+    if (field === 'name' || field === 'attachmentSet') {
+      const support = this.supports().find((support) => support.uuid === uuid);
+      const supportName = field === 'name' ? (value as string | null) : support?.name;
+      const attachmentSet = field === 'attachmentSet' ? (value as number | null) : support?.attachmentSet;
+      // Guard against a stale update race: a faster edit of the same row (e.g. typing successive
+      // digits into the attachment-set field) must not be overwritten by an older lookup resolving late.
+      const requestId = this.derivedFieldsRequests.begin(uuid);
+      const catalogFields = await this.attachmentService.resolveDerivedSupportFields(supportName, attachmentSet);
+      if (catalogFields && this.derivedFieldsRequests.isCurrent(uuid, requestId)) {
+        this.supportChange.emit({ uuid, support: catalogFields });
+      }
+    }
   }
 
-  copyColumn(header: keyof Support) {
-    const changes = buildCopyColumnChanges(this.supports(), header);
+  async copyColumn(header: keyof Support) {
+    // Snapshot the supports once: the list is read again after the await below, so a
+    // reference captured up front keeps the resolved fields aligned to the same rows.
+    const supports = this.supports();
+    const changes = buildCopyColumnChanges(supports, header);
+    if (header === 'attachmentSet' || header === 'name') {
+      const firstSupport = supports[0];
+      // The copied column is taken from the first support; the other half of the
+      // (support name, attachment set) pair stays per-row, so each row's derived
+      // fields (tower model, arm length, height below console) resolve correctly.
+      const resolveName = (support: Support) => (header === 'name' ? firstSupport?.name : support.name);
+      const resolveSet = (support: Support) =>
+        header === 'attachmentSet' ? firstSupport?.attachmentSet : support.attachmentSet;
+      // Register a lookup per row up front so a later inline edit of any of these rows
+      // supersedes this copy's derived fields rather than being overwritten by them.
+      const rows = supports.map((support) => ({
+        support,
+        requestId: this.derivedFieldsRequests.begin(support.uuid)
+      }));
+      // Resolve each DISTINCT support name's attachment sets in a single DB read, then derive each
+      // row locally. Copying one name onto many rows would otherwise re-fetch its group once per row.
+      const distinctNames = [...new Set(supports.map(resolveName).filter((name): name is string => !!name))];
+      const fieldsByName = new Map(
+        await Promise.all(
+          distinctNames.map(
+            async (name) =>
+              [name, await this.attachmentService.getDerivedSupportFieldsBySet(name).catch(() => undefined)] as const
+          )
+        )
+      );
+      rows.forEach(({ support, requestId }) => {
+        const name = resolveName(support);
+        const attachmentSet = resolveSet(support);
+        const catalogFields =
+          name != null && attachmentSet != null ? fieldsByName.get(name)?.get(attachmentSet) : undefined;
+        if (catalogFields && this.derivedFieldsRequests.isCurrent(support.uuid, requestId)) {
+          changes.push({ uuid: support.uuid, support: catalogFields });
+        }
+      });
+    }
     changes.forEach((change) => this.supportChange.emit(change));
   }
 
@@ -244,7 +303,7 @@ export class SupportsTableComponent implements OnInit {
     if (this.mode() === 'view') {
       return;
     }
-    this.copyColumn(header);
+    void this.copyColumn(header);
   }
 
   openAttachmentSetModal(uuid: string) {

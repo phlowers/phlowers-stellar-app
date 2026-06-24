@@ -10,6 +10,7 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { vi } from 'vitest';
 
 // Mock child component
@@ -35,7 +36,19 @@ let distinctSupportNamesSubject: Subject<string[]>;
 const mockAttachmentService = {
   get distinctSupportNames$() {
     return distinctSupportNamesSubject;
-  }
+  },
+  getAttachmentDetails: vi.fn().mockResolvedValue(undefined),
+  getDerivedSupportFields: vi.fn().mockResolvedValue(undefined),
+  getDerivedSupportFieldsBySet: vi.fn().mockResolvedValue(new Map()),
+  // Mirrors the real wrapper: applies the (name, set) guard and delegates to getDerivedSupportFields
+  // (returning its promise directly to preserve tick timing), so tests can keep asserting on it.
+  resolveDerivedSupportFields: vi
+    .fn()
+    .mockImplementation((name: string | null | undefined, set: number | null | undefined) =>
+      !name || set == null || set === 0
+        ? Promise.resolve(undefined)
+        : mockAttachmentService.getDerivedSupportFields(name, set)
+    )
 };
 
 let workerReadySubject: BehaviorSubject<boolean>;
@@ -291,10 +304,9 @@ describe('SupportsTableComponent', () => {
       });
     });
 
-    it("should copy the first support's attachmentSet to all supports", () => {
-      component.onSupportNumberDoubleClick('attachmentSet');
+    it("should copy the first support's attachmentSet to all supports", async () => {
+      await component.copyColumn('attachmentSet');
 
-      expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         support: { attachmentSet: 1 }
@@ -327,8 +339,8 @@ describe('SupportsTableComponent', () => {
       });
     });
 
-    it("should copy the first support's name to all supports", () => {
-      component.onSupportNumberDoubleClick('name');
+    it("should copy the first support's name to all supports", async () => {
+      await component.copyColumn('name');
 
       expect(component.supportChange.emit).toHaveBeenCalledTimes(3);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
@@ -532,6 +544,196 @@ describe('SupportsTableComponent', () => {
         uuid: 'support1',
         support: { chainName: 'Non-existent Chain' }
       });
+    });
+  });
+
+  // Regression tests for #657 (tower model) plus the arm-length / height-below-
+  // console follow-up: every catalog-derived field must follow the attachment
+  // set through inline edits and column copy, resolving from each support's OWN name.
+  describe('attachment set derived fields (regression #657 + arm length + height below console)', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      // Catalog returns fields derived from the support name so we can assert
+      // that each row resolves its own values, not the first support's.
+      mockAttachmentService.getDerivedSupportFields.mockImplementation((supportName: string) =>
+        Promise.resolve({
+          towerModel: `tower-of-${supportName}`,
+          armLength: 3.4,
+          heightBelowConsole: 25.5
+        })
+      );
+      // Bulk path: one DB read per support name returns the derived fields for each of its sets.
+      mockAttachmentService.getDerivedSupportFieldsBySet.mockImplementation((supportName: string) =>
+        Promise.resolve(
+          new Map(
+            [1, 2, 3].map((set) => [
+              set,
+              { towerModel: `tower-of-${supportName}`, armLength: 3.4, heightBelowConsole: 25.5 }
+            ])
+          )
+        )
+      );
+    });
+
+    it('copies the attachment set AND resolves each row derived fields from its own support name', async () => {
+      await component.copyColumn('attachmentSet');
+
+      // First support's attachment set (1) is copied to every row...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { attachmentSet: 1 }
+      });
+      // ...and each row's fields are looked up under its OWN name (one DB read per name).
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 1');
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 2');
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 3');
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { towerModel: 'tower-of-Support 1', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support 2', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support3',
+        support: { towerModel: 'tower-of-Support 3', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+    });
+
+    it('copies the support name AND resolves each row derived fields from the copied name + its own set', async () => {
+      await component.copyColumn('name');
+
+      // First support's name ('Support 1') is copied to every row...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { name: 'Support 1' }
+      });
+      // ...and the copied name is fetched ONCE, then each row derives its OWN attachment set
+      // locally, so towers follow the name-clone workflow (#657) without redundant DB reads.
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 1');
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledTimes(1);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support 1', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+    });
+
+    it('resolves and emits the derived fields when the attachment set is edited inline', async () => {
+      await component.onSupportFieldChange('support2', 'attachmentSet', 7);
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { attachmentSet: 7 }
+      });
+      // Fields are fetched for the row's own support name + the new set, and
+      // arm length / height / tower are emitted together (the inline-edit bug).
+      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 2', 7);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support 2', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+    });
+
+    it('resolves and emits the derived fields when the support name is edited inline', async () => {
+      await component.onSupportFieldChange('support2', 'name', 'Support X');
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { name: 'Support X' }
+      });
+      // The new name is resolved against the row's current attachment set (2),
+      // so the tower / arm length / height follow support-name edits (#657).
+      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support X', 2);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support2',
+        support: { towerModel: 'tower-of-Support X', armLength: 3.4, heightBelowConsole: 25.5 }
+      });
+    });
+
+    it('drops a stale derived-fields lookup when the same row is edited again before it resolves', async () => {
+      // Each call hands back a controllable promise so we can resolve them out of order.
+      const resolvers: (() => void)[] = [];
+      mockAttachmentService.getDerivedSupportFields.mockImplementation(
+        (_name: string, set: number) =>
+          new Promise((resolve) => {
+            resolvers.push(() => resolve({ towerModel: `tower-set-${set}`, armLength: set, heightBelowConsole: 25.5 }));
+          })
+      );
+
+      const first = component.onSupportFieldChange('support1', 'attachmentSet', 1);
+      const second = component.onSupportFieldChange('support1', 'attachmentSet', 2);
+
+      // The newer lookup (set 2) resolves first; the older one (set 1) resolves late.
+      resolvers[1]();
+      resolvers[0]();
+      await Promise.all([first, second]);
+
+      // Only the latest edit's derived fields are emitted...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { towerModel: 'tower-set-2', armLength: 2, heightBelowConsole: 25.5 }
+      });
+      // ...the stale (set 1) result is discarded instead of overwriting them.
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { towerModel: 'tower-set-1', armLength: 1, heightBelowConsole: 25.5 }
+      });
+    });
+
+    it('does not look up derived fields for non-name/attachmentSet field edits', async () => {
+      await component.onSupportFieldChange('support1', 'number', 5);
+
+      expect(mockAttachmentService.getDerivedSupportFields).not.toHaveBeenCalled();
+    });
+
+    it('does not look up or emit derived fields when the support name is cleared', async () => {
+      await component.onSupportFieldChange('support1', 'name', null);
+
+      // The name change itself is emitted...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { name: null }
+      });
+      // ...but a null name short-circuits the catalog lookup, so no derived fields are resolved/emitted.
+      expect(mockAttachmentService.getDerivedSupportFields).not.toHaveBeenCalled();
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith(
+        expect.objectContaining({ support: expect.objectContaining({ towerModel: expect.anything() }) })
+      );
+    });
+
+    it('does not emit a derived-fields change when the catalog has no match', async () => {
+      mockAttachmentService.getDerivedSupportFields.mockResolvedValue(undefined);
+
+      await component.onSupportFieldChange('support1', 'attachmentSet', 99);
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { attachmentSet: 99 }
+      });
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith(
+        expect.objectContaining({ support: expect.objectContaining({ armLength: expect.anything() }) })
+      );
+    });
+
+    it('prunes derived-field request tokens for supports removed from the table (no unbounded growth)', async () => {
+      // Touch two rows so both get a token (1) tracked in the request tracker.
+      await component.onSupportFieldChange('support1', 'attachmentSet', 5);
+      await component.onSupportFieldChange('support2', 'attachmentSet', 6);
+
+      const tracker = (
+        component as unknown as {
+          derivedFieldsRequests: KeyedLatestRequestTracker<string>;
+        }
+      ).derivedFieldsRequests;
+      expect(tracker.isCurrent('support1', 1)).toBe(true);
+      expect(tracker.isCurrent('support2', 1)).toBe(true);
+
+      // Remove support1 from the table, then retain (done reactively by an effect in production).
+      tracker.retain(['support2']);
+
+      expect(tracker.isCurrent('support1', 1)).toBe(false);
+      expect(tracker.isCurrent('support2', 1)).toBe(true);
     });
   });
 
