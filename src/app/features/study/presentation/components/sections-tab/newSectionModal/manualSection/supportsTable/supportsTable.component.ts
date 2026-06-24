@@ -268,7 +268,7 @@ export class SupportsTableComponent implements OnInit {
       // Guard against a stale update race: a faster edit of the same row (e.g. typing successive
       // digits into the attachment-set field) must not be overwritten by an older lookup resolving late.
       const requestId = this.nextDerivedFieldsRequest(uuid);
-      const catalogFields = await this.resolveAttachmentFields(supportName, attachmentSet);
+      const catalogFields = await this.resolveAttachmentFields(supportName, attachmentSet).catch(() => undefined);
       if (catalogFields && this.isLatestDerivedFieldsRequest(uuid, requestId)) {
         this.supportChange.emit({ uuid, support: catalogFields });
       }
@@ -294,7 +294,9 @@ export class SupportsTableComponent implements OnInit {
         supports.map((support) => [support.uuid, this.nextDerivedFieldsRequest(support.uuid)])
       );
       const catalogFieldsList = await Promise.all(
-        supports.map((support) => this.resolveAttachmentFields(resolveName(support), resolveSet(support)))
+        supports.map((support) =>
+          this.resolveAttachmentFields(resolveName(support), resolveSet(support)).catch(() => undefined)
+        )
       );
       supports.forEach((support, index) => {
         const catalogFields = catalogFieldsList[index];

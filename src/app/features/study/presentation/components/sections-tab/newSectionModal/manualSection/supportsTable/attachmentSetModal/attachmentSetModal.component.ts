@@ -129,7 +129,9 @@ export class AttachmentSetModalComponent {
    * dropped if the modal was reopened/closed — and thus invalidated — while the lookup was in flight.
    */
   private async backfillDerivedFields(supportName: string, attachmentSet: number, requestId: number): Promise<void> {
-    const derivedFields = await this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
+    const derivedFields = await this.attachmentService
+      .getDerivedSupportFields(supportName, attachmentSet)
+      .catch(() => undefined);
     if (requestId !== this.backfillRequestId || !this.isOpen() || !derivedFields) {
       return;
     }
@@ -186,10 +188,11 @@ export class AttachmentSetModalComponent {
       this.attachmentSet.set(event.value as number);
       const currentSupportName = this.supportName();
       if (currentSupportName) {
-        const derivedFields = await this.attachmentService.getDerivedSupportFields(
-          currentSupportName,
-          event.value as number
-        );
+        // Swallow lookup failures so selecting an attachment set never rejects this event
+        // handler (which would surface in Angular's global error handler).
+        const derivedFields = await this.attachmentService
+          .getDerivedSupportFields(currentSupportName, event.value as number)
+          .catch(() => undefined);
         if (derivedFields) {
           this.armLength.set(derivedFields.armLength ?? undefined);
           this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
