@@ -256,6 +256,41 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('resolveDerivedSupportFields', () => {
+    it('resolves the derived fields for a valid (name, set) pair', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1, attachment_altitude: 25.5, cross_arm_length: 3.456 }]
+      });
+
+      expect(await service.resolveDerivedSupportFields('S1', 1)).toEqual({
+        towerModel: 'T1',
+        armLength: 3.4,
+        heightBelowConsole: 25.5
+      });
+    });
+
+    it.each([
+      ['a blank name', '', 1],
+      ['a null name', null, 1],
+      ['a null set', 'S1', null],
+      ['a zero set', 'S1', 0]
+    ])('returns undefined without hitting the catalog for %s', async (_label, name, set) => {
+      expect(await service.resolveDerivedSupportFields(name as string | null, set as number | null)).toBeUndefined();
+      expect(mockTable.get).not.toHaveBeenCalled();
+    });
+
+    it('swallows lookup failures and returns undefined', async () => {
+      mockTable.get.mockRejectedValue(new Error('boom'));
+
+      expect(await service.resolveDerivedSupportFields('S1', 1)).toBeUndefined();
+    });
+  });
+
   describe('getDerivedSupportFieldsBySet', () => {
     it('derives fields for every attachment set with a single DB read, keyed by set number', async () => {
       mockTable.get.mockResolvedValue({

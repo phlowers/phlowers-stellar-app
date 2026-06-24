@@ -34,7 +34,6 @@ import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
 import { PaginatorModule } from 'primeng/paginator';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
-import type { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
 import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,
@@ -46,6 +45,7 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 
 /**
@@ -140,19 +140,9 @@ export class SupportsTableComponent implements OnInit {
     effect(() => {
       this.updateSupportFilterTables(this.allCatalogSupportNames() ?? []);
     });
-    // Drop derived-field request ids for supports that no longer exist so the tracking map
+    // Drop derived-field request tokens for supports that no longer exist so the tracker
     // cannot grow unbounded across a long editing session (e.g. rows added then deleted).
-    effect(() => this.pruneStaleDerivedFieldsRequests());
-  }
-
-  /** Removes derived-field request ids whose support is no longer present in the table. */
-  private pruneStaleDerivedFieldsRequests(): void {
-    const liveUuids = new Set(this.supports().map((support) => support.uuid));
-    for (const uuid of this.derivedFieldsRequestId.keys()) {
-      if (!liveUuids.has(uuid)) {
-        this.derivedFieldsRequestId.delete(uuid);
-      }
-    }
+    effect(() => this.derivedFieldsRequests.retain(this.supports().map((support) => support.uuid)));
   }
 
   private updateSupportFilterTables(catalogNames: string[]): void {
@@ -244,30 +234,8 @@ export class SupportsTableComponent implements OnInit {
     }
   }
 
-  private async resolveAttachmentFields(
-    supportName: string | null | undefined,
-    attachmentSet: number | null | undefined
-  ): Promise<DerivedSupportAttachmentFields | undefined> {
-    if (!supportName || attachmentSet == null || attachmentSet === 0) {
-      return undefined;
-    }
-    return this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
-  }
-
-  /** Latest derived-field resolution id per support UUID, used to drop stale async results. */
-  private readonly derivedFieldsRequestId = new Map<string, number>();
-
-  /** Registers a new derived-field lookup for a row and returns its id. */
-  private nextDerivedFieldsRequest(uuid: string): number {
-    const requestId = (this.derivedFieldsRequestId.get(uuid) ?? 0) + 1;
-    this.derivedFieldsRequestId.set(uuid, requestId);
-    return requestId;
-  }
-
-  /** True when `requestId` is still the most recent lookup for `uuid` (no newer edit raced ahead). */
-  private isLatestDerivedFieldsRequest(uuid: string, requestId: number): boolean {
-    return this.derivedFieldsRequestId.get(uuid) === requestId;
-  }
+  /** Latest derived-field resolution per support UUID, used to drop stale async results. */
+  private readonly derivedFieldsRequests = new KeyedLatestRequestTracker<string>();
 
   async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
     const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
@@ -280,9 +248,9 @@ export class SupportsTableComponent implements OnInit {
       const attachmentSet = field === 'attachmentSet' ? (value as number | null) : support?.attachmentSet;
       // Guard against a stale update race: a faster edit of the same row (e.g. typing successive
       // digits into the attachment-set field) must not be overwritten by an older lookup resolving late.
-      const requestId = this.nextDerivedFieldsRequest(uuid);
-      const catalogFields = await this.resolveAttachmentFields(supportName, attachmentSet).catch(() => undefined);
-      if (catalogFields && this.isLatestDerivedFieldsRequest(uuid, requestId)) {
+      const requestId = this.derivedFieldsRequests.begin(uuid);
+      const catalogFields = await this.attachmentService.resolveDerivedSupportFields(supportName, attachmentSet);
+      if (catalogFields && this.derivedFieldsRequests.isCurrent(uuid, requestId)) {
         this.supportChange.emit({ uuid, support: catalogFields });
       }
     }
@@ -303,9 +271,10 @@ export class SupportsTableComponent implements OnInit {
         header === 'attachmentSet' ? firstSupport?.attachmentSet : support.attachmentSet;
       // Register a lookup per row up front so a later inline edit of any of these rows
       // supersedes this copy's derived fields rather than being overwritten by them.
-      const requestIds = new Map(
-        supports.map((support) => [support.uuid, this.nextDerivedFieldsRequest(support.uuid)])
-      );
+      const rows = supports.map((support) => ({
+        support,
+        requestId: this.derivedFieldsRequests.begin(support.uuid)
+      }));
       // Resolve each DISTINCT support name's attachment sets in a single DB read, then derive each
       // row locally. Copying one name onto many rows would otherwise re-fetch its group once per row.
       const distinctNames = [...new Set(supports.map(resolveName).filter((name): name is string => !!name))];
@@ -317,12 +286,12 @@ export class SupportsTableComponent implements OnInit {
           )
         )
       );
-      supports.forEach((support) => {
+      rows.forEach(({ support, requestId }) => {
         const name = resolveName(support);
         const attachmentSet = resolveSet(support);
         const catalogFields =
           name != null && attachmentSet != null ? fieldsByName.get(name)?.get(attachmentSet) : undefined;
-        if (catalogFields && this.isLatestDerivedFieldsRequest(support.uuid, requestIds.get(support.uuid)!)) {
+        if (catalogFields && this.derivedFieldsRequests.isCurrent(support.uuid, requestId)) {
           changes.push({ uuid: support.uuid, support: catalogFields });
         }
       });

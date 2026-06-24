@@ -142,6 +142,33 @@ export class AttachmentService {
   }
 
   /**
+   * Lenient counterpart of {@link getDerivedSupportFields} for UI call sites.
+   *
+   * @remarks
+   * Tolerates a missing or incomplete (support name, attachment set) pair and never rejects, so
+   * callers don't repeat the same "is there anything worth resolving?" guard and `.catch(...)`.
+   * Returns `undefined` whenever there is nothing to apply: a blank name, no/zero attachment set,
+   * a pair with no catalog match, or a lookup failure.
+   *
+   * @param supportName - The support name to look up (may be null/undefined/empty)
+   * @param attachmentSet - The attachment set number to look up (may be null/undefined/0)
+   * @returns the derived fields, or `undefined` when there is nothing to apply
+   */
+  async resolveDerivedSupportFields(
+    supportName: string | null | undefined,
+    attachmentSet: number | null | undefined
+  ): Promise<DerivedSupportAttachmentFields | undefined> {
+    if (!supportName || attachmentSet == null || attachmentSet === 0) {
+      return undefined;
+    }
+    try {
+      return await this.getDerivedSupportFields(supportName, attachmentSet);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
    * Resolve the derived support fields for every attachment set of a support in a single DB read,
    * keyed by attachment set number.
    *

@@ -192,7 +192,16 @@ describe('AttachmentSetModalComponent', () => {
               }
             : undefined
         );
-      })
+      }),
+      // Mirrors the real wrapper: applies the (name, set) guard and delegates to getDerivedSupportFields
+      // (returning its promise directly to preserve tick timing), so tests can keep asserting on it.
+      resolveDerivedSupportFields: vi
+        .fn()
+        .mockImplementation((name: string | null | undefined, set: number | null | undefined) =>
+          !name || set == null || set === 0
+            ? Promise.resolve(undefined)
+            : attachmentServiceMock.getDerivedSupportFields(name, set)
+        )
     } as unknown as vi.Mocked<AttachmentService>;
 
     workerPythonServiceMock = {

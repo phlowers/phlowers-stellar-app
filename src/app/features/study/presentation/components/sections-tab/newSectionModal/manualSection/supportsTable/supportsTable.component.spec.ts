@@ -10,6 +10,7 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { vi } from 'vitest';
 
 // Mock child component
@@ -38,7 +39,16 @@ const mockAttachmentService = {
   },
   getAttachmentDetails: vi.fn().mockResolvedValue(undefined),
   getDerivedSupportFields: vi.fn().mockResolvedValue(undefined),
-  getDerivedSupportFieldsBySet: vi.fn().mockResolvedValue(new Map())
+  getDerivedSupportFieldsBySet: vi.fn().mockResolvedValue(new Map()),
+  // Mirrors the real wrapper: applies the (name, set) guard and delegates to getDerivedSupportFields
+  // (returning its promise directly to preserve tick timing), so tests can keep asserting on it.
+  resolveDerivedSupportFields: vi
+    .fn()
+    .mockImplementation((name: string | null | undefined, set: number | null | undefined) =>
+      !name || set == null || set === 0
+        ? Promise.resolve(undefined)
+        : mockAttachmentService.getDerivedSupportFields(name, set)
+    )
 };
 
 let workerReadySubject: BehaviorSubject<boolean>;
@@ -706,24 +716,24 @@ describe('SupportsTableComponent', () => {
       );
     });
 
-    it('prunes derived-field request ids for supports removed from the table (no unbounded growth)', async () => {
-      // Touch two rows so both get tracked in the request-id map.
+    it('prunes derived-field request tokens for supports removed from the table (no unbounded growth)', async () => {
+      // Touch two rows so both get a token (1) tracked in the request tracker.
       await component.onSupportFieldChange('support1', 'attachmentSet', 5);
       await component.onSupportFieldChange('support2', 'attachmentSet', 6);
 
-      const internals = component as unknown as {
-        derivedFieldsRequestId: Map<string, number>;
-        pruneStaleDerivedFieldsRequests: () => void;
-      };
-      expect(internals.derivedFieldsRequestId.has('support1')).toBe(true);
-      expect(internals.derivedFieldsRequestId.has('support2')).toBe(true);
+      const tracker = (
+        component as unknown as {
+          derivedFieldsRequests: KeyedLatestRequestTracker<string>;
+        }
+      ).derivedFieldsRequests;
+      expect(tracker.isCurrent('support1', 1)).toBe(true);
+      expect(tracker.isCurrent('support2', 1)).toBe(true);
 
-      // Remove support1 from the table, then prune (done reactively by an effect in production).
-      (component.supports as unknown as () => Support[]) = () => mockSupports.filter((s) => s.uuid !== 'support1');
-      internals.pruneStaleDerivedFieldsRequests();
+      // Remove support1 from the table, then retain (done reactively by an effect in production).
+      tracker.retain(['support2']);
 
-      expect(internals.derivedFieldsRequestId.has('support1')).toBe(false);
-      expect(internals.derivedFieldsRequestId.has('support2')).toBe(true);
+      expect(tracker.isCurrent('support1', 1)).toBe(false);
+      expect(tracker.isCurrent('support2', 1)).toBe(true);
     });
   });
 
