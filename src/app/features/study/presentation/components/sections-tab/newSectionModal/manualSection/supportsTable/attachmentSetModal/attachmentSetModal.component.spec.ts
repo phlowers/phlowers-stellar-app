@@ -36,6 +36,7 @@ import { of } from 'rxjs';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import type { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
 import { CatalogAttachment, Support, Section } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
@@ -179,6 +180,27 @@ describe('AttachmentSetModalComponent', () => {
         .fn()
         .mockImplementation((name: string, set: number) =>
           Promise.resolve(mockAttachments.find((a) => a.support_name === name && a.attachment_set === set))
+        ),
+      getDerivedSupportFields: vi.fn().mockImplementation((name: string, set: number) => {
+        const detail = mockAttachments.find((a) => a.support_name === name && a.attachment_set === set);
+        return Promise.resolve(
+          detail
+            ? {
+                towerModel: detail.support_tower,
+                armLength: detail.cross_arm_length,
+                heightBelowConsole: detail.attachment_altitude
+              }
+            : undefined
+        );
+      }),
+      // Mirrors the real wrapper: applies the (name, set) guard and delegates to getDerivedSupportFields
+      // (returning its promise directly to preserve tick timing), so tests can keep asserting on it.
+      resolveDerivedSupportFields: vi
+        .fn()
+        .mockImplementation((name: string | null | undefined, set: number | null | undefined) =>
+          !name || set == null || set === 0
+            ? Promise.resolve(undefined)
+            : attachmentServiceMock.getDerivedSupportFields(name, set)
         )
     } as unknown as vi.Mocked<AttachmentService>;
 
@@ -274,7 +296,7 @@ describe('AttachmentSetModalComponent', () => {
     const event = { value: 1 };
     await component.onAttachmentSelect(event, 'attachment_set');
 
-    expect(attachmentServiceMock.getAttachmentDetails).toHaveBeenCalledWith('Support A', 1);
+    expect(attachmentServiceMock.getDerivedSupportFields).toHaveBeenCalledWith('Support A', 1);
     expect(component.armLength()).toBe(2.5);
     expect(component.heightBelowConsole()).toBe(10.5);
   });
@@ -447,6 +469,126 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.attachmentSet()).toBeUndefined();
       expect(component.armLength()).toBeUndefined();
       expect(component.heightBelowConsole()).toBeUndefined();
+      expect(component.towerModel()).toBeUndefined();
+    });
+
+    it('backfills all catalog-derived fields when the support has an attachment set but is missing them (regression #657)', async () => {
+      // A support whose name + set exist in the catalog, but whose derived fields were
+      // never resolved (e.g. set via inline edit / column copy before this fix).
+      const supportMissingDerived: Support = {
+        ...mockSupport,
+        name: 'Support A',
+        attachmentSet: 1,
+        armLength: null,
+        heightBelowConsole: null,
+        towerModel: null
+      };
+
+      fixture.componentRef.setInput('support', supportMissingDerived);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // All three derived fields are resolved together (not just the tower), so validate()
+      // cannot emit 0 for arm length / height below console.
+      expect(attachmentServiceMock.getDerivedSupportFields).toHaveBeenCalledWith('Support A', 1);
+      expect(component.armLength()).toBe(2.5);
+      expect(component.heightBelowConsole()).toBe(10.5);
+      expect(component.towerModel()).toBe('Tower Model');
+    });
+
+    it('keeps the existing derived values without a catalog lookup when the support already has them', async () => {
+      // mockSupport already carries armLength, heightBelowConsole and towerModel.
+      fixture.componentRef.setInput('support', mockSupport);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(attachmentServiceMock.getDerivedSupportFields).not.toHaveBeenCalled();
+      expect(component.armLength()).toBe(2.5);
+      expect(component.heightBelowConsole()).toBe(10.0);
+      expect(component.towerModel()).toBe('Tower Model');
+    });
+
+    it('discards an in-flight backfill when reopened for another support that starts no new backfill', async () => {
+      // Support A is missing its derived fields, so opening starts a backfill we keep pending.
+      let resolveA!: (value: DerivedSupportAttachmentFields) => void;
+      attachmentServiceMock.getDerivedSupportFields.mockReturnValueOnce(
+        new Promise<DerivedSupportAttachmentFields>((resolve) => {
+          resolveA = resolve;
+        })
+      );
+
+      const supportAMissing: Support = {
+        ...mockSupport,
+        name: 'Support A',
+        attachmentSet: 1,
+        armLength: null,
+        heightBelowConsole: null,
+        towerModel: null
+      };
+      fixture.componentRef.setInput('support', supportAMissing);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Reopen for a support WITHOUT an attachment set: no new backfill is started, so the open
+      // itself must invalidate A's lookup (the inner emptiness guards alone would not).
+      const supportBNoSet: Support = { ...mockSupport, name: 'Support B', attachmentSet: null };
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('support', supportBNoSet);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // A's lookup resolves late with A's data.
+      resolveA({ towerModel: 'Tower-A', armLength: 1.1, heightBelowConsole: 2.2 });
+      await fixture.whenStable();
+
+      // B has no attachment set, so its derived fields must stay empty — not be filled with A's.
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
+      expect(component.towerModel()).toBeUndefined();
+    });
+
+    it('discards an in-flight open backfill when the user selects a different attachment set first', async () => {
+      // The open-effect backfill stays pending; the later user selection resolves with set-2 data
+      // that has no tower, leaving towerModel empty.
+      let resolveBackfill!: (value: DerivedSupportAttachmentFields) => void;
+      attachmentServiceMock.getDerivedSupportFields
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveBackfill = resolve;
+          })
+        )
+        .mockResolvedValue({ towerModel: null, armLength: 7.7, heightBelowConsole: 8.8 });
+
+      const supportMissing: Support = {
+        ...mockSupport,
+        name: 'Support A',
+        attachmentSet: 1,
+        armLength: null,
+        heightBelowConsole: null,
+        towerModel: null
+      };
+      fixture.componentRef.setInput('support', supportMissing);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // User picks a different attachment set before the open backfill resolves.
+      await component.onAttachmentSelect({ value: 2 }, 'attachment_set');
+      expect(component.armLength()).toBe(7.7);
+      expect(component.towerModel()).toBeUndefined();
+
+      // The original (set 1) backfill resolves late.
+      resolveBackfill({ towerModel: 'Tower-1', armLength: 1.1, heightBelowConsole: 2.2 });
+      await fixture.whenStable();
+
+      // The set-2 selection wins; the stale set-1 backfill must not fill the empty tower.
+      expect(component.armLength()).toBe(7.7);
+      expect(component.heightBelowConsole()).toBe(8.8);
       expect(component.towerModel()).toBeUndefined();
     });
 

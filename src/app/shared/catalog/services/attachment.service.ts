@@ -10,9 +10,10 @@ import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, filter, merge, of, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
 import { CatalogAttachmentEntity, CatalogSupportAttachmentEntity } from '@infrastructure/database';
 import { v4 as uuidv4 } from 'uuid';
-import { SupportNameEntry } from './attachment.interfaces';
+import { DerivedSupportAttachmentFields, SupportNameEntry } from './attachment.interfaces';
 import { toLegacyEntity } from './attachment.helpers';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 
 /**
  * Service for managing attachment point catalog data.
@@ -122,6 +123,85 @@ export class AttachmentService {
     const group = await this.storageService.db?.catSupportAttachments.get(supportName);
     const item = group?.attachments.find((a) => a.attachment_set === attachmentSet);
     return item && group ? toLegacyEntity(group, item) : undefined;
+  }
+
+  /**
+   * Resolve the support fields derived from a catalog attachment for a
+   * (support name, attachment set) pair.
+   *
+   * @param supportName - The support name to look up
+   * @param attachmentSet - The attachment set number to look up
+   * @returns the derived fields, or `undefined` when the pair has no catalog match
+   */
+  async getDerivedSupportFields(
+    supportName: string,
+    attachmentSet: number
+  ): Promise<DerivedSupportAttachmentFields | undefined> {
+    const details = await this.getAttachmentDetails(supportName, attachmentSet);
+    return details ? this.deriveSupportFields(details) : undefined;
+  }
+
+  /**
+   * Lenient counterpart of `getDerivedSupportFields` for UI call sites.
+   *
+   * @remarks
+   * Tolerates a missing or incomplete (support name, attachment set) pair and never rejects, so
+   * callers don't repeat the same "is there anything worth resolving?" guard and `.catch(...)`.
+   * Returns `undefined` whenever there is nothing to apply: a blank name, no/zero attachment set,
+   * a pair with no catalog match, or a lookup failure.
+   *
+   * @param supportName - The support name to look up (may be null/undefined/empty)
+   * @param attachmentSet - The attachment set number to look up (may be null/undefined/0)
+   * @returns the derived fields, or `undefined` when there is nothing to apply
+   */
+  async resolveDerivedSupportFields(
+    supportName: string | null | undefined,
+    attachmentSet: number | null | undefined
+  ): Promise<DerivedSupportAttachmentFields | undefined> {
+    if (!supportName || attachmentSet == null || attachmentSet === 0) {
+      return undefined;
+    }
+    try {
+      return await this.getDerivedSupportFields(supportName, attachmentSet);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to resolve derived support fields for supportName="${supportName}", attachmentSet=${attachmentSet}`,
+        error
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * Resolve the derived support fields for every attachment set of a support in a single DB read,
+   * keyed by attachment set number.
+   *
+   * @remarks
+   * Use for bulk operations (e.g. copying one support name onto many rows): a per-row
+   * `getDerivedSupportFields` call would re-fetch the same support group once per row.
+   *
+   * @param supportName - The support name to look up
+   * @returns a map of attachment set number to its derived fields (empty when the support is unknown)
+   */
+  async getDerivedSupportFieldsBySet(supportName: string): Promise<Map<number, DerivedSupportAttachmentFields>> {
+    const group = await this.storageService.db?.catSupportAttachments.get(supportName);
+    const fieldsBySet = new Map<number, DerivedSupportAttachmentFields>();
+    if (!group) return fieldsBySet;
+    for (const item of group.attachments) {
+      fieldsBySet.set(item.attachment_set, this.deriveSupportFields(toLegacyEntity(group, item)));
+    }
+    return fieldsBySet;
+  }
+
+  /** Maps a flat catalog attachment entity to the support fields derived from it. */
+  private deriveSupportFields(details: CatalogAttachmentEntity): DerivedSupportAttachmentFields {
+    return {
+      // The catalog stores a missing tower as an empty string, so normalize blanks to null
+      // to honour the `string | null` contract (and the Support model's null convention).
+      towerModel: details.support_tower || null,
+      armLength: details.cross_arm_length == null ? null : truncateNumberToOneDecimal(details.cross_arm_length),
+      heightBelowConsole: details.attachment_altitude ?? null
+    };
   }
 
   /**
