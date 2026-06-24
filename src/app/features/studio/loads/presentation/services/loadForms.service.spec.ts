@@ -428,7 +428,11 @@ describe('LoadFormsService', () => {
     it('should set plotService.error and pythonErrorCode when runTask returns an error', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_FAILED', pythonErrorCode: 42 });
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_FAILED',
+        pythonErrorCode: 42
+      });
 
       await service.calculateLoad();
 
@@ -439,7 +443,11 @@ describe('LoadFormsService', () => {
     it('should not call refreshProjection when runTask returns an error', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_FAILED', pythonErrorCode: 42 });
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_FAILED',
+        pythonErrorCode: 42
+      });
 
       await service.calculateLoad();
 
@@ -449,7 +457,11 @@ describe('LoadFormsService', () => {
     it('should still set loading to false when runTask returns an error', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
-      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_FAILED', pythonErrorCode: 42 });
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_FAILED',
+        pythonErrorCode: 42
+      });
 
       await service.calculateLoad();
 
