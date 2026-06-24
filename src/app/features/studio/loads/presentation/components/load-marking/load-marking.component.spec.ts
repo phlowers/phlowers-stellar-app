@@ -437,11 +437,13 @@ describe('LoadMarkingComponent', () => {
       it('should preserve span A load data when switching back to span A after visiting span B', () => {
         // Scenario:
         // 1. Select span A, user sets referenceSupport to 'RIGHT' → signal = 'RIGHT'
-        // 2. Switch to span B → applySelectedLoadValues sets form to 'LEFT' (emitEvent:false)
-        //    signal stays 'RIGHT', but the form control value is now 'LEFT'
-        // 3. Switch back to span A → enable() (already enabled) re-emits 'LEFT' (the current form value)
-        //    Without emitEvent:false: signal 'RIGHT'→'LEFT' → referenceSupportEffect fires
+        // 2. Switch to span B → applySelectedLoadValues sets form to 'LEFT' (emitEvent:true)
+        //    signal updates to 'LEFT', span B data correctly set to 'LEFT'
+        // 3. Switch back to span A → enable() re-emits the STALE form value 'LEFT'
+        //    Without enable({ emitEvent: false }): signal 'RIGHT'→'LEFT' → referenceSupportEffect fires
         //    → onLoadControlChange('referenceSupport', 'LEFT') → span A data corrupted to 'LEFT'
+        //    Fix: enable({ emitEvent: false }) silences the re-emission.
+        //    Then applySelectedLoadValues sets form + signal to 'RIGHT' correctly.
         const temporaryLoadData = createTemporaryLoadDataTwoSpans();
         mockPlotService['temporaryLoadData'] = temporaryLoadData;
 
@@ -452,16 +454,16 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
         expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
 
-        // Step 2 — switch to span B: form becomes 'LEFT' (span B data), signal stays 'RIGHT'
+        // Step 2 — switch to span B: form and signal both update to 'LEFT' (span B data)
         component.form.controls.spanSelect.setValue('support-2');
         fixture.detectChanges();
 
-        // Step 3 — switch back to span A: enable() would emit 'LEFT' (current form value)
-        // if emitEvent:true, triggering the effect with a stale value
+        // Step 3 — switch back to span A: enable() is silent (emitEvent:false);
+        // applySelectedLoadValues then sets form + signal to 'RIGHT'
         component.form.controls.spanSelect.setValue('support-1');
         fixture.detectChanges();
 
-        // Span A's referenceSupport must remain 'RIGHT', not be overwritten by span B's form value
+        // Span A's referenceSupport must remain 'RIGHT', not be overwritten
         expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
       });
     });
@@ -471,9 +473,9 @@ describe('LoadMarkingComponent', () => {
         // Scenario:
         // 1. Select span A, set type to MARKING → type signal = 'marking'
         // 2. Switch to span B (PUNCTUAL, loadWeight 20) → applySelectedLoadValues sets form.type
-        //    to 'punctual' with emitEvent:false → type signal stays 'marking'
+        //    to 'punctual' (emitEvent:true) → type signal updates to 'punctual', span B.type = 'punctual'
         // 3. User changes loadPosition on span B
-        //    Old bug (combined effect): type signal 'marking' → onLoadControlChange('type','marking')
+        //    Old bug (combined effect): stale type signal → onLoadControlChange('type','marking')
         //    → span B type overwritten to 'marking' AND loadWeight reset to 0
         //    Fix (separate effects): only loadPositionEffect fires → only loadPosition updated
         const temporaryLoadData = createTemporaryLoadDataTwoSpans();
@@ -518,7 +520,7 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
         // loadWeight signal is now 999
 
-        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:false), signal stays 999
+        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:true), signal updates to 20
         component.form.controls.spanSelect.setValue('support-2');
         fixture.detectChanges();
 
@@ -527,6 +529,57 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
 
         expect(temporaryLoadData.spanLoads[1].loadWeight).toBe(20);
+        expect(temporaryLoadData.spanLoads[1].referenceSupport).toBe('RIGHT');
+      });
+    });
+
+    describe('Bug 4 — selecting the same type/referenceSupport on a second span must update its data', () => {
+      it('should update span B type to MARKING when span A was already set to MARKING', () => {
+        // Root cause: applySelectedLoadValues previously used emitEvent:false for type/referenceSupport.
+        // When switching from span A (MARKING) to span B, the type signal stayed 'marking'.
+        // Selecting 'marking' on span B emitted 'marking' → signal 'marking'→'marking' (no change)
+        // → typeEffect never fired → span B.type was never updated → only span A had a marking.
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and set type to MARKING
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.type.setValue(LoadType.MARKING);
+        fixture.detectChanges();
+        expect(temporaryLoadData.spanLoads[0].type).toBe(LoadType.MARKING);
+
+        // Step 2 — switch to span B (PUNCTUAL): type signal must update to 'punctual'
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — user selects MARKING for span B
+        component.form.controls.type.setValue(LoadType.MARKING);
+        fixture.detectChanges();
+
+        // Both spans must now have MARKING type
+        expect(temporaryLoadData.spanLoads[1].type).toBe(LoadType.MARKING);
+      });
+
+      it('should update span B referenceSupport to RIGHT when span A already had RIGHT', () => {
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and set referenceSupport to RIGHT
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.referenceSupport.setValue('RIGHT');
+        fixture.detectChanges();
+        expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
+
+        // Step 2 — switch to span B (LEFT): signal must update to 'LEFT'
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — user selects RIGHT for span B
+        component.form.controls.referenceSupport.setValue('RIGHT');
+        fixture.detectChanges();
+
         expect(temporaryLoadData.spanLoads[1].referenceSupport).toBe('RIGHT');
       });
     });

@@ -10,6 +10,8 @@ import logging
 
 import numpy as np
 from mechaphlowers import SectionStudy, units
+from mechaphlowers.utils import arr
+from mechaphlowers.core.models.balance.interfaces import IBalanceModel
 
 from stellar_engine.entities.inputs import ClimateCharge, compute_ice_thickness
 
@@ -18,60 +20,32 @@ logger = logging.getLogger("stellar_engine")
 # logger.setLevel(logging.WARNING) # TODO: not sure about the effect of this, but it seems to be necessary to see info messages in the console
 
 
-def apply_span_loads(study: SectionStudy, span_loads: list):
-    """Parse span loads and apply them to the engine, clearing previous loads when needed."""
-    n_spans = len(study.balance_engine)
-    if not span_loads:
-        study.add_loads(np.zeros(n_spans), np.zeros(n_spans))
-        return
-    load_position_meters, load_mass = parse_span_loads(study, span_loads)
-    study.add_loads(load_position_meters, load_mass)
+#TODO: correct the bug in mechaphlowers
+def reset_balance_model_state(study: SectionStudy) -> None:
+    """Workaround: reset balance model state before solve_adjustment to avoid
+    contamination from a previous solve_change_state.
 
+    Resets balance_model.parameter to its initial sagging value and zeroes
+    nodes.dxdydz so the adjustment solver always starts from a clean geometry.
+    Also invalidates the _precompute_merge_indices cache so that
+    merge_loads_to_span_model recomputes span-split indices correctly if the
+    number of loaded spans changed since the last solve.
+    """
+    bm: IBalanceModel = study._balance_engine.balance_model
+    bm.parameter = bm.parameter_init.copy()
+    bm.span_model.set_parameter(arr.incr(bm.parameter_init))
+    bm.nodes.dxdydz[:] = 0
+    for _attr in (
+        "_merge_normal_idx",
+        "_merge_left_idx",
+        "_merge_right_idx",
+        "_merge_not_load_mask",
+        "_merge_n_total",
+        "_merge_span_index",
+        "_merge_span_type",
+    ):
+        bm.__dict__.pop(_attr, None)
 
-def parse_span_loads(
-    study: SectionStudy, span_loads: list
-) -> tuple[np.ndarray, np.ndarray]:
-    """Convert raw span load dicts into position and mass arrays."""
-    load_position_list = []
-    load_weight_list_daN = []
-    engine = study.balance_engine
-    span_lengths = engine.section_array.data["span_length"].to_numpy()
-    for index, span in enumerate(span_loads):
-        try:
-            if span['referenceSupport'] == 'LEFT':
-                load_position_list.append(span["loadPosition"])
-            elif span['referenceSupport'] == 'RIGHT':
-                if 0 <= index < len(span_lengths):
-                    span_length = span_lengths[index]
-                    load_position_list.append(
-                        span_length - span["loadPosition"]
-                    )
-                else:
-                    logger.warning(
-                        "Span load index %s is out of bounds for span_length array (size %s). "
-                        "Defaulting load position to 0.",
-                        index,
-                        len(span_lengths),
-                    )
-                    load_position_list.append(0)
-            else:
-                load_position_list.append(0)
-
-            if span['type'] == 'punctual':
-                load_weight_list_daN.append(span["loadWeight"])
-            else:
-                load_weight_list_daN.append(0.01)
-        except KeyError as e:
-            logger.warning(
-                "Span load at index %s is missing required key %s. "
-                "Skipping with defaults (position=0, weight=0.01).",
-                index,
-                e,
-            )
-            load_position_list.append(0)
-            load_weight_list_daN.append(0.01)
-    load_mass_kg = units(load_weight_list_daN, 'daN').to('kg').magnitude
-    return np.array(load_position_list), np.array(load_mass_kg)
 
 
 def change_state(
@@ -84,9 +58,20 @@ def change_state(
     cable_temperature = climate.cableTemperature
     ice_thickness = compute_ice_thickness(climate, len(study.balance_engine))
 
-    apply_span_loads(study, change_state_inputs["spanLoads"])
+    # apply_span_loads(study, change_state_inputs["spanLoads"])
+    logger.debug("---------Load case applied to engine---------")
+    logger.debug(
+        "Wind pressure: %s, Cable temperature: %s, Ice thickness: %s",
+        wind_pressure,
+        cable_temperature,
+        ice_thickness,
+    )
+    logger.debug("-----------------------------------------------")
+    
+    reset_balance_model_state(study)
 
     study.solve_adjustment()
+    study._solve_intermediate()
     study.solve_change_state(
         ice_thickness=ice_thickness,
         new_temperature=cable_temperature,

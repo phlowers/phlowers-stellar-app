@@ -131,8 +131,7 @@ export class LoadMarkingComponent {
   async deleteCharge(): Promise<void> {
     const supportUuid = this.form.controls.spanSelect.value;
     if (!supportUuid) return;
-    this.loadFormsService.deleteSpanLoad(supportUuid);
-    await this.loadFormsService.calculateLoad();
+    await this.loadFormsService.deleteSpanLoad(supportUuid);
     await this.loadFormsService.saveTemporaryLoadDataInSection();
     this.form.reset();
     this.form.controls.referenceSupport.disable();
@@ -142,7 +141,6 @@ export class LoadMarkingComponent {
     if (this.form.invalid) return;
     this.isSaving.set(true);
     try {
-      await this.loadFormsService.calculateLoad();
       await this.loadFormsService.saveTemporaryLoadDataInSection();
     } finally {
       this.isSaving.set(false);
@@ -201,19 +199,19 @@ export class LoadMarkingComponent {
   }
 
   private applySelectedLoadValues(): void {
+    console.log("==> applySelectedLoadValues called");
     const load = this.findSelectedLoad();
     if (!load) {
       return;
     }
-    this.form.controls.referenceSupport.setValue(load.referenceSupport, {
-      emitEvent: false
-    });
-    this.form.controls.type.setValue(load.type, { emitEvent: false });
+    this.form.controls.referenceSupport.setValue(load.referenceSupport);
+    this.form.controls.type.setValue(load.type);
     this.form.controls.loadWeight.setValue(load.loadWeight ?? 0);
     this.form.controls.loadPosition.setValue(load.loadPosition ?? 0);
   }
 
   private onLoadControlChange(controlName: LoadControlName, value: unknown) {
+    console.log("==> onLoadControlChange", controlName, value);
     const load = this.findSelectedLoad();
     if (!load) {
       return;

@@ -388,7 +388,7 @@ describe('LoadFormsService', () => {
       expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
 
-    it('should re-apply saved cable modifications after changeState so lengthening/shortening is not lost', async () => {
+    it('should not call cableModification when reapplyCableModifications is deactivated', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue({
         ...mockSection,
@@ -403,25 +403,12 @@ describe('LoadFormsService', () => {
           }
         ]
       } as Section);
-      mockWorkerPythonService.runTask
-        .mockResolvedValueOnce({ result: { success: true }, error: null }) // changeState
-        .mockResolvedValueOnce({ result: { current: { id: 'after-cable-mod' }, base: null }, error: null }); // cableModification
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: { success: true }, error: null });
 
       await service.calculateLoad();
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.cableModification,
-        expect.objectContaining({
-          spanIndex: 0,
-          widthCable: 'lengthening',
-          sizeCable: 0.5,
-          distanceSupportRef: 100,
-          supportRef: 'LEFT'
-        })
-      );
-      // Final litData reflects the cable modification, not the bare change-state.
-      expect(mockPlotService.litData.set).toHaveBeenLastCalledWith({ id: 'after-cable-mod' });
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
     });
 
     it('should not run any cable modification task when the section has none', async () => {
@@ -456,46 +443,38 @@ describe('LoadFormsService', () => {
   });
 
   describe('deleteLoad', () => {
-    it('should return early when studyUuid is missing', () => {
-      mockPlotService.study.mockReturnValue(null);
+    it('should call deleteAllLoads and changeState with base climate', async () => {
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        initial_conditions: [{ uuid: 'ic-1', base_temperature: 20 }],
+        selected_initial_condition_uuid: 'ic-1'
+      });
+      mockPlotService.temporaryLoadData = mockChargeData;
+
+      await service.deleteLoad();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.deleteAllLoads, undefined);
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
+        climate: expect.objectContaining({ windPressure: 0, iceThickness: 0, cableTemperature: 20 })
+      });
+    });
+
+    it('should clear temporaryLoadData and call refreshProjection', async () => {
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockPlotService.temporaryLoadData = mockChargeData;
+
+      await service.deleteLoad();
+
+      expect(mockPlotService.temporaryLoadData).toBeNull();
+      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
+    });
+
+    it('should not call chargesService.deleteCharge', async () => {
       mockSpanService.section.mockReturnValue(mockSection);
 
-      service.deleteLoad();
+      await service.deleteLoad();
 
       expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
-    });
-
-    it('should return early when sectionUuid is missing', () => {
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockSpanService.section.mockReturnValue(null);
-
-      service.deleteLoad();
-
-      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
-    });
-
-    it('should return early when chargeUuid is missing', () => {
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: null
-      } as Section);
-
-      service.deleteLoad();
-
-      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
-    });
-
-    it('should call deleteCharge with correct parameters', () => {
-      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1'
-      } as Section);
-
-      service.deleteLoad();
-
-      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid', 'section-uuid-1', 'charge-uuid-1');
     });
   });
 

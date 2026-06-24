@@ -8,6 +8,7 @@ import logging
 
 from stellar_engine.core import pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
+from stellar_engine.core import loads
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
@@ -28,6 +29,7 @@ logger = logging.getLogger("stellar_engine")
 debug_log = make_debug_log(logger, prefix="API")
 
 study: SectionStudy
+temporary_study: SectionStudy
 base_study: SectionStudy
 
 
@@ -158,6 +160,28 @@ def clear_obstacles():
 
 
 @debug_log
+def delete_all_loads():
+    global study
+    return loads.apply_span_loads(study, span_loads=[])
+
+
+@debug_log
+def delete_load(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for delete load: {python_inputs}")
+    return loads.delete_load(python_inputs["supportIndex"], study)
+
+
+@debug_log
+def set_loads(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for set_loads: {python_inputs}")
+    return loads.apply_span_loads(study, python_inputs["spanLoads"])
+
+
+@debug_log
 def compute_localization(js_inputs):
     return geography.compute_localization(js_to_python(js_inputs))
 
@@ -206,11 +230,3 @@ def set_resolution(js_inputs):
     resolution = python_inputs["resolution"]
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
-
-@debug_log
-def add_single_load(js_inputs):
-    global study
-    python_inputs = js_to_python(js_inputs)
-
-    
-    return run_solver.add_loading(python_inputs, study)

@@ -20,6 +20,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
+import { defaultClimaticCharge, getBaseClimate } from './climate.helpers';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
 
@@ -35,41 +36,7 @@ function integerValidator(control: AbstractControl): ValidationErrors | null {
   return null;
 }
 
-/** Default base temperature in degrees Celsius used for climatic charge calculations. */
-export const DEFAULT_BASE_TEMPERATURE = 15;
-
-/** Default climatic charge values used when creating a new charge case. */
-export const defaultClimaticCharge: ClimateCharge = {
-  windPressure: 0,
-  cableTemperature: DEFAULT_BASE_TEMPERATURE,
-  symmetryType: SymmetryType.SYMMETRIC,
-  iceThickness: 0,
-  frontierSupportNumber: null,
-  iceThicknessBefore: null,
-  iceThicknessAfter: null
-};
-
-/**
- * Returns the base climate values that match the base state calculation.
- * The base state uses the initial condition's base_temperature (or 15 if none),
- * with no wind pressure and no ice.
- */
-export const getBaseClimate = (
-  section: {
-    initial_conditions: { uuid: string; base_temperature: number }[];
-    selected_initial_condition_uuid?: string;
-  } | null
-): ClimateCharge => {
-  const selectedInitialCondition = section?.initial_conditions?.find(
-    (ic) => ic.uuid === section.selected_initial_condition_uuid
-  );
-  const baseTemperature = selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
-
-  return {
-    ...defaultClimaticCharge,
-    cableTemperature: baseTemperature
-  };
-};
+export { defaultClimaticCharge, DEFAULT_BASE_TEMPERATURE, getBaseClimate } from './climate.helpers';
 
 /** Min/max constraints for climate form fields. */
 export const climateConstraints = {
@@ -212,12 +179,13 @@ export class ClimateComponent {
     } as ChargeData;
   }
 
-  deleteCharge() {
+  async deleteCharge(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       throw new Error('Study or section not found');
     }
+    await this.loadFormsService.deleteLoad();
     this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
   }
 
@@ -229,7 +197,6 @@ export class ClimateComponent {
     }
     this.isSaving.set(true);
     try {
-      await this.loadFormsService.calculateLoad();
       await this.loadFormsService.saveTemporaryLoadDataInSection();
     } finally {
       this.isSaving.set(false);

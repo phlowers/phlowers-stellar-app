@@ -26,7 +26,7 @@ from stellar_engine.entities.inputs import (
     Support,
 )
 from stellar_engine.plot import obstacles as obst
-from stellar_engine.plot.run_solver import apply_span_loads
+from stellar_engine.core.loads import apply_span_loads
 
 logger = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ def apply_climate_to_engine(
         units(ice_thickness, "cm").to("m").magnitude
     )  # in meters in the engine
 
-    study.balance_engine.solve_change_state(
+    study.solve_change_state(
         ice_thickness=ice_thickness,
         new_temperature=climate_data.cableTemperature,
         wind_pressure=climate_data.windPressure,
@@ -237,7 +237,7 @@ def initialize_study(python_inputs: dict):
     if climate:
         apply_climate_to_engine(study, climate, len(study.balance_engine))
     elif has_span_loads:
-        study.balance_engine.solve_change_state()
+        study.solve_change_state()
 
     if obstacles:
         obst.add_bulk_obstacles(

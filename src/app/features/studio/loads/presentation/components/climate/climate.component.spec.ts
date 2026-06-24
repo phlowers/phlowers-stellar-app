@@ -1,5 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { ClimateComponent, getBaseClimate, DEFAULT_BASE_TEMPERATURE } from './climate.component';
+import { ClimateComponent } from './climate.component';
+import { getBaseClimate, DEFAULT_BASE_TEMPERATURE } from './climate.helpers';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
@@ -320,24 +321,24 @@ describe('ClimateComponent', () => {
   });
 
   describe('deleteCharge', () => {
-    it('should call chargesService.deleteCharge with correct parameters', () => {
+    it('should call loadFormsService.deleteLoad then chargesService.deleteCharge', async () => {
+      const loadFormsService = TestBed.inject(LoadFormsService);
       const chargesService = TestBed.inject(ChargesService);
-      component.deleteCharge();
+      await component.deleteCharge();
+      expect(loadFormsService.deleteLoad).toHaveBeenCalled();
       expect(chargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-charge-uuid');
     });
 
-    it('should throw error when study is not found', () => {
+    it('should throw error when study is not found', async () => {
       const plotService = TestBed.inject(PlotService);
       (plotService.study as ReturnType<typeof signal>).set(null);
-
-      expect(() => component.deleteCharge()).toThrow('Study or section not found');
+      await expect(component.deleteCharge()).rejects.toThrow('Study or section not found');
     });
 
-    it('should throw error when section is not found', () => {
+    it('should throw error when section is not found', async () => {
       const spanService = TestBed.inject(PlotSpanService);
       (spanService.section as ReturnType<typeof signal>).set(null);
-
-      expect(() => component.deleteCharge()).toThrow('Study or section not found');
+      await expect(component.deleteCharge()).rejects.toThrow('Study or section not found');
     });
   });
 
