@@ -63,7 +63,7 @@ export class AttachmentSetModalComponent {
   attachmentSetNumbers = signal<number[]>([]);
 
   private readonly attachmentService = inject(AttachmentService);
-  /** Monotonic id used to discard stale derived-field backfills (modal reopened/closed mid-await). */
+  /** Monotonic id bumped on every open; discards derived-field backfills left in flight from a prior open. */
   private backfillRequestId = 0;
   readonly supportsFilterTable = toSignal(this.attachmentService.distinctSupportNames$);
   readonly catalogLoading = computed(() => this.supportsFilterTable() === undefined);
@@ -87,6 +87,9 @@ export class AttachmentSetModalComponent {
   constructor() {
     effect(() => {
       if (this.isOpen()) {
+        // Opening (for a new support, or reopening) invalidates any backfill still in flight,
+        // even when this open does not start a new one (e.g. a support without an attachment set).
+        const requestId = ++this.backfillRequestId;
         this.resetValues(true);
         const support = this.support();
         const name = support?.name;
@@ -107,7 +110,7 @@ export class AttachmentSetModalComponent {
           // them all together keeps arm length / height / tower consistent — a tower-only backfill
           // would leave the others undefined and validate() would emit 0.
           if (name && (armLength == null || heightBelowConsole == null || !towerModel)) {
-            void this.backfillDerivedFields(name, attachmentSet);
+            void this.backfillDerivedFields(name, attachmentSet, requestId);
           }
         }
       }
@@ -122,11 +125,10 @@ export class AttachmentSetModalComponent {
   /**
    * Fills the catalog-derived fields (tower model, arm length, height below console) that the
    * support does not already carry. Only empty signals are set, so user-edited values are kept.
-   * A request id guards against stale resolutions when the modal is reopened for another support
-   * (or closed) while the lookup is in flight.
+   * The `requestId` (assigned by the open effect) guards against stale resolutions: the result is
+   * dropped if the modal was reopened/closed — and thus invalidated — while the lookup was in flight.
    */
-  private async backfillDerivedFields(supportName: string, attachmentSet: number): Promise<void> {
-    const requestId = ++this.backfillRequestId;
+  private async backfillDerivedFields(supportName: string, attachmentSet: number, requestId: number): Promise<void> {
     const derivedFields = await this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
     if (requestId !== this.backfillRequestId || !this.isOpen() || !derivedFields) {
       return;

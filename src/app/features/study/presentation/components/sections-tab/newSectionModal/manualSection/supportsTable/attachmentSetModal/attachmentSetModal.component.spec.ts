@@ -36,6 +36,7 @@ import { of } from 'rxjs';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import type { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
 import { CatalogAttachment, Support, Section } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 
@@ -498,6 +499,48 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
       expect(component.towerModel()).toBe('Tower Model');
+    });
+
+    it('discards an in-flight backfill when reopened for another support that starts no new backfill', async () => {
+      // Support A is missing its derived fields, so opening starts a backfill we keep pending.
+      let resolveA!: (value: DerivedSupportAttachmentFields) => void;
+      attachmentServiceMock.getDerivedSupportFields.mockReturnValueOnce(
+        new Promise<DerivedSupportAttachmentFields>((resolve) => {
+          resolveA = resolve;
+        })
+      );
+
+      const supportAMissing: Support = {
+        ...mockSupport,
+        name: 'Support A',
+        attachmentSet: 1,
+        armLength: null,
+        heightBelowConsole: null,
+        towerModel: null
+      };
+      fixture.componentRef.setInput('support', supportAMissing);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Reopen for a support WITHOUT an attachment set: no new backfill is started, so the open
+      // itself must invalidate A's lookup (the inner emptiness guards alone would not).
+      const supportBNoSet: Support = { ...mockSupport, name: 'Support B', attachmentSet: null };
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('support', supportBNoSet);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // A's lookup resolves late with A's data.
+      resolveA({ towerModel: 'Tower-A', armLength: 1.1, heightBelowConsole: 2.2 });
+      await fixture.whenStable();
+
+      // B has no attachment set, so its derived fields must stay empty — not be filled with A's.
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
+      expect(component.towerModel()).toBeUndefined();
     });
 
     it('should not run effect when modal is closed', async () => {

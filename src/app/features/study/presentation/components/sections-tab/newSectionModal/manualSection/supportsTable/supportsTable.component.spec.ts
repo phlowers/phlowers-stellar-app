@@ -629,6 +629,36 @@ describe('SupportsTableComponent', () => {
       });
     });
 
+    it('drops a stale derived-fields lookup when the same row is edited again before it resolves', async () => {
+      // Each call hands back a controllable promise so we can resolve them out of order.
+      const resolvers: (() => void)[] = [];
+      mockAttachmentService.getDerivedSupportFields.mockImplementation(
+        (_name: string, set: number) =>
+          new Promise((resolve) => {
+            resolvers.push(() => resolve({ towerModel: `tower-set-${set}`, armLength: set, heightBelowConsole: 25.5 }));
+          })
+      );
+
+      const first = component.onSupportFieldChange('support1', 'attachmentSet', 1);
+      const second = component.onSupportFieldChange('support1', 'attachmentSet', 2);
+
+      // The newer lookup (set 2) resolves first; the older one (set 1) resolves late.
+      resolvers[1]();
+      resolvers[0]();
+      await Promise.all([first, second]);
+
+      // Only the latest edit's derived fields are emitted...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { towerModel: 'tower-set-2', armLength: 2, heightBelowConsole: 25.5 }
+      });
+      // ...the stale (set 1) result is discarded instead of overwriting them.
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { towerModel: 'tower-set-1', armLength: 1, heightBelowConsole: 25.5 }
+      });
+    });
+
     it('does not look up derived fields for non-name/attachmentSet field edits', async () => {
       await component.onSupportFieldChange('support1', 'number', 5);
 

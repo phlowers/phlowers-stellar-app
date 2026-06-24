@@ -140,7 +140,9 @@ export class AttachmentService {
     const details = await this.getAttachmentDetails(supportName, attachmentSet);
     if (!details) return undefined;
     return {
-      towerModel: details.support_tower,
+      // The catalog stores a missing tower as an empty string, so normalize blanks to null
+      // to honour the `string | null` contract (and the Support model's null convention).
+      towerModel: details.support_tower || null,
       armLength: details.cross_arm_length == null ? null : truncateNumberToOneDecimal(details.cross_arm_length),
       heightBelowConsole: details.attachment_altitude ?? null
     };

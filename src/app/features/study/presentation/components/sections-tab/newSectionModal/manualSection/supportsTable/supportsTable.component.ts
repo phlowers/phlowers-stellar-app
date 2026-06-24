@@ -241,6 +241,21 @@ export class SupportsTableComponent implements OnInit {
     return this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
   }
 
+  /** Latest derived-field resolution id per support UUID, used to drop stale async results. */
+  private readonly derivedFieldsRequestId = new Map<string, number>();
+
+  /** Registers a new derived-field lookup for a row and returns its id. */
+  private nextDerivedFieldsRequest(uuid: string): number {
+    const requestId = (this.derivedFieldsRequestId.get(uuid) ?? 0) + 1;
+    this.derivedFieldsRequestId.set(uuid, requestId);
+    return requestId;
+  }
+
+  /** True when `requestId` is still the most recent lookup for `uuid` (no newer edit raced ahead). */
+  private isLatestDerivedFieldsRequest(uuid: string, requestId: number): boolean {
+    return this.derivedFieldsRequestId.get(uuid) === requestId;
+  }
+
   async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
     const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
     changes.forEach((change) => this.supportChange.emit(change));
@@ -250,8 +265,11 @@ export class SupportsTableComponent implements OnInit {
       const support = this.supports().find((support) => support.uuid === uuid);
       const supportName = field === 'name' ? (value as string | null) : support?.name;
       const attachmentSet = field === 'attachmentSet' ? (value as number | null) : support?.attachmentSet;
+      // Guard against a stale update race: a faster edit of the same row (e.g. typing successive
+      // digits into the attachment-set field) must not be overwritten by an older lookup resolving late.
+      const requestId = this.nextDerivedFieldsRequest(uuid);
       const catalogFields = await this.resolveAttachmentFields(supportName, attachmentSet);
-      if (catalogFields) {
+      if (catalogFields && this.isLatestDerivedFieldsRequest(uuid, requestId)) {
         this.supportChange.emit({ uuid, support: catalogFields });
       }
     }
@@ -270,12 +288,17 @@ export class SupportsTableComponent implements OnInit {
       const resolveName = (support: Support) => (header === 'name' ? firstSupport?.name : support.name);
       const resolveSet = (support: Support) =>
         header === 'attachmentSet' ? firstSupport?.attachmentSet : support.attachmentSet;
+      // Register a lookup per row up front so a later inline edit of any of these rows
+      // supersedes this copy's derived fields rather than being overwritten by them.
+      const requestIds = new Map(
+        supports.map((support) => [support.uuid, this.nextDerivedFieldsRequest(support.uuid)])
+      );
       const catalogFieldsList = await Promise.all(
         supports.map((support) => this.resolveAttachmentFields(resolveName(support), resolveSet(support)))
       );
       supports.forEach((support, index) => {
         const catalogFields = catalogFieldsList[index];
-        if (catalogFields) {
+        if (catalogFields && this.isLatestDerivedFieldsRequest(support.uuid, requestIds.get(support.uuid)!)) {
           changes.push({ uuid: support.uuid, support: catalogFields });
         }
       });

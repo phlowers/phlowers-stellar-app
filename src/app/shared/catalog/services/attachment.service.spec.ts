@@ -223,6 +223,25 @@ describe('AttachmentService', () => {
       });
     });
 
+    it('normalizes a blank tower model (stored as an empty string) to null', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: '',
+        attachments: [{ attachment_set: 1, attachment_altitude: 12, cross_arm_length: 3 }]
+      });
+
+      const result = await service.getDerivedSupportFields('S1', 1);
+
+      expect(result).toEqual({
+        towerModel: null,
+        armLength: 3,
+        heightBelowConsole: 12
+      });
+    });
+
     it('returns undefined when no attachment matches', async () => {
       mockTable.get.mockResolvedValue({
         uuid: 'g',
