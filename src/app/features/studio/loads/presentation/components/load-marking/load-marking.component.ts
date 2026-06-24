@@ -71,13 +71,21 @@ export class LoadMarkingComponent {
 
   private readonly loadControlSignals: Record<LoadControlName, Signal<unknown>> = {
     loadPosition: toSignal(this.form.controls.loadPosition.valueChanges, {
-      initialValue: this.form.controls.loadPosition.value, equal: () => false }),
+      initialValue: this.form.controls.loadPosition.value,
+      equal: () => false
+    }),
     loadWeight: toSignal(this.form.controls.loadWeight.valueChanges, {
-      initialValue: this.form.controls.loadWeight.value, equal: () => false }),
+      initialValue: this.form.controls.loadWeight.value,
+      equal: () => false
+    }),
     type: toSignal(this.form.controls.type.valueChanges, {
-      initialValue: this.form.controls.type.value, equal: () => false }),
+      initialValue: this.form.controls.type.value,
+      equal: () => false
+    }),
     referenceSupport: toSignal(this.form.controls.referenceSupport.valueChanges, {
-      initialValue: this.form.controls.referenceSupport.value, equal: () => false })
+      initialValue: this.form.controls.referenceSupport.value,
+      equal: () => false
+    })
   };
 
   private readonly spanSelectEffect = effect(() => {

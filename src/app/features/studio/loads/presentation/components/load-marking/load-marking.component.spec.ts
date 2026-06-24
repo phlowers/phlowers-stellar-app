@@ -180,17 +180,13 @@ describe('LoadMarkingComponent', () => {
       expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).not.toHaveBeenCalled();
     });
 
-    it('calls deleteSpanLoad, calculateLoad, saveTemporaryLoadDataInSection in order then resets form controls', async () => {
+    it('calls deleteSpanLoad then saveTemporaryLoadDataInSection in order then resets form controls', async () => {
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();
 
       const callOrder: string[] = [];
       (mockLoadFormsService['deleteSpanLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callOrder.push('deleteSpanLoad');
-      });
-      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callOrder.push('calculateLoad');
-        return Promise.resolve();
       });
       (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callOrder.push('save');
@@ -200,7 +196,7 @@ describe('LoadMarkingComponent', () => {
       await component.deleteCharge();
       fixture.detectChanges();
 
-      expect(callOrder).toEqual(['deleteSpanLoad', 'calculateLoad', 'save']);
+      expect(callOrder).toEqual(['deleteSpanLoad', 'save']);
       expect(mockLoadFormsService['deleteSpanLoad']).toHaveBeenCalledWith('support-1');
       expect(component.form.controls.spanSelect.value).toBeNull();
     });
@@ -214,25 +210,17 @@ describe('LoadMarkingComponent', () => {
       expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).not.toHaveBeenCalled();
     });
 
-    it('calculates then saves when form is valid', async () => {
+    it('calls saveTemporaryLoadDataInSection when form is valid', async () => {
       component.form.controls.spanSelect.setValue('support-1');
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       fixture.detectChanges();
 
-      const callOrder: string[] = [];
-      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callOrder.push('calculate');
-        return Promise.resolve();
-      });
-      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callOrder.push('save');
-        return Promise.resolve();
-      });
+      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
       await component.saveLoadCase();
 
-      expect(callOrder).toEqual(['calculate', 'save']);
+      expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).toHaveBeenCalled();
     });
 
     it('sets isSaving to true during save and false after', async () => {
@@ -242,7 +230,7 @@ describe('LoadMarkingComponent', () => {
       fixture.detectChanges();
 
       let savingDuring = false;
-      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         savingDuring = component.isSaving();
         return Promise.resolve();
       });

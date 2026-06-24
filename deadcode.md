@@ -213,7 +213,7 @@
 - **Type**: method
 - **Reason**: After the fix for bug #526, `deleteCharge()` in `load-marking.component.ts` no longer calls `deleteLoad()`. No other caller exists in the codebase.
 - **Detected on**: 2026-04-14
-- **Status**: ⏳ PENDING REVIEW
+- **Status**: ✅ REINSTATED — 2026-06-24 — Now called by `ClimateComponent.deleteCharge()` to fix loadcase deletion not refreshing the plot.
 
 ---
 

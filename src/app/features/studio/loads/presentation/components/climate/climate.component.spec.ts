@@ -479,43 +479,35 @@ describe('ClimateComponent', () => {
   });
 
   describe('saveForm', () => {
-    it('should call calculateLoad then saveTemporaryLoadDataInSection when study and section exist', async () => {
+    it('should call saveTemporaryLoadDataInSection when study and section exist', async () => {
       const loadFormsService = TestBed.inject(LoadFormsService);
-      const callOrder: string[] = [];
-      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(() => {
-        callOrder.push('calculate');
-        return Promise.resolve();
-      });
-      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockImplementation(() => {
-        callOrder.push('save');
-        return Promise.resolve();
-      });
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockResolvedValue(undefined);
 
       await component.saveForm();
 
-      expect(callOrder).toEqual(['calculate', 'save']);
+      expect(loadFormsService.saveTemporaryLoadDataInSection).toHaveBeenCalled();
     });
 
     it('should return early when study is missing', async () => {
       const plotService = TestBed.inject(PlotService);
       (plotService.study as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
       const loadFormsService = TestBed.inject(LoadFormsService);
-      const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
+      const saveSpy = vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection');
 
       await component.saveForm();
 
-      expect(calculateSpy).not.toHaveBeenCalled();
+      expect(saveSpy).not.toHaveBeenCalled();
     });
 
     it('should return early when section is missing', async () => {
       const spanService = TestBed.inject(PlotSpanService);
       (spanService.section as ReturnType<typeof signal<{ uuid: string } | null>>).set(null);
       const loadFormsService = TestBed.inject(LoadFormsService);
-      const calculateSpy = vi.spyOn(loadFormsService, 'calculateLoad');
+      const saveSpy = vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection');
 
       await component.saveForm();
 
-      expect(calculateSpy).not.toHaveBeenCalled();
+      expect(saveSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -527,13 +519,12 @@ describe('ClimateComponent', () => {
     it('should be true during saveForm then false after', async () => {
       const loadFormsService = TestBed.inject(LoadFormsService);
       let resolveTask!: () => void;
-      vi.spyOn(loadFormsService, 'calculateLoad').mockImplementation(
+      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockImplementation(
         () =>
           new Promise<void>((res) => {
             resolveTask = res;
           })
       );
-      vi.spyOn(loadFormsService, 'saveTemporaryLoadDataInSection').mockResolvedValue(undefined);
 
       const promise = component.saveForm();
       expect(component.isSaving()).toBe(true);
