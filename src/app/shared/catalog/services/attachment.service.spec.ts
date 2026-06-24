@@ -256,6 +256,38 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('getDerivedSupportFieldsBySet', () => {
+    it('derives fields for every attachment set with a single DB read, keyed by set number', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [
+          { attachment_set: 1, attachment_altitude: 25.5, cross_arm_length: 3.456 },
+          { attachment_set: 2, attachment_altitude: 12, cross_arm_length: null }
+        ]
+      });
+
+      const result = await service.getDerivedSupportFieldsBySet('S1');
+
+      // One read serves all sets (the point of the batch API).
+      expect(mockTable.get).toHaveBeenCalledTimes(1);
+      expect(mockTable.get).toHaveBeenCalledWith('S1');
+      expect(result.get(1)).toEqual({ towerModel: 'T1', armLength: 3.4, heightBelowConsole: 25.5 });
+      expect(result.get(2)).toEqual({ towerModel: 'T1', armLength: null, heightBelowConsole: 12 });
+    });
+
+    it('returns an empty map when the support is unknown', async () => {
+      mockTable.get.mockResolvedValue(undefined);
+
+      const result = await service.getDerivedSupportFieldsBySet('missing');
+
+      expect(result.size).toBe(0);
+    });
+  });
+
   describe('addSupportNamesIfAbsent', () => {
     it('does nothing when entries are empty', async () => {
       await service.addSupportNamesIfAbsent([]);

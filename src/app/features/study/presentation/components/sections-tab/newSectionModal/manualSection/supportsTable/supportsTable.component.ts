@@ -306,13 +306,22 @@ export class SupportsTableComponent implements OnInit {
       const requestIds = new Map(
         supports.map((support) => [support.uuid, this.nextDerivedFieldsRequest(support.uuid)])
       );
-      const catalogFieldsList = await Promise.all(
-        supports.map((support) =>
-          this.resolveAttachmentFields(resolveName(support), resolveSet(support)).catch(() => undefined)
+      // Resolve each DISTINCT support name's attachment sets in a single DB read, then derive each
+      // row locally. Copying one name onto many rows would otherwise re-fetch its group once per row.
+      const distinctNames = [...new Set(supports.map(resolveName).filter((name): name is string => !!name))];
+      const fieldsByName = new Map(
+        await Promise.all(
+          distinctNames.map(
+            async (name) =>
+              [name, await this.attachmentService.getDerivedSupportFieldsBySet(name).catch(() => undefined)] as const
+          )
         )
       );
-      supports.forEach((support, index) => {
-        const catalogFields = catalogFieldsList[index];
+      supports.forEach((support) => {
+        const name = resolveName(support);
+        const attachmentSet = resolveSet(support);
+        const catalogFields =
+          name != null && attachmentSet != null ? fieldsByName.get(name)?.get(attachmentSet) : undefined;
         if (catalogFields && this.isLatestDerivedFieldsRequest(support.uuid, requestIds.get(support.uuid)!)) {
           changes.push({ uuid: support.uuid, support: catalogFields });
         }

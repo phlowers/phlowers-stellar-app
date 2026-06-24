@@ -138,7 +138,32 @@ export class AttachmentService {
     attachmentSet: number
   ): Promise<DerivedSupportAttachmentFields | undefined> {
     const details = await this.getAttachmentDetails(supportName, attachmentSet);
-    if (!details) return undefined;
+    return details ? this.deriveSupportFields(details) : undefined;
+  }
+
+  /**
+   * Resolve the derived support fields for every attachment set of a support in a single DB read,
+   * keyed by attachment set number.
+   *
+   * @remarks
+   * Use for bulk operations (e.g. copying one support name onto many rows): a per-row
+   * {@link getDerivedSupportFields} call would re-fetch the same support group once per row.
+   *
+   * @param supportName - The support name to look up
+   * @returns a map of attachment set number to its derived fields (empty when the support is unknown)
+   */
+  async getDerivedSupportFieldsBySet(supportName: string): Promise<Map<number, DerivedSupportAttachmentFields>> {
+    const group = await this.storageService.db?.catSupportAttachments.get(supportName);
+    const fieldsBySet = new Map<number, DerivedSupportAttachmentFields>();
+    if (!group) return fieldsBySet;
+    for (const item of group.attachments) {
+      fieldsBySet.set(item.attachment_set, this.deriveSupportFields(toLegacyEntity(group, item)));
+    }
+    return fieldsBySet;
+  }
+
+  /** Maps a flat catalog attachment entity to the support fields derived from it. */
+  private deriveSupportFields(details: CatalogAttachmentEntity): DerivedSupportAttachmentFields {
     return {
       // The catalog stores a missing tower as an empty string, so normalize blanks to null
       // to honour the `string | null` contract (and the Support model's null convention).

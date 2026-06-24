@@ -63,8 +63,12 @@ export class AttachmentSetModalComponent {
   attachmentSetNumbers = signal<number[]>([]);
 
   private readonly attachmentService = inject(AttachmentService);
-  /** Monotonic id bumped on every open; discards derived-field backfills left in flight from a prior open. */
-  private backfillRequestId = 0;
+  /**
+   * Monotonic id for derived-field resolutions. Bumped on every open and on every user-driven
+   * name/set change, so any lookup (open-effect backfill or an earlier selection) still in flight
+   * is discarded once a newer one supersedes it.
+   */
+  private derivedFieldsRequestId = 0;
   readonly supportsFilterTable = toSignal(this.attachmentService.distinctSupportNames$);
   readonly catalogLoading = computed(() => this.supportsFilterTable() === undefined);
 
@@ -89,7 +93,7 @@ export class AttachmentSetModalComponent {
       if (this.isOpen()) {
         // Opening (for a new support, or reopening) invalidates any backfill still in flight,
         // even when this open does not start a new one (e.g. a support without an attachment set).
-        const requestId = ++this.backfillRequestId;
+        const requestId = ++this.derivedFieldsRequestId;
         this.resetValues(true);
         const support = this.support();
         const name = support?.name;
@@ -126,13 +130,13 @@ export class AttachmentSetModalComponent {
    * Fills the catalog-derived fields (tower model, arm length, height below console) that the
    * support does not already carry. Only empty signals are set, so user-edited values are kept.
    * The `requestId` (assigned by the open effect) guards against stale resolutions: the result is
-   * dropped if the modal was reopened/closed — and thus invalidated — while the lookup was in flight.
+   * dropped if a newer open/close or a user name/set change invalidated it while the lookup was in flight.
    */
   private async backfillDerivedFields(supportName: string, attachmentSet: number, requestId: number): Promise<void> {
     const derivedFields = await this.attachmentService
       .getDerivedSupportFields(supportName, attachmentSet)
       .catch(() => undefined);
-    if (requestId !== this.backfillRequestId || !this.isOpen() || !derivedFields) {
+    if (requestId !== this.derivedFieldsRequestId || !this.isOpen() || !derivedFields) {
       return;
     }
     if (this.armLength() == null) {
@@ -175,6 +179,10 @@ export class AttachmentSetModalComponent {
   }
 
   async onAttachmentSelect(event: { value: string | number | null }, key: keyof CatalogAttachment) {
+    // A user-driven name/set change supersedes any derived-field resolution already in flight
+    // (the open-effect backfill, or an earlier selection), so late results can't clobber it.
+    const requestId = ++this.derivedFieldsRequestId;
+
     if (event.value === null || event.value === undefined) {
       this.resetValues(key === 'support_name');
       return;
@@ -193,11 +201,12 @@ export class AttachmentSetModalComponent {
         const derivedFields = await this.attachmentService
           .getDerivedSupportFields(currentSupportName, event.value as number)
           .catch(() => undefined);
-        if (derivedFields) {
-          this.armLength.set(derivedFields.armLength ?? undefined);
-          this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
-          this.towerModel.set(derivedFields.towerModel ?? undefined);
+        if (requestId !== this.derivedFieldsRequestId || !derivedFields) {
+          return;
         }
+        this.armLength.set(derivedFields.armLength ?? undefined);
+        this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
+        this.towerModel.set(derivedFields.towerModel ?? undefined);
       }
     }
   }

@@ -543,6 +543,46 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.towerModel()).toBeUndefined();
     });
 
+    it('discards an in-flight open backfill when the user selects a different attachment set first', async () => {
+      // The open-effect backfill stays pending; the later user selection resolves with set-2 data
+      // that has no tower, leaving towerModel empty.
+      let resolveBackfill!: (value: DerivedSupportAttachmentFields) => void;
+      attachmentServiceMock.getDerivedSupportFields
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveBackfill = resolve;
+          })
+        )
+        .mockResolvedValue({ towerModel: null, armLength: 7.7, heightBelowConsole: 8.8 });
+
+      const supportMissing: Support = {
+        ...mockSupport,
+        name: 'Support A',
+        attachmentSet: 1,
+        armLength: null,
+        heightBelowConsole: null,
+        towerModel: null
+      };
+      fixture.componentRef.setInput('support', supportMissing);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // User picks a different attachment set before the open backfill resolves.
+      await component.onAttachmentSelect({ value: 2 }, 'attachment_set');
+      expect(component.armLength()).toBe(7.7);
+      expect(component.towerModel()).toBeUndefined();
+
+      // The original (set 1) backfill resolves late.
+      resolveBackfill({ towerModel: 'Tower-1', armLength: 1.1, heightBelowConsole: 2.2 });
+      await fixture.whenStable();
+
+      // The set-2 selection wins; the stale set-1 backfill must not fill the empty tower.
+      expect(component.armLength()).toBe(7.7);
+      expect(component.heightBelowConsole()).toBe(8.8);
+      expect(component.towerModel()).toBeUndefined();
+    });
+
     it('should not run effect when modal is closed', async () => {
       // Set initial values
       component.armLength.set(5);

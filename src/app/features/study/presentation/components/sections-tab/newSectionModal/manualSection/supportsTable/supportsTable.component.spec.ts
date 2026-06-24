@@ -37,7 +37,8 @@ const mockAttachmentService = {
     return distinctSupportNamesSubject;
   },
   getAttachmentDetails: vi.fn().mockResolvedValue(undefined),
-  getDerivedSupportFields: vi.fn().mockResolvedValue(undefined)
+  getDerivedSupportFields: vi.fn().mockResolvedValue(undefined),
+  getDerivedSupportFieldsBySet: vi.fn().mockResolvedValue(new Map())
 };
 
 let workerReadySubject: BehaviorSubject<boolean>;
@@ -551,6 +552,17 @@ describe('SupportsTableComponent', () => {
           heightBelowConsole: 25.5
         })
       );
+      // Bulk path: one DB read per support name returns the derived fields for each of its sets.
+      mockAttachmentService.getDerivedSupportFieldsBySet.mockImplementation((supportName: string) =>
+        Promise.resolve(
+          new Map(
+            [1, 2, 3].map((set) => [
+              set,
+              { towerModel: `tower-of-${supportName}`, armLength: 3.4, heightBelowConsole: 25.5 }
+            ])
+          )
+        )
+      );
     });
 
     it('copies the attachment set AND resolves each row derived fields from its own support name', async () => {
@@ -561,10 +573,10 @@ describe('SupportsTableComponent', () => {
         uuid: 'support2',
         support: { attachmentSet: 1 }
       });
-      // ...and each row's fields are looked up with that set under its OWN name.
-      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 1', 1);
-      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 2', 1);
-      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 3', 1);
+      // ...and each row's fields are looked up under its OWN name (one DB read per name).
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 1');
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 2');
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 3');
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support1',
         support: { towerModel: 'tower-of-Support 1', armLength: 3.4, heightBelowConsole: 25.5 }
@@ -587,10 +599,10 @@ describe('SupportsTableComponent', () => {
         uuid: 'support2',
         support: { name: 'Support 1' }
       });
-      // ...and each row's fields are looked up with the copied name under its OWN attachment set,
-      // so towers follow the name-clone workflow (#657).
-      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 1', 1);
-      expect(mockAttachmentService.getDerivedSupportFields).toHaveBeenCalledWith('Support 1', 2);
+      // ...and the copied name is fetched ONCE, then each row derives its OWN attachment set
+      // locally, so towers follow the name-clone workflow (#657) without redundant DB reads.
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledWith('Support 1');
+      expect(mockAttachmentService.getDerivedSupportFieldsBySet).toHaveBeenCalledTimes(1);
       expect(component.supportChange.emit).toHaveBeenCalledWith({
         uuid: 'support2',
         support: { towerModel: 'tower-of-Support 1', armLength: 3.4, heightBelowConsole: 25.5 }
