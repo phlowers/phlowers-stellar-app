@@ -665,6 +665,21 @@ describe('SupportsTableComponent', () => {
       expect(mockAttachmentService.getDerivedSupportFields).not.toHaveBeenCalled();
     });
 
+    it('does not look up or emit derived fields when the support name is cleared', async () => {
+      await component.onSupportFieldChange('support1', 'name', null);
+
+      // The name change itself is emitted...
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { name: null }
+      });
+      // ...but a null name short-circuits the catalog lookup, so no derived fields are resolved/emitted.
+      expect(mockAttachmentService.getDerivedSupportFields).not.toHaveBeenCalled();
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith(
+        expect.objectContaining({ support: expect.objectContaining({ towerModel: expect.anything() }) })
+      );
+    });
+
     it('does not emit a derived-fields change when the catalog has no match', async () => {
       mockAttachmentService.getDerivedSupportFields.mockResolvedValue(undefined);
 
@@ -677,6 +692,26 @@ describe('SupportsTableComponent', () => {
       expect(component.supportChange.emit).not.toHaveBeenCalledWith(
         expect.objectContaining({ support: expect.objectContaining({ armLength: expect.anything() }) })
       );
+    });
+
+    it('prunes derived-field request ids for supports removed from the table (no unbounded growth)', async () => {
+      // Touch two rows so both get tracked in the request-id map.
+      await component.onSupportFieldChange('support1', 'attachmentSet', 5);
+      await component.onSupportFieldChange('support2', 'attachmentSet', 6);
+
+      const internals = component as unknown as {
+        derivedFieldsRequestId: Map<string, number>;
+        pruneStaleDerivedFieldsRequests: () => void;
+      };
+      expect(internals.derivedFieldsRequestId.has('support1')).toBe(true);
+      expect(internals.derivedFieldsRequestId.has('support2')).toBe(true);
+
+      // Remove support1 from the table, then prune (done reactively by an effect in production).
+      (component.supports as unknown as () => Support[]) = () => mockSupports.filter((s) => s.uuid !== 'support1');
+      internals.pruneStaleDerivedFieldsRequests();
+
+      expect(internals.derivedFieldsRequestId.has('support1')).toBe(false);
+      expect(internals.derivedFieldsRequestId.has('support2')).toBe(true);
     });
   });
 

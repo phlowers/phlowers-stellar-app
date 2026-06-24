@@ -140,6 +140,19 @@ export class SupportsTableComponent implements OnInit {
     effect(() => {
       this.updateSupportFilterTables(this.allCatalogSupportNames() ?? []);
     });
+    // Drop derived-field request ids for supports that no longer exist so the tracking map
+    // cannot grow unbounded across a long editing session (e.g. rows added then deleted).
+    effect(() => this.pruneStaleDerivedFieldsRequests());
+  }
+
+  /** Removes derived-field request ids whose support is no longer present in the table. */
+  private pruneStaleDerivedFieldsRequests(): void {
+    const liveUuids = new Set(this.supports().map((support) => support.uuid));
+    for (const uuid of this.derivedFieldsRequestId.keys()) {
+      if (!liveUuids.has(uuid)) {
+        this.derivedFieldsRequestId.delete(uuid);
+      }
+    }
   }
 
   private updateSupportFilterTables(catalogNames: string[]): void {
@@ -235,7 +248,7 @@ export class SupportsTableComponent implements OnInit {
     supportName: string | null | undefined,
     attachmentSet: number | null | undefined
   ): Promise<DerivedSupportAttachmentFields | undefined> {
-    if (!supportName || attachmentSet == null) {
+    if (!supportName || attachmentSet == null || attachmentSet === 0) {
       return undefined;
     }
     return this.attachmentService.getDerivedSupportFields(supportName, attachmentSet);
