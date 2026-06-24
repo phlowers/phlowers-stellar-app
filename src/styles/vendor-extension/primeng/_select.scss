@@ -27,7 +27,7 @@
   --p-select-option-focus-background: var(--primary-50);
   --p-select-option-selected-background: var(--secondary-50);
   --p-select-option-selected-focus-background: var(--tertiary-50);
-  --p-select-option-color: --p-select-color;
+  --p-select-option-color: var(--p-select-color);
   --p-select-option-focus-color: var(--p-select-option-color);
   --p-select-option-selected-color: var(--p-select-option-color);
   --p-select-option-selected-focus-color: var(--p-select-option-color);
