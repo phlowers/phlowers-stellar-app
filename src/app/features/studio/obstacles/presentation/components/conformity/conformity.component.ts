@@ -72,7 +72,7 @@ export class ConformityComponent {
   readonly calculationError = signal<string | null>(null);
 
   private readonly _conformityResults = signal<Record<string, ConformityRuleResult> | null>(null);
-  /** Computed results, set only by {@link calculate}. Null hides the results section. */
+  /** Computed results, set only by `calculate`. Null hides the results section. */
   readonly conformityResults = this._conformityResults.asReadonly();
 
   readonly form = this.fb.group({

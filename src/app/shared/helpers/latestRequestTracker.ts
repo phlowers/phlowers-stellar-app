@@ -8,7 +8,7 @@
 /**
  * "Latest wins" guard for overlapping async resolutions of a single subject.
  *
- * Each {@link begin} returns a monotonically increasing token; {@link isCurrent}
+ * Each `begin` returns a monotonically increasing token; `isCurrent`
  * tells whether that token is still the most recent one. A late-resolving lookup
  * can therefore detect that a newer request has superseded it and discard its
  * result instead of clobbering fresher state.
@@ -28,10 +28,10 @@ export class LatestRequestTracker {
 }
 
 /**
- * Per-key variant of {@link LatestRequestTracker}: an independent "latest wins"
+ * Per-key variant of `LatestRequestTracker`: an independent "latest wins"
  * token sequence for each key (e.g. one per table row identified by UUID).
  *
- * Use {@link retain} to drop keys that no longer exist so the internal map cannot
+ * Use `retain` to drop keys that no longer exist so the internal map cannot
  * grow unbounded across a long-lived session.
  */
 export class KeyedLatestRequestTracker<K> {

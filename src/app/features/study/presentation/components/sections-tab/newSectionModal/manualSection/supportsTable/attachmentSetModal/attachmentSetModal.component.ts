@@ -143,7 +143,7 @@ export class AttachmentSetModalComponent {
   }
 
   /**
-   * Fans a resolved {@link DerivedSupportAttachmentFields} out into the tower model, arm length and
+   * Fans a resolved `DerivedSupportAttachmentFields` out into the tower model, arm length and
    * height-below-console signals. When `onlyIfEmpty` is true (backfill), each signal is set only if
    * still empty so user-edited values survive; otherwise (a fresh selection) all three are overwritten.
    */

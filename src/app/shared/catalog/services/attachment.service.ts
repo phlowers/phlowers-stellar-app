@@ -142,7 +142,7 @@ export class AttachmentService {
   }
 
   /**
-   * Lenient counterpart of {@link getDerivedSupportFields} for UI call sites.
+   * Lenient counterpart of `getDerivedSupportFields` for UI call sites.
    *
    * @remarks
    * Tolerates a missing or incomplete (support name, attachment set) pair and never rejects, so
@@ -178,7 +178,7 @@ export class AttachmentService {
    *
    * @remarks
    * Use for bulk operations (e.g. copying one support name onto many rows): a per-row
-   * {@link getDerivedSupportFields} call would re-fetch the same support group once per row.
+   * `getDerivedSupportFields` call would re-fetch the same support group once per row.
    *
    * @param supportName - The support name to look up
    * @returns a map of attachment set number to its derived fields (empty when the support is unknown)
