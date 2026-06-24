@@ -143,6 +143,7 @@ describe('LoadFormsService', () => {
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
+      pythonErrorCode: createSignalMock(null),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
@@ -422,6 +423,38 @@ describe('LoadFormsService', () => {
       );
       // Final litData reflects the cable modification, not the bare change-state.
       expect(mockPlotService.litData.set).toHaveBeenLastCalledWith({ id: 'after-cable-mod' });
+    });
+
+    it('should set plotService.error and pythonErrorCode when runTask returns an error', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_FAILED', pythonErrorCode: 42 });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.error.set).toHaveBeenCalledWith('CALCULATION_FAILED');
+      expect(mockPlotService.pythonErrorCode.set).toHaveBeenCalledWith(42);
+    });
+
+    it('should not call refreshProjection when runTask returns an error', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_FAILED', pythonErrorCode: 42 });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+    });
+
+    it('should still set loading to false when runTask returns an error', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_FAILED', pythonErrorCode: 42 });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
+      expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
     });
 
     it('should not run any cable modification task when the section has none', async () => {
