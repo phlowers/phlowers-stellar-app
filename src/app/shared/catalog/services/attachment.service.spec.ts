@@ -184,6 +184,145 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('getDerivedSupportFields', () => {
+    it('maps the matching attachment to tower, arm length and height, truncating arm length to one decimal', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1, attachment_altitude: 25.5, cross_arm_length: 3.456 }]
+      });
+
+      const result = await service.getDerivedSupportFields('S1', 1);
+
+      expect(result).toEqual({
+        towerModel: 'T1',
+        armLength: 3.4,
+        heightBelowConsole: 25.5
+      });
+    });
+
+    it('returns a null arm length when cross_arm_length is missing', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1, attachment_altitude: 12 }]
+      });
+
+      const result = await service.getDerivedSupportFields('S1', 1);
+
+      expect(result).toEqual({
+        towerModel: 'T1',
+        armLength: null,
+        heightBelowConsole: 12
+      });
+    });
+
+    it('normalizes a blank tower model (stored as an empty string) to null', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: '',
+        attachments: [{ attachment_set: 1, attachment_altitude: 12, cross_arm_length: 3 }]
+      });
+
+      const result = await service.getDerivedSupportFields('S1', 1);
+
+      expect(result).toEqual({
+        towerModel: null,
+        armLength: 3,
+        heightBelowConsole: 12
+      });
+    });
+
+    it('returns undefined when no attachment matches', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1 }]
+      });
+
+      expect(await service.getDerivedSupportFields('S1', 99)).toBeUndefined();
+    });
+  });
+
+  describe('resolveDerivedSupportFields', () => {
+    it('resolves the derived fields for a valid (name, set) pair', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [{ attachment_set: 1, attachment_altitude: 25.5, cross_arm_length: 3.456 }]
+      });
+
+      expect(await service.resolveDerivedSupportFields('S1', 1)).toEqual({
+        towerModel: 'T1',
+        armLength: 3.4,
+        heightBelowConsole: 25.5
+      });
+    });
+
+    it.each([
+      ['a blank name', '', 1],
+      ['a null name', null, 1],
+      ['a null set', 'S1', null],
+      ['a zero set', 'S1', 0]
+    ])('returns undefined without hitting the catalog for %s', async (_label, name, set) => {
+      expect(await service.resolveDerivedSupportFields(name as string | null, set as number | null)).toBeUndefined();
+      expect(mockTable.get).not.toHaveBeenCalled();
+    });
+
+    it('swallows lookup failures and returns undefined', async () => {
+      mockTable.get.mockRejectedValue(new Error('boom'));
+
+      expect(await service.resolveDerivedSupportFields('S1', 1)).toBeUndefined();
+    });
+  });
+
+  describe('getDerivedSupportFieldsBySet', () => {
+    it('derives fields for every attachment set with a single DB read, keyed by set number', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [
+          { attachment_set: 1, attachment_altitude: 25.5, cross_arm_length: 3.456 },
+          { attachment_set: 2, attachment_altitude: 12, cross_arm_length: null }
+        ]
+      });
+
+      const result = await service.getDerivedSupportFieldsBySet('S1');
+
+      // One read serves all sets (the point of the batch API).
+      expect(mockTable.get).toHaveBeenCalledTimes(1);
+      expect(mockTable.get).toHaveBeenCalledWith('S1');
+      expect(result.get(1)).toEqual({ towerModel: 'T1', armLength: 3.4, heightBelowConsole: 25.5 });
+      expect(result.get(2)).toEqual({ towerModel: 'T1', armLength: null, heightBelowConsole: 12 });
+    });
+
+    it('returns an empty map when the support is unknown', async () => {
+      mockTable.get.mockResolvedValue(undefined);
+
+      const result = await service.getDerivedSupportFieldsBySet('missing');
+
+      expect(result.size).toBe(0);
+    });
+  });
+
   describe('addSupportNamesIfAbsent', () => {
     it('does nothing when entries are empty', async () => {
       await service.addSupportNamesIfAbsent([]);

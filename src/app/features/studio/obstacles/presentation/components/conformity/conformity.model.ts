@@ -1,6 +1,6 @@
 /**
  * Declarative description of one row of the conformity results table, mapping a label and unit to
- * the overhang / lateral fields of {@link ConformityRuleResult} (either may be `null` when the row
+ * the overhang / lateral fields of `ConformityRuleResult` (either may be `null` when the row
  * only has one side). Drives the table rendering so the four near-identical value accessors and the
  * parallel units array can be replaced by a single `getValue(rule, key)` lookup.
  */
