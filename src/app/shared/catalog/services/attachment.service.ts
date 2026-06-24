@@ -163,7 +163,11 @@ export class AttachmentService {
     }
     try {
       return await this.getDerivedSupportFields(supportName, attachmentSet);
-    } catch {
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to resolve derived support fields for supportName="${supportName}", attachmentSet=${attachmentSet}`,
+        error
+      );
       return undefined;
     }
   }
