@@ -10,7 +10,6 @@ import logging
 import numpy as np
 from mechaphlowers import SectionStudy, units
 from mechaphlowers.core.geometry.distances import DistanceResult
-from mechaphlowers.core.geometry.points import SparsePoints
 from mechaphlowers.utils import ArrayTools
 
 from stellar_engine.entities.errors import GeneratedPointsNoneError
@@ -60,8 +59,8 @@ def get_coordinates(
     if project:
         projected_group_points = base_group_points.change_frame(
             frame_index=middle_span
-        )    
-        
+        )
+
         span, supports, insulators = (
             projected_group_points.spans,
             projected_group_points.supports,
