@@ -293,13 +293,14 @@ const layout2d = (
     },
     xaxis: {
       ...PLOT_AXIS_CONFIG,
-      autorange: plotParams.invert ? 'reversed' : true,
+      autorange: plotParams.side === 'face' ? 'reversed' : plotParams.invert ? 'reversed' : true,
       showticklabels: true,
       showgrid: true,
       showline: true
     },
     yaxis: {
       ...PLOT_AXIS_CONFIG,
+      // autorange: ,
       showticklabels: true,
       showgrid: true,
       showline: true,

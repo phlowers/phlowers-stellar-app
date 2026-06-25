@@ -60,19 +60,16 @@ def get_coordinates(
     if project:
         projected_group_points = base_group_points.change_frame(
             frame_index=middle_span
-        )
-        coord_dict = projected_group_points.get_all_objects_dict(
-            reversed_y_axis=project
-        )
+        )    
+        
         span, supports, insulators = (
-            coord_dict["spans"],
-            coord_dict["supports"],
-            coord_dict["insulators"],
+            projected_group_points.spans,
+            projected_group_points.supports,
+            projected_group_points.insulators,
         )
-        obstacles: SparsePoints = coord_dict.get("obstacles", None)
-        distances: dict[str, dict[int, DistanceResult]] = coord_dict.get(
-            "distances", None
-        )
+        obstacles = projected_group_points.obstacles
+        distances = projected_group_points.distances
+
     else:
         span, supports, insulators = (
             base_group_points.spans,
