@@ -300,7 +300,6 @@ const layout2d = (
     },
     yaxis: {
       ...PLOT_AXIS_CONFIG,
-      // autorange: ,
       showticklabels: true,
       showgrid: true,
       showline: true,
