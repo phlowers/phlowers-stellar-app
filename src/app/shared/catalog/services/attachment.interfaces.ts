@@ -15,3 +15,18 @@ export interface SupportNameEntry {
   /** Tower model/type identifier */
   supportTower: string | null;
 }
+
+/**
+ * Support fields derived from a catalog attachment, shared by the supports
+ * table (inline attachment-set edit / copy column) and the attachment-set
+ * modal. Centralizes the mapping rules — notably truncating the arm length to
+ * one decimal — so both call sites stay consistent.
+ *
+ * Absent values use `null` (not `undefined`) to match the `Support` domain
+ * model, since these fields are merged straight into a support and persisted.
+ */
+export interface DerivedSupportAttachmentFields {
+  towerModel: string | null;
+  armLength: number | null;
+  heightBelowConsole: number | null;
+}
