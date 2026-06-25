@@ -111,9 +111,19 @@ export class LoadFormsService {
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: checkedSpanLoads
       });
-      const { result: changeResult } = await this.workerPythonService.runTask(Task.changeState, {
+      const {
+        result: changeResult,
+        error,
+        pythonErrorCode
+      } = await this.workerPythonService.runTask(Task.changeState, {
         climate: temporaryLoadData.climate
       });
+
+      if (error) {
+        this.plotService.error.set(error);
+        this.plotService.pythonErrorCode.set(pythonErrorCode);
+        return;
+      }
 
       if (!changeResult?.success) {
         return;
