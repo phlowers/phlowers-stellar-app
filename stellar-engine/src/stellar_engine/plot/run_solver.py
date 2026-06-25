@@ -8,8 +8,8 @@
 # TODO: investigate to see if logging is imported correctly
 import logging
 
-import numpy as np
-from mechaphlowers import SectionStudy, units
+
+from mechaphlowers import SectionStudy
 from mechaphlowers.utils import arr
 from mechaphlowers.core.models.balance.interfaces import IBalanceModel
 

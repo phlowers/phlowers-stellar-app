@@ -1,13 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
@@ -20,23 +12,11 @@ import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
-import { defaultClimaticCharge, getBaseClimate } from './climate.helpers';
+import { defaultClimaticCharge, getBaseClimate, integerValidator } from './climate.helpers';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
 
-/** Validator that rejects non-integer numeric values. */
-function integerValidator(control: AbstractControl): ValidationErrors | null {
-  if (control.value === null || control.value === undefined) {
-    return null;
-  }
-  const value = control.value;
-  if (!Number.isInteger(value)) {
-    return { integer: true };
-  }
-  return null;
-}
-
-export { defaultClimaticCharge, DEFAULT_BASE_TEMPERATURE, getBaseClimate } from './climate.helpers';
+export { defaultClimaticCharge, DEFAULT_BASE_TEMPERATURE, getBaseClimate, integerValidator } from './climate.helpers';
 
 /** Min/max constraints for climate form fields. */
 export const climateConstraints = {
@@ -186,7 +166,7 @@ export class ClimateComponent {
       throw new Error('Study or section not found');
     }
     await this.loadFormsService.deleteLoad();
-    this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
+    await this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
   }
 
   async saveForm() {

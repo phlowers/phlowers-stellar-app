@@ -5,7 +5,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
+
+/** Validator that rejects non-integer numeric values. */
+export function integerValidator(control: AbstractControl): ValidationErrors | null {
+  if (control.value === null || control.value === undefined) {
+    return null;
+  }
+  const value = control.value;
+  if (!Number.isInteger(value)) {
+    return { integer: true };
+  }
+  return null;
+}
 
 /** Default base temperature in degrees Celsius used for climatic charge calculations. */
 export const DEFAULT_BASE_TEMPERATURE = 15;
@@ -33,7 +46,7 @@ export const getBaseClimate = (
   } | null
 ): ClimateCharge => {
   const selectedInitialCondition = section?.initial_conditions?.find(
-    (ic) => ic.uuid === section.selected_initial_condition_uuid
+    (ic) => ic.uuid === section?.selected_initial_condition_uuid
   );
   const baseTemperature = selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
 

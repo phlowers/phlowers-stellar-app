@@ -425,13 +425,13 @@ describe('LoadMarkingComponent', () => {
       it('should preserve span A load data when switching back to span A after visiting span B', () => {
         // Scenario:
         // 1. Select span A, user sets referenceSupport to 'RIGHT' → signal = 'RIGHT'
-        // 2. Switch to span B → applySelectedLoadValues sets form to 'LEFT' (emitEvent:true)
-        //    signal updates to 'LEFT', span B data correctly set to 'LEFT'
-        // 3. Switch back to span A → enable() re-emits the STALE form value 'LEFT'
+        // 2. Switch to span B → applySelectedLoadValues sets form to 'LEFT' (emitEvent:false)
+        //    signal stays 'RIGHT', but span B form value is 'LEFT'
+        // 3. Switch back to span A → enable() would re-emit the current form value 'LEFT'
         //    Without enable({ emitEvent: false }): signal 'RIGHT'→'LEFT' → referenceSupportEffect fires
         //    → onLoadControlChange('referenceSupport', 'LEFT') → span A data corrupted to 'LEFT'
         //    Fix: enable({ emitEvent: false }) silences the re-emission.
-        //    Then applySelectedLoadValues sets form + signal to 'RIGHT' correctly.
+        //    Then applySelectedLoadValues sets the form to 'RIGHT' (emitEvent:false), signal stays 'RIGHT'.
         const temporaryLoadData = createTemporaryLoadDataTwoSpans();
         mockPlotService['temporaryLoadData'] = temporaryLoadData;
 
@@ -461,7 +461,7 @@ describe('LoadMarkingComponent', () => {
         // Scenario:
         // 1. Select span A, set type to MARKING → type signal = 'marking'
         // 2. Switch to span B (PUNCTUAL, loadWeight 20) → applySelectedLoadValues sets form.type
-        //    to 'punctual' (emitEvent:true) → type signal updates to 'punctual', span B.type = 'punctual'
+        //    to 'punctual' (emitEvent:false) → type signal stays 'marking', span B form value is 'punctual'
         // 3. User changes loadPosition on span B
         //    Old bug (combined effect): stale type signal → onLoadControlChange('type','marking')
         //    → span B type overwritten to 'marking' AND loadWeight reset to 0
@@ -508,7 +508,7 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
         // loadWeight signal is now 999
 
-        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:true), signal updates to 20
+        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:false) → loadWeight signal stays 999
         component.form.controls.spanSelect.setValue('support-2');
         fixture.detectChanges();
 
