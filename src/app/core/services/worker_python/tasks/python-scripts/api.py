@@ -29,7 +29,6 @@ logger = logging.getLogger("stellar_engine")
 debug_log = make_debug_log(logger, prefix="API")
 
 study: SectionStudy
-temporary_study: SectionStudy
 base_study: SectionStudy
 
 
