@@ -8,10 +8,9 @@
 # TODO: investigate to see if logging is imported correctly
 import logging
 
-
 from mechaphlowers import SectionStudy
-from mechaphlowers.utils import arr
 from mechaphlowers.core.models.balance.interfaces import IBalanceModel
+from mechaphlowers.utils import arr
 
 from stellar_engine.entities.inputs import ClimateCharge, compute_ice_thickness
 
@@ -20,7 +19,7 @@ logger = logging.getLogger("stellar_engine")
 # logger.setLevel(logging.WARNING) # TODO: not sure about the effect of this, but it seems to be necessary to see info messages in the console
 
 
-#TODO: correct the bug in mechaphlowers
+# TODO: correct the bug in mechaphlowers
 def reset_balance_model_state(study: SectionStudy) -> None:
     """Workaround: reset balance model state before solve_adjustment to avoid
     contamination from a previous solve_change_state.
@@ -47,7 +46,6 @@ def reset_balance_model_state(study: SectionStudy) -> None:
         bm.__dict__.pop(_attr, None)
 
 
-
 def change_state(
     change_state_inputs: dict,
     study: SectionStudy,
@@ -67,7 +65,7 @@ def change_state(
         ice_thickness,
     )
     logger.debug("-----------------------------------------------")
-    
+
     reset_balance_model_state(study)
 
     study.solve_adjustment()

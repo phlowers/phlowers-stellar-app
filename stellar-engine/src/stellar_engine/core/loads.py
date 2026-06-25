@@ -1,25 +1,25 @@
 import logging
 
-from mechaphlowers import SectionStudy, units
 import numpy as np
+from mechaphlowers import SectionStudy, units
+
 from stellar_engine.entities.errors import SupportOutOfRangeError
 from stellar_engine.utils import make_debug_log
-
 
 logger = logging.getLogger("stellar_engine")
 
 debug_log = make_debug_log(logger, prefix="LOADS")
 
+
 @debug_log
 def delete_all_loads(study: SectionStudy):
-
     n_spans = len(study.balance_engine)
     study.set_loads(np.zeros(n_spans), np.zeros(n_spans))
     return {"success": True}
 
+
 @debug_log
 def delete_load(support_index: int, study: SectionStudy):
-
     n_spans = len(study.balance_engine)
     if support_index < 0 or support_index >= n_spans:
         raise SupportOutOfRangeError(
@@ -32,6 +32,7 @@ def delete_load(support_index: int, study: SectionStudy):
     study.set_loads(load_position_array, load_mass_array)
 
     return {"success": True}
+
 
 @debug_log
 def build_loads_arrays(
@@ -52,7 +53,6 @@ def build_loads_arrays(
     return load_position_array, load_mass_array
 
 
-
 def apply_span_loads(study: SectionStudy, span_loads: list):
     """Parse span loads and apply them to the engine, clearing previous loads when needed.
 
@@ -70,7 +70,11 @@ def apply_span_loads(study: SectionStudy, span_loads: list):
         study.add_loads(np.zeros(n_spans), np.zeros(n_spans))
         return {"success": True}
     load_position_meters, load_mass = parse_span_loads(study, span_loads)
-    logger.debug("Applying span loads: positions=%s, masses=%s", load_position_meters, load_mass)
+    logger.debug(
+        "Applying span loads: positions=%s, masses=%s",
+        load_position_meters,
+        load_mass,
+    )
     study.add_loads(load_position_meters, load_mass)
     return {"success": True}
 
@@ -119,4 +123,3 @@ def parse_span_loads(
             load_weight_list_daN.append(0.01)
     load_mass_kg = units(load_weight_list_daN, 'daN').to('kg').magnitude
     return np.array(load_position_list), np.array(load_mass_kg)
-

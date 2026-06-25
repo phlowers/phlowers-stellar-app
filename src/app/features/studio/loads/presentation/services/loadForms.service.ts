@@ -48,11 +48,11 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], section?.supports ?? []);
     this.plotService.temporaryLoadData = newData;
-    this.lastLoadedChargeUuid = currentChargeUuid;
 
     await this.workerPythonService.runTask(Task.setLoads, { spanLoads: newData.spanLoads });
     await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
     await this.plotService.refreshProjection();
+    this.lastLoadedChargeUuid = currentChargeUuid;
   };
 
   private readonly plotService = inject(PlotService);

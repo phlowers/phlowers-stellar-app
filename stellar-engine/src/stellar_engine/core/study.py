@@ -17,6 +17,7 @@ from mechaphlowers import (
     units,
 )
 
+from stellar_engine.core.loads import apply_span_loads
 from stellar_engine.core.section import generate_section_array
 from stellar_engine.entities.errors import _Errors
 from stellar_engine.entities.inputs import (
@@ -26,7 +27,6 @@ from stellar_engine.entities.inputs import (
     Support,
 )
 from stellar_engine.plot import obstacles as obst
-from stellar_engine.core.loads import apply_span_loads
 
 logger = logging.getLogger(__name__)
 
