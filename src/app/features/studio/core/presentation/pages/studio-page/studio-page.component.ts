@@ -156,6 +156,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       showTicksValues: true,
       animate: false,
       animateOnMove: false,
+      noSwitching: true,
+      minRange: 1,
       disabled: this.plotService.loading() || this.plotOptionsService.isFreePositioningMode(),
       translate: (value: number) => {
         const num = this.spanService.section()?.supports?.[value]?.number;
@@ -324,8 +326,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       });
     } else {
       const offset = value === 'single' ? 1 : 2;
+      const newEndSupport = Math.min(startSupport + offset, maxSupport);
+      const newStartSupport = Math.max(newEndSupport - offset, 0);
       this.plotService.plotOptionsChange({
-        endSupport: Math.min(startSupport + offset, maxSupport)
+        startSupport: newStartSupport,
+        endSupport: newEndSupport
       });
     }
   }

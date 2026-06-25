@@ -342,6 +342,7 @@ describe('StudioPageComponent', () => {
 
     expect(spanService.spanAmountChoice()).toBe('single');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1,
       endSupport: 2
     });
   });
@@ -360,6 +361,7 @@ describe('StudioPageComponent', () => {
 
     expect(spanService.spanAmountChoice()).toBe('double');
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 1,
       endSupport: 3
     });
   });
@@ -383,11 +385,12 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  it('onSelectSpanAmount single should clamp to maxSupport', () => {
+  it('onSelectSpanAmount single should clamp to maxSupport and pull startSupport back', () => {
+    // startSupport at last index → endSupport would overflow → startSupport must be adjusted
     plotOptionsServiceMock.plotOptions.mockReturnValue({
       invert: false,
       startSupport: 4,
-      endSupport: 5
+      endSupport: 4
     });
     spanService.section.set({
       supports: [1, 2, 3, 4, 5]
@@ -396,7 +399,91 @@ describe('StudioPageComponent', () => {
     component.onSelectSpanAmount('single');
 
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+      startSupport: 3,
       endSupport: 4
+    });
+  });
+
+  describe('onSelectSpanAmount - range clamping', () => {
+    it('should pull startSupport backward when selecting double from the last single span', () => {
+      // 5 supports → maxSupport=4. Last span: startSupport=3, endSupport=4.
+      // Selecting double: endSupport=min(3+2,4)=4, startSupport=max(4-2,0)=2.
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 3,
+        endSupport: 4
+      });
+      spanService.section.set({ supports: [1, 2, 3, 4, 5] } as unknown as Section);
+
+      component.onSelectSpanAmount('double');
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 2,
+        endSupport: 4
+      });
+    });
+
+    it('should pull startSupport backward when selecting double from second-to-last position at boundary', () => {
+      // 4 supports → maxSupport=3. startSupport=2, endSupport=3.
+      // Selecting double: endSupport=min(2+2,3)=3, startSupport=max(3-2,0)=1.
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 2,
+        endSupport: 3
+      });
+      spanService.section.set({ supports: [1, 2, 3, 4] } as unknown as Section);
+
+      component.onSelectSpanAmount('double');
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 1,
+        endSupport: 3
+      });
+    });
+
+    it('should not move startSupport when there is room for the double span', () => {
+      // 6 supports → maxSupport=5. startSupport=1 → room for double span.
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 1,
+        endSupport: 2
+      });
+      spanService.section.set({ supports: [1, 2, 3, 4, 5, 6] } as unknown as Section);
+
+      component.onSelectSpanAmount('double');
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 1,
+        endSupport: 3
+      });
+    });
+
+    it('should clamp to section bounds when section has fewer supports than the requested span count', () => {
+      // 2 supports → maxSupport=1. Only 1 span exists, cannot fit 2 spans.
+      // endSupport=min(0+2,1)=1, startSupport=max(1-2,0)=0.
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 0,
+        endSupport: 1
+      });
+      spanService.section.set({ supports: [1, 2] } as unknown as Section);
+
+      component.onSelectSpanAmount('double');
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 0,
+        endSupport: 1
+      });
+    });
+  });
+
+  describe('sliderOptions - range constraints', () => {
+    it('should set noSwitching to true to prevent end handle from crossing start handle', () => {
+      expect(component.sliderOptions().noSwitching).toBe(true);
+    });
+
+    it('should set minRange to 1 to prevent start and end from landing on the same support', () => {
+      expect(component.sliderOptions().minRange).toBe(1);
     });
   });
 
