@@ -281,6 +281,8 @@ const layout2d = (
     scaleratio = 1;
   }
 
+  const xAutorange: 'reversed' | true = plotParams.side === 'face' || plotParams.invert ? 'reversed' : true;
+
   return {
     autosize: true,
     showlegend: false,
@@ -293,7 +295,7 @@ const layout2d = (
     },
     xaxis: {
       ...PLOT_AXIS_CONFIG,
-      autorange: plotParams.invert ? 'reversed' : true,
+      autorange: xAutorange,
       showticklabels: true,
       showgrid: true,
       showline: true

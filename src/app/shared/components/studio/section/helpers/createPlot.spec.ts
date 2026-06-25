@@ -190,11 +190,11 @@ describe('createPlot', () => {
       expect(layoutArg.xaxis.autorange).toBe(true);
     });
 
-    it('should configure xaxis with autorange true for face side', () => {
+    it('should configure xaxis with autorange reversed for face side', () => {
       createPlot({ ...createDefaultParams(), view: '2d', side: 'face' });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.xaxis.autorange).toBe(true);
+      expect(layoutArg.xaxis.autorange).toBe('reversed');
     });
 
     it('should configure xaxis with common properties', () => {
@@ -290,7 +290,7 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
-      expect(layoutArg.xaxis.autorange).toBe(true);
+      expect(layoutArg.xaxis.autorange).toBe('reversed');
       expect(layoutArg.yaxis.scaleratio).toBe(1);
     });
 
@@ -307,7 +307,7 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
-      expect(layoutArg.xaxis.autorange).toBe(true);
+      expect(layoutArg.xaxis.autorange).toBe('reversed');
     });
   });
 
