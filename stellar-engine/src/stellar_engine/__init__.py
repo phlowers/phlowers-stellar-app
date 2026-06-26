@@ -1,6 +1,6 @@
 import logging
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

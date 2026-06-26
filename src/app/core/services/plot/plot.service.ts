@@ -15,6 +15,7 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
@@ -145,6 +146,14 @@ export class PlotService {
       return;
     }
 
+    // When no charge is selected, apply base climate so the engine reflects
+    // the default state (wind=0, ice=0, base temperature) instead of the raw
+    // initial conditions left by initLit.
+    // if (!section.selected_charge_uuid) {
+    const baseClimate = getBaseClimate(section);
+    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: true });
+    // }
+
     const obstacles = section.obstacles ?? [];
     if (obstacles.length > 0) {
       await this.obstacleStateService.syncObstacles(
@@ -207,26 +216,5 @@ export class PlotService {
     if (result) {
       this.plotOptionsService.setAspectRatio(result);
     }
-  }
-
-  async reapplyObstacles(): Promise<void> {
-    const section = untracked(() => this.spanService.section());
-    const obstacles = section?.obstacles ?? [];
-    const plotOptions = untracked(() => this.plotOptionsService.plotOptions());
-
-    // Restore the load-applied base state before re-adding obstacles
-    if (this.temporaryLoadData) {
-      await this.workerPythonService.runTask(Task.changeState, {
-        climate: this.temporaryLoadData.climate,
-        spanLoads: this.temporaryLoadData.spanLoads
-      });
-    }
-
-    if (obstacles.length) {
-      await this.obstacleStateService.addBulkObstacles(obstacles, plotOptions);
-    }
-
-    // refreshProjection gets all data including obstacles and distances
-    await this.refreshProjection();
   }
 }

@@ -17,3 +17,7 @@ class _Errors:
 
 class GeneratedPointsNoneError(ValueError):
     """Raised when generated points (spans, supports, insulators, others) are None."""
+
+
+class SupportOutOfRangeError(ValueError):
+    """Raised when a support index is out of range for the number of spans."""

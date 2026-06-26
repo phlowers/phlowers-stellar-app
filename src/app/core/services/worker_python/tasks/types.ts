@@ -65,7 +65,13 @@ export enum Task {
   // get equivalent span/ruling span value
   getEquivalentSpan = 'getEquivalentSpan',
   // compute pose table at different temperatures
-  getPoseTable = 'getPoseTable'
+  getPoseTable = 'getPoseTable',
+  // Remove all span loads from the engine
+  deleteAllLoads = 'deleteAllLoads',
+  // Remove a single span load from the engine by span index
+  deleteLoad = 'deleteLoad',
+  // Apply span loads to the engine (via apply_span_loads)
+  setLoads = 'setLoads'
 }
 
 /**
@@ -261,7 +267,7 @@ export interface TaskInputs {
   /** Inputs for changeState task */
   [Task.changeState]: {
     climate: ClimateCharge;
-    spanLoads: SpanLoad[];
+    reload?: boolean;
   };
   /** Inputs for refreshProjection task */
   [Task.refreshProjection]: {
@@ -401,6 +407,16 @@ export interface TaskInputs {
     baseTemperature: number;
     numberValues: number;
   };
+  /** Inputs for deleteAllLoads task: no inputs */
+  [Task.deleteAllLoads]: undefined;
+  /** Inputs for deleteLoad task */
+  [Task.deleteLoad]: {
+    supportIndex: number;
+  };
+  /** Inputs for setLoads task: apply span loads via apply_span_loads */
+  [Task.setLoads]: {
+    spanLoads: SpanLoad[];
+  };
 }
 
 /**
@@ -529,4 +545,10 @@ export interface TaskOutputs {
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;
+  /** Output from deleteAllLoads task */
+  [Task.deleteAllLoads]: { success: boolean };
+  /** Output from deleteLoad task */
+  [Task.deleteLoad]: { success: boolean };
+  /** Output from setLoads task */
+  [Task.setLoads]: { success: boolean };
 }

@@ -11,19 +11,12 @@ from stellar_engine.plot.obstacles import (
 )
 from stellar_engine.plot.plot_2d import refresh_projection
 from stellar_engine.plot.plot_settings import get_aspect_ratio
-from stellar_engine.plot.run_solver import (
-    apply_span_loads,
-    change_state,
-    parse_span_loads,
-)
+from stellar_engine.plot.run_solver import change_state
 from stellar_engine.plot.supports_coords import get_support_coordinates
 
 __all__ = [
-    "obstacles",
     "refresh_projection",
     "get_support_coordinates",
-    "apply_span_loads",
-    "parse_span_loads",
     "change_state",
     "get_aspect_ratio",
     "delete_obstacle",

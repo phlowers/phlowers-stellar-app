@@ -6,8 +6,10 @@ import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { emptySpanLoad } from '../helpers';
+import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { Task, TaskError } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,23 +21,53 @@ export class LoadFormsService {
 
   /** UUID of the span support to select in the span form, set when clicking a load annotation. Cleared after consumption. */
   readonly selectedSpanSupportUuid = signal<string | null>(null);
+
+  /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */
+  private lastLoadedChargeUuid: string | null = null;
   /**
-   * Initialize the temporary load data by getting the selected charge case and checking the span loads
+   * Initialize the temporary load data by getting the selected charge case and checking the span loads,
+   * then push all span loads into the Python engine via setLoads.
    */
-  initTemporaryLoadData = () => {
-    const currentChargeUuid = this.spanService.section()?.selected_charge_uuid;
+  initTemporaryLoadData = async () => {
+    const section = this.spanService.section();
+    const currentChargeUuid = section?.selected_charge_uuid;
     if (!currentChargeUuid) {
       this.plotService.temporaryLoadData = null;
+      this.lastLoadedChargeUuid = null;
       return;
     }
-    const charge = this.spanService.section()?.charges?.find((c) => c.uuid === currentChargeUuid);
+
+    // Skip entirely when re-entering for the same charge case
+    // (e.g. after save writes back to IndexedDB and liveQuery re-fires).
+    if (currentChargeUuid === this.lastLoadedChargeUuid) return;
+
+    const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
       this.plotService.temporaryLoadData = null;
       return;
     }
     const newData = cloneDeep(charge.data);
-    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], this.spanService.section()?.supports ?? []);
+    const rawSpanLoads = newData.spanLoads || [];
+    newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
     this.plotService.temporaryLoadData = newData;
+    // Set before async calls so the effect guard prevents concurrent re-entrant
+    // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
+    this.lastLoadedChargeUuid = currentChargeUuid;
+
+    try {
+      // When there are no saved span loads, pass an empty array so the Python engine
+      // takes its "no loads" code path instead of receiving zero-weight placeholder
+      // entries created by recheckSpanLoads (which would have the wrong array size).
+      await this.workerPythonService.runTask(Task.setLoads, {
+        spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : []
+      });
+      await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
+      await this.plotService.refreshProjection();
+    } catch (err) {
+      this.lastLoadedChargeUuid = null; // Allow retry on next signal change
+      this.plotService.error.set(TaskError.CALCULATION_ERROR);
+      this.logger.error('initTemporaryLoadData failed', err);
+    }
   };
 
   private readonly plotService = inject(PlotService);
@@ -43,16 +75,17 @@ export class LoadFormsService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly logger = inject(LoggerService);
   // private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
-      this.initTemporaryLoadData();
+      void this.initTemporaryLoadData();
     });
   }
 
   /**
-   * Save the temporary load data in the section by creating or updating the charge case
+   * Persist the temporary load data (inputs only), then calculate to refresh the graph.
    */
   saveTemporaryLoadDataInSection = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -69,6 +102,7 @@ export class LoadFormsService {
       ...currentCharge,
       data: temporaryLoadData
     });
+    await this.calculateLoad();
   };
 
   /**
@@ -90,13 +124,15 @@ export class LoadFormsService {
         spanLoads: checkedSpanLoads
       };
 
+      await this.workerPythonService.runTask(Task.setLoads, {
+        spanLoads: checkedSpanLoads
+      });
       const {
         result: changeResult,
         error,
         pythonErrorCode
       } = await this.workerPythonService.runTask(Task.changeState, {
-        climate: temporaryLoadData.climate,
-        spanLoads: checkedSpanLoads
+        climate: temporaryLoadData.climate
       });
 
       if (error) {
@@ -125,48 +161,14 @@ export class LoadFormsService {
       // result. `Task.changeState` resets the engine to the climate state without
       // knowing about cable_modifications, which would otherwise be silently
       // dropped from the recomputed geometry.
-      await this.reapplyCableModifications(currentSection);
+      // await this.reapplyCableModifications(currentSection);
     } finally {
       this.plotService.loading.set(false);
     }
   };
 
   /**
-   * Re-runs `Task.cableModification` for each saved modification of the
-   * current section so the lengthening/shortening effect survives a load
-   * recalculation. The last applied modification wins (the Python task uses
-   * a single simulated temperature on the whole engine), which matches the
-   * current single-modification-per-section product constraint.
-   */
-  private async reapplyCableModifications(currentSection: ReturnType<PlotSpanService['section']>): Promise<void> {
-    const modifications = currentSection?.cable_modifications ?? [];
-    if (modifications.length === 0) return;
-
-    const supportUuidToIndex = new Map<string, number>();
-    (currentSection?.supports ?? []).forEach((support, index) => {
-      supportUuidToIndex.set(support.uuid, index);
-    });
-
-    for (const modification of modifications) {
-      const spanIndex = supportUuidToIndex.get(modification.spanUuid);
-      if (spanIndex === undefined) continue;
-
-      const { result } = await this.workerPythonService.runTask(Task.cableModification, {
-        spanIndex,
-        widthCable: modification.widthCable,
-        sizeCable: modification.sizeCable,
-        distanceSupportRef: modification.distanceSupportRef,
-        supportRef: modification.supportRef
-      });
-      if (result) {
-        this.plotService.litData.set(result.current);
-        this.plotService.baseLitData.set(result.base);
-      }
-    }
-  }
-
-  /**
-   * Reset the span load for the given support UUID to its empty state.
+   * Reset the span load for the given support UUID in the engine and refresh the plot.
    */
   async deleteSpanLoad(supportUuid: string): Promise<void> {
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -177,18 +179,30 @@ export class LoadFormsService {
 
     const reset = { ...emptySpanLoad, supportUuid };
     Object.assign(spanLoad, reset);
-    await this.plotService.refreshProjection();
+
+    const supportIndex = this.spanService.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
+    if (supportIndex === -1) return;
+
+    this.plotService.loading.set(true);
+    try {
+      await this.workerPythonService.runTask(Task.deleteLoad, { supportIndex });
+      await this.plotService.refreshProjection();
+    } finally {
+      this.plotService.loading.set(false);
+    }
   }
 
   /**
-   * Delete the load by deleting the charge case
+   * Clear all loads from the Python engine and reset to the default change state
+   * (base climate, no span loads), then refresh the plot.
+   * The caller is responsible for deleting the charge from the database.
    */
   async deleteLoad(): Promise<void> {
-    const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.spanService.section()?.uuid;
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid;
-    if (!studyUuid || !sectionUuid || !chargeUuid) return;
-    await this.chargesService.deleteCharge(studyUuid, sectionUuid, chargeUuid);
+    await this.workerPythonService.runTask(Task.deleteAllLoads, undefined);
+    const baseClimate = getBaseClimate(this.spanService.section());
+    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
+    this.plotService.temporaryLoadData = null;
+    this.lastLoadedChargeUuid = null;
     await this.plotService.refreshProjection();
   }
 }
