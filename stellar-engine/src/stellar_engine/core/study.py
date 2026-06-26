@@ -232,7 +232,7 @@ def initialize_study(python_inputs: dict):
 
     if has_span_loads:
         apply_span_loads(study, input_charge["data"]["spanLoads"])
-        study.solve_adjustment()
+        # study.solve_adjustment()
 
     if climate:
         apply_climate_to_engine(study, climate, len(study.balance_engine))

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { StudioMenuBarComponent } from './menu-bar.component';
 import { ChargesService } from '@services/charges/charges.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -18,6 +19,7 @@ describe('StudioMenuBarComponent', () => {
   let fixture: ComponentFixture<StudioMenuBarComponent>;
   let mockChargesService: Partial<ChargesService>;
   let mockToolbarDialogService: Partial<ToolbarDialogService>;
+  let mockLoadFormsService: Partial<LoadFormsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -148,6 +150,11 @@ describe('StudioMenuBarComponent', () => {
       openTool: vi.fn()
     };
 
+    // Mock PlotService
+    mockLoadFormsService = {
+      deleteLoad: vi.fn().mockResolvedValue(undefined)
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         StudioMenuBarComponent,
@@ -168,6 +175,10 @@ describe('StudioMenuBarComponent', () => {
         {
           provide: ToolbarDialogService,
           useValue: mockToolbarDialogService as ToolbarDialogService
+        },
+        {
+          provide: LoadFormsService,
+          useValue: mockLoadFormsService as LoadFormsService
         },
         {
           provide: ActivatedRoute,
@@ -507,26 +518,55 @@ describe('StudioMenuBarComponent', () => {
   });
 
   describe('deleteChargeCase', () => {
-    it('should call deleteCharge with charge case value', () => {
-      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
+    it('should call deleteLoad then deleteCharge when deleting the selected charge', async () => {
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' }; // charge-uuid-1 is selected
 
-      component.deleteChargeCase(charge);
+      await component.deleteChargeCase(charge);
 
+      expect(mockLoadFormsService.deleteLoad).toHaveBeenCalled();
       expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
     });
 
-    it('should not call deleteCharge when charge is undefined', () => {
-      component.deleteChargeCase(undefined);
+    it('should call deleteLoad before deleteCharge when deleting the selected charge', async () => {
+      const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
+      const callOrder: string[] = [];
+      (mockLoadFormsService.deleteLoad as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        callOrder.push('deleteLoad');
+        return Promise.resolve();
+      });
+      (mockChargesService.deleteCharge as ReturnType<typeof vi.fn>).mockImplementation(() => {
+        callOrder.push('deleteCharge');
+        return Promise.resolve();
+      });
 
-      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+      await component.deleteChargeCase(charge);
+
+      expect(callOrder).toEqual(['deleteLoad', 'deleteCharge']);
     });
 
-    it('should not call deleteCharge when charge value is empty string', () => {
-      const charge = { label: 'Charge 1', value: '' };
+    it('should skip deleteLoad when deleting a non-selected charge', async () => {
+      const charge = { label: 'Charge 2', value: 'charge-uuid-2' }; // charge-uuid-2 is NOT selected
 
-      component.deleteChargeCase(charge);
+      await component.deleteChargeCase(charge);
+
+      expect(mockLoadFormsService.deleteLoad).not.toHaveBeenCalled();
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'charge-uuid-2');
+    });
+
+    it('should not call deleteCharge when charge is undefined', async () => {
+      await component.deleteChargeCase(undefined);
 
       expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+      expect(mockLoadFormsService.deleteLoad).not.toHaveBeenCalled();
+    });
+
+    it('should not call deleteCharge when charge value is empty string', async () => {
+      const charge = { label: 'Charge 1', value: '' };
+
+      await component.deleteChargeCase(charge);
+
+      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+      expect(mockLoadFormsService.deleteLoad).not.toHaveBeenCalled();
     });
   });
 

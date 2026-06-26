@@ -267,6 +267,38 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
     });
+
+    it('should call setLoads with empty array when charge has no span loads', async () => {
+      const chargeWithNoLoads = {
+        ...mockCharge,
+        data: { ...mockChargeData, spanLoads: [] }
+      };
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [chargeWithNoLoads]
+      } as Section);
+
+      await service.initTemporaryLoadData();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setLoads, { spanLoads: [] });
+    });
+
+    it('should call setLoads with recheckSpanLoads result when charge has span loads', async () => {
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      await service.initTemporaryLoadData();
+
+      const setLoadsCall = (mockWorkerPythonService.runTask as ReturnType<typeof vi.fn>).mock.calls.find(
+        ([task]) => task === Task.setLoads
+      );
+      expect(setLoadsCall).toBeDefined();
+      expect((setLoadsCall![1] as { spanLoads: unknown[] }).spanLoads.length).toBeGreaterThan(0);
+    });
   });
 
   describe('saveTemporaryLoadDataInSection', () => {

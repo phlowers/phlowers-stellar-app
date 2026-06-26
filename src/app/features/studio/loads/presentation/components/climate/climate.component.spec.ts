@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ClimateComponent } from './climate.component';
-import { getBaseClimate, DEFAULT_BASE_TEMPERATURE } from './climate.helpers';
+import { getBaseClimate, DEFAULT_BASE_TEMPERATURE } from '@shared/domain/helpers/climate.helpers';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';

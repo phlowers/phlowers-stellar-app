@@ -71,8 +71,13 @@ def get_support_coordinates(js_inputs):
 
 @debug_log
 def change_state(js_inputs):
+    global study
     change_state_inputs: dict = js_to_python(js_inputs)  # type: ignore
-    return run_solver.change_state(change_state_inputs, study)
+    if "reload" in change_state_inputs:
+        reload = change_state_inputs["reload"]
+    else:
+        reload = False
+    return run_solver.change_state(change_state_inputs, study, reload=reload)
 
 
 @debug_log

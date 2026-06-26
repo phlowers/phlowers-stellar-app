@@ -49,7 +49,8 @@ def reset_balance_model_state(study: SectionStudy) -> None:
 def change_state(
     change_state_inputs: dict,
     study: SectionStudy,
-):
+    reload: bool = False,
+) -> dict:
     climate = ClimateCharge(**change_state_inputs["climate"])
     logger.debug("python_inputs: %s", change_state_inputs)
     wind_pressure = climate.windPressure
@@ -66,10 +67,16 @@ def change_state(
     )
     logger.debug("-----------------------------------------------")
 
-    reset_balance_model_state(study)
+    has_span = (study.balance_engine.span_loads.load_weight > 0.001).any()
 
-    study.solve_adjustment()
-    study._solve_intermediate()
+    if has_span:
+        reset_balance_model_state(study)
+
+    if reload:
+
+        study.solve_adjustment()
+        study._solve_intermediate()
+
     study.solve_change_state(
         ice_thickness=ice_thickness,
         new_temperature=cable_temperature,

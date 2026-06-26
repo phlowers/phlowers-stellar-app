@@ -15,7 +15,7 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
-import { getBaseClimate } from '@features/studio/loads/presentation/components/climate/climate.helpers';
+import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
@@ -149,10 +149,10 @@ export class PlotService {
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
     // initial conditions left by initLit.
-    if (!section.selected_charge_uuid) {
-      const baseClimate = getBaseClimate(section);
-      await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
-    }
+    // if (!section.selected_charge_uuid) {
+    const baseClimate = getBaseClimate(section);
+    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: true });
+    // }
 
     const obstacles = section.obstacles ?? [];
     if (obstacles.length > 0) {

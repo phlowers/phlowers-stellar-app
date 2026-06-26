@@ -311,25 +311,6 @@
             </p-tab>
           </p-tablist>
 
-          @if (!spanService.section()?.charges?.length) {
-            <div class="flex items-center justify-center gap-1 my-4">
-              <app-icon icon="info" />
-              <p i18n>In order to add charges, you need to create a charge case.</p>
-            </div>
-            <div class="flex justify-center">
-              <button
-                app-btn
-                btnStyle="outlined"
-                btnSize="s"
-                (click)="openNewChargeModal()"
-                data-testid="add-charge-case-btn"
-              >
-                <app-icon icon="add_circle" />
-                <ng-container i18n>Add a charge case</ng-container>
-              </button>
-            </div>
-          }
-
           @if (spanService.section()?.selected_charge_uuid) {
             <p-tabpanels>
               <p-tabpanel value="0">
@@ -352,6 +333,25 @@
                 <app-cable-span-manip />
               </p-tabpanel>
             </p-tabpanels>
+          }
+
+          @else {
+            <div class="flex items-center justify-center gap-1 my-4">
+              <app-icon icon="info" />
+              <p i18n>In order to add charges, you need to create a charge case.</p>
+            </div>
+            <div class="flex justify-center">
+              <button
+                app-btn
+                btnStyle="outlined"
+                btnSize="s"
+                (click)="openNewChargeModal()"
+                data-testid="add-charge-case-btn"
+              >
+                <app-icon icon="add_circle" />
+                <ng-container i18n>Add a charge case</ng-container>
+              </button>
+            </div>
           }
         </p-tabs>
       </ng-template>

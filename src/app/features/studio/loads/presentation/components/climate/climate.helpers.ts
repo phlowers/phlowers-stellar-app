@@ -6,7 +6,6 @@
  */
 
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
 
 /** Validator that rejects non-integer numeric values. */
 export function integerValidator(control: AbstractControl): ValidationErrors | null {
@@ -19,39 +18,3 @@ export function integerValidator(control: AbstractControl): ValidationErrors | n
   }
   return null;
 }
-
-/** Default base temperature in degrees Celsius used for climatic charge calculations. */
-export const DEFAULT_BASE_TEMPERATURE = 15;
-
-/** Default climatic charge values used when creating a new charge case. */
-export const defaultClimaticCharge: ClimateCharge = {
-  windPressure: 0,
-  cableTemperature: DEFAULT_BASE_TEMPERATURE,
-  symmetryType: SymmetryType.SYMMETRIC,
-  iceThickness: 0,
-  frontierSupportNumber: null,
-  iceThicknessBefore: null,
-  iceThicknessAfter: null
-};
-
-/**
- * Returns the base climate values that match the base state calculation.
- * The base state uses the initial condition's base_temperature (or 15 if none),
- * with no wind pressure and no ice.
- */
-export const getBaseClimate = (
-  section: {
-    initial_conditions: { uuid: string; base_temperature: number }[];
-    selected_initial_condition_uuid?: string;
-  } | null
-): ClimateCharge => {
-  const selectedInitialCondition = section?.initial_conditions?.find(
-    (ic) => ic.uuid === section?.selected_initial_condition_uuid
-  );
-  const baseTemperature = selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
-
-  return {
-    ...defaultClimaticCharge,
-    cableTemperature: baseTemperature
-  };
-};

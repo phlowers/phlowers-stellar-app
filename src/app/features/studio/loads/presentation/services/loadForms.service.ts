@@ -6,9 +6,10 @@ import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { emptySpanLoad } from '../helpers';
-import { getBaseClimate } from '../components/climate/climate.helpers';
+import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { Task, TaskError } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 @Injectable({
   providedIn: 'root'
@@ -46,13 +47,25 @@ export class LoadFormsService {
       return;
     }
     const newData = cloneDeep(charge.data);
-    newData.spanLoads = recheckSpanLoads(newData.spanLoads || [], section?.supports ?? []);
+    const rawSpanLoads = newData.spanLoads || [];
+    newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
     this.plotService.temporaryLoadData = newData;
-
-    await this.workerPythonService.runTask(Task.setLoads, { spanLoads: newData.spanLoads });
-    await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
-    await this.plotService.refreshProjection();
+    // Set before async calls so the effect guard prevents concurrent re-entrant
+    // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
     this.lastLoadedChargeUuid = currentChargeUuid;
+
+    try {
+      // When there are no saved span loads, pass an empty array so the Python engine
+      // takes its "no loads" code path instead of receiving zero-weight placeholder
+      // entries created by recheckSpanLoads (which would have the wrong array size).
+      await this.workerPythonService.runTask(Task.setLoads, { spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : [] });
+      await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
+      await this.plotService.refreshProjection();
+    } catch (err) {
+      this.lastLoadedChargeUuid = null; // Allow retry on next signal change
+      this.plotService.error.set(TaskError.CALCULATION_ERROR);
+      this.logger.error('initTemporaryLoadData failed', err);
+    }
   };
 
   private readonly plotService = inject(PlotService);
@@ -60,11 +73,12 @@ export class LoadFormsService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly logger = inject(LoggerService);
   // private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
-      this.initTemporaryLoadData();
+      void this.initTemporaryLoadData();
     });
   }
 
@@ -152,27 +166,6 @@ export class LoadFormsService {
   };
 
   /**
-   * Apply a single span load to the Python engine and refresh the plot.
-   */
-  saveSingleLoad = async (supportUuid: string): Promise<void> => {
-    const temporaryLoadData = this.plotService.temporaryLoadData;
-    if (!temporaryLoadData) return;
-
-    const hasLoad = temporaryLoadData.spanLoads.some((s) => s.supportUuid === supportUuid);
-    if (!hasLoad) return;
-
-    this.plotService.loading.set(true);
-    try {
-      await this.workerPythonService.runTask(Task.setLoads, {
-        spanLoads: temporaryLoadData.spanLoads
-      });
-      await this.plotService.refreshProjection();
-    } finally {
-      this.plotService.loading.set(false);
-    }
-  };
-
-  /**
    * Reset the span load for the given support UUID in the engine and refresh the plot.
    */
   async deleteSpanLoad(supportUuid: string): Promise<void> {
@@ -188,8 +181,13 @@ export class LoadFormsService {
     const supportIndex = this.spanService.section()?.supports?.findIndex((s) => s.uuid === supportUuid) ?? -1;
     if (supportIndex === -1) return;
 
-    await this.workerPythonService.runTask(Task.deleteLoad, { supportIndex });
-    await this.plotService.refreshProjection();
+    this.plotService.loading.set(true);
+    try {
+      await this.workerPythonService.runTask(Task.deleteLoad, { supportIndex });
+      await this.plotService.refreshProjection();
+    } finally {
+      this.plotService.loading.set(false);
+    }
   }
 
   /**

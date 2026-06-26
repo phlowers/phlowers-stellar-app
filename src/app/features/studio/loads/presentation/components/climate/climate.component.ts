@@ -12,18 +12,11 @@ import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
-import { defaultClimaticCharge, getBaseClimate, integerValidator } from './climate.helpers';
+import { defaultClimaticCharge, getBaseClimate } from '@shared/domain/helpers/climate.helpers';
+import { integerValidator } from './climate.helpers';
+import { climateConstraints } from './climate.constantes';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
-
-export { defaultClimaticCharge, DEFAULT_BASE_TEMPERATURE, getBaseClimate, integerValidator } from './climate.helpers';
-
-/** Min/max constraints for climate form fields. */
-export const climateConstraints = {
-  windPressure: { min: -3000, max: 3000 },
-  cableTemperature: { min: -50, max: 250 },
-  iceThickness: { min: 0, max: 20 }
-} as const;
 
 @Component({
   selector: 'app-climate',
