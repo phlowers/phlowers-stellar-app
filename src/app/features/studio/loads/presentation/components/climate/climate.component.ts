@@ -1,13 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { SelectModule } from 'primeng/select';
@@ -20,63 +12,11 @@ import { ChargesService } from '@services/charges/charges.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ChargeData, ClimateCharge, SymmetryType } from '@shared/domain/models/charge.model';
+import { defaultClimaticCharge, getBaseClimate } from '@shared/domain/helpers/climate.helpers';
+import { integerValidator } from './climate.helpers';
+import { climateConstraints } from './climate.constantes';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
-
-/** Validator that rejects non-integer numeric values. */
-function integerValidator(control: AbstractControl): ValidationErrors | null {
-  if (control.value === null || control.value === undefined) {
-    return null;
-  }
-  const value = control.value;
-  if (!Number.isInteger(value)) {
-    return { integer: true };
-  }
-  return null;
-}
-
-/** Default base temperature in degrees Celsius used for climatic charge calculations. */
-export const DEFAULT_BASE_TEMPERATURE = 15;
-
-/** Default climatic charge values used when creating a new charge case. */
-export const defaultClimaticCharge: ClimateCharge = {
-  windPressure: 0,
-  cableTemperature: DEFAULT_BASE_TEMPERATURE,
-  symmetryType: SymmetryType.SYMMETRIC,
-  iceThickness: 0,
-  frontierSupportNumber: null,
-  iceThicknessBefore: null,
-  iceThicknessAfter: null
-};
-
-/**
- * Returns the base climate values that match the base state calculation.
- * The base state uses the initial condition's base_temperature (or 15 if none),
- * with no wind pressure and no ice.
- */
-export const getBaseClimate = (
-  section: {
-    initial_conditions: { uuid: string; base_temperature: number }[];
-    selected_initial_condition_uuid?: string;
-  } | null
-): ClimateCharge => {
-  const selectedInitialCondition = section?.initial_conditions?.find(
-    (ic) => ic.uuid === section.selected_initial_condition_uuid
-  );
-  const baseTemperature = selectedInitialCondition?.base_temperature ?? DEFAULT_BASE_TEMPERATURE;
-
-  return {
-    ...defaultClimaticCharge,
-    cableTemperature: baseTemperature
-  };
-};
-
-/** Min/max constraints for climate form fields. */
-export const climateConstraints = {
-  windPressure: { min: -3000, max: 3000 },
-  cableTemperature: { min: -50, max: 250 },
-  iceThickness: { min: 0, max: 20 }
-} as const;
 
 @Component({
   selector: 'app-climate',
@@ -212,13 +152,14 @@ export class ClimateComponent {
     } as ChargeData;
   }
 
-  deleteCharge() {
+  async deleteCharge(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       throw new Error('Study or section not found');
     }
-    this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
+    await this.loadFormsService.deleteLoad();
+    await this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
   }
 
   async saveForm() {
@@ -229,7 +170,6 @@ export class ClimateComponent {
     }
     this.isSaving.set(true);
     try {
-      await this.loadFormsService.calculateLoad();
       await this.loadFormsService.saveTemporaryLoadDataInSection();
     } finally {
       this.isSaving.set(false);

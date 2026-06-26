@@ -7,9 +7,6 @@
 
 import logging
 
-import mechaphlowers as mph
-from stellar_engine.pyodide_utils import js_to_python
-
 from importlib.metadata import version
 import sys
 
@@ -40,11 +37,7 @@ logger.setLevel(logging.WARNING)
 logger.addHandler(handler)
 
 
-# initialization functions
-def init_config():
-    mph.options.graphics.resolution = RESOLUTION
-    mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
-
+from stellar_engine.pyodide_utils import js_to_python  # noqa: E402
 
 # log utils functions
 def set_log_level(js_inputs: dict):
@@ -59,6 +52,14 @@ def set_log_level(js_inputs: dict):
     mph_logger.info(f"mechaphlowers version: {version('mechaphlowers')}")
     stellar_logger.info(f"stellar_engine version: {version('stellar_engine')}")
     return {"success": True}
+
+
+import mechaphlowers as mph  # noqa: E402
+
+# initialization functions
+def init_config():
+    mph.options.graphics.resolution = RESOLUTION
+    mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
 
 
 init_config()
