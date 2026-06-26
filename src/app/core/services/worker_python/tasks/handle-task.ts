@@ -109,6 +109,18 @@ const tasks: Record<
   [Task.getPoseTable]: {
     function: 'get_pose_table',
     externalPackages: []
+  },
+  [Task.deleteAllLoads]: {
+    function: 'delete_all_loads',
+    externalPackages: []
+  },
+  [Task.deleteLoad]: {
+    function: 'delete_load',
+    externalPackages: []
+  },
+  [Task.setLoads]: {
+    function: 'set_loads',
+    externalPackages: []
   }
 };
 

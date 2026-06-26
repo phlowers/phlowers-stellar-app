@@ -71,16 +71,20 @@ export class LoadMarkingComponent {
 
   private readonly loadControlSignals: Record<LoadControlName, Signal<unknown>> = {
     loadPosition: toSignal(this.form.controls.loadPosition.valueChanges, {
-      initialValue: this.form.controls.loadPosition.value
+      initialValue: this.form.controls.loadPosition.value,
+      equal: () => false
     }),
     loadWeight: toSignal(this.form.controls.loadWeight.valueChanges, {
-      initialValue: this.form.controls.loadWeight.value
+      initialValue: this.form.controls.loadWeight.value,
+      equal: () => false
     }),
     type: toSignal(this.form.controls.type.valueChanges, {
-      initialValue: this.form.controls.type.value
+      initialValue: this.form.controls.type.value,
+      equal: () => false
     }),
     referenceSupport: toSignal(this.form.controls.referenceSupport.valueChanges, {
-      initialValue: this.form.controls.referenceSupport.value
+      initialValue: this.form.controls.referenceSupport.value,
+      equal: () => false
     })
   };
 
@@ -131,8 +135,7 @@ export class LoadMarkingComponent {
   async deleteCharge(): Promise<void> {
     const supportUuid = this.form.controls.spanSelect.value;
     if (!supportUuid) return;
-    this.loadFormsService.deleteSpanLoad(supportUuid);
-    await this.loadFormsService.calculateLoad();
+    await this.loadFormsService.deleteSpanLoad(supportUuid);
     await this.loadFormsService.saveTemporaryLoadDataInSection();
     this.form.reset();
     this.form.controls.referenceSupport.disable();
@@ -142,7 +145,6 @@ export class LoadMarkingComponent {
     if (this.form.invalid) return;
     this.isSaving.set(true);
     try {
-      await this.loadFormsService.calculateLoad();
       await this.loadFormsService.saveTemporaryLoadDataInSection();
     } finally {
       this.isSaving.set(false);
@@ -205,12 +207,10 @@ export class LoadMarkingComponent {
     if (!load) {
       return;
     }
-    this.form.controls.referenceSupport.setValue(load.referenceSupport, {
-      emitEvent: false
-    });
+    this.form.controls.referenceSupport.setValue(load.referenceSupport, { emitEvent: false });
     this.form.controls.type.setValue(load.type, { emitEvent: false });
-    this.form.controls.loadWeight.setValue(load.loadWeight ?? 0);
-    this.form.controls.loadPosition.setValue(load.loadPosition ?? 0);
+    this.form.controls.loadWeight.setValue(load.loadWeight ?? 0, { emitEvent: false });
+    this.form.controls.loadPosition.setValue(load.loadPosition ?? 0, { emitEvent: false });
   }
 
   private onLoadControlChange(controlName: LoadControlName, value: unknown) {

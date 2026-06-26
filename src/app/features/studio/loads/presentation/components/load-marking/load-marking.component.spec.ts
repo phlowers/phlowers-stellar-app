@@ -180,17 +180,13 @@ describe('LoadMarkingComponent', () => {
       expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).not.toHaveBeenCalled();
     });
 
-    it('calls deleteSpanLoad, calculateLoad, saveTemporaryLoadDataInSection in order then resets form controls', async () => {
+    it('calls deleteSpanLoad then saveTemporaryLoadDataInSection in order then resets form controls', async () => {
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();
 
       const callOrder: string[] = [];
       (mockLoadFormsService['deleteSpanLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callOrder.push('deleteSpanLoad');
-      });
-      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callOrder.push('calculateLoad');
-        return Promise.resolve();
       });
       (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         callOrder.push('save');
@@ -200,7 +196,7 @@ describe('LoadMarkingComponent', () => {
       await component.deleteCharge();
       fixture.detectChanges();
 
-      expect(callOrder).toEqual(['deleteSpanLoad', 'calculateLoad', 'save']);
+      expect(callOrder).toEqual(['deleteSpanLoad', 'save']);
       expect(mockLoadFormsService['deleteSpanLoad']).toHaveBeenCalledWith('support-1');
       expect(component.form.controls.spanSelect.value).toBeNull();
     });
@@ -214,25 +210,17 @@ describe('LoadMarkingComponent', () => {
       expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).not.toHaveBeenCalled();
     });
 
-    it('calculates then saves when form is valid', async () => {
+    it('calls saveTemporaryLoadDataInSection when form is valid', async () => {
       component.form.controls.spanSelect.setValue('support-1');
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
       fixture.detectChanges();
 
-      const callOrder: string[] = [];
-      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callOrder.push('calculate');
-        return Promise.resolve();
-      });
-      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callOrder.push('save');
-        return Promise.resolve();
-      });
+      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
       await component.saveLoadCase();
 
-      expect(callOrder).toEqual(['calculate', 'save']);
+      expect(mockLoadFormsService['saveTemporaryLoadDataInSection']).toHaveBeenCalled();
     });
 
     it('sets isSaving to true during save and false after', async () => {
@@ -242,7 +230,7 @@ describe('LoadMarkingComponent', () => {
       fixture.detectChanges();
 
       let savingDuring = false;
-      (mockLoadFormsService['calculateLoad'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      (mockLoadFormsService['saveTemporaryLoadDataInSection'] as ReturnType<typeof vi.fn>).mockImplementation(() => {
         savingDuring = component.isSaving();
         return Promise.resolve();
       });
@@ -438,10 +426,12 @@ describe('LoadMarkingComponent', () => {
         // Scenario:
         // 1. Select span A, user sets referenceSupport to 'RIGHT' → signal = 'RIGHT'
         // 2. Switch to span B → applySelectedLoadValues sets form to 'LEFT' (emitEvent:false)
-        //    signal stays 'RIGHT', but the form control value is now 'LEFT'
-        // 3. Switch back to span A → enable() (already enabled) re-emits 'LEFT' (the current form value)
-        //    Without emitEvent:false: signal 'RIGHT'→'LEFT' → referenceSupportEffect fires
+        //    signal stays 'RIGHT', but span B form value is 'LEFT'
+        // 3. Switch back to span A → enable() would re-emit the current form value 'LEFT'
+        //    Without enable({ emitEvent: false }): signal 'RIGHT'→'LEFT' → referenceSupportEffect fires
         //    → onLoadControlChange('referenceSupport', 'LEFT') → span A data corrupted to 'LEFT'
+        //    Fix: enable({ emitEvent: false }) silences the re-emission.
+        //    Then applySelectedLoadValues sets the form to 'RIGHT' (emitEvent:false), signal stays 'RIGHT'.
         const temporaryLoadData = createTemporaryLoadDataTwoSpans();
         mockPlotService['temporaryLoadData'] = temporaryLoadData;
 
@@ -452,16 +442,16 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
         expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
 
-        // Step 2 — switch to span B: form becomes 'LEFT' (span B data), signal stays 'RIGHT'
+        // Step 2 — switch to span B: form and signal both update to 'LEFT' (span B data)
         component.form.controls.spanSelect.setValue('support-2');
         fixture.detectChanges();
 
-        // Step 3 — switch back to span A: enable() would emit 'LEFT' (current form value)
-        // if emitEvent:true, triggering the effect with a stale value
+        // Step 3 — switch back to span A: enable() is silent (emitEvent:false);
+        // applySelectedLoadValues then sets form + signal to 'RIGHT'
         component.form.controls.spanSelect.setValue('support-1');
         fixture.detectChanges();
 
-        // Span A's referenceSupport must remain 'RIGHT', not be overwritten by span B's form value
+        // Span A's referenceSupport must remain 'RIGHT', not be overwritten
         expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
       });
     });
@@ -471,9 +461,9 @@ describe('LoadMarkingComponent', () => {
         // Scenario:
         // 1. Select span A, set type to MARKING → type signal = 'marking'
         // 2. Switch to span B (PUNCTUAL, loadWeight 20) → applySelectedLoadValues sets form.type
-        //    to 'punctual' with emitEvent:false → type signal stays 'marking'
+        //    to 'punctual' (emitEvent:false) → type signal stays 'marking', span B form value is 'punctual'
         // 3. User changes loadPosition on span B
-        //    Old bug (combined effect): type signal 'marking' → onLoadControlChange('type','marking')
+        //    Old bug (combined effect): stale type signal → onLoadControlChange('type','marking')
         //    → span B type overwritten to 'marking' AND loadWeight reset to 0
         //    Fix (separate effects): only loadPositionEffect fires → only loadPosition updated
         const temporaryLoadData = createTemporaryLoadDataTwoSpans();
@@ -518,7 +508,7 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
         // loadWeight signal is now 999
 
-        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:false), signal stays 999
+        // Step 2 — switch to span B: form.loadWeight → 20 (emitEvent:false) → loadWeight signal stays 999
         component.form.controls.spanSelect.setValue('support-2');
         fixture.detectChanges();
 
@@ -527,6 +517,57 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
 
         expect(temporaryLoadData.spanLoads[1].loadWeight).toBe(20);
+        expect(temporaryLoadData.spanLoads[1].referenceSupport).toBe('RIGHT');
+      });
+    });
+
+    describe('Bug 4 — selecting the same type/referenceSupport on a second span must update its data', () => {
+      it('should update span B type to MARKING when span A was already set to MARKING', () => {
+        // Root cause: applySelectedLoadValues previously used emitEvent:false for type/referenceSupport.
+        // When switching from span A (MARKING) to span B, the type signal stayed 'marking'.
+        // Selecting 'marking' on span B emitted 'marking' → signal 'marking'→'marking' (no change)
+        // → typeEffect never fired → span B.type was never updated → only span A had a marking.
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and set type to MARKING
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.type.setValue(LoadType.MARKING);
+        fixture.detectChanges();
+        expect(temporaryLoadData.spanLoads[0].type).toBe(LoadType.MARKING);
+
+        // Step 2 — switch to span B (PUNCTUAL): type signal must update to 'punctual'
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — user selects MARKING for span B
+        component.form.controls.type.setValue(LoadType.MARKING);
+        fixture.detectChanges();
+
+        // Both spans must now have MARKING type
+        expect(temporaryLoadData.spanLoads[1].type).toBe(LoadType.MARKING);
+      });
+
+      it('should update span B referenceSupport to RIGHT when span A already had RIGHT', () => {
+        const temporaryLoadData = createTemporaryLoadDataTwoSpans();
+        mockPlotService['temporaryLoadData'] = temporaryLoadData;
+
+        // Step 1 — select span A and set referenceSupport to RIGHT
+        component.form.controls.spanSelect.setValue('support-1');
+        fixture.detectChanges();
+        component.form.controls.referenceSupport.setValue('RIGHT');
+        fixture.detectChanges();
+        expect(temporaryLoadData.spanLoads[0].referenceSupport).toBe('RIGHT');
+
+        // Step 2 — switch to span B (LEFT): signal must update to 'LEFT'
+        component.form.controls.spanSelect.setValue('support-2');
+        fixture.detectChanges();
+
+        // Step 3 — user selects RIGHT for span B
+        component.form.controls.referenceSupport.setValue('RIGHT');
+        fixture.detectChanges();
+
         expect(temporaryLoadData.spanLoads[1].referenceSupport).toBe('RIGHT');
       });
     });
