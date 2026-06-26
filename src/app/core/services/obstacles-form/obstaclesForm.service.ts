@@ -106,6 +106,11 @@ export class ObstacleFormService {
       },
       { emitEvent: false }
     );
+    // Emit supportUuid explicitly so that components tracking supportUuidValue via
+    // valueChanges (e.g. zoom button disabled state) update correctly.
+    // uuid is already set above (emitEvent:false), so the isEditingExisting guard
+    // in supportUuidEffect will prevent any unwanted form reset.
+    this.form.controls.supportUuid.setValue(obstacle.supportUuid);
     this.setPositions(obstacle.positions);
     this.obstaclesService.setCurrentPointIndex(index);
   }

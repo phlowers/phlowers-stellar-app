@@ -68,6 +68,7 @@ export class LoadMarkingComponent {
   private readonly spanSelectSignal = toSignal(this.form.controls.spanSelect.valueChanges, {
     initialValue: this.form.controls.spanSelect.value
   });
+  readonly spanSelectValue = computed(() => this.spanSelectSignal());
 
   private readonly loadControlSignals: Record<LoadControlName, Signal<unknown>> = {
     loadPosition: toSignal(this.form.controls.loadPosition.valueChanges, {

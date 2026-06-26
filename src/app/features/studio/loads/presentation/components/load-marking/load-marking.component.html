@@ -1,5 +1,19 @@
 <form [formGroup]="form" class="span__form" data-testid="span-form">
-  <div class="span__reset">
+  <div class="header-btns">
+    <button
+      class="flex items-center m-0"
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      [disabled]="!spanSelectValue()"
+      (click)="zoomToSpan()"
+      data-testid="span-zoom"
+    >
+      <app-icon icon="filter_center_focus" />
+      <ng-container i18n>Zoom</ng-container>
+    </button>
+
     <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="span-reset">
       <app-icon icon="refresh" />
       <ng-container i18n>Reset</ng-container>
@@ -7,22 +21,7 @@
   </div>
 
   <div>
-    <div class="flex items-baseline justify-between mb-0.5">
-      <label for="spanSelect" class="mb-0" i18n>Span</label>
-
-      <button
-        class="flex items-center m-0"
-        app-btn
-        type="button"
-        btnStyle="outlined"
-        btnSize="s"
-        (click)="zoomToSpan()"
-        data-testid="span-zoom"
-      >
-        <app-icon icon="filter_center_focus" />
-        <ng-container i18n>Zoom</ng-container>
-      </button>
-    </div>
+    <label for="spanSelect" class="mb-0" i18n>Span</label>
     <p-select
       inputId="spanSelect"
       [options]="spansOptions()"

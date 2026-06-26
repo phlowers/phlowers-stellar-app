@@ -176,6 +176,12 @@ describe('CableLengthChangeComponent', () => {
       expect(form?.tagName).toBe('FORM');
     });
 
+    it('should render the zoom button', () => {
+      const btn = getByTestId('cable-length-change-zoom');
+      expect(btn).toBeTruthy();
+      expect(btn?.tagName).toBe('BUTTON');
+    });
+
     it('should render the reset button', () => {
       const btn = getByTestId('cable-length-change-reset');
       expect(btn).toBeTruthy();
@@ -232,6 +238,21 @@ describe('CableLengthChangeComponent', () => {
   // HTML rendering — button states
   // ---------------------------------------------------------------------------
   describe('HTML rendering - button states', () => {
+    it('should disable zoom button when no scope is selected', () => {
+      component.form.controls.scope.setValue(null);
+      fixture.detectChanges();
+      const btn = getByTestId('cable-length-change-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should enable zoom button when a scope is selected and not loading', () => {
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.isLoading.set(false);
+      fixture.detectChanges();
+      const btn = getByTestId('cable-length-change-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
+    });
+
     it('should disable save button when form is invalid', () => {
       const btn = getByTestId('cable-length-change-save') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
@@ -313,11 +334,13 @@ describe('CableLengthChangeComponent', () => {
       const calculate = getByTestId('cable-length-change-calculate') as HTMLButtonElement;
       const reset = getByTestId('cable-length-change-reset') as HTMLButtonElement;
       const deleteBtn = getByTestId('cable-length-change-delete') as HTMLButtonElement;
+      const zoom = getByTestId('cable-length-change-zoom') as HTMLButtonElement;
 
       expect(save.disabled).toBe(true);
       expect(calculate.disabled).toBe(true);
       expect(reset.disabled).toBe(true);
       expect(deleteBtn.disabled).toBe(true);
+      expect(zoom.disabled).toBe(true);
     });
   });
 

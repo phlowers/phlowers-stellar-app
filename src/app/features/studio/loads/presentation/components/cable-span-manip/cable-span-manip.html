@@ -6,7 +6,7 @@
       btnStyle="outlined"
       btnSize="s"
       (click)="zoomToSpan()"
-      [disabled]="isLoading()"
+      [disabled]="isLoading() || !scopeValue()"
       data-testid="cable-span-manip-zoom"
     >
       <app-icon icon="filter_center_focus" />
