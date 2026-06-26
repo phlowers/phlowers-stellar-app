@@ -58,7 +58,9 @@ export class LoadFormsService {
       // When there are no saved span loads, pass an empty array so the Python engine
       // takes its "no loads" code path instead of receiving zero-weight placeholder
       // entries created by recheckSpanLoads (which would have the wrong array size).
-      await this.workerPythonService.runTask(Task.setLoads, { spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : [] });
+      await this.workerPythonService.runTask(Task.setLoads, {
+        spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : []
+      });
       await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
       await this.plotService.refreshProjection();
     } catch (err) {
