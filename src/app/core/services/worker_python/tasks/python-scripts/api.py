@@ -8,6 +8,7 @@ import logging
 
 from stellar_engine.core import pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
+from stellar_engine.core import loads
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
@@ -70,8 +71,13 @@ def get_support_coordinates(js_inputs):
 
 @debug_log
 def change_state(js_inputs):
+    global study
     change_state_inputs: dict = js_to_python(js_inputs)  # type: ignore
-    return run_solver.change_state(change_state_inputs, study)
+    if "reload" in change_state_inputs:
+        reload = change_state_inputs["reload"]
+    else:
+        reload = False
+    return run_solver.change_state(change_state_inputs, study, reload=reload)
 
 
 @debug_log
@@ -155,6 +161,28 @@ def clear_obstacles():
     obst.clear_obstacles(study, project=True, support_index=0)
 
     return {"success": True}
+
+
+@debug_log
+def delete_all_loads():
+    global study
+    return loads.apply_span_loads(study, span_loads=[])
+
+
+@debug_log
+def delete_load(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for delete load: {python_inputs}")
+    return loads.delete_load(python_inputs["supportIndex"], study)
+
+
+@debug_log
+def set_loads(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for set_loads: {python_inputs}")
+    return loads.apply_span_loads(study, python_inputs["spanLoads"])
 
 
 @debug_log

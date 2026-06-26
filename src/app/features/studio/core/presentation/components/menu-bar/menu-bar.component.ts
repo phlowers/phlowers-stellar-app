@@ -11,6 +11,7 @@ import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 
 @Component({
   selector: 'app-studio-menu-bar',
@@ -61,6 +62,7 @@ export class StudioMenuBarComponent {
   });
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly chargesService = inject(ChargesService);
+  private readonly loadFormsService = inject(LoadFormsService);
 
   launchChargeFunction(
     functionToLaunch: (studyUuid: string, sectionUuid: string, value: string) => void,
@@ -75,8 +77,13 @@ export class StudioMenuBarComponent {
     this.launchChargeFunction(this.chargesService.setSelectedCharge.bind(this.chargesService), charge?.value ?? '');
   }
 
-  deleteChargeCase(charge?: { label: string; value: string }) {
-    this.launchChargeFunction(this.chargesService.deleteCharge.bind(this.chargesService), charge?.value ?? '');
+  async deleteChargeCase(charge?: { label: string; value: string }): Promise<void> {
+    if (!charge?.value) return;
+    const isSelectedCharge = charge.value === this.selectedChargeCaseUuid();
+    if (isSelectedCharge) {
+      await this.loadFormsService.deleteLoad();
+    }
+    await this.chargesService.deleteCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', charge.value);
   }
 
   duplicateChargeCase(charge?: { label: string; value: string }) {
