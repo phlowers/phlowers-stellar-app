@@ -85,9 +85,12 @@ def get_coordinates(
         study.balance_engine.balance_model.vhl_under_console().vhl
     )
 
-    loads_coords = study.position_engine.get_loads_coords(
+    loads_coords: dict = study.position_engine.get_loads_coords(
         project=project, frame_index=middle_span
     )
+    # TODO: temporary solution to inverse y waiting fix in mechaphlowers
+    loads_coords = {k: [v[0], -v[1], v[2]] for k, v in loads_coords.items()}
+
     line_angle_rad = (
         study.balance_engine.section_array.data.line_angle.to_numpy()
     )
