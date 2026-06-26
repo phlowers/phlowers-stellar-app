@@ -8,7 +8,7 @@
   &__form {
     @apply grid grid-cols-2;
     gap: 0.625rem;
-    align-items: end;
+    align-items: start;
   }
 
   &__btns {

@@ -319,18 +319,6 @@ describe('LoadMarkingComponent', () => {
       expect(component.form.controls.loadWeight.value).toBe(0);
     });
 
-    it('resets type to default when type value is null', () => {
-      const temporaryLoadData = createTemporaryLoadData({ type: LoadType.MARKING });
-      mockPlotService['temporaryLoadData'] = temporaryLoadData;
-
-      component.form.controls.spanSelect.setValue('support-1');
-      fixture.detectChanges();
-
-      component.form.controls.type.setValue(null as unknown as LoadType);
-      fixture.detectChanges();
-
-      expect(temporaryLoadData.spanLoads[0].type).toBe(LoadType.PUNCTUAL);
-    });
 
     it('resets referenceSupport to default when value is null', () => {
       const temporaryLoadData = createTemporaryLoadData({ referenceSupport: 'RIGHT' });

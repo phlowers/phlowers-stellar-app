@@ -10,12 +10,12 @@
       (click)="zoomToSpan()"
       data-testid="span-zoom"
     >
-      <app-icon icon="filter_center_focus" />
+      <app-icon icon="filter_center_focus" aria-hidden="true" />
       <ng-container i18n>Zoom</ng-container>
     </button>
 
     <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="span-reset">
-      <app-icon icon="refresh" />
+      <app-icon icon="refresh" aria-hidden="true" />
       <ng-container i18n>Reset</ng-container>
     </button>
   </div>
@@ -97,7 +97,7 @@
       (click)="deleteCharge()"
       data-testid="delete-load"
     >
-      <app-icon icon="delete" />
+      <app-icon icon="delete" aria-hidden="true" />
     </button>
 
     <button
@@ -109,7 +109,7 @@
       [btnLoading]="isSaving()"
       data-testid="save-load"
     >
-      <app-icon icon="save" />
+      <app-icon icon="save" aria-hidden="true" />
       <ng-container i18n>Save</ng-container>
     </button>
 
@@ -121,7 +121,7 @@
       (click)="calculateLoadCase()"
       data-testid="calculate-load"
     >
-      <app-icon icon="rocket_launch" />
+      <app-icon icon="rocket_launch" aria-hidden="true" />
       <ng-container i18n>Calculate</ng-container>
     </button>
   </div>

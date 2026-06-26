@@ -228,11 +228,7 @@ export class LoadMarkingComponent {
         load.loadWeight = typeof value === 'number' ? value : emptySpanLoad.loadWeight;
         break;
       case 'type':
-        if (value === LoadType.PUNCTUAL || value === LoadType.MARKING) {
-          load.type = value;
-        } else {
-          load.type = emptySpanLoad.type;
-        }
+        load.type = value === LoadType.MARKING ? LoadType.MARKING : LoadType.PUNCTUAL;
         if (load.type === LoadType.MARKING) {
           load.loadWeight = 0;
           this.form.controls.loadWeight.setValue(0, { emitEvent: false });

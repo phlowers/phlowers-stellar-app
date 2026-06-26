@@ -3281,12 +3281,6 @@
         <target>Obstacle enregistré</target>
       </segment>
     </unit>
-    <unit id="3490467566453662140">
-      <segment state="initial">
-        <source>Return to span</source>
-        <target>Retour à la portée</target>
-      </segment>
-    </unit>
     <unit id="8897211906922465937">
       <segment state="initial">
         <source>Create new obstacle</source>
@@ -4713,6 +4707,12 @@
       <segment state="initial">
         <source>Pan</source>
         <target>Pan</target>
+      </segment>
+    </unit>
+    <unit id="4122048021216749117">
+      <segment state="initial">
+        <source>Distance to reference support must not exceed span length</source>
+        <target>La distance au support de référence ne peut pas dépasser la longueur de la portée</target>
       </segment>
     </unit>
   </file>
