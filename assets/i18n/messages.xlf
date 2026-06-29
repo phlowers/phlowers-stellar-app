@@ -3904,5 +3904,35 @@
         <source>Pan</source>
       </segment>
     </unit>
+    <unit id="1108587408255387766">
+      <segment>
+        <source>Measurement data is not available.</source>
+      </segment>
+    </unit>
+    <unit id="2014194600688237631">
+      <segment>
+        <source>The manipulation keys provided are invalid.</source>
+      </segment>
+    </unit>
+    <unit id="5928313975045168370">
+      <segment>
+        <source>Uncertainty data is not available.</source>
+      </segment>
+    </unit>
+    <unit id="6752188158155764170">
+      <segment>
+        <source>The manipulation index provided is invalid.</source>
+      </segment>
+    </unit>
+    <unit id="6876083598423831028">
+      <segment>
+        <source>No intersection plane was found for the distance calculation.</source>
+      </segment>
+    </unit>
+    <unit id="8782567139321890483">
+      <segment>
+        <source>The manipulation range provided is invalid.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>
