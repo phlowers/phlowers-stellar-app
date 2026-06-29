@@ -117,6 +117,10 @@ export class CableSupportManipComponent {
     })
   });
 
+  readonly supportValue = toSignal(this.form.controls.support.valueChanges, {
+    initialValue: this.form.controls.support.value
+  });
+
   /** All supports from the current section as select options. */
   readonly supportsOptions = computed<{ label: string; value: string }[]>(() => {
     const supports = this.spanService.section()?.supports ?? [];
