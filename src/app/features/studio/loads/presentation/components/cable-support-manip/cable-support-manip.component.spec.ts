@@ -126,6 +126,21 @@ describe('CableSupportManipComponent', () => {
   // HTML rendering — button states
   // ---------------------------------------------------------------------------
   describe('HTML rendering - button states', () => {
+    it('should disable zoom button when no support is selected', () => {
+      component.form.controls.support.setValue(null);
+      fixture.detectChanges();
+      const btn = getByTestId('cable-support-manip-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should enable zoom button when a support is selected and not loading', () => {
+      component.form.controls.support.setValue('support-uuid-1');
+      component.isLoading.set(false);
+      fixture.detectChanges();
+      const btn = getByTestId('cable-support-manip-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
+    });
+
     it('should disable save button when form is invalid', () => {
       const btn = getByTestId('cable-support-manip-save') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);

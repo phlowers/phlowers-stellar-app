@@ -284,6 +284,21 @@ describe('CableSpanManipComponent', () => {
       expect(btn.disabled).toBe(false);
     });
 
+    it('should disable zoom button when no scope is selected', () => {
+      component.form.controls.scope.setValue(null);
+      fixture.detectChanges();
+      const btn = getByTestId('cable-span-manip-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should enable zoom button when a scope is selected and not loading', () => {
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.isLoading.set(false);
+      fixture.detectChanges();
+      const btn = getByTestId('cable-span-manip-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
+    });
+
     it('should disable buttons when isLoading is true', () => {
       component.form.patchValue({
         scope: 'support-uuid-1',

@@ -3281,12 +3281,6 @@
         <target>Obstacle enregistré</target>
       </segment>
     </unit>
-    <unit id="3490467566453662140">
-      <segment state="initial">
-        <source>Return to span</source>
-        <target>Retour à la portée</target>
-      </segment>
-    </unit>
     <unit id="8897211906922465937">
       <segment state="initial">
         <source>Create new obstacle</source>
