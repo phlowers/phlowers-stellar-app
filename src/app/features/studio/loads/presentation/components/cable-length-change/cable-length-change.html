@@ -5,7 +5,20 @@
   (ngSubmit)="saveForm()"
   data-testid="cable-length-change-form"
 >
-  <div class="cable-length-change__reset">
+  <div class="header-btns">
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      btnSize="s"
+      (click)="zoomToSpan()"
+      [disabled]="isLoading() || !scopeValue()"
+      data-testid="cable-length-change-zoom"
+    >
+      <app-icon icon="filter_center_focus" aria-hidden="true" />
+      <ng-container i18n>Zoom</ng-container>
+    </button>
+
     <button
       app-btn
       type="button"

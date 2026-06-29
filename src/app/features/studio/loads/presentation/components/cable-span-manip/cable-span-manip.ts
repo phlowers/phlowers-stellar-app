@@ -76,6 +76,7 @@ export class CableSpanManipComponent implements OnInit {
   private readonly scopeValueSignal = toSignal(this.form.controls.scope.valueChanges, {
     initialValue: this.form.controls.scope.value
   });
+  readonly scopeValue = computed(() => this.scopeValueSignal());
 
   /** Support data for the currently selected span's left support, reactive to section changes. */
   private readonly selectedSupportData = computed(() => {
