@@ -3904,10 +3904,5 @@
         <source>Pan</source>
       </segment>
     </unit>
-    <unit id="4122048021216749117">
-      <segment>
-        <source>Distance to reference support must not exceed span length</source>
-      </segment>
-    </unit>
   </file>
 </xliff>
