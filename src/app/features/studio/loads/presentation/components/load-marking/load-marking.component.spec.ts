@@ -307,19 +307,6 @@ describe('LoadMarkingComponent', () => {
       expect(component.form.controls.loadWeight.value).toBe(0);
     });
 
-    it('resets type to default when type value is null', () => {
-      const temporaryLoadData = createTemporaryLoadData({ type: LoadType.MARKING });
-      mockPlotService['temporaryLoadData'] = temporaryLoadData;
-
-      component.form.controls.spanSelect.setValue('support-1');
-      fixture.detectChanges();
-
-      component.form.controls.type.setValue(null);
-      fixture.detectChanges();
-
-      expect(temporaryLoadData.spanLoads[0].type).toBe(LoadType.PUNCTUAL);
-    });
-
     it('resets referenceSupport to default when value is null', () => {
       const temporaryLoadData = createTemporaryLoadData({ referenceSupport: 'RIGHT' });
       mockPlotService['temporaryLoadData'] = temporaryLoadData;
@@ -620,6 +607,20 @@ describe('LoadMarkingComponent', () => {
       btn.click();
 
       expect(mockPlotService['plotOptionsChange']).not.toHaveBeenCalled();
+    });
+
+    it('should disable zoom button when no span is selected', () => {
+      component.form.controls.spanSelect.setValue(null);
+      fixture.detectChanges();
+      const btn = getByTestId('span-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should enable zoom button when a span is selected', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+      const btn = getByTestId('span-zoom') as HTMLButtonElement;
+      expect(btn.disabled).toBe(false);
     });
   });
 

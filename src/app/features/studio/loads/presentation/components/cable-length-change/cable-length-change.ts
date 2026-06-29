@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -58,6 +58,10 @@ export class CableLengthChangeComponent {
     })
   });
 
+  readonly scopeValue = toSignal(this.form.controls.scope.valueChanges, {
+    initialValue: this.form.controls.scope.value
+  });
+
   /** Span options per RG.LON-CAB.POR.1. */
   readonly spansOptions = this.spanService.getSpanOptions;
 
@@ -104,7 +108,7 @@ export class CableLengthChangeComponent {
       const startIndex = untracked(() => this.plotOptionsService.plotOptions().startSupport);
       const defaultUuid = section.supports?.[startIndex]?.uuid ?? section.supports?.[0]?.uuid ?? null;
       untracked(() => {
-        this.form.controls.scope.setValue(defaultUuid, { emitEvent: false });
+        this.form.controls.scope.setValue(defaultUuid);
         if (defaultUuid) this.onScopeChange(defaultUuid);
       });
     });
@@ -116,7 +120,7 @@ export class CableLengthChangeComponent {
       const spanUuid = this.cableModificationsService.selectedSpanUuid();
       if (!spanUuid) return;
       untracked(() => {
-        this.form.controls.scope.setValue(spanUuid, { emitEvent: false });
+        this.form.controls.scope.setValue(spanUuid);
         this.onScopeChange(spanUuid);
         this.cableModificationsService.clearSelectedSpan();
       });
@@ -163,6 +167,14 @@ export class CableLengthChangeComponent {
     }
     this.statesFormControls();
     this.isDirtySinceLastSave.set(false);
+  }
+
+  zoomToSpan(): void {
+    const uuid = this.form.controls.scope.value;
+    if (!uuid) return;
+    const index = this.spanService.getSupportIndex(uuid);
+    if (index < 0) return;
+    this.plotService.plotOptionsChange({ startSupport: index, endSupport: index + 1 });
   }
 
   resetForm(): void {

@@ -6,7 +6,7 @@
       btnStyle="outlined"
       btnSize="s"
       (click)="zoomToSupport()"
-      [disabled]="isLoading()"
+      [disabled]="isLoading() || !supportValue()"
       data-testid="cable-support-manip-zoom"
     >
       <app-icon icon="filter_center_focus" aria-hidden="true" />
