@@ -3934,5 +3934,15 @@
         <source>The manipulation range provided is invalid.</source>
       </segment>
     </unit>
+    <unit id="2984456095430307546">
+      <segment>
+        <source>No generated points were found after computation.</source>
+      </segment>
+    </unit>
+    <unit id="4448179347809899324">
+      <segment>
+        <source>The support is out of the valid range.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

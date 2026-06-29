@@ -21,7 +21,9 @@ const PYTHON_ERROR_MESSAGES: Record<PythonErrorCode, string> = {
   [PythonErrorCode.UncertaintyNotAvailable]: $localize`Uncertainty data is not available.`,
   [PythonErrorCode.InvalidManipulationIndex]: $localize`The manipulation index provided is invalid.`,
   [PythonErrorCode.InvalidManipulationKeys]: $localize`The manipulation keys provided are invalid.`,
-  [PythonErrorCode.InvalidManipulationRange]: $localize`The manipulation range provided is invalid.`
+  [PythonErrorCode.InvalidManipulationRange]: $localize`The manipulation range provided is invalid.`,
+  [PythonErrorCode.SupportOutOfRangeError]: $localize`The support is out of the valid range.`,
+  [PythonErrorCode.GeneratedPointsNoneError]: $localize`No generated points were found after computation.`
 };
 
 /**

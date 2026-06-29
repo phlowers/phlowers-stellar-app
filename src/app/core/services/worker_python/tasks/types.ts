@@ -118,7 +118,11 @@ export enum PythonErrorCode {
   /** Raised when a value is out of the allowed range in manipulation */
   InvalidManipulationRange = 'InvalidManipulationRange',
   /** Raised when no intersection plane can be found for distance computation */
-  NoIntersectionPlaneForDistanceError = 'NoIntersectionPlaneForDistanceError'
+  NoIntersectionPlaneForDistanceError = 'NoIntersectionPlaneForDistanceError',
+  /** Raised when a support index is out of range for the number of spans. */
+  SupportOutOfRangeError = 'SupportOutOfRangeError',
+  /** Raised when generated points (spans, supports, insulators, others) are None after computation. */
+  GeneratedPointsNoneError = 'GeneratedPointsNoneError'
 }
 
 /**
