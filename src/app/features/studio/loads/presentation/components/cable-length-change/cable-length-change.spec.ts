@@ -679,6 +679,36 @@ describe('CableLengthChangeComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // zoomToSpan()
+  // ---------------------------------------------------------------------------
+  describe('zoomToSpan()', () => {
+    beforeEach(() => {
+      mockPlotService.plotOptionsChange.mockClear();
+    });
+
+    it('should not call plotOptionsChange when scope is null', () => {
+      component.form.controls.scope.setValue(null);
+      component.zoomToSpan();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+
+    it('should not call plotOptionsChange when getSupportIndex returns -1', () => {
+      mockSpanService.getSupportIndex.mockReturnValue(-1);
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.zoomToSpan();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+
+    it('should call plotOptionsChange with the correct startSupport and endSupport for a valid span', () => {
+      mockSpanService.getSupportIndex.mockReturnValue(2);
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.zoomToSpan();
+      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledOnce();
+      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 2, endSupport: 3 });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // hasActiveModification computed
   // ---------------------------------------------------------------------------
   describe('hasActiveModification', () => {

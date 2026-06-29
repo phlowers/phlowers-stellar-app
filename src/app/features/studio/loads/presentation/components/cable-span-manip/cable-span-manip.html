@@ -9,7 +9,7 @@
       [disabled]="isLoading() || !scopeValue()"
       data-testid="cable-span-manip-zoom"
     >
-      <app-icon icon="filter_center_focus" />
+      <app-icon icon="filter_center_focus" aria-hidden="true" />
       <ng-container i18n>Zoom</ng-container>
     </button>
 
@@ -22,7 +22,7 @@
       [disabled]="isLoading()"
       data-testid="cable-span-manip-reset"
     >
-      <app-icon icon="refresh" />
+      <app-icon icon="refresh" aria-hidden="true" />
       <ng-container i18n>Reset</ng-container>
     </button>
   </div>
@@ -245,7 +245,7 @@
 
     <div class="distance-calc-line">
       <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-span-manip-dist-calc-btn">
-        <app-icon icon="rocket_launch" />
+        <app-icon icon="rocket_launch" aria-hidden="true" />
         <ng-container i18n="@@distCalcBetweenPoints">Dist. calc. between points</ng-container>
       </button>
 
@@ -377,7 +377,7 @@
       [disabled]="!hasSavedManipulation() || isLoading()"
       data-testid="cable-span-manip-delete"
     >
-      <app-icon icon="delete" />
+      <app-icon icon="delete" aria-hidden="true" />
     </button>
 
     <button
@@ -388,7 +388,7 @@
       [btnLoading]="isCalculating()"
       data-testid="cable-span-manip-save"
     >
-      <app-icon icon="save" />
+      <app-icon icon="save" aria-hidden="true" />
       <ng-container i18n>Save</ng-container>
     </button>
 
@@ -400,7 +400,7 @@
       (click)="calculate()"
       data-testid="cable-span-manip-calculate"
     >
-      <app-icon icon="rocket_launch" />
+      <app-icon icon="rocket_launch" aria-hidden="true" />
       <ng-container i18n>Calculate</ng-container>
     </button>
   </div>

@@ -319,7 +319,6 @@ describe('LoadMarkingComponent', () => {
       expect(component.form.controls.loadWeight.value).toBe(0);
     });
 
-
     it('resets referenceSupport to default when value is null', () => {
       const temporaryLoadData = createTemporaryLoadData({ referenceSupport: 'RIGHT' });
       mockPlotService['temporaryLoadData'] = temporaryLoadData;
