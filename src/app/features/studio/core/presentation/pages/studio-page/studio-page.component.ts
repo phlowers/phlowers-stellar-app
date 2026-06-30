@@ -40,9 +40,11 @@ import { ClimateComponent } from '@features/studio/loads/presentation/components
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
+import { Camera } from 'plotly.js-dist-min';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
@@ -53,6 +55,7 @@ import { CableSpanManipComponent } from '@features/studio/loads/presentation/com
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
+import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -207,8 +210,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly studiesService = inject(StudiesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly resolutionService = inject(PlotResolutionService);
 
   previousSectionUuid = signal<string | null>(null);
+  private activeSectionUuid: string | null = null;
   private previousStartSupport: number | null = null;
   private previousEndSupport: number | null = null;
 
@@ -265,10 +270,35 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           if (section) {
             this.spanService.section.set(section);
             if (this.previousSectionUuid() !== section.uuid) {
-              this.plotService.plotOptionsChange({
-                endSupport: section.supports.length - 1,
-                startSupport: 0
-              });
+              this.activeSectionUuid = sectionUuid;
+              const maxSupport = section.supports.length - 1;
+              const vs = section.studioViewState;
+              if (vs) {
+                const start =
+                  vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport
+                    ? vs.startSupport
+                    : 0;
+                const end =
+                  vs.endSupport !== undefined && vs.endSupport > start && vs.endSupport <= maxSupport
+                    ? vs.endSupport
+                    : maxSupport;
+                this.plotService.plotOptionsChange({ startSupport: start, endSupport: end });
+                if (vs.camera) {
+                  this.plotOptionsService.camera.set(vs.camera as Camera);
+                }
+                if (vs.scalingFactors) {
+                  this.plotOptionsService.setScalingFactors(vs.scalingFactors);
+                }
+                if (vs.resolution !== undefined) {
+                  this.resolutionService.setResolution(vs.resolution);
+                  void this.resolutionService.applyResolution(vs.resolution);
+                }
+              } else {
+                this.plotService.plotOptionsChange({
+                  endSupport: maxSupport,
+                  startSupport: 0
+                });
+              }
               this.previousSectionUuid.set(section.uuid);
             }
           } else {
@@ -281,10 +311,39 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.saveViewState();
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
     this.obstaclesService.setSelectedObstacle(null, null);
     this.obstacleFormService.clearPositions();
+  }
+
+  private saveViewState(): void {
+    const study = this.plotService.study();
+    if (!study || !this.activeSectionUuid) return;
+
+    const rawCam = this.plotOptionsService.camera();
+    const camera: StudioViewCamera | null = rawCam
+      ? {
+          eye: { x: rawCam.eye?.x ?? 0, y: rawCam.eye?.y ?? 0, z: rawCam.eye?.z ?? 0 },
+          center: { x: rawCam.center?.x ?? 0, y: rawCam.center?.y ?? 0, z: rawCam.center?.z ?? 0 },
+          up: { x: rawCam.up?.x ?? 0, y: rawCam.up?.y ?? 0, z: rawCam.up?.z ?? 0 }
+        }
+      : null;
+
+    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
+    const studioViewState: StudioViewState = {
+      camera,
+      scalingFactors: this.plotOptionsService.scalingFactors(),
+      resolution: this.resolutionService.resolution(),
+      startSupport,
+      endSupport
+    };
+
+    const updatedSections = study.sections.map((s) =>
+      s.uuid === this.activeSectionUuid ? { ...s, studioViewState } : s
+    );
+    void this.studiesService.updateStudy({ ...study, sections: updatedSections }, true);
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {

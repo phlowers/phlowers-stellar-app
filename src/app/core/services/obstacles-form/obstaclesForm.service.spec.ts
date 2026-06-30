@@ -1277,4 +1277,35 @@ describe('ObstacleFormService', () => {
       expect(plotOptionsServiceMock.camera()).toBeNull();
     });
   });
+
+  describe('syncSpanSelectionWithoutZoom', () => {
+    it('should return early when no supportUuid', () => {
+      service.form.patchValue({ supportUuid: null });
+      service.syncSpanSelectionWithoutZoom();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+
+    it('should not update plot when support index is invalid', () => {
+      mockSpanService.getSupportIndex.mockReturnValue(-1);
+      service.form.patchValue({ supportUuid: 'sup-1' });
+      service.syncSpanSelectionWithoutZoom();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+
+    it('should update span amount without triggering plotOptionsChange when support is valid', () => {
+      mockSpanService.getSupportIndex.mockReturnValue(0);
+      service.form.patchValue({ supportUuid: 'sup-1' });
+      service.syncSpanSelectionWithoutZoom();
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+      expect(mockSpanService.spanAmountChoice()).toBe('single');
+    });
+
+    it('should reset camera to null when support is valid', () => {
+      mockSpanService.getSupportIndex.mockReturnValue(0);
+      service.form.patchValue({ supportUuid: 'sup-1' });
+      plotOptionsServiceMock.camera.set({ eye: { x: 1, y: -2, z: 0.5 } });
+      service.syncSpanSelectionWithoutZoom();
+      expect(plotOptionsServiceMock.camera()).toBeNull();
+    });
+  });
 });
