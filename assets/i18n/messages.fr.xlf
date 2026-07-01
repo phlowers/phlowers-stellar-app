@@ -4709,5 +4709,53 @@
         <target>Pan</target>
       </segment>
     </unit>
+    <unit id="6876083598423831028">
+      <segment state="initial">
+        <source>No intersection plane was found for the distance calculation.</source>
+        <target>Aucun plan d&apos;intersection n&apos;a été trouvé pour le calcul de la distance.</target>
+      </segment>
+    </unit>
+    <unit id="1108587408255387766">
+      <segment state="initial">
+        <source>Measurement data is not available.</source>
+        <target>Les données de mesure ne sont pas disponibles.</target>
+      </segment>
+    </unit>
+    <unit id="5928313975045168370">
+      <segment state="initial">
+        <source>Uncertainty data is not available.</source>
+        <target>Les données d&apos;incertitude ne sont pas disponibles.</target>
+      </segment>
+    </unit>
+    <unit id="6752188158155764170">
+      <segment state="initial">
+        <source>The manipulation index provided is invalid.</source>
+        <target>L&apos;indice de manipulation fourni est invalide.</target>
+      </segment>
+    </unit>
+    <unit id="2014194600688237631">
+      <segment state="initial">
+        <source>The manipulation keys provided are invalid.</source>
+        <target>La manipulation s&apos;applique sur des éléments invalides.</target>
+      </segment>
+    </unit>
+    <unit id="8782567139321890483">
+      <segment state="initial">
+        <source>The manipulation range provided is invalid.</source>
+        <target>La plage de manipulation fournie est invalide.</target>
+      </segment>
+    </unit>
+    <unit id="4448179347809899324">
+      <segment state="initial">
+        <source>The support is out of the valid range.</source>
+        <target>Le support sélectionné est hors de la plage valide.</target>
+      </segment>
+    </unit>
+    <unit id="2984456095430307546">
+      <segment state="initial">
+        <source>No generated points were found after computation.</source>
+        <target>Le calcul n'a généré aucun point en sortie.</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
