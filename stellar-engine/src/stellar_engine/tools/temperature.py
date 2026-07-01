@@ -56,9 +56,13 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         longitude=np.array([temp_inputs.longitude]),
         altitude=np.array([temp_inputs.altitude]),
         azimuth=np.array([temp_inputs.azimuth]),
-        month=np.array([temp_inputs.date.month]),
-        day=np.array([temp_inputs.date.day]),
-        hour=np.array([temp_inputs.time.hour]),
+        datetime_utc=np.array(
+            [
+                np.datetime64(
+                    f"{temp_inputs.date.strftime('%Y-%m-%d')}T{temp_inputs.time.strftime('%H:%M')}"
+                )
+            ]
+        ),
         intensity=np.array([temp_inputs.transit]),
         ambient_temp=np.array([temp_inputs.ambientTemperature]),
         wind_speed=np.array([wind_speed]),
