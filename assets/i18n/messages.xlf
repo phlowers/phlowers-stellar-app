@@ -3944,5 +3944,35 @@
         <source>The support is out of the valid range.</source>
       </segment>
     </unit>
+    <unit id="108316195302681988">
+      <segment>
+        <source>Distance 1-2</source>
+      </segment>
+    </unit>
+    <unit id="3708805422444813457">
+      <segment>
+        <source>This tab&apos;s data is never saved</source>
+      </segment>
+    </unit>
+    <unit id="381168125876659676">
+      <segment>
+        <source>Distance 2-3</source>
+      </segment>
+    </unit>
+    <unit id="5776214170793753530">
+      <segment>
+        <source>delete points</source>
+      </segment>
+    </unit>
+    <unit id="6003898912034143664">
+      <segment>
+        <source>Distances</source>
+      </segment>
+    </unit>
+    <unit id="7793282032906069695">
+      <segment>
+        <source>Angle 1-2-3</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -72,7 +72,11 @@ export class DistanceMeasuringService {
   readonly results = signal<DistanceMeasuringResults | null>(null);
 
   /** True once points 1 and 2 have all three coordinates filled in (point 3 is optional). */
-  readonly canCalculate = computed(() => this.positions().slice(0, 2).every((point) => this.isPointFilled(point)));
+  readonly canCalculate = computed(() =>
+    this.positions()
+      .slice(0, 2)
+      .every((point) => this.isPointFilled(point))
+  );
 
   private isPointFilled(point: Position3D): boolean {
     return point.x !== null && point.y !== null && point.z !== null;
