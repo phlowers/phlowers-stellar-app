@@ -500,7 +500,6 @@ export class ObstacleFormService {
     }
     const supportIndex = this.spanService.getSupportIndex(supportUuid);
     if (supportIndex >= 0) {
-      this.plotOptionsService.camera.set(null);
       this.spanService.spanAmountChoice.set('single');
     }
   }

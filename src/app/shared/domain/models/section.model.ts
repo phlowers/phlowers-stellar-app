@@ -158,5 +158,5 @@ export interface Section {
   /** Azimuth of the first support */
   start_azimuth: number | null;
   /** Saved studio view state (camera, scale, resolution, span selection). */
-  studioViewState?: StudioViewState;
+  studio_view_state?: StudioViewState;
 }

@@ -1300,12 +1300,13 @@ describe('ObstacleFormService', () => {
       expect(mockSpanService.spanAmountChoice()).toBe('single');
     });
 
-    it('should reset camera to null when support is valid', () => {
+    it('should not modify camera when support is valid', () => {
       mockSpanService.getSupportIndex.mockReturnValue(0);
       service.form.patchValue({ supportUuid: 'sup-1' });
-      plotOptionsServiceMock.camera.set({ eye: { x: 1, y: -2, z: 0.5 } });
+      const existingCamera = { eye: { x: 1, y: -2, z: 0.5 } };
+      plotOptionsServiceMock.camera.set(existingCamera);
       service.syncSpanSelectionWithoutZoom();
-      expect(plotOptionsServiceMock.camera()).toBeNull();
+      expect(plotOptionsServiceMock.camera()).toEqual(existingCamera);
     });
   });
 });

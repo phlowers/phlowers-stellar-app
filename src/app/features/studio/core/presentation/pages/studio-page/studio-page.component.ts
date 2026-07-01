@@ -56,6 +56,7 @@ import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -211,6 +212,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly studiesService = inject(StudiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly resolutionService = inject(PlotResolutionService);
+  private readonly logger = inject(LoggerService);
 
   previousSectionUuid = signal<string | null>(null);
   private activeSectionUuid: string | null = null;
@@ -272,7 +274,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
             if (this.previousSectionUuid() !== section.uuid) {
               this.activeSectionUuid = sectionUuid;
               const maxSupport = section.supports.length - 1;
-              const vs = section.studioViewState;
+              const vs = section.studio_view_state;
               if (vs) {
                 const start =
                   vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport
@@ -341,9 +343,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
 
     const updatedSections = study.sections.map((s) =>
-      s.uuid === this.activeSectionUuid ? { ...s, studioViewState } : s
+      s.uuid === this.activeSectionUuid ? { ...s, studio_view_state: studioViewState } : s
     );
-    void this.studiesService.updateStudy({ ...study, sections: updatedSections }, true);
+    this.studiesService.updateStudy({ ...study, sections: updatedSections }, true).catch((err) => {
+      this.logger.error('Failed to save studio view state', err);
+    });
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {

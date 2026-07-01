@@ -655,7 +655,7 @@ describe('StudioPageComponent', () => {
           sections: expect.arrayContaining([
             expect.objectContaining({
               uuid: sectionUuid,
-              studioViewState: {
+              studio_view_state: {
                 camera: mockCam,
                 scalingFactors: savedScaling,
                 resolution: 75,
@@ -677,7 +677,7 @@ describe('StudioPageComponent', () => {
 
       const updatedStudy = (studiesService.updateStudy as vi.Mock).mock.calls[0][0];
       const savedState = updatedStudy.sections.find((s: { uuid: string }) => s.uuid === sectionUuid)
-        ?.studioViewState as StudioViewState;
+        ?.studio_view_state as StudioViewState;
       expect(savedState.camera).toBeNull();
     });
 
@@ -711,7 +711,7 @@ describe('StudioPageComponent', () => {
         endSupport: 3
       };
       const study = {
-        sections: [{ uuid: 'section-1', supports: [1, 2, 3, 4], obstacles: [], studioViewState }]
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3, 4], obstacles: [], studio_view_state: studioViewState }]
       } as unknown as Study;
 
       studiesService.getStudyAsObservable.mockReturnValue(of(study));
@@ -752,7 +752,7 @@ describe('StudioPageComponent', () => {
 
       const studioViewState: StudioViewState = { startSupport: 10, endSupport: 20 };
       const study = {
-        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studioViewState }]
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
       } as unknown as Study;
 
       studiesService.getStudyAsObservable.mockReturnValue(of(study));
@@ -770,7 +770,7 @@ describe('StudioPageComponent', () => {
 
       const studioViewState: StudioViewState = { resolution: 75, startSupport: 0, endSupport: 2 };
       const study = {
-        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studioViewState }]
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
       } as unknown as Study;
 
       studiesService.getStudyAsObservable.mockReturnValue(of(study));
@@ -788,7 +788,7 @@ describe('StudioPageComponent', () => {
 
       const studioViewState: StudioViewState = { startSupport: 0, endSupport: 2 };
       const study = {
-        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studioViewState }]
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
       } as unknown as Study;
 
       studiesService.getStudyAsObservable.mockReturnValue(of(study));
@@ -823,7 +823,7 @@ describe('StudioPageComponent', () => {
 
       const studioViewState: StudioViewState = { startSupport: 0, endSupport: 2 };
       const study = {
-        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studioViewState }]
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
       } as unknown as Study;
 
       studiesService.getStudyAsObservable.mockReturnValue(of(study));
