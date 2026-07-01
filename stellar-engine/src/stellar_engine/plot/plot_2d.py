@@ -60,4 +60,5 @@ def get_states_coordinates(
         "sectionOutput": {"current": current_coords, "base": base_coords},
         "obstacles": obstacles,
         "distances": distances,
+        "additionalPoints": current_coords.get("additionalPoints", []),
     }
