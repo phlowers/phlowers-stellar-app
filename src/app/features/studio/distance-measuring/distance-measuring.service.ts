@@ -20,10 +20,10 @@ const POINT_COUNT = 3;
 export interface DistanceMeasuringResults {
   /** Distance between point 1 and point 2 (meters). */
   distance12: number;
-  /** Distance between point 2 and point 3 (meters). */
-  distance23: number;
-  /** Angle at point 2 formed by points 1-2-3 (degrees). */
-  angle123: number;
+  /** Distance between point 2 and point 3 (meters), null when point 3 is not filled in. */
+  distance23: number | null;
+  /** Angle at point 2 formed by points 1-2-3 (degrees), null when point 3 is not filled in. */
+  angle123: number | null;
 }
 
 /**
@@ -71,10 +71,12 @@ export class DistanceMeasuringService {
   readonly isCalculating = signal(false);
   readonly results = signal<DistanceMeasuringResults | null>(null);
 
-  /** True once every point has all three coordinates filled in. */
-  readonly canCalculate = computed(() =>
-    this.positions().every((point) => point.x !== null && point.y !== null && point.z !== null)
-  );
+  /** True once points 1 and 2 have all three coordinates filled in (point 3 is optional). */
+  readonly canCalculate = computed(() => this.positions().slice(0, 2).every((point) => this.isPointFilled(point)));
+
+  private isPointFilled(point: Position3D): boolean {
+    return point.x !== null && point.y !== null && point.z !== null;
+  }
 
   private createPointGroup(): PositionFormGroup {
     return this.fb.group({
@@ -132,7 +134,15 @@ export class DistanceMeasuringService {
       // Mocked result — replace with workerPythonService.runTask(Task.<distanceMeasuring>,
       // { points: this.positions() }) once the Python task is available.
       await new Promise((resolve) => setTimeout(resolve, 600));
-      this.results.set({ distance12: 0, distance23: 0, angle123: 0 });
+      const hasThirdPoint = this.isPointFilled(this.positions()[2]);
+      this.results.set({
+        distance12: 0,
+        distance23: hasThirdPoint ? 0 : null,
+        angle123: hasThirdPoint ? 0 : null
+      });
+      console.log({ supportUuid: this.selectedSupportUuid(), positions: this.positions() });
+
+      await this.plotService.refreshProjection();
     } finally {
       this.isCalculating.set(false);
     }

@@ -11,6 +11,7 @@
     (ngModelChange)="service.selectedSupportUuid.set($event)"
     optionLabel="label"
     optionValue="value"
+    required="true"
     class="span-input"
     aria-describedby="distance-measuring-hint"
     data-testid="span-select"
@@ -78,6 +79,7 @@
             step="0.01"
             aria-describedby="distance-measuring-hint"
             data-testid="point-altitude"
+            [attr.required]="$index !== 2 ? 'true' : null"
           />
           <p-inputgroup-addon i18n>m</p-inputgroup-addon>
         </p-inputgroup>
@@ -96,6 +98,7 @@
             step="0.01"
             aria-describedby="distance-measuring-hint"
             data-testid="point-ref-distance"
+            [attr.required]="$index !== 2 ? 'true' : null"
           />
           <p-inputgroup-addon i18n>m</p-inputgroup-addon>
         </p-inputgroup>
@@ -114,6 +117,7 @@
             step="0.01"
             aria-describedby="distance-measuring-hint"
             data-testid="point-axis-distance"
+            [attr.required]="$index !== 2 ? 'true' : null"
           />
           <p-inputgroup-addon i18n>m</p-inputgroup-addon>
         </p-inputgroup>
@@ -156,22 +160,30 @@
       <dl class="distance-measuring__sticky__results__grid">
         <div class="distance-measuring__sticky__results__grid__item">
           <dt class="distance-measuring__sticky__results__grid__item__term" i18n>Distance 1-2</dt>
-          <dd class="distance-measuring__sticky__results__grid__item__def">
-            <span data-testid="result-distance-12">{{ results.distance12 | number: '1.0-2' }} m</span>
+          <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-12">
+            {{ results.distance12 | number: '1.0-2' }} m
           </dd>
         </div>
 
         <div class="distance-measuring__sticky__results__grid__item">
           <dt class="distance-measuring__sticky__results__grid__item__term" i18n>Distance 2-3</dt>
-          <dd class="distance-measuring__sticky__results__grid__item__def">
-            <span data-testid="result-distance-23">{{ results.distance23 | number: '1.0-2' }} m</span>
+          <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-23">
+            @if (results.distance23 !== null) {
+              {{ results.distance23 | number: '1.0-2' }} m
+            } @else {
+              -
+            }
           </dd>
         </div>
 
         <div class="distance-measuring__sticky__results__grid__item">
           <dt class="distance-measuring__sticky__results__grid__item__term" i18n>Angle 1-2-3</dt>
-          <dd class="distance-measuring__sticky__results__grid__item__def">
-            <span data-testid="result-angle-123">{{ results.angle123 | number: '1.0-2' }}°</span>
+          <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-angle-123">
+            @if (results.angle123 !== null) {
+              {{ results.angle123 | number: '1.0-2' }}°
+            } @else {
+              -
+            }
           </dd>
         </div>
       </dl>

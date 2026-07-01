@@ -11,7 +11,7 @@ describe('DistanceMeasuringComponent', () => {
   let component: DistanceMeasuringComponent;
   let fixture: ComponentFixture<DistanceMeasuringComponent>;
   let service: DistanceMeasuringService;
-  let mockPlotService: { plotOptionsChange: ReturnType<typeof vi.fn> };
+  let mockPlotService: { plotOptionsChange: ReturnType<typeof vi.fn>; refreshProjection: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -24,8 +24,14 @@ describe('DistanceMeasuringComponent', () => {
     fixture.detectChanges();
   };
 
+  /** Fills only points 1 and 2, leaving point 3 empty. */
+  const fillMandatoryPoints = () => {
+    service.form.controls.slice(0, 2).forEach((group) => group.setValue({ x: 1, y: 2, z: 3 }));
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
-    mockPlotService = { plotOptionsChange: vi.fn() };
+    mockPlotService = { plotOptionsChange: vi.fn(), refreshProjection: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
       imports: [DistanceMeasuringComponent],
@@ -90,6 +96,11 @@ describe('DistanceMeasuringComponent', () => {
     expect((getByTestId('calculate') as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it('should enable Calculate once only the mandatory points 1 and 2 are filled', () => {
+    fillMandatoryPoints();
+    expect((getByTestId('calculate') as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it('should not render results before a calculation', () => {
     expect(getByTestId('results')).toBeNull();
   });
@@ -137,5 +148,20 @@ describe('DistanceMeasuringComponent', () => {
 
     fixture.detectChanges();
     expect(getByTestId('results')).toBeTruthy();
+  });
+
+  it('should display "-" for distance 2-3 and angle 1-2-3 when point 3 is not filled in', async () => {
+    vi.useFakeTimers();
+    fillMandatoryPoints();
+
+    const pending = service.calculate();
+    await vi.advanceTimersByTimeAsync(600);
+    await pending;
+    vi.useRealTimers();
+
+    fixture.detectChanges();
+    expect(service.results()).toEqual({ distance12: 0, distance23: null, angle123: null });
+    expect(getByTestId('result-distance-23')?.textContent?.trim()).toBe('-');
+    expect(getByTestId('result-angle-123')?.textContent?.trim()).toBe('-');
   });
 });
