@@ -39,7 +39,7 @@ function shouldUseNetworkFirst(request: Request): boolean {
   }
   const url = new URL(request.url);
   const path = url.pathname;
-  // Note: /assets_list.json is handled by shouldBypassSW() before reaching this function.
+  // Note: /assets_list.json and /version.json are handled by shouldBypassSW() before reaching this function.
   return path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.css');
 }
 
@@ -135,12 +135,19 @@ const NO_CACHE_INIT: RequestInit = {
 /**
  * Returns true for URL paths that must be bypassed completely by the SW
  * (no cache read, no cache write). These are OIDC/Apache routes and the
- * asset manifest which the main thread must always receive fresh from the server.
+ * version/asset manifests which the main thread must always receive fresh
+ * from the server.
+ *
+ * `/version.json` MUST be bypassed even though it is listed in
+ * `manifest.files` (and therefore precached): without this bypass it is
+ * served stale from the SW cache-first branch until the user performs a
+ * hard-reload (which bypasses the SW entirely), because it is only
+ * refreshed when `updateApp()`/`installApp()` runs.
  */
 function shouldBypassSW(url: string): boolean {
   try {
     const path = new URL(url).pathname;
-    return path.startsWith('/auth/') || path === '/assets_list.json';
+    return path.startsWith('/auth/') || path === '/assets_list.json' || path === '/version.json';
   } catch {
     return false;
   }
@@ -160,7 +167,7 @@ export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
 
-  // Full bypass: /auth/* (OIDC) and /assets_list.json must never be intercepted.
+  // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
   if (shouldBypassSW(url)) {
     event.respondWith(fetch(event.request));
     return;
