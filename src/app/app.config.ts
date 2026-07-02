@@ -45,8 +45,12 @@ export const appConfig: ApplicationConfig = {
      * Enforces the V2 startup sequence (§5.1 of connexion-gaia.md):
      * 1. StorageService.setPersistentStorage()
      * 2. StorageService.createDatabase()
-     * 3. AuthService.initialize()
-     * 4. UpdateService.checkForUpdateOnce()
+     * 3. AuthService.initialize() — cache-first: resolves instantly when a
+     *    previously-authenticated OIDC user is cached, running the network
+     *    resync in the background (does not block this initializer).
+     * 4. UpdateService.checkForUpdateOnce() — started in the background, not
+     *    awaited: the update/install prompt is not part of the critical
+     *    first-render path and must never delay it.
      *
      * Steps 5 (setupData) and 6 (WorkerPythonService.setup) are handled by AppComponent.ngOnInit
      * after this initializer completes, with an explicit try/catch so step 6 always runs.
@@ -58,7 +62,7 @@ export const appConfig: ApplicationConfig = {
       await storageService.setPersistentStorage();
       await storageService.createDatabase();
       await authService.initialize();
-      await updateService.checkForUpdateOnce();
+      void updateService.checkForUpdateOnce();
     })
   ]
 };
