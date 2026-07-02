@@ -6,6 +6,7 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';
+import { AuthResyncService } from './auth-resync.service';
 import { OidcClaims } from '@services/auth/oidc-claims.interface';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
@@ -32,6 +33,7 @@ const userinfoStatus = (status: number): Response =>
 
 describe('AuthService', () => {
   let service: AuthService;
+  let authResyncService: AuthResyncService;
   let mockFetch: vi.Mock & typeof fetch;
   let originalFetch: typeof fetch;
   let usersTableMock: {
@@ -96,6 +98,7 @@ describe('AuthService', () => {
       ]
     });
     service = TestBed.inject(AuthService);
+    authResyncService = TestBed.inject(AuthResyncService);
   });
 
   afterEach(() => {
@@ -176,11 +179,19 @@ describe('AuthService', () => {
   });
 
   describe('initialize — network failure (offline)', () => {
-    it('should keep oidcEnabled at the strict default and trust an OIDC cached user', async () => {
+    it('should trust an OIDC cached user instantly and eventually resolve the mode in the background', async () => {
       mockFetch.mockRejectedValue(new Error('Offline'));
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
+
+      // Cache-first: the cached OIDC user is available immediately.
+      expect(service.currentUser()).toEqual(testOidcUser);
+
+      // The background resync (fire-and-forget) eventually settles modeResolved.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.modeResolved()).toBe(true);
       expect(service.oidcEnabled()).toBe(true);
@@ -218,15 +229,47 @@ describe('AuthService', () => {
     });
   });
 
-  describe('initialize — explicit auth mismatch blocks cache restore while online', () => {
-    it('should keep currentUser null even with cached OIDC user', async () => {
+  describe('initialize — cache-first fast path (instant startup for a proven OIDC user)', () => {
+    it('should publish the cached OIDC user without waiting for the network probe', async () => {
+      let resolveFetch: (value: Response) => void = () => undefined;
+      mockFetch.mockReturnValue(
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        })
+      );
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+
+      await service.initialize();
+
+      // The cached user must be available immediately, before the (still
+      // pending) network probe has any chance to resolve.
+      expect(service.currentUser()).toEqual(testOidcUser);
+
+      // Unblock the pending background probe so it doesn't leak into other tests.
+      resolveFetch(userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  });
+
+  describe('initialize — background resync after cache-first restore proves a mismatch', () => {
+    it('should keep the cached user instantly available, then flag the mismatch once the background probe resolves', async () => {
       mockFetch.mockResolvedValue(userinfoStatus(403));
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
 
+      // Cache-first: the previously-authenticated user renders immediately.
+      // Apache remains the authoritative enforcement layer for any real
+      // protected request from this point on (see connexion-gaia.md §2).
+      expect(service.currentUser()).toEqual(testOidcUser);
+
+      // Flush the background resync microtasks.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(service.serverSessionInvalid()).toBe(true);
-      expect(service.currentUser()).toBeNull();
     });
   });
 
@@ -299,6 +342,29 @@ describe('AuthService', () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
+
+    it('should retry the OIDC login redirect when reconnect sync still proves the session invalid', async () => {
+      globalThis.sessionStorage.clear();
+      usersTableMock.toArray.mockResolvedValue([testOidcUser]);
+      mockFetch.mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce(userinfoStatus(401));
+
+      await service.initialize();
+      expect(service.currentUser()).toEqual(testOidcUser);
+
+      const redirectSpy = vi.spyOn(authResyncService, 'navigateToOidcLogin').mockImplementation(() => undefined);
+
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        configurable: true,
+        value: true
+      });
+      globalThis.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(service.serverSessionInvalid()).toBe(true);
+      expect(redirectSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('initialize — never deletes users', () => {
@@ -324,6 +390,25 @@ describe('AuthService', () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
       const result = await service.refreshFromNetwork();
       expect(result).toBeNull();
+    });
+
+    it('should pass an AbortSignal to the userinfo fetch so a hanging network never blocks startup', async () => {
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: false, oidcEnabled: false }));
+      await service.refreshFromNetwork();
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/userinfo'),
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it('should treat an aborted (timed-out) fetch as a transient error, never as a proven mismatch', async () => {
+      mockFetch.mockRejectedValue(new DOMException('The operation was aborted', 'AbortError'));
+
+      const result = await service.refreshFromNetwork();
+
+      expect(result).toBeNull();
+      expect(service.serverSessionInvalid()).toBe(false);
+      expect(service.modeResolved()).toBe(true);
     });
 
     it('should preserve existing user fields when upserting OIDC claims', async () => {

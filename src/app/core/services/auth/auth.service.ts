@@ -12,6 +12,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { User } from '@shared/domain';
 import { OidcClaims } from '@services/auth/oidc-claims.interface';
 import { USERINFO_URL } from '@services/auth/auth.constants';
+import { AuthResyncService } from '@services/auth/auth-resync.service';
 import { fromEvent } from 'rxjs';
 
 /**
@@ -41,9 +42,13 @@ interface UserinfoResponse extends Partial<OidcClaims> {
 export class AuthService {
   private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403]);
 
+  /** Timeout (ms) for the `/auth/userinfo` probe, so a slow/unreachable network never blocks startup. */
+  private static readonly USERINFO_PROBE_TIMEOUT_MS = 5000;
+
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
+  private readonly authResyncService = inject(AuthResyncService);
   private readonly destroyRef = inject(DestroyRef);
   private refreshOnReconnectInFlight = false;
 
@@ -85,6 +90,27 @@ export class AuthService {
    * `StorageService.createDatabase()`.
    */
   async initialize(): Promise<void> {
+    const cached = await this.loadCachedUser();
+
+    // Fast path: a previously-authenticated OIDC user (proven by the presence
+    // of a `sub` claim) is valid offline regardless of the server mode, which
+    // is not yet known at this point. Publish it immediately so the app
+    // starts instantly from cache, then resync with the server in the
+    // background without making the caller (APP_INITIALIZER) wait for it.
+    // Skipped when a server mismatch is already proven while online (defence
+    // in depth): that case must go through the authoritative probe below.
+    if (cached?.sub && !this.shouldForceServerResync()) {
+      this.currentUser.set(cached);
+      void this.refreshFromNetwork().catch((err) => {
+        this.logger.warn('AuthService: background resync failed', err);
+      });
+      return;
+    }
+
+    // No proven-OIDC cached user: the mode (OIDC vs fallback) is still
+    // unknown, so the network probe (bounded by a timeout, see
+    // `probeUserinfo`) must run before deciding whether an email-only cached
+    // user (fallback mode) may be trusted.
     const claims = await this.probeUserinfo();
 
     // 1. Active OIDC session — authoritative path.
@@ -100,14 +126,14 @@ export class AuthService {
       return;
     }
 
-    const cached = await this.loadCachedUser();
     if (!cached) {
       return;
     }
 
     // 2a. In OIDC mode (or when mode is unknown), reject stale email-only
     // users that were created in fallback mode. Only previously-OIDC users
-    // (those that have a `sub` claim) are accepted offline.
+    // (those that have a `sub` claim) are accepted offline — already handled
+    // by the fast path above, so reaching here means `cached.sub` is absent.
     if (this.oidcEnabled() && !cached.sub) {
       this.logger.warn('AuthService: stale email-only cached user ignored because OIDC mode is required');
       return;
@@ -157,12 +183,18 @@ export class AuthService {
    */
   private async probeUserinfo(): Promise<OidcClaims | null> {
     let response: Response;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), AuthService.USERINFO_PROBE_TIMEOUT_MS);
     try {
-      response = await fetch(USERINFO_URL, { cache: 'no-store' });
+      response = await fetch(USERINFO_URL, { cache: 'no-store', signal: controller.signal });
     } catch (err) {
+      // Includes AbortError on timeout: treated as a transient network issue,
+      // never as a proven auth mismatch (which requires an explicit 401/403).
       this.logger.warn('AuthService: userinfo fetch error', err);
       this.modeResolved.set(true);
       return null;
+    } finally {
+      clearTimeout(timer);
     }
 
     if (response.status === 401) {
@@ -288,6 +320,10 @@ export class AuthService {
    *
    * When connectivity returns, silently probe `/auth/userinfo` to refresh claims.
    * Never raises UI errors and does nothing for anonymous first launches.
+   * If the server session is still proven invalid after the resync attempt,
+   * retries the OIDC login redirect (subject to `AuthResyncService`'s own
+   * cooldown/suppressed-path guards) so a user who was offline when the
+   * mismatch was first detected is not left stuck indefinitely.
    */
   private async handleBrowserReconnected(): Promise<void> {
     if (this.refreshOnReconnectInFlight) {
@@ -304,6 +340,10 @@ export class AuthService {
       this.logger.warn('AuthService: reconnect refresh failed', err);
     } finally {
       this.refreshOnReconnectInFlight = false;
+    }
+
+    if (this.shouldForceServerResync()) {
+      this.authResyncService.triggerImmediateRedirect();
     }
   }
 }
