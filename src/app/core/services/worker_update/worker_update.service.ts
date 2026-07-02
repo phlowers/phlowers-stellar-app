@@ -39,6 +39,9 @@ export type PendingPwaAction = 'none' | 'first-install' | 'update-available';
 export class UpdateService {
   private static readonly hasServiceWorker = 'serviceWorker' in navigator;
 
+  /** Timeout (ms) for the `/version.json` fetch, so a slow/unreachable network never hangs startup. */
+  private static readonly VERSION_FETCH_TIMEOUT_MS = 5000;
+
   /**
    * True when the current runtime exposes a Service Worker API.
    * Centralizes the capability check so callers do not need to probe
@@ -318,18 +321,34 @@ export class UpdateService {
 
   /**
    * Load the current application version from the build-time version.json file.
-   * This file is generated at build time and cached by the Service Worker.
-   * Falls back to the environment-based version if the fetch fails.
+   *
+   * @remarks
+   * Fetched with `no-store` semantics and bounded by a timeout: `/version.json`
+   * is bypassed by the Service Worker cache (see `shouldBypassSW` in
+   * `service-worker.ts`), but the main-thread fetch must still avoid stale
+   * intermediary caches and never hang indefinitely on a slow/unreachable
+   * network. Falls back to the environment-based version if the fetch fails.
    */
   async loadCurrentVersion(): Promise<void> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), UpdateService.VERSION_FETCH_TIMEOUT_MS);
     try {
-      const response = await fetch('/version.json');
+      const response = await fetch('/version.json', {
+        cache: 'no-store',
+        headers: {
+          'cache-control': 'no-cache',
+          pragma: 'no-cache'
+        },
+        signal: controller.signal
+      });
       if (response.ok) {
         const version = (await response.json()) as AppVersion;
         this.currentVersion.set(version);
       }
     } catch {
       // Keep environment-based fallback already set in the signal.
+    } finally {
+      clearTimeout(timer);
     }
   }
 
