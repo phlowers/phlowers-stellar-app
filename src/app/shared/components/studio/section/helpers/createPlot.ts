@@ -399,3 +399,14 @@ export const purgePlot = (documentRef: Document, plotId: string): void => {
 
   Plotly.purge(plotElement);
 };
+
+/**
+ * Applies a saved camera directly to a Plotly 3D plot via `Plotly.relayout`.
+ * Called after the first render following a back-navigation to guarantee that
+ * the saved camera is used regardless of any layout/uirevision timing issues.
+ *
+ * @param plotId - The DOM element ID of the Plotly plot container.
+ * @param camera - The camera to restore.
+ */
+export const applyRestoreCamera = (plotId: string, camera: Camera): Promise<void> =>
+  Plotly.relayout(plotId, { 'scene.camera': camera as unknown } as Record<string, unknown>) as unknown as Promise<void>;
