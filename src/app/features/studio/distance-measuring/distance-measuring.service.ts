@@ -12,19 +12,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { Position3D } from '@shared/domain/models/obstacle.model';
 import { PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
-
-/** Number of points handled by the distance-measuring tool. */
-const POINT_COUNT = 3;
-
-/** Results of a distance/angle measurement between the three points. */
-export interface DistanceMeasuringResults {
-  /** Distance between point 1 and point 2 (meters). */
-  distance12: number;
-  /** Distance between point 2 and point 3 (meters), null when point 3 is not filled in. */
-  distance23: number | null;
-  /** Angle at point 2 formed by points 1-2-3 (degrees), null when point 3 is not filled in. */
-  angle123: number | null;
-}
+import { POINT_COUNT } from './distance-measuring.constants';
+import { DistanceMeasuringResults } from './distance-measuring.model';
 
 /**
  * Holds the ephemeral state of the distance-measuring tool (span selection,
