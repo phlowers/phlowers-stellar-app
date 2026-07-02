@@ -133,7 +133,12 @@ export class DistanceMeasuringService {
         distance23: hasThirdPoint ? 0 : null,
         angle123: hasThirdPoint ? 0 : null
       });
-      console.log({ supportUuid: this.selectedSupportUuid(), positions: this.positions() });
+      // support UUID: this.selectedSupportUuid()
+      // Points 1-2-3: this.positions()
+      // support list: this.spanService.section()?.supports;
+      // start current support index: this.spanService.getSupportIndex(this.selectedSupportUuid());
+      // start support: supports?.[startIndex];
+      // end support: supports?.[startIndex + 1];
 
       await this.plotService.refreshProjection();
     } finally {
