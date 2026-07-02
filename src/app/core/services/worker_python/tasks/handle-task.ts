@@ -6,6 +6,8 @@
  */
 import { loadPyodide } from 'pyodide';
 import type { PyProxy } from 'pyodide/ffi';
+import { PythonDiagnostic } from './python-diagnostic.interfaces';
+import { PYTHON_ERROR_SEVERITY } from './python-error-severity';
 import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './types';
 
 /** Type alias for the initialised Pyodide runtime API. */
@@ -125,6 +127,40 @@ const tasks: Record<
 };
 
 /**
+ * Retrieves Python warnings captured since the last call (via `warnings.warn()`,
+ * e.g. inside mechaphlowers) and maps each one to a known `PythonErrorCode`.
+ * Warnings that don't match any known code are logged but dropped — no toast is shown for them.
+ */
+function collectWarningDiagnostics(
+  pyodide: PyodideAPI,
+  task: Task,
+  log?: (level: 'debug' | 'error', message: string, details?: unknown) => void
+): PythonDiagnostic[] {
+  const getAndClearWarnings = pyodide.globals.get('get_and_clear_warnings') as () => PyProxy;
+  const warningsProxy = getAndClearWarnings();
+  const capturedWarnings = warningsProxy.toJs() as string[];
+  warningsProxy.destroy();
+
+  const diagnostics: PythonDiagnostic[] = [];
+  for (const warningText of capturedWarnings) {
+    const matchedCode = Object.values(PythonErrorCode).find((code) => warningText.includes(code)) ?? null;
+    if (matchedCode) {
+      diagnostics.push({
+        code: matchedCode,
+        severity: PYTHON_ERROR_SEVERITY[matchedCode],
+        origin: 'warning',
+        rawText: warningText
+      });
+    }
+    log?.(
+      'debug',
+      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}`
+    );
+  }
+  return diagnostics;
+}
+
+/**
  * Executes a Python task inside the Pyodide runtime.
  *
  * Loads any required external packages, passes `inputs` to the corresponding
@@ -144,7 +180,7 @@ export async function handleTask(
   result: TaskOutputs[Task] | null;
   runTime: number;
   error: TaskError | null;
-  pythonErrorCode: PythonErrorCode | null;
+  diagnostics: PythonDiagnostic[];
 }> {
   const start = performance.now();
   try {
@@ -165,25 +201,40 @@ export async function handleTask(
     log?.('debug', `Task ${task} executed successfully, converting result to JS object`);
     const resultJs = result.toJs({ dict_converter: Object.fromEntries });
     result.destroy();
+    const diagnostics = collectWarningDiagnostics(pyodide, task, log);
+    log?.('debug', `Task ${task} succeeded, no error raised`);
     return {
       result: resultJs as TaskOutputs[Task],
       runTime: performance.now() - start,
       error: null,
-      pythonErrorCode: null
+      diagnostics
     };
   } catch (error: unknown) {
-    log?.('error', 'Task execution failed', error instanceof Error ? error.message : String(error));
-    let errorType = TaskError.CALCULATION_ERROR;
     const errorMessage = error instanceof Error ? error.message : String(error);
+    log?.('error', `Task ${task} execution failed, raw error message: "${errorMessage}"`);
+    let errorType = TaskError.CALCULATION_ERROR;
     if (errorMessage.toLowerCase().includes('did not converge')) {
       errorType = TaskError.SOLVER_DID_NOT_CONVERGE;
     }
     const pythonErrorCode = Object.values(PythonErrorCode).find((code) => errorMessage.includes(code)) ?? null;
+    const diagnostics = collectWarningDiagnostics(pyodide, task, log);
+    if (pythonErrorCode) {
+      diagnostics.unshift({
+        code: pythonErrorCode,
+        severity: PYTHON_ERROR_SEVERITY[pythonErrorCode],
+        origin: 'exception',
+        rawText: errorMessage
+      });
+    }
+    log?.(
+      'debug',
+      `Task ${task}: derived errorType=${errorType}, pythonErrorCode=${pythonErrorCode ?? 'null (no PythonErrorCode matched in error message)'}`
+    );
     return {
       result: null,
       runTime: performance.now() - start,
       error: errorType,
-      pythonErrorCode
+      diagnostics
     };
   }
 }

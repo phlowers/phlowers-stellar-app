@@ -130,14 +130,14 @@ export class LoadFormsService {
       const {
         result: changeResult,
         error,
-        pythonErrorCode
+        diagnostics
       } = await this.workerPythonService.runTask(Task.changeState, {
         climate: temporaryLoadData.climate
       });
 
       if (error) {
         this.plotService.error.set(error);
-        this.plotService.pythonErrorCode.set(pythonErrorCode);
+        this.plotService.diagnostics.set(diagnostics);
         return;
       }
 

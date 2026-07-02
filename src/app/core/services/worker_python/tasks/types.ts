@@ -106,7 +106,9 @@ export enum PythonErrorCode {
   /** Balance engine warning */
   BalanceEngineWarning = 'BalanceEngineWarning',
   /** RTS catalog data missing or contains NaN values */
-  RtsDataNotAvailable = 'RtsDataNotAvailable'
+  RtsDataNotAvailable = 'RtsDataNotAvailable',
+  /** Generic Python warning raised via `warnings.warn()` without a specific category */
+  UserWarning = 'UserWarning'
 }
 
 /**

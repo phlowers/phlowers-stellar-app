@@ -25,7 +25,9 @@ describe('Task handlers', () => {
       loadPackage: vi.fn().mockResolvedValue(undefined),
       runPythonAsync: vi.fn().mockResolvedValue(undefined),
       globals: {
-        get: vi.fn(),
+        get: vi.fn((name: string) =>
+          name === 'get_and_clear_warnings' ? () => ({ toJs: () => [], destroy: vi.fn() }) : undefined
+        ),
         set: vi.fn()
       }
     } as unknown as vi.Mocked<PyodideAPI>;
@@ -51,9 +53,7 @@ describe('Task handlers', () => {
         .mockReturnValueOnce(1200); // End time
 
       const mockToJs = vi.fn().mockReturnValue(mockResult);
-      (mockPyodide.globals.get as vi.Mock)
-        .mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }))
-        .mockReturnValueOnce(undefined as never);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
 
       // Execute
       const result = await handleTask(mockPyodide, Task.initLit, undefined);
@@ -65,7 +65,12 @@ describe('Task handlers', () => {
       expect(mockToJs).toHaveBeenCalledWith({
         dict_converter: Object.fromEntries
       });
-      expect(result).toEqual({ result: mockResult, runTime: 200, error: null, pythonErrorCode: null });
+      expect(result).toEqual({
+        result: mockResult,
+        runTime: 200,
+        error: null,
+        diagnostics: []
+      });
     });
 
     it('should handle unknown task', async () => {
@@ -81,11 +86,11 @@ describe('Task handlers', () => {
         result: null,
         runTime: expect.any(Number),
         error: 'CALCULATION_ERROR',
-        pythonErrorCode: null
+        diagnostics: []
       });
     });
 
-    it('should extract pythonErrorCode when the exception message contains a PythonErrorCode value', async () => {
+    it('should extract a matching diagnostic when the exception message contains a PythonErrorCode value', async () => {
       // The mock task function raises an error whose message includes 'SolverError'
       vi.spyOn(console, 'error').mockReturnValue(undefined);
       (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => {
@@ -96,10 +101,17 @@ describe('Task handlers', () => {
 
       expect(result.result).toBeNull();
       expect(result.error).toBe('CALCULATION_ERROR');
-      expect(result.pythonErrorCode).toBe('SolverError');
+      expect(result.diagnostics).toEqual([
+        {
+          code: 'SolverError',
+          severity: 'error',
+          origin: 'exception',
+          rawText: 'mechaphlowers.SolverError: mechanical equilibrium failed'
+        }
+      ]);
     });
 
-    it('should extract pythonErrorCode ConvergenceError from exception message', async () => {
+    it('should extract ConvergenceError diagnostic from exception message', async () => {
       vi.spyOn(console, 'error').mockReturnValue(undefined);
       (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => {
         throw new Error('ConvergenceError: optimizer reached maximum iterations');
@@ -107,10 +119,17 @@ describe('Task handlers', () => {
 
       const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
-      expect(result.pythonErrorCode).toBe('ConvergenceError');
+      expect(result.diagnostics).toEqual([
+        {
+          code: 'ConvergenceError',
+          severity: 'error',
+          origin: 'exception',
+          rawText: 'ConvergenceError: optimizer reached maximum iterations'
+        }
+      ]);
     });
 
-    it('should set pythonErrorCode to null when exception message contains no known PythonErrorCode', async () => {
+    it('should return an empty diagnostics array when exception message contains no known PythonErrorCode', async () => {
       vi.spyOn(console, 'error').mockReturnValue(undefined);
       (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => {
         throw new Error('ValueError: unexpected input shape');
@@ -118,7 +137,46 @@ describe('Task handlers', () => {
 
       const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
-      expect(result.pythonErrorCode).toBeNull();
+      expect(result.diagnostics).toEqual([]);
+    });
+
+    it('should return a matched warning diagnostic from captured Python warnings', async () => {
+      const mockToJs = vi.fn().mockReturnValue({ success: true });
+      (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
+        name === 'get_and_clear_warnings'
+          ? () => ({
+              toJs: () => ['UserWarning: no intersection found for this point'],
+              destroy: vi.fn()
+            })
+          : () => ({ toJs: mockToJs, destroy: vi.fn() })
+      );
+
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
+
+      expect(result.diagnostics).toEqual([
+        {
+          code: 'UserWarning',
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'UserWarning: no intersection found for this point'
+        }
+      ]);
+    });
+
+    it('should drop captured warnings that match no known PythonErrorCode', async () => {
+      const mockToJs = vi.fn().mockReturnValue({ success: true });
+      (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
+        name === 'get_and_clear_warnings'
+          ? () => ({
+              toJs: () => ['DeprecationWarning: section_pts was renamed coords_calculator'],
+              destroy: vi.fn()
+            })
+          : () => ({ toJs: mockToJs, destroy: vi.fn() })
+      );
+
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
+
+      expect(result.diagnostics).toEqual([]);
     });
   });
 });

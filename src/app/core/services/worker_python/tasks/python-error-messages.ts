@@ -15,7 +15,8 @@ const PYTHON_ERROR_MESSAGES: Record<PythonErrorCode, string> = {
   [PythonErrorCode.ShapeError]: $localize`A shape mismatch was detected in arrays.`,
   [PythonErrorCode.DataWarning]: $localize`A data-related warning was raised.`,
   [PythonErrorCode.BalanceEngineWarning]: $localize`A balance engine warning was raised.`,
-  [PythonErrorCode.RtsDataNotAvailable]: $localize`RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.`
+  [PythonErrorCode.RtsDataNotAvailable]: $localize`RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.`,
+  [PythonErrorCode.UserWarning]: $localize`Object position impose the distance plane has no intersection with the cable.`
 };
 
 /**

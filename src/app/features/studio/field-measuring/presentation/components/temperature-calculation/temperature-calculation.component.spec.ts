@@ -6,7 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, TaskOutputs, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
@@ -142,7 +142,7 @@ describe('TemperatureCalculationComponent', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.temperatureCalculation];
         error: TaskError | null;
-        pythonErrorCode: PythonErrorCode | null;
+        diagnostics: [];
       }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
@@ -160,7 +160,7 @@ describe('TemperatureCalculationComponent', () => {
       resolveTask({
         result: { cableSolarFlux: 0, cableTemperature: 0, cableTemperatureUncertainty: 0 },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
       await calcPromise;
 
@@ -189,7 +189,7 @@ describe('TemperatureCalculationComponent', () => {
     workerPythonServiceMock.runTask.mockResolvedValue({
       result: mockResult,
       error: null,
-      pythonErrorCode: null
+      diagnostics: []
     });
 
     // Set all required fields
@@ -256,7 +256,7 @@ describe('TemperatureCalculationComponent', () => {
       });
 
       it('should still show spinner when worker is ready but windIncidence is still null', async () => {
-        let resolveTask!: (value: { result: { windIncidence: number }; error: null; pythonErrorCode: null }) => void;
+        let resolveTask!: (value: { result: { windIncidence: number }; error: null; diagnostics: [] }) => void;
         workerPythonServiceMock.runTask.mockReturnValueOnce(
           new Promise((res) => {
             resolveTask = res;
@@ -270,7 +270,7 @@ describe('TemperatureCalculationComponent', () => {
         expect(getByTestId('wind-incidence-spinner')).toBeTruthy();
         expect(getByTestId('wind-incidence-value')).toBeNull();
 
-        resolveTask({ result: { windIncidence: 58 }, error: null, pythonErrorCode: null });
+        resolveTask({ result: { windIncidence: 58 }, error: null, diagnostics: [] });
         await fixture.whenStable();
         fixture.detectChanges();
 
@@ -282,7 +282,7 @@ describe('TemperatureCalculationComponent', () => {
         workerPythonServiceMock.runTask.mockResolvedValue({
           result: { windIncidence: 58.00000000000001 },
           error: null,
-          pythonErrorCode: null
+          diagnostics: []
         });
         workerReadySubject.next(true);
         fixture.detectChanges();
@@ -424,7 +424,7 @@ describe('TemperatureCalculationComponent', () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
         result: { windIncidence: 58.00000000000001 },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
       workerReadySubject.next(true);
       fixture.detectChanges();
@@ -437,7 +437,7 @@ describe('TemperatureCalculationComponent', () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
         result: { windIncidence: 63.999999999999986 },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
       workerReadySubject.next(true);
       fixture.detectChanges();
@@ -450,7 +450,7 @@ describe('TemperatureCalculationComponent', () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
         result: undefined,
         error: TaskError.CALCULATION_ERROR,
-        pythonErrorCode: null
+        diagnostics: []
       });
       workerReadySubject.next(true);
       fixture.detectChanges();
@@ -465,7 +465,7 @@ describe('TemperatureCalculationComponent', () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
         result: { windIncidence: 45 },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
       componentRef.setInput(
         'measureData',

@@ -8,7 +8,7 @@ import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 function createSignalMock<T>(initialValue: T) {
@@ -143,7 +143,7 @@ describe('LoadFormsService', () => {
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
-      pythonErrorCode: createSignalMock(null),
+      diagnostics: createSignalMock([]),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
@@ -444,19 +444,22 @@ describe('LoadFormsService', () => {
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
     });
 
-    it('should set plotService.error and pythonErrorCode when runTask returns an error', async () => {
+    it('should set plotService.error and diagnostics when runTask returns an error', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
+      const diagnostics = [
+        { code: PythonErrorCode.SolverError, severity: 'error' as const, origin: 'exception' as const, rawText: 'mock' }
+      ];
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null,
         error: 'CALCULATION_FAILED',
-        pythonErrorCode: 42
+        diagnostics
       });
 
       await service.calculateLoad();
 
       expect(mockPlotService.error.set).toHaveBeenCalledWith('CALCULATION_FAILED');
-      expect(mockPlotService.pythonErrorCode.set).toHaveBeenCalledWith(42);
+      expect(mockPlotService.diagnostics.set).toHaveBeenCalledWith(diagnostics);
     });
 
     it('should not call refreshProjection when runTask returns an error', async () => {
@@ -465,7 +468,7 @@ describe('LoadFormsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null,
         error: 'CALCULATION_FAILED',
-        pythonErrorCode: 42
+        diagnostics: []
       });
 
       await service.calculateLoad();
@@ -479,7 +482,7 @@ describe('LoadFormsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null,
         error: 'CALCULATION_FAILED',
-        pythonErrorCode: 42
+        diagnostics: []
       });
 
       await service.calculateLoad();
