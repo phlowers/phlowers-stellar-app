@@ -131,7 +131,7 @@ export class ObstaclesFormComponent {
     }
     this.obstacleFormService.resetFormForNewObstacle(supportUuid);
     if (supportUuid) {
-      untracked(() => this.obstacleFormService.returnToSpan());
+      untracked(() => this.obstacleFormService.syncSpanSelectionWithoutZoom());
     }
   });
 

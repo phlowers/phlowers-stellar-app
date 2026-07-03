@@ -622,7 +622,7 @@ describe('CableLengthChangeComponent', () => {
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
-    it('should populate supportRefOptions, enable supportRef and update the plot view for a valid span', () => {
+    it('should populate supportRefOptions and enable supportRef for a valid span without changing plot view', () => {
       mockPlotService.plotOptionsChange.mockClear();
       component.onScopeChange('support-uuid-1');
 
@@ -631,7 +631,7 @@ describe('CableLengthChangeComponent', () => {
         { label: '2', value: 'RIGHT' }
       ]);
       expect(component.form.controls.supportRef.enabled).toBe(true);
-      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
     it('should load saved modification values when one exists for the span', () => {

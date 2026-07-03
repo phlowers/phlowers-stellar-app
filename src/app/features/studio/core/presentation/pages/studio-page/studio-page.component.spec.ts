@@ -18,6 +18,7 @@ import { TabsModule } from 'primeng/tabs';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { SectionService } from '@services/section/section.service';
@@ -25,6 +26,8 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { Section, Study } from '@shared/domain';
+import { Camera } from 'plotly.js-dist-min';
+import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 
 interface SignalFn<T> {
   (): T;
@@ -66,6 +69,7 @@ class StudiesServiceMock {
   ready = new Subject<boolean>();
   getStudyAsObservable = vi.fn();
   setCurrentStudy = vi.fn();
+  updateStudy = vi.fn().mockResolvedValue(undefined);
 }
 
 describe('StudioPageComponent', () => {
@@ -75,8 +79,19 @@ describe('StudioPageComponent', () => {
   let route: ActivatedRoute;
   let plotService: PlotServiceMock;
   let spanService: SpanServiceMock;
-  let plotOptionsServiceMock: { plotOptions: ReturnType<typeof vi.fn>; isFreePositioningMode: SignalFn<boolean> };
+  let plotOptionsServiceMock: {
+    plotOptions: ReturnType<typeof vi.fn>;
+    isFreePositioningMode: SignalFn<boolean>;
+    camera: SignalFn<Camera | null>;
+    setScalingFactors: ReturnType<typeof vi.fn>;
+    scalingFactors: SignalFn<ScalingFactors>;
+  };
   let studiesService: StudiesServiceMock;
+  let mockResolutionService: {
+    resolution: SignalFn<number>;
+    setResolution: ReturnType<typeof vi.fn>;
+    applyResolution: ReturnType<typeof vi.fn>;
+  };
   let sectionService: vi.Mocked<SectionService>;
   let obstaclesService: ObstaclesService;
   let obstacleFormService: vi.Mocked<ObstacleFormService>;
@@ -87,9 +102,17 @@ describe('StudioPageComponent', () => {
     spanService = new SpanServiceMock();
     plotOptionsServiceMock = {
       plotOptions: vi.fn().mockReturnValue({ invert: false }),
-      isFreePositioningMode: createSignalMock<boolean>(false)
+      isFreePositioningMode: createSignalMock<boolean>(false),
+      camera: createSignalMock<Camera | null>(null),
+      setScalingFactors: vi.fn(),
+      scalingFactors: createSignalMock<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' })
     };
     studiesService = new StudiesServiceMock();
+    mockResolutionService = {
+      resolution: createSignalMock<number>(100),
+      setResolution: vi.fn(),
+      applyResolution: vi.fn().mockResolvedValue(undefined)
+    };
     sectionService = {} as unknown as vi.Mocked<SectionService>;
     obstacleFormService = {
       setExistingObstacle: vi.fn(),
@@ -113,6 +136,7 @@ describe('StudioPageComponent', () => {
         { provide: PlotService, useValue: plotService },
         { provide: PlotSpanService, useValue: spanService },
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+        { provide: PlotResolutionService, useValue: mockResolutionService },
         { provide: StudiesService, useValue: studiesService },
         { provide: SectionService, useValue: sectionService },
         { provide: ObstacleFormService, useValue: obstacleFormService },
@@ -590,6 +614,227 @@ describe('StudioPageComponent', () => {
     expect(plotService.isStudioActive()).toBe(false);
     expect(obstaclesService.selectedObstacleUuid()).toBeNull();
     expect(obstaclesService.activePointIndex()).toBeNull();
+    // study is null → saveViewState does not call updateStudy
+    expect(studiesService.updateStudy).not.toHaveBeenCalled();
+  });
+
+  describe('saveViewState()', () => {
+    const sectionUuid = 'section-1';
+    const baseStudy = {
+      uuid: 'study-1',
+      author_email: 'test@test.com',
+      sections: [{ uuid: sectionUuid, supports: [1, 2, 3, 4], obstacles: [] }]
+    } as unknown as Study;
+
+    beforeEach(() => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue(sectionUuid);
+      studiesService.getStudyAsObservable.mockReturnValue(of(baseStudy));
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+      // At this point plotService.study() is set and activeSectionUuid is populated
+    });
+
+    it('should call updateStudy with studioViewState on the active section', () => {
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 3 });
+      const mockCam: StudioViewCamera = {
+        eye: { x: 0.02, y: -3.5, z: 0.2 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+      plotOptionsServiceMock.camera.set(mockCam);
+      const savedScaling: ScalingFactors = { x: 1, y: 1, z: 0.5, aspectMode: 'manual' };
+      plotOptionsServiceMock.scalingFactors.set(savedScaling);
+      mockResolutionService.resolution.set(75);
+
+      component.ngOnDestroy();
+
+      expect(studiesService.updateStudy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sections: expect.arrayContaining([
+            expect.objectContaining({
+              uuid: sectionUuid,
+              studio_view_state: {
+                camera: mockCam,
+                scalingFactors: savedScaling,
+                resolution: 75,
+                startSupport: 1,
+                endSupport: 3
+              }
+            })
+          ])
+        }),
+        true
+      );
+    });
+
+    it('should set camera to null in studioViewState when camera signal is null', () => {
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 0, endSupport: 3 });
+      plotOptionsServiceMock.camera.set(null);
+
+      component.ngOnDestroy();
+
+      const updatedStudy = (studiesService.updateStudy as vi.Mock).mock.calls[0][0];
+      const savedState = updatedStudy.sections.find((s: { uuid: string }) => s.uuid === sectionUuid)
+        ?.studio_view_state as StudioViewState;
+      expect(savedState.camera).toBeNull();
+    });
+
+    it('should not call updateStudy when study is null', () => {
+      plotService.study.set(null);
+      // Reset call count from beforeEach initialization
+      (studiesService.updateStudy as vi.Mock).mockClear();
+
+      component.ngOnDestroy();
+
+      expect(studiesService.updateStudy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ngOnInit – studioViewState restoration', () => {
+    it('should restore startSupport, endSupport, camera, scalingFactors and resolution', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const savedCamera: StudioViewCamera = {
+        eye: { x: 1, y: 2, z: 3 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+      const savedScaling: ScalingFactors = { x: 1, y: 1, z: 0.5, aspectMode: 'manual' };
+      const studioViewState: StudioViewState = {
+        camera: savedCamera,
+        scalingFactors: savedScaling,
+        resolution: 75,
+        startSupport: 1,
+        endSupport: 3
+      };
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3, 4], obstacles: [], studio_view_state: studioViewState }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+      const cameraSpy = vi.spyOn(plotOptionsServiceMock.camera, 'set');
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 1, endSupport: 3 });
+      expect(cameraSpy).toHaveBeenCalledWith(savedCamera);
+      expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith(savedScaling);
+      expect(mockResolutionService.setResolution).toHaveBeenCalledWith(75);
+    });
+
+    it('should fall back to 0/maxSupport when studioViewState is absent', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [] }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 2 });
+      expect(plotOptionsServiceMock.setScalingFactors).not.toHaveBeenCalled();
+      expect(mockResolutionService.setResolution).not.toHaveBeenCalled();
+    });
+
+    it('should clamp startSupport/endSupport when out of bounds', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const studioViewState: StudioViewState = { startSupport: 10, endSupport: 20 };
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 2 });
+    });
+
+    it('should call applyResolution with saved resolution when studioViewState has resolution', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const studioViewState: StudioViewState = { resolution: 75, startSupport: 0, endSupport: 2 };
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(mockResolutionService.applyResolution).toHaveBeenCalledWith(75);
+    });
+
+    it('should not call applyResolution when studioViewState has no resolution', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const studioViewState: StudioViewState = { startSupport: 0, endSupport: 2 };
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(mockResolutionService.applyResolution).not.toHaveBeenCalled();
+    });
+
+    it('should not call applyResolution when studioViewState is absent', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [] }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(mockResolutionService.applyResolution).not.toHaveBeenCalled();
+    });
+
+    it('should not set camera when studioViewState.camera is absent', () => {
+      (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
+      (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
+
+      const studioViewState: StudioViewState = { startSupport: 0, endSupport: 2 };
+      const study = {
+        sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
+      } as unknown as Study;
+
+      studiesService.getStudyAsObservable.mockReturnValue(of(study));
+      const cameraSpy = vi.spyOn(plotOptionsServiceMock.camera, 'set');
+
+      component.ngOnInit();
+      studiesService.ready.next(true);
+      fixture.detectChanges();
+
+      expect(cameraSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('UC: studio page initialization and navigation', () => {

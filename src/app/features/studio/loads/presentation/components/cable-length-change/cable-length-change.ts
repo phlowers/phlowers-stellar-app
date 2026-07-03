@@ -144,10 +144,6 @@ export class CableLengthChangeComponent {
     this.supportRefOptions.set(untracked(() => this.spanService.getSupportOptions(uuid)));
     this.form.controls.supportRef.enable({ emitEvent: false });
     this.form.controls.supportRef.setValue('LEFT', { emitEvent: false });
-    this.plotService.plotOptionsChange({
-      startSupport: index,
-      endSupport: index + 1
-    });
 
     const savedMod = untracked(() => this.spanService.section()?.cable_modifications?.find((m) => m.spanUuid === uuid));
     if (savedMod) {
