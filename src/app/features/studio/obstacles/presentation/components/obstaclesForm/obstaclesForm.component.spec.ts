@@ -33,6 +33,7 @@ class MockObstacleFormService {
   formValue = signal<{ uuid: string | null; type: string | null }>({ uuid: null, type: 'House' });
 
   returnToSpan = vi.fn();
+  syncSpanSelectionWithoutZoom = vi.fn();
   resetFormForNewObstacle = vi.fn();
   addPosition = vi.fn();
   deletePoint = vi.fn();
@@ -1006,22 +1007,22 @@ describe('ObstaclesFormComponent', () => {
       expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
     });
 
-    it('should call returnToSpan when supportUuid changes to a non-null value', () => {
+    it('should call syncSpanSelectionWithoutZoom when supportUuid changes to a non-null value', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       fixture.detectChanges();
 
-      expect(mockObstacleFormService.returnToSpan).toHaveBeenCalled();
+      expect(mockObstacleFormService.syncSpanSelectionWithoutZoom).toHaveBeenCalled();
     });
 
-    it('should not call returnToSpan when supportUuid is cleared', () => {
+    it('should not call syncSpanSelectionWithoutZoom when supportUuid is cleared', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       fixture.detectChanges();
-      mockObstacleFormService.returnToSpan.mockClear();
+      mockObstacleFormService.syncSpanSelectionWithoutZoom.mockClear();
 
       mockObstacleFormService.form.controls.supportUuid.setValue(null);
       fixture.detectChanges();
 
-      expect(mockObstacleFormService.returnToSpan).not.toHaveBeenCalled();
+      expect(mockObstacleFormService.syncSpanSelectionWithoutZoom).not.toHaveBeenCalled();
     });
   });
 

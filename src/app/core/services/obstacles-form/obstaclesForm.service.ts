@@ -492,4 +492,15 @@ export class ObstacleFormService {
       this.spanService.spanAmountChoice.set('single');
     }
   }
+
+  syncSpanSelectionWithoutZoom(): void {
+    const supportUuid = this.form.get('supportUuid')?.value;
+    if (!supportUuid) {
+      return;
+    }
+    const supportIndex = this.spanService.getSupportIndex(supportUuid);
+    if (supportIndex >= 0) {
+      this.spanService.spanAmountChoice.set('single');
+    }
+  }
 }
