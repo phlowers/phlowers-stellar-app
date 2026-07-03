@@ -80,6 +80,10 @@ export class LoadFormsService {
 
   constructor() {
     effect(() => {
+      if (!this.plotService.workerReady()) return;
+      // Wait for initSectionStudio to complete (litData is populated by refreshProjection after initLit succeeds).
+      // Without this gate, setLoads could be posted before initialize_study finishes.
+      if (!this.plotService.litData()) return;
       void this.initTemporaryLoadData();
     });
   }
