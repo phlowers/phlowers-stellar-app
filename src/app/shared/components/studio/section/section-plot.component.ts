@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot } from './helpers/createPlot';
+import { applyRestoreCamera, createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
@@ -240,8 +240,11 @@ export class SectionPlotComponent implements OnDestroy {
       if (plot) {
         this.addEventListenersToPlot(plot);
         // If there is a saved camera pending restore (first render after back-navigation),
-        // apply it directly via Plotly.relayout to bypass any layout/uirevision timing issues.
+        // apply it directly to bypass any layout/uirevision timing issues.
         if (pendingCamera) {
+          if (plotOptions.view === '3d') {
+            await applyRestoreCamera(PLOT_ID, pendingCamera);
+          }
           this.plotOptionsService.pendingCameraRestore.set(null);
         }
       }
