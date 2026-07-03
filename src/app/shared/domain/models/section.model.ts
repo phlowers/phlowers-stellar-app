@@ -14,6 +14,7 @@ import { Obstacle } from './obstacle.model';
 import { CableModification } from './cable-modification.model';
 import { CableSpanManipulation } from './cable-span-manipulation.model';
 import { CableSupportManipulation } from './cable-support-manipulation.model';
+import { StudioViewState } from '@shared/types/plot.types';
 
 export interface PoseResults {
   temperatures: number[];
@@ -156,4 +157,6 @@ export interface Section {
   start_longitude: number | null;
   /** Azimuth of the first support */
   start_azimuth: number | null;
+  /** Saved studio view state (camera, scale, resolution, span selection). */
+  studio_view_state?: StudioViewState;
 }
