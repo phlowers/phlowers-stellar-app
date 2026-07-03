@@ -32,6 +32,8 @@ study: SectionStudy
 base_study: SectionStudy
 
 
+#---------------------------tools----------------
+
 @debug_log
 def calculate_guying(js_inputs):
     global study
@@ -41,6 +43,21 @@ def calculate_guying(js_inputs):
 
     return guying.calculate_guying(inputs, engine=study.balance_engine)
 
+@debug_log
+def get_support_coordinates(js_inputs):
+    return supports_coords.get_support_coordinates(js_to_python(js_inputs))
+
+
+
+@debug_log
+def get_pose_table(js_inputs):
+    global study
+    return pose_table.get_pose_table(js_to_python(js_inputs), study.balance_engine)
+
+
+
+
+#---------------------------measures----------------
 
 @debug_log
 def parameter_15_without_wind(js_inputs):
@@ -64,9 +81,28 @@ def calculate_papoto(js_inputs):
     return papoto.calculate_papoto(inputs=js_inputs.to_py())
 
 
+
 @debug_log
-def get_support_coordinates(js_inputs):
-    return supports_coords.get_support_coordinates(js_to_python(js_inputs))
+def get_wind_incidence(js_inputs):
+    python_inputs = js_to_python(js_inputs)
+    return temperature.get_wind_attack_angle(python_inputs)
+
+
+
+
+
+#---------------------------study core----------------
+
+
+@debug_log
+def initialize_study(js_inputs):
+    global study, base_study
+
+    python_inputs = js_to_python(js_inputs)
+
+    study, base_study = stellar_initialize_study(python_inputs)
+    logger.debug(f"Study initialized. Study: {study}, Base Study: {base_study}")
+    return {"success": True}
 
 
 @debug_log
@@ -99,6 +135,14 @@ def get_aspect_ratio(js_inputs):
 
 
 @debug_log
+def get_equivalent_span():
+    global study
+    return {"equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)}
+
+
+#---------------------------obstacles----------------
+
+@debug_log
 def extract_obstacles_inputs(js_inputs):
     py_inputs = js_inputs.to_py()
     logger.debug(f"js_inputs for obstacle extraction: {py_inputs}")
@@ -107,12 +151,6 @@ def extract_obstacles_inputs(js_inputs):
     )
     project = py_inputs["view"] == "2d"
     return py_inputs["obstacles"], project, middle_span
-
-
-@debug_log
-def get_wind_incidence(js_inputs):
-    python_inputs = js_to_python(js_inputs)
-    return temperature.get_wind_attack_angle(python_inputs)
 
 
 @debug_log
@@ -163,6 +201,9 @@ def clear_obstacles():
     return {"success": True}
 
 
+#---------------------------loads----------------
+
+
 @debug_log
 def delete_all_loads():
     global study
@@ -185,6 +226,8 @@ def set_loads(js_inputs):
     return loads.apply_span_loads(study, python_inputs["spanLoads"])
 
 
+#---------------------------localization----------------
+
 @debug_log
 def compute_localization(js_inputs):
     return geography.compute_localization(js_to_python(js_inputs))
@@ -200,28 +243,8 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
-@debug_log
-def get_equivalent_span():
-    global study
-    return {"equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)}
 
-
-@debug_log
-def get_pose_table(js_inputs):
-    global study
-    return pose_table.get_pose_table(js_to_python(js_inputs), study.balance_engine)
-
-
-@debug_log
-def initialize_study(js_inputs):
-    global study, base_study
-
-    python_inputs = js_to_python(js_inputs)
-
-    study, base_study = stellar_initialize_study(python_inputs)
-    logger.debug(f"Study initialized. Study: {study}, Base Study: {base_study}")
-    return {"success": True}
-
+#--------------------------config----------------
 
 @debug_log
 def get_config():
