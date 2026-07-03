@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { StudioTopToolbarComponent } from './top-toolbar.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import { SelectedDisplayOptions } from '@shared/types/plot.types';
+import { SelectedDisplayOptions, ScalingFactors } from '@shared/types/plot.types';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -30,6 +30,8 @@ describe('StudioTopToolbarComponent', () => {
     selectedDisplayOptions: ReturnType<typeof signal>;
     setAxesNorms: ReturnType<typeof vi.fn>;
     setBaseScaleFactors: ReturnType<typeof vi.fn>;
+    scalingFactors: ReturnType<typeof signal<ScalingFactors>>;
+    setScalingFactors: ReturnType<typeof vi.fn>;
   };
   let resolutionServiceMock: {
     resolution: ReturnType<typeof signal<number>>;
@@ -63,7 +65,9 @@ describe('StudioTopToolbarComponent', () => {
       isFreePositioningMode: signal(false),
       selectedDisplayOptions: signal({ loads: false }),
       setAxesNorms: vi.fn(),
-      setBaseScaleFactors: vi.fn()
+      setBaseScaleFactors: vi.fn(),
+      scalingFactors: signal<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
+      setScalingFactors: vi.fn()
     };
 
     resolutionServiceMock = {

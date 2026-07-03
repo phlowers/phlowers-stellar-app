@@ -77,3 +77,31 @@ export interface AspectRatio {
   y: number;
   z: number;
 }
+
+/**
+ * Serialisable camera position for the studio 3D view.
+ * Mirrors the structure of Plotly's Camera type but uses plain primitive types
+ * to avoid introducing a Plotly dependency in the domain layer.
+ */
+export interface StudioViewCamera {
+  eye: { x: number; y: number; z: number };
+  center: { x: number; y: number; z: number };
+  up: { x: number; y: number; z: number };
+}
+
+/**
+ * Persisted studio view state stored per section.
+ * Saved when the user leaves the studio and restored when they return.
+ */
+export interface StudioViewState {
+  /** Last known 3D camera position. Null if the user never moved the camera. */
+  camera?: StudioViewCamera | null;
+  /** Axis scaling factors chosen via the Scale/View panel. */
+  scalingFactors?: ScalingFactors;
+  /** Plot resolution (point density) set via the Scale/View slider. */
+  resolution?: number;
+  /** Zero-based index of the first visible support. */
+  startSupport?: number;
+  /** Zero-based index of the last visible support. */
+  endSupport?: number;
+}

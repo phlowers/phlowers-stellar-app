@@ -48,11 +48,11 @@ export interface ClimateCharge {
   /** Ice thickness in mm (for symmetric loading) */
   iceThickness: number | null;
   /** Support number at frontier (for asymmetric loading) */
-  frontierSupportNumber: null;
+  frontierSupportNumber: number | null;
   /** Ice thickness before frontier support */
-  iceThicknessBefore: null;
+  iceThicknessBefore: number | null;
   /** Ice thickness after frontier support */
-  iceThicknessAfter: null;
+  iceThicknessAfter: number | null;
 }
 
 /**

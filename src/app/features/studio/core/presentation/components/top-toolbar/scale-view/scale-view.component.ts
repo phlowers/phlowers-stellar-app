@@ -65,6 +65,7 @@ export class ScaleViewComponent {
   constructor() {
     this.setupControlsSynchronization();
     this.setupResolutionSync();
+    this.setupScaleSync();
   }
 
   private setupControlsSynchronization(): void {
@@ -113,6 +114,30 @@ export class ScaleViewComponent {
 
   private getScaleNorms(scale: string): ScalingFactors {
     return this.scaleNormsMap[scale] ?? { x: 1, y: 1, z: 1, aspectMode: 'data' };
+  }
+
+  private getScaleNameFromFactors(factors: ScalingFactors): string {
+    for (const [name, norms] of Object.entries(this.scaleNormsMap)) {
+      if (
+        norms.aspectMode === factors.aspectMode &&
+        norms.x === factors.x &&
+        norms.y === factors.y &&
+        norms.z === factors.z
+      ) {
+        return name;
+      }
+    }
+    return 'auto';
+  }
+
+  private setupScaleSync(): void {
+    effect(() => {
+      const factors = this.plotOptionsService.scalingFactors();
+      const scaleName = this.getScaleNameFromFactors(factors);
+      if (this.formScaleView.get('scale')?.value !== scaleName) {
+        this.formScaleView.get('scale')?.setValue(scaleName, { emitEvent: false });
+      }
+    });
   }
 
   public async onValidate(): Promise<void> {

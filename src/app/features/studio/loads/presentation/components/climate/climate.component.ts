@@ -48,9 +48,9 @@ export class ClimateComponent {
     cableTemperature: FormControl<number | null>;
     symmetryType: FormControl<SymmetryType | null>;
     iceThickness: FormControl<number | null>;
-    frontierSupportNumber: FormControl<null>;
-    iceThicknessBefore: FormControl<null>;
-    iceThicknessAfter: FormControl<null>;
+    frontierSupportNumber: FormControl<number | null>;
+    iceThicknessBefore: FormControl<number | null>;
+    iceThicknessAfter: FormControl<number | null>;
   }> = this.fb.group({
     windPressure: [
       defaultClimaticCharge.windPressure,
@@ -113,6 +113,8 @@ export class ClimateComponent {
     frontierSupportOptions.shift();
     frontierSupportOptions.pop();
     this.frontierSupportOptions.set(frontierSupportOptions);
+    const defaultFrontierSupportNumber = frontierSupportOptions[0]?.value ?? null;
+    this.form.patchValue({ frontierSupportNumber: defaultFrontierSupportNumber });
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
@@ -123,7 +125,10 @@ export class ClimateComponent {
       return;
     }
     const climate = charge.data.climate;
-    this.form.patchValue(climate);
+    this.form.patchValue({
+      ...climate,
+      frontierSupportNumber: climate.frontierSupportNumber ?? defaultFrontierSupportNumber
+    });
     this.form.updateValueAndValidity();
   }
 
@@ -144,6 +149,7 @@ export class ClimateComponent {
 
   resetForm() {
     const baseClimate = getBaseClimate(this.spanService.section());
+    baseClimate.frontierSupportNumber = this.frontierSupportOptions()[0]?.value ?? null;
     this.form.reset({ ...baseClimate });
     // Update temporaryLoadData with the base climate values
     this.plotService.temporaryLoadData = {

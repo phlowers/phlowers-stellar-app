@@ -7,6 +7,7 @@ import { ScaleViewComponent } from './scale-view.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { ScalingFactors } from '@shared/types/plot.types';
 
 describe('ScaleViewComponent', () => {
   let component: ScaleViewComponent;
@@ -19,11 +20,16 @@ describe('ScaleViewComponent', () => {
     setResolution: ReturnType<typeof vi.fn>;
     applyResolution: ReturnType<typeof vi.fn>;
   };
-  let plotOptionsServiceMock: { setScalingFactors: ReturnType<typeof vi.fn> };
+  let plotOptionsServiceMock: {
+    setScalingFactors: ReturnType<typeof vi.fn>;
+    scalingFactors: ReturnType<typeof signal<ScalingFactors>>;
+  };
   let mockPopover: { toggle: vi.Mock };
+  let scalingFactorsSignal: ReturnType<typeof signal<ScalingFactors>>;
 
   beforeEach(async () => {
     resolutionSignal = signal(100);
+    scalingFactorsSignal = signal<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
 
     mockPlotService = {
       refreshProjection: vi.fn().mockResolvedValue(undefined)
@@ -35,7 +41,8 @@ describe('ScaleViewComponent', () => {
       applyResolution: vi.fn().mockResolvedValue(undefined)
     };
     plotOptionsServiceMock = {
-      setScalingFactors: vi.fn()
+      setScalingFactors: vi.fn(),
+      scalingFactors: scalingFactorsSignal
     };
 
     mockPopover = { toggle: vi.fn() };
@@ -425,6 +432,58 @@ describe('ScaleViewComponent', () => {
 
         expect(spy).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('setupScaleSync()', () => {
+    it('should set scale form control to "plan" when scalingFactors changes to plan norms', () => {
+      scalingFactorsSignal.set({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
+      fixture.detectChanges();
+
+      expect(component.formScaleView.get('scale')?.value).toBe('plan');
+    });
+
+    it('should set scale form control to "geo" when scalingFactors changes to geo norms', () => {
+      scalingFactorsSignal.set({ x: 1, y: 1, z: 1, aspectMode: 'manual' });
+      fixture.detectChanges();
+
+      expect(component.formScaleView.get('scale')?.value).toBe('geo');
+    });
+
+    it('should set scale form control to "celeste" when scalingFactors changes to celeste norms', () => {
+      scalingFactorsSignal.set({ x: 1, y: 1, z: 0.5, aspectMode: 'manual' });
+      fixture.detectChanges();
+
+      expect(component.formScaleView.get('scale')?.value).toBe('celeste');
+    });
+
+    it('should set scale form control to "auto" when scalingFactors changes to auto norms', () => {
+      // Start with a different value first
+      scalingFactorsSignal.set({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
+      fixture.detectChanges();
+
+      scalingFactorsSignal.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
+      fixture.detectChanges();
+
+      expect(component.formScaleView.get('scale')?.value).toBe('auto');
+    });
+
+    it('should fall back to "auto" for an unrecognized ScalingFactors combination', () => {
+      scalingFactorsSignal.set({ x: 99, y: 99, z: 99, aspectMode: 'manual' });
+      fixture.detectChanges();
+
+      expect(component.formScaleView.get('scale')?.value).toBe('auto');
+    });
+
+    it('should not emit valueChanges when the scale radio is updated by sync', () => {
+      const emittedValues: string[] = [];
+      const sub = component.formScaleView.get('scale')!.valueChanges.subscribe((v) => emittedValues.push(v));
+
+      scalingFactorsSignal.set({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
+      fixture.detectChanges();
+
+      sub.unsubscribe();
+      expect(emittedValues).toHaveLength(0);
     });
   });
 });
