@@ -57,6 +57,8 @@ import { CableSupportManipComponent } from '@features/studio/loads/presentation/
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { Study } from '@shared/domain/models/study.model';
+import { Section } from '@shared/domain/models/section.model';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -265,51 +267,56 @@ export class StudioPageComponent implements OnInit, OnDestroy {
         switchMap(() => from(this.studiesService.getStudyAsObservable(studyUuid))),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((study) => {
-        if (study) {
-          this.plotService.study.set(study);
-          const section = study.sections.find((s) => s.uuid === sectionUuid);
-          if (section) {
-            this.spanService.section.set(section);
-            if (this.previousSectionUuid() !== section.uuid) {
-              this.activeSectionUuid = sectionUuid;
-              const maxSupport = section.supports.length - 1;
-              const vs = section.studio_view_state;
-              if (vs) {
-                const start =
-                  vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport
-                    ? vs.startSupport
-                    : 0;
-                const end =
-                  vs.endSupport !== undefined && vs.endSupport > start && vs.endSupport <= maxSupport
-                    ? vs.endSupport
-                    : maxSupport;
-                this.plotService.plotOptionsChange({ startSupport: start, endSupport: end });
-                if (vs.camera) {
-                  this.plotOptionsService.camera.set(vs.camera as Camera);
-                }
-                if (vs.scalingFactors) {
-                  this.plotOptionsService.setScalingFactors(vs.scalingFactors);
-                }
-                if (vs.resolution !== undefined) {
-                  this.resolutionService.setResolution(vs.resolution);
-                  void this.resolutionService.applyResolution(vs.resolution);
-                }
-              } else {
-                this.plotService.plotOptionsChange({
-                  endSupport: maxSupport,
-                  startSupport: 0
-                });
-              }
-              this.previousSectionUuid.set(section.uuid);
-            }
-          } else {
-            this.router.navigate(['/studies']);
-          }
-        } else {
-          this.router.navigate(['/studies']);
-        }
-      });
+      .subscribe((study) => this.handleStudyUpdate(study, sectionUuid));
+  }
+
+  private handleStudyUpdate(study: Study | undefined, sectionUuid: string): void {
+    if (!study) {
+      this.router.navigate(['/studies']);
+      return;
+    }
+    this.plotService.study.set(study);
+    const section = study.sections.find((s) => s.uuid === sectionUuid);
+    if (!section) {
+      this.router.navigate(['/studies']);
+      return;
+    }
+    this.spanService.section.set(section);
+    this.initSection(section, sectionUuid);
+  }
+
+  private initSection(section: Section, sectionUuid: string): void {
+    if (this.previousSectionUuid() === section.uuid) return;
+
+    this.activeSectionUuid = sectionUuid;
+    const maxSupport = section.supports.length - 1;
+
+    if (section.studio_view_state) {
+      this.applyViewState(section.studio_view_state, maxSupport);
+    } else {
+      this.plotService.plotOptionsChange({ startSupport: 0, endSupport: maxSupport });
+    }
+
+    this.previousSectionUuid.set(section.uuid);
+  }
+
+  private applyViewState(vs: StudioViewState, maxSupport: number): void {
+    const start =
+      vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport ? vs.startSupport : 0;
+    const end =
+      vs.endSupport !== undefined && vs.endSupport > start && vs.endSupport <= maxSupport ? vs.endSupport : maxSupport;
+    this.plotService.plotOptionsChange({ startSupport: start, endSupport: end });
+
+    if (vs.camera) {
+      this.plotOptionsService.camera.set(vs.camera as Camera);
+    }
+    if (vs.scalingFactors) {
+      this.plotOptionsService.setScalingFactors(vs.scalingFactors);
+    }
+    if (vs.resolution !== undefined) {
+      this.resolutionService.setResolution(vs.resolution);
+      void this.resolutionService.applyResolution(vs.resolution);
+    }
   }
 
   ngOnDestroy(): void {
