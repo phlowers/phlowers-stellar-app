@@ -55,10 +55,11 @@ def get_states_coordinates(
     # Extract formatted obstacles/distances computed before serialization
     obstacles = current_coords.pop("obstacles_formatted", [])
     distances = current_coords.pop("distances_formatted", [])
+    additional_points = current_coords.pop("additionalPoints", [])
 
     return {
         "sectionOutput": {"current": current_coords, "base": base_coords},
         "obstacles": obstacles,
         "distances": distances,
-        "additionalPoints": current_coords.get("additionalPoints", []),
+        "additionalPoints": additional_points,
     }
