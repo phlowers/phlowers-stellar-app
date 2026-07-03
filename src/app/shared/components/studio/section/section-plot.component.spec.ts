@@ -20,6 +20,8 @@ import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/
 import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -234,6 +236,7 @@ describe('SectionPlotComponent', () => {
   const mockPlotService = {
     litData: litDataSignal,
     baseLitData: baseLitDataSignal,
+    additionalPoints: signal<{ uuid: string; points: [number, number, number][] }[]>([]),
     temporaryLoadData: null as ChargeData | null | undefined,
     plotOptionsChange: noopMock,
     purgePlot: vi.fn()
@@ -274,6 +277,15 @@ describe('SectionPlotComponent', () => {
     selectedObstacleUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
     setSelectedObstacle: vi.fn()
+  };
+
+  const mockObstacleStateService = {
+    distances: signal([]),
+    distanceType: signal<'oblique' | 'vertical' | 'horizontal' | null>(null)
+  };
+
+  const mockDistanceMeasuringService = {
+    selectedSupportUuid: signal<string | null>(null)
   };
 
   const createFormGet =
@@ -325,7 +337,9 @@ describe('SectionPlotComponent', () => {
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: LoadFormsService, useValue: mockLoadFormsService },
-        { provide: CableModificationsService, useValue: mockCableModificationsService }
+        { provide: CableModificationsService, useValue: mockCableModificationsService },
+        { provide: ObstacleStateService, useValue: mockObstacleStateService },
+        { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService }
       ]
     }).compileComponents();
 

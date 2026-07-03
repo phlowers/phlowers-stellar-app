@@ -29,6 +29,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { ClickAnnotationEvent } from './section-plot.interfaces';
@@ -59,6 +60,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly cableModificationsService = inject(CableModificationsService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
+  private readonly distanceMeasuringService = inject(DistanceMeasuringService);
   private readonly documentRef = inject(DOCUMENT);
 
   // Signals
@@ -100,6 +102,7 @@ export class SectionPlotComponent implements OnDestroy {
     distances: this.obstacleStateService.distances(),
     distanceType: this.obstacleStateService.distanceType(),
     additionalPoints: this.plotService.additionalPoints(),
+    measureSupportUuid: this.distanceMeasuringService.selectedSupportUuid(),
     cableModifications: this.spanService.section()?.cable_modifications ?? [],
     previewCableModification: this.cableModificationsService.previewCableModification()
   }));
@@ -182,8 +185,19 @@ export class SectionPlotComponent implements OnDestroy {
 
       const distances = this.obstacleStateService.distances();
       const distanceType = this.obstacleStateService.distanceType();
-      const additionalPoints = this.plotService.additionalPoints();
       const section = this.spanService.section();
+      // Only render the registered measurement points when the span selected in the
+      // distance-measuring tab is within the currently visible span window — same rule
+      // as obstacles: a span starts at its left support, so `endSupport` itself belongs
+      // to the *next* span and must be excluded.
+      const visibleMeasureSupportUuids = new Set(
+        (section?.supports ?? []).slice(plotOptions.startSupport, plotOptions.endSupport).map((s) => s.uuid)
+      );
+      const measureSupportUuid = this.distanceMeasuringService.selectedSupportUuid();
+      const additionalPoints =
+        measureSupportUuid && visibleMeasureSupportUuids.has(measureSupportUuid)
+          ? this.plotService.additionalPoints()
+          : [];
       const savedCableModifications = section?.cable_modifications ?? [];
       const preview = this.cableModificationsService.previewCableModification();
       // The preview (current Calculate input) takes precedence over the saved
