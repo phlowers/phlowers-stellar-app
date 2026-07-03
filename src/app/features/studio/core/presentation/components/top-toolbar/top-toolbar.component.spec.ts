@@ -63,7 +63,12 @@ describe('StudioTopToolbarComponent', () => {
         invert: false
       }),
       isFreePositioningMode: signal(false),
-      selectedDisplayOptions: signal({ loads: false }),
+      selectedDisplayOptions: signal({
+        loads: false,
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
+      }),
       setAxesNorms: vi.fn(),
       setBaseScaleFactors: vi.fn(),
       scalingFactors: signal<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
@@ -536,14 +541,18 @@ describe('StudioTopToolbarComponent', () => {
     it('should return mapped display options from plotService', () => {
       plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
 
       const options = component.selectedDisplayOptions();
 
       expect(options).toEqual([
         { label: 'loads', value: 'loads' },
-        { label: 'baseState', value: 'baseState' }
+        { label: 'baseState', value: 'baseState' },
+        { label: 'transparentBackground', value: 'transparentBackground' },
+        { label: 'measurePoints', value: 'measurePoints' }
       ]);
     });
 
@@ -560,7 +569,9 @@ describe('StudioTopToolbarComponent', () => {
     it('should return keys with truthy values', () => {
       plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
 
       const values = component.selectedDisplayValues();
@@ -571,7 +582,9 @@ describe('StudioTopToolbarComponent', () => {
     it('should exclude keys with falsy values', () => {
       plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: false,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
 
       const values = component.selectedDisplayValues();

@@ -4799,5 +4799,29 @@
         <target>Angle 1-2-3</target>
       </segment>
     </unit>
+    <unit id="3333144204835243237">
+      <segment state="initial">
+        <source>Transparent background</source>
+        <target>Fond transparent</target>
+      </segment>
+    </unit>
+    <unit id="6765816795647473599">
+      <segment state="initial">
+        <source>Measurement points</source>
+        <target>Points de mesure</target>
+      </segment>
+    </unit>
+    <unit id="6490579965306000316">
+      <segment state="initial">
+        <source>Reference support is left and altitude is taken absolute</source>
+        <target>Le support de référence est à gauche et l'altitude est prise en valeur absolue</target>
+      </segment>
+    </unit>
+    <unit id="7948668127845854530">
+      <segment state="initial">
+        <source>Failed to add measurement points</source>
+        <target>Échec de l'ajout des points de mesure</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

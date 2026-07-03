@@ -43,8 +43,8 @@ def measure_distance_angle(
     inputs: dict,
     study: SectionStudy,
     support_index: int,
-) -> dict:
-    """Measure distance between two points"""
+) -> dict[str, float | None]:
+    """Measure distances and angle between two/three points"""
 
     _, coords = get_points_from_context(
         inputs, study, support_index, key_object="points"
@@ -57,25 +57,22 @@ def measure_distance_angle(
 
     vector_2_1 = coords[0] - coords[1]
     vector_2_3 = coords[2] - coords[1] if coords.shape[0] == 3 else None
-
-    distance_1_2 = np.linalg.norm(vector_2_1)
-    distance_2_3 = (
-        np.linalg.norm(vector_2_3) if vector_2_3 is not None else None
+    norm_2_1 = np.linalg.norm(vector_2_1)
+    distance_1_2 = norm_2_1
+    if vector_2_3 is None:
+        distance_2_3 = None
+        angle_1_2_3 = None
+    else:
+        norm_2_3 = np.linalg.norm(vector_2_3)
+        distance_2_3 = norm_2_3
+        if norm_2_1 == 0.0 or norm_2_3 == 0.0:
+            angle_1_2_3 = None
+        else:
+            cos_angle = np.dot(vector_2_3, vector_2_1) / (norm_2_1 * norm_2_3)
+            angle_1_2_3 = float(
+                np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0)))
     )
 
-    angle_1_2_3 = (
-        np.arccos(
-            np.clip(
-                np.dot(vector_2_3, vector_2_1)
-                / (np.linalg.norm(vector_2_1) * np.linalg.norm(vector_2_3)),
-                -1.0,
-                1.0,
-            )
-        )
-        * (180 / np.pi)
-        if vector_2_3 is not None
-        else None
-    )
 
     return {
         "distance_1_2": distance_1_2,
@@ -97,7 +94,6 @@ def add_measure_distance_angle_points(
         name="angle_distance_measurement",
         span_index=my_object['supportIndex'],
         coords=coords,
-        # object_type=my_object['type'],
         support_reference=my_object['engineReferenceSupport'],
         span_length=study.balance_engine.section_array.data.span_length.to_numpy(),
     )

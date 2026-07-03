@@ -210,7 +210,9 @@ describe('SectionPlotComponent', () => {
 
   const mockSelectedDisplayOptions: SelectedDisplayOptions = {
     loads: false,
-    baseState: false
+    baseState: false,
+    transparentBackground: false,
+    measurePoints: false
   };
   const mockShadowPlotData: Data[] = [
     {
@@ -523,7 +525,9 @@ describe('SectionPlotComponent', () => {
     it('should include shadow traces when baseState is enabled', async () => {
       const displayOptionsWithBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
@@ -544,7 +548,9 @@ describe('SectionPlotComponent', () => {
     it('should not include shadow traces when baseState is disabled', async () => {
       const displayOptionsWithoutBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       baseLitDataSignal.set(mockLitData);
@@ -563,7 +569,9 @@ describe('SectionPlotComponent', () => {
     it('should not include shadow traces when baseLitData is null', async () => {
       const displayOptionsWithBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       baseLitDataSignal.set(null); // baseLitData is null
@@ -582,7 +590,9 @@ describe('SectionPlotComponent', () => {
     it('should fallback to base plot data when shadow traces are not iterable', async () => {
       const displayOptionsWithBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       baseLitDataSignal.set(mockLitData);
@@ -602,7 +612,7 @@ describe('SectionPlotComponent', () => {
 
   describe('getSpanLoadsToDisplay Method', () => {
     it('should return empty array when loads option is disabled', () => {
-      const displayOptions = { loads: false, baseState: false };
+      const displayOptions = { loads: false, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toEqual([]);
@@ -610,7 +620,7 @@ describe('SectionPlotComponent', () => {
 
     it('should return empty array when section is null', () => {
       sectionSignal.set(null);
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toEqual([]);
@@ -627,7 +637,7 @@ describe('SectionPlotComponent', () => {
         spanLoads: [spanLoad]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -643,7 +653,7 @@ describe('SectionPlotComponent', () => {
         ]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -661,7 +671,7 @@ describe('SectionPlotComponent', () => {
         spanLoads: [punctualLoad]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -674,7 +684,7 @@ describe('SectionPlotComponent', () => {
         spanLoads: [markingLoad]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -684,7 +694,7 @@ describe('SectionPlotComponent', () => {
 
     it('should handle missing temporaryLoadData', () => {
       mockPlotService.temporaryLoadData = undefined;
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toEqual([null, null]);
