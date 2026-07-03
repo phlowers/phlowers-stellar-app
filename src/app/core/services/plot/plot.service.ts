@@ -2,7 +2,8 @@ import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
-import { DataError, GetSectionOutput, PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
+import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
@@ -25,7 +26,8 @@ import * as plotly from 'plotly.js-dist-min';
 export class PlotService {
   temporaryLoadData: ChargeData | null = null;
   error = signal<TaskError | DataError | null>(null);
-  pythonErrorCode = signal<PythonErrorCode | null>(null);
+  /** Diagnostics (errors and warnings) raised by the Python engine during the last task. */
+  diagnostics = signal<PythonDiagnostic[]>([]);
 
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
@@ -68,7 +70,7 @@ export class PlotService {
   resetAll = () => {
     this.purgePlot();
     this.error.set(null);
-    this.pythonErrorCode.set(null);
+    this.diagnostics.set([]);
     this.litData.set(null);
     this.baseLitData.set(null);
     this.loading.set(false);
@@ -118,7 +120,7 @@ export class PlotService {
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
     this.error.set(null);
-    this.pythonErrorCode.set(null);
+    this.diagnostics.set([]);
     this.litData.set(null);
     this.baseLitData.set(null);
     this.spanService.section.set(section);
@@ -136,9 +138,9 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.initLit, { section, cable });
+    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.initLit, { section, cable });
     this.error.set(error);
-    this.pythonErrorCode.set(pythonErrorCode ?? null);
+    this.diagnostics.set(diagnostics);
 
     if (error || !result?.success) {
       this.obstacleStateService.reset();
@@ -169,7 +171,7 @@ export class PlotService {
   refreshProjection = async () => {
     this.loading.set(true);
     const plotOptions = this.plotOptionsService.plotOptions();
-    const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.refreshProjection, {
+    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
@@ -183,7 +185,7 @@ export class PlotService {
     }
     this.obstacleStateService.setDistances(result?.distances ?? []);
     this.error.set(error);
-    this.pythonErrorCode.set(pythonErrorCode ?? null);
+    this.diagnostics.set(diagnostics);
 
     const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
     await this.updateAspectRatio(scalingFactors, plotOptions);
@@ -199,7 +201,7 @@ export class PlotService {
     this.litData.set(null);
     this.baseLitData.set(null);
     this.error.set(null);
-    this.pythonErrorCode.set(null);
+    this.diagnostics.set([]);
     this.loading.set(false);
   };
 

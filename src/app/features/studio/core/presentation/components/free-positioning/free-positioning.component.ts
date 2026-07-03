@@ -119,7 +119,8 @@ export class FreePositioningComponent implements OnDestroy {
   faceMousePosition = signal<MousePosition | null>(null);
 
   getErrorString = computed(() => {
-    return formatStudioError(this.plotService.error(), this.plotService.pythonErrorCode());
+    const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
+    return formatStudioError(this.plotService.error(), exceptionDiagnostic?.code ?? null);
   });
 
   // Dependencies

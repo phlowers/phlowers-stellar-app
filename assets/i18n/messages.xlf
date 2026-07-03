@@ -3904,6 +3904,11 @@
         <source>Pan</source>
       </segment>
     </unit>
+    <unit id="1573494796322280810">
+      <segment>
+        <source>The object position imposes a distance plane that does not intersect the cable.</source>
+      </segment>
+    </unit>
     <unit id="1108587408255387766">
       <segment>
         <source>Measurement data is not available.</source>

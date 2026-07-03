@@ -6,8 +6,10 @@ import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TaskError, DataError, GetSectionOutput, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
+import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
 
 // Stub child component to avoid pulling in its dependency tree
 @Component({
@@ -112,14 +114,14 @@ describe('StudioComponent', () => {
   let fixture: ComponentFixture<StudioComponent>;
   let mockPlotService: {
     error: WritableSignal<TaskError | DataError | null>;
-    pythonErrorCode: WritableSignal<PythonErrorCode | null>;
+    diagnostics: WritableSignal<PythonDiagnostic[]>;
     litData: WritableSignal<GetSectionOutput | null>;
     loading: WritableSignal<boolean>;
     workerReady: WritableSignal<boolean>;
     refreshSection: ReturnType<typeof vi.fn>;
     initSectionStudio: ReturnType<typeof vi.fn>;
   };
-  let mockNotificationService: { error: ReturnType<typeof vi.fn> };
+  let mockNotificationService: { error: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn> };
   let mockSpanService: {
     section: WritableSignal<Section | null>;
   };
@@ -127,14 +129,14 @@ describe('StudioComponent', () => {
   beforeEach(async () => {
     mockPlotService = {
       error: signal<TaskError | DataError | null>(null),
-      pythonErrorCode: signal<PythonErrorCode | null>(null),
+      diagnostics: signal<PythonDiagnostic[]>([]),
       litData: signal<GetSectionOutput | null>(null),
       loading: signal<boolean>(false),
       workerReady: signal<boolean>(false),
       refreshSection: vi.fn(),
       initSectionStudio: vi.fn()
     };
-    mockNotificationService = { error: vi.fn() };
+    mockNotificationService = { error: vi.fn(), warning: vi.fn() };
     mockSpanService = {
       section: signal<Section | null>(null)
     };
@@ -208,13 +210,71 @@ describe('StudioComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
     });
 
-    it('should use pythonErrorCode message when pythonErrorCode is set', () => {
+    it('should use pythonErrorCode message when a matching exception diagnostic is set', () => {
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
-      mockPlotService.pythonErrorCode.set(PythonErrorCode.SolverError);
+      mockPlotService.diagnostics.set([
+        { code: PythonErrorCode.SolverError, severity: 'error', origin: 'exception', rawText: 'SolverError: boom' }
+      ]);
       fixture.detectChanges();
       expect(mockNotificationService.error).toHaveBeenCalledWith(
         formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.SolverError)
       );
+      expect(mockNotificationService.warning).not.toHaveBeenCalled();
+    });
+
+    it('should call notificationService.warning instead of error when the exception diagnostic is a warning (e.g. DataWarning)', () => {
+      mockPlotService.error.set(TaskError.CALCULATION_ERROR);
+      mockPlotService.diagnostics.set([
+        { code: PythonErrorCode.DataWarning, severity: 'warning', origin: 'exception', rawText: 'DataWarning: boom' }
+      ]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(
+        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.DataWarning)
+      );
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
+    });
+
+    it('should call notificationService.warning for a BalanceEngineWarning exception diagnostic', () => {
+      mockPlotService.error.set(TaskError.CALCULATION_ERROR);
+      mockPlotService.diagnostics.set([
+        {
+          code: PythonErrorCode.BalanceEngineWarning,
+          severity: 'warning',
+          origin: 'exception',
+          rawText: 'BalanceEngineWarning: boom'
+        }
+      ]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(
+        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.BalanceEngineWarning)
+      );
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Effect – warning notification', () => {
+    it('should not call notificationService.warning when diagnostics is empty', () => {
+      mockPlotService.diagnostics.set([]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).not.toHaveBeenCalled();
+    });
+
+    it('should call notificationService.warning once for a captured warning diagnostic', () => {
+      mockPlotService.diagnostics.set([
+        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' }
+      ]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(formatPythonError(PythonErrorCode.UserWarning));
+    });
+
+    it('should call notificationService.warning once per captured warning diagnostic', () => {
+      mockPlotService.diagnostics.set([
+        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' },
+        { code: PythonErrorCode.DataWarning, severity: 'warning', origin: 'warning', rawText: 'DataWarning: boom' }
+      ]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).toHaveBeenCalledTimes(2);
     });
   });
 

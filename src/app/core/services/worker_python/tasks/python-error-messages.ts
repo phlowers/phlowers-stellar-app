@@ -16,6 +16,7 @@ const PYTHON_ERROR_MESSAGES: Record<PythonErrorCode, string> = {
   [PythonErrorCode.DataWarning]: $localize`A data-related warning was raised.`,
   [PythonErrorCode.BalanceEngineWarning]: $localize`A balance engine warning was raised.`,
   [PythonErrorCode.RtsDataNotAvailable]: $localize`RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.`,
+  [PythonErrorCode.UserWarning]: $localize`The object position imposes a distance plane that does not intersect the cable.`,
   [PythonErrorCode.NoIntersectionPlaneForDistanceError]: $localize`No intersection plane was found for the distance calculation.`,
   [PythonErrorCode.MeasurementDataNotAvailable]: $localize`Measurement data is not available.`,
   [PythonErrorCode.UncertaintyNotAvailable]: $localize`Uncertainty data is not available.`,

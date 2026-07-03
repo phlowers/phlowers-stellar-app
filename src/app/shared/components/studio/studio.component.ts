@@ -6,6 +6,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatStudioError } from './helpers/errors';
+import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
 
 @Component({
   selector: 'app-studio',
@@ -33,9 +34,25 @@ export class StudioComponent implements OnDestroy {
   constructor() {
     effect(() => {
       const error = this.plotService.error();
-      const pythonErrorCode = this.plotService.pythonErrorCode();
+      const diagnostics = this.plotService.diagnostics();
+      const exceptionDiagnostic = diagnostics.find((diagnostic) => diagnostic.origin === 'exception') ?? null;
+
       if (error !== null) {
-        this.notificationService.error(formatStudioError(error, pythonErrorCode));
+        const message = formatStudioError(error, exceptionDiagnostic?.code ?? null);
+        if (exceptionDiagnostic?.severity === 'warning') {
+          this.notificationService.warning(message);
+        } else {
+          this.notificationService.error(message);
+        }
+      }
+
+      for (const diagnostic of diagnostics) {
+        if (diagnostic.origin === 'warning') {
+          const message = formatPythonError(diagnostic.code);
+          if (message !== null) {
+            this.notificationService.warning(message);
+          }
+        }
       }
     });
 
@@ -58,5 +75,6 @@ export class StudioComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.plotService.error.set(null);
+    this.plotService.diagnostics.set([]);
   }
 }
