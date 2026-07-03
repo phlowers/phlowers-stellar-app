@@ -6,6 +6,7 @@
  */
 
 import { PYTHON_ERROR_SEVERITY } from './python-error-severity';
+import { formatPythonError } from './python-error-messages';
 import { PythonErrorCode } from './types';
 
 describe('PYTHON_ERROR_SEVERITY', () => {
@@ -27,5 +28,24 @@ describe('PYTHON_ERROR_SEVERITY', () => {
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.DataWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.BalanceEngineWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.UserWarning]).toBe('warning');
+  });
+
+  it('should have both a severity and a localized message defined for every PythonErrorCode, keeping the two catalogs in sync', () => {
+    Object.values(PythonErrorCode).forEach((code) => {
+      const severity = PYTHON_ERROR_SEVERITY[code];
+      const message = formatPythonError(code);
+
+      expect(severity, `missing severity for ${code}`).toBeDefined();
+      expect(['error', 'warning']).toContain(severity);
+      expect(message, `missing localized message for ${code}`).not.toBeNull();
+      expect(message?.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should not have any severity entry without a matching PythonErrorCode enum value (no stale keys)', () => {
+    const enumValues = new Set(Object.values(PythonErrorCode));
+    Object.keys(PYTHON_ERROR_SEVERITY).forEach((key) => {
+      expect(enumValues.has(key as PythonErrorCode)).toBe(true);
+    });
   });
 });

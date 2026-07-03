@@ -27,5 +27,13 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.DataWarning]: 'warning',
   [PythonErrorCode.BalanceEngineWarning]: 'warning',
   [PythonErrorCode.RtsDataNotAvailable]: 'error',
-  [PythonErrorCode.UserWarning]: 'warning'
+  [PythonErrorCode.UserWarning]: 'warning',
+  [PythonErrorCode.MeasurementDataNotAvailable]: 'error',
+  [PythonErrorCode.UncertaintyNotAvailable]: 'error',
+  [PythonErrorCode.InvalidManipulationIndex]: 'error',
+  [PythonErrorCode.InvalidManipulationKeys]: 'error',
+  [PythonErrorCode.InvalidManipulationRange]: 'error',
+  [PythonErrorCode.NoIntersectionPlaneForDistanceError]: 'warning',
+  [PythonErrorCode.SupportOutOfRangeError]: 'error',
+  [PythonErrorCode.GeneratedPointsNoneError]: 'error'
 };
