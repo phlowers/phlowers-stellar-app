@@ -73,7 +73,6 @@ def change_state(
         reset_balance_model_state(study)
 
     if reload:
-
         study.solve_adjustment()
         study._solve_intermediate()
 

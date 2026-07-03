@@ -7,9 +7,12 @@
 import { computed, inject, Injectable, signal, Signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { Position3D } from '@shared/domain/models/obstacle.model';
 import { PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { POINT_COUNT } from './distance-measuring.constants';
@@ -37,6 +40,7 @@ export class DistanceMeasuringService {
   private readonly spanService = inject(PlotSpanService);
   private readonly plotService = inject(PlotService);
   private readonly plotOptionsService = inject(PlotOptionsService);
+  private readonly workerPythonService = inject(WorkerPythonService);
 
   private readonly emptyPosition = { x: null, y: null, z: null } as const satisfies Position3D;
 
@@ -60,12 +64,19 @@ export class DistanceMeasuringService {
   readonly isCalculating = signal(false);
   readonly results = signal<DistanceMeasuringResults | null>(null);
 
-  /** True once points 1 and 2 have all three coordinates filled in (point 3 is optional). */
-  readonly canCalculate = computed(() =>
-    this.positions()
+  /**
+   * True once a span is selected and points 1 and 2 have all three coordinates filled in
+   * (point 3 is optional).
+   */
+  readonly canCalculate = computed(() => {
+    const supportUuid = this.selectedSupportUuid();
+    if (!supportUuid || this.spanService.getSupportIndex(supportUuid) < 0) {
+      return false;
+    }
+    return this.positions()
       .slice(0, 2)
-      .every((point) => this.isPointFilled(point))
-  );
+      .every((point) => this.isPointFilled(point));
+  });
 
   private isPointFilled(point: Position3D): boolean {
     return point.x !== null && point.y !== null && point.z !== null;
@@ -110,35 +121,57 @@ export class DistanceMeasuringService {
   }
 
   /**
-   * Computes the distances and angle between the three points.
+   * Computes the distances and angle between the two or three points.
    *
    * @remarks
-   * Mocked for now — the Python task is not available yet. When it lands, wire it
-   * here following the `papoto` / `temperature-calculation` pattern
-   * (`workerPythonService.runTask(...)` inside the try/finally).
+   * `z` (`Point alt.`) and `x` (`Ref. support dist.`) are expressed relative to the
+   * span's left support, so `altitudeType` is fixed to `relative`, `lateralDistanceType`
+   * to `SPAN_AXIS`, and `referenceSupport` to `LEFT`.
    */
   async calculate(): Promise<void> {
     if (!this.canCalculate() || this.isCalculating()) {
       return;
     }
+    const supportUuid = this.selectedSupportUuid();
+    const supportIndex = supportUuid ? this.spanService.getSupportIndex(supportUuid) : -1;
+    if (!supportUuid || supportIndex < 0) {
+      return;
+    }
     this.isCalculating.set(true);
     this.results.set(null);
     try {
-      // Mocked result — replace with workerPythonService.runTask(Task.<distanceMeasuring>,
-      // { points: this.positions() }) once the Python task is available.
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const hasThirdPoint = this.isPointFilled(this.positions()[2]);
-      this.results.set({
-        distance12: 0,
-        distance23: hasThirdPoint ? 0 : null,
-        angle123: hasThirdPoint ? 0 : null
+      const positions = this.positions()
+        .filter((point) => this.isPointFilled(point))
+        .map((point) => ({ x: point.x as number, y: point.y as number, z: point.z as number }));
+      const { startSupport, endSupport, view } = this.plotOptionsService.plotOptions();
+
+      const { result, error } = await this.workerPythonService.runTask(Task.measureDistance, {
+        points: [
+          {
+            uuid: uuidv4(),
+            supportUuid,
+            supportIndex,
+            name: 'Distance measurement',
+            type: 'distance_measurement_points',
+            altitudeType: 'relative',
+            lateralDistanceType: 'SPAN_AXIS',
+            referenceSupport: 'LEFT',
+            positions
+          }
+        ],
+        supportIndex,
+        startSupport,
+        endSupport,
+        view
       });
-      // support UUID: this.selectedSupportUuid()
-      // Points 1-2-3: this.positions()
-      // support list: this.spanService.section()?.supports;
-      // start current support index: this.spanService.getSupportIndex(this.selectedSupportUuid());
-      // start support: supports?.[startIndex];
-      // end support: supports?.[startIndex + 1];
+
+      if (!error && result) {
+        this.results.set({
+          distance12: result.distance_1_2,
+          distance23: result.distance_2_3,
+          angle123: result.angle_1_2_3
+        });
+      }
 
       await this.plotService.refreshProjection();
     } finally {
