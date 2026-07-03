@@ -99,6 +99,7 @@ export class SectionPlotComponent implements OnDestroy {
     referenceSupport: this.currentReferenceSupport(),
     distances: this.obstacleStateService.distances(),
     distanceType: this.obstacleStateService.distanceType(),
+    additionalPoints: this.plotService.additionalPoints(),
     cableModifications: this.spanService.section()?.cable_modifications ?? [],
     previewCableModification: this.cableModificationsService.previewCableModification()
   }));
@@ -181,6 +182,7 @@ export class SectionPlotComponent implements OnDestroy {
 
       const distances = this.obstacleStateService.distances();
       const distanceType = this.obstacleStateService.distanceType();
+      const additionalPoints = this.plotService.additionalPoints();
       const section = this.spanService.section();
       const savedCableModifications = section?.cable_modifications ?? [];
       const preview = this.cableModificationsService.previewCableModification();
@@ -213,6 +215,8 @@ export class SectionPlotComponent implements OnDestroy {
         scalingFactors,
         distances,
         distanceType,
+        additionalPoints,
+        selectedDisplayOptions,
         cableModifications,
         spanUuidToIndex
       });

@@ -1,11 +1,12 @@
 import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Icon } from 'plotly.js-dist-min';
-import { AspectRatio, ScalingFactors, Side, View } from '@shared/types/plot.types';
-import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View } from '@shared/types/plot.types';
+import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
 import { CableModification, SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
+import { createAdditionalPointsTraces } from './createAdditionalPointsTraces';
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
@@ -53,6 +54,10 @@ export interface CreatePlotParams {
   distances: Distance[];
   /** Which distance type is currently selected for visualization. */
   distanceType: 'oblique' | 'vertical' | 'horizontal' | null;
+  /** Registered distance/angle measurement point groups, rendered like obstacles. */
+  additionalPoints?: ObstacleOutput['obstacles'];
+  /** Currently selected display overlay toggles (loads, base state, background, measure points). */
+  selectedDisplayOptions?: SelectedDisplayOptions;
   /** Persisted cable length modifications to display as clickable annotations. */
   cableModifications?: readonly CableModification[];
   /** Lookup mapping a span uuid (left support uuid) to its absolute support index. */
@@ -101,6 +106,10 @@ const createScene = (
     sceneCamera = plotParams.camera;
   }
 
+  const axisConfig = plotParams.selectedDisplayOptions?.transparentBackground
+    ? { ...PLOT_AXIS_CONFIG, backgroundcolor: 'transparent', showbackground: false }
+    : PLOT_AXIS_CONFIG;
+
   return {
     aspectmode:
       plotParams.scalingFactors?.aspectMode &&
@@ -109,9 +118,9 @@ const createScene = (
       )
         ? (plotParams.scalingFactors.aspectMode as 'auto' | 'data' | 'cube' | 'manual')
         : 'manual',
-    xaxis: PLOT_AXIS_CONFIG,
-    yaxis: PLOT_AXIS_CONFIG,
-    zaxis: PLOT_AXIS_CONFIG,
+    xaxis: axisConfig,
+    yaxis: axisConfig,
+    zaxis: axisConfig,
     aspectratio: {
       x: plotParams.aspectRatio?.x ?? 3,
       y: plotParams.aspectRatio?.y ?? 0.2,
@@ -286,7 +295,7 @@ const layout2d = (
   return {
     autosize: true,
     showlegend: false,
-    plot_bgcolor: 'gainsboro',
+    plot_bgcolor: plotParams.selectedDisplayOptions?.transparentBackground ? 'transparent' : 'gainsboro',
     margin: {
       l: 50,
       r: 0,
@@ -359,11 +368,15 @@ export const createPlot = (plotParams: CreatePlotParams) => {
       ? { ...plotParams, camera: getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera }
       : plotParams;
   const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
+  const additionalPointsTraces =
+    resolvedParams.selectedDisplayOptions?.measurePoints ?? true
+      ? createAdditionalPointsTraces(resolvedParams.additionalPoints, resolvedParams.view, resolvedParams.side)
+      : [];
   const baseLayout =
     resolvedParams.view === '3d'
       ? layout3d(resolvedParams, distanceAnnotations)
       : layout2d(resolvedParams, distanceAnnotations);
-  const allData = [...resolvedParams.data, ...distanceTraces];
+  const allData = [...resolvedParams.data, ...distanceTraces, ...additionalPointsTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
