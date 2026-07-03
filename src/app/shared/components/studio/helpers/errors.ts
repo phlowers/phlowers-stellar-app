@@ -12,14 +12,14 @@ const ERROR_MESSAGES = {
 
 /**
  * Formats a `TaskError` or `DataError` into a localized human-readable string.
- * If a `pythonErrorCode` is provided and recognized, its message takes priority.
+ * If a `diagnosticCode` is provided and recognized, its message takes priority.
  * Falls back to the `ERROR_MESSAGES` map, then to a generic "Unknown error" message.
  */
 export const formatStudioError = (
   error: TaskError | DataError | null,
-  pythonErrorCode: PythonErrorCode | null = null
+  diagnosticCode: PythonErrorCode | null = null
 ): string => {
-  const pythonMessage = formatPythonError(pythonErrorCode);
+  const pythonMessage = formatPythonError(diagnosticCode);
   if (pythonMessage !== null) {
     return pythonMessage;
   }

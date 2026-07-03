@@ -237,7 +237,7 @@ describe('WorkerService', () => {
       // Simulate worker message with id and result
       mockWorker.onmessage!({ data: { id: mockId, result: mockResult } });
 
-      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, null, null);
+      expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, null, []);
     });
   });
 

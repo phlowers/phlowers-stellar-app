@@ -9,7 +9,8 @@ import { PapotoComponent } from './papoto.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/presentation/mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, TaskOutputs, GetSectionOutput, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { Task, TaskError, TaskOutputs, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 
@@ -113,7 +114,7 @@ describe('Papoto component', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.calculatePapoto];
         error: TaskError | null;
-        pythonErrorCode: PythonErrorCode | null;
+        diagnostics: PythonDiagnostic[];
       }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
@@ -148,7 +149,7 @@ describe('Papoto component', () => {
           uncertainty: 0
         },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
       await calcPromise;
 
@@ -190,7 +191,7 @@ describe('Papoto component', () => {
     workerPythonServiceMock.runTask.mockResolvedValue({
       result: mockResult,
       error: null,
-      pythonErrorCode: null
+      diagnostics: []
     });
 
     // Set all required fields
@@ -241,7 +242,7 @@ describe('Papoto component', () => {
         uncertainty: number;
       },
       error: TaskError.CALCULATION_ERROR,
-      pythonErrorCode: null
+      diagnostics: []
     });
 
     // Set all required fields
@@ -543,7 +544,7 @@ describe('Papoto component', () => {
             uncertainty: 0.5
           },
           error: null,
-          pythonErrorCode: null
+          diagnostics: []
         });
 
         component.updateField('leftSupport', '12');

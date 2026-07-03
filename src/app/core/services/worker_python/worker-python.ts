@@ -78,7 +78,7 @@ addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[
       id: data.id,
       result: null,
       error: TaskError.PYODIDE_LOAD_ERROR,
-      pythonErrorCode: null,
+      diagnostics: [],
       log: {
         level: 'error',
         message: `pyodide is not loaded, cannot handle task ${String(data.task)}`

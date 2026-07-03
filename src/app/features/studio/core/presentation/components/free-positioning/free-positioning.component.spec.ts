@@ -53,14 +53,14 @@ describe('FreePositioningComponent', () => {
     obstacles: []
   });
   const errorSignal = signal<unknown>(null);
-  const pythonErrorCodeSignal = signal<unknown>(null);
+  const diagnosticsSignal = signal<{ code: string; severity: string; origin: string; rawText: string }[]>([]);
   const loadingSignal = signal(false);
 
   const mockPlotService = {
     workerReady: workerReadySignal,
     litData: litDataSignal,
     error: errorSignal,
-    pythonErrorCode: pythonErrorCodeSignal,
+    diagnostics: diagnosticsSignal,
     loading: loadingSignal,
     temporaryLoadData: null
   };
@@ -300,9 +300,9 @@ describe('FreePositioningComponent', () => {
       expect(component.getErrorString()).toBeTruthy();
     });
 
-    it('should return python-specific message when pythonErrorCode is set', () => {
+    it('should return python-specific message when a matching exception diagnostic is set', () => {
       errorSignal.set('CALCULATION_ERROR');
-      pythonErrorCodeSignal.set('SolverError');
+      diagnosticsSignal.set([{ code: 'SolverError', severity: 'error', origin: 'exception', rawText: 'mock' }]);
       expect(component.getErrorString()).toContain('solver');
     });
   });
