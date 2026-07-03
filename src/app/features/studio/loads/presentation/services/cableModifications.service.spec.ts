@@ -114,7 +114,7 @@ describe('CableModificationsService', () => {
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
-      pythonErrorCode: createSignalMock(null)
+      diagnostics: createSignalMock([])
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
       section: createSignalMock<Section | null>(mockSectionBase),
@@ -171,7 +171,7 @@ describe('CableModificationsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current: {} as GetSectionOutput, base: null },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
 
       await service.calculate(mockParams);
@@ -185,7 +185,7 @@ describe('CableModificationsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current: {} as GetSectionOutput, base: null },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
 
       await service.calculate(mockParams);
@@ -205,7 +205,7 @@ describe('CableModificationsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current, base },
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
 
       await service.calculate(mockParams);
@@ -218,7 +218,7 @@ describe('CableModificationsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null as unknown as GetSectionWithBaseOutput,
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
 
       await service.calculate(mockParams);
@@ -232,7 +232,7 @@ describe('CableModificationsService', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null as unknown as GetSectionWithBaseOutput,
         error: taskError,
-        pythonErrorCode: null
+        diagnostics: []
       });
 
       await service.calculate(mockParams);

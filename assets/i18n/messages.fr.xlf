@@ -4709,6 +4709,12 @@
         <target>Pan</target>
       </segment>
     </unit>
+    <unit id="1573494796322280810">
+      <segment state="initial">
+        <source>The object position imposes a distance plane that does not intersect the cable.</source>
+        <target>La position de l&apos;objet impose un plan de mesure des distances qui n&apos;a pas d&apos;intersection avec le câble.</target>
+      </segment>
+    </unit>
     <unit id="6876083598423831028">
       <segment state="initial">
         <source>No intersection plane was found for the distance calculation.</source>
@@ -4754,7 +4760,7 @@
     <unit id="2984456095430307546">
       <segment state="initial">
         <source>No generated points were found after computation.</source>
-        <target>Le calcul n'a généré aucun point en sortie.</target>
+        <target>Le calcul n&apos;a généré aucun point en sortie.</target>
       </segment>
     </unit>
   </file>

@@ -9,7 +9,8 @@ import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { LoggerService } from '@services/logger/logger.service';
-import { PythonErrorCode, Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
+import { PythonDiagnostic } from './tasks/python-diagnostic.interfaces';
+import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
 
 /** Log levels accepted from worker `log` messages. */
 export type WorkerLogLevel = 'log' | 'info' | 'warn' | 'error';
@@ -70,7 +71,7 @@ export class WorkerPythonService {
   /** Map of pending task IDs to their resolve callbacks, used to correlate worker responses */
   handlerMap: Record<
     string,
-    (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void
+    (result: TaskOutputs[Task], error: TaskError | null, diagnostics: PythonDiagnostic[]) => void
   > = {};
 
   /**
@@ -124,8 +125,8 @@ export class WorkerPythonService {
         const handler = this.handlerMap[data.id];
         if (handler) {
           const error = (data.error as TaskError) ?? null;
-          const pythonErrorCode = (data.pythonErrorCode as PythonErrorCode) ?? null;
-          handler(data.result, error, pythonErrorCode);
+          const diagnostics = (data.diagnostics as PythonDiagnostic[]) ?? [];
+          handler(data.result, error, diagnostics);
         }
       }
     };
@@ -153,7 +154,11 @@ export class WorkerPythonService {
   runTask<taskId extends Task>(
     task: taskId,
     inputs: TaskInputs[taskId]
-  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+  ): Promise<{
+    result: TaskOutputs[taskId];
+    error: TaskError | null;
+    diagnostics: PythonDiagnostic[];
+  }> {
     return this.runTaskInternal(task, inputs);
   }
 
@@ -188,7 +193,11 @@ export class WorkerPythonService {
     task: taskId,
     inputs: TaskInputs[taskId],
     timeout = 30000
-  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+  ): Promise<{
+    result: TaskOutputs[taskId];
+    error: TaskError | null;
+    diagnostics: PythonDiagnostic[];
+  }> {
     return this.runTaskInternal(task, inputs, timeout);
   }
 
@@ -196,7 +205,11 @@ export class WorkerPythonService {
     task: taskId,
     inputs: TaskInputs[taskId],
     timeout = 30000
-  ): Promise<{ result: TaskOutputs[taskId]; error: TaskError | null; pythonErrorCode: PythonErrorCode | null }> {
+  ): Promise<{
+    result: TaskOutputs[taskId];
+    error: TaskError | null;
+    diagnostics: PythonDiagnostic[];
+  }> {
     const worker = this.worker;
     if (!worker) {
       return Promise.reject(new Error('Python worker is not initialized. Call setup() before running tasks.'));
@@ -216,14 +229,14 @@ export class WorkerPythonService {
       this.handlerMap[id] = ((
         result: TaskOutputs[taskId],
         error: TaskError | null,
-        pythonErrorCode: PythonErrorCode | null
+        diagnostics: PythonDiagnostic[]
       ) => {
         if (timeoutId !== null) {
           globalThis.clearTimeout(timeoutId);
         }
         delete this.handlerMap[id];
-        resolve({ result, error, pythonErrorCode });
-      }) as (result: TaskOutputs[Task], error: TaskError | null, pythonErrorCode: PythonErrorCode | null) => void;
+        resolve({ result, error, diagnostics });
+      }) as (result: TaskOutputs[Task], error: TaskError | null, diagnostics: PythonDiagnostic[]) => void;
 
       worker.postMessage({ task, inputs, id });
     });
