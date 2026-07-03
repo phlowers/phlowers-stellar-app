@@ -228,6 +228,29 @@ describe('createPlot', () => {
     });
   });
 
+  describe('uirevision', () => {
+    it('should use uirevision stable by default', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.uirevision).toBe('stable');
+    });
+
+    it('should use uirevision restore when pendingRestore is true', () => {
+      createPlot({ ...createDefaultParams(), pendingRestore: true });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.uirevision).toBe('restore');
+    });
+
+    it('should use uirevision stable when pendingRestore is false', () => {
+      createPlot({ ...createDefaultParams(), pendingRestore: false });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.uirevision).toBe('stable');
+    });
+  });
+
   describe('layout2d configuration', () => {
     it('should have basic layout properties', () => {
       createPlot({ ...createDefaultParams(), view: '2d' });
