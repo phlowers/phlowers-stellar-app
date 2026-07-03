@@ -3904,9 +3904,9 @@
         <source>Pan</source>
       </segment>
     </unit>
-    <unit id="5450804360328881935">
+    <unit id="1573494796322280810">
       <segment>
-        <source>Object position impose the distance plane has no intersection with the cable.</source>
+        <source>The object position imposes a distance plane that does not intersect the cable.</source>
       </segment>
     </unit>
   </file>

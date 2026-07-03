@@ -7,6 +7,7 @@ import { TemperatureCalculationComponent } from './temperature-calculation.compo
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
@@ -142,7 +143,7 @@ describe('TemperatureCalculationComponent', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.temperatureCalculation];
         error: TaskError | null;
-        diagnostics: [];
+        diagnostics: PythonDiagnostic[];
       }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
@@ -256,7 +257,7 @@ describe('TemperatureCalculationComponent', () => {
       });
 
       it('should still show spinner when worker is ready but windIncidence is still null', async () => {
-        let resolveTask!: (value: { result: { windIncidence: number }; error: null; diagnostics: [] }) => void;
+        let resolveTask!: (value: { result: { windIncidence: number }; error: null; diagnostics: PythonDiagnostic[] }) => void;
         workerPythonServiceMock.runTask.mockReturnValueOnce(
           new Promise((res) => {
             resolveTask = res;

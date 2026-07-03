@@ -6,6 +6,7 @@ import { ParameterCalculation15WithoutWindComponent } from './parameter-calculat
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { MessageService } from 'primeng/api';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
@@ -146,7 +147,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.calculateParameter15CWithoutWind];
         error: TaskError | null;
-        diagnostics: [];
+        diagnostics: PythonDiagnostic[];
       }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {

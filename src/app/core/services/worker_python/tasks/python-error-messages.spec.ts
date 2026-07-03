@@ -16,4 +16,11 @@ describe('formatPythonError', () => {
   it('should return the localized message for a known code', () => {
     expect(formatPythonError(PythonErrorCode.SolverError)).toBe('A solver error occurred.');
   });
+
+  it.each(Object.values(PythonErrorCode))('should format code %s to a non-null, non-empty message', (code) => {
+    const message = formatPythonError(code);
+    expect(message).not.toBeNull();
+    expect(typeof message).toBe('string');
+    expect(message?.length).toBeGreaterThan(0);
+  });
 });

@@ -25,8 +25,11 @@ describe('Task handlers', () => {
       loadPackage: vi.fn().mockResolvedValue(undefined),
       runPythonAsync: vi.fn().mockResolvedValue(undefined),
       globals: {
+        has: vi.fn(() => true),
         get: vi.fn((name: string) =>
-          name === 'get_and_clear_warnings' ? () => ({ toJs: () => [], destroy: vi.fn() }) : undefined
+          name === 'get_and_clear_warnings'
+            ? Object.assign(() => ({ toJs: () => [], destroy: vi.fn() }), { destroy: vi.fn() })
+            : undefined
         ),
         set: vi.fn()
       }
@@ -54,6 +57,7 @@ describe('Task handlers', () => {
 
       const mockToJs = vi.fn().mockReturnValue(mockResult);
       (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
+      (mockPyodide.globals.has as vi.Mock).mockReturnValue(true);
 
       // Execute
       const result = await handleTask(mockPyodide, Task.initLit, undefined);
@@ -144,10 +148,13 @@ describe('Task handlers', () => {
       const mockToJs = vi.fn().mockReturnValue({ success: true });
       (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
         name === 'get_and_clear_warnings'
-          ? () => ({
-              toJs: () => ['UserWarning: no intersection found for this point'],
-              destroy: vi.fn()
-            })
+          ? Object.assign(
+              () => ({
+                toJs: () => ['UserWarning: no intersection found for this point'],
+                destroy: vi.fn()
+              }),
+              { destroy: vi.fn() }
+            )
           : () => ({ toJs: mockToJs, destroy: vi.fn() })
       );
 
@@ -167,15 +174,48 @@ describe('Task handlers', () => {
       const mockToJs = vi.fn().mockReturnValue({ success: true });
       (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
         name === 'get_and_clear_warnings'
-          ? () => ({
-              toJs: () => ['DeprecationWarning: section_pts was renamed coords_calculator'],
-              destroy: vi.fn()
-            })
+          ? Object.assign(
+              () => ({
+                toJs: () => ['DeprecationWarning: section_pts was renamed coords_calculator'],
+                destroy: vi.fn()
+              }),
+              { destroy: vi.fn() }
+            )
           : () => ({ toJs: mockToJs, destroy: vi.fn() })
       );
 
       const result = await handleTask(mockPyodide, Task.initLit, undefined);
 
+      expect(result.diagnostics).toEqual([]);
+    });
+
+    it('should destroy the get_and_clear_warnings function proxy after use', async () => {
+      const mockToJs = vi.fn().mockReturnValue({ success: true });
+      const warningsProxyDestroy = vi.fn();
+      const functionProxyDestroy = vi.fn();
+      (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
+        name === 'get_and_clear_warnings'
+          ? Object.assign(() => ({ toJs: () => [], destroy: warningsProxyDestroy }), { destroy: functionProxyDestroy })
+          : () => ({ toJs: mockToJs, destroy: vi.fn() })
+      );
+
+      await handleTask(mockPyodide, Task.initLit, undefined);
+
+      expect(warningsProxyDestroy).toHaveBeenCalled();
+      expect(functionProxyDestroy).toHaveBeenCalled();
+    });
+
+    it('should skip warning collection and return empty diagnostics when get_and_clear_warnings is not defined', async () => {
+      const mockToJs = vi.fn().mockReturnValue({ success: true });
+      (mockPyodide.globals.has as vi.Mock).mockReturnValue(false);
+      (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
+        name === 'get_and_clear_warnings' ? undefined : () => ({ toJs: mockToJs, destroy: vi.fn() })
+      );
+
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
+
+      expect(result.result).toEqual({ success: true });
+      expect(result.error).toBeNull();
       expect(result.diagnostics).toEqual([]);
     });
   });

@@ -136,10 +136,20 @@ function collectWarningDiagnostics(
   task: Task,
   log?: (level: 'debug' | 'error', message: string, details?: unknown) => void
 ): PythonDiagnostic[] {
-  const getAndClearWarnings = pyodide.globals.get('get_and_clear_warnings') as () => PyProxy;
-  const warningsProxy = getAndClearWarnings();
-  const capturedWarnings = warningsProxy.toJs() as string[];
-  warningsProxy.destroy();
+  if (!pyodide.globals.has('get_and_clear_warnings')) {
+    log?.('error', `Task ${task}: get_and_clear_warnings is not defined in Python globals, skipping warning collection`);
+    return [];
+  }
+
+  const getAndClearWarnings = pyodide.globals.get('get_and_clear_warnings') as (() => PyProxy) & PyProxy;
+  let capturedWarnings: string[];
+  try {
+    const warningsProxy = getAndClearWarnings();
+    capturedWarnings = warningsProxy.toJs() as string[];
+    warningsProxy.destroy();
+  } finally {
+    getAndClearWarnings.destroy();
+  }
 
   const diagnostics: PythonDiagnostic[] = [];
   for (const warningText of capturedWarnings) {

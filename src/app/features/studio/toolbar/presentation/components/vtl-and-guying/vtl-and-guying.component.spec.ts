@@ -7,6 +7,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
@@ -158,7 +159,7 @@ describe('VhlAndGuyingComponent', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.calculateGuying];
         error: TaskError | null;
-        diagnostics: [];
+        diagnostics: PythonDiagnostic[];
       }) => void;
       mockWorkerPythonService.runTask.mockReturnValueOnce(
         new Promise((res) => {

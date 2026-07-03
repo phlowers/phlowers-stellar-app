@@ -4709,10 +4709,10 @@
         <target>Pan</target>
       </segment>
     </unit>
-    <unit id="5450804360328881935">
+    <unit id="1573494796322280810">
       <segment state="initial">
-        <source>Object position impose the distance plane has no intersection with the cable.</source>
-        <target>La position de l'objet impose que le plan de coupe des distances n'a pas d'intersection avec le câble.</target>
+        <source>The object position imposes a distance plane that does not intersect the cable.</source>
+        <target>La position de l'objet impose un plan de mesure des distances qui n'a pas d'intersection avec le câble.</target>
       </segment>
     </unit>
   </file>

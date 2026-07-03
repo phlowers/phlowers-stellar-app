@@ -27,8 +27,7 @@ known `PythonErrorCode` enum values as a substring. This means:
 
 ### Steps to add a new code
 
-1. **Add the enum value** in
-   [types.ts](../../../../../src/app/core/services/worker_python/tasks/types.ts):
+1. **Add the enum value** in types.ts:
 
    ```typescript
    export enum PythonErrorCode {
@@ -40,9 +39,7 @@ known `PythonErrorCode` enum values as a substring. This means:
    The string value **must** be the exact substring that appears in the
    Python exception message or `warnings.warn(...)` text (e.g. `MyNewError`).
 
-2. **Add its localized message** in
-   [python-error-messages.ts](../../../../../src/app/core/services/worker_python/tasks/python-error-messages.ts),
-   in `PYTHON_ERROR_MESSAGES`:
+2. **Add its localized message** in python-error-messages.ts, in `PYTHON_ERROR_MESSAGES`:
 
    ```typescript
    const PYTHON_ERROR_MESSAGES: Record<PythonErrorCode, string> = {
@@ -51,9 +48,7 @@ known `PythonErrorCode` enum values as a substring. This means:
    };
    ```
 
-3. **Classify its severity** in
-   [python-error-severity.ts](../../../../../src/app/core/services/worker_python/tasks/python-error-severity.ts),
-   in `PYTHON_ERROR_SEVERITY`:
+3. **Classify its severity** in python-error-severity.ts, in `PYTHON_ERROR_SEVERITY`:
 
    ```typescript
    export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> = {
@@ -102,13 +97,12 @@ known `PythonErrorCode` enum values as a substring. This means:
    ```
 
 6. **Add/update tests**:
-   - [python-error-severity.spec.ts](../../../../../src/app/core/services/worker_python/tasks/python-error-severity.spec.ts)
+   - python-error-severity.spec.ts
      asserts every `PythonErrorCode` has a severity mapping — this will fail
      until you add step 3.
-   - [python-error-messages.spec.ts](../../../../../src/app/core/services/worker_python/tasks/python-error-messages.spec.ts)
+   - python-error-messages.spec.ts
      asserts every known code formats to a non-null message.
-   - Add a case to
-     [handle-task.spec.ts](../../../../../src/app/core/services/worker_python/tasks/handle-task.spec.ts)
+   - Add a case to handle-task.spec.ts
      if the new code needs dedicated coverage for the matching logic.
 
 No changes are needed in `WorkerPythonService`, `PlotService`, or

@@ -10,6 +10,7 @@ import { createTestMeasureData } from '@features/studio/field-measuring/presenta
 import { LEFT_SUPPORT_OPTIONS_MOCK } from '@features/studio/field-measuring/presentation/mock-data';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError, TaskOutputs, GetSectionOutput } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 
@@ -113,7 +114,7 @@ describe('Papoto component', () => {
       let resolveTask!: (value: {
         result: TaskOutputs[Task.calculatePapoto];
         error: TaskError | null;
-        diagnostics: [];
+        diagnostics: PythonDiagnostic[];
       }) => void;
       workerPythonServiceMock.runTask.mockReturnValueOnce(
         new Promise((res) => {
