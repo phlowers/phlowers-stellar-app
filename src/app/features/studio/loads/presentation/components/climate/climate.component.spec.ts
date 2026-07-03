@@ -105,7 +105,9 @@ const mockCharge: Charge = {
 describe('ClimateComponent effect edge cases', () => {
   it('should return early when studyUuid is missing', async () => {
     const plotServiceMock = {
-      study: signal(null)
+      study: signal(null),
+      workerReady: signal(false),
+      litData: signal(null)
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
@@ -139,7 +141,9 @@ describe('ClimateComponent effect edge cases', () => {
   it('should return early when charge has no data', async () => {
     const chargeWithoutData = { uuid: 'test', data: null } as unknown as Charge;
     const plotServiceMock = {
-      study: signal({ uuid: 'study-uuid-1' })
+      study: signal({ uuid: 'study-uuid-1' }),
+      workerReady: signal(false),
+      litData: signal(null)
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
