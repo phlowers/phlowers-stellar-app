@@ -17,8 +17,8 @@ export const defaultClimaticCharge: ClimateCharge = {
   symmetryType: SymmetryType.SYMMETRIC,
   iceThickness: 0,
   frontierSupportNumber: null,
-  iceThicknessBefore: null,
-  iceThicknessAfter: null
+  iceThicknessBefore: 0,
+  iceThicknessAfter: 0
 };
 
 /**

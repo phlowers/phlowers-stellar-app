@@ -78,8 +78,8 @@ describe('getBaseClimate', () => {
     expect(result.iceThickness).toBe(0);
     expect(result.cableTemperature).toBe(20);
     expect(result.frontierSupportNumber).toBeNull();
-    expect(result.iceThicknessBefore).toBeNull();
-    expect(result.iceThicknessAfter).toBeNull();
+    expect(result.iceThicknessBefore).toBe(0);
+    expect(result.iceThicknessAfter).toBe(0);
   });
 });
 
@@ -295,8 +295,8 @@ describe('ClimateComponent', () => {
       symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
       frontierSupportNumber: null,
-      iceThicknessBefore: null,
-      iceThicknessAfter: null
+      iceThicknessBefore: 0,
+      iceThicknessAfter: 0
     });
   });
 
@@ -606,6 +606,8 @@ describe('ClimateComponent', () => {
 
       // shift removes first, pop removes last → 1 option remains from 3 supports
       expect(component.frontierSupportOptions().length).toBe(1);
+      // frontierSupportNumber defaults to the first available option
+      expect(component.form.value.frontierSupportNumber).toBe(component.frontierSupportOptions()[0].value);
     });
 
     it('should build no frontierSupportOptions when section has fewer than 3 supports', async () => {
