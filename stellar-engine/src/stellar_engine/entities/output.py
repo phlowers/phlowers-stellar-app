@@ -44,7 +44,6 @@ def to_serializable(obj):
     return obj
 
 
-# TODO: ideally, we want to separate [generating GroupPoints] and [change frame/fetch data]
 def get_coordinates(
     study: SectionStudy,
     project: bool = False,
@@ -68,6 +67,7 @@ def get_coordinates(
         )
         obstacles = projected_group_points.obstacles
         distances = projected_group_points.distances
+        additional_points = projected_group_points.additional_points
 
     else:
         span, supports, insulators = (
@@ -77,6 +77,7 @@ def get_coordinates(
         )
         obstacles = base_group_points.obstacles
         distances = base_group_points.distances
+        additional_points = base_group_points.additional_points
     # -------function 2: get data-----------
     vtl_under_chain = list(
         study.balance_engine.balance_model.vhl_under_chain().vhl
@@ -88,8 +89,6 @@ def get_coordinates(
     loads_coords: dict = study.position_engine.get_loads_coords(
         project=project, frame_index=middle_span
     )
-    # # TODO: temporary solution to inverse y waiting fix in mechaphlowers
-    # loads_coords = {k: [v[0], -v[1], v[2]] for k, v in loads_coords.items()}
 
     line_angle_rad = (
         study.balance_engine.section_array.data.line_angle.to_numpy()
@@ -115,19 +114,22 @@ def get_coordinates(
     )
 
     # Build structured obstacles and distances for the frontend renderer
-    result["obstacles_formatted"] = format_obstacles_for_plot(obstacles)
+    result["obstacles_formatted"] = format_sparse_points_for_plot(obstacles)
     result["distances_formatted"] = format_distances_for_plot(distances)
+    result["additionalPoints"] = format_sparse_points_for_plot(
+        additional_points
+    )
 
     return result
 
 
-def format_obstacles_for_plot(obstacles):
+def format_sparse_points_for_plot(sparse_points):
     """Convert SparsePoints dict_coords to frontend array format: [{ uuid, points }]."""
-    if obstacles is None:
+    if sparse_points is None:
         return []
     return [
         {"uuid": key, "points": value.tolist()}
-        for key, value in obstacles.dict_coords().items()
+        for key, value in sparse_points.dict_coords().items()
     ]
 
 

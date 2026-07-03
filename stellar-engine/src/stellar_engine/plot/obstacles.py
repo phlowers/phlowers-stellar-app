@@ -5,110 +5,13 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
-from typing import Literal
 
-import numpy as np
-import pandas as pd
-from mechaphlowers import BalanceEngine, SectionStudy
+from mechaphlowers import SectionStudy
 from mechaphlowers.core.geometry.group_points import GroupPoints
 
+from stellar_engine.entities.inputs import get_points_from_context
+
 logger = logging.getLogger("stellar_engine")
-
-
-SUPPORT_REFERENCE_MAPPING: dict[str, Literal["left", "right"]] = {
-    "LEFT": "left",
-    "RIGHT": "right",
-}
-
-LATERAL_DISTANCE_MAPPING: dict[str, Literal["span_axis", "line_axis"]] = {
-    "SPAN_AXIS": "span_axis",
-    "LINE_AXIS": "line_axis",
-}
-
-ALTITUDE_TYPE_MAPPING: dict[
-    str, Literal["absolute", "support_relative", "attachment_relative"]
-] = {
-    "absolute": "absolute",
-    "relative": "support_relative",
-    "relative_cable": "attachment_relative",
-}
-
-
-# -----------Helpers for obstacles management----------------
-
-
-def get_single_obstacle_coords(
-    altitude_type: str,
-    lateral_distance_type: str,
-    coords: np.ndarray,
-    ground_altitude: float,
-    attachment_altitude: float,
-) -> np.ndarray:
-    logger.debug(
-        f"Calculating coordinates for single obstacle with altitude_type: {altitude_type}, lateral_distance_type: {lateral_distance_type}, positions: {coords}"
-    )
-    logger.debug(
-        "No lateral distance adjustment is applied for single obstacles in this implementation."
-    )
-
-    if altitude_type == "attachment_relative":
-        # Assuming attachment_altitude is available in the context
-        coords[:, 2] += attachment_altitude
-
-    elif altitude_type == "support_relative":
-        # Assuming ground_altitude is available in the context
-        coords[:, 2] += ground_altitude
-    elif altitude_type == "absolute":
-        # No adjustment needed for absolute altitude
-        pass
-    else:
-        logger.warning(
-            f"Altitude type '{altitude_type}' is not recognized. Using absolute altitude."
-        )
-
-    logger.debug(f"Calculated coordinates for single obstacle: {coords}")
-    return coords
-
-
-def change_obstacles_coordinates(
-    df: pd.DataFrame, balance_engine: BalanceEngine
-):
-    if df.empty:
-        logger.warning("No obstacles to process. Returning empty DataFrame.")
-        return df
-
-    span_index = df['span_index'].to_numpy(copy=True, dtype=np.int64)
-
-    x = df['x'].to_numpy(copy=True, dtype=np.float64)
-    z = df['z'].to_numpy(copy=True, dtype=np.float64)
-
-    alt = df['altitude_type'].to_numpy()
-    ref_support = df['ref_support'].to_numpy()
-
-    mask_x = ref_support == "RIGHT"
-    span_index[mask_x] = span_index[mask_x] + 1
-
-    span_length = balance_engine.section_array.data.span_length.to_numpy()[
-        span_index
-    ]
-    x[mask_x] = span_length[mask_x] - x[mask_x]
-
-    # not used for the moment but could be useful in the future
-    mask_z = alt == "attachment_relative"
-    altitudes = balance_engine.section_array.data.conductor_attachment_altitude.to_numpy()[
-        span_index
-    ]
-    z[mask_z] += altitudes[mask_z]
-
-    mask_z = alt == "relative"
-    altitudes = balance_engine.section_array.data.ground_altitude.to_numpy()[
-        span_index
-    ]
-    z[mask_z] += altitudes[mask_z]
-
-    df['x'] = x
-    df['z'] = z
-    return df
 
 
 # TODO: probably more to have GroupPoints as argument instead of plot_engine
@@ -195,51 +98,8 @@ def add_single_obstacle(
     support_index: int,
 ):
     # check there is a single obstacle
-    if len(inputs['obstacles']) != 1:
-        logger.error(
-            f"Expected a single obstacle, but received {len(inputs['obstacles'])}."
-        )
-        raise ValueError(
-            f"Expected a single obstacle, but received {len(inputs['obstacles'])}."
-        )
-
-    my_obstacle = inputs['obstacles'][0]
-    logger.debug(f"Received single obstacle: {my_obstacle}")
-    logger.debug(f"Adding single obstacle with support index: {support_index}")
-    logger.debug(f"Obstacle coordinates: {my_obstacle['positions']}")
-    logger.debug("Overwrite is set to True for adding the obstacle.")
-    logger.debug(
-        "attachment_altitude is taken from the section's conductor attachment altitude, not moving with state changes."
-    )
-    logger.debug(
-        "and ground_altitude is taken from the section's ground altitude."
-    )
-
-    coords = np.array(
-        [[pos['x'], pos['y'], pos['z']] for pos in my_obstacle['positions']],
-        dtype=np.float64,
-    )
-
-    altitude_index = support_index
-    if my_obstacle['referenceSupport'] == 'RIGHT':
-        altitude_index = support_index + 1
-
-    coords = get_single_obstacle_coords(
-        altitude_type=ALTITUDE_TYPE_MAPPING[my_obstacle['altitudeType']],
-        lateral_distance_type=LATERAL_DISTANCE_MAPPING[
-            my_obstacle['lateralDistanceType']
-        ],
-        coords=coords,
-        ground_altitude=float(
-            study.balance_engine.section_array.data.ground_altitude.to_numpy()[
-                altitude_index
-            ]
-        ),
-        attachment_altitude=float(
-            study.balance_engine.section_array.data.conductor_attachment_altitude.to_numpy()[
-                altitude_index
-            ]
-        ),
+    my_obstacle, coords = get_points_from_context(
+        inputs, study, support_index, key_object="obstacles"
     )
 
     study.position_engine.add_obstacle(
@@ -247,9 +107,7 @@ def add_single_obstacle(
         span_index=my_obstacle['supportIndex'],
         coords=coords,
         object_type=my_obstacle['type'],
-        support_reference=SUPPORT_REFERENCE_MAPPING[
-            my_obstacle['referenceSupport']
-        ],
+        support_reference=my_obstacle['engineReferenceSupport'],
         span_length=study.balance_engine.section_array.data.span_length.to_numpy(),
     )
     return True
@@ -294,139 +152,3 @@ def clear_obstacles(
     )
 
     return {"success": True}
-
-
-# Not used anymore with refactoring
-# def add_obstacles(
-#     inputs: list,
-#     balance_engine: BalanceEngine,
-#     plot_engine: PlotEngine,
-#     project: bool,
-#     support_index: int,
-# ):
-#     logger.debug(f"Received obstacles: {inputs}")
-
-#     rows = []
-#     for obstacle in inputs:
-#         for i, pos in enumerate(obstacle['positions']):
-#             rows.append(
-#                 {
-#                     "name": obstacle['uuid'],
-#                     "point_index": i,
-#                     "span_index": obstacle['supportIndex'],
-#                     "altitude_type": obstacle['altitudeType'],
-#                     "lateral_distance_type": obstacle['lateralDistanceType'],
-#                     "x": pos['x'],
-#                     "y": pos['y'],
-#                     "z": pos['z'],
-#                     "object_type": obstacle['type'],
-#                     "ref_support": obstacle['referenceSupport'],
-#                 }
-#             )
-
-#     if not rows:
-#         # logger.debug(
-#         #     "No obstacle positions to register — clearing all obstacles."
-#         # )
-#         # Bug: clear() is not a method of pd.DataFrame
-#         # Don't know what was the expected behaviour here
-#         # plot_engine.position_engine.obstacle_array._data.clear()
-#         return {"obstacles": []}
-
-#     df = pd.DataFrame(rows)
-#     df = change_obstacles_coordinates(df, balance_engine)
-#     plot_engine.add_obstacle_array(ObstacleArray(df))
-#     # TODO: to get obstacles, use GroupPoints.obstacles or GroupPoints.obstacle_dict(),
-#     # for better handling of frame change
-#     result = get_current_obstacles(
-#         plot_engine, project=project, support_index=support_index
-#     )
-#     logger.debug(f"Obstacles after addition: {result}")
-#     return {"obstacles": result}
-
-
-# TODO:
-# generate the new GroupPoints (ideally this would already be generated before)
-# eventually change frame and inverse y axis
-# extract distances dict
-# recreate stellar format of distances dict
-
-
-# Not used anymore with refactoring
-# def compute_distances(
-#     inputs: dict, plot_engine: PlotEngine, project: bool, support_index: int
-# ):
-#     logger.debug(f"Received inputs for distance computation: {inputs}")
-#     points_for_plot = plot_engine.position_engine.get_points_for_plot()
-#     result = []
-
-#     for obstacle in plot_engine.position_engine.obstacle_array.data.to_dict(
-#         orient="records"
-#     ):
-#         span_index = obstacle["span_index"]
-#         plot_engine.position_engine.distance_engine.add_curves(
-#             curve_points=points_for_plot[0].coords[span_index]
-#         )
-#         points_for_plot[1].coords[obstacle["span_index"]]
-#         sea_level_ground_coords_start = plot_engine.position_engine.coords_calculator.supports_ground_coords[
-#             span_index
-#         ].copy()
-#         sea_level_ground_coords_end = plot_engine.position_engine.coords_calculator.supports_ground_coords[
-#             span_index + 1
-#         ].copy()
-#         sea_level_ground_coords_start[2] = 0.0
-#         sea_level_ground_coords_end[2] = 0.0
-
-#         plot_engine.position_engine.distance_engine.add_span_frame(
-#             x_axis_start=sea_level_ground_coords_start,
-#             x_axis_end=sea_level_ground_coords_end,
-#         )
-#         # Compute the distance from a point to the curve
-#         try:
-#             distance_result: DistanceResult = (
-#                 plot_engine.position_engine.distance_engine.plane_distance(
-#                     np.array([obstacle['x'], obstacle['y'], obstacle['z']])
-#                 )
-#             )
-#             u_proj, v_proj = distance_result.projection_points(
-#                 distance_result.point_base
-#             )
-#             result.append(
-#                 {
-#                     "obstacleUuid": obstacle["name"],
-#                     "points": [
-#                         {
-#                             "pointIndex": obstacle["point_index"],
-#                             "linePoint": distance_result.point_target.tolist(),
-#                             "virtualPointHorizontal": u_proj.tolist(),
-#                             "virtualPointVertical": v_proj.tolist(),
-#                             "distanceDiagonal": distance_result.distance_3d,
-#                             "distanceHorizontal": distance_result.distance_projection_u,
-#                             "distanceVertical": distance_result.distance_projection_v,
-#                         }
-#                     ],
-#                 }
-#             )
-
-#         except ValueError as e:
-#             logger.error(
-#                 f"Error computing distance for obstacle {obstacle['name']}: {e}"
-#             )
-#             result.append(
-#                 {
-#                     "obstacleUuid": obstacle["name"],
-#                     "points": [
-#                         {
-#                             "pointIndex": obstacle["point_index"],
-#                             "linePoint": [],
-#                             "virtualPointHorizontal": [],
-#                             "virtualPointVertical": [],
-#                             "distanceDiagonal": [],
-#                             "distanceHorizontal": [],
-#                             "distanceVertical": [],
-#                         }
-#                     ],
-#                 }
-#             )
-#             continue
-#     return result
