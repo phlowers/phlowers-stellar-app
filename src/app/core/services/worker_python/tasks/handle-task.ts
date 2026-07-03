@@ -137,7 +137,10 @@ function collectWarningDiagnostics(
   log?: (level: 'debug' | 'error', message: string, details?: unknown) => void
 ): PythonDiagnostic[] {
   if (!pyodide.globals.has('get_and_clear_warnings')) {
-    log?.('error', `Task ${task}: get_and_clear_warnings is not defined in Python globals, skipping warning collection`);
+    log?.(
+      'error',
+      `Task ${task}: get_and_clear_warnings is not defined in Python globals, skipping warning collection`
+    );
     return [];
   }
 

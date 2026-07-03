@@ -257,7 +257,11 @@ describe('TemperatureCalculationComponent', () => {
       });
 
       it('should still show spinner when worker is ready but windIncidence is still null', async () => {
-        let resolveTask!: (value: { result: { windIncidence: number }; error: null; diagnostics: PythonDiagnostic[] }) => void;
+        let resolveTask!: (value: {
+          result: { windIncidence: number };
+          error: null;
+          diagnostics: PythonDiagnostic[];
+        }) => void;
         workerPythonServiceMock.runTask.mockReturnValueOnce(
           new Promise((res) => {
             resolveTask = res;
