@@ -717,6 +717,17 @@ describe('PlotService', () => {
       expect(service.error()).toBeNull();
       expect(service.loading()).toBe(false);
     });
+
+    it('should clear additionalPoints', () => {
+      service.additionalPoints.set([{ uuid: 'measure-group-1', points: [[1, 2, 3]] as [number, number, number][] }]);
+      (document.getElementById as vi.Mock).mockReturnValue({
+        id: 'plotly-output'
+      });
+
+      service.purgePlot();
+
+      expect(service.additionalPoints()).toEqual([]);
+    });
   });
 
   describe('resetAll', () => {
@@ -1323,6 +1334,38 @@ describe('PlotService', () => {
         Task.addBulkObstacles,
         expect.anything()
       );
+    });
+
+    it('should set additionalPoints from the additionalPoints returned by Python', async () => {
+      const additionalPoints = [{ uuid: 'measure-group-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: [],
+          additionalPoints
+        },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(service.additionalPoints()).toEqual(additionalPoints);
+    });
+
+    it('should default additionalPoints to an empty array when Python does not return any', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(service.additionalPoints()).toEqual([]);
     });
   });
 });

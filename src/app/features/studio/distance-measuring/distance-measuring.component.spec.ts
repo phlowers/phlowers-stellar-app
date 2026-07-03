@@ -7,6 +7,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 
 describe('DistanceMeasuringComponent', () => {
@@ -14,7 +15,7 @@ describe('DistanceMeasuringComponent', () => {
   let fixture: ComponentFixture<DistanceMeasuringComponent>;
   let service: DistanceMeasuringService;
   let mockPlotService: { plotOptionsChange: ReturnType<typeof vi.fn>; refreshProjection: ReturnType<typeof vi.fn> };
-  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
+  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn>; ready: boolean };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -44,6 +45,7 @@ describe('DistanceMeasuringComponent', () => {
   beforeEach(async () => {
     mockPlotService = { plotOptionsChange: vi.fn(), refreshProjection: vi.fn().mockResolvedValue(undefined) };
     mockWorkerPythonService = {
+      ready: true,
       runTask: vi.fn().mockResolvedValue({
         result: { distance_1_2: 0, distance_2_3: null, angle_1_2_3: null },
         error: null,
@@ -202,6 +204,28 @@ describe('DistanceMeasuringComponent', () => {
     expect(service.results()).toEqual({ distance12: 0, distance23: null, angle123: null });
     expect(getByTestId('result-distance-23')?.textContent?.trim()).toBe('-');
     expect(getByTestId('result-angle-123')?.textContent?.trim()).toBe('-');
+  });
+
+  it('should notify an error and skip measureDistance when addMeasureDistanceAnglePoints fails', async () => {
+    fillAllPoints();
+    const notificationService = TestBed.inject(NotificationService);
+    const notifyErrorSpy = vi.spyOn(notificationService, 'error').mockImplementation(() => undefined);
+    mockWorkerPythonService.runTask.mockImplementation((task: Task) => {
+      if (task === Task.addMeasureDistanceAnglePoints) {
+        return Promise.resolve({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
+      }
+      return Promise.resolve({
+        result: { distance_1_2: 1, distance_2_3: 2, angle_1_2_3: 3 },
+        error: null,
+        diagnostics: []
+      });
+    });
+
+    await service.calculate();
+
+    expect(notifyErrorSpy).toHaveBeenCalledWith('Failed to add measurement points');
+    expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.measureDistance, expect.any(Object));
+    expect(service.results()).toBeNull();
   });
 
   it('should not update results when the task returns an error', async () => {

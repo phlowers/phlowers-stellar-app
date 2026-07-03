@@ -485,6 +485,43 @@ describe('SectionPlotComponent', () => {
       );
     });
 
+    it('should include additionalPoints when the selected measurement support is within the visible span window', async () => {
+      const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockPlotService.additionalPoints.set(points);
+      mockDistanceMeasuringService.selectedSupportUuid.set('s0');
+      plotOptionsSignal.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 2, invert: false });
+      sectionSignal.set(mockSection);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ additionalPoints: points }));
+    });
+
+    it('should exclude additionalPoints when the selected measurement support is outside the visible span window', async () => {
+      const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockPlotService.additionalPoints.set(points);
+      mockDistanceMeasuringService.selectedSupportUuid.set('s1');
+      plotOptionsSignal.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 0, invert: false });
+      sectionSignal.set(mockSection);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ additionalPoints: [] }));
+    });
+
+    it('should exclude additionalPoints when no measurement support is selected', async () => {
+      const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockPlotService.additionalPoints.set(points);
+      mockDistanceMeasuringService.selectedSupportUuid.set(null);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ additionalPoints: [] }));
+    });
+
     it('should set isPlotRefreshing signal during refresh', async () => {
       litDataSignal.set(mockLitData);
 
