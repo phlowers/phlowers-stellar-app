@@ -4763,5 +4763,41 @@
         <target>Le calcul n&apos;a généré aucun point en sortie.</target>
       </segment>
     </unit>
+    <unit id="6003898912034143664">
+      <segment state="initial">
+        <source>Distances</source>
+        <target>Distances</target>
+      </segment>
+    </unit>
+    <unit id="3708805422444813457">
+      <segment state="initial">
+        <source>This tab&apos;s data is never saved</source>
+        <target>Les données de ce formulaire ne sont jamais enregistrées</target>
+      </segment>
+    </unit>
+    <unit id="5776214170793753530">
+      <segment state="initial">
+        <source>delete points</source>
+        <target>Supprimer les points</target>
+      </segment>
+    </unit>
+    <unit id="108316195302681988">
+      <segment state="initial">
+        <source>Distance 1-2</source>
+        <target>Distance 1-2</target>
+      </segment>
+    </unit>
+    <unit id="381168125876659676">
+      <segment state="initial">
+        <source>Distance 2-3</source>
+        <target>Distance 2-3</target>
+      </segment>
+    </unit>
+    <unit id="7793282032906069695">
+      <segment state="initial">
+        <source>Angle 1-2-3</source>
+        <target>Angle 1-2-3</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
