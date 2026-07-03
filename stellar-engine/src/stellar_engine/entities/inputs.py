@@ -6,11 +6,14 @@
 
 import datetime
 import inspect
+import logging
 from dataclasses import dataclass
 from typing import Literal, Optional
 
 import numpy as np
 from mechaphlowers import units
+
+logger = logging.getLogger("stellar_engine")
 
 
 def compute_ice_thickness(climate, section_length):
@@ -34,6 +37,129 @@ def compute_ice_thickness(climate, section_length):
     ice_thickness = units(ice_thickness, "cm").to("m").magnitude
 
     return ice_thickness
+
+
+SUPPORT_REFERENCE_MAPPING: dict[str, Literal["left", "right"]] = {
+    "LEFT": "left",
+    "RIGHT": "right",
+}
+
+LATERAL_DISTANCE_MAPPING: dict[str, Literal["span_axis", "line_axis"]] = {
+    "SPAN_AXIS": "span_axis",
+    "LINE_AXIS": "line_axis",
+}
+
+ALTITUDE_TYPE_MAPPING: dict[
+    str, Literal["absolute", "support_relative", "attachment_relative"]
+] = {
+    "absolute": "absolute",
+    "relative": "support_relative",
+    "relative_cable": "attachment_relative",
+}
+
+
+def get_single_coords_from_studio_tab(
+    altitude_type: str,
+    lateral_distance_type: str,
+    coords: np.ndarray,
+    ground_altitude: float,
+    attachment_altitude: float,
+) -> np.ndarray:
+    logger.debug(
+        f"Calculating coordinates for single obstacle with altitude_type: {altitude_type}, lateral_distance_type: {lateral_distance_type}, positions: {coords}"
+    )
+    logger.debug(
+        "No lateral distance adjustment is applied for single obstacles in this implementation."
+    )
+
+    if altitude_type == "attachment_relative":
+        # Assuming attachment_altitude is available in the context
+        coords[:, 2] += attachment_altitude
+
+    elif altitude_type == "support_relative":
+        # Assuming ground_altitude is available in the context
+        coords[:, 2] += ground_altitude
+    elif altitude_type == "absolute":
+        # No adjustment needed for absolute altitude
+        pass
+    else:
+        logger.warning(
+            f"Altitude type '{altitude_type}' is not recognized. Using absolute altitude."
+        )
+
+    logger.debug(f"Calculated coordinates for single obstacle: {coords}")
+    return coords
+
+
+def get_points_from_context(
+    inputs, study, support_index, key_object="points"
+) -> tuple[dict, np.ndarray]:
+    """Extracts a single point or obstacle from the inputs and computes its coordinates based on the study context.
+
+    Expected field in inputs: 'points' or 'obstacles' (depending on key_object), which should contain a list with a single dictionary representing the point or obstacle.
+    Inside the dictionary, are expected:
+    - 'positions' should be a list of dictionaries with 'x', 'y', and 'z' keys representing coordinates.
+    - 'referenceSupport' should be either 'LEFT' or 'RIGHT'.
+    - 'altitudeType' should be one of 'absolute', 'relative', or 'relative_cable'.
+    - 'lateralDistanceType' should be either 'SPAN_AXIS' or 'LINE_AXIS'.
+
+
+    """
+
+    if len(inputs[key_object]) != 1:
+        logger.error(
+            f"Expected a single {key_object}, but received {len(inputs[key_object])}."
+        )
+        raise ValueError(
+            f"Expected a single {key_object}, but received {len(inputs[key_object])}."
+        )
+
+    my_object = inputs[key_object][0]
+    logger.debug(f"Received single {key_object}: {my_object}")
+    logger.debug(
+        f"Adding single {key_object} with support index: {support_index}"
+    )
+    logger.debug(f"{key_object} coordinates: {my_object['positions']}")
+    logger.debug("Overwrite is set to True for adding the obstacle.")
+    logger.debug(
+        "attachment_altitude is taken from the section's conductor attachment altitude, not moving with state changes."
+    )
+    logger.debug(
+        "and ground_altitude is taken from the section's ground altitude."
+    )
+
+    coords = np.array(
+        [[pos['x'], pos['y'], pos['z']] for pos in my_object['positions']],
+        dtype=np.float64,
+    )
+
+    altitude_index = support_index
+    if my_object['referenceSupport'] == 'RIGHT':
+        altitude_index = support_index + 1
+
+    my_object['engineReferenceSupport'] = SUPPORT_REFERENCE_MAPPING[
+        my_object['referenceSupport']
+    ]
+
+    coords = get_single_coords_from_studio_tab(
+        altitude_type=ALTITUDE_TYPE_MAPPING[my_object['altitudeType']],
+        lateral_distance_type=LATERAL_DISTANCE_MAPPING[
+            my_object['lateralDistanceType']
+        ],
+        coords=coords,
+        ground_altitude=float(
+            study.balance_engine.section_array.data.ground_altitude.to_numpy()[
+                altitude_index
+            ]
+        ),
+        attachment_altitude=float(
+            study.balance_engine.section_array.data.conductor_attachment_altitude.to_numpy()[
+                altitude_index
+            ]
+        ),
+    )
+
+    return my_object, coords
 
 
 @dataclass

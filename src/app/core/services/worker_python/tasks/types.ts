@@ -71,7 +71,13 @@ export enum Task {
   // Remove a single span load from the engine by span index
   deleteLoad = 'deleteLoad',
   // Apply span loads to the engine (via apply_span_loads)
-  setLoads = 'setLoads'
+  setLoads = 'setLoads',
+  // Measure distance and angle between 2 or 3 points
+  measureDistance = 'measureDistance',
+  // Add distance/angle measurement points to the study's position engine
+  addMeasureDistanceAnglePoints = 'addMeasureDistanceAnglePoints',
+  // Clear all distance/angle measurement points from the study's position engine
+  clearMeasureDistanceAnglePoints = 'clearMeasureDistanceAnglePoints'
 }
 
 /**
@@ -435,6 +441,24 @@ export interface TaskInputs {
   [Task.setLoads]: {
     spanLoads: SpanLoad[];
   };
+  /** Inputs for measureDistance task: compute distance/angle between 2 or 3 points */
+  [Task.measureDistance]: {
+    points: [MeasurePointGroup];
+    supportIndex: number;
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  /** Inputs for addMeasureDistanceAnglePoints task: register measurement points in the position engine */
+  [Task.addMeasureDistanceAnglePoints]: {
+    points: [MeasurePointGroup];
+    supportIndex: number;
+    startSupport: number;
+    endSupport: number;
+    view: View;
+  };
+  /** Inputs for clearMeasureDistanceAnglePoints task: no inputs */
+  [Task.clearMeasureDistanceAnglePoints]: undefined;
 }
 
 /**
@@ -476,6 +500,38 @@ export interface Localization {
   lambert_x: number[];
   lambert_y: number[];
   azimuth: number[];
+}
+
+/**
+ * A group of 2 or 3 points used for distance/angle measurement, expressed relative to a support.
+ *
+ * @remarks
+ * The Python side (`get_points_from_context`) expects a `points` array containing exactly
+ * one `MeasurePointGroup`, whose `positions` holds the 2 or 3 measured points themselves.
+ *
+ * @category Worker Types
+ */
+export interface MeasurePointGroup {
+  uuid: string;
+  supportUuid: string;
+  supportIndex: number;
+  name: string;
+  type: 'distance_measurement_points';
+  altitudeType: 'absolute' | 'relative' | 'relative_cable';
+  lateralDistanceType: 'SPAN_AXIS' | 'LINE_AXIS';
+  referenceSupport: 'LEFT' | 'RIGHT';
+  positions: { x: number; y: number; z: number }[];
+}
+
+/**
+ * Result of a distance/angle measurement between 2 or 3 points.
+ *
+ * @category Worker Types
+ */
+export interface MeasureDistanceAngleResult {
+  distance_1_2: number;
+  distance_2_3: number | null;
+  angle_1_2_3: number | null;
 }
 
 /**
@@ -569,4 +625,10 @@ export interface TaskOutputs {
   [Task.deleteLoad]: { success: boolean };
   /** Output from setLoads task */
   [Task.setLoads]: { success: boolean };
+  /** Output from measureDistance task */
+  [Task.measureDistance]: MeasureDistanceAngleResult;
+  /** Output from addMeasureDistanceAnglePoints task */
+  [Task.addMeasureDistanceAnglePoints]: { success: boolean };
+  /** Output from clearMeasureDistanceAnglePoints task */
+  [Task.clearMeasureDistanceAnglePoints]: { success: boolean };
 }
