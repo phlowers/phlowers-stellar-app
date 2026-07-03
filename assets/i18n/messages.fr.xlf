@@ -4709,5 +4709,95 @@
         <target>Pan</target>
       </segment>
     </unit>
+    <unit id="1573494796322280810">
+      <segment state="initial">
+        <source>The object position imposes a distance plane that does not intersect the cable.</source>
+        <target>La position de l&apos;objet impose un plan de mesure des distances qui n&apos;a pas d&apos;intersection avec le câble.</target>
+      </segment>
+    </unit>
+    <unit id="6876083598423831028">
+      <segment state="initial">
+        <source>No intersection plane was found for the distance calculation.</source>
+        <target>Aucun plan d&apos;intersection n&apos;a été trouvé pour le calcul de la distance.</target>
+      </segment>
+    </unit>
+    <unit id="1108587408255387766">
+      <segment state="initial">
+        <source>Measurement data is not available.</source>
+        <target>Les données de mesure ne sont pas disponibles.</target>
+      </segment>
+    </unit>
+    <unit id="5928313975045168370">
+      <segment state="initial">
+        <source>Uncertainty data is not available.</source>
+        <target>Les données d&apos;incertitude ne sont pas disponibles.</target>
+      </segment>
+    </unit>
+    <unit id="6752188158155764170">
+      <segment state="initial">
+        <source>The manipulation index provided is invalid.</source>
+        <target>L&apos;indice de manipulation fourni est invalide.</target>
+      </segment>
+    </unit>
+    <unit id="2014194600688237631">
+      <segment state="initial">
+        <source>The manipulation keys provided are invalid.</source>
+        <target>La manipulation s&apos;applique sur des éléments invalides.</target>
+      </segment>
+    </unit>
+    <unit id="8782567139321890483">
+      <segment state="initial">
+        <source>The manipulation range provided is invalid.</source>
+        <target>La plage de manipulation fournie est invalide.</target>
+      </segment>
+    </unit>
+    <unit id="4448179347809899324">
+      <segment state="initial">
+        <source>The support is out of the valid range.</source>
+        <target>Le support sélectionné est hors de la plage valide.</target>
+      </segment>
+    </unit>
+    <unit id="2984456095430307546">
+      <segment state="initial">
+        <source>No generated points were found after computation.</source>
+        <target>Le calcul n&apos;a généré aucun point en sortie.</target>
+      </segment>
+    </unit>
+    <unit id="6003898912034143664">
+      <segment state="initial">
+        <source>Distances</source>
+        <target>Distances</target>
+      </segment>
+    </unit>
+    <unit id="3708805422444813457">
+      <segment state="initial">
+        <source>This tab&apos;s data is never saved</source>
+        <target>Les données de ce formulaire ne sont jamais enregistrées</target>
+      </segment>
+    </unit>
+    <unit id="5776214170793753530">
+      <segment state="initial">
+        <source>delete points</source>
+        <target>Supprimer les points</target>
+      </segment>
+    </unit>
+    <unit id="108316195302681988">
+      <segment state="initial">
+        <source>Distance 1-2</source>
+        <target>Distance 1-2</target>
+      </segment>
+    </unit>
+    <unit id="381168125876659676">
+      <segment state="initial">
+        <source>Distance 2-3</source>
+        <target>Distance 2-3</target>
+      </segment>
+    </unit>
+    <unit id="7793282032906069695">
+      <segment state="initial">
+        <source>Angle 1-2-3</source>
+        <target>Angle 1-2-3</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

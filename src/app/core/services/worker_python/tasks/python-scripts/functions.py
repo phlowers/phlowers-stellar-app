@@ -6,6 +6,7 @@
 
 
 import logging
+import warnings
 
 from importlib.metadata import version
 import sys
@@ -35,6 +36,28 @@ stellar_logger.addHandler(handler)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 logger.addHandler(handler)
+
+# Capture Python warnings (e.g. warnings.warn() raised inside mechaphlowers)
+# so they can be forwarded to JS and surfaced as a toast, since they don't
+# raise an exception and would otherwise be silently lost.
+_captured_warnings: list[str] = []
+
+
+def _capture_warning(message, category, filename, lineno, file=None, line=None):
+    _captured_warnings.append(f"{category.__name__}: {message}")
+
+
+warnings.showwarning = _capture_warning
+# "always" ensures every occurrence is captured, since this worker is long-lived
+# (default filter only reports the first occurrence per call site).
+warnings.simplefilter("always")
+
+
+def get_and_clear_warnings() -> list[str]:
+    """Return captured warnings since the last call and clear the buffer."""
+    captured = list(_captured_warnings)
+    _captured_warnings.clear()
+    return captured
 
 
 from stellar_engine.pyodide_utils import js_to_python  # noqa: E402

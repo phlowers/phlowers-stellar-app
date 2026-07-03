@@ -80,6 +80,10 @@ export class LoadFormsService {
 
   constructor() {
     effect(() => {
+      if (!this.plotService.workerReady()) return;
+      // Wait for initSectionStudio to complete (litData is populated by refreshProjection after initLit succeeds).
+      // Without this gate, setLoads could be posted before initialize_study finishes.
+      if (!this.plotService.litData()) return;
       void this.initTemporaryLoadData();
     });
   }
@@ -130,14 +134,14 @@ export class LoadFormsService {
       const {
         result: changeResult,
         error,
-        pythonErrorCode
+        diagnostics
       } = await this.workerPythonService.runTask(Task.changeState, {
         climate: temporaryLoadData.climate
       });
 
       if (error) {
         this.plotService.error.set(error);
-        this.plotService.pythonErrorCode.set(pythonErrorCode);
+        this.plotService.diagnostics.set(diagnostics);
         return;
       }
 

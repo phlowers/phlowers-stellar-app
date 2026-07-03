@@ -106,7 +106,25 @@ export enum PythonErrorCode {
   /** Balance engine warning */
   BalanceEngineWarning = 'BalanceEngineWarning',
   /** RTS catalog data missing or contains NaN values */
-  RtsDataNotAvailable = 'RtsDataNotAvailable'
+  RtsDataNotAvailable = 'RtsDataNotAvailable',
+  /** Generic Python warning raised via `warnings.warn()` without a specific category */
+  UserWarning = 'UserWarning',
+  /** Raised when measurement data are not available for computation */
+  MeasurementDataNotAvailable = 'MeasurementDataNotAvailable',
+  /** Raised when attempting to read uncertainty while it hasn't been computed */
+  UncertaintyNotAvailable = 'UncertaintyNotAvailable',
+  /** Raised when an invalid index is used in manipulation */
+  InvalidManipulationIndex = 'InvalidManipulationIndex',
+  /** Raised when invalid keys are used in manipulation */
+  InvalidManipulationKeys = 'InvalidManipulationKeys',
+  /** Raised when a value is out of the allowed range in manipulation */
+  InvalidManipulationRange = 'InvalidManipulationRange',
+  /** Raised when no intersection plane can be found for distance computation */
+  NoIntersectionPlaneForDistanceError = 'NoIntersectionPlaneForDistanceError',
+  /** Raised when a support index is out of range for the number of spans. */
+  SupportOutOfRangeError = 'SupportOutOfRangeError',
+  /** Raised when generated points (spans, supports, insulators, others) are None after computation. */
+  GeneratedPointsNoneError = 'GeneratedPointsNoneError'
 }
 
 /**

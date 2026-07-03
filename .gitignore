@@ -6,6 +6,9 @@ dist/
 /out-tsc
 /bazel-out
 
+# Audit IA DDL (artefact de travail, pas du code)
+audit-ia-ddl/
+
 # Node
 /node_modules
 npm-debug.log
