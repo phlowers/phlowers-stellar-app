@@ -94,9 +94,10 @@ def add_measure_distance_angle_points(
     my_object, coords = get_points_from_context(inputs, study, support_index)
 
     study.position_engine.add_additional_point(
+        name="angle_distance_measurement",
         span_index=my_object['supportIndex'],
         coords=coords,
-        object_type=my_object['type'],
+        # object_type=my_object['type'],
         support_reference=my_object['engineReferenceSupport'],
         span_length=study.balance_engine.section_array.data.span_length.to_numpy(),
     )

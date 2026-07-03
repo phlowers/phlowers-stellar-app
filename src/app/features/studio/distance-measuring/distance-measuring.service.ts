@@ -154,7 +154,7 @@ export class DistanceMeasuringService {
           supportIndex,
           name: 'Distance measurement',
           type: 'distance_measurement_points',
-          altitudeType: 'relative',
+          altitudeType: 'absolute',
           lateralDistanceType: 'SPAN_AXIS',
           referenceSupport: 'LEFT',
           positions

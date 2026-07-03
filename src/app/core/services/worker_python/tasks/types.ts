@@ -552,6 +552,8 @@ export interface TaskOutputs {
     sectionOutput: GetSectionWithBaseOutput;
     obstacles: ObstacleOutput['obstacles'];
     distances: Distance[];
+    /** Registered distance/angle measurement point groups, rendered like obstacles. */
+    additionalPoints: ObstacleOutput['obstacles'];
   };
 
   /** Output from getSupportCoordinates task: 2D display coordinates for supports */
