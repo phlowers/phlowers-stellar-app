@@ -123,6 +123,18 @@ const tasks: Record<
   [Task.setLoads]: {
     function: 'set_loads',
     externalPackages: []
+  },
+  [Task.measureDistance]: {
+    function: 'measure_distance',
+    externalPackages: []
+  },
+  [Task.addMeasureDistanceAnglePoints]: {
+    function: 'add_measure_distance_angle_points',
+    externalPackages: []
+  },
+  [Task.clearMeasureDistanceAnglePoints]: {
+    function: 'clear_measure_distance_angle_points',
+    externalPackages: []
   }
 };
 

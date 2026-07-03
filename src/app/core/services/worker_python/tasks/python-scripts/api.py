@@ -6,7 +6,7 @@
 
 import logging
 
-from stellar_engine.core import pose_table
+from stellar_engine.core import geometry, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
 from stellar_engine.data import geography
@@ -86,8 +86,6 @@ def calculate_papoto(js_inputs):
 def get_wind_incidence(js_inputs):
     python_inputs = js_to_python(js_inputs)
     return temperature.get_wind_attack_angle(python_inputs)
-
-
 
 
 
@@ -224,6 +222,32 @@ def set_loads(js_inputs):
     python_inputs = js_to_python(js_inputs)
     logger.debug(f"python_inputs for set_loads: {python_inputs}")
     return loads.apply_span_loads(study, python_inputs["spanLoads"])
+
+
+#---------------------------distance measurement----------------
+
+@debug_log
+def measure_distance(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    support_index = python_inputs["supportIndex"]
+    logger.debug(f"python_inputs for measure_distance: {python_inputs}")
+    return geometry.measure_distance_angle(inputs=python_inputs, study=study, support_index=support_index)
+
+
+@debug_log
+def add_measure_distance_angle_points(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    support_index = python_inputs["supportIndex"]
+    logger.debug(f"python_inputs for add_measure_distance_angle_points: {python_inputs}")
+    return geometry.add_measure_distance_angle_points(inputs=python_inputs, study=study, support_index=support_index)
+
+@debug_log
+def clear_measure_distance_angle_points():
+    global study
+    logger.debug("Clearing measure distance angle points.")
+    return geometry.clear_measure_distance_angle_points(study=study)
 
 
 #---------------------------localization----------------
