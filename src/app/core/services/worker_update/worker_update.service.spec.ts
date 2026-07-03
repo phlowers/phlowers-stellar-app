@@ -276,8 +276,35 @@ describe('UpdateService', () => {
 
       await service.loadCurrentVersion();
 
-      expect(mockFetch).toHaveBeenCalledWith('/version.json');
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/version.json',
+        expect.objectContaining({
+          cache: 'no-store',
+          headers: expect.objectContaining({
+            'cache-control': 'no-cache',
+            pragma: 'no-cache'
+          })
+        })
+      );
       expect(service.currentVersion()).toEqual(serverVersion);
+    });
+
+    it('should pass an AbortSignal so a hanging network never blocks startup indefinitely', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValueOnce({
+          git_hash: 'server-hash-456',
+          build_datetime_utc: '2025-06-01T00:00:00.000000',
+          version: '2.0.0'
+        })
+      });
+
+      await service.loadCurrentVersion();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/version.json',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
     });
 
     it('should keep environment fallback when fetch fails', async () => {

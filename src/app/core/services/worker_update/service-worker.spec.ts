@@ -263,6 +263,16 @@ describe('Service Worker Functions', () => {
       expect(mockEvent.respondWith).toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
+
+    it('should bypass /version.json completely (no stale cache-first serving)', async () => {
+      mockEvent.request.url = 'https://example.com/version.json';
+      mockFetch.mockResolvedValue({ ok: true, status: 200 });
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
   });
 
   describe('handleFetch — 3xx response not cached', () => {
