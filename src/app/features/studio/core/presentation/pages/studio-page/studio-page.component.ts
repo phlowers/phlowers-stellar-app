@@ -52,6 +52,7 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
+import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -88,7 +89,8 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     ObstaclesFormComponent,
     FreePositioningComponent,
     CableSpanManipComponent,
-    CableSupportManipComponent
+    CableSupportManipComponent,
+    DistanceMeasuringComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',

@@ -1,0 +1,199 @@
+@use 'abstract.extracts' as app;
+
+%_align-end {
+  align-self: end;
+}
+
+%_align-center {
+  align-self: center;
+}
+
+:host {
+  @apply flex flex-col gap-3 px-4 h-full min-h-0 max-h-full;
+  width: 25rem;
+}
+
+.distance-measuring {
+  &__hint {
+    @apply mb-0;
+    @extend %text-s-400;
+    color: var(--star-dust-900);
+  }
+
+  &__span-cols {
+    @apply grid grid-cols-2;
+    grid-template-areas:
+      'spanLabel .'
+      'spanInput spanZoom';
+    column-gap: 0.625rem;
+
+    @at-root {
+      .span-label {
+        grid-area: spanLabel;
+        @extend %_align-end;
+      }
+
+      .span-input {
+        grid-area: spanInput;
+        @extend %_align-center;
+      }
+
+      .span-zoom {
+        grid-area: spanZoom;
+        @extend %_align-center;
+        justify-self: end;
+      }
+    }
+  }
+
+  &__free-positioning {
+    @apply flex items-center gap-2;
+
+    p-toggleswitch {
+      @apply block h-4; // nullify weird trailing whitespace that prevent good alignment
+    }
+  }
+
+  &__points {
+    @apply flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden;
+  }
+
+  &__sticky {
+    @apply flex flex-col gap-3;
+    flex-shrink: 0;
+
+    &__btns {
+      @apply flex justify-end items-center;
+      gap: 0.625rem;
+    }
+
+    &__divider {
+      margin: 0 0 0.75rem;
+      border: none;
+      border-top: 0.0625rem solid var(--star-dust-300);
+    }
+
+    &__results {
+      margin-top: 0;
+      padding: 0;
+      border-radius: 0.25rem;
+
+      &__title {
+        @extend %heading-xs;
+        margin-bottom: 0.5rem;
+      }
+
+      &__grid {
+        @apply grid grid-cols-3;
+        column-gap: 1rem;
+
+        &__item {
+          @apply flex flex-col;
+
+          &__term {
+            color: var(--star-dust-900);
+            padding: 0.125rem 0.25rem;
+          }
+
+          &__def {
+            @extend %text-m-400;
+            color: var(--star-dust-950);
+            padding: 0.375rem 0.5rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+// point list item
+.distance-item {
+  @apply relative p-2;
+  border: 0.0625rem solid rgb(255 255 255 / 0);
+  border-radius: 0.25rem;
+  transition:
+    border-color 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
+
+  &--active {
+    border-color: var(--main-primary);
+  }
+
+  &:hover {
+    background-color: var(--primary-100);
+  }
+
+  &__select {
+    @apply overflow-hidden;
+
+    &,
+    &::after {
+      @apply absolute inset-0;
+    }
+    &::after {
+      content: '';
+    }
+
+    &:focus-visible::after {
+      @extend %focus-state;
+    }
+  }
+
+  &__header {
+    @apply flex flex-row justify-between items-center mb-1;
+  }
+
+  &__title {
+    @extend %text-l-400;
+    margin: 0;
+  }
+
+  &__form {
+    @apply grid grid-cols-3;
+    grid-template-areas:
+      'altPointLabel distRefLabel distAxisLabel'
+      'altPointInput distRefInput distAxisInput';
+    column-gap: 0.625rem;
+  }
+
+  &__label,
+  &__input {
+    @apply relative;
+    z-index: 1;
+  }
+}
+
+input {
+  @apply w-full;
+}
+
+// grid positioning
+.alt-point-label {
+  grid-area: altPointLabel;
+  @extend %_align-end;
+}
+
+.alt-point-input {
+  grid-area: altPointInput;
+  @extend %_align-center;
+}
+
+.dist-ref-label {
+  grid-area: distRefLabel;
+  @extend %_align-end;
+}
+
+.dist-ref-input {
+  grid-area: distRefInput;
+  @extend %_align-center;
+}
+
+.dist-axis-label {
+  grid-area: distAxisLabel;
+  @extend %_align-end;
+}
+
+.dist-axis-input {
+  grid-area: distAxisInput;
+  @extend %_align-center;
+}
