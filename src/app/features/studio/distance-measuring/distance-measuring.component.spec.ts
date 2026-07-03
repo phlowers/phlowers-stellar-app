@@ -6,38 +6,57 @@ import { DistanceMeasuringService } from './distance-measuring.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { TaskError } from '@services/worker_python/tasks/types';
 
 describe('DistanceMeasuringComponent', () => {
   let component: DistanceMeasuringComponent;
   let fixture: ComponentFixture<DistanceMeasuringComponent>;
   let service: DistanceMeasuringService;
   let mockPlotService: { plotOptionsChange: ReturnType<typeof vi.fn>; refreshProjection: ReturnType<typeof vi.fn> };
+  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
   const getAllByTestId = (testId: string): HTMLElement[] =>
     Array.from(fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));
 
+  /** Selects the (only mocked) span, making the support-selection requirement satisfied. */
+  const selectSpan = () => {
+    service.selectedSupportUuid.set('support-1');
+    fixture.detectChanges();
+  };
+
   /** Fills the three points so the Calculate button is enabled. */
   const fillAllPoints = () => {
+    selectSpan();
     service.form.controls.forEach((group) => group.setValue({ x: 1, y: 2, z: 3 }));
     fixture.detectChanges();
   };
 
   /** Fills only points 1 and 2, leaving point 3 empty. */
   const fillMandatoryPoints = () => {
+    selectSpan();
     service.form.controls.slice(0, 2).forEach((group) => group.setValue({ x: 1, y: 2, z: 3 }));
     fixture.detectChanges();
   };
 
   beforeEach(async () => {
     mockPlotService = { plotOptionsChange: vi.fn(), refreshProjection: vi.fn().mockResolvedValue(undefined) };
+    mockWorkerPythonService = {
+      runTask: vi.fn().mockResolvedValue({
+        result: { distance_1_2: 0, distance_2_3: null, angle_1_2_3: null },
+        error: null,
+        diagnostics: []
+      })
+    };
 
     await TestBed.configureTestingModule({
       imports: [DistanceMeasuringComponent],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         {
           provide: PlotSpanService,
           useValue: {
@@ -46,7 +65,13 @@ describe('DistanceMeasuringComponent', () => {
             spanAmountChoice: signal('all')
           }
         },
-        { provide: PlotOptionsService, useValue: { camera: signal<unknown>(null) } }
+        {
+          provide: PlotOptionsService,
+          useValue: {
+            camera: signal<unknown>(null),
+            plotOptions: signal({ view: '3d', startSupport: 0, endSupport: 1 })
+          }
+        }
       ]
     }).compileComponents();
 
@@ -101,6 +126,12 @@ describe('DistanceMeasuringComponent', () => {
     expect((getByTestId('calculate') as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it('should keep Calculate disabled when no span is selected, even if all points are filled', () => {
+    service.form.controls.forEach((group) => group.setValue({ x: 1, y: 2, z: 3 }));
+    fixture.detectChanges();
+    expect((getByTestId('calculate') as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it('should not render results before a calculation', () => {
     expect(getByTestId('results')).toBeNull();
   });
@@ -134,34 +165,50 @@ describe('DistanceMeasuringComponent', () => {
   });
 
   it('should display results after a successful calculation', async () => {
-    vi.useFakeTimers();
     fillAllPoints();
+    mockWorkerPythonService.runTask.mockResolvedValue({
+      result: { distance_1_2: 1, distance_2_3: 2, angle_1_2_3: 3 },
+      error: null,
+      diagnostics: []
+    });
 
-    const pending = service.calculate();
-    expect(service.isCalculating()).toBe(true);
-    await vi.advanceTimersByTimeAsync(600);
-    await pending;
+    await service.calculate();
 
+    expect(mockWorkerPythonService.runTask).toHaveBeenCalled();
     expect(service.isCalculating()).toBe(false);
-    expect(service.results()).not.toBeNull();
-    vi.useRealTimers();
+    expect(service.results()).toEqual({ distance12: 1, distance23: 2, angle123: 3 });
 
     fixture.detectChanges();
     expect(getByTestId('results')).toBeTruthy();
   });
 
   it('should display "-" for distance 2-3 and angle 1-2-3 when point 3 is not filled in', async () => {
-    vi.useFakeTimers();
     fillMandatoryPoints();
+    mockWorkerPythonService.runTask.mockResolvedValue({
+      result: { distance_1_2: 0, distance_2_3: null, angle_1_2_3: null },
+      error: null,
+      diagnostics: []
+    });
 
-    const pending = service.calculate();
-    await vi.advanceTimersByTimeAsync(600);
-    await pending;
-    vi.useRealTimers();
+    await service.calculate();
 
     fixture.detectChanges();
     expect(service.results()).toEqual({ distance12: 0, distance23: null, angle123: null });
     expect(getByTestId('result-distance-23')?.textContent?.trim()).toBe('-');
     expect(getByTestId('result-angle-123')?.textContent?.trim()).toBe('-');
+  });
+
+  it('should not update results when the task returns an error', async () => {
+    fillAllPoints();
+    mockWorkerPythonService.runTask.mockResolvedValue({
+      result: null,
+      error: TaskError.CALCULATION_ERROR,
+      diagnostics: []
+    });
+
+    await service.calculate();
+
+    expect(service.results()).toBeNull();
+    expect(service.isCalculating()).toBe(false);
   });
 });
