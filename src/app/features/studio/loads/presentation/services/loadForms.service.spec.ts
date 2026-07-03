@@ -144,6 +144,7 @@ describe('LoadFormsService', () => {
       baseLitData: createSignalMock(null),
       error: createSignalMock(null),
       pythonErrorCode: createSignalMock(null),
+      workerReady: createSignalMock(false),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
@@ -189,6 +190,53 @@ describe('LoadFormsService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('constructor effect gating', () => {
+    it('should not call setLoads when worker is not ready even if a charge is selected', () => {
+      mockPlotService.workerReady.mockReturnValue(false);
+      mockPlotService.litData.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should not call setLoads when worker is ready but section studio has not finished initializing (litData null)', () => {
+      mockPlotService.workerReady.mockReturnValue(true);
+      mockPlotService.litData.mockReturnValue(null);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should call setLoads once worker is ready and litData is set (section studio initialized)', () => {
+      mockPlotService.workerReady.mockReturnValue(true);
+      mockPlotService.litData.mockReturnValue({} as ReturnType<typeof mockPlotService.litData>);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        Task.setLoads,
+        expect.objectContaining({ spanLoads: expect.any(Array) })
+      );
+    });
   });
 
   describe('initTemporaryLoadData', () => {
