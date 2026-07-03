@@ -170,7 +170,7 @@ describe('SupportsTableComponent', () => {
   beforeEach(async () => {
     distinctSupportNamesSubject = new Subject<string[]>();
     workerReadySubject = new BehaviorSubject<boolean>(false);
-    mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, pythonErrorCode: null });
+    mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, diagnostics: [] });
 
     await TestBed.configureTestingModule({
       imports: [FormsModule, SupportsTableComponent, NoopAnimationsModule],
@@ -895,7 +895,7 @@ describe('SupportsTableComponent', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: mockLocalizationResult,
         error: null,
-        pythonErrorCode: null
+        diagnostics: []
       });
     });
 
@@ -926,7 +926,7 @@ describe('SupportsTableComponent', () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null,
         error: 'CALCULATION_ERROR',
-        pythonErrorCode: null
+        diagnostics: []
       });
       workerReadySubject.next(true);
       fixture.detectChanges();
