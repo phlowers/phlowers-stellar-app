@@ -369,7 +369,7 @@ export const createPlot = (plotParams: CreatePlotParams) => {
       : plotParams;
   const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
   const additionalPointsTraces =
-    resolvedParams.selectedDisplayOptions?.measurePoints ?? true
+    (resolvedParams.selectedDisplayOptions?.measurePoints ?? true)
       ? createAdditionalPointsTraces(resolvedParams.additionalPoints, resolvedParams.view, resolvedParams.side)
       : [];
   const baseLayout =
