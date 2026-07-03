@@ -139,12 +139,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should initialize displayOptions signal', () => {
       const options = component.displayOptions();
       expect(options).toHaveLength(4);
-      expect(options.map((o) => o.value)).toEqual([
-        'loads',
-        'baseState',
-        'transparentBackground',
-        'measurePoints'
-      ]);
+      expect(options.map((o) => o.value)).toEqual(['loads', 'baseState', 'transparentBackground', 'measurePoints']);
     });
 
     it('should initialize toolsItems with 7 items', () => {
