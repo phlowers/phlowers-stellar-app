@@ -7,7 +7,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { TaskError } from '@services/worker_python/tasks/types';
+import { Task, TaskError } from '@services/worker_python/tasks/types';
 
 describe('DistanceMeasuringComponent', () => {
   let component: DistanceMeasuringComponent;
@@ -147,12 +147,12 @@ describe('DistanceMeasuringComponent', () => {
     expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
   });
 
-  it('should reset all points and clear results', () => {
+  it('should reset all points and clear results', async () => {
     fillAllPoints();
     service.results.set({ distance12: 1, distance23: 2, angle123: 3 });
     fixture.detectChanges();
 
-    service.reset();
+    await service.reset();
     fixture.detectChanges();
 
     expect(service.form.value).toEqual([
@@ -162,6 +162,8 @@ describe('DistanceMeasuringComponent', () => {
     ]);
     expect(service.results()).toBeNull();
     expect(getByTestId('results')).toBeNull();
+    expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.clearMeasureDistanceAnglePoints, undefined);
+    expect(mockPlotService.refreshProjection).toHaveBeenCalled();
   });
 
   it('should display results after a successful calculation', async () => {
@@ -174,7 +176,11 @@ describe('DistanceMeasuringComponent', () => {
 
     await service.calculate();
 
-    expect(mockWorkerPythonService.runTask).toHaveBeenCalled();
+    expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+      Task.addMeasureDistanceAnglePoints,
+      expect.any(Object)
+    );
+    expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.measureDistance, expect.any(Object));
     expect(service.isCalculating()).toBe(false);
     expect(service.results()).toEqual({ distance12: 1, distance23: 2, angle123: 3 });
 
