@@ -63,7 +63,12 @@ describe('StudioTopToolbarComponent', () => {
         invert: false
       }),
       isFreePositioningMode: signal(false),
-      selectedDisplayOptions: signal({ loads: false }),
+      selectedDisplayOptions: signal({
+        loads: false,
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
+      }),
       setAxesNorms: vi.fn(),
       setBaseScaleFactors: vi.fn(),
       scalingFactors: signal<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
@@ -138,8 +143,8 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should initialize displayOptions signal', () => {
       const options = component.displayOptions();
-      expect(options).toHaveLength(2);
-      expect(options.map((o) => o.value)).toEqual(['loads', 'baseState']);
+      expect(options).toHaveLength(4);
+      expect(options.map((o) => o.value)).toEqual(['loads', 'baseState', 'transparentBackground', 'measurePoints']);
     });
 
     it('should initialize toolsItems with 7 items', () => {
@@ -536,14 +541,18 @@ describe('StudioTopToolbarComponent', () => {
     it('should return mapped display options from plotService', () => {
       plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
 
       const options = component.selectedDisplayOptions();
 
       expect(options).toEqual([
         { label: 'loads', value: 'loads' },
-        { label: 'baseState', value: 'baseState' }
+        { label: 'baseState', value: 'baseState' },
+        { label: 'transparentBackground', value: 'transparentBackground' },
+        { label: 'measurePoints', value: 'measurePoints' }
       ]);
     });
 
@@ -560,7 +569,9 @@ describe('StudioTopToolbarComponent', () => {
     it('should return keys with truthy values', () => {
       plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: true,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
 
       const values = component.selectedDisplayValues();
@@ -571,7 +582,9 @@ describe('StudioTopToolbarComponent', () => {
     it('should exclude keys with falsy values', () => {
       plotOptionsServiceMock.selectedDisplayOptions.set({
         loads: false,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
 
       const values = component.selectedDisplayValues();
@@ -598,7 +611,9 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: true,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
     });
 
@@ -607,7 +622,9 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: false,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
     });
 
@@ -616,7 +633,9 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: false,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       });
     });
 
@@ -625,7 +644,9 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       });
     });
 
@@ -634,7 +655,20 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
         loads: true,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
+      });
+    });
+
+    it('should set transparentBackground and measurePoints when included', () => {
+      component.setSelectedDisplayOptions(['transparentBackground', 'measurePoints']);
+
+      expect(plotOptionsServiceMock.selectedDisplayOptions()).toEqual({
+        loads: false,
+        baseState: false,
+        transparentBackground: true,
+        measurePoints: true
       });
     });
   });
