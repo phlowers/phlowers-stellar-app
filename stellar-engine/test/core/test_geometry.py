@@ -10,7 +10,7 @@ from mechaphlowers import BalanceEngine, SectionStudy
 from stellar_engine.core.geometry import measure_distance_angle
 
 
-def test_get_single_coords_from_studio_tab_valid_input(
+def test_measure_distance_angle_from_studio_tab_valid_input(
     balance_engine_base: BalanceEngine,
 ):
     study = SectionStudy(

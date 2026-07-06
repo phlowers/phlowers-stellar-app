@@ -132,7 +132,9 @@ export class StudioTopToolbarComponent implements OnInit {
     }[]
   >([
     { label: $localize`Loads`, value: 'loads' },
-    { label: $localize`Base`, value: 'baseState' }
+    { label: $localize`Base`, value: 'baseState' },
+    { label: $localize`Transparent background`, value: 'transparentBackground' },
+    { label: $localize`Measurement points`, value: 'measurePoints' }
     // { label: $localize`Obstacles`, value: 'mesh' },
     // { label: $localize`Ground`, value: 'ground' },
     // { label: $localize`In line angle`, value: 'angleInLine' },
@@ -160,7 +162,9 @@ export class StudioTopToolbarComponent implements OnInit {
   setSelectedDisplayOptions(selectedDisplayOptions: string[]): void {
     this.plotOptionsService.selectedDisplayOptions.set({
       loads: selectedDisplayOptions.includes('loads'),
-      baseState: selectedDisplayOptions.includes('baseState')
+      baseState: selectedDisplayOptions.includes('baseState'),
+      transparentBackground: selectedDisplayOptions.includes('transparentBackground'),
+      measurePoints: selectedDisplayOptions.includes('measurePoints')
     });
   }
 
