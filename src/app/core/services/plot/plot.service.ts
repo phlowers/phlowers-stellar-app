@@ -155,7 +155,7 @@ export class PlotService {
     // initial conditions left by initLit.
     // if (!section.selected_charge_uuid) {
     const baseClimate = getBaseClimate(section);
-    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: true });
+    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: false });
     // }
 
     const obstacles = section.obstacles ?? [];
