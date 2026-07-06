@@ -39,8 +39,19 @@ export type PendingPwaAction = 'none' | 'first-install' | 'update-available';
 export class UpdateService {
   private static readonly hasServiceWorker = 'serviceWorker' in navigator;
 
-  /** Timeout (ms) for the `/version.json` fetch, so a slow/unreachable network never hangs startup. */
-  private static readonly VERSION_FETCH_TIMEOUT_MS = 5000;
+  /**
+   * Timeout (ms) for the `/version.json` fetch, so a slow/unreachable network
+   * never hangs startup.
+   *
+   * `/version.json` is bypassed by the Service Worker cache but is still an
+   * application route behind Apache's OIDC catch-all `<Location />`, so it
+   * is subject to the same OIDC refresh-token retry window as `/auth/userinfo`
+   * (`oidc_refresh_token_cache_get` backs off in ~0.5s steps for up to ~5s
+   * before giving up — see connexion-gaia.md §6 and `AuthService.USERINFO_PROBE_TIMEOUT_MS`).
+   * Kept above that window with margin so a shorter client timeout never
+   * races against Apache right when it might have answered.
+   */
+  private static readonly VERSION_FETCH_TIMEOUT_MS = 8000;
 
   /**
    * True when the current runtime exposes a Service Worker API.
@@ -331,7 +342,10 @@ export class UpdateService {
    */
   async loadCurrentVersion(): Promise<void> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), UpdateService.VERSION_FETCH_TIMEOUT_MS);
+    const timer = setTimeout(
+      () => controller.abort('UpdateService: version.json fetch timed out'),
+      UpdateService.VERSION_FETCH_TIMEOUT_MS
+    );
     try {
       const response = await fetch('/version.json', {
         cache: 'no-store',
