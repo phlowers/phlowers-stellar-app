@@ -42,8 +42,18 @@ interface UserinfoResponse extends Partial<OidcClaims> {
 export class AuthService {
   private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403]);
 
-  /** Timeout (ms) for the `/auth/userinfo` probe, so a slow/unreachable network never blocks startup. */
-  private static readonly USERINFO_PROBE_TIMEOUT_MS = 5000;
+  /**
+   * Timeout (ms) for the `/auth/userinfo` probe, so a slow/unreachable
+   * network never blocks startup.
+   *
+   * Deliberately set above Apache's own observed OIDC refresh-token retry
+   * window (`oidc_refresh_token_cache_get` backs off in ~0.5s steps for up
+   * to ~5s before giving up with `invalid_grant`/502 — see connexion-gaia.md
+   * §6): a shorter client timeout races against that window and aborts the
+   * request right as Apache might have been about to answer, which only
+   * makes the perceived slowness worse without gaining anything.
+   */
+  private static readonly USERINFO_PROBE_TIMEOUT_MS = 8000;
 
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
@@ -184,7 +194,10 @@ export class AuthService {
   private async probeUserinfo(): Promise<OidcClaims | null> {
     let response: Response;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), AuthService.USERINFO_PROBE_TIMEOUT_MS);
+    const timer = setTimeout(
+      () => controller.abort('AuthService: userinfo probe timed out'),
+      AuthService.USERINFO_PROBE_TIMEOUT_MS
+    );
     try {
       response = await fetch(USERINFO_URL, { cache: 'no-store', signal: controller.signal });
     } catch (err) {
