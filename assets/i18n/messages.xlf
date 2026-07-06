@@ -3979,5 +3979,25 @@
         <source>Angle 1-2-3</source>
       </segment>
     </unit>
+    <unit id="3333144204835243237">
+      <segment>
+        <source>Transparent background</source>
+      </segment>
+    </unit>
+    <unit id="6490579965306000316">
+      <segment>
+        <source>Reference support is left and altitude is taken absolute</source>
+      </segment>
+    </unit>
+    <unit id="6765816795647473599">
+      <segment>
+        <source>Measurement points</source>
+      </segment>
+    </unit>
+    <unit id="7948668127845854530">
+      <segment>
+        <source>Failed to add measurement points</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

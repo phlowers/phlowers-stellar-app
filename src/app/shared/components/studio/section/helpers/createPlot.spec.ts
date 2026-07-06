@@ -159,6 +159,73 @@ describe('createPlot', () => {
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.scene.aspectratio).toEqual({ x: 3, y: 0.2, z: 0.5 });
     });
+
+    it('should use the default (non-transparent) axis background when transparentBackground is not set', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.scene.xaxis.showbackground).toBe(true);
+      expect(layoutArg.scene.xaxis.backgroundcolor).not.toBe('transparent');
+    });
+
+    it('should make axes transparent when selectedDisplayOptions.transparentBackground is true', () => {
+      createPlot({
+        ...createDefaultParams(),
+        selectedDisplayOptions: {
+          loads: false,
+          baseState: false,
+          transparentBackground: true,
+          measurePoints: false
+        }
+      });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.scene.xaxis.backgroundcolor).toBe('transparent');
+      expect(layoutArg.scene.xaxis.showbackground).toBe(false);
+      expect(layoutArg.scene.yaxis.backgroundcolor).toBe('transparent');
+      expect(layoutArg.scene.zaxis.backgroundcolor).toBe('transparent');
+    });
+  });
+
+  describe('distance measuring points traces', () => {
+    const distanceMeasuringPoints = [
+      {
+        uuid: 'group-1',
+        points: [
+          [1, 2, 3],
+          [4, 5, 6]
+        ] as [number, number, number][]
+      }
+    ];
+
+    it('should include distance measuring point traces by default (measurePoints defaults to true)', () => {
+      createPlot({ ...createDefaultParams(), distanceMeasuringPoints });
+
+      const dataArg = (Plotly.react as Mock).mock.calls[0][1];
+      expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(true);
+    });
+
+    it('should include distance measuring point traces when measurePoints is true', () => {
+      createPlot({
+        ...createDefaultParams(),
+        distanceMeasuringPoints,
+        selectedDisplayOptions: { loads: false, baseState: false, transparentBackground: false, measurePoints: true }
+      });
+
+      const dataArg = (Plotly.react as Mock).mock.calls[0][1];
+      expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(true);
+    });
+
+    it('should exclude distance measuring point traces when measurePoints is false', () => {
+      createPlot({
+        ...createDefaultParams(),
+        distanceMeasuringPoints,
+        selectedDisplayOptions: { loads: false, baseState: false, transparentBackground: false, measurePoints: false }
+      });
+
+      const dataArg = (Plotly.react as Mock).mock.calls[0][1];
+      expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(false);
+    });
   });
 
   describe('layout2d configuration', () => {
@@ -169,6 +236,22 @@ describe('createPlot', () => {
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.showlegend).toBe(false);
       expect(layoutArg.plot_bgcolor).toBe('gainsboro');
+    });
+
+    it('should use a transparent background when transparentBackground is true', () => {
+      createPlot({
+        ...createDefaultParams(),
+        view: '2d',
+        selectedDisplayOptions: {
+          loads: false,
+          baseState: false,
+          transparentBackground: true,
+          measurePoints: false
+        }
+      });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.plot_bgcolor).toBe('transparent');
     });
 
     it('should have correct margin configuration', () => {

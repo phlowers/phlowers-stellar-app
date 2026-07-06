@@ -20,6 +20,8 @@ import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/
 import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -208,7 +210,9 @@ describe('SectionPlotComponent', () => {
 
   const mockSelectedDisplayOptions: SelectedDisplayOptions = {
     loads: false,
-    baseState: false
+    baseState: false,
+    transparentBackground: false,
+    measurePoints: false
   };
   const mockShadowPlotData: Data[] = [
     {
@@ -234,6 +238,7 @@ describe('SectionPlotComponent', () => {
   const mockPlotService = {
     litData: litDataSignal,
     baseLitData: baseLitDataSignal,
+    distanceMeasuringPoints: signal<{ uuid: string; points: [number, number, number][] }[]>([]),
     temporaryLoadData: null as ChargeData | null | undefined,
     plotOptionsChange: noopMock,
     purgePlot: vi.fn()
@@ -274,6 +279,15 @@ describe('SectionPlotComponent', () => {
     selectedObstacleUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
     setSelectedObstacle: vi.fn()
+  };
+
+  const mockObstacleStateService = {
+    distances: signal([]),
+    distanceType: signal<'oblique' | 'vertical' | 'horizontal' | null>(null)
+  };
+
+  const mockDistanceMeasuringService = {
+    selectedSupportUuid: signal<string | null>(null)
   };
 
   const createFormGet =
@@ -325,7 +339,9 @@ describe('SectionPlotComponent', () => {
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: LoadFormsService, useValue: mockLoadFormsService },
-        { provide: CableModificationsService, useValue: mockCableModificationsService }
+        { provide: CableModificationsService, useValue: mockCableModificationsService },
+        { provide: ObstacleStateService, useValue: mockObstacleStateService },
+        { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService }
       ]
     }).compileComponents();
 
@@ -469,6 +485,43 @@ describe('SectionPlotComponent', () => {
       );
     });
 
+    it('should include distanceMeasuringPoints when the selected measurement support is within the visible span window', async () => {
+      const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockPlotService.distanceMeasuringPoints.set(points);
+      mockDistanceMeasuringService.selectedSupportUuid.set('s0');
+      plotOptionsSignal.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 2, invert: false });
+      sectionSignal.set(mockSection);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ distanceMeasuringPoints: points }));
+    });
+
+    it('should exclude distanceMeasuringPoints when the selected measurement support is outside the visible span window', async () => {
+      const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockPlotService.distanceMeasuringPoints.set(points);
+      mockDistanceMeasuringService.selectedSupportUuid.set('s1');
+      plotOptionsSignal.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 0, invert: false });
+      sectionSignal.set(mockSection);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ distanceMeasuringPoints: [] }));
+    });
+
+    it('should exclude distanceMeasuringPoints when no measurement support is selected', async () => {
+      const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockPlotService.distanceMeasuringPoints.set(points);
+      mockDistanceMeasuringService.selectedSupportUuid.set(null);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ distanceMeasuringPoints: [] }));
+    });
+
     it('should set isPlotRefreshing signal during refresh', async () => {
       litDataSignal.set(mockLitData);
 
@@ -509,7 +562,9 @@ describe('SectionPlotComponent', () => {
     it('should include shadow traces when baseState is enabled', async () => {
       const displayOptionsWithBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       mockCreateShadowPlotData.mockReturnValue(mockShadowPlotData);
@@ -530,7 +585,9 @@ describe('SectionPlotComponent', () => {
     it('should not include shadow traces when baseState is disabled', async () => {
       const displayOptionsWithoutBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: false
+        baseState: false,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       baseLitDataSignal.set(mockLitData);
@@ -549,7 +606,9 @@ describe('SectionPlotComponent', () => {
     it('should not include shadow traces when baseLitData is null', async () => {
       const displayOptionsWithBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       baseLitDataSignal.set(null); // baseLitData is null
@@ -568,7 +627,9 @@ describe('SectionPlotComponent', () => {
     it('should fallback to base plot data when shadow traces are not iterable', async () => {
       const displayOptionsWithBase: SelectedDisplayOptions = {
         loads: false,
-        baseState: true
+        baseState: true,
+        transparentBackground: false,
+        measurePoints: false
       };
 
       baseLitDataSignal.set(mockLitData);
@@ -588,7 +649,7 @@ describe('SectionPlotComponent', () => {
 
   describe('getSpanLoadsToDisplay Method', () => {
     it('should return empty array when loads option is disabled', () => {
-      const displayOptions = { loads: false, baseState: false };
+      const displayOptions = { loads: false, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toEqual([]);
@@ -596,7 +657,7 @@ describe('SectionPlotComponent', () => {
 
     it('should return empty array when section is null', () => {
       sectionSignal.set(null);
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toEqual([]);
@@ -613,7 +674,7 @@ describe('SectionPlotComponent', () => {
         spanLoads: [spanLoad]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -629,7 +690,7 @@ describe('SectionPlotComponent', () => {
         ]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -647,7 +708,7 @@ describe('SectionPlotComponent', () => {
         spanLoads: [punctualLoad]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -660,7 +721,7 @@ describe('SectionPlotComponent', () => {
         spanLoads: [markingLoad]
       } as unknown as ChargeData;
 
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toHaveLength(2);
@@ -670,7 +731,7 @@ describe('SectionPlotComponent', () => {
 
     it('should handle missing temporaryLoadData', () => {
       mockPlotService.temporaryLoadData = undefined;
-      const displayOptions = { loads: true, baseState: false };
+      const displayOptions = { loads: true, baseState: false, transparentBackground: false, measurePoints: false };
       const result = component['getSpanLoadsToDisplay'](displayOptions, mockPlotOptions);
 
       expect(result).toEqual([null, null]);
@@ -922,7 +983,7 @@ describe('SectionPlotComponent', () => {
 
   describe('Template', () => {
     it('should render the plotly output container', () => {
-      const container = fixture.nativeElement.querySelector('#plotly-output');
+      const container = fixture.nativeElement.querySelector('[data-testid="section-plot-container"]');
       expect(container).toBeTruthy();
     });
 
