@@ -12,7 +12,8 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { NotificationService } from '@services/notification/notification.service';
+import { Task, MeasurePointGroup } from '@services/worker_python/tasks/types';
 import { Position3D } from '@shared/domain/models/obstacle.model';
 import { PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { POINT_COUNT } from './distance-measuring.constants';
@@ -41,6 +42,7 @@ export class DistanceMeasuringService {
   private readonly plotService = inject(PlotService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly notificationService = inject(NotificationService);
 
   private readonly emptyPosition = { x: null, y: null, z: null } as const satisfies Position3D;
 
@@ -96,10 +98,15 @@ export class DistanceMeasuringService {
   }
 
   /** Resets every point to empty and clears the results. */
-  reset(): void {
+  async reset(): Promise<void> {
     this.form.controls.forEach((group) => group.reset(this.emptyPosition));
     this.activePointIndex.set(0);
     this.results.set(null);
+    if (!this.workerPythonService.ready) {
+      return;
+    }
+    await this.workerPythonService.runTask(Task.clearMeasureDistanceAnglePoints, undefined);
+    await this.plotService.refreshProjection();
   }
 
   /** Zooms the plot onto the currently selected span (does not run on span change). */
@@ -124,8 +131,8 @@ export class DistanceMeasuringService {
    * Computes the distances and angle between the two or three points.
    *
    * @remarks
-   * `z` (`Point alt.`) and `x` (`Ref. support dist.`) are expressed relative to the
-   * span's left support, so `altitudeType` is fixed to `relative`, `lateralDistanceType`
+   * `z` (`Point alt.`) is absolute and  `x` (`Ref. support dist.`) is relative to the
+   * span's left support, so `altitudeType` is fixed to `absolute`, `lateralDistanceType`
    * to `SPAN_AXIS`, and `referenceSupport` to `LEFT`.
    */
   async calculate(): Promise<void> {
@@ -145,20 +152,35 @@ export class DistanceMeasuringService {
         .map((point) => ({ x: point.x as number, y: point.y as number, z: point.z as number }));
       const { startSupport, endSupport, view } = this.plotOptionsService.plotOptions();
 
+      const points: [MeasurePointGroup] = [
+        {
+          uuid: uuidv4(),
+          supportUuid,
+          supportIndex,
+          name: 'Distance measurement',
+          type: 'distance_measurement_points',
+          altitudeType: 'absolute',
+          lateralDistanceType: 'SPAN_AXIS',
+          referenceSupport: 'LEFT',
+          positions
+        }
+      ];
+
+      const { error: addPointsError } = await this.workerPythonService.runTask(Task.addMeasureDistanceAnglePoints, {
+        points,
+        supportIndex,
+        startSupport,
+        endSupport,
+        view
+      });
+
+      if (addPointsError) {
+        this.notificationService.error($localize`Failed to add measurement points`);
+        return;
+      }
+
       const { result, error } = await this.workerPythonService.runTask(Task.measureDistance, {
-        points: [
-          {
-            uuid: uuidv4(),
-            supportUuid,
-            supportIndex,
-            name: 'Distance measurement',
-            type: 'distance_measurement_points',
-            altitudeType: 'relative',
-            lateralDistanceType: 'SPAN_AXIS',
-            referenceSupport: 'LEFT',
-            positions
-          }
-        ],
+        points,
         supportIndex,
         startSupport,
         endSupport,

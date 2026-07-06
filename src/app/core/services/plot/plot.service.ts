@@ -2,7 +2,7 @@ import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
-import { DataError, GetSectionOutput, Task, TaskError } from '@services/worker_python/tasks/types';
+import { DataError, GetSectionOutput, ObstacleOutput, Task, TaskError } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
@@ -31,6 +31,8 @@ export class PlotService {
 
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
+  /** Distance/angle measurement point groups registered in the position engine, rendered like obstacles. */
+  distanceMeasuringPoints = signal<ObstacleOutput['obstacles']>([]);
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
@@ -184,6 +186,7 @@ export class PlotService {
       this.litData.set({ ...currentLitData, obstacles });
     }
     this.obstacleStateService.setDistances(result?.distances ?? []);
+    this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
     this.error.set(error);
     this.diagnostics.set(diagnostics);
 
@@ -200,6 +203,7 @@ export class PlotService {
     plotly.purge(PLOT_ID);
     this.litData.set(null);
     this.baseLitData.set(null);
+    this.distanceMeasuringPoints.set([]);
     this.error.set(null);
     this.diagnostics.set([]);
     this.loading.set(false);

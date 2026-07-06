@@ -116,7 +116,7 @@ def get_coordinates(
     # Build structured obstacles and distances for the frontend renderer
     result["obstacles_formatted"] = format_sparse_points_for_plot(obstacles)
     result["distances_formatted"] = format_distances_for_plot(distances)
-    result["additionalPoints"] = format_sparse_points_for_plot(
+    result["distanceMeasuringPoints"] = format_sparse_points_for_plot(
         additional_points
     )
 

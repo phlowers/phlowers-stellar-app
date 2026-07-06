@@ -24,7 +24,7 @@ import {
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@shared/domain';
 import * as plotly from 'plotly.js-dist-min';
-import { PlotOptions } from '@shared/types/plot.types';
+import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
@@ -670,18 +670,18 @@ describe('PlotService', () => {
 
     it('should call plotly.purge when plotly-output element exists', () => {
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.purgePlot();
 
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
     });
 
     it('should clear litData', () => {
       service.litData.set(mockGetSectionOutput);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.purgePlot();
@@ -692,7 +692,7 @@ describe('PlotService', () => {
     it('should clear baseLitData', () => {
       service.baseLitData.set(mockGetSectionOutput);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.purgePlot();
@@ -706,16 +706,29 @@ describe('PlotService', () => {
       service.error.set(TaskError.CALCULATION_ERROR);
       service.loading.set(true);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.purgePlot();
 
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
       expect(service.litData()).toBeNull();
       expect(service.baseLitData()).toBeNull();
       expect(service.error()).toBeNull();
       expect(service.loading()).toBe(false);
+    });
+
+    it('should clear distanceMeasuringPoints', () => {
+      service.distanceMeasuringPoints.set([
+        { uuid: 'measure-group-1', points: [[1, 2, 3]] as [number, number, number][] }
+      ]);
+      (document.getElementById as vi.Mock).mockReturnValue({
+        id: PLOT_ID
+      });
+
+      service.purgePlot();
+
+      expect(service.distanceMeasuringPoints()).toEqual([]);
     });
   });
 
@@ -727,18 +740,18 @@ describe('PlotService', () => {
 
     it('should call purgePlot', () => {
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
 
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
     });
 
     it('should reset error to null', () => {
       service.error.set(TaskError.CALCULATION_ERROR);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -749,7 +762,7 @@ describe('PlotService', () => {
     it('should reset litData to null', () => {
       service.litData.set(mockGetSectionOutput);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -760,7 +773,7 @@ describe('PlotService', () => {
     it('should reset baseLitData to null', () => {
       service.baseLitData.set(mockGetSectionOutput);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -771,7 +784,7 @@ describe('PlotService', () => {
     it('should set loading to false', () => {
       service.loading.set(true);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -788,7 +801,7 @@ describe('PlotService', () => {
         invert: true
       });
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -809,7 +822,7 @@ describe('PlotService', () => {
       };
       plotOptionsService.camera.set(mockCamera);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -820,7 +833,7 @@ describe('PlotService', () => {
     it('should reset section to null', () => {
       spanService.section.set(mockSection);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -842,7 +855,7 @@ describe('PlotService', () => {
       };
       service.study.set(mockStudy);
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
@@ -884,13 +897,13 @@ describe('PlotService', () => {
       service.study.set(mockStudy);
 
       (document.getElementById as vi.Mock).mockReturnValue({
-        id: 'plotly-output'
+        id: PLOT_ID
       });
 
       service.resetAll();
 
       // Verify all state is reset
-      expect(plotly.purge).toHaveBeenCalledWith('plotly-output');
+      expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
       expect(service.error()).toBeNull();
       expect(service.litData()).toBeNull();
       expect(service.loading()).toBe(false);
@@ -1323,6 +1336,38 @@ describe('PlotService', () => {
         Task.addBulkObstacles,
         expect.anything()
       );
+    });
+
+    it('should set distanceMeasuringPoints from the distanceMeasuringPoints returned by Python', async () => {
+      const distanceMeasuringPoints = [{ uuid: 'measure-group-1', points: [[1, 2, 3]] as [number, number, number][] }];
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: [],
+          distanceMeasuringPoints
+        },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(service.distanceMeasuringPoints()).toEqual(distanceMeasuringPoints);
+    });
+
+    it('should default distanceMeasuringPoints to an empty array when Python does not return any', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: { current: mockGetSectionOutput, base: mockGetSectionOutput },
+          obstacles: [],
+          distances: []
+        },
+        error: null
+      });
+
+      await service.refreshProjection();
+
+      expect(service.distanceMeasuringPoints()).toEqual([]);
     });
   });
 });

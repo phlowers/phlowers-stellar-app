@@ -57,6 +57,10 @@ export interface SelectedDisplayOptions {
   loads: boolean;
   /** Whether base state results are displayed. */
   baseState: boolean;
+  /** Whether the plot background is transparent instead of the default grey. */
+  transparentBackground: boolean;
+  /** Whether registered distance/angle measurement points are displayed. */
+  measurePoints: boolean;
 }
 
 /** User-controlled scaling factors per axis and Plotly aspect mode. Used as input to getAspectRatio and for 2D scaleratio. */
