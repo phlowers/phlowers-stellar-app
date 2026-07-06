@@ -24,7 +24,7 @@ import {
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@shared/domain';
 import * as plotly from 'plotly.js-dist-min';
-import { PlotOptions } from '@shared/types/plot.types';
+import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
