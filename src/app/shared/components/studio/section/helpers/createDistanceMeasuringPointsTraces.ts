@@ -8,9 +8,9 @@ import { ObstacleOutput } from '@services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 import { Coord3 } from './distance.types';
 
-const ADDITIONAL_POINT_COLOR = '#ed6e13';
-const ADDITIONAL_POINT_LINE_WIDTH = 4;
-const ADDITIONAL_POINT_MARKER_SIZE = 5;
+const DISTANCE_MEASURING_POINT_COLOR = '#ed6e13';
+const DISTANCE_MEASURING_POINT_LINE_WIDTH = 4;
+const DISTANCE_MEASURING_POINT_MARKER_SIZE = 5;
 
 /**
  * Maps a 3D coordinate tuple to Plotly x/y(/z) values based on the current view and side.
@@ -40,10 +40,10 @@ const createMarkerTrace = (point: Coord3, view: string, side: string): DataObjec
     z: is3d ? [mapped.z] : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'markers',
-    marker: { color: ADDITIONAL_POINT_COLOR, size: ADDITIONAL_POINT_MARKER_SIZE, symbol: 'diamond' },
+    marker: { color: DISTANCE_MEASURING_POINT_COLOR, size: DISTANCE_MEASURING_POINT_MARKER_SIZE, symbol: 'diamond' },
     showlegend: false,
     hoverinfo: 'skip',
-    name: 'additional-point-marker',
+    name: 'distance-measuring-point-marker',
     supportUuid: undefined
   } as DataObject;
 };
@@ -59,10 +59,10 @@ const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string): 
     z: is3d ? [fromMapped.z, toMapped.z] : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'lines',
-    line: { color: ADDITIONAL_POINT_COLOR, width: ADDITIONAL_POINT_LINE_WIDTH, dash: 'dash' },
+    line: { color: DISTANCE_MEASURING_POINT_COLOR, width: DISTANCE_MEASURING_POINT_LINE_WIDTH, dash: 'dash' },
     showlegend: false,
     hoverinfo: 'skip',
-    name: 'additional-point-line',
+    name: 'distance-measuring-point-line',
     supportUuid: undefined
   } as DataObject;
 };
@@ -72,18 +72,18 @@ const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string): 
  * registered via the `addMeasureDistanceAnglePoints` task, following the same
  * trace-building conventions as `createDistanceTraces`.
  *
- * @param additionalPoints - Groups of registered measurement points (2 or 3 points each).
+ * @param distanceMeasuringPoints - Groups of registered measurement points (2 or 3 points each).
  * @param view - Current plot view ('2d' or '3d').
  * @param side - Current 2D side ('profile' or 'face'), ignored in 3D.
  */
 export const createDistanceMeasuringPointsTraces = (
-  additionalPoints: ObstacleOutput['obstacles'] | undefined,
+  distanceMeasuringPoints: ObstacleOutput['obstacles'] | undefined,
   view: string,
   side: string
 ): DataObject[] => {
   const traces: DataObject[] = [];
 
-  for (const group of additionalPoints ?? []) {
+  for (const group of distanceMeasuringPoints ?? []) {
     const points = group.points;
     points.forEach((point) => traces.push(createMarkerTrace(point, view, side)));
     for (let i = 0; i < points.length - 1; i++) {

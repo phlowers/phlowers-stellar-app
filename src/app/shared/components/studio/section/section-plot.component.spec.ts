@@ -238,7 +238,7 @@ describe('SectionPlotComponent', () => {
   const mockPlotService = {
     litData: litDataSignal,
     baseLitData: baseLitDataSignal,
-    additionalPoints: signal<{ uuid: string; points: [number, number, number][] }[]>([]),
+    distanceMeasuringPoints: signal<{ uuid: string; points: [number, number, number][] }[]>([]),
     temporaryLoadData: null as ChargeData | null | undefined,
     plotOptionsChange: noopMock,
     purgePlot: vi.fn()
@@ -485,9 +485,9 @@ describe('SectionPlotComponent', () => {
       );
     });
 
-    it('should include additionalPoints when the selected measurement support is within the visible span window', async () => {
+    it('should include distanceMeasuringPoints when the selected measurement support is within the visible span window', async () => {
       const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
-      mockPlotService.additionalPoints.set(points);
+      mockPlotService.distanceMeasuringPoints.set(points);
       mockDistanceMeasuringService.selectedSupportUuid.set('s0');
       plotOptionsSignal.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 2, invert: false });
       sectionSignal.set(mockSection);
@@ -495,12 +495,12 @@ describe('SectionPlotComponent', () => {
 
       await component.refreshPlot();
 
-      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ additionalPoints: points }));
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ distanceMeasuringPoints: points }));
     });
 
-    it('should exclude additionalPoints when the selected measurement support is outside the visible span window', async () => {
+    it('should exclude distanceMeasuringPoints when the selected measurement support is outside the visible span window', async () => {
       const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
-      mockPlotService.additionalPoints.set(points);
+      mockPlotService.distanceMeasuringPoints.set(points);
       mockDistanceMeasuringService.selectedSupportUuid.set('s1');
       plotOptionsSignal.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 0, invert: false });
       sectionSignal.set(mockSection);
@@ -508,18 +508,18 @@ describe('SectionPlotComponent', () => {
 
       await component.refreshPlot();
 
-      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ additionalPoints: [] }));
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ distanceMeasuringPoints: [] }));
     });
 
-    it('should exclude additionalPoints when no measurement support is selected', async () => {
+    it('should exclude distanceMeasuringPoints when no measurement support is selected', async () => {
       const points = [{ uuid: 'measure-1', points: [[1, 2, 3]] as [number, number, number][] }];
-      mockPlotService.additionalPoints.set(points);
+      mockPlotService.distanceMeasuringPoints.set(points);
       mockDistanceMeasuringService.selectedSupportUuid.set(null);
       litDataSignal.set(mockLitData);
 
       await component.refreshPlot();
 
-      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ additionalPoints: [] }));
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ distanceMeasuringPoints: [] }));
     });
 
     it('should set isPlotRefreshing signal during refresh', async () => {
@@ -983,7 +983,7 @@ describe('SectionPlotComponent', () => {
 
   describe('Template', () => {
     it('should render the plotly output container', () => {
-      const container = fixture.nativeElement.querySelector('#plotly-output');
+      const container = fixture.nativeElement.querySelector('[data-testid="section-plot-container"]');
       expect(container).toBeTruthy();
     });
 

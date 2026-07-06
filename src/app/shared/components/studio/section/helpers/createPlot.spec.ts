@@ -187,8 +187,8 @@ describe('createPlot', () => {
     });
   });
 
-  describe('additional (measurement) points traces', () => {
-    const additionalPoints = [
+  describe('distance measuring points traces', () => {
+    const distanceMeasuringPoints = [
       {
         uuid: 'group-1',
         points: [
@@ -198,33 +198,33 @@ describe('createPlot', () => {
       }
     ];
 
-    it('should include additional points traces by default (measurePoints defaults to true)', () => {
-      createPlot({ ...createDefaultParams(), additionalPoints });
+    it('should include distance measuring point traces by default (measurePoints defaults to true)', () => {
+      createPlot({ ...createDefaultParams(), distanceMeasuringPoints });
 
       const dataArg = (Plotly.react as Mock).mock.calls[0][1];
-      expect(dataArg.some((d: DataObject) => d.name === 'additional-point-marker')).toBe(true);
+      expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(true);
     });
 
-    it('should include additional points traces when measurePoints is true', () => {
+    it('should include distance measuring point traces when measurePoints is true', () => {
       createPlot({
         ...createDefaultParams(),
-        additionalPoints,
+        distanceMeasuringPoints,
         selectedDisplayOptions: { loads: false, baseState: false, transparentBackground: false, measurePoints: true }
       });
 
       const dataArg = (Plotly.react as Mock).mock.calls[0][1];
-      expect(dataArg.some((d: DataObject) => d.name === 'additional-point-marker')).toBe(true);
+      expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(true);
     });
 
-    it('should exclude additional points traces when measurePoints is false', () => {
+    it('should exclude distance measuring point traces when measurePoints is false', () => {
       createPlot({
         ...createDefaultParams(),
-        additionalPoints,
+        distanceMeasuringPoints,
         selectedDisplayOptions: { loads: false, baseState: false, transparentBackground: false, measurePoints: false }
       });
 
       const dataArg = (Plotly.react as Mock).mock.calls[0][1];
-      expect(dataArg.some((d: DataObject) => d.name === 'additional-point-marker')).toBe(false);
+      expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(false);
     });
   });
 

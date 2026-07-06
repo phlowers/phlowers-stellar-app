@@ -6,7 +6,7 @@ import { createCableModificationAnnotations } from './createCableModificationAnn
 import { CableModification, SpanLoad } from '@shared/domain';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
-import { createAdditionalPointsTraces } from './createAdditionalPointsTraces';
+import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPointsTraces';
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
@@ -55,7 +55,7 @@ export interface CreatePlotParams {
   /** Which distance type is currently selected for visualization. */
   distanceType: 'oblique' | 'vertical' | 'horizontal' | null;
   /** Registered distance/angle measurement point groups, rendered like obstacles. */
-  additionalPoints?: ObstacleOutput['obstacles'];
+  distanceMeasuringPoints?: ObstacleOutput['obstacles'];
   /** Currently selected display overlay toggles (loads, base state, background, measure points). */
   selectedDisplayOptions?: SelectedDisplayOptions;
   /** Persisted cable length modifications to display as clickable annotations. */
@@ -368,15 +368,19 @@ export const createPlot = (plotParams: CreatePlotParams) => {
       ? { ...plotParams, camera: getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera }
       : plotParams;
   const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
-  const additionalPointsTraces =
+  const distanceMeasuringPointsTraces =
     (resolvedParams.selectedDisplayOptions?.measurePoints ?? true)
-      ? createAdditionalPointsTraces(resolvedParams.additionalPoints, resolvedParams.view, resolvedParams.side)
+      ? createDistanceMeasuringPointsTraces(
+          resolvedParams.distanceMeasuringPoints,
+          resolvedParams.view,
+          resolvedParams.side
+        )
       : [];
   const baseLayout =
     resolvedParams.view === '3d'
       ? layout3d(resolvedParams, distanceAnnotations)
       : layout2d(resolvedParams, distanceAnnotations);
-  const allData = [...resolvedParams.data, ...distanceTraces, ...additionalPointsTraces];
+  const allData = [...resolvedParams.data, ...distanceTraces, ...distanceMeasuringPointsTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does

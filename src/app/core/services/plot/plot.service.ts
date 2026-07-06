@@ -32,7 +32,7 @@ export class PlotService {
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
   /** Distance/angle measurement point groups registered in the position engine, rendered like obstacles. */
-  additionalPoints = signal<ObstacleOutput['obstacles']>([]);
+  distanceMeasuringPoints = signal<ObstacleOutput['obstacles']>([]);
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
@@ -186,7 +186,7 @@ export class PlotService {
       this.litData.set({ ...currentLitData, obstacles });
     }
     this.obstacleStateService.setDistances(result?.distances ?? []);
-    this.additionalPoints.set(result?.additionalPoints ?? []);
+    this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
     this.error.set(error);
     this.diagnostics.set(diagnostics);
 
@@ -203,7 +203,7 @@ export class PlotService {
     plotly.purge(PLOT_ID);
     this.litData.set(null);
     this.baseLitData.set(null);
-    this.additionalPoints.set([]);
+    this.distanceMeasuringPoints.set([]);
     this.error.set(null);
     this.diagnostics.set([]);
     this.loading.set(false);
