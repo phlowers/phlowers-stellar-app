@@ -62,9 +62,14 @@ export class LoadFormsService {
         if (cached) {
           this.plotService.litData.set(cached);
         } else {
-          const base = this.plotService.baseLitData();
-          if (base) {
-            this.plotService.litData.set(base);
+          // When deselecting a charge case (chargeUuid is null), revert to the base state immediately.
+          // When switching to a different charge case, keep the current litData visible until
+          // calculateLoad returns the new result — avoids a flash of the uncharged base state.
+          if (!chargeUuid) {
+            const base = this.plotService.baseLitData();
+            if (base) {
+              this.plotService.litData.set(base);
+            }
           }
           if (chargeUuid && previousChargeUuid !== undefined) {
             if (!this.plotService.loading()) {

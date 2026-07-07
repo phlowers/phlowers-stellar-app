@@ -629,7 +629,7 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.litData.set).not.toHaveBeenCalled();
     });
 
-    it('should set litData to baseLitData on cache miss when baseLitData is set', () => {
+    it('should NOT set litData to baseLitData on cache miss when a charge is selected', () => {
       const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
       const freshPlotService = {
         ...mockPlotService,
@@ -660,6 +660,43 @@ describe('LoadFormsService', () => {
       const freshService = TestBed.inject(LoadFormsService);
       TestBed.flushEffects();
       expect(freshService).toBeTruthy();
+      // Switching to a charge case: keep current litData visible, do NOT flash the base state
+      expect(freshPlotService.litData.set).not.toHaveBeenCalledWith(mockBaseData);
+    });
+
+    it('should set litData to baseLitData when charge is deselected (chargeUuid becomes null)', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: vi.fn().mockReturnValue(mockBaseData),
+        litData: { set: vi.fn() },
+        litDataCache: new Map()
+      };
+      // Section has no selected charge (deselected)
+      const freshSpanService = {
+        section: vi.fn().mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: null
+        } as Section)
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      TestBed.flushEffects();
+      expect(freshService).toBeTruthy();
+      // Deselecting a charge → revert to base state immediately
       expect(freshPlotService.litData.set).toHaveBeenCalledWith(mockBaseData);
     });
 
