@@ -197,8 +197,8 @@ describe('PlotService', () => {
         chainSurface: 0.1,
         towerModel: 'Tower Model',
         spanAzimut: null,
-        xFootLambert93: null,
-        yFootLambert93: null
+        footLongitude: null,
+        footLatitude: null
       },
       {
         uuid: 'support-uuid-2',
@@ -221,8 +221,8 @@ describe('PlotService', () => {
         chainSurface: 0.1,
         towerModel: 'Tower Model',
         spanAzimut: null,
-        xFootLambert93: null,
-        yFootLambert93: null
+        footLongitude: null,
+        footLatitude: null
       }
     ],
     obstacles: [],
@@ -250,7 +250,8 @@ describe('PlotService', () => {
     selected_cable_span_manipulation_uuid: null,
     start_latitude: null,
     start_longitude: null,
-    start_azimuth: null
+    start_azimuth: null,
+    mean_gps_diff_meters: null
   };
 
   beforeEach(() => {
