@@ -11,11 +11,13 @@ import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/s
 import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/import/domain/import-contracts.interfaces';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@core/services/worker_python/tasks/types';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { sectionImportErrors, importSuccessDetail } from './section-import.constantes';
+import { sectionImportErrors, importSuccessDetail, buildGpsReprojectionInfoMessage } from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
 import {
   buildSectionName,
@@ -67,6 +69,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly logger = inject(LoggerService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly attachmentService = inject(AttachmentService);
+  private readonly workerPythonService = inject(WorkerPythonService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -286,6 +289,14 @@ export class SectionImportService implements ImportAdapter<Section> {
       .filter((e) => !!e.supportName);
     await this.attachmentService.addSupportNamesIfAbsent(supportNameEntries);
 
+    const lambertX = accroches.map((a) => parseFloatOrNull(a.PIED_X_LAMBERT93));
+    const lambertY = accroches.map((a) => parseFloatOrNull(a.PIED_Y_LAMBERT93));
+    const { supports: reprojectedSupports, meanGpsDiffMeters } = await this.applyLambertReprojection(
+      supports,
+      lambertX,
+      lambertY
+    );
+
     return {
       ...createEmptySection(),
       uuid: general.CANTON_CUR.trim(),
@@ -311,7 +322,8 @@ export class SectionImportService implements ImportAdapter<Section> {
       regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
       initial_conditions: [],
       selected_initial_condition_uuid: undefined,
-      supports
+      supports: reprojectedSupports,
+      mean_gps_diff_meters: meanGpsDiffMeters
     };
   }
 
@@ -351,12 +363,102 @@ export class SectionImportService implements ImportAdapter<Section> {
       counterWeight: parseFloatOrNull(accroche.CONTREPOIDS),
       chainSurface: parseFloatOrNull(accroche.CHAINE_DRN_SURFACE),
       supportFootAltitude: parseFloatOrNull(accroche.PIED_Z_LAMBERT93),
-      xFootLambert93: parseFloatOrNull(accroche.PIED_X_LAMBERT93),
-      yFootLambert93: parseFloatOrNull(accroche.PIED_Y_LAMBERT93),
       name: accroche.SUPPORT_IDR ?? null,
       number: accroche.SUPPORT_NUMERO ?? null,
       towerModel: accroche.SUPPORT_TOWER ?? null,
       attachmentPosition: extractAttachmentPosition(portee.PORTEE_UNITAIRE_DESIGNATION)
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private — Lambert93 to GPS reprojection
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Converts each support's raw Lambert93 foot coordinates to GPS (`footLatitude`/`footLongitude`)
+   * and computes the mean absolute error (meters) between the surveyed Lambert93 positions and
+   * the app's span/angle data model reprojection.
+   *
+   * Uses only the existing `Task.importLambert`, `Task.importLambertAndValidate` and
+   * `Task.computeLocalization` Python tasks — no new conversion logic is introduced.
+   * If any support is missing its raw Lambert93 coordinates, the whole reprojection is skipped
+   * (supports are returned unchanged, `meanGpsDiffMeters` is `null`) rather than blocking the import.
+   *
+   * @throws An `ImportError` (`MAPPING_ERROR`/`MAPPING`) if the worker reports an error or returns
+   *   no result for any of the three calls.
+   */
+  private async applyLambertReprojection(
+    supports: Support[],
+    lambertX: (number | null)[],
+    lambertY: (number | null)[]
+  ): Promise<{ supports: Support[]; meanGpsDiffMeters: number | null }> {
+    if (lambertX.some((x) => x === null) || lambertY.some((y) => y === null)) {
+      this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
+      return { supports, meanGpsDiffMeters: null };
+    }
+
+    const lambert_x = lambertX as number[];
+    const lambert_y = lambertY as number[];
+    const lastIndex = supports.length - 1;
+    const spanLength = supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!));
+    const lineAngle = supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!));
+
+    // Call 1 — bootstrap: direct conversion of the raw Lambert93 arrays to get a start point.
+    const bootstrap = await this.workerPythonService.runTask(Task.importLambert, { lambert_x, lambert_y });
+    if (bootstrap.error || !bootstrap.result) {
+      throw this.buildLambertReprojectionError();
+    }
+    const startLatitude = bootstrap.result.latitude[0];
+    const startLongitude = bootstrap.result.longitude[0];
+    const startAzimuth = bootstrap.result.azimuth[0];
+
+    // Call 2 — direct conversion + degree-based validation (the actual "import lambert validate" task).
+    const validated = await this.workerPythonService.runTask(Task.importLambertAndValidate, {
+      lambert_x,
+      lambert_y,
+      startLatitude,
+      startLongitude,
+      startAzimuth,
+      spanLength,
+      lineAngle
+    });
+    if (validated.error || !validated.result) {
+      throw this.buildLambertReprojectionError();
+    }
+
+    // Call 3 — reprojection using only the app's span/angle data model (no surveyed Lambert93 input),
+    // used to compare against the surveyed coordinates in meters.
+    const reconstructed = await this.workerPythonService.runTask(Task.computeLocalization, {
+      startLatitude,
+      startLongitude,
+      startAzimuth,
+      spanLength,
+      lineAngle
+    });
+    if (reconstructed.error || !reconstructed.result) {
+      throw this.buildLambertReprojectionError();
+    }
+
+    const { latitude, longitude } = validated.result.localization;
+    const updatedSupports = supports.map((support, i) => ({
+      ...support,
+      footLatitude: latitude[i] ?? null,
+      footLongitude: longitude[i] ?? null
+    }));
+
+    const { lambert_x: reconstructedX, lambert_y: reconstructedY } = reconstructed.result;
+    const meanGpsDiffMeters =
+      lambert_x.reduce((sum, x, i) => sum + Math.hypot(x - reconstructedX[i], lambert_y[i] - reconstructedY[i]), 0) /
+      lambert_x.length;
+
+    return { supports: updatedSupports, meanGpsDiffMeters };
+  }
+
+  private buildLambertReprojectionError(): ImportError {
+    return {
+      code: 'MAPPING_ERROR',
+      message: sectionImportErrors.lambertReprojectionError,
+      stage: 'MAPPING'
     };
   }
 
@@ -471,6 +573,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       }
 
       this.notificationService.success(importSuccessDetail);
+      this.notifyGpsReprojection(section);
       return section;
     }
 
@@ -488,6 +591,17 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     this.notificationService.success(importSuccessDetail);
+    this.notifyGpsReprojection(section);
     return section;
+  }
+
+  /**
+   * Shows an info toast reporting the mean Lambert93-to-GPS reprojection error (meters), when one
+   * was computed for this import (see `applyLambertReprojection`).
+   */
+  private notifyGpsReprojection(section: Section): void {
+    if (section.mean_gps_diff_meters != null) {
+      this.notificationService.info(buildGpsReprojectionInfoMessage(section.mean_gps_diff_meters));
+    }
   }
 }

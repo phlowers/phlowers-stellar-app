@@ -4821,6 +4821,16 @@
       <segment state="initial">
         <source>Failed to add measurement points</source>
         <target>Échec de l&apos;ajout des points de mesure</target>
+    <unit id="8900223846846763673">
+      <segment state="translated">
+        <source>Error computing GPS coordinates from Lambert93 data</source>
+        <target>Erreur lors du calcul des coordonnées GPS à partir des données Lambert93</target>
+      </segment>
+    </unit>
+    <unit id="4865056246123491233">
+      <segment state="translated">
+        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanGpsDiffMeters.toFixed(1)"/> m</source>
+        <target>La reprojection sur le modèle de donnée <ph id="0" equiv="PH" disp="environment.appName"/> semble ajouter une erreur absolue moyenne de <ph id="1" equiv="PH_1" disp="meanGpsDiffMeters.toFixed(1)"/> m</target>
       </segment>
     </unit>
   </file>

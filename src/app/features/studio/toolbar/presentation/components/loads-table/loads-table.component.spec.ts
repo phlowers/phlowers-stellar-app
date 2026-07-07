@@ -40,8 +40,8 @@ describe('LoadsTableComponent', () => {
       attachmentPosition: null,
       chainSurface: null,
       spanAzimut: null,
-      xFootLambert93: null,
-      yFootLambert93: null
+      footLongitude: null,
+      footLatitude: null
     },
     {
       uuid: 'support-uuid-2',
@@ -64,8 +64,8 @@ describe('LoadsTableComponent', () => {
       attachmentPosition: null,
       chainSurface: null,
       spanAzimut: null,
-      xFootLambert93: null,
-      yFootLambert93: null
+      footLongitude: null,
+      footLatitude: null
     },
     {
       uuid: 'support-uuid-3',
@@ -88,8 +88,8 @@ describe('LoadsTableComponent', () => {
       attachmentPosition: null,
       chainSurface: null,
       spanAzimut: null,
-      xFootLambert93: null,
-      yFootLambert93: null
+      footLongitude: null,
+      footLatitude: null
     }
   ];
 
@@ -188,7 +188,8 @@ describe('LoadsTableComponent', () => {
     selected_cable_span_manipulation_uuid: null,
     start_latitude: null,
     start_longitude: null,
-    start_azimuth: null
+    start_azimuth: null,
+    mean_gps_diff_meters: null
   };
 
   beforeEach(async () => {

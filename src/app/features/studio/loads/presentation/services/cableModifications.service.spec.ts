@@ -76,7 +76,8 @@ const mockSectionBase: Section = {
   selected_cable_span_manipulation_uuid: null,
   start_latitude: null,
   start_longitude: null,
-  start_azimuth: null
+  start_azimuth: null,
+  mean_gps_diff_meters: null
 };
 
 const mockStudy: StudyEntity = {
