@@ -31,6 +31,7 @@ export class PlotService {
 
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
+  readonly litDataCache = new Map<string, GetSectionOutput>();
   /** Distance/angle measurement point groups registered in the position engine, rendered like obstacles. */
   distanceMeasuringPoints = signal<ObstacleOutput['obstacles']>([]);
   loading = signal<boolean>(true);
@@ -121,6 +122,7 @@ export class PlotService {
 
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
+    this.litDataCache.clear();
     this.error.set(null);
     this.diagnostics.set([]);
     this.litData.set(null);
@@ -172,6 +174,12 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
+
+    // Preserve the current camera position before any geometry or aspect ratio changes.
+    // The aspect ratio recalculation below can cause Plotly to resize the plot, which
+    // may visually reset the camera zoom and angle if we don't explicitly restore it.
+    const preservedCamera = this.plotOptionsService.getCamera();
+
     const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: plotOptions.startSupport,
@@ -192,6 +200,12 @@ export class PlotService {
 
     const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
     await this.updateAspectRatio(scalingFactors, plotOptions);
+
+    // Restore the preserved camera to maintain the user's viewport after aspect ratio
+    // updates. This prevents unwanted zoom/angle resets when the plot geometry changes.
+    if (preservedCamera) {
+      this.plotOptionsService.camera.set(preservedCamera);
+    }
 
     this.loading.set(false);
   };

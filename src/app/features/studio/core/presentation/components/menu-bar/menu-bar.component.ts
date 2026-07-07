@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChargesService } from '@services/charges/charges.service';
+import { PlotService } from '@services/plot/plot.service';
 import { Section, Study } from '@shared/domain';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -63,6 +64,7 @@ export class StudioMenuBarComponent {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly chargesService = inject(ChargesService);
   private readonly loadFormsService = inject(LoadFormsService);
+  private readonly plotService = inject(PlotService);
 
   launchChargeFunction(
     functionToLaunch: (studyUuid: string, sectionUuid: string, value: string) => void,
@@ -87,7 +89,14 @@ export class StudioMenuBarComponent {
   }
 
   duplicateChargeCase(charge?: { label: string; value: string }) {
-    this.launchChargeFunction(this.chargesService.duplicateCharge.bind(this.chargesService), charge?.value ?? '');
+    const chargeUuid = charge?.value ?? '';
+    if (!chargeUuid) return;
+    const litDataSnapshot = this.plotService.litData();
+    this.chargesService.duplicateCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', chargeUuid).then((newCharge) => {
+      if (litDataSnapshot) {
+        this.plotService.litDataCache.set(newCharge.uuid, litDataSnapshot);
+      }
+    });
   }
 
   viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit') {
