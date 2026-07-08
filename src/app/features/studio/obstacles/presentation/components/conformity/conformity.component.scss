@@ -135,7 +135,6 @@ legend {
   }
   &__electric-tension-input {
     grid-area: tensionInput;
-    @extend %_mb-3;
   }
   &__wind-label {
     grid-area: windLabel;
@@ -178,7 +177,6 @@ legend {
   }
   &__conformity-select-input {
     grid-area: conformitySelectInput;
-    @extend %_mb-3;
   }
   &__submit {
     @apply justify-self-end;
@@ -202,6 +200,7 @@ legend {
 
   &__figure {
     flex: 1 1 27rem;
+    min-height: 24rem;
   }
 
   &__table {
