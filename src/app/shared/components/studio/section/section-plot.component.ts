@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot } from './helpers/createPlot';
+import { applyRestoreCamera, createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
@@ -37,7 +38,7 @@ import { ClickAnnotationEvent } from './section-plot.interfaces';
 @Component({
   selector: 'app-section-plot',
   templateUrl: './section-plot.component.html',
-  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule],
+  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule, ProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
@@ -64,7 +65,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly documentRef = inject(DOCUMENT);
 
   // Signals
-  private readonly isPlotRefreshing = signal(false);
+  protected readonly isPlotRefreshing = signal(false);
 
   // Form values as signals
   private readonly currentObstaclePositions = toSignal(this.obstacleFormService.form.get('positions')!.valueChanges, {
@@ -209,13 +210,13 @@ export class SectionPlotComponent implements OnDestroy {
       const spanUuidToIndex = new Map<string, number>(
         (section?.supports ?? []).map((support, index) => [support.uuid, index])
       );
+      const pendingCamera = this.plotOptionsService.pendingCameraRestore();
       const plot = await createPlot({
         documentRef: this.documentRef,
         plotId: PLOT_ID,
         data: plotData,
         invert: plotOptions.invert,
         view: plotOptions.view,
-        camera,
         side: plotOptions.side,
         spanLoads,
         litData,
@@ -225,6 +226,8 @@ export class SectionPlotComponent implements OnDestroy {
         currentObstaclePointIndex,
         obstacles,
         supports,
+        camera: pendingCamera ?? camera,
+        pendingRestore: !!pendingCamera,
         aspectRatio,
         scalingFactors,
         distances,
@@ -236,6 +239,14 @@ export class SectionPlotComponent implements OnDestroy {
       });
       if (plot) {
         this.addEventListenersToPlot(plot);
+        // If there is a saved camera pending restore (first render after back-navigation),
+        // apply it directly to bypass any layout/uirevision timing issues.
+        if (pendingCamera) {
+          if (plotOptions.view === '3d') {
+            await applyRestoreCamera(PLOT_ID, pendingCamera);
+          }
+          this.plotOptionsService.pendingCameraRestore.set(null);
+        }
       }
     } catch (error) {
       this.logger.error('Error refreshing plot:', error);
@@ -293,6 +304,10 @@ export class SectionPlotComponent implements OnDestroy {
   };
 
   ngOnDestroy(): void {
+    // Capture the current camera into the signal before the plot is purged.
+    // The parent StudioPageComponent runs its ngOnDestroy after children, so
+    // saveViewState() reads camera() as a fallback when getCamera() returns null.
+    this.plotOptionsService.refreshCamera();
     this.plotService.purgePlot();
   }
 }

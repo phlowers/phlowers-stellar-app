@@ -38,6 +38,12 @@ export class PlotOptionsService {
   readonly scalingFactors = signal<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' });
   readonly aspectRatio = signal<AspectRatio>({ x: 1, y: 1, z: 1 });
   readonly camera = signal<Camera | null>(null);
+  /**
+   * Camera to restore directly via Plotly.relayout after the first render following
+   * a back-navigation. Set by StudioPageComponent on init, cleared by SectionPlotComponent
+   * after the restore relayout completes.
+   */
+  readonly pendingCameraRestore = signal<Camera | null>(null);
   readonly isFreePositioningMode = signal<boolean>(false);
 
   private readonly document = inject(DOCUMENT);
@@ -101,6 +107,7 @@ export class PlotOptionsService {
   reset(): void {
     this.plotOptions.set({ ...defaultPlotOptions });
     this.camera.set(null);
+    this.pendingCameraRestore.set(null);
     this.isFreePositioningMode.set(false);
     this.scalingFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     this.aspectRatio.set({ x: 1, y: 1, z: 1 });
