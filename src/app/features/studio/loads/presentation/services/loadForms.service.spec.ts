@@ -340,7 +340,7 @@ describe('LoadFormsService', () => {
       expect(plotOptionsServiceMock.refreshCamera).not.toHaveBeenCalled();
     });
 
-    it('should call refreshCamera and runTask(changeState) when temporaryLoadData is set', async () => {
+    it('should call refreshCamera and runTask(changeState) with climate AND spanLoads', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
       mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
@@ -348,7 +348,34 @@ describe('LoadFormsService', () => {
       await service.calculateLoad();
 
       expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
+        climate: expect.any(Object),
+        spanLoads: expect.any(Array)
+      });
+    });
+
+    it('should pass empty spanLoads array to clear previous loads', async () => {
+      mockPlotService.temporaryLoadData = {
+        climate: mockChargeData.climate,
+        spanLoads: []
+      };
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
+
+      await service.calculateLoad();
+
+      // recheckSpanLoads creates placeholder entries for each support with loadWeight=0
+      // This is the expected behavior - the Python engine will zero them out
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
+        climate: expect.any(Object),
+        spanLoads: expect.arrayContaining([
+          expect.objectContaining({
+            supportUuid: 'support-uuid-1',
+            loadWeight: 0,
+            loadPosition: 0
+          })
+        ])
+      });
     });
 
     it('should update temporaryLoadData spanLoads with rechecked values before delegating', async () => {

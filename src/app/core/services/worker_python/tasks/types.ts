@@ -291,6 +291,7 @@ export interface TaskInputs {
   /** Inputs for changeState task */
   [Task.changeState]: {
     climate: ClimateCharge;
+    spanLoads?: SpanLoad[];
     reload?: boolean;
   };
   /** Inputs for refreshProjection task */

@@ -138,7 +138,8 @@ export class LoadFormsService {
       };
 
       const { result: changeResult, error } = await this.workerPythonService.runTask(Task.changeState, {
-        climate: temporaryLoadData.climate
+        climate: temporaryLoadData.climate,
+        spanLoads: checkedSpanLoads
       });
 
       if (error) {

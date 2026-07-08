@@ -187,11 +187,6 @@ export class PlotService {
   refreshProjection = async () => {
     this.loading.set(true);
 
-    // Preserve the current camera position before any geometry or aspect ratio changes.
-    // The aspect ratio recalculation below can cause Plotly to resize the plot, which
-    // may visually reset the camera zoom and angle if we don't explicitly restore it.
-    const preservedCamera = this.plotOptionsService.getCamera();
-
     const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: plotOptions.startSupport,
