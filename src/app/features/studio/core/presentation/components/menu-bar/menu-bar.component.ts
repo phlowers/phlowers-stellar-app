@@ -93,11 +93,13 @@ export class StudioMenuBarComponent {
     const chargeUuid = charge?.value ?? '';
     if (!chargeUuid) return;
     const litDataSnapshot = this.plotService.litData();
-    this.chargesService.duplicateCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', chargeUuid).then((newCharge) => {
-      if (litDataSnapshot) {
-        this.plotService.litDataCache.set(newCharge.uuid, litDataSnapshot);
-      }
-    });
+    this.chargesService
+      .duplicateCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', chargeUuid)
+      .then((newCharge) => {
+        if (litDataSnapshot) {
+          this.plotService.litDataCache.set(newCharge.uuid, litDataSnapshot);
+        }
+      });
   }
 
   viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit') {

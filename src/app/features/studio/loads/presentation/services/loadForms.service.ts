@@ -91,7 +91,7 @@ export class LoadFormsService {
           this._pendingChargeCalculation.set(null);
           untracked(() => this.calculateLoad());
         } else {
-          // Le cas a changé entre-temps, on annule la demande obsolète
+          // The charge case has changed in the meantime, cancel the stale request
           this._pendingChargeCalculation.set(null);
         }
       }

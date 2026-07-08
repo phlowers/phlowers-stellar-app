@@ -172,7 +172,7 @@ describe('LoadMarkingComponent', () => {
     it('resets form immediately regardless of loading state', () => {
       // Set loading to true
       (mockPlotService.loading as ReturnType<typeof signal<boolean>>).set(true);
-      
+
       component.form.controls.spanSelect.setValue('support-1');
       component.form.controls.referenceSupport.enable();
       component.form.controls.referenceSupport.setValue('LEFT');
