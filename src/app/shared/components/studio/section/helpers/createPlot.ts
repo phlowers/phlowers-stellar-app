@@ -295,6 +295,10 @@ const layout2d = (
   return {
     autosize: true,
     showlegend: false,
+    // Keep uirevision constant so Plotly never resets user-driven zoom/pan state.
+    // On subsequent Plotly.react() calls (e.g. after a selection change in the cards),
+    // the same uirevision tells Plotly to preserve the interactive viewport.
+    uirevision: 'stable',
     plot_bgcolor: plotParams.selectedDisplayOptions?.transparentBackground ? 'transparent' : 'gainsboro',
     margin: {
       l: 50,
