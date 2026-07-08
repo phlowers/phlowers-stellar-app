@@ -204,6 +204,13 @@ describe('PlotOptionsService', () => {
       expect(service.camera()).toBeNull();
     });
 
+    it('should reset pendingCameraRestore to null', () => {
+      const mockCamera: Camera = { eye: { x: 1, y: 1, z: 1 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      service.pendingCameraRestore.set(mockCamera);
+      service.reset();
+      expect(service.pendingCameraRestore()).toBeNull();
+    });
+
     it('should reset isFreePositioningMode to false', () => {
       service.isFreePositioningMode.set(true);
       service.reset();
@@ -223,6 +230,25 @@ describe('PlotOptionsService', () => {
       service.plotOptions.set(opts);
       service.reset();
       expect(service.plotOptions().view).toBe('3d');
+    });
+  });
+
+  describe('pendingCameraRestore', () => {
+    it('should initialize to null', () => {
+      expect(service.pendingCameraRestore()).toBeNull();
+    });
+
+    it('should store a camera when set', () => {
+      const cam: Camera = { eye: { x: 1, y: 2, z: 3 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      service.pendingCameraRestore.set(cam);
+      expect(service.pendingCameraRestore()).toEqual(cam);
+    });
+
+    it('should be cleared after set to null', () => {
+      const cam: Camera = { eye: { x: 1, y: 2, z: 3 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      service.pendingCameraRestore.set(cam);
+      service.pendingCameraRestore.set(null);
+      expect(service.pendingCameraRestore()).toBeNull();
     });
   });
 });

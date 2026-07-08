@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot } from './helpers/createPlot';
+import { createPlot, applyRestoreCamera } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { PlotOptions, SelectedDisplayOptions } from '@shared/types/plot.types';
@@ -32,6 +32,7 @@ vi.mock('./helpers/createShadowPlotData');
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 
 const mockCreatePlot = vi.mocked(createPlot);
+const mockApplyRestoreCamera = vi.mocked(applyRestoreCamera);
 const mockCreatePlotData = vi.mocked(createPlotData);
 const mockCreateShadowPlotData = vi.mocked(createShadowPlotData);
 
@@ -248,6 +249,8 @@ describe('SectionPlotComponent', () => {
     section: sectionSignal
   };
 
+  const pendingCameraRestoreSignal = signal<unknown>(null);
+
   const plotOptionsServiceMock = {
     plotOptions: plotOptionsSignal,
     selectedDisplayOptions: selectedDisplayOptionsSignal,
@@ -255,7 +258,8 @@ describe('SectionPlotComponent', () => {
     isFreePositioningMode: isFreePositioningModeSignal,
     scalingFactors: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     aspectRatio: signal({ x: 1, y: 1, z: 1 }),
-    refreshCamera: noopMock
+    refreshCamera: noopMock,
+    pendingCameraRestore: pendingCameraRestoreSignal
   };
 
   const mockSideTabsService = {
@@ -318,6 +322,7 @@ describe('SectionPlotComponent', () => {
     vi.clearAllMocks();
     mockCreatePlotData.mockReturnValue(mockPlotData);
     mockCreatePlot.mockResolvedValue(mockPlotElement as unknown as PlotlyHTMLElement);
+    mockApplyRestoreCamera.mockResolvedValue(undefined);
     mockCreateShadowPlotData.mockReturnValue([]);
 
     litDataSignal.set(mockLitData);
@@ -326,6 +331,7 @@ describe('SectionPlotComponent', () => {
     selectedDisplayOptionsSignal.set(mockSelectedDisplayOptions);
     sectionSignal.set(mockSection);
     cameraSignal.set(null);
+    pendingCameraRestoreSignal.set(null);
     mockObstacleFormService.form.get = createFormGet();
     mockObstacleFormService.form.value = { uuid: null };
 
@@ -644,6 +650,42 @@ describe('SectionPlotComponent', () => {
           data: mockPlotData
         })
       );
+    });
+
+    it('should call applyRestoreCamera and clear pendingCameraRestore when view is 3d and pendingCameraRestore is set', async () => {
+      const savedCamera = { eye: { x: 1, y: 2, z: 3 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
+      pendingCameraRestoreSignal.set(savedCamera);
+      litDataSignal.set(mockLitData);
+
+      const clearSpy = vi.spyOn(pendingCameraRestoreSignal, 'set');
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreCamera).toHaveBeenCalledWith('plotly-output', savedCamera);
+      expect(clearSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should NOT call applyRestoreCamera when view is 2d and pendingCameraRestore is set', async () => {
+      const savedCamera = { eye: { x: 1, y: 2, z: 3 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
+      pendingCameraRestoreSignal.set(savedCamera);
+      litDataSignal.set(mockLitData);
+
+      const clearSpy = vi.spyOn(pendingCameraRestoreSignal, 'set');
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreCamera).not.toHaveBeenCalled();
+      expect(clearSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should NOT call applyRestoreCamera when pendingCameraRestore is null', async () => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
+      pendingCameraRestoreSignal.set(null);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreCamera).not.toHaveBeenCalled();
     });
   });
 
