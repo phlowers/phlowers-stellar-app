@@ -277,6 +277,7 @@ describe('ClimateComponent', () => {
   });
 
   it('should reset form to default values', () => {
+    component.frontierSupportOptions.set([{ label: '2', value: 2 }]);
     component.form.patchValue({
       windPressure: 50,
       cableTemperature: 25,
@@ -294,10 +295,16 @@ describe('ClimateComponent', () => {
       cableTemperature: 15,
       symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
-      frontierSupportNumber: null,
+      frontierSupportNumber: 2,
       iceThicknessBefore: 0,
       iceThicknessAfter: 0
     });
+  });
+
+  it('should reset frontierSupportNumber to null when no support options are available', () => {
+    component.resetForm();
+
+    expect(component.form.value.frontierSupportNumber).toBeNull();
   });
 
   describe('button actions', () => {

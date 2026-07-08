@@ -134,10 +134,14 @@ export class ClimateComponent {
 
   constructor() {
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+      const temporaryLoadData = this.plotService.temporaryLoadData;
+      if (!temporaryLoadData) {
+        return;
+      }
       this.plotService.temporaryLoadData = {
-        ...this.plotService.temporaryLoadData!,
+        ...temporaryLoadData,
         climate: {
-          ...this.plotService.temporaryLoadData?.climate,
+          ...temporaryLoadData.climate,
           ...value
         } as ClimateCharge
       } as ChargeData;
