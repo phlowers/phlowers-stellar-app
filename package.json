@@ -109,6 +109,9 @@
     "anymatch": {
       "picomatch": "2.3.2"
     },
+    "chokidar": {
+      "readdirp": "4.0.2"
+    },
     "micromatch": {
       "picomatch": "2.3.2"
     }
