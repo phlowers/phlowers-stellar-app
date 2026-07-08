@@ -214,7 +214,9 @@ export function createConformityPlot(
     scrollZoom: false
   };
 
-  void Plotly.newPlot(CONFORMITY_PLOT_ID, traces, layout, config);
+  // Plotly.react creates the plot if it doesn't exist yet, or efficiently updates it in place
+  // (rather than fully tearing down and rebuilding) when only the rule selection changed.
+  void Plotly.react(CONFORMITY_PLOT_ID, traces, layout, config);
 }
 
 /** Remove the conformity plot from the DOM, guarding on the div's existence. */
