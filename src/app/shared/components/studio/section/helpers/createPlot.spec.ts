@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { createPlot } from './createPlot';
+import { applyRestoreCamera, createPlot } from './createPlot';
 import Plotly from 'plotly.js-dist-min';
 import { SpanLoad } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
@@ -225,6 +225,29 @@ describe('createPlot', () => {
 
       const dataArg = (Plotly.react as Mock).mock.calls[0][1];
       expect(dataArg.some((d: DataObject) => d.name === 'distance-measuring-point-marker')).toBe(false);
+    });
+  });
+
+  describe('uirevision', () => {
+    it('should use uirevision stable by default', () => {
+      createPlot({ ...createDefaultParams() });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.uirevision).toBe('stable');
+    });
+
+    it('should use uirevision restore when pendingRestore is true', () => {
+      createPlot({ ...createDefaultParams(), pendingRestore: true });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.uirevision).toBe('restore');
+    });
+
+    it('should use uirevision stable when pendingRestore is false', () => {
+      createPlot({ ...createDefaultParams(), pendingRestore: false });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.uirevision).toBe('stable');
     });
   });
 
@@ -652,5 +675,13 @@ describe('createPlot', () => {
       expect(mockGd.layout.scene.dragmode).toBe('pan');
       expect(updateActiveButton).toHaveBeenCalledOnce();
     });
+  });
+});
+
+describe('applyRestoreCamera', () => {
+  it('should call Plotly.relayout with scene.camera', async () => {
+    const camera = { eye: { x: 1, y: 2, z: 3 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+    await applyRestoreCamera('my-plot', camera as never);
+    expect(Plotly.relayout).toHaveBeenCalledWith('my-plot', { 'scene.camera': camera });
   });
 });
