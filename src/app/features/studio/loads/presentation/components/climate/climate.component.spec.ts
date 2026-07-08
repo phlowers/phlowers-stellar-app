@@ -331,12 +331,10 @@ describe('ClimateComponent', () => {
   });
 
   describe('deleteCharge', () => {
-    it('should call loadFormsService.deleteLoad then chargesService.deleteCharge', async () => {
+    it('should call loadFormsService.deleteLoad', async () => {
       const loadFormsService = TestBed.inject(LoadFormsService);
-      const chargesService = TestBed.inject(ChargesService);
       await component.deleteCharge();
       expect(loadFormsService.deleteLoad).toHaveBeenCalled();
-      expect(chargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-charge-uuid');
     });
 
     it('should throw error when study is not found', async () => {

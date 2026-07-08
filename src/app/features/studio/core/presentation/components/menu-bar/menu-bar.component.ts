@@ -84,8 +84,9 @@ export class StudioMenuBarComponent {
     const isSelectedCharge = charge.value === this.selectedChargeCaseUuid();
     if (isSelectedCharge) {
       await this.loadFormsService.deleteLoad();
+    } else {
+      await this.chargesService.deleteCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', charge.value);
     }
-    await this.chargesService.deleteCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', charge.value);
   }
 
   duplicateChargeCase(charge?: { label: string; value: string }) {
