@@ -107,7 +107,10 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal(null),
       workerReady: signal(false),
-      litData: signal(null)
+      litData: signal(null),
+      baseLitData: signal(null),
+      loading: signal(false),
+      litDataCache: new Map()
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
@@ -143,7 +146,10 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       workerReady: signal(false),
-      litData: signal(null)
+      litData: signal(null),
+      baseLitData: signal(null),
+      loading: signal(false),
+      litDataCache: new Map()
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })

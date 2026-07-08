@@ -116,7 +116,7 @@ export class LoadFormsService {
       ...currentCharge,
       data: temporaryLoadData
     });
-    await this.plotService.refreshProjection();
+    await this.calculateLoad();
   };
 
   /**
