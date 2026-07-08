@@ -430,6 +430,7 @@ export class ConformityComponent {
           uuid: obstacle.uuid,
           name: obstacle.name,
           type: obstacle.type,
+          supportIndex: obstacle.supportIndex,
           altitudeType: obstacle.altitudeType,
           lateralDistanceType: obstacle.lateralDistanceType,
           referenceSupport: obstacle.referenceSupport,
@@ -444,7 +445,8 @@ export class ConformityComponent {
           redZonePresence: v.redZonePresence,
           repartitionTemperature: v.repartitionTemperature,
           lateralDistanceTemperature: v.lateralDistanceTemperature,
-          selectedConformityRules: selectedRuleTypes
+          selectedConformityRules: selectedRuleTypes,
+          conformity: v.conformity
         },
         rulesClimaticConditions: rules.map((r) => ({
           ruleType: r.rule_type,

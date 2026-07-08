@@ -267,6 +267,16 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
+#---------------------------conformity----------------
+
+@debug_log
+def get_conformity(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for get_conformity: {python_inputs}")
+    return obst.get_conformity(python_inputs, study)
+
+
 
 #--------------------------config----------------
 
