@@ -491,7 +491,7 @@ describe('createPlot', () => {
     });
   });
 
-  describe('3D uirevision behaviour', () => {
+  describe('uirevision behaviour', () => {
     it('should set uirevision to "stable" in 3D layout when camera is provided', () => {
       const camera = { center: { x: 0, y: 0, z: 0 }, eye: { x: 0.02, y: -3.5, z: 0.2 }, up: { x: 0, y: 0, z: 1 } };
       createPlot({ ...createDefaultParams(), view: '3d', camera });
@@ -507,11 +507,11 @@ describe('createPlot', () => {
       expect(layoutArg.uirevision).toBe('stable');
     });
 
-    it('should not have uirevision in 2D layout', () => {
+    it('should set uirevision to "stable" in 2D layout to preserve viewport', () => {
       createPlot({ ...createDefaultParams(), view: '2d' });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.uirevision).toBeUndefined();
+      expect(layoutArg.uirevision).toBe('stable');
     });
   });
 
