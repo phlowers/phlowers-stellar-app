@@ -107,7 +107,10 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal(null),
       workerReady: signal(false),
-      litData: signal(null)
+      litData: signal(null),
+      baseLitData: signal(null),
+      loading: signal(false),
+      litDataCache: new Map()
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
@@ -143,7 +146,10 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       workerReady: signal(false),
-      litData: signal(null)
+      litData: signal(null),
+      baseLitData: signal(null),
+      loading: signal(false),
+      litDataCache: new Map()
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
@@ -277,6 +283,7 @@ describe('ClimateComponent', () => {
   });
 
   it('should reset form to default values', () => {
+    component.frontierSupportOptions.set([{ label: '2', value: 2 }]);
     component.form.patchValue({
       windPressure: 50,
       cableTemperature: 25,
@@ -294,10 +301,16 @@ describe('ClimateComponent', () => {
       cableTemperature: 15,
       symmetryType: SymmetryType.SYMMETRIC,
       iceThickness: 0,
-      frontierSupportNumber: null,
+      frontierSupportNumber: 2,
       iceThicknessBefore: 0,
       iceThicknessAfter: 0
     });
+  });
+
+  it('should reset frontierSupportNumber to null when no support options are available', () => {
+    component.resetForm();
+
+    expect(component.form.value.frontierSupportNumber).toBeNull();
   });
 
   describe('button actions', () => {
@@ -325,12 +338,10 @@ describe('ClimateComponent', () => {
   });
 
   describe('deleteCharge', () => {
-    it('should call loadFormsService.deleteLoad then chargesService.deleteCharge', async () => {
+    it('should call loadFormsService.deleteLoad', async () => {
       const loadFormsService = TestBed.inject(LoadFormsService);
-      const chargesService = TestBed.inject(ChargesService);
       await component.deleteCharge();
       expect(loadFormsService.deleteLoad).toHaveBeenCalled();
-      expect(chargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-charge-uuid');
     });
 
     it('should throw error when study is not found', async () => {

@@ -8,6 +8,13 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
+import { createConformityPlot, purgeConformityPlot } from './helpers/createConformityPlot';
+import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
+
+vi.mock('./helpers/createConformityPlot');
+
+const mockCreateConformityPlot = vi.mocked(createConformityPlot);
+const mockPurgeConformityPlot = vi.mocked(purgeConformityPlot);
 
 /** Shape of the in-memory data backing the mock Dexie database. */
 interface DbData {
@@ -188,7 +195,7 @@ describe('ConformityComponent', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should create', async () => {
@@ -549,6 +556,61 @@ describe('ConformityComponent', () => {
       expect(component.calculationError()).toBe('boom');
       expect(mockNotification.error).toHaveBeenCalled();
       expect(component.isCalculating()).toBe(false);
+    });
+  });
+
+  describe('conformity plot rendering', () => {
+    it('should render the mock plot data with the selected rules and their colors once the plot div exists', async () => {
+      await createComponent();
+      vi.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
+      component.form.controls.conformity.setValue(['rule_a']);
+      fixture.detectChanges();
+
+      await component.calculate();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(mockCreateConformityPlot).toHaveBeenCalledWith(
+        document,
+        CONFORMITY_PLOT_MOCK,
+        expect.objectContaining({ selectedRuleTypes: ['rule_a'], conformityType: 'cable_track' })
+      );
+    });
+
+    it('should not render the plot when the #conformity-plot div is not present in the DOM', async () => {
+      await createComponent();
+      vi.spyOn(document, 'getElementById').mockReturnValue(null);
+
+      await component.calculate();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(mockCreateConformityPlot).not.toHaveBeenCalled();
+    });
+
+    it('should purge the plot when results are cleared because the modal closes', async () => {
+      await createComponent();
+      vi.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await component.calculate();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      mockPurgeConformityPlot.mockClear();
+
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+
+      expect(mockPurgeConformityPlot).toHaveBeenCalledWith(document);
+    });
+
+    it('should purge the plot when the component is destroyed', async () => {
+      await createComponent();
+      mockPurgeConformityPlot.mockClear();
+
+      fixture.destroy();
+
+      expect(mockPurgeConformityPlot).toHaveBeenCalledWith(document);
     });
   });
 

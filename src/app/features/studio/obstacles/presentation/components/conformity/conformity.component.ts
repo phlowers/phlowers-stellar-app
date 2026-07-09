@@ -1,6 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  Injector,
+  input,
+  OnDestroy,
+  signal,
+  untracked
+} from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { DecimalPipe, DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { from, map, of, startWith, switchMap } from 'rxjs';
@@ -24,6 +36,9 @@ import {
   LATERAL_DISTANCE_TYPE_LABELS
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
+import { ConformityPlotResponse } from './conformity-plot.model';
+import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
+import { createConformityPlot, CONFORMITY_PLOT_ID, purgeConformityPlot } from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
@@ -59,12 +74,14 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
     ])
   ]
 })
-export class ConformityComponent {
+export class ConformityComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   readonly obstacleFormService = inject(ObstacleFormService);
   private readonly spanService = inject(PlotSpanService);
   private readonly storageService = inject(StorageService);
   private readonly notificationService = inject(NotificationService);
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
 
   readonly isOpen = input<boolean>(false);
 
@@ -74,6 +91,12 @@ export class ConformityComponent {
   private readonly _conformityResults = signal<Record<string, ConformityRuleResult> | null>(null);
   /** Computed results, set only by `calculate`. Null hides the results section. */
   readonly conformityResults = this._conformityResults.asReadonly();
+
+  /** Graph data feeding the `#conformity-plot` cross-section, set alongside the results. */
+  private readonly _conformityPlotData = signal<ConformityPlotResponse | null>(null);
+
+  /** Zone color per rule type (from the catalog rule definitions), captured at calculation. */
+  private readonly _ruleColorsByType = signal<Record<string, string>>({});
 
   readonly form = this.fb.group({
     selectedPoint: [null as number | null],
@@ -349,6 +372,8 @@ export class ConformityComponent {
       if (isNewObstacle) {
         this.lastPopulatedUuid = uuid;
         this._conformityResults.set(null);
+        this._conformityPlotData.set(null);
+        this._ruleColorsByType.set({});
       }
 
       const isEmpty = (value: unknown): boolean =>
@@ -375,7 +400,36 @@ export class ConformityComponent {
 
   /** Clear results when the modal closes so a reopen starts from a clean slate. */
   private readonly clearResultsOnClose = effect(() => {
-    if (!this.isOpen()) untracked(() => this._conformityResults.set(null));
+    if (!this.isOpen())
+      untracked(() => {
+        this._conformityResults.set(null);
+        this._conformityPlotData.set(null);
+        this._ruleColorsByType.set({});
+      });
+  });
+
+  /**
+   * Render (or purge) the `#conformity-plot` cross-section. Reacts to the graph data plus the
+   * live conformity selection so toggling a rule adds/removes its zone immediately. The plot div
+   * lives inside the results `@if`, so defer to `afterNextRender` and re-check its existence.
+   */
+  private readonly renderPlot = effect(() => {
+    const data = this._conformityPlotData();
+    const selectedRuleTypes = this.selectedConformityValues() ?? [];
+    const ruleColors = this._ruleColorsByType();
+    const conformityType = this.conformityType();
+    if (!data) {
+      untracked(() => purgeConformityPlot(this.document));
+      return;
+    }
+    afterNextRender(
+      () => {
+        if (this.document.getElementById(CONFORMITY_PLOT_ID)) {
+          createConformityPlot(this.document, data, { selectedRuleTypes, ruleColors, conformityType });
+        }
+      },
+      { injector: this.injector }
+    );
   });
 
   /** Auto-display results when reopening a saved conformity whose inputs are all present. */
@@ -477,6 +531,8 @@ export class ConformityComponent {
         results[ruleType] = this.generateMockResult(isCableTrack, index === 0);
       });
       this._conformityResults.set(results);
+      this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
+      this._conformityPlotData.set(CONFORMITY_PLOT_MOCK);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
@@ -507,6 +563,10 @@ export class ConformityComponent {
       result.lateralMinimalDistance = 4;
     }
     return result;
+  }
+
+  ngOnDestroy(): void {
+    purgeConformityPlot(this.document);
   }
 
   /** Single accessor for any overhang/lateral result field, replacing the four per-section getters. */

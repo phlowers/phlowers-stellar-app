@@ -1,5 +1,13 @@
 @use 'abstract.extracts' as app;
 
+%_mb-3 {
+  @apply mb-3;
+}
+
+%_self-end {
+  align-self: end;
+}
+
 dl,
 fieldset {
   @apply contents;
@@ -18,74 +26,157 @@ legend {
 }
 
 .form {
-  @apply grid gap-x-8 gap-y-3 grid-cols-5 mb-3;
+  @apply grid gap-x-8 grid-cols-5 mb-3;
+  align-items: start;
 
   grid-template-areas:
     'titleObs titleObs titleObs titleObs titleObs'
-    'obsName obsSelect obsType obsSpan obsSupport'
-    'obsAltType obsLatDistType obsAltPt obsRefSuppDist obsDistLineAxis'
+    'obsNameLabel obsSelectLabel obsTypeLabel obsSpanLabel obsSupportLabel'
+    'obsNameInput obsSelectInput obsTypeInput obsSpanInput obsSupportInput'
+    'obsAltTypeLabel obsLatDistTypeLabel obsAltPtLabel obsRefSuppDistLabel obsDistLineAxisLabel'
+    'obsAltTypeInput obsLatDistTypeInput obsAltPtInput obsRefSuppDistInput obsDistLineAxisInput'
     'titleForm titleForm titleForm titleForm titleForm'
-    'tension wind distribTemp latTemp conformitySelect'
+    'tensionLabel windLabel distribTempLabel latTempLabel conformitySelectLabel'
+    'tensionInput windInput distribTempInput latTempInput conformitySelectInput'
+    '. windComplement distribTempComplement latTempComplement .'
     'submit submit submit submit submit';
 
   &__title-obstacle {
     @apply justify-self-start;
     grid-area: titleObs;
   }
-  &__select-obstacle {
-    grid-area: obsSelect;
+  &__select-obstacle-label {
+    grid-area: obsSelectLabel;
+    @extend %_self-end;
   }
-  &__name-obstacle {
-    grid-area: obsName;
+  &__select-obstacle-input {
+    grid-area: obsSelectInput;
+    @extend %_mb-3;
   }
-  &__type-obstacle {
-    grid-area: obsType;
+  &__name-obstacle-label {
+    grid-area: obsNameLabel;
+    @extend %_self-end;
   }
-  &__span-obstacle {
-    grid-area: obsSpan;
+  &__name-obstacle-input {
+    grid-area: obsNameInput;
+    @extend %_mb-3;
   }
-  &__ref-supp-obstacle {
-    grid-area: obsSupport;
+  &__type-obstacle-label {
+    grid-area: obsTypeLabel;
+    @extend %_self-end;
   }
-  &__alt-type-obstacle {
-    grid-area: obsAltType;
+  &__type-obstacle-input {
+    grid-area: obsTypeInput;
+    @extend %_mb-3;
   }
-  &__lat-dist-type-obstacle {
-    grid-area: obsLatDistType;
+  &__span-obstacle-label {
+    grid-area: obsSpanLabel;
+    @extend %_self-end;
   }
-  &__alt-pt-obstacle {
-    grid-area: obsAltPt;
+  &__span-obstacle-input {
+    grid-area: obsSpanInput;
+    @extend %_mb-3;
   }
-  &__ref-supp-distance-obstacle {
-    grid-area: obsRefSuppDist;
+  &__ref-supp-obstacle-label {
+    grid-area: obsSupportLabel;
+    @extend %_self-end;
   }
-  &__dist-line-axis-obstacle {
-    grid-area: obsDistLineAxis;
+  &__ref-supp-obstacle-input {
+    grid-area: obsSupportInput;
+    @extend %_mb-3;
+  }
+  &__alt-type-obstacle-label {
+    grid-area: obsAltTypeLabel;
+    @extend %_self-end;
+  }
+  &__alt-type-obstacle-input {
+    grid-area: obsAltTypeInput;
+    @extend %_mb-3;
+  }
+  &__lat-dist-type-obstacle-label {
+    grid-area: obsLatDistTypeLabel;
+    @extend %_self-end;
+  }
+  &__lat-dist-type-obstacle-input {
+    grid-area: obsLatDistTypeInput;
+    @extend %_mb-3;
+  }
+  &__alt-pt-obstacle-label {
+    grid-area: obsAltPtLabel;
+    @extend %_self-end;
+  }
+  &__alt-pt-obstacle-input {
+    grid-area: obsAltPtInput;
+    @extend %_mb-3;
+  }
+  &__ref-supp-distance-obstacle-label {
+    grid-area: obsRefSuppDistLabel;
+    @extend %_self-end;
+  }
+  &__ref-supp-distance-obstacle-input {
+    grid-area: obsRefSuppDistInput;
+    @extend %_mb-3;
+  }
+  &__dist-line-axis-obstacle-label {
+    grid-area: obsDistLineAxisLabel;
+    @extend %_self-end;
+  }
+  &__dist-line-axis-obstacle-input {
+    grid-area: obsDistLineAxisInput;
+    @extend %_mb-3;
   }
   &__title-form {
     @apply justify-self-start;
     grid-area: titleForm;
   }
-  &__electric-tension {
-    @apply block;
-    grid-area: tension;
+  &__electric-tension-label {
+    grid-area: tensionLabel;
+    @extend %_self-end;
   }
-  &__wind {
-    grid-area: wind;
-
-    &__checkboxes {
-      @apply grid gap-x-1 gap-y-3 items-center mt-3;
-      grid-template-columns: repeat(2, max-content);
-    }
+  &__electric-tension-input {
+    grid-area: tensionInput;
   }
-  &__distrib-temp {
-    grid-area: distribTemp;
+  &__wind-label {
+    grid-area: windLabel;
+    @extend %_self-end;
   }
-  &__lat-temp {
-    grid-area: latTemp;
+  &__wind-input {
+    grid-area: windInput;
   }
-  &__conformity-select {
-    grid-area: conformitySelect;
+  &__wind-compl {
+    grid-area: windComplement;
+    @apply grid gap-x-1 gap-y-3 items-center mt-3;
+    grid-template-columns: repeat(2, max-content);
+    @extend %_mb-3;
+  }
+  &__distrib-temp-label {
+    grid-area: distribTempLabel;
+    @extend %_self-end;
+  }
+  &__distrib-temp-input {
+    grid-area: distribTempInput;
+  }
+  &__distrib-temp-error {
+    grid-area: distribTempComplement;
+    @extend %_mb-3;
+  }
+  &__lat-temp-label {
+    grid-area: latTempLabel;
+    @extend %_self-end;
+  }
+  &__lat-temp-input {
+    grid-area: latTempInput;
+  }
+  &__lat-temp-compl {
+    grid-area: latTempComplement;
+    @extend %_mb-3;
+  }
+  &__conformity-select-label {
+    grid-area: conformitySelectLabel;
+    @extend %_self-end;
+  }
+  &__conformity-select-input {
+    grid-area: conformitySelectInput;
   }
   &__submit {
     @apply justify-self-end;
@@ -109,6 +200,7 @@ legend {
 
   &__figure {
     flex: 1 1 27rem;
+    min-height: 24rem;
   }
 
   &__table {

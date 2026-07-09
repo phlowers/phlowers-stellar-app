@@ -40,7 +40,6 @@ import { ClimateComponent } from '@features/studio/loads/presentation/components
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
-import { Camera } from 'plotly.js-dist-min';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -48,17 +47,17 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
-import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
+import { STUDIO_SLIDER_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
+import { Camera } from 'plotly.js-dist-min';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { Study } from '@shared/domain/models/study.model';
-import { Section } from '@shared/domain/models/section.model';
+import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -215,9 +214,11 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly logger = inject(LoggerService);
+  private readonly persistenceService = inject(StudioViewPersistenceService);
 
   previousSectionUuid = signal<string | null>(null);
-  private activeSectionUuid: string | null = null;
+  private readonly activeSectionUuid = signal<string | null>(null);
+  private readonly isViewReady = signal<boolean>(false);
   private previousStartSupport: number | null = null;
   private previousEndSupport: number | null = null;
 
@@ -234,6 +235,15 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       }
       this.previousStartSupport = startSupport;
       this.previousEndSupport = endSupport;
+    });
+
+    // Save view state to localStorage immediately on any view-state signal change.
+    // Using an effect (not a debounce) ensures the camera is always persisted even if
+    // the user navigates away within milliseconds of the last interaction.
+    effect(() => {
+      const sectionUuid = this.activeSectionUuid();
+      if (!sectionUuid || !this.isViewReady()) return;
+      this.persistenceService.save(sectionUuid, this.buildViewState());
     });
   }
 
@@ -267,59 +277,61 @@ export class StudioPageComponent implements OnInit, OnDestroy {
         switchMap(() => from(this.studiesService.getStudyAsObservable(studyUuid))),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((study) => this.handleStudyUpdate(study, sectionUuid));
-  }
-
-  private handleStudyUpdate(study: Study | undefined, sectionUuid: string): void {
-    if (!study) {
-      this.router.navigate(['/studies']);
-      return;
-    }
-    this.plotService.study.set(study);
-    const section = study.sections.find((s) => s.uuid === sectionUuid);
-    if (!section) {
-      this.router.navigate(['/studies']);
-      return;
-    }
-    this.spanService.section.set(section);
-    this.initSection(section, sectionUuid);
-  }
-
-  private initSection(section: Section, sectionUuid: string): void {
-    if (this.previousSectionUuid() === section.uuid) return;
-
-    this.activeSectionUuid = sectionUuid;
-    const maxSupport = section.supports.length - 1;
-
-    if (section.studio_view_state) {
-      this.applyViewState(section.studio_view_state, maxSupport);
-    } else {
-      this.plotService.plotOptionsChange({ startSupport: 0, endSupport: maxSupport });
-    }
-
-    this.previousSectionUuid.set(section.uuid);
-  }
-
-  private applyViewState(vs: StudioViewState, maxSupport: number): void {
-    const start =
-      vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport ? vs.startSupport : 0;
-    const end =
-      vs.endSupport !== undefined && vs.endSupport > start && vs.endSupport <= maxSupport ? vs.endSupport : maxSupport;
-    this.plotService.plotOptionsChange({ startSupport: start, endSupport: end });
-
-    if (vs.camera) {
-      this.plotOptionsService.camera.set(vs.camera as Camera);
-    }
-    if (vs.scalingFactors) {
-      this.plotOptionsService.setScalingFactors(vs.scalingFactors);
-    }
-    if (vs.resolution !== undefined) {
-      this.resolutionService.setResolution(vs.resolution);
-      void this.resolutionService.applyResolution(vs.resolution);
-    }
+      .subscribe((study) => {
+        if (study) {
+          this.plotService.study.set(study);
+          const section = study.sections.find((s) => s.uuid === sectionUuid);
+          if (section) {
+            this.spanService.section.set(section);
+            if (this.previousSectionUuid() !== section.uuid) {
+              this.activeSectionUuid.set(sectionUuid);
+              this.isViewReady.set(false);
+              const maxSupport = section.supports.length - 1;
+              const vs = this.persistenceService.load(sectionUuid) ?? section.studio_view_state;
+              if (vs) {
+                const start =
+                  vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport
+                    ? vs.startSupport
+                    : 0;
+                const end =
+                  vs.endSupport !== undefined && vs.endSupport > start && vs.endSupport <= maxSupport
+                    ? vs.endSupport
+                    : maxSupport;
+                this.plotService.plotOptionsChange({ startSupport: start, endSupport: end });
+                if (vs.camera) {
+                  this.plotOptionsService.camera.set(vs.camera as Camera);
+                  // Also set as pending restore so SectionPlotComponent can apply it
+                  // directly via Plotly.relayout after the first render, guaranteeing
+                  // the camera is used even if layout-camera application is unreliable.
+                  this.plotOptionsService.pendingCameraRestore.set(vs.camera as Camera);
+                }
+                if (vs.scalingFactors) {
+                  this.plotOptionsService.setScalingFactors(vs.scalingFactors);
+                }
+                if (vs.resolution !== undefined) {
+                  this.resolutionService.setResolution(vs.resolution);
+                  void this.resolutionService.applyResolution(vs.resolution);
+                }
+              } else {
+                this.plotService.plotOptionsChange({
+                  endSupport: maxSupport,
+                  startSupport: 0
+                });
+              }
+              this.previousSectionUuid.set(section.uuid);
+              this.isViewReady.set(true);
+            }
+          } else {
+            this.router.navigate(['/studies']);
+          }
+        } else {
+          this.router.navigate(['/studies']);
+        }
+      });
   }
 
   ngOnDestroy(): void {
+    this.isViewReady.set(false);
     this.saveViewState();
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
@@ -327,10 +339,9 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.obstacleFormService.clearPositions();
   }
 
-  private saveViewState(): void {
-    const study = this.plotService.study();
-    if (!study || !this.activeSectionUuid) return;
-
+  private buildViewState(): StudioViewState {
+    // Use the camera signal only — it is kept synchronous with every plotly_relayout
+    // event via refreshCamera(), so DOM access (getCamera()) is not needed.
     const rawCam = this.plotOptionsService.camera();
     const camera: StudioViewCamera | null = rawCam
       ? {
@@ -339,18 +350,29 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           up: { x: rawCam.up?.x ?? 0, y: rawCam.up?.y ?? 0, z: rawCam.up?.z ?? 0 }
         }
       : null;
-
     const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    const studioViewState: StudioViewState = {
+    return {
       camera,
       scalingFactors: this.plotOptionsService.scalingFactors(),
       resolution: this.resolutionService.resolution(),
       startSupport,
       endSupport
     };
+  }
+
+  private saveViewState(): void {
+    const study = this.plotService.study();
+    const sectionUuid = this.activeSectionUuid();
+    if (!study || !sectionUuid) return;
+
+    const studioViewState = this.buildViewState();
+
+    // Sync localStorage with the definitive state on exit (effect may have fired earlier
+    // but isViewReady is now false so this explicit call guarantees the final write).
+    this.persistenceService.save(sectionUuid, studioViewState);
 
     const updatedSections = study.sections.map((s) =>
-      s.uuid === this.activeSectionUuid ? { ...s, studio_view_state: studioViewState } : s
+      s.uuid === sectionUuid ? { ...s, studio_view_state: studioViewState } : s
     );
     this.studiesService.updateStudy({ ...study, sections: updatedSections }, true).catch((err) => {
       this.logger.error('Failed to save studio view state', err);
@@ -363,7 +385,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const diff = Math.abs(options.endSupport - options.startSupport);
     const spanAmount = this.getSpanAmount(diff);
     this.spanService.spanAmountChoice.set(spanAmount);
-  }, STUDIO_PLOT_DEBOUNCE_DELAY);
+  }, STUDIO_SLIDER_DEBOUNCE_DELAY);
 
   private getSpanAmount(diff: number): SpanAmountChoice {
     if (diff === 1) return 'single';

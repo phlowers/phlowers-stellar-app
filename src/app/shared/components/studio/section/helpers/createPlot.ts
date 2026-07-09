@@ -62,6 +62,13 @@ export interface CreatePlotParams {
   cableModifications?: readonly CableModification[];
   /** Lookup mapping a span uuid (left support uuid) to its absolute support index. */
   spanUuidToIndex?: ReadonlyMap<string, number>;
+  /**
+   * When `true`, forces Plotly to reset to the layout camera instead of preserving
+   * any cached UI state. Set on the first render after a back-navigation that has a
+   * saved camera to restore. Plotly detects the uirevision change (`'restore'` vs
+   * `'stable'`) and applies the layout camera instantly — no relayout animation.
+   */
+  pendingRestore?: boolean;
 }
 
 const normalCamera = () => ({
@@ -257,12 +264,12 @@ const layout3d = (
 ): Partial<Layout> => ({
   autosize: true,
   showlegend: false,
-  // Keep uirevision constant so Plotly never resets user-driven camera state.
-  // On the very first render the plot element doesn't exist yet, so Plotly creates
-  // it from scratch and applies the layout camera regardless of uirevision.
-  // On subsequent Plotly.react() calls (e.g. after a slider change), the same
-  // uirevision tells Plotly to preserve the interactive camera position.
-  uirevision: 'stable',
+  // When pendingRestore is true (first render after a back-navigation with a saved camera),
+  // use a different uirevision value so Plotly detects a change and resets to the layout
+  // camera instantly — no smooth 3D fly-animation.
+  // On the very next render pendingRestore is false, uirevision returns to 'stable', and
+  // getLiveCamera() supplies the correctly-set saved camera, so Plotly preserves it.
+  uirevision: plotParams.pendingRestore ? 'restore' : 'stable',
   margin: {
     l: 0,
     r: 0,
@@ -295,6 +302,10 @@ const layout2d = (
   return {
     autosize: true,
     showlegend: false,
+    // Keep uirevision constant so Plotly never resets user-driven zoom/pan state.
+    // On subsequent Plotly.react() calls (e.g. after a selection change in the cards),
+    // the same uirevision tells Plotly to preserve the interactive viewport.
+    uirevision: 'stable',
     plot_bgcolor: plotParams.selectedDisplayOptions?.transparentBackground ? 'transparent' : 'gainsboro',
     margin: {
       l: 50,
@@ -399,3 +410,14 @@ export const purgePlot = (documentRef: Document, plotId: string): void => {
 
   Plotly.purge(plotElement);
 };
+
+/**
+ * Applies a saved camera directly to a Plotly 3D plot via `Plotly.relayout`.
+ * Called after the first render following a back-navigation to guarantee that
+ * the saved camera is used regardless of any layout/uirevision timing issues.
+ *
+ * @param plotId - The DOM element ID of the Plotly plot container.
+ * @param camera - The camera to restore.
+ */
+export const applyRestoreCamera = (plotId: string, camera: Camera): Promise<void> =>
+  Plotly.relayout(plotId, { 'scene.camera': camera as unknown } as Record<string, unknown>) as unknown as Promise<void>;
