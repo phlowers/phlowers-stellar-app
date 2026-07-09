@@ -83,6 +83,13 @@ def temperature_calculation(js_inputs):
 
 
 @debug_log
+def compute_diffuse_and_beam_radiations(js_inputs):
+    return temperature.compute_diffuse_and_beam_radiations(
+        inputs=js_inputs.to_py(default_converter=default_converter),
+    )
+
+
+@debug_log
 def calculate_papoto(js_inputs):
     return papoto.calculate_papoto(inputs=js_inputs.to_py())
 

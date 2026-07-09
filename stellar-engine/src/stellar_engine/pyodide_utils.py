@@ -37,5 +37,9 @@ def js_to_python(js_inputs) -> dict:
 def default_converter(value, _ignored1, _ignored2):
     """Convert js Date object into python Datetime object"""
     if value.constructor.name == "Date":
-        return datetime.fromtimestamp(value.valueOf() / 1000)
+        # Convert to UTC
+        # Value has type pyodide.ffi.JsProxy
+        # and thus has same methods as javascript Date
+        # NB: summer/winter time ignored
+        return datetime.fromisoformat(value.toISOString())
     return value
