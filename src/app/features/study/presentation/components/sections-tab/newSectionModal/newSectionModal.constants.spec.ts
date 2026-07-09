@@ -22,8 +22,8 @@ const validSupport: Support = {
   attachmentPosition: null,
   towerModel: null,
   spanAzimut: null,
-  xFootLambert93: null,
-  yFootLambert93: null
+  footLongitude: null,
+  footLatitude: null
 };
 
 const makeSection = (supports: Support[]): Section =>

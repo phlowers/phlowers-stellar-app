@@ -34,8 +34,8 @@ const makeSupport = (uuid: string, overrides: Partial<Support> = {}): Support =>
   attachmentPosition: null,
   towerModel: null,
   spanAzimut: null,
-  xFootLambert93: null,
-  yFootLambert93: null,
+  footLongitude: null,
+  footLatitude: null,
   ...overrides
 });
 

@@ -9,6 +9,47 @@ import { Section, Support } from '@shared/domain';
 import { GeoLiaisonAccroche, GeoLiaisonFieldError, GeoLiaisonFormat } from './section-import.interfaces';
 
 // ---------------------------------------------------------------------------
+// Lambert93 to GPS reprojection helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds the `spanLength`/`lineAngle` arrays consumed by the Lambert93-to-GPS reprojection
+ * tasks. The last support has no outgoing span, so it gets `NaN`/`0` placeholders.
+ */
+export function buildReprojectionAngles(supports: Support[]): { spanLength: number[]; lineAngle: number[] } {
+  const lastIndex = supports.length - 1;
+  return {
+    spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
+    lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
+  };
+}
+
+/** Returns a copy of `supports` with `footLatitude`/`footLongitude` set from the given arrays (by index). */
+export function applyFootCoordinates(supports: Support[], latitude: number[], longitude: number[]): Support[] {
+  return supports.map((support, i) => ({
+    ...support,
+    footLatitude: latitude[i] ?? null,
+    footLongitude: longitude[i] ?? null
+  }));
+}
+
+/**
+ * Computes the mean absolute distance (meters) between two Lambert93 coordinate arrays —
+ * the surveyed positions vs. the app's span/angle data model reconstruction.
+ */
+export function computeMeanReprojectionDiffMeters(
+  lambertX: number[],
+  lambertY: number[],
+  reconstructedX: number[],
+  reconstructedY: number[]
+): number {
+  return (
+    lambertX.reduce((sum, x, i) => sum + Math.hypot(x - reconstructedX[i], lambertY[i] - reconstructedY[i]), 0) /
+    lambertX.length
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Pure helper functions
 // ---------------------------------------------------------------------------
 
