@@ -126,7 +126,9 @@
     <dd class="directSolarFlux__value">{{ measureData().directSolarFlux | number: '1.0-2' }} W/m²</dd>
 
     <dt i18n class="diffusedPlusDirectSolarFlux__label">Diffused + direct solar flux</dt>
-    <dd class="diffusedPlusDirectSolarFlux__value">{{ measureData().diffusedPlusDirectSolarFlux  | number: '1.0-2' }} W/m²</dd>
+    <dd class="diffusedPlusDirectSolarFlux__value">
+      {{ measureData().diffusedPlusDirectSolarFlux | number: '1.0-2' }} W/m²
+    </dd>
   </dl>
 
   <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measuredDiffusedPlusDirectSolarFlux__label">
