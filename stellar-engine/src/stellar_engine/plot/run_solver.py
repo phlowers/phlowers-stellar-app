@@ -12,6 +12,7 @@ from mechaphlowers import SectionStudy
 from mechaphlowers.core.models.balance.interfaces import IBalanceModel
 from mechaphlowers.utils import arr
 
+from stellar_engine.core.loads import apply_span_loads
 from stellar_engine.entities.inputs import ClimateCharge, compute_ice_thickness
 
 logger = logging.getLogger("stellar_engine")
@@ -57,7 +58,11 @@ def change_state(
     cable_temperature = climate.cableTemperature
     ice_thickness = compute_ice_thickness(climate, len(study.balance_engine))
 
-    # apply_span_loads(study, change_state_inputs["spanLoads"])
+    # Apply span loads before checking has_span, so the engine reflects the current charge case
+    span_loads = change_state_inputs.get("spanLoads", None)
+    if span_loads is not None:
+        apply_span_loads(study, span_loads)
+
     logger.debug("---------Load case applied to engine---------")
     logger.debug(
         "Wind pressure: %s, Cable temperature: %s, Ice thickness: %s",

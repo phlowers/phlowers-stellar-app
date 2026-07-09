@@ -169,7 +169,6 @@ export class ClimateComponent {
       throw new Error('Study or section not found');
     }
     await this.loadFormsService.deleteLoad();
-    await this.chargesService.deleteCharge(studyUuid, sectionUuid, this.chargeUuid());
   }
 
   async saveForm() {
