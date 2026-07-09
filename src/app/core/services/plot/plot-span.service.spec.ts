@@ -34,8 +34,8 @@ describe('PlotSpanService', () => {
       chainSurface: 0.1,
       towerModel: 'Tower Model',
       spanAzimut: null,
-      xFootLambert93: null,
-      yFootLambert93: null
+      footLongitude: null,
+      footLatitude: null
     },
     {
       uuid: 'support-uuid-2',
@@ -58,8 +58,8 @@ describe('PlotSpanService', () => {
       chainSurface: 0.1,
       towerModel: 'Tower Model',
       spanAzimut: null,
-      xFootLambert93: null,
-      yFootLambert93: null
+      footLongitude: null,
+      footLatitude: null
     },
     {
       uuid: 'support-uuid-3',
@@ -82,8 +82,8 @@ describe('PlotSpanService', () => {
       chainSurface: 0.1,
       towerModel: 'Tower Model',
       spanAzimut: null,
-      xFootLambert93: null,
-      yFootLambert93: null
+      footLongitude: null,
+      footLatitude: null
     }
   ];
 

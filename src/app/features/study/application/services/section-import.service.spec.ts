@@ -10,6 +10,8 @@ import { MessageService } from 'primeng/api';
 import { SectionImportService } from './section-import.service';
 import { SectionService } from '@services/section/section.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskError } from '@core/services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
@@ -170,6 +172,57 @@ describe('SectionImportService', () => {
   let loggerSpy: vi.Mocked<LoggerService>;
   let maintenanceServiceMock: { getMaintenance: ReturnType<typeof vi.fn> };
   let attachmentServiceMock: { addSupportNamesIfAbsent: ReturnType<typeof vi.fn> };
+  let workerPythonServiceMock: { runTask: ReturnType<typeof vi.fn> };
+
+  /** Default successful runTask mock: returns arrays matching the length of the input arrays. */
+  const mockSuccessfulRunTask = (task: Task, inputs: Record<string, unknown>) => {
+    if (task === Task.importLambert) {
+      const lambertX = inputs['lambert_x'] as number[];
+      return Promise.resolve({
+        result: {
+          latitude: lambertX.map((_, i) => 45 + i),
+          longitude: lambertX.map((_, i) => 3 + i),
+          azimuth: lambertX.map(() => 0),
+          lambert_x: lambertX,
+          lambert_y: inputs['lambert_y']
+        },
+        error: null,
+        pythonErrorCode: null
+      });
+    }
+    if (task === Task.importLambertAndValidate) {
+      const lambertX = inputs['lambert_x'] as number[];
+      return Promise.resolve({
+        result: {
+          localization: {
+            latitude: lambertX.map((_, i) => 45 + i),
+            longitude: lambertX.map((_, i) => 3 + i),
+            azimuth: lambertX.map(() => 0),
+            lambert_x: lambertX,
+            lambert_y: inputs['lambert_y']
+          },
+          meanGpsDiff: 0.0001
+        },
+        error: null,
+        pythonErrorCode: null
+      });
+    }
+    if (task === Task.computeLocalization) {
+      const spanLength = inputs['spanLength'] as number[];
+      return Promise.resolve({
+        result: {
+          latitude: spanLength.map((_, i) => 45 + i),
+          longitude: spanLength.map((_, i) => 3 + i),
+          azimuth: spanLength.map(() => 0),
+          lambert_x: spanLength.map((_, i) => 100 + i),
+          lambert_y: spanLength.map((_, i) => 200 + i)
+        },
+        error: null,
+        pythonErrorCode: null
+      });
+    }
+    return Promise.resolve({ result: null, error: null, pythonErrorCode: null });
+  };
 
   const mockMaintenanceData: CatalogMaintenance[] = [
     {
@@ -207,6 +260,10 @@ describe('SectionImportService', () => {
       addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined)
     };
 
+    workerPythonServiceMock = {
+      runTask: vi.fn(mockSuccessfulRunTask)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         SectionImportService,
@@ -214,7 +271,8 @@ describe('SectionImportService', () => {
         { provide: MessageService, useValue: messageServiceMock },
         { provide: LoggerService, useValue: loggerSpy },
         { provide: MaintenanceService, useValue: maintenanceServiceMock },
-        { provide: AttachmentService, useValue: attachmentServiceMock }
+        { provide: AttachmentService, useValue: attachmentServiceMock },
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock }
       ]
     });
     service = TestBed.inject(SectionImportService);
@@ -608,8 +666,10 @@ describe('SectionImportService', () => {
       expect(firstSupport?.spanLength).toBe(565.49);
       expect(firstSupport?.spanAzimut).toBe(180.5);
       expect(firstSupport?.attachmentHeight).toBe(25.0);
-      expect(firstSupport?.xFootLambert93).toBe(123456.0);
-      expect(firstSupport?.yFootLambert93).toBe(789012.0);
+      // footLatitude/footLongitude come from the mocked Task.importLambertAndValidate result,
+      // not from the raw PIED_X_LAMBERT93/PIED_Y_LAMBERT93 values anymore.
+      expect(firstSupport?.footLatitude).toBe(45);
+      expect(firstSupport?.footLongitude).toBe(3);
     });
 
     it('should extract attachmentPosition from PORTEE_UNITAIRE_DESIGNATION', async () => {
@@ -715,6 +775,66 @@ describe('SectionImportService', () => {
         code: 'VALIDATION_ERROR',
         message: expect.stringContaining('ANGLE_LIGNE: null')
       });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // GeoLiaison format — Lambert93 to GPS reprojection
+  // -------------------------------------------------------------------------
+
+  describe('processFile() — Lambert93 to GPS reprojection', () => {
+    beforeEach(() => {
+      service.setStudyContext(buildMockStudy());
+    });
+
+    it('should call importLambert, importLambertAndValidate and computeLocalization in order', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      await service.processFile(file, neverAccept);
+
+      const calledTasks = workerPythonServiceMock.runTask.mock.calls.map((call) => call[0]);
+      expect(calledTasks).toEqual([Task.importLambert, Task.importLambertAndValidate, Task.computeLocalization]);
+    });
+
+    it('should store mean_reprojection_diff_meters computed from the raw Lambert93 input vs. computeLocalization output', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      // 3 supports: raw lambert_x = [123456, 123456, 123456], reconstructed lambert_x = [100, 101, 102]
+      // raw lambert_y = [789012, 789012, 789012], reconstructed lambert_y = [200, 201, 202]
+      const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(123456.0 - (100 + i), 789012.0 - (200 + i)));
+      const expectedMean = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
+      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(expectedMean, 6);
+    });
+
+    it('should throw an ImportError and abort the import when a reprojection task fails', async () => {
+      workerPythonServiceMock.runTask.mockImplementation((task: Task) => {
+        if (task === Task.importLambert) {
+          return Promise.resolve({ result: null, error: TaskError.CALCULATION_ERROR, pythonErrorCode: null });
+        }
+        return mockSuccessfulRunTask(task, {});
+      });
+
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
+        code: 'MAPPING_ERROR',
+        stage: 'MAPPING'
+      });
+      expect(sectionServiceMock.createOrUpdateSection).not.toHaveBeenCalled();
+    });
+
+    it('should skip reprojection and still persist the section when a support has no raw Lambert93 coordinates', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      (portees[0]['accroche depart'] as Record<string, unknown>)['PIED_X_LAMBERT93'] = null;
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result).not.toBeNull();
+      expect(result?.mean_reprojection_diff_meters).toBeNull();
+      expect(result?.supports.every((s) => s.footLatitude === null && s.footLongitude === null)).toBe(true);
+      expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(1);
     });
   });
 

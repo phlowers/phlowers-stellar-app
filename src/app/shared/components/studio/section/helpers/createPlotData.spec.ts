@@ -30,8 +30,8 @@ const mockSupports: Support[] = [
     chainSurface: null,
     towerModel: null,
     spanAzimut: null,
-    xFootLambert93: null,
-    yFootLambert93: null
+    footLongitude: null,
+    footLatitude: null
   },
   {
     uuid: 's1',
@@ -54,8 +54,8 @@ const mockSupports: Support[] = [
     chainSurface: null,
     towerModel: null,
     spanAzimut: null,
-    xFootLambert93: null,
-    yFootLambert93: null
+    footLongitude: null,
+    footLatitude: null
   }
 ];
 

@@ -69,21 +69,23 @@ export async function runCsvImport<TRow>(
       skipEmptyLines: true,
       delimiter: config.delimiter,
       chunkSize,
-      chunk: async (results, parser) => {
+      chunk: (results, parser) => {
         parser.pause();
-        try {
-          const { processedRows, keys } = await config.processChunk(results.data, ctx);
-          totalRows += processedRows;
-          if (keys) {
-            for (const k of keys) seenKeys.add(k);
+        void (async () => {
+          try {
+            const { processedRows, keys } = await config.processChunk(results.data, ctx);
+            totalRows += processedRows;
+            if (keys) {
+              for (const k of keys) seenKeys.add(k);
+            }
+            post({ type: 'progress', csvKey: config.csvKey, processedRows });
+          } catch (e) {
+            parser.abort();
+            reject(e instanceof Error ? e : new Error(String(e)));
+            return;
           }
-          post({ type: 'progress', csvKey: config.csvKey, processedRows });
-        } catch (e) {
-          parser.abort();
-          reject(e instanceof Error ? e : new Error(String(e)));
-          return;
-        }
-        parser.resume();
+          parser.resume();
+        })();
       },
       complete: () => resolve(),
       error: (err) => reject(err instanceof Error ? err : new Error(String(err)))

@@ -2027,12 +2027,6 @@
         <target>Erreur de calcul: &apos;Solver did not converge&apos;</target>
       </segment>
     </unit>
-    <unit id="8837923071812939954">
-      <segment state="initial">
-        <source>Are you sure you want to delete this study?</source>
-        <target>Êtes-vous sûr de vouloir supprimer cette étude ?</target>
-      </segment>
-    </unit>
     <unit id="1616102757855967475">
       <segment state="initial">
         <source>All</source>
@@ -2885,12 +2879,6 @@
         <target>Ajouter un cas de charge</target>
       </segment>
     </unit>
-    <unit id="8690924341268563915">
-      <segment state="initial">
-        <source>Add a load case</source>
-        <target>Ajouter un cas de charge</target>
-      </segment>
-    </unit>
     <unit id="2587240527868724590">
       <segment state="initial">
         <source>CC</source>
@@ -3303,18 +3291,6 @@
       <segment state="initial">
         <source>Select point</source>
         <target>Sélectionner le point</target>
-      </segment>
-    </unit>
-    <unit id="3876336363073925034">
-      <segment state="initial">
-        <source>Ice thickness before support frontier</source>
-        <target>Épaisseur du givre avant le support frontière</target>
-      </segment>
-    </unit>
-    <unit id="421318936396804890">
-      <segment state="initial">
-        <source>Ice thickness after support frontier</source>
-        <target>Épaisseur du givre après le support frontière</target>
       </segment>
     </unit>
     <unit id="6930809859018263642">
@@ -4821,6 +4797,24 @@
       <segment state="initial">
         <source>Failed to add measurement points</source>
         <target>Échec de l&apos;ajout des points de mesure</target>
+      </segment>
+    </unit>
+    <unit id="8900223846846763673">
+      <segment state="translated">
+        <source>Error computing GPS coordinates from Lambert93 data</source>
+        <target>Erreur lors du calcul des coordonnées GPS à partir des données Lambert93</target>
+      </segment>
+    </unit>
+    <unit id="4865056246123491233">
+      <segment state="translated">
+        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</source>
+        <target>La reprojection sur le modèle de données <ph id="0" equiv="PH" disp="environment.appName"/> semble ajouter une erreur absolue moyenne de <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</target>
+      </segment>
+    </unit>
+    <unit id="studio.plot.loading">
+      <segment state="initial">
+        <source>loading</source>
+        <target>chargement</target>
       </segment>
     </unit>
   </file>
