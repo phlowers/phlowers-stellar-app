@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -8,7 +9,7 @@ import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { GetSectionOutput, Task } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
 function createSignalMock<T>(initialValue: T) {
@@ -142,10 +143,9 @@ describe('LoadFormsService', () => {
       loading: createSignalMock(false),
       litData: createSignalMock(null),
       baseLitData: createSignalMock(null),
+      litDataCache: new Map(),
       error: createSignalMock(null),
-      diagnostics: createSignalMock([]),
       pythonErrorCode: createSignalMock(null),
-      workerReady: createSignalMock(false),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
@@ -153,7 +153,9 @@ describe('LoadFormsService', () => {
     } as unknown as vi.Mocked<PlotSpanService>;
     plotOptionsServiceMock = {
       refreshCamera: vi.fn(),
-      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1, view: '3d' })
+      getCamera: vi.fn().mockReturnValue(null),
+      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1, view: '3d' }),
+      camera: createSignalMock(null)
     } as unknown as vi.Mocked<PlotOptionsService>;
 
     mockChargesService = {
@@ -191,53 +193,6 @@ describe('LoadFormsService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
-  });
-
-  describe('constructor effect gating', () => {
-    it('should not call setLoads when worker is not ready even if a charge is selected', () => {
-      mockPlotService.workerReady.mockReturnValue(false);
-      mockPlotService.litData.mockReturnValue(null);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [mockCharge]
-      } as Section);
-
-      TestBed.flushEffects();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should not call setLoads when worker is ready but section studio has not finished initializing (litData null)', () => {
-      mockPlotService.workerReady.mockReturnValue(true);
-      mockPlotService.litData.mockReturnValue(null);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [mockCharge]
-      } as Section);
-
-      TestBed.flushEffects();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should call setLoads once worker is ready and litData is set (section studio initialized)', () => {
-      mockPlotService.workerReady.mockReturnValue(true);
-      mockPlotService.litData.mockReturnValue({} as ReturnType<typeof mockPlotService.litData>);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [mockCharge]
-      } as Section);
-
-      TestBed.flushEffects();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.setLoads,
-        expect.objectContaining({ spanLoads: expect.any(Array) })
-      );
-    });
   });
 
   describe('initTemporaryLoadData', () => {
@@ -316,38 +271,6 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
     });
-
-    it('should call setLoads with empty array when charge has no span loads', async () => {
-      const chargeWithNoLoads = {
-        ...mockCharge,
-        data: { ...mockChargeData, spanLoads: [] }
-      };
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [chargeWithNoLoads]
-      } as Section);
-
-      await service.initTemporaryLoadData();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setLoads, { spanLoads: [] });
-    });
-
-    it('should call setLoads with recheckSpanLoads result when charge has span loads', async () => {
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [mockCharge]
-      } as Section);
-
-      await service.initTemporaryLoadData();
-
-      const setLoadsCall = (mockWorkerPythonService.runTask as ReturnType<typeof vi.fn>).mock.calls.find(
-        ([task]) => task === Task.setLoads
-      );
-      expect(setLoadsCall).toBeDefined();
-      expect((setLoadsCall![1] as { spanLoads: unknown[] }).spanLoads.length).toBeGreaterThan(0);
-    });
   });
 
   describe('saveTemporaryLoadDataInSection', () => {
@@ -417,14 +340,42 @@ describe('LoadFormsService', () => {
       expect(plotOptionsServiceMock.refreshCamera).not.toHaveBeenCalled();
     });
 
-    it('should call refreshCamera and runTask(changeState) when temporaryLoadData is set', async () => {
+    it('should call refreshCamera and runTask(changeState) with climate AND spanLoads', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
 
       await service.calculateLoad();
 
       expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
+        climate: expect.any(Object),
+        spanLoads: expect.any(Array)
+      });
+    });
+
+    it('should pass empty spanLoads array to clear previous loads', async () => {
+      mockPlotService.temporaryLoadData = {
+        climate: mockChargeData.climate,
+        spanLoads: []
+      };
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
+
+      await service.calculateLoad();
+
+      // recheckSpanLoads creates placeholder entries for each support with loadWeight=0
+      // This is the expected behavior - the Python engine will zero them out
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
+        climate: expect.any(Object),
+        spanLoads: expect.arrayContaining([
+          expect.objectContaining({
+            supportUuid: 'support-uuid-1',
+            loadWeight: 0,
+            loadPosition: 0
+          })
+        ])
+      });
     });
 
     it('should update temporaryLoadData spanLoads with rechecked values before delegating', async () => {
@@ -470,7 +421,7 @@ describe('LoadFormsService', () => {
       expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
 
-    it('should not call cableModification when reapplyCableModifications is deactivated', async () => {
+    it('should re-apply saved cable modifications after changeState so lengthening/shortening is not lost', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue({
         ...mockSection,
@@ -485,30 +436,39 @@ describe('LoadFormsService', () => {
           }
         ]
       } as Section);
-      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: { success: true }, error: null });
+      mockWorkerPythonService.runTask
+        .mockResolvedValueOnce({ result: { success: true }, error: null }) // changeState
+        .mockResolvedValueOnce({ result: { current: { id: 'after-cable-mod' }, base: null }, error: null }); // cableModification
 
       await service.calculateLoad();
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        Task.cableModification,
+        expect.objectContaining({
+          spanIndex: 0,
+          widthCable: 'lengthening',
+          sizeCable: 0.5,
+          distanceSupportRef: 100,
+          supportRef: 'LEFT'
+        })
+      );
+      // Final litData reflects the cable modification, not the bare change-state.
+      expect(mockPlotService.litData.set).toHaveBeenLastCalledWith({ id: 'after-cable-mod' });
     });
 
-    it('should set plotService.error and diagnostics when runTask returns an error', async () => {
+    it('should set plotService.error when runTask returns an error', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue(mockSection);
-      const diagnostics = [
-        { code: PythonErrorCode.SolverError, severity: 'error' as const, origin: 'exception' as const, rawText: 'mock' }
-      ];
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null,
         error: 'CALCULATION_FAILED',
-        diagnostics
+        diagnostics: []
       });
 
       await service.calculateLoad();
 
       expect(mockPlotService.error.set).toHaveBeenCalledWith('CALCULATION_FAILED');
-      expect(mockPlotService.diagnostics.set).toHaveBeenCalledWith(diagnostics);
     });
 
     it('should not call refreshProjection when runTask returns an error', async () => {
@@ -569,41 +529,81 @@ describe('LoadFormsService', () => {
 
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
     });
+
+    it('should store final litData in litDataCache after successful calculation', async () => {
+      const finalLitData = { litCode: 'final' } as unknown as GetSectionOutput;
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1'
+      } as Section);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
+      mockPlotService.litData.mockReturnValue(finalLitData);
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.litDataCache.get('charge-uuid-1')).toBe(finalLitData);
+    });
+
+    it('should NOT update litDataCache when runTask returns an error', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1'
+      } as Section);
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_FAILED',
+        diagnostics: []
+      });
+
+      await service.calculateLoad();
+
+      expect(mockPlotService.litDataCache.has('charge-uuid-1')).toBe(false);
+    });
   });
 
   describe('deleteLoad', () => {
-    it('should call deleteAllLoads and changeState with base climate', async () => {
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        initial_conditions: [{ uuid: 'ic-1', base_temperature: 20 }],
-        selected_initial_condition_uuid: 'ic-1'
-      });
-      mockPlotService.temporaryLoadData = mockChargeData;
-
-      await service.deleteLoad();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.deleteAllLoads, undefined);
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
-        climate: expect.objectContaining({ windPressure: 0, iceThickness: 0, cableTemperature: 20 })
-      });
-    });
-
-    it('should clear temporaryLoadData and call refreshProjection', async () => {
-      mockSpanService.section.mockReturnValue(mockSection);
-      mockPlotService.temporaryLoadData = mockChargeData;
-
-      await service.deleteLoad();
-
-      expect(mockPlotService.temporaryLoadData).toBeNull();
-      expect(mockPlotService.refreshProjection).toHaveBeenCalled();
-    });
-
-    it('should not call chargesService.deleteCharge', async () => {
+    it('should return early when studyUuid is missing', () => {
+      mockPlotService.study.mockReturnValue(null);
       mockSpanService.section.mockReturnValue(mockSection);
 
-      await service.deleteLoad();
+      service.deleteLoad();
 
       expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+    });
+
+    it('should return early when sectionUuid is missing', () => {
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
+      mockSpanService.section.mockReturnValue(null);
+
+      service.deleteLoad();
+
+      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+    });
+
+    it('should return early when chargeUuid is missing', () => {
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: null
+      } as Section);
+
+      service.deleteLoad();
+
+      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+    });
+
+    it('should call deleteCharge with correct parameters', () => {
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid' } as Partial<Study> as Study);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1'
+      } as Section);
+
+      service.deleteLoad();
+
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid', 'section-uuid-1', 'charge-uuid-1');
     });
   });
 
@@ -646,6 +646,481 @@ describe('LoadFormsService', () => {
       expect(spanLoad?.loadWeight).toBe(0);
       expect(spanLoad?.type).toBe(LoadType.PUNCTUAL);
       expect(spanLoad?.referenceSupport).toBe('LEFT');
+    });
+  });
+
+  describe('litData cache on charge change', () => {
+    it('should NOT call litData.set when baseLitData is null and no cache entry', () => {
+      // On service creation: section() = null → chargeUuid = null ≠ undefined → effect fires
+      // no cache entry, baseLitData() = null → guard prevents litData.set
+      expect(mockPlotService.litData.set).not.toHaveBeenCalled();
+    });
+
+    it('should NOT set litData to baseLitData on cache miss when a charge is selected', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: vi.fn().mockReturnValue(mockBaseData),
+        litData: { set: vi.fn() },
+        litDataCache: new Map()
+      };
+      const freshSpanService = {
+        section: vi.fn().mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1'
+        } as Section)
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      TestBed.flushEffects();
+      expect(freshService).toBeTruthy();
+      // Switching to a charge case: keep current litData visible, do NOT flash the base state
+      expect(freshPlotService.litData.set).not.toHaveBeenCalledWith(mockBaseData);
+    });
+
+    it('should set litData to baseLitData when charge is deselected (chargeUuid becomes null)', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: vi.fn().mockReturnValue(mockBaseData),
+        litData: { set: vi.fn() },
+        litDataCache: new Map()
+      };
+      // Section has no selected charge (deselected)
+      const freshSpanService = {
+        section: vi.fn().mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: null
+        } as Section)
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      TestBed.flushEffects();
+      expect(freshService).toBeTruthy();
+      // Deselecting a charge → revert to base state immediately
+      expect(freshPlotService.litData.set).toHaveBeenCalledWith(mockBaseData);
+    });
+
+    it('should restore litData from cache on cache hit', () => {
+      const cachedData = { litCode: 'cached' } as unknown as GetSectionOutput;
+      const cache = new Map([['charge-uuid-1', cachedData]]);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: vi.fn().mockReturnValue({ litCode: 'base' }),
+        litData: { set: vi.fn() },
+        litDataCache: cache
+      };
+      const freshSpanService = {
+        section: vi.fn().mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1'
+        } as Section)
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      TestBed.flushEffects();
+      expect(freshService).toBeTruthy();
+      // cache hit → restored, NOT the base
+      expect(freshPlotService.litData.set).toHaveBeenCalledWith(cachedData);
+      expect(freshPlotService.litData.set).not.toHaveBeenCalledWith({ litCode: 'base' });
+    });
+  });
+
+  describe('Deferred calculation during loading', () => {
+    it('should calculate immediately when loading is false', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const loadingSignal = signal(false);
+      const sectionSignal = signal<Section | null>({
+        ...mockSection,
+        selected_charge_uuid: null,
+        charges: [mockCharge]
+      } as Section);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: signal(mockBaseData),
+        litData: signal<GetSectionOutput | null>(null),
+        litDataCache: new Map(),
+        loading: loadingSignal
+      };
+      const freshSpanService = {
+        section: sectionSignal
+      };
+      const spyCalculateLoad = vi.fn();
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      freshService.calculateLoad = spyCalculateLoad;
+      TestBed.flushEffects();
+
+      // Now change to a charge (simulating user selecting a charge)
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Verify calculateLoad was called immediately
+      expect(spyCalculateLoad).toHaveBeenCalled();
+    });
+
+    it('should defer calculation when loading is true', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const loadingSignal = signal(true);
+      const sectionSignal = signal<Section | null>({
+        ...mockSection,
+        selected_charge_uuid: null,
+        charges: [mockCharge]
+      } as Section);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: signal(mockBaseData),
+        litData: signal<GetSectionOutput | null>(null),
+        litDataCache: new Map(),
+        loading: loadingSignal
+      };
+      const freshSpanService = {
+        section: sectionSignal
+      };
+      const spyCalculateLoad = vi.fn();
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      freshService.calculateLoad = spyCalculateLoad;
+      TestBed.flushEffects();
+
+      // Now change to a charge while loading is true
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Verify calculateLoad was NOT called because loading is true
+      expect(spyCalculateLoad).not.toHaveBeenCalled();
+      // Verify the pending flag is set (accessing private property via type assertion)
+      const pendingUuid = (
+        freshService as unknown as { _pendingChargeCalculation: () => string | null }
+      )._pendingChargeCalculation();
+      expect(pendingUuid).toBe('charge-uuid-1');
+    });
+
+    it('should trigger pending calculation when loading becomes false', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const loadingSignal = signal(true);
+      const sectionSignal = signal<Section | null>({
+        ...mockSection,
+        selected_charge_uuid: null,
+        charges: [mockCharge]
+      } as Section);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: signal(mockBaseData),
+        litData: signal<GetSectionOutput | null>(null),
+        litDataCache: new Map(),
+        loading: loadingSignal
+      };
+      const freshSpanService = {
+        section: sectionSignal
+      };
+      const spyCalculateLoad = vi.fn();
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      freshService.calculateLoad = spyCalculateLoad;
+      TestBed.flushEffects();
+
+      // Change to a charge while loading is true
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Initially loading is true, so no calculation
+      expect(spyCalculateLoad).not.toHaveBeenCalled();
+
+      // Now set loading to false
+      loadingSignal.set(false);
+      TestBed.flushEffects();
+
+      // Verify calculateLoad was called after loading became false
+      expect(spyCalculateLoad).toHaveBeenCalled();
+      // Verify the pending flag is cleared
+      const pendingUuid = (
+        freshService as unknown as { _pendingChargeCalculation: () => string | null }
+      )._pendingChargeCalculation();
+      expect(pendingUuid).toBeNull();
+    });
+
+    it('should discard pending calculation if charge has changed again', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const loadingSignal = createSignalMock(true);
+      const sectionSignal = createSignalMock({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge, { ...mockCharge, uuid: 'charge-uuid-2', name: 'Charge 2' }]
+      } as Section);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: vi.fn().mockReturnValue(mockBaseData),
+        litData: { set: vi.fn() },
+        litDataCache: new Map(),
+        loading: loadingSignal
+      };
+      const freshSpanService = {
+        section: sectionSignal
+      };
+      const spyCalculateLoad = vi.fn();
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      freshService.calculateLoad = spyCalculateLoad;
+      TestBed.flushEffects();
+
+      // Initially loading is true, charge-uuid-1 is pending
+      expect(spyCalculateLoad).not.toHaveBeenCalled();
+
+      // Change to charge-uuid-2
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-2',
+        charges: [mockCharge, { ...mockCharge, uuid: 'charge-uuid-2', name: 'Charge 2' }]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Now set loading to false
+      loadingSignal.set(false);
+      TestBed.flushEffects();
+
+      // Verify pending calculation was discarded (UUID mismatch)
+      // The pending was charge-uuid-1 but current is charge-uuid-2
+      const pendingUuid = (
+        freshService as unknown as { _pendingChargeCalculation: () => string | null }
+      )._pendingChargeCalculation();
+      expect(pendingUuid).toBeNull();
+    });
+
+    it('should handle multiple rapid charge changes during loading', () => {
+      const mockBaseData = { litCode: 'base' } as unknown as GetSectionOutput;
+      const loadingSignal = signal(true);
+      const sectionSignal = signal<Section | null>({
+        ...mockSection,
+        selected_charge_uuid: null,
+        charges: [
+          mockCharge,
+          { ...mockCharge, uuid: 'charge-uuid-2', name: 'Charge 2' },
+          { ...mockCharge, uuid: 'charge-uuid-3', name: 'Charge 3' }
+        ]
+      } as Section);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: signal(mockBaseData),
+        litData: signal<GetSectionOutput | null>(null),
+        litDataCache: new Map(),
+        loading: loadingSignal
+      };
+      const freshSpanService = {
+        section: sectionSignal
+      };
+      const spyCalculateLoad = vi.fn();
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      freshService.calculateLoad = spyCalculateLoad;
+      TestBed.flushEffects();
+
+      // Change to charge-uuid-1
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [
+          mockCharge,
+          { ...mockCharge, uuid: 'charge-uuid-2', name: 'Charge 2' },
+          { ...mockCharge, uuid: 'charge-uuid-3', name: 'Charge 3' }
+        ]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Change to charge-uuid-2
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-2',
+        charges: [
+          mockCharge,
+          { ...mockCharge, uuid: 'charge-uuid-2', name: 'Charge 2' },
+          { ...mockCharge, uuid: 'charge-uuid-3', name: 'Charge 3' }
+        ]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Change to charge-uuid-3
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-3',
+        charges: [
+          mockCharge,
+          { ...mockCharge, uuid: 'charge-uuid-2', name: 'Charge 2' },
+          { ...mockCharge, uuid: 'charge-uuid-3', name: 'Charge 3' }
+        ]
+      } as Section);
+      TestBed.flushEffects();
+
+      // Now set loading to false
+      loadingSignal.set(false);
+      TestBed.flushEffects();
+
+      // Verify calculateLoad was called only once for the last charge (charge-uuid-3)
+      expect(spyCalculateLoad).toHaveBeenCalledTimes(1);
+    });
+
+    it('should use cache immediately even when loading is true', () => {
+      const cachedData = { litCode: 'cached' } as unknown as GetSectionOutput;
+      const cache = new Map([['charge-uuid-1', cachedData]]);
+      const loadingSignal = createSignalMock(true);
+      const freshPlotService = {
+        ...mockPlotService,
+        baseLitData: vi.fn().mockReturnValue({ litCode: 'base' }),
+        litData: { set: vi.fn() },
+        litDataCache: cache,
+        loading: loadingSignal
+      };
+      const freshSpanService = {
+        section: vi.fn().mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1',
+          charges: [mockCharge]
+        } as Section)
+      };
+      const spyCalculateLoad = vi.fn();
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          LoadFormsService,
+          { provide: PlotService, useValue: freshPlotService },
+          { provide: PlotSpanService, useValue: freshSpanService },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: ChargesService, useValue: mockChargesService },
+          { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+          { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        ]
+      });
+
+      const freshService = TestBed.inject(LoadFormsService);
+      freshService.calculateLoad = spyCalculateLoad;
+      TestBed.flushEffects();
+
+      // Verify cache was used immediately
+      expect(freshPlotService.litData.set).toHaveBeenCalledWith(cachedData);
+      // Verify calculateLoad was NOT called (cache hit)
+      expect(spyCalculateLoad).not.toHaveBeenCalled();
+      // Verify no pending calculation
+      const pendingUuid = (
+        freshService as unknown as { _pendingChargeCalculation: () => string | null }
+      )._pendingChargeCalculation();
+      expect(pendingUuid).toBeNull();
     });
   });
 });
