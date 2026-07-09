@@ -67,8 +67,8 @@ export interface Support {
   chainSurface: number | null;
   /** Azimut of the span (degrees) */
   spanAzimut: number | null;
-  /** X coordinate of the support foot in Lambert 93 projection */
-  xFootLambert93: number | null;
-  /** Y coordinate of the support foot in Lambert 93 projection */
-  yFootLambert93: number | null;
+  /** Longitude of the support foot, computed from Lambert93 reprojection (degrees) */
+  footLongitude: number | null;
+  /** Latitude of the support foot, computed from Lambert93 reprojection (degrees) */
+  footLatitude: number | null;
 }

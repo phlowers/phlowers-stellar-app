@@ -110,8 +110,8 @@ const mockSupports: Support[] = [
     attachmentPosition: 'Position 1',
     towerModel: 'Tower Model',
     spanAzimut: null,
-    xFootLambert93: null,
-    yFootLambert93: null
+    footLongitude: null,
+    footLatitude: null
   },
   {
     uuid: 'support2',
@@ -134,8 +134,8 @@ const mockSupports: Support[] = [
     attachmentPosition: 'Position 2',
     towerModel: 'Tower Model',
     spanAzimut: null,
-    xFootLambert93: null,
-    yFootLambert93: null
+    footLongitude: null,
+    footLatitude: null
   },
   {
     uuid: 'support3',
@@ -158,8 +158,8 @@ const mockSupports: Support[] = [
     attachmentPosition: null,
     towerModel: null,
     spanAzimut: null,
-    xFootLambert93: null,
-    yFootLambert93: null
+    footLongitude: null,
+    footLatitude: null
   }
 ];
 

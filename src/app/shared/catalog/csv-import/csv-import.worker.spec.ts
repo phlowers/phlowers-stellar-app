@@ -76,18 +76,21 @@ describe('csv-import.worker - runWorkerImport', () => {
     const { runWorkerImport } = await import('./csv-import.worker');
     vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
       const opts = args[1] as Papa.ParseConfig<Record<string, string>>;
-      const parser = { pause: vi.fn(), resume: vi.fn(), abort: vi.fn() } as unknown as Papa.Parser;
-      void (async () => {
-        await opts.chunk?.(
-          {
-            data: [{ name: 'FAKE_X', cable_id: 'ID' } as Record<string, string>],
-            errors: [],
-            meta: {} as Papa.ParseMeta
-          },
-          parser
-        );
-        opts.complete?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, undefined);
-      })();
+      const parser = {
+        pause: vi.fn(),
+        resume: vi.fn(() => {
+          opts.complete?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, undefined);
+        }),
+        abort: vi.fn()
+      } as unknown as Papa.Parser;
+      opts.chunk?.(
+        {
+          data: [{ name: 'FAKE_X', cable_id: 'ID' } as Record<string, string>],
+          errors: [],
+          meta: {} as Papa.ParseMeta
+        },
+        parser
+      );
     });
 
     const messages: CsvImportWorkerResponse[] = [];
@@ -103,18 +106,21 @@ describe('csv-import.worker - runWorkerImport', () => {
     const { runWorkerImport } = await import('./csv-import.worker');
     vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
       const opts = args[1] as Papa.ParseConfig<Record<string, string>>;
-      const parser = { pause: vi.fn(), resume: vi.fn(), abort: vi.fn() } as unknown as Papa.Parser;
-      void (async () => {
-        await opts.chunk?.(
-          {
-            data: [{ support_idr: 'S1', support_adr: '', support_tower: 'T', position: '1' } as Record<string, string>],
-            errors: [],
-            meta: {} as Papa.ParseMeta
-          },
-          parser
-        );
-        opts.complete?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, undefined);
-      })();
+      const parser = {
+        pause: vi.fn(),
+        resume: vi.fn(() => {
+          opts.complete?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, undefined);
+        }),
+        abort: vi.fn()
+      } as unknown as Papa.Parser;
+      opts.chunk?.(
+        {
+          data: [{ support_idr: 'S1', support_adr: '', support_tower: 'T', position: '1' } as Record<string, string>],
+          errors: [],
+          meta: {} as Papa.ParseMeta
+        },
+        parser
+      );
     });
     const messages: CsvImportWorkerResponse[] = [];
     await runWorkerImport({ csvKey: 'attachments', url: 'http://x/a.csv' }, (m) => messages.push(m));

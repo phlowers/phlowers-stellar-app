@@ -114,8 +114,8 @@ describe('AttachmentSetModalComponent', () => {
     attachmentPosition: 'Position 1',
     towerModel: 'Tower Model',
     spanAzimut: null,
-    xFootLambert93: null,
-    yFootLambert93: null
+    footLongitude: null,
+    footLatitude: null
   };
 
   const mockSection: Section = {
@@ -167,7 +167,8 @@ describe('AttachmentSetModalComponent', () => {
     selected_cable_span_manipulation_uuid: null,
     start_latitude: null,
     start_longitude: null,
-    start_azimuth: null
+    start_azimuth: null,
+    mean_reprojection_diff_meters: null
   };
 
   beforeEach(async () => {
