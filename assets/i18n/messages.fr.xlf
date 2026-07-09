@@ -2551,25 +2551,25 @@
     </unit>
     <unit id="4841701538805347294">
       <segment state="initial">
-        <source>Diffused solar flux</source>
+        <source>Diffuse solar radiation</source>
         <target>Flux solaire diffus</target>
       </segment>
     </unit>
     <unit id="230124996532453189">
       <segment state="initial">
-        <source>Direct solar flux</source>
+        <source>Beam solar radiation</source>
         <target>Flux solaire direct</target>
       </segment>
     </unit>
     <unit id="4412456247511617977">
       <segment state="initial">
-        <source>Diffused + direct solar flux</source>
+        <source>Diffuse + beam solar radiation</source>
         <target>Flux solaire diffus + direct</target>
       </segment>
     </unit>
     <unit id="6052330236106770932">
       <segment state="initial">
-        <source> Measured diffused + direct solar flux (not required) </source>
+        <source> Measured diffuse + beam solar radiation (not required) </source>
         <target> Flux solaire diffus + direct mesuré (facultatif) </target>
       </segment>
     </unit>
