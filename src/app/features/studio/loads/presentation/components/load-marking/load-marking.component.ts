@@ -127,15 +127,6 @@ export class LoadMarkingComponent {
     { label: $localize`Marking`, value: 'marking' }
   ];
 
-  private _previousChargeUuid: string | null | undefined = undefined;
-
-  private readonly _reloadOnChargeChange = effect(() => {
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    if (chargeUuid === this._previousChargeUuid) return;
-    this._previousChargeUuid = chargeUuid;
-    untracked(() => this.resetForm());
-  });
-
   resetForm() {
     this.form.reset();
     this.form.controls.referenceSupport.disable();

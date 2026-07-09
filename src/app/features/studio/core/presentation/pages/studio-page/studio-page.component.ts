@@ -47,7 +47,7 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
-import { STUDIO_SLIDER_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
+import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
@@ -385,7 +385,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const diff = Math.abs(options.endSupport - options.startSupport);
     const spanAmount = this.getSpanAmount(diff);
     this.spanService.spanAmountChoice.set(spanAmount);
-  }, STUDIO_SLIDER_DEBOUNCE_DELAY);
+  }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
   private getSpanAmount(diff: number): SpanAmountChoice {
     if (diff === 1) return 'single';
