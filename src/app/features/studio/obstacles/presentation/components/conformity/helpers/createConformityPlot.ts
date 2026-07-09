@@ -151,8 +151,8 @@ function obstacleTrace(response: ConformityPlotResponse): Data {
 /**
  * Render the conformity cross-section into the `#conformity-plot` div.
  *
- * Only the rules selected in the multiselect are drawn, stacked so the first rule key
- * (RULE_1) sits on top of the following ones. Styling depends on the conformity type:
+ * Only the rules selected in the multiselect are drawn, stacked so the first rule key in
+ * `response.conformity` sits on top of the following ones. Styling depends on the conformity type:
  * - `overhang` / `vegetation`: filled zone with a bright border following the task's
  *   `zoneBorder`; cable points as `#017aa3` markers.
  * - `cable_track`: no zone box; cable points drawn as rule-colored disks sized by `radius`.
@@ -165,7 +165,7 @@ export function createConformityPlot(
   if (!documentRef.getElementById(CONFORMITY_PLOT_ID)) return;
 
   const isCableTrack = options.conformityType === 'cable_track';
-  // Response key order is the stacking priority; draw reversed so RULE_1 lands on top.
+  // Response key order is the stacking priority; draw reversed so the first key lands on top.
   const ruleTypes = Object.keys(response.conformity).filter((rt) => options.selectedRuleTypes.includes(rt));
 
   const traces: Data[] = [];

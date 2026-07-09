@@ -53,6 +53,6 @@ export interface ConformityPlotObstacle {
 /** Full response the conformity calculation returns for the graph. */
 export interface ConformityPlotResponse {
   obstacle: ConformityPlotObstacle;
-  /** Rules keyed by `rule_type` (e.g. `'RULE_1'`). Key order is the stacking priority. */
+  /** Rules keyed by `rule_type` (e.g. `'rule_a'`). Key order is the stacking priority. */
   conformity: Record<string, ConformityRulePlot>;
 }
