@@ -100,6 +100,13 @@ export class AuthService {
   async initialize(): Promise<void> {
     const cached = await this.loadCachedUser();
 
+    // Fast offline-first path: a previously-authenticated OIDC user (proven by
+    // the presence of a `sub` claim) is valid offline regardless of the server
+    // mode, which is not yet known at this point. Publish it immediately so the
+    // app starts instantly from cache, then resync with the server in the
+    // background WITHOUT making the caller (APP_INITIALIZER) wait for it.
+    // Skipped when a server mismatch is already proven while online (defence in
+    // depth): that case must go through the authoritative probe below.
     if (cached?.sub && !this.shouldForceServerResync()) {
       this.currentUser.set(cached);
       void this.refreshFromNetwork().catch((err) => {
@@ -108,23 +115,9 @@ export class AuthService {
       return;
     }
 
-    // IMPORTANT: never await the network probe here. This method is called
-    // from APP_INITIALIZER and Angular renders nothing until it resolves.
-    // probeUserinfo() can take up to USERINFO_PROBE_TIMEOUT_MS (13s) on a
-    // slow/unreachable server — that must never turn into a blank white
-    // screen. The auth guard and the login page already tolerate the
-    // transient "unresolved" state (IndexedDB fallback, `modeResolved`
-    // signal), so resolving in the background is safe.
-    void this.resolveModeAndUserFromNetwork(cached);
-  }
-
-  /**
-   * Background counterpart of `initialize()` for the "no proven-OIDC cached
-   * user" path: probes the server to discover the auth mode and any active
-   * session, then falls back to the IndexedDB cache. Never awaited by the
-   * caller so it cannot delay the app's first render.
-   */
-  private async resolveModeAndUserFromNetwork(cached: User | null): Promise<void> {
+    // No proven-OIDC cached user: the mode (OIDC vs fallback) is still unknown,
+    // so the network probe (bounded by USERINFO_PROBE_TIMEOUT_MS) must run
+    // before deciding whether an email-only cached user may be trusted.
     const claims = await this.probeUserinfo();
 
     // 1. Active OIDC session — authoritative path.

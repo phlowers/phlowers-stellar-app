@@ -1083,12 +1083,8 @@
     </unit>
     <unit id="187187500641108332">
       <segment state="initial">
-        <source>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
-        </source>
-        <target>
-          <ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/>
-        </target>
+        <source><ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/></source>
+        <target><ph id="0" equiv="INTERPOLATION" disp="{{ cardTitle() }}"/></target>
       </segment>
     </unit>
     <unit id="997715536640361323">
@@ -2549,28 +2545,22 @@
         <target>Flux solaire :</target>
       </segment>
     </unit>
-    <unit id="4841701538805347294">
+    <unit id="3808497976539301592">
       <segment state="initial">
-        <source>Diffused solar flux</source>
+        <source>Diffuse solar radiation</source>
         <target>Flux solaire diffus</target>
       </segment>
     </unit>
-    <unit id="230124996532453189">
+    <unit id="4226146180293313534">
       <segment state="initial">
-        <source>Direct solar flux</source>
+        <source>Beam solar radiation</source>
         <target>Flux solaire direct</target>
       </segment>
     </unit>
-    <unit id="4412456247511617977">
+    <unit id="7894946941174275313">
       <segment state="initial">
-        <source>Diffused + direct solar flux</source>
+        <source>Diffuse + beam solar radiation</source>
         <target>Flux solaire diffus + direct</target>
-      </segment>
-    </unit>
-    <unit id="6052330236106770932">
-      <segment state="initial">
-        <source> Measured diffused + direct solar flux (not required) </source>
-        <target> Flux solaire diffus + direct mesuré (facultatif) </target>
       </segment>
     </unit>
     <unit id="4153303378370584000">
@@ -4829,6 +4819,12 @@
         <target>Une erreur inattendue s&apos;est produite. Veuillez recharger la page si le problème persiste.</target>
       </segment>
     </unit>
+    <unit id="3017905259126952863">
+      <segment state="initial">
+        <source>An unexpected error occurred. Please reload the page if the problem persists.</source>
+        <target>Une erreur inattendue s&apos;est produite. Veuillez recharger la page si le problème persiste.</target>
+      </segment>
+    </unit>
     <unit id="3791858162236753226">
       <segment state="initial">
         <source>Cannot calculate conformity: obstacle type has no conformity configuration</source>
@@ -4845,6 +4841,12 @@
       <segment state="initial">
         <source>Conformity results updated.</source>
         <target>Résultats de la conformité mis à jour.</target>
+      </segment>
+    </unit>
+    <unit id="2568633915195803623">
+      <segment state="initial">
+        <source> Measured diffuse + beam solar radiation (not required) </source>
+        <target> Flux solaire diffus + direct mesuré (facultatif) </target>
       </segment>
     </unit>
   </file>
