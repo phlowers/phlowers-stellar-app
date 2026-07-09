@@ -3999,7 +3999,7 @@
         <source>Failed to add measurement points</source>
     <unit id="4865056246123491233">
       <segment>
-        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanGpsDiffMeters.toFixed(1)"/> m</source>
+        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</source>
       </segment>
     </unit>
     <unit id="8900223846846763673">

@@ -4829,8 +4829,8 @@
     </unit>
     <unit id="4865056246123491233">
       <segment state="translated">
-        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanGpsDiffMeters.toFixed(1)"/> m</source>
-        <target>La reprojection sur le modèle de donnée <ph id="0" equiv="PH" disp="environment.appName"/> semble ajouter une erreur absolue moyenne de <ph id="1" equiv="PH_1" disp="meanGpsDiffMeters.toFixed(1)"/> m</target>
+        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</source>
+        <target>La reprojection sur le modèle de données <ph id="0" equiv="PH" disp="environment.appName"/> semble ajouter une erreur absolue moyenne de <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</target>
       </segment>
     </unit>
   </file>

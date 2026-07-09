@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 import numpy as np
 import pandas as pd
 from mechaphlowers import (
@@ -18,6 +19,7 @@ from stellar_engine.entities.inputs import (
     SectionGeoData,
 )
 
+logger = logging.getLogger("stellar_engine")
 
 def compute_localization(inputs: dict) -> dict:
     geo_inputs = SectionGeoData(**inputs)
@@ -117,5 +119,8 @@ def import_lambert_and_validate(inputs: dict):
     lon_diff = abs(np.array(result_loc["longitude"]) - lon_section_data)
     dist_diff = np.linalg.norm([lat_diff, lon_diff], axis=0)
     mean_gps_diff = np.mean(dist_diff)
+
+    logger.debug(f"Latitude difference between imported Lambert and section data: {lat_diff}")
+    logger.debug(f"Longitude difference between imported Lambert and section data: {lon_diff}")
 
     return {"localization": result_loc, "meanGpsDiff": mean_gps_diff}

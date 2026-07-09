@@ -160,5 +160,5 @@ export interface Section {
   /** Saved studio view state (camera, scale, resolution, span selection). */
   studio_view_state?: StudioViewState;
   /** Mean absolute error (meters) between surveyed Lambert93 foot coordinates and the app's span/angle data model reprojection, computed on GeoLiaison import */
-  mean_gps_diff_meters: number | null;
+  mean_reprojection_diff_meters: number | null;
 }

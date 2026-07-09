@@ -251,7 +251,7 @@ describe('PlotService', () => {
     start_latitude: null,
     start_longitude: null,
     start_azimuth: null,
-    mean_gps_diff_meters: null
+    mean_reprojection_diff_meters: null
   };
 
   beforeEach(() => {
