@@ -1495,22 +1495,22 @@
     </unit>
     <unit id="4841701538805347294">
       <segment>
-        <source>Diffused solar flux</source>
+        <source>Diffuse solar radiation</source>
       </segment>
     </unit>
     <unit id="230124996532453189">
       <segment>
-        <source>Direct solar flux</source>
+        <source>Beam solar radiation</source>
       </segment>
     </unit>
     <unit id="4412456247511617977">
       <segment>
-        <source>Diffused + direct solar flux</source>
+        <source>Diffuse + beam solar radiation</source>
       </segment>
     </unit>
     <unit id="6052330236106770932">
       <segment>
-        <source> Measured diffused + direct solar flux (not required) </source>
+        <source> Measured diffuse + beam solar radiation (not required) </source>
       </segment>
     </unit>
     <unit id="4153303378370584000">
