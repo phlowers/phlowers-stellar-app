@@ -4814,13 +4814,13 @@
     <unit id="6490579965306000316">
       <segment state="initial">
         <source>Reference support is left and altitude is taken absolute</source>
-        <target>Le support de référence est à gauche et l'altitude est prise en valeur absolue</target>
+        <target>Le support de référence est à gauche et l&apos;altitude est prise en valeur absolue</target>
       </segment>
     </unit>
     <unit id="7948668127845854530">
       <segment state="initial">
         <source>Failed to add measurement points</source>
-        <target>Échec de l'ajout des points de mesure</target>
+        <target>Échec de l&apos;ajout des points de mesure</target>
       </segment>
     </unit>
   </file>
