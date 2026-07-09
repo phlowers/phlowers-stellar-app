@@ -233,6 +233,15 @@ export class ConformityComponent {
     { initialValue: null as number | null }
   );
 
+  private readonly intermediatePointsConfig = toSignal(
+    from(
+      this.storageService.db?.catObstacleConformityConfig
+        .get(OBSTACLE_CONFORMITY_CONFIG_KEY)
+        .then((c) => c?.intermediate_point_positions ?? []) ?? Promise.resolve([] as number[])
+    ),
+    { initialValue: [] as number[] }
+  );
+
   private readonly lateralTemperatureConfig = toSignal(
     from(
       (async (): Promise<{ defaultTemp: number | null; message: string | null; ruleName: string | null }> => {
@@ -446,7 +455,8 @@ export class ConformityComponent {
           repartitionTemperature: v.repartitionTemperature,
           lateralDistanceTemperature: v.lateralDistanceTemperature,
           selectedConformityRules: selectedRuleTypes,
-          conformity: v.conformity
+          conformity: v.conformity,
+          intermediatePoints: this.intermediatePointsConfig()
         },
         rulesClimaticConditions: rules.map((r) => ({
           ruleType: r.rule_type,

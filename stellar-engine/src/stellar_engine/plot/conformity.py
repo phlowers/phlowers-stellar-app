@@ -5,9 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 from copy import deepcopy
 from dataclasses import dataclass, field
-import logging
 from typing import Literal, Optional
 
 import numpy as np
@@ -112,21 +112,27 @@ class ConformityResult:
         self.u_plane = u_plane
         self.v_plane = v_plane
 
+    def project_onto_plane(self, point, plane_origin=np.array([0.0, 0.0, 0.0])) -> tuple[float, float]:
+        target_coords_in_plane = point_coordinates_in_plane(
+            point=point,
+            plane_origin=plane_origin,
+            u_plane=self.u_plane,
+            v_plane=self.v_plane,
+        )
+        return target_coords_in_plane
+    
+
     def add_obstacle_3d_point(
         self,
         point: np.ndarray,
         radius: Optional[float] = None,
     ) -> None:
         """Add the obstacle point after plane projection."""
-        target_coords_in_plane = point_coordinates_in_plane(
-            point=point,
-            plane_origin=np.array([0.0, 0.0, 0.0]),
-            u_plane=self.u_plane,
-            v_plane=self.v_plane,
-        )
+        target_coords_in_plane = self.project_onto_plane(point)
         self.obstacle.points.append(
             Point2D(x=target_coords_in_plane[0], y=target_coords_in_plane[1], radius=radius)
         )
+
 
     def add_zone_3d_point(
         self,
@@ -135,12 +141,7 @@ class ConformityResult:
         radius: float,
     ) -> None:
         """Add a target point to the zone points list after plane projection."""
-        target_coords_in_plane = point_coordinates_in_plane(
-            point=point,
-            plane_origin=np.array([0.0, 0.0, 0.0]),
-            u_plane=self.u_plane,
-            v_plane=self.v_plane,
-        )
+        target_coords_in_plane = self.project_onto_plane(point)
         self.conformity[rule_type].points.append(
             Point2D(x=target_coords_in_plane[0], y=target_coords_in_plane[1], radius=radius)
         )
@@ -175,7 +176,7 @@ class Scenario:
     """Represents a conformity computation scenario."""
     rule_type: str
     conformity_rule: str
-    conformity_point: str  # "lateral" or "overhang"
+    conformity_point: str  # "lateral" or "overhang" or "cable_tracks"
     security_distance: float
     target_state: TargetState
 
@@ -255,6 +256,13 @@ class RuleClimaticCondition:
     lateral_point: ClimaticPoint
     overhang_point: ClimaticPoint
 
+    def with_inverse_lateral_pressure(self) -> 'RuleClimaticCondition':
+        """Return a copy of the rule with the lateral pressure inverted."""
+        inverse_rule = deepcopy(self)
+        if isinstance(inverse_rule.lateral_point.pressure, (int, float)):
+            inverse_rule.lateral_point.pressure = -inverse_rule.lateral_point.pressure
+        return inverse_rule
+
     @classmethod
     def from_dict(cls, data: dict) -> 'RuleClimaticCondition':
         """Create RuleClimaticCondition from dictionary with validation.
@@ -272,9 +280,9 @@ class RuleClimaticCondition:
             raise ValueError("RuleClimaticCondition data must be a dictionary")
         
         required_fields = ["ruleType", "ruleName", "lateralPoint", "overhangPoint"]
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"RuleClimaticCondition missing required field: {field}")
+        for fields in required_fields:
+            if fields not in data:
+                raise ValueError(f"RuleClimaticCondition missing required field: {fields}")
         
         return cls(
             rule_type=data["ruleType"],
@@ -317,9 +325,9 @@ class RuleDistance:
             raise ValueError("RuleDistance data must be a dictionary")
         
         required_fields = ["ruleType", "lateral", "overhang"]
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"RuleDistance missing required field: {field}")
+        for fields in required_fields:
+            if fields not in data:
+                raise ValueError(f"RuleDistance missing required field: {fields}")
         
         if not isinstance(data["lateral"], dict):
             raise ValueError("RuleDistance lateral must be a dictionary")
@@ -351,8 +359,8 @@ class ConformityParameters:
     repartition_temperature: float
     lateral_distance_temperature: float
     selected_conformity_rules: list[str]
+    intermediate_points: list[float] = field(default_factory=list)
     conformity_plot: Literal["vegetation", "cable_tracks", "overhang"] | None = None
-
     @classmethod
     def from_dict(cls, data: dict) -> 'ConformityParameters':
         """Create ConformityParameters from dictionary with validation.
@@ -374,9 +382,9 @@ class ConformityParameters:
             "repartitionTemperature", "lateralDistanceTemperature",
             "selectedConformityRules"
         ]
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"ConformityParameters missing required field: {field}")
+        for fields in required_fields:
+            if fields not in data:
+                raise ValueError(f"ConformityParameters missing required field: {fields}")
 
         if not isinstance(data["windZone"], str):
             raise ValueError("windZone must be a string")
@@ -394,6 +402,12 @@ class ConformityParameters:
             isinstance(r, str) for r in data["selectedConformityRules"]
         ):
             raise ValueError("selectedConformityRules must be a list of strings")
+
+        intermediate_points = data.get("intermediatePoints", [])
+        if not isinstance(intermediate_points, list) or not all(
+            isinstance(point, (int, float)) for point in intermediate_points
+        ):
+            raise ValueError("intermediatePoints must be a list of numbers")
 
         conformity_plot = data.get("conformityPlot")
         if conformity_plot is not None and conformity_plot not in (
@@ -413,6 +427,7 @@ class ConformityParameters:
             repartition_temperature=data["repartitionTemperature"],
             lateral_distance_temperature=data["lateralDistanceTemperature"],
             selected_conformity_rules=data["selectedConformityRules"],
+            intermediate_points=intermediate_points,
             conformity_plot=data.get("conformityPlot"),
         )
 
@@ -427,6 +442,8 @@ class ConformityParameters:
             "lateralDistanceTemperature": self.lateral_distance_temperature,
             "selectedConformityRules": self.selected_conformity_rules,
         }
+        if self.intermediate_points:
+            result["intermediatePoints"] = self.intermediate_points
         if self.conformity_plot is not None:
             result["conformityPlot"] = self.conformity_plot
         return result
@@ -439,9 +456,52 @@ class ConformityPlotRules:
 
     default_radius = 1.0
     
-    def __init__(self, conformity_plot: Literal["vegetation", "cable_tracks", "overhang"]):
+    def __init__(
+        self,
+        conformity_plot: Literal["vegetation", "cable_tracks", "overhang"],
+        intermediate_points: list[float] | None = None,
+    ):
         self.conformity_plot = conformity_plot
         self.rules_distances: dict[str, TensionRules] = {}
+        self.intermediate_points = intermediate_points
+
+    def build_rules_climatic_conditions(self, rules_climatic_conditions_data: list[dict]) -> list[RuleClimaticCondition]:
+        """Build list of RuleClimaticCondition from list of dictionaries."""
+
+        rules = []
+        for rcc in rules_climatic_conditions_data:
+            rule = RuleClimaticCondition.from_dict(rcc)
+            rules.append(rule)
+            
+            inverse_rule = rule.with_inverse_lateral_pressure()
+            rules.append(inverse_rule)
+
+            if self.conformity_plot == "cable_tracks":
+                if not isinstance(rule.lateral_point.pressure, (int, float)):
+                    continue
+                if not isinstance(rule.overhang_point.pressure, (int, float)):
+                    continue
+
+                lateral_pressure = float(rule.lateral_point.pressure)
+                overhang_pressure = float(rule.overhang_point.pressure)
+                inverse_lateral_pressure = -lateral_pressure
+
+                for point in self.intermediate_points:
+                    inverse_to_overhang = deepcopy(inverse_rule)
+                    inverse_to_overhang.lateral_point.pressure = (
+                        inverse_lateral_pressure * (1 - point)
+                        + overhang_pressure * point
+                    )
+                    rules.append(inverse_to_overhang)
+
+                    overhang_to_lateral = deepcopy(rule)
+                    overhang_to_lateral.lateral_point.pressure = (
+                        overhang_pressure * (1 - point)
+                        + lateral_pressure * point
+                    )
+                    rules.append(overhang_to_lateral)
+
+        return rules
 
     def get_zone(self, points) -> ZonePlot:
         """Get the zone plot based on the points and conformity plot type."""
@@ -490,6 +550,16 @@ class ConformityPlotRules:
             return self.default_radius
         else:
             raise ValueError(f"Unsupported conformity plot type: {self.conformity_plot}")
+        
+    def add_scenarios(self, scenarios_dict: dict[str, Scenario]) -> None:
+        """Add scenarios to the rules distances mapping."""
+        for rule_type, scenario in scenarios_dict.items():
+            if scenario.rule_type == "cable_tracks":
+                self.rules_distances[rule_type] = TensionRules(
+                    lateral=scenario.security_distance,
+                    overhang=scenario.security_distance,
+                )
+            
 
 
 class ElectricTensionMapper:
@@ -580,11 +650,9 @@ def build_scenario(
         else default_temperature
     )
     
-    wind_pressure = (
-        point.pressure
-        if point.pressure != "WindZoneInput"
-        else parameters.wind_pressure
-    )
+    wind_pressure = parameters.wind_pressure
+    if isinstance(point.pressure, (int, float)):
+        wind_pressure = float(point.pressure)
 
     target_state = TargetState(
         new_temperature=temperature,
@@ -637,6 +705,7 @@ def build_scenarios(
                     security_distance=tension_rules_distance.lateral,
                 )
             )
+            
         if tension_rules_distance.overhang is None:
             logger.debug(f"Missing overhang tension rules for rule type: {rule.rule_type}. Skipping this rule.")
             continue
@@ -648,6 +717,18 @@ def build_scenarios(
                     temperature_key="repartitionTemperature",
                     parameters=parameters,
                     security_distance=tension_rules_distance.overhang,
+                )
+            )
+
+        if tension_rules_distance.overhang is not None and tension_rules_distance.lateral is not None:
+            logger.debug(f"Adding cable_tracks scenario for rule type: {rule.rule_type}.")
+            scenarios.append(
+                build_scenario(
+                    rule=rule,
+                    conformity_point="cable_tracks",
+                    temperature_key="repartitionTemperature",
+                    parameters=parameters,
+                    security_distance=max(tension_rules_distance.lateral, tension_rules_distance.overhang),
                 )
             )
 
@@ -666,13 +747,6 @@ def point_coordinates_in_plane(
         float(np.dot(relative_point, u_plane)),
         float(np.dot(relative_point, v_plane)),
     )
-
-    # point = np.asarray(point)
-    # if point.shape != (3,):
-    #     raise ValueError("point must be a 1D array of shape (3,)")
-
-    #
-    # return self.distance_engine.plane_distance(point, frame="section")
 
 
 def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
@@ -693,6 +767,8 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
     )
     electric_tension_code = python_inputs.get("electricTension")
     try:
+        if not isinstance(electric_tension_code, str):
+            raise ValueError("Invalid electric tension code: missing or non-string value")
         electric_tension = ElectricTensionMapper.get_code(electric_tension_code)
         if electric_tension is None:
             raise ValueError(f"Invalid electric tension code: {electric_tension_code}")
@@ -717,19 +793,6 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         logger.error(f"Invalid rule distances data: {e}")
         raise
 
-    # Validate and create RuleClimaticCondition objects
-    if not rules_climatic_conditions_data:
-        logger.warning("No climatic conditions provided. Returning empty conformity result.")
-        return {}
-
-    try:
-        rules_climatic_conditions = [
-            RuleClimaticCondition.from_dict(rcc) for rcc in rules_climatic_conditions_data
-        ]
-    except ValueError as e:
-        logger.error(f"Invalid climatic conditions data: {e}")
-        raise
-
     # Validate and create ConformityParameters object
     try:
         parameters = ConformityParameters.from_dict(parameters_data)
@@ -737,12 +800,26 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         logger.error(f"Invalid form parameters: {e}")
         raise
 
+    conformity_plot_rules = ConformityPlotRules(
+        parameters.conformity_plot or "vegetation",
+        parameters.intermediate_points,
+    )
+
+    # Validate and create RuleClimaticCondition objects
+    if not rules_climatic_conditions_data:
+        logger.warning("No climatic conditions provided. Returning empty conformity result.")
+        return {}
+
+    try:
+        rules_climatic_conditions = conformity_plot_rules.build_rules_climatic_conditions(rules_climatic_conditions_data)
+    except ValueError as e:
+        logger.error(f"Invalid climatic conditions data: {e}")
+        raise
+
     # Build TensionRules objects for each rule type
     tension_rules = build_tension_rules(electric_tension, rule_distances)
 
     scenarios = build_scenarios(rules_climatic_conditions, parameters, tension_rules)
-
-    conformity_plot_rules = ConformityPlotRules(parameters.conformity_plot)
 
     dist_engine = DistanceEngine()
 
@@ -758,6 +835,8 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         obstacle_coords = study_copy.position_engine.coords_calculator.obstacles_points.dict_coords().get(
             obstacle_id
         )
+        if obstacle_coords is None:
+            raise KeyError(obstacle_id)
     except KeyError:
         logger.error(f"Obstacle with uuid: {obstacle_id} not found in study.")
         raise ObstacleNotFoundError(
@@ -818,7 +897,10 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         if not zone_conformity.points:
             logger.debug(f"No points for zone {zone_name}, skipping zone plot generation.")
             continue
-        conformity_result.conformity[zone_name].zone_plot = conformity_plot_rules.get_zone(zone_conformity.points)
+        zone_plot = conformity_plot_rules.get_zone(zone_conformity.points)
+        if zone_plot is None:
+            continue
+        conformity_result.conformity[zone_name].zone_plot = zone_plot
 
     result_dict = conformity_result.to_dict()
     logger.debug(f"Conformity result: {result_dict}")
