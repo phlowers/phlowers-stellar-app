@@ -795,7 +795,7 @@ describe('SectionImportService', () => {
       expect(calledTasks).toEqual([Task.importLambert, Task.importLambertAndValidate, Task.computeLocalization]);
     });
 
-    it('should store mean_gps_diff_meters computed from the raw Lambert93 input vs. computeLocalization output', async () => {
+    it('should store mean_reprojection_diff_meters computed from the raw Lambert93 input vs. computeLocalization output', async () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
@@ -803,7 +803,7 @@ describe('SectionImportService', () => {
       // raw lambert_y = [789012, 789012, 789012], reconstructed lambert_y = [200, 201, 202]
       const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(123456.0 - (100 + i), 789012.0 - (200 + i)));
       const expectedMean = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
-      expect(result?.mean_gps_diff_meters).toBeCloseTo(expectedMean, 6);
+      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(expectedMean, 6);
     });
 
     it('should throw an ImportError and abort the import when a reprojection task fails', async () => {
@@ -831,7 +831,7 @@ describe('SectionImportService', () => {
       const result = await service.processFile(file, neverAccept);
 
       expect(result).not.toBeNull();
-      expect(result?.mean_gps_diff_meters).toBeNull();
+      expect(result?.mean_reprojection_diff_meters).toBeNull();
       expect(result?.supports.every((s) => s.footLatitude === null && s.footLongitude === null)).toBe(true);
       expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
       expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(1);

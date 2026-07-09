@@ -25,8 +25,8 @@ export const sectionImportErrors = {
  * Lambert93-to-GPS reprojection was computed, reporting the mean absolute error (in meters)
  * between the surveyed Lambert93 foot coordinates and the app's span/angle data model.
  */
-export const buildGpsReprojectionInfoMessage = (meanGpsDiffMeters: number): string =>
-  $localize`Reprojection using ${environment.appName} data model seems to add a mean absolute error of ${meanGpsDiffMeters.toFixed(1)} m`;
+export const buildReprojectionInfoMessage = (meanReprojectionDiffMeters: number): string =>
+  $localize`Reprojection using ${environment.appName} data model seems to add a mean absolute error of ${meanReprojectionDiffMeters.toFixed(1)} m`;
 
 /** Localised success message shown after a successful section import. */
 export const importSuccessDetail = $localize`Section imported successfully`;

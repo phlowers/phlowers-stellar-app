@@ -157,5 +157,5 @@ export interface Section {
   /** Azimuth of the first support */
   start_azimuth: number | null;
   /** Mean absolute error (meters) between surveyed Lambert93 foot coordinates and the app's span/angle data model reprojection, computed on GeoLiaison import */
-  mean_gps_diff_meters: number | null;
+  mean_reprojection_diff_meters: number | null;
 }

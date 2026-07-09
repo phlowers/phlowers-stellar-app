@@ -177,8 +177,7 @@ export class FreePositioningComponent implements OnDestroy {
     }
 
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
-      | ReferenceSupport
-      | undefined;
+      ReferenceSupport | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
     this.referenceSupportAltitudeNgf.set(this.getSupportAltitudeNgf(currentLitData, referenceSupportIndex));
 
