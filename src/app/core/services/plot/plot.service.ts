@@ -31,7 +31,6 @@ export class PlotService {
 
   litData = signal<GetSectionOutput | null>(null);
   baseLitData = signal<GetSectionOutput | null>(null);
-  readonly litDataCache = new Map<string, GetSectionOutput>();
   /** Distance/angle measurement point groups registered in the position engine, rendered like obstacles. */
   distanceMeasuringPoints = signal<ObstacleOutput['obstacles']>([]);
   loading = signal<boolean>(true);
@@ -55,16 +54,6 @@ export class PlotService {
 
   /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
   private currentSectionUuid: string | null = null;
-
-  /** Last aspect ratio calculation inputs — used to skip redundant getAspectRatio calls when geometry hasn't changed. */
-  private lastAspectRatioInputs: {
-    x: number;
-    y: number;
-    z: number;
-    startSupport: number;
-    endSupport: number;
-    view: string;
-  } | null = null;
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -93,7 +82,6 @@ export class PlotService {
     this.spanService.section.set(null);
     this.study.set(null);
     this.currentSectionUuid = null;
-    this.lastAspectRatioInputs = null;
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedObstacle(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -133,8 +121,6 @@ export class PlotService {
 
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
-    this.litDataCache.clear();
-    this.lastAspectRatioInputs = null;
     this.error.set(null);
     this.diagnostics.set([]);
     this.litData.set(null);
@@ -186,7 +172,6 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
-
     const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: plotOptions.startSupport,
@@ -206,9 +191,7 @@ export class PlotService {
     this.diagnostics.set(diagnostics);
 
     const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
-    if (this.hasAspectRatioInputsChanged(scalingFactors, plotOptions)) {
-      await this.updateAspectRatio(scalingFactors, plotOptions);
-    }
+    await this.updateAspectRatio(scalingFactors, plotOptions);
 
     this.loading.set(false);
   };
@@ -226,29 +209,6 @@ export class PlotService {
     this.loading.set(false);
   };
 
-  /**
-   * Checks if the aspect ratio calculation inputs have changed since the last computation.
-   * @param scalingFactors - Current scaling factors
-   * @param plotOptions - Current plot options
-   * @returns `true` if inputs changed or no previous calculation exists, `false` otherwise
-   */
-  private hasAspectRatioInputsChanged(
-    scalingFactors: { x: number; y: number; z: number },
-    plotOptions: PlotOptions
-  ): boolean {
-    if (this.lastAspectRatioInputs === null) {
-      return true;
-    }
-    return (
-      this.lastAspectRatioInputs.x !== scalingFactors.x ||
-      this.lastAspectRatioInputs.y !== scalingFactors.y ||
-      this.lastAspectRatioInputs.z !== scalingFactors.z ||
-      this.lastAspectRatioInputs.startSupport !== plotOptions.startSupport ||
-      this.lastAspectRatioInputs.endSupport !== plotOptions.endSupport ||
-      this.lastAspectRatioInputs.view !== plotOptions.view
-    );
-  }
-
   private async updateAspectRatio(
     scalingFactors: { x: number; y: number; z: number },
     plotOptions: PlotOptions
@@ -261,14 +221,6 @@ export class PlotService {
     });
     if (result) {
       this.plotOptionsService.setAspectRatio(result);
-      this.lastAspectRatioInputs = {
-        x: scalingFactors.x,
-        y: scalingFactors.y,
-        z: scalingFactors.z,
-        startSupport: plotOptions.startSupport,
-        endSupport: plotOptions.endSupport,
-        view: plotOptions.view
-      };
     }
   }
 }
