@@ -262,16 +262,28 @@ describe('StudioComponent', () => {
 
     it('should call notificationService.warning once for a captured warning diagnostic', () => {
       mockPlotService.diagnostics.set([
-        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' }
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: boom'
+        }
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
-      expect(mockNotificationService.warning).toHaveBeenCalledWith(formatPythonError(PythonErrorCode.UserWarning));
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(
+        formatPythonError(PythonErrorCode.NoIntersectionPlaneWarning)
+      );
     });
 
     it('should call notificationService.warning once per captured warning diagnostic', () => {
       mockPlotService.diagnostics.set([
-        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' },
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: boom'
+        },
         { code: PythonErrorCode.DataWarning, severity: 'warning', origin: 'warning', rawText: 'DataWarning: boom' }
       ]);
       fixture.detectChanges();

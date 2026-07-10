@@ -150,7 +150,7 @@ describe('Task handlers', () => {
         name === 'get_and_clear_warnings'
           ? Object.assign(
               () => ({
-                toJs: () => ['UserWarning: no intersection found for this point'],
+                toJs: () => ['NoIntersectionPlaneWarning: no intersection found for this point'],
                 destroy: vi.fn()
               }),
               { destroy: vi.fn() }
@@ -162,10 +162,10 @@ describe('Task handlers', () => {
 
       expect(result.diagnostics).toEqual([
         {
-          code: 'UserWarning',
+          code: 'NoIntersectionPlaneWarning',
           severity: 'warning',
           origin: 'warning',
-          rawText: 'UserWarning: no intersection found for this point'
+          rawText: 'NoIntersectionPlaneWarning: no intersection found for this point'
         }
       ]);
     });
