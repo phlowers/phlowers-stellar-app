@@ -195,7 +195,9 @@ export async function handleFetch(event: FetchEvent) {
         const cache = await caches.open(CACHE_NAME);
         const indexUrl = scope + 'index.html';
         try {
-          const networkResponse = await fetchWithTimeout(event.request.clone());
+          const networkResponse = await fetchWithTimeout(event.request.clone(), {
+            redirect: 'manual'
+          });
           if (networkResponse?.ok) {
             await cache.put(indexUrl, networkResponse.clone());
             return networkResponse;

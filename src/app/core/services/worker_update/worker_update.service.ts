@@ -350,7 +350,14 @@ export class UpdateService {
       UpdateService.FETCH_TIMEOUT_MS
     );
     try {
-      const response = await fetch('/version.json', { signal: controller.signal });
+      const response = await fetch('/version.json', {
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {
+          'cache-control': 'no-cache',
+          pragma: 'no-cache'
+        }
+      });
       if (response.ok) {
         const version = (await response.json()) as AppVersion;
         this.currentVersion.set(version);
