@@ -171,7 +171,7 @@ function collectWarningDiagnostics(
   for (const warningText of capturedWarnings) {
     const matchedCode = Object.values(PythonErrorCode).find((code) => warningText.includes(code)) ?? null;
     const isDuplicate = matchedCode !== null && seenCodes.has(matchedCode);
-    
+
     if (matchedCode && !isDuplicate) {
       diagnostics.push({
         code: matchedCode,
