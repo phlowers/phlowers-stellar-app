@@ -189,9 +189,9 @@ export class TemperatureCalculationComponent {
     if (!error && result !== undefined) {
       this.measureData.update((d) => ({
         ...d,
-        diffuseSolarRadiation: result.diffuseRadiation,
-        beamSolarRadiation: result.beamRadiation,
-        diffusePlusBeamSolarRadiation: result.diffusePlusBeamRadiation
+        diffusedSolarFlux: result.diffuseRadiation,
+        directSolarFlux: result.beamRadiation,
+        diffusedPlusDirectSolarFlux: result.diffusePlusBeamRadiation
       }));
     }
   }
