@@ -604,7 +604,7 @@ export interface TaskOutputs {
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
   /** Output from cableModification task: recalculated geometry with optional base state */
-  [Task.cableModification]: GetSectionWithBaseOutput;
+  [Task.cableModification]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;
     y: number;

@@ -120,8 +120,8 @@ export class CableModificationsService {
       supportRef: params.supportRef
     });
 
-    this.plotService.litData.set(result?.current ?? null);
-    this.plotService.baseLitData.set(result?.base ?? null);
+    // this.plotService.litData.set(result?.current ?? null);
+    // this.plotService.baseLitData.set(result?.base ?? null);
     this.plotService.error.set(error);
     this.plotService.diagnostics.set(diagnostics);
     this.plotService.loading.set(false);

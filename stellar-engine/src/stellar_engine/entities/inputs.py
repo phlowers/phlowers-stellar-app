@@ -312,6 +312,17 @@ class ClimateCharge:
 
 
 @dataclass
+class ModifyCableInputs:
+    spanIndex: int
+    # rename this to modificationType?
+    widthCable: Literal['lengthening', 'shortening']
+    # rename this to modifiedLengthCable?
+    sizeCable: float
+    distanceSupportRef: float
+    supportRef: Literal['LEFT', 'RIGHT']
+
+
+@dataclass
 class SpanLoad:
     loadPosition: float
     loadWeight: float

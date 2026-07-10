@@ -137,7 +137,7 @@
 
     <button
       app-btn
-      [disabled]="true"
+      [disabled]="isFormInvalid() || isLoading()"
       [btnLoading]="isCalculatingOnly()"
       type="button"
       (click)="calculate()"
