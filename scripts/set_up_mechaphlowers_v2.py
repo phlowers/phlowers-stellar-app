@@ -449,7 +449,7 @@ def main() -> None:
         local_wheel = find_wheel(SE_INPUT, "mechaphlowers*.whl", "mechaphlowers")
         print(f"  Found local mechaphlowers wheel: {local_wheel.name}")
 
-    if args.engine_only:
+    if args.engine_only:    
         print("\n" + "=" * 50)
         print("ENGINE-ONLY MODE")
         print("=" * 50)
@@ -460,15 +460,9 @@ def main() -> None:
         return
 
     ver = pyodide_version()
-    mech = (
-        f"{parse_wheel(local_wheel.name)[1]} (local)"
-        if local_wheel
-        else json.loads(PACKAGE_JSON.read_text())
-        .get("config", {})
-        .get("mechaphlowers", "?")
-    )
+
     print("=" * 50)
-    print(f"Pyodide: {ver} | Mechaphlowers: {mech}")
+    print(f"Pyodide: {ver}")
     print("=" * 50)
 
     if PYODIDE_DIR.exists():
