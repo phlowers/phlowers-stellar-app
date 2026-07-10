@@ -47,9 +47,9 @@ export interface ConformityPlotOptions {
 /** Convert a `#rrggbb` hex color to an `rgba()` string with the given alpha. */
 function hexToRgba(hex: string, alpha: number): string {
   const value = hex.replace('#', '');
-  const r = parseInt(value.substring(0, 2), 16);
-  const g = parseInt(value.substring(2, 4), 16);
-  const b = parseInt(value.substring(4, 6), 16);
+  const r = Number.parseInt(value.substring(0, 2), 16);
+  const g = Number.parseInt(value.substring(2, 4), 16);
+  const b = Number.parseInt(value.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -124,15 +124,7 @@ function diskShapes(points: ConformityCablePoint[], color: string): Partial<Shap
 
 /** Center markers of the `cable_track` disks, in the single cable color (like `zonePointsTrace`). */
 function diskCentersTrace(points: ConformityCablePoint[]): Data {
-  return {
-    x: points.map((p) => p.x),
-    y: points.map((p) => p.y),
-    type: 'scatter',
-    mode: 'markers',
-    marker: { color: CABLE_POINT_COLOR, size: CABLE_MARKER_SIZE },
-    hovertemplate: HOVER_TEMPLATE,
-    showlegend: false
-  };
+  return zonePointsTrace(points);
 }
 
 /** Obstacle point(s), drawn on top for every conformity type. */
@@ -222,7 +214,7 @@ export function createConformityPlot(
 
 /** Resize the conformity plot to its container, e.g. after the figure is enlarged/reduced. */
 export function resizeConformityPlot(documentRef: Document): void {
-  if (documentRef.getElementById(CONFORMITY_PLOT_ID)) void Plotly.Plots.resize(CONFORMITY_PLOT_ID);
+  if (documentRef.getElementById(CONFORMITY_PLOT_ID)) Plotly.Plots.resize(CONFORMITY_PLOT_ID);
 }
 
 /** Remove the conformity plot from the DOM, guarding on the div's existence. */
