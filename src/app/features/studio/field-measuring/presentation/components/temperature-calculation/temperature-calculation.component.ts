@@ -204,7 +204,21 @@ export class TemperatureCalculationComponent {
     skyCover: string;
   } | null>(null);
 
+  private resetSolarFluxResults(): void {
+    const { diffusedSolarFlux, directSolarFlux, diffusedPlusDirectSolarFlux } = this.measureData();
+    if (diffusedSolarFlux !== null || directSolarFlux !== null || diffusedPlusDirectSolarFlux != null) {
+      this.measureData.update((d) => ({
+        ...d,
+        diffusedSolarFlux: null,
+        directSolarFlux: null,
+        diffusedPlusDirectSolarFlux: null
+      }));
+    }
+  }
+
   private readonly diffuseAndBeamRadiationEffect = effect(() => {
+    console.log('diffuseAndBeamRadiationEffect triggered');
+
     const isWorkerReady = this.workerReady();
     const { longitude, latitude, date, time, skyCover } = this.measureData();
 
@@ -222,6 +236,7 @@ export class TemperatureCalculationComponent {
       skyCover === null
     ) {
       this.lastDiffuseAndBeamRadiationInput.set(null);
+      this.resetSolarFluxResults();
       return;
     }
 
