@@ -476,7 +476,7 @@ def main() -> None:
         )
         print(f"  Found local mechaphlowers wheel: {local_wheel.name}")
 
-    if args.engine_only:    
+    if args.engine_only:
         print("\n" + "=" * 50)
         print("ENGINE-ONLY MODE")
         print("=" * 50)
