@@ -4817,5 +4817,11 @@
         <target>chargement</target>
       </segment>
     </unit>
+    <unit id="3017905259126952863">
+      <segment state="initial">
+        <source>An unexpected error occurred. Please reload the page if the problem persists.</source>
+        <target>Une erreur inattendue s'est produite. Veuillez recharger la page si le problème persiste.</target>
+      </segment>
+    </unit>
   </file>
 </xliff>
