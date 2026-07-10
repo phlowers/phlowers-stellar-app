@@ -109,10 +109,9 @@ def change_state(js_inputs):
     change_state_inputs: dict = js_to_python(js_inputs)  # type: ignore
     if "reload" in change_state_inputs:
         reload = change_state_inputs["reload"]
-        logger.debug(f"Reload is True !")
     else:
         reload = False
-        logger.debug(f"Reload is False !")
+    logger.debug(f"Reload value: {reload}")
     return run_solver.change_state(change_state_inputs, study, reload=reload)
 
 
