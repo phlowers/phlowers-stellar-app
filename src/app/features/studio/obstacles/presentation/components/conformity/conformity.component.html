@@ -207,7 +207,7 @@
   </form>
 }
 
-<output class="sr-only">
+<output class="sr-only" aria-live="polite">
   @if (isCalculating()) {
     <ng-container i18n>Calculating conformity…</ng-container>
   } @else if (calculationError()) {
@@ -242,7 +242,7 @@
           <ng-container i18n>Enlarge graphic view</ng-container>
         }
       </button>
-      <div id="conformity-plot"></div>
+      <div id="conformity-plot" class="results__plot"></div>
     </figure>
 
     <div class="results__table-wrapper" [attr.aria-hidden]="isGraphEnlarged() ? 'true' : null">

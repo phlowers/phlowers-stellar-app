@@ -210,6 +210,11 @@ legend {
     align-self: flex-end;
   }
 
+  &__plot {
+    @apply flex-1;
+    min-height: 0;
+  }
+
   // Wraps the table so it can be clipped away when enlarged: unlike a <table>, a block honours
   // `min-width: 0` + `overflow: hidden`, so its flex width can animate to 0 without the table's
   // min-content width reserving blank space.
@@ -227,11 +232,6 @@ legend {
     color: var(--star-dust-950);
     border: 1px solid var(--star-dust-300);
   }
-}
-
-#conformity-plot {
-  @apply flex-1;
-  min-height: 0;
 }
 
 /* Enlarged graph: the figure grows to fill the modal while the result table collapses into it
