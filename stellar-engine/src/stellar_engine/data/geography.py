@@ -22,6 +22,7 @@ from stellar_engine.entities.inputs import (
 
 logger = logging.getLogger("stellar_engine")
 
+
 def compute_localization(inputs: dict) -> dict:
     geo_inputs = SectionGeoData(**inputs)
 
@@ -121,7 +122,11 @@ def import_lambert_and_validate(inputs: dict):
     dist_diff = np.linalg.norm([lat_diff, lon_diff], axis=0)
     mean_gps_diff = np.mean(dist_diff)
 
-    logger.debug(f"Latitude difference between imported Lambert and section data: {lat_diff}")
-    logger.debug(f"Longitude difference between imported Lambert and section data: {lon_diff}")
+    logger.debug(
+        f"Latitude difference between imported Lambert and section data: {lat_diff}"
+    )
+    logger.debug(
+        f"Longitude difference between imported Lambert and section data: {lon_diff}"
+    )
 
     return {"localization": result_loc, "meanGpsDiff": mean_gps_diff}

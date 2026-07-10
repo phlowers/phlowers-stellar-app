@@ -16,7 +16,13 @@ def cable_modification(js_inputs: dict):
     - distanceSupportRef (float): distance from reference support in meters
     - supportRef ('LEFT' | 'RIGHT'): reference support for the modification
     """
-    global engine, plt_line, base_plt_line, base_engine, js_to_python, get_coordinates
+    global \
+        engine, \
+        plt_line, \
+        base_plt_line, \
+        base_engine, \
+        js_to_python, \
+        get_coordinates
 
     _inputs = js_to_python(js_inputs)  # type: ignore
     span_index = _inputs["spanIndex"]
