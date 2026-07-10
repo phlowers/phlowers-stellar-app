@@ -147,6 +147,7 @@ export class ClimateComponent {
       } as ChargeData;
     });
     effect(async () => {
+      this.chargeUuid();
       await this.initForm();
     });
   }
