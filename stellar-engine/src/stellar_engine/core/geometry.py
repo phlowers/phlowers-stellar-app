@@ -71,8 +71,7 @@ def measure_distance_angle(
             cos_angle = np.dot(vector_2_3, vector_2_1) / (norm_2_1 * norm_2_3)
             angle_1_2_3 = float(
                 np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0)))
-    )
-
+            )
 
     return {
         "distance_1_2": distance_1_2,
