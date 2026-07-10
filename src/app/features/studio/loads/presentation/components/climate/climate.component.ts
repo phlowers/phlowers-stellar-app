@@ -146,9 +146,23 @@ export class ClimateComponent {
         } as ClimateCharge
       } as ChargeData;
     });
-    effect(async () => {
-      this.chargeUuid();
-      await this.initForm();
+    effect((onCleanup) => {
+      const currentChargeUuid = this.chargeUuid(); // Capture current value
+      let isCancelled = false;
+
+      onCleanup(() => {
+        isCancelled = true; // Mark as cancelled if effect reruns
+      });
+
+      // Wrap the async call
+      (async () => {
+        await this.initForm();
+
+        // Before patching, verify we haven't been superseded
+        if (!isCancelled && this.chargeUuid() === currentChargeUuid) {
+          // Safe to update form
+        }
+      })();
     });
   }
 

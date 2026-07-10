@@ -48,7 +48,7 @@ export class LoadMarkingComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly loadFormsService = inject(LoadFormsService);
-  readonly chargeUuid = input.required<string>();
+  readonly chargeUuid = input<string | null>(null);
   readonly form = this.fb.group<SpanFormControls>({
     spanSelect: new FormControl<string | null>(null, {
       validators: [Validators.required]
@@ -105,7 +105,7 @@ export class LoadMarkingComponent {
   });
 
   private readonly chargeChangeEffect = effect(() => {
-    this.chargeUuid(); // tracking : quand l'UUID change, l'effect se relance
+    this.chargeUuid(); // Tracking: when the UUID changes, the effect rerun
     untracked(() => {
       this.form.reset();
       this.form.controls.referenceSupport.disable();
