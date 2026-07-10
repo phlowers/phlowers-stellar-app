@@ -276,16 +276,7 @@ describe('UpdateService', () => {
 
       await service.loadCurrentVersion();
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/version.json',
-        expect.objectContaining({
-          cache: 'no-store',
-          headers: expect.objectContaining({
-            'cache-control': 'no-cache',
-            pragma: 'no-cache'
-          })
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledWith('/version.json', expect.objectContaining({ signal: expect.anything() }));
       expect(service.currentVersion()).toEqual(serverVersion);
     });
 

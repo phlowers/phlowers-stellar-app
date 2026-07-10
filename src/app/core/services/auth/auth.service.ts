@@ -43,17 +43,15 @@ export class AuthService {
   private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403]);
 
   /**
-   * Timeout (ms) for the `/auth/userinfo` probe, so a slow/unreachable
-   * network never blocks startup.
+   * Timeout (ms) for the `/auth/userinfo` probe so a slow or unreachable
+   * server never blocks startup.
    *
-   * Deliberately set above Apache's own observed OIDC refresh-token retry
-   * window (`oidc_refresh_token_cache_get` backs off in ~0.5s steps for up
-   * to ~5s before giving up with `invalid_grant`/502 — see connexion-gaia.md
-   * §6): a shorter client timeout races against that window and aborts the
-   * request right as Apache might have been about to answer, which only
-   * makes the perceived slowness worse without gaining anything.
+   * MUST stay strictly greater than Apache's `OIDCHTTPTimeoutLong` (10s in
+   * `httpd-oidc.conf.template`): a shorter client timeout races Apache's own
+   * outgoing call to G@IA and aborts the request right as Apache might have
+   * been about to answer. 13s leaves a ~3s margin.
    */
-  private static readonly USERINFO_PROBE_TIMEOUT_MS = 8000;
+  private static readonly USERINFO_PROBE_TIMEOUT_MS = 13000;
 
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
@@ -102,13 +100,13 @@ export class AuthService {
   async initialize(): Promise<void> {
     const cached = await this.loadCachedUser();
 
-    // Fast path: a previously-authenticated OIDC user (proven by the presence
-    // of a `sub` claim) is valid offline regardless of the server mode, which
-    // is not yet known at this point. Publish it immediately so the app
-    // starts instantly from cache, then resync with the server in the
-    // background without making the caller (APP_INITIALIZER) wait for it.
-    // Skipped when a server mismatch is already proven while online (defence
-    // in depth): that case must go through the authoritative probe below.
+    // Fast offline-first path: a previously-authenticated OIDC user (proven by
+    // the presence of a `sub` claim) is valid offline regardless of the server
+    // mode, which is not yet known at this point. Publish it immediately so the
+    // app starts instantly from cache, then resync with the server in the
+    // background WITHOUT making the caller (APP_INITIALIZER) wait for it.
+    // Skipped when a server mismatch is already proven while online (defence in
+    // depth): that case must go through the authoritative probe below.
     if (cached?.sub && !this.shouldForceServerResync()) {
       this.currentUser.set(cached);
       void this.refreshFromNetwork().catch((err) => {
@@ -117,10 +115,9 @@ export class AuthService {
       return;
     }
 
-    // No proven-OIDC cached user: the mode (OIDC vs fallback) is still
-    // unknown, so the network probe (bounded by a timeout, see
-    // `probeUserinfo`) must run before deciding whether an email-only cached
-    // user (fallback mode) may be trusted.
+    // No proven-OIDC cached user: the mode (OIDC vs fallback) is still unknown,
+    // so the network probe (bounded by USERINFO_PROBE_TIMEOUT_MS) must run
+    // before deciding whether an email-only cached user may be trusted.
     const claims = await this.probeUserinfo();
 
     // 1. Active OIDC session — authoritative path.
@@ -160,6 +157,11 @@ export class AuthService {
   async refreshFromNetwork(): Promise<User | null> {
     const claims = await this.probeUserinfo();
     if (!claims) {
+      // Background reconciliation of the offline-first fast path: a proven
+      // server mismatch (401/403) is recorded via `serverSessionInvalid`
+      // (see `probeUserinfo`), but the cache-first user is intentionally kept
+      // visible so startup stays instant. Apache remains the authoritative
+      // enforcement layer for any real protected request from this point on.
       return null;
     }
     const user = await this.upsertUser(claims);
@@ -194,8 +196,8 @@ export class AuthService {
   private async probeUserinfo(): Promise<OidcClaims | null> {
     let response: Response;
     const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort('AuthService: userinfo probe timed out'),
+    const timeoutId = setTimeout(
+      () => controller.abort(new DOMException('userinfo probe timeout', 'TimeoutError')),
       AuthService.USERINFO_PROBE_TIMEOUT_MS
     );
     try {
@@ -207,7 +209,7 @@ export class AuthService {
       this.modeResolved.set(true);
       return null;
     } finally {
-      clearTimeout(timer);
+      clearTimeout(timeoutId);
     }
 
     if (response.status === 401) {

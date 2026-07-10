@@ -184,6 +184,12 @@ describe('AuthService', () => {
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
+      // Cache-first: the cached OIDC user is trusted immediately; the network
+      // resync runs in the background, so flush microtasks before asserting
+      // the mode has resolved.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Cache-first: the cached OIDC user is available immediately.
       expect(service.currentUser()).toEqual(testOidcUser);
@@ -258,6 +264,11 @@ describe('AuthService', () => {
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
+      // Cache-first trusts the cached user momentarily, then the background
+      // resync observes the 403 mismatch and drops it. Flush microtasks.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Cache-first: the previously-authenticated user renders immediately.
       // Apache remains the authoritative enforcement layer for any real
