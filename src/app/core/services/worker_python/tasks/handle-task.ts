@@ -170,7 +170,9 @@ function collectWarningDiagnostics(
   const seenCodes = new Set<PythonErrorCode>();
   for (const warningText of capturedWarnings) {
     const matchedCode = Object.values(PythonErrorCode).find((code) => warningText.includes(code)) ?? null;
-    if (matchedCode && !seenCodes.has(matchedCode)) {
+    const isDuplicate = matchedCode !== null && seenCodes.has(matchedCode);
+    
+    if (matchedCode && !isDuplicate) {
       diagnostics.push({
         code: matchedCode,
         severity: PYTHON_ERROR_SEVERITY[matchedCode],
@@ -181,7 +183,7 @@ function collectWarningDiagnostics(
     }
     log?.(
       'debug',
-      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}${matchedCode && seenCodes.has(matchedCode) ? ' (duplicate, skipped)' : ''}`
+      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}${isDuplicate ? ' (duplicate, skipped)' : ''}`
     );
   }
   return diagnostics;
