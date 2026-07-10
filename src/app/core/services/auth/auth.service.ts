@@ -157,12 +157,11 @@ export class AuthService {
   async refreshFromNetwork(): Promise<User | null> {
     const claims = await this.probeUserinfo();
     if (!claims) {
-      // Background reconciliation of the offline-first fast path: if the server
-      // proved the session invalid (401/403) while online, drop the cached user
-      // so the guard/UI stop trusting it and route to re-authentication.
-      if (this.shouldForceServerResync()) {
-        this.currentUser.set(null);
-      }
+      // Background reconciliation of the offline-first fast path: a proven
+      // server mismatch (401/403) is recorded via `serverSessionInvalid`
+      // (see `probeUserinfo`), but the cache-first user is intentionally kept
+      // visible so startup stays instant. Apache remains the authoritative
+      // enforcement layer for any real protected request from this point on.
       return null;
     }
     const user = await this.upsertUser(claims);
