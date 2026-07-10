@@ -1,6 +1,6 @@
 {
   "name": "phlowers-stellar-app",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "packageManager": "npm@10.9.8",
   "scripts": {
     "ng": "ng",
