@@ -67,14 +67,14 @@ def change_state(
     )
     logger.debug("-----------------------------------------------")
 
-    has_span = (study.balance_engine.span_loads.load_weight > 0.001).any()
+    # has_span = (study.balance_engine.span_loads.load_weight > 0.001).any()
 
-    if has_span:
-        reset_balance_model_state(study)
+    # if has_span:
+    #     reset_balance_model_state(study)
 
     if reload:
         study.solve_adjustment()
-        study._solve_intermediate()
+        # study._solve_intermediate()
 
     study.solve_change_state(
         ice_thickness=ice_thickness,
