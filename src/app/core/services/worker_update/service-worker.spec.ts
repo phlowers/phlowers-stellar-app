@@ -264,7 +264,7 @@ describe('Service Worker Functions', () => {
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
-    it('should bypass /version.json completely (no stale cache-first serving)', async () => {
+    it('should bypass /version.json completely (no cache access)', async () => {
       mockEvent.request.url = 'https://example.com/version.json';
       mockFetch.mockResolvedValue({ ok: true, status: 200 });
 
@@ -353,6 +353,69 @@ describe('Service Worker Functions', () => {
       const response = await responsePromise;
 
       expect(response).toBe(cachedIndex);
+    });
+  });
+
+  describe('handleFetch — home page serves cached shell on 401/5xx (no technical page)', () => {
+    let mockEvent: { respondWith: ReturnType<typeof vi.fn>; request: { url: string; clone: ReturnType<typeof vi.fn> } };
+
+    beforeEach(() => {
+      mockEvent = {
+        request: {
+          url: 'https://example.com/',
+          clone: vi.fn().mockReturnThis()
+        },
+        respondWith: vi.fn()
+      };
+    });
+
+    it('should serve the cached shell when the server returns 502', async () => {
+      mockFetch.mockResolvedValue({ ok: false, status: 502 });
+      const cachedShell = { ok: true, status: 200 };
+      mockCache.match.mockResolvedValue(cachedShell);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const response = await mockEvent.respondWith.mock.calls[0][0];
+
+      expect(response).toBe(cachedShell);
+      expect(mockCache.put).not.toHaveBeenCalled();
+    });
+
+    it('should serve the cached shell when the server returns a bare 401', async () => {
+      mockFetch.mockResolvedValue({ ok: false, status: 401 });
+      const cachedShell = { ok: true, status: 200 };
+      mockCache.match.mockResolvedValue(cachedShell);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const response = await mockEvent.respondWith.mock.calls[0][0];
+
+      expect(response).toBe(cachedShell);
+    });
+
+    it('should still pass a 302 redirect through even with a cached shell (OIDC flow)', async () => {
+      const redirectResponse = { ok: false, status: 302 };
+      mockFetch.mockResolvedValue(redirectResponse);
+      mockCache.match.mockResolvedValue({ ok: true, status: 200 });
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const response = await mockEvent.respondWith.mock.calls[0][0];
+
+      expect(response).toBe(redirectResponse);
+    });
+
+    it('should return the network error response when 5xx and no cached shell', async () => {
+      const errorResponse = { ok: false, status: 503 };
+      mockFetch.mockResolvedValue(errorResponse);
+      mockCache.match.mockResolvedValue(undefined);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const response = await mockEvent.respondWith.mock.calls[0][0];
+
+      expect(response).toBe(errorResponse);
     });
   });
 

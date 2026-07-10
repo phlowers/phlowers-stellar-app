@@ -44,6 +44,18 @@ function shouldUseNetworkFirst(request: Request): boolean {
 }
 
 /**
+ * Returns true when a response is a redirect that the browser must be allowed
+ * to follow (e.g. Apache's 302 to the G@IA OIDC login). Navigation requests
+ * are fetched with `redirect: 'manual'`, so a redirect surfaces here as an
+ * `opaqueredirect` response (status 0). Such responses MUST be passed through
+ * untouched so the browser performs the navigation instead of the SW
+ * swallowing it and serving the cached shell.
+ */
+function isRedirectResponse(response: Response): boolean {
+  return response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400);
+}
+
+/**
  * Performs a full application installation by fetching the asset
  * manifest, caching all listed files, and storing the build version.
  * Notifies all controlled clients upon completion.
@@ -174,8 +186,10 @@ export async function handleFetch(event: FetchEvent) {
   }
 
   if (url === scope) {
-    // Home page: network-first so Apache can redirect when OIDC session expires.
-    // 3xx responses are passed through without caching.
+    // Home page: network-first so Apache can redirect when the OIDC session
+    // expires. On any non-redirect error (401/403/5xx) we fall back to the
+    // cached shell so the user never sees a raw technical page; the app then
+    // re-evaluates auth on the main thread.
     event.respondWith(
       (async () => {
         const cache = await caches.open(CACHE_NAME);
@@ -186,8 +200,13 @@ export async function handleFetch(event: FetchEvent) {
             await cache.put(indexUrl, networkResponse.clone());
             return networkResponse;
           }
-          // 3xx or non-ok: return directly without caching (preserves Apache redirects).
-          return networkResponse;
+          // Preserve Apache/G@IA redirects (OIDC login flow): let the browser follow.
+          if (networkResponse && isRedirectResponse(networkResponse)) {
+            return networkResponse;
+          }
+          // 401/403/5xx (or any other non-ok): serve the cached shell if present.
+          const cachedShell = await cache.match(indexUrl);
+          return cachedShell ?? networkResponse ?? Response.error();
         } catch {
           const cached = await cache.match(indexUrl);
           return cached ?? Response.error();
@@ -215,6 +234,12 @@ export async function handleFetch(event: FetchEvent) {
             // Only cache successful (2xx) responses — never cache 3xx redirects.
             if (networkResponse?.ok) {
               await cache.put(event.request, networkResponse.clone());
+              return networkResponse;
+            }
+            // Non-ok (401/403/5xx) for a code asset: prefer a cached copy over
+            // surfacing a technical error that would break the page.
+            if (cachedResponse) {
+              return cachedResponse;
             }
             return networkResponse;
           } catch (error) {
