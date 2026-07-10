@@ -114,7 +114,7 @@ export enum PythonErrorCode {
   /** RTS catalog data missing or contains NaN values */
   RtsDataNotAvailable = 'RtsDataNotAvailable',
   /** Generic Python warning raised via `warnings.warn()` without a specific category */
-  UserWarning = 'UserWarning',
+  NoIntersectionPlaneWarning = 'NoIntersectionPlaneWarning',
   /** Raised when measurement data are not available for computation */
   MeasurementDataNotAvailable = 'MeasurementDataNotAvailable',
   /** Raised when attempting to read uncertainty while it hasn't been computed */
