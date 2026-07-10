@@ -4029,5 +4029,15 @@
         <source>Cannot calculate conformity: obstacle type has no conformity configuration</source>
       </segment>
     </unit>
+    <unit id="6927576156195589232">
+      <segment>
+        <source>Conformity results updated.</source>
+      </segment>
+    </unit>
+    <unit id="7435704250978299258">
+      <segment>
+        <source>Calculating conformity…</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -4835,5 +4835,17 @@
         <target>Impossible de calculer la conformité : le type d&apos;obstacle n&apos;a pas de configuration de conformité</target>
       </segment>
     </unit>
+    <unit id="7435704250978299258">
+      <segment state="initial">
+        <source>Calculating conformity…</source>
+        <target>Calcul de la conformité…</target>
+      </segment>
+    </unit>
+    <unit id="6927576156195589232">
+      <segment state="initial">
+        <source>Conformity results updated.</source>
+        <target>Résultats de la conformité mis à jour.</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

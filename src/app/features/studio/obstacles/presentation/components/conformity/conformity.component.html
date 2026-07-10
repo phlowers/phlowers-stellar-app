@@ -207,6 +207,16 @@
   </form>
 }
 
+<output class="sr-only">
+  @if (isCalculating()) {
+    <ng-container i18n>Calculating conformity…</ng-container>
+  } @else if (calculationError()) {
+    {{ calculationError() }}
+  } @else if (conformityResults()) {
+    <ng-container i18n>Conformity results updated.</ng-container>
+  }
+</output>
+
 @if (conformityResults()) {
   <div class="results" @expandHeight>
     <hr class="results__separator" />
@@ -235,7 +245,7 @@
       <div id="conformity-plot"></div>
     </figure>
 
-    <div class="results__table-wrapper">
+    <div class="results__table-wrapper" [attr.aria-hidden]="isGraphEnlarged() ? 'true' : null">
       <table class="results__table">
         <thead>
           <tr>
