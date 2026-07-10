@@ -220,6 +220,11 @@ export function createConformityPlot(
   void Plotly.react(CONFORMITY_PLOT_ID, traces, layout, config);
 }
 
+/** Resize the conformity plot to its container, e.g. after the figure is enlarged/reduced. */
+export function resizeConformityPlot(documentRef: Document): void {
+  if (documentRef.getElementById(CONFORMITY_PLOT_ID)) void Plotly.Plots.resize(CONFORMITY_PLOT_ID);
+}
+
 /** Remove the conformity plot from the DOM, guarding on the div's existence. */
 export function purgeConformityPlot(documentRef: Document): void {
   if (documentRef.getElementById(CONFORMITY_PLOT_ID)) Plotly.purge(CONFORMITY_PLOT_ID);

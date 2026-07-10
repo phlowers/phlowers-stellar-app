@@ -4805,6 +4805,18 @@
         <target>La reprojection sur le modèle de données <ph id="0" equiv="PH" disp="environment.appName"/> semble ajouter une erreur absolue moyenne de <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</target>
       </segment>
     </unit>
+    <unit id="8842888376703158025">
+      <segment state="initial">
+        <source>Reduce graphic view</source>
+        <target>Réduire la vue graphique</target>
+      </segment>
+    </unit>
+    <unit id="1426284662747419795">
+      <segment state="initial">
+        <source>Enlarge graphic view</source>
+        <target>Agrandir la vue graphique</target>
+      </segment>
+    </unit>
     <unit id="studio.plot.loading">
       <segment state="initial">
         <source>loading</source>

@@ -1,202 +1,211 @@
-<form [formGroup]="form" class="form" (ngSubmit)="calculate()" data-testid="conformity-form">
-  <fieldset>
-    <legend class="form__title-obstacle underline-text" i18n>Obstacle</legend>
+@if (!isGraphEnlarged()) {
+  <form
+    [formGroup]="form"
+    class="form"
+    (ngSubmit)="calculate()"
+    data-testid="conformity-form"
+    @collapse
+    [@.disabled]="!animationsReady()"
+  >
+    <fieldset>
+      <legend class="form__title-obstacle underline-text" i18n>Obstacle</legend>
 
-    @if (hasMultiplePoints()) {
-      <label for="selectedPoint" class="form__select-obstacle-label" i18n>Obstacle's point</label>
+      @if (hasMultiplePoints()) {
+        <label for="selectedPoint" class="form__select-obstacle-label" i18n>Obstacle's point</label>
+        <p-select
+          inputId="selectedPoint"
+          formControlName="selectedPoint"
+          [options]="pointOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+          class="form__select-obstacle-input"
+          data-testid="conformity-point-select"
+        />
+      }
+
+      <dl>
+        <dt class="form__name-obstacle-label" i18n>Name</dt>
+        <dd class="form__name-obstacle-input">{{ obstacleData()?.name || '-' }}</dd>
+
+        <dt class="form__type-obstacle-label" i18n>Type</dt>
+        <dd class="form__type-obstacle-input">{{ obstacleData()?.type || '-' }}</dd>
+
+        <dt class="form__span-obstacle-label" i18n>Span</dt>
+        <dd class="form__span-obstacle-input">{{ spanLabel() }}</dd>
+
+        <dt class="form__ref-supp-obstacle-label" i18n>Reference support</dt>
+        <dd class="form__ref-supp-obstacle-input">{{ referenceSupportLabel() }}</dd>
+
+        <dt class="form__alt-type-obstacle-label" i18n>Altitude type</dt>
+        <dd class="form__alt-type-obstacle-input">{{ altitudeTypeLabel() }}</dd>
+
+        <dt class="form__lat-dist-type-obstacle-label" i18n>Lateral distance type</dt>
+        <dd class="form__lat-dist-type-obstacle-input">{{ lateralDistanceTypeLabel() }}</dd>
+
+        <dt class="form__alt-pt-obstacle-label" i18n>Altitude point</dt>
+        <dd class="form__alt-pt-obstacle-input" aria-live="polite">
+          {{ activePoint()?.z !== null && activePoint()?.z !== undefined ? activePoint()!.z + ' m' : '-' }}
+        </dd>
+
+        <dt class="form__ref-supp-distance-obstacle-label" i18n>Reference support distance</dt>
+        <dd class="form__ref-supp-distance-obstacle-input" aria-live="polite">
+          {{ activePoint()?.x !== null && activePoint()?.x !== undefined ? activePoint()!.x + ' m' : '-' }}
+        </dd>
+
+        <dt class="form__dist-line-axis-obstacle-label" i18n>Distance to line axis</dt>
+        <dd class="form__dist-line-axis-obstacle-input" aria-live="polite">
+          {{ activePoint()?.y !== null && activePoint()?.y !== undefined ? activePoint()!.y + ' m' : '-' }}
+        </dd>
+      </dl>
+    </fieldset>
+
+    <fieldset>
+      <legend class="form__title-form underline-text" i18n>Form</legend>
+
+      <dl class="contents">
+        <dt class="form__electric-tension-label" i18n>Electric tension</dt>
+        <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
+      </dl>
+
+      <label for="windZone" class="form__wind-label" i18n>Wind zone</label>
       <p-select
-        inputId="selectedPoint"
-        formControlName="selectedPoint"
-        [options]="pointOptions()"
+        inputId="windZone"
+        formControlName="windZone"
+        [options]="windZoneOptions()"
         optionLabel="label"
         optionValue="value"
         fluid
-        class="form__select-obstacle-input"
-        data-testid="conformity-point-select"
+        class="form__wind-input"
+        data-testid="conformity-wind-zone-select"
       />
-    }
 
-    <dl>
-      <dt class="form__name-obstacle-label" i18n>Name</dt>
-      <dd class="form__name-obstacle-input">{{ obstacleData()?.name || '-' }}</dd>
-
-      <dt class="form__type-obstacle-label" i18n>Type</dt>
-      <dd class="form__type-obstacle-input">{{ obstacleData()?.type || '-' }}</dd>
-
-      <dt class="form__span-obstacle-label" i18n>Span</dt>
-      <dd class="form__span-obstacle-input">{{ spanLabel() }}</dd>
-
-      <dt class="form__ref-supp-obstacle-label" i18n>Reference support</dt>
-      <dd class="form__ref-supp-obstacle-input">{{ referenceSupportLabel() }}</dd>
-
-      <dt class="form__alt-type-obstacle-label" i18n>Altitude type</dt>
-      <dd class="form__alt-type-obstacle-input">{{ altitudeTypeLabel() }}</dd>
-
-      <dt class="form__lat-dist-type-obstacle-label" i18n>Lateral distance type</dt>
-      <dd class="form__lat-dist-type-obstacle-input">{{ lateralDistanceTypeLabel() }}</dd>
-
-      <dt class="form__alt-pt-obstacle-label" i18n>Altitude point</dt>
-      <dd class="form__alt-pt-obstacle-input" aria-live="polite">
-        {{ activePoint()?.z !== null && activePoint()?.z !== undefined ? activePoint()!.z + ' m' : '-' }}
-      </dd>
-
-      <dt class="form__ref-supp-distance-obstacle-label" i18n>Reference support distance</dt>
-      <dd class="form__ref-supp-distance-obstacle-input" aria-live="polite">
-        {{ activePoint()?.x !== null && activePoint()?.x !== undefined ? activePoint()!.x + ' m' : '-' }}
-      </dd>
-
-      <dt class="form__dist-line-axis-obstacle-label" i18n>Distance to line axis</dt>
-      <dd class="form__dist-line-axis-obstacle-input" aria-live="polite">
-        {{ activePoint()?.y !== null && activePoint()?.y !== undefined ? activePoint()!.y + ' m' : '-' }}
-      </dd>
-    </dl>
-  </fieldset>
-
-  <fieldset>
-    <legend class="form__title-form underline-text" i18n>Form</legend>
-
-    <dl class="contents">
-      <dt class="form__electric-tension-label" i18n>Electric tension</dt>
-      <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
-    </dl>
-
-    <label for="windZone" class="form__wind-label" i18n>Wind zone</label>
-    <p-select
-      inputId="windZone"
-      formControlName="windZone"
-      [options]="windZoneOptions()"
-      optionLabel="label"
-      optionValue="value"
-      fluid
-      class="form__wind-input"
-      data-testid="conformity-wind-zone-select"
-    />
-
-    <div class="form__wind-compl">
-      <p-checkbox
-        formControlName="windMinus"
-        inputId="windMinus"
-        [binary]="true"
-        data-testid="conformity-wind-minus-checkbox"
-      />
-      <label for="windMinus" i18n>Wind -</label>
-
-      @if (showRedZonePresence()) {
+      <div class="form__wind-compl">
         <p-checkbox
-          formControlName="redZonePresence"
-          inputId="redZonePresence"
+          formControlName="windMinus"
+          inputId="windMinus"
           [binary]="true"
-          data-testid="conformity-red-zone-checkbox"
+          data-testid="conformity-wind-minus-checkbox"
         />
-        <label for="redZonePresence" i18n>Red zone presence</label>
-      }
-    </div>
+        <label for="windMinus" i18n>Wind -</label>
 
-    <label for="repartitionTemperature" class="form__distrib-temp-label" i18n>Repartition temperature</label>
-    <p-inputgroup class="form__distrib-temp-input">
-      <input
-        id="repartitionTemperature"
-        type="number"
-        pInputText
-        [attr.step]="BOUNDS.repartitionTemperature.step"
-        [attr.min]="BOUNDS.repartitionTemperature.min"
-        [attr.max]="BOUNDS.repartitionTemperature.max"
-        formControlName="repartitionTemperature"
-        [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
-        [attr.aria-errormessage]="repartitionTemperatureErrorId()"
-        (input)="truncateTwoDecimals($event)"
-        data-testid="conformity-repartition-temperature-input"
-      />
-      <p-inputgroup-addon>°C</p-inputgroup-addon>
-    </p-inputgroup>
-    @if (form.controls.repartitionTemperature.errors?.['min']) {
-      <p-message
-        id="repartition-temperature-min-error"
-        class="form__distrib-temp-error"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.repartitionTemperature.min }}
-      </p-message>
-    } @else if (form.controls.repartitionTemperature.errors?.['max']) {
-      <p-message
-        id="repartition-temperature-max-error"
-        class="form__distrib-temp-error"
-        severity="error"
-        size="small"
-        variant="simple"
-      >
-        <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.repartitionTemperature.max }}
-      </p-message>
-    }
+        @if (showRedZonePresence()) {
+          <p-checkbox
+            formControlName="redZonePresence"
+            inputId="redZonePresence"
+            [binary]="true"
+            data-testid="conformity-red-zone-checkbox"
+          />
+          <label for="redZonePresence" i18n>Red zone presence</label>
+        }
+      </div>
 
-    <label for="lateralDistanceTemperature" class="form__lat-temp-label">
-      @if (lateralTemperatureRuleName()) {
-        {{ lateralTemperatureRuleName() }} —
-      }
-      <ng-container i18n>Lateral distance temperature</ng-container>
-    </label>
-    <p-inputgroup class="form__lat-temp-input">
-      <input
-        id="lateralDistanceTemperature"
-        type="number"
-        pInputText
-        [attr.step]="BOUNDS.lateralDistanceTemperature.step"
-        [attr.min]="BOUNDS.lateralDistanceTemperature.min"
-        [attr.max]="BOUNDS.lateralDistanceTemperature.max"
-        formControlName="lateralDistanceTemperature"
-        [attr.aria-describedby]="lateralTemperatureHint() ? 'lateral-distance-hint' : null"
-        [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
-        [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
-        (input)="truncateTwoDecimals($event)"
-        data-testid="conformity-lateral-temperature-input"
-      />
-      <p-inputgroup-addon>°C</p-inputgroup-addon>
-    </p-inputgroup>
-
-    <div class="form__lat-temp-compl">
-      @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
-        <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
-          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.min }}
+      <label for="repartitionTemperature" class="form__distrib-temp-label" i18n>Repartition temperature</label>
+      <p-inputgroup class="form__distrib-temp-input">
+        <input
+          id="repartitionTemperature"
+          type="number"
+          pInputText
+          [attr.step]="BOUNDS.repartitionTemperature.step"
+          [attr.min]="BOUNDS.repartitionTemperature.min"
+          [attr.max]="BOUNDS.repartitionTemperature.max"
+          formControlName="repartitionTemperature"
+          [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
+          [attr.aria-errormessage]="repartitionTemperatureErrorId()"
+          (input)="truncateTwoDecimals($event)"
+          data-testid="conformity-repartition-temperature-input"
+        />
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (form.controls.repartitionTemperature.errors?.['min']) {
+        <p-message
+          id="repartition-temperature-min-error"
+          class="form__distrib-temp-error"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.repartitionTemperature.min }}
         </p-message>
-      } @else if (form.controls.lateralDistanceTemperature.errors?.['max']) {
-        <p-message id="lateral-distance-temperature-max-error" severity="error" size="small" variant="simple">
-          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.max }}
+      } @else if (form.controls.repartitionTemperature.errors?.['max']) {
+        <p-message
+          id="repartition-temperature-max-error"
+          class="form__distrib-temp-error"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.repartitionTemperature.max }}
         </p-message>
       }
-      @if (lateralTemperatureHint()) {
-        <small id="lateral-distance-hint">{{ lateralTemperatureHint() }}</small>
-      }
-    </div>
 
-    <label for="conformityMultiselect" class="form__conformity-select-label" i18n>Conformity</label>
-    <p-multiselect
-      inputId="conformityMultiselect"
-      formControlName="conformity"
-      [options]="conformityOptions()"
-      optionLabel="label"
-      optionValue="value"
-      [filter]="false"
-      [showToggleAll]="false"
-      fluid
-      class="form__conformity-select-input"
-      data-testid="conformity-type-multiselect"
-    />
-  </fieldset>
+      <label for="lateralDistanceTemperature" class="form__lat-temp-label">
+        @if (lateralTemperatureRuleName()) {
+          {{ lateralTemperatureRuleName() }} —
+        }
+        <ng-container i18n>Lateral distance temperature</ng-container>
+      </label>
+      <p-inputgroup class="form__lat-temp-input">
+        <input
+          id="lateralDistanceTemperature"
+          type="number"
+          pInputText
+          [attr.step]="BOUNDS.lateralDistanceTemperature.step"
+          [attr.min]="BOUNDS.lateralDistanceTemperature.min"
+          [attr.max]="BOUNDS.lateralDistanceTemperature.max"
+          formControlName="lateralDistanceTemperature"
+          [attr.aria-describedby]="lateralTemperatureHint() ? 'lateral-distance-hint' : null"
+          [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
+          [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
+          (input)="truncateTwoDecimals($event)"
+          data-testid="conformity-lateral-temperature-input"
+        />
+        <p-inputgroup-addon>°C</p-inputgroup-addon>
+      </p-inputgroup>
 
-  <button
-    class="form__submit"
-    app-btn
-    type="submit"
-    [disabled]="!canCalculate()"
-    [btnLoading]="isCalculating()"
-    data-testid="conformity-calculate-btn"
-    i18n
-  >
-    Calculate
-  </button>
-</form>
+      <div class="form__lat-temp-compl">
+        @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
+          <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
+            <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.min }}
+          </p-message>
+        } @else if (form.controls.lateralDistanceTemperature.errors?.['max']) {
+          <p-message id="lateral-distance-temperature-max-error" severity="error" size="small" variant="simple">
+            <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.max }}
+          </p-message>
+        }
+        @if (lateralTemperatureHint()) {
+          <small id="lateral-distance-hint">{{ lateralTemperatureHint() }}</small>
+        }
+      </div>
+
+      <label for="conformityMultiselect" class="form__conformity-select-label" i18n>Conformity</label>
+      <p-multiselect
+        inputId="conformityMultiselect"
+        formControlName="conformity"
+        [options]="conformityOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [filter]="false"
+        [showToggleAll]="false"
+        fluid
+        class="form__conformity-select-input"
+        data-testid="conformity-type-multiselect"
+      />
+    </fieldset>
+
+    <button
+      class="form__submit"
+      app-btn
+      type="submit"
+      [disabled]="!canCalculate()"
+      [btnLoading]="isCalculating()"
+      data-testid="conformity-calculate-btn"
+      i18n
+    >
+      Calculate
+    </button>
+  </form>
+}
 
 @if (conformityResults()) {
   <div class="results" @expandHeight>
@@ -205,65 +214,84 @@
     <h2 class="results__title" i18n>Results:</h2>
 
     <figure class="results__figure">
-      <div id="conformity-plot"></div>
       <figcaption class="sr-only" i18n>Conformity visualisation graph</figcaption>
+      <button
+        app-btn
+        btnStyle="text"
+        btnSize="s"
+        type="button"
+        class="results__figure-toggle"
+        [attr.aria-pressed]="isGraphEnlarged()"
+        (click)="toggleGraphSize()"
+        data-testid="conformity-graph-toggle-btn"
+      >
+        <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
+        @if (isGraphEnlarged()) {
+          <ng-container i18n>Reduce graphic view</ng-container>
+        } @else {
+          <ng-container i18n>Enlarge graphic view</ng-container>
+        }
+      </button>
+      <div id="conformity-plot"></div>
     </figure>
 
-    <table class="results__table">
-      <thead>
-        <tr>
-          <th scope="col"></th>
-          @for (col of selectedConformityColumns(); track col.value) {
-            <th scope="col">{{ col.label }} <ng-container i18n>overhang</ng-container></th>
-            @if (showLateralColumn()) {
-              <th scope="col">{{ col.label }} <ng-container i18n>lateral</ng-container></th>
-            }
-          }
-        </tr>
-      </thead>
-      <tbody>
-        <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: commonRows }" />
-
-        <tr>
-          <th scope="row" i18n>Conformity compliance</th>
-          @for (col of selectedConformityColumns(); track col.value) {
-            <td [attr.colspan]="showLateralColumn() ? 2 : null">
-              @switch (getConformityCompliance(col.value)) {
-                @case (null) {
-                  <div class="compliance">
-                    <span class="compliance__text" i18n>Unknown</span>
-                    <app-icon
-                      icon="shield_question"
-                      class="compliance__icon compliance__icon--unknown"
-                      aria-hidden="true"
-                    />
-                  </div>
-                }
-                @case (true) {
-                  <div class="compliance">
-                    <span class="compliance__text" i18n>Yes</span>
-                    <app-icon icon="check" class="compliance__icon compliance__icon--yes" aria-hidden="true" />
-                  </div>
-                }
-                @default {
-                  <div class="compliance">
-                    <span class="compliance__text" i18n>No</span>
-                    <app-icon icon="close" class="compliance__icon compliance__icon--no" aria-hidden="true" />
-                  </div>
-                }
-              }
-            </td>
-          }
-        </tr>
-
-        @if (conformityType() === 'cable_track') {
+    <div class="results__table-wrapper">
+      <table class="results__table">
+        <thead>
           <tr>
-            <th scope="colgroup" [attr.colspan]="totalColSpan()" i18n>Minimum distance case</th>
+            <th scope="col"></th>
+            @for (col of selectedConformityColumns(); track col.value) {
+              <th scope="col">{{ col.label }} <ng-container i18n>overhang</ng-container></th>
+              @if (showLateralColumn()) {
+                <th scope="col">{{ col.label }} <ng-container i18n>lateral</ng-container></th>
+              }
+            }
           </tr>
-          <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: cableTrackRows }" />
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: commonRows }" />
+
+          <tr>
+            <th scope="row" i18n>Conformity compliance</th>
+            @for (col of selectedConformityColumns(); track col.value) {
+              <td [attr.colspan]="showLateralColumn() ? 2 : null">
+                @switch (getConformityCompliance(col.value)) {
+                  @case (null) {
+                    <div class="compliance">
+                      <span class="compliance__text" i18n>Unknown</span>
+                      <app-icon
+                        icon="shield_question"
+                        class="compliance__icon compliance__icon--unknown"
+                        aria-hidden="true"
+                      />
+                    </div>
+                  }
+                  @case (true) {
+                    <div class="compliance">
+                      <span class="compliance__text" i18n>Yes</span>
+                      <app-icon icon="check" class="compliance__icon compliance__icon--yes" aria-hidden="true" />
+                    </div>
+                  }
+                  @default {
+                    <div class="compliance">
+                      <span class="compliance__text" i18n>No</span>
+                      <app-icon icon="close" class="compliance__icon compliance__icon--no" aria-hidden="true" />
+                    </div>
+                  }
+                }
+              </td>
+            }
+          </tr>
+
+          @if (conformityType() === 'cable_track') {
+            <tr>
+              <th scope="colgroup" [attr.colspan]="totalColSpan()" i18n>Minimum distance case</th>
+            </tr>
+            <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: cableTrackRows }" />
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
 }
 

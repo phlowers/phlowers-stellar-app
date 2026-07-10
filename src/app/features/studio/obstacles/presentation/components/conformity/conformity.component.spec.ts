@@ -10,13 +10,14 @@ import { NotificationService } from '@services/notification/notification.service
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
-import { createConformityPlot, purgeConformityPlot } from './helpers/createConformityPlot';
+import { createConformityPlot, purgeConformityPlot, resizeConformityPlot } from './helpers/createConformityPlot';
 import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
 
 vi.mock('./helpers/createConformityPlot');
 
 const mockCreateConformityPlot = vi.mocked(createConformityPlot);
 const mockPurgeConformityPlot = vi.mocked(purgeConformityPlot);
+const mockResizeConformityPlot = vi.mocked(resizeConformityPlot);
 
 /** Shape of the in-memory data backing the mock Dexie database. */
 interface DbData {
@@ -644,6 +645,38 @@ describe('ConformityComponent', () => {
       fixture.destroy();
 
       expect(mockPurgeConformityPlot).toHaveBeenCalledWith(document);
+    });
+  });
+
+  describe('graph enlarge toggle', () => {
+    it('should toggle the enlarged state and resize the plot on each click', async () => {
+      await createComponent();
+      mockResizeConformityPlot.mockClear();
+      expect(component.isGraphEnlarged()).toBe(false);
+
+      component.toggleGraphSize();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.isGraphEnlarged()).toBe(true);
+      expect(mockResizeConformityPlot).toHaveBeenCalledWith(document);
+
+      component.toggleGraphSize();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.isGraphEnlarged()).toBe(false);
+      expect(mockResizeConformityPlot).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reset the enlarged state when the modal closes', async () => {
+      await createComponent();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      component.isGraphEnlarged.set(true);
+
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+
+      expect(component.isGraphEnlarged()).toBe(false);
     });
   });
 
