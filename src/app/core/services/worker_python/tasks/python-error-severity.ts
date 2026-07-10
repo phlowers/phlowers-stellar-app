@@ -27,7 +27,7 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.DataWarning]: 'warning',
   [PythonErrorCode.BalanceEngineWarning]: 'warning',
   [PythonErrorCode.RtsDataNotAvailable]: 'error',
-  [PythonErrorCode.UserWarning]: 'warning',
+  [PythonErrorCode.NoIntersectionPlaneWarning]: 'warning',
   [PythonErrorCode.MeasurementDataNotAvailable]: 'error',
   [PythonErrorCode.UncertaintyNotAvailable]: 'error',
   [PythonErrorCode.InvalidManipulationIndex]: 'error',

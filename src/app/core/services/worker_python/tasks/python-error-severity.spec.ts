@@ -27,7 +27,7 @@ describe('PYTHON_ERROR_SEVERITY', () => {
   it('should classify warning-like codes as warning', () => {
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.DataWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.BalanceEngineWarning]).toBe('warning');
-    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.UserWarning]).toBe('warning');
+    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.NoIntersectionPlaneWarning]).toBe('warning');
   });
 
   it('should have both a severity and a localized message defined for every PythonErrorCode, keeping the two catalogs in sync', () => {

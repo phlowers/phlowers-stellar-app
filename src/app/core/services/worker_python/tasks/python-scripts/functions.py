@@ -17,7 +17,9 @@ RESOLUTION = 100
 
 # configure handler to print to stdout
 handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 handler.setFormatter(formatter)
 
 # mechaphlowers logger — reset any handlers set by the library on import
@@ -43,7 +45,9 @@ logger.addHandler(handler)
 _captured_warnings: list[str] = []
 
 
-def _capture_warning(message, category, filename, lineno, file=None, line=None):
+def _capture_warning(
+    message, category, filename, lineno, file=None, line=None
+):
     _captured_warnings.append(f"{category.__name__}: {message}")
 
 
@@ -62,6 +66,7 @@ def get_and_clear_warnings() -> list[str]:
 
 from stellar_engine.pyodide_utils import js_to_python  # noqa: E402
 
+
 # log utils functions
 def set_log_level(js_inputs: dict):
     python_inputs = js_to_python(js_inputs)
@@ -78,6 +83,7 @@ def set_log_level(js_inputs: dict):
 
 
 import mechaphlowers as mph  # noqa: E402
+
 
 # initialization functions
 def init_config():
