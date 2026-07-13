@@ -82,12 +82,13 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         )
         return {}
 
-    print(f"rule_distances_data: {rule_distances_data}")
+    
     try:
         rule_distances = [
             RuleDistanceInput.from_dict(rd) for rd in rule_distances_data
         ]
     except ValueError as e:
+        logger.debug(f"rule_distances_data: {rule_distances_data}")
         logger.error(f"Invalid rule distances data: {e}")
         raise
 
@@ -141,15 +142,15 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
 
     # Init objects for simulation
     dist_engine = DistanceEngine()
-    study_copy = deepcopy(study)
-    ground_supports = study_copy.position_engine.coords_calculator.supports_ground_coords.copy()
+    
+    ground_supports = study.position_engine.coords_calculator.supports_ground_coords.copy()
     dist_engine.add_span_frame(
         ground_supports[obstacle_support_index],
         ground_supports[obstacle_support_index + 1],
     )
 
     try:
-        obstacle_coords = study_copy.position_engine.coords_calculator.obstacles_points.dict_coords().get(
+        obstacle_coords = study.position_engine.coords_calculator.obstacles_points.dict_coords().get(
             obstacle_id
         )
         if obstacle_coords is None:

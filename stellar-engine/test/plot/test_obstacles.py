@@ -14,7 +14,6 @@ from mechaphlowers.data.catalog.catalog import (
     sample_cable_catalog,
 )
 
-# from stellar_engine.utils import get_section_middle_span
 
 
 def _make_balance_engine(span_lengths, conductor_altitudes):
