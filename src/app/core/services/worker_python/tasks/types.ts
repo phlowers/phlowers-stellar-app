@@ -566,6 +566,7 @@ export interface ConformityFormInput {
   lateralDistanceTemperature: number | null;
   selectedConformityRules: string[];
   conformity: string[] | null;
+  conformityPlot: 'vegetation' | 'cable_track' | 'overhang';
   intermediatePoints: number[];
 }
 

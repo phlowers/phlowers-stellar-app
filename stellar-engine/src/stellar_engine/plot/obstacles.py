@@ -4,15 +4,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from copy import deepcopy
 import logging
 
 from mechaphlowers import SectionStudy
 from mechaphlowers.core.geometry.group_points import GroupPoints
-from mechaphlowers.core.geometry.distances import DistanceEngine
 
-import numpy as np
-from stellar_engine.entities.errors import ObstacleNotFoundError
 from stellar_engine.entities.inputs import get_points_from_context
 
 logger = logging.getLogger("stellar_engine")
@@ -156,4 +152,3 @@ def clear_obstacles(
     )
 
     return {"success": True}
-

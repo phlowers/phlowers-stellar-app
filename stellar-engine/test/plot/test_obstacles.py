@@ -13,7 +13,7 @@ from mechaphlowers import BalanceEngine, CableArray, SectionArray
 from mechaphlowers.data.catalog.catalog import (
     sample_cable_catalog,
 )
-from stellar_engine.plot.obstacles import add_single_obstacle
+
 # from stellar_engine.utils import get_section_middle_span
 
 

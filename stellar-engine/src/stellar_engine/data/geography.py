@@ -117,5 +117,5 @@ def import_lambert_and_validate(inputs: dict):
     lon_diff = abs(np.array(result_loc["longitude"]) - lon_section_data)
     dist_diff = np.linalg.norm([lat_diff, lon_diff], axis=0)
     mean_gps_diff = np.mean(dist_diff)
-    
+
     return {"localization": result_loc, "meanGpsDiff": mean_gps_diff}

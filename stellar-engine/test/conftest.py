@@ -74,6 +74,7 @@ def balance_engine_no_anchor(cable_array_AM600: CableArray) -> BalanceEngine:
         cable_array=cable_array_AM600, section_array=section_array
     )
 
+
 @pytest.fixture
 def study_base(cable_array_AM600: CableArray):
     from stellar_engine.plot.obstacles import SectionStudy
@@ -98,4 +99,6 @@ def study_base(cable_array_AM600: CableArray):
     )
     section_array.add_units({"line_angle": "grad"})
 
-    return SectionStudy(cable_array=cable_array_AM600, section_array=section_array)
+    return SectionStudy(
+        cable_array=cable_array_AM600, section_array=section_array
+    )

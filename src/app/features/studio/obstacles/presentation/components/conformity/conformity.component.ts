@@ -465,6 +465,13 @@ export class ConformityComponent implements OnDestroy {
     if (!this.canCalculate()) return;
     const obstacle = this.obstacleData();
     if (!obstacle) return;
+    const conformityType = this.conformityType();
+    if (!conformityType) {
+      this.notificationService.error($localize`Cannot calculate conformity: obstacle type has no conformity configuration`);
+      return;
+    }
+    // Map database value to Python worker expected value
+    // const conformityPlot: 'vegetation' | 'cable_track' | 'overhang' = conformityType: conformityType;
     const v = this.form.getRawValue();
     const db = this.storageService.db;
     const selectedRuleTypes = v.conformity ?? [];
@@ -502,6 +509,7 @@ export class ConformityComponent implements OnDestroy {
           lateralDistanceTemperature: v.lateralDistanceTemperature,
           selectedConformityRules: selectedRuleTypes,
           conformity: v.conformity,
+          conformityPlot: conformityType,
           intermediatePoints: this.intermediatePointsConfig()
         },
         rulesClimaticConditions: rules.map((r) => ({
