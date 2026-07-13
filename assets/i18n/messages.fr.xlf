@@ -3203,12 +3203,6 @@
         <target>Positionnement libre</target>
       </segment>
     </unit>
-    <unit id="8244905429888828226">
-      <segment state="initial">
-        <source>AT-CCGLA</source>
-        <target>AT-CCGLA</target>
-      </segment>
-    </unit>
     <unit id="5469472899799340456">
       <segment state="initial">
         <source>Calculate and save</source>
@@ -4820,7 +4814,13 @@
     <unit id="3017905259126952863">
       <segment state="initial">
         <source>An unexpected error occurred. Please reload the page if the problem persists.</source>
-        <target>Une erreur inattendue s'est produite. Veuillez recharger la page si le problème persiste.</target>
+        <target>Une erreur inattendue s&apos;est produite. Veuillez recharger la page si le problème persiste.</target>
+      </segment>
+    </unit>
+    <unit id="3791858162236753226">
+      <segment state="initial">
+        <source>Cannot calculate conformity: obstacle type has no conformity configuration</source>
+        <target>Impossible de calculer la conformité : le type d&apos;obstacle n&apos;a pas de configuration de conformité</target>
       </segment>
     </unit>
   </file>

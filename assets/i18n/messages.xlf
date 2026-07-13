@@ -1813,11 +1813,6 @@
         <source>delete obstacle</source>
       </segment>
     </unit>
-    <unit id="8244905429888828226">
-      <segment>
-        <source>AT-CCGLA</source>
-      </segment>
-    </unit>
     <unit id="5469472899799340456">
       <segment>
         <source>Calculate and save</source>
@@ -4017,6 +4012,11 @@
     <unit id="3017905259126952863">
       <segment>
         <source>An unexpected error occurred. Please reload the page if the problem persists.</source>
+      </segment>
+    </unit>
+    <unit id="3791858162236753226">
+      <segment>
+        <source>Cannot calculate conformity: obstacle type has no conformity configuration</source>
       </segment>
     </unit>
   </file>
