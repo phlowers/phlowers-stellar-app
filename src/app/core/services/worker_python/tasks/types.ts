@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -77,7 +77,9 @@ export enum Task {
   // Add distance/angle measurement points to the study's position engine
   addMeasureDistanceAnglePoints = 'addMeasureDistanceAnglePoints',
   // Clear all distance/angle measurement points from the study's position engine
-  clearMeasureDistanceAnglePoints = 'clearMeasureDistanceAnglePoints'
+  clearMeasureDistanceAnglePoints = 'clearMeasureDistanceAnglePoints',
+  // Compute obstacle conformity zones and points
+  getConformity = 'getConformity'
 }
 
 /**
@@ -459,6 +461,8 @@ export interface TaskInputs {
   };
   /** Inputs for clearMeasureDistanceAnglePoints task: no inputs */
   [Task.clearMeasureDistanceAnglePoints]: undefined;
+  /** Inputs for getConformity task */
+  [Task.getConformity]: ConformityTaskInput;
 }
 
 /**
@@ -532,6 +536,110 @@ export interface MeasureDistanceAngleResult {
   distance_1_2: number;
   distance_2_3: number | null;
   angle_1_2_3: number | null;
+}
+
+export interface ConformityPointInput {
+  temperature: number | null;
+  pressure: number | 'WindZoneInput';
+}
+
+export interface ConformityRuleClimaticConditionInput {
+  ruleType: string;
+  ruleName: string;
+  lateralPoint: ConformityPointInput;
+  overhangPoint: ConformityPointInput;
+}
+
+export interface ConformityRuleDistanceInput {
+  ruleType: string;
+  lateral: Record<string, number> | null;
+  overhang: Record<string, number> | null;
+}
+
+export interface ConformityFormInput {
+  windZone: string | null;
+  windPressure: number | null;
+  windMinus: boolean;
+  redZonePresence: boolean;
+  repartitionTemperature: number | null;
+  lateralDistanceTemperature: number | null;
+  selectedConformityRules: string[];
+  conformity: string[] | null;
+  conformityPlot: 'vegetation' | 'cable_track' | 'overhang';
+  intermediatePoints: number[];
+}
+
+export interface ConformityTaskInput {
+  obstacle: Obstacle;
+  electricTension: string;
+  form: ConformityFormInput;
+  rulesClimaticConditions: ConformityRuleClimaticConditionInput[];
+  rulesDistances: ConformityRuleDistanceInput[];
+}
+
+/** A point in the 2D conformity cross-section: x = lateral distance (m), y = altitude (m). */
+export interface ConformityPointOutput {
+  x: number;
+  y: number;
+}
+
+/** A cable candidate point, carrying the disk radius (m) used by `cable_track`. */
+export interface ConformityCablePointOutput extends ConformityPointOutput {
+  radius: number;
+}
+
+/** Name of a zone corner. */
+export type ConformityCornerName = 'UpperLeft' | 'UpperRight' | 'LowerRight' | 'LowerLeft';
+
+/** One zone corner, delivered as a single-key object e.g. `{ LowerLeft: { x, y } }`. */
+export type ConformityZoneCorner = Partial<Record<ConformityCornerName, ConformityPointOutput>>;
+
+/** Geometry of a rule's conformity zone. */
+export interface ConformityZonePlot {
+  /** Ordered polygon corners (fill outline). */
+  zonePoints: ConformityZoneCorner[];
+  /** Bright-border polyline, already trimmed by the task to the edges to highlight. */
+  zoneBorder: ConformityPointOutput[];
+}
+
+/** One conformity rule: its zone geometry and candidate cable points. */
+export interface ConformityRulePlot {
+  zonePlot: ConformityZonePlot;
+  points: ConformityCablePointOutput[];
+}
+
+/** The obstacle and its own point(s), always drawn regardless of conformity type. */
+export interface ConformityObstacleOutput {
+  name: string;
+  points: ConformityPointOutput[];
+}
+
+/** Detailed numerical results for a single conformity rule (overhang and lateral sides). */
+export interface ConformityRuleResult {
+  overhangCableAltitude: number;
+  lateralCableAltitude: number;
+  overhangCableLineAxisDistance: number;
+  lateralCableLineAxisDistance: number;
+  overhangDistanceToComply: number;
+  lateralDistanceToComply: number;
+  overhangComplianceAltitude: number;
+  lateralComplianceLineAxisDistance: number;
+  conformityCompliance: boolean;
+  overhangTemperature?: number;
+  lateralTemperature?: number;
+  overhangWindPressure?: number;
+  lateralWindPressure?: number;
+  overhangMinimalDistance?: number;
+  lateralMinimalDistance?: number;
+}
+
+/** Full response the conformity calculation returns for the graph. */
+export interface ConformityTaskOutput {
+  obstacle: ConformityObstacleOutput;
+  /** Rules keyed by `rule_type` (e.g. `'AT'`, `'CCG-LA'`). Key order is the stacking priority. */
+  conformity: Record<string, ConformityRulePlot>;
+  /** Detailed numerical results per rule, keyed by `rule_type`. */
+  results: Record<string, ConformityRuleResult>;
 }
 
 /**
@@ -633,4 +741,6 @@ export interface TaskOutputs {
   [Task.addMeasureDistanceAnglePoints]: { success: boolean };
   /** Output from clearMeasureDistanceAnglePoints task */
   [Task.clearMeasureDistanceAnglePoints]: { success: boolean };
+  /** Output from getConformity task */
+  [Task.getConformity]: ConformityTaskOutput;
 }

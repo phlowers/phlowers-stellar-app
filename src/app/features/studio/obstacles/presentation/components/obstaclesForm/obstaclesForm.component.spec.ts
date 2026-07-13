@@ -269,7 +269,7 @@ describe('ObstaclesFormComponent', () => {
       expect(button?.tagName).toBe('BUTTON');
     });
 
-    it('should render the open-conformity-modal (AT-CCGLA) button as enabled', () => {
+    it('should render the open-conformity-modal (Conformity) button as enabled', () => {
       const button = getByTestId('open-conformity-modal') as HTMLButtonElement;
       expect(button).toBeTruthy();
       expect(button.disabled).toBe(false);
@@ -897,7 +897,7 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
-  describe('conformity modal (AT-CCGLA button)', () => {
+  describe('conformity modal (Conformity button)', () => {
     /** Sets up the form/section so every openConformityModal precondition is satisfied. */
     const satisfyAllConditions = () => {
       mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
@@ -953,7 +953,7 @@ describe('ObstaclesFormComponent', () => {
       expect(component.isConformityModalOpen()).toBe(true);
     });
 
-    it('should call openConformityModal when the AT-CCGLA button is clicked', () => {
+    it('should call openConformityModal when the Conformity button is clicked', () => {
       const spy = vi.spyOn(component, 'openConformityModal').mockResolvedValue();
 
       (getByTestId('open-conformity-modal') as HTMLButtonElement).click();

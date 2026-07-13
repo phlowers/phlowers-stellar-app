@@ -250,22 +250,23 @@ describe('createConformityPlot', () => {
   });
 
   describe('layout', () => {
-    it('should configure fixed, 1:1 scaled axes with the expected titles', () => {
+    it('should configure 1:1 scaled axes that allow zooming', () => {
       createConformityPlot(mockDocument, mockResponse, defaultOptions);
 
       const layout = (Plotly.react as Mock).mock.calls[0][2] as Partial<Layout>;
-      expect(layout.xaxis?.fixedrange).toBe(true);
-      expect(layout.yaxis?.fixedrange).toBe(true);
+      expect(layout.dragmode).toBe('zoom');
+      expect(layout.xaxis?.fixedrange).toBeUndefined();
+      expect(layout.yaxis?.fixedrange).toBeUndefined();
       expect(layout.yaxis?.scaleanchor).toBe('x');
       expect(layout.yaxis?.scaleratio).toBe(1);
     });
 
-    it('should disable the mode bar, drag and scroll zoom in the config', () => {
+    it('should enable the mode bar and scroll zoom in the config', () => {
       createConformityPlot(mockDocument, mockResponse, defaultOptions);
 
       const config = (Plotly.react as Mock).mock.calls[0][3] as { displayModeBar: boolean; scrollZoom: boolean };
-      expect(config.displayModeBar).toBe(false);
-      expect(config.scrollZoom).toBe(false);
+      expect(config.displayModeBar).toBe(true);
+      expect(config.scrollZoom).toBe(true);
     });
   });
 });
