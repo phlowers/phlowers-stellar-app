@@ -9,6 +9,7 @@ import logging
 from stellar_engine.core import geometry, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
+from stellar_engine.core.conformity import simulation as conformity_simulation
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
@@ -289,8 +290,19 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
-# --------------------------config----------------
+#---------------------------conformity----------------
 
+@debug_log
+def get_conformity(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for get_conformity: {python_inputs}")
+    out = conformity_simulation.get_conformity(python_inputs, study)
+    logger.debug(f"Conformity output: {out}")
+    return out
+
+
+#--------------------------config----------------
 
 @debug_log
 def get_config():

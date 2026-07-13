@@ -1,3 +1,9 @@
+# Copyright (c) 2026, RTE (http://www.rte-france.com)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
 import sys
 from pathlib import Path
 
@@ -71,5 +77,34 @@ def balance_engine_no_anchor(cable_array_AM600: CableArray) -> BalanceEngine:
     )
     section_array.add_units({"line_angle": "grad"})
     return BalanceEngine(
+        cable_array=cable_array_AM600, section_array=section_array
+    )
+
+
+@pytest.fixture
+def study_base(cable_array_AM600: CableArray):
+    from stellar_engine.plot.obstacles import SectionStudy
+
+    section_array = SectionArray(
+        pd.DataFrame(
+            {
+                "name": ["1", "2", "3", "4"],
+                "suspension": [False, True, True, False],
+                "conductor_attachment_altitude": [50, 100, 50, 50],
+                "crossarm_length": [10, 10, 10, 10],
+                "line_angle": [0, 0, 0, 0],
+                "insulator_length": [3, 3, 3, 3],
+                "span_length": [500, 500, 500, np.nan],
+                "insulator_mass": [100.0, 50.0, 5.0, 100.0],
+                "load_mass": [0, 0, 0, 0],
+                "load_position": [0, 0, 0, 0],
+            }
+        ),
+        sagging_parameter=2000,
+        sagging_temperature=15,
+    )
+    section_array.add_units({"line_angle": "grad"})
+
+    return SectionStudy(
         cable_array=cable_array_AM600, section_array=section_array
     )
