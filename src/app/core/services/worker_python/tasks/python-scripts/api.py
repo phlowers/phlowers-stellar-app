@@ -16,7 +16,7 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_2d, plot_settings, run_solver, supports_coords
+from stellar_engine.plot import conformity, plot_2d, plot_settings, run_solver, supports_coords
 import stellar_engine.plot.obstacles as obst
 
 from mechaphlowers import SectionStudy
@@ -274,7 +274,9 @@ def get_conformity(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
     logger.debug(f"python_inputs for get_conformity: {python_inputs}")
-    return obst.get_conformity(python_inputs, study)
+    out =conformity.get_conformity(python_inputs, study)
+    logger.debug(f"Conformity output: {out}")
+    return out
 
 
 

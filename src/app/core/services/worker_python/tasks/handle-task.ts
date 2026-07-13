@@ -135,6 +135,10 @@ const tasks: Record<
   [Task.clearMeasureDistanceAnglePoints]: {
     function: 'clear_measure_distance_angle_points',
     externalPackages: []
+  },
+  [Task.getConformity]: {
+    function: 'get_conformity',
+    externalPackages: []
   }
 };
 
