@@ -8,6 +8,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { createConformityPlot, purgeConformityPlot } from './helpers/createConformityPlot';
 import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
 
@@ -139,7 +141,7 @@ describe('ConformityComponent', () => {
   };
   let mockSpanService: { section: typeof sectionSignal; getSpanOptions: ReturnType<typeof vi.fn> };
   let mockNotification: { error: ReturnType<typeof vi.fn> };
-
+  let mockWorkerPython: { runTask: ReturnType<typeof vi.fn> };
   /**
    * Configures the TestBed and creates the component, then flushes the async Dexie-backed
    * signals (wind zones, conformity config, options) so derived state is fully resolved.
@@ -167,6 +169,36 @@ describe('ConformityComponent', () => {
     };
     mockNotification = { error: vi.fn() };
 
+    mockWorkerPython = {
+      runTask: vi.fn().mockImplementation((_task: Task, inputs: { form: { selectedConformityRules?: string[] } }) => {
+        const rules = inputs.form.selectedConformityRules ?? [];
+        const results = Object.fromEntries(
+          rules.map((ruleType) => [
+            ruleType,
+            {
+              overhangCableAltitude: 42,
+              lateralCableAltitude: 38,
+              overhangCableLineAxisDistance: 150,
+              lateralCableLineAxisDistance: 120,
+              overhangDistanceToComply: 5,
+              lateralDistanceToComply: 3,
+              overhangComplianceAltitude: 7,
+              lateralComplianceLineAxisDistance: 4,
+              conformityCompliance: true
+            }
+          ])
+        );
+        return Promise.resolve({
+          result: {
+            obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+            conformity: CONFORMITY_PLOT_MOCK.conformity,
+            results
+          },
+          error: null
+        });
+      })
+    };
+
     await TestBed.configureTestingModule({
       imports: [ConformityComponent],
       providers: [
@@ -174,7 +206,8 @@ describe('ConformityComponent', () => {
         { provide: ObstacleFormService, useValue: mockFormService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
-        { provide: NotificationService, useValue: mockNotification }
+        { provide: NotificationService, useValue: mockNotification },
+        { provide: WorkerPythonService, useValue: mockWorkerPython }
       ]
     }).compileComponents();
 
@@ -704,6 +737,13 @@ describe('ConformityComponent', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
       await fixture.whenStable();
+
+      // The auto-calculate effect kicks off calculate(), whose async db/worker chain resolves
+      // over several microtask + change-detection cycles.
+      for (let i = 0; i < 3; i++) {
+        fixture.detectChanges();
+        await fixture.whenStable();
+      }
 
       expect(component.conformityResults()).not.toBeNull();
     });
