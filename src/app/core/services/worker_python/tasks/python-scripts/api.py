@@ -16,7 +16,12 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_2d, plot_settings, run_solver, supports_coords
+from stellar_engine.plot import (
+    plot_2d,
+    plot_settings,
+    run_solver,
+    supports_coords,
+)
 import stellar_engine.plot.obstacles as obst
 
 from mechaphlowers import SectionStudy
@@ -53,7 +58,9 @@ def get_support_coordinates(js_inputs):
 @debug_log
 def get_pose_table(js_inputs):
     global study
-    return pose_table.get_pose_table(js_to_python(js_inputs), study.balance_engine)
+    return pose_table.get_pose_table(
+        js_to_python(js_inputs), study.balance_engine
+    )
 
 
 # ---------------------------measures----------------
@@ -97,7 +104,9 @@ def initialize_study(js_inputs):
     python_inputs = js_to_python(js_inputs)
 
     study, base_study = stellar_initialize_study(python_inputs)
-    logger.debug(f"Study initialized. Study: {study}, Base Study: {base_study}")
+    logger.debug(
+        f"Study initialized. Study: {study}, Base Study: {base_study}"
+    )
     return {"success": True}
 
 
@@ -109,6 +118,7 @@ def change_state(js_inputs):
         reload = change_state_inputs["reload"]
     else:
         reload = False
+    logger.debug(f"Reload value: {reload}")
     return run_solver.change_state(change_state_inputs, study, reload=reload)
 
 
@@ -133,7 +143,9 @@ def get_aspect_ratio(js_inputs):
 @debug_log
 def get_equivalent_span():
     global study
-    return {"equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)}
+    return {
+        "equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)
+    }
 
 
 # ---------------------------obstacles----------------
@@ -186,7 +198,9 @@ def delete_obstacle(js_inputs):
     )
     project = py_inputs["view"] == "2D"
     global study
-    obst.delete_obstacle(uuid, study, project=project, support_index=middle_span)
+    obst.delete_obstacle(
+        uuid, study, project=project, support_index=middle_span
+    )
     return {"success": True}
 
 
