@@ -189,6 +189,42 @@ describe('Task handlers', () => {
       expect(result.diagnostics).toEqual([]);
     });
 
+    it('should de-duplicate warnings with the same PythonErrorCode', async () => {
+      const mockToJs = vi.fn().mockReturnValue({ success: true });
+      (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
+        name === 'get_and_clear_warnings'
+          ? Object.assign(
+              () => ({
+                toJs: () => [
+                  'NoIntersectionPlaneWarning: no intersection found for point 1',
+                  'NoIntersectionPlaneWarning: no intersection found for point 2',
+                  'DataWarning: some data issue'
+                ],
+                destroy: vi.fn()
+              }),
+              { destroy: vi.fn() }
+            )
+          : () => ({ toJs: mockToJs, destroy: vi.fn() })
+      );
+
+      const result = await handleTask(mockPyodide, Task.initLit, undefined);
+
+      expect(result.diagnostics).toEqual([
+        {
+          code: 'NoIntersectionPlaneWarning',
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: no intersection found for point 1'
+        },
+        {
+          code: 'DataWarning',
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'DataWarning: some data issue'
+        }
+      ]);
+    });
+
     it('should destroy the get_and_clear_warnings function proxy after use', async () => {
       const mockToJs = vi.fn().mockReturnValue({ success: true });
       const warningsProxyDestroy = vi.fn();
