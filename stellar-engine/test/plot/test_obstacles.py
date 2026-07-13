@@ -15,7 +15,6 @@ from mechaphlowers.data.catalog.catalog import (
 )
 
 
-
 def _make_balance_engine(span_lengths, conductor_altitudes):
     """Create a mock BalanceEngine with given span_lengths and conductor_altitudes."""
     engine = MagicMock()

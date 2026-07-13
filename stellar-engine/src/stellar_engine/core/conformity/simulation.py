@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
-from copy import deepcopy
 
 from mechaphlowers import SectionStudy
 from mechaphlowers.core.geometry.distances import DistanceEngine
@@ -82,7 +81,6 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         )
         return {}
 
-    
     try:
         rule_distances = [
             RuleDistanceInput.from_dict(rd) for rd in rule_distances_data
@@ -142,8 +140,10 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
 
     # Init objects for simulation
     dist_engine = DistanceEngine()
-    
-    ground_supports = study.position_engine.coords_calculator.supports_ground_coords.copy()
+
+    ground_supports = (
+        study.position_engine.coords_calculator.supports_ground_coords.copy()
+    )
     dist_engine.add_span_frame(
         ground_supports[obstacle_support_index],
         ground_supports[obstacle_support_index + 1],
