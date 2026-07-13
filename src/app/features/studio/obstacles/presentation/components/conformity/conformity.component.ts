@@ -37,13 +37,14 @@ import {
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
 import { ConformityPlotResponse } from './conformity-plot.model';
-import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
 import { createConformityPlot, CONFORMITY_PLOT_ID, purgeConformityPlot } from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-conformity',
@@ -80,6 +81,7 @@ export class ConformityComponent implements OnDestroy {
   private readonly spanService = inject(PlotSpanService);
   private readonly storageService = inject(StorageService);
   private readonly notificationService = inject(NotificationService);
+  private readonly workerPythonService = inject(WorkerPythonService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
 
@@ -464,10 +466,10 @@ export class ConformityComponent implements OnDestroy {
     const obstacle = this.obstacleData();
     if (!obstacle) return;
     const v = this.form.getRawValue();
-    const point = this.activePoint();
     const db = this.storageService.db;
     const selectedRuleTypes = v.conformity ?? [];
     const obstacleType = obstacle.type ?? '';
+    const electricTension = this.spanService.section()?.voltage_idr;
 
     this.isCalculating.set(true);
     this.calculationError.set(null);
@@ -486,26 +488,16 @@ export class ConformityComponent implements OnDestroy {
           : Promise.resolve([])
       ]);
 
-      // TODO: replace with actual Pyodide/Python calculation
-      // eslint-disable-next-line no-console
-      console.log('--- Conformity calculation inputs ---', {
-        obstacle: {
-          uuid: obstacle.uuid,
-          name: obstacle.name,
-          type: obstacle.type,
-          supportIndex: obstacle.supportIndex,
-          altitudeType: obstacle.altitudeType,
-          lateralDistanceType: obstacle.lateralDistanceType,
-          referenceSupport: obstacle.referenceSupport,
-          allPositions: obstacle.positions,
-          activePoint: point
-        },
-        electricTension: this.spanService.section()?.voltage_idr ?? null,
+      if (!electricTension) throw new Error('Missing electric tension');
+
+      const conformityInputs: TaskInputs[Task.getConformity] = {
+        obstacle,
+        electricTension,
         form: {
           windZone: v.windZone,
           windPressure: this.effectiveWindPressure(),
-          windMinus: v.windMinus,
-          redZonePresence: v.redZonePresence,
+          windMinus: v.windMinus ?? false,
+          redZonePresence: v.redZonePresence ?? false,
           repartitionTemperature: v.repartitionTemperature,
           lateralDistanceTemperature: v.lateralDistanceTemperature,
           selectedConformityRules: selectedRuleTypes,
@@ -523,16 +515,24 @@ export class ConformityComponent implements OnDestroy {
           lateral: d.lateral,
           overhang: d.overhang
         }))
-      });
+      };
 
-      const isCableTrack = this.conformityType() === 'cable_track';
-      const results: Record<string, ConformityRuleResult> = {};
-      selectedRuleTypes.forEach((ruleType, index) => {
-        results[ruleType] = this.generateMockResult(isCableTrack, index === 0);
-      });
+      const { result: conformityTaskOutput, error: conformityTaskError } = await this.workerPythonService.runTask(
+        Task.getConformity,
+        conformityInputs
+      );
+      if (conformityTaskError || !conformityTaskOutput) {
+        throw new Error(conformityTaskError ?? 'Conformity task failed');
+      }
+
+      const plotData: ConformityPlotResponse = {
+        obstacle: conformityTaskOutput.obstacle,
+        conformity: conformityTaskOutput.conformity
+      };
+      const results: Record<string, ConformityRuleResult> = conformityTaskOutput.results;
       this._conformityResults.set(results);
       this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
-      this._conformityPlotData.set(CONFORMITY_PLOT_MOCK);
+      this._conformityPlotData.set(plotData);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);

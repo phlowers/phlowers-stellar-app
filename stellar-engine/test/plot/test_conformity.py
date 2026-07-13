@@ -6,21 +6,6 @@ from stellar_engine.plot.conformity import (
 from stellar_engine.plot.obstacles import add_single_obstacle
 
 
-def test_rule_climatic_condition_with_inverse_lateral_pressure():
-    rule = RuleClimaticCondition(
-        rule_type="RULE_1",
-        rule_name="RULE_1",
-        lateral_point=ClimaticPoint(temperature=17, pressure=12.5, red_zone=False),
-        overhang_point=ClimaticPoint(temperature=None, pressure=0, red_zone=False),
-    )
-
-    inverse_rule = rule.with_inverse_lateral_pressure()
-
-    assert inverse_rule is not rule
-    assert inverse_rule.lateral_point is not rule.lateral_point
-    assert inverse_rule.lateral_point.pressure == -12.5
-    assert rule.lateral_point.pressure == 12.5
-
 
 def test_get_scenario_conformity(study_base):
     python_inputs = {

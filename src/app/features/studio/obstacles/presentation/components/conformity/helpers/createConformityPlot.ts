@@ -193,12 +193,11 @@ export function createConformityPlot(
   const layout: Partial<Layout> = {
     autosize: true,
     showlegend: false,
-    dragmode: false,
+    dragmode: 'zoom',
     hovermode: 'closest',
     margin: { l: 55, r: 15, t: 15, b: 45 },
-    xaxis: { fixedrange: true, zeroline: false },
+    xaxis: { zeroline: false },
     yaxis: {
-      fixedrange: true,
       zeroline: false,
       scaleanchor: 'x',
       scaleratio: 1
@@ -207,11 +206,13 @@ export function createConformityPlot(
   };
 
   const config: Partial<Config> = {
-    displayModeBar: false,
+    displayModeBar: true,
     displaylogo: false,
     responsive: true,
     staticPlot: false,
-    scrollZoom: false
+    scrollZoom: true,
+    modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d'],
+    modeBarButtonsToAdd: []
   };
 
   // Plotly.react creates the plot if it doesn't exist yet, or efficiently updates it in place
