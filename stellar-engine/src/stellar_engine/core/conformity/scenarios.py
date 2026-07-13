@@ -61,7 +61,6 @@ class Scenario:
         }
 
 
-
 @dataclass
 class ClimaticPoint:
     """Represents climatic conditions for a conformity point."""

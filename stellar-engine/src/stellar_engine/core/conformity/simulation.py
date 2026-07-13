@@ -88,7 +88,7 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
     # - Validate and create ConformityParameters object
     try:
         parameters = ConformityParametersInput.from_dict(parameters_data)
-    
+
     except ValueError as e:
         logger.error(f"Invalid conformity parameters data: {parameters_data}")
         logger.error(f"Invalid form parameters: {e}")

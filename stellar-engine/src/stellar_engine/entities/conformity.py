@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Conformity input entities for structured conformity computation parameters."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, Optional
@@ -16,7 +16,8 @@ import logging
 
 logger = logging.getLogger("stellar_engine")
 
-#--------data classes for conformity input entities----------------
+# --------data classes for conformity input entities----------------
+
 
 @dataclass
 class TensionRules:
@@ -40,13 +41,14 @@ class TensionRules:
         tension_rules: dict[str, TensionRules] = {
             rd.rule_type: TensionRules(
                 lateral=rd.lateral[electric_tension] if rd.lateral else None,
-                overhang=rd.overhang[electric_tension] if rd.overhang else None,
+                overhang=rd.overhang[electric_tension]
+                if rd.overhang
+                else None,
             )
             for rd in rule_distances
         }
 
         return tension_rules
-
 
 
 # --------------------output classes --------------------
@@ -185,10 +187,14 @@ class RuleDistanceInput:
                 )
 
         if not isinstance(data["lateral"], dict):
-            logger.warning("RuleDistance lateral is missing, it could be normal if this is the configuration")
+            logger.warning(
+                "RuleDistance lateral is missing, it could be normal if this is the configuration"
+            )
             data["lateral"] = {}
         if not isinstance(data["overhang"], dict):
-            logger.warning("RuleDistance overhang is missing, it could be normal if this is the configuration")
+            logger.warning(
+                "RuleDistance overhang is missing, it could be normal if this is the configuration"
+            )
             data["overhang"] = {}
 
         return cls(

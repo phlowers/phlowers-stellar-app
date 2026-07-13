@@ -128,8 +128,16 @@ class ConformityPlotRules:
         if not points:
             return None
 
-        lateral_security_distance = self.tension_rules[rule_type].lateral if self.tension_rules[rule_type].lateral is not None else 0
-        overhang_security_distance = self.tension_rules[rule_type].overhang if self.tension_rules[rule_type].overhang is not None else 0
+        lateral_security_distance = (
+            self.tension_rules[rule_type].lateral
+            if self.tension_rules[rule_type].lateral is not None
+            else 0
+        )
+        overhang_security_distance = (
+            self.tension_rules[rule_type].overhang
+            if self.tension_rules[rule_type].overhang is not None
+            else 0
+        )
 
         max_x = max(p.x for p in points) + lateral_security_distance
         min_x = min(p.x for p in points) - lateral_security_distance
