@@ -3999,5 +3999,25 @@
         <source>Failed to add measurement points</source>
       </segment>
     </unit>
+    <unit id="4865056246123491233">
+      <segment>
+        <source>Reprojection using <ph id="0" equiv="PH" disp="environment.appName"/> data model seems to add a mean absolute error of <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</source>
+      </segment>
+    </unit>
+    <unit id="8900223846846763673">
+      <segment>
+        <source>Error computing GPS coordinates from Lambert93 data</source>
+      </segment>
+    </unit>
+    <unit id="studio.plot.loading">
+      <segment>
+        <source>loading</source>
+      </segment>
+    </unit>
+    <unit id="3017905259126952863">
+      <segment>
+        <source>An unexpected error occurred. Please reload the page if the problem persists.</source>
+      </segment>
+    </unit>
   </file>
 </xliff>

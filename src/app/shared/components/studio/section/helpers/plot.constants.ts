@@ -21,11 +21,8 @@ export const getShadowColor = (view: '2d' | '3d'): string => {
   return view === '3d' ? SPAN_COLOR : `rgba(${SPAN_COLOR_RGB},${SHADOW_OPACITY})`;
 };
 
-/** Debounce delay in ms for the Plotly render — keeps the render responsive after data signals settle. */
-export const STUDIO_PLOT_DEBOUNCE_DELAY = 50;
-
-/** Debounce delay in ms for slider/user-input interactions — prevents rapid Worker calls during dragging. */
-export const STUDIO_SLIDER_DEBOUNCE_DELAY = 300;
+/** Debounce delay in ms for studio plot refresh operations. */
+export const STUDIO_PLOT_DEBOUNCE_DELAY = 300;
 
 /** Shared Plotly axis background configuration used across all plot views. */
 export const PLOT_AXIS_CONFIG = {

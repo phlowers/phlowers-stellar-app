@@ -8,7 +8,9 @@ import { Injectable, inject } from '@angular/core';
 import { MessageService } from 'primeng/api';
 
 /** Default toast duration in milliseconds. */
-const DEFAULT_LIFE = 10000;
+const DEFAULT_LIFE = 5000;
+const LIFE_WARNING = 7000;
+const LIFE_ERROR = 10000;
 
 /**
  * Global notification service for displaying toast messages.
@@ -25,7 +27,7 @@ export class NotificationService {
    * Displays a success toast (green).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Successful"
-   * @param life - Display duration in ms, defaults to 10000
+   * @param life - Display duration in ms, defaults to 5000
    */
   success(detail: string, summary: string = $localize`Successful`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'success', summary, detail, life });
@@ -37,7 +39,7 @@ export class NotificationService {
    * @param summary - Toast title, defaults to "Error"
    * @param life - Display duration in ms, defaults to 10000
    */
-  error(detail: string, summary: string = $localize`Error`, life: number = DEFAULT_LIFE): void {
+  error(detail: string, summary: string = $localize`Error`, life: number = LIFE_ERROR): void {
     this.messageService.add({ severity: 'error', summary, detail, life });
   }
 
@@ -45,7 +47,7 @@ export class NotificationService {
    * Displays an info toast (blue).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Info"
-   * @param life - Display duration in ms, defaults to 10000
+   * @param life - Display duration in ms, defaults to 5000
    */
   info(detail: string, summary: string = $localize`Info`, life: number = DEFAULT_LIFE): void {
     this.messageService.add({ severity: 'info', summary, detail, life });
@@ -55,13 +57,13 @@ export class NotificationService {
    * Displays a warning toast (orange).
    * @param detail - Main message body
    * @param summary - Toast title, defaults to "Warning"
-   * @param life - Display duration in ms, defaults to 10000
+   * @param life - Display duration in ms, defaults to 7000
    */
-  warning(detail: string, summary: string = $localize`Warning`, life: number = DEFAULT_LIFE): void {
+  warning(detail: string, summary: string = $localize`Warning`, life: number = LIFE_WARNING): void {
     this.messageService.add({ severity: 'warn', summary, detail, life });
   }
 
-  warningList(warnings: string[], summary: string = $localize`Warning`, life: number = DEFAULT_LIFE): void {
+  warningList(warnings: string[], summary: string = $localize`Warning`, life: number = LIFE_WARNING): void {
     this.messageService.add({ key: 'warning-list', severity: 'warn', summary, data: { warnings }, life });
   }
 }

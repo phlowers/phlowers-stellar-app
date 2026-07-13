@@ -122,7 +122,8 @@ describe('StudioMenuBarComponent', () => {
     selected_cable_span_manipulation_uuid: null,
     start_latitude: null,
     start_longitude: null,
-    start_azimuth: null
+    start_azimuth: null,
+    mean_reprojection_diff_meters: null
   };
 
   const mockStudy: Study = {
@@ -518,16 +519,16 @@ describe('StudioMenuBarComponent', () => {
   });
 
   describe('deleteChargeCase', () => {
-    it('should call deleteLoad when deleting the selected charge', async () => {
+    it('should call deleteLoad then deleteCharge when deleting the selected charge', async () => {
       const charge = { label: 'Charge 1', value: 'charge-uuid-1' }; // charge-uuid-1 is selected
 
       await component.deleteChargeCase(charge);
 
       expect(mockLoadFormsService.deleteLoad).toHaveBeenCalled();
-      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
     });
 
-    it('should call only deleteLoad when deleting the selected charge', async () => {
+    it('should call deleteLoad before deleteCharge when deleting the selected charge', async () => {
       const charge = { label: 'Charge 1', value: 'charge-uuid-1' };
       const callOrder: string[] = [];
       (mockLoadFormsService.deleteLoad as ReturnType<typeof vi.fn>).mockImplementation(() => {
@@ -541,7 +542,7 @@ describe('StudioMenuBarComponent', () => {
 
       await component.deleteChargeCase(charge);
 
-      expect(callOrder).toEqual(['deleteLoad']);
+      expect(callOrder).toEqual(['deleteLoad', 'deleteCharge']);
     });
 
     it('should skip deleteLoad when deleting a non-selected charge', async () => {

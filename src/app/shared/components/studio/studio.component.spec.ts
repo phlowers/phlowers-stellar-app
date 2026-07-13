@@ -70,7 +70,8 @@ const mockSection: Section = {
   selected_cable_span_manipulation_uuid: null,
   start_latitude: null,
   start_longitude: null,
-  start_azimuth: null
+  start_azimuth: null,
+  mean_reprojection_diff_meters: null
 };
 
 const mockLitData: GetSectionOutput = {
@@ -261,16 +262,28 @@ describe('StudioComponent', () => {
 
     it('should call notificationService.warning once for a captured warning diagnostic', () => {
       mockPlotService.diagnostics.set([
-        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' }
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: boom'
+        }
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
-      expect(mockNotificationService.warning).toHaveBeenCalledWith(formatPythonError(PythonErrorCode.UserWarning));
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(
+        formatPythonError(PythonErrorCode.NoIntersectionPlaneWarning)
+      );
     });
 
     it('should call notificationService.warning once per captured warning diagnostic', () => {
       mockPlotService.diagnostics.set([
-        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' },
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: boom'
+        },
         { code: PythonErrorCode.DataWarning, severity: 'warning', origin: 'warning', rawText: 'DataWarning: boom' }
       ]);
       fixture.detectChanges();

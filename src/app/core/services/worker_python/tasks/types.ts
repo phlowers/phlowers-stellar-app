@@ -115,8 +115,8 @@ export enum PythonErrorCode {
   BalanceEngineWarning = 'BalanceEngineWarning',
   /** RTS catalog data missing or contains NaN values */
   RtsDataNotAvailable = 'RtsDataNotAvailable',
-  /** Generic Python warning raised via `warnings.warn()` without a specific category */
-  UserWarning = 'UserWarning',
+  /** Specific Python warning raised by mechaphlowers DistanceEngine */
+  NoIntersectionPlaneWarning = 'NoIntersectionPlaneWarning',
   /** Raised when measurement data are not available for computation */
   MeasurementDataNotAvailable = 'MeasurementDataNotAvailable',
   /** Raised when attempting to read uncertainty while it hasn't been computed */
@@ -293,7 +293,6 @@ export interface TaskInputs {
   /** Inputs for changeState task */
   [Task.changeState]: {
     climate: ClimateCharge;
-    spanLoads?: SpanLoad[];
     reload?: boolean;
   };
   /** Inputs for refreshProjection task */

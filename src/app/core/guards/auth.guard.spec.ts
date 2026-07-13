@@ -48,28 +48,30 @@ describe('authGuard', () => {
     const result = await TestBed.runInInjectionContext(() => authGuard(dummyRoute, dummyState));
 
     expect(result).toBe(true);
-    expect(authServiceMock.shouldForceServerResync).toHaveBeenCalledTimes(1);
     expect(authServiceMock.tryRestoreFromCache).not.toHaveBeenCalled();
+    // Offline-first: the guard must never block navigation on a network call.
+    expect(authServiceMock.refreshFromNetwork).not.toHaveBeenCalled();
   });
 
-  it('should refresh from network when server mismatch is flagged', async () => {
-    authServiceMock.shouldForceServerResync.mockReturnValue(true);
-    authServiceMock.refreshFromNetwork.mockResolvedValue({ email: 'recovered@example.com' });
+  it('should not perform any network refresh (offline-first) and restore from cache', async () => {
+    authServiceMock.currentUser.mockReturnValue(null);
+    authServiceMock.tryRestoreFromCache.mockResolvedValue(true);
 
     const result = await TestBed.runInInjectionContext(() => authGuard(dummyRoute, dummyState));
 
-    expect(authServiceMock.refreshFromNetwork).toHaveBeenCalledTimes(1);
     expect(result).toBe(true);
+    expect(authServiceMock.tryRestoreFromCache).toHaveBeenCalledTimes(1);
+    expect(authServiceMock.refreshFromNetwork).not.toHaveBeenCalled();
   });
 
-  it('should redirect to /login when resync fails after mismatch', async () => {
-    authServiceMock.shouldForceServerResync.mockReturnValue(true);
-    authServiceMock.refreshFromNetwork.mockResolvedValue(null);
+  it('should redirect to /login when no cached user is available', async () => {
+    authServiceMock.currentUser.mockReturnValue(null);
+    authServiceMock.tryRestoreFromCache.mockResolvedValue(false);
 
     await TestBed.runInInjectionContext(() => authGuard(dummyRoute, dummyState));
 
     expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
-    expect(authServiceMock.tryRestoreFromCache).not.toHaveBeenCalled();
+    expect(authServiceMock.refreshFromNetwork).not.toHaveBeenCalled();
   });
 
   it('should try to restore from cache when currentUser is null', async () => {
