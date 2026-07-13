@@ -51,7 +51,7 @@ export enum Task {
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
   /** Apply a cable length modification (lengthen or shorten) on a span */
-  cableModification = 'cableModification',
+  shortenLengthenCable = 'shortenLengthenCable',
   // get aspect ratio for plotting scale
   getAspectRatio = 'getAspectRatio',
   // get wind incidence angle for cable temperature calculation
@@ -384,8 +384,8 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  /** Inputs for cableModification task */
-  [Task.cableModification]: {
+  /** Inputs for shortenLengthenCable task */
+  [Task.shortenLengthenCable]: {
     spanIndex: number;
     widthCable: 'lengthening' | 'shortening';
     sizeCable: number;
@@ -603,8 +603,8 @@ export interface TaskOutputs {
   [Task.deleteObstacle]: { success: boolean };
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
-  /** Output from cableModification task: recalculated geometry with optional base state */
-  [Task.cableModification]: { success: boolean };
+  /** Output from shortenLengthenCable task: recalculated geometry with optional base state */
+  [Task.shortenLengthenCable]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;
     y: number;

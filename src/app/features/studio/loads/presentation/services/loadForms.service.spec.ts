@@ -471,7 +471,7 @@ describe('LoadFormsService', () => {
       expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
 
-    it('should not call cableModification when reapplyCableModifications is deactivated', async () => {
+    it('should not call shortenLengthenCable when reapplyCableModifications is deactivated', async () => {
       mockPlotService.temporaryLoadData = mockChargeData;
       mockSpanService.section.mockReturnValue({
         ...mockSection,
@@ -491,7 +491,7 @@ describe('LoadFormsService', () => {
       await service.calculateLoad();
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
     });
 
     it('should set plotService.error and diagnostics when runTask returns an error', async () => {
@@ -547,7 +547,7 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
     });
 
     it('should skip cable modifications whose span uuid is not in the support list', async () => {
@@ -568,7 +568,7 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.cableModification, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
     });
   });
 

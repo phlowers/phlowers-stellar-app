@@ -112,7 +112,7 @@ export class CableModificationsService {
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
 
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.cableModification, {
+    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
       spanIndex,
       widthCable: params.widthCable,
       sizeCable: params.sizeCable,

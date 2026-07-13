@@ -292,7 +292,7 @@ def set_resolution(js_inputs):
 
 
 @debug_log
-def cable_modification(js_inputs):
+def shorten_lengthen_cable(js_inputs):
     global study
     logger.debug(js_to_python(js_inputs))
     out = manipulations.modify_cable(js_to_python(js_inputs), study)

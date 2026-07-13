@@ -182,7 +182,7 @@ describe('CableModificationsService', () => {
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
     });
 
-    it('should call runTask with cableModification task and correct inputs', async () => {
+    it('should call runTask with shortenLengthenCable task and correct inputs', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: { current: {} as GetSectionOutput, base: null },
         error: null,
@@ -191,7 +191,7 @@ describe('CableModificationsService', () => {
 
       await service.calculate(mockParams);
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.cableModification, {
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.shortenLengthenCable, {
         spanIndex: 0,
         widthCable: mockParams.widthCable,
         sizeCable: mockParams.sizeCable,
