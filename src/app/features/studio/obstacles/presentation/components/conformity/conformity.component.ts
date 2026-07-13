@@ -467,7 +467,9 @@ export class ConformityComponent implements OnDestroy {
     if (!obstacle) return;
     const conformityType = this.conformityType();
     if (!conformityType) {
-      this.notificationService.error($localize`Cannot calculate conformity: obstacle type has no conformity configuration`);
+      this.notificationService.error(
+        $localize`Cannot calculate conformity: obstacle type has no conformity configuration`
+      );
       return;
     }
     // Map database value to Python worker expected value
