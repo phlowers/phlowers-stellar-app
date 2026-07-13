@@ -9,7 +9,9 @@ import { MessageService } from 'primeng/api';
 import { vi, type Mock } from 'vitest';
 import { NotificationService } from './notification.service';
 
-const DEFAULT_LIFE = 10000;
+const DEFAULT_LIFE = 5000;
+const LIFE_WARNING = 7000;
+const LIFE_ERROR = 10000;
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -68,7 +70,7 @@ describe('NotificationService', () => {
         severity: 'error',
         summary: expect.any(String),
         detail: 'Something went wrong',
-        life: DEFAULT_LIFE
+        life: LIFE_ERROR
       });
     });
 
@@ -79,7 +81,7 @@ describe('NotificationService', () => {
         severity: 'error',
         summary: 'Critical Error',
         detail: 'Failed',
-        life: DEFAULT_LIFE
+        life: LIFE_ERROR
       });
     });
 
@@ -127,7 +129,7 @@ describe('NotificationService', () => {
         severity: 'warn',
         summary: expect.any(String),
         detail: 'Proceed with caution',
-        life: DEFAULT_LIFE
+        life: LIFE_WARNING
       });
     });
 
@@ -138,7 +140,7 @@ describe('NotificationService', () => {
         severity: 'warn',
         summary: 'Attention',
         detail: 'Be careful',
-        life: DEFAULT_LIFE
+        life: LIFE_WARNING
       });
     });
   });
