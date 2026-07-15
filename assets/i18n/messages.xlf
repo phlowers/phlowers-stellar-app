@@ -4004,6 +4004,16 @@
         <source>Error computing GPS coordinates from Lambert93 data</source>
       </segment>
     </unit>
+    <unit id="1426284662747419795">
+      <segment>
+        <source>Enlarge graphic view</source>
+      </segment>
+    </unit>
+    <unit id="8842888376703158025">
+      <segment>
+        <source>Reduce graphic view</source>
+      </segment>
+    </unit>
     <unit id="studio.plot.loading">
       <segment>
         <source>loading</source>
@@ -4017,6 +4027,16 @@
     <unit id="3791858162236753226">
       <segment>
         <source>Cannot calculate conformity: obstacle type has no conformity configuration</source>
+      </segment>
+    </unit>
+    <unit id="6927576156195589232">
+      <segment>
+        <source>Conformity results updated.</source>
+      </segment>
+    </unit>
+    <unit id="7435704250978299258">
+      <segment>
+        <source>Calculating conformity…</source>
       </segment>
     </unit>
   </file>
