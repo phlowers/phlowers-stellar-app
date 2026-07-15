@@ -13,6 +13,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableLengthChangeFormControls, CableWidthType } from './cable-length-change.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -36,6 +37,7 @@ export class CableLengthChangeComponent {
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly cableModificationsService = inject(CableModificationsService);
+  private readonly loadFormsService = inject(LoadFormsService);
 
   readonly isLoading = signal(false);
   readonly isCalculatingOnly = signal(false);
@@ -223,7 +225,7 @@ export class CableLengthChangeComponent {
     if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
     this.isLoading.set(true);
     try {
-      await this.calculate({ scope, supportRef, widthCable, sizeCable, distanceSupportRef });
+      await this.calculateCableLength({ scope, supportRef, widthCable, sizeCable, distanceSupportRef });
       await this.cableModificationsService.save({
         spanUuid: scope,
         supportRef,
@@ -239,7 +241,7 @@ export class CableLengthChangeComponent {
     }
   }
 
-  async calculate(params?: {
+  async calculateCableLength(params?: {
     scope: string;
     supportRef: 'LEFT' | 'RIGHT';
     widthCable: CableWidthType;
@@ -260,6 +262,7 @@ export class CableLengthChangeComponent {
         sizeCable: sizeCable ?? 0,
         distanceSupportRef: distanceSupportRef ?? 0
       });
+      await this.loadFormsService.calculateLoad();
       const workerError = this.plotService.error();
       this.error.set(workerError ? String(workerError) : null);
     } finally {

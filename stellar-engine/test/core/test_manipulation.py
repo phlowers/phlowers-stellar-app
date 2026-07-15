@@ -1,7 +1,6 @@
-from stellar_engine.core import manipulations
 from mechaphlowers import BalanceEngine, SectionStudy
 
-
+from stellar_engine.core import manipulations
 
 
 def test_lengthen_cable(balance_engine_base: BalanceEngine):
@@ -10,13 +9,21 @@ def test_lengthen_cable(balance_engine_base: BalanceEngine):
         section_array=balance_engine_base.section_array,
     )
     inputs = {
-    'spanIndex': 0,
-    'widthCable': 'lengthening',
-    'sizeCable': 10,
-    'distanceSupportRef': 0,
-    'supportRef': 'LEFT',
+        'spanIndex': 0,
+        'widthCable': 'lengthening',
+        'sizeCable': 10,
+        'distanceSupportRef': 0,
+        'supportRef': 'LEFT',
     }
     study.solve_adjustment()
+    study.solve_change_state()
+    # plot_2d.refresh_projection(study)
+    spans_coords_0 = study.position_engine.get_group_points().spans.coords
+    extract_span_coords_0 = spans_coords_0[0][0:6]
     manipulations.modify_cable(inputs, study)
-    
-    assert True
+
+    spans_coords_1 = study.position_engine.get_group_points().spans.coords
+    extract_span_coords_1 = spans_coords_1[0][0:6]
+
+    print(extract_span_coords_0)
+    print(extract_span_coords_1)

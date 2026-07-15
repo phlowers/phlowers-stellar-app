@@ -15,7 +15,7 @@ import { Task, TaskError, TaskInputs } from './tasks/types';
 
 const pythonFiles = [
   { name: 'functions', content: functions },
-  { name: 'api', content: api },
+  { name: 'api', content: api }
 ];
 
 /** Type alias for the initialised Pyodide runtime API. */

@@ -46,6 +46,6 @@ def modify_cable(
             modify_cable_inputs.sizeCable
         )
     study.manipulation.modify_cable(shorten_span=input_dict)
-    study.solve_adjustment()
+    study.solve_adjustment()  # in the long run: we should not need to run solve_adjustment, modify_cable() should suffice
     print("------MODIFY CABLE------", study.manipulation.shortening_span)
     return {"success": True}

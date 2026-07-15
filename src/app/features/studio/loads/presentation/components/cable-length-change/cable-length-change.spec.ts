@@ -134,7 +134,7 @@ describe('CableLengthChangeComponent', () => {
           })
       );
 
-      const promise = component.calculate();
+      const promise = component.calculateCableLength();
       expect(component.isCalculatingOnly()).toBe(true);
       resolveTask();
       await promise;
@@ -158,7 +158,7 @@ describe('CableLengthChangeComponent', () => {
           })
       );
 
-      const promise = component.calculate(params);
+      const promise = component.calculateCableLength(params);
       expect(component.isCalculatingOnly()).toBe(false);
       resolveTask();
       await promise;
@@ -391,12 +391,12 @@ describe('CableLengthChangeComponent', () => {
 
     it('should not call calculate service if form is invalid', () => {
       component.form.controls.scope.setValue(null);
-      component.calculate();
+      component.calculateCableLength();
       expect(mockCableModificationsService.calculate).not.toHaveBeenCalled();
     });
 
     it('should call cableModificationsService.calculate with form values', () => {
-      component.calculate();
+      component.calculateCableLength();
       expect(mockCableModificationsService.calculate).toHaveBeenCalledWith({
         spanUuid: 'support-uuid-1',
         supportRef: 'LEFT',
@@ -414,7 +414,7 @@ describe('CableLengthChangeComponent', () => {
             resolveTask = res;
           })
       );
-      component.calculate();
+      component.calculateCableLength();
       fixture.detectChanges();
       // We wait for two microtasks to ensure the effect is processed
       await new Promise((r) => setTimeout(r, 0));

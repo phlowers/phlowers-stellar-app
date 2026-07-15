@@ -111,7 +111,13 @@ export class CableModificationsService {
 
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
-
+    const section = this.spanService.section();
+    const currentChargeUuid = section?.selected_charge_uuid;
+    const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
+    if (!charge) {
+      this.plotService.temporaryLoadData = null;
+      return;
+    }
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
       spanIndex,
       widthCable: params.widthCable,
@@ -119,6 +125,8 @@ export class CableModificationsService {
       distanceSupportRef: params.distanceSupportRef,
       supportRef: params.supportRef
     });
+    await this.workerPythonService.runTask(Task.changeState, { climate: charge.data.climate });
+    await this.plotService.refreshProjection();
 
     // this.plotService.litData.set(result?.current ?? null);
     // this.plotService.baseLitData.set(result?.base ?? null);
