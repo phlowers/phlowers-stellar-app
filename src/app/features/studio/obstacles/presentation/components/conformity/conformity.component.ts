@@ -44,7 +44,12 @@ import {
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
 import { ConformityPlotResponse } from './conformity-plot.model';
-import { createConformityPlot, CONFORMITY_PLOT_ID, purgeConformityPlot } from './helpers/createConformityPlot';
+import {
+  createConformityPlot,
+  CONFORMITY_PLOT_ID,
+  purgeConformityPlot,
+  resizeConformityPlot
+} from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
@@ -72,12 +77,25 @@ import { Task, TaskInputs } from '@services/worker_python/tasks/types';
   ],
   templateUrl: './conformity.component.html',
   styleUrl: './conformity.component.scss',
+  host: { '[class.graph-enlarged]': 'isGraphEnlarged()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('expandHeight', [
       transition(':enter', [
         style({ height: 0, overflow: 'hidden', opacity: 0 }),
         animate('300ms ease-out', style({ height: '*', overflow: 'hidden', opacity: 1 }))
+      ])
+    ]),
+    // Collapse/expand the form and result table when the graph is enlarged/reduced, so the figure
+    // grows into their space instead of them vanishing abruptly.
+    trigger('collapse', [
+      transition(':enter', [
+        style({ height: 0, opacity: 0, marginBottom: 0, overflow: 'hidden' }),
+        animate('300ms ease', style({ height: '*', opacity: 1, marginBottom: '*' }))
+      ]),
+      transition(':leave', [
+        style({ height: '*', opacity: 1, marginBottom: '*', overflow: 'hidden' }),
+        animate('300ms ease', style({ height: 0, opacity: 0, marginBottom: 0 }))
       ])
     ])
   ]
@@ -96,6 +114,20 @@ export class ConformityComponent implements OnDestroy {
 
   readonly isCalculating = signal(false);
   readonly calculationError = signal<string | null>(null);
+
+  /** Whether the results graph is enlarged to fill the modal (hiding the form and result table). */
+  readonly isGraphEnlarged = signal(false);
+
+  /** Gates the form's collapse/expand animation. Off for the first render so the enter animation
+   * doesn't fire (and collapse the form) as the PrimeNG dialog opens; enabled once the view is in
+   * place so later enlarge/reduce toggles still animate. */
+  readonly animationsReady = signal(false);
+  private readonly enableAnimations = afterNextRender(() => this.animationsReady.set(true), {
+    injector: this.injector
+  });
+
+  /** Keeps the Plotly plot sized to its container while the enlarge/reduce CSS transition runs. */
+  private plotResizeObserver?: ResizeObserver;
 
   private readonly _conformityResults = signal<Record<string, ConformityRuleResult> | null>(null);
   /** Computed results, set only by `calculate`. Null hides the results section. */
@@ -414,6 +446,7 @@ export class ConformityComponent implements OnDestroy {
         this._conformityResults.set(null);
         this._conformityPlotData.set(null);
         this._ruleColorsByType.set({});
+        this.isGraphEnlarged.set(false);
       });
   });
 
@@ -428,13 +461,17 @@ export class ConformityComponent implements OnDestroy {
     const ruleColors = this._ruleColorsByType();
     const conformityType = this.conformityType();
     if (!data) {
-      untracked(() => purgeConformityPlot(this.document));
+      untracked(() => {
+        this.disconnectPlotResize();
+        purgeConformityPlot(this.document);
+      });
       return;
     }
     afterNextRender(
       () => {
         if (this.document.getElementById(CONFORMITY_PLOT_ID)) {
           createConformityPlot(this.document, data, { selectedRuleTypes, ruleColors, conformityType });
+          this.observePlotResize();
         }
       },
       { injector: this.injector }
@@ -582,7 +619,22 @@ export class ConformityComponent implements OnDestroy {
     return result;
   }
 
+  /** Observe the plot container so Plotly follows its animated size (idempotent per plot div). */
+  private observePlotResize(): void {
+    if (this.plotResizeObserver || typeof ResizeObserver === 'undefined') return;
+    const element = this.document.getElementById(CONFORMITY_PLOT_ID);
+    if (!element) return;
+    this.plotResizeObserver = new ResizeObserver(() => resizeConformityPlot(this.document));
+    this.plotResizeObserver.observe(element);
+  }
+
+  private disconnectPlotResize(): void {
+    this.plotResizeObserver?.disconnect();
+    this.plotResizeObserver = undefined;
+  }
+
   ngOnDestroy(): void {
+    this.disconnectPlotResize();
     purgeConformityPlot(this.document);
   }
 
@@ -595,5 +647,12 @@ export class ConformityComponent implements OnDestroy {
 
   getConformityCompliance(ruleValue: string): boolean | null {
     return this._conformityResults()?.[ruleValue]?.conformityCompliance ?? null;
+  }
+
+  /** Toggle the results graph between its in-flow size and filling the whole modal, then resize
+   * the Plotly plot to match its new container once the layout change has been rendered. */
+  toggleGraphSize(): void {
+    this.isGraphEnlarged.update((enlarged) => !enlarged);
+    afterNextRender(() => resizeConformityPlot(this.document), { injector: this.injector });
   }
 }

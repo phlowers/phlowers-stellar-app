@@ -4805,6 +4805,18 @@
         <target>La reprojection sur le modèle de données <ph id="0" equiv="PH" disp="environment.appName"/> semble ajouter une erreur absolue moyenne de <ph id="1" equiv="PH_1" disp="meanReprojectionDiffMeters.toFixed(1)"/> m</target>
       </segment>
     </unit>
+    <unit id="8842888376703158025">
+      <segment state="initial">
+        <source>Reduce graphic view</source>
+        <target>Réduire la vue graphique</target>
+      </segment>
+    </unit>
+    <unit id="1426284662747419795">
+      <segment state="initial">
+        <source>Enlarge graphic view</source>
+        <target>Agrandir la vue graphique</target>
+      </segment>
+    </unit>
     <unit id="studio.plot.loading">
       <segment state="initial">
         <source>loading</source>
@@ -4821,6 +4833,18 @@
       <segment state="initial">
         <source>Cannot calculate conformity: obstacle type has no conformity configuration</source>
         <target>Impossible de calculer la conformité : le type d&apos;obstacle n&apos;a pas de configuration de conformité</target>
+      </segment>
+    </unit>
+    <unit id="7435704250978299258">
+      <segment state="initial">
+        <source>Calculating conformity…</source>
+        <target>Calcul de la conformité…</target>
+      </segment>
+    </unit>
+    <unit id="6927576156195589232">
+      <segment state="initial">
+        <source>Conformity results updated.</source>
+        <target>Résultats de la conformité mis à jour.</target>
       </segment>
     </unit>
   </file>
