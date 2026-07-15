@@ -125,11 +125,7 @@ export class CableModificationsService {
       distanceSupportRef: params.distanceSupportRef,
       supportRef: params.supportRef
     });
-    await this.workerPythonService.runTask(Task.changeState, { climate: charge.data.climate });
-    await this.plotService.refreshProjection();
 
-    // this.plotService.litData.set(result?.current ?? null);
-    // this.plotService.baseLitData.set(result?.base ?? null);
     this.plotService.error.set(error);
     this.plotService.diagnostics.set(diagnostics);
     this.plotService.loading.set(false);
