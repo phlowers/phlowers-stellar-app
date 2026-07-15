@@ -234,10 +234,31 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.workerService.setup();
+    this.deferHeavyStartupWork();
+  }
 
-    this.setupData().catch((err) => {
-      this.logger.error('Error during data setup', err);
-    });
+  /**
+   * Defers Pyodide worker boot (numpy/pandas/pydantic wasm wheels) and the
+   * catalog CSV import until the browser is idle, so they never compete with
+   * the critical rendering path (shell JS/CSS) right after bootstrap. Falls
+   * back to a macrotask when `requestIdleCallback` is unavailable (Safari).
+   */
+  private deferHeavyStartupWork(): void {
+    const runHeavyStartup = () => {
+      this.workerService.setup();
+      this.setupData().catch((err) => {
+        this.logger.error('Error during data setup', err);
+      });
+    };
+
+    const idleGlobal = globalThis as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+
+    if (typeof idleGlobal.requestIdleCallback === 'function') {
+      idleGlobal.requestIdleCallback(runHeavyStartup, { timeout: 2000 });
+    } else {
+      setTimeout(runHeavyStartup, 0);
+    }
   }
 }
