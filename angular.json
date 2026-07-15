@@ -71,9 +71,7 @@
                 "src/styles/abstracts"
               ]
             },
-            "scripts": [
-              "./node_modules/plotly.js-dist-min/plotly.min.js"
-            ],
+            "scripts": [],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
