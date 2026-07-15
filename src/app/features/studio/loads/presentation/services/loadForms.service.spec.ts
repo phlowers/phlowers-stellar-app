@@ -480,8 +480,8 @@ describe('LoadFormsService', () => {
             uuid: 'mod-1',
             spanUuid: 'support-uuid-1',
             supportRef: 'LEFT',
-            widthCable: 'lengthening',
-            sizeCable: 0.5,
+            modificationType: 'lengthening',
+            modifiedLengthCable: 0.5,
             distanceSupportRef: 100
           }
         ]
@@ -559,8 +559,8 @@ describe('LoadFormsService', () => {
             uuid: 'mod-orphan',
             spanUuid: 'unknown-support',
             supportRef: 'LEFT',
-            widthCable: 'lengthening',
-            sizeCable: 0.5,
+            modificationType: 'lengthening',
+            modifiedLengthCable: 0.5,
             distanceSupportRef: 100
           }
         ]

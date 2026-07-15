@@ -22,9 +22,9 @@ export interface CableModification {
   /** Reference support used as origin for the modification */
   supportRef: 'LEFT' | 'RIGHT';
   /** Direction of the cable length modification */
-  widthCable: 'lengthening' | 'shortening';
+  modificationType: 'lengthening' | 'shortening';
   /** Size of the cable modification in meters */
-  sizeCable: number;
+  modifiedLengthCable: number;
   /** Distance from the reference support in meters */
   distanceSupportRef: number;
 }

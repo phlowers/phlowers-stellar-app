@@ -37,13 +37,13 @@ def modify_cable(
     else:
         input_dict = {}
 
-    if modify_cable_inputs.widthCable == "lengthening":
+    if modify_cable_inputs.modificationType == "lengthening":
         input_dict[
             modify_cable_inputs.spanIndex
-        ] = -modify_cable_inputs.sizeCable
-    elif modify_cable_inputs.widthCable == "shortening":
+        ] = -modify_cable_inputs.modifiedLengthCable
+    elif modify_cable_inputs.modificationType == "shortening":
         input_dict[modify_cable_inputs.spanIndex] = (
-            modify_cable_inputs.sizeCable
+            modify_cable_inputs.modifiedLengthCable
         )
     study.manipulation.modify_cable(shorten_span=input_dict)
     study.solve_adjustment()  # in the long run: we should not need to run solve_adjustment, modify_cable() should suffice

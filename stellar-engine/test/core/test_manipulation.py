@@ -10,8 +10,8 @@ def test_lengthen_cable(balance_engine_base: BalanceEngine):
     )
     inputs = {
         'spanIndex': 0,
-        'widthCable': 'lengthening',
-        'sizeCable': 10,
+        'modificationType': 'lengthening',
+        'modifiedLengthCable': 10,
         'distanceSupportRef': 0,
         'supportRef': 'LEFT',
     }

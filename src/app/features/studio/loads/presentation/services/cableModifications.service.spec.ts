@@ -95,8 +95,8 @@ const mockStudy: StudyEntity = {
 const mockParams: CableModificationParams = {
   spanUuid: 'support-uuid-1',
   supportRef: 'LEFT',
-  widthCable: 'lengthening',
-  sizeCable: 0.5,
+  modificationType: 'lengthening',
+  modifiedLengthCable: 0.5,
   distanceSupportRef: 10
 };
 
@@ -193,8 +193,8 @@ describe('CableModificationsService', () => {
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.shortenLengthenCable, {
         spanIndex: 0,
-        widthCable: mockParams.widthCable,
-        sizeCable: mockParams.sizeCable,
+        modificationType: mockParams.modificationType,
+        modifiedLengthCable: mockParams.modifiedLengthCable,
         distanceSupportRef: mockParams.distanceSupportRef,
         supportRef: mockParams.supportRef
       });
@@ -252,8 +252,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -266,8 +266,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -280,8 +280,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -295,8 +295,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -307,8 +307,8 @@ describe('CableModificationsService', () => {
       const modification = {
         spanUuid: 'support-uuid-1',
         supportRef: 'LEFT' as const,
-        widthCable: 'lengthening' as const,
-        sizeCable: 0.5,
+        modificationType: 'lengthening' as const,
+        modifiedLengthCable: 0.5,
         distanceSupportRef: 10
       };
 
@@ -325,8 +325,8 @@ describe('CableModificationsService', () => {
       const modification = {
         spanUuid: 'support-uuid-1',
         supportRef: 'LEFT' as const,
-        widthCable: 'lengthening' as const,
-        sizeCable: 0.5,
+        modificationType: 'lengthening' as const,
+        modifiedLengthCable: 0.5,
         distanceSupportRef: 10
       };
 
@@ -349,8 +349,8 @@ describe('CableModificationsService', () => {
                 uuid: existingUuid,
                 spanUuid: 'support-uuid-1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 0.1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 0.1,
                 distanceSupportRef: 5
               }
             ]
@@ -363,8 +363,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
-        widthCable: 'shortening',
-        sizeCable: 0.9,
+        modificationType: 'shortening',
+        modifiedLengthCable: 0.9,
         distanceSupportRef: 20
       });
 
@@ -372,7 +372,7 @@ describe('CableModificationsService', () => {
       const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_modifications).toHaveLength(1);
       expect(section?.cable_modifications[0].uuid).toBe(existingUuid);
-      expect(section?.cable_modifications[0].sizeCable).toBe(0.9);
+      expect(section?.cable_modifications[0].modifiedLengthCable).toBe(0.9);
       expect(section?.cable_modifications[0].supportRef).toBe('RIGHT');
     });
 
@@ -388,8 +388,8 @@ describe('CableModificationsService', () => {
                 uuid: existingUuid,
                 spanUuid: 'support-uuid-1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 0.1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 0.1,
                 distanceSupportRef: 5
               }
             ]
@@ -402,15 +402,15 @@ describe('CableModificationsService', () => {
         uuid: existingUuid,
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
-        widthCable: 'shortening',
-        sizeCable: 0.9,
+        modificationType: 'shortening',
+        modifiedLengthCable: 0.9,
         distanceSupportRef: 20
       });
 
       const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_modifications).toHaveLength(1);
-      expect(section?.cable_modifications[0].sizeCable).toBe(0.9);
+      expect(section?.cable_modifications[0].modifiedLengthCable).toBe(0.9);
     });
   });
 
@@ -466,8 +466,8 @@ describe('CableModificationsService', () => {
                 uuid,
                 spanUuid: 'support-uuid-1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 1,
                 distanceSupportRef: 5
               }
             ],
@@ -499,16 +499,16 @@ describe('CableModificationsService', () => {
                 uuid,
                 spanUuid: 'su1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 1,
                 distanceSupportRef: 5
               },
               {
                 uuid: otherId,
                 spanUuid: 'su1',
                 supportRef: 'RIGHT',
-                widthCable: 'shortening',
-                sizeCable: 2,
+                modificationType: 'shortening',
+                modifiedLengthCable: 2,
                 distanceSupportRef: 3
               }
             ],

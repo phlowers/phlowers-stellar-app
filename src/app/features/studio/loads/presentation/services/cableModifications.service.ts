@@ -104,8 +104,8 @@ export class CableModificationsService {
       uuid: this.previewCableModification()?.uuid ?? uuidv4(),
       spanUuid: params.spanUuid,
       supportRef: params.supportRef,
-      widthCable: params.widthCable,
-      sizeCable: params.sizeCable,
+      modificationType: params.modificationType,
+      modifiedLengthCable: params.modifiedLengthCable,
       distanceSupportRef: params.distanceSupportRef
     });
 
@@ -120,8 +120,8 @@ export class CableModificationsService {
     }
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
       spanIndex,
-      widthCable: params.widthCable,
-      sizeCable: params.sizeCable,
+      modificationType: params.modificationType,
+      modifiedLengthCable: params.modifiedLengthCable,
       distanceSupportRef: params.distanceSupportRef,
       supportRef: params.supportRef
     });

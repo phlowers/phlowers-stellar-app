@@ -152,7 +152,7 @@ const buildLabelAnnotation = (
     showarrow: false,
     xshift: CABLE_MOD_ARROW_X_OFFSET,
     yshift: CABLE_MOD_LABEL_Y_SHIFT,
-    text: getCableModificationLabel(modification.widthCable),
+    text: getCableModificationLabel(modification.modificationType),
     captureevents: false,
     bgcolor: 'rgba(0,0,0,0)',
     font: {

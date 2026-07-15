@@ -387,8 +387,8 @@ export interface TaskInputs {
   /** Inputs for shortenLengthenCable task */
   [Task.shortenLengthenCable]: {
     spanIndex: number;
-    widthCable: 'lengthening' | 'shortening';
-    sizeCable: number;
+    modificationType: 'lengthening' | 'shortening';
+    modifiedLengthCable: number;
     distanceSupportRef: number;
     supportRef: 'LEFT' | 'RIGHT';
   };

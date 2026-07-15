@@ -9,7 +9,7 @@
 export interface CableModificationParams {
   spanUuid: string;
   supportRef: 'LEFT' | 'RIGHT';
-  widthCable: 'lengthening' | 'shortening';
-  sizeCable: number;
+  modificationType: 'lengthening' | 'shortening';
+  modifiedLengthCable: number;
   distanceSupportRef: number;
 }

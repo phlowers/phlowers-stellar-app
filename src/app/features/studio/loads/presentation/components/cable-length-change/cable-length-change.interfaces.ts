@@ -10,9 +10,9 @@ export interface CableLengthChangeFormControls {
   /** Reference support side. */
   supportRef: FormControl<'LEFT' | 'RIGHT' | null>;
   /** Type of cable length modification. */
-  widthCable: FormControl<CableWidthType | null>;
+  modificationType: FormControl<CableWidthType | null>;
   /** Cable length modification value in meters. */
-  sizeCable: FormControl<number | null>;
+  modifiedLengthCable: FormControl<number | null>;
   /** Distance to reference support in meters. */
   distanceSupportRef: FormControl<number | null>;
 }
