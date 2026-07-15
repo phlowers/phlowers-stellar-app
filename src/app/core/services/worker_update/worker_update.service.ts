@@ -252,9 +252,6 @@ export class UpdateService {
    */
   async checkForUpdateOnce(): Promise<void> {
     try {
-      // Load the build-time version file (served from SW cache or network).
-      await this.loadCurrentVersion();
-
       const cachePopulated = await this.isCachePopulated();
       const latestVersion = await this.getLatestVersion();
 
