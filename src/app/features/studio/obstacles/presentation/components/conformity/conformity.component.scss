@@ -186,6 +186,7 @@ legend {
 
 .results {
   @apply flex flex-wrap gap-x-8;
+  transition: column-gap 0.3s ease-in-out;
 
   &__separator {
     @apply flex-1 min-w-full border-t my-3;
@@ -199,14 +200,61 @@ legend {
   }
 
   &__figure {
+    @apply flex flex-col m-0;
     flex: 1 1 27rem;
-    min-height: 24rem;
+    height: 24rem;
+    transition: height 0.3s ease-in-out;
+  }
+
+  &__figure-toggle {
+    align-self: flex-end;
+  }
+
+  &__plot {
+    @apply flex-1;
+    min-height: 0;
+  }
+
+  // Wraps the table so it can be clipped away when enlarged: unlike a <table>, a block honours
+  // `min-width: 0` + `overflow: hidden`, so its flex width can animate to 0 without the table's
+  // min-content width reserving blank space.
+  &__table-wrapper {
+    flex: 1 1 41.5rem;
+    min-width: 0;
+    overflow: hidden;
+    transition:
+      flex-grow 0.3s ease-in-out,
+      flex-basis 0.3s ease-in-out;
   }
 
   &__table {
-    flex: 1 1 41.5rem;
+    width: 100%;
     color: var(--star-dust-950);
     border: 1px solid var(--star-dust-300);
+  }
+}
+
+/* Enlarged graph: the figure grows to fill the modal while the result table collapses into it
+   (the form is removed with its own collapse animation, see the `collapse` trigger). */
+:host(.graph-enlarged) {
+  .results {
+    column-gap: 0;
+  }
+
+  .results__separator,
+  .results__title {
+    display: none;
+  }
+
+  .results__figure {
+    height: 75vh;
+  }
+
+  // Collapse the wrapper's flex width to 0 so the figure grows to fill the row; `overflow: hidden`
+  // wipes the table away with no reserved space.
+  .results__table-wrapper {
+    flex-grow: 0;
+    flex-basis: 0;
   }
 }
 
