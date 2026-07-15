@@ -120,6 +120,11 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims }));
 
       await service.initialize();
+      // No cached user: the network probe now runs in the background (never
+      // blocks APP_INITIALIZER) — flush microtasks/macrotasks before asserting.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.oidcEnabled()).toBe(true);
       expect(service.modeResolved()).toBe(true);
@@ -135,6 +140,10 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValue(userinfoOk({ authenticated: false, oidcEnabled: false }));
 
       await service.initialize();
+      // No cached user: the network probe now runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.oidcEnabled()).toBe(false);
       expect(service.modeResolved()).toBe(true);
@@ -149,6 +158,11 @@ describe('AuthService', () => {
       usersTableMock.toArray.mockResolvedValue([testEmailOnlyUser]);
 
       await service.initialize();
+      // Email-only cache has no `sub`: the fast path is skipped and the mode/cache
+      // fallback resolution now runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.currentUser()).toEqual(testEmailOnlyUser);
     });
@@ -228,6 +242,10 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValue(userinfoStatus(401));
 
       await service.initialize();
+      // No cached user: the network probe now runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.oidcEnabled()).toBe(true);
       expect(service.modeResolved()).toBe(true);
