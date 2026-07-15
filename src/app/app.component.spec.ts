@@ -216,11 +216,15 @@ describe('AppComponent', () => {
     });
   });
 
-  describe('ngOnInit — V2 startup sequence', () => {
-    it('should call workerService.setup() immediately on ngOnInit', () => {
+  describe('ngOnInit — deferred startup work', () => {
+    it('should call workerService.setup() once the browser is idle', async () => {
       const setupDataSpy = vi.spyOn(component, 'setupData').mockResolvedValue(undefined);
 
       component.ngOnInit();
+      // Heavy startup work (Pyodide worker + catalog import) is deferred via
+      // requestIdleCallback (falls back to setTimeout(0) under jsdom) so it
+      // never competes with the critical rendering path — flush it here.
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
       expect(setupDataSpy).toHaveBeenCalledTimes(1);
@@ -230,6 +234,7 @@ describe('AppComponent', () => {
       vi.spyOn(component, 'setupData').mockRejectedValue(new Error('setup failed'));
 
       component.ngOnInit();
+      await new Promise((resolve) => setTimeout(resolve, 0));
       await fixture.whenStable();
 
       expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
