@@ -318,7 +318,7 @@
               </p-tabpanel>
 
               <p-tabpanel value="1">
-                <app-load-marking />
+                <app-load-marking [chargeUuid]="spanService.section()?.selected_charge_uuid ?? ''" />
               </p-tabpanel>
 
               <p-tabpanel value="2">
