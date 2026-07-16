@@ -83,6 +83,7 @@ describe('LoadMarkingComponent', () => {
 
     fixture = TestBed.createComponent(LoadMarkingComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('chargeUuid', 'test-charge-uuid');
     fixture.detectChanges();
   });
 
