@@ -13,7 +13,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { Task, GetSectionOutput, GetSectionWithBaseOutput, TaskError } from '@services/worker_python/tasks/types';
+import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { Charge, Section, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { StudyEntity } from '@infrastructure/database';
