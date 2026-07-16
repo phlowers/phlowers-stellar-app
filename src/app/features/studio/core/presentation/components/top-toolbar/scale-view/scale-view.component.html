@@ -1,18 +1,18 @@
-<p-button
+<button
+  app-btn
+  type="button"
+  btnStyle="outlined"
+  btnSize="s"
   data-testid="scale-view-trigger"
-  i18n-label="@@scaleView.button.label"
-  label="View"
-  variant="outlined"
-  size="small"
-  [styleClass]="popoverOpen() ? 'view-button--active' : ''"
+  class="scale-view-trigger"
+  [class]="popoverOpen() ? 'view-button--active' : ''"
   aria-haspopup="dialog"
   [attr.aria-expanded]="popoverOpen()"
-  (onClick)="togglePopover($event)"
+  (click)="togglePopover($event)"
 >
-  <ng-template #icon>
-    <app-icon icon="image_aspect_ratio" />
-  </ng-template>
-</p-button>
+  <ng-container i18n="@@scaleView.button.label">View</ng-container>
+  <app-icon icon="image_aspect_ratio" />
+</button>
 
 <p-popover appendTo="body" styleClass="scale-view-popover" #popover (onHide)="popoverOpen.set(false)">
   <form

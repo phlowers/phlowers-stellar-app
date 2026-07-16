@@ -1,0 +1,28 @@
+.prime-debug {
+  padding: 1.5rem 2rem 4rem;
+  max-width: 75rem;
+  margin: 0 auto;
+}
+
+.prime-debug__header {
+  margin-bottom: 2rem;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--grey-600, #6b7280);
+    max-width: 50rem;
+  }
+}
+
+.prime-debug__inline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prime-debug__popover-content {
+  padding: 0.5rem 1rem;
+}

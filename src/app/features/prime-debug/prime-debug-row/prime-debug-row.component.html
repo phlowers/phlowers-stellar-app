@@ -1,0 +1,21 @@
+<section class="prime-debug-row">
+  <h2 class="prime-debug-row__name underline-text">{{ name() }}</h2>
+
+  <div class="prime-debug-row__demo">
+    <ng-content></ng-content>
+  </div>
+
+  <dl class="prime-debug-row__meta">
+    <dt class="prime-debug-row__override">Override</dt>
+    <dd class="prime-debug-row__override">{{ overrideClass() }}</dd>
+    <dt class="prime-debug-row__usage">Usage</dt>
+    <dd class="prime-debug-row__usage">{{ usage() }}</dd>
+  </dl>
+
+  @if (screenshot(); as screenshotSrc) {
+    <figure class="prime-debug-row__screenshot">
+      <figcaption>Reference</figcaption>
+      <img [src]="screenshotSrc" alt="Baseline reference screenshot for {{ name() }}" />
+    </figure>
+  }
+</section>
