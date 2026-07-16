@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   templateUrl: './card.component.html',
   styleUrl: './card.component.scss',
   host: {
-    '[role]': 'role()',
+    '[attr.role]': 'role()',
     '[attr.tabindex]': 'tabIndexValue()'
   },
   changeDetection: ChangeDetectionStrategy.OnPush
