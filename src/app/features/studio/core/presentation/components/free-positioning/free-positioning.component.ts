@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -100,7 +100,7 @@ interface PlotElement extends HTMLElement {
 @Component({
   selector: 'app-free-positioning',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule],
+  imports: [FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule],
   templateUrl: './free-positioning.component.html',
   styleUrl: './free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

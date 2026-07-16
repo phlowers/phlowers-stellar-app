@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { inject, Injectable, signal, untracked } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { inject, Injectable, signal, untracked, DOCUMENT } from '@angular/core';
+
 import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';

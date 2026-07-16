@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal, DOCUMENT } from '@angular/core';
+
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { applyRestoreCamera, createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';

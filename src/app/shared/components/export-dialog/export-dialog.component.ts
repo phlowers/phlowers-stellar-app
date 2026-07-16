@@ -5,7 +5,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StudiesService } from '@services/studies/studies.service';
-import { CommonModule } from '@angular/common';
+
 import { SelectModule } from 'primeng/select';
 
 /**
@@ -22,9 +22,8 @@ import { SelectModule } from 'primeng/select';
     InputTextModule,
     IconComponent,
     ButtonComponent,
-    CommonModule,
     SelectModule
-  ],
+],
   templateUrl: './export-dialog.component.html',
   styleUrl: './export-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

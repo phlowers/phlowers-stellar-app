@@ -21,7 +21,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from '@features/study/presentation/components/sections-tab/sectionsTab.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
-import { CommonModule } from '@angular/common';
+
 
 /**
  * Study detail page component.
@@ -41,9 +41,8 @@ import { CommonModule } from '@angular/common';
     StepperModule,
     InputTextModule,
     SectionsTabComponent,
-    CommonModule,
     NewStudyModalComponent
-  ],
+],
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
