@@ -35,6 +35,7 @@ describe('HeaderComponent', () => {
 
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('measureData', mockMeasureData);
   });
 
   describe('Component Creation', () => {

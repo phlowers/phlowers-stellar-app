@@ -146,7 +146,9 @@ describe('ImportStudyComponent', () => {
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(function () {
+        return mockFileReader;
+      });
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.csv', { type: 'text/csv' });

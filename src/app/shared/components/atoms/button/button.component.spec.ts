@@ -361,26 +361,33 @@ describe('ButtonComponent', () => {
     });
 
     it('should handle rapid loading state changes', () => {
+      // Not loading: click is allowed
       hostFixture = TestBed.createComponent(TestHostComponent);
       hostComponent = hostFixture.componentInstance;
-
-      // Start not loading
       hostComponent.loading = false;
       hostFixture.detectChanges();
-      expect(hostComponent.clickCount).toBe(0);
 
-      // Enable loading
+      let buttonElement = hostFixture.nativeElement.querySelector('button');
+      buttonElement.click();
+      expect(hostComponent.clickCount).toBe(1);
+
+      // Loading: click is prevented
+      hostFixture = TestBed.createComponent(TestHostComponent);
+      hostComponent = hostFixture.componentInstance;
       hostComponent.loading = true;
       hostFixture.detectChanges();
 
-      const buttonElement = hostFixture.nativeElement.querySelector('button');
+      buttonElement = hostFixture.nativeElement.querySelector('button');
       buttonElement.click();
       expect(hostComponent.clickCount).toBe(0);
 
-      // Disable loading
+      // Loading disabled again: click is allowed
+      hostFixture = TestBed.createComponent(TestHostComponent);
+      hostComponent = hostFixture.componentInstance;
       hostComponent.loading = false;
       hostFixture.detectChanges();
 
+      buttonElement = hostFixture.nativeElement.querySelector('button');
       buttonElement.click();
       expect(hostComponent.clickCount).toBe(1);
     });
