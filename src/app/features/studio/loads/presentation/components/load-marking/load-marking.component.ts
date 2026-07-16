@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, Signal, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  Signal,
+  signal,
+  untracked
+} from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -38,7 +48,7 @@ export class LoadMarkingComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly loadFormsService = inject(LoadFormsService);
-
+  readonly chargeUuid = input<string | null>(null);
   readonly form = this.fb.group<SpanFormControls>({
     spanSelect: new FormControl<string | null>(null, {
       validators: [Validators.required]
@@ -92,6 +102,14 @@ export class LoadMarkingComponent {
   private readonly spanSelectEffect = effect(() => {
     const value = this.spanSelectSignal();
     this.onSpanSelectChange(value ?? null);
+  });
+
+  private readonly chargeChangeEffect = effect(() => {
+    this.chargeUuid(); // Tracking: when the UUID changes, the effect rerun
+    untracked(() => {
+      this.form.reset();
+      this.form.controls.referenceSupport.disable();
+    });
   });
 
   private readonly externalSpanSelectionEffect = effect(() => {
