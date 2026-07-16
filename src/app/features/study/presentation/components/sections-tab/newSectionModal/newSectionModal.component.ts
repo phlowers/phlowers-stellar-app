@@ -46,7 +46,7 @@ import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
     IconComponent,
     ButtonComponent,
     ImportSectionComponent
-],
+  ],
   templateUrl: './newSectionModal.component.html',
   styleUrl: './newSectionModal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

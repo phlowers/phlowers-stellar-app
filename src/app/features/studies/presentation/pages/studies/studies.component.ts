@@ -46,7 +46,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     ConfirmDialogModule,
     ImportStudyComponent,
     ExportDialogComponent
-],
+  ],
   templateUrl: './studies.component.html',
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush

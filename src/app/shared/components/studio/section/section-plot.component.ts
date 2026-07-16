@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal, DOCUMENT } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  DOCUMENT
+} from '@angular/core';
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { applyRestoreCamera, createPlot } from './helpers/createPlot';

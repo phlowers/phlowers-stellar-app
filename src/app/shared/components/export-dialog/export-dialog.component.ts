@@ -16,14 +16,7 @@ import { SelectModule } from 'primeng/select';
 @Component({
   selector: 'app-export-dialog',
   standalone: true,
-  imports: [
-    DialogModule,
-    ReactiveFormsModule,
-    InputTextModule,
-    IconComponent,
-    ButtonComponent,
-    SelectModule
-],
+  imports: [DialogModule, ReactiveFormsModule, InputTextModule, IconComponent, ButtonComponent, SelectModule],
   templateUrl: './export-dialog.component.html',
   styleUrl: './export-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

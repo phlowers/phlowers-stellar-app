@@ -22,7 +22,6 @@ import { SectionsTabComponent } from '@features/study/presentation/components/se
 import { NotificationService } from '@services/notification/notification.service';
 import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
 
-
 /**
  * Study detail page component.
  *
@@ -42,7 +41,7 @@ import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-s
     InputTextModule,
     SectionsTabComponent,
     NewStudyModalComponent
-],
+  ],
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

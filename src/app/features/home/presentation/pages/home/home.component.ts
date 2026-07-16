@@ -15,7 +15,6 @@ import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';
 
-
 if (navigator.language.includes('fr')) {
   TimeAgo.addLocale(fr);
 } else {
