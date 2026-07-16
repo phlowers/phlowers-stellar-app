@@ -114,11 +114,11 @@ export class CableModificationsService {
     const section = this.spanService.section();
     const currentChargeUuid = section?.selected_charge_uuid;
     const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
-    if (!charge) {
-      this.plotService.temporaryLoadData = null;
-      return;
-    }
     try {
+      if (!charge) {
+        this.plotService.temporaryLoadData = null;
+        return;
+      }
       const { error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
         spanIndex,
         modificationType: params.modificationType,

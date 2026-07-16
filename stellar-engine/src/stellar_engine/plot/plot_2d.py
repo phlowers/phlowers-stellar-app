@@ -30,7 +30,6 @@ def refresh_projection(
     study: SectionStudy,
     base_study: SectionStudy | None = None,
 ):
-    print("--------API--------", inputs)
     start_support = inputs["startSupport"]
     end_support = inputs["endSupport"]
     view = inputs["view"]

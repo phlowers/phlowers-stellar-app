@@ -45,7 +45,11 @@ def modify_cable(
         input_dict[modify_cable_inputs.spanIndex] = (
             modify_cable_inputs.modifiedLengthCable
         )
+
+    else:
+        raise ValueError(
+            f"Unsupported modificationType: {modify_cable_inputs.modificationType}. Expected 'lengthening' or 'shortening'"
+        )
     study.manipulation.modify_cable(shorten_span=input_dict)
     study.solve_adjustment()  # in the long run: we should not need to run solve_adjustment, modify_cable() should suffice
-    print("------MODIFY CABLE------", study.manipulation.shortening_span)
     return {"success": True}

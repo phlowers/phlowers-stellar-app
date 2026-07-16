@@ -300,8 +300,4 @@ def set_resolution(js_inputs):
 @debug_log
 def shorten_lengthen_cable(js_inputs):
     global study
-    logger.debug(js_to_python(js_inputs))
-    out = manipulations.modify_cable(js_to_python(js_inputs), study)
-    logger.debug(study.balance_engine.L_ref)
-    logger.debug(study.position_engine.get_group_points().spans.coords[0][0:6])
-    return out
+    return manipulations.modify_cable(js_to_python(js_inputs), study)

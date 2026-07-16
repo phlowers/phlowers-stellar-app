@@ -603,7 +603,7 @@ export interface TaskOutputs {
   [Task.deleteObstacle]: { success: boolean };
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
-  /** Output from shortenLengthenCable task: recalculated geometry with optional base state */
+  // Output from shortenLengthenCable task: registration acknowledgement
   [Task.shortenLengthenCable]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;
