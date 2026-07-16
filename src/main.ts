@@ -7,7 +7,7 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
-import { isDevMode } from '@angular/core';
+import { isDevMode, provideZoneChangeDetection } from '@angular/core';
 (globalThis as unknown as { global: typeof globalThis }).global = globalThis;
 
 // Register Service Worker before bootstrap so registration starts early.
@@ -18,4 +18,7 @@ if ('serviceWorker' in navigator && !isDevMode()) {
   });
 }
 
-bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  ...appConfig,
+  providers: [provideZoneChangeDetection(), ...appConfig.providers]
+}).catch((err) => console.error(err));
