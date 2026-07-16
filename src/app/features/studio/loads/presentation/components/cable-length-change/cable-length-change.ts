@@ -160,7 +160,10 @@ export class CableLengthChangeComponent {
         { emitEvent: false }
       );
     } else {
-      this.form.patchValue({ modificationType: 'lengthening', modifiedLengthCable: 0, distanceSupportRef: 0 }, { emitEvent: false });
+      this.form.patchValue(
+        { modificationType: 'lengthening', modifiedLengthCable: 0, distanceSupportRef: 0 },
+        { emitEvent: false }
+      );
       this.hasSavedModification.set(true);
     }
     this.statesFormControls();
@@ -222,7 +225,8 @@ export class CableLengthChangeComponent {
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
     const { scope, supportRef, modificationType, modifiedLengthCable, distanceSupportRef } = this.form.getRawValue();
-    if (!scope || !supportRef || !modificationType || modifiedLengthCable === null || distanceSupportRef === null) return;
+    if (!scope || !supportRef || !modificationType || modifiedLengthCable === null || distanceSupportRef === null)
+      return;
     this.isLoading.set(true);
     try {
       await this.calculateCableLength({ scope, supportRef, modificationType, modifiedLengthCable, distanceSupportRef });
@@ -251,7 +255,8 @@ export class CableLengthChangeComponent {
     const values = params ?? this.form.getRawValue();
     const { scope, supportRef, modificationType, modifiedLengthCable, distanceSupportRef } = values;
     if (this.form.invalid && !params) return;
-    if (!scope || !supportRef || !modificationType || modifiedLengthCable === null || distanceSupportRef === null) return;
+    if (!scope || !supportRef || !modificationType || modifiedLengthCable === null || distanceSupportRef === null)
+      return;
     if (!params) this.isCalculatingOnly.set(true);
     this.error.set(null);
     try {

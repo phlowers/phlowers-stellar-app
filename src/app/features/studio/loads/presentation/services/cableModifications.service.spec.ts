@@ -14,7 +14,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Task, GetSectionOutput, GetSectionWithBaseOutput, TaskError } from '@services/worker_python/tasks/types';
-import { Section } from '@shared/domain';
+import { Charge, Section, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { StudyEntity } from '@infrastructure/database';
 
@@ -26,6 +26,25 @@ function createSignalMock<T>(initialValue: T) {
   });
   return fn;
 }
+
+const mockChargeData: Charge = {
+  uuid: 'charge-uuid-1',
+  name: 'Charge 1',
+  personnelPresence: true,
+  description: 'Test charge description',
+  data: {
+    climate: {
+      windPressure: 0,
+      cableTemperature: 15,
+      symmetryType: SymmetryType.SYMMETRIC,
+      iceThickness: 0,
+      frontierSupportNumber: null,
+      iceThicknessBefore: null,
+      iceThicknessAfter: null
+    },
+    spanLoads: []
+  }
+};
 
 const mockSectionBase: Section = {
   uuid: 'section-uuid-1',
@@ -65,8 +84,8 @@ const mockSectionBase: Section = {
   obstacles: [],
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
-  charges: [],
-  selected_charge_uuid: null,
+  charges: [mockChargeData],
+  selected_charge_uuid: 'charge-uuid-1',
   field_measures: [],
   selected_field_measure_uuid: undefined,
   vtl_and_guying: undefined,
@@ -170,7 +189,7 @@ describe('CableModificationsService', () => {
 
     it('should call refreshCamera and set loading to true then false', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: {} as GetSectionOutput, base: null },
+        result: { success: true },
         error: null,
         diagnostics: []
       });
@@ -184,7 +203,7 @@ describe('CableModificationsService', () => {
 
     it('should call runTask with shortenLengthenCable task and correct inputs', async () => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: {} as GetSectionOutput, base: null },
+        result: { success: true },
         error: null,
         diagnostics: []
       });
@@ -200,38 +219,10 @@ describe('CableModificationsService', () => {
       });
     });
 
-    it('should update litData and baseLitData from task result', async () => {
-      const current = { spans: [[]] } as unknown as GetSectionOutput;
-      const base = { spans: [[]] } as unknown as GetSectionOutput;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current, base },
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(current);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(base);
-    });
-
-    it('should set litData and baseLitData to null when result is null', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null as unknown as GetSectionWithBaseOutput,
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(null);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(null);
-    });
-
     it('should propagate task error to plotService.error', async () => {
       const taskError = TaskError.CALCULATION_ERROR;
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null as unknown as GetSectionWithBaseOutput,
+        result: { success: true },
         error: taskError,
         diagnostics: []
       });

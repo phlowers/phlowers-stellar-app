@@ -13,6 +13,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableModificationsService } from '../../services/cableModifications.service';
+import { LoadFormsService } from '../../services/loadForms.service';
 import { Section } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 
@@ -47,6 +48,7 @@ describe('CableLengthChangeComponent', () => {
   let mockSpanService: vi.Mocked<PlotSpanService>;
   let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockCableModificationsService: vi.Mocked<CableModificationsService>;
+  let mockLoadFormsService: vi.Mocked<LoadFormsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -87,6 +89,10 @@ describe('CableLengthChangeComponent', () => {
       clearPreview: vi.fn()
     } as unknown as vi.Mocked<CableModificationsService>;
 
+    mockLoadFormsService = {
+      calculateLoad: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<LoadFormsService>;
+
     await TestBed.configureTestingModule({
       imports: [CableLengthChangeComponent],
       providers: [
@@ -94,7 +100,8 @@ describe('CableLengthChangeComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
-        { provide: CableModificationsService, useValue: mockCableModificationsService }
+        { provide: CableModificationsService, useValue: mockCableModificationsService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 

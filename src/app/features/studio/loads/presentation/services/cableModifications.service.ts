@@ -118,17 +118,20 @@ export class CableModificationsService {
       this.plotService.temporaryLoadData = null;
       return;
     }
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
-      spanIndex,
-      modificationType: params.modificationType,
-      modifiedLengthCable: params.modifiedLengthCable,
-      distanceSupportRef: params.distanceSupportRef,
-      supportRef: params.supportRef
-    });
+    try {
+      const { error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
+        spanIndex,
+        modificationType: params.modificationType,
+        modifiedLengthCable: params.modifiedLengthCable,
+        distanceSupportRef: params.distanceSupportRef,
+        supportRef: params.supportRef
+      });
 
-    this.plotService.error.set(error);
-    this.plotService.diagnostics.set(diagnostics);
-    this.plotService.loading.set(false);
+      this.plotService.error.set(error);
+      this.plotService.diagnostics.set(diagnostics);
+    } finally {
+      this.plotService.loading.set(false);
+    }
   };
 
   /**
