@@ -8,17 +8,18 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 import { isDevMode, provideZoneChangeDetection } from '@angular/core';
+import { logBootstrapError } from './bootstrap-logger';
 (globalThis as unknown as { global: typeof globalThis }).global = globalThis;
 
 // Register Service Worker before bootstrap so registration starts early.
 // Note: activation may still complete after APP_INITIALIZER runs.
 if ('serviceWorker' in navigator && !isDevMode()) {
   navigator.serviceWorker.register('/service-worker.js').catch((error) => {
-    console.error('Service Worker registration failed:', error);
+    logBootstrapError('Service Worker registration', error);
   });
 }
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [provideZoneChangeDetection(), ...appConfig.providers]
-}).catch((err) => console.error(err));
+}).catch((err) => logBootstrapError('Application bootstrap', err));

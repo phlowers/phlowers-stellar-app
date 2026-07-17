@@ -16,11 +16,10 @@ import {
   input,
   OnDestroy,
   signal,
-  untracked,
-  DOCUMENT
+  untracked
 } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { DecimalPipe, DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { from, map, of, startWith, switchMap } from 'rxjs';

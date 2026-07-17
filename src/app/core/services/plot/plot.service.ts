@@ -1,4 +1,5 @@
-import { effect, inject, Injectable, signal, untracked, DOCUMENT } from '@angular/core';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';

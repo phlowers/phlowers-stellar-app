@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed, inject, DOCUMENT } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnInit, signal, computed, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 import { PossibleIconNames, CustomSvgIconNames, CUSTOM_SVG_ICONS } from '@shared/model/icon.model';
 import { LoggerService } from '@core/services/logger/logger.service';
