@@ -18,7 +18,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@shared/domain';
 import { StudiesService } from '@services/studies/studies.service';
-import { CommonModule } from '@angular/common';
+
 import { StudiesTableComponent } from '@features/studies/presentation/components/studies-table/studies-table.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
@@ -42,7 +42,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     TableModule,
     CheckboxModule,
     PopoverModule,
-    CommonModule,
     StudiesTableComponent,
     ConfirmDialogModule,
     ImportStudyComponent,

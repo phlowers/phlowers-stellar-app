@@ -13,7 +13,7 @@ import { AppDatabase } from '@infrastructure/database';
 // Mock AppDatabase
 vi.mock('@infrastructure/database', () => {
   return {
-    AppDatabase: vi.fn().mockImplementation(() => {
+    AppDatabase: vi.fn().mockImplementation(function () {
       return {};
     })
   };
@@ -163,7 +163,7 @@ describe('StorageService', () => {
 
   it('should throw and log error when createDatabase fails', async () => {
     const error = new Error('DB init failed');
-    (AppDatabase as unknown as vi.Mock).mockImplementationOnce(() => {
+    (AppDatabase as unknown as vi.Mock).mockImplementationOnce(function () {
       throw error;
     });
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -105,8 +106,8 @@ describe('ToolbarDialogComponent', () => {
       toolbarDialogService.isOpen.set(true);
       fixture.detectChanges();
 
-      const dialog = fixture.nativeElement.querySelector('p-dialog');
-      expect(dialog.getAttribute('ng-reflect-visible')).toBe('true');
+      const dialog = fixture.debugElement.query(By.css('p-dialog'));
+      expect(dialog.componentInstance.visible).toBe(true);
     });
 
     it('should display dialog in init phase when tool with initComponent is opened', () => {

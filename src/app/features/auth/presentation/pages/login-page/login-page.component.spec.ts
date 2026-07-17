@@ -45,6 +45,13 @@ describe('LoginPageComponent', () => {
     });
   });
 
+  afterEach(() => {
+    // vi.spyOn() on the shared component prototype (redirectToOidcLogin, reloadToHome)
+    // returns the SAME spy instance across tests if not restored, accumulating call
+    // counts across describe blocks. Restore all spies after every test.
+    vi.restoreAllMocks();
+  });
+
   /**
    * Build the component with the given resolved auth mode.
    * Default: mode resolved + fallback (email form rendered).

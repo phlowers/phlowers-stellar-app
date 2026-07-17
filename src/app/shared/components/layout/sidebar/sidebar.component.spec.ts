@@ -168,6 +168,8 @@ describe('SidebarComponent', () => {
   });
 
   it('should not show version when appVersionDisplay is false', () => {
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
     hostComponent.appVersionDisplay = false;
     hostFixture.detectChanges();
 
@@ -252,6 +254,8 @@ describe('SidebarComponent', () => {
   // Additional tests to verify input binding changes
   it('should respond to changes in input properties', () => {
     // Change the logo text
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
     hostComponent.logoText = 'New App Name';
     hostFixture.detectChanges();
 
@@ -261,6 +265,8 @@ describe('SidebarComponent', () => {
 
   it('should update displayed links when input links change', () => {
     // Add a new link to mainLinks
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
     hostComponent.mainLinks = [
       ...hostComponent.mainLinks,
       {

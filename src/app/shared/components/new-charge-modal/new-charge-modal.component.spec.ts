@@ -272,7 +272,7 @@ describe('NewChargeModalComponent (Jest)', () => {
     const descriptionTextarea = fixture.debugElement.query(By.css('#description'));
 
     expect(nameInput.nativeElement.disabled).toBe(false);
-    expect(toggleSwitch.componentInstance.disabled).toBe(false);
+    expect(toggleSwitch.nativeElement.getAttribute('data-p-disabled')).toBe('false');
     expect(descriptionTextarea.nativeElement.disabled).toBe(false);
   });
 

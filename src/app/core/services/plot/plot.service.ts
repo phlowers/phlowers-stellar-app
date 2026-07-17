@@ -1,5 +1,6 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
 import { DataError, GetSectionOutput, ObstacleOutput, Task, TaskError } from '@services/worker_python/tasks/types';

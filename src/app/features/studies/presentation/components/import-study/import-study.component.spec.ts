@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { ImportStudyComponent } from './import-study.component';
 import { StudiesService } from '@services/studies/studies.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -119,6 +120,7 @@ describe('ImportStudyComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ImportStudyComponent],
       providers: [
+        provideRouter([]),
         { provide: StudiesService, useValue: studiesServiceMock },
         { provide: MessageService, useValue: mockMessageService },
         { provide: CablesService, useValue: mockCablesService },
@@ -146,7 +148,9 @@ describe('ImportStudyComponent', () => {
       };
 
       // Mock global FileReader
-      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(() => mockFileReader);
+      (global as unknown as { FileReader: vi.Mock }).FileReader = vi.fn(function () {
+        return mockFileReader;
+      });
 
       // Create a mock file
       mockFile = new File(['test content'], 'test.csv', { type: 'text/csv' });
