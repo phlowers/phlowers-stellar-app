@@ -15,14 +15,14 @@
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
+    "lib": ["ES2023", "dom", "dom.iterable"],
     "module": "esnext",
-    "lib": ["ES2022", "ES2023.Array", "DOM", "DOM.Iterable"],
     "types": [
       "@angular/localize",
       "vitest/globals"
     ],
-    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@src/*": [
         "./src/*"

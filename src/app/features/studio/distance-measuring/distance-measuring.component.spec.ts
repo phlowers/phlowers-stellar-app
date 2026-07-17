@@ -114,7 +114,7 @@ describe('DistanceMeasuringComponent', () => {
 
   it('should keep the free-positioning toggle disabled', () => {
     const toggle = getByTestId('free-positioning-toggle');
-    expect(toggle?.getAttribute('ng-reflect-disabled')).toBe('true');
+    expect(toggle?.getAttribute('data-p-disabled')).toBe('true');
   });
 
   it('should disable Calculate until all points are filled', () => {

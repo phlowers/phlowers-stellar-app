@@ -10,40 +10,40 @@ import Aura from '@primeng/themes/aura';
 import { getColorPalette } from './theme-helper';
 
 /** PrimeNG theme preset built on top of Aura, using CSS custom properties for color palettes. */
-export const primengPreset = definePreset(Aura, {
-  semantic: {
-    primary: getColorPalette('primary'),
-    secondary: getColorPalette('secondary'),
-    grey: getColorPalette('grey', [
-      'white',
-      0,
-      50,
-      100,
-      150,
-      200,
-      250,
-      300,
-      350,
-      400,
-      450,
-      500,
-      550,
-      600,
-      650,
-      700,
-      750,
-      800,
-      850,
-      900,
-      950
-    ]),
-    colorScheme: {
-      light: {
-        primary: {
-          color: '{primary.600}',
-          hoverColor: '{primary.700}'
-        }
+const semantic = {
+  primary: getColorPalette('primary'),
+  secondary: getColorPalette('secondary'),
+  grey: getColorPalette('grey', [
+    'white',
+    0,
+    50,
+    100,
+    150,
+    200,
+    250,
+    300,
+    350,
+    400,
+    450,
+    500,
+    550,
+    600,
+    650,
+    700,
+    750,
+    800,
+    850,
+    900,
+    950
+  ]),
+  colorScheme: {
+    light: {
+      primary: {
+        color: '{primary.600}',
+        hoverColor: '{primary.700}'
       }
     }
   }
-});
+};
+
+export const primengPreset = definePreset(Aura, { semantic });

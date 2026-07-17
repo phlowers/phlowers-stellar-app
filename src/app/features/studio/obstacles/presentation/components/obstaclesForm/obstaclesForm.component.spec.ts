@@ -635,25 +635,33 @@ describe('ObstaclesFormComponent', () => {
   describe('free positioning toggle', () => {
     it('should be disabled when no support is selected', () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
-      expect(toggle.getAttribute('ng-reflect-disabled')).toBe('true');
+      expect(toggle.getAttribute('data-p-disabled')).toBe('true');
     });
 
     it('should be enabled when a support is selected', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-      fixture.detectChanges();
 
-      const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
-      expect(toggle.getAttribute('ng-reflect-disabled')).toBe('false');
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+
+      const toggle = localFixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('data-p-disabled')).toBe('false');
     });
 
-    it('should reflect isFreePositioningMode value', () => {
+    it('should reflect isFreePositioningMode value', async () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
-      expect(toggle.getAttribute('ng-reflect-model')).toBe('false');
+      expect(toggle.getAttribute('data-p-checked')).toBe('false');
 
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       mockPlotOptionsService.isFreePositioningMode.set(true);
-      fixture.detectChanges();
 
-      expect(toggle.getAttribute('ng-reflect-model')).toBe('true');
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+      await Promise.resolve();
+      localFixture.detectChanges();
+
+      const localToggle = localFixture.nativeElement.querySelector('p-toggleswitch');
+      expect(localToggle.getAttribute('data-p-checked')).toBe('true');
     });
   });
 

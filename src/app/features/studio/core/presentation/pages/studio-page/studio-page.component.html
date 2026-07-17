@@ -244,7 +244,7 @@
       <ng-template>
         <p-tabs
           [value]="loadFormsService.activeLoadTab()"
-          (valueChange)="loadFormsService.activeLoadTab.set($event.toString())"
+          (valueChange)="loadFormsService.activeLoadTab.set($event?.toString() ?? '0')"
           class="load-tabs"
           data-testid="load-tabs"
         >

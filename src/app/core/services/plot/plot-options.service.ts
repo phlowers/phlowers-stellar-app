@@ -7,6 +7,7 @@
 
 import { inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+
 import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
