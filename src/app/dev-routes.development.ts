@@ -11,7 +11,6 @@ export const devRoutes: Routes = [
   {
     path: 'primeDebug',
     title: 'PrimeNG Debug',
-    loadComponent: () =>
-      import('@features/prime-debug/prime-debug.component').then((m) => m.PrimeDebugComponent)
+    loadComponent: () => import('@features/prime-debug/prime-debug.component').then((m) => m.PrimeDebugComponent)
   }
 ];

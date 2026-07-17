@@ -5,7 +5,7 @@
   btnSize="s"
   data-testid="scale-view-trigger"
   class="scale-view-trigger"
-  [class]="popoverOpen() ? 'view-button--active' : ''"
+  [class.view-button--active]="popoverOpen()"
   aria-haspopup="dialog"
   [attr.aria-expanded]="popoverOpen()"
   (click)="togglePopover($event)"

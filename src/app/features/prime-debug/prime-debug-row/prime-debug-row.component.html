@@ -1,19 +1,19 @@
 <section class="prime-debug-row">
-  <h2 class="prime-debug-row__name underline-text">{{ name() }}</h2>
+  <h2 class="prime-debug-row__name underline-text" data-testid="prime-debug-row-name">{{ name() }}</h2>
 
-  <div class="prime-debug-row__demo">
+  <div class="prime-debug-row__demo" data-testid="prime-debug-row-demo">
     <ng-content></ng-content>
   </div>
 
   <dl class="prime-debug-row__meta">
     <dt class="prime-debug-row__override">Override</dt>
-    <dd class="prime-debug-row__override">{{ overrideClass() }}</dd>
+    <dd class="prime-debug-row__override" data-testid="prime-debug-row-override">{{ overrideClass() }}</dd>
     <dt class="prime-debug-row__usage">Usage</dt>
-    <dd class="prime-debug-row__usage">{{ usage() }}</dd>
+    <dd class="prime-debug-row__usage" data-testid="prime-debug-row-usage">{{ usage() }}</dd>
   </dl>
 
   @if (screenshot(); as screenshotSrc) {
-    <figure class="prime-debug-row__screenshot">
+    <figure class="prime-debug-row__screenshot" data-testid="prime-debug-row-screenshot">
       <figcaption>Reference</figcaption>
       <img [src]="screenshotSrc" alt="Baseline reference screenshot for {{ name() }}" />
     </figure>

@@ -36,11 +36,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { PrimeDebugRowComponent } from './prime-debug-row/prime-debug-row.component';
-
-interface DebugOption extends Record<string, unknown> {
-  label: string;
-  value: string;
-}
+import { DebugOption } from './prime-debug.model';
 
 /**
  * Dev-only showcase of every PrimeNG component that has a style override in
@@ -50,6 +46,7 @@ interface DebugOption extends Record<string, unknown> {
  */
 @Component({
   selector: 'app-prime-debug',
+  standalone: true,
   imports: [
     FormsModule,
     AccordionModule,

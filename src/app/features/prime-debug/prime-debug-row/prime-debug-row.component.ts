@@ -12,6 +12,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  */
 @Component({
   selector: 'app-prime-debug-row',
+  standalone: true,
   templateUrl: './prime-debug-row.component.html',
   styleUrl: './prime-debug-row.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
