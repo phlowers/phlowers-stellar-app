@@ -104,27 +104,34 @@ export class CableModificationsService {
       uuid: this.previewCableModification()?.uuid ?? uuidv4(),
       spanUuid: params.spanUuid,
       supportRef: params.supportRef,
-      widthCable: params.widthCable,
-      sizeCable: params.sizeCable,
+      modificationType: params.modificationType,
+      modifiedLengthCable: params.modifiedLengthCable,
       distanceSupportRef: params.distanceSupportRef
     });
 
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
+    const section = this.spanService.section();
+    const currentChargeUuid = section?.selected_charge_uuid;
+    const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
+    try {
+      if (!charge) {
+        this.plotService.temporaryLoadData = null;
+        return;
+      }
+      const { error, diagnostics } = await this.workerPythonService.runTask(Task.shortenLengthenCable, {
+        spanIndex,
+        modificationType: params.modificationType,
+        modifiedLengthCable: params.modifiedLengthCable,
+        distanceSupportRef: params.distanceSupportRef,
+        supportRef: params.supportRef
+      });
 
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.cableModification, {
-      spanIndex,
-      widthCable: params.widthCable,
-      sizeCable: params.sizeCable,
-      distanceSupportRef: params.distanceSupportRef,
-      supportRef: params.supportRef
-    });
-
-    this.plotService.litData.set(result?.current ?? null);
-    this.plotService.baseLitData.set(result?.base ?? null);
-    this.plotService.error.set(error);
-    this.plotService.diagnostics.set(diagnostics);
-    this.plotService.loading.set(false);
+      this.plotService.error.set(error);
+      this.plotService.diagnostics.set(diagnostics);
+    } finally {
+      this.plotService.loading.set(false);
+    }
   };
 
   /**

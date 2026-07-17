@@ -6,7 +6,7 @@
 
 import logging
 
-from stellar_engine.core import geometry, pose_table
+from stellar_engine.core import geometry, manipulations, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
 from stellar_engine.core.conformity import simulation as conformity_simulation
@@ -59,9 +59,7 @@ def get_support_coordinates(js_inputs):
 @debug_log
 def get_pose_table(js_inputs):
     global study
-    return pose_table.get_pose_table(
-        js_to_python(js_inputs), study.balance_engine
-    )
+    return pose_table.get_pose_table(js_to_python(js_inputs), study.balance_engine)
 
 
 # ---------------------------measures----------------
@@ -105,9 +103,7 @@ def initialize_study(js_inputs):
     python_inputs = js_to_python(js_inputs)
 
     study, base_study = stellar_initialize_study(python_inputs)
-    logger.debug(
-        f"Study initialized. Study: {study}, Base Study: {base_study}"
-    )
+    logger.debug(f"Study initialized. Study: {study}, Base Study: {base_study}")
     return {"success": True}
 
 
@@ -144,9 +140,7 @@ def get_aspect_ratio(js_inputs):
 @debug_log
 def get_equivalent_span():
     global study
-    return {
-        "equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)
-    }
+    return {"equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)}
 
 
 # ---------------------------obstacles----------------
@@ -199,9 +193,7 @@ def delete_obstacle(js_inputs):
     )
     project = py_inputs["view"] == "2D"
     global study
-    obst.delete_obstacle(
-        uuid, study, project=project, support_index=middle_span
-    )
+    obst.delete_obstacle(uuid, study, project=project, support_index=middle_span)
     return {"success": True}
 
 
@@ -315,3 +307,9 @@ def set_resolution(js_inputs):
     resolution = python_inputs["resolution"]
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
+
+
+@debug_log
+def shorten_lengthen_cable(js_inputs):
+    global study
+    return manipulations.modify_cable(js_to_python(js_inputs), study)

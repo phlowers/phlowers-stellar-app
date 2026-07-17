@@ -80,8 +80,8 @@ const tasks: Record<
     function: 'clear_obstacles',
     externalPackages: []
   },
-  [Task.cableModification]: {
-    function: 'cable_modification',
+  [Task.shortenLengthenCable]: {
+    function: 'shorten_lengthen_cable',
     externalPackages: []
   },
   [Task.getAspectRatio]: {
