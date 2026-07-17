@@ -9,15 +9,13 @@
 import { loadPyodide } from 'pyodide';
 import functions from './tasks/python-scripts/functions.py';
 import api from './tasks/python-scripts/api.py';
-import cable_modification from './tasks/python-scripts/cable_modification.py';
 import pythonPackages from './python-packages.json';
 import { handleTask } from './tasks/handle-task';
 import { Task, TaskError, TaskInputs } from './tasks/types';
 
 const pythonFiles = [
   { name: 'functions', content: functions },
-  { name: 'api', content: api },
-  { name: 'cable_modification', content: cable_modification }
+  { name: 'api', content: api }
 ];
 
 /** Type alias for the initialised Pyodide runtime API. */
