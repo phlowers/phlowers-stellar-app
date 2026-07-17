@@ -34,7 +34,7 @@ def js_to_python(js_inputs) -> dict:
 
 
 @debug_log
-def default_converter(value, _ignored1, _ignored2):
+def date_converter(value, _ignored1, _ignored2):
     """Convert js Date object into python Datetime object"""
     if value.constructor.name == "Date":
         # Convert to UTC

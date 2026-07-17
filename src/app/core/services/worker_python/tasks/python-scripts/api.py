@@ -29,7 +29,7 @@ from mechaphlowers import SectionStudy
 from mechaphlowers.config import options
 from stellar_engine.utils import get_section_middle_span, make_debug_log
 
-from stellar_engine.pyodide_utils import js_to_python, default_converter
+from stellar_engine.pyodide_utils import js_to_python, date_converter
 
 logger = logging.getLogger("stellar_engine")
 debug_log = make_debug_log(logger, prefix="API")
@@ -77,7 +77,7 @@ def parameter_15_without_wind(js_inputs):
 def temperature_calculation(js_inputs):
     global study
     return temperature.temperature_calculation(
-        inputs=js_inputs.to_py(default_converter=default_converter),
+        inputs=js_inputs.to_py(default_converter=date_converter),
         engine=study.balance_engine,
     )
 
@@ -85,7 +85,7 @@ def temperature_calculation(js_inputs):
 @debug_log
 def compute_diffuse_and_beam_radiations(js_inputs):
     return temperature.compute_diffuse_and_beam_radiations(
-        inputs=js_inputs.to_py(default_converter=default_converter),
+        inputs=js_inputs.to_py(default_converter=date_converter),
     )
 
 

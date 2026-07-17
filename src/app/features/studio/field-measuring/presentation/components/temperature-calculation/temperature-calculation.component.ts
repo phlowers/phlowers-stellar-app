@@ -179,20 +179,25 @@ export class TemperatureCalculationComponent {
 
   private async computeDiffuseAndBeamRadiation(): Promise<void> {
     const data = this.measureData();
-    const { result, error } = await this.workerPythonService.runTask(Task.diffuseAndBeamRadiationsCalculation, {
-      longitude: data.longitude || 0,
-      latitude: data.latitude || 0,
-      date: data.date ?? null,
-      time: data.time ?? null,
-      skyCover: data.skyCover ?? ''
-    });
-    if (!error && result !== undefined) {
-      this.measureData.update((d) => ({
-        ...d,
-        diffusedSolarFlux: result.diffuseRadiation,
-        directSolarFlux: result.beamRadiation,
-        diffusedPlusDirectSolarFlux: result.diffusePlusBeamRadiation
-      }));
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.diffuseAndBeamRadiationsCalculation, {
+        longitude: data.longitude || 0,
+        latitude: data.latitude || 0,
+        date: data.date ?? null,
+        time: data.time ?? null,
+        skyCover: data.skyCover ?? ''
+      });
+      if (!error && result !== undefined) {
+        this.measureData.update((d) => ({
+          ...d,
+          diffusedSolarFlux: result.diffuseRadiation,
+          directSolarFlux: result.beamRadiation,
+          diffusedPlusDirectSolarFlux: result.diffusePlusBeamRadiation
+        }));
+      }
+    } finally {
+      this.isCalculating.set(false);
     }
   }
 
