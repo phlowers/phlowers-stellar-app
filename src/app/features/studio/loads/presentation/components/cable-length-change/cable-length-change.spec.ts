@@ -13,6 +13,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableModificationsService } from '../../services/cableModifications.service';
+import { LoadFormsService } from '../../services/loadForms.service';
 import { Section } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 
@@ -47,6 +48,7 @@ describe('CableLengthChangeComponent', () => {
   let mockSpanService: vi.Mocked<PlotSpanService>;
   let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockCableModificationsService: vi.Mocked<CableModificationsService>;
+  let mockLoadFormsService: vi.Mocked<LoadFormsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -87,6 +89,10 @@ describe('CableLengthChangeComponent', () => {
       clearPreview: vi.fn()
     } as unknown as vi.Mocked<CableModificationsService>;
 
+    mockLoadFormsService = {
+      calculateLoad: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<LoadFormsService>;
+
     await TestBed.configureTestingModule({
       imports: [CableLengthChangeComponent],
       providers: [
@@ -94,7 +100,8 @@ describe('CableLengthChangeComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
-        { provide: CableModificationsService, useValue: mockCableModificationsService }
+        { provide: CableModificationsService, useValue: mockCableModificationsService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 
@@ -119,8 +126,8 @@ describe('CableLengthChangeComponent', () => {
     it('should be true during calculate() without params then false after', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
       component.form.controls.supportRef.enable();
@@ -134,7 +141,7 @@ describe('CableLengthChangeComponent', () => {
           })
       );
 
-      const promise = component.calculate();
+      const promise = component.calculateCableLength();
       expect(component.isCalculatingOnly()).toBe(true);
       resolveTask();
       await promise;
@@ -145,8 +152,8 @@ describe('CableLengthChangeComponent', () => {
       const params = {
         scope: 'support-uuid-1',
         supportRef: 'LEFT' as const,
-        widthCable: 'lengthening' as const,
-        sizeCable: 1,
+        modificationType: 'lengthening' as const,
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       };
 
@@ -158,7 +165,7 @@ describe('CableLengthChangeComponent', () => {
           })
       );
 
-      const promise = component.calculate(params);
+      const promise = component.calculateCableLength(params);
       expect(component.isCalculatingOnly()).toBe(false);
       resolveTask();
       await promise;
@@ -270,8 +277,8 @@ describe('CableLengthChangeComponent', () => {
     it('should disable save button when form is valid but not dirty', () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
       component.form.controls.supportRef.enable();
@@ -286,8 +293,8 @@ describe('CableLengthChangeComponent', () => {
     it('should enable save button when form is valid and dirty', () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
       component.form.controls.supportRef.enable();
@@ -312,8 +319,8 @@ describe('CableLengthChangeComponent', () => {
             uuid: 'mod-uuid',
             spanUuid: 'support-uuid-1',
             supportRef: 'LEFT',
-            widthCable: 'lengthening',
-            sizeCable: 1,
+            modificationType: 'lengthening',
+            modifiedLengthCable: 1,
             distanceSupportRef: 5
           }
         ]
@@ -380,8 +387,8 @@ describe('CableLengthChangeComponent', () => {
     beforeEach(() => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
       component.form.controls.supportRef.enable();
@@ -391,17 +398,17 @@ describe('CableLengthChangeComponent', () => {
 
     it('should not call calculate service if form is invalid', () => {
       component.form.controls.scope.setValue(null);
-      component.calculate();
+      component.calculateCableLength();
       expect(mockCableModificationsService.calculate).not.toHaveBeenCalled();
     });
 
     it('should call cableModificationsService.calculate with form values', () => {
-      component.calculate();
+      component.calculateCableLength();
       expect(mockCableModificationsService.calculate).toHaveBeenCalledWith({
         spanUuid: 'support-uuid-1',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
     });
@@ -414,7 +421,7 @@ describe('CableLengthChangeComponent', () => {
             resolveTask = res;
           })
       );
-      component.calculate();
+      component.calculateCableLength();
       fixture.detectChanges();
       // We wait for two microtasks to ensure the effect is processed
       await new Promise((r) => setTimeout(r, 0));
@@ -442,8 +449,8 @@ describe('CableLengthChangeComponent', () => {
     it('should call calculate then save with form values', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'shortening',
-        sizeCable: 2,
+        modificationType: 'shortening',
+        modifiedLengthCable: 2,
         distanceSupportRef: 8
       });
       component.form.controls.supportRef.enable();
@@ -465,15 +472,15 @@ describe('CableLengthChangeComponent', () => {
       expect(mockCableModificationsService.calculate).toHaveBeenCalledWith({
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
-        widthCable: 'shortening',
-        sizeCable: 2,
+        modificationType: 'shortening',
+        modifiedLengthCable: 2,
         distanceSupportRef: 8
       });
       expect(mockCableModificationsService.save).toHaveBeenCalledWith({
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
-        widthCable: 'shortening',
-        sizeCable: 2,
+        modificationType: 'shortening',
+        modifiedLengthCable: 2,
         distanceSupportRef: 8
       });
     });
@@ -481,8 +488,8 @@ describe('CableLengthChangeComponent', () => {
     it('should reset isDirtySinceLastSave after save', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'shortening',
-        sizeCable: 2,
+        modificationType: 'shortening',
+        modifiedLengthCable: 2,
         distanceSupportRef: 8
       });
       component.form.controls.supportRef.enable();
@@ -497,8 +504,8 @@ describe('CableLengthChangeComponent', () => {
     it('should reset isLoading to false even if calculate throws', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
-        widthCable: 'shortening',
-        sizeCable: 2,
+        modificationType: 'shortening',
+        modifiedLengthCable: 2,
         distanceSupportRef: 8
       });
       component.form.controls.supportRef.enable();
@@ -524,8 +531,8 @@ describe('CableLengthChangeComponent', () => {
             uuid: 'mod-uuid',
             spanUuid: 'support-uuid-1',
             supportRef: 'LEFT',
-            widthCable: 'lengthening',
-            sizeCable: 1,
+            modificationType: 'lengthening',
+            modifiedLengthCable: 1,
             distanceSupportRef: 5
           }
         ]
@@ -569,11 +576,11 @@ describe('CableLengthChangeComponent', () => {
   // ---------------------------------------------------------------------------
   describe('resetForm()', () => {
     it('should reset all form controls', () => {
-      component.form.patchValue({ scope: 'support-uuid-1', widthCable: 'lengthening' });
+      component.form.patchValue({ scope: 'support-uuid-1', modificationType: 'lengthening' });
       component.resetForm();
       // scope is reset to the default value (first support of the section)
       expect(component.form.controls.scope.value).toBe('support-uuid-1');
-      expect(component.form.controls.widthCable.value).toBe('lengthening');
+      expect(component.form.controls.modificationType.value).toBe('lengthening');
     });
 
     it('should disable supportRef control', () => {
@@ -642,8 +649,8 @@ describe('CableLengthChangeComponent', () => {
             uuid: 'mod-uuid',
             spanUuid: 'support-uuid-1',
             supportRef: 'RIGHT',
-            widthCable: 'shortening',
-            sizeCable: 3,
+            modificationType: 'shortening',
+            modifiedLengthCable: 3,
             distanceSupportRef: 7
           }
         ]
@@ -652,8 +659,8 @@ describe('CableLengthChangeComponent', () => {
       component.onScopeChange('support-uuid-1');
 
       expect(component.form.controls.supportRef.value).toBe('RIGHT');
-      expect(component.form.controls.widthCable.value).toBe('shortening');
-      expect(component.form.controls.sizeCable.value).toBe(3);
+      expect(component.form.controls.modificationType.value).toBe('shortening');
+      expect(component.form.controls.modifiedLengthCable.value).toBe(3);
       expect(component.form.controls.distanceSupportRef.value).toBe(7);
       expect(component.hasSavedModification()).toBe(false);
     });
@@ -663,8 +670,8 @@ describe('CableLengthChangeComponent', () => {
 
       component.onScopeChange('support-uuid-1');
 
-      expect(component.form.controls.widthCable.value).toBe('lengthening');
-      expect(component.form.controls.sizeCable.value).toBe(0);
+      expect(component.form.controls.modificationType.value).toBe('lengthening');
+      expect(component.form.controls.modifiedLengthCable.value).toBe(0);
       expect(component.form.controls.distanceSupportRef.value).toBe(0);
       expect(component.hasSavedModification()).toBe(true);
     });
