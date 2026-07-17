@@ -222,8 +222,6 @@ export class TemperatureCalculationComponent {
   }
 
   private readonly diffuseAndBeamRadiationEffect = effect(() => {
-    console.log('diffuseAndBeamRadiationEffect triggered');
-
     const isWorkerReady = this.workerReady();
     const { longitude, latitude, date, time, skyCover } = this.measureData();
 
