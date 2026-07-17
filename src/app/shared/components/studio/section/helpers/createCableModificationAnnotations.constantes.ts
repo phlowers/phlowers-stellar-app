@@ -54,7 +54,7 @@ export const CABLE_MOD_LABEL_Y_SHIFT = 110;
  * Wrapped in a function so `$localize` is evaluated at call time, which
  * keeps the constants module side-effect free and friendly to unit tests.
  */
-export const getCableModificationLabel = (widthCable: 'lengthening' | 'shortening'): string =>
-  widthCable === 'lengthening'
+export const getCableModificationLabel = (modificationType: 'lengthening' | 'shortening'): string =>
+  modificationType === 'lengthening'
     ? $localize`:@@studio.cable-modification.lengthening:Lengthening`
     : $localize`:@@studio.cable-modification.shortening:Shortening`;

@@ -13,6 +13,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableLengthChangeFormControls, CableWidthType } from './cable-length-change.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -36,6 +37,7 @@ export class CableLengthChangeComponent {
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly cableModificationsService = inject(CableModificationsService);
+  private readonly loadFormsService = inject(LoadFormsService);
 
   readonly isLoading = signal(false);
   readonly isCalculatingOnly = signal(false);
@@ -49,8 +51,8 @@ export class CableLengthChangeComponent {
       { value: null, disabled: true },
       { validators: [Validators.required] }
     ),
-    widthCable: new FormControl<CableWidthType | null>('lengthening', { validators: [Validators.required] }),
-    sizeCable: new FormControl<number | null>(0, {
+    modificationType: new FormControl<CableWidthType | null>('lengthening', { validators: [Validators.required] }),
+    modifiedLengthCable: new FormControl<number | null>(0, {
       validators: [Validators.required, Validators.min(0), Validators.max(1000)]
     }),
     distanceSupportRef: new FormControl<number | null>(0, {
@@ -67,7 +69,7 @@ export class CableLengthChangeComponent {
 
   readonly supportRefOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
 
-  readonly widthCableOptions = [
+  readonly modificationTypeOptions = [
     { label: $localize`Lengthening`, value: 'lengthening' as CableWidthType },
     { label: $localize`Shortening`, value: 'shortening' as CableWidthType }
   ];
@@ -82,8 +84,8 @@ export class CableLengthChangeComponent {
   constructor() {
     // Track dirty state when user edits content fields (RG.LON-CAB.ENR-BTN.1)
     merge(
-      this.form.controls.widthCable.valueChanges,
-      this.form.controls.sizeCable.valueChanges,
+      this.form.controls.modificationType.valueChanges,
+      this.form.controls.modifiedLengthCable.valueChanges,
       this.form.controls.distanceSupportRef.valueChanges,
       this.form.controls.supportRef.valueChanges
     )
@@ -151,14 +153,17 @@ export class CableLengthChangeComponent {
       this.form.patchValue(
         {
           supportRef: savedMod.supportRef,
-          widthCable: savedMod.widthCable,
-          sizeCable: savedMod.sizeCable,
+          modificationType: savedMod.modificationType,
+          modifiedLengthCable: savedMod.modifiedLengthCable,
           distanceSupportRef: savedMod.distanceSupportRef
         },
         { emitEvent: false }
       );
     } else {
-      this.form.patchValue({ widthCable: 'lengthening', sizeCable: 0, distanceSupportRef: 0 }, { emitEvent: false });
+      this.form.patchValue(
+        { modificationType: 'lengthening', modifiedLengthCable: 0, distanceSupportRef: 0 },
+        { emitEvent: false }
+      );
       this.hasSavedModification.set(true);
     }
     this.statesFormControls();
@@ -179,8 +184,8 @@ export class CableLengthChangeComponent {
     this.form.patchValue(
       {
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: null,
+        modificationType: 'lengthening',
+        modifiedLengthCable: null,
         distanceSupportRef: null
       },
       { emitEvent: false }
@@ -194,10 +199,10 @@ export class CableLengthChangeComponent {
   }
 
   private statesFormControls() {
-    this.form.controls.widthCable.markAsPristine();
-    this.form.controls.widthCable.markAsUntouched();
-    this.form.controls.sizeCable.markAsPristine();
-    this.form.controls.sizeCable.markAsUntouched();
+    this.form.controls.modificationType.markAsPristine();
+    this.form.controls.modificationType.markAsUntouched();
+    this.form.controls.modifiedLengthCable.markAsPristine();
+    this.form.controls.modifiedLengthCable.markAsUntouched();
     this.form.controls.distanceSupportRef.markAsPristine();
     this.form.controls.distanceSupportRef.markAsUntouched();
     this.form.controls.supportRef.markAsPristine();
@@ -219,16 +224,17 @@ export class CableLengthChangeComponent {
 
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
-    const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = this.form.getRawValue();
-    if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
+    const { scope, supportRef, modificationType, modifiedLengthCable, distanceSupportRef } = this.form.getRawValue();
+    if (!scope || !supportRef || !modificationType || modifiedLengthCable === null || distanceSupportRef === null)
+      return;
     this.isLoading.set(true);
     try {
-      await this.calculate({ scope, supportRef, widthCable, sizeCable, distanceSupportRef });
+      await this.calculateCableLength({ scope, supportRef, modificationType, modifiedLengthCable, distanceSupportRef });
       await this.cableModificationsService.save({
         spanUuid: scope,
         supportRef,
-        widthCable,
-        sizeCable,
+        modificationType,
+        modifiedLengthCable,
         distanceSupportRef
       });
       this.hasSavedModification.set(false);
@@ -239,27 +245,29 @@ export class CableLengthChangeComponent {
     }
   }
 
-  async calculate(params?: {
+  async calculateCableLength(params?: {
     scope: string;
     supportRef: 'LEFT' | 'RIGHT';
-    widthCable: CableWidthType;
-    sizeCable: number;
+    modificationType: CableWidthType;
+    modifiedLengthCable: number;
     distanceSupportRef: number;
   }): Promise<void> {
     const values = params ?? this.form.getRawValue();
-    const { scope, supportRef, widthCable, sizeCable, distanceSupportRef } = values;
+    const { scope, supportRef, modificationType, modifiedLengthCable, distanceSupportRef } = values;
     if (this.form.invalid && !params) return;
-    if (!scope || !supportRef || !widthCable || sizeCable === null || distanceSupportRef === null) return;
+    if (!scope || !supportRef || !modificationType || modifiedLengthCable === null || distanceSupportRef === null)
+      return;
     if (!params) this.isCalculatingOnly.set(true);
     this.error.set(null);
     try {
       await this.cableModificationsService.calculate({
         spanUuid: scope,
         supportRef,
-        widthCable,
-        sizeCable: sizeCable ?? 0,
+        modificationType,
+        modifiedLengthCable: modifiedLengthCable ?? 0,
         distanceSupportRef: distanceSupportRef ?? 0
       });
+      await this.loadFormsService.calculateLoad();
       const workerError = this.plotService.error();
       this.error.set(workerError ? String(workerError) : null);
     } finally {
@@ -285,8 +293,8 @@ export class CableLengthChangeComponent {
     this.form.patchValue(
       {
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 0,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 0,
         distanceSupportRef: 0
       },
       { emitEvent: false }
