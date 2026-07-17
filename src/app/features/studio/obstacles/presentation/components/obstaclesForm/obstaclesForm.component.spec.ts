@@ -648,13 +648,16 @@ describe('ObstaclesFormComponent', () => {
       expect(toggle.getAttribute('data-p-disabled')).toBe('false');
     });
 
-    it('should reflect isFreePositioningMode value', () => {
+    it('should reflect isFreePositioningMode value', async () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
       expect(toggle.getAttribute('data-p-checked')).toBe('false');
 
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       mockPlotOptionsService.isFreePositioningMode.set(true);
 
       const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+      await Promise.resolve();
       localFixture.detectChanges();
 
       const localToggle = localFixture.nativeElement.querySelector('p-toggleswitch');

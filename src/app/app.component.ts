@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -103,7 +103,9 @@ export class AppComponent implements OnInit {
       if (action === 'first-install') {
         // First install runs automatically once the user is authenticated.
         this.isUpdateDialogOpen.set(false);
-        if (!this.autoInstallTriggered()) {
+        // Read the guard untracked: resetting it to false on a failure path must not
+        // re-trigger this effect (it would otherwise loop while pendingAction stays 'first-install').
+        if (!untracked(this.autoInstallTriggered)) {
           this.autoInstallTriggered.set(true);
           this.tryAutomaticFirstInstall();
         }

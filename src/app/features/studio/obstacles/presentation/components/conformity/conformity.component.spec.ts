@@ -613,6 +613,7 @@ describe('ConformityComponent', () => {
 
     it('should not render the plot when the #conformity-plot div is not present in the DOM', async () => {
       await createComponent();
+      mockCreateConformityPlot.mockClear();
       vi.spyOn(document, 'getElementById').mockReturnValue(null);
 
       await component.calculate();
