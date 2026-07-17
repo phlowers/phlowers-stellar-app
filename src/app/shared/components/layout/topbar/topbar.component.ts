@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PageTitleService } from '@shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
@@ -14,7 +14,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 
 @Component({
   selector: 'app-topbar',
-  imports: [CommonModule, IconComponent],
+  imports: [IconComponent],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

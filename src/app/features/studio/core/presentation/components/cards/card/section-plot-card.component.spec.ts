@@ -147,19 +147,21 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       expect(header).toBeTruthy();
     });
 
-    it('should render correct title for support and span', () => {
+    it('should render correct title for a support card', () => {
       hostComponent.cardType = 'support';
       hostComponent.cardIndex = 3;
       hostFixture.detectChanges();
 
-      let title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
+      const title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
       expect(title.textContent?.trim()).toBe('4');
+    });
 
+    it('should render correct title for a span card', () => {
       hostComponent.cardType = 'span';
       hostComponent.cardIndex = 4;
       hostFixture.detectChanges();
 
-      title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
+      const title = hostFixture.nativeElement.querySelector('.title') as HTMLElement;
       expect(title.textContent?.trim()).toBe('5-6');
     });
 
@@ -168,7 +170,8 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
       hostFixture.detectChanges();
 
       const icon = hostFixture.nativeElement.querySelector('app-icon');
-      expect(icon?.getAttribute('ng-reflect-icon')).toBe('span');
+      const use = icon?.querySelector('use');
+      expect(use?.getAttribute('xlink:href')).toBe('/icons/customs.svg#span');
     });
   });
 
@@ -195,12 +198,12 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     it('should update arrow icon when toggled', () => {
       const button = hostFixture.nativeElement.querySelector('button');
       let arrow = hostFixture.nativeElement.querySelector('.arrow');
-      expect(arrow?.getAttribute('ng-reflect-icon')).toBe('keyboard_arrow_down');
+      expect(arrow?.textContent?.trim()).toBe('keyboard_arrow_down');
 
       button.click();
       hostFixture.detectChanges();
       arrow = hostFixture.nativeElement.querySelector('.arrow');
-      expect(arrow?.getAttribute('ng-reflect-icon')).toBe('keyboard_arrow_up');
+      expect(arrow?.textContent?.trim()).toBe('keyboard_arrow_up');
     });
   });
 

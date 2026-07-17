@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
-  afterRender,
+  afterEveryRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -214,7 +214,7 @@ export class CableSupportManipComponent {
 
   // Re-enable manip2 animations after each render cycle so that
   // user-triggered add/remove interactions still animate normally.
-  private readonly _reenableManip2Anim = afterRender(() => {
+  private readonly _reenableManip2Anim = afterEveryRender(() => {
     if (untracked(() => this.disableManip2Anim())) {
       this.disableManip2Anim.set(false);
     }

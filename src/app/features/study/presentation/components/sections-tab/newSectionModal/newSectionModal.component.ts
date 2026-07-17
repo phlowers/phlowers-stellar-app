@@ -10,7 +10,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { ManualSectionComponent } from './manualSection/manualSection.component';
-import { CommonModule } from '@angular/common';
+
 import { Section, Study } from '@shared/domain';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -43,7 +43,6 @@ import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
     DividerModule,
     SelectModule,
     ManualSectionComponent,
-    CommonModule,
     IconComponent,
     ButtonComponent,
     ImportSectionComponent

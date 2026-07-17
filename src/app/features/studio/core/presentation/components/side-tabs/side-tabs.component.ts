@@ -68,7 +68,9 @@ export class SideTabsComponent {
   private focusPanel(i: number) {
     setTimeout(() => {
       const el = this.panels()[i]?.nativeElement;
-      el?.focus({ preventScroll: true });
+      if (typeof el?.focus === 'function') {
+        el.focus({ preventScroll: true });
+      }
     });
   }
 

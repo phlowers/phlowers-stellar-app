@@ -55,6 +55,7 @@ class PlotServiceMock {
   plotOptions = vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
   plotOptionsChange = vi.fn();
   resetAll = vi.fn();
+  workerReady: SignalFn<boolean> = createSignalMock<boolean>(true);
 }
 
 // SpanService mock
@@ -1318,7 +1319,8 @@ describe('StudioPageComponent - HTML rendering', () => {
       spanAmountChoice: signal<'single' | 'double' | 'all'>('all'),
       study: signal(null),
       isStudioActive: signal(false),
-      resetAll: vi.fn()
+      resetAll: vi.fn(),
+      workerReady: signal(true)
     };
 
     const mockLoadFormsService = {
@@ -1489,16 +1491,21 @@ describe('HTML rendering - distance radio buttons disabled state', () => {
   });
 
   it('should enable all distance radio buttons when an obstacle is selected', () => {
-    obstaclesService.selectedObstacleUuid.set('obs-1');
-    fixture.detectChanges();
+    const localFixture = TestBed.createComponent(StudioPageComponent);
+    const localObstaclesService = TestBed.inject(ObstaclesService);
+    localObstaclesService.selectedObstacleUuid.set('obs-1');
+    localFixture.detectChanges();
 
-    const obliqueInput = getByTestId('oblique-distance-radio')?.querySelector(
+    const getByLocalTestId = (testId: string): HTMLElement | null =>
+      localFixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    const obliqueInput = getByLocalTestId('oblique-distance-radio')?.querySelector(
       'input[type="radio"]'
     ) as HTMLInputElement;
-    const verticalInput = getByTestId('vertical-distance-radio')?.querySelector(
+    const verticalInput = getByLocalTestId('vertical-distance-radio')?.querySelector(
       'input[type="radio"]'
     ) as HTMLInputElement;
-    const horizontalInput = getByTestId('horizontal-distance-radio')?.querySelector(
+    const horizontalInput = getByLocalTestId('horizontal-distance-radio')?.querySelector(
       'input[type="radio"]'
     ) as HTMLInputElement;
 

@@ -14,7 +14,6 @@ import { Study } from '@shared/domain';
 import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';
-import { CommonModule } from '@angular/common';
 
 if (navigator.language.includes('fr')) {
   TimeAgo.addLocale(fr);
@@ -69,7 +68,7 @@ type ServerStates = CardState;
  */
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent, CommonModule],
+  imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
