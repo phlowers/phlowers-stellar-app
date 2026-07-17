@@ -18,6 +18,8 @@ import { AuthService } from '@services/auth/auth.service';
 import { authSessionInterceptor } from '@services/auth/auth-session.interceptor';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
+import { LoggerService } from '@services/logger/logger.service';
+import { getAndClearBootstrapErrors } from '../bootstrap-logger';
 
 /** Root Angular application configuration with routing, HTTP, animations, PrimeNG theme, and markdown support. */
 export const appConfig: ApplicationConfig = {
@@ -58,9 +60,17 @@ export const appConfig: ApplicationConfig = {
      * after this initializer completes, with an explicit try/catch so step 6 always runs.
      */
     provideAppInitializer(async () => {
+      const logger = inject(LoggerService);
       const storageService = inject(StorageService);
       const authService = inject(AuthService);
       const updateService = inject(UpdateService);
+
+      // Flush any errors that occurred during bootstrap phase (e.g., Service Worker registration)
+      const bootstrapErrors = getAndClearBootstrapErrors();
+      for (const err of bootstrapErrors) {
+        logger.error(`Bootstrap error [${err.context}]`, err.error);
+      }
+
       await storageService.setPersistentStorage();
       await storageService.createDatabase();
       await authService.initialize();

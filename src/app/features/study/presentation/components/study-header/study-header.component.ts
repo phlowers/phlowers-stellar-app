@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { AccordionModule } from 'primeng/accordion';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TagComponent } from '@shared/components/atoms/tag/tag.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { AccordionModule } from 'primeng/accordion';
-import { Study } from '@shared/domain';
-import { CommonModule, DatePipe } from '@angular/common';
-import { StudiesService } from '@services/studies/studies.service';
 import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
+import { Study } from '@src/app/shared/domain';
+import { StudiesService } from '@src/app/core/services/studies/studies.service';
 
 /**
  * Header component for a study page.
@@ -21,8 +21,8 @@ import { ExportDialogComponent } from '@shared/components/export-dialog/export-d
     IconComponent,
     TagComponent,
     AccordionModule,
-    DatePipe,
     CommonModule,
+    DatePipe,
     ExportDialogComponent
   ],
   templateUrl: './study-header.component.html',

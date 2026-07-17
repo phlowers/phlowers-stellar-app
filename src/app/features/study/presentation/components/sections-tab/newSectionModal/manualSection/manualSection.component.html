@@ -431,7 +431,7 @@
               <label for="supportsAmount" i18n>Supports amount</label>
               <div class="flex flex-row gap-2 justify-between items-start w-[9.375rem]">
                 <p-inputnumber
-                  min="2"
+                  [min]="2"
                   fluid
                   [ngModel]="section().supports.length || 0"
                   [showButtons]="true"

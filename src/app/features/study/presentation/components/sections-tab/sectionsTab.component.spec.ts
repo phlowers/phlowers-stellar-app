@@ -238,7 +238,7 @@ describe('SectionsTabComponent', () => {
     expect(component.isInitialConditionModalOpen()).toBe(true);
   });
 
-  it('should emit deleteSection when delete button clicked in popover', () => {
+  it('should emit deleteSection when delete button clicked in popover', async () => {
     fixture.componentRef.setInput('study', { sections: [mockSection] });
     fixture.detectChanges();
 
@@ -246,16 +246,19 @@ describe('SectionsTabComponent', () => {
     expect(triggerBtn).toBeTruthy();
     triggerBtn.click();
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    const deleteBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.erase-btn');
+    // p-popover portals its content onto the document body.
+    const deleteBtn: HTMLButtonElement | null = document.body.querySelector('.erase-btn');
     expect(deleteBtn).toBeTruthy();
-    deleteBtn.click();
+    deleteBtn!.click();
     fixture.detectChanges();
 
     expect(component.deleteSection.emit).toHaveBeenCalledWith(mockSection);
   });
 
-  it('should emit duplicateSection when duplicate button clicked in popover', () => {
+  it('should emit duplicateSection when duplicate button clicked in popover', async () => {
     fixture.componentRef.setInput('study', { sections: [mockSection] });
     fixture.detectChanges();
 
@@ -263,11 +266,11 @@ describe('SectionsTabComponent', () => {
     expect(triggerBtn).toBeTruthy();
     triggerBtn.click();
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    const allBtns = fixture.nativeElement.querySelectorAll('p-popover button');
-    const duplicateButton = Array.from(allBtns).find((btn) =>
-      (btn as HTMLElement).textContent?.includes('Duplicate')
-    ) as HTMLButtonElement;
+    // p-popover portals its content onto the document body.
+    const duplicateButton = document.body.querySelector('[data-testid="section-duplicate-btn"]') as HTMLButtonElement;
     expect(duplicateButton).toBeTruthy();
 
     duplicateButton.click();
@@ -329,67 +332,77 @@ describe('SectionsTabComponent', () => {
       expect(btn?.tagName).toBe('BUTTON');
     });
 
-    it('should render section-view-btn in popover', () => {
+    it('should render section-view-btn in popover', async () => {
       fixture.componentRef.setInput('study', { sections: [mockSection] });
       fixture.detectChanges();
 
       const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
       triggerBtn.click();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
-      const viewBtn = getByTestId('section-view-btn');
+      const viewBtn = document.body.querySelector('[data-testid="section-view-btn"]');
       expect(viewBtn).toBeTruthy();
       expect(viewBtn?.tagName).toBe('BUTTON');
     });
 
-    it('should render section-edit-btn in popover', () => {
+    it('should render section-edit-btn in popover', async () => {
       fixture.componentRef.setInput('study', { sections: [mockSection] });
       fixture.detectChanges();
 
       const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
       triggerBtn.click();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
-      const editBtn = getByTestId('section-edit-btn');
+      const editBtn = document.body.querySelector('[data-testid="section-edit-btn"]');
       expect(editBtn).toBeTruthy();
       expect(editBtn?.tagName).toBe('BUTTON');
     });
 
-    it('should render section-add-ic-btn in popover', () => {
+    it('should render section-add-ic-btn in popover', async () => {
       fixture.componentRef.setInput('study', { sections: [mockSection] });
       fixture.detectChanges();
 
       const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
       triggerBtn.click();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
-      const addBtn = getByTestId('section-add-ic-btn');
+      const addBtn = document.body.querySelector('[data-testid="section-add-ic-btn"]');
       expect(addBtn).toBeTruthy();
       expect(addBtn?.tagName).toBe('BUTTON');
     });
 
-    it('should render section-duplicate-btn in popover', () => {
+    it('should render section-duplicate-btn in popover', async () => {
       fixture.componentRef.setInput('study', { sections: [mockSection] });
       fixture.detectChanges();
 
       const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
       triggerBtn.click();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
-      const dupBtn = getByTestId('section-duplicate-btn');
+      const dupBtn = document.body.querySelector('[data-testid="section-duplicate-btn"]');
       expect(dupBtn).toBeTruthy();
       expect(dupBtn?.tagName).toBe('BUTTON');
     });
 
-    it('should render section-delete-btn in popover', () => {
+    it('should render section-delete-btn in popover', async () => {
       fixture.componentRef.setInput('study', { sections: [mockSection] });
       fixture.detectChanges();
 
       const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
       triggerBtn.click();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
-      const delBtn = getByTestId('section-delete-btn');
+      const delBtn = document.body.querySelector('[data-testid="section-delete-btn"]');
       expect(delBtn).toBeTruthy();
       expect(delBtn?.tagName).toBe('BUTTON');
     });

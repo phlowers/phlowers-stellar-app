@@ -25,6 +25,7 @@ describe('CardComponent', () => {
 
     fixture = TestBed.createComponent(CardComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('role', 'button');
   });
 
   it('should create', () => {

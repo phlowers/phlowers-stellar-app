@@ -23,7 +23,9 @@ vi.mock('jspdf', () => {
     splitTextToSize: vi.fn().mockImplementation((text: string) => [text]),
     save: mockSave
   };
-  const mockJsPDF = vi.fn().mockImplementation(() => mockDoc);
+  const mockJsPDF = vi.fn(function () {
+    return mockDoc;
+  });
   return {
     default: mockJsPDF,
     jsPDF: mockJsPDF,

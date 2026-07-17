@@ -37,6 +37,7 @@
 
   .p-tab {
     @extend %text-s-600;
+    display: flex;
     flex: 1 1 0;
     min-width: 0;
     height: 2rem;

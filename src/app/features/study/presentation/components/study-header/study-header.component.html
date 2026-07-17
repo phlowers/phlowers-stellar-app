@@ -41,10 +41,11 @@
     <app-icon icon="schedule" />
     {{ study()?.created_at_offline | date: dateFormat }}
   </time>
+  @if (study()?.shareable) {
+    <hr class="study-header__separator" />
 
-  <hr *ngIf="study()?.shareable" class="study-header__separator" />
-
-  <app-tag *ngIf="study()?.shareable" text="Shared" type="error" />
+    <app-tag text="Shared" type="error" />
+  }
 
   <hr class="study-header__separator" />
 

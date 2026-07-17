@@ -195,9 +195,8 @@ describe('NewSectionModalComponent (Jest)', () => {
 
   describe('onValidate', () => {
     it('should persist location defaults when the section has null coordinates and the user never interacted with the location inputs', async () => {
-      const { LOCATION_CONFIG } = await import(
-        '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.constantes'
-      );
+      const { LOCATION_CONFIG } =
+        await import('@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.constantes');
       fixture.componentRef.setInput('mode', 'edit');
       fixture.detectChanges();
       const spyOutput = vi.spyOn(component.outputSection, 'emit');

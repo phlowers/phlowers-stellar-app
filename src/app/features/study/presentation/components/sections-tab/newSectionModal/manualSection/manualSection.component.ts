@@ -206,8 +206,8 @@ export class ManualSectionComponent implements OnInit {
     });
   }
 
-  tabValueChange = (event: string | number) => {
-    this.tabValue.set(String(event));
+  tabValueChange = (event: string | number | undefined) => {
+    this.tabValue.set(String(event ?? 'general'));
     if (event === 'graphical') {
       this.spanService.section.set(this.section());
       this.plotService.plotOptionsChange({

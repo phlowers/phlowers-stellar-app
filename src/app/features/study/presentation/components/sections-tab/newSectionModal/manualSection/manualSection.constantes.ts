@@ -16,9 +16,7 @@ export const lineTablePropertiesToSectionProperties: Record<LineTableProperties,
 
 /** Ordered maintenance hierarchy for cascading filter: center -> regional team -> maintenance team. */
 export const orderedMaintenanceTableProperties: (
-  | 'maintenance_center_id'
-  | 'regional_team_id'
-  | 'maintenance_team_id'
+  'maintenance_center_id' | 'regional_team_id' | 'maintenance_team_id'
 )[] = ['maintenance_center_id', 'regional_team_id', 'maintenance_team_id'];
 
 /** Ordered line table properties for cascading filter logic. */
