@@ -4,6 +4,7 @@ const CACHE_NAME = 'app-assets';
 const APP_VERSION_CACHE_KEY = '/app_version';
 /** Timeout (ms) for network-first fetch before falling back to cache. */
 const NETWORK_FIRST_TIMEOUT_MS = 3000;
+const NAVIGATE_TIMEOUT_MS = 13000;
 
 /**
  * Fetch with an AbortController timeout.

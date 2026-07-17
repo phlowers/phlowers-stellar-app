@@ -9,7 +9,7 @@ import { Routes } from '@angular/router';
 /** Dev-only routes, only wired in for `ng serve`/`ng build --configuration development`. */
 export const devRoutes: Routes = [
   {
-    path: 'primeDebug',
+    path: 'prime-debug',
     title: 'PrimeNG Debug',
     loadComponent: () => import('@features/prime-debug/prime-debug.component').then((m) => m.PrimeDebugComponent)
   }

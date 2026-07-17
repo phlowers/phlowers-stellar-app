@@ -107,7 +107,6 @@ export class PrimeDebugComponent {
   toggleSwitchValue = false;
   toggleButtonValue = false;
   selectButtonValue = 'a';
-  selectButtonSmallValue = 'a';
 
   inputTextValue = '';
   invalidInputTextValue = '';

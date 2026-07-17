@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.resolve(__dirname, '../dev-assets/prime-debug');
-const BASE_URL = process.env.PRIME_DEBUG_URL || 'http://localhost:4200/primeDebug';
+const BASE_URL = process.env.PRIME_DEBUG_URL || 'http://localhost:4200/prime-debug';
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -126,12 +126,16 @@ async function main() {
         await target.screenshot({ path: path.join(OUTPUT_DIR, file), timeout: 15000 });
 
         if (after) await after({ page, row });
-        console.log(`captured ${file}`);
+        process.stdout.write(`captured ${file}\n`);
         break;
       } catch (error) {
         if (after) await after({ page, row }).catch(() => undefined);
         if (attempt === 2) throw error;
-        console.warn(`retrying ${file} after error: ${error.message.split('\n')[0]}`);
+        process.stderr.write(
+          `retrying ${file} after error: ${
+            error instanceof Error ? error.message.split('\n')[0] : String(error).split('\n')[0]
+          }\n`
+        );
         await page.waitForTimeout(1000);
       }
     }
@@ -143,6 +147,6 @@ async function main() {
 try {
   await main();
 } catch (error) {
-  console.error(error);
+  process.stderr.write(`${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`);
   process.exit(1);
 }
