@@ -108,6 +108,7 @@ export class SupportsTableComponent implements OnInit {
   supportFilterTable = signal<string[]>([]);
   supplementarySupportFilterTable = signal<string[]>([]);
   allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
+  private readonly attachmentSetRestrictionsBySupportUuid = signal<Record<string, number[]>>({});
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly allCatalogSupportNames = toSignal(this.attachmentService.distinctSupportNames$);
@@ -167,6 +168,9 @@ export class SupportsTableComponent implements OnInit {
 
   ngOnInit() {
     this.getData();
+    this.supports().forEach((support) => {
+      void this.refreshAttachmentSetRestriction(support.uuid, support.name, support.attachmentSet);
+    });
   }
 
   private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
@@ -237,15 +241,69 @@ export class SupportsTableComponent implements OnInit {
   /** Latest derived-field resolution per support UUID, used to drop stale async results. */
   private readonly derivedFieldsRequests = new KeyedLatestRequestTracker<string>();
 
+  getRestrictedAttachmentSets(uuid: string): number[] {
+    return this.attachmentSetRestrictionsBySupportUuid()[uuid] ?? [];
+  }
+
+  private async refreshAttachmentSetRestriction(
+    uuid: string,
+    supportName: string | null,
+    attachmentSet: number | null
+  ): Promise<void> {
+    if (!supportName || attachmentSet == null) {
+      this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
+        const rest = { ...prev };
+        delete rest[uuid];
+        return rest;
+      });
+      return;
+    }
+
+    const matchedEntry = await this.attachmentService.resolveGeoLiaisonCatalogAttachment(
+      supportName,
+      null,
+      attachmentSet
+    );
+    if (!matchedEntry) {
+      this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
+        const rest = { ...prev };
+        delete rest[uuid];
+        return rest;
+      });
+      return;
+    }
+
+    const allowedSets = await this.attachmentService
+      .getCompleteAttachmentSetsBySupportName(supportName)
+      .catch(() => [] as number[]);
+    this.attachmentSetRestrictionsBySupportUuid.update((prev) => ({
+      ...prev,
+      [uuid]: allowedSets
+    }));
+  }
+
   async onSupportFieldChange(uuid: string, field: keyof Support, value: unknown) {
+    if (field === 'attachmentSet') {
+      const restrictedSets = this.getRestrictedAttachmentSets(uuid);
+      if (restrictedSets.length > 0 && value != null && !restrictedSets.includes(value as number)) {
+        return;
+      }
+    }
+
     const changes = buildFieldChangeUpdates(uuid, field, value, this.chainsOptions());
     changes.forEach((change) => this.supportChange.emit(change));
-    // The catalog-derived fields (tower model, arm length, height below console) depend on the
-    // (support name, attachment set) pair, so re-resolve them whenever either side changes.
+
+    // The attachment-set restriction and the catalog-derived fields (tower model, arm length,
+    // height below console) both depend on the (support name, attachment set) pair, so
+    // re-resolve them together whenever either side changes.
     if (field === 'name' || field === 'attachmentSet') {
-      const support = this.supports().find((support) => support.uuid === uuid);
-      const supportName = field === 'name' ? (value as string | null) : support?.name;
-      const attachmentSet = field === 'attachmentSet' ? (value as number | null) : support?.attachmentSet;
+      const support = this.supports().find((currentSupport) => currentSupport.uuid === uuid);
+      const supportName = field === 'name' ? (value as string | null) : (support?.name ?? null);
+      const attachmentSet =
+        field === 'attachmentSet' ? ((value as number | null) ?? null) : (support?.attachmentSet ?? null);
+
+      await this.refreshAttachmentSetRestriction(uuid, supportName, attachmentSet);
+
       // Guard against a stale update race: a faster edit of the same row (e.g. typing successive
       // digits into the attachment-set field) must not be overwritten by an older lookup resolving late.
       const requestId = this.derivedFieldsRequests.begin(uuid);

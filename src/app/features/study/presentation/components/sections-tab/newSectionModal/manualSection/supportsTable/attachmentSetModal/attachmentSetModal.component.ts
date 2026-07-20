@@ -105,18 +105,15 @@ export class AttachmentSetModalComponent {
         const attachmentSet = support?.attachmentSet;
         if (attachmentSet) {
           this.attachmentSet.set(attachmentSet);
-          const armLength = support?.armLength ?? undefined;
-          const heightBelowConsole = support?.heightBelowConsole ?? undefined;
+          // Keep file-imported tower model as fallback, then try to override with catalog values.
+          // Per US RG.CAN.SUP-NOM.1, catalog values take priority if support+set exists in catalog.
+          // armLength/heightBelowConsole must come from the catalog only: they are left unset here
+          // (already reset to undefined above) and only ever populated by backfillDerivedFields.
           const towerModel = support?.towerModel ?? undefined;
-          this.armLength.set(armLength);
-          this.heightBelowConsole.set(heightBelowConsole);
           this.towerModel.set(towerModel);
-          // Backfill any catalog-derived field the support is missing (e.g. an attachment set
-          // assigned via inline edit / column copy before these fields were resolved). Resolving
-          // them all together keeps arm length / height / tower consistent — a tower-only backfill
-          // would leave the others undefined and validate() would emit 0.
-          if (name && (armLength == null || heightBelowConsole == null || !towerModel)) {
-            void this.backfillDerivedFields(name, attachmentSet, requestId);
+          // Try to resolve and override with catalog-derived fields (pass false to always overwrite)
+          if (name) {
+            void this.backfillDerivedFields(name, attachmentSet, requestId, false);
           }
         }
       }
@@ -129,17 +126,24 @@ export class AttachmentSetModalComponent {
   }
 
   /**
-   * Fills the catalog-derived fields (tower model, arm length, height below console) that the
-   * support does not already carry. Only empty signals are set, so user-edited values are kept.
+   * Fills the catalog-derived fields (tower model, arm length, height below console).
+   * When `onlyIfEmpty` is false (modal opening), all catalog values override file-imported values
+   * to ensure US RG.CAN.SUP-NOM.1 compliance (catalog-only values, never file values).
+   * When `onlyIfEmpty` is true, only empty signals are set, so user-edited values are kept.
    * The `requestId` (assigned by the open effect) guards against stale resolutions: the result is
    * dropped if a newer open/close or a user name/set change invalidated it while the lookup was in flight.
    */
-  private async backfillDerivedFields(supportName: string, attachmentSet: number, requestId: number): Promise<void> {
+  private async backfillDerivedFields(
+    supportName: string,
+    attachmentSet: number,
+    requestId: number,
+    onlyIfEmpty: boolean = true
+  ): Promise<void> {
     const derivedFields = await this.attachmentService.resolveDerivedSupportFields(supportName, attachmentSet);
     if (!this.derivedFieldsRequests.isCurrent(requestId) || !this.isOpen() || !derivedFields) {
       return;
     }
-    this.applyDerivedFields(derivedFields, true);
+    this.applyDerivedFields(derivedFields, onlyIfEmpty);
   }
 
   /**

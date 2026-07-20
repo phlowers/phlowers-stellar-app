@@ -90,6 +90,17 @@ describe('AttachmentSetModalComponent', () => {
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
       support_tower: 'Tower Model'
+    },
+    {
+      uuid: '4',
+      support_name: 'Test Support',
+      attachment_set: 1,
+      support_order: 1,
+      attachment_altitude: 10.0,
+      cross_arm_length: 2.5,
+      created_at: '2023-01-01',
+      updated_at: '2023-01-01',
+      support_tower: 'Tower Model'
     }
   ];
 
@@ -446,11 +457,13 @@ describe('AttachmentSetModalComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      // Verify supportName is not set (resetValues(true) clears it)
+      // Support has no name, so no catalog lookup is possible.
+      // File-imported towerModel is kept as fallback, but armLength/heightBelowConsole must come
+      // from the catalog only and stay unset.
       expect(component.supportName()).toBeUndefined();
       expect(component.attachmentSet()).toBe(1);
-      expect(component.armLength()).toBe(2.5);
-      expect(component.heightBelowConsole()).toBe(10.0);
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
       expect(component.towerModel()).toBe('Tower Model');
     });
 
@@ -498,14 +511,16 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.towerModel()).toBe('Tower Model');
     });
 
-    it('keeps the existing derived values without a catalog lookup when the support already has them', async () => {
-      // mockSupport already carries armLength, heightBelowConsole and towerModel.
+    it('ALWAYS resolves catalog-derived fields to ensure catalog values override file-imported values (US RG.CAN.SUP-NOM.1)', async () => {
+      // mockSupport carries armLength/heightBelowConsole/towerModel from import file,
+      // but the catalog lookup MUST be called to replace them with catalog-only values.
+      // This ensures that file-imported values (e.g., placeholder 999.9) are never displayed.
       fixture.componentRef.setInput('support', mockSupport);
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(attachmentServiceMock.getDerivedSupportFields).not.toHaveBeenCalled();
+      expect(attachmentServiceMock.getDerivedSupportFields).toHaveBeenCalledWith('Test Support', 1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
       expect(component.towerModel()).toBe('Tower Model');

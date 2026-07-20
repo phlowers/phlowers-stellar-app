@@ -20,6 +20,9 @@ export const sectionImportErrors = {
   lambertReprojectionError: $localize`Error computing GPS coordinates from Lambert93 data`
 };
 
+/** Warning shown when at least one GeoLiaison support cannot be resolved with complete catalog data. */
+export const geoLiaisonSupportCatalogMissingWarning = $localize`Le support d'accrochage du fichier de géoliaison n'est pas présent au catalogue des supports de l'application`;
+
 /**
  * Builds the localized info toast detail shown after a GeoLiaison import whenever the
  * Lambert93-to-GPS reprojection was computed, reporting the mean absolute error (in meters)
