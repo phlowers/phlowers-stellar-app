@@ -42,12 +42,12 @@ describe('PrimeDebugComponent', () => {
   });
 
   it('should initialize form-related state with sensible defaults', () => {
-    expect(component.checkboxValue).toBe(false);
-    expect(component.radioValue).toBe('plan');
-    expect(component.toggleSwitchValue).toBe(false);
-    expect(component.selectValue).toBeNull();
-    expect(component.multiSelectValues).toEqual(['a']);
-    expect(component.dialogVisible).toBe(false);
+    expect(component.checkboxValue()).toBe(false);
+    expect(component.radioValue()).toBe('plan');
+    expect(component.toggleSwitchValue()).toBe(false);
+    expect(component.selectValue()).toBeNull();
+    expect(component.multiSelectValues()).toEqual(['a']);
+    expect(component.dialogVisible()).toBe(false);
   });
 
   it('should expose the demo table rows', () => {
