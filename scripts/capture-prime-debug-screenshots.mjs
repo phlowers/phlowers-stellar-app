@@ -91,11 +91,7 @@ const rows = [
   { file: 'progress-spinner-wind.png' }
 ];
 
-async function main() {
-  const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-
+async function getRowSections(page) {
   const sections = page.locator('.prime-debug-row');
   await sections.first().waitFor({ state: 'attached', timeout: 15000 });
   const count = await sections.count();
@@ -105,40 +101,59 @@ async function main() {
         'Update the `rows` mapping in this script to match prime-debug.component.html.'
     );
   }
+  return sections;
+}
 
-  // The app eagerly boots a pyodide (Python-in-WASM) web worker on startup, which can
-  // starve the main thread for CPU for a while and make overlay transitions/screenshots
-  // flaky. Retry each row once before giving up.
-  for (let i = 0; i < rows.length; i++) {
-    const { file, capture, action, after } = rows[i];
-    if (!file) continue;
+async function captureRowOnce(page, row, { file, capture, action, after }) {
+  await row.scrollIntoViewIfNeeded();
+  if (action) await action({ page, row });
 
-    const row = sections.nth(i);
+  const target = capture ? page.locator(capture).first() : row.locator('.prime-debug-row__demo');
+  await target.waitFor({ state: 'visible', timeout: 15000 });
+  if (action) await page.waitForTimeout(800); // let open/close transitions settle
+  await target.screenshot({ path: path.join(OUTPUT_DIR, file), timeout: 15000 });
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        await row.scrollIntoViewIfNeeded();
-        if (action) await action({ page, row });
+  if (after) await after({ page, row });
+}
 
-        const target = capture ? page.locator(capture).first() : row.locator('.prime-debug-row__demo');
-        await target.waitFor({ state: 'visible', timeout: 15000 });
-        if (action) await page.waitForTimeout(800); // let open/close transitions settle
-        await target.screenshot({ path: path.join(OUTPUT_DIR, file), timeout: 15000 });
+function formatErrorMessage(error) {
+  return error instanceof Error ? error.message.split('\n')[0] : String(error).split('\n')[0];
+}
 
-        if (after) await after({ page, row });
-        process.stdout.write(`captured ${file}\n`);
-        break;
-      } catch (error) {
-        if (after) await after({ page, row }).catch(() => undefined);
-        if (attempt === 2) throw error;
-        process.stderr.write(
-          `retrying ${file} after error: ${
-            error instanceof Error ? error.message.split('\n')[0] : String(error).split('\n')[0]
-          }\n`
-        );
-        await page.waitForTimeout(1000);
-      }
+// The app eagerly boots a pyodide (Python-in-WASM) web worker on startup, which can
+// starve the main thread for CPU for a while and make overlay transitions/screenshots
+// flaky. Retry each row once before giving up.
+async function captureRowWithRetry(page, row, rowConfig) {
+  const { file, after } = rowConfig;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await captureRowOnce(page, row, rowConfig);
+      process.stdout.write(`captured ${file}\n`);
+      return;
+    } catch (error) {
+      if (after) await after({ page, row }).catch(() => undefined);
+      if (attempt === 2) throw error;
+      process.stderr.write(`retrying ${file} after error: ${formatErrorMessage(error)}\n`);
+      await page.waitForTimeout(1000);
     }
+  }
+}
+
+async function main() {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  // 'networkidle' can hang against the Angular dev server: HMR/live-reload keeps a
+  // websocket open, so the network never goes fully idle. The explicit waitFor below
+  // already covers waiting for the app to actually render.
+  await page.goto(BASE_URL, { waitUntil: 'load' });
+
+  const sections = await getRowSections(page);
+
+  for (let i = 0; i < rows.length; i++) {
+    const rowConfig = rows[i];
+    if (!rowConfig.file) continue;
+    await captureRowWithRetry(page, sections.nth(i), rowConfig);
   }
 
   await browser.close();

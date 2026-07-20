@@ -1,4 +1,4 @@
-<div class="prime-debug">
+<main class="prime-debug">
   <header class="prime-debug__header">
     <h1>PrimeNG override debug page</h1>
     <p>
@@ -19,7 +19,7 @@
     usage="generic — no dedicated context"
     screenshot="/prime-debug/accordion-base.png"
   >
-    <p-accordion [value]="accordionValue">
+    <p-accordion [value]="accordionValue()" (valueChange)="accordionValue.set($any($event))">
       <p-accordion-panel value="0">
         <p-accordion-header>Accordion header</p-accordion-header>
         <p-accordion-content>Accordion content.</p-accordion-content>
@@ -33,7 +33,11 @@
     usage="study header (features/study/.../study-header)"
     screenshot="/prime-debug/accordion-study-header.png"
   >
-    <p-accordion class="study-header__accordion" [value]="studyHeaderAccordionValue">
+    <p-accordion
+      class="study-header__accordion"
+      [value]="studyHeaderAccordionValue()"
+      (valueChange)="studyHeaderAccordionValue.set($any($event))"
+    >
       <p-accordion-panel value="0">
         <p-accordion-content>Study description shown below the study header toggle button.</p-accordion-content>
       </p-accordion-panel>
@@ -46,7 +50,13 @@
     usage="generic — used across many forms"
     screenshot="/prime-debug/input-text-base.png"
   >
-    <input pInputText [(ngModel)]="inputTextValue" placeholder="Type here" aria-label="Demo input text" />
+    <input
+      pInputText
+      [ngModel]="inputTextValue()"
+      (ngModelChange)="inputTextValue.set($event)"
+      placeholder="Type here"
+      aria-label="Demo input text"
+    />
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -58,7 +68,8 @@
     <input
       pInputText
       class="ng-invalid ng-dirty"
-      [(ngModel)]="invalidInputTextValue"
+      [ngModel]="invalidInputTextValue()"
+      (ngModelChange)="invalidInputTextValue.set($event)"
       placeholder="Invalid value"
       aria-label="Demo invalid input text"
     />
@@ -70,7 +81,7 @@
     usage="generic — many numeric fields"
     screenshot="/prime-debug/input-number-base.png"
   >
-    <p-inputnumber [(ngModel)]="inputNumberValue" />
+    <p-inputnumber [ngModel]="inputNumberValue()" (ngModelChange)="inputNumberValue.set($event)" />
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -79,7 +90,13 @@
     usage="study section tab — supports amount"
     screenshot="/prime-debug/input-number-horizontal.png"
   >
-    <p-inputnumber [(ngModel)]="inputNumberHorizontalValue" [showButtons]="true" buttonLayout="horizontal" [min]="0" />
+    <p-inputnumber
+      [ngModel]="inputNumberHorizontalValue()"
+      (ngModelChange)="inputNumberHorizontalValue.set($event)"
+      [showButtons]="true"
+      buttonLayout="horizontal"
+      [min]="0"
+    />
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -88,15 +105,20 @@
     usage="generic — modals across the app (e.g. studio toolbar shortcuts dialog)"
     screenshot="/prime-debug/dialog-base.png"
   >
-    <button app-btn type="button" (click)="dialogVisible = true">Open dialog</button>
-    <p-dialog [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '25rem' }">
+    <button app-btn type="button" (click)="dialogVisible.set(true)">Open dialog</button>
+    <p-dialog
+      [visible]="dialogVisible()"
+      (visibleChange)="dialogVisible.set($event)"
+      [modal]="true"
+      [style]="{ width: '25rem' }"
+    >
       <ng-template #header>
         <span>Demo dialog</span>
       </ng-template>
       <p>Dialog body content.</p>
       <ng-template #footer>
-        <button app-btn type="button" btnStyle="outlined" (click)="dialogVisible = false">Cancel</button>
-        <button app-btn type="button" (click)="dialogVisible = false">Confirm</button>
+        <button app-btn type="button" btnStyle="outlined" (click)="dialogVisible.set(false)">Cancel</button>
+        <button app-btn type="button" (click)="dialogVisible.set(false)">Confirm</button>
       </ng-template>
     </p-dialog>
   </app-prime-debug-row>
@@ -223,7 +245,8 @@
   >
     <p-select
       [options]="demoOptions"
-      [(ngModel)]="selectValue"
+      [ngModel]="selectValue()"
+      (ngModelChange)="selectValue.set($event)"
       optionLabel="label"
       optionValue="value"
       placeholder="Select an option"
@@ -238,7 +261,7 @@
   >
     <app-select-with-buttons
       [options]="demoOptions"
-      [selectedOption]="selectWithButtonsValue"
+      [selectedOption]="selectWithButtonsValue()"
       optionLabel="label"
       optionValue="value"
       ariaLabel="Demo select with buttons"
@@ -256,7 +279,7 @@
     <app-select-with-buttons
       class="menubar__select"
       [options]="demoOptions"
-      [selectedOption]="menubarSelectValue"
+      [selectedOption]="menubarSelectValue()"
       optionLabel="label"
       optionValue="value"
       ariaLabel="Demo menubar select"
@@ -272,9 +295,21 @@
     screenshot="/prime-debug/radio-button.png"
   >
     <div class="prime-debug__inline-row">
-      <p-radiobutton name="demoScale" value="plan" [(ngModel)]="radioValue" inputId="demo-radio-plan" />
+      <p-radiobutton
+        name="demoScale"
+        value="plan"
+        [ngModel]="radioValue()"
+        (ngModelChange)="radioValue.set($event)"
+        inputId="demo-radio-plan"
+      />
       <label for="demo-radio-plan">Plan</label>
-      <p-radiobutton name="demoScale" value="geo" [(ngModel)]="radioValue" inputId="demo-radio-geo" />
+      <p-radiobutton
+        name="demoScale"
+        value="geo"
+        [ngModel]="radioValue()"
+        (ngModelChange)="radioValue.set($event)"
+        inputId="demo-radio-geo"
+      />
       <label for="demo-radio-geo">Geo</label>
     </div>
   </app-prime-debug-row>
@@ -285,7 +320,14 @@
     usage="generic — loads table, manual section"
     screenshot="/prime-debug/textarea.png"
   >
-    <textarea pTextarea rows="3" [(ngModel)]="textareaValue" placeholder="Notes" aria-label="Demo textarea"></textarea>
+    <textarea
+      pTextarea
+      rows="3"
+      [ngModel]="textareaValue()"
+      (ngModelChange)="textareaValue.set($event)"
+      placeholder="Notes"
+      aria-label="Demo textarea"
+    ></textarea>
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -337,7 +379,12 @@
     usage="generic — section selection, shortcuts"
     screenshot="/prime-debug/checkbox.png"
   >
-    <p-checkbox [(ngModel)]="checkboxValue" [binary]="true" inputId="demo-checkbox" />
+    <p-checkbox
+      [ngModel]="checkboxValue()"
+      (ngModelChange)="checkboxValue.set($event)"
+      [binary]="true"
+      inputId="demo-checkbox"
+    />
     <label for="demo-checkbox">Checkbox label</label>
   </app-prime-debug-row>
 
@@ -347,7 +394,12 @@
     usage="no standalone usage — same .p-togglebutton class powers each SelectButton option below"
     screenshot="/prime-debug/toggle-button.png"
   >
-    <p-togglebutton [(ngModel)]="toggleButtonValue" onLabel="On" offLabel="Off" />
+    <p-togglebutton
+      [ngModel]="toggleButtonValue()"
+      (ngModelChange)="toggleButtonValue.set($event)"
+      onLabel="On"
+      offLabel="Off"
+    />
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -358,7 +410,8 @@
   >
     <p-selectbutton
       [options]="demoOptions"
-      [(ngModel)]="selectButtonValue"
+      [ngModel]="selectButtonValue()"
+      (ngModelChange)="selectButtonValue.set($event)"
       optionLabel="label"
       optionValue="value"
       [allowEmpty]="false"
@@ -371,7 +424,11 @@
     usage="studio top-toolbar invert switch"
     screenshot="/prime-debug/toggle-switch.png"
   >
-    <p-toggleswitch [(ngModel)]="toggleSwitchValue" inputId="demo-toggle-switch" />
+    <p-toggleswitch
+      [ngModel]="toggleSwitchValue()"
+      (ngModelChange)="toggleSwitchValue.set($event)"
+      inputId="demo-toggle-switch"
+    />
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -381,7 +438,12 @@
     screenshot="/prime-debug/input-group.png"
   >
     <p-inputgroup>
-      <input pInputText [(ngModel)]="inputTextValue" aria-label="Demo weight input" />
+      <input
+        pInputText
+        [ngModel]="inputTextValue()"
+        (ngModelChange)="inputTextValue.set($event)"
+        aria-label="Demo weight input"
+      />
       <p-inputgroup-addon>kg</p-inputgroup-addon>
     </p-inputgroup>
   </app-prime-debug-row>
@@ -392,7 +454,13 @@
     usage="generic — filters"
     screenshot="/prime-debug/multiselect-base.png"
   >
-    <p-multiselect [options]="demoOptions" [(ngModel)]="multiSelectValues" optionLabel="label" optionValue="value" />
+    <p-multiselect
+      [options]="demoOptions"
+      [ngModel]="multiSelectValues()"
+      (ngModelChange)="multiSelectValues.set($event)"
+      optionLabel="label"
+      optionValue="value"
+    />
   </app-prime-debug-row>
 
   <app-prime-debug-row
@@ -403,7 +471,8 @@
   >
     <p-multiselect
       [options]="demoOptions"
-      [(ngModel)]="toolbarMultiSelectValues"
+      [ngModel]="toolbarMultiSelectValues()"
+      (ngModelChange)="toolbarMultiSelectValues.set($event)"
       optionLabel="label"
       optionValue="value"
       class="toolbar-multiselect"
@@ -472,4 +541,4 @@
   >
     <p-progressSpinner styleClass="wind-incidence-loader" strokeWidth="2" />
   </app-prime-debug-row>
-</div>
+</main>
