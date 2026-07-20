@@ -295,6 +295,25 @@ class TemperatureCalculationInputs:
 
 
 @dataclass
+class DiffuseAndBeamRadiationInputs:
+    date: datetime.datetime
+    time: datetime.datetime
+    longitude: float
+    latitude: float
+    skyCover: Literal[
+        "N0",
+        "N1",
+        "N2",
+        "N3",
+        "N4",
+        "N5",
+        "N6",
+        "N7",
+        "N8",
+    ]
+
+
+@dataclass
 class WindAngleCalculationInputs:
     azimuth: float
     windDirection: str

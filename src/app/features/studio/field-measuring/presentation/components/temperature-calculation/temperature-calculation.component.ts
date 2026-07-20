@@ -176,4 +176,94 @@ export class TemperatureCalculationComponent {
       this.isCalculating.set(false);
     }
   }
+
+  private async computeDiffuseAndBeamRadiation(): Promise<void> {
+    const data = this.measureData();
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.diffuseAndBeamRadiationsCalculation, {
+        longitude: data.longitude || 0,
+        latitude: data.latitude || 0,
+        date: data.date ?? null,
+        time: data.time ?? null,
+        skyCover: data.skyCover ?? ''
+      });
+      if (!error && result !== undefined) {
+        this.measureData.update((d) => ({
+          ...d,
+          diffusedSolarFlux: result.diffuseRadiation,
+          directSolarFlux: result.beamRadiation,
+          diffusedPlusDirectSolarFlux: result.diffusePlusBeamRadiation
+        }));
+      }
+    } finally {
+      this.isCalculating.set(false);
+    }
+  }
+
+  private readonly lastDiffuseAndBeamRadiationInput = signal<{
+    longitude: number;
+    latitude: number;
+    date: Date | null;
+    time: Date | null;
+    skyCover: string;
+  } | null>(null);
+
+  private resetSolarFluxResults(): void {
+    const { diffusedSolarFlux, directSolarFlux, diffusedPlusDirectSolarFlux } = this.measureData();
+    if (diffusedSolarFlux !== null || directSolarFlux !== null || diffusedPlusDirectSolarFlux != null) {
+      this.measureData.update((d) => ({
+        ...d,
+        diffusedSolarFlux: null,
+        directSolarFlux: null,
+        diffusedPlusDirectSolarFlux: null
+      }));
+    }
+  }
+
+  private readonly diffuseAndBeamRadiationEffect = effect(() => {
+    const isWorkerReady = this.workerReady();
+    const { longitude, latitude, date, time, skyCover } = this.measureData();
+
+    if (
+      !isWorkerReady ||
+      longitude === null ||
+      longitude === undefined ||
+      latitude === null ||
+      latitude === undefined ||
+      date === null ||
+      date === undefined ||
+      time === null ||
+      time === undefined ||
+      skyCover === undefined ||
+      skyCover === null
+    ) {
+      this.lastDiffuseAndBeamRadiationInput.set(null);
+      this.resetSolarFluxResults();
+      return;
+    }
+
+    const lastInput = this.lastDiffuseAndBeamRadiationInput();
+    const hasSameInput =
+      lastInput !== null &&
+      lastInput.longitude === longitude &&
+      lastInput.latitude === latitude &&
+      lastInput.date === date &&
+      lastInput.time === time &&
+      lastInput.skyCover === skyCover;
+
+    if (hasSameInput) {
+      return;
+    }
+
+    this.lastDiffuseAndBeamRadiationInput.set({
+      longitude,
+      latitude,
+      date,
+      time,
+      skyCover
+    });
+
+    void this.computeDiffuseAndBeamRadiation();
+  });
 }
