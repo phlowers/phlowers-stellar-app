@@ -52,6 +52,10 @@ const tasks: Record<
     function: 'temperature_calculation',
     externalPackages: []
   },
+  [Task.diffuseAndBeamRadiationsCalculation]: {
+    function: 'compute_diffuse_and_beam_radiations',
+    externalPackages: []
+  },
   [Task.calculateParameter15CWithoutWind]: {
     function: 'parameter_15_without_wind',
     externalPackages: []

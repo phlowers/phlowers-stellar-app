@@ -36,6 +36,8 @@ export enum Task {
   setLogLevel = 'setLogLevel',
   // Calculate cable temperature from ambient conditions
   temperatureCalculation = 'temperatureCalculation',
+  // Calculate some sun radiations from datetime, coordinates and sky cover
+  diffuseAndBeamRadiationsCalculation = 'diffuseAndBeamRadiationsCalculation',
   // Calculate parameter at 15°C without wind
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind',
   // Set the number of calculation points per span
@@ -347,6 +349,14 @@ export interface TaskInputs {
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
     windDirection: string;
+    skyCover: string;
+  };
+  /** Inputs for computeDiffuseAndBeamRadiation task */
+  [Task.diffuseAndBeamRadiationsCalculation]: {
+    date: Date | null;
+    time: Date | null;
+    longitude: number;
+    latitude: number;
     skyCover: string;
   };
   /** Inputs for calculateParameter15CWithoutWind task */
@@ -687,6 +697,11 @@ export interface TaskOutputs {
     cableSolarFlux: number;
     cableTemperature: number;
     cableTemperatureUncertainty: number;
+  };
+  [Task.diffuseAndBeamRadiationsCalculation]: {
+    diffuseRadiation: number;
+    beamRadiation: number;
+    diffusePlusBeamRadiation: number;
   };
   /** Output from calculateParameter15CWithoutWind task */
   [Task.calculateParameter15CWithoutWind]: {
