@@ -23,6 +23,7 @@
     "e2e:headed": "playwright test --headed",
     "e2e:update": "playwright test e2e/update-flow.spec.ts",
     "e2e:prepare": "npm run build:en",
+    "prime-debug:screenshots": "node scripts/capture-prime-debug-screenshots.mjs",
     "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py",
     "set-up-mechaphlowers:local-cdn": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-cdn-dir",
     "set-up-mechaphlowers:local-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py --local-mechaphlowers",
@@ -94,6 +95,7 @@
     "marked": "$marked",
     "uuid": "14.0.0",
     "tar": "7.5.13",
+    "rolldown": "1.0.0",
     "copy-webpack-plugin": {
       "serialize-javascript": "7.0.5"
     },

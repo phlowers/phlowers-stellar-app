@@ -170,7 +170,7 @@ readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue:
 
 - Import individual modules only — never a barrel
 - Style overrides via PrimeNG CSS variables only — **no global selectors**
-- `p-button` always has a visible text `<span>` — never icon-only
+- `p-button` should be replaced by `app-btn` (custom wrapper) for consistent styling and behavior
 - `p-message` for inline errors (use `severity="error"`, `role="alert"` where appropriate)
 - Forms: `ReactiveFormsModule` + `toSignal()` for signal integration
 

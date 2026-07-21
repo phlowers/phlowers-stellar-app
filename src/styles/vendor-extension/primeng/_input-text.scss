@@ -63,10 +63,3 @@
     color: var(--p-inputtext-disabled-color);
   }
 }
-
-.input-error-message {
-  @extend %text-l-600;
-  display: block;
-  color: var(--error-600);
-  padding: 0.25rem 0.5rem;
-}

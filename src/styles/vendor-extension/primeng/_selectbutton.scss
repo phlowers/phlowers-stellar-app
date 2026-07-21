@@ -10,21 +10,13 @@
 
     &.p-togglebutton-checked {
       --p-togglebutton-border-radius: var(--p-selectbutton-border-radius);
-      --p-togglebutton-content-border-radius: var(
-        --p-selectbutton-border-radius
-      );
+      --p-togglebutton-content-border-radius: var(--p-selectbutton-border-radius);
       z-index: 1;
       outline: 0.0625rem solid var(--star-dust-300);
 
       &:focus-visible {
         @extend %focus-state;
       }
-    }
-  }
-
-  &.small {
-    .p-togglebutton.p-togglebutton {
-      font-size: 0.75rem;
     }
   }
 }

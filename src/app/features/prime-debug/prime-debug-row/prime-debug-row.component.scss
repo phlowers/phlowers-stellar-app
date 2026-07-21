@@ -1,0 +1,61 @@
+@use 'abstract.extracts' as app;
+
+.prime-debug-row {
+  display: grid;
+  grid-template-areas:
+    'name name'
+    'demo infos'
+    'screenshot .';
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0.25rem;
+  row-gap: 1rem;
+  align-items: center;
+  justify-items: start;
+  padding: 0.75rem 1rem;
+  border-bottom: 0.0625rem solid var(--star-dust-200);
+
+  &__name {
+    @extend %heading-xs;
+    grid-area: name;
+    margin-bottom: 0rem;
+    justify-self: start;
+  }
+
+  &__demo {
+    grid-area: demo;
+  }
+
+  &__meta {
+    grid-area: infos;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 0.5rem;
+    row-gap: 0.125rem;
+  }
+
+  &__override {
+    color: var(--primary-700);
+    overflow-wrap: break-word;
+  }
+
+  &__usage {
+    color: var(--star-dust-900);
+    overflow-wrap: break-word;
+  }
+
+  &__screenshot {
+    grid-area: screenshot;
+    margin: 0;
+    padding: 0.5rem;
+    border: 0.0625rem solid var(--star-dust-200);
+    border-radius: 0.25rem;
+    background-color: var(--star-dust-50);
+    text-align: center;
+
+    figcaption {
+      @extend %text-s-600;
+      margin-bottom: 0.5rem;
+      color: var(--star-dust-950);
+    }
+  }
+}
