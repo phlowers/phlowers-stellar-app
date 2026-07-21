@@ -354,8 +354,7 @@ export class SectionImportService implements ImportAdapter<Section> {
    * `AttachmentService.resolveGeoLiaisonCatalogAttachment` already guarantees a complete
    * (L/X/Y/Z) entry when it returns one, so an `undefined` result is the single signal that the
    * support is absent from the catalog — in that case the GeoLiaison file values are kept as-is,
-   * except for `armLength`/`heightBelowConsole` which must come from the catalog only and are
-   * therefore reset to `null` rather than falling back to the imported file values.
+   * including `armLength` (`LONGUEUR_BRAS`) and `heightBelowConsole` (`HAUTEUR_SOUS_CONSOLE`).
    */
   private async resolveGeoLiaisonCatalogSupportFields(
     supports: Support[],
@@ -378,13 +377,12 @@ export class SectionImportService implements ImportAdapter<Section> {
 
         if (!catalogEntry) {
           hasCatalogFallbackWarnings = true;
+          // Support absent from catalog: keep the GeoLiaison file values for armLength
+          // (LONGUEUR_BRAS) and heightBelowConsole (HAUTEUR_SOUS_CONSOLE) already mapped
+          // into `support` by `mapAccrocheToSupport`.
           return {
             ...support,
-            name: accroche.SUPPORT_IDR ?? null,
-            // armLength/heightBelowConsole must come from the catalog only, never from the
-            // imported file — reset instead of keeping the GeoLiaison fallback values.
-            armLength: null,
-            heightBelowConsole: null
+            name: accroche.SUPPORT_IDR ?? null
           };
         }
 

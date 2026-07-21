@@ -744,27 +744,27 @@ describe('SectionImportService', () => {
       expect(support?.heightBelowConsole).toBe(99.9);
     });
 
-    it('should keep file attachmentSet but null out armLength/heightBelowConsole and warn once when SUPPORT_IDR is absent from catalog', async () => {
+    it('should keep file attachmentSet and file armLength/heightBelowConsole and warn once when SUPPORT_IDR is absent from catalog', async () => {
       attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
 
       const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
 
       expect(result?.supports[0].attachmentSet).toBe(19);
-      expect(result?.supports[0].armLength).toBeNull();
-      expect(result?.supports[0].heightBelowConsole).toBeNull();
+      expect(result?.supports[0].armLength).toBe(3.0);
+      expect(result?.supports[0].heightBelowConsole).toBe(2.5);
       expect(messageServiceMock.add).toHaveBeenCalledWith(
         expect.objectContaining({ severity: 'warn', detail: geoLiaisonSupportCatalogMissingWarning })
       );
     });
 
-    it('should keep file attachmentSet but null out armLength/heightBelowConsole and warn once when matching support exists but attachment set is absent', async () => {
+    it('should keep file attachmentSet and file armLength/heightBelowConsole and warn once when matching support exists but attachment set is absent', async () => {
       attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
 
       const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
 
       expect(result?.supports[0].attachmentSet).toBe(19);
-      expect(result?.supports[0].armLength).toBeNull();
-      expect(result?.supports[0].heightBelowConsole).toBeNull();
+      expect(result?.supports[0].armLength).toBe(3.0);
+      expect(result?.supports[0].heightBelowConsole).toBe(2.5);
       expect(
         messageServiceMock.add.mock.calls.filter((call) =>
           [geoLiaisonSupportCatalogMissingWarning].includes(call[0].detail as string)

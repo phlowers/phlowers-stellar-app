@@ -137,7 +137,7 @@ export class AttachmentSetModalComponent {
     supportName: string,
     attachmentSet: number,
     requestId: number,
-    onlyIfEmpty: boolean = true
+    onlyIfEmpty = true
   ): Promise<void> {
     const derivedFields = await this.attachmentService.resolveDerivedSupportFields(supportName, attachmentSet);
     if (!this.derivedFieldsRequests.isCurrent(requestId) || !this.isOpen() || !derivedFields) {
