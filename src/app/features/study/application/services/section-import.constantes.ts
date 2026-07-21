@@ -21,7 +21,7 @@ export const sectionImportErrors = {
 };
 
 /** Warning shown when at least one GeoLiaison support cannot be resolved with complete catalog data. */
-export const geoLiaisonSupportCatalogMissingWarning = $localize`Le support d'accrochage du fichier de géoliaison n'est pas présent au catalogue des supports de l'application`;
+export const geoLiaisonSupportCatalogMissingWarning = $localize`The attachment support from the geolink file is not present in the application support catalog`;
 
 /**
  * Builds the localized info toast detail shown after a GeoLiaison import whenever the

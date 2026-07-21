@@ -103,7 +103,7 @@ export class AttachmentSetModalComponent {
           this.supportName.set(name);
         }
         const attachmentSet = support?.attachmentSet;
-        if (attachmentSet) {
+        if (attachmentSet != null) {
           this.attachmentSet.set(attachmentSet);
           // Keep file-imported tower model as fallback, then try to override with catalog values.
           // Per US RG.CAN.SUP-NOM.1, catalog values take priority if support+set exists in catalog.

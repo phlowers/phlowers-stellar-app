@@ -143,7 +143,11 @@ export class SupportsTableComponent implements OnInit {
     });
     // Drop derived-field request tokens for supports that no longer exist so the tracker
     // cannot grow unbounded across a long editing session (e.g. rows added then deleted).
-    effect(() => this.derivedFieldsRequests.retain(this.supports().map((support) => support.uuid)));
+    effect(() => {
+      const activeUuids = this.supports().map((support) => support.uuid);
+      this.derivedFieldsRequests.retain(activeUuids);
+      this.restrictionRequests.retain(activeUuids);
+    });
   }
 
   private updateSupportFilterTables(catalogNames: string[]): void {
@@ -240,6 +244,8 @@ export class SupportsTableComponent implements OnInit {
 
   /** Latest derived-field resolution per support UUID, used to drop stale async results. */
   private readonly derivedFieldsRequests = new KeyedLatestRequestTracker<string>();
+  /** Latest attachment-set restriction lookup per support UUID, used to drop stale async results. */
+  private readonly restrictionRequests = new KeyedLatestRequestTracker<string>();
 
   getRestrictedAttachmentSets(uuid: string): number[] {
     return this.attachmentSetRestrictionsBySupportUuid()[uuid] ?? [];
@@ -250,6 +256,9 @@ export class SupportsTableComponent implements OnInit {
     supportName: string | null,
     attachmentSet: number | null
   ): Promise<void> {
+    // Invalidate any in-flight lookup from a previous call so a stale resolution doesn't re-populate restrictions.
+    const requestId = this.restrictionRequests.begin(uuid);
+
     if (!supportName || attachmentSet == null) {
       this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
         const rest = { ...prev };
@@ -264,7 +273,13 @@ export class SupportsTableComponent implements OnInit {
       null,
       attachmentSet
     );
+    if (!this.restrictionRequests.isCurrent(uuid, requestId)) {
+      return;
+    }
     if (!matchedEntry) {
+      if (!this.restrictionRequests.isCurrent(uuid, requestId)) {
+        return;
+      }
       this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
         const rest = { ...prev };
         delete rest[uuid];
@@ -276,6 +291,9 @@ export class SupportsTableComponent implements OnInit {
     const allowedSets = await this.attachmentService
       .getCompleteAttachmentSetsBySupportName(supportName)
       .catch(() => [] as number[]);
+    if (!this.restrictionRequests.isCurrent(uuid, requestId)) {
+      return;
+    }
     this.attachmentSetRestrictionsBySupportUuid.update((prev) => ({
       ...prev,
       [uuid]: allowedSets
