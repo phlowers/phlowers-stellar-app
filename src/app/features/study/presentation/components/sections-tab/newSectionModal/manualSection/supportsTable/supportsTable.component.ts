@@ -268,11 +268,9 @@ export class SupportsTableComponent implements OnInit {
       return;
     }
 
-    const matchedEntry = await this.attachmentService.resolveGeoLiaisonCatalogAttachment(
-      supportName,
-      null,
-      attachmentSet
-    );
+    const matchedEntry = await this.attachmentService
+      .resolveGeoLiaisonCatalogAttachment(supportName, null, attachmentSet)
+      .catch(() => undefined);
     if (!this.restrictionRequests.isCurrent(uuid, requestId)) {
       return;
     }

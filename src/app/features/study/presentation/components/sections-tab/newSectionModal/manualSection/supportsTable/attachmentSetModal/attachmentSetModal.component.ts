@@ -150,6 +150,8 @@ export class AttachmentSetModalComponent {
    * Fans a resolved `DerivedSupportAttachmentFields` out into the tower model, arm length and
    * height-below-console signals. When `onlyIfEmpty` is true (backfill), each signal is set only if
    * still empty so user-edited values survive; otherwise (a fresh selection) all three are overwritten.
+   * For towerModel specifically, only overwrite if the catalog has an actual non-null value,
+   * preserving the file-imported fallback when the catalog has no tower model.
    */
   private applyDerivedFields(derivedFields: DerivedSupportAttachmentFields, onlyIfEmpty: boolean): void {
     if (!onlyIfEmpty || this.armLength() == null) {
@@ -159,7 +161,11 @@ export class AttachmentSetModalComponent {
       this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
     }
     if (!onlyIfEmpty || !this.towerModel()) {
-      this.towerModel.set(derivedFields.towerModel ?? undefined);
+      // Only overwrite with catalog tower model if it has an actual value,
+      // preserving the file-imported fallback when catalog has none.
+      if (derivedFields.towerModel != null) {
+        this.towerModel.set(derivedFields.towerModel);
+      }
     }
   }
 

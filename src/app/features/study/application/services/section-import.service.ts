@@ -380,15 +380,17 @@ export class SectionImportService implements ImportAdapter<Section> {
           // Support absent from catalog: keep the GeoLiaison file values for armLength
           // (LONGUEUR_BRAS) and heightBelowConsole (HAUTEUR_SOUS_CONSOLE) already mapped
           // into `support` by `mapAccrocheToSupport`.
+          // Fall back to SUPPORT_ADR if SUPPORT_IDR is missing, as it's already used
+          // in the catalog lookup and elsewhere as a secondary identifier.
           return {
             ...support,
-            name: accroche.SUPPORT_IDR ?? null
+            name: accroche.SUPPORT_IDR ?? accroche.SUPPORT_ADR ?? null
           };
         }
 
         return {
           ...support,
-          name: accroche.SUPPORT_IDR ?? null,
+          name: accroche.SUPPORT_IDR ?? accroche.SUPPORT_ADR ?? null,
           attachmentSet: catalogEntry.attachment_set ?? null,
           armLength: catalogEntry.cross_arm_length ?? null,
           heightBelowConsole: catalogEntry.attachment_altitude ?? null
