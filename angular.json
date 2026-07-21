@@ -133,6 +133,20 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.development.ts"
+                },
+                {
+                  "replace": "src/app/dev-routes.ts",
+                  "with": "src/app/dev-routes.development.ts"
+                }
+              ],
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "dev-assets"
                 }
               ]
             },
