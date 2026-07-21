@@ -1,0 +1,544 @@
+<main class="prime-debug">
+  <header class="prime-debug__header">
+    <h1>PrimeNG override debug page</h1>
+    <p>
+      Every PrimeNG component overridden in <code>src/styles/vendor-extension/primeng</code>, rendered with every
+      contextual variant used across the app. Compare against the "used in" pointer, and against the "Reference"
+      thumbnail, after a PrimeNG/Angular upgrade to spot regressions. Dev-only — never bundled in production.
+    </p>
+    <p>
+      The "Reference" thumbnails are baseline screenshots captured before the last upgrade. Regenerate them with
+      <code>npm run prime-debug:screenshots</code> (dev server must be running) whenever a visual change here is
+      intentional, then commit the updated files under <code>dev-assets/prime-debug/</code>.
+    </p>
+  </header>
+
+  <app-prime-debug-row
+    name="Accordion"
+    overrideClass="base styling only"
+    usage="generic — no dedicated context"
+    screenshot="/prime-debug/accordion-base.png"
+  >
+    <p-accordion [value]="accordionValue()" (valueChange)="accordionValue.set($any($event))">
+      <p-accordion-panel value="0">
+        <p-accordion-header>Accordion header</p-accordion-header>
+        <p-accordion-content>Accordion content.</p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Accordion"
+    overrideClass=".study-header__accordion"
+    usage="study header (features/study/.../study-header)"
+    screenshot="/prime-debug/accordion-study-header.png"
+  >
+    <p-accordion
+      class="study-header__accordion"
+      [value]="studyHeaderAccordionValue()"
+      (valueChange)="studyHeaderAccordionValue.set($any($event))"
+    >
+      <p-accordion-panel value="0">
+        <p-accordion-content>Study description shown below the study header toggle button.</p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="InputText"
+    overrideClass="base styling only"
+    usage="generic — used across many forms"
+    screenshot="/prime-debug/input-text-base.png"
+  >
+    <input
+      pInputText
+      [ngModel]="inputTextValue()"
+      (ngModelChange)="inputTextValue.set($event)"
+      placeholder="Type here"
+      aria-label="Demo input text"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Input on error"
+    overrideClass="invalid state"
+    usage="field-measuring temperature-calculation transit input"
+    screenshot="/prime-debug/input-text-invalid.png"
+  >
+    <input
+      pInputText
+      class="ng-invalid ng-dirty"
+      [ngModel]="invalidInputTextValue()"
+      (ngModelChange)="invalidInputTextValue.set($event)"
+      placeholder="Invalid value"
+      aria-label="Demo invalid input text"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="InputNumber"
+    overrideClass="base styling only"
+    usage="generic — many numeric fields"
+    screenshot="/prime-debug/input-number-base.png"
+  >
+    <p-inputnumber [ngModel]="inputNumberValue()" (ngModelChange)="inputNumberValue.set($event)" />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="InputNumber"
+    overrideClass=".p-inputnumber-horizontal (stock modifier, buttonLayout=horizontal)"
+    usage="study section tab — supports amount"
+    screenshot="/prime-debug/input-number-horizontal.png"
+  >
+    <p-inputnumber
+      [ngModel]="inputNumberHorizontalValue()"
+      (ngModelChange)="inputNumberHorizontalValue.set($event)"
+      [showButtons]="true"
+      buttonLayout="horizontal"
+      [min]="0"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Dialog"
+    overrideClass="base styling only, footer stock .p-button-text.p-button-secondary combo are overridden but unused"
+    usage="generic — modals across the app (e.g. studio toolbar shortcuts dialog)"
+    screenshot="/prime-debug/dialog-base.png"
+  >
+    <button app-btn type="button" (click)="dialogVisible.set(true)">Open dialog</button>
+    <p-dialog
+      [visible]="dialogVisible()"
+      (visibleChange)="dialogVisible.set($event)"
+      [modal]="true"
+      [style]="{ width: '25rem' }"
+    >
+      <ng-template #header>
+        <span>Demo dialog</span>
+      </ng-template>
+      <p>Dialog body content.</p>
+      <ng-template #footer>
+        <button app-btn type="button" btnStyle="outlined" (click)="dialogVisible.set(false)">Cancel</button>
+        <button app-btn type="button" (click)="dialogVisible.set(false)">Confirm</button>
+      </ng-template>
+    </p-dialog>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Overlay"
+    overrideClass=".p-overlay-mask background only"
+    usage="no direct usage — exercised via the modal Dialog above and Popover masks"
+  >
+    <em>No standalone &lt;p-overlay&gt; usage in the app; open the Dialog above to see the mask.</em>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Table"
+    overrideClass="base styling only"
+    usage="generic — admin studies table etc."
+    screenshot="/prime-debug/table-base.png"
+  >
+    <p-table [value]="tableRows" [paginator]="true" [rows]="2">
+      <ng-template #header>
+        <tr>
+          <th scope="col">Span</th>
+          <th scope="col">Length</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-row>
+        <tr>
+          <td>{{ row.span }}</td>
+          <td>{{ row.length }}&nbsp;m</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Table"
+    overrideClass=".l0-table"
+    usage="studio toolbar L0 sum table (features/studio/toolbar/.../l0-sum)"
+    screenshot="/prime-debug/table-l0.png"
+  >
+    <p-table [value]="tableRows" [paginator]="true" [rows]="2" styleClass="l0-table">
+      <ng-template #header>
+        <tr>
+          <th scope="col">Span</th>
+          <th scope="col">L0</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-row>
+        <tr>
+          <td>{{ row.span }}</td>
+          <td>{{ row.length }}&nbsp;m</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Divider"
+    overrideClass="horizontal margin only"
+    usage="generic — form/section separators"
+    screenshot="/prime-debug/divider-horizontal.png"
+  >
+    <div>
+      <span>Above</span>
+      <p-divider />
+      <span>Below</span>
+    </div>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Divider"
+    overrideClass="vertical margin only"
+    usage="generic — inline separators"
+    screenshot="/prime-debug/divider-vertical.png"
+  >
+    <div class="prime-debug__inline-row">
+      <span>Left</span>
+      <p-divider layout="vertical" />
+      <span>Right</span>
+    </div>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Tabs"
+    overrideClass="base styling only"
+    usage="studies page tabs, studio page tabs"
+    screenshot="/prime-debug/tabs-base.png"
+  >
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">First</p-tab>
+        <p-tab value="1">Second</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">First tab content.</p-tabpanel>
+        <p-tabpanel value="1">Second tab content.</p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Tabs"
+    overrideClass=".load-tabs"
+    usage="studio side-tabs, load tabs (features/studio/core/.../studio-page)"
+    screenshot="/prime-debug/tabs-load.png"
+  >
+    <p-tabs value="0" class="load-tabs" style="height: 10rem; display: block">
+      <p-tablist>
+        <p-tab value="0">Loads</p-tab>
+        <p-tab value="1">Sections</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">Loads tab content.</p-tabpanel>
+        <p-tabpanel value="1">Sections tab content.</p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Select"
+    overrideClass="base styling only"
+    usage="generic — many filters/selects"
+    screenshot="/prime-debug/select-base.png"
+  >
+    <p-select
+      [options]="demoOptions"
+      [ngModel]="selectValue()"
+      (ngModelChange)="selectValue.set($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Select an option"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Select (via app-select-with-buttons atom)"
+    overrideClass=".select-with-buttons.has-clear-btn + .select-with-buttons-panel"
+    usage="study section tab initial condition select, studio menu bar charge case select"
+    screenshot="/prime-debug/select-with-buttons-base.png"
+  >
+    <app-select-with-buttons
+      [options]="demoOptions"
+      [selectedOption]="selectWithButtonsValue()"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabel="Demo select with buttons"
+      placeholder="Select an option"
+      [showClear]="true"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Select (via app-select-with-buttons atom)"
+    overrideClass=".menubar__select"
+    usage="studio menu bar charge case select (features/studio/core/.../menu-bar)"
+    screenshot="/prime-debug/select-with-buttons-menubar.png"
+  >
+    <app-select-with-buttons
+      class="menubar__select"
+      [options]="demoOptions"
+      [selectedOption]="menubarSelectValue()"
+      optionLabel="label"
+      optionValue="value"
+      ariaLabel="Demo menubar select"
+      placeholder="Select an option"
+      [showClear]="false"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="RadioButton"
+    overrideClass="base styling only"
+    usage="scale-view popover scale selector"
+    screenshot="/prime-debug/radio-button.png"
+  >
+    <div class="prime-debug__inline-row">
+      <p-radiobutton
+        name="demoScale"
+        value="plan"
+        [ngModel]="radioValue()"
+        (ngModelChange)="radioValue.set($event)"
+        inputId="demo-radio-plan"
+      />
+      <label for="demo-radio-plan">Plan</label>
+      <p-radiobutton
+        name="demoScale"
+        value="geo"
+        [ngModel]="radioValue()"
+        (ngModelChange)="radioValue.set($event)"
+        inputId="demo-radio-geo"
+      />
+      <label for="demo-radio-geo">Geo</label>
+    </div>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Textarea"
+    overrideClass="base styling only"
+    usage="generic — loads table, manual section"
+    screenshot="/prime-debug/textarea.png"
+  >
+    <textarea
+      pTextarea
+      rows="3"
+      [ngModel]="textareaValue()"
+      (ngModelChange)="textareaValue.set($event)"
+      placeholder="Notes"
+      aria-label="Demo textarea"
+    ></textarea>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Popover"
+    overrideClass="base styling only"
+    usage="generic — study section actions popover"
+    screenshot="/prime-debug/popover-base.png"
+  >
+    <button app-btn type="button" (click)="popoverDefault.toggle($event)">Open popover</button>
+    <p-popover #popoverDefault>
+      <div class="prime-debug__popover-content">Popover content.</div>
+    </p-popover>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Popover"
+    overrideClass=".scale-view-popover + nested .app-btn.app-btn-text"
+    usage="studio scale-view popover (top-toolbar/scale-view)"
+    screenshot="/prime-debug/popover-scale.png"
+  >
+    <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="popoverScale.toggle($event)">View</button>
+    <p-popover #popoverScale styleClass="scale-view-popover">
+      <button app-btn btnStyle="text" btnSize="s">Action</button>
+      <button app-btn btnStyle="text" btnSize="s" class="erase-btn">Delete</button>
+    </p-popover>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Panel"
+    overrideClass="base styling only"
+    usage="changelog entries"
+    screenshot="/prime-debug/panel.png"
+  >
+    <p-panel header="Panel title" [toggleable]="true">Panel content.</p-panel>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Paginator"
+    overrideClass="base styling only"
+    usage="generic — also used inside Table"
+    screenshot="/prime-debug/paginator.png"
+  >
+    <p-paginator [rows]="10" [totalRecords]="120" [first]="0" />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Checkbox"
+    overrideClass="base styling only"
+    usage="generic — section selection, shortcuts"
+    screenshot="/prime-debug/checkbox.png"
+  >
+    <p-checkbox
+      [ngModel]="checkboxValue()"
+      (ngModelChange)="checkboxValue.set($event)"
+      [binary]="true"
+      inputId="demo-checkbox"
+    />
+    <label for="demo-checkbox">Checkbox label</label>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="ToggleButton"
+    overrideClass="base styling only"
+    usage="no standalone usage — same .p-togglebutton class powers each SelectButton option below"
+    screenshot="/prime-debug/toggle-button.png"
+  >
+    <p-togglebutton
+      [ngModel]="toggleButtonValue()"
+      (ngModelChange)="toggleButtonValue.set($event)"
+      onLabel="On"
+      offLabel="Off"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="SelectButton"
+    overrideClass="base styling only"
+    usage="studio top-toolbar view/side selector"
+    screenshot="/prime-debug/select-button.png"
+  >
+    <p-selectbutton
+      [options]="demoOptions"
+      [ngModel]="selectButtonValue()"
+      (ngModelChange)="selectButtonValue.set($event)"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="ToggleSwitch"
+    overrideClass="base styling only"
+    usage="studio top-toolbar invert switch"
+    screenshot="/prime-debug/toggle-switch.png"
+  >
+    <p-toggleswitch
+      [ngModel]="toggleSwitchValue()"
+      (ngModelChange)="toggleSwitchValue.set($event)"
+      inputId="demo-toggle-switch"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="InputGroup + InputGroupAddon"
+    overrideClass="base styling only (always used together)"
+    usage="field-measuring papoto/temperature-calculation transit input"
+    screenshot="/prime-debug/input-group.png"
+  >
+    <p-inputgroup>
+      <input
+        pInputText
+        [ngModel]="inputTextValue()"
+        (ngModelChange)="inputTextValue.set($event)"
+        aria-label="Demo weight input"
+      />
+      <p-inputgroup-addon>kg</p-inputgroup-addon>
+    </p-inputgroup>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="MultiSelect"
+    overrideClass="base styling only"
+    usage="generic — filters"
+    screenshot="/prime-debug/multiselect-base.png"
+  >
+    <p-multiselect
+      [options]="demoOptions"
+      [ngModel]="multiSelectValues()"
+      (ngModelChange)="multiSelectValues.set($event)"
+      optionLabel="label"
+      optionValue="value"
+    />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="MultiSelect"
+    overrideClass=".toolbar-multiselect + .toolbar-multiselect-overlay"
+    usage="studio top toolbar 'display' multiselect"
+    screenshot="/prime-debug/multiselect-toolbar.png"
+  >
+    <p-multiselect
+      [options]="demoOptions"
+      [ngModel]="toolbarMultiSelectValues()"
+      (ngModelChange)="toolbarMultiSelectValues.set($event)"
+      optionLabel="label"
+      optionValue="value"
+      class="toolbar-multiselect"
+      panelStyleClass="toolbar-multiselect-overlay"
+      placeholder="Display"
+    >
+      <ng-template #dropdownicon>
+        <app-icon icon="visibility" />
+      </ng-template>
+    </p-multiselect>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="SpeedDial"
+    overrideClass=".toolbar-speed-dial (only variant that exists)"
+    usage="studio top toolbar tables/tools dropdowns"
+    screenshot="/prime-debug/speed-dial.png"
+  >
+    <div style="position: relative; height: 2.5rem">
+      <p-speedDial direction="down" class="toolbar-speed-dial" [model]="toolsMenuItems">
+        <ng-template #button let-toggleCallback="toggleCallback">
+          <button (click)="toggleCallback($event)">
+            <app-icon icon="build" />
+            Tools
+          </button>
+        </ng-template>
+      </p-speedDial>
+    </div>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Message"
+    overrideClass="base styling only"
+    usage="field validation messages"
+    screenshot="/prime-debug/message.png"
+  >
+    <p-message severity="info" size="small" variant="simple">Info message.</p-message>
+    <p-message severity="warn" size="small" variant="simple">Warning message.</p-message>
+    <p-message severity="error" size="small" variant="simple">Error message.</p-message>
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="Toast"
+    overrideClass="base styling only"
+    usage="generic — success/error notifications"
+    screenshot="/prime-debug/toast.png"
+  >
+    <button app-btn type="button" (click)="showToast()">Show toast</button>
+    <p-toast />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="ProgressSpinner"
+    overrideClass="base styling only"
+    usage="studio L0 sum loading state"
+    screenshot="/prime-debug/progress-spinner-base.png"
+  >
+    <p-progressSpinner />
+  </app-prime-debug-row>
+
+  <app-prime-debug-row
+    name="ProgressSpinner"
+    overrideClass=".wind-incidence-loader"
+    usage="field-measuring temperature-calculation wind incidence"
+    screenshot="/prime-debug/progress-spinner-wind.png"
+  >
+    <p-progressSpinner styleClass="wind-incidence-loader" strokeWidth="2" />
+  </app-prime-debug-row>
+</main>

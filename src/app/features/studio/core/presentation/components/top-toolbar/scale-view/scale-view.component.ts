@@ -5,7 +5,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Popover, PopoverModule } from 'primeng/popover';
 import { RadioButton } from 'primeng/radiobutton';
 import { SliderModule } from 'primeng/slider';
-import { Button } from 'primeng/button';
 
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -20,7 +19,6 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    Button,
     IconComponent,
     InputNumberComponent,
     SliderModule,

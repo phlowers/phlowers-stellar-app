@@ -329,18 +329,18 @@ describe('ScaleViewComponent', () => {
         component.popoverOpen.set(true);
         fixture.detectChanges();
 
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
+        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"]');
         expect(btn.classList).toContain('view-button--active');
       });
 
       it('inner button should NOT have view-button--active class when popover is closed', () => {
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
+        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"]');
         expect(btn.classList).not.toContain('view-button--active');
       });
 
       it('clicking the inner button should call togglePopover', () => {
         const spy = vi.spyOn(component, 'togglePopover');
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
+        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"]');
 
         btn.click();
 
@@ -358,7 +358,7 @@ describe('ScaleViewComponent', () => {
         // Click the real trigger button so event.target is a DOM element (not null),
         // preventing absolutePosition from throwing in JSDOM.
         const innerViewBtn = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-          '[data-testid="scale-view-trigger"] button'
+          '[data-testid="scale-view-trigger"]'
         );
         innerViewBtn?.click();
         fixture.detectChanges();
