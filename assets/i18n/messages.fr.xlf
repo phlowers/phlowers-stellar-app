@@ -4207,6 +4207,12 @@
         <target>Longueur de corde</target>
       </segment>
     </unit>
+    <unit id="2861737300887040849">
+      <segment state="initial">
+        <source>The attachment support from the geolink file is not present in the application support catalog</source>
+        <target>Le support d'accrochage du fichier de géoliaison n'est pas présent au catalogue des supports de l'application</target>
+      </segment>
+    </unit>
     <unit id="8749123360857368229">
       <segment state="initial">
         <source>Shifting clamp length</source>
