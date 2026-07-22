@@ -314,6 +314,15 @@ class DiffuseAndBeamRadiationInputs:
 
 
 @dataclass
+class SkyCoverEstimationInputs:
+    date: datetime.datetime
+    time: datetime.datetime
+    longitude: float
+    latitude: float
+    measuredSolarRadiation: float
+
+
+@dataclass
 class WindAngleCalculationInputs:
     azimuth: float
     windDirection: str

@@ -56,6 +56,10 @@ const tasks: Record<
     function: 'compute_diffuse_and_beam_radiations',
     externalPackages: []
   },
+  [Task.estimateSkyCover]: {
+    function: 'estimate_sky_cover',
+    externalPackages: []
+  },
   [Task.calculateParameter15CWithoutWind]: {
     function: 'parameter_15_without_wind',
     externalPackages: []
