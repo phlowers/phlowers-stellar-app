@@ -18,6 +18,7 @@ import { MaintenanceService } from '@shared/catalog/services/maintenance.service
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
+import { geoLiaisonSupportCatalogMissingWarning } from './section-import.constantes';
 
 // ---------------------------------------------------------------------------
 // Polyfill File.prototype.text — jsdom 26 does not implement it
@@ -171,7 +172,10 @@ describe('SectionImportService', () => {
   let messageServiceMock: vi.Mocked<MessageService>;
   let loggerSpy: vi.Mocked<LoggerService>;
   let maintenanceServiceMock: { getMaintenance: ReturnType<typeof vi.fn> };
-  let attachmentServiceMock: { addSupportNamesIfAbsent: ReturnType<typeof vi.fn> };
+  let attachmentServiceMock: {
+    addSupportNamesIfAbsent: ReturnType<typeof vi.fn>;
+    resolveGeoLiaisonCatalogAttachment: ReturnType<typeof vi.fn>;
+  };
   let workerPythonServiceMock: { runTask: ReturnType<typeof vi.fn> };
 
   /** Default successful runTask mock: returns arrays matching the length of the input arrays. */
@@ -257,7 +261,8 @@ describe('SectionImportService', () => {
     };
 
     attachmentServiceMock = {
-      addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined)
+      addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined),
+      resolveGeoLiaisonCatalogAttachment: vi.fn().mockResolvedValue(undefined)
     };
 
     workerPythonServiceMock = {
@@ -573,6 +578,7 @@ describe('SectionImportService', () => {
   describe('processFile() — GeoLiaison format', () => {
     beforeEach(() => {
       service.setStudyContext(buildMockStudy());
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
     });
 
     it('should map UUID from CANTON_CUR', async () => {
@@ -685,6 +691,107 @@ describe('SectionImportService', () => {
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.cable_name).toBe('GeoSection');
+    });
+
+    it('should always keep support name equal to SUPPORT_IDR in both catalog and fallback branches', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValueOnce({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Support A',
+        support_tower: 'Tower X',
+        attachment_set: 19,
+        cross_arm_length: 4,
+        attachment_altitude: 40,
+        attachment_set_x: 1,
+        attachment_set_y: 2,
+        attachment_set_z: 40
+      });
+
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.supports[0].name).toBe('Support_IDR_A');
+      expect(result?.supports[1].name).toBe('Support_IDR_A');
+    });
+
+    it('should prioritize catalog attachmentSet/armLength/heightBelowConsole over file values when complete', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Support A',
+        support_tower: 'Tower X',
+        attachment_set: 7,
+        cross_arm_length: 9.9,
+        attachment_altitude: 99.9,
+        attachment_set_x: 1,
+        attachment_set_y: 2,
+        attachment_set_z: 99.9
+      });
+
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      (portees[0]['accroche depart'] as Record<string, unknown>)['ACCROCHE_SET'] = '19';
+      (portees[0]['accroche depart'] as Record<string, unknown>)['LONGUEUR_BRAS'] = '3.0';
+      (portees[0]['accroche depart'] as Record<string, unknown>)['HAUTEUR_SOUS_CONSOLE'] = '2.5';
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+      const support = result?.supports[0];
+
+      expect(support?.attachmentSet).toBe(7);
+      expect(support?.armLength).toBe(9.9);
+      expect(support?.heightBelowConsole).toBe(99.9);
+    });
+
+    it('should keep file attachmentSet and file armLength/heightBelowConsole and warn once when SUPPORT_IDR is absent from catalog', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+
+      expect(result?.supports[0].attachmentSet).toBe(19);
+      expect(result?.supports[0].armLength).toBe(3.0);
+      expect(result?.supports[0].heightBelowConsole).toBe(2.5);
+      expect(messageServiceMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'warn', detail: geoLiaisonSupportCatalogMissingWarning })
+      );
+    });
+
+    it('should keep file attachmentSet and file armLength/heightBelowConsole and warn once when matching support exists but attachment set is absent', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+
+      expect(result?.supports[0].attachmentSet).toBe(19);
+      expect(result?.supports[0].armLength).toBe(3.0);
+      expect(result?.supports[0].heightBelowConsole).toBe(2.5);
+      expect(
+        messageServiceMock.add.mock.calls.filter((call) =>
+          [geoLiaisonSupportCatalogMissingWarning].includes(call[0].detail as string)
+        )
+      ).toHaveLength(1);
+    });
+
+    it('should accept zero values from catalog when complete geometry is present', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Support A',
+        support_tower: 'Tower X',
+        attachment_set: 0,
+        cross_arm_length: 0,
+        attachment_altitude: 0,
+        attachment_set_x: 0,
+        attachment_set_y: 0,
+        attachment_set_z: 0
+      });
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+
+      expect(result?.supports[0].attachmentSet).toBe(0);
+      expect(result?.supports[0].armLength).toBe(0);
+      expect(result?.supports[0].heightBelowConsole).toBe(0);
     });
 
     it('should handle null maintenance lookup gracefully when no match found', async () => {

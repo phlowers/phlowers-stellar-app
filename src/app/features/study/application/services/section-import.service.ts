@@ -17,7 +17,12 @@ import { hasSupportsBoundsErrors } from '@features/study/presentation/components
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { sectionImportErrors, importSuccessDetail, buildReprojectionInfoMessage } from './section-import.constantes';
+import {
+  sectionImportErrors,
+  importSuccessDetail,
+  buildReprojectionInfoMessage,
+  geoLiaisonSupportCatalogMissingWarning
+} from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
 import { Localization } from '@core/services/worker_python/tasks/types';
 import {
@@ -151,7 +156,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Stage: DECODING + PARSING
-    const { section, isGeoLiaison, rawGeoLiaison } = await this.parseJsonFile(file);
+    const { section, isGeoLiaison, rawGeoLiaison, hasCatalogFallbackWarnings } = await this.parseJsonFile(file);
 
     // Stage: VALIDATION
     // GeoLiaison: validate on the raw JSON so error messages show original field names
@@ -164,7 +169,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Stage: COLLISION_CHECK + PERSISTENCE
-    return this.persistSection(section, study, collisionResolver);
+    return this.persistSection(section, study, collisionResolver, isGeoLiaison && hasCatalogFallbackWarnings);
   }
 
   // ---------------------------------------------------------------------------
@@ -195,9 +200,12 @@ export class SectionImportService implements ImportAdapter<Section> {
   // Private — parsing
   // ---------------------------------------------------------------------------
 
-  private async parseJsonFile(
-    file: File
-  ): Promise<{ section: Section; isGeoLiaison: boolean; rawGeoLiaison?: GeoLiaisonFormat }> {
+  private async parseJsonFile(file: File): Promise<{
+    section: Section;
+    isGeoLiaison: boolean;
+    rawGeoLiaison?: GeoLiaisonFormat;
+    hasCatalogFallbackWarnings: boolean;
+  }> {
     let text: string;
     try {
       text = await file.text();
@@ -237,18 +245,21 @@ export class SectionImportService implements ImportAdapter<Section> {
         throw error;
       }
       const rawGeoLiaison = parsed as unknown as GeoLiaisonFormat;
-      const section = await this.mapGeoLiaisonToSection(rawGeoLiaison);
-      return { section, isGeoLiaison: true, rawGeoLiaison };
+      const { section, hasCatalogFallbackWarnings } = await this.mapGeoLiaisonToSection(rawGeoLiaison);
+      return { section, isGeoLiaison: true, rawGeoLiaison, hasCatalogFallbackWarnings };
     }
 
-    return { section: this.mapToSection(parsed), isGeoLiaison: false };
+    return { section: this.mapToSection(parsed), isGeoLiaison: false, hasCatalogFallbackWarnings: false };
   }
 
   // ---------------------------------------------------------------------------
   // Private — GeoLiaison mapping
   // ---------------------------------------------------------------------------
 
-  private async mapGeoLiaisonToSection(raw: GeoLiaisonFormat): Promise<Section> {
+  private async mapGeoLiaisonToSection(raw: GeoLiaisonFormat): Promise<{
+    section: Section;
+    hasCatalogFallbackWarnings: boolean;
+  }> {
     const canton = raw.cantons[0];
     const general = canton.general;
     const portees = canton['portee unitaire'] ?? [];
@@ -279,8 +290,6 @@ export class SectionImportService implements ImportAdapter<Section> {
       : undefined;
 
     const supports = this.mapGeoLiaisonSupports(sortedPortees);
-
-    // Persist new support names in the local catalog (RG.CAN.ATT)
     const accroches =
       sortedPortees.length === 0
         ? []
@@ -288,6 +297,10 @@ export class SectionImportService implements ImportAdapter<Section> {
             ...sortedPortees.map((p) => p['accroche depart']),
             sortedPortees[sortedPortees.length - 1]['accroche arrivee']
           ];
+    const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } =
+      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+
+    // Persist new support names in the local catalog (RG.CAN.ATT)
     const supportNameEntries: SupportNameEntry[] = accroches
       .map((a) => ({ supportName: a.SUPPORT_IDR || a.SUPPORT_ADR || '', supportTower: a.SUPPORT_TOWER ?? null }))
       .filter((e) => !!e.supportName);
@@ -296,39 +309,96 @@ export class SectionImportService implements ImportAdapter<Section> {
     const lambertX = accroches.map((a) => parseFloatOrNull(a.PIED_X_LAMBERT93));
     const lambertY = accroches.map((a) => parseFloatOrNull(a.PIED_Y_LAMBERT93));
     const { supports: reprojectedSupports, meanReprojectionDiffMeters } = await this.applyLambertReprojection(
-      supports,
+      supportsWithCatalogResolution,
       lambertX,
       lambertY
     );
 
     return {
-      ...createEmptySection(),
-      uuid: general.CANTON_CUR.trim(),
-      name: buildSectionName(
-        appartenance?.BRANCHE_IDR ?? null,
-        general.CANTON_TYPE,
-        general.PHASE_ELECTRIQUE_NUMERO,
-        supports
-      ),
-      cable_name: general.CABLE_ADR ?? undefined,
-      type: general.CANTON_TYPE?.toLowerCase() ?? '',
-      cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
-      electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
-      lit_name: appartenance?.LIT_ADR ?? undefined,
-      lit_code: appartenance?.LIT_IDR ?? undefined,
-      link_name: appartenance?.LIAISON_IDR ?? undefined,
-      branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
-      voltage_idr: undefined,
-      maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
-      maintenance_center_names: cmDesignation ? [cmDesignation] : [],
-      maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
-      regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
-      regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
-      initial_conditions: [],
-      selected_initial_condition_uuid: undefined,
-      supports: reprojectedSupports,
-      mean_reprojection_diff_meters: meanReprojectionDiffMeters
+      section: {
+        ...createEmptySection(),
+        uuid: general.CANTON_CUR.trim(),
+        name: buildSectionName(
+          appartenance?.BRANCHE_IDR ?? null,
+          general.CANTON_TYPE,
+          general.PHASE_ELECTRIQUE_NUMERO,
+          supportsWithCatalogResolution
+        ),
+        cable_name: general.CABLE_ADR ?? undefined,
+        type: general.CANTON_TYPE?.toLowerCase() ?? '',
+        cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
+        electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
+        lit_name: appartenance?.LIT_ADR ?? undefined,
+        lit_code: appartenance?.LIT_IDR ?? undefined,
+        link_name: appartenance?.LIAISON_IDR ?? undefined,
+        branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
+        voltage_idr: undefined,
+        maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
+        maintenance_center_names: cmDesignation ? [cmDesignation] : [],
+        maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
+        regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
+        regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
+        initial_conditions: [],
+        selected_initial_condition_uuid: undefined,
+        supports: reprojectedSupports,
+        mean_reprojection_diff_meters: meanReprojectionDiffMeters
+      },
+      hasCatalogFallbackWarnings
     };
+  }
+
+  /**
+   * Resolves each support's name/attachmentSet/armLength/heightBelowConsole against the local
+   * attachment catalog (RG.CAN.SUP-NOM/SET/BRA).
+   *
+   * `AttachmentService.resolveGeoLiaisonCatalogAttachment` already guarantees a complete
+   * (L/X/Y/Z) entry when it returns one, so an `undefined` result is the single signal that the
+   * support is absent from the catalog — in that case the GeoLiaison file values are kept as-is,
+   * including `armLength` (`LONGUEUR_BRAS`) and `heightBelowConsole` (`HAUTEUR_SOUS_CONSOLE`).
+   */
+  private async resolveGeoLiaisonCatalogSupportFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
+    let hasCatalogFallbackWarnings = false;
+
+    const resolvedSupports = await Promise.all(
+      supports.map(async (support, index) => {
+        const accroche = accroches[index];
+        if (!accroche) {
+          return support;
+        }
+
+        const catalogEntry = await this.attachmentService.resolveGeoLiaisonCatalogAttachment(
+          accroche.SUPPORT_IDR,
+          accroche.SUPPORT_ADR,
+          support.attachmentSet
+        );
+
+        if (!catalogEntry) {
+          hasCatalogFallbackWarnings = true;
+          // Support absent from catalog: keep the GeoLiaison file values for armLength
+          // (LONGUEUR_BRAS) and heightBelowConsole (HAUTEUR_SOUS_CONSOLE) already mapped
+          // into `support` by `mapAccrocheToSupport`.
+          // Fall back to SUPPORT_ADR if SUPPORT_IDR is missing, as it's already used
+          // in the catalog lookup and elsewhere as a secondary identifier.
+          return {
+            ...support,
+            name: accroche.SUPPORT_IDR ?? accroche.SUPPORT_ADR ?? null
+          };
+        }
+
+        return {
+          ...support,
+          name: accroche.SUPPORT_IDR ?? accroche.SUPPORT_ADR ?? null,
+          attachmentSet: catalogEntry.attachment_set ?? null,
+          armLength: catalogEntry.cross_arm_length ?? null,
+          heightBelowConsole: catalogEntry.attachment_altitude ?? null
+        };
+      })
+    );
+
+    return { supports: resolvedSupports, hasCatalogFallbackWarnings };
   }
 
   private mapGeoLiaisonSupports(sortedPortees: GeoLiaisonPortee[]): Support[] {
@@ -556,7 +626,8 @@ export class SectionImportService implements ImportAdapter<Section> {
   private async persistSection(
     section: Section,
     study: Study,
-    collisionResolver: UUIDCollisionResolver
+    collisionResolver: UUIDCollisionResolver,
+    hasCatalogFallbackWarnings: boolean
   ): Promise<Section | null> {
     const existingSection = study.sections.find((s) => s.uuid === section.uuid);
 
@@ -597,6 +668,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
       this.notificationService.success(importSuccessDetail);
       this.notifyGpsReprojection(section);
+      this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
       return section;
     }
 
@@ -615,6 +687,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     this.notificationService.success(importSuccessDetail);
     this.notifyGpsReprojection(section);
+    this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
     return section;
   }
 
@@ -626,5 +699,13 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (section.mean_reprojection_diff_meters != null) {
       this.notificationService.info(buildReprojectionInfoMessage(section.mean_reprojection_diff_meters));
     }
+  }
+
+  private notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings: boolean): void {
+    if (!hasCatalogFallbackWarnings) {
+      return;
+    }
+
+    this.notificationService.warning(geoLiaisonSupportCatalogMissingWarning);
   }
 }

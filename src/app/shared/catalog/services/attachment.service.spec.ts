@@ -184,6 +184,102 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('resolveGeoLiaisonCatalogAttachment', () => {
+    it('resolves using SUPPORT_IDR first and requires complete L/X/Y/Z', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'SUPPORT_IDR_1',
+        support_tower: 'T',
+        attachments: [
+          {
+            attachment_set: 4,
+            cross_arm_length: 3.2,
+            attachment_altitude: 20,
+            attachment_set_x: 1,
+            attachment_set_y: 2,
+            attachment_set_z: 20
+          }
+        ]
+      });
+
+      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', 'SUPPORT_ADR_1', 4);
+      expect(result?.support_name).toBe('SUPPORT_IDR_1');
+      expect(mockTable.get).toHaveBeenCalledWith('SUPPORT_IDR_1');
+    });
+
+    it('falls back to SUPPORT_ADR when SUPPORT_IDR has no matching entry', async () => {
+      mockTable.get.mockResolvedValueOnce(undefined).mockResolvedValueOnce({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'SUPPORT_ADR_1',
+        support_tower: 'T',
+        attachments: [
+          {
+            attachment_set: 4,
+            cross_arm_length: 3.2,
+            attachment_altitude: 20,
+            attachment_set_x: 1,
+            attachment_set_y: 2,
+            attachment_set_z: 20
+          }
+        ]
+      });
+
+      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', 'SUPPORT_ADR_1', 4);
+      expect(result?.support_name).toBe('SUPPORT_ADR_1');
+    });
+
+    it('returns undefined when a matching set exists but geometry is incomplete', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'SUPPORT_IDR_1',
+        support_tower: 'T',
+        attachments: [
+          {
+            attachment_set: 4,
+            cross_arm_length: 3.2,
+            attachment_altitude: 20,
+            attachment_set_x: 1,
+            attachment_set_y: 2,
+            attachment_set_z: undefined
+          }
+        ]
+      });
+
+      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', null, 4);
+      expect(result).toBeUndefined();
+    });
+
+    it('accepts zero values as complete geometry', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'SUPPORT_IDR_1',
+        support_tower: 'T',
+        attachments: [
+          {
+            attachment_set: 0,
+            cross_arm_length: 0,
+            attachment_altitude: 0,
+            attachment_set_x: 0,
+            attachment_set_y: 0,
+            attachment_set_z: 0
+          }
+        ]
+      });
+
+      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', null, 0);
+      expect(result).toBeDefined();
+      expect(result?.attachment_set).toBe(0);
+    });
+  });
+
   describe('getDerivedSupportFields', () => {
     it('maps the matching attachment to tower, arm length and height, truncating arm length to one decimal', async () => {
       mockTable.get.mockResolvedValue({
@@ -320,6 +416,32 @@ describe('AttachmentService', () => {
       const result = await service.getDerivedSupportFieldsBySet('missing');
 
       expect(result.size).toBe(0);
+    });
+  });
+
+  describe('getCompleteAttachmentSetsBySupportName', () => {
+    it('returns only complete attachment sets for the support', async () => {
+      mockTable.get.mockResolvedValue({
+        uuid: 'g',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'S1',
+        support_tower: 'T1',
+        attachments: [
+          { attachment_set: 3, cross_arm_length: 1, attachment_set_x: 1, attachment_set_y: 1, attachment_set_z: 1 },
+          {
+            attachment_set: 2,
+            cross_arm_length: 1,
+            attachment_set_x: 1,
+            attachment_set_y: 1,
+            attachment_set_z: undefined
+          },
+          { attachment_set: 1, cross_arm_length: 0, attachment_set_x: 0, attachment_set_y: 0, attachment_set_z: 0 }
+        ]
+      });
+
+      const result = await service.getCompleteAttachmentSetsBySupportName('S1');
+      expect(result).toEqual([1, 3]);
     });
   });
 
