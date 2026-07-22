@@ -795,14 +795,14 @@ describe('SupportsTableComponent', () => {
   });
 
   describe('attachment set eye button availability', () => {
-    it('keeps the eye button enabled for unknown support names when support name is present', async () => {
+    it('disables the eye button for support names not in catalog when catalog is loaded', async () => {
       distinctSupportNamesSubject.next(['Support 1']);
       fixture.detectChanges();
       await Promise.resolve();
 
       const buttons = fixture.debugElement.queryAll(By.css('[data-testid="open-attachment-set-modal-btn"]'));
       const secondRowButton = buttons[1].nativeElement as HTMLButtonElement;
-      expect(secondRowButton.disabled).toBe(false);
+      expect(secondRowButton.disabled).toBe(true);
     });
   });
 
@@ -1124,11 +1124,11 @@ describe('SupportsTableComponent', () => {
       expect(isDisabled).toBe(false);
     });
 
-    it('should keep the button enabled when catalog is loaded and support name is not in catalog', () => {
+    it('should disable the button when catalog is loaded and support name is not in catalog', () => {
       distinctSupportNamesSubject.next(['CatalogType']);
       fixture.detectChanges();
       const btn = getByTestId('open-attachment-set-modal-btn') as HTMLButtonElement;
-      expect(btn.disabled).toBe(false);
+      expect(btn.disabled).toBe(true);
     });
 
     it('should disable the button when support name is null regardless of catalog state', () => {
