@@ -12,6 +12,7 @@ from mechaphlowers import BalanceEngine
 
 from stellar_engine.tools.temperature import (
     compute_diffuse_and_beam_radiations,
+    compute_nebulosity,
     get_wind_attack_angle,
     temperature_calculation,
 )
@@ -130,3 +131,15 @@ def test_diffuse_and_beam_radiation__wrong_sky_cover_type() -> None:
     }
     with pytest.raises(ValueError):
         compute_diffuse_and_beam_radiations(inputs)
+
+
+def test_compute_nebulosity() -> None:
+    inputs = {
+        "date": datetime.datetime(1970, 12, 21),
+        "time": datetime.datetime(1970, 3, 21, 12),
+        "longitude": 45.0,
+        "latitude": 0.0,
+        "measuredSolarRadiation": 600,
+    }
+    result = compute_nebulosity(inputs)
+    assert result["skyCover"] == 'N5'

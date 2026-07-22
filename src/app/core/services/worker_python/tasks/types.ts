@@ -38,6 +38,8 @@ export enum Task {
   temperatureCalculation = 'temperatureCalculation',
   // Calculate some sun radiations from datetime, coordinates and sky cover
   diffuseAndBeamRadiationsCalculation = 'diffuseAndBeamRadiationsCalculation',
+  // Estimate sky cover from measured sun radiation
+  estimateSkyCover = 'estimateSkyCover',
   // Calculate parameter at 15°C without wind
   calculateParameter15CWithoutWind = 'calculateParameter15CWithoutWind',
   // Set the number of calculation points per span
@@ -359,6 +361,14 @@ export interface TaskInputs {
     latitude: number;
     skyCover: string;
   };
+  /** Inputs for estimateSkyCover task */
+  [Task.estimateSkyCover]: {
+    date: Date | null;
+    time: Date | null;
+    longitude: number;
+    latitude: number;
+    measuredSolarRadiation: number;
+  };
   /** Inputs for calculateParameter15CWithoutWind task */
   [Task.calculateParameter15CWithoutWind]: {
     parameterPapoto: number | null;
@@ -396,7 +406,7 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  /** Inputs for shortenLengthenCable task */
+  // Inputs for shortenLengthenCable task
   [Task.shortenLengthenCable]: {
     spanIndex: number;
     modificationType: 'lengthening' | 'shortening';
@@ -443,17 +453,17 @@ export interface TaskInputs {
     baseTemperature: number;
     numberValues: number;
   };
-  /** Inputs for deleteAllLoads task: no inputs */
+  // Inputs for deleteAllLoads task: no inputs
   [Task.deleteAllLoads]: undefined;
-  /** Inputs for deleteLoad task */
+  // Inputs for deleteLoad task
   [Task.deleteLoad]: {
     supportIndex: number;
   };
-  /** Inputs for setLoads task: apply span loads via apply_span_loads */
+  // Inputs for setLoads task: apply span loads via apply_span_loads
   [Task.setLoads]: {
     spanLoads: SpanLoad[];
   };
-  /** Inputs for measureDistance task: compute distance/angle between 2 or 3 points */
+  // Inputs for measureDistance task: compute distance/angle between 2 or 3 points
   [Task.measureDistance]: {
     points: [MeasurePointGroup];
     supportIndex: number;
@@ -461,7 +471,7 @@ export interface TaskInputs {
     endSupport: number;
     view: View;
   };
-  /** Inputs for addMeasureDistanceAnglePoints task: register measurement points in the position engine */
+  // Inputs for addMeasureDistanceAnglePoints task: register measurement points in the position engine
   [Task.addMeasureDistanceAnglePoints]: {
     points: [MeasurePointGroup];
     supportIndex: number;
@@ -469,9 +479,9 @@ export interface TaskInputs {
     endSupport: number;
     view: View;
   };
-  /** Inputs for clearMeasureDistanceAnglePoints task: no inputs */
+  // Inputs for clearMeasureDistanceAnglePoints task: no inputs
   [Task.clearMeasureDistanceAnglePoints]: undefined;
-  /** Inputs for getConformity task */
+  // Inputs for getConformity task
   [Task.getConformity]: ConformityTaskInput;
 }
 
@@ -702,6 +712,9 @@ export interface TaskOutputs {
     diffuseRadiation: number;
     beamRadiation: number;
     diffusePlusBeamRadiation: number;
+  };
+  [Task.estimateSkyCover]: {
+    skyCover: string; // "N0" to "N8"
   };
   /** Output from calculateParameter15CWithoutWind task */
   [Task.calculateParameter15CWithoutWind]: {

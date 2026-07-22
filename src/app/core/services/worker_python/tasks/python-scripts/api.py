@@ -100,6 +100,13 @@ def get_wind_incidence(js_inputs):
     return temperature.get_wind_attack_angle(python_inputs)
 
 
+@debug_log
+def estimate_sky_cover(js_inputs):
+    return temperature.compute_nebulosity(
+        inputs=js_inputs.to_py(default_converter=date_converter),
+    )
+
+
 # ---------------------------study core----------------
 
 
@@ -289,7 +296,8 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
-#---------------------------conformity----------------
+# ---------------------------conformity----------------
+
 
 @debug_log
 def get_conformity(js_inputs):
@@ -301,7 +309,8 @@ def get_conformity(js_inputs):
     return out
 
 
-#--------------------------config----------------
+# --------------------------config----------------
+
 
 @debug_log
 def get_config():
