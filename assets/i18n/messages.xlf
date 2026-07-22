@@ -3527,6 +3527,11 @@
         <source>Rope length</source>
       </segment>
     </unit>
+    <unit id="2861737300887040849">
+      <segment>
+        <source>The attachment support from the geolink file is not present in the application support catalog</source>
+      </segment>
+    </unit>
     <unit id="2872097738404332614">
       <segment>
         <source>displac. manip. type</source>

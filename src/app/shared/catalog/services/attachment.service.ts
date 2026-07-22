@@ -126,6 +126,46 @@ export class AttachmentService {
   }
 
   /**
+   * Resolves a GeoLiaison support/set lookup against the catalog, trying SUPPORT_IDR first
+   * and SUPPORT_ADR as fallback. Returns only complete L/X/Y/Z entries.
+   */
+  async resolveGeoLiaisonCatalogAttachment(
+    supportIdr: string | null | undefined,
+    supportAdr: string | null | undefined,
+    attachmentSet: number | null | undefined
+  ): Promise<CatalogAttachmentEntity | undefined> {
+    if (attachmentSet == null) {
+      return undefined;
+    }
+
+    const candidates = [...new Set([supportIdr?.trim(), supportAdr?.trim()].filter((name): name is string => !!name))];
+
+    for (const candidate of candidates) {
+      const details = await this.getAttachmentDetails(candidate, attachmentSet);
+      if (details && this.hasCompleteAttachmentGeometry(details)) {
+        return details;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Returns the attachment-set numbers with complete L/X/Y/Z data for the given support.
+   */
+  async getCompleteAttachmentSetsBySupportName(supportName: string): Promise<number[]> {
+    const group = await this.storageService.db?.catSupportAttachments.get(supportName);
+    if (!group) {
+      return [];
+    }
+
+    return group.attachments
+      .filter((item) => this.hasCompleteAttachmentSetGeometry(item))
+      .map((item) => item.attachment_set)
+      .sort((a, b) => a - b);
+  }
+
+  /**
    * Resolve the support fields derived from a catalog attachment for a
    * (support name, attachment set) pair.
    *
@@ -202,6 +242,24 @@ export class AttachmentService {
       armLength: details.cross_arm_length == null ? null : truncateNumberToOneDecimal(details.cross_arm_length),
       heightBelowConsole: details.attachment_altitude ?? null
     };
+  }
+
+  private hasCompleteAttachmentGeometry(details: CatalogAttachmentEntity): boolean {
+    return (
+      details.cross_arm_length != null &&
+      details.attachment_set_x != null &&
+      details.attachment_set_y != null &&
+      details.attachment_set_z != null
+    );
+  }
+
+  private hasCompleteAttachmentSetGeometry(item: CatalogSupportAttachmentEntity['attachments'][number]): boolean {
+    return (
+      item.cross_arm_length != null &&
+      item.attachment_set_x != null &&
+      item.attachment_set_y != null &&
+      item.attachment_set_z != null
+    );
   }
 
   /**
