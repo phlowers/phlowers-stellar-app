@@ -9,6 +9,8 @@ import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 import { isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { logBootstrapError } from './bootstrap-logger';
+import { TranslocoHttpLoader } from './transloco-loader';
+import { provideTransloco } from '@jsverse/transloco';
 (globalThis as unknown as { global: typeof globalThis }).global = globalThis;
 
 // Register Service Worker before bootstrap so registration starts early.
@@ -21,5 +23,18 @@ if ('serviceWorker' in navigator && !isDevMode()) {
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
-  providers: [provideZoneChangeDetection(), ...appConfig.providers]
+  providers: [
+    provideZoneChangeDetection(),
+    ...appConfig.providers,
+    provideTransloco({
+      config: {
+        availableLangs: ['en', 'fr'],
+        defaultLang: 'en',
+        // Remove this option if your application doesn't support changing language in runtime.
+        reRenderOnLangChange: true,
+        prodMode: !isDevMode()
+      },
+      loader: TranslocoHttpLoader
+    })
+  ]
 }).catch((err) => logBootstrapError('Application bootstrap', err));
