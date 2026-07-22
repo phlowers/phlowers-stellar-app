@@ -12,6 +12,7 @@ from mechaphlowers import BalanceEngine, ThermalEngine, units
 
 from stellar_engine.entities.inputs import (
     DiffuseAndBeamRadiationInputs,
+    SkyCoverEstimationInputs,
     TemperatureCalculationInputs,
     WindAngleCalculationInputs,
 )
@@ -27,7 +28,7 @@ DIRECTION_MAP = {
     'North-West': 315,
 }
 
-COVER_MAP = {
+SKY_COVER_MAP = {
     "N0": 0,
     "N1": 1,
     "N2": 2,
@@ -37,6 +38,18 @@ COVER_MAP = {
     "N6": 6,
     "N7": 7,
     "N8": 8,
+}
+
+REVERSED_SKY_COVER_MAP = {
+    0: "N0",
+    1: "N1",
+    2: "N2",
+    3: "N3",
+    4: "N4",
+    5: "N5",
+    6: "N6",
+    7: "N7",
+    8: "N8",
 }
 
 UNIT_MAP = {"kmh": "km/h", "ms": "m/s"}
@@ -60,10 +73,10 @@ def _check_inputs_are_datetimes(date, time) -> None:
 def _check_sky_cover_input(sky_cover: str) -> None:
     if not isinstance(sky_cover, str):
         raise TypeError("`sky_cover` should be a string")
-    if sky_cover not in COVER_MAP:
+    if sky_cover not in SKY_COVER_MAP:
         raise ValueError(
             "`sky_cover` should be one of following values:\n"
-            + ", ".join(COVER_MAP)
+            + ", ".join(SKY_COVER_MAP)
             + ".\n"
             f"Got {sky_cover}"
         )
@@ -87,7 +100,7 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         .m
     )
     wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
-    sky_cover = COVER_MAP[temp_inputs.skyCover]
+    sky_cover = SKY_COVER_MAP[temp_inputs.skyCover]
     thermal_engine.set(
         cable_array=engine.cable_array,
         latitude=np.array([temp_inputs.latitude]),
@@ -117,7 +130,7 @@ def compute_diffuse_and_beam_radiations(inputs: dict) -> dict[str, float]:
     parsed_inputs = DiffuseAndBeamRadiationInputs(**inputs)
     _check_sky_cover_input(parsed_inputs.skyCover)
     datetime_utc = _build_np_datetime64(parsed_inputs.date, parsed_inputs.time)
-    nebulosity = COVER_MAP[parsed_inputs.skyCover]
+    nebulosity = SKY_COVER_MAP[parsed_inputs.skyCover]
     radiation_result = ThermalEngine.diffuse_and_beam_solar_radiations(
         datetime_utc=np.array([datetime_utc]),
         latitude=np.array([parsed_inputs.latitude]),
@@ -140,3 +153,20 @@ def get_wind_attack_angle(inputs: dict):
         np.array(wind_inputs.azimuth), np.array(wind_azimuth)
     )
     return {"windIncidence": wind_incidence}
+
+
+def compute_nebulosity(inputs: dict) -> dict[str, str]:
+    parsed_inputs = SkyCoverEstimationInputs(**inputs)
+    datetime_utc = _build_np_datetime64(parsed_inputs.date, parsed_inputs.time)
+    nebulosity = ThermalEngine.nebulosity(
+        diffuse_plus_beam_radiation=np.array(
+            [parsed_inputs.measuredSolarRadiation]
+        ),
+        datetime_utc=np.array([datetime_utc]),
+        latitude=np.array([parsed_inputs.latitude]),
+        longitude=np.array([parsed_inputs.longitude]),
+    )
+    nebulosity_str = REVERSED_SKY_COVER_MAP[
+        int(nebulosity.data["nebulosity"].iloc[0])
+    ]
+    return {"skyCover": nebulosity_str}
