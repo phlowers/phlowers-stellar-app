@@ -41,15 +41,7 @@ SKY_COVER_MAP = {
 }
 
 REVERSED_SKY_COVER_MAP = {
-    0: "N0",
-    1: "N1",
-    2: "N2",
-    3: "N3",
-    4: "N4",
-    5: "N5",
-    6: "N6",
-    7: "N7",
-    8: "N8",
+    conver_int: cover_str for cover_str, conver_int in SKY_COVER_MAP.items()
 }
 
 UNIT_MAP = {"kmh": "km/h", "ms": "m/s"}
@@ -166,7 +158,11 @@ def compute_nebulosity(inputs: dict) -> dict[str, str]:
         latitude=np.array([parsed_inputs.latitude]),
         longitude=np.array([parsed_inputs.longitude]),
     )
-    nebulosity_str = REVERSED_SKY_COVER_MAP[
-        int(nebulosity.data["nebulosity"].iloc[0])
-    ]
+    nebulosity_value = int(nebulosity.data["nebulosity"].iloc[0])
+    try:
+        nebulosity_str = REVERSED_SKY_COVER_MAP[nebulosity_value]
+    except KeyError as e:
+        raise ValueError(
+            f"Unexpected nebulosity value: {nebulosity_value}"
+        ) from e
     return {"skyCover": nebulosity_str}
