@@ -28,4 +28,4 @@ class ObstacleNotFoundError(ValueError):
 
 
 class NightTimeError(ValueError):
-    """Raised when inputed time is night time but computation requires to be during day time."""
+    """Raised when input time is night time but computation requires to be during day time."""

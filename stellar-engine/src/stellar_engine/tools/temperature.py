@@ -150,7 +150,6 @@ def get_wind_attack_angle(inputs: dict):
 
 def compute_nebulosity(inputs: dict) -> dict[str, str]:
     parsed_inputs = SkyCoverEstimationInputs(**inputs)
-    print(parsed_inputs)
     datetime_utc = _build_np_datetime64(parsed_inputs.date, parsed_inputs.time)
     nebulosity = ThermalEngine.nebulosity(
         diffuse_plus_beam_radiation=np.array(
