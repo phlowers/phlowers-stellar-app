@@ -7,7 +7,7 @@ import { TemperatureCalculationComponent } from './temperature-calculation.compo
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { NotificationService } from '@services/notification/notification.service';
-import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { PythonErrorCode, Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { SkyCover } from '@shared/domain';
 import {
@@ -281,8 +281,8 @@ describe('TemperatureCalculationComponent', () => {
 
     it('should show an error notification and not update skyCover when the task returns an error', async () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
-        result: undefined,
-        error: 'cannot convert float NaN to integer',
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
+        error: TaskError.CALCULATION_ERROR,
         diagnostics: []
       });
 
@@ -292,9 +292,31 @@ describe('TemperatureCalculationComponent', () => {
       expect(component.measureData().skyCover).toBeNull();
     });
 
+    it('should show the specific message when the task reports a NightTimeError diagnostic', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: [
+          {
+            code: PythonErrorCode.NightTimeError,
+            severity: 'error',
+            origin: 'exception',
+            rawText: 'NightTimeError: Cannot compute sky cover if input time is during the night'
+          }
+        ]
+      });
+
+      await component.estimateSkyCover();
+
+      expect(notificationServiceMock.error).toHaveBeenCalledWith(
+        'Sky cover cannot be estimated because the provided time is during the night.'
+      );
+      expect(component.measureData().skyCover).toBeNull();
+    });
+
     it('should show an error notification when the task returns no result', async () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
-        result: undefined,
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
         error: null,
         diagnostics: []
       });

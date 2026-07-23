@@ -1426,6 +1426,11 @@
         <source>Parameter at 15°C - uncertainty</source>
       </segment>
     </unit>
+    <unit id="3044861858989669396">
+      <segment>
+        <source>Sky cover cannot be estimated because the provided time is during the night.</source>
+      </segment>
+    </unit>
     <unit id="7477006503326420990">
       <segment>
         <source>Parameter at 15°C</source>

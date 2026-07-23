@@ -19,6 +19,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { NotificationService } from '@services/notification/notification.service';
 import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, SelectOption } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
+import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
 @Component({
   selector: 'app-temperature-calculation',
@@ -200,17 +201,9 @@ export class TemperatureCalculationComponent {
   // Estimates the sky cover from the measured solar beam; the user can still override the selection afterwards.
   async estimateSkyCover(): Promise<void> {
     const { longitude, latitude, date, time, measuredDiffusedPlusDirectSolarFlux } = this.measureData();
-    // eslint-disable-next-line no-console
-    console.log('[estimateSkyCover] inputs sent to task:', {
-      longitude,
-      latitude,
-      date,
-      time,
-      measuredSolarRadiation: measuredDiffusedPlusDirectSolarFlux
-    });
     this.isEstimatingSkyCover.set(true);
     try {
-      const { result, error } = await this.workerPythonService.runTask(Task.estimateSkyCover, {
+      const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.estimateSkyCover, {
         longitude: longitude!,
         latitude: latitude!,
         date: date ?? null,
@@ -218,8 +211,11 @@ export class TemperatureCalculationComponent {
         measuredSolarRadiation: measuredDiffusedPlusDirectSolarFlux!
       });
       if (error || result === undefined) {
+        // Prefer the specific message matching the Python error raised by the task, if any.
+        const pythonErrorMessage = formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null);
         this.notificationService.error(
-          $localize`Sky cover could not be estimated from the provided inputs. Please check the values and try again.`
+          pythonErrorMessage ??
+            $localize`Sky cover could not be estimated from the provided inputs. Please check the values and try again.`
         );
         return;
       }

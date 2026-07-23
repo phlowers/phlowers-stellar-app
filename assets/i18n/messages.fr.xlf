@@ -2617,6 +2617,12 @@
         <target>Paramètre à 15°C moins l&apos;incertitude</target>
       </segment>
     </unit>
+    <unit id="3044861858989669396">
+      <segment state="initial">
+        <source>Sky cover cannot be estimated because the provided time is during the night.</source>
+        <target>La nébulosité ne peut pas être estimée car l&apos;heure fournie se situe pendant la nuit.</target>
+      </segment>
+    </unit>
     <unit id="7477006503326420990">
       <segment state="initial">
         <source>Parameter at 15°C</source>

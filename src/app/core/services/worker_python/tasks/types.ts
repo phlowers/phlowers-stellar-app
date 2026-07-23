@@ -136,7 +136,9 @@ export enum PythonErrorCode {
   // Raised when a support index is out of range for the number of spans.
   SupportOutOfRangeError = 'SupportOutOfRangeError',
   // Raised when generated points (spans, supports, insulators, others) are None after computation.
-  GeneratedPointsNoneError = 'GeneratedPointsNoneError'
+  GeneratedPointsNoneError = 'GeneratedPointsNoneError',
+  // Raised when the provided time is during the night but the computation requires daytime.
+  NightTimeError = 'NightTimeError'
 }
 
 /**
