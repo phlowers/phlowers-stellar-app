@@ -98,11 +98,6 @@ describe('lines.config - mapLineRow', () => {
 });
 
 describe('lines.config - mapLineRow - worker context safety', () => {
-  // Regression guard: before the fix, mapLineRow called $localize`NO VOLTAGE` for rows
-  // with missing voltage data. @angular/localize/init is only loaded in the main thread;
-  // the Web Worker has no access to it. That ReferenceError/TypeError aborted the PapaParse
-  // stream, finalize() never ran, and catLines stayed empty — all p-select dropdowns
-  // showed no options. The fix replaces the tagged-template call with a plain string literal.
   let savedLocalize: unknown;
 
   beforeEach(() => {

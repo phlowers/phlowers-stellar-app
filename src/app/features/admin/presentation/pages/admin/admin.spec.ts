@@ -150,7 +150,7 @@ describe('AdminComponent', () => {
       component.deleteAllStudies();
 
       expect(confirmationServiceMock.confirm).toHaveBeenCalledWith({
-        message: expect.any(String), // $localize returns a string
+        message: expect.any(String),
         accept: expect.any(Function)
       });
     });
