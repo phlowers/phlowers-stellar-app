@@ -7,6 +7,7 @@ import Papa from 'papaparse';
 import { Study } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { StudyImportService } from '@features/studies/application/services/study-import.service';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 const waitFor = (ms = 0): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -118,7 +119,28 @@ describe('ImportStudyComponent', () => {
     (Papa as unknown as { parse: typeof mockParse }).parse = mockParse;
 
     await TestBed.configureTestingModule({
-      imports: [ImportStudyComponent],
+      imports: [
+        ImportStudyComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studies.import-study.error-cable-not-found': 'Cable not found in database',
+              'studies.import-study.error-import': 'Error importing study',
+              'studies.import-study.error-delete': 'Error deleting study',
+              'studies.import-study.error-decode': 'Error decoding file',
+              'studies.import-study.error-parse': 'Error parsing file',
+              'studies.import-study.error-read': 'Error reading file',
+              'studies.import-study.success-detail': 'Study imported successfully',
+              'studies.import-study.collision-message': 'Study {{ label }} already exists. Do you want to replace it?',
+              'common.import.error.fileTypeNotAllowed': 'File type not allowed',
+              'common.import.collision.yes': 'Yes',
+              'common.import.collision.no': 'No'
+            },
+            fr: {}
+          },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en', reRenderOnLangChange: false }
+        })
+      ],
       providers: [
         provideRouter([]),
         { provide: StudiesService, useValue: studiesServiceMock },
@@ -130,6 +152,7 @@ describe('ImportStudyComponent', () => {
 
     fixture = TestBed.createComponent(ImportStudyComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
     studyImportService = TestBed.inject(StudyImportService);
   });
 

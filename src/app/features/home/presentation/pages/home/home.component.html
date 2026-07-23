@@ -1,7 +1,7 @@
 <section class="btn-wrapper">
-  <a routerLink="/studies" [queryParams]="{ create: 'true' }" app-btn i18n data-testid="create-study-btn">
+  <a routerLink="/studies" [queryParams]="{ create: 'true' }" app-btn data-testid="create-study-btn">
     <app-icon icon="add" />
-    Create a new study
+    {{ 'home.home.create-study' | transloco }}
   </a>
 </section>
 
@@ -43,7 +43,7 @@
 
 <article>
   <header>
-    <h2 i18n class="text-xl-400 underline-text">My last studies</h2>
+    <h2 class="text-xl-400 underline-text">{{ 'home.home.my-last-studies' | transloco }}</h2>
   </header>
 
   <main class="study-cards" data-testid="latest-studies-list">
@@ -59,13 +59,13 @@
     }
 
     @if (latestStudies().length === 0) {
-      <p i18n class="study-empty">No recent studies</p>
+      <p class="study-empty">{{ 'home.home.no-recent-studies' | transloco }}</p>
     }
   </main>
 
   <footer class="btn-wrapper">
-    <a routerLink="/studies" app-btn btnStyle="text" btnSize="m" i18n>
-      Go to my studies
+    <a routerLink="/studies" app-btn btnStyle="text" btnSize="m">
+      {{ 'home.home.go-to-studies' | transloco }}
       <app-icon icon="keyboard_arrow_right" iconRight />
     </a>
   </footer>

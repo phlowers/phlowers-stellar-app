@@ -5,16 +5,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-/** Localized error messages for study import failures. */
+/** Transloco key map for study import error messages. */
 export const studyImportErrors = {
-  cableNotFound: $localize`Cable not found in database`,
-  fileTypeNotAllowed: $localize`File type not allowed`,
-  studyImportError: $localize`Error importing study`,
-  studyDeleteError: $localize`Error deleting study`,
-  fileDecodeError: $localize`Error decoding file`,
-  fileParseError: $localize`Error parsing file`,
-  fileReadError: $localize`Error reading file`
+  cableNotFound: 'studies.import-study.error-cable-not-found',
+  fileTypeNotAllowed: 'common.import.error.fileTypeNotAllowed',
+  studyImportError: 'studies.import-study.error-import',
+  studyDeleteError: 'studies.import-study.error-delete',
+  fileDecodeError: 'studies.import-study.error-decode',
+  fileParseError: 'studies.import-study.error-parse',
+  fileReadError: 'studies.import-study.error-read'
 };
 
-/** Detail message shown on successful study import. */
-export const importSuccessDetail = $localize`Study imported successfully`;
+/** Transloco key for the successful study import notification. */
+export const importSuccessDetail = 'studies.import-study.success-detail';

@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@services/auth/auth.service';
 import { LOGIN_URL } from '@services/auth/auth.constants';
 
@@ -27,7 +28,7 @@ import { LOGIN_URL } from '@services/auth/auth.constants';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, ButtonModule, MessageModule],
+  imports: [ReactiveFormsModule, InputTextModule, ButtonModule, MessageModule, TranslocoModule],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,6 +37,7 @@ export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -121,7 +123,7 @@ export class LoginPageComponent {
     try {
       await this.authService.loginWithEmail(this.emailControl.value);
     } catch {
-      this.submitError.set($localize`Login failed. Please try again.`);
+      this.submitError.set(this.translocoService.translate('auth.login-page.login-failed'));
       this.isSubmitting.set(false);
       return;
     }

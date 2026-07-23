@@ -3,20 +3,24 @@
 <section>
   <app-new-study-modal [isOpen]="isNewStudyModalOpen()" (isOpenChange)="isNewStudyModalOpen.set($event)" />
   <div class="flex justify-between items-start">
-    <h2 i18n>Studies</h2>
+    <h2>{{ 'shared.logged-layout.studies' | transloco }}</h2>
     <button app-btn type="submit" btnSize="m" (click)="isNewStudyModalOpen.set(true)" data-testid="create-study-btn">
       <app-icon icon="add" />
-      <span i18n>Create a new study</span>
+      <span>{{ 'home.home.create-study' | transloco }}</span>
     </button>
   </div>
 </section>
 <p-tabs value="myStudies">
   <p-tablist>
-    <p-tab value="myStudies" i18n data-testid="my-studies-tab">My last studies</p-tab>
+    <p-tab value="myStudies" data-testid="my-studies-tab">{{ 'studies.studies.tab-my-studies' | transloco }}</p-tab>
     @if (false) {
-      <p-tab value="searchStudy" disabled="true" i18n data-testid="search-study-tab">Search a study</p-tab>
+      <p-tab value="searchStudy" disabled="true" data-testid="search-study-tab">{{
+        'studies.studies.tab-search-study' | transloco
+      }}</p-tab>
     }
-    <p-tab value="importStudy" i18n data-testid="import-study-tab">Import a study</p-tab>
+    <p-tab value="importStudy" data-testid="import-study-tab">{{
+      'studies.studies.tab-import-study' | transloco
+    }}</p-tab>
   </p-tablist>
   <p-tabpanels>
     <p-tabpanel value="myStudies"
