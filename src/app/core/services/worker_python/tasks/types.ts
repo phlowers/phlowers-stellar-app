@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
+import { CatalogCable, ClimateCharge, PapotoResult, Section, SkyCover, SpanLoad } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PoseResults } from '@shared/domain/models/section.model';
@@ -351,7 +351,7 @@ export interface TaskInputs {
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
     windDirection: string;
-    skyCover: string;
+    skyCover: SkyCover;
   };
   /** Inputs for computeDiffuseAndBeamRadiation task */
   [Task.diffuseAndBeamRadiationsCalculation]: {
@@ -359,7 +359,7 @@ export interface TaskInputs {
     time: Date | null;
     longitude: number;
     latitude: number;
-    skyCover: string;
+    skyCover: SkyCover;
   };
   /** Inputs for estimateSkyCover task */
   [Task.estimateSkyCover]: {
@@ -714,7 +714,7 @@ export interface TaskOutputs {
     diffusePlusBeamRadiation: number;
   };
   [Task.estimateSkyCover]: {
-    skyCover: string; // "N0" to "N8"
+    skyCover: SkyCover;
   };
   /** Output from calculateParameter15CWithoutWind task */
   [Task.calculateParameter15CWithoutWind]: {

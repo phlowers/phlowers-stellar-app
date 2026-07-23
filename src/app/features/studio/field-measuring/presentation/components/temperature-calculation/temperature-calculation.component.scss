@@ -26,9 +26,9 @@ dd {
       'ambientTemp__label windSpeed__label windDirection__label windIncidence__label windIncidence__label'
       'ambientTemp__value windSpeed__value windDirection__value windIncidence__value windIncidence__value'
       'solar solar solar solar solar'
-      'skyCover__label diffusedSolarFlux__label directSolarFlux__label diffusedPlusDirectSolarFlux__label measuredDiffusedPlusDirectSolarFlux__label'
-      'skyCover__value diffusedSolarFlux__value directSolarFlux__value diffusedPlusDirectSolarFlux__value measuredDiffusedPlusDirectSolarFlux__value'
-      '. . . . measuredDiffusedPlusDirectSolarFluxInfo';
+      'measuredDiffusedPlusDirectSolarFlux__label skyCover__label diffusedSolarFlux__label directSolarFlux__label diffusedPlusDirectSolarFlux__label'
+      'measuredDiffusedPlusDirectSolarFlux__value skyCover__value diffusedSolarFlux__value directSolarFlux__value diffusedPlusDirectSolarFlux__value'
+      'measuredDiffusedPlusDirectSolarFluxInfo . . . .';
     row-gap: 0rem;
 
     .with-mt-labels dt {
@@ -133,6 +133,22 @@ dd {
 
     .measuredDiffusedPlusDirectSolarFlux__label {
       grid-area: measuredDiffusedPlusDirectSolarFlux__label;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 0.25rem;
+      padding-bottom: 0.125rem;
+
+      &__txt {
+        margin-right: 0rem;
+        margin-bottom: 0rem;
+      }
+
+      &__btn {
+        flex: 0 1 min-content;
+        padding-right: 0.25rem;
+        padding-left: 0.25rem;
+      }
     }
 
     .measuredDiffusedPlusDirectSolarFlux__value {

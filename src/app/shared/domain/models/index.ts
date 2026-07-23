@@ -43,3 +43,4 @@ export type {
   Parameter15CResult,
   ManualParameterCalculation15CWithoutWind
 } from './field-measure.model';
+export { SkyCover } from './field-measure.model';
