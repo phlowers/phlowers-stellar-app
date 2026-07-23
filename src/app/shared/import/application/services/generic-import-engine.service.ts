@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import {
   IMPORT_ADAPTER_TOKEN,
@@ -42,6 +43,7 @@ import {
 export class GenericImportEngineService {
   private readonly adapter = inject(IMPORT_ADAPTER_TOKEN);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   /**
    * Processes a list of files sequentially through the import pipeline.
@@ -72,7 +74,7 @@ export class GenericImportEngineService {
         status: 'error',
         error: {
           code: 'FILE_TYPE_NOT_ALLOWED',
-          message: $localize`File type not allowed`,
+          message: this.translocoService.translate('common.import.error.fileTypeNotAllowed'),
           stage: 'FILE_VALIDATION'
         }
       };

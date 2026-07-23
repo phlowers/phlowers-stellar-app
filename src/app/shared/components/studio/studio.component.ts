@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy, signal } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -11,7 +11,7 @@ import { formatPythonError } from '@core/services/worker_python/tasks/python-err
 @Component({
   selector: 'app-studio',
   templateUrl: './studio.component.html',
-  imports: [SectionPlotComponent, ProgressSpinnerModule],
+  imports: [SectionPlotComponent, ProgressSpinnerModule, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
@@ -27,6 +27,7 @@ export class StudioComponent implements OnDestroy {
   protected readonly plotService = inject(PlotService);
   private readonly notificationService = inject(NotificationService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly translocoService = inject(TranslocoService);
 
   // State
   readonly plotInitialized = signal(false);
@@ -38,7 +39,7 @@ export class StudioComponent implements OnDestroy {
       const exceptionDiagnostic = diagnostics.find((diagnostic) => diagnostic.origin === 'exception') ?? null;
 
       if (error !== null) {
-        const message = formatStudioError(error, exceptionDiagnostic?.code ?? null);
+        const message = formatStudioError(error, exceptionDiagnostic?.code ?? null, this.translocoService);
         if (exceptionDiagnostic?.severity === 'warning') {
           this.notificationService.warning(message);
         } else {

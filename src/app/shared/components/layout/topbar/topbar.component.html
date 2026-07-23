@@ -29,11 +29,15 @@
       ></app-icon>
     </span>
 
-    <span i18n class="calculation__txt" [class.show]="!workerReady() && !workerError()"> Loading </span>
+    <span class="calculation__txt" [class.show]="!workerReady() && !workerError()">{{
+      'shared.topbar.loading' | transloco
+    }}</span>
 
-    <span i18n class="calculation__txt" [class.show]="workerReady() && !workerError()"> Ready </span>
+    <span class="calculation__txt" [class.show]="workerReady() && !workerError()">{{
+      'shared.topbar.ready' | transloco
+    }}</span>
 
-    <span i18n class="calculation__txt" [class.show]="workerError()"> Error </span>
+    <span class="calculation__txt" [class.show]="workerError()">{{ 'shared.topbar.error' | transloco }}</span>
   </p>
 
   <p class="user" data-testid="user-info">{{ user()?.email ?? 'No user' }}</p>

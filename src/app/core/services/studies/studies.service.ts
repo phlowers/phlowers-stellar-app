@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
@@ -55,6 +56,7 @@ export class StudiesService {
   private readonly storageService = inject(StorageService);
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -128,7 +130,11 @@ export class StudiesService {
     const userEmail = await this.getUserEmail();
     const allStudies = (await this.db?.studies.toArray()) ?? [];
     const allStudyTitles = allStudies.map((studyItem) => studyItem.title);
-    const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
+    const duplicateTitle = findDuplicateTitle(
+      allStudyTitles,
+      study.title,
+      this.translocoService.translate('shared.duplicate.copy-suffix')
+    );
     const newStudy = {
       ...study,
       title: duplicateTitle,

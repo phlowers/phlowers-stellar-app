@@ -139,7 +139,8 @@ const buildLabelAnnotation = (
   anchor: number[],
   modification: CableModification,
   view: CreatePlotParams['view'],
-  side: CreatePlotParams['side']
+  side: CreatePlotParams['side'],
+  translocoService?: CreatePlotParams['translocoService']
 ): Partial<Plotly.Annotations> => {
   const mapped = mapAnchorToAxes(anchor, view, side);
   return {
@@ -152,7 +153,7 @@ const buildLabelAnnotation = (
     showarrow: false,
     xshift: CABLE_MOD_ARROW_X_OFFSET,
     yshift: CABLE_MOD_LABEL_Y_SHIFT,
-    text: getCableModificationLabel(modification.modificationType),
+    text: getCableModificationLabel(modification.modificationType, translocoService),
     captureevents: false,
     bgcolor: 'rgba(0,0,0,0)',
     font: {
@@ -207,7 +208,7 @@ export const createCableModificationAnnotations = (
 
     annotations.push(
       buildIconAnnotation(anchor, modification, view, side),
-      buildLabelAnnotation(anchor, modification, view, side)
+      buildLabelAnnotation(anchor, modification, view, side, plotParams.translocoService)
     );
   });
 
