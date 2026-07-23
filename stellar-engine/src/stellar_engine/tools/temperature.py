@@ -171,6 +171,6 @@ def compute_nebulosity(inputs: dict) -> dict[str, str]:
         nebulosity_str = REVERSED_SKY_COVER_MAP[nebulosity_value]
     except (KeyError, ValueError) as e:
         raise ValueError(
-            "Failed to compute nebulosity. Please verify inputs"
+            f"Unexpected nebulosity value: {nebulosity_value}"
         ) from e
     return {"skyCover": nebulosity_str}
