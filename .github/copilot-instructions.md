@@ -74,23 +74,93 @@ Rules:
 
 ---
 
-## i18n — Angular native ONLY
+---
+applyTo: "src/**/*.html,src/**/*.ts"
+---
 
-**`TranslateService` does not exist. `translate` pipe does not exist. Never use them.**
+# Migration i18n Angular -> Transloco (Stellar)
 
-```typescript
-// TypeScript
-this.notificationService.error($localize`Error creating user`);
-const ERRORS = { [TaskError.CALCULATION_ERROR]: $localize`Calculation error` };
+## Structure des clés : à plat, jamais imbriquée
 
-// Templates
-<h1 i18n="@@studies.title">Studies</h1>
+Un seul objet JSON par langue (public/i18n/en.json, public/i18n/fr.json).
+Chaque clé est une chaîne complète au premier niveau, même si elle contient
+des points :
+
+```json
+{ "auth.login.title": "Sign in", "common.actions.save": "Save" }
 ```
 
-After adding `i18n` / `$localize`: run `npm run extract-i18n`.  
-Files: `assets/i18n/messages.xlf` (en source) · `messages.fr.xlf`.
+Ne JAMAIS créer d'objet imbriqué du type {"auth": {"login": {...}}}, même
+si la clé contient plusieurs segments séparés par des points.
 
----
+## Namespaces
+
+- `common.*` — texte générique réutilisé dans plusieurs features
+- `domain.*` — vocabulaire métier partagé entre study/studio (altitude,
+  anchoring, cableManipMethod, chainLength, chainName, chainSurface,
+  chainWeight, counterWeight, distance, referenceSupport, slingLength...)
+- `<feature>.shared.*` — texte réutilisé par plusieurs composants d'UNE
+  même feature (changelog/news/home/admin/auth/studies/study/studio)
+- `<feature>.<composant>.*` — texte propre à un seul composant
+
+**Avant de créer une clé locale, vérifie si le texte existe déjà dans
+public/i18n/en.json sous common.* ou domain.* — si oui, réutilise cette
+clé, n'en crée pas une nouvelle.**
+
+## RÈGLE CRITIQUE : ce qui est traduisible, ce qui ne l'est jamais
+
+Ne considère un texte comme traduisible QUE dans ces trois cas précis :
+1. Contenu d'un élément portant l'attribut `i18n` (ex: `<h2 i18n>Texte</h2>`)
+2. Valeur d'un attribut nommé `i18n-xxx` (ex: `i18n-title` associé à `title="..."`)
+3. Un appel `$localize\`...\`` en TypeScript
+
+**Ne touche JAMAIS à :**
+- un nom de balise ou nom d'attribut, même s'il ressemble à un mot anglais
+  (`<section>`, `type=`, `name=`, `id=`, `formControlName=`, `data-testid=`)
+- la valeur d'un attribut qui n'est PAS explicitement marqué `i18n-*`,
+  même si cette valeur est un mot anglais courant (`type="button"`,
+  `aria-label="view"` sans `i18n-aria-label` associé, `class="..."`)
+- une correspondance de texte trouvée par simple recherche insensible à
+  la casse — vérifie que le mot est bien à l'intérieur d'un vrai marqueur
+  i18n, pas juste présent quelque part sur la ligne
+
+En cas de doute sur si quelque chose est réellement marqué pour traduction,
+laisse-le tel quel et signale-le plutôt que de deviner.
+
+## Imports requis pour Transloco — checklist systématique
+
+Lors de TOUTE migration i18n vers Transloco ou lors de la vérification de conformité
+d'un composant/service :
+
+1. **Composants template** → vérifier `TranslocoModule` dans les imports:
+   ```typescript
+   import { TranslocoModule } from '@jsverse/transloco';
+   
+   @Component({
+     imports: [TranslocoModule, ...],  // ← MUST be present for pipe usage
+     ...
+   })
+   ```
+
+2. **Services injectant TranslocoService** → vérifier l'import:
+   ```typescript
+   import { TranslocoService } from '@jsverse/transloco';
+   
+   private readonly translocoService = inject(TranslocoService);
+   this.translocoService.instant('common.key');  // ✅
+   ```
+
+3. **Validation de conformité** (HTML ou TypeScript migration):
+   - ✅ Les clés utilisent les **bonnes clés pointillées** du fichier JSON (ex: `common.import.upload.prompt`)
+   - ✅ Le pipe/service est **importé et disponible** (`TranslocoModule` ou `TranslocoService`)
+   - ✅ Les clés existent dans `public/i18n/en.json` et `public/i18n/fr.json`
+
+## Les 15 fichiers nécessitant un refactoring (pas un simple remplacement)
+
+Ces fichiers définissent des constantes en dehors d'un contexte
+d'injection Angular (au niveau du module, pas dans une classe) :
+
+------------------------------
 
 ## UUID
 

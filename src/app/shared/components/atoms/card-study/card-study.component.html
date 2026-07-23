@@ -6,7 +6,7 @@
   <dl>
     <dt>
       <app-icon icon="person" />
-      <span i18n>Author:</span>
+      <span>{{ 'studies.card-study.author' | transloco }}</span>
     </dt>
     <dd data-testid="card-study-author">
       {{ authorMail() }}
@@ -14,7 +14,7 @@
 
     <dt>
       <app-icon icon="history" />
-      <span i18n>Last changed:</span>
+      <span>{{ 'studies.card-study.last-changed' | transloco }}</span>
     </dt>
     <dd data-testid="card-study-date">
       {{ modificationDate() }}
@@ -32,6 +32,6 @@
   }
 
   <button (click)="onCardClick()" data-testid="go-to-study-btn">
-    <ng-container i18n>Go to study</ng-container> {{ title() }}
+    {{ 'studies.card-study.go-to-study' | transloco }} {{ title() }}
   </button>
 </article>

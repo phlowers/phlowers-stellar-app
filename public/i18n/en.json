@@ -1,3 +1,22 @@
 {
-    "test": "Test"
+  "common.import.upload.prompt": "Upload one or several files",
+  "common.import.action.open": "Open",
+  "common.import.collision.message": "already exists. Do you want to replace it?",
+  "common.import.collision.yes": "Yes",
+  "common.import.collision.no": "No",
+  "common.import.error.fileSummary": "Error reading the input file",
+  "common.export-dialog.title": "Export",
+  "common.export-dialog.filename-label": "Filename",
+  "common.export-dialog.format-label": "Export format",
+  "common.export-dialog.cancel": "Cancel",
+  "studies.card-study.author": "Author:",
+  "studies.card-study.last-changed": "Last changed:",
+  "studies.card-study.go-to-study": "Go to study",
+  "shared.input-number.reduce": "Reduce",
+  "shared.input-number.increase": "Increase",
+  "shared.select-with-buttons.view": "view",
+  "shared.select-with-buttons.edit": "edit",
+  "shared.select-with-buttons.duplicate": "duplicate",
+  "shared.select-with-buttons.delete": "delete",
+  "shared.select-with-buttons.clear-selection": "clear selection"
 }

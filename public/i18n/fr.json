@@ -1,3 +1,22 @@
 {
-    "test": "Test"
+  "common.import.upload.prompt": "Télécharger un ou plusieurs fichiers",
+  "common.import.action.open": "Ouvrir",
+  "common.import.collision.message": "existe déjà. Voulez-vous le remplacer ?",
+  "common.import.collision.yes": "Oui",
+  "common.import.collision.no": "Non",
+  "common.import.error.fileSummary": "Erreur lors de la lecture du fichier d'entrée",
+  "common.export-dialog.title": "Export",
+  "common.export-dialog.filename-label": "Nom du fichier",
+  "common.export-dialog.format-label": "Format d'export",
+  "common.export-dialog.cancel": "Annuler",
+  "studies.card-study.author": "Auteur",
+  "studies.card-study.last-changed": "Dernière modification:",
+  "studies.card-study.go-to-study": "Aller à l'étude",
+  "shared.input-number.reduce": "Réduire",
+  "shared.input-number.increase": "Augmenter",
+  "shared.select-with-buttons.view": "voir",
+  "shared.select-with-buttons.edit": "modifier",
+  "shared.select-with-buttons.duplicate": "dupliquer",
+  "shared.select-with-buttons.delete": "supprimer",
+  "shared.select-with-buttons.clear-selection": "effacer la sélection"
 }
