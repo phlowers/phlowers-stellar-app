@@ -11,17 +11,17 @@
       data-testid="span-zoom"
     >
       <app-icon icon="filter_center_focus" aria-hidden="true" />
-      <ng-container i18n>Zoom</ng-container>
+      <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
     </button>
 
     <button app-btn type="button" btnStyle="outlined" btnSize="s" (click)="resetForm()" data-testid="span-reset">
       <app-icon icon="refresh" aria-hidden="true" />
-      <ng-container i18n>Reset</ng-container>
+      <ng-container>{{ 'loads.shared.reset-btn' | transloco }}</ng-container>
     </button>
   </div>
 
   <div>
-    <label for="spanSelect" class="mb-0" i18n>Span</label>
+    <label for="spanSelect" class="mb-0">{{ 'loads.shared.span-label' | transloco }}</label>
     <p-select
       inputId="spanSelect"
       [options]="spansOptions()"
@@ -34,7 +34,7 @@
   </div>
 
   <div>
-    <label for="referenceSupport" i18n>Reference support</label>
+    <label for="referenceSupport">{{ 'loads.shared.reference-support-label' | transloco }}</label>
     <p-select
       inputId="referenceSupport"
       [options]="supportsOptions()"
@@ -47,7 +47,7 @@
   </div>
 
   <div class="col-span-2">
-    <label for="type" i18n>Load type</label>
+    <label for="type">{{ 'loads.load-marking.load-type-label' | transloco }}</label>
     <p-select
       inputId="type"
       fluid
@@ -60,11 +60,11 @@
   </div>
   <div class="col-span-2 flex items-center">
     <p-toggleswitch disabled inputId="freePositioning" name="freePositioning" data-testid="free-positioning" />
-    <label for="freePositioning" i18n> Free positioning </label>
+    <label for="freePositioning">{{ 'loads.load-marking.free-positioning-label' | transloco }}</label>
   </div>
 
   <div>
-    <label for="loadPosition" i18n>Dist. to ref. support</label>
+    <label for="loadPosition">{{ 'loads.cable-length-change.dist-to-ref-support-label' | transloco }}</label>
     <p-inputgroup>
       <input
         pInputText
@@ -79,7 +79,7 @@
   </div>
   @if (form.get('type')?.value === 'punctual') {
     <div>
-      <label for="loadWeight" i18n>Load</label>
+      <label for="loadWeight">{{ 'loads.load-marking.load-label' | transloco }}</label>
       <p-inputgroup>
         <input pInputText type="number" id="loadWeight" fluid formControlName="loadWeight" data-testid="load-weight" />
         <p-inputgroup-addon>daN</p-inputgroup-addon>
@@ -92,8 +92,7 @@
       app-btn
       btnStyle="danger"
       type="button"
-      aria-label="erase load case"
-      i18n-aria-label
+      [attr.aria-label]="'loads.shared.erase-load-case-aria-label' | transloco"
       (click)="deleteCharge()"
       data-testid="delete-load"
     >
@@ -110,7 +109,7 @@
       data-testid="save-load"
     >
       <app-icon icon="save" aria-hidden="true" />
-      <ng-container i18n>Save</ng-container>
+      <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
     </button>
 
     <button
@@ -122,7 +121,7 @@
       data-testid="calculate-load"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
-      <ng-container i18n>Calculate</ng-container>
+      <ng-container>{{ 'loads.shared.calculate-btn' | transloco }}</ng-container>
     </button>
   </div>
 </form>

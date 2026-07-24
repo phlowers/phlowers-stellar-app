@@ -10,7 +10,7 @@
       data-testid="cable-span-manip-zoom"
     >
       <app-icon icon="filter_center_focus" aria-hidden="true" />
-      <ng-container i18n>Zoom</ng-container>
+      <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
     </button>
 
     <button
@@ -23,12 +23,14 @@
       data-testid="cable-span-manip-reset"
     >
       <app-icon icon="refresh" aria-hidden="true" />
-      <ng-container i18n>Reset</ng-container>
+      <ng-container>{{ 'loads.shared.reset-btn' | transloco }}</ng-container>
     </button>
   </div>
 
   <div class="split-1-line">
-    <label for="scope" i18n="@@manipulatedSpan" class="split-1-line__label-1">Manipulated span</label>
+    <label for="scope" class="split-1-line__label-1"
+      >{{ 'loads.cable-span-manip.manipulated-span-label' | transloco }}</label
+    >
     <p-select
       inputId="scope"
       fluid
@@ -41,7 +43,9 @@
       class="split-1-line__input-1"
     />
 
-    <label for="referenceSupport" i18n="@@referenceSupport" class="split-1-line__label-2">Reference support</label>
+    <label for="referenceSupport" class="split-1-line__label-2"
+      >{{ 'loads.shared.reference-support-label' | transloco }}</label
+    >
     <p-select
       inputId="referenceSupport"
       fluid
@@ -54,8 +58,8 @@
     />
   </div>
 
-  <label for="distanceToRefSupport" i18n="@@manipulatedPointCableDistRefSupport">
-    Manipulated point on the cable (Dist. to ref. support)
+  <label for="distanceToRefSupport">
+    {{ 'loads.cable-span-manip.manipulated-point-dist-ref-support-label' | transloco }}
   </label>
   <p-inputgroup>
     <input
@@ -75,18 +79,20 @@
   </p-inputgroup>
   @if (form.controls.distanceToRefSupport.errors?.['min']) {
   <p-message id="distanceToRefSupport-error-min" severity="error" size="small" variant="simple">
-    <ng-container i18n>Minimum value:</ng-container>
+    <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
     {{ distRefSupportMin() }}
   </p-message>
   } @else if (form.controls.distanceToRefSupport.errors?.['max']) {
   <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
-    <ng-container i18n>Maximum value:</ng-container>
+    <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
     {{ distRefSupportMax() }}
   </p-message>
   }
 
   <div class="split-1-line">
-    <label for="cableManipType" i18n="@@cableManipType" class="split-1-line__label-1">Cable manipulation type</label>
+    <label for="cableManipType" class="split-1-line__label-1"
+      >{{ 'loads.cable-span-manip.cable-manip-type-label' | transloco }}</label
+    >
     <p-select
       inputId="cableManipType"
       fluid
@@ -98,8 +104,8 @@
       class="split-1-line__input-1"
     />
 
-    <label for="cableManipMethod" i18n="@@cableManipMethod" class="split-1-line__label-2">
-      Cable manipulation method
+    <label for="cableManipMethod" class="split-1-line__label-2">
+      {{ 'loads.cable-span-manip.cable-manip-method-label' | transloco }}
     </label>
     <p-select
       inputId="cableManipMethod"
@@ -114,12 +120,12 @@
   </div>
 
   <fieldset>
-    <legend i18n="@@manipFixedPointPosition" class="legend">Manipulation fixed point position</legend>
+    <legend class="legend">{{ 'loads.cable-span-manip.manip-fixed-point-position-label' | transloco }}</legend>
 
     <div class="third-1-line">
       @if (isWithCrane()) {
-      <label for="longitudinalDistance" i18n="@@longitudinalDistance" class="third-1-line__label-1"
-        >Longitudinal dist.</label
+      <label for="longitudinalDistance" class="third-1-line__label-1"
+        >{{ 'loads.cable-span-manip.longitudinal-distance-label' | transloco }}</label
       >
       <p-inputgroup class="third-1-line__input-1">
         <input
@@ -145,7 +151,7 @@
         variant="simple"
         class="third-1-line__error-1"
       >
-        <ng-container i18n>Minimum value:</ng-container>
+        <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
         -100
       </p-message>
       } @else if (form.controls.longitudinalDistance.errors?.['max']) {
@@ -156,12 +162,14 @@
         variant="simple"
         class="third-1-line__error-1"
       >
-        <ng-container i18n>Maximum value:</ng-container>
+        <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
         5000
       </p-message>
       } } @else {
       <dl class="contents">
-        <dt class="label third-1-line__label-1" i18n="@@longitudinalDistance">Longitudinal dist.</dt>
+        <dt class="label third-1-line__label-1">
+          {{ 'loads.cable-span-manip.longitudinal-distance-label' | transloco }}
+        </dt>
         <dd
           data-testid="cable-span-manip-longitudinal-dist-readonly"
           class="third-1-line__input-1 read-only-info"
@@ -172,7 +180,9 @@
       </dl>
       }
 
-      <label for="lateralDistance" i18n="@@lateralDistance" class="third-1-line__label-2">Lateral dist.</label>
+      <label for="lateralDistance" class="third-1-line__label-2"
+        >{{ 'loads.cable-span-manip.lateral-distance-label' | transloco }}</label
+      >
       <p-inputgroup class="third-1-line__input-2">
         <input
           type="number"
@@ -197,7 +207,7 @@
         variant="simple"
         class="third-1-line__error-2"
       >
-        <ng-container i18n>Minimum value:</ng-container>
+        <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
         -100
       </p-message>
       } @else if (form.controls.lateralDistance.errors?.['max']) {
@@ -208,12 +218,14 @@
         variant="simple"
         class="third-1-line__error-2"
       >
-        <ng-container i18n>Maximum value:</ng-container>
+        <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
         100
       </p-message>
       }
 
-      <label for="altitude" i18n="@@altitude" class="third-1-line__label-3">Altitude</label>
+      <label for="altitude" class="third-1-line__label-3"
+        >{{ 'loads.cable-span-manip.altitude-label' | transloco }}</label
+      >
       <p-inputgroup class="third-1-line__input-3">
         <input
           type="number"
@@ -232,12 +244,12 @@
       </p-inputgroup>
       @if (form.controls.altitude.errors?.['min']) {
       <p-message id="altitude-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-        <ng-container i18n>Minimum value:</ng-container>
+        <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
         -100
       </p-message>
       } @else if (form.controls.altitude.errors?.['max']) {
       <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-        <ng-container i18n>Maximum value:</ng-container>
+        <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
         9000
       </p-message>
       }
@@ -246,17 +258,17 @@
     <div class="distance-calc-line">
       <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-span-manip-dist-calc-btn">
         <app-icon icon="rocket_launch" aria-hidden="true" />
-        <ng-container i18n="@@distCalcBetweenPoints">Dist. calc. between points</ng-container>
+        <ng-container>{{ 'loads.cable-span-manip.dist-calc-between-points-label' | transloco }}</ng-container>
       </button>
 
       <dl>
-        <dt class="label" i18n="@@distance">Distance</dt>
+        <dt class="label">{{ 'loads.cable-span-manip.distance-label' | transloco }}</dt>
         <dd class="read-only-info" data-testid="cable-span-manip-dist-result">- m</dd>
       </dl>
     </div>
   </fieldset>
 
-  <label for="anchoring" i18n="@@anchoring">Anchoring</label>
+  <label for="anchoring">{{ 'loads.cable-span-manip.anchoring-label' | transloco }}</label>
   <p-select
     inputId="anchoring"
     fluid
@@ -268,7 +280,7 @@
   />
 
   @if (isWithChain()) {
-  <label for="chainName" i18n="@@chainName">Chain name</label>
+  <label for="chainName">{{ 'loads.cable-span-manip.chain-name-label' | transloco }}</label>
   <p-select
     inputId="chainName"
     fluid
@@ -280,7 +292,9 @@
   />
 
   <div class="split-2-line">
-    <label for="chainLength" i18n="@@chainLength" class="split-2-line__label-1">Chain length</label>
+    <label for="chainLength" class="split-2-line__label-1"
+      >{{ 'loads.cable-span-manip.chain-length-label' | transloco }}</label
+    >
     <p-inputgroup class="split-2-line__input-1">
       <input
         type="number"
@@ -294,7 +308,9 @@
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
 
-    <label for="chainWeight" i18n="@@chainWeight" class="split-2-line__label-2">Chain weight</label>
+    <label for="chainWeight" class="split-2-line__label-2"
+      >{{ 'loads.cable-span-manip.chain-weight-label' | transloco }}</label
+    >
     <p-inputgroup class="split-2-line__input-2">
       <input
         type="number"
@@ -308,7 +324,9 @@
       <p-inputgroup-addon>kg</p-inputgroup-addon>
     </p-inputgroup>
 
-    <label for="chainSurface" i18n="@@chainSurface" class="split-2-line__label-3">Chain surface</label>
+    <label for="chainSurface" class="split-2-line__label-3"
+      >{{ 'loads.cable-span-manip.chain-surface-label' | transloco }}</label
+    >
     <p-inputgroup class="split-2-line__input-3">
       <input
         type="number"
@@ -322,7 +340,9 @@
       <p-inputgroup-addon>m²</p-inputgroup-addon>
     </p-inputgroup>
 
-    <label for="counterWeight" i18n="@@counterWeight" class="split-2-line__label-4">Counter weight</label>
+    <label for="counterWeight" class="split-2-line__label-4"
+      >{{ 'loads.cable-span-manip.counter-weight-label' | transloco }}</label
+    >
     <p-inputgroup class="split-2-line__input-4">
       <input
         type="number"
@@ -337,7 +357,7 @@
     </p-inputgroup>
   </div>
   } @else if (isWithSling()) {
-  <label for="slingLength" i18n="@@slingLength">Sling length</label>
+  <label for="slingLength">{{ 'loads.cable-span-manip.sling-length-label' | transloco }}</label>
   <p-inputgroup>
     <input
       type="number"
@@ -356,12 +376,12 @@
   </p-inputgroup>
   @if (form.controls.slingLength.errors?.['min']) {
   <p-message id="slingLength-error-min" severity="error" size="small" variant="simple">
-    <ng-container i18n>Minimum value:</ng-container>
+    <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
     0
   </p-message>
   } @else if (form.controls.slingLength.errors?.['max']) {
   <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
-    <ng-container i18n>Maximum value:</ng-container>
+    <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
     99
   </p-message>
   } }
@@ -371,8 +391,7 @@
       app-btn
       btnStyle="danger"
       type="button"
-      aria-label="erase span's cable manipulation"
-      i18n-aria-label
+      [attr.aria-label]="'loads.cable-span-manip.erase-aria-label' | transloco"
       (click)="deleteForm()"
       [disabled]="!hasSavedManipulation() || isLoading()"
       data-testid="cable-span-manip-delete"
@@ -389,7 +408,7 @@
       data-testid="cable-span-manip-save"
     >
       <app-icon icon="save" aria-hidden="true" />
-      <ng-container i18n>Save</ng-container>
+      <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
     </button>
 
     <button
@@ -401,7 +420,7 @@
       data-testid="cable-span-manip-calculate"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
-      <ng-container i18n>Calculate</ng-container>
+      <ng-container>{{ 'loads.shared.calculate-btn' | transloco }}</ng-container>
     </button>
   </div>
 </form>

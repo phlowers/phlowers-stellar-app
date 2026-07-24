@@ -58,6 +58,7 @@ import { Camera } from 'plotly.js-dist-min';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -72,6 +73,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     DecimalPipe,
     FormsModule,
     NgxSliderModule,
+    TranslocoModule,
     InputNumberModule,
     RadioButtonModule,
     SelectModule,
@@ -111,6 +113,8 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
   ]
 })
 export class StudioPageComponent implements OnInit, OnDestroy {
+  private readonly translocoService = inject(TranslocoService);
+
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
   spanAmountChoiceOptions = signal<
@@ -119,17 +123,17 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       value: SpanAmountChoice;
     }[]
   >([
-    { label: $localize`One span`, value: 'single' },
-    { label: $localize`Two spans`, value: 'double' },
-    { label: $localize`All`, value: 'all' }
+    { label: this.translocoService.translate('studio.studioPage.oneSpanOption'), value: 'single' },
+    { label: this.translocoService.translate('studio.studioPage.twoSpansOption'), value: 'double' },
+    { label: this.translocoService.translate('studio.studioPage.allOption'), value: 'all' }
   ]);
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
 
   // graph global param.
   globalStateOptions = [
-    { label: $localize`Span`, value: 'span' },
-    { label: $localize`Max section`, value: 'max_section' }
+    { label: this.translocoService.translate('studio.studioPage.spanOption'), value: 'span' },
+    { label: this.translocoService.translate('studio.studioPage.maxSectionOption'), value: 'max_section' }
   ];
 
   globalState = signal<GlobalStateMode>('max_section');
@@ -183,7 +187,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));
     if (options.length) {
-      options.unshift({ label: $localize`Not selected`, value: null });
+      options.unshift({ label: this.translocoService.translate('studio.studioPage.notSelectedOption'), value: null });
     }
     return options;
   });
@@ -193,7 +197,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     if (!uuid) return [];
     const obstacle = this.spanService.section()?.obstacles.find((o) => o.uuid === uuid);
     if (!obstacle) return [];
-    return obstacle.positions.map((_, index) => ({ label: $localize`Point ${index + 1}`, value: index }));
+    return obstacle.positions.map((_, index) => ({
+      label: this.translocoService.translate('studio.studioPage.pointOption', { index: index + 1 }),
+      value: index
+    }));
   });
 
   toggleSidebar() {

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 import { LoadsTableComponent } from './loads-table.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
@@ -216,7 +217,20 @@ describe('LoadsTableComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [LoadsTableComponent],
+      imports: [
+        LoadsTableComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.loads-table.symmetric-label': 'Symmetric',
+              'studio.loads-table.dis-symmetric-label': 'Dis Symmetric',
+              'studio.loads-table.punctual-load-label': 'Punctual load',
+              'studio.loads-table.marking-label': 'Marking'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: ChargesService, useValue: mockChargesService },

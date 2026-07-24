@@ -13,6 +13,7 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ScalingFactors } from '@shared/types/plot.types';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-scale-view',
@@ -26,7 +27,8 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     PopoverModule,
     ReactiveFormsModule,
     Popover,
-    ButtonComponent
+    ButtonComponent,
+    TranslocoModule
   ],
   templateUrl: './scale-view.component.html',
   styleUrls: ['./scale-view.component.scss']

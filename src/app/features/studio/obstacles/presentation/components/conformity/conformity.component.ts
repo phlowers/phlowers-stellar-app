@@ -35,12 +35,13 @@ import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
-  ALTITUDE_TYPE_LABELS,
   CONFORMITY_BOUNDS,
-  CONFORMITY_CABLE_TRACK_ROWS,
-  CONFORMITY_COMMON_ROWS,
-  LATERAL_DISTANCE_TYPE_LABELS
+  getAltitudeTypeLabels,
+  getConformityCableTrackRows,
+  getConformityCommonRows,
+  getLateralDistanceTypeLabels
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
 import { ConformityPlotResponse } from './conformity-plot.model';
@@ -73,7 +74,8 @@ import { Task, TaskInputs } from '@services/worker_python/tasks/types';
     ButtonComponent,
     DecimalPipe,
     NgTemplateOutlet,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   templateUrl: './conformity.component.html',
   styleUrl: './conformity.component.scss',
@@ -109,6 +111,7 @@ export class ConformityComponent implements OnDestroy {
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly isOpen = input<boolean>(false);
 
@@ -214,7 +217,10 @@ export class ConformityComponent implements OnDestroy {
   readonly hasMultiplePoints = computed(() => this.positions().length > 1);
 
   readonly pointOptions = computed(() =>
-    this.positions().map((_, i) => ({ label: $localize`Point ${i + 1}`, value: i }))
+    this.positions().map((_, i) => ({
+      label: this.translocoService.translate('studio.conformity.pointOptionLabel', { index: i + 1 }),
+      value: i
+    }))
   );
 
   readonly activePoint = computed(() => {
@@ -236,14 +242,17 @@ export class ConformityComponent implements OnDestroy {
     return voltage ?? '-';
   });
 
+  private readonly altitudeTypeLabels = getAltitudeTypeLabels(this.translocoService);
+  private readonly lateralDistanceTypeLabels = getLateralDistanceTypeLabels(this.translocoService);
+
   readonly altitudeTypeLabel = computed(() => {
     const type = this.obstacleData()?.altitudeType;
-    return type ? (ALTITUDE_TYPE_LABELS[type] ?? type) : '-';
+    return type ? (this.altitudeTypeLabels[type] ?? type) : '-';
   });
 
   readonly lateralDistanceTypeLabel = computed(() => {
     const type = this.obstacleData()?.lateralDistanceType;
-    return type ? (LATERAL_DISTANCE_TYPE_LABELS[type] ?? type) : '-';
+    return type ? (this.lateralDistanceTypeLabels[type] ?? type) : '-';
   });
 
   readonly referenceSupportLabel = computed(() => {
@@ -252,8 +261,8 @@ export class ConformityComponent implements OnDestroy {
     return this.obstacleFormService.supportsOptions().find((o) => o.value === ref)?.label ?? ref;
   });
 
-  readonly commonRows = CONFORMITY_COMMON_ROWS;
-  readonly cableTrackRows = CONFORMITY_CABLE_TRACK_ROWS;
+  readonly commonRows = getConformityCommonRows(this.translocoService);
+  readonly cableTrackRows = getConformityCableTrackRows(this.translocoService);
 
   readonly BOUNDS = CONFORMITY_BOUNDS;
   readonly truncateTwoDecimals = truncateTwoDecimals;
@@ -511,9 +520,7 @@ export class ConformityComponent implements OnDestroy {
     if (!obstacle) return;
     const conformityType = this.conformityType();
     if (!conformityType) {
-      this.notificationService.error(
-        $localize`Cannot calculate conformity: obstacle type has no conformity configuration`
-      );
+      this.notificationService.error(this.translocoService.translate('studio.conformity.noConformityConfigError'));
       return;
     }
     // Map database value to Python worker expected value
@@ -590,7 +597,9 @@ export class ConformityComponent implements OnDestroy {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
-      this.notificationService.error($localize`Calculation failed: ${errorMessage}`);
+      this.notificationService.error(
+        this.translocoService.translate('studio.conformity.calculationFailedError', { errorMessage })
+      );
     } finally {
       this.isCalculating.set(false);
     }

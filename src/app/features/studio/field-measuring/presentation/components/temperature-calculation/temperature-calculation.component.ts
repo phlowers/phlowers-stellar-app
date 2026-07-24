@@ -21,6 +21,7 @@ import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, Se
 import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -36,7 +37,8 @@ import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
     ProgressSpinnerModule,
     IconComponent,
     ButtonComponent,
-    DecimalPipe
+    DecimalPipe,
+    TranslocoModule
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
@@ -71,10 +73,21 @@ export class TemperatureCalculationComponent {
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
-  readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto' },
-    { label: $localize`Perpendicular`, value: 'perpendicular' }
-  ];
+  private readonly translocoService = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
+  readonly windIncidenceModeOptions = computed(() => {
+    this.activeLang();
+    return [
+      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      {
+        label: this.translocoService.translate('field-measuring.temperature-calculation.perpendicular-option'),
+        value: 'perpendicular'
+      }
+    ];
+  });
 
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly notificationService = inject(NotificationService);

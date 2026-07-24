@@ -16,6 +16,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ScaleViewComponent } from './scale-view/scale-view.component';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-studio-top-toolbar',
@@ -32,7 +33,8 @@ import { LoggerService } from '@core/services/logger/logger.service';
     DialogModule,
     CheckboxModule,
     ButtonComponent,
-    ScaleViewComponent
+    ScaleViewComponent,
+    TranslocoModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -40,6 +42,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 export class StudioTopToolbarComponent implements OnInit {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   items = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
@@ -51,35 +54,35 @@ export class StudioTopToolbarComponent implements OnInit {
 
   tablesDropdown = computed<MenuItem[]>(() => [
     {
-      label: $localize`Loads table`, // Tableau de charges
+      label: this.translocoService.translate('studio.topToolbar.loadsTableLabel'),
       disabled: !this.hasCharges(),
       command: () => {
         this.toolbarDialogService.openTool('load-table');
       }
     },
     {
-      label: $localize`L0 table`, // Tableau L0
+      label: this.translocoService.translate('studio.topToolbar.l0TableLabel'),
       disabled: false,
       command: () => {
         this.toolbarDialogService.openTool('l0-sum');
       }
     },
     {
-      label: $localize`Pose table`, // Tableau de pose
+      label: this.translocoService.translate('studio.topToolbar.poseTableLabel'),
       disabled: false,
       command: () => {
         this.toolbarDialogService.openTool('pose-table');
       }
     },
     {
-      label: $localize`Obstacles table`, // Tableau d'obstacles
+      label: this.translocoService.translate('studio.topToolbar.obstaclesTableLabel'),
       disabled: true,
       command: () => {
         this.logger.log('Add action triggered');
       }
     },
     {
-      label: $localize`Grounds table`, // Tableau de sols
+      label: this.translocoService.translate('studio.topToolbar.groundsTableLabel'),
       disabled: true,
       command: () => {
         this.logger.log('Add action triggered');
@@ -121,8 +124,8 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: $localize`Profile`, value: 'profile' },
-    { label: $localize`Face`, value: 'face' }
+    { label: this.translocoService.translate('studio.topToolbar.profileOption'), value: 'profile' },
+    { label: this.translocoService.translate('studio.topToolbar.faceOption'), value: 'face' }
   ]);
 
   displayOptions = signal<
@@ -131,14 +134,13 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: $localize`Loads`, value: 'loads' },
-    { label: $localize`Base`, value: 'baseState' },
-    { label: $localize`Transparent background`, value: 'transparentBackground' },
-    { label: $localize`Measurement points`, value: 'measurePoints' }
-    // { label: $localize`Obstacles`, value: 'mesh' },
-    // { label: $localize`Ground`, value: 'ground' },
-    // { label: $localize`In line angle`, value: 'angleInLine' },
-    // { label: $localize`Measure`, value: 'measure' }
+    { label: this.translocoService.translate('studio.topToolbar.loadsOption'), value: 'loads' },
+    { label: this.translocoService.translate('studio.topToolbar.baseOption'), value: 'baseState' },
+    {
+      label: this.translocoService.translate('studio.topToolbar.transparentBackgroundOption'),
+      value: 'transparentBackground'
+    },
+    { label: this.translocoService.translate('studio.topToolbar.measurementPointsOption'), value: 'measurePoints' }
   ]);
 
   selectedDisplayOptions = computed(() =>
@@ -181,7 +183,7 @@ export class StudioTopToolbarComponent implements OnInit {
   >([
     {
       id: 1,
-      label: $localize`Field measurements`, // Mesures terrain
+      label: this.translocoService.translate('studio.topToolbar.fieldMeasurementsTool'),
       checked: false,
       disabled: false,
       action: () => {
@@ -190,7 +192,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 3,
-      label: $localize`VTL & Guying`, // VTL & haubanage
+      label: this.translocoService.translate('studio.topToolbar.vtlAndGuyingTool'),
       checked: false,
       disabled: false,
       action: () => {
@@ -199,7 +201,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 4,
-      label: $localize`Cable marking`, // Marquage câble
+      label: this.translocoService.translate('studio.topToolbar.cableMarkingTool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -208,7 +210,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 5,
-      label: $localize`Strand RRTS`, // CRR de brin
+      label: this.translocoService.translate('studio.topToolbar.strandRrtsTool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -217,7 +219,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 6,
-      label: $localize`Forest trenches`, // Rapport Vegeo
+      label: this.translocoService.translate('studio.topToolbar.forestTrenchesTool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -226,7 +228,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 7,
-      label: $localize`Height & lateral distance`, // Hauteur libre & distance latérale
+      label: this.translocoService.translate('studio.topToolbar.heightAndLateralDistanceTool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -235,7 +237,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 8,
-      label: $localize`Cable adjustment`, // Réglage câble
+      label: this.translocoService.translate('studio.topToolbar.cableAdjustmentTool'),
       checked: false,
       disabled: true,
       action: () => {

@@ -30,6 +30,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ConformityComponent } from '../conformity/conformity.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -48,7 +49,8 @@ import { StorageService } from '@services/storage/storage.service';
     FormsModule,
     DecimalPipe,
     DialogModule,
-    ConformityComponent
+    ConformityComponent,
+    TranslocoModule
   ],
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss',
@@ -62,6 +64,7 @@ export class ObstaclesFormComponent {
   private readonly plotService = inject(PlotService);
   private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly isConformityModalOpen = signal(false);
@@ -91,12 +94,14 @@ export class ObstaclesFormComponent {
   }
 
   readonly altitudeTypeOptions = [
-    { label: $localize`Absolute (NGF)`, value: 'absolute' },
-    { label: $localize`Relative to support`, value: 'relative' },
-    { label: $localize`Relative to cable attachment`, value: 'relative_cable' }
+    { label: this.translocoService.translate('studio.shared.altitudeTypeAbsolute'), value: 'absolute' },
+    { label: this.translocoService.translate('studio.shared.altitudeTypeRelative'), value: 'relative' },
+    { label: this.translocoService.translate('studio.shared.altitudeTypeRelativeCable'), value: 'relative_cable' }
   ];
 
-  readonly lateralDistanceTypeOptions = [{ label: $localize`Span axis`, value: 'SPAN_AXIS' }];
+  readonly lateralDistanceTypeOptions = [
+    { label: this.translocoService.translate('studio.shared.spanAxisOption'), value: 'SPAN_AXIS' }
+  ];
 
   readonly spansOptions = computed(() => {
     return this.spanService.getSpanOptions();
@@ -155,7 +160,7 @@ export class ObstaclesFormComponent {
     const uuid = this.obstacleFormService.form.value.uuid;
     const isSaved = !!uuid;
     if (!isSaved) {
-      warnings.push($localize`obstacle must be saved`);
+      warnings.push(this.translocoService.translate('studio.obstaclesForm.obstacleMustBeSavedWarning'));
     }
 
     const obstacleType = this.obstacleFormService.form.value.type;
@@ -164,19 +169,21 @@ export class ObstaclesFormComponent {
       const distanceCount = db ? await db.catObstacleDistances.where('obstacle_type').equals(obstacleType).count() : 0;
       if (distanceCount === 0) {
         const typeLabel = this.obstacleTypeOptions().find((o) => o.value === obstacleType)?.label ?? obstacleType;
-        warnings.push($localize`obstacle type '${typeLabel}' is not eligible for conformity control`);
+        warnings.push(
+          this.translocoService.translate('studio.obstaclesForm.obstacleTypeNotEligibleWarning', { typeLabel })
+        );
       }
     }
 
     if (!this.spanService.section()?.voltage_idr) {
-      warnings.push($localize`study must have an electric tension level`);
+      warnings.push(this.translocoService.translate('studio.obstaclesForm.tensionLevelRequiredWarning'));
     }
 
     if (warnings.length > 0) {
       const summary =
         warnings.length === 1
-          ? $localize`You cannot open conformity control because this condition is not met:`
-          : $localize`You cannot open conformity control because these conditions are not met:`;
+          ? this.translocoService.translate('studio.obstaclesForm.singleConditionWarningSummary')
+          : this.translocoService.translate('studio.obstaclesForm.multipleConditionsWarningSummary');
       this.notificationService.warningList(warnings, summary);
       return;
     }

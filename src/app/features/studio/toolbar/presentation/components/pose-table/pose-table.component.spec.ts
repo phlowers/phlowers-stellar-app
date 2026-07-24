@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { PoseTableComponent } from './pose-table.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
@@ -83,7 +84,26 @@ describe('PoseTableComponent', () => {
     mockNotificationService = { success: vi.fn(), error: vi.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [PoseTableComponent, NoopAnimationsModule],
+      imports: [
+        PoseTableComponent,
+        NoopAnimationsModule,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.pose-table.failed-to-compute-equivalent-span': 'Failed to compute equivalent span',
+              'studio.pose-table.failed-to-compute-pose-table': 'Failed to compute pose table',
+              'studio.pose-table.pose-table-saved': 'Pose table saved',
+              'studio.pose-table.failed-to-save-pose-table': 'Failed to save pose table',
+              'studio.pose-table.required-error': 'Required',
+              'studio.pose-table.max-two-decimals-error': 'Maximum 2 decimal places',
+              'studio.pose-table.min-value-error': 'Minimum value:',
+              'studio.pose-table.max-value-error': 'Maximum value:',
+              'studio.pose-table.integer-error': 'Value must be a whole number'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         { provide: PlotSpanService, useValue: { section: sectionSignal } },
         { provide: PlotService, useValue: { study: studySignal, litData: litDataSignal } },

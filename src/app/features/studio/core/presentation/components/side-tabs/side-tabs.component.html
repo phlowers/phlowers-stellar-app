@@ -39,7 +39,7 @@
         <header class="side-tab__main__section__header">
           <button app-btn btnStyle="text" btnSize="s" (click)="toggleTab($index)">
             <app-icon icon="keyboard_arrow_right" />
-            <ng-container i18n> Fold back </ng-container>
+            <ng-container>{{ 'studio.sideTabs.foldBack' | transloco }}</ng-container>
           </button>
         </header>
         <ng-container *ngTemplateOutlet="tab.template() ?? null" />

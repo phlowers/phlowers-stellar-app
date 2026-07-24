@@ -39,6 +39,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { TranslocoModule } from '@jsverse/transloco';
 
 // Constants
 const PLOT_CONFIG = {
@@ -100,7 +101,7 @@ interface PlotElement extends HTMLElement {
 @Component({
   selector: 'app-free-positioning',
   standalone: true,
-  imports: [FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule],
+  imports: [FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule, TranslocoModule],
   templateUrl: './free-positioning.component.html',
   styleUrl: './free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

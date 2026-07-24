@@ -1,7 +1,7 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2">
     <app-icon icon="calculate" />
-    <span i18n>Compute base parameter from terrain measurement</span>
+    <span>{{ 'field-measuring.shared.dialog-title' | transloco }}</span>
   </p>
 </ng-template>
 
@@ -9,10 +9,18 @@
 
 <p-tabs [(value)]="activeTab">
   <p-tablist>
-    <p-tab value="terrainData" i18n data-testid="terrain-data-tab">Terrain data</p-tab>
-    <p-tab value="parameterCalculation" i18n data-testid="parameter-calc-tab">Parameter calculation</p-tab>
-    <p-tab value="temperatureCalculation" i18n data-testid="temperature-calc-tab">Temperature calculation</p-tab>
-    <p-tab value="parameterAt15CWithoutWind" i18n data-testid="param-15c-tab">Parameter at 15°C without wind</p-tab>
+    <p-tab value="terrainData" data-testid="terrain-data-tab">{{
+      'field-measuring.field-measuring.tab-terrain-data' | transloco
+    }}</p-tab>
+    <p-tab value="parameterCalculation" data-testid="parameter-calc-tab">{{
+      'field-measuring.field-measuring.tab-parameter-calculation' | transloco
+    }}</p-tab>
+    <p-tab value="temperatureCalculation" data-testid="temperature-calc-tab">{{
+      'field-measuring.field-measuring.tab-temperature-calculation' | transloco
+    }}</p-tab>
+    <p-tab value="parameterAt15CWithoutWind" data-testid="param-15c-tab">{{
+      'field-measuring.field-measuring.tab-parameter-15c' | transloco
+    }}</p-tab>
   </p-tablist>
 
   <p-tabpanel value="terrainData">
@@ -44,15 +52,15 @@
   <div class="dialog-footer">
     <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onReport()">
       <app-icon icon="description" />
-      <span i18n>Report</span>
+      <span>{{ 'field-measuring.field-measuring.report-button' | transloco }}</span>
     </button>
     <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onExport()">
       <app-icon icon="download" />
-      <span i18n>Export</span>
+      <span>{{ 'field-measuring.field-measuring.export-button' | transloco }}</span>
     </button>
     <button app-btn type="button" [disabled]="!isFormValid()" (click)="onSave()" data-testid="save-btn">
       <app-icon icon="save" />
-      <span i18n>Save</span>
+      <span>{{ 'field-measuring.field-measuring.save-button' | transloco }}</span>
     </button>
   </div>
 </ng-template>

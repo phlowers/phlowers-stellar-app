@@ -31,10 +31,19 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { MessageModule } from 'primeng/message';
+import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-pose-table',
-  imports: [IconComponent, ButtonComponent, InputNumberComponent, ReactiveFormsModule, DecimalPipe, MessageModule],
+  imports: [
+    IconComponent,
+    ButtonComponent,
+    InputNumberComponent,
+    ReactiveFormsModule,
+    DecimalPipe,
+    MessageModule,
+    TranslocoModule
+  ],
   templateUrl: './pose-table.component.html',
   styleUrl: './pose-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +79,7 @@ export class PoseTableComponent {
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly isPlotReady = computed(() => this.plotService.litData() !== null);
 
@@ -159,14 +169,18 @@ export class PoseTableComponent {
         if (runId !== this.equivalentSpanRunId) return;
         if (error || result === null) {
           this.equivalentSpan.set(null);
-          this.notificationService.error($localize`Failed to compute equivalent span`);
+          this.notificationService.error(
+            this.translocoService.translate('studio.pose-table.failed-to-compute-equivalent-span')
+          );
         } else {
           this.equivalentSpan.set(result.equivalentSpan);
         }
       } catch {
         if (runId !== this.equivalentSpanRunId) return;
         this.equivalentSpan.set(null);
-        this.notificationService.error($localize`Failed to compute equivalent span`);
+        this.notificationService.error(
+          this.translocoService.translate('studio.pose-table.failed-to-compute-equivalent-span')
+        );
       } finally {
         if (runId === this.equivalentSpanRunId) {
           this.isCalculatingEquivalentSpan.set(false);
@@ -192,7 +206,7 @@ export class PoseTableComponent {
     } catch {
       this.poseTableError.set(true);
       this.results.set(null);
-      this.notificationService.error($localize`Failed to compute pose table`);
+      this.notificationService.error(this.translocoService.translate('studio.pose-table.failed-to-compute-pose-table'));
     } finally {
       this.isCalculating.set(false);
     }
@@ -209,27 +223,31 @@ export class PoseTableComponent {
     };
     try {
       await this.sectionService.createOrUpdateSection(study, { ...section, pose_table: data });
-      this.notificationService.success($localize`Pose table saved`);
+      this.notificationService.success(this.translocoService.translate('studio.pose-table.pose-table-saved'));
     } catch {
-      this.notificationService.error($localize`Failed to save pose table`);
+      this.notificationService.error(this.translocoService.translate('studio.pose-table.failed-to-save-pose-table'));
     }
   }
 
   getLowestTempError(): string {
     const errors = this.form.controls.lowestTemp.errors;
-    if (errors?.['required']) return $localize`Required`;
-    if (errors?.['maxTwoDecimals']) return $localize`Maximum 2 decimal places`;
-    if (errors?.['min']) return $localize`Minimum value:` + ' ' + this.LOWEST_TEMP_MIN + '°C';
-    if (errors?.['max']) return $localize`Maximum value:` + ' ' + this.LOWEST_TEMP_MAX + '°C';
+    if (errors?.['required']) return this.translocoService.translate('studio.pose-table.required-error');
+    if (errors?.['maxTwoDecimals']) return this.translocoService.translate('studio.pose-table.max-two-decimals-error');
+    if (errors?.['min'])
+      return this.translocoService.translate('studio.pose-table.min-value-error') + ' ' + this.LOWEST_TEMP_MIN + '°C';
+    if (errors?.['max'])
+      return this.translocoService.translate('studio.pose-table.max-value-error') + ' ' + this.LOWEST_TEMP_MAX + '°C';
     return '';
   }
 
   getComputingStepError(): string {
     const errors = this.form.controls.computingStep.errors;
-    if (errors?.['required']) return $localize`Required`;
-    if (errors?.['integer']) return $localize`Value must be a whole number`;
-    if (errors?.['min']) return $localize`Minimum value:` + ' ' + this.COMPUTING_STEP_MIN;
-    if (errors?.['max']) return $localize`Maximum value:` + ' ' + this.COMPUTING_STEP_MAX;
+    if (errors?.['required']) return this.translocoService.translate('studio.pose-table.required-error');
+    if (errors?.['integer']) return this.translocoService.translate('studio.pose-table.integer-error');
+    if (errors?.['min'])
+      return this.translocoService.translate('studio.pose-table.min-value-error') + ' ' + this.COMPUTING_STEP_MIN;
+    if (errors?.['max'])
+      return this.translocoService.translate('studio.pose-table.max-value-error') + ' ' + this.COMPUTING_STEP_MAX;
     return '';
   }
 

@@ -33,6 +33,7 @@ import {
   SupportManipType
 } from './cable-support-manip.interfaces';
 import { CABLE_SUPPORT_MANIP_BOUNDS, conditionalRangeValidators } from './cable-support-manip.constantes';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-cable-support-manip',
@@ -45,7 +46,8 @@ import { CABLE_SUPPORT_MANIP_BOUNDS, conditionalRangeValidators } from './cable-
     SelectModule,
     MessageModule,
     ButtonComponent,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   templateUrl: './cable-support-manip.component.html',
   styleUrl: './cable-support-manip.component.scss',
@@ -69,6 +71,7 @@ export class CableSupportManipComponent {
   private readonly spanService = inject(PlotSpanService);
   private readonly cableSupportManipService = inject(CableSupportManipService);
   private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly isLoading = signal(false);
   readonly isCalculating = computed(() => this.plotService.loading());
@@ -131,14 +134,14 @@ export class CableSupportManipComponent {
   });
 
   readonly manip1TypeOptions = [
-    { label: $localize`Crane handling`, value: 'crane' as SupportManipType },
-    { label: $localize`Rope handling`, value: 'rope' as SupportManipType },
-    { label: $localize`Shifting`, value: 'shifting' as SupportManipType }
+    { label: this.translocoService.translate('loads.cable-support-manip.crane-handling-option'), value: 'crane' as SupportManipType },
+    { label: this.translocoService.translate('loads.cable-support-manip.rope-handling-option'), value: 'rope' as SupportManipType },
+    { label: this.translocoService.translate('loads.cable-support-manip.shifting-option'), value: 'shifting' as SupportManipType }
   ];
 
   readonly anchoringOptions = [
-    { label: $localize`Without chain`, value: 'without_chain' as SupportAnchoringType },
-    { label: $localize`With chain`, value: 'with_chain' as SupportAnchoringType, disabled: true }
+    { label: this.translocoService.translate('loads.cable-support-manip.without-chain-option'), value: 'without_chain' as SupportAnchoringType },
+    { label: this.translocoService.translate('loads.shared.with-chain-option'), value: 'with_chain' as SupportAnchoringType, disabled: true }
   ];
 
   private readonly manip1TypeSignal: Signal<SupportManipType | null> = toSignal(
@@ -159,7 +162,9 @@ export class CableSupportManipComponent {
     () => this.manip1TypeSignal() === 'crane' || this.manip1TypeSignal() === 'rope'
   );
 
-  readonly manip2TypeOptions = [{ label: $localize`Shifting`, value: 'shifting' as SupportManipType }];
+  readonly manip2TypeOptions = [
+    { label: this.translocoService.translate('loads.cable-support-manip.shifting-option'), value: 'shifting' as SupportManipType }
+  ];
 
   private readonly manip2TypeSignal: Signal<SupportManipType | null> = toSignal(
     this.form.controls.manip2Type.valueChanges,
@@ -313,9 +318,9 @@ export class CableSupportManipComponent {
       });
       this.hasSavedManipulation.set(true);
       await this.cableSupportManipService.reloadSection();
-      this.notificationService.success($localize`Cable support manipulation saved`);
+      this.notificationService.success(this.translocoService.translate('loads.cable-support-manip.saved-notification'));
     } catch {
-      this.notificationService.error($localize`Failed to save cable support manipulation`);
+      this.notificationService.error(this.translocoService.translate('loads.cable-support-manip.save-failed-notification'));
     } finally {
       this.isLoading.set(false);
     }
@@ -337,13 +342,13 @@ export class CableSupportManipComponent {
       if (uuid) {
         await this.cableSupportManipService.delete(uuid);
         await this.cableSupportManipService.reloadSection();
-        this.notificationService.success($localize`Cable support manipulation deleted`);
+        this.notificationService.success(this.translocoService.translate('loads.cable-support-manip.deleted-notification'));
       }
       this.clearManip2();
       this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value });
       this.hasSavedManipulation.set(false);
     } catch {
-      this.notificationService.error($localize`Failed to delete cable support manipulation`);
+      this.notificationService.error(this.translocoService.translate('loads.cable-support-manip.delete-failed-notification'));
     } finally {
       this.isLoading.set(false);
     }

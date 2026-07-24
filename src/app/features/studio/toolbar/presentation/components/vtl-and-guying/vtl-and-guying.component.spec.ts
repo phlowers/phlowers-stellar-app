@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { VhlAndGuyingComponent } from './vtl-and-guying.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
@@ -105,8 +106,21 @@ describe('VhlAndGuyingComponent', () => {
       getDiagramImageBase64: vi.fn().mockResolvedValue('data:image/png;base64,mock')
     };
 
+    const translations: Record<string, string> = {
+      'studio.vtl-and-guying.suspension-label': 'Suspension',
+      'studio.vtl-and-guying.anchor-label': 'Anchor',
+      'field-measuring.parameter-calculation-15-without-wind.success-summary': 'Successful',
+      'studio.vtl-and-guying.saved-detail': 'VTL and guying saved'
+    };
+
     await TestBed.configureTestingModule({
-      imports: [VhlAndGuyingComponent],
+      imports: [
+        VhlAndGuyingComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: translations },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         ToolbarDialogService,
         provideHttpClientTesting(),

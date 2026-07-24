@@ -10,7 +10,7 @@
       data-testid="return-to-span"
     >
       <app-icon icon="filter_center_focus" aria-hidden="true" />
-      <ng-container i18n>Zoom</ng-container>
+      <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
     </button>
 
     <button
@@ -22,12 +22,12 @@
       data-testid="create-new-obstacle"
     >
       <app-icon icon="add_circle" aria-hidden="true" />
-      <ng-container i18n>Create new obstacle</ng-container>
+      <ng-container>{{ 'studio.obstaclesForm.createNewObstacleBtn' | transloco }}</ng-container>
     </button>
   </div>
 
   <div class="obstacles-form__grid-2-cols">
-    <label for="span" class="span-label" i18n>Span</label>
+    <label for="span" class="span-label">{{ 'studio.shared.spanLabel' | transloco }}</label>
 
     <p-select
       inputId="span"
@@ -39,7 +39,7 @@
       data-testid="span-select"
     />
 
-    <label for="obstacleType" class="type-label" i18n>Obstacle type</label>
+    <label for="obstacleType" class="type-label">{{ 'studio.obstaclesForm.obstacleTypeLabel' | transloco }}</label>
 
     <p-select
       inputId="obstacleType"
@@ -53,7 +53,7 @@
   </div>
 
   <div class="obstacles-form__grid-2-cols">
-    <label for="obstacleName" class="name-label" i18n>Obstacle name</label>
+    <label for="obstacleName" class="name-label">{{ 'studio.obstaclesForm.obstacleNameLabel' | transloco }}</label>
 
     <input
       pInputText
@@ -65,7 +65,7 @@
       data-testid="obstacle-name"
     />
 
-    <label for="referenceSupport" class="ref-label" i18n>Reference support</label>
+    <label for="referenceSupport" class="ref-label">{{ 'studio.shared.referenceSupportLabel' | transloco }}</label>
     <p-select
       inputId="referenceSupport"
       [options]="obstacleFormService.supportsOptions()"
@@ -78,7 +78,9 @@
   </div>
 
   <div class="obstacles-form__grid-2-cols">
-    <label for="altitudeType" class="alt-label" i18n>Obstacle altitude type</label>
+    <label for="altitudeType" class="alt-label">{{
+      'studio.obstaclesForm.obstacleAltitudeTypeLabel' | transloco
+    }}</label>
 
     <p-select
       inputId="altitudeType"
@@ -90,7 +92,9 @@
       data-testid="altitude-type"
     />
 
-    <label for="lateralDistanceType" class="lat-label" i18n>Lateral distance type</label>
+    <label for="lateralDistanceType" class="lat-label">{{
+      'studio.shared.lateralDistanceTypeLabel' | transloco
+    }}</label>
 
     <p-select
       inputId="lateralDistanceType"
@@ -113,7 +117,7 @@
         [ngModelOptions]="{ standalone: true }"
         (onChange)="plotOptionsService.isFreePositioningMode.set($event.checked)"
       />
-      <label for="freePositioning" i18n>Free positioning</label>
+      <label for="freePositioning">{{ 'studio.obstaclesForm.freePositioningLabel' | transloco }}</label>
     </div>
 
     <button
@@ -127,7 +131,7 @@
       data-testid="add-point"
     >
       <app-icon icon="add_circle" aria-hidden="true" />
-      <ng-container i18n>Add point</ng-container>
+      <ng-container>{{ 'studio.obstaclesForm.addPointBtn' | transloco }}</ng-container>
     </button>
   </div>
 
@@ -145,11 +149,16 @@
           (click)="setCurrentObstaclePoint($index)"
           data-testid="select-point"
         >
-          <span class="sr-only"><ng-container i18n>Select point</ng-container>&nbsp;{{ $index + 1 }}</span>
+          <span class="sr-only"
+            ><ng-container>{{ 'studio.obstaclesForm.selectPointLabel' | transloco }}</ng-container
+            >&nbsp;{{ $index + 1 }}</span
+          >
         </button>
 
         <div class="obstacles-item__header">
-          <p class="obstacles-item__title"><ng-container i18n>Point</ng-container> {{ $index + 1 }}</p>
+          <p class="obstacles-item__title">
+            <ng-container>{{ 'studio.obstaclesForm.pointLabel' | transloco }}</ng-container> {{ $index + 1 }}
+          </p>
           <button
             app-btn
             btnStyle="danger"
@@ -157,8 +166,7 @@
             type="button"
             class="obstacles-item__erase-btn"
             (click)="obstacleFormService.deletePoint($index); $event.stopPropagation()"
-            aria-label="delete point"
-            i18n-aria-label
+            [attr.aria-label]="'studio.obstaclesForm.deletePointAriaLabel' | transloco"
             data-testid="delete-point"
           >
             <app-icon icon="delete" aria-hidden="true" />
@@ -167,11 +175,10 @@
 
         <div class="obstacles-item__form">
           <label
-            i18n
             [for]="'altitudePoint' + $index"
             class="obstacles-item__label alt-point-label"
             data-testid="label-point-altitude"
-            >Point alt.</label
+            >{{ 'studio.obstaclesForm.pointAltLabel' | transloco }}</label
           >
 
           <p-inputgroup class="obstacles-item__input">
@@ -187,15 +194,14 @@
               (focus)="setCurrentObstaclePoint($index)"
               data-testid="point-altitude"
             />
-            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+            <p-inputgroup-addon>{{ 'studio.obstaclesForm.meterUnit' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
 
           <label
-            i18n
             [for]="'distanceToRefSupport' + $index"
             class="obstacles-item__label dist-ref-label"
             data-testid="label-ref-distance"
-            >Ref. support dist.</label
+            >{{ 'studio.obstaclesForm.refSupportDistLabel' | transloco }}</label
           >
 
           <p-inputgroup class="obstacles-item__input">
@@ -211,15 +217,14 @@
               (focus)="setCurrentObstaclePoint($index)"
               data-testid="point-ref-distance"
             />
-            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+            <p-inputgroup-addon>{{ 'studio.obstaclesForm.meterUnit' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
 
           <label
-            i18n
             [for]="'distanceToLineAxis' + $index"
             class="obstacles-item__label dist-axis-label"
             data-testid="label-axis-distance"
-            >Line axis dist.</label
+            >{{ 'studio.obstaclesForm.lineAxisDistLabel' | transloco }}</label
           >
 
           <p-inputgroup class="obstacles-item__input">
@@ -235,7 +240,7 @@
               (focus)="setCurrentObstaclePoint($index)"
               data-testid="point-axis-distance"
             />
-            <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+            <p-inputgroup-addon>{{ 'studio.obstaclesForm.meterUnit' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
         </div>
       </li>
@@ -250,8 +255,7 @@
         type="button"
         [disabled]="!obstacleFormService.form.get('uuid')?.value"
         (click)="obstacleFormService.deleteObstacle()"
-        aria-label="delete obstacle"
-        i18n-aria-label
+        [attr.aria-label]="'studio.obstaclesForm.deleteObstacleAriaLabel' | transloco"
         data-testid="delete-obstacle"
       >
         <app-icon icon="delete" aria-hidden="true" />
@@ -265,7 +269,7 @@
         (click)="openConformityModal()"
         data-testid="open-conformity-modal"
       >
-        <ng-container i18n>Conformity</ng-container>
+        <ng-container>{{ 'studio.shared.conformityLabel' | transloco }}</ng-container>
       </button>
 
       <button
@@ -277,14 +281,14 @@
         data-testid="calculate-save"
       >
         <app-icon icon="rocket_launch" aria-hidden="true" />
-        <ng-container i18n>Calculate and save</ng-container>
+        <ng-container>{{ 'studio.obstaclesForm.calculateAndSaveBtn' | transloco }}</ng-container>
       </button>
     </div>
 
     <hr class="obstacles-form__sticky__divider" />
 
     <div class="obstacles-form__sticky__results" data-testid="results">
-      <h2 class="obstacles-form__sticky__results__title" i18n>Results:</h2>
+      <h2 class="obstacles-form__sticky__results__title">{{ 'studio.shared.resultsTitle' | transloco }}</h2>
 
       @if (obstacleFormService.calculationError()) {
         <p-message
@@ -297,7 +301,9 @@
 
       <dl class="obstacles-form__sticky__results__grid">
         <div class="obstacles-form__sticky__results__grid__item">
-          <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Oblique</dt>
+          <dt class="obstacles-form__sticky__results__grid__item__term">
+            {{ 'studio.obstaclesForm.obliqueLabel' | transloco }}
+          </dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-oblique">
               {{
@@ -310,7 +316,9 @@
         </div>
 
         <div class="obstacles-form__sticky__results__grid__item">
-          <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Vertical</dt>
+          <dt class="obstacles-form__sticky__results__grid__item__term">
+            {{ 'studio.obstaclesForm.verticalLabel' | transloco }}
+          </dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-vertical">
               {{
@@ -323,7 +331,9 @@
         </div>
 
         <div class="obstacles-form__sticky__results__grid__item">
-          <dt class="obstacles-form__sticky__results__grid__item__term" i18n>Horizontal</dt>
+          <dt class="obstacles-form__sticky__results__grid__item__term">
+            {{ 'studio.obstaclesForm.horizontalLabel' | transloco }}
+          </dt>
           <dd class="obstacles-form__sticky__results__grid__item__def">
             <span data-testid="result-horizontal">
               {{
@@ -350,7 +360,7 @@
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
       <app-icon icon="assignment_turned_in" aria-hidden="true" />
-      <span i18n>Conformity verifications</span>
+      <span>{{ 'studio.obstaclesForm.conformityDialogTitle' | transloco }}</span>
     </p>
   </ng-template>
 
@@ -359,11 +369,11 @@
   <ng-template #footer>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-report-btn" disabled>
       <app-icon icon="description" aria-hidden="true" />
-      <ng-container i18n>Report</ng-container>
+      <ng-container>{{ 'studio.obstaclesForm.reportBtn' | transloco }}</ng-container>
     </button>
     <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn" disabled>
       <app-icon icon="download" aria-hidden="true" />
-      <ng-container i18n>Export</ng-container>
+      <ng-container>{{ 'common.export-dialog.title' | transloco }}</ng-container>
     </button>
     <button
       app-btn
@@ -373,7 +383,7 @@
       (click)="conformityRef()?.saveConformityData()"
     >
       <app-icon icon="save" aria-hidden="true" />
-      <ng-container i18n>Save</ng-container>
+      <ng-container>{{ 'studio.obstaclesForm.saveBtn' | transloco }}</ng-container>
     </button>
   </ng-template>
 </p-dialog>
