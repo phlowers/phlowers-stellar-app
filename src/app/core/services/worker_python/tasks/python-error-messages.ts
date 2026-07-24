@@ -24,7 +24,8 @@ const PYTHON_ERROR_MESSAGES: Record<PythonErrorCode, string> = {
   [PythonErrorCode.InvalidManipulationKeys]: $localize`The manipulation keys provided are invalid.`,
   [PythonErrorCode.InvalidManipulationRange]: $localize`The manipulation range provided is invalid.`,
   [PythonErrorCode.SupportOutOfRangeError]: $localize`The support is out of the valid range.`,
-  [PythonErrorCode.GeneratedPointsNoneError]: $localize`No generated points were found after computation.`
+  [PythonErrorCode.GeneratedPointsNoneError]: $localize`No generated points were found after computation.`,
+  [PythonErrorCode.NightTimeError]: $localize`Sky cover cannot be estimated because the provided time is during the night.`
 };
 
 /**

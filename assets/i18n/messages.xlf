@@ -106,6 +106,11 @@
         <source>Charge created</source>
       </segment>
     </unit>
+    <unit id="1030833965279598521">
+      <segment>
+        <source>Minimum solar beam value:</source>
+      </segment>
+    </unit>
     <unit id="4807396535461926931">
       <segment>
         <source>Charge deleted</source>
@@ -309,6 +314,11 @@
     <unit id="1839839226703008167">
       <segment>
         <source>The python logs have been deactivated</source>
+      </segment>
+    </unit>
+    <unit id="1845447508284521819">
+      <segment>
+        <source>Estimate</source>
       </segment>
     </unit>
     <unit id="4768592761478998496">
@@ -1416,6 +1426,11 @@
         <source>Parameter at 15°C - uncertainty</source>
       </segment>
     </unit>
+    <unit id="3044861858989669396">
+      <segment>
+        <source>Sky cover cannot be estimated because the provided time is during the night.</source>
+      </segment>
+    </unit>
     <unit id="7477006503326420990">
       <segment>
         <source>Parameter at 15°C</source>
@@ -1654,6 +1669,11 @@
     <unit id="6494949896986424409">
       <segment>
         <source>Shortening</source>
+      </segment>
+    </unit>
+    <unit id="6496057902996933975">
+      <segment>
+        <source> Measured solar beam (not required) </source>
       </segment>
     </unit>
     <unit id="6613300769068333223">
@@ -2896,6 +2916,11 @@
         <source>No cable found</source>
       </segment>
     </unit>
+    <unit id="7207024934417821132">
+      <segment>
+        <source>Maximum solar beam value:</source>
+      </segment>
+    </unit>
     <unit id="7215028324689336548">
       <segment>
         <source>Calculation error</source>
@@ -3455,6 +3480,11 @@
     <unit id="7323621884957166471">
       <segment>
         <source>Lowest temperature (°C)</source>
+      </segment>
+    </unit>
+    <unit id="7329048005009948690">
+      <segment>
+        <source>Sky cover could not be estimated from the provided inputs. Please check the values and try again.</source>
       </segment>
     </unit>
     <unit id="7692794071516027083">
@@ -4035,11 +4065,6 @@
     <unit id="7435704250978299258">
       <segment>
         <source>Calculating conformity…</source>
-      </segment>
-    </unit>
-    <unit id="2568633915195803623">
-      <segment>
-        <source> Measured diffuse + beam solar radiation (not required) </source>
       </segment>
     </unit>
   </file>

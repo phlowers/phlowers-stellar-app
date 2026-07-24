@@ -8,6 +8,7 @@
 import {
   truncateTwoDecimals,
   truncateOneDecimal,
+  truncateNoDecimals,
   truncateOneDecimalValue,
   truncateNumberToOneDecimal
 } from './truncateDecimals';
@@ -69,6 +70,32 @@ describe('truncateOneDecimal', () => {
     const event = makeEvent('-1.23');
     truncateOneDecimal(event);
     expect((event.target as HTMLInputElement).value).toBe('-1.2');
+  });
+});
+
+describe('truncateNoDecimals', () => {
+  it('should do nothing when value has no decimal separator', () => {
+    const event = makeEvent('123');
+    truncateNoDecimals(event);
+    expect((event.target as HTMLInputElement).value).toBe('123');
+  });
+
+  it('should strip the decimal part and separator', () => {
+    const event = makeEvent('1.23');
+    truncateNoDecimals(event);
+    expect((event.target as HTMLInputElement).value).toBe('1');
+  });
+
+  it('should strip a trailing separator', () => {
+    const event = makeEvent('123.');
+    truncateNoDecimals(event);
+    expect((event.target as HTMLInputElement).value).toBe('123');
+  });
+
+  it('should strip the decimal part from negative numbers', () => {
+    const event = makeEvent('-1.9');
+    truncateNoDecimals(event);
+    expect((event.target as HTMLInputElement).value).toBe('-1');
   });
 });
 

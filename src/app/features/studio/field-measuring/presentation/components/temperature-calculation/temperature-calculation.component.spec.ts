@@ -6,12 +6,15 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
+import { NotificationService } from '@services/notification/notification.service';
+import { PythonErrorCode, Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
+import { SkyCover } from '@shared/domain';
 import {
   WIND_DIRECTION_OPTIONS,
   SKY_COVER_OPTIONS,
-  TRANSIT_BOUNDS
+  TRANSIT_BOUNDS,
+  MEASURED_SOLAR_FLUX_BOUNDS
 } from '@features/studio/field-measuring/presentation/constants';
 
 describe('TemperatureCalculationComponent', () => {
@@ -19,6 +22,7 @@ describe('TemperatureCalculationComponent', () => {
   let fixture: ComponentFixture<TemperatureCalculationComponent>;
   let componentRef: ComponentRef<TemperatureCalculationComponent>;
   let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
+  let notificationServiceMock: vi.Mocked<NotificationService>;
   let workerReadySubject: BehaviorSubject<boolean>;
 
   beforeEach(async () => {
@@ -29,9 +33,17 @@ describe('TemperatureCalculationComponent', () => {
       ready$: workerReadySubject.asObservable()
     } as unknown as vi.Mocked<WorkerPythonService>;
 
+    notificationServiceMock = {
+      error: vi.fn()
+    } as unknown as vi.Mocked<NotificationService>;
+
     await TestBed.configureTestingModule({
       imports: [TemperatureCalculationComponent],
-      providers: [provideNoopAnimations(), { provide: WorkerPythonService, useValue: workerPythonServiceMock }]
+      providers: [
+        provideNoopAnimations(),
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TemperatureCalculationComponent);
@@ -97,15 +109,47 @@ describe('TemperatureCalculationComponent', () => {
     });
   });
 
+  describe('isMeasuredSolarFluxOutOfBounds', () => {
+    it('should return false when measured solar flux is null', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', null);
+      expect(component.isMeasuredSolarFluxOutOfBounds()).toBe(false);
+    });
+
+    it('should return false when measured solar flux is at minimum boundary', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', MEASURED_SOLAR_FLUX_BOUNDS.min);
+      expect(component.isMeasuredSolarFluxOutOfBounds()).toBe(false);
+    });
+
+    it('should return false when measured solar flux is at maximum boundary', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', MEASURED_SOLAR_FLUX_BOUNDS.max);
+      expect(component.isMeasuredSolarFluxOutOfBounds()).toBe(false);
+    });
+
+    it('should return true when measured solar flux is below minimum', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', MEASURED_SOLAR_FLUX_BOUNDS.min - 1);
+      expect(component.isMeasuredSolarFluxOutOfBounds()).toBe(true);
+    });
+
+    it('should return true when measured solar flux is above maximum', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', MEASURED_SOLAR_FLUX_BOUNDS.max + 1);
+      expect(component.isMeasuredSolarFluxOutOfBounds()).toBe(true);
+    });
+  });
+
   describe('isFormValid', () => {
     beforeEach(() => {
       component.updateField('cableName', 'ASTER570');
-      component.updateField('skyCover', 'N5');
+      component.updateField('skyCover', SkyCover.N5);
       component.updateField('transit', 1000);
     });
 
     it('should return true when all required fields are set and transit is in range', () => {
       expect(component.isFormValid()).toBe(true);
+    });
+
+    it('should return false when measured solar flux is out of bounds', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', MEASURED_SOLAR_FLUX_BOUNDS.max + 1);
+      expect(component.isFormValid()).toBe(false);
     });
 
     it('should return false when transit is null', () => {
@@ -153,7 +197,7 @@ describe('TemperatureCalculationComponent', () => {
 
       component.updateField('cableName', 'ASTER570');
       component.updateField('transit', 1000);
-      component.updateField('skyCover', 'N5');
+      component.updateField('skyCover', SkyCover.N5);
 
       const calcPromise = component.calculateTemperature();
       expect(component.isCalculating()).toBe(true);
@@ -173,7 +217,7 @@ describe('TemperatureCalculationComponent', () => {
 
       component.updateField('cableName', 'ASTER570');
       component.updateField('transit', 1000);
-      component.updateField('skyCover', 'N5');
+      component.updateField('skyCover', SkyCover.N5);
 
       await expect(component.calculateTemperature()).rejects.toThrow('unexpected');
       expect(component.isCalculating()).toBe(false);
@@ -202,7 +246,7 @@ describe('TemperatureCalculationComponent', () => {
     component.updateField('azimuth', 90);
     component.updateField('windSpeed', 5);
     component.updateField('windDirection', 'North');
-    component.updateField('skyCover', 'N5');
+    component.updateField('skyCover', SkyCover.N5);
 
     expect(component.measureData().outputs.cableTemperature).toBe(null);
     expect(component.temperatureCalculationError()).toBe(false);
@@ -210,6 +254,78 @@ describe('TemperatureCalculationComponent', () => {
     await component.calculateTemperature();
 
     expect(component.temperatureCalculationError()).toBe(false);
+  });
+
+  describe('estimateSkyCover', () => {
+    beforeEach(() => {
+      component.updateField('longitude', 2.3522);
+      component.updateField('latitude', 48.8566);
+      component.updateField('date', new Date('2026-07-23'));
+      component.updateField('time', new Date('2026-07-23T12:00:00'));
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', 800);
+      component.updateField('skyCover', null);
+    });
+
+    it('should update skyCover from the task result on success', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: { skyCover: SkyCover.N3 },
+        error: null,
+        diagnostics: []
+      });
+
+      await component.estimateSkyCover();
+
+      expect(component.measureData().skyCover).toBe(SkyCover.N3);
+      expect(notificationServiceMock.error).not.toHaveBeenCalled();
+    });
+
+    it('should show an error notification and not update skyCover when the task returns an error', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: []
+      });
+
+      await component.estimateSkyCover();
+
+      expect(notificationServiceMock.error).toHaveBeenCalledTimes(1);
+      expect(component.measureData().skyCover).toBeNull();
+    });
+
+    it('should show the specific message when the task reports a NightTimeError diagnostic', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: [
+          {
+            code: PythonErrorCode.NightTimeError,
+            severity: 'error',
+            origin: 'exception',
+            rawText: 'NightTimeError: Cannot compute sky cover if input time is during the night'
+          }
+        ]
+      });
+
+      await component.estimateSkyCover();
+
+      expect(notificationServiceMock.error).toHaveBeenCalledWith(
+        'Sky cover cannot be estimated because the provided time is during the night.'
+      );
+      expect(component.measureData().skyCover).toBeNull();
+    });
+
+    it('should show an error notification when the task returns no result', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
+        error: null,
+        diagnostics: []
+      });
+
+      await component.estimateSkyCover();
+
+      expect(notificationServiceMock.error).toHaveBeenCalledTimes(1);
+      expect(component.measureData().skyCover).toBeNull();
+    });
   });
 
   describe('HTML rendering', () => {
@@ -453,7 +569,8 @@ describe('TemperatureCalculationComponent', () => {
 
     it('should not update windIncidence when task returns an error', async () => {
       workerPythonServiceMock.runTask.mockResolvedValue({
-        result: undefined,
+        // runTask's declared type doesn't model the error case, where result is null at runtime
+        result: null as never,
         error: TaskError.CALCULATION_ERROR,
         diagnostics: []
       });
