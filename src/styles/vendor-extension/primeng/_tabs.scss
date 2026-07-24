@@ -32,7 +32,7 @@
 
   .p-tablist-tab-list {
     gap: 0.125rem;
-    padding: 0.5rem 1rem 0rem;
+    padding: 0.5rem 1rem 0.375rem;
   }
 
   .p-tab {
@@ -70,6 +70,8 @@
   }
 
   .p-tabpanels {
+    --p-tabs-tabpanel-padding: 0.625rem 1rem 1rem;
+
     overflow-y: auto;
 
     @supports not selector(::-webkit-scrollbar) {
