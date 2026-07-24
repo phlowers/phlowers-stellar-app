@@ -181,10 +181,10 @@ export class StudiesService {
   async updateStudy(study: { uuid: string; author_email: string } & Partial<StudyEntity>, overrideAuthorCheck = false) {
     const userEmail = await this.getUserEmail();
     if (!overrideAuthorCheck && userEmail !== study.author_email) {
-      const errorMessage = $localize`You cannot update a study that you did not create, please duplicate it instead.`;
+      const errorMessage = this.translocoService.translate('shared.studies-service.unauthorized-error');
       this.messageService.add({
         severity: 'error',
-        summary: $localize`Unauthorized`,
+        summary: this.translocoService.translate('shared.studies-service.unauthorized-summary'),
         detail: errorMessage
       });
       throw new Error(errorMessage);
@@ -207,7 +207,7 @@ export class StudiesService {
       ...createEmptyStudy(),
       author_email: '',
       title: parameters.project_name,
-      description: $localize`Study imported from protoV4`,
+      description: this.translocoService.translate('shared.studies-service.imported-from-protov4'),
       shareable: false,
       sections: [section]
     });
@@ -347,7 +347,7 @@ export class StudiesService {
   private buildInitialCondition(parameters: ProtoV4Parameters): InitialCondition {
     return {
       uuid: uuidv4(),
-      name: $localize`IC 1`,
+      name: this.translocoService.translate('shared.sections-helpers.ic-default-name'),
       base_parameters: parameters.parameter,
       base_temperature: parameters.temperature_reference,
       cable_pretension: parameters.cra,

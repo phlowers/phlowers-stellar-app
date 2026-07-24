@@ -39,7 +39,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 // Constants
 const PLOT_CONFIG = {
@@ -121,11 +121,12 @@ export class FreePositioningComponent implements OnDestroy {
 
   getErrorString = computed(() => {
     const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
-    return formatStudioError(this.plotService.error(), exceptionDiagnostic?.code ?? null);
+    return formatStudioError(this.plotService.error(), this.translocoService, exceptionDiagnostic?.code ?? null);
   });
 
   // Dependencies
   readonly plotService = inject(PlotService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   readonly sideTabsService = inject(SideTabsService);

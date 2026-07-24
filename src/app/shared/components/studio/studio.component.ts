@@ -39,7 +39,7 @@ export class StudioComponent implements OnDestroy {
       const exceptionDiagnostic = diagnostics.find((diagnostic) => diagnostic.origin === 'exception') ?? null;
 
       if (error !== null) {
-        const message = formatStudioError(error, exceptionDiagnostic?.code ?? null, this.translocoService);
+        const message = formatStudioError(error, this.translocoService, exceptionDiagnostic?.code ?? null);
         if (exceptionDiagnostic?.severity === 'warning') {
           this.notificationService.warning(message);
         } else {
@@ -49,7 +49,7 @@ export class StudioComponent implements OnDestroy {
 
       for (const diagnostic of diagnostics) {
         if (diagnostic.origin === 'warning') {
-          const message = formatPythonError(diagnostic.code);
+          const message = formatPythonError(diagnostic.code, this.translocoService);
           if (message !== null) {
             this.notificationService.warning(message);
           }

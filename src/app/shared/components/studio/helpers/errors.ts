@@ -9,10 +9,10 @@ import { TranslocoService } from '@jsverse/transloco';
  */
 export const formatStudioError = (
   error: TaskError | DataError | null,
-  diagnosticCode: PythonErrorCode | null = null,
-  translocoService: TranslocoService
+  translocoService: TranslocoService,
+  diagnosticCode: PythonErrorCode | null = null
 ): string => {
-  const pythonMessage = formatPythonError(diagnosticCode);
+  const pythonMessage = formatPythonError(diagnosticCode, translocoService);
   if (pythonMessage !== null) {
     return pythonMessage;
   }

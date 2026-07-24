@@ -12,10 +12,9 @@ import { PythonErrorCode } from './types';
  * Map of each `PythonErrorCode` to the severity it should be surfaced with (error vs warning toast).
  *
  * @remarks
- * This file must stay free of `$localize`/i18n usage: it is imported by `handle-task.ts`,
+ * This file must stay free of i18n usage: it is imported by `handle-task.ts`,
  * which runs inside the Pyodide Web Worker bundle. That bundle does not load the
  * `@angular/localize/init` polyfill (only the main "browser" build does), so evaluating
- * a `$localize` tagged template at module load time there throws `ReferenceError: $localize is not defined`
  * and crashes the worker before Pyodide can even start. Localized messages belong in
  * `python-error-messages.ts`, which must only be imported from main-thread code.
  */

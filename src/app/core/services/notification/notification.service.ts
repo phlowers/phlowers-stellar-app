@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Injectable, inject } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { MessageService } from 'primeng/api';
 
 /** Default toast duration in milliseconds. */
@@ -22,6 +23,7 @@ const LIFE_ERROR = 10000;
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private readonly messageService = inject(MessageService);
+  private readonly translocoService = inject(TranslocoService);
 
   /**
    * Displays a success toast (green).
@@ -29,7 +31,11 @@ export class NotificationService {
    * @param summary - Toast title, defaults to "Successful"
    * @param life - Display duration in ms, defaults to 5000
    */
-  success(detail: string, summary: string = $localize`Successful`, life: number = DEFAULT_LIFE): void {
+  success(
+    detail: string,
+    summary: string = this.translocoService.translate('common.notification.severity-successful'),
+    life: number = DEFAULT_LIFE
+  ): void {
     this.messageService.add({ severity: 'success', summary, detail, life });
   }
 
@@ -39,7 +45,11 @@ export class NotificationService {
    * @param summary - Toast title, defaults to "Error"
    * @param life - Display duration in ms, defaults to 10000
    */
-  error(detail: string, summary: string = $localize`Error`, life: number = LIFE_ERROR): void {
+  error(
+    detail: string,
+    summary: string = this.translocoService.translate('shared.topbar.error'),
+    life: number = LIFE_ERROR
+  ): void {
     this.messageService.add({ severity: 'error', summary, detail, life });
   }
 
@@ -49,7 +59,11 @@ export class NotificationService {
    * @param summary - Toast title, defaults to "Info"
    * @param life - Display duration in ms, defaults to 5000
    */
-  info(detail: string, summary: string = $localize`Info`, life: number = DEFAULT_LIFE): void {
+  info(
+    detail: string,
+    summary: string = this.translocoService.translate('common.notification.severity-info'),
+    life: number = DEFAULT_LIFE
+  ): void {
     this.messageService.add({ severity: 'info', summary, detail, life });
   }
 
@@ -59,11 +73,19 @@ export class NotificationService {
    * @param summary - Toast title, defaults to "Warning"
    * @param life - Display duration in ms, defaults to 7000
    */
-  warning(detail: string, summary: string = $localize`Warning`, life: number = LIFE_WARNING): void {
+  warning(
+    detail: string,
+    summary: string = this.translocoService.translate('common.notification.severity-warning'),
+    life: number = LIFE_WARNING
+  ): void {
     this.messageService.add({ severity: 'warn', summary, detail, life });
   }
 
-  warningList(warnings: string[], summary: string = $localize`Warning`, life: number = LIFE_WARNING): void {
+  warningList(
+    warnings: string[],
+    summary: string = this.translocoService.translate('common.notification.severity-warning'),
+    life: number = LIFE_WARNING
+  ): void {
     this.messageService.add({ key: 'warning-list', severity: 'warn', summary, data: { warnings }, life });
   }
 }

@@ -86,8 +86,10 @@ export class ChargesService {
     await this.studiesService.updateStudy(study);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Successful`,
-      detail: existingCharge ? $localize`Charge updated` : $localize`Charge created`
+      summary: this.translocoService.translate('common.notification.severity-successful'),
+      detail: existingCharge
+        ? this.translocoService.translate('shared.charges-service.update-detail')
+        : this.translocoService.translate('shared.charges-service.create-detail')
     });
   }
 
@@ -108,8 +110,8 @@ export class ChargesService {
     await this.studiesService.updateStudy(study);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Charge deleted`,
+      summary: this.translocoService.translate('common.notification.severity-successful'),
+      detail: this.translocoService.translate('shared.charges-service.delete-detail'),
       life: 500
     });
   }
