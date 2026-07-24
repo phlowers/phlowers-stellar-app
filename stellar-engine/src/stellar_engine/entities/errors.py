@@ -25,3 +25,7 @@ class SupportOutOfRangeError(ValueError):
 
 class ObstacleNotFoundError(ValueError):
     """Raised when an obstacle with a given UUID is not found in the study."""
+
+
+class NightTimeError(ValueError):
+    """Raised when input time is night time but computation requires to be during day time."""

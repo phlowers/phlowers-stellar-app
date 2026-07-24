@@ -1555,6 +1555,12 @@
         <target>Aucun câble trouvé</target>
       </segment>
     </unit>
+    <unit id="7207024934417821132">
+      <segment state="initial">
+        <source>Maximum solar beam value:</source>
+        <target>Valeur maximum du flux solaire :</target>
+      </segment>
+    </unit>
     <unit id="7215028324689336548">
       <segment state="initial">
         <source>Calculation error</source>
@@ -1583,6 +1589,12 @@
       <segment state="initial">
         <source>Charge created</source>
         <target>Charge créée</target>
+      </segment>
+    </unit>
+    <unit id="1030833965279598521">
+      <segment state="initial">
+        <source>Minimum solar beam value:</source>
+        <target>Valeur minimum du flux solaire :</target>
       </segment>
     </unit>
     <unit id="4807396535461926931">
@@ -2605,6 +2617,12 @@
         <target>Paramètre à 15°C moins l&apos;incertitude</target>
       </segment>
     </unit>
+    <unit id="3044861858989669396">
+      <segment state="initial">
+        <source>Sky cover cannot be estimated because the provided time is during the night.</source>
+        <target>La nébulosité ne peut pas être estimée car l&apos;heure fournie se situe pendant la nuit.</target>
+      </segment>
+    </unit>
     <unit id="7477006503326420990">
       <segment state="initial">
         <source>Parameter at 15°C</source>
@@ -2861,6 +2879,12 @@
       <segment state="initial">
         <source>The python logs have been deactivated</source>
         <target>Les logs Python sont désactivés</target>
+      </segment>
+    </unit>
+    <unit id="1845447508284521819">
+      <segment state="initial">
+        <source>Estimate</source>
+        <target>Estimer</target>
       </segment>
     </unit>
     <unit id="8690924341268563915">
@@ -3497,6 +3521,12 @@
       <segment state="initial">
         <source>Shortening</source>
         <target>Raccourcissement</target>
+      </segment>
+    </unit>
+    <unit id="6496057902996933975">
+      <segment state="initial">
+        <source> Measured solar beam (not required) </source>
+        <target> Flux solaire mesuré (facultatif) </target>
       </segment>
     </unit>
     <unit id="6421460271971606186">
@@ -4141,6 +4171,12 @@
         <target>Température la plus basse (°C)</target>
       </segment>
     </unit>
+    <unit id="7329048005009948690">
+      <segment state="initial">
+        <source>Sky cover could not be estimated from the provided inputs. Please check the values and try again.</source>
+        <target>La nébulosité n&apos;a pas pu être estimée à partir des données fournies. Veuillez vérifier les valeurs et réessayer.</target>
+      </segment>
+    </unit>
     <unit id="7692794071516027083">
       <segment state="initial">
         <source>Computing step (°C)</source>
@@ -4210,7 +4246,7 @@
     <unit id="2861737300887040849">
       <segment state="initial">
         <source>The attachment support from the geolink file is not present in the application support catalog</source>
-        <target>Le support d'accrochage du fichier de géoliaison n'est pas présent au catalogue des supports de l'application</target>
+        <target>Le support d&apos;accrochage du fichier de géoliaison n&apos;est pas présent au catalogue des supports de l&apos;application</target>
       </segment>
     </unit>
     <unit id="8749123360857368229">
@@ -4841,12 +4877,6 @@
       <segment state="initial">
         <source>Conformity results updated.</source>
         <target>Résultats de la conformité mis à jour.</target>
-      </segment>
-    </unit>
-    <unit id="2568633915195803623">
-      <segment state="initial">
-        <source> Measured diffuse + beam solar radiation (not required) </source>
-        <target> Flux solaire diffus + direct mesuré (facultatif) </target>
       </segment>
     </unit>
   </file>

@@ -31,7 +31,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TemperatureCalculationComponent } from '../temperature-calculation/temperature-calculation.component';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { InitialCondition } from '@shared/domain';
+import { InitialCondition, SkyCover } from '@shared/domain';
 import { ParameterCalculation15WithoutWindComponent } from '../parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import { createInitialMeasureData } from '../../helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -87,7 +87,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   );
 
   readonly windDirectionOptions = signal<SelectOption[]>(WIND_DIRECTION_OPTIONS);
-  readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
+  readonly skyCoverOptions = signal<SelectOption<SkyCover>[]>(SKY_COVER_OPTIONS);
   readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
   readonly cableOptions = signal<SelectOption[]>([]);
 

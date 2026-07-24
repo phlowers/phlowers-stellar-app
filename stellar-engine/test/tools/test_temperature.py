@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 from mechaphlowers import BalanceEngine
 
+from stellar_engine.entities.errors import NightTimeError
 from stellar_engine.tools.temperature import (
     compute_diffuse_and_beam_radiations,
     compute_nebulosity,
@@ -143,3 +144,15 @@ def test_compute_nebulosity() -> None:
     }
     result = compute_nebulosity(inputs)
     assert result["skyCover"] == 'N5'
+
+
+def test_compute_nebulosity_night() -> None:
+    inputs = {
+        "date": datetime.datetime(1970, 12, 21),
+        "time": datetime.datetime(1970, 3, 21, 2),
+        "longitude": 45.0,
+        "latitude": 0.0,
+        "measuredSolarRadiation": 600,
+    }
+    with pytest.raises(NightTimeError):
+        compute_nebulosity(inputs)
