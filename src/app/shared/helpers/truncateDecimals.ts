@@ -46,6 +46,21 @@ export function truncateOneDecimal(event: Event): void {
 }
 
 /**
+ * Strips any decimal part (including the separator) from the value of a number input,
+ * hard-blocking decimals so only integers can be entered.
+ * Intended as an `(input)` event handler on integer-only `<input type="number" step="1">` elements.
+ *
+ * @param event - The DOM input event fired by the number input element
+ */
+export function truncateNoDecimals(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const sepIndex = input.value.indexOf('.');
+  if (sepIndex !== -1) {
+    input.value = input.value.substring(0, sepIndex);
+  }
+}
+
+/**
  * Returns the string `value` truncated to at most 1 decimal place.
  * Pure function — does not touch the DOM. Use this when the caller controls the DOM mutation.
  *

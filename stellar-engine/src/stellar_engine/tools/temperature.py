@@ -10,6 +10,7 @@ from datetime import datetime
 import numpy as np
 from mechaphlowers import BalanceEngine, ThermalEngine, units
 
+from stellar_engine.entities.errors import NightTimeError
 from stellar_engine.entities.inputs import (
     DiffuseAndBeamRadiationInputs,
     SkyCoverEstimationInputs,
@@ -158,10 +159,16 @@ def compute_nebulosity(inputs: dict) -> dict[str, str]:
         latitude=np.array([parsed_inputs.latitude]),
         longitude=np.array([parsed_inputs.longitude]),
     )
-    nebulosity_value = int(nebulosity.data["nebulosity"].iloc[0])
+    result_sky_cover = nebulosity.data["nebulosity"].iloc[0]
+    if np.isnan(result_sky_cover):
+        raise NightTimeError(
+            "Cannot compute sky cover if input time is during the night"
+        )
+
     try:
+        nebulosity_value = int(result_sky_cover)
         nebulosity_str = REVERSED_SKY_COVER_MAP[nebulosity_value]
-    except KeyError as e:
+    except (KeyError, ValueError) as e:
         raise ValueError(
             f"Unexpected nebulosity value: {nebulosity_value}"
         ) from e

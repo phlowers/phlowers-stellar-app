@@ -35,5 +35,6 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.InvalidManipulationRange]: 'error',
   [PythonErrorCode.NoIntersectionPlaneForDistanceError]: 'warning',
   [PythonErrorCode.SupportOutOfRangeError]: 'error',
-  [PythonErrorCode.GeneratedPointsNoneError]: 'error'
+  [PythonErrorCode.GeneratedPointsNoneError]: 'error',
+  [PythonErrorCode.NightTimeError]: 'error'
 };

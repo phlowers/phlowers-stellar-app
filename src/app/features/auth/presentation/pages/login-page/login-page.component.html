@@ -10,48 +10,41 @@
     <h1 class="login-page__title" i18n="@@login.title" data-testid="login-title">Sign in</h1>
 
     @if (isResolvingMode()) {
-      <p
+      <output
         class="login-page__subtitle"
-        role="status"
         aria-live="polite"
         data-testid="login-resolving"
         i18n="@@login.resolvingMode"
       >
         Checking sign-in mode…
-      </p>
+      </output>
     } @else if (showOidcRedirecting()) {
-      <p
+      <output
         class="login-page__subtitle"
-        role="status"
         aria-live="polite"
         data-testid="login-redirecting"
         i18n="@@login.redirectingToGaia"
       >
         Redirecting to G&#64;IA for sign in…
-      </p>
+      </output>
     } @else if (showOfflineOidcWaiting()) {
-      <p
+      <output
         class="login-page__subtitle"
-        role="status"
         aria-live="polite"
         data-testid="login-offline-waiting"
         i18n="@@login.offlineWaitingForGaia"
       >
         You are offline. Reconnect to continue with G&#64;IA sign in.
-      </p>
+      </output>
     } @else {
       <p class="login-page__subtitle" i18n="@@login.subtitle" data-testid="login-subtitle">
         Enter your email address to continue.
       </p>
 
       @if (submitError()) {
-        <p-message
-          severity="error"
-          [text]="submitError()!"
-          data-testid="login-error"
-          role="alert"
-          aria-live="assertive"
-        />
+        <p-message severity="error" data-testid="login-error" role="alert" aria-live="assertive">
+          {{ submitError()! }}
+        </p-message>
       }
 
       <form class="login-page__form" [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="login-form">
