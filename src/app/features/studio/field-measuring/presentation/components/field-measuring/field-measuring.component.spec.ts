@@ -15,7 +15,7 @@ import { StudiesService } from '@services/studies/studies.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { BehaviorSubject } from 'rxjs';
-import { Section } from '@shared/domain';
+import { Section, SkyCover } from '@shared/domain';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
@@ -371,7 +371,7 @@ describe('FieldMeasuringComponent', () => {
       windSpeed: 10,
       ambientTemperature: 20,
       windDirection: 'North',
-      skyCover: 'N5'
+      skyCover: SkyCover.N5
     };
 
     it('should return true when transit is null (progressive save allowed)', () => {

@@ -20,6 +20,19 @@ Exception: user-facing text uses `i18n` attribute or `$localize`.
 
 ---
 
+## Comments
+
+Single-line comments → **always `//`**. Never use a `/** */` or `/* */` block on a single line.  
+Reserve `/** */` (TSDoc) for genuine multi-line documentation of exported APIs.
+
+```typescript
+// ✅
+// Distance between the two supports, in meters
+/** ❌ FORBIDDEN on a single line */
+```
+
+---
+
 ## Import aliases — always, no relative paths
 
 ```

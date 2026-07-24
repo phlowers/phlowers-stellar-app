@@ -27,8 +27,7 @@
         aria-describedby="mandatory-temperature"
         [ngClass]="{ 'ng-invalid ng-dirty': isTransitOutOfBounds() }"
         [attr.aria-invalid]="isTransitOutOfBounds() || null"
-        [attr.aria-errormessage]="measureData().transit! < transitBounds.min ? 'transit-error-min-message' : null"
-        [attr.aria-errormessage]="measureData().transit! > transitBounds.max ? 'transit-error-max-message' : null"
+        [attr.aria-errormessage]="transitErrorMessageId()"
         required
         data-testid="transit-input"
       />
@@ -102,6 +101,69 @@
 
   <h3 class="solar underline-text justify-self-start" i18n>Solar flux :</h3>
 
+  <div class="measuredDiffusedPlusDirectSolarFlux__label">
+    <label for="measuredDiffusedPlusDirectSolarFlux" class="measuredDiffusedPlusDirectSolarFlux__label__txt" i18n>
+      Measured solar beam (not required)
+    </label>
+
+    <button
+      app-btn
+      btnSize="s"
+      btnStyle="outlined"
+      class="measuredDiffusedPlusDirectSolarFlux__label__btn"
+      (click)="estimateSkyCover()"
+      [disabled]="!canEstimateSkyCover()"
+      [btnLoading]="isEstimatingSkyCover()"
+      data-testid="estimate-sky-cover-btn"
+    >
+      <ng-container i18n>Estimate</ng-container>
+    </button>
+  </div>
+  <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
+    <input
+      id="measuredDiffusedPlusDirectSolarFlux"
+      type="number"
+      pInputText
+      [ngModel]="measureData().measuredDiffusedPlusDirectSolarFlux"
+      (ngModelChange)="updateField('measuredDiffusedPlusDirectSolarFlux', $event)"
+      (input)="truncateNoDecimals($event)"
+      [min]="measuredSolarFluxBounds.min"
+      [max]="measuredSolarFluxBounds.max"
+      step="1"
+      aria-describedby="solar-fluxs-impact"
+      [ngClass]="{ 'ng-invalid ng-dirty': isMeasuredSolarFluxOutOfBounds() }"
+      [attr.aria-invalid]="isMeasuredSolarFluxOutOfBounds() || null"
+      [attr.aria-errormessage]="measuredSolarFluxErrorMessageId()"
+      data-testid="measured-solar-flux-input"
+    />
+    <p-inputgroup-addon>W/m²</p-inputgroup-addon>
+  </p-inputgroup>
+
+  <div class="solar-fluxs-impact">
+    @if (measureData().measuredDiffusedPlusDirectSolarFlux! < measuredSolarFluxBounds.min) {
+      <p-message
+        id="solar-fluxs-error-min-message"
+        severity="error"
+        size="small"
+        variant="simple"
+        data-testid="solar-fluxs-impact-error"
+      >
+        <ng-container i18n>Minimum solar beam value:</ng-container> {{ measuredSolarFluxBounds.min }} W/m².
+      </p-message>
+    } @else if (measureData().measuredDiffusedPlusDirectSolarFlux! > measuredSolarFluxBounds.max) {
+      <p-message
+        id="solar-fluxs-error-max-message"
+        severity="error"
+        size="small"
+        variant="simple"
+        data-testid="solar-fluxs-impact-error"
+      >
+        <ng-container i18n>Maximum solar beam value:</ng-container> {{ measuredSolarFluxBounds.max }} W/m².
+      </p-message>
+    }
+    <p id="solar-fluxs-impact" i18n>It won't be used in the calculation.</p>
+  </div>
+
   <label for="skyCover" i18n class="skyCover__label">Sky cover</label>
   <p-select
     inputId="skyCover"
@@ -130,25 +192,6 @@
       {{ measureData().diffusedPlusDirectSolarFlux | number: '1.0-2' }} W/m²
     </dd>
   </dl>
-
-  <label for="measuredDiffusedPlusDirectSolarFlux" i18n class="measuredDiffusedPlusDirectSolarFlux__label">
-    Measured diffuse + beam solar radiation (not required)
-  </label>
-  <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
-    <input
-      id="measuredDiffusedPlusDirectSolarFlux"
-      type="number"
-      pInputText
-      [ngModel]="measureData().measuredDiffusedPlusDirectSolarFlux"
-      (ngModelChange)="updateField('measuredDiffusedPlusDirectSolarFlux', $event)"
-      [min]="0"
-      aria-describedby="solar-fluxs-impact"
-      data-testid="measured-solar-flux-input"
-    />
-    <p-inputgroup-addon>W/m²</p-inputgroup-addon>
-  </p-inputgroup>
-
-  <p id="solar-fluxs-impact" class="solar-fluxs-impact" i18n>It won't be used in the calculation.</p>
 </div>
 
 <div class="text-right">

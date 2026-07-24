@@ -145,9 +145,12 @@ export class AuthService {
     }
 
     // 2a. In OIDC mode (or when mode is unknown), reject stale email-only
-    // users that were created in fallback mode.
+    // users that were created in fallback mode. Also clear `currentUser` in
+    // case the auth guard optimistically restored the cached user while the
+    // mode was still unresolved (see `tryRestoreFromCache`).
     if (this.oidcEnabled() && !cached.sub) {
       this.logger.warn('AuthService: stale email-only cached user ignored because OIDC mode is required');
+      this.currentUser.set(null);
       return;
     }
 
@@ -306,7 +309,13 @@ export class AuthService {
    * Used as a safety net by the auth guard in case the APP_INITIALIZER
    * signal was not yet visible when the guard evaluated. Honours the
    * current OIDC mode: stale email-only users are rejected when OIDC is
-   * required.
+   * required — but only once the mode has actually been resolved by the
+   * server probe. While the mode is still unknown, `oidcEnabled` holds its
+   * strict default (`true`) and rejecting on it would race the in-flight
+   * `/auth/userinfo` probe, kicking a valid fallback-mode user back to the
+   * login page on every full reload. Restoring optimistically is safe:
+   * Apache remains the authoritative enforcement layer, and
+   * `resolveModeAndUserFromNetwork` re-evaluates once the probe lands.
    *
    * @returns `true` if a cached user was found and restored.
    */
@@ -319,7 +328,7 @@ export class AuthService {
     if (!cachedUser) {
       return false;
     }
-    if (this.oidcEnabled() && !cachedUser.sub) {
+    if (this.modeResolved() && this.oidcEnabled() && !cachedUser.sub) {
       return false;
     }
     this.currentUser.set(cachedUser);

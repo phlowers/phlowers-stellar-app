@@ -1,9 +1,11 @@
+import { SkyCover } from '@shared/domain';
+
 /** Option entry for select dropdowns with a string label and value. */
-export interface SelectOption {
+export interface SelectOption<T extends string = string> {
   /** Display label for the option. */
   label: string;
   /** Underlying value. */
-  value: string;
+  value: T;
 }
 
 /** Predefined span options for field measuring. */
@@ -38,20 +40,23 @@ export const WIND_SPEED_UNIT_OPTIONS: SelectOption[] = [
 ];
 
 /** Available sky cover options for field measuring (N0–N8 nebulosity scale). */
-export const SKY_COVER_OPTIONS: SelectOption[] = [
-  { label: `N0`, value: 'N0' },
-  { label: $localize`N1 - Sunny`, value: 'N1' },
-  { label: $localize`N2 - partly cloudy`, value: 'N2' },
-  { label: `N3`, value: 'N3' },
-  { label: `N4`, value: 'N4' },
-  { label: $localize`N5 - Cloudy`, value: 'N5' },
-  { label: $localize`N6 - Covered sky`, value: 'N6' },
-  { label: `N7`, value: 'N7' },
-  { label: $localize`N8 - covered - smoky`, value: 'N8' }
+export const SKY_COVER_OPTIONS: SelectOption<SkyCover>[] = [
+  { label: `N0`, value: SkyCover.N0 },
+  { label: $localize`N1 - Sunny`, value: SkyCover.N1 },
+  { label: $localize`N2 - partly cloudy`, value: SkyCover.N2 },
+  { label: `N3`, value: SkyCover.N3 },
+  { label: `N4`, value: SkyCover.N4 },
+  { label: $localize`N5 - Cloudy`, value: SkyCover.N5 },
+  { label: $localize`N6 - Covered sky`, value: SkyCover.N6 },
+  { label: `N7`, value: SkyCover.N7 },
+  { label: $localize`N8 - covered - smoky`, value: SkyCover.N8 }
 ];
 
 /** Min/max bounds for the transit input (in Amperes). */
 export const TRANSIT_BOUNDS = { min: 0, max: 4000 };
+
+/** Min/max bounds and default for the measured solar beam input (in W/m²). Decimals are not allowed. */
+export const MEASURED_SOLAR_FLUX_BOUNDS = { min: 0, max: 2000, default: 0 };
 
 /** Default left support options for field measuring. */
 export const LEFT_SUPPORT_OPTIONS: SelectOption[] = [

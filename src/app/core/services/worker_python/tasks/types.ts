@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable, ClimateCharge, PapotoResult, Section, SpanLoad } from '@shared/domain';
+import { CatalogCable, ClimateCharge, PapotoResult, Section, SkyCover, SpanLoad } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PoseResults } from '@shared/domain/models/section.model';
@@ -92,9 +92,9 @@ export enum Task {
  * @category Worker Types
  */
 export enum DataError {
-  /** Cable not found in catalog */
+  // Cable not found in catalog
   NO_CABLE_FOUND = 'NO_CABLE_FOUND',
-  /** No initial condition configured or selected for this section */
+  // No initial condition configured or selected for this section
   NO_INITIAL_CONDITION = 'NO_INITIAL_CONDITION'
 }
 
@@ -105,38 +105,40 @@ export enum DataError {
  * @category Worker Types
  */
 export enum PythonErrorCode {
-  /** Generic solver error */
+  // Generic solver error
   SolverError = 'SolverError',
-  /** Insulator chain suspected to have reversed above horizontal position */
+  // Insulator chain suspected to have reversed above horizontal position
   SuspectedChainReversal = 'SuspectedChainReversal',
-  /** Numerical solver failed to converge */
+  // Numerical solver failed to converge
   ConvergenceError = 'ConvergenceError',
-  /** Shape mismatch detected in arrays */
+  // Shape mismatch detected in arrays
   ShapeError = 'ShapeError',
-  /** Data-related warning */
+  // Data-related warning
   DataWarning = 'DataWarning',
-  /** Balance engine warning */
+  // Balance engine warning
   BalanceEngineWarning = 'BalanceEngineWarning',
-  /** RTS catalog data missing or contains NaN values */
+  // RTS catalog data missing or contains NaN values
   RtsDataNotAvailable = 'RtsDataNotAvailable',
-  /** Specific Python warning raised by mechaphlowers DistanceEngine */
+  // Specific Python warning raised by mechaphlowers DistanceEngine
   NoIntersectionPlaneWarning = 'NoIntersectionPlaneWarning',
-  /** Raised when measurement data are not available for computation */
+  // Raised when measurement data are not available for computation
   MeasurementDataNotAvailable = 'MeasurementDataNotAvailable',
-  /** Raised when attempting to read uncertainty while it hasn't been computed */
+  // Raised when attempting to read uncertainty while it hasn't been computed
   UncertaintyNotAvailable = 'UncertaintyNotAvailable',
-  /** Raised when an invalid index is used in manipulation */
+  // Raised when an invalid index is used in manipulation
   InvalidManipulationIndex = 'InvalidManipulationIndex',
-  /** Raised when invalid keys are used in manipulation */
+  // Raised when invalid keys are used in manipulation
   InvalidManipulationKeys = 'InvalidManipulationKeys',
-  /** Raised when a value is out of the allowed range in manipulation */
+  // Raised when a value is out of the allowed range in manipulation
   InvalidManipulationRange = 'InvalidManipulationRange',
-  /** Raised when no intersection plane can be found for distance computation */
+  // Raised when no intersection plane can be found for distance computation
   NoIntersectionPlaneForDistanceError = 'NoIntersectionPlaneForDistanceError',
-  /** Raised when a support index is out of range for the number of spans. */
+  // Raised when a support index is out of range for the number of spans.
   SupportOutOfRangeError = 'SupportOutOfRangeError',
-  /** Raised when generated points (spans, supports, insulators, others) are None after computation. */
-  GeneratedPointsNoneError = 'GeneratedPointsNoneError'
+  // Raised when generated points (spans, supports, insulators, others) are None after computation.
+  GeneratedPointsNoneError = 'GeneratedPointsNoneError',
+  // Raised when the provided time is during the night but the computation requires daytime.
+  NightTimeError = 'NightTimeError'
 }
 
 /**
@@ -145,13 +147,13 @@ export enum PythonErrorCode {
  * @category Worker Types
  */
 export enum TaskError {
-  /** Failed to load Pyodide runtime */
+  // Failed to load Pyodide runtime
   PYODIDE_LOAD_ERROR = 'PYODIDE_LOAD_ERROR',
-  /** Error during calculation execution */
+  // Error during calculation execution
   CALCULATION_ERROR = 'CALCULATION_ERROR',
-  /** Numerical solver did not converge */
+  // Numerical solver did not converge
   SOLVER_DID_NOT_CONVERGE = 'SOLVER_DID_NOT_CONVERGE',
-  /** Unspecified error occurred */
+  // Unspecified error occurred
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
 
@@ -161,17 +163,17 @@ export enum TaskError {
  * @category Worker Types
  */
 export interface SectionCoords {
-  /** 3D coordinates of span catenary curves */
+  // 3D coordinates of span catenary curves
   spans: number[][][];
-  /** 3D coordinates of support structures */
+  // 3D coordinates of support structures
   supports: number[][][];
-  /** 3D coordinates of insulator chains */
+  // 3D coordinates of insulator chains
   insulators: number[][][];
-  /** Obstacle coordinate arrays keyed by UUID from position engine (null if none registered) */
+  // Obstacle coordinate arrays keyed by UUID from position engine (null if none registered)
   obstacles: Record<string, number[][]> | null;
-  /** Distance data from position engine keyed by obstacle UUID (null if none computed) */
+  // Distance data from position engine keyed by obstacle UUID (null if none computed)
   distances: Record<string, unknown> | null;
-  /** Coordinates of applied loads by support UUID */
+  // Coordinates of applied loads by support UUID
   loads: Record<string, number[]>;
 }
 
@@ -181,51 +183,51 @@ export interface SectionCoords {
  * @category Worker Types
  */
 export interface SectionOutputParameters {
-  /** Line angle at each support (grad) */
+  // Line angle at each support (grad)
   line_angle: number[];
-  /** VTL under chain for each support */
+  // VTL under chain for each support
   vtl_under_chain: number[][];
-  /** VTL under console for each support */
+  // VTL under console for each support
   vtl_under_console: number[][];
-  /** Resultant force under chain */
+  // Resultant force under chain
   r_under_chain: number[];
-  /** Resultant force under console */
+  // Resultant force under console
   r_under_console: number[];
-  /** Ground altitude at each support */
+  // Ground altitude at each support
   ground_altitude: number[];
-  /** Cable displacement values */
+  // Cable displacement values
   displacement: number[][];
-  /** Load angle at each support */
+  // Load angle at each support
   load_angle: number[];
-  /** Span lengths */
+  // Span lengths
   span_length: number[];
-  /** Coordinates of applied loads by support UUID */
+  // Coordinates of applied loads by support UUID
   loads_coords: Record<string, number[]>;
-  /** Utilization rate per span (descending order) */
+  // Utilization rate per span (descending order)
   utilization_rate: number[];
-  /** Elevation values at each support */
+  // Elevation values at each support
   elevation: number[];
-  /** Cable sag parameter (unitless) at each span */
+  // Cable sag parameter (unitless) at each span
   parameter: number[];
-  /** Slope angle of the left support of the span */
+  // Slope angle of the left support of the span
   slope_left: number[];
-  /** Slope angle of the right support of the span */
+  // Slope angle of the right support of the span
   slope_right: number[];
-  /** Superior (upper) tension at each support (daN) */
+  // Superior (upper) tension at each support (daN)
   tension_sup: number[];
-  /** Inferior (lower) tension at each support (daN) */
+  // Inferior (lower) tension at each support (daN)
   tension_inf: number[];
-  /** L0 parameter values for each span */
+  // L0 parameter values for each span
   L0: number[];
-  /** Horizontal distance at each span (m) */
+  // Horizontal distance at each span (m)
   horizontal_distance: number[];
-  /** Arc length of cable in each span (m) */
+  // Arc length of cable in each span (m)
   arc_length: number[];
-  /** Horizontal component of cable tension at each span (daN) */
+  // Horizontal component of cable tension at each span (daN)
   T_h: number[];
-  /** Sag S1 */
+  // Sag S1
   sag: number[];
-  /** Sag S2 */
+  // Sag S2
   sag_s2: number[];
 }
 
@@ -240,11 +242,11 @@ export interface SectionOutputParameters {
  * @category Worker Types
  */
 export interface GetSectionOutput {
-  /** Coordinate arrays for rendering section geometry */
+  // Coordinate arrays for rendering section geometry
   coords: SectionCoords;
-  /** Computed parameters from the balance/span engine */
+  // Computed parameters from the balance/span engine
   output_parameters: SectionOutputParameters;
-  /** Structured obstacle annotations (merged from refreshProjection, not from Python directly) */
+  // Structured obstacle annotations (merged from refreshProjection, not from Python directly)
   obstacles?: {
     uuid: string;
     points: [number, number, number][];
@@ -271,15 +273,15 @@ export interface GetSectionWithBaseOutput {
  * @category Worker Types
  */
 export enum LogLevel {
-  /** Detailed debug information */
+  // Detailed debug information
   DEBUG = 10,
-  /** General information messages */
+  // General information messages
   INFO = 20,
-  /** Warning messages */
+  // Warning messages
   WARNING = 30,
-  /** Error messages */
+  // Error messages
   ERROR = 40,
-  /** Critical error messages */
+  // Critical error messages
   CRITICAL = 50
 }
 
@@ -292,25 +294,25 @@ export enum LogLevel {
  * @category Worker Types
  */
 export interface TaskInputs {
-  /** Inputs for initLit task: initialize the section study in the engine */
+  // Inputs for initLit task: initialize the section study in the engine
   [Task.initLit]: { section: Section; cable: CatalogCable; obstacles?: Obstacle[] };
-  /** Inputs for changeState task */
+  // Inputs for changeState task
   [Task.changeState]: {
     climate: ClimateCharge;
     reload?: boolean;
   };
-  /** Inputs for refreshProjection task */
+  // Inputs for refreshProjection task
   [Task.refreshProjection]: {
     startSupport: number;
     endSupport: number;
     view: View;
   };
-  /** Inputs for getSupportCoordinates task */
+  // Inputs for getSupportCoordinates task
   [Task.getSupportCoordinates]: {
     coordinates: (number | undefined)[][];
     attachmentSetNumbers: number[];
   };
-  /** Inputs for calculatePapoto task */
+  // Inputs for calculatePapoto task
   [Task.calculatePapoto]: {
     spanLength: number;
     measuredElevationDifference: number;
@@ -325,7 +327,7 @@ export interface TaskInputs {
     V3: number;
     VR: number;
   };
-  /** Inputs for calculateGuying task */
+  // Inputs for calculateGuying task
   [Task.calculateGuying]: {
     altitude: number;
     horizontalDistance: number;
@@ -333,11 +335,11 @@ export interface TaskInputs {
     selectedSpanIndex: number;
     selectedSupport: 'LEFT' | 'RIGHT' | null;
   };
-  /** Inputs for setLogLevel task */
+  // Inputs for setLogLevel task
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
   };
-  /** Inputs for temperatureCalculation task */
+  // Inputs for temperatureCalculation task
   [Task.temperatureCalculation]: {
     cableName: string;
     ambientTemperature: number;
@@ -351,17 +353,17 @@ export interface TaskInputs {
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
     windDirection: string;
-    skyCover: string;
+    skyCover: SkyCover;
   };
-  /** Inputs for computeDiffuseAndBeamRadiation task */
+  // Inputs for computeDiffuseAndBeamRadiation task
   [Task.diffuseAndBeamRadiationsCalculation]: {
     date: Date | null;
     time: Date | null;
     longitude: number;
     latitude: number;
-    skyCover: string;
+    skyCover: SkyCover;
   };
-  /** Inputs for estimateSkyCover task */
+  // Inputs for estimateSkyCover task
   [Task.estimateSkyCover]: {
     date: Date | null;
     time: Date | null;
@@ -369,7 +371,7 @@ export interface TaskInputs {
     latitude: number;
     measuredSolarRadiation: number;
   };
-  /** Inputs for calculateParameter15CWithoutWind task */
+  // Inputs for calculateParameter15CWithoutWind task
   [Task.calculateParameter15CWithoutWind]: {
     parameterPapoto: number | null;
     parameterUncertaintyPapoto: number | null;
@@ -377,11 +379,11 @@ export interface TaskInputs {
     cableTemperatureCalibrationUncertainty: number | null;
     span_index: number | null;
   };
-  /** Inputs for setResolution task */
+  // Inputs for setResolution task
   [Task.setResolution]: {
     resolution: number;
   };
-  /** Inputs for getConfig task: no inputs */
+  // Inputs for getConfig task: no inputs
   [Task.getConfig]: undefined;
   // Inputs for addBulkObstacles task: all current obstacles to register at once
   [Task.addBulkObstacles]: {
@@ -496,7 +498,7 @@ export interface TaskInputs {
  * @category Worker Types
  */
 export interface ObstacleOutput {
-  /** Rendered 3D coordinates for each registered obstacle */
+  // Rendered 3D coordinates for each registered obstacle
   obstacles: {
     uuid: string;
     points: [number, number, number][];
@@ -597,44 +599,44 @@ export interface ConformityTaskInput {
   rulesDistances: ConformityRuleDistanceInput[];
 }
 
-/** A point in the 2D conformity cross-section: x = lateral distance (m), y = altitude (m). */
+// A point in the 2D conformity cross-section: x = lateral distance (m), y = altitude (m).
 export interface ConformityPointOutput {
   x: number;
   y: number;
 }
 
-/** A cable candidate point, carrying the disk radius (m) used by `cable_track`. */
+// A cable candidate point, carrying the disk radius (m) used by `cable_track`.
 export interface ConformityCablePointOutput extends ConformityPointOutput {
   radius: number;
 }
 
-/** Name of a zone corner. */
+// Name of a zone corner.
 export type ConformityCornerName = 'UpperLeft' | 'UpperRight' | 'LowerRight' | 'LowerLeft';
 
-/** One zone corner, delivered as a single-key object e.g. `{ LowerLeft: { x, y } }`. */
+// One zone corner, delivered as a single-key object e.g. `{ LowerLeft: { x, y } }`.
 export type ConformityZoneCorner = Partial<Record<ConformityCornerName, ConformityPointOutput>>;
 
-/** Geometry of a rule's conformity zone. */
+// Geometry of a rule's conformity zone.
 export interface ConformityZonePlot {
-  /** Ordered polygon corners (fill outline). */
+  // Ordered polygon corners (fill outline).
   zonePoints: ConformityZoneCorner[];
-  /** Bright-border polyline, already trimmed by the task to the edges to highlight. */
+  // Bright-border polyline, already trimmed by the task to the edges to highlight.
   zoneBorder: ConformityPointOutput[];
 }
 
-/** One conformity rule: its zone geometry and candidate cable points. */
+// One conformity rule: its zone geometry and candidate cable points.
 export interface ConformityRulePlot {
   zonePlot: ConformityZonePlot;
   points: ConformityCablePointOutput[];
 }
 
-/** The obstacle and its own point(s), always drawn regardless of conformity type. */
+// The obstacle and its own point(s), always drawn regardless of conformity type.
 export interface ConformityObstacleOutput {
   name: string;
   points: ConformityPointOutput[];
 }
 
-/** Detailed numerical results for a single conformity rule (overhang and lateral sides). */
+// Detailed numerical results for a single conformity rule (overhang and lateral sides).
 export interface ConformityRuleResult {
   overhangCableAltitude: number;
   lateralCableAltitude: number;
@@ -653,12 +655,12 @@ export interface ConformityRuleResult {
   lateralMinimalDistance?: number;
 }
 
-/** Full response the conformity calculation returns for the graph. */
+// Full response the conformity calculation returns for the graph.
 export interface ConformityTaskOutput {
   obstacle: ConformityObstacleOutput;
-  /** Rules keyed by `rule_type` (e.g. `'AT'`, `'CCG-LA'`). Key order is the stacking priority. */
+  // Rules keyed by `rule_type` (e.g. `'AT'`, `'CCG-LA'`). Key order is the stacking priority.
   conformity: Record<string, ConformityRulePlot>;
-  /** Detailed numerical results per rule, keyed by `rule_type`. */
+  // Detailed numerical results per rule, keyed by `rule_type`.
   results: Record<string, ConformityRuleResult>;
 }
 
@@ -671,28 +673,28 @@ export interface ConformityTaskOutput {
  * @category Worker Types
  */
 export interface TaskOutputs {
-  /** Output from initLit task: initialization acknowledgement */
+  // Output from initLit task: initialization acknowledgement
   [Task.initLit]: { success: boolean };
-  /** Output from changeState task: acknowledgement that state was changed in the engine */
+  // Output from changeState task: acknowledgement that state was changed in the engine
   [Task.changeState]: { success: boolean };
-  /** Output from refreshProjection task: reprojected geometry with optional base state */
+  // Output from refreshProjection task: reprojected geometry with optional base state
   [Task.refreshProjection]: {
     sectionOutput: GetSectionWithBaseOutput;
     obstacles: ObstacleOutput['obstacles'];
     distances: Distance[];
-    /** Registered distance/angle measurement point groups, rendered like obstacles. */
+    // Registered distance/angle measurement point groups, rendered like obstacles.
     distanceMeasuringPoints: ObstacleOutput['obstacles'];
   };
 
-  /** Output from getSupportCoordinates task: 2D display coordinates for supports */
+  // Output from getSupportCoordinates task: 2D display coordinates for supports
   [Task.getSupportCoordinates]: {
     shape_points: number[][];
     text_display_points: number[][];
     text_to_display: number[];
   };
-  /** Output from calculatePapoto task */
+  // Output from calculatePapoto task
   [Task.calculatePapoto]: PapotoResult;
-  /** Output from calculateGuying task */
+  // Output from calculateGuying task
   [Task.calculateGuying]: {
     tensionInGuy: number;
     guyAngle: number;
@@ -700,9 +702,9 @@ export interface TaskOutputs {
     chargeHUnderConsole: number;
     chargeLIfPulley: number;
   };
-  /** Output from setLogLevel task */
+  // Output from setLogLevel task
   [Task.setLogLevel]: { success: boolean };
-  /** Output from temperatureCalculation task */
+  // Output from temperatureCalculation task
   [Task.temperatureCalculation]: {
     cableSolarFlux: number;
     cableTemperature: number;
@@ -714,20 +716,20 @@ export interface TaskOutputs {
     diffusePlusBeamRadiation: number;
   };
   [Task.estimateSkyCover]: {
-    skyCover: string; // "N0" to "N8"
+    skyCover: SkyCover;
   };
-  /** Output from calculateParameter15CWithoutWind task */
+  // Output from calculateParameter15CWithoutWind task
   [Task.calculateParameter15CWithoutWind]: {
     parameter15CMinusUncertainty: number;
     parameter15C: number;
     parameter15CPlusUncertainty: number;
   };
-  /** Output from setResolution task */
+  // Output from setResolution task
   [Task.setResolution]: {
     success: boolean;
     resolution: number;
   };
-  /** Output from getConfig task */
+  // Output from getConfig task
   [Task.getConfig]: {
     resolution: number;
   };
@@ -757,18 +759,18 @@ export interface TaskOutputs {
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;
-  /** Output from deleteAllLoads task */
+  // Output from deleteAllLoads task
   [Task.deleteAllLoads]: { success: boolean };
-  /** Output from deleteLoad task */
+  // Output from deleteLoad task
   [Task.deleteLoad]: { success: boolean };
-  /** Output from setLoads task */
+  // Output from setLoads task
   [Task.setLoads]: { success: boolean };
-  /** Output from measureDistance task */
+  // Output from measureDistance task
   [Task.measureDistance]: MeasureDistanceAngleResult;
-  /** Output from addMeasureDistanceAnglePoints task */
+  // Output from addMeasureDistanceAnglePoints task
   [Task.addMeasureDistanceAnglePoints]: { success: boolean };
-  /** Output from clearMeasureDistanceAnglePoints task */
+  // Output from clearMeasureDistanceAnglePoints task
   [Task.clearMeasureDistanceAnglePoints]: { success: boolean };
-  /** Output from getConformity task */
+  // Output from getConformity task
   [Task.getConformity]: ConformityTaskOutput;
 }

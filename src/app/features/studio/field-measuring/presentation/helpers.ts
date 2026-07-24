@@ -2,6 +2,7 @@ import { Section } from '@shared/domain';
 import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
+import { MEASURED_SOLAR_FLUX_BOUNDS } from './constants';
 
 /**
  * Determines if the current date is in Daylight Saving Time (DST)
@@ -85,7 +86,7 @@ export const createInitialMeasureData = (
     directSolarFlux: null,
     diffuseDirectSolarFlux: 246,
     diffusedSolarFlux: null,
-    measuredDiffusedPlusDirectSolarFlux: null,
+    measuredDiffusedPlusDirectSolarFlux: MEASURED_SOLAR_FLUX_BOUNDS.default,
     measuredDiffusedSolarFlux: null,
     diffusedPlusDirectSolarFlux: null,
     updateMode15C: 'auto',
