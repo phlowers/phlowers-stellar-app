@@ -12,7 +12,7 @@ import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/impor
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@core/services/worker_python/tasks/types';
+import { Task, Localization } from '@core/services/worker_python/tasks/types';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
@@ -24,7 +24,6 @@ import {
   geoLiaisonSupportCatalogMissingWarning
 } from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
-import { Localization } from '@core/services/worker_python/tasks/types';
 import {
   applyFootCoordinates,
   buildReprojectionAngles,
@@ -266,7 +265,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Sort portees by PORTEE_UNITAIRE_ORDRE (ascending)
     const sortedPortees = [...portees].sort(
-      (a, b) => parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
+      (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
     );
 
     const firstPortee = sortedPortees[0];
@@ -295,7 +294,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         ? []
         : [
             ...sortedPortees.map((p) => p['accroche depart']),
-            sortedPortees[sortedPortees.length - 1]['accroche arrivee']
+            sortedPortees.at(-1)!['accroche arrivee']
           ];
     const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } =
       await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
@@ -412,7 +411,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Last support comes from 'accroche arrivee' of the last portee
     // spanLength must be null on the last support (no span after it)
-    const lastPortee = sortedPortees[sortedPortees.length - 1];
+    const lastPortee = sortedPortees.at(-1)!;
     const lastSupport = this.mapAccrocheToSupport(lastPortee['accroche arrivee'], lastPortee);
     lastSupport.spanLength = null;
     supports.push(lastSupport);
@@ -466,7 +465,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     lambertX: (number | null)[],
     lambertY: (number | null)[]
   ): Promise<{ supports: Support[]; meanReprojectionDiffMeters: number | null }> {
-    if (lambertX.some((x) => x === null) || lambertY.some((y) => y === null)) {
+    if (lambertX.includes(null) || lambertY.includes(null)) {
       this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
       return { supports, meanReprojectionDiffMeters: null };
     }
