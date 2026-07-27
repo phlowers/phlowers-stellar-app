@@ -16,6 +16,7 @@ import { Task, Localization } from '@core/services/worker_python/tasks/types';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import {
   sectionImportErrors,
@@ -77,6 +78,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly logger = inject(LoggerService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly attachmentService = inject(AttachmentService);
+  private readonly chainsService = inject(ChainsService);
   private readonly workerPythonService = inject(WorkerPythonService);
 
   // ---------------------------------------------------------------------------
@@ -292,12 +294,9 @@ export class SectionImportService implements ImportAdapter<Section> {
     const accroches =
       sortedPortees.length === 0
         ? []
-        : [
-            ...sortedPortees.map((p) => p['accroche depart']),
-            sortedPortees.at(-1)!['accroche arrivee']
-          ];
+        : [...sortedPortees.map((p) => p['accroche depart']), sortedPortees.at(-1)!['accroche arrivee']];
     const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } =
-      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+      await this.resolveGeoLiaisonCatalogFields(supports, accroches);
 
     // Persist new support names in the local catalog (RG.CAN.ATT)
     const supportNameEntries: SupportNameEntry[] = accroches
@@ -344,6 +343,61 @@ export class SectionImportService implements ImportAdapter<Section> {
       },
       hasCatalogFallbackWarnings
     };
+  }
+
+  /**
+   * Resolves every support field the local catalogs are authoritative for: the attachment fields
+   * against the attachment catalog, then the chain details against the chain catalog.
+   */
+  private async resolveGeoLiaisonCatalogFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
+    const { supports: supportsWithAttachments, hasCatalogFallbackWarnings } =
+      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+
+    return {
+      supports: await this.resolveGeoLiaisonCatalogChainFields(supportsWithAttachments, accroches),
+      hasCatalogFallbackWarnings
+    };
+  }
+
+  /**
+   * Overrides each support's chain details with the chain catalog entry matching `CHAINE_DRN_IDR`.
+   *
+   * The catalog is authoritative whenever it holds the chain: `chainLength`, `chainWeight`,
+   * `chainV` and `chainSurface` are all taken from the catalog entry, including when its value is
+   * `0`. Chains absent from the catalog keep the GeoLiaison file values mapped by
+   * `mapAccrocheToSupport`. `counterWeight` (`CONTREPOIDS`) has no catalog counterpart and is
+   * always kept from the file.
+   */
+  private async resolveGeoLiaisonCatalogChainFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<Support[]> {
+    const catalogChains = (await this.chainsService.getChains()) ?? [];
+    if (catalogChains.length === 0) {
+      return supports;
+    }
+
+    const catalogChainsByName = new Map(catalogChains.map((chain) => [chain.chain_name, chain]));
+
+    return supports.map((support, index) => {
+      const chainName = accroches[index]?.CHAINE_DRN_IDR?.trim();
+      const catalogChain = chainName ? catalogChainsByName.get(chainName) : undefined;
+      if (!catalogChain) {
+        return support;
+      }
+
+      return {
+        ...support,
+        chainName: catalogChain.chain_name,
+        chainLength: catalogChain.mean_length,
+        chainWeight: catalogChain.mean_mass,
+        chainV: catalogChain.v_chain,
+        chainSurface: catalogChain.chain_surface
+      };
+    });
   }
 
   /**
