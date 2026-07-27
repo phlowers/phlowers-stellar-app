@@ -12,6 +12,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { User } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 interface UserinfoBody extends Partial<OidcClaims> {
   authenticated: boolean;
   oidcEnabled: boolean;
@@ -91,6 +92,11 @@ describe('AuthService', () => {
     };
 
     TestBed.configureTestingModule({
+      imports: [TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })],
       providers: [
         AuthService,
         { provide: StorageService, useValue: mockStorageService },

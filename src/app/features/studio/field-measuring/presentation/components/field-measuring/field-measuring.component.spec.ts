@@ -20,6 +20,7 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
 
+import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
   selector: 'app-button',
   standalone: true,
@@ -141,6 +142,26 @@ describe('FieldMeasuringComponent', () => {
     } as unknown as CablesService;
 
     await TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'field-measuring.field-measuring.export-button': 'Export',
+              'field-measuring.field-measuring.report-button': 'Report',
+              'field-measuring.field-measuring.save-button': 'Save',
+              'field-measuring.field-measuring.success-detail': 'Data saved successfully',
+              'field-measuring.field-measuring.success-summary': 'Success',
+              'field-measuring.field-measuring.tab-parameter-15c': 'Parameter at 15\u00b0C without wind',
+              'field-measuring.field-measuring.tab-parameter-calculation': 'Parameter calculation',
+              'field-measuring.field-measuring.tab-temperature-calculation': 'Temperature calculation',
+              'field-measuring.field-measuring.tab-terrain-data': 'Terrain data',
+              'field-measuring.shared.dialog-title': 'Compute base parameter from terrain measurement'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [
         ToolbarDialogService,
         provideAnimations(),
@@ -159,6 +180,7 @@ describe('FieldMeasuringComponent', () => {
         set: {
           imports: [
             TabsModule,
+            TranslocoModule,
             MockButtonComponent,
             MockIconComponent,
             MockHeaderComponent,

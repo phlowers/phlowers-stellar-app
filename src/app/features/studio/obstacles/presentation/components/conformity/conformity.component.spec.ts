@@ -13,6 +13,7 @@ import { Task } from '@services/worker_python/tasks/types';
 import { createConformityPlot, purgeConformityPlot, resizeConformityPlot } from './helpers/createConformityPlot';
 import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('./helpers/createConformityPlot');
 
 const mockCreateConformityPlot = vi.mocked(createConformityPlot);
@@ -201,7 +202,68 @@ describe('ConformityComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [ConformityComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.shared.altitudeTypeAbsolute': 'Absolute (NGF)',
+              'studio.shared.altitudeTypeRelative': 'Relative to support',
+              'studio.shared.altitudeTypeRelativeCable': 'Relative to cable attachment',
+              'studio.shared.spanAxisOption': 'Span axis',
+              'studio.conformity.cableAltitudeLabel': 'Cable altitude',
+              'studio.conformity.cableLineAxisDistanceLabel': 'Cable line axis distance',
+              'studio.conformity.distanceToComplyLabel': 'Distance to comply',
+              'studio.conformity.complianceAltitudeLabel': 'Compliance altitude',
+              'studio.conformity.complianceLineAxisDistanceLabel': 'Compliance line axis distance',
+              'studio.conformity.temperatureLabel': 'Temperature',
+              'studio.conformity.windPressureLabel': 'Wind pressure',
+              'studio.conformity.minimalDistanceLabel': 'Minimal distance',
+              'studio.conformity.altitudePointLabel': 'Altitude point',
+              'studio.conformity.altitudeTypeLabel': 'Altitude type',
+              'studio.conformity.calculateBtn': 'Calculate',
+              'studio.conformity.calculatingText': 'Calculating conformity\u2026',
+              'studio.conformity.calculationFailedError': 'Calculation failed: {{ errorMessage }}',
+              'studio.conformity.complianceColumnLabel': 'Conformity compliance',
+              'studio.conformity.complianceNoLabel': 'No',
+              'studio.conformity.complianceYesLabel': 'Yes',
+              'studio.conformity.distanceToLineAxisLabel': 'Distance to line axis',
+              'studio.conformity.electricTensionLabel': 'Electric tension',
+              'studio.conformity.enlargeGraphicViewBtn': 'Enlarge graphic view',
+              'studio.conformity.formLegend': 'Form',
+              'studio.conformity.lateralColumnSuffix': 'lateral',
+              'studio.conformity.lateralDistanceTemperatureLabel': 'Lateral distance temperature',
+              'studio.conformity.maxValueError': 'Maximum value:',
+              'studio.conformity.minValueError': 'Minimum value:',
+              'studio.conformity.minimumDistanceCaseLabel': 'Minimum distance case',
+              'studio.conformity.nameLabel': 'Name',
+              'studio.conformity.noConformityConfigError':
+                'Cannot calculate conformity: obstacle type has no conformity configuration',
+              'studio.conformity.obstacleLegend': 'Obstacle',
+              'studio.conformity.obstaclePointLabel': "Obstacle's point",
+              'studio.conformity.overhangColumnSuffix': 'overhang',
+              'studio.conformity.pointOptionLabel': 'Point {{ index }}',
+              'studio.conformity.redZonePresenceLabel': 'Red zone presence',
+              'studio.conformity.reduceGraphicViewBtn': 'Reduce graphic view',
+              'studio.conformity.referenceSupportDistanceLabel': 'Reference support distance',
+              'studio.conformity.repartitionTemperatureLabel': 'Repartition temperature',
+              'studio.conformity.resultsUpdatedText': 'Conformity results updated.',
+              'studio.conformity.typeLabel': 'Type',
+              'studio.conformity.unknownComplianceLabel': 'Unknown',
+              'studio.conformity.visualisationGraphCaption': 'Conformity visualisation graph',
+              'studio.conformity.windMinusLabel': 'Wind -',
+              'studio.conformity.windZoneLabel': 'Wind zone',
+              'studio.shared.conformityLabel': 'Conformity',
+              'studio.shared.lateralDistanceTypeLabel': 'Lateral distance type',
+              'studio.shared.referenceSupportLabel': 'Reference support',
+              'studio.shared.resultsTitle': 'Results:',
+              'studio.shared.spanLabel': 'Span'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ConformityComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: ObstacleFormService, useValue: mockFormService },

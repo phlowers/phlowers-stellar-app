@@ -14,6 +14,7 @@ import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnosti
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('Papoto component', () => {
   let component: PapotoComponent;
   let fixture: ComponentFixture<PapotoComponent>;
@@ -41,7 +42,12 @@ describe('Papoto component', () => {
     } as unknown as vi.Mocked<PlotSpanService>;
 
     await TestBed.configureTestingModule({
-      imports: [PapotoComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),PapotoComponent],
       providers: [
         provideNoopAnimations(),
         provideHttpClient(),

@@ -76,13 +76,6 @@ export class SectionsTabComponent {
   duplicateInitialCondition = output<DuplicateInitialConditionFunctionsInput>();
   /** Emits an initial condition to set as active. */
   setInitialCondition = output<InitialConditionFunctionsInput>();
-  currentSection = signal<Section>(createEmptySection());
-  currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
-  isNewSectionModalOpen = signal<boolean>(false);
-  newSectionModalMode = signal<CreateEditView>('create');
-  isInitialConditionModalOpen = signal<boolean>(false);
-  initialConditionModalMode = signal<CreateEditView>('create');
-  selectedSection = signal<string>('');
   readonly popover = viewChild<Popover>('popover');
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly transloco = inject(TranslocoService);
@@ -90,6 +83,14 @@ export class SectionsTabComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly chargesService = inject(ChargesService);
+
+  currentSection = signal<Section>(createEmptySection());
+  currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
+  isNewSectionModalOpen = signal<boolean>(false);
+  newSectionModalMode = signal<CreateEditView>('create');
+  isInitialConditionModalOpen = signal<boolean>(false);
+  initialConditionModalMode = signal<CreateEditView>('create');
+  selectedSection = signal<string>('');
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;

@@ -12,6 +12,7 @@ import { MessageService } from 'primeng/api';
 import { Charge, Section, SymmetryType } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock uuid
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
@@ -134,6 +135,11 @@ describe('ChargesService', () => {
     } as unknown as vi.Mocked<MessageService>;
 
     TestBed.configureTestingModule({
+      imports: [TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })],
       providers: [
         ChargesService,
         { provide: StudiesService, useValue: mockStudiesService },

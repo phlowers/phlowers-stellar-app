@@ -19,6 +19,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { signal } from '@angular/core';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
@@ -89,6 +90,11 @@ describe('StudioTopToolbarComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
         StudioTopToolbarComponent,
         FormsModule,
         SelectButtonModule,

@@ -20,6 +20,7 @@ import { Study } from '@shared/domain/models/study.model';
 import { Section } from '@shared/domain';
 import { BehaviorSubject } from 'rxjs';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 interface SignalFn<T> {
   (): T;
   set: (v: T) => void;
@@ -81,7 +82,12 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     } as unknown as StorageService;
 
     await TestBed.configureTestingModule({
-      imports: [ParameterCalculation15WithoutWindComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),ParameterCalculation15WithoutWindComponent],
       providers: [
         provideNoopAnimations(),
         provideHttpClient(),

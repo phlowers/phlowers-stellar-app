@@ -82,6 +82,7 @@
   "shared.python-errors.invalid-manipulation-range": "The manipulation range provided is invalid.",
   "shared.python-errors.support-out-of-range-error": "The support is out of the valid range.",
   "shared.python-errors.generated-points-none-error": "No generated points were found after computation.",
+  "shared.python-errors.night-time-error": "Sky cover cannot be estimated because the provided time is during the night.",
   "studies.card-study.author": "Author:",
   "studies.card-study.last-changed": "Last changed:",
   "studies.card-study.go-to-study": "Go to study",

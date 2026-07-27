@@ -12,6 +12,7 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { Subject } from 'rxjs';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -125,7 +126,27 @@ describe('NewSectionModalComponent (Jest)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NewSectionModalComponent],
+      imports: [
+        NewSectionModalComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'newSectionModal.titleView': 'View a study section',
+              'newSectionModal.titleModify': 'Modify a study section',
+              'newSectionModal.titleCreate': 'Create a study section',
+              'newSectionModal.importError': 'The imported section could not be found. Please try again.',
+              'newSectionModal.createBtn': 'Create section',
+              'newSectionModal.updateBtn': 'Update section',
+              'newSectionModal.createSection': 'Create a section'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: MaintenanceService, useClass: MockMaintenanceService },

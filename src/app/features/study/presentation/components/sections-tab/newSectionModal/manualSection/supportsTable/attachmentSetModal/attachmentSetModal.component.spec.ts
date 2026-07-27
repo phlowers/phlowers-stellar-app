@@ -33,6 +33,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { of } from 'rxjs';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
@@ -221,7 +222,33 @@ describe('AttachmentSetModalComponent', () => {
     } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
-      imports: [AttachmentSetModalComponent, BrowserAnimationsModule, FormsModule],
+      imports: [
+        AttachmentSetModalComponent,
+        BrowserAnimationsModule,
+        FormsModule,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'attachmentSetModal.title': 'Attachment set',
+              'attachmentSetModal.chooseHint':
+                'Choose the attachment set in the list or on the graph to find the right arm length.',
+              'attachmentSetModal.labelSupportName': 'Support name',
+              'attachmentSetModal.labelAttachmentSet': 'Attachment set',
+              'attachmentSetModal.armLength': 'Arm length',
+              'attachmentSetModal.unitMeter': 'm',
+              'attachmentSetModal.heightBelowConsole': 'Height below console',
+              'attachmentSetModal.autoFillHint':
+                'The attachment set and the arm length (m) will be automatically filled in the table.',
+              'attachmentSetModal.close': 'Close',
+              'attachmentSetModal.validate': 'Validate'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          }
+        })
+      ],
       providers: [
         {
           provide: AttachmentService,

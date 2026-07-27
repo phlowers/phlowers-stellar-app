@@ -14,6 +14,7 @@ import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with
 import { Charge, InitialCondition, Section, Study, SymmetryType } from '@shared/domain';
 import { ActivatedRoute } from '@angular/router';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('StudioMenuBarComponent', () => {
   let component: StudioMenuBarComponent;
   let fixture: ComponentFixture<StudioMenuBarComponent>;
@@ -158,6 +159,11 @@ describe('StudioMenuBarComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
         StudioMenuBarComponent,
         FormsModule,
         SelectButtonModule,

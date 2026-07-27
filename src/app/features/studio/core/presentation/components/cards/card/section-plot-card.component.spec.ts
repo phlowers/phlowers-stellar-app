@@ -8,6 +8,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 const mockLitData: GetSectionOutput = {
   coords: {
     supports: [[[1, 2, 3]]],
@@ -79,7 +80,48 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [SectionPlotCardComponent, TestHostComponent, CardComponent, IconComponent, NoopAnimationsModule],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.sectionPlotCard.altSuppFootLabel': 'Alt. supp foot:',
+              'studio.sectionPlotCard.angleBalancementLabel': 'Angle balancement:',
+              'studio.sectionPlotCard.arcLengthLaLabel': 'Arc length LA:',
+              'studio.sectionPlotCard.arrowF1Label': 'Arrow F1:',
+              'studio.sectionPlotCard.arrowF2Label': 'Arrow F2:',
+              'studio.sectionPlotCard.cableSlopeLeftAttLabel': 'Cable slope left att.:',
+              'studio.sectionPlotCard.cableSlopeRightAttLabel': 'Cable slope right att.:',
+              'studio.sectionPlotCard.chainDisplacementAccTitle': 'Chain displacement acc.',
+              'studio.sectionPlotCard.elevationLabel': 'Elevation:',
+              'studio.sectionPlotCard.expandDetailsAriaLabel': 'Expand details',
+              'studio.sectionPlotCard.horizontalDistAccLabel': 'Horizontal dist. acc.:',
+              'studio.sectionPlotCard.infTensionAccLabel': 'Inf tension acc.:',
+              'studio.sectionPlotCard.lLabel': 'L:',
+              'studio.sectionPlotCard.lineAngleLabel': 'Line angle:',
+              'studio.sectionPlotCard.naturalLengthL0Label': 'Natural length L0:',
+              'studio.sectionPlotCard.parameterLabel': 'Parameter:',
+              'studio.sectionPlotCard.resultantLabel': 'Resultant:',
+              'studio.sectionPlotCard.spanLengthLabel': 'Span length:',
+              'studio.sectionPlotCard.suppTensionMaxLabel': 'Supp tension (Max):',
+              'studio.sectionPlotCard.tLabel': 'T:',
+              'studio.sectionPlotCard.thT0Label': 'Th - T0:',
+              'studio.sectionPlotCard.vLabel': 'V:',
+              'studio.sectionPlotCard.vtlUnderChainTitle': 'VTL (under chain)',
+              'studio.sectionPlotCard.vtlUnderConsoleTitle': 'VTL (under console)',
+              'studio.sectionPlotCard.xLabel': 'X:',
+              'studio.sectionPlotCard.yLabel': 'Y:',
+              'studio.sectionPlotCard.zLabel': 'Z:'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        SectionPlotCardComponent,
+        TestHostComponent,
+        CardComponent,
+        IconComponent,
+        NoopAnimationsModule
+      ],
       providers: [{ provide: PlotSpanService, useValue: mockPlotSpanService }]
     }).compileComponents();
 

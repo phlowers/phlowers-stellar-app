@@ -10,6 +10,7 @@ import { GenericImportEngineService } from './generic-import-engine.service';
 import { IMPORT_ADAPTER_TOKEN, ImportAdapter, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
 import { LoggerService } from '@core/services/logger/logger.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -44,6 +45,11 @@ describe('GenericImportEngineService', () => {
     } as unknown as vi.Mocked<LoggerService>;
 
     TestBed.configureTestingModule({
+      imports: [TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })],
       providers: [
         GenericImportEngineService,
         { provide: IMPORT_ADAPTER_TOKEN, useValue: adapter },

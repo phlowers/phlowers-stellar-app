@@ -9,6 +9,7 @@ import { MessageService } from 'primeng/api';
 import { vi, type Mock } from 'vitest';
 import { NotificationService } from './notification.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 const DEFAULT_LIFE = 5000;
 const LIFE_WARNING = 7000;
 const LIFE_ERROR = 10000;
@@ -21,6 +22,11 @@ describe('NotificationService', () => {
     mockMessageService = { add: vi.fn() };
 
     TestBed.configureTestingModule({
+      imports: [TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })],
       providers: [NotificationService, { provide: MessageService, useValue: mockMessageService }]
     });
 

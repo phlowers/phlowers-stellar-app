@@ -8,6 +8,7 @@ import { provideMarkdown } from 'ngx-markdown';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('Changelog component', () => {
   let component: ChangelogComponent;
   let fixture: ComponentFixture<ChangelogComponent>;
@@ -32,7 +33,12 @@ describe('Changelog component', () => {
     } as unknown as vi.Mocked<OnlineService>;
 
     await TestBed.configureTestingModule({
-      imports: [ChangelogComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),ChangelogComponent],
       providers: [
         provideHttpClient(),
         provideMarkdown(),

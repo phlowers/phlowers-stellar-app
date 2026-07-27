@@ -6,6 +6,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
   template: `<app-side-tabs>
     <app-side-tab label="One">Content One</app-side-tab>
@@ -28,7 +29,18 @@ describe('SideTabsComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [TestHostComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.sideTabs.foldBack': 'Fold back'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        TestHostComponent
+      ],
       providers: [{ provide: PlotOptionsService, useValue: plotOptionsServiceMock }, SideTabsService]
     }).compileComponents();
 

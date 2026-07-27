@@ -30,6 +30,7 @@ import { Camera } from 'plotly.js-dist-min';
 import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 
+import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 interface SignalFn<T> {
   (): T;
   set: (v: T) => void;
@@ -137,7 +138,47 @@ describe('StudioPageComponent', () => {
     mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
 
     await TestBed.configureTestingModule({
-      imports: [StudioPageComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.studioPage.addChargeCaseLabel': 'Add a charge case',
+              'studio.studioPage.allOption': 'All',
+              'studio.studioPage.cableLengthChangeLabel': 'Cable length change',
+              'studio.studioPage.cableManipSpanLabel': 'Cable manip. at span',
+              'studio.studioPage.cableManipSupportLabel': 'Cable manip. at support',
+              'studio.studioPage.climateConditionLabel': 'Climate condition',
+              'studio.studioPage.distancesLabel': 'Distances',
+              'studio.studioPage.horizontalLabel': 'Horizontal',
+              'studio.studioPage.loadMarkingLabel': 'Load / Marking',
+              'studio.studioPage.maxSectionOption': 'Max section',
+              'studio.studioPage.nextSupportAriaLabel': 'Next support',
+              'studio.studioPage.noChargeCaseMessage': 'In order to add charges, you need to create a charge case.',
+              'studio.studioPage.notSelectedOption': 'Not selected',
+              'studio.studioPage.obliqueLabel': 'Oblique',
+              'studio.studioPage.oneSpanOption': 'One span',
+              'studio.studioPage.parameterLabel': 'Parameter',
+              'studio.studioPage.pointOption': 'Point {{ index }}',
+              'studio.studioPage.previousSupportAriaLabel': 'Previous support',
+              'studio.studioPage.selectObstacleAriaLabel': 'select an obstacle',
+              'studio.studioPage.selectObstaclePointAriaLabel': "select an obstacle's point",
+              'studio.studioPage.spanOption': 'Span',
+              'studio.studioPage.strandCutAriaLabel': 'strand is cut',
+              'studio.studioPage.strandNotCutAriaLabel': 'strand is not cut',
+              'studio.studioPage.twoSpansOption': 'Two spans',
+              'studio.studioPage.verticalLabel': 'Vertical',
+              'studio.studioPage.workingLoadAtRiskAriaLabel': 'working load is at risk',
+              'studio.studioPage.workingLoadFineAriaLabel': 'working load is fine',
+              'studio.studioPage.workingLoadLabel': 'Working load',
+              'studio.studioPage.workingLoadTooHighAriaLabel': 'working load is too high',
+              'studio.studioPage.workingLoadUnknownAriaLabel': 'working load is unknown'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        StudioPageComponent
+      ],
       providers: [
         { provide: Router, useValue: { navigate: vi.fn() } },
         {
@@ -1334,7 +1375,47 @@ describe('StudioPageComponent - HTML rendering', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [StudioPageComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.studioPage.addChargeCaseLabel': 'Add a charge case',
+              'studio.studioPage.allOption': 'All',
+              'studio.studioPage.cableLengthChangeLabel': 'Cable length change',
+              'studio.studioPage.cableManipSpanLabel': 'Cable manip. at span',
+              'studio.studioPage.cableManipSupportLabel': 'Cable manip. at support',
+              'studio.studioPage.climateConditionLabel': 'Climate condition',
+              'studio.studioPage.distancesLabel': 'Distances',
+              'studio.studioPage.horizontalLabel': 'Horizontal',
+              'studio.studioPage.loadMarkingLabel': 'Load / Marking',
+              'studio.studioPage.maxSectionOption': 'Max section',
+              'studio.studioPage.nextSupportAriaLabel': 'Next support',
+              'studio.studioPage.noChargeCaseMessage': 'In order to add charges, you need to create a charge case.',
+              'studio.studioPage.notSelectedOption': 'Not selected',
+              'studio.studioPage.obliqueLabel': 'Oblique',
+              'studio.studioPage.oneSpanOption': 'One span',
+              'studio.studioPage.parameterLabel': 'Parameter',
+              'studio.studioPage.pointOption': 'Point {{ index }}',
+              'studio.studioPage.previousSupportAriaLabel': 'Previous support',
+              'studio.studioPage.selectObstacleAriaLabel': 'select an obstacle',
+              'studio.studioPage.selectObstaclePointAriaLabel': "select an obstacle's point",
+              'studio.studioPage.spanOption': 'Span',
+              'studio.studioPage.strandCutAriaLabel': 'strand is cut',
+              'studio.studioPage.strandNotCutAriaLabel': 'strand is not cut',
+              'studio.studioPage.twoSpansOption': 'Two spans',
+              'studio.studioPage.verticalLabel': 'Vertical',
+              'studio.studioPage.workingLoadAtRiskAriaLabel': 'working load is at risk',
+              'studio.studioPage.workingLoadFineAriaLabel': 'working load is fine',
+              'studio.studioPage.workingLoadLabel': 'Working load',
+              'studio.studioPage.workingLoadTooHighAriaLabel': 'working load is too high',
+              'studio.studioPage.workingLoadUnknownAriaLabel': 'working load is unknown'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        StudioPageComponent
+      ],
       providers: [
         provideNoopAnimations(),
         provideHttpClient(),
@@ -1361,6 +1442,7 @@ describe('StudioPageComponent - HTML rendering', () => {
       .overrideComponent(StudioPageComponent, {
         set: {
           imports: [
+            TranslocoModule,
             DecimalPipe,
             FormsModule,
             NgxSliderModule,
@@ -1420,7 +1502,47 @@ describe('HTML rendering - distance radio buttons disabled state', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [StudioPageComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.studioPage.addChargeCaseLabel': 'Add a charge case',
+              'studio.studioPage.allOption': 'All',
+              'studio.studioPage.cableLengthChangeLabel': 'Cable length change',
+              'studio.studioPage.cableManipSpanLabel': 'Cable manip. at span',
+              'studio.studioPage.cableManipSupportLabel': 'Cable manip. at support',
+              'studio.studioPage.climateConditionLabel': 'Climate condition',
+              'studio.studioPage.distancesLabel': 'Distances',
+              'studio.studioPage.horizontalLabel': 'Horizontal',
+              'studio.studioPage.loadMarkingLabel': 'Load / Marking',
+              'studio.studioPage.maxSectionOption': 'Max section',
+              'studio.studioPage.nextSupportAriaLabel': 'Next support',
+              'studio.studioPage.noChargeCaseMessage': 'In order to add charges, you need to create a charge case.',
+              'studio.studioPage.notSelectedOption': 'Not selected',
+              'studio.studioPage.obliqueLabel': 'Oblique',
+              'studio.studioPage.oneSpanOption': 'One span',
+              'studio.studioPage.parameterLabel': 'Parameter',
+              'studio.studioPage.pointOption': 'Point {{ index }}',
+              'studio.studioPage.previousSupportAriaLabel': 'Previous support',
+              'studio.studioPage.selectObstacleAriaLabel': 'select an obstacle',
+              'studio.studioPage.selectObstaclePointAriaLabel': "select an obstacle's point",
+              'studio.studioPage.spanOption': 'Span',
+              'studio.studioPage.strandCutAriaLabel': 'strand is cut',
+              'studio.studioPage.strandNotCutAriaLabel': 'strand is not cut',
+              'studio.studioPage.twoSpansOption': 'Two spans',
+              'studio.studioPage.verticalLabel': 'Vertical',
+              'studio.studioPage.workingLoadAtRiskAriaLabel': 'working load is at risk',
+              'studio.studioPage.workingLoadFineAriaLabel': 'working load is fine',
+              'studio.studioPage.workingLoadLabel': 'Working load',
+              'studio.studioPage.workingLoadTooHighAriaLabel': 'working load is too high',
+              'studio.studioPage.workingLoadUnknownAriaLabel': 'working load is unknown'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        StudioPageComponent
+      ],
       providers: [
         { provide: Router, useValue: { navigate: vi.fn() } },
         {
@@ -1454,7 +1576,7 @@ describe('HTML rendering - distance radio buttons disabled state', () => {
     })
       .overrideComponent(StudioPageComponent, {
         set: {
-          imports: [FormsModule, RadioButtonModule, SelectModule, SelectButtonModule, DecimalPipe],
+          imports: [TranslocoModule, FormsModule, RadioButtonModule, SelectModule, SelectButtonModule, DecimalPipe],
           schemas: [CUSTOM_ELEMENTS_SCHEMA]
         }
       })

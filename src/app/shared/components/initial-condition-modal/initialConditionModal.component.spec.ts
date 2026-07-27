@@ -6,6 +6,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock uuid
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-duplicate')
@@ -104,7 +105,12 @@ describe('InitialConditionModalComponent', () => {
     } as unknown as CablesService;
 
     await TestBed.configureTestingModule({
-      imports: [InitialConditionModalComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),InitialConditionModalComponent],
       providers: [
         { provide: StorageService, useValue: mockStorageService },
         { provide: CablesService, useValue: mockCablesService },

@@ -5,6 +5,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TagList } from '@shared/model/card-study.model';
 import { provideRouter } from '@angular/router';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('CardStudyComponent', () => {
   let component: CardStudyComponent;
   let fixture: ComponentFixture<CardStudyComponent>;
@@ -14,7 +15,12 @@ describe('CardStudyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CardStudyComponent, TagComponent, IconComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),CardStudyComponent, TagComponent, IconComponent],
       providers: [provideRouter([])]
     }).compileComponents();
 

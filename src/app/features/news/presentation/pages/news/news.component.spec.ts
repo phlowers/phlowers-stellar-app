@@ -7,6 +7,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { provideMarkdown } from 'ngx-markdown';
 import { provideHttpClient } from '@angular/common/http';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('News component', () => {
   let component: NewsComponent;
   let fixture: ComponentFixture<NewsComponent>;
@@ -23,7 +24,12 @@ describe('News component', () => {
     } as unknown as vi.Mocked<OnlineService>;
 
     await TestBed.configureTestingModule({
-      imports: [NewsComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),NewsComponent],
       providers: [
         provideHttpClient(),
         provideMarkdown(),

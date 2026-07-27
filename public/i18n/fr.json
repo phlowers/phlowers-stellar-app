@@ -82,6 +82,7 @@
   "shared.python-errors.invalid-manipulation-range": "La plage de manipulation fournie est invalide.",
   "shared.python-errors.support-out-of-range-error": "Le support est hors de la plage valide.",
   "shared.python-errors.generated-points-none-error": "Aucun point généré n'a été trouvé après le calcul.",
+  "shared.python-errors.night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit.",
   "studies.card-study.author": "Auteur",
   "studies.card-study.last-changed": "Dernière modification:",
   "studies.card-study.go-to-study": "Aller à l'étude",

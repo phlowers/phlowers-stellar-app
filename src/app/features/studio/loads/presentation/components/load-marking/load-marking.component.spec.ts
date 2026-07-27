@@ -7,6 +7,7 @@ import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 import { SpanOption } from '@src/app/shared/types/plot.types';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 const mockSpanOptions: SpanOption[] = [
   { label: '1 - 2', value: 'support-1' },
   { label: '2 - 3', value: 'support-2' }
@@ -73,7 +74,12 @@ describe('LoadMarkingComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [LoadMarkingComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),LoadMarkingComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },

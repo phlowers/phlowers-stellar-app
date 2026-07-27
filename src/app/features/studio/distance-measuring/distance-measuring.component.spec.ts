@@ -10,6 +10,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { NotificationService } from '@services/notification/notification.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('DistanceMeasuringComponent', () => {
   let component: DistanceMeasuringComponent;
   let fixture: ComponentFixture<DistanceMeasuringComponent>;
@@ -54,7 +55,35 @@ describe('DistanceMeasuringComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [DistanceMeasuringComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.studio.zoom': 'Zoom',
+              'studio.distanceMeasuring.addMeasurementPointsError': 'Failed to add measurement points',
+              'studio.distanceMeasuring.angle123Label': 'Angle 1-2-3',
+              'studio.distanceMeasuring.calculateLabel': 'Calculate',
+              'studio.distanceMeasuring.deletePointsAriaLabel': 'delete points',
+              'studio.distanceMeasuring.distance12Label': 'Distance 1-2',
+              'studio.distanceMeasuring.distance23Label': 'Distance 2-3',
+              'studio.distanceMeasuring.freePositioningLabel': 'Free positioning',
+              'studio.distanceMeasuring.lineAxisDistLabel': 'Line axis dist.',
+              'studio.distanceMeasuring.meterUnit': 'm',
+              'studio.distanceMeasuring.neverSavedHint': "This tab's data is never saved",
+              'studio.distanceMeasuring.pointAltLabel': 'Point alt.',
+              'studio.distanceMeasuring.pointLabel': 'Point',
+              'studio.distanceMeasuring.refSupportDistLabel': 'Ref. support dist.',
+              'studio.distanceMeasuring.referenceHint': 'Reference support is left and altitude is taken absolute',
+              'studio.distanceMeasuring.resultsTitle': 'Results:',
+              'studio.distanceMeasuring.selectPointLabel': 'Select point',
+              'studio.studioPage.spanOption': 'Span'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        DistanceMeasuringComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },

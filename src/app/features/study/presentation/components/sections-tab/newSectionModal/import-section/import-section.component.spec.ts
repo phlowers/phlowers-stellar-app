@@ -14,6 +14,7 @@ import { IMPORT_ADAPTER_TOKEN } from '@shared/import/domain/import-contracts';
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
 import { Study } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -56,7 +57,14 @@ describe('ImportSectionComponent', () => {
     } as unknown as vi.Mocked<GenericImportEngineService>;
 
     await TestBed.configureTestingModule({
-      imports: [ImportSectionComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {
+              "importSection.edit": "Edit"
+            } },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),ImportSectionComponent],
       providers: [
         provideRouter([]),
         { provide: SectionImportService, useValue: sectionImportServiceMock },

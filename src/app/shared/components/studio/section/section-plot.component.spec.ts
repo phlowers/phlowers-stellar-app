@@ -31,6 +31,7 @@ vi.mock('./helpers/createShadowPlotData');
 
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 const mockCreatePlot = vi.mocked(createPlot);
 const mockApplyRestoreCamera = vi.mocked(applyRestoreCamera);
 const mockCreatePlotData = vi.mocked(createPlotData);
@@ -337,7 +338,12 @@ describe('SectionPlotComponent', () => {
     mockObstacleFormService.form.value = { uuid: null };
 
     await TestBed.configureTestingModule({
-      imports: [SectionPlotComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),SectionPlotComponent],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },

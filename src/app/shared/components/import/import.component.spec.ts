@@ -13,6 +13,7 @@ import { GenericImportEngineService } from '@shared/import/application/services/
 import { IMPORT_ADAPTER_TOKEN, ImportContextConfig, ImportOutcome } from '@shared/import/domain/import-contracts';
 import { NotificationService } from '@core/services/notification/notification.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -100,7 +101,12 @@ describe('ImportComponent', () => {
     notificationServiceMock = { error: vi.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [ImportComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),ImportComponent],
       providers: [
         provideRouter([]),
         { provide: GenericImportEngineService, useValue: engineMock },
