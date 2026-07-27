@@ -57,7 +57,7 @@ export class TemperatureCalculationComponent {
   // Available wind direction options.
   windDirectionOptions = input.required<{ label: string; value: string }[]>();
   // Available sky cover options.
-  skyCoverOptions = input.required<SelectOption<SkyCover>[]>();
+  skyCoverOptions = input.required<SelectOption[]>();
   // Field measure data model bound two-way.
   measureData = model.required<FieldMeasure>();
 
@@ -225,7 +225,10 @@ export class TemperatureCalculationComponent {
       });
       if (error || result === undefined) {
         // Prefer the specific message matching the Python error raised by the task, if any.
-        const pythonErrorMessage = formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null);
+        const pythonErrorMessage = formatPythonError(
+          diagnostics.find((d) => d.origin === 'exception')?.code ?? null,
+          this.translocoService
+        );
         this.notificationService.error(
           pythonErrorMessage ??
             $localize`Sky cover could not be estimated from the provided inputs. Please check the values and try again.`

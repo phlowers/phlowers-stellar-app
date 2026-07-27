@@ -1,5 +1,3 @@
-import { SkyCover } from '@shared/domain';
-
 /** Option entry for select dropdowns with a string label and value. */
 export interface SelectOption<T extends string = string> {
   /** Display label for the option. */
@@ -51,7 +49,7 @@ export const WIND_SPEED_UNIT_OPTIONS: SelectOption[] = [
 ];
 
 /** Available sky cover option sources for field measuring (N0–N8 nebulosity scale). */
-export const SKY_COVER_OPTION: SkyCoverOptionSource[] = [
+export const SKY_COVER_OPTION_SOURCES: SkyCoverOptionSource[] = [
   { label: 'N0', value: 'N0' },
   { labelKey: 'field-measuring.shared.sky-cover.n1', value: 'N1' },
   { labelKey: 'field-measuring.shared.sky-cover.n2', value: 'N2' },
