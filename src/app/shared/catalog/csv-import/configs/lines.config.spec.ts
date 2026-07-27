@@ -97,6 +97,10 @@ describe('lines.config - mapLineRow', () => {
   });
 });
 
+describe('lines.config - createLinesConfig', () => {
+  it('accumulates rows across multiple chunks and dedupes in finalize', async () => {
+    const config = createLinesConfig();
+    const bulkAdd = vi.fn().mockResolvedValue(undefined);
     const ctx = { table: { bulkAdd } as never, now: '2026-01-01' };
     const rows = parseFixtureCsv<LineCsvDto>('lines');
     const half = Math.ceil(rows.length / 2);

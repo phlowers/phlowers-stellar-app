@@ -77,7 +77,6 @@
           "configurations": {
             "fr": {
               "baseHref": "/",
-              "localize": ["fr"],
               "optimization": {
                   "scripts": true,
                   "styles": {
@@ -89,7 +88,6 @@
             },
             "en": {
               "baseHref": "/",
-              "localize": ["en"],
               "optimization": {
                   "scripts": true,
                   "styles": {
@@ -100,7 +98,6 @@
               }
             },
             "production": {
-              "localize": ["fr"],
               "baseHref": "/",
               "extractLicenses": false,
               "sourceMap": true,
