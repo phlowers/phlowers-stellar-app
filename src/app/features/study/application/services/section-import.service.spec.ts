@@ -19,7 +19,24 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { geoLiaisonSupportCatalogMissingWarning } from './section-import.constantes';
+import { TranslocoService } from '@jsverse/transloco';
+
+const geoLiaisonSupportCatalogMissingWarning =
+  'The attachment support from the geolink file is not present in the application support catalog';
+
+const sectionImportTranslations: Record<string, string> = {
+  'sectionImport.fileTypeNotAllowed': 'File type not allowed',
+  'sectionImport.fileReadError': 'Error reading file',
+  'sectionImport.fileParseError': 'Error parsing file',
+  'sectionImport.validationRequiredFields': 'Section is missing required fields',
+  'sectionImport.validationSupportsBounds': 'Section has supports with values out of bounds',
+  'sectionImport.importError': 'Error importing section',
+  'sectionImport.deleteError': 'Error deleting section',
+  'sectionImport.geoLiaisonFormatError': 'The geolink file to import is invalid.',
+  'sectionImport.lambertReprojectionError': 'Error computing GPS coordinates from Lambert93 data',
+  'sectionImport.catalogMissingWarning': geoLiaisonSupportCatalogMissingWarning,
+  'sectionImport.importSuccess': 'Section imported successfully'
+};
 
 // ---------------------------------------------------------------------------
 // Polyfill File.prototype.text — jsdom 26 does not implement it
@@ -284,7 +301,18 @@ describe('SectionImportService', () => {
         { provide: MaintenanceService, useValue: maintenanceServiceMock },
         { provide: AttachmentService, useValue: attachmentServiceMock },
         { provide: ChainsService, useValue: chainsServiceMock },
-        { provide: WorkerPythonService, useValue: workerPythonServiceMock }
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock },
+        {
+          provide: TranslocoService,
+          useValue: {
+            translate: (key: string, params?: Record<string, unknown>): string => {
+              if (key === 'sectionImport.reprojectionInfo') {
+                return `Reprojection using ${params?.['appName']} data model seems to add a mean absolute error of ${params?.['error']} m`;
+              }
+              return sectionImportTranslations[key] ?? key;
+            }
+          }
+        }
       ]
     });
     service = TestBed.inject(SectionImportService);

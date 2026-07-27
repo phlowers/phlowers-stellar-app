@@ -39,9 +39,9 @@
                 data-testid="section-name-input"
               />
               @if (!isNameUnique()) {
-                <p-message id="section-name-error-message" severity="error" size="small" variant="simple" i18n
-                  >Section name must be unique.</p-message
-                >
+                <p-message id="section-name-error-message" severity="error" size="small" variant="simple">{{
+                  'manualSection.nameUnique' | transloco
+                }}</p-message>
               }
             </div>
 
@@ -495,7 +495,6 @@
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
-              i18n-currentPageReportTemplate
               currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
             />
           </div>

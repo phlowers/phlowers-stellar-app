@@ -7,7 +7,12 @@
 import { ApplicationConfig, ErrorHandler, inject, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import {
+  provideRouter,
+  TitleStrategy,
+  withEnabledBlockingInitialNavigation,
+  withInMemoryScrolling
+} from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
@@ -18,6 +23,7 @@ import { AuthService } from '@services/auth/auth.service';
 import { authSessionInterceptor } from '@services/auth/auth-session.interceptor';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
+import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strategy';
 import { LoggerService } from '@services/logger/logger.service';
 import { getAndClearBootstrapErrors } from '../bootstrap-logger';
 
@@ -43,6 +49,7 @@ export const appConfig: ApplicationConfig = {
     provideMarkdown(),
     MessageService,
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: TitleStrategy, useClass: TranslocoTitleStrategy },
     /**
      * Application initializer.
      *

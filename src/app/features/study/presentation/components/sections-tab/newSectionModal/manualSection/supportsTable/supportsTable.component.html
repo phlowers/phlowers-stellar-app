@@ -76,13 +76,8 @@
         <ng-container>{{ 'supportsTable.colSuppFootAlt' | transloco }}</ng-container>
         <app-icon class="align-middle pl-1" icon="rocket_launch" />
       </th>
-      <th
-        id="attachment_position"
-        (dblclick)="onSupportNumberDoubleClick('attachmentPosition')"
-        i18n
-        class="decimal-column"
-      >
-        Attachment pos.
+      <th id="attachment_position" (dblclick)="onSupportNumberDoubleClick('attachmentPosition')" class="decimal-column">
+        {{ 'supportsTable.colAttachmentPosition' | transloco }}
       </th>
       <th id="chain_surface" (dblclick)="onSupportNumberDoubleClick('chainSurface')" class="decimal-column">
         {{ 'supportsTable.colChainSurface' | transloco }}
@@ -597,8 +592,7 @@
           <p-select
             [options]="optionsAttachmentPosition"
             appendTo="body"
-            aria-label="attachment position"
-            i18n-aria-label
+            [attr.aria-label]="'supportsTable.ariaAttachmentPosition' | transloco"
             [ngModel]="support.attachmentPosition"
             optionLabel="label"
             optionValue="value"

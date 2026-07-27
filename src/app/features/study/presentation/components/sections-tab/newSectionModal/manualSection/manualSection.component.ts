@@ -96,9 +96,7 @@ export class ManualSectionComponent implements OnInit {
   cablesFilterTable = signal<CatalogCable[]>([]);
   protected readonly sectionTypes = createSectionTypes(this.transloco);
   isNameUnique = input<boolean>();
-  // TODO: STOP #2 — paginator interpolation (p-paginator placeholders {first}/{last}/{totalRecords}
-  // are not Transloco-compatible interpolation syntax).
-  currentPageReportTemplate = $localize`Support ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
+  currentPageReportTemplate = this.transloco.translate('manualSection.currentPageReportTemplate');
   readonly noVoltageLabel = this.transloco.translate('manualSection.noVoltage');
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);

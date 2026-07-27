@@ -97,57 +97,6 @@ describe('lines.config - mapLineRow', () => {
   });
 });
 
-describe('lines.config - mapLineRow - worker context safety', () => {
-  let savedLocalize: unknown;
-
-  beforeEach(() => {
-    savedLocalize = (globalThis as Record<string, unknown>)['$localize'];
-    vi.stubGlobal('$localize', undefined);
-  });
-
-  afterEach(() => {
-    vi.stubGlobal('$localize', savedLocalize);
-  });
-
-  it('does not throw when $localize is unavailable (simulates Web Worker environment)', () => {
-    const row: LineCsvDto = {
-      link_idr: 'L',
-      voltage_idr: '',
-      voltage_adr: '225.0',
-      link_adr: '',
-      lit_idr: '',
-      lit_adr: '',
-      branch_id: '',
-      branch_idr: '',
-      branch_adr: ''
-    } as unknown as LineCsvDto;
-    expect(() => mapLineRow(row)).not.toThrow();
-    const e = mapLineRow(row);
-    expect(e?.voltage_idr).toBe('NO VOLTAGE');
-    expect(e?.voltage_adr).toBe('NO_VOLTAGE');
-  });
-
-  it('handles voltage_adr "0.0" no-voltage path without $localize', () => {
-    const row: LineCsvDto = {
-      link_idr: 'L',
-      voltage_idr: 'V',
-      voltage_adr: '0.0',
-      link_adr: '',
-      lit_idr: '',
-      lit_adr: '',
-      branch_id: '',
-      branch_idr: '',
-      branch_adr: ''
-    } as unknown as LineCsvDto;
-    expect(() => mapLineRow(row)).not.toThrow();
-    expect(mapLineRow(row)?.voltage_idr).toBe('NO VOLTAGE');
-  });
-});
-
-describe('lines.config - createLinesConfig', () => {
-  it('accumulates rows across multiple chunks and dedupes in finalize', async () => {
-    const config = createLinesConfig();
-    const bulkAdd = vi.fn().mockResolvedValue(undefined);
     const ctx = { table: { bulkAdd } as never, now: '2026-01-01' };
     const rows = parseFixtureCsv<LineCsvDto>('lines');
     const half = Math.ceil(rows.length / 2);
