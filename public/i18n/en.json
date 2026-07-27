@@ -562,6 +562,7 @@
   "field-measuring.temperature-calculation.solar-flux-on-cable-label": "Solar flux on the cable",
   "field-measuring.temperature-calculation.error-message": "An error occurred while calculating the temperature",
   "field-measuring.temperature-calculation.perpendicular-option": "Perpendicular",
+  "field-measuring.temperature-calculation.sky-cover-estimation-error": "Sky cover could not be estimated from the provided inputs. Please check the values and try again.",
   "field-measuring.field-measuring.tab-terrain-data": "Terrain data",
   "field-measuring.field-measuring.tab-parameter-calculation": "Parameter calculation",
   "field-measuring.field-measuring.tab-temperature-calculation": "Temperature calculation",

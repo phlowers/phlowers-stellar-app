@@ -231,7 +231,7 @@ export class TemperatureCalculationComponent {
         );
         this.notificationService.error(
           pythonErrorMessage ??
-            $localize`Sky cover could not be estimated from the provided inputs. Please check the values and try again.`
+            this.translocoService.translate('field-measuring.temperature-calculation.sky-cover-estimation-error')
         );
         return;
       }

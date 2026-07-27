@@ -119,7 +119,12 @@
   <div class="toolbar__shortcuts">
     @for (item of toolsItems(); track $index) {
       @if (item.checked) {
-        <button class="toolbar__specifbtn" [disabled]="item.disabled" (click)="item.action()" [attr.aria-label]="item.label">
+        <button
+          class="toolbar__specifbtn"
+          [disabled]="item.disabled"
+          (click)="item.action()"
+          [attr.aria-label]="item.label"
+        >
           {{ item.label }}
         </button>
       }

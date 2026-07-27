@@ -134,14 +134,30 @@ export class CableSupportManipComponent {
   });
 
   readonly manip1TypeOptions = [
-    { label: this.translocoService.translate('loads.cable-support-manip.crane-handling-option'), value: 'crane' as SupportManipType },
-    { label: this.translocoService.translate('loads.cable-support-manip.rope-handling-option'), value: 'rope' as SupportManipType },
-    { label: this.translocoService.translate('loads.cable-support-manip.shifting-option'), value: 'shifting' as SupportManipType }
+    {
+      label: this.translocoService.translate('loads.cable-support-manip.crane-handling-option'),
+      value: 'crane' as SupportManipType
+    },
+    {
+      label: this.translocoService.translate('loads.cable-support-manip.rope-handling-option'),
+      value: 'rope' as SupportManipType
+    },
+    {
+      label: this.translocoService.translate('loads.cable-support-manip.shifting-option'),
+      value: 'shifting' as SupportManipType
+    }
   ];
 
   readonly anchoringOptions = [
-    { label: this.translocoService.translate('loads.cable-support-manip.without-chain-option'), value: 'without_chain' as SupportAnchoringType },
-    { label: this.translocoService.translate('loads.shared.with-chain-option'), value: 'with_chain' as SupportAnchoringType, disabled: true }
+    {
+      label: this.translocoService.translate('loads.cable-support-manip.without-chain-option'),
+      value: 'without_chain' as SupportAnchoringType
+    },
+    {
+      label: this.translocoService.translate('loads.shared.with-chain-option'),
+      value: 'with_chain' as SupportAnchoringType,
+      disabled: true
+    }
   ];
 
   private readonly manip1TypeSignal: Signal<SupportManipType | null> = toSignal(
@@ -163,7 +179,10 @@ export class CableSupportManipComponent {
   );
 
   readonly manip2TypeOptions = [
-    { label: this.translocoService.translate('loads.cable-support-manip.shifting-option'), value: 'shifting' as SupportManipType }
+    {
+      label: this.translocoService.translate('loads.cable-support-manip.shifting-option'),
+      value: 'shifting' as SupportManipType
+    }
   ];
 
   private readonly manip2TypeSignal: Signal<SupportManipType | null> = toSignal(
@@ -320,7 +339,9 @@ export class CableSupportManipComponent {
       await this.cableSupportManipService.reloadSection();
       this.notificationService.success(this.translocoService.translate('loads.cable-support-manip.saved-notification'));
     } catch {
-      this.notificationService.error(this.translocoService.translate('loads.cable-support-manip.save-failed-notification'));
+      this.notificationService.error(
+        this.translocoService.translate('loads.cable-support-manip.save-failed-notification')
+      );
     } finally {
       this.isLoading.set(false);
     }
@@ -342,13 +363,17 @@ export class CableSupportManipComponent {
       if (uuid) {
         await this.cableSupportManipService.delete(uuid);
         await this.cableSupportManipService.reloadSection();
-        this.notificationService.success(this.translocoService.translate('loads.cable-support-manip.deleted-notification'));
+        this.notificationService.success(
+          this.translocoService.translate('loads.cable-support-manip.deleted-notification')
+        );
       }
       this.clearManip2();
       this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value });
       this.hasSavedManipulation.set(false);
     } catch {
-      this.notificationService.error(this.translocoService.translate('loads.cable-support-manip.delete-failed-notification'));
+      this.notificationService.error(
+        this.translocoService.translate('loads.cable-support-manip.delete-failed-notification')
+      );
     } finally {
       this.isLoading.set(false);
     }

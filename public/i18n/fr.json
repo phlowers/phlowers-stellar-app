@@ -562,6 +562,7 @@
   "field-measuring.temperature-calculation.solar-flux-on-cable-label": "Flux solaire sur le câble",
   "field-measuring.temperature-calculation.error-message": "Une erreur est survenue lors du calcul de la température",
   "field-measuring.temperature-calculation.perpendicular-option": "Perpendiculaire",
+  "field-measuring.temperature-calculation.sky-cover-estimation-error": "La nébulosité n'a pas pu être estimée à partir des données fournies. Veuillez vérifier les valeurs et réessayer.",
   "field-measuring.field-measuring.tab-terrain-data": "Données de terrain",
   "field-measuring.field-measuring.tab-parameter-calculation": "Calcul de paramètre",
   "field-measuring.field-measuring.tab-temperature-calculation": "Calcul de température",
