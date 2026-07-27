@@ -16,12 +16,16 @@
 <div class="mt-6">
   <p-tabs value="sections">
     <p-tablist>
-      <p-tab value="sections" i18n data-testid="sections-tab">Sections</p-tab>
-      <p-tab value="studyStates" disabled="true" i18n data-testid="study-states-tab">List of saved states</p-tab>
-      <p-tab value="measurements" disabled="true" i18n data-testid="measurements-tab">Measurements</p-tab>
-      <p-tab value="groundAndObstacles" disabled="true" i18n data-testid="ground-obstacles-tab"
-        >Ground & obstacles</p-tab
-      >
+      <p-tab value="sections" data-testid="sections-tab">{{ 'study.tabs.sections' | transloco }}</p-tab>
+      <p-tab value="studyStates" disabled="true" data-testid="study-states-tab">{{
+        'study.tabs.savedStates' | transloco
+      }}</p-tab>
+      <p-tab value="measurements" disabled="true" data-testid="measurements-tab">{{
+        'study.tabs.measurements' | transloco
+      }}</p-tab>
+      <p-tab value="groundAndObstacles" disabled="true" data-testid="ground-obstacles-tab">{{
+        'study.tabs.groundObstacles' | transloco
+      }}</p-tab>
     </p-tablist>
     <p-tabpanels class="px-0">
       <p-tabpanel value="sections">

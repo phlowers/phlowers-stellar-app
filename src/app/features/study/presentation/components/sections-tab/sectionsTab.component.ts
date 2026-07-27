@@ -26,6 +26,7 @@ import { ToolbarDialogService } from '@features/studio/toolbar/presentation/serv
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -49,7 +50,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
     CheckboxModule,
     RouterLink,
     SelectWithButtonsComponent,
-    ToolbarDialogComponent
+    ToolbarDialogComponent,
+    TranslocoModule
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss',
@@ -83,6 +85,7 @@ export class SectionsTabComponent {
   selectedSection = signal<string>('');
   readonly popover = viewChild<Popover>('popover');
   private readonly toolbarDialogService = inject(ToolbarDialogService);
+  readonly transloco = inject(TranslocoService);
 
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
@@ -92,7 +95,7 @@ export class SectionsTabComponent {
     const currentInitialConditions = section.initial_conditions;
     return {
       uuid: uuidv4(),
-      name: $localize`IC` + ' ' + (currentInitialConditions.length + 1),
+      name: this.transloco.translate('sectionsTab.icPrefix') + ' ' + (currentInitialConditions.length + 1),
       base_parameters: null,
       base_temperature: 15,
       cable_pretension: 0,

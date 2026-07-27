@@ -22,6 +22,7 @@ import { SectionSourceMode } from './newSectionModal.interfaces';
 import { cloneDeep } from 'lodash';
 import { LocationData } from './manualSection/location/location.interfaces';
 import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -45,7 +46,8 @@ import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
     ManualSectionComponent,
     IconComponent,
     ButtonComponent,
-    ImportSectionComponent
+    ImportSectionComponent,
+    TranslocoModule
   ],
   templateUrl: './newSectionModal.component.html',
   styleUrl: './newSectionModal.component.scss',
@@ -85,14 +87,15 @@ export class NewSectionModalComponent {
 
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
+  private readonly transloco = inject(TranslocoService);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
-      return $localize`View a study section`;
+      return this.transloco.translate('newSectionModal.titleView');
     } else if (this.mode() === 'edit') {
-      return $localize`Modify a study section`;
+      return this.transloco.translate('newSectionModal.titleModify');
     }
-    return $localize`Create a study section`;
+    return this.transloco.translate('newSectionModal.titleCreate');
   });
 
   constructor() {
@@ -187,7 +190,7 @@ export class NewSectionModalComponent {
 
     const section = this.study()?.sections.find((s) => s.uuid === sectionUuid);
     if (!section) {
-      this.notificationService.error($localize`The imported section could not be found. Please try again.`);
+      this.notificationService.error(this.transloco.translate('newSectionModal.importError'));
       return;
     }
 

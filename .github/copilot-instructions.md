@@ -6,16 +6,16 @@ Angular 19 PWA · Pyodide/Web Worker · Dexie (via `StorageService`) · Plotly.j
 
 ## ESLint hard rules — never violate
 
-- `no-explicit-any` → use proper types, generics, or `unknown`
-- `no-restricted-globals` → `window` is **banned** — always `globalThis`
-- Component selector: prefix `app-`, kebab-case
-- Directive selector: prefix `app`, camelCase
+- `no-explicit-any` → proper types, generics, or `unknown`
+- `no-restricted-globals` → `window` banned, use `globalThis`
+- Component selector: `app-` prefix, kebab-case
+- Directive selector: `app` prefix, camelCase
 
 ---
 
 ## Language
 
-All code, comments, TSDoc, test descriptions, commit messages → **English only**.  
+English only: code, comments, TSDoc, test descriptions, commit messages.
 Exception: user-facing text uses `i18n` attribute or `$localize`.
 
 ---
@@ -36,12 +36,12 @@ Reserve `/** */` (TSDoc) for genuine multi-line documentation of exported APIs.
 ## Import aliases — always, no relative paths
 
 ```
-@src/*            → src/*
-@app/*            → src/app/*
-@core/*           → src/app/core/*
-@services/*       → src/app/core/services/*
-@features/*       → src/app/features/*
-@shared/*         → src/app/shared/*
+@src/* → src/*
+@app/* → src/app/*
+@core/* → src/app/core/*
+@services/* → src/app/core/services/*
+@features/* → src/app/features/*
+@shared/* → src/app/shared/*
 @infrastructure/* → src/app/infrastructure/*
 ```
 
@@ -49,118 +49,26 @@ Reserve `/** */` (TSDoc) for genuine multi-line documentation of exported APIs.
 
 ## Angular — mandatory patterns
 
-Every component: `standalone: true` · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
-State: `signal()` / `computed()` / `effect()` — no plain mutable properties.  
-Observables in components: always `toSignal()`.  
-Control flow: `@if` / `@for` / `@switch` — never `*ngIf` / `*ngFor`.
+Every component: `standalone: true` · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).
+State: `signal()` / `computed()` / `effect()` — no plain mutable properties.
+Observables in components: always `toSignal()`.
+Control flow: `@if` / `@for` / `@switch` only — never `*ngIf` / `*ngFor`.
 
 ---
 
 ## Code organisation — externalize everything
 
-**Never declare interfaces, types, constants, or standalone functions directly inside a component or service file.**  
-Always extract them into dedicated co-located files:
+Never declare interfaces, types, constants, or standalone functions inside a component/service file. Extract to co-located files:
 
-| What | File suffix | Example |
-|---|---|---|
-| Interfaces / types | `.interfaces.ts` | `section-import.interfaces.ts` |
-| Constants / error catalogs / i18n strings | `.constantes.ts` | `section-import.constantes.ts` |
-| Pure helper functions | `.helpers.ts` | `section-import.helpers.ts` |
+| What | Suffix |
+|---|---|
+| Interfaces / types | `.interfaces.ts` |
+| Constants / error catalogs / i18n strings | `.constantes.ts` |
+| Pure helper functions | `.helpers.ts` |
 
-Rules:
-- A component or service file must **only** contain the class declaration and its Angular metadata.
-- Re-export from the feature's public entry point when consumers need access.
-- Helpers must be **pure functions** (no side effects, no DI) so they can be tested in isolation.
+Component/service files contain only the class + Angular metadata. Helpers are pure (no side effects, no DI).
 
 ---
-
----
-applyTo: "src/**/*.html,src/**/*.ts"
----
-
-# Migration i18n Angular -> Transloco (Stellar)
-
-## Structure des clés : à plat, jamais imbriquée
-
-Un seul objet JSON par langue (public/i18n/en.json, public/i18n/fr.json).
-Chaque clé est une chaîne complète au premier niveau, même si elle contient
-des points :
-
-```json
-{ "auth.login.title": "Sign in", "common.actions.save": "Save" }
-```
-
-Ne JAMAIS créer d'objet imbriqué du type {"auth": {"login": {...}}}, même
-si la clé contient plusieurs segments séparés par des points.
-
-## Namespaces
-
-- `common.*` — texte générique réutilisé dans plusieurs features
-- `domain.*` — vocabulaire métier partagé entre study/studio (altitude,
-  anchoring, cableManipMethod, chainLength, chainName, chainSurface,
-  chainWeight, counterWeight, distance, referenceSupport, slingLength...)
-- `<feature>.shared.*` — texte réutilisé par plusieurs composants d'UNE
-  même feature (changelog/news/home/admin/auth/studies/study/studio)
-- `<feature>.<composant>.*` — texte propre à un seul composant
-
-**Avant de créer une clé locale, vérifie si le texte existe déjà dans
-public/i18n/en.json sous common.* ou domain.* — si oui, réutilise cette
-clé, n'en crée pas une nouvelle.**
-
-## RÈGLE CRITIQUE : ce qui est traduisible, ce qui ne l'est jamais
-
-Ne considère un texte comme traduisible QUE dans ces trois cas précis :
-1. Contenu d'un élément portant l'attribut `i18n` (ex: `<h2 i18n>Texte</h2>`)
-2. Valeur d'un attribut nommé `i18n-xxx` (ex: `i18n-title` associé à `title="..."`)
-3. Un appel `$localize\`...\`` en TypeScript
-
-**Ne touche JAMAIS à :**
-- un nom de balise ou nom d'attribut, même s'il ressemble à un mot anglais
-  (`<section>`, `type=`, `name=`, `id=`, `formControlName=`, `data-testid=`)
-- la valeur d'un attribut qui n'est PAS explicitement marqué `i18n-*`,
-  même si cette valeur est un mot anglais courant (`type="button"`,
-  `aria-label="view"` sans `i18n-aria-label` associé, `class="..."`)
-- une correspondance de texte trouvée par simple recherche insensible à
-  la casse — vérifie que le mot est bien à l'intérieur d'un vrai marqueur
-  i18n, pas juste présent quelque part sur la ligne
-
-En cas de doute sur si quelque chose est réellement marqué pour traduction,
-laisse-le tel quel et signale-le plutôt que de deviner.
-
-## Imports requis pour Transloco — checklist systématique
-
-Lors de TOUTE migration i18n vers Transloco ou lors de la vérification de conformité
-d'un composant/service :
-
-1. **Composants template** → vérifier `TranslocoModule` dans les imports:
-   ```typescript
-   import { TranslocoModule } from '@jsverse/transloco';
-   
-   @Component({
-     imports: [TranslocoModule, ...],  // ← MUST be present for pipe usage
-     ...
-   })
-   ```
-
-2. **Services injectant TranslocoService** → vérifier l'import:
-   ```typescript
-   import { TranslocoService } from '@jsverse/transloco';
-   
-   private readonly translocoService = inject(TranslocoService);
-   this.translocoService.instant('common.key');  // ✅
-   ```
-
-3. **Validation de conformité** (HTML ou TypeScript migration):
-   - ✅ Les clés utilisent les **bonnes clés pointillées** du fichier JSON (ex: `common.import.upload.prompt`)
-   - ✅ Le pipe/service est **importé et disponible** (`TranslocoModule` ou `TranslocoService`)
-   - ✅ Les clés existent dans `public/i18n/en.json` et `public/i18n/fr.json`
-
-## Les 15 fichiers nécessitant un refactoring (pas un simple remplacement)
-
-Ces fichiers définissent des constantes en dehors d'un contexte
-d'injection Angular (au niveau du module, pas dans une classe) :
-
-------------------------------
 
 ## UUID
 
@@ -168,24 +76,12 @@ Always `import { v4 as uuidv4 } from 'uuid'` — never `crypto.randomUUID()`.
 
 ---
 
-## Dexie — real pattern
+## Dexie
 
-`AppDatabase` is owned by `StorageService`. **Never instantiate it directly.**
-
-```typescript
-private readonly storageService = inject(StorageService);
-
-// Wait for readiness
-readonly dbReady = toSignal(this.storageService.ready$, { initialValue: false });
-
-// Access
-await this.storageService.db.studies.toArray();
-
-// Multi-table ops → transaction
-const db = this.storageService.db;
-await db.transaction('rw', [db.studies, db.metadata], async () => { ... });
-```
-
+`AppDatabase` owned by `StorageService`. Never instantiate directly.
+Access via `inject(StorageService)` → `storageService.db.xxx`.
+Readiness: `toSignal(storageService.ready$, { initialValue: false })`.
+Multi-table ops → `db.transaction('rw', [...], async () => {...})`.
 Schema migrations: `this.version(N).stores({...}).upgrade(...)` in `AppDatabase`.
 
 ---
@@ -194,54 +90,20 @@ Schema migrations: `this.version(N).stores({...}).upgrade(...)` in `AppDatabase`
 
 ```typescript
 import * as Plotly from 'plotly.js-dist-min';
-
 this.ngZone.runOutsideAngular(() => Plotly.newPlot(el, data, layout));
-this.ngZone.runOutsideAngular(() => Plotly.react(el, data, layout)); // updates only
-
 ngOnDestroy(): void { Plotly.purge(this.chartContainer.nativeElement); }
 ```
-
 Chart container: `role="img"` + descriptive `aria-label`.
 
-### Studio 3D section plot — modebar camera buttons
+**Studio 3D section plot:** `zoom3d`/`pan3d` must stay in `modeBarButtonsToRemove`, replaced by custom `customZoom3d`/`customPan3d` (use `setDragmodeDirect()`, bypasses `relayout` which resets camera — regression bug #703). Same for `orbitRotation`/`tableRotation`. Never call `Plotly.relayout` with `scene.dragmode` in the section plot. File: `createPlot.ts` → `getConfig()`.
 
-**`zoom3d` and `pan3d` MUST remain in `modeBarButtonsToRemove` and replaced by custom buttons.**
-
-Native `zoom3d`/`pan3d` call `Plotly.relayout` → `updateFx()` internally, which resets the 3D camera (POV, angle, zoom) — regression bug #703.  
-The custom replacements (`customZoom3d`, `customPan3d`) use `setDragmodeDirect()` which bypasses `relayout` and preserves the camera.  
-Same applies to `orbitRotation` / `tableRotation` → `customOrbitRotation` / `customTurntableRotation`.
-
-**Never revert these to native Plotly buttons. Never call `Plotly.relayout` with `scene.dragmode` in the section plot.**
-
-File: `src/app/shared/components/studio/section/helpers/createPlot.ts` — `getConfig()`.
-
-### Studio section plot — annotations
-
-**Never build a clickable icon annotation (FontAwesome icon + arrow) manually.**  
-Always use `buildClickableIconAnnotation` from `@shared/components/studio/section/helpers/createClickableIconAnnotation`.
-
-```typescript
-import { buildClickableIconAnnotation } from '@shared/components/studio/section/helpers/createClickableIconAnnotation';
-
-buildClickableIconAnnotation({
-  x, y, z,
-  icon: '&#xf5cd;',   // FontAwesome HTML entity
-  color: '#4A355A',
-  arrowYOffset: -50,
-  arrowXOffset: 0,        // optional, defaults to 0
-  data: { type: 'myType', uuid: '...' }  // payload for plotly_clickannotation
-});
-```
-
-Applies to: span load annotations, cable modification annotations, and any new clickable icon annotation on the studio section plot.  
-**Exception:** obstacle annotations use a different rendering model (Unicode markers + label, `showarrow: false`) and must NOT use this helper.
+**Studio annotations:** always use `buildClickableIconAnnotation` (`createClickableIconAnnotation.ts`) for clickable icon annotations — never build manually. Exception: obstacle annotations (different rendering model, `showarrow: false`).
 
 ---
 
 ## Pyodide
 
-Use `WorkerPythonService` at `@services/worker_python/worker-python.service`.
-
+`WorkerPythonService` at `@services/worker_python/worker-python.service`.
 ```typescript
 const { result, error, pythonErrorCode } = await this.workerPythonService.runTask(Task.xxx, inputs);
 readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
@@ -251,176 +113,109 @@ readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue:
 
 ## PrimeNG
 
-- Import individual modules only — never a barrel
-- Style overrides via PrimeNG CSS variables only — **no global selectors**
-- `p-button` should be replaced by `app-btn` (custom wrapper) for consistent styling and behavior
-- `p-message` for inline errors (use `severity="error"`, `role="alert"` where appropriate)
-- Forms: `ReactiveFormsModule` + `toSignal()` for signal integration
+Individual module imports only, never a barrel. Style overrides via CSS variables only — no global selectors. `p-button` → replace with `app-btn`. `p-message` for inline errors (`severity="error"`, `role="alert"`). Forms: `ReactiveFormsModule` + `toSignal()`.
 
 ---
 
-## Logging & User notifications
+## Logging & notifications
 
-- Never use `console.log`, `console.warn`, or `console.error`
-- For technical logs, always use `LoggerService`
-- For user-facing error/warning/info/success notifications, always use `NotificationService`
-- If both are needed, log technical details with `LoggerService` and show user feedback with `NotificationService`
+Never `console.log`/`warn`/`error`. Technical logs → `LoggerService`. User-facing feedback → `NotificationService`.
 
 ---
 
 ## HTML5 & Accessibility
 
-Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
-
-```html
-<div [attr.aria-busy]="isLoading()">
-  <div role="alert" aria-live="assertive"><!-- errors --></div>
-  <p role="status"><!-- non-critical status --></p>
-</div>
-```
-
-- `aria-live="assertive"` for errors · `aria-live="polite"` for notifications
-- `[attr.aria-busy]="isLoading()"` on loading containers
-- All `<input>` associated with `<label>` via `for`/`id` or `aria-labelledby`
-- Decorative icons: `aria-hidden="true"` · Interactive icons: `aria-label`
-- WCAG AA contrast minimum (4.5:1)
+Semantic tags: `<main>` `<header>` `<section>` `<nav>` `<aside>`.
+`aria-live="assertive"` for errors, `"polite"` for notifications. `[attr.aria-busy]="isLoading()"` on loading containers. Every `<input>` linked to a `<label>`. Decorative icons `aria-hidden="true"`, interactive icons `aria-label`. WCAG AA contrast (4.5:1).
 
 ---
 
 ## SCSS — BEM strict, max 3 levels
 
-```scss
-.my-component {
-  gap: var(--spacing-md); // CSS variables only — no magic numbers
-
-  &__header {
-  }
-  &__header--sticky {
-  }
-
-  &__item {
-    &--selected {
-    } // level 3 — stop here
-  }
-}
-```
-
-One SCSS file per component. Tailwind only in HTML templates for one-off tweaks.
+CSS variables only, no magic numbers. One file per component. Tailwind only in HTML for one-off tweaks.
+`.block__element--modifier` — stop at 3 levels deep.
 
 ---
 
 ## Tests — Vitest, mandatory before merge
 
-Every new feature/service/component requires unit tests. **PR without tests is rejected.**  
-Modified code → update existing tests. No orphaned tests, no untested features.
+Every new feature/service/component needs unit tests. PR without tests is rejected. Modified code → update existing tests, no orphaned tests.
 
-### `vi` only — `jest.*` is forbidden
+`vi` only (`vi.fn()`, `vi.spyOn()`, `vi.mock()`, `vi.hoisted()`) — `jest.*` forbidden.
+HTTP mocking: `provideHttpClient()` + `provideHttpClientTesting()` — `HttpClientTestingModule` forbidden (deprecated).
+`data-testid` required on all interactive/meaningful elements, kebab-case (`submit-btn`, `name-input`). Repeated elements share a `data-testid`, queried via `querySelectorAll`. Testing purpose only, no semantic/styling meaning.
 
+---
+
+## RTK — commandes terminal
+
+Toujours préfixer les commandes shell compatibles par `rtk` (ex: `rtk git status`, `rtk npm test`) pour réduire la sortie envoyée au contexte. Ne pas préfixer une commande non supportée. `rtk proxy <commande>` uniquement si un suivi sans filtrage est nécessaire.
+
+---
+
+> ⚠️ TEMPORAIRE — section à retirer une fois la migration Transloco terminée sur cette feature.
+
+## Migration i18n Angular → Transloco (Stellar)
+
+**Structure des clés : à plat, jamais imbriquée.** Un seul objet JSON par langue (`public/i18n/en.json`, `public/i18n/fr.json`). Chaque clé est une chaîne complète au premier niveau, même avec des points :
+```json
+{ "auth.login.title": "Sign in", "common.actions.save": "Save" }
+```
+Ne jamais créer d'objet imbriqué type `{"auth": {"login": {...}}}`.
+
+**Namespaces**
+- `common.*` — texte générique réutilisé
+- `domain.*` — vocabulaire métier partagé study/studio
+- `<feature>.shared.*` — texte réutilisé dans une feature
+- `<feature>.<composant>.*` — texte propre à un composant
+
+Avant de créer une clé locale, vérifier si elle existe déjà sous `common.*`/`domain.*` dans `en.json` — réutiliser, ne pas dupliquer.
+
+**Ce qui est traduisible — 3 cas seulement**
+1. Contenu d'un élément avec attribut `i18n`
+2. Valeur d'un attribut `i18n-xxx`
+3. Appel `$localize\`...\``
+
+Ne jamais toucher : noms de balises/attributs, valeurs d'attributs non marquées `i18n-*` (même si ressemblant à de l'anglais), correspondance trouvée par simple recherche texte hors marqueur i18n. En cas de doute → laisser tel quel et signaler.
+
+**Imports requis — checklist systématique**
 ```typescript
-// Globals (no import): describe it expect beforeEach afterEach
-// vi.Mocked<T> vi.Mock vi.MockedFunction → globally typed via src/vitest.d.ts
-import { vi } from 'vitest'; // only for vi.mock() / vi.hoisted()
+// Composants avec template
+import { TranslocoModule } from '@jsverse/transloco';
+@Component({ imports: [TranslocoModule, ...] })
 
-// ✅
-vi.fn() · vi.spyOn() · vi.mock() · vi.hoisted() · vi.Mocked<T>
-// ❌ FORBIDDEN
-jest.fn() · jest.spyOn() · jest.mock() · jest.Mocked<T>
+// Services
+import { TranslocoService } from '@jsverse/transloco';
+private readonly translocoService = inject(TranslocoService);
+this.translocoService.instant('common.key');
 ```
+Validation : clés pointillées correctes, module/service importé, clés présentes dans `en.json` et `fr.json`.
 
-### HTTP mocking
+---
 
-```typescript
-// ✅
-providers: [provideHttpClient(), provideHttpClientTesting()]
-// ❌ FORBIDDEN — deprecated
-import { HttpClientTestingModule }
-```
+## Caveman — réponses compressées
 
-### `data-testid` — required on all interactive/meaningful elements
+Respond terse like smart caveman. All technical substance stay. Only fluff die.
 
-- kebab-case values: `submit-btn` · `name-input` · `items-list` · `result-value`
-- Repeated elements: shared `data-testid`, queried with `querySelectorAll`
-- For testing only — no semantic or styling meaning
+Rules:
+- Drop: articles (a/an/the), filler (just/really/basically), pleasantries, hedging
+- Fragments OK. Short synonyms. Technical terms exact. Code unchanged.
+- Pattern: [thing] [action] [reason]. [next step].
+- Not: "Sure! I'd be happy to help you with that."
+- Yes: "Bug in auth middleware. Fix:"
 
-```html
-<form data-testid="my-form">
-  <input data-testid="name-input" />
-  <ul data-testid="items-list">
-    @for (item of items(); track item.uuid) {
-    <li data-testid="item-row">{{ item.name }}</li>
-    }
-  </ul>
-  <span data-testid="result-value">{{ result() ?? 'N/A' }}</span>
-  <button type="submit" data-testid="submit-btn">Save</button>
-</form>
-```
+Switch level: /caveman lite|full|ultra|wenyan
+Stop: "stop caveman" or "normal mode"
 
-### Rendering tests structure
+Auto-Clarity: drop caveman for security warnings, irreversible actions, user confused. Resume after.
 
-```typescript
-const getByTestId = (id: string): HTMLElement | null =>
-  fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
-
-describe("HTML rendering - form structure", () => {
-  it("should render the form", () => {
-    expect(getByTestId("my-form")?.tagName).toBe("FORM");
-  });
-});
-
-describe("HTML rendering - dynamic content", () => {
-  it("should render one row per item", () => {
-    const rows = fixture.nativeElement.querySelectorAll(
-      '[data-testid="item-row"]',
-    );
-    expect(rows.length).toBe(3);
-  });
-  it("should show N/A when result is null", () => {
-    expect(getByTestId("result-value")?.textContent).toContain("N/A");
-  });
-});
-
-describe("HTML rendering - button states", () => {
-  it("should disable submit when form is invalid", () => {
-    expect((getByTestId("submit-btn") as HTMLButtonElement).disabled).toBe(
-      true,
-    );
-  });
-});
-
-describe("HTML rendering - accessibility", () => {
-  it("should set aria-invalid on invalid input", () => {
-    expect(getByTestId("name-input")?.getAttribute("aria-invalid")).toBe(
-      "true",
-    );
-  });
-});
-```
+Boundaries: code/commits/PRs written normal.
 
 ---
 
 ## Skills
 
-Use these project skills for focused workflows. Trigger them when the user request matches the listed intent or keywords.
-
-- `/skill-plan`: Architect mode to break a feature/task into atomic steps in `plan.md`.
-  Use when: planning, decomposition, architecture design, step-by-step delivery.
-- `/skill-agent`: Executor mode to implement exactly one step from `plan.md`.
-  Use when: implementing step N, executing a planned step, applying a defined scope.
-- `/skill-test`: Tester mode to add/update Vitest unit tests with strong coverage.
-  Use when: writing tests, increasing coverage, creating/updating `*.spec.ts`.
-- `/skill-fix-test`: Test repairer mode to detect and fix failing tests without lowering coverage.
-  Use when: red tests, regression after refactor, broken specs.
-- `/skill-review`: Senior auditor mode to review an implemented step and report PASS/WARN/FAIL.
-  Use when: code audit, regression check, quality gate before next step.
-- `/skill-rebase`: Mediator mode to resolve merge/rebase conflicts with zero logic loss.
-  Use when: conflict markers, rebase conflict, merge/cherry-pick conflict.
-
-Rule of thumb:
-
-- Plan first with `/skill-plan` for non-trivial work
-- Implement one step at a time with `/skill-agent`
-- Validate with `/skill-test` and `/skill-review`
-- Use `/skill-fix-test` for failing suites and `/skill-rebase` for git conflicts
+Trigger only on explicit match — planning (`/skill-plan`), implementing a defined step (`/skill-agent`), writing/updating tests (`/skill-test`), fixing failing tests (`/skill-fix-test`), auditing an implemented step (`/skill-review`), resolving rebase/merge conflicts (`/skill-rebase`).
 
 ---
 
@@ -432,9 +227,7 @@ Never delete silently. Log in `./deadcode.md` under "Pending review". Delete onl
 
 ## Git policy
 
-- Never run `git commit`
-- Never run `git push`
-- If a commit or push is needed, ask the user to run it manually
+Never run `git commit`/`git push`. If needed, ask the user to run it manually.
 
 ---
 

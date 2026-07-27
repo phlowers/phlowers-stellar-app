@@ -7,6 +7,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
 import { Study } from '@src/app/shared/domain';
 import { StudiesService } from '@src/app/core/services/studies/studies.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Header component for a study page.
@@ -23,7 +24,8 @@ import { StudiesService } from '@src/app/core/services/studies/studies.service';
     AccordionModule,
     CommonModule,
     DatePipe,
-    ExportDialogComponent
+    ExportDialogComponent,
+    TranslocoModule
   ],
   templateUrl: './study-header.component.html',
   styleUrl: './study-header.component.scss',
@@ -41,7 +43,8 @@ export class StudyHeaderComponent {
   public duplicateStudy = output<string>();
   /** Emits when the user requests to modify the study metadata. */
   public openModifyStudyModal = output<void>();
-  public dateFormat = $localize`dd/MM:yyyy at HH'h'mm`;
+  private readonly transloco = inject(TranslocoService);
+  public dateFormat = this.transloco.translate('studyHeader.dateFormat');
   private readonly studiesService = inject(StudiesService);
 
   toggleActiveDetail() {
