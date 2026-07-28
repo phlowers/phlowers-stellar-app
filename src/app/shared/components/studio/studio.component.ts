@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnDestroy } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -30,7 +30,14 @@ export class StudioComponent implements OnDestroy {
   private readonly translocoService = inject(TranslocoService);
 
   // State
-  readonly plotInitialized = signal(false);
+  /**
+   * Whether the current section's plot data is available. Derived directly from
+   * litData (rather than latched) so it correctly resets on every new section load —
+   * litData is nulled synchronously by initSectionStudio but left untouched by
+   * refreshProjection (support-range panning), so this stays true across pans
+   * and only drops while a genuinely new section is loading.
+   */
+  readonly plotInitialized = computed(() => this.plotService.litData() !== null);
 
   constructor() {
     effect(() => {
@@ -54,12 +61,6 @@ export class StudioComponent implements OnDestroy {
             this.notificationService.warning(message);
           }
         }
-      }
-    });
-
-    effect(() => {
-      if (this.plotService.litData() !== null) {
-        this.plotInitialized.set(true);
       }
     });
 
