@@ -12,10 +12,11 @@ import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/impor
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@core/services/worker_python/tasks/types';
+import { Task, Localization } from '@core/services/worker_python/tasks/types';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import {
   sectionImportErrors,
@@ -24,7 +25,6 @@ import {
   geoLiaisonSupportCatalogMissingWarning
 } from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
-import { Localization } from '@core/services/worker_python/tasks/types';
 import {
   applyFootCoordinates,
   buildReprojectionAngles,
@@ -78,6 +78,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly logger = inject(LoggerService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly attachmentService = inject(AttachmentService);
+  private readonly chainsService = inject(ChainsService);
   private readonly workerPythonService = inject(WorkerPythonService);
 
   // ---------------------------------------------------------------------------
@@ -266,7 +267,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Sort portees by PORTEE_UNITAIRE_ORDRE (ascending)
     const sortedPortees = [...portees].sort(
-      (a, b) => parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
+      (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
     );
 
     const firstPortee = sortedPortees[0];
@@ -293,12 +294,9 @@ export class SectionImportService implements ImportAdapter<Section> {
     const accroches =
       sortedPortees.length === 0
         ? []
-        : [
-            ...sortedPortees.map((p) => p['accroche depart']),
-            sortedPortees[sortedPortees.length - 1]['accroche arrivee']
-          ];
+        : [...sortedPortees.map((p) => p['accroche depart']), sortedPortees.at(-1)!['accroche arrivee']];
     const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } =
-      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+      await this.resolveGeoLiaisonCatalogFields(supports, accroches);
 
     // Persist new support names in the local catalog (RG.CAN.ATT)
     const supportNameEntries: SupportNameEntry[] = accroches
@@ -345,6 +343,75 @@ export class SectionImportService implements ImportAdapter<Section> {
       },
       hasCatalogFallbackWarnings
     };
+  }
+
+  /**
+   * Resolves every support field the local catalogs are authoritative for: the attachment fields
+   * against the attachment catalog, then the chain details against the chain catalog.
+   */
+  private async resolveGeoLiaisonCatalogFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
+    const { supports: supportsWithAttachments, hasCatalogFallbackWarnings } =
+      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+
+    return {
+      supports: await this.resolveGeoLiaisonCatalogChainFields(supportsWithAttachments, accroches),
+      hasCatalogFallbackWarnings
+    };
+  }
+
+  /**
+   * Overrides each support's chain details with the chain catalog entry matching `CHAINE_DRN_IDR`.
+   *
+   * The catalog is authoritative whenever it holds the chain: `chainLength`, `chainWeight`,
+   * `chainV` and `chainSurface` are all taken from the catalog entry, including when its value is
+   * `0`. Chains absent from the catalog keep the GeoLiaison file values mapped by
+   * `mapAccrocheToSupport`. `counterWeight` (`CONTREPOIDS`) has no catalog counterpart and is
+   * always kept from the file.
+   */
+  private async resolveGeoLiaisonCatalogChainFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<Support[]> {
+    let catalogChains: Awaited<ReturnType<ChainsService['getChains']>>;
+    try {
+      catalogChains = await this.chainsService.getChains();
+    } catch (err) {
+      this.logger.warn('Error reading chain catalog, keeping GeoLiaison file chain values', err);
+      return supports;
+    }
+    if (!catalogChains || catalogChains.length === 0) {
+      return supports;
+    }
+
+    const catalogChainsByName = new Map(catalogChains.map((chain) => [chain.chain_name, chain]));
+
+    return supports.map((support, index) => {
+      const chainName = accroches[index]?.CHAINE_DRN_IDR?.trim();
+      if (!chainName) {
+        this.logger.warn(`Support #${index}: missing CHAINE_DRN_IDR, keeping GeoLiaison file chain values`);
+        return support;
+      }
+
+      const catalogChain = catalogChainsByName.get(chainName);
+      if (!catalogChain) {
+        this.logger.warn(
+          `Support #${index}: chain "${chainName}" not found in the chain catalog, keeping GeoLiaison file chain values`
+        );
+        return support;
+      }
+
+      return {
+        ...support,
+        chainName: catalogChain.chain_name,
+        chainLength: catalogChain.mean_length,
+        chainWeight: catalogChain.mean_mass,
+        chainV: catalogChain.v_chain,
+        chainSurface: catalogChain.chain_surface
+      };
+    });
   }
 
   /**
@@ -412,7 +479,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Last support comes from 'accroche arrivee' of the last portee
     // spanLength must be null on the last support (no span after it)
-    const lastPortee = sortedPortees[sortedPortees.length - 1];
+    const lastPortee = sortedPortees.at(-1)!;
     const lastSupport = this.mapAccrocheToSupport(lastPortee['accroche arrivee'], lastPortee);
     lastSupport.spanLength = null;
     supports.push(lastSupport);
@@ -466,7 +533,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     lambertX: (number | null)[],
     lambertY: (number | null)[]
   ): Promise<{ supports: Support[]; meanReprojectionDiffMeters: number | null }> {
-    if (lambertX.some((x) => x === null) || lambertY.some((y) => y === null)) {
+    if (lambertX.includes(null) || lambertY.includes(null)) {
       this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
       return { supports, meanReprojectionDiffMeters: null };
     }

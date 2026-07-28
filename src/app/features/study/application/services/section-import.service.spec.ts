@@ -16,6 +16,7 @@ import { Section, Study } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { geoLiaisonSupportCatalogMissingWarning } from './section-import.constantes';
@@ -176,6 +177,7 @@ describe('SectionImportService', () => {
     addSupportNamesIfAbsent: ReturnType<typeof vi.fn>;
     resolveGeoLiaisonCatalogAttachment: ReturnType<typeof vi.fn>;
   };
+  let chainsServiceMock: { getChains: ReturnType<typeof vi.fn> };
   let workerPythonServiceMock: { runTask: ReturnType<typeof vi.fn> };
 
   /** Default successful runTask mock: returns arrays matching the length of the input arrays. */
@@ -265,6 +267,10 @@ describe('SectionImportService', () => {
       resolveGeoLiaisonCatalogAttachment: vi.fn().mockResolvedValue(undefined)
     };
 
+    chainsServiceMock = {
+      getChains: vi.fn().mockResolvedValue([])
+    };
+
     workerPythonServiceMock = {
       runTask: vi.fn(mockSuccessfulRunTask)
     };
@@ -277,6 +283,7 @@ describe('SectionImportService', () => {
         { provide: LoggerService, useValue: loggerSpy },
         { provide: MaintenanceService, useValue: maintenanceServiceMock },
         { provide: AttachmentService, useValue: attachmentServiceMock },
+        { provide: ChainsService, useValue: chainsServiceMock },
         { provide: WorkerPythonService, useValue: workerPythonServiceMock }
       ]
     });
@@ -792,6 +799,105 @@ describe('SectionImportService', () => {
       expect(result?.supports[0].attachmentSet).toBe(0);
       expect(result?.supports[0].armLength).toBe(0);
       expect(result?.supports[0].heightBelowConsole).toBe(0);
+    });
+
+    it('should prioritize catalog chain details over file values when CHAINE_DRN_IDR is in the catalog', async () => {
+      chainsServiceMock.getChains.mockResolvedValue([
+        {
+          uuid: 'chain-1',
+          chain_name: 'ChainA_IDR',
+          mean_length: 7.7,
+          mean_mass: 707.8,
+          v_chain: true,
+          chain_type: 'suspension',
+          chain_surface: 2.91
+        }
+      ]);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const support = result?.supports[0];
+
+      expect(support?.chainName).toBe('ChainA_IDR');
+      expect(support?.chainLength).toBe(7.7);
+      expect(support?.chainWeight).toBe(707.8);
+      expect(support?.chainV).toBe(true);
+      expect(support?.chainSurface).toBe(2.91);
+    });
+
+    it('should apply catalog zero chain values over non-zero file values', async () => {
+      chainsServiceMock.getChains.mockResolvedValue([
+        {
+          uuid: 'chain-1',
+          chain_name: 'ChainA_IDR',
+          mean_length: 0,
+          mean_mass: 0,
+          v_chain: false,
+          chain_type: 'suspension',
+          chain_surface: 0
+        }
+      ]);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const support = result?.supports[0];
+
+      // File carries CHAINE_DRN_SURFACE 0.5 / LONGUEUR 5.0 / POIDS 50.0: the catalog still wins.
+      expect(support?.chainLength).toBe(0);
+      expect(support?.chainWeight).toBe(0);
+      expect(support?.chainSurface).toBe(0);
+    });
+
+    it('should keep file chain details when CHAINE_DRN_IDR is absent from the catalog', async () => {
+      chainsServiceMock.getChains.mockResolvedValue([
+        {
+          uuid: 'chain-2',
+          chain_name: 'SomeOtherChain',
+          mean_length: 7.7,
+          mean_mass: 707.8,
+          v_chain: true,
+          chain_type: 'suspension',
+          chain_surface: 2.91
+        }
+      ]);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const support = result?.supports[0];
+
+      expect(support?.chainName).toBe('ChainA_IDR');
+      expect(support?.chainLength).toBe(5.0);
+      expect(support?.chainWeight).toBe(50.0);
+      expect(support?.chainV).toBe(false);
+      expect(support?.chainSurface).toBe(0.5);
+    });
+
+    it('should keep file chain details when the chain catalog is empty', async () => {
+      chainsServiceMock.getChains.mockResolvedValue([]);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+
+      expect(result?.supports[0].chainLength).toBe(5.0);
+      expect(result?.supports[0].chainSurface).toBe(0.5);
+    });
+
+    it('should keep the counterWeight from the file even when the chain is resolved from the catalog', async () => {
+      chainsServiceMock.getChains.mockResolvedValue([
+        {
+          uuid: 'chain-1',
+          chain_name: 'ChainA_IDR',
+          mean_length: 7.7,
+          mean_mass: 707.8,
+          v_chain: true,
+          chain_type: 'suspension',
+          chain_surface: 2.91
+        }
+      ]);
+
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      (portees[1]['accroche depart'] as Record<string, unknown>)['CONTREPOIDS'] = '42';
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      expect(result?.supports[0].counterWeight).toBe(42);
     });
 
     it('should handle null maintenance lookup gracefully when no match found', async () => {
