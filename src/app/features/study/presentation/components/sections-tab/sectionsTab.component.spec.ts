@@ -162,35 +162,40 @@ describe('SectionsTabComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "sectionsTab.actionAddIC": "Add an initial condition",
-              "sectionsTab.actionDelete": "Delete",
-              "sectionsTab.actionDuplicate": "Duplicate",
-              "sectionsTab.actionEdit": "Edit",
-              "sectionsTab.actionView": "View",
-              "sectionsTab.actions": "Actions",
-              "sectionsTab.addInitialCondition": "Add initial condition",
-              "sectionsTab.ariaActionsForSection": "Actions for section {{ name }}",
-              "sectionsTab.ariaSelectCharge": "Select charge case",
-              "sectionsTab.ariaSelectIC": "Select initial conditions",
-              "sectionsTab.ariaSelectSection": "select this study's section",
-              "sectionsTab.chargeCases": "Charge cases",
-              "sectionsTab.colLastModified": "Last modified",
-              "sectionsTab.colLit": "LIT",
-              "sectionsTab.colName": "Section Name",
-              "sectionsTab.colType": "Section type",
-              "sectionsTab.createSection": "Create a section",
-              "sectionsTab.generateState": "Generate a state",
-              "sectionsTab.icPrefix": "IC",
-              "sectionsTab.initialCondition": "Initial condition",
-              "sectionsTab.noSection": "No existing section",
-              "sectionsTab.placeholderViewIC": "View initial conditions",
-              "sectionsTab.typeGuard": "Guard",
-              "sectionsTab.typePhase": "Phase"
-            } },
+          langs: {
+            en: {
+              'sectionsTab.actionAddIC': 'Add an initial condition',
+              'sectionsTab.actionDelete': 'Delete',
+              'sectionsTab.actionDuplicate': 'Duplicate',
+              'sectionsTab.actionEdit': 'Edit',
+              'sectionsTab.actionView': 'View',
+              'sectionsTab.actions': 'Actions',
+              'sectionsTab.addInitialCondition': 'Add initial condition',
+              'sectionsTab.ariaActionsForSection': 'Actions for section {{ name }}',
+              'sectionsTab.ariaSelectCharge': 'Select charge case',
+              'sectionsTab.ariaSelectIC': 'Select initial conditions',
+              'sectionsTab.ariaSelectSection': "select this study's section",
+              'sectionsTab.chargeCases': 'Charge cases',
+              'sectionsTab.colLastModified': 'Last modified',
+              'sectionsTab.colLit': 'LIT',
+              'sectionsTab.colName': 'Section Name',
+              'sectionsTab.colType': 'Section type',
+              'sectionsTab.createSection': 'Create a section',
+              'sectionsTab.generateState': 'Generate a state',
+              'sectionsTab.icPrefix': 'IC',
+              'sectionsTab.initialCondition': 'Initial condition',
+              'sectionsTab.noSection': 'No existing section',
+              'sectionsTab.placeholderViewIC': 'View initial conditions',
+              'sectionsTab.typeGuard': 'Guard',
+              'sectionsTab.typePhase': 'Phase'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),SectionsTabComponent, NoopAnimationsModule],
+        }),
+        SectionsTabComponent,
+        NoopAnimationsModule
+      ],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },

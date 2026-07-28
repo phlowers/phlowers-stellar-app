@@ -17,14 +17,18 @@ describe('CalculusSetting component', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "field-measuring.calculus-setting.papoto-radio-label": "PAPOTO",
-              "field-measuring.calculus-setting.pep-radio-label": "PEP",
-              "field-measuring.calculus-setting.tangent-aiming-radio-label": "Tangent aiming"
-            } },
+          langs: {
+            en: {
+              'field-measuring.calculus-setting.papoto-radio-label': 'PAPOTO',
+              'field-measuring.calculus-setting.pep-radio-label': 'PEP',
+              'field-measuring.calculus-setting.tangent-aiming-radio-label': 'Tangent aiming'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),CalculusSettingComponent],
+        }),
+        CalculusSettingComponent
+      ],
       providers: [provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 

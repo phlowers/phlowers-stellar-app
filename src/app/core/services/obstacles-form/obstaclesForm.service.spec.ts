@@ -238,19 +238,24 @@ describe('ObstacleFormService', () => {
     TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "common.notification.severity-success": "Success",
-              "shared.obstacle-form-service.conformity-saved-detail": "Conformity data saved",
-              "shared.obstacle-form-service.delete-detail": "Obstacle deleted",
-              "shared.obstacle-form-service.delete-error-detail": "Failed to delete obstacle",
-              "shared.obstacle-form-service.distance-calculation-error-detail": "Failed to calculate obstacle distances",
-              "shared.obstacle-form-service.save-detail": "Obstacle saved",
-              "shared.topbar.error": "Error",
-              "studio.conformity.calculationFailedError": "Calculation failed: {{ errorMessage }}"
-            } },
+          langs: {
+            en: {
+              'common.notification.severity-success': 'Success',
+              'shared.obstacle-form-service.conformity-saved-detail': 'Conformity data saved',
+              'shared.obstacle-form-service.delete-detail': 'Obstacle deleted',
+              'shared.obstacle-form-service.delete-error-detail': 'Failed to delete obstacle',
+              'shared.obstacle-form-service.distance-calculation-error-detail':
+                'Failed to calculate obstacle distances',
+              'shared.obstacle-form-service.save-detail': 'Obstacle saved',
+              'shared.topbar.error': 'Error',
+              'studio.conformity.calculationFailedError': 'Calculation failed: {{ errorMessage }}'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ReactiveFormsModule],
+        }),
+        ReactiveFormsModule
+      ],
       providers: [
         ObstacleFormService,
         { provide: PlotService, useValue: mockPlotService },

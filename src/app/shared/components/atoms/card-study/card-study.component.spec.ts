@@ -20,7 +20,11 @@ describe('CardStudyComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),CardStudyComponent, TagComponent, IconComponent],
+        }),
+        CardStudyComponent,
+        TagComponent,
+        IconComponent
+      ],
       providers: [provideRouter([])]
     }).compileComponents();
 

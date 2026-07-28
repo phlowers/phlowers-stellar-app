@@ -127,21 +127,25 @@ describe('NewChargeModalComponent (Jest)', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "common.actions.validate": "Validate",
-              "shared.new-charge-modal.charge-name-error": "The charge case name must be unique.",
-              "shared.new-charge-modal.charge-name-label": "Charge case name",
-              "shared.new-charge-modal.close": "Close",
-              "shared.new-charge-modal.create-title": "Create a charge case",
-              "shared.new-charge-modal.default-name": "CC",
-              "shared.new-charge-modal.description-label": "Description",
-              "shared.new-charge-modal.description-placeholder": "Add a description to the charge case",
-              "shared.new-charge-modal.generalities": "Generalities",
-              "shared.new-charge-modal.personnel-presence": "Personnel presence"
-            } },
+          langs: {
+            en: {
+              'common.actions.validate': 'Validate',
+              'shared.new-charge-modal.charge-name-error': 'The charge case name must be unique.',
+              'shared.new-charge-modal.charge-name-label': 'Charge case name',
+              'shared.new-charge-modal.close': 'Close',
+              'shared.new-charge-modal.create-title': 'Create a charge case',
+              'shared.new-charge-modal.default-name': 'CC',
+              'shared.new-charge-modal.description-label': 'Description',
+              'shared.new-charge-modal.description-placeholder': 'Add a description to the charge case',
+              'shared.new-charge-modal.generalities': 'Generalities',
+              'shared.new-charge-modal.personnel-presence': 'Personnel presence'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),NewChargeModalComponent],
+        }),
+        NewChargeModalComponent
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

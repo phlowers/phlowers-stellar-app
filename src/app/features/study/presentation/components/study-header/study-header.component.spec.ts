@@ -23,7 +23,9 @@ describe('StudyHeader', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),StudyHeaderComponent],
+        }),
+        StudyHeaderComponent
+      ],
       providers: [provideNoopAnimations(), { provide: MessageService, useValue: mockMessageService }]
     }).compileComponents();
 

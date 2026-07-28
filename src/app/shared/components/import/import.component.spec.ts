@@ -106,7 +106,9 @@ describe('ImportComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ImportComponent],
+        }),
+        ImportComponent
+      ],
       providers: [
         provideRouter([]),
         { provide: GenericImportEngineService, useValue: engineMock },

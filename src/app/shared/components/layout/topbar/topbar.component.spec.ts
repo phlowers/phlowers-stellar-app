@@ -47,7 +47,10 @@ describe('TopbarComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),TopbarComponent, IconComponent],
+        }),
+        TopbarComponent,
+        IconComponent
+      ],
       providers: [
         { provide: PageTitleService, useValue: mockPageTitleService },
         { provide: AuthService, useValue: mockAuthService },

@@ -17,7 +17,10 @@ describe('InputNumberComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),InputNumberComponent, ReactiveFormsModule]
+        }),
+        InputNumberComponent,
+        ReactiveFormsModule
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputNumberComponent);

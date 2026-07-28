@@ -59,12 +59,16 @@ describe('ImportSectionComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "importSection.edit": "Edit"
-            } },
+          langs: {
+            en: {
+              'importSection.edit': 'Edit'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ImportSectionComponent],
+        }),
+        ImportSectionComponent
+      ],
       providers: [
         provideRouter([]),
         { provide: SectionImportService, useValue: sectionImportServiceMock },

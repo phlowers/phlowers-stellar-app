@@ -77,7 +77,9 @@ describe('LoginPageComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),LoginPageComponent],
+        }),
+        LoginPageComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: AuthService, useValue: authServiceMock },

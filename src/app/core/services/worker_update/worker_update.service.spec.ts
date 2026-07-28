@@ -67,11 +67,13 @@ describe('UpdateService', () => {
     globalThis.fetch = mockFetch;
 
     TestBed.configureTestingModule({
-      imports: [TranslocoTestingModule.forRoot({
+      imports: [
+        TranslocoTestingModule.forRoot({
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        })],
+        })
+      ],
       providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
     });
     service = TestBed.inject(UpdateService);

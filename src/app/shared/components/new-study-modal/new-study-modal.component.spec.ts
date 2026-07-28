@@ -49,7 +49,10 @@ describe('NewStudyModalComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),NewStudyModalComponent, BrowserAnimationsModule],
+        }),
+        NewStudyModalComponent,
+        BrowserAnimationsModule
+      ],
       providers: [
         {
           provide: ActivatedRoute,

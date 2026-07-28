@@ -243,7 +243,10 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),SectionPlotCardsComponent, NoopAnimationsModule],
+        }),
+        SectionPlotCardsComponent,
+        NoopAnimationsModule
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },

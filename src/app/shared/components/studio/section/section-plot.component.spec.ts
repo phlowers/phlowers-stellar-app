@@ -343,7 +343,9 @@ describe('SectionPlotComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),SectionPlotComponent],
+        }),
+        SectionPlotComponent
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },

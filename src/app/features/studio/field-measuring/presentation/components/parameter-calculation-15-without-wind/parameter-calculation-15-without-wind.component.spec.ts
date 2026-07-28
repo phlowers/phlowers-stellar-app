@@ -87,7 +87,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ParameterCalculation15WithoutWindComponent],
+        }),
+        ParameterCalculation15WithoutWindComponent
+      ],
       providers: [
         provideNoopAnimations(),
         provideHttpClient(),

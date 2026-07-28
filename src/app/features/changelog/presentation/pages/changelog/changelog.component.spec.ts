@@ -38,7 +38,9 @@ describe('Changelog component', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ChangelogComponent],
+        }),
+        ChangelogComponent
+      ],
       providers: [
         provideHttpClient(),
         provideMarkdown(),

@@ -22,11 +22,13 @@ describe('NotificationService', () => {
     mockMessageService = { add: vi.fn() };
 
     TestBed.configureTestingModule({
-      imports: [TranslocoTestingModule.forRoot({
+      imports: [
+        TranslocoTestingModule.forRoot({
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        })],
+        })
+      ],
       providers: [NotificationService, { provide: MessageService, useValue: mockMessageService }]
     });
 

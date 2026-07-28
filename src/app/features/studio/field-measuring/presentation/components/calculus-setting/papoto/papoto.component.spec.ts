@@ -47,7 +47,9 @@ describe('Papoto component', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),PapotoComponent],
+        }),
+        PapotoComponent
+      ],
       providers: [
         provideNoopAnimations(),
         provideHttpClient(),

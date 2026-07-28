@@ -79,7 +79,9 @@ describe('LoadMarkingComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),LoadMarkingComponent],
+        }),
+        LoadMarkingComponent
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },

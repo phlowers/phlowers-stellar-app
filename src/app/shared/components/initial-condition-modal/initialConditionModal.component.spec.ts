@@ -110,7 +110,9 @@ describe('InitialConditionModalComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),InitialConditionModalComponent],
+        }),
+        InitialConditionModalComponent
+      ],
       providers: [
         { provide: StorageService, useValue: mockStorageService },
         { provide: CablesService, useValue: mockCablesService },

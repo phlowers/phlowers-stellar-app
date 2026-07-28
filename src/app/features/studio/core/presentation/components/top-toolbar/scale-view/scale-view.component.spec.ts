@@ -51,22 +51,26 @@ describe('ScaleViewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "common.actions.validate": "Validate",
-              "studio.scaleView.buttonLabel": "View",
-              "studio.scaleView.formAriaLabel": "View configuration",
-              "studio.scaleView.inputAriaLabel": "Number of points per range",
-              "studio.scaleView.pointsLegend": "Choose the number of points to display per range.",
-              "studio.scaleView.scaleAuto": "Auto",
-              "studio.scaleView.scaleCeleste": "Reduced in z (x, y, z/2)",
-              "studio.scaleView.scaleGeo": "Uniform (x, y, z)",
-              "studio.scaleView.scaleLegend": "Select the display scale.",
-              "studio.scaleView.scalePlan": "Reduced in x (x/5, y, z)",
-              "studio.scaleView.sliderAriaLabel": "Number of points per range"
-            } },
+          langs: {
+            en: {
+              'common.actions.validate': 'Validate',
+              'studio.scaleView.buttonLabel': 'View',
+              'studio.scaleView.formAriaLabel': 'View configuration',
+              'studio.scaleView.inputAriaLabel': 'Number of points per range',
+              'studio.scaleView.pointsLegend': 'Choose the number of points to display per range.',
+              'studio.scaleView.scaleAuto': 'Auto',
+              'studio.scaleView.scaleCeleste': 'Reduced in z (x, y, z/2)',
+              'studio.scaleView.scaleGeo': 'Uniform (x, y, z)',
+              'studio.scaleView.scaleLegend': 'Select the display scale.',
+              'studio.scaleView.scalePlan': 'Reduced in x (x/5, y, z)',
+              'studio.scaleView.sliderAriaLabel': 'Number of points per range'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ScaleViewComponent],
+        }),
+        ScaleViewComponent
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },

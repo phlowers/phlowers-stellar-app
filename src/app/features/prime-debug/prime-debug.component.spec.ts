@@ -18,7 +18,9 @@ describe('PrimeDebugComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),PrimeDebugComponent],
+        }),
+        PrimeDebugComponent
+      ],
       providers: [provideNoopAnimations()]
     }).compileComponents();
 

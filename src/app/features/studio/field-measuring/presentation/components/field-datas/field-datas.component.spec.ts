@@ -18,7 +18,9 @@ describe('FieldDatasComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),FieldDatasComponent]
+        }),
+        FieldDatasComponent
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldDatasComponent);

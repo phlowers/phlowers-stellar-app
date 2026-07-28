@@ -122,27 +122,36 @@ describe('ClimateComponent effect edge cases', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "loads.climate.cable-temperature-label": "Cable Temperature",
-              "loads.climate.dis-symmetric-option": "Dis Symmetric",
-              "loads.climate.frontier-support-label": "Frontier support",
-              "loads.climate.ice-indicator-label": "Ice indicator",
-              "loads.climate.ice-thickness-after-label": "Ice thickness after support frontier",
-              "loads.climate.ice-thickness-before-label": "Ice thickness before support frontier",
-              "loads.climate.ice-thickness-label": "Ice thickness",
-              "loads.climate.symmetric-option": "Symmetric",
-              "loads.climate.whole-number-required": "Whole number required",
-              "loads.climate.wind-pressure-label": "Wind Pressure",
-              "loads.shared.calculate-btn": "Calculate",
-              "loads.shared.erase-load-case-aria-label": "erase load case",
-              "loads.shared.max-value": "Maximum value:",
-              "loads.shared.min-value": "Minimum value:",
-              "loads.shared.reset-btn": "Reset",
-              "loads.shared.save-btn": "Save"
-            } },
+          langs: {
+            en: {
+              'loads.climate.cable-temperature-label': 'Cable Temperature',
+              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'loads.climate.frontier-support-label': 'Frontier support',
+              'loads.climate.ice-indicator-label': 'Ice indicator',
+              'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
+              'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
+              'loads.climate.ice-thickness-label': 'Ice thickness',
+              'loads.climate.symmetric-option': 'Symmetric',
+              'loads.climate.whole-number-required': 'Whole number required',
+              'loads.climate.wind-pressure-label': 'Wind Pressure',
+              'loads.shared.calculate-btn': 'Calculate',
+              'loads.shared.erase-load-case-aria-label': 'erase load case',
+              'loads.shared.max-value': 'Maximum value:',
+              'loads.shared.min-value': 'Minimum value:',
+              'loads.shared.reset-btn': 'Reset',
+              'loads.shared.save-btn': 'Save'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
+        }),
+        ReactiveFormsModule,
+        SelectModule,
+        InputText,
+        ButtonComponent,
+        IconComponent,
+        ClimateComponent
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },
@@ -180,27 +189,36 @@ describe('ClimateComponent effect edge cases', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "loads.climate.cable-temperature-label": "Cable Temperature",
-              "loads.climate.dis-symmetric-option": "Dis Symmetric",
-              "loads.climate.frontier-support-label": "Frontier support",
-              "loads.climate.ice-indicator-label": "Ice indicator",
-              "loads.climate.ice-thickness-after-label": "Ice thickness after support frontier",
-              "loads.climate.ice-thickness-before-label": "Ice thickness before support frontier",
-              "loads.climate.ice-thickness-label": "Ice thickness",
-              "loads.climate.symmetric-option": "Symmetric",
-              "loads.climate.whole-number-required": "Whole number required",
-              "loads.climate.wind-pressure-label": "Wind Pressure",
-              "loads.shared.calculate-btn": "Calculate",
-              "loads.shared.erase-load-case-aria-label": "erase load case",
-              "loads.shared.max-value": "Maximum value:",
-              "loads.shared.min-value": "Minimum value:",
-              "loads.shared.reset-btn": "Reset",
-              "loads.shared.save-btn": "Save"
-            } },
+          langs: {
+            en: {
+              'loads.climate.cable-temperature-label': 'Cable Temperature',
+              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'loads.climate.frontier-support-label': 'Frontier support',
+              'loads.climate.ice-indicator-label': 'Ice indicator',
+              'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
+              'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
+              'loads.climate.ice-thickness-label': 'Ice thickness',
+              'loads.climate.symmetric-option': 'Symmetric',
+              'loads.climate.whole-number-required': 'Whole number required',
+              'loads.climate.wind-pressure-label': 'Wind Pressure',
+              'loads.shared.calculate-btn': 'Calculate',
+              'loads.shared.erase-load-case-aria-label': 'erase load case',
+              'loads.shared.max-value': 'Maximum value:',
+              'loads.shared.min-value': 'Minimum value:',
+              'loads.shared.reset-btn': 'Reset',
+              'loads.shared.save-btn': 'Save'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
+        }),
+        ReactiveFormsModule,
+        SelectModule,
+        InputText,
+        ButtonComponent,
+        IconComponent,
+        ClimateComponent
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },
@@ -293,27 +311,36 @@ describe('ClimateComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "loads.climate.cable-temperature-label": "Cable Temperature",
-              "loads.climate.dis-symmetric-option": "Dis Symmetric",
-              "loads.climate.frontier-support-label": "Frontier support",
-              "loads.climate.ice-indicator-label": "Ice indicator",
-              "loads.climate.ice-thickness-after-label": "Ice thickness after support frontier",
-              "loads.climate.ice-thickness-before-label": "Ice thickness before support frontier",
-              "loads.climate.ice-thickness-label": "Ice thickness",
-              "loads.climate.symmetric-option": "Symmetric",
-              "loads.climate.whole-number-required": "Whole number required",
-              "loads.climate.wind-pressure-label": "Wind Pressure",
-              "loads.shared.calculate-btn": "Calculate",
-              "loads.shared.erase-load-case-aria-label": "erase load case",
-              "loads.shared.max-value": "Maximum value:",
-              "loads.shared.min-value": "Minimum value:",
-              "loads.shared.reset-btn": "Reset",
-              "loads.shared.save-btn": "Save"
-            } },
+          langs: {
+            en: {
+              'loads.climate.cable-temperature-label': 'Cable Temperature',
+              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'loads.climate.frontier-support-label': 'Frontier support',
+              'loads.climate.ice-indicator-label': 'Ice indicator',
+              'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
+              'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
+              'loads.climate.ice-thickness-label': 'Ice thickness',
+              'loads.climate.symmetric-option': 'Symmetric',
+              'loads.climate.whole-number-required': 'Whole number required',
+              'loads.climate.wind-pressure-label': 'Wind Pressure',
+              'loads.shared.calculate-btn': 'Calculate',
+              'loads.shared.erase-load-case-aria-label': 'erase load case',
+              'loads.shared.max-value': 'Maximum value:',
+              'loads.shared.min-value': 'Minimum value:',
+              'loads.shared.reset-btn': 'Reset',
+              'loads.shared.save-btn': 'Save'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
+        }),
+        ReactiveFormsModule,
+        SelectModule,
+        InputText,
+        ButtonComponent,
+        IconComponent,
+        ClimateComponent
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },

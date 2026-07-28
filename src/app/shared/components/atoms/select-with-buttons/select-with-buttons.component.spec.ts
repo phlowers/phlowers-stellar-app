@@ -42,7 +42,13 @@ describe('SelectWithButtonsComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),SelectWithButtonsComponent, FormsModule, SelectModule, DividerModule, NoopAnimationsModule],
+        }),
+        SelectWithButtonsComponent,
+        FormsModule,
+        SelectModule,
+        DividerModule,
+        NoopAnimationsModule
+      ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 

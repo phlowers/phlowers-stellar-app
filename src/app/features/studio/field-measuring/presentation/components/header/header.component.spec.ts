@@ -27,32 +27,34 @@ describe('HeaderComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "field-measuring.header.altitude-label": "Altitude",
-              "field-measuring.header.azimuth-label": "Azimuth (clockwise \u2014 0\u00b0 North/South) ",
-              "field-measuring.header.cable-amount-label": "Cable amount",
-              "field-measuring.header.degree-addon": "\u00b0",
-              "field-measuring.header.guard-label": "Guard",
-              "field-measuring.header.latitude-label": "Latitude",
-              "field-measuring.header.link-label": "Link",
-              "field-measuring.header.longitude-label": "Longitude",
-              "field-measuring.header.meter-addon": "m",
-              "field-measuring.header.phase-label": "Phase",
-              "field-measuring.header.phase-number-label": "Phase number",
-              "field-measuring.header.span-label": "Span",
-              "field-measuring.header.span-type-label": "Span type",
-              "field-measuring.header.voltage-label": "Voltage"
-            } },
+          langs: {
+            en: {
+              'field-measuring.header.altitude-label': 'Altitude',
+              'field-measuring.header.azimuth-label': 'Azimuth (clockwise \u2014 0\u00b0 North/South) ',
+              'field-measuring.header.cable-amount-label': 'Cable amount',
+              'field-measuring.header.degree-addon': '\u00b0',
+              'field-measuring.header.guard-label': 'Guard',
+              'field-measuring.header.latitude-label': 'Latitude',
+              'field-measuring.header.link-label': 'Link',
+              'field-measuring.header.longitude-label': 'Longitude',
+              'field-measuring.header.meter-addon': 'm',
+              'field-measuring.header.phase-label': 'Phase',
+              'field-measuring.header.phase-number-label': 'Phase number',
+              'field-measuring.header.span-label': 'Span',
+              'field-measuring.header.span-type-label': 'Span type',
+              'field-measuring.header.voltage-label': 'Voltage'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),HeaderComponent],
+        }),
+        HeaderComponent
+      ],
       providers: [provideHttpClient(), provideHttpClientTesting()]
     })
       .overrideComponent(HeaderComponent, {
-        remove: { imports: [
-        IconComponent] },
-        add: { imports: [
-        MockIconComponent] }
+        remove: { imports: [IconComponent] },
+        add: { imports: [MockIconComponent] }
       })
       .compileComponents();
 

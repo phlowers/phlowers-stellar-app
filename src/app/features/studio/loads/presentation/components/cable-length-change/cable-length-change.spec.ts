@@ -100,7 +100,9 @@ describe('CableLengthChangeComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),CableLengthChangeComponent],
+        }),
+        CableLengthChangeComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },

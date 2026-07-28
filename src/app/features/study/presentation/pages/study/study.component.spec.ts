@@ -197,25 +197,29 @@ describe('StudyComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "study.notifications.duplicated": "Study Duplicated",
-              "study.notifications.duplicationFailed": "Study Duplication Failed",
-              "study.notifications.icAdded": "Initial Condition Added",
-              "study.notifications.icDeleted": "Initial Condition Deleted",
-              "study.notifications.icDuplicated": "Initial Condition Duplicated",
-              "study.notifications.icUpdated": "Initial Condition Updated",
-              "study.notifications.sectionCreated": "Section Created",
-              "study.notifications.sectionDeleted": "Section Deleted",
-              "study.notifications.sectionDuplicated": "Section Duplicated",
-              "study.notifications.sectionUpdated": "Section Updated",
-              "study.tabs.groundObstacles": "Ground and obstacles",
-              "study.tabs.measurements": "Measurements",
-              "study.tabs.savedStates": "Saved states",
-              "study.tabs.sections": "Sections"
-            } },
+          langs: {
+            en: {
+              'study.notifications.duplicated': 'Study Duplicated',
+              'study.notifications.duplicationFailed': 'Study Duplication Failed',
+              'study.notifications.icAdded': 'Initial Condition Added',
+              'study.notifications.icDeleted': 'Initial Condition Deleted',
+              'study.notifications.icDuplicated': 'Initial Condition Duplicated',
+              'study.notifications.icUpdated': 'Initial Condition Updated',
+              'study.notifications.sectionCreated': 'Section Created',
+              'study.notifications.sectionDeleted': 'Section Deleted',
+              'study.notifications.sectionDuplicated': 'Section Duplicated',
+              'study.notifications.sectionUpdated': 'Section Updated',
+              'study.tabs.groundObstacles': 'Ground and obstacles',
+              'study.tabs.measurements': 'Measurements',
+              'study.tabs.savedStates': 'Saved states',
+              'study.tabs.sections': 'Sections'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),StudyComponent],
+        }),
+        StudyComponent
+      ],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: StudiesService, useValue: mockStudiesService },

@@ -26,7 +26,11 @@ describe('ExportDialogComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),ExportDialogComponent, ReactiveFormsModule, NoopAnimationsModule],
+        }),
+        ExportDialogComponent,
+        ReactiveFormsModule,
+        NoopAnimationsModule
+      ],
       providers: [{ provide: StudiesService, useValue: mockStudiesService }]
     }).compileComponents();
 
@@ -90,11 +94,15 @@ describe('ExportDialogComponent', () => {
       await TestBed.resetTestingModule()
         .configureTestingModule({
           imports: [
-        TranslocoTestingModule.forRoot({
-          langs: { en: {} },
-          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
-          preloadLangs: true
-        }),ExportDialogComponent, ReactiveFormsModule, NoopAnimationsModule],
+            TranslocoTestingModule.forRoot({
+              langs: { en: {} },
+              translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+              preloadLangs: true
+            }),
+            ExportDialogComponent,
+            ReactiveFormsModule,
+            NoopAnimationsModule
+          ],
           providers: [{ provide: StudiesService, useValue: mockStudiesService }]
         })
         .compileComponents();

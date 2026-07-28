@@ -147,7 +147,9 @@ describe('FreePositioningComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),FreePositioningComponent],
+        }),
+        FreePositioningComponent
+      ],
       providers: [
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: PlotService, useValue: mockPlotService },

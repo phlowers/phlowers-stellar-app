@@ -68,7 +68,9 @@ describe('Init component', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),InitComponent],
+        }),
+        InitComponent
+      ],
       providers: [
         ToolbarDialogService,
         provideHttpClient(),

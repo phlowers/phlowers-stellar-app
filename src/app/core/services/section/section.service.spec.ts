@@ -105,11 +105,13 @@ describe('SectionService', () => {
     } as unknown as vi.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
-      imports: [TranslocoTestingModule.forRoot({
+      imports: [
+        TranslocoTestingModule.forRoot({
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        })],
+        })
+      ],
       providers: [SectionService, { provide: StudiesService, useValue: mockStudiesService }]
     });
 

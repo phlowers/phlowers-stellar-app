@@ -45,11 +45,13 @@ describe('GenericImportEngineService', () => {
     } as unknown as vi.Mocked<LoggerService>;
 
     TestBed.configureTestingModule({
-      imports: [TranslocoTestingModule.forRoot({
+      imports: [
+        TranslocoTestingModule.forRoot({
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        })],
+        })
+      ],
       providers: [
         GenericImportEngineService,
         { provide: IMPORT_ADAPTER_TOKEN, useValue: adapter },

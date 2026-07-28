@@ -107,17 +107,22 @@ describe('StudiesService', () => {
     } as unknown as vi.Mocked<StorageService>;
 
     TestBed.configureTestingModule({
-      imports: [TranslocoTestingModule.forRoot({
-          langs: { en: {
-              "shared.duplicate.copy-suffix": "Copy",
-              "shared.sections-helpers.ic-default-name": "IC 1",
-              "shared.studies-service.imported-from-protov4": "Study imported from protoV4",
-              "shared.studies-service.unauthorized-error": "You cannot update a study that you did not create, please duplicate it instead.",
-              "shared.studies-service.unauthorized-summary": "Unauthorized"
-            } },
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.duplicate.copy-suffix': 'Copy',
+              'shared.sections-helpers.ic-default-name': 'IC 1',
+              'shared.studies-service.imported-from-protov4': 'Study imported from protoV4',
+              'shared.studies-service.unauthorized-error':
+                'You cannot update a study that you did not create, please duplicate it instead.',
+              'shared.studies-service.unauthorized-summary': 'Unauthorized'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        })],
+        })
+      ],
       providers: [
         StudiesService,
         { provide: StorageService, useValue: mockStorageService },

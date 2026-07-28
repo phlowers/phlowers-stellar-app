@@ -16,7 +16,9 @@ describe('NotFoundComponent', () => {
           langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
-        }),NotFoundComponent],
+        }),
+        NotFoundComponent
+      ],
       providers: [provideRouter([])]
     }).compileComponents();
 
