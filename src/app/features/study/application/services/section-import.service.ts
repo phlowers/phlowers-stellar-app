@@ -375,8 +375,14 @@ export class SectionImportService implements ImportAdapter<Section> {
     supports: Support[],
     accroches: GeoLiaisonAccroche[]
   ): Promise<Support[]> {
-    const catalogChains = (await this.chainsService.getChains()) ?? [];
-    if (catalogChains.length === 0) {
+    let catalogChains: Awaited<ReturnType<ChainsService['getChains']>>;
+    try {
+      catalogChains = await this.chainsService.getChains();
+    } catch (err) {
+      this.logger.warn('Error reading chain catalog, keeping GeoLiaison file chain values', err);
+      return supports;
+    }
+    if (!catalogChains || catalogChains.length === 0) {
       return supports;
     }
 
@@ -384,8 +390,16 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     return supports.map((support, index) => {
       const chainName = accroches[index]?.CHAINE_DRN_IDR?.trim();
-      const catalogChain = chainName ? catalogChainsByName.get(chainName) : undefined;
+      if (!chainName) {
+        this.logger.warn(`Support #${index}: missing CHAINE_DRN_IDR, keeping GeoLiaison file chain values`);
+        return support;
+      }
+
+      const catalogChain = catalogChainsByName.get(chainName);
       if (!catalogChain) {
+        this.logger.warn(
+          `Support #${index}: chain "${chainName}" not found in the chain catalog, keeping GeoLiaison file chain values`
+        );
         return support;
       }
 
