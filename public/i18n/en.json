@@ -373,6 +373,7 @@
   "sections-tab": {
     "no-section": "No existing section",
     "create-section": "Create a section",
+    "select-btn": "Select the study section",
     "aria-select-section": "select this study's section",
     "col-name": "Section Name",
     "col-type": "Section type",

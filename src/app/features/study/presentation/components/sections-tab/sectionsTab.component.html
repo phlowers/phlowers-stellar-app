@@ -43,207 +43,182 @@
 @if (study()?.sections?.length) {
   <article class="sections-container">
     @for (section of study()?.sections; track $index) {
-      <div
-        role="button"
-        (click)="
-          selectSection(section, {
-            checked: selectedSection() !== section.uuid
-          })
-        "
-        [tabindex]="$index"
-        (keydown)="
-          selectSection(section, {
-            checked: selectedSection() !== section.uuid
-          })
-        "
-      >
-        <app-card class="section" role="article" data-testid="section-card">
-          <p-checkbox
-            data-testid="section-checkbox"
-            [ariaLabel]="'sections-tab.aria-select-section' | transloco"
-            class="section__selector"
-            [binary]="true"
-            (click)="$event.stopPropagation()"
-            [ngModel]="selectedSection() === section.uuid"
-            (onChange)="selectSection(section, $event)"
-          />
+      <app-card class="section" role="article" data-testid="section-card">
+        <button
+          class="section__select-btn"
+          (click)="selectSection(section, { checked: selectedSection() !== section.uuid })"
+        >
+          {{ 'sections-tab.select-btn' | transloco }} {{ section.name }}
+        </button>
 
-          <dl>
-            <div class="contents">
-              <dt class="section__title-name">{{ 'sections-tab.col-name' | transloco }}</dt>
-              <dd class="section__text-name" data-testid="section-name">{{ section.name }}</dd>
-            </div>
-            <div class="contents">
-              <dt class="section__title-type">{{ 'sections-tab.col-type' | transloco }}</dt>
-              <dd class="section__text-type">
-                @if (section.type === 'guard') {
-                  <ng-container>{{ 'sections-tab.type-guard' | transloco }}</ng-container>
-                } @else {
-                  <ng-container>{{ 'sections-tab.type-phase' | transloco }}</ng-container>
-                }
-              </dd>
-            </div>
-            <div class="contents">
-              <dt class="section__title-lit">{{ 'sections-tab.col-lit' | transloco }}</dt>
-              <dd class="section__text-lit">{{ section.lit_name }}</dd>
-            </div>
-            <div class="contents">
-              <dt class="section__title-date">{{ 'sections-tab.col-last-modified' | transloco }}</dt>
-              <dd class="section__text-date">
-                {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
-              </dd>
-            </div>
-          </dl>
+        <p-checkbox
+          data-testid="section-checkbox"
+          [ariaLabel]="'sections-tab.aria-select-section' | transloco"
+          class="section__selector"
+          [binary]="true"
+          [ngModel]="selectedSection() === section.uuid"
+          (onChange)="selectSection(section, $event)"
+        />
 
-          <p class="mb-0 section__title-init">{{ 'sections-tab.initial-condition' | transloco }}</p>
+        <dl>
+          <dt class="section__title-name">{{ 'sections-tab.col-name' | transloco }}</dt>
+          <dd class="section__text-name" data-testid="section-name">{{ section.name }}</dd>
 
-          @if (!section.initial_conditions || section.initial_conditions.length === 0) {
-            <button
-              (click)="
-                $event.stopPropagation(); openInitialConditionModal(section, createInitialCondition(section), 'create')
+          <dt class="section__title-type">{{ 'sections-tab.col-type' | transloco }}</dt>
+          <dd class="section__text-type">
+            @if (section.type === 'guard') {
+              <ng-container>{{ 'sections-tab.type-guard' | transloco }}</ng-container>
+            } @else {
+              <ng-container>{{ 'sections-tab.type-phase' | transloco }}</ng-container>
+            }
+          </dd>
+
+          <dt class="section__title-lit">{{ 'sections-tab.col-lit' | transloco }}</dt>
+          <dd class="section__text-lit">{{ section.lit_name }}</dd>
+
+          <dt class="section__title-date">{{ 'sections-tab.col-last-modified' | transloco }}</dt>
+          <dd class="section__text-date">
+            {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
+          </dd>
+        </dl>
+
+        <p class="mb-0 section__title-init">{{ 'sections-tab.initial-condition' | transloco }}</p>
+
+        @if (!section.initial_conditions || section.initial_conditions.length === 0) {
+          <button
+            (click)="openInitialConditionModal(section, createInitialCondition(section), 'create')"
+            app-btn
+            btnSize="s"
+            btnStyle="outlined"
+            class="section__content-init"
+          >
+            <app-icon icon="add" />
+            <span>{{ 'sections-tab.add-initial-condition' | transloco }}</span>
+          </button>
+        } @else if (section.initial_conditions && section.initial_conditions.length > 0) {
+          <div class="section__content-init w-[12.5rem]">
+            <app-select-with-buttons
+              [options]="$any(orderedInitialConditions(section.initial_conditions))"
+              [selectedOption]="section.selected_initial_condition_uuid"
+              [ariaLabel]="'sections-tab.aria-select-ic' | transloco"
+              (selectOption)="
+                selectInitialConditionClick({
+                  initialCondition: $any($event),
+                  section: section
+                })
               "
+              [placeholder]="'sections-tab.placeholder-view-ic' | transloco"
+              (viewOption)="
+                viewInitialConditionClick({
+                  initialCondition: $any($event),
+                  section: section
+                })
+              "
+              (editOption)="
+                editInitialConditionClick({
+                  initialCondition: $any($event),
+                  section: section
+                })
+              "
+              (duplicateOption)="
+                duplicateInitialConditionClick({
+                  initialCondition: $any($event),
+                  section: section
+                })
+              "
+              (deleteOption)="
+                deleteInitialConditionClick({
+                  initialCondition: $any($event),
+                  section: section
+                })
+              "
+              optionLabel="name"
+              optionValue="uuid"
+              class="section__content-init"
+            />
+          </div>
+        }
+
+        @if (section.charges && section.charges.length > 0) {
+          <p class="mb-0 section__title-charges">{{ 'sections-tab.charge-cases' | transloco }}</p>
+          <div class="section__content-charges w-[12.5rem]">
+            <app-select-with-buttons
+              [options]="getChargesOptions(section)"
+              [selectedOption]="section.selected_charge_uuid"
+              (selectOption)="selectChargeCase($event, section)"
+              (deleteOption)="deleteChargeCase($event, section)"
+              (duplicateOption)="duplicateChargeCase($event, section)"
+              (viewOption)="viewOrEditChargeCase($event, 'view', section)"
+              (editOption)="viewOrEditChargeCase($event, 'edit', section)"
+              optionLabel="label"
+              optionValue="value"
+              [ariaLabel]="'sections-tab.aria-select-charge' | transloco"
+              [showClear]="false"
+            />
+          </div>
+        }
+
+        <p class="mb-0 section__title-action">{{ 'sections-tab.actions' | transloco }}</p>
+
+        <button
+          (click)="popover.toggle($event)"
+          app-btn
+          btnSize="l"
+          btnStyle="text"
+          class="section__content-action"
+          [ariaLabel]="transloco.translate('sections-tab.aria-actions-for-section', { name: section.name })"
+          data-testid="section-actions-btn"
+        >
+          <app-icon icon="more_horiz" />
+        </button>
+
+        <p-popover #popover>
+          <ng-template pTemplate="content">
+            <button app-btn btnSize="s" btnStyle="text" (click)="viewSection(section)" data-testid="section-view-btn">
+              <app-icon icon="visibility" />
+              <span>{{ 'sections-tab.action-view' | transloco }}</span>
+            </button>
+            <button app-btn btnSize="s" btnStyle="text" (click)="editSection(section)" data-testid="section-edit-btn">
+              <app-icon icon="edit" />
+              <span>{{ 'sections-tab.action-edit' | transloco }}</span>
+            </button>
+
+            <button
               app-btn
               btnSize="s"
-              btnStyle="outlined"
-              class="section__content-init"
+              btnStyle="text"
+              data-testid="section-add-ic-btn"
+              (click)="openInitialConditionModal(section, createInitialCondition(section), 'create')"
             >
-              <app-icon icon="add" />
-              <span>{{ 'sections-tab.add-initial-condition' | transloco }}</span>
+              <app-icon icon="add_circle" />
+              <span>{{ 'sections-tab.action-add-ic' | transloco }}</span>
             </button>
-          } @else if (section.initial_conditions && section.initial_conditions.length > 0) {
-            <div class="section__content-init w-[12.5rem]">
-              <app-select-with-buttons
-                onKeyDown="$event.stopPropagation()"
-                (keydown)="$event.stopPropagation()"
-                (click)="$event.stopPropagation()"
-                [options]="$any(orderedInitialConditions(section.initial_conditions))"
-                [selectedOption]="section.selected_initial_condition_uuid"
-                [ariaLabel]="'sections-tab.aria-select-ic' | transloco"
-                (selectOption)="
-                  selectInitialConditionClick({
-                    initialCondition: $any($event),
-                    section: section
-                  })
-                "
-                [placeholder]="'sections-tab.placeholder-view-ic' | transloco"
-                (viewOption)="
-                  viewInitialConditionClick({
-                    initialCondition: $any($event),
-                    section: section
-                  })
-                "
-                (editOption)="
-                  editInitialConditionClick({
-                    initialCondition: $any($event),
-                    section: section
-                  })
-                "
-                (duplicateOption)="
-                  duplicateInitialConditionClick({
-                    initialCondition: $any($event),
-                    section: section
-                  })
-                "
-                (deleteOption)="
-                  deleteInitialConditionClick({
-                    initialCondition: $any($event),
-                    section: section
-                  })
-                "
-                optionLabel="name"
-                optionValue="uuid"
-                class="section__content-init"
-              />
-            </div>
-          }
 
-          @if (section.charges && section.charges.length > 0) {
-            <p class="mb-0 section__title-charges">{{ 'sections-tab.charge-cases' | transloco }}</p>
-            <div class="section__content-charges w-[12.5rem]">
-              <app-select-with-buttons
-                onKeyDown="$event.stopPropagation()"
-                (keydown)="$event.stopPropagation()"
-                (click)="$event.stopPropagation()"
-                [options]="getChargesOptions(section)"
-                [selectedOption]="section.selected_charge_uuid"
-                (selectOption)="selectChargeCase($event, section)"
-                (deleteOption)="deleteChargeCase($event, section)"
-                (duplicateOption)="duplicateChargeCase($event, section)"
-                (viewOption)="viewOrEditChargeCase($event, 'view', section)"
-                (editOption)="viewOrEditChargeCase($event, 'edit', section)"
-                optionLabel="label"
-                optionValue="value"
-                [ariaLabel]="'sections-tab.aria-select-charge' | transloco"
-                [showClear]="false"
-              />
-            </div>
-          }
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              (click)="popover.hide(); duplicateSection.emit(section)"
+              data-testid="section-duplicate-btn"
+            >
+              <app-icon icon="content_copy" />
+              <span>{{ 'sections-tab.action-duplicate' | transloco }}</span>
+            </button>
 
-          <p class="mb-0 section__title-action">{{ 'sections-tab.actions' | transloco }}</p>
-
-          <button
-            (click)="$event.stopPropagation(); popover.toggle($event)"
-            app-btn
-            btnSize="l"
-            btnStyle="text"
-            class="section__content-action"
-            [ariaLabel]="transloco.translate('sections-tab.aria-actions-for-section', { name: section.name })"
-            data-testid="section-actions-btn"
-          >
-            <app-icon icon="more_horiz" />
-          </button>
-
-          <p-popover #popover>
-            <ng-template pTemplate="content">
-              <button app-btn btnSize="s" btnStyle="text" (click)="viewSection(section)" data-testid="section-view-btn">
-                <app-icon icon="visibility" />
-                <span>{{ 'common.view' | transloco }}</span>
-              </button>
-              <button app-btn btnSize="s" btnStyle="text" (click)="editSection(section)" data-testid="section-edit-btn">
-                <app-icon icon="edit" />
-                <span>{{ 'common.edit' | transloco }}</span>
-              </button>
-
-              <button
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                data-testid="section-add-ic-btn"
-                (click)="
-                  $event.stopPropagation();
-                  openInitialConditionModal(section, createInitialCondition(section), 'create')
-                "
-              >
-                <app-icon icon="add_circle" />
-                <span>{{ 'sections-tab.action-add-ic' | transloco }}</span>
-              </button>
-
-              <button
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                (click)="popover.hide(); duplicateSection.emit(section)"
-                data-testid="section-duplicate-btn"
-              >
-                <app-icon icon="content_copy" />
-                <span>{{ 'common.duplicate' | transloco }}</span>
-              </button>
-
-              <button
-                app-btn
-                btnSize="s"
-                btnStyle="text"
-                class="erase-btn"
-                (click)="deleteSection.emit(section)"
-                data-testid="section-delete-btn"
-              >
-                <app-icon icon="delete" />
-                <span>{{ 'common.delete' | transloco }}</span>
-              </button>
-            </ng-template>
-          </p-popover>
-        </app-card>
-      </div>
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              class="erase-btn"
+              (click)="deleteSection.emit(section)"
+              data-testid="section-delete-btn"
+            >
+              <app-icon icon="delete" />
+              <span>{{ 'sections-tab.action-delete' | transloco }}</span>
+            </button>
+          </ng-template>
+        </p-popover>
+      </app-card>
     }
   </article>
 

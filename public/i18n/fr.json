@@ -373,6 +373,7 @@
   "sections-tab": {
     "no-section": "Aucun canton existant",
     "create-section": "Créer un canton",
+    "select-btn": "sélectionner le canton d'étude",
     "aria-select-section": "sélectionner ce canton de l'étude",
     "col-name": "Nom du canton",
     "col-type": "Type de canton",
