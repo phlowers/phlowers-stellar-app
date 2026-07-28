@@ -8,7 +8,7 @@
 @if (!loading()) {
   <div class="l0-sum">
     <section>
-      <h3 class="heading-xs underline-text">{{ 'studio.topToolbar.l0TableLabel' | transloco }}</h3>
+      <h3 class="heading-xs underline-text">{{ 'studio.top-toolbar.l0-table-label' | transloco }}</h3>
 
       <p-table
         [value]="l0Rows()"
@@ -27,7 +27,7 @@
           <tr>
             <th id="span-header" pSortableColumn="span">
               <div class="flex items-center gap-2">
-                <span>{{ 'studio.shared.spanLabel' | transloco }}</span>
+                <span>{{ 'studio.shared.span-label' | transloco }}</span>
                 <app-icon [icon]="getSortIcon('span')" />
               </div>
             </th>
@@ -64,6 +64,6 @@
 <ng-template #footer>
   <button disabled="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="l0-export-btn">
     <app-icon icon="download" />
-    <span>{{ 'common.export-dialog.title' | transloco }}</span>
+    <span>{{ 'common.export' | transloco }}</span>
   </button>
 </ng-template>

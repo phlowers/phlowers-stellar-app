@@ -53,17 +53,17 @@ describe('ScaleViewComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'common.actions.validate': 'Validate',
-              'studio.scaleView.buttonLabel': 'View',
-              'studio.scaleView.formAriaLabel': 'View configuration',
-              'studio.scaleView.inputAriaLabel': 'Number of points per range',
-              'studio.scaleView.pointsLegend': 'Choose the number of points to display per range.',
-              'studio.scaleView.scaleAuto': 'Auto',
-              'studio.scaleView.scaleCeleste': 'Reduced in z (x, y, z/2)',
-              'studio.scaleView.scaleGeo': 'Uniform (x, y, z)',
-              'studio.scaleView.scaleLegend': 'Select the display scale.',
-              'studio.scaleView.scalePlan': 'Reduced in x (x/5, y, z)',
-              'studio.scaleView.sliderAriaLabel': 'Number of points per range'
+              'common.validate': 'Validate',
+              'studio.scale-view.button-label': 'View',
+              'studio.scale-view.form-aria-label': 'View configuration',
+              'studio.scale-view.input-aria-label': 'Number of points per range',
+              'studio.scale-view.points-legend': 'Choose the number of points to display per range.',
+              'studio.scale-view.scale-auto': 'Auto',
+              'studio.scale-view.scale-celeste': 'Reduced in z (x, y, z/2)',
+              'studio.scale-view.scale-geo': 'Uniform (x, y, z)',
+              'studio.scale-view.scale-legend': 'Select the display scale.',
+              'studio.scale-view.scale-plan': 'Reduced in x (x/5, y, z)',
+              'studio.scale-view.slider-aria-label': 'Number of points per range'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

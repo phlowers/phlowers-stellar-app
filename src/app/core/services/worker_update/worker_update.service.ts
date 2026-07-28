@@ -237,7 +237,7 @@ export class UpdateService {
     if (!silent) {
       this.messageService.add({
         severity: 'info',
-        summary: this.translocoService.translate('admin.admin.app-version'),
+        summary: this.translocoService.translate('admin.app-version'),
         detail: this.translocoService.translate('shared.update-service.version-checked-detail')
       });
     }

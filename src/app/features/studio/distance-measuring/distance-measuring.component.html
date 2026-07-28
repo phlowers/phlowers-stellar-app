@@ -1,10 +1,10 @@
 <p id="distance-measuring-hint" class="distance-measuring__hint">
-  {{ 'studio.distanceMeasuring.neverSavedHint' | transloco }}
+  {{ 'studio.distance-measuring.never-saved-hint' | transloco }}
 </p>
-<p class="distance-measuring__hint">{{ 'studio.distanceMeasuring.referenceHint' | transloco }}</p>
+<p class="distance-measuring__hint">{{ 'studio.distance-measuring.reference-hint' | transloco }}</p>
 
 <div class="distance-measuring__span-cols">
-  <label for="distanceSpan" class="span-label">{{ 'studio.studioPage.spanOption' | transloco }}</label>
+  <label for="distanceSpan" class="span-label">{{ 'studio.studio-page.span-option' | transloco }}</label>
   <p-select
     inputId="distanceSpan"
     [options]="service.spanOptions()"
@@ -43,7 +43,7 @@
     aria-describedby="distance-measuring-hint"
     data-testid="free-positioning-toggle"
   />
-  <label for="distanceFreePositioning">{{ 'studio.distanceMeasuring.freePositioningLabel' | transloco }}</label>
+  <label for="distanceFreePositioning">{{ 'studio.distance-measuring.free-positioning-label' | transloco }}</label>
 </div>
 
 <ul class="distance-measuring__points" data-testid="points-list">
@@ -60,16 +60,16 @@
         (click)="service.setActivePoint($index)"
         data-testid="select-point"
       >
-        <span class="sr-only">{{ 'studio.distanceMeasuring.selectPointLabel' | transloco }}&nbsp;{{ $index + 1 }}</span>
+        <span class="sr-only">{{ 'studio.distance-measuring.select-point-label' | transloco }}&nbsp;{{ $index + 1 }}</span>
       </button>
 
       <div class="distance-item__header">
-        <p class="distance-item__title">{{ 'studio.distanceMeasuring.pointLabel' | transloco }} {{ $index + 1 }}</p>
+        <p class="distance-item__title">{{ 'studio.distance-measuring.point-label' | transloco }} {{ $index + 1 }}</p>
       </div>
 
       <div class="distance-item__form">
         <label [for]="'altitudePoint' + $index" class="distance-item__label alt-point-label">{{
-          'studio.distanceMeasuring.pointAltLabel' | transloco
+          'studio.distance-measuring.point-alt-label' | transloco
         }}</label>
         <p-inputgroup class="distance-item__input">
           <input
@@ -84,11 +84,11 @@
             data-testid="point-altitude"
             [attr.required]="$index !== 2 ? 'true' : null"
           />
-          <p-inputgroup-addon>{{ 'studio.distanceMeasuring.meterUnit' | transloco }}</p-inputgroup-addon>
+          <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
         </p-inputgroup>
 
         <label [for]="'distanceToRefSupport' + $index" class="distance-item__label dist-ref-label">{{
-          'studio.distanceMeasuring.refSupportDistLabel' | transloco
+          'studio.distance-measuring.ref-support-dist-label' | transloco
         }}</label>
         <p-inputgroup class="distance-item__input">
           <input
@@ -103,11 +103,11 @@
             data-testid="point-ref-distance"
             [attr.required]="$index !== 2 ? 'true' : null"
           />
-          <p-inputgroup-addon>{{ 'studio.distanceMeasuring.meterUnit' | transloco }}</p-inputgroup-addon>
+          <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
         </p-inputgroup>
 
         <label [for]="'distanceToLineAxis' + $index" class="distance-item__label dist-axis-label">{{
-          'studio.distanceMeasuring.lineAxisDistLabel' | transloco
+          'studio.distance-measuring.line-axis-dist-label' | transloco
         }}</label>
         <p-inputgroup class="distance-item__input">
           <input
@@ -122,7 +122,7 @@
             data-testid="point-axis-distance"
             [attr.required]="$index !== 2 ? 'true' : null"
           />
-          <p-inputgroup-addon>{{ 'studio.distanceMeasuring.meterUnit' | transloco }}</p-inputgroup-addon>
+          <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
         </p-inputgroup>
       </div>
     </li>
@@ -136,7 +136,7 @@
       btnStyle="danger"
       type="button"
       (click)="service.reset()"
-      [attr.aria-label]="'studio.distanceMeasuring.deletePointsAriaLabel' | transloco"
+      [attr.aria-label]="'studio.distance-measuring.delete-points-aria-label' | transloco"
       data-testid="delete-points"
     >
       <app-icon icon="delete" aria-hidden="true" />
@@ -151,7 +151,7 @@
       data-testid="calculate"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
-      <ng-container>{{ 'studio.distanceMeasuring.calculateLabel' | transloco }}</ng-container>
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </div>
 
@@ -159,12 +159,12 @@
     <div class="distance-measuring__sticky__results" [@expandHeight] data-testid="results">
       <hr class="distance-measuring__sticky__divider" />
       <h2 class="distance-measuring__sticky__results__title">
-        {{ 'studio.distanceMeasuring.resultsTitle' | transloco }}
+        {{ 'common.results' | transloco }}
       </h2>
       <dl class="distance-measuring__sticky__results__grid">
         <div class="distance-measuring__sticky__results__grid__item">
           <dt class="distance-measuring__sticky__results__grid__item__term">
-            {{ 'studio.distanceMeasuring.distance12Label' | transloco }}
+            {{ 'studio.distance-measuring.distance-12-label' | transloco }}
           </dt>
           <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-12">
             {{ results.distance12 | number: '1.0-2' }} m
@@ -173,7 +173,7 @@
 
         <div class="distance-measuring__sticky__results__grid__item">
           <dt class="distance-measuring__sticky__results__grid__item__term">
-            {{ 'studio.distanceMeasuring.distance23Label' | transloco }}
+            {{ 'studio.distance-measuring.distance-23-label' | transloco }}
           </dt>
           <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-23">
             @if (results.distance23 !== null) {
@@ -186,7 +186,7 @@
 
         <div class="distance-measuring__sticky__results__grid__item">
           <dt class="distance-measuring__sticky__results__grid__item__term">
-            {{ 'studio.distanceMeasuring.angle123Label' | transloco }}
+            {{ 'studio.distance-measuring.angle-123-label' | transloco }}
           </dt>
           <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-angle-123">
             @if (results.angle123 !== null) {

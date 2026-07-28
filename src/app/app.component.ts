@@ -188,7 +188,7 @@ export class AppComponent implements OnInit {
    * can trigger another attempt on the next state change.
    */
   private tryAutomaticFirstInstall(): void {
-    const installFailedMessage = this.transloco.translate('app.installFailed');
+    const installFailedMessage = this.transloco.translate('app.install-failed');
 
     this.updateService
       .install()

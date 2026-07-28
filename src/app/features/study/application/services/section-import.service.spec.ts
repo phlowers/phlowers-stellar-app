@@ -25,17 +25,17 @@ const geoLiaisonSupportCatalogMissingWarning =
   'The attachment support from the geolink file is not present in the application support catalog';
 
 const sectionImportTranslations: Record<string, string> = {
-  'sectionImport.fileTypeNotAllowed': 'File type not allowed',
-  'sectionImport.fileReadError': 'Error reading file',
-  'sectionImport.fileParseError': 'Error parsing file',
-  'sectionImport.validationRequiredFields': 'Section is missing required fields',
-  'sectionImport.validationSupportsBounds': 'Section has supports with values out of bounds',
-  'sectionImport.importError': 'Error importing section',
-  'sectionImport.deleteError': 'Error deleting section',
-  'sectionImport.geoLiaisonFormatError': 'The geolink file to import is invalid.',
-  'sectionImport.lambertReprojectionError': 'Error computing GPS coordinates from Lambert93 data',
-  'sectionImport.catalogMissingWarning': geoLiaisonSupportCatalogMissingWarning,
-  'sectionImport.importSuccess': 'Section imported successfully'
+  'section-import.file-type-not-allowed': 'File type not allowed',
+  'section-import.file-read-error': 'Error reading file',
+  'section-import.file-parse-error': 'Error parsing file',
+  'section-import.validation-required-fields': 'Section is missing required fields',
+  'section-import.validation-supports-bounds': 'Section has supports with values out of bounds',
+  'section-import.import-error': 'Error importing section',
+  'section-import.delete-error': 'Error deleting section',
+  'section-import.geo-liaison-format-error': 'The geolink file to import is invalid.',
+  'section-import.lambert-reprojection-error': 'Error computing GPS coordinates from Lambert93 data',
+  'section-import.catalog-missing-warning': geoLiaisonSupportCatalogMissingWarning,
+  'section-import.import-success': 'Section imported successfully'
 };
 
 // ---------------------------------------------------------------------------
@@ -306,7 +306,7 @@ describe('SectionImportService', () => {
           provide: TranslocoService,
           useValue: {
             translate: (key: string, params?: Record<string, unknown>): string => {
-              if (key === 'sectionImport.reprojectionInfo') {
+              if (key === 'section-import.reprojection-info') {
                 return `Reprojection using ${params?.['appName']} data model seems to add a mean absolute error of ${params?.['error']} m`;
               }
               return sectionImportTranslations[key] ?? key;

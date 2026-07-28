@@ -6,7 +6,7 @@
   (onSort)="onSort($event)"
   [value]="studies()"
   [showCurrentPageReport]="true"
-  [currentPageReportTemplate]="'studies.studies-table.pagination-report' | transloco"
+  [currentPageReportTemplate]="'studies.table.pagination-report' | transloco"
   [tableStyleClass]="'w-full mt-6'"
 >
   <ng-template #header>
@@ -17,7 +17,7 @@
 
       <th id="title" pSortableColumn="title">
         <div class="flex items-center gap-2">
-          {{ 'studies.studies-table.col-title' | transloco }}
+          {{ 'studies.table.col-title' | transloco }}
           <app-icon
             [icon]="
               $any(sortField() === 'title' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert')
@@ -27,7 +27,7 @@
       </th>
       <th id="author_email" pSortableColumn="author_email">
         <div class="flex items-center gap-2">
-          {{ 'studies.studies-table.col-author' | transloco }}
+          {{ 'studies.table.col-author' | transloco }}
           <app-icon
             [icon]="
               $any(
@@ -39,7 +39,7 @@
       </th>
       <th id="updated_at_offline" pSortableColumn="updated_at_offline">
         <div class="flex items-center gap-2">
-          {{ 'studies.studies-table.col-modification-date' | transloco }}
+          {{ 'studies.table.col-modification-date' | transloco }}
           <app-icon
             [icon]="
               $any(
@@ -55,7 +55,7 @@
       </th>
       <th id="lit_code" pSortableColumn="lit_code">
         <div class="flex items-center gap-2">
-          {{ 'studies.studies-table.col-lit' | transloco }}
+          {{ 'studies.table.col-lit' | transloco }}
           <app-icon
             [icon]="
               $any(sortField() === 'lit_code' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert')
@@ -64,11 +64,11 @@
         </div>
       </th>
       <th id="description" pSortableColumn="description">
-        <div class="flex items-center gap-2">{{ 'studies.studies-table.col-description' | transloco }}</div>
+        <div class="flex items-center gap-2">{{ 'studies.table.col-description' | transloco }}</div>
       </th>
       <th id="space"></th>
       <th id="actions">
-        <div class="flex items-center gap-2">{{ 'studies.studies-table.col-actions' | transloco }}</div>
+        <div class="flex items-center gap-2">{{ 'studies.table.col-actions' | transloco }}</div>
       </th>
     </tr>
   </ng-template>
@@ -98,7 +98,7 @@
           btnSize="l"
           btnStyle="text"
           data-testid="study-actions-btn"
-          [attr.aria-label]="'studies.studies-table.study-actions-menu' | transloco"
+          [attr.aria-label]="'studies.table.study-actions-menu' | transloco"
         >
           <app-icon icon="more_horiz" aria-hidden="true" />
         </button>
@@ -112,7 +112,7 @@
               data-testid="duplicate-study-btn"
             >
               <app-icon icon="content_copy" />
-              <span>{{ 'common.actions.duplicate' | transloco }}</span>
+              <span>{{ 'common.duplicate' | transloco }}</span>
             </button>
             <button
               app-btn
@@ -122,7 +122,7 @@
               data-testid="export-study-btn"
             >
               <app-icon icon="download" />
-              <ng-container>{{ 'common.export-dialog.title' | transloco }}</ng-container>
+              <ng-container>{{ 'common.export' | transloco }}</ng-container>
             </button>
             <button
               app-btn
@@ -133,7 +133,7 @@
               data-testid="delete-study-btn"
             >
               <app-icon icon="delete" />
-              <span>{{ 'common.actions.delete' | transloco }}</span>
+              <span>{{ 'common.delete' | transloco }}</span>
             </button>
           </ng-template>
         </p-popover>

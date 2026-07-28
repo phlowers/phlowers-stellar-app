@@ -30,7 +30,7 @@
   </ng-template>
   <ng-template #content>
     @if (!updateService.updateLoading()) {
-      <p class="font-bold text-l-600 underline">{{ 'app.newVersionAvailable' | transloco }}</p>
+      <p class="font-bold text-l-600 underline">{{ 'app.new-version-available' | transloco }}</p>
       <div class="flex flex-row gap-2 items-center">
         <p class="m-0">
           <ng-container>{{ 'app.version' | transloco }}</ng-container>
@@ -48,10 +48,10 @@
         </p>
       </div>
     } @else {
-      <p class="font-bold underline text-xl-600">{{ 'app.updateInProgress' | transloco }}</p>
+      <p class="font-bold underline text-xl-600">{{ 'app.update-in-progress' | transloco }}</p>
       <p class="flex gap-2 items-center text-l-600">
         <app-icon icon="warning" />
-        <ng-container> {{ 'app.updateWarning' | transloco }} </ng-container>
+        <ng-container> {{ 'app.update-warning' | transloco }} </ng-container>
       </p>
       <p-progressbar mode="indeterminate" [style]="{ height: '.375rem' }" />
     }
@@ -70,7 +70,7 @@
       </button>
       <button app-btn (click)="updateService.confirmUpdate()" data-testid="update-now-btn">
         <app-icon icon="sync" />
-        <span>{{ 'app.updateNow' | transloco }}</span>
+        <span>{{ 'app.update-now' | transloco }}</span>
       </button>
     </ng-template>
   }

@@ -1,7 +1,7 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="table_chart" aria-hidden="true" />
-    <span>{{ 'studio.topToolbar.poseTableLabel' | transloco }}</span>
+    <span>{{ 'studio.top-toolbar.pose-table-label' | transloco }}</span>
   </p>
 </ng-template>
 
@@ -56,7 +56,7 @@
     [btnLoading]="isBusy()"
   >
     <app-icon icon="rocket_launch" aria-hidden="true" />
-    <ng-container>{{ 'loads.shared.calculate-btn' | transloco }}</ng-container>
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
   </button>
 </form>
 
@@ -64,12 +64,12 @@
   <div @expand>
     <hr />
 
-    <h2>{{ 'studio.shared.resultsTitle' | transloco }}</h2>
+    <h2>{{ 'common.results' | transloco }}</h2>
 
     <table>
       <tbody>
         <tr>
-          <th scope="row">{{ 'studio.conformity.temperatureLabel' | transloco }}</th>
+          <th scope="row">{{ 'studio.conformity.temperature-label' | transloco }}</th>
           @for (temp of res.temperatures; track $index) {
             <td>{{ temp }} °C</td>
           }
@@ -110,7 +110,7 @@
     (click)="save()"
   >
     <app-icon icon="save" aria-hidden="true" />
-    <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
+    <ng-container>{{ 'common.save' | transloco }}</ng-container>
   </button>
 
   <button
@@ -121,6 +121,6 @@
     [btnLoading]="isBusy()"
   >
     <app-icon icon="description" aria-hidden="true" />
-    <ng-container>{{ 'studio.obstaclesForm.reportBtn' | transloco }}</ng-container>
+    <ng-container>{{ 'common.report' | transloco }}</ng-container>
   </button>
 </ng-template>

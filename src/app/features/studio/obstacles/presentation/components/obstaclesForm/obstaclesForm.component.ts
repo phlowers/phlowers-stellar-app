@@ -94,13 +94,13 @@ export class ObstaclesFormComponent {
   }
 
   readonly altitudeTypeOptions = [
-    { label: this.translocoService.translate('studio.shared.altitudeTypeAbsolute'), value: 'absolute' },
-    { label: this.translocoService.translate('studio.shared.altitudeTypeRelative'), value: 'relative' },
-    { label: this.translocoService.translate('studio.shared.altitudeTypeRelativeCable'), value: 'relative_cable' }
+    { label: this.translocoService.translate('studio.shared.altitude-type-absolute'), value: 'absolute' },
+    { label: this.translocoService.translate('studio.shared.altitude-type-relative'), value: 'relative' },
+    { label: this.translocoService.translate('studio.shared.altitude-type-relative-cable'), value: 'relative_cable' }
   ];
 
   readonly lateralDistanceTypeOptions = [
-    { label: this.translocoService.translate('studio.shared.spanAxisOption'), value: 'SPAN_AXIS' }
+    { label: this.translocoService.translate('studio.shared.span-axis-option'), value: 'SPAN_AXIS' }
   ];
 
   readonly spansOptions = computed(() => {
@@ -160,7 +160,7 @@ export class ObstaclesFormComponent {
     const uuid = this.obstacleFormService.form.value.uuid;
     const isSaved = !!uuid;
     if (!isSaved) {
-      warnings.push(this.translocoService.translate('studio.obstaclesForm.obstacleMustBeSavedWarning'));
+      warnings.push(this.translocoService.translate('studio.obstacles-form.obstacle-must-be-saved-warning'));
     }
 
     const obstacleType = this.obstacleFormService.form.value.type;
@@ -170,20 +170,20 @@ export class ObstaclesFormComponent {
       if (distanceCount === 0) {
         const typeLabel = this.obstacleTypeOptions().find((o) => o.value === obstacleType)?.label ?? obstacleType;
         warnings.push(
-          this.translocoService.translate('studio.obstaclesForm.obstacleTypeNotEligibleWarning', { typeLabel })
+          this.translocoService.translate('studio.obstacles-form.obstacle-type-not-eligible-warning', { typeLabel })
         );
       }
     }
 
     if (!this.spanService.section()?.voltage_idr) {
-      warnings.push(this.translocoService.translate('studio.obstaclesForm.tensionLevelRequiredWarning'));
+      warnings.push(this.translocoService.translate('studio.obstacles-form.tension-level-required-warning'));
     }
 
     if (warnings.length > 0) {
       const summary =
         warnings.length === 1
-          ? this.translocoService.translate('studio.obstaclesForm.singleConditionWarningSummary')
-          : this.translocoService.translate('studio.obstaclesForm.multipleConditionsWarningSummary');
+          ? this.translocoService.translate('studio.obstacles-form.single-condition-warning-summary')
+          : this.translocoService.translate('studio.obstacles-form.multiple-conditions-warning-summary');
       this.notificationService.warningList(warnings, summary);
       return;
     }

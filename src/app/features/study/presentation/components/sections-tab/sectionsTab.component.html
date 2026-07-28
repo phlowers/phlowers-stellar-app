@@ -26,7 +26,7 @@
 
 @if (study() && !study()!.sections!.length) {
   <section class="text-center">
-    <h1 class="no-section-text text-xl-400">{{ 'sectionsTab.noSection' | transloco }}</h1>
+    <h1 class="no-section-text text-xl-400">{{ 'sections-tab.no-section' | transloco }}</h1>
     <button
       app-btn
       btnStyle="base"
@@ -35,7 +35,7 @@
       data-testid="create-section-empty-btn"
     >
       <app-icon icon="add" />
-      {{ 'sectionsTab.createSection' | transloco }}
+      {{ 'sections-tab.create-section' | transloco }}
     </button>
   </section>
 }
@@ -60,7 +60,7 @@
         <app-card class="section" role="article" data-testid="section-card">
           <p-checkbox
             data-testid="section-checkbox"
-            [ariaLabel]="'sectionsTab.ariaSelectSection' | transloco"
+            [ariaLabel]="'sections-tab.aria-select-section' | transloco"
             class="section__selector"
             [binary]="true"
             (click)="$event.stopPropagation()"
@@ -70,32 +70,32 @@
 
           <dl>
             <div class="contents">
-              <dt class="section__title-name">{{ 'sectionsTab.colName' | transloco }}</dt>
+              <dt class="section__title-name">{{ 'sections-tab.col-name' | transloco }}</dt>
               <dd class="section__text-name" data-testid="section-name">{{ section.name }}</dd>
             </div>
             <div class="contents">
-              <dt class="section__title-type">{{ 'sectionsTab.colType' | transloco }}</dt>
+              <dt class="section__title-type">{{ 'sections-tab.col-type' | transloco }}</dt>
               <dd class="section__text-type">
                 @if (section.type === 'guard') {
-                  <ng-container>{{ 'sectionsTab.typeGuard' | transloco }}</ng-container>
+                  <ng-container>{{ 'sections-tab.type-guard' | transloco }}</ng-container>
                 } @else {
-                  <ng-container>{{ 'sectionsTab.typePhase' | transloco }}</ng-container>
+                  <ng-container>{{ 'sections-tab.type-phase' | transloco }}</ng-container>
                 }
               </dd>
             </div>
             <div class="contents">
-              <dt class="section__title-lit">{{ 'sectionsTab.colLit' | transloco }}</dt>
+              <dt class="section__title-lit">{{ 'sections-tab.col-lit' | transloco }}</dt>
               <dd class="section__text-lit">{{ section.lit_name }}</dd>
             </div>
             <div class="contents">
-              <dt class="section__title-date">{{ 'sectionsTab.colLastModified' | transloco }}</dt>
+              <dt class="section__title-date">{{ 'sections-tab.col-last-modified' | transloco }}</dt>
               <dd class="section__text-date">
                 {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
               </dd>
             </div>
           </dl>
 
-          <p class="mb-0 section__title-init">{{ 'sectionsTab.initialCondition' | transloco }}</p>
+          <p class="mb-0 section__title-init">{{ 'sections-tab.initial-condition' | transloco }}</p>
 
           @if (!section.initial_conditions || section.initial_conditions.length === 0) {
             <button
@@ -108,7 +108,7 @@
               class="section__content-init"
             >
               <app-icon icon="add" />
-              <span>{{ 'sectionsTab.addInitialCondition' | transloco }}</span>
+              <span>{{ 'sections-tab.add-initial-condition' | transloco }}</span>
             </button>
           } @else if (section.initial_conditions && section.initial_conditions.length > 0) {
             <div class="section__content-init w-[12.5rem]">
@@ -118,14 +118,14 @@
                 (click)="$event.stopPropagation()"
                 [options]="$any(orderedInitialConditions(section.initial_conditions))"
                 [selectedOption]="section.selected_initial_condition_uuid"
-                [ariaLabel]="'sectionsTab.ariaSelectIC' | transloco"
+                [ariaLabel]="'sections-tab.aria-select-ic' | transloco"
                 (selectOption)="
                   selectInitialConditionClick({
                     initialCondition: $any($event),
                     section: section
                   })
                 "
-                [placeholder]="'sectionsTab.placeholderViewIC' | transloco"
+                [placeholder]="'sections-tab.placeholder-view-ic' | transloco"
                 (viewOption)="
                   viewInitialConditionClick({
                     initialCondition: $any($event),
@@ -158,7 +158,7 @@
           }
 
           @if (section.charges && section.charges.length > 0) {
-            <p class="mb-0 section__title-charges">{{ 'sectionsTab.chargeCases' | transloco }}</p>
+            <p class="mb-0 section__title-charges">{{ 'sections-tab.charge-cases' | transloco }}</p>
             <div class="section__content-charges w-[12.5rem]">
               <app-select-with-buttons
                 onKeyDown="$event.stopPropagation()"
@@ -173,13 +173,13 @@
                 (editOption)="viewOrEditChargeCase($event, 'edit', section)"
                 optionLabel="label"
                 optionValue="value"
-                [ariaLabel]="'sectionsTab.ariaSelectCharge' | transloco"
+                [ariaLabel]="'sections-tab.aria-select-charge' | transloco"
                 [showClear]="false"
               />
             </div>
           }
 
-          <p class="mb-0 section__title-action">{{ 'sectionsTab.actions' | transloco }}</p>
+          <p class="mb-0 section__title-action">{{ 'sections-tab.actions' | transloco }}</p>
 
           <button
             (click)="$event.stopPropagation(); popover.toggle($event)"
@@ -187,7 +187,7 @@
             btnSize="l"
             btnStyle="text"
             class="section__content-action"
-            [ariaLabel]="transloco.translate('sectionsTab.ariaActionsForSection', { name: section.name })"
+            [ariaLabel]="transloco.translate('sections-tab.aria-actions-for-section', { name: section.name })"
             data-testid="section-actions-btn"
           >
             <app-icon icon="more_horiz" />
@@ -197,11 +197,11 @@
             <ng-template pTemplate="content">
               <button app-btn btnSize="s" btnStyle="text" (click)="viewSection(section)" data-testid="section-view-btn">
                 <app-icon icon="visibility" />
-                <span>{{ 'sectionsTab.actionView' | transloco }}</span>
+                <span>{{ 'common.view' | transloco }}</span>
               </button>
               <button app-btn btnSize="s" btnStyle="text" (click)="editSection(section)" data-testid="section-edit-btn">
                 <app-icon icon="edit" />
-                <span>{{ 'sectionsTab.actionEdit' | transloco }}</span>
+                <span>{{ 'common.edit' | transloco }}</span>
               </button>
 
               <button
@@ -215,7 +215,7 @@
                 "
               >
                 <app-icon icon="add_circle" />
-                <span>{{ 'sectionsTab.actionAddIC' | transloco }}</span>
+                <span>{{ 'sections-tab.action-add-ic' | transloco }}</span>
               </button>
 
               <button
@@ -226,7 +226,7 @@
                 data-testid="section-duplicate-btn"
               >
                 <app-icon icon="content_copy" />
-                <span>{{ 'sectionsTab.actionDuplicate' | transloco }}</span>
+                <span>{{ 'common.duplicate' | transloco }}</span>
               </button>
 
               <button
@@ -238,7 +238,7 @@
                 data-testid="section-delete-btn"
               >
                 <app-icon icon="delete" />
-                <span>{{ 'sectionsTab.actionDelete' | transloco }}</span>
+                <span>{{ 'common.delete' | transloco }}</span>
               </button>
             </ng-template>
           </p-popover>
@@ -256,7 +256,7 @@
       data-testid="create-section-btn"
     >
       <app-icon icon="add" />
-      {{ 'sectionsTab.createSection' | transloco }}
+      {{ 'sections-tab.create-section' | transloco }}
     </button>
     <a
       app-btn
@@ -268,7 +268,7 @@
       data-testid="generate-state-btn"
     >
       <app-icon icon="play_circle" />
-      <ng-container>{{ 'sectionsTab.generateState' | transloco }}</ng-container>
+      <ng-container>{{ 'sections-tab.generate-state' | transloco }}</ng-container>
     </a>
   </div>
 }

@@ -146,15 +146,15 @@ describe('FieldMeasuringComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'field-measuring.field-measuring.export-button': 'Export',
-              'field-measuring.field-measuring.report-button': 'Report',
-              'field-measuring.field-measuring.save-button': 'Save',
-              'field-measuring.field-measuring.success-detail': 'Data saved successfully',
-              'field-measuring.field-measuring.success-summary': 'Success',
-              'field-measuring.field-measuring.tab-parameter-15c': 'Parameter at 15\u00b0C without wind',
-              'field-measuring.field-measuring.tab-parameter-calculation': 'Parameter calculation',
-              'field-measuring.field-measuring.tab-temperature-calculation': 'Temperature calculation',
-              'field-measuring.field-measuring.tab-terrain-data': 'Terrain data',
+              'common.export': 'Export',
+              'common.report': 'Report',
+              'common.save': 'Save',
+              'field-measuring.actions.success-detail': 'Data saved successfully',
+              'common.success': 'Success',
+              'field-measuring.tabs.parameter-15c': 'Parameter at 15\u00b0C without wind',
+              'field-measuring.tabs.parameter-calculation': 'Parameter calculation',
+              'field-measuring.tabs.temperature-calculation': 'Temperature calculation',
+              'field-measuring.tabs.terrain-data': 'Terrain data',
               'field-measuring.shared.dialog-title': 'Compute base parameter from terrain measurement'
             }
           },

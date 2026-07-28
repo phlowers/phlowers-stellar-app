@@ -124,7 +124,7 @@ export class ImportComponent {
       for (const outcome of results) {
         if (outcome.status === 'error') {
           const detail = `${outcome.fileName}: ${outcome.error?.message ?? ''}`;
-          const summary = this.translocoService.translate('common.import.error.fileSummary');
+          const summary = this.translocoService.translate('common.import.error.file-summary');
           this.notificationService.error(detail, summary);
         }
       }

@@ -92,7 +92,7 @@ export class StudiesComponent {
   deleteStudy(uuid: string) {
     this.confirmationService.confirm({
       key: 'positionDialog',
-      message: this.translocoService.translate('studies.studies.delete-confirm-message'),
+      message: this.translocoService.translate('studies.delete-confirm-message'),
       accept: () => {
         this.studiesService.deleteStudy(uuid);
       },

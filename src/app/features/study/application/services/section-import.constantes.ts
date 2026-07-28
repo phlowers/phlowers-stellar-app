@@ -7,22 +7,22 @@
 
 /** Transloco translation keys for section import error messages. */
 export const SECTION_IMPORT_ERROR_KEYS = {
-  fileTypeNotAllowed: 'sectionImport.fileTypeNotAllowed',
-  fileReadError: 'sectionImport.fileReadError',
-  fileParseError: 'sectionImport.fileParseError',
-  validationErrorRequiredFields: 'sectionImport.validationRequiredFields',
-  validationErrorSupportsBounds: 'sectionImport.validationSupportsBounds',
-  sectionImportError: 'sectionImport.importError',
-  sectionDeleteError: 'sectionImport.deleteError',
-  geoLiaisonFormatError: 'sectionImport.geoLiaisonFormatError',
-  lambertReprojectionError: 'sectionImport.lambertReprojectionError'
+  fileTypeNotAllowed: 'section-import.file-type-not-allowed',
+  fileReadError: 'section-import.file-read-error',
+  fileParseError: 'section-import.file-parse-error',
+  validationErrorRequiredFields: 'section-import.validation-required-fields',
+  validationErrorSupportsBounds: 'section-import.validation-supports-bounds',
+  sectionImportError: 'section-import.import-error',
+  sectionDeleteError: 'section-import.delete-error',
+  geoLiaisonFormatError: 'section-import.geo-liaison-format-error',
+  lambertReprojectionError: 'section-import.lambert-reprojection-error'
 } as const;
 
 /** Transloco translation key for the GeoLiaison catalog-missing warning. */
-export const GEO_LIAISON_CATALOG_MISSING_KEY = 'sectionImport.catalogMissingWarning';
+export const GEO_LIAISON_CATALOG_MISSING_KEY = 'section-import.catalog-missing-warning';
 
 /** Transloco translation key for the Lambert93-to-GPS reprojection info toast. */
-export const REPROJECTION_INFO_KEY = 'sectionImport.reprojectionInfo';
+export const REPROJECTION_INFO_KEY = 'section-import.reprojection-info';
 
 /** Transloco translation key for the section import success toast. */
-export const IMPORT_SUCCESS_KEY = 'sectionImport.importSuccess';
+export const IMPORT_SUCCESS_KEY = 'section-import.import-success';

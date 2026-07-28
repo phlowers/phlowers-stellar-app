@@ -74,7 +74,7 @@ export class GenericImportEngineService {
         status: 'error',
         error: {
           code: 'FILE_TYPE_NOT_ALLOWED',
-          message: this.translocoService.translate('common.import.error.fileTypeNotAllowed'),
+          message: this.translocoService.translate('common.import.error.file-type-not-allowed'),
           stage: 'FILE_VALIDATION'
         }
       };

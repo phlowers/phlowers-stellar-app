@@ -1,7 +1,7 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="build" />
-    <span>{{ 'studio.topToolbar.vtlAndGuyingTool' | transloco }}</span>
+    <span>{{ 'studio.top-toolbar.vtl-and-guying-tool' | transloco }}</span>
   </p>
 </ng-template>
 
@@ -22,7 +22,7 @@
           />
         </div>
         <div class="vtl-guying__form-field">
-          <label for="support-select">{{ 'studio.shared.referenceSupportLabel' | transloco }}</label>
+          <label for="support-select">{{ 'studio.shared.reference-support-label' | transloco }}</label>
           <p-select
             id="support-select"
             [options]="supportOptions()"
@@ -61,7 +61,7 @@
             data-testid="export-vtl-btn"
           >
             <app-icon icon="download" />
-            <span>{{ 'common.export-dialog.title' | transloco }}</span>
+            <span>{{ 'common.export' | transloco }}</span>
           </button>
         </header>
         <dl class="vtl-guying__vtl-fields">
@@ -146,7 +146,7 @@
             data-testid="calculate-btn"
           >
             <app-icon icon="rocket_launch" />
-            <span>{{ 'loads.shared.calculate-btn' | transloco }}</span>
+            <span>{{ 'common.calculate' | transloco }}</span>
           </button>
         </div>
       </section>
@@ -156,7 +156,7 @@
       @if (results()) {
         <section class="vtl-guying__results-section">
           <div>
-            <h3 class="vtl-guying__section-title">{{ 'studio.shared.resultsTitle' | transloco }}</h3>
+            <h3 class="vtl-guying__section-title">{{ 'common.results' | transloco }}</h3>
           </div>
           <dl class="vtl-guying__results-fields">
             <div class="vtl-guying__result-field tensionInGuy">
@@ -236,15 +236,15 @@
       data-testid="report-dialog-btn"
     >
       <app-icon icon="picture_as_pdf" aria-hidden="true" />
-      <ng-container>{{ 'studio.obstaclesForm.reportBtn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.report' | transloco }}</ng-container>
     </button>
     <button [disabled]="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="export-dialog-btn">
       <app-icon icon="download" aria-hidden="true" />
-      <span>{{ 'common.export-dialog.title' | transloco }}</span>
+      <span>{{ 'common.export' | transloco }}</span>
     </button>
     <button app-btn type="button" btnSize="m" (click)="onSave()" data-testid="save-results-btn">
       <app-icon icon="save" aria-hidden="true" />
-      <span>{{ 'loads.shared.save-btn' | transloco }}</span>
+      <span>{{ 'common.save' | transloco }}</span>
     </button>
   </div>
 </ng-template>

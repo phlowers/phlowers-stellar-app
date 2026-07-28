@@ -30,14 +30,14 @@
 
         <dl class="global-params__list">
           <div class="global-params__list__item">
-            <dt class="global-params__list__title">{{ 'studio.studioPage.parameterLabel' | transloco }}</dt>
+            <dt class="global-params__list__title">{{ 'studio.studio-page.parameter-label' | transloco }}</dt>
             <dd class="global-params__list__value">{{ globalParameter() !== null ? globalParameter() : '-' }} m</dd>
           </div>
 
           <hr class="global-params__separator" />
 
           <div class="global-params__list__item">
-            <dt class="global-params__list__title">{{ 'studio.studioPage.workingLoadLabel' | transloco }}</dt>
+            <dt class="global-params__list__title">{{ 'studio.studio-page.working-load-label' | transloco }}</dt>
             <dd class="global-params__list__value global-params__list__value--items-center">
               @let stressRate = globalStressRate();
               {{ stressRate !== null ? (stressRate | number: '1.0-1') : '-' }}&nbsp;%
@@ -45,25 +45,25 @@
                 <app-icon
                   icon="check"
                   class="global-params__list__load-status global-params__list__load-status--success"
-                  [ariaLabel]="'studio.studioPage.workingLoadFineAriaLabel' | transloco"
+                  [ariaLabel]="'studio.studio-page.working-load-fine-aria-label' | transloco"
                 />
               } @else if (stressRate !== null && stressRate > 75 && stressRate <= 100) {
                 <app-icon
                   icon="priority_high"
                   class="global-params__list__load-status global-params__list__load-status--warning"
-                  [ariaLabel]="'studio.studioPage.workingLoadAtRiskAriaLabel' | transloco"
+                  [ariaLabel]="'studio.studio-page.working-load-at-risk-aria-label' | transloco"
                 />
               } @else if (stressRate !== null && stressRate > 100) {
                 <app-icon
                   icon="close_small"
                   class="global-params__list__load-status global-params__list__load-status--error"
-                  [ariaLabel]="'studio.studioPage.workingLoadTooHighAriaLabel' | transloco"
+                  [ariaLabel]="'studio.studio-page.working-load-too-high-aria-label' | transloco"
                 />
               } @else {
                 <app-icon
                   icon="close_small"
                   class="global-params__list__load-status global-params__list__load-status--unknown"
-                  [ariaLabel]="'studio.studioPage.workingLoadUnknownAriaLabel' | transloco"
+                  [ariaLabel]="'studio.studio-page.working-load-unknown-aria-label' | transloco"
                 />
               }
 
@@ -71,13 +71,13 @@
                 <app-icon
                   icon="content_cut"
                   class="global-params__list__cut-status global-params__list__cut-status--cut"
-                  [ariaLabel]="'studio.studioPage.strandCutAriaLabel' | transloco"
+                  [ariaLabel]="'studio.studio-page.strand-cut-aria-label' | transloco"
                 />
               } @else {
                 <app-icon
                   icon="content_cut"
                   class="global-params__list__cut-status global-params__list__cut-status--uncut"
-                  [ariaLabel]="'studio.studioPage.strandNotCutAriaLabel' | transloco"
+                  [ariaLabel]="'studio.studio-page.strand-not-cut-aria-label' | transloco"
                 />
               }
             </dd>
@@ -87,7 +87,7 @@
 
       <div class="graph-tools-cards__item quick-measures">
         <p-select
-          [ariaLabel]="'studio.studioPage.selectObstacleAriaLabel' | transloco"
+          [ariaLabel]="'studio.studio-page.select-obstacle-aria-label' | transloco"
           styleClass="quick-measures__select"
           [options]="filteredObstaclesOptions()"
           [ngModel]="obstaclesService.selectedObstacleUuid()"
@@ -99,7 +99,7 @@
         @if (obstaclePointOptions().length > 1) {
           <p-select
             @pointSelect
-            [ariaLabel]="'studio.studioPage.selectObstaclePointAriaLabel' | transloco"
+            [ariaLabel]="'studio.studio-page.select-obstacle-point-aria-label' | transloco"
             styleClass="quick-measures__select"
             [options]="obstaclePointOptions()"
             [ngModel]="obstaclesService.activePointIndex()"
@@ -111,7 +111,7 @@
         <dl class="quick-measures__list">
           <div>
             <dt class="quick-measures__list__title">
-              <label for="oblique-distance">{{ 'studio.studioPage.obliqueLabel' | transloco }}</label>
+              <label for="oblique-distance">{{ 'studio.shared.oblique' | transloco }}</label>
               <p-radiobutton
                 name="distanceType"
                 value="oblique"
@@ -132,7 +132,7 @@
 
           <div>
             <dt class="quick-measures__list__title">
-              <label for="vertical-distance">{{ 'studio.studioPage.verticalLabel' | transloco }}</label>
+              <label for="vertical-distance">{{ 'studio.shared.vertical' | transloco }}</label>
               <p-radiobutton
                 name="distanceType"
                 value="vertical"
@@ -153,7 +153,7 @@
 
           <div>
             <dt class="quick-measures__list__title">
-              <label for="horizontal-distance">{{ 'studio.studioPage.horizontalLabel' | transloco }}</label>
+              <label for="horizontal-distance">{{ 'studio.shared.horizontal' | transloco }}</label>
               <p-radiobutton
                 name="distanceType"
                 value="horizontal"
@@ -183,7 +183,7 @@
           [disabled]="isPreviousDisabled()"
           (click)="onSupportButtonClick('left')"
           class="supports-select__buttons supports-select__buttons--left"
-          [attr.aria-label]="'studio.studioPage.previousSupportAriaLabel' | transloco"
+          [attr.aria-label]="'studio.studio-page.previous-support-aria-label' | transloco"
           data-testid="prev-support-btn"
         >
           <app-icon icon="chevron_left" class="supports-select__buttons__icon" aria-hidden="true" />
@@ -204,7 +204,7 @@
           [disabled]="isNextDisabled()"
           (click)="onSupportButtonClick('right')"
           class="supports-select__buttons supports-select__buttons--right"
-          [attr.aria-label]="'studio.studioPage.nextSupportAriaLabel' | transloco"
+          [attr.aria-label]="'studio.studio-page.next-support-aria-label' | transloco"
           data-testid="next-support-btn"
         >
           <app-icon icon="chevron_right" class="supports-select__buttons__icon" aria-hidden="true" />
@@ -243,56 +243,56 @@
               value="0"
               [disabled]="!spanService.section()?.selected_charge_uuid"
               class="climate"
-              [pTooltip]="'studio.studioPage.climateConditionLabel' | transloco"
+              [pTooltip]="'studio.studio-page.climate-condition-label' | transloco"
               tooltipPosition="bottom"
               data-testid="load-tab-climate"
             >
               <i class="fa-solid fa-cloud-sun" aria-hidden="true"></i>
-              <span class="sr-only">{{ 'studio.studioPage.climateConditionLabel' | transloco }}</span>
+              <span class="sr-only">{{ 'studio.studio-page.climate-condition-label' | transloco }}</span>
             </p-tab>
             <p-tab
               value="1"
               [disabled]="!spanService.section()?.selected_charge_uuid"
               class="load-marking"
-              [pTooltip]="'studio.studioPage.loadMarkingLabel' | transloco"
+              [pTooltip]="'studio.studio-page.load-marking-label' | transloco"
               tooltipPosition="bottom"
               data-testid="load-tab-load-marking"
             >
               <i class="fa-solid fa-weight-hanging" aria-hidden="true"></i>
-              <span class="sr-only">{{ 'studio.studioPage.loadMarkingLabel' | transloco }}</span>
+              <span class="sr-only">{{ 'studio.studio-page.load-marking-label' | transloco }}</span>
             </p-tab>
             <p-tab
               value="2"
               [disabled]="!spanService.section()?.selected_charge_uuid"
               class="cable-length"
-              [pTooltip]="'studio.studioPage.cableLengthChangeLabel' | transloco"
+              [pTooltip]="'studio.studio-page.cable-length-change-label' | transloco"
               tooltipPosition="bottom"
               data-testid="load-tab-cable-length"
             >
               <i class="fa-solid fa-arrows-left-right-to-line" aria-hidden="true"></i>
-              <span class="sr-only">{{ 'studio.studioPage.cableLengthChangeLabel' | transloco }}</span>
+              <span class="sr-only">{{ 'studio.studio-page.cable-length-change-label' | transloco }}</span>
             </p-tab>
             <p-tab
               value="3"
               [disabled]="!spanService.section()?.selected_charge_uuid"
               class="cable-support"
-              [pTooltip]="'studio.studioPage.cableManipSupportLabel' | transloco"
+              [pTooltip]="'studio.studio-page.cable-manip-support-label' | transloco"
               tooltipPosition="bottom"
               data-testid="load-tab-cable-support"
             >
               <i class="fa-solid fa-hand-back-fist" aria-hidden="true"></i>
-              <span class="sr-only">{{ 'studio.studioPage.cableManipSupportLabel' | transloco }}</span>
+              <span class="sr-only">{{ 'studio.studio-page.cable-manip-support-label' | transloco }}</span>
             </p-tab>
             <p-tab
               value="4"
               [disabled]="!spanService.section()?.selected_charge_uuid"
               class="cable-span"
-              [pTooltip]="'studio.studioPage.cableManipSpanLabel' | transloco"
+              [pTooltip]="'studio.studio-page.cable-manip-span-label' | transloco"
               tooltipPosition="bottom"
               data-testid="load-tab-cable-span"
             >
               <i class="fa-solid fa-arrows-up-down-left-right" aria-hidden="true"></i>
-              <span class="sr-only">{{ 'studio.studioPage.cableManipSpanLabel' | transloco }}</span>
+              <span class="sr-only">{{ 'studio.studio-page.cable-manip-span-label' | transloco }}</span>
             </p-tab>
           </p-tablist>
 
@@ -321,7 +321,7 @@
           } @else {
             <div class="flex items-center justify-center gap-1 my-4">
               <app-icon icon="info" />
-              <p>{{ 'studio.studioPage.noChargeCaseMessage' | transloco }}</p>
+              <p>{{ 'studio.studio-page.no-charge-case-message' | transloco }}</p>
             </div>
             <div class="flex justify-center">
               <button
@@ -332,7 +332,7 @@
                 data-testid="add-charge-case-btn"
               >
                 <app-icon icon="add_circle" />
-                <ng-container>{{ 'studio.studioPage.addChargeCaseLabel' | transloco }}</ng-container>
+                <ng-container>{{ 'studio.studio-page.add-charge-case-label' | transloco }}</ng-container>
               </button>
             </div>
           }
@@ -344,7 +344,7 @@
       <ng-template><app-obstacles-form /></ng-template>
     </app-side-tab>
 
-    <app-side-tab [label]="'studio.studioPage.distancesLabel' | transloco">
+    <app-side-tab [label]="'studio.studio-page.distances-label' | transloco">
       <ng-template><app-distance-measuring /></ng-template>
     </app-side-tab>
   </app-side-tabs>

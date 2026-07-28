@@ -240,15 +240,15 @@ describe('ObstacleFormService', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'common.notification.severity-success': 'Success',
+              'common.success': 'Success',
               'shared.obstacle-form-service.conformity-saved-detail': 'Conformity data saved',
               'shared.obstacle-form-service.delete-detail': 'Obstacle deleted',
               'shared.obstacle-form-service.delete-error-detail': 'Failed to delete obstacle',
               'shared.obstacle-form-service.distance-calculation-error-detail':
                 'Failed to calculate obstacle distances',
               'shared.obstacle-form-service.save-detail': 'Obstacle saved',
-              'shared.topbar.error': 'Error',
-              'studio.conformity.calculationFailedError': 'Calculation failed: {{ errorMessage }}'
+              'common.error': 'Error',
+              'studio.conformity.calculation-failed-error': 'Calculation failed: {{ errorMessage }}'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

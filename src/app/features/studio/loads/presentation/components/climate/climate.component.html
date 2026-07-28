@@ -9,7 +9,7 @@
     data-testid="reset-btn"
   >
     <app-icon icon="refresh" />
-    <ng-container>{{ 'loads.shared.reset-btn' | transloco }}</ng-container>
+    <ng-container>{{ 'common.reset' | transloco }}</ng-container>
   </button>
 
   <div class="climate__divided-line">
@@ -37,13 +37,13 @@
       <div class="wind-error">
         @if (form.controls.windPressure.errors['min']) {
           <p-message id="windPressure-error-min" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
             {{ constraints.windPressure.min }}
           </p-message>
         }
         @if (form.controls.windPressure.errors['max']) {
           <p-message id="windPressure-error-max" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
             {{ constraints.windPressure.max }}
           </p-message>
         }
@@ -79,13 +79,13 @@
       <div class="temp-error">
         @if (form.controls.cableTemperature.errors['min']) {
           <p-message id="cableTemperature-error-min" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
             {{ constraints.cableTemperature.min }}
           </p-message>
         }
         @if (form.controls.cableTemperature.errors['max']) {
           <p-message id="cableTemperature-error-max" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
             {{ constraints.cableTemperature.max }}
           </p-message>
         }
@@ -132,13 +132,13 @@
       </p-inputgroup>
       @if (form.controls.iceThickness.errors?.['min']) {
         <p-message id="iceThickness-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.min }}
         </p-message>
       }
       @if (form.controls.iceThickness.errors?.['max']) {
         <p-message id="iceThickness-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
         </p-message>
       }
@@ -176,13 +176,13 @@
 
       @if (form.controls.iceThicknessBefore.errors?.['min']) {
         <p-message id="iceThicknessBefore-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.min }}
         </p-message>
       }
       @if (form.controls.iceThicknessBefore.errors?.['max']) {
         <p-message id="iceThicknessBefore-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
         </p-message>
       }
@@ -209,13 +209,13 @@
 
       @if (form.controls.iceThicknessAfter.errors?.['min']) {
         <p-message id="iceThicknessAfter-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.min }}
         </p-message>
       }
       @if (form.controls.iceThicknessAfter.errors?.['max']) {
         <p-message id="iceThicknessAfter-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
         </p-message>
       }
@@ -243,7 +243,7 @@
       data-testid="save-btn"
     >
       <app-icon icon="save" />
-      <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
 
     <button
@@ -255,7 +255,7 @@
       data-testid="calculate-btn"
     >
       <app-icon icon="rocket_launch" />
-      <ng-container>{{ 'loads.shared.calculate-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </div>
 </form>

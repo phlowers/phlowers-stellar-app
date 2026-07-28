@@ -61,7 +61,7 @@ describe('ImportSectionComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'importSection.edit': 'Edit'
+              'common.edit': 'Edit'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

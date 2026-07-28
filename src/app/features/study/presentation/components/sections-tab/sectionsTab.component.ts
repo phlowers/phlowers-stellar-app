@@ -96,7 +96,7 @@ export class SectionsTabComponent {
     const currentInitialConditions = section.initial_conditions;
     return {
       uuid: uuidv4(),
-      name: this.transloco.translate('sectionsTab.icPrefix') + ' ' + (currentInitialConditions.length + 1),
+      name: this.transloco.translate('sections-tab.ic-prefix') + ' ' + (currentInitialConditions.length + 1),
       base_parameters: null,
       base_temperature: 15,
       cable_pretension: 0,

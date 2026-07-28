@@ -44,7 +44,7 @@ export class StudyHeaderComponent {
   /** Emits when the user requests to modify the study metadata. */
   public openModifyStudyModal = output<void>();
   private readonly transloco = inject(TranslocoService);
-  public dateFormat = this.transloco.translate('studyHeader.dateFormat');
+  public dateFormat = this.transloco.translate('study.header.date-format');
   private readonly studiesService = inject(StudiesService);
 
   toggleActiveDetail() {

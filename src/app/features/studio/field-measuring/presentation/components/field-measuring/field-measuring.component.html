@@ -10,16 +10,16 @@
 <p-tabs [(value)]="activeTab">
   <p-tablist>
     <p-tab value="terrainData" data-testid="terrain-data-tab">{{
-      'field-measuring.field-measuring.tab-terrain-data' | transloco
+      'field-measuring.tabs.terrain-data' | transloco
     }}</p-tab>
     <p-tab value="parameterCalculation" data-testid="parameter-calc-tab">{{
-      'field-measuring.field-measuring.tab-parameter-calculation' | transloco
+      'field-measuring.tabs.parameter-calculation' | transloco
     }}</p-tab>
     <p-tab value="temperatureCalculation" data-testid="temperature-calc-tab">{{
-      'field-measuring.field-measuring.tab-temperature-calculation' | transloco
+      'field-measuring.tabs.temperature-calculation' | transloco
     }}</p-tab>
     <p-tab value="parameterAt15CWithoutWind" data-testid="param-15c-tab">{{
-      'field-measuring.field-measuring.tab-parameter-15c' | transloco
+      'field-measuring.tabs.parameter-15c' | transloco
     }}</p-tab>
   </p-tablist>
 
@@ -52,15 +52,15 @@
   <div class="dialog-footer">
     <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onReport()">
       <app-icon icon="description" />
-      <span>{{ 'field-measuring.field-measuring.report-button' | transloco }}</span>
+      <span>{{ 'common.report' | transloco }}</span>
     </button>
     <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onExport()">
       <app-icon icon="download" />
-      <span>{{ 'field-measuring.field-measuring.export-button' | transloco }}</span>
+      <span>{{ 'common.export' | transloco }}</span>
     </button>
     <button app-btn type="button" [disabled]="!isFormValid()" (click)="onSave()" data-testid="save-btn">
       <app-icon icon="save" />
-      <span>{{ 'field-measuring.field-measuring.save-button' | transloco }}</span>
+      <span>{{ 'common.save' | transloco }}</span>
     </button>
   </div>
 </ng-template>

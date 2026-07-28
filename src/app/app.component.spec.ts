@@ -137,9 +137,9 @@ describe('AppComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'app.installFailed': 'Install failed',
+              'app.install-failed': 'Install failed',
               'app.update': 'Update',
-              'app.newVersionAvailable': 'New version available',
+              'app.new-version-available': 'New version available',
               'app.version': 'Version',
               'app.hash': 'Hash'
             }
@@ -622,7 +622,7 @@ describe('AppComponent - automatic first-install resilience', () => {
     });
 
     // Patch the LoggerService used by AppComponent via DI override.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const { LoggerService } = await import('@core/services/logger/logger.service');
     TestBed.overrideProvider(LoggerService, {
       useValue: { error: loggerError, warn: loggerWarn, info: vi.fn(), debug: vi.fn() }

@@ -96,8 +96,8 @@ export class ManualSectionComponent implements OnInit {
   cablesFilterTable = signal<CatalogCable[]>([]);
   protected readonly sectionTypes = createSectionTypes(this.transloco);
   isNameUnique = input<boolean>();
-  currentPageReportTemplate = this.transloco.translate('manualSection.currentPageReportTemplate');
-  readonly noVoltageLabel = this.transloco.translate('manualSection.noVoltage');
+  currentPageReportTemplate = this.transloco.translate('manual-section.currentPageReportTemplate');
+  readonly noVoltageLabel = this.transloco.translate('manual-section.noVoltage');
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);

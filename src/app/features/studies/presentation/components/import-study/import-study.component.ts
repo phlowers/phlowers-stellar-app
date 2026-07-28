@@ -110,7 +110,7 @@ export class ImportStudyComponent {
       new Promise((resolve) =>
         this.confirmationService.confirm({
           key: 'positionDialog',
-          message: this.translocoService.translate('studies.import-study.collision-message', { label }),
+          message: this.translocoService.translate('studies.import.collision-message', { label }),
           accept: () => resolve(true),
           reject: () => resolve(false),
           acceptLabel: this.translocoService.translate('common.import.collision.yes'),

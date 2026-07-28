@@ -41,7 +41,7 @@
           btnSize="l"
           btnStyle="text"
           type="button"
-          [attr.aria-label]="'shared.select-with-buttons.view' | transloco"
+          [attr.aria-label]="'common.view' | transloco"
           data-testid="select-view-btn"
           (click)="onViewOption($event, item)"
         >
@@ -59,7 +59,7 @@
           btnSize="l"
           btnStyle="text"
           type="button"
-          [attr.aria-label]="'shared.select-with-buttons.edit' | transloco"
+          [attr.aria-label]="'common.edit' | transloco"
           data-testid="select-edit-btn"
           (click)="onEditOption($event, item)"
         >
@@ -77,7 +77,7 @@
           btnSize="l"
           btnStyle="text"
           type="button"
-          [attr.aria-label]="'shared.select-with-buttons.duplicate' | transloco"
+          [attr.aria-label]="'common.duplicate' | transloco"
           data-testid="select-duplicate-btn"
           (click)="onDuplicateOption($event, item)"
         >
@@ -96,7 +96,7 @@
           btnStyle="text"
           type="button"
           class="erase-btn"
-          [attr.aria-label]="'shared.select-with-buttons.delete' | transloco"
+          [attr.aria-label]="'common.delete' | transloco"
           data-testid="select-delete-btn"
           (click)="onDeleteOption($event, item)"
         >
@@ -113,7 +113,7 @@
     btnStyle="text"
     btnSize="s"
     type="button"
-    [attr.aria-label]="'shared.select-with-buttons.clear-selection' | transloco"
+    [attr.aria-label]="'common.clear-selection' | transloco"
     data-testid="clear-selection-btn"
     (click)="clearSelectedOptionValue()"
     class="clear-button"

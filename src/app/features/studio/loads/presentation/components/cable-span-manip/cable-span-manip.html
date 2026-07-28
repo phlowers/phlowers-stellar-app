@@ -23,7 +23,7 @@
       data-testid="cable-span-manip-reset"
     >
       <app-icon icon="refresh" aria-hidden="true" />
-      <ng-container>{{ 'loads.shared.reset-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.reset' | transloco }}</ng-container>
     </button>
   </div>
 
@@ -79,12 +79,12 @@
   </p-inputgroup>
   @if (form.controls.distanceToRefSupport.errors?.['min']) {
   <p-message id="distanceToRefSupport-error-min" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+    <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
     {{ distRefSupportMin() }}
   </p-message>
   } @else if (form.controls.distanceToRefSupport.errors?.['max']) {
   <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+    <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
     {{ distRefSupportMax() }}
   </p-message>
   }
@@ -151,7 +151,7 @@
         variant="simple"
         class="third-1-line__error-1"
       >
-        <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+        <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
         -100
       </p-message>
       } @else if (form.controls.longitudinalDistance.errors?.['max']) {
@@ -162,7 +162,7 @@
         variant="simple"
         class="third-1-line__error-1"
       >
-        <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+        <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
         5000
       </p-message>
       } } @else {
@@ -207,7 +207,7 @@
         variant="simple"
         class="third-1-line__error-2"
       >
-        <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+        <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
         -100
       </p-message>
       } @else if (form.controls.lateralDistance.errors?.['max']) {
@@ -218,7 +218,7 @@
         variant="simple"
         class="third-1-line__error-2"
       >
-        <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+        <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
         100
       </p-message>
       }
@@ -244,12 +244,12 @@
       </p-inputgroup>
       @if (form.controls.altitude.errors?.['min']) {
       <p-message id="altitude-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-        <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+        <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
         -100
       </p-message>
       } @else if (form.controls.altitude.errors?.['max']) {
       <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-        <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+        <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
         9000
       </p-message>
       }
@@ -376,12 +376,12 @@
   </p-inputgroup>
   @if (form.controls.slingLength.errors?.['min']) {
   <p-message id="slingLength-error-min" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+    <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
     0
   </p-message>
   } @else if (form.controls.slingLength.errors?.['max']) {
   <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+    <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
     99
   </p-message>
   } }
@@ -408,7 +408,7 @@
       data-testid="cable-span-manip-save"
     >
       <app-icon icon="save" aria-hidden="true" />
-      <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
 
     <button
@@ -420,7 +420,7 @@
       data-testid="cable-span-manip-calculate"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
-      <ng-container>{{ 'loads.shared.calculate-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </div>
 </form>

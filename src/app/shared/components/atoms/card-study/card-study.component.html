@@ -6,7 +6,7 @@
   <dl>
     <dt>
       <app-icon icon="person" />
-      <span>{{ 'studies.card-study.author' | transloco }}</span>
+      <span>{{ 'studies.card.author' | transloco }}</span>
     </dt>
     <dd data-testid="card-study-author">
       {{ authorMail() }}
@@ -14,7 +14,7 @@
 
     <dt>
       <app-icon icon="history" />
-      <span>{{ 'studies.card-study.last-changed' | transloco }}</span>
+      <span>{{ 'studies.card.last-changed' | transloco }}</span>
     </dt>
     <dd data-testid="card-study-date">
       {{ modificationDate() }}
@@ -32,6 +32,6 @@
   }
 
   <button (click)="onCardClick()" data-testid="go-to-study-btn">
-    {{ 'studies.card-study.go-to-study' | transloco }} {{ title() }}
+    {{ 'studies.card.go-to-study' | transloco }} {{ title() }}
   </button>
 </article>

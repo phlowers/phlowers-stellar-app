@@ -69,27 +69,27 @@ describe('HomeComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'home.home.create-study': 'Create a new study',
-              'home.home.go-to-studies': 'Go to my studies',
-              'home.home.my-last-studies': 'My last studies',
-              'home.home.news-link-text': 'View all news',
-              'home.home.news-text':
+              'home.create-study': 'Create a new study',
+              'home.go-to-studies': 'Go to my studies',
+              'home.my-last-studies': 'My last studies',
+              'home.news-link-text': 'View all news',
+              'home.news-text':
                 'Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!',
-              'home.home.news-title': 'News',
-              'home.home.no-recent-studies': 'No recent studies',
-              'home.home.server-error': 'An error occured while trying to reach servers.',
-              'home.home.server-offline': 'Application in offline mode.',
-              'home.home.server-success': 'Server connexion success!',
-              'home.home.server-text-default': 'Trying to reach the servers!',
-              'home.home.server-title': 'Server state',
-              'home.home.server-unknown': 'Cannot reach data. Please check your internet connectivity.',
-              'home.home.server-warning': 'Trying to reach the servers.',
-              'home.home.update-available': 'Update available',
-              'home.home.update-link-explicit-text': 'Learn more about latest updates',
-              'home.home.update-link-text': 'Learn more',
-              'home.home.update-new-available': 'A new application update is available!',
-              'home.home.update-text': 'View latest updates.',
-              'home.home.update-title': 'Changelogs'
+              'home.news-title': 'News',
+              'home.no-recent-studies': 'No recent studies',
+              'home.server-error': 'An error occured while trying to reach servers.',
+              'home.server-offline': 'Application in offline mode.',
+              'home.server-success': 'Server connexion success!',
+              'home.server-text-default': 'Trying to reach the servers!',
+              'home.server-title': 'Server state',
+              'home.server-unknown': 'Cannot reach data. Please check your internet connectivity.',
+              'home.server-warning': 'Trying to reach the servers.',
+              'home.update-available': 'Update available',
+              'home.update-link-explicit-text': 'Learn more about latest updates',
+              'home.update-link-text': 'Learn more',
+              'home.update-new-available': 'A new application update is available!',
+              'home.update-text': 'View latest updates.',
+              'home.update-title': 'Changelogs'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

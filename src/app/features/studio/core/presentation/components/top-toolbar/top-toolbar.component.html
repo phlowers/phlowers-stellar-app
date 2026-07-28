@@ -29,7 +29,7 @@
   <hr class="toolbar__separator" />
 
   <div class="flex flex-col items-start">
-    <label for="invert" class="text-m-600 m-0">{{ 'studio.topToolbar.invertLabel' | transloco }}</label>
+    <label for="invert" class="text-m-600 m-0">{{ 'studio.top-toolbar.invert-label' | transloco }}</label>
     <p-toggleswitch
       inputId="invert"
       data-testid="invert-toggle"
@@ -48,7 +48,7 @@
   <p-multiselect
     data-testid="display-multiselect"
     appendTo="body"
-    [placeholder]="'studio.topToolbar.displayLabel' | transloco"
+    [placeholder]="'studio.top-toolbar.display-label' | transloco"
     [filter]="false"
     [showToggleAll]="false"
     [options]="selectedDisplayOptions()"
@@ -64,7 +64,7 @@
   >
     <ng-template #selecteditems let-value>
       @if (value?.length) {
-        <ng-container>{{ 'studio.topToolbar.displayLabel' | transloco }}</ng-container>
+        <ng-container>{{ 'studio.top-toolbar.display-label' | transloco }}</ng-container>
       }
     </ng-template>
 
@@ -75,7 +75,7 @@
     <ng-template #header>
       <div class="toolbar-multiselect__dropdown__header">
         <app-icon icon="info" />
-        <p class="mb-0">{{ 'studio.topToolbar.displayInfoText' | transloco }}</p>
+        <p class="mb-0">{{ 'studio.top-toolbar.display-info-text' | transloco }}</p>
       </div>
     </ng-template>
   </p-multiselect>
@@ -86,7 +86,7 @@
     <ng-template #button let-toggleCallback="toggleCallback">
       <button (click)="toggleCallback($event)">
         <app-icon icon="table_chart" />
-        <ng-container>{{ 'studio.topToolbar.tablesLabel' | transloco }}</ng-container>
+        <ng-container>{{ 'studio.top-toolbar.tables-label' | transloco }}</ng-container>
       </button>
     </ng-template>
 
@@ -103,7 +103,7 @@
     <ng-template #button let-toggleCallback="toggleCallback">
       <button (click)="toggleCallback($event)">
         <app-icon icon="build" />
-        <ng-container>{{ 'studio.topToolbar.toolsLabel' | transloco }}</ng-container>
+        <ng-container>{{ 'studio.top-toolbar.tools-label' | transloco }}</ng-container>
       </button>
     </ng-template>
 
@@ -133,7 +133,7 @@
 
   <button
     class="toolbar__specifbtn toolbar__specifbtn--icon"
-    [attr.aria-label]="'studio.topToolbar.editShortcutsAriaLabel' | transloco"
+    [attr.aria-label]="'studio.top-toolbar.edit-shortcuts-aria-label' | transloco"
     (click)="shortcutsModal.set(true)"
     data-testid="shortcuts-btn"
   >
@@ -145,12 +145,12 @@
   <ng-template #header>
     <p class="modal__header">
       <app-icon icon="build" />
-      <ng-container>{{ 'studio.topToolbar.insetTitle' | transloco }}</ng-container>
+      <ng-container>{{ 'studio.top-toolbar.inset-title' | transloco }}</ng-container>
     </p>
   </ng-template>
 
   <div class="modal__content">
-    <p>{{ 'studio.topToolbar.organizeToolsInfoText' | transloco }}</p>
+    <p>{{ 'studio.top-toolbar.organize-tools-info-text' | transloco }}</p>
 
     <ul>
       @for (item of toolsItems(); track $index) {
@@ -174,7 +174,7 @@
   <ng-template #footer>
     <button app-btn (click)="shortcutsModal.set(false)">
       <app-icon icon="check" />
-      <ng-container>{{ 'common.actions.validate' | transloco }}</ng-container>
+      <ng-container>{{ 'common.validate' | transloco }}</ng-container>
     </button>
   </ng-template>
 </p-dialog>

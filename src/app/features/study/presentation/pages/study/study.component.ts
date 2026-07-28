@@ -123,7 +123,7 @@ export class StudyComponent implements OnInit {
         }
       })
       .catch(() => {
-        this.notificationService.error(this.transloco.translate('study.notifications.duplicationFailed'));
+        this.notificationService.error(this.transloco.translate('study.notifications.duplication-failed'));
       });
   }
 
@@ -142,8 +142,8 @@ export class StudyComponent implements OnInit {
 
     this.notificationService.success(
       existingSection
-        ? this.transloco.translate('study.notifications.sectionUpdated')
-        : this.transloco.translate('study.notifications.sectionCreated')
+        ? this.transloco.translate('study.notifications.section-updated')
+        : this.transloco.translate('study.notifications.section-created')
     );
   }
 
@@ -155,7 +155,7 @@ export class StudyComponent implements OnInit {
 
     await this.sectionService.deleteSection(study, section);
 
-    this.notificationService.success(this.transloco.translate('study.notifications.sectionDeleted'));
+    this.notificationService.success(this.transloco.translate('study.notifications.section-deleted'));
   }
 
   async duplicateSection(section: Section) {
@@ -166,7 +166,7 @@ export class StudyComponent implements OnInit {
 
     await this.sectionService.duplicateSection(study, section);
 
-    this.notificationService.success(this.transloco.translate('study.notifications.sectionDuplicated'));
+    this.notificationService.success(this.transloco.translate('study.notifications.section-duplicated'));
   }
 
   async updateInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
@@ -186,7 +186,7 @@ export class StudyComponent implements OnInit {
     }
     await this.initialConditionService.setInitialCondition(study, updatedSection, initialCondition.uuid);
 
-    this.notificationService.success(this.transloco.translate('study.notifications.icUpdated'));
+    this.notificationService.success(this.transloco.translate('study.notifications.ic-updated'));
   }
 
   async addInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
@@ -205,7 +205,7 @@ export class StudyComponent implements OnInit {
     }
     await this.initialConditionService.setInitialCondition(study, addedSection, initialCondition.uuid);
 
-    this.notificationService.success(this.transloco.translate('study.notifications.icAdded'));
+    this.notificationService.success(this.transloco.translate('study.notifications.ic-added'));
   }
 
   async deleteInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {
@@ -216,7 +216,7 @@ export class StudyComponent implements OnInit {
 
     await this.initialConditionService.deleteInitialCondition(study, section, initialCondition);
 
-    this.notificationService.success(this.transloco.translate('study.notifications.icDeleted'));
+    this.notificationService.success(this.transloco.translate('study.notifications.ic-deleted'));
   }
 
   async duplicateInitialCondition({ section, initialCondition, newUuid }: DuplicateInitialConditionFunctionsInput) {
@@ -228,7 +228,7 @@ export class StudyComponent implements OnInit {
     await this.initialConditionService.duplicateInitialCondition(study, section, initialCondition, newUuid);
     await this.initialConditionService.setInitialCondition(study, section, newUuid);
 
-    this.notificationService.success(this.transloco.translate('study.notifications.icDuplicated'));
+    this.notificationService.success(this.transloco.translate('study.notifications.ic-duplicated'));
   }
 
   async setInitialCondition({ section, initialCondition }: InitialConditionFunctionsInput) {

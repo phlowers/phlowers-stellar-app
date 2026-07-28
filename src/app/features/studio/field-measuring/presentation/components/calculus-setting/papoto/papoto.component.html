@@ -315,10 +315,10 @@
         <dt>{{ 'field-measuring.papoto.criterion-label' | transloco }}</dt>
         <dd class="crit__result">
           @if (measureData().outputs.papoto?.checkValidity) {
-            <ng-container>{{ 'field-measuring.papoto.yes-label' | transloco }}</ng-container>
+            <ng-container>{{ 'common.yes' | transloco }}</ng-container>
             <app-icon icon="check" class="criterion-ok" />
           } @else {
-            <ng-container>{{ 'field-measuring.papoto.no-label' | transloco }}</ng-container>
+            <ng-container>{{ 'common.no' | transloco }}</ng-container>
             <app-icon icon="close" class="criterion-ko" />
           }
         </dd>

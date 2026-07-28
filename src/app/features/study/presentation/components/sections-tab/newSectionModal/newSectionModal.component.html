@@ -10,7 +10,7 @@
     <p class="text-l-600 mb-0 flex gap-2">
       @if (mode() === 'create') {
         <app-icon icon="edit" />
-        <span>{{ 'newSectionModal.createSection' | transloco }}</span>
+        <span>{{ 'section-modal.create-section' | transloco }}</span>
       } @else {
         @if (mode() === 'view') {
           <app-icon icon="visibility" />
@@ -25,7 +25,7 @@
   <div class="flex flex-col h-full">
     @if (mode() === 'create') {
       <div class="section-form-part">
-        <h3 class="title-underline">{{ 'newSectionModal.chooseType' | transloco }}</h3>
+        <h3 class="title-underline">{{ 'section-modal.choose-type' | transloco }}</h3>
         <div class="flex flex-wrap gap-6">
           <div class="flex items-center">
             <p-radiobutton
@@ -36,7 +36,7 @@
               inputId="manual"
               data-testid="source-manual-radio"
             />
-            <label for="manual" class="ml-2">{{ 'newSectionModal.typeManual' | transloco }}</label>
+            <label for="manual" class="ml-2">{{ 'section-modal.type-manual' | transloco }}</label>
             <app-icon icon="info" />
           </div>
           <div class="flex items-center">
@@ -48,7 +48,7 @@
               [disabled]="true"
               data-testid="source-referencial-radio"
             />
-            <label for="referencial" class="ml-2">{{ 'newSectionModal.typeLocalRef' | transloco }}</label>
+            <label for="referencial" class="ml-2">{{ 'section-modal.type-local-ref' | transloco }}</label>
             <app-icon icon="info" />
           </div>
           <div class="flex items-center">
@@ -60,7 +60,7 @@
               [disabled]="true"
               data-testid="source-distant-referencial-radio"
             />
-            <label for="distantReferencial" class="ml-2">{{ 'newSectionModal.typeDistantRef' | transloco }}</label>
+            <label for="distantReferencial" class="ml-2">{{ 'section-modal.type-distant-ref' | transloco }}</label>
             <app-icon icon="info" />
           </div>
           <div class="flex items-center">
@@ -72,7 +72,7 @@
               inputId="extraction"
               data-testid="source-extraction-radio"
             />
-            <label for="extraction" class="ml-2">{{ 'newSectionModal.typeFile' | transloco }}</label>
+            <label for="extraction" class="ml-2">{{ 'section-modal.type-file' | transloco }}</label>
             <app-icon icon="info" />
           </div>
         </div>
@@ -107,7 +107,7 @@
         data-testid="cancel-section-btn"
       >
         <app-icon icon="close" />
-        <ng-container>{{ 'newSectionModal.cancel' | transloco }}</ng-container>
+        <ng-container>{{ 'common.cancel' | transloco }}</ng-container>
       </button>
       <button
         app-btn
@@ -119,9 +119,9 @@
       >
         <app-icon icon="save" />
         @if (mode() === 'create') {
-          <ng-container>{{ 'newSectionModal.createBtn' | transloco }}</ng-container>
+          <ng-container>{{ 'section-modal.create-btn' | transloco }}</ng-container>
         } @else {
-          <ng-container>{{ 'newSectionModal.updateBtn' | transloco }}</ng-container>
+          <ng-container>{{ 'section-modal.update-btn' | transloco }}</ng-container>
         }
       </button>
     } @else {
@@ -135,7 +135,7 @@
           data-testid="delete-section-btn"
         >
           <app-icon icon="delete" />
-          <ng-container>{{ 'newSectionModal.delete' | transloco }}</ng-container>
+          <ng-container>{{ 'common.delete' | transloco }}</ng-container>
         </button>
       </div>
 
@@ -148,11 +148,11 @@
         data-testid="duplicate-section-btn"
       >
         <app-icon icon="content_copy" />
-        <ng-container>{{ 'newSectionModal.duplicate' | transloco }}</ng-container>
+        <ng-container>{{ 'common.duplicate' | transloco }}</ng-container>
       </button>
       <button app-btn type="button" btnSize="m" (click)="onEditSection()" data-testid="edit-section-btn">
         <app-icon icon="edit" />
-        <ng-container>{{ 'newSectionModal.edit' | transloco }}</ng-container>
+        <ng-container>{{ 'common.edit' | transloco }}</ng-container>
       </button>
     }
   </ng-template>

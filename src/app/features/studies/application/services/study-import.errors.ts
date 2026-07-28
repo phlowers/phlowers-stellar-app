@@ -7,14 +7,14 @@
 
 /** Transloco key map for study import error messages. */
 export const studyImportErrors = {
-  cableNotFound: 'studies.import-study.error-cable-not-found',
-  fileTypeNotAllowed: 'common.import.error.fileTypeNotAllowed',
-  studyImportError: 'studies.import-study.error-import',
-  studyDeleteError: 'studies.import-study.error-delete',
-  fileDecodeError: 'studies.import-study.error-decode',
-  fileParseError: 'studies.import-study.error-parse',
-  fileReadError: 'studies.import-study.error-read'
+  cableNotFound: 'studies.import.error-cable-not-found',
+  fileTypeNotAllowed: 'common.import.error.file-type-not-allowed',
+  studyImportError: 'studies.import.error-import',
+  studyDeleteError: 'studies.import.error-delete',
+  fileDecodeError: 'studies.import.error-decode',
+  fileParseError: 'studies.import.error-parse',
+  fileReadError: 'studies.import.error-read'
 };
 
 /** Transloco key for the successful study import notification. */
-export const importSuccessDetail = 'studies.import-study.success-detail';
+export const importSuccessDetail = 'studies.import.success-detail';

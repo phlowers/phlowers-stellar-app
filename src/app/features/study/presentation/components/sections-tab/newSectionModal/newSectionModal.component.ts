@@ -91,11 +91,11 @@ export class NewSectionModalComponent {
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
-      return this.transloco.translate('newSectionModal.titleView');
+      return this.transloco.translate('section-modal.title-view');
     } else if (this.mode() === 'edit') {
-      return this.transloco.translate('newSectionModal.titleModify');
+      return this.transloco.translate('section-modal.title-modify');
     }
-    return this.transloco.translate('newSectionModal.titleCreate');
+    return this.transloco.translate('section-modal.title-create');
   });
 
   constructor() {
@@ -190,7 +190,7 @@ export class NewSectionModalComponent {
 
     const section = this.study()?.sections.find((s) => s.uuid === sectionUuid);
     if (!section) {
-      this.notificationService.error(this.transloco.translate('newSectionModal.importError'));
+      this.notificationService.error(this.transloco.translate('section-import.import-error'));
       return;
     }
 

@@ -199,10 +199,10 @@ describe('ManualSectionComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'manualSection.currentPageReportTemplate': 'Current page report template',
-              'manualSection.noVoltage': 'No Voltage',
-              'sectionMock.guard': 'Guard',
-              'sectionMock.phase': 'Phase'
+              'manual-section.current-page-report': 'Current page report template',
+              'manual-section.no-voltage': 'No Voltage',
+              'common.section-type.guard': 'Guard',
+              'common.section-type.phase': 'Phase'
             }
           },
           translocoConfig: {

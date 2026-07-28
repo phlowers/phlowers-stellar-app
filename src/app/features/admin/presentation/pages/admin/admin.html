@@ -1,35 +1,35 @@
 <p-confirmdialog />
 <div class="flex flex-col gap-4">
-  <p-card [header]="'admin.admin.app-version' | transloco">
+  <p-card [header]="'admin.app-version' | transloco">
     @if (onlineService.online$ | async) {<button
       app-btn
       [btnLoading]="updateService.updateLoading()"
       (click)="updateService.checkAppVersion()"
       [disabled]="updateService.updateLoading()"
     >
-      {{ 'admin.admin.check-app-version' | transloco }}
+      {{ 'admin.check-app-version' | transloco }}
     </button>
     }
     <table class="my-2 w-full">
       <thead>
         <tr>
           <th></th>
-          <th>{{ 'admin.admin.current-version' | transloco }}</th>
-          <th>{{ 'admin.admin.latest-version' | transloco }}</th>
+          <th>{{ 'admin.current-version' | transloco }}</th>
+          <th>{{ 'admin.latest-version' | transloco }}</th>
         </tr>
       </thead>
       <tr>
-        <td>{{ 'admin.admin.build-hash' | transloco }}</td>
+        <td>{{ 'admin.build-hash' | transloco }}</td>
         <td>{{ updateService.currentVersion().git_hash }}</td>
         <td>{{ updateService.latestVersion()?.git_hash }}</td>
       </tr>
       <tr>
-        <td>{{ 'admin.admin.build-datetime' | transloco }}</td>
+        <td>{{ 'admin.build-datetime' | transloco }}</td>
         <td>{{ updateService.currentVersion().build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
         <td>{{ updateService.latestVersion()?.build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
       </tr>
       <tr>
-        <td>{{ 'admin.admin.build-version' | transloco }}</td>
+        <td>{{ 'admin.build-version' | transloco }}</td>
         <td>{{ updateService.currentVersion().version }}</td>
         <td>{{ updateService.latestVersion()?.version }}</td>
       </tr>
@@ -41,13 +41,13 @@
       (click)="updateService.update()"
       [disabled]="updateService.updateLoading()"
     >
-      {{ 'admin.admin.update-to-latest' | transloco }}
+      {{ 'admin.update-to-latest' | transloco }}
     </button>
     }
   </p-card>
   <p-card>
     <div class="flex flex-row gap-2 items-center">
-      <label for="activateDebugLogs">{{ 'admin.admin.activate-python-logs' | transloco }}</label>
+      <label for="activateDebugLogs">{{ 'admin.activate-python-logs' | transloco }}</label>
       <p-toggleSwitch
         inputId="activateDebugLogs"
         [ngModel]="activateDebugLogs()"
@@ -56,16 +56,16 @@
       />
     </div>
   </p-card>
-  <p-card [header]="'admin.admin.danger-zone' | transloco">
+  <p-card [header]="'admin.danger-zone' | transloco">
     <div class="flex flex-row gap-2">
       <button app-btn btnStyle="danger" (click)="deleteAllStudies()">
-        {{ 'admin.admin.delete-all-studies' | transloco }}
+        {{ 'admin.delete-all-studies' | transloco }}
       </button>
       <button app-btn btnStyle="danger" (click)="resetDatabase()">
-        {{ 'admin.admin.reset-database' | transloco }}
+        {{ 'admin.reset-database' | transloco }}
       </button>
       <button app-btn btnStyle="danger" (click)="resetApp()">
-        {{ 'admin.admin.reset-app-without-db' | transloco }}
+        {{ 'admin.reset-app-without-db' | transloco }}
       </button>
     </div>
   </p-card>

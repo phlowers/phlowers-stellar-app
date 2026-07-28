@@ -84,7 +84,7 @@ export class ParameterCalculation15WithoutWindComponent {
     return [
       { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
       {
-        label: this.translocoService.translate('field-measuring.parameter-calculation-15-without-wind.manual-option'),
+        label: this.translocoService.translate('field-measuring.parameter-calculation-15.manual-option'),
         value: 'manual'
       }
     ];
@@ -238,10 +238,10 @@ export class ParameterCalculation15WithoutWindComponent {
       this.messageService.add({
         severity: 'success',
         summary: this.translocoService.translate(
-          'field-measuring.parameter-calculation-15-without-wind.success-summary'
+          'common.success'
         ),
         detail: this.translocoService.translate(
-          'field-measuring.parameter-calculation-15-without-wind.success-detail-state-generated'
+          'field-measuring.parameter-calculation-15.success-detail-state-generated'
         ),
         life: 3000
       });
@@ -249,9 +249,9 @@ export class ParameterCalculation15WithoutWindComponent {
       this.messageService.add({
         severity: 'success',
         summary: this.translocoService.translate(
-          'field-measuring.parameter-calculation-15-without-wind.success-summary'
+          'common.success'
         ),
-        detail: this.translocoService.translate('field-measuring.parameter-calculation-15-without-wind.success-detail'),
+        detail: this.translocoService.translate('field-measuring.parameter-calculation-15.success-detail'),
         life: 3000
       });
     }

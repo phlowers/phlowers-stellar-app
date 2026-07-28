@@ -2,7 +2,7 @@
   <a
     [routerLink]="'/study/' + study()?.uuid"
     app-btn
-    [attr.aria-label]="'studio.menuBar.backToStudyAriaLabel' | transloco"
+    [attr.aria-label]="'studio.menu-bar.back-to-study-aria-label' | transloco"
     btnStyle="text"
     btnSize="s"
     data-testid="back-to-study-btn"
@@ -11,7 +11,7 @@
   </a>
 
   <p class="menubar__title">
-    <span class="text-s-600 pr-1">{{ 'studio.menuBar.sectionLabel' | transloco }}</span>
+    <span class="text-s-600 pr-1">{{ 'studio.menu-bar.section-label' | transloco }}</span>
     <span class="text-m-600 menubar__title__content" data-testid="section-name">
       {{ section()?.name }}
     </span>
@@ -20,7 +20,7 @@
   <hr class="menubar__separator" />
 
   <p class="mb-0">
-    <span class="text-s-600 pr-1">{{ 'studio.menuBar.icLabel' | transloco }}</span>
+    <span class="text-s-600 pr-1">{{ 'studio.menu-bar.ic-label' | transloco }}</span>
     <span class="text-m-400" data-testid="ic-name">{{ initialCondition()?.name }}</span>
   </p>
 
@@ -28,7 +28,7 @@
 
   @if (charges().length > 0) {
     <div class="flex items-center gap-1">
-      <p class="mb-0 text-s-600 whitespace-nowrap">{{ 'studio.menuBar.ccLabel' | transloco }}</p>
+      <p class="mb-0 text-s-600 whitespace-nowrap">{{ 'studio.menu-bar.cc-label' | transloco }}</p>
       <app-select-with-buttons
         [options]="charges()"
         [selectedOption]="selectedChargeCaseUuid()"
@@ -39,8 +39,8 @@
         (editOption)="viewOrEditChargeCase($event, 'edit')"
         optionLabel="label"
         optionValue="value"
-        [placeholder]="'studio.menuBar.chargeCaseSelectLabel' | transloco"
-        [ariaLabel]="'studio.menuBar.chargeCaseSelectLabel' | transloco"
+        [placeholder]="'studio.menu-bar.charge-case-select-label' | transloco"
+        [ariaLabel]="'studio.menu-bar.charge-case-select-label' | transloco"
         class="menubar__select"
         [showClear]="false"
         data-testid="charge-case-select"
@@ -48,7 +48,7 @@
     </div>
 
     <button
-      [attr.aria-label]="'studio.menuBar.addChargeAriaLabel' | transloco"
+      [attr.aria-label]="'studio.menu-bar.add-charge-aria-label' | transloco"
       app-btn
       btnStyle="outlined"
       btnSize="s"
@@ -60,7 +60,7 @@
   } @else {
     <button (click)="openNewChargeModal.emit()" app-btn btnSize="s" btnStyle="outlined" class="section__content-init">
       <app-icon icon="add" />
-      <span>{{ 'studio.menuBar.addLoadCase' | transloco }}</span>
+      <span>{{ 'studio.menu-bar.add-load-case' | transloco }}</span>
     </button>
   }
 
@@ -68,9 +68,9 @@
     <p class="text-s-600 flex items-center gap-2 mb-0">
       <app-icon [class]="staffIsPresent() ? 'icon-present' : 'icon-absent'" icon="engineering" [fill]="true" />
       @if (staffIsPresent() === true) {
-        <ng-container>{{ 'studio.menuBar.staffPresent' | transloco }}</ng-container>
+        <ng-container>{{ 'studio.menu-bar.staff-present' | transloco }}</ng-container>
       } @else if (staffIsPresent() === false) {
-        <ng-container>{{ 'studio.menuBar.staffAbsent' | transloco }}</ng-container>
+        <ng-container>{{ 'studio.menu-bar.staff-absent' | transloco }}</ng-container>
       }
     </p>
   }
@@ -79,6 +79,6 @@
 
   <button app-btn btnSize="s" btnStyle="outlined" disabled>
     <app-icon icon="save" />
-    <ng-container>{{ 'studio.menuBar.saveState' | transloco }}</ng-container>
+    <ng-container>{{ 'studio.menu-bar.save-state' | transloco }}</ng-container>
   </button>
 </div>

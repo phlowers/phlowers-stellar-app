@@ -134,12 +134,12 @@ describe('ClimateComponent effect edge cases', () => {
               'loads.climate.symmetric-option': 'Symmetric',
               'loads.climate.whole-number-required': 'Whole number required',
               'loads.climate.wind-pressure-label': 'Wind Pressure',
-              'loads.shared.calculate-btn': 'Calculate',
+              'common.calculate': 'Calculate',
               'loads.shared.erase-load-case-aria-label': 'erase load case',
-              'loads.shared.max-value': 'Maximum value:',
-              'loads.shared.min-value': 'Minimum value:',
-              'loads.shared.reset-btn': 'Reset',
-              'loads.shared.save-btn': 'Save'
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.reset': 'Reset',
+              'common.save': 'Save'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -201,12 +201,12 @@ describe('ClimateComponent effect edge cases', () => {
               'loads.climate.symmetric-option': 'Symmetric',
               'loads.climate.whole-number-required': 'Whole number required',
               'loads.climate.wind-pressure-label': 'Wind Pressure',
-              'loads.shared.calculate-btn': 'Calculate',
+              'common.calculate': 'Calculate',
               'loads.shared.erase-load-case-aria-label': 'erase load case',
-              'loads.shared.max-value': 'Maximum value:',
-              'loads.shared.min-value': 'Minimum value:',
-              'loads.shared.reset-btn': 'Reset',
-              'loads.shared.save-btn': 'Save'
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.reset': 'Reset',
+              'common.save': 'Save'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -323,12 +323,12 @@ describe('ClimateComponent', () => {
               'loads.climate.symmetric-option': 'Symmetric',
               'loads.climate.whole-number-required': 'Whole number required',
               'loads.climate.wind-pressure-label': 'Wind Pressure',
-              'loads.shared.calculate-btn': 'Calculate',
+              'common.calculate': 'Calculate',
               'loads.shared.erase-load-case-aria-label': 'erase load case',
-              'loads.shared.max-value': 'Maximum value:',
-              'loads.shared.min-value': 'Minimum value:',
-              'loads.shared.reset-btn': 'Reset',
-              'loads.shared.save-btn': 'Save'
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.reset': 'Reset',
+              'common.save': 'Save'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

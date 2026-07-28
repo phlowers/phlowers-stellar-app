@@ -1,7 +1,7 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="assignment_turned_in" />
-    <span>{{ 'studio.topToolbar.loadsTableLabel' | transloco }}</span>
+    <span>{{ 'studio.top-toolbar.loads-table-label' | transloco }}</span>
   </p>
 </ng-template>
 
@@ -59,12 +59,12 @@
 
 @if (climateRows().length > 0) {
   <section>
-    <h2 class="title underline-text">{{ 'studio.studioPage.climateConditionLabel' | transloco }}</h2>
+    <h2 class="title underline-text">{{ 'studio.studio-page.climate-condition-label' | transloco }}</h2>
 
     <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }" data-testid="climate-table">
       <ng-template pTemplate="header">
         <tr>
-          <th id="wind-pressure-col">{{ 'studio.conformity.windPressureLabel' | transloco }}</th>
+          <th id="wind-pressure-col">{{ 'studio.conformity.wind-pressure-label' | transloco }}</th>
           <th id="cable-temp-col">{{ 'studio.loads-table.cable-temp-label' | transloco }}</th>
           <th id="ice-indicator-col">{{ 'studio.loads-table.ice-indicator-label' | transloco }}</th>
           @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
@@ -99,13 +99,13 @@
 
 @if (spanLoadRows().length > 0) {
   <section>
-    <h2 class="title underline-text">{{ 'studio.studioPage.loadMarkingLabel' | transloco }}</h2>
+    <h2 class="title underline-text">{{ 'studio.studio-page.load-marking-label' | transloco }}</h2>
 
     <p-table [value]="spanLoadRows()" [tableStyle]="{ width: 'auto' }" data-testid="load-marking-table">
       <ng-template pTemplate="header">
         <tr>
           <th id="index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
-          <th id="span-col">{{ 'studio.shared.spanLabel' | transloco }}</th>
+          <th id="span-col">{{ 'studio.shared.span-label' | transloco }}</th>
           <th id="ref-support-col">{{ 'studio.loads-table.ref-support-label' | transloco }}</th>
           <th id="type-col">{{ 'loads.load-marking.load-type-label' | transloco }}</th>
           <th id="position-col">{{ 'studio.loads-table.distance-to-ref-support-label' | transloco }}</th>
@@ -135,7 +135,7 @@
   @if (mode() === 'view') {
     <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
       <app-icon icon="description" />
-      <ng-container>{{ 'studio.obstaclesForm.reportBtn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.report' | transloco }}</ng-container>
     </button>
 
     <button app-btn type="button" (click)="switchToEditMode()" data-testid="modify-btn">
@@ -145,12 +145,12 @@
   } @else {
     <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()" data-testid="cancel-edit-btn">
       <app-icon icon="close" />
-      <ng-container>{{ 'common.export-dialog.cancel' | transloco }}</ng-container>
+      <ng-container>{{ 'common.cancel' | transloco }}</ng-container>
     </button>
 
     <button app-btn type="button" (click)="saveChanges()" [disabled]="!isFormValid()" data-testid="save-changes-btn">
       <app-icon icon="save" />
-      <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
   }
 </ng-template>

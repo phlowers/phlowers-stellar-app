@@ -10,7 +10,7 @@
       @if (config().texts?.uploadPrompt; as prompt) {
         <span>{{ prompt }}</span>
       } @else {
-        <span>{{ 'common.import.upload.prompt' | transloco }}</span>
+        <span>{{ 'common.import.upload-prompt' | transloco }}</span>
       }
       <br />
       <span class="small-txt">{{ config().acceptedFiles.hint }}</span>
@@ -26,7 +26,7 @@
       [accept]="acceptAttribute()"
       class="file-import__tool__input"
       data-testid="file-upload-input"
-      [attr.aria-label]="config().texts?.uploadPrompt || ('common.import.upload.prompt' | transloco)"
+      [attr.aria-label]="config().texts?.uploadPrompt || ('common.import.upload-prompt' | transloco)"
     />
   </label>
 

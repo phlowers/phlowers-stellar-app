@@ -33,7 +33,7 @@ export class NotificationService {
    */
   success(
     detail: string,
-    summary: string = this.translocoService.translate('common.notification.severity-successful'),
+    summary: string = this.translocoService.translate('common.notification.successful'),
     life: number = DEFAULT_LIFE
   ): void {
     this.messageService.add({ severity: 'success', summary, detail, life });
@@ -47,7 +47,7 @@ export class NotificationService {
    */
   error(
     detail: string,
-    summary: string = this.translocoService.translate('shared.topbar.error'),
+    summary: string = this.translocoService.translate('common.error'),
     life: number = LIFE_ERROR
   ): void {
     this.messageService.add({ severity: 'error', summary, detail, life });
@@ -61,7 +61,7 @@ export class NotificationService {
    */
   info(
     detail: string,
-    summary: string = this.translocoService.translate('common.notification.severity-info'),
+    summary: string = this.translocoService.translate('common.notification.info'),
     life: number = DEFAULT_LIFE
   ): void {
     this.messageService.add({ severity: 'info', summary, detail, life });
@@ -75,7 +75,7 @@ export class NotificationService {
    */
   warning(
     detail: string,
-    summary: string = this.translocoService.translate('common.notification.severity-warning'),
+    summary: string = this.translocoService.translate('common.notification.warning'),
     life: number = LIFE_WARNING
   ): void {
     this.messageService.add({ severity: 'warn', summary, detail, life });
@@ -83,7 +83,7 @@ export class NotificationService {
 
   warningList(
     warnings: string[],
-    summary: string = this.translocoService.translate('common.notification.severity-warning'),
+    summary: string = this.translocoService.translate('common.notification.warning'),
     life: number = LIFE_WARNING
   ): void {
     this.messageService.add({ key: 'warning-list', severity: 'warn', summary, data: { warnings }, life });

@@ -23,7 +23,7 @@
       data-testid="cable-support-manip-reset"
     >
       <app-icon icon="refresh" aria-hidden="true" />
-      <ng-container>{{ 'loads.shared.reset-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.reset' | transloco }}</ng-container>
     </button>
   </div>
 
@@ -86,7 +86,7 @@
                 variant="simple"
                 class="crane-divide__error1"
               >
-                <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+                <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                 {{ BOUNDS.vertDisplacement.min }}
               </p-message>
             } @else if (form.controls.vertDisplacement.errors?.['max']) {
@@ -97,7 +97,7 @@
                 variant="simple"
                 class="crane-divide__error1"
               >
-                <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+                <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                 {{ BOUNDS.vertDisplacement.max }}
               </p-message>
             }
@@ -138,12 +138,12 @@
           </p-inputgroup>
           @if (form.controls.lateralDistance.errors?.['min']) {
             <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
               {{ BOUNDS.lateralDistance.min }}
             </p-message>
           } @else if (form.controls.lateralDistance.errors?.['max']) {
             <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
               {{ BOUNDS.lateralDistance.max }}
             </p-message>
           }
@@ -181,12 +181,12 @@
           </p-inputgroup>
           @if (form.controls.ropeLength.errors?.['min']) {
             <p-message id="ropeLength-error-min" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
               {{ BOUNDS.ropeLength.min }}
             </p-message>
           } @else if (form.controls.ropeLength.errors?.['max']) {
             <p-message id="ropeLength-error-max" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
               {{ BOUNDS.ropeLength.max }}
             </p-message>
           }
@@ -214,12 +214,12 @@
           </p-inputgroup>
           @if (form.controls.shiftingClampLength.errors?.['min']) {
             <p-message id="shiftingClampLength-error-min" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
               {{ BOUNDS.shiftingClampLength.min }}
             </p-message>
           } @else if (form.controls.shiftingClampLength.errors?.['max']) {
             <p-message id="shiftingClampLength-error-max" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
               {{ BOUNDS.shiftingClampLength.max }}
             </p-message>
           }
@@ -299,12 +299,12 @@
               </p-inputgroup>
               @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
                 <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'loads.shared.min-value' | transloco }}</ng-container>
+                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                   {{ BOUNDS.shiftingClampLength.min }}
                 </p-message>
               } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
                 <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'loads.shared.max-value' | transloco }}</ng-container>
+                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ BOUNDS.shiftingClampLength.max }}
                 </p-message>
               }
@@ -338,7 +338,7 @@
       data-testid="cable-support-manip-save"
     >
       <app-icon icon="save" aria-hidden="true" />
-      <ng-container>{{ 'loads.shared.save-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
 
     <button
@@ -350,7 +350,7 @@
       data-testid="cable-support-manip-calculate"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
-      <ng-container>{{ 'loads.shared.calculate-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </div>
 </form>

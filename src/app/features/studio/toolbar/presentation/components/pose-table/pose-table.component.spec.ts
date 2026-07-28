@@ -94,10 +94,10 @@ describe('PoseTableComponent', () => {
               'studio.pose-table.failed-to-compute-pose-table': 'Failed to compute pose table',
               'studio.pose-table.pose-table-saved': 'Pose table saved',
               'studio.pose-table.failed-to-save-pose-table': 'Failed to save pose table',
-              'studio.pose-table.required-error': 'Required',
+              'common.required': 'Required',
               'studio.pose-table.max-two-decimals-error': 'Maximum 2 decimal places',
-              'studio.pose-table.min-value-error': 'Minimum value:',
-              'studio.pose-table.max-value-error': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.max-value': 'Maximum value:',
               'studio.pose-table.integer-error': 'Value must be a whole number'
             }
           },

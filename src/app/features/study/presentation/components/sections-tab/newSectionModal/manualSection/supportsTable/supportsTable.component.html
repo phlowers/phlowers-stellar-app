@@ -7,7 +7,7 @@
 />
 @if (localizationLoading()) {
   <output id="localization-status" class="sr-only" aria-live="polite">
-    {{ 'supportsTable.localizationStatus' | transloco }}
+    {{ 'supports-table.localization-status' | transloco }}
   </output>
 }
 <p-table
@@ -26,73 +26,73 @@
     <tr>
       <th class="position-column sticky-left" id="position"></th>
       <th id="support_number" (dblclick)="onSupportNumberDoubleClick('number')" class="integer-column">
-        <ng-container>{{ 'supportsTable.colNumber' | transloco }}</ng-container>
+        <ng-container>{{ 'supports-table.col-number' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </th>
       <th id="span_length" (dblclick)="onSupportNumberDoubleClick('spanLength')" class="decimal-column">
-        <ng-container>{{ 'supportsTable.colSpanLength' | transloco }}</ng-container>
+        <ng-container>{{ 'supports-table.col-span-length' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </th>
       <th id="attachment_height" (dblclick)="onSupportNumberDoubleClick('attachmentHeight')" class="decimal-column">
-        <ng-container>{{ 'supportsTable.colAttachmentAlt' | transloco }}</ng-container>
+        <ng-container>{{ 'supports-table.col-attachment-alt' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </th>
       <th id="span_angle" (dblclick)="onSupportNumberDoubleClick('spanAngle')" class="decimal-column">
-        <ng-container>{{ 'supportsTable.colAngle' | transloco }}</ng-container>
+        <ng-container>{{ 'supports-table.col-angle' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </th>
       <th id="chain_name" (dblclick)="onSupportNumberDoubleClick('chainName')" class="text-column">
-        {{ 'supportsTable.colChainName' | transloco }}
+        {{ 'supports-table.col-chain-name' | transloco }}
       </th>
       <th id="chain_length" (dblclick)="onSupportNumberDoubleClick('chainLength')" class="decimal-column">
-        <ng-container>{{ 'supportsTable.colChainLength' | transloco }}</ng-container>
+        <ng-container>{{ 'supports-table.col-chain-length' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </th>
       <th id="chain_weight" (dblclick)="onSupportNumberDoubleClick('chainWeight')" class="decimal-column">
-        {{ 'supportsTable.colChainWeight' | transloco }}
+        {{ 'supports-table.col-chain-weight' | transloco }}
       </th>
       <th id="support_name" (dblclick)="onSupportNumberDoubleClick('name')" class="text-column">
-        {{ 'supportsTable.colSupportName' | transloco }}
+        {{ 'supports-table.col-support-name' | transloco }}
       </th>
 
       <th id="attachment_set" (dblclick)="onSupportNumberDoubleClick('attachmentSet')" class="integer-column">
-        {{ 'supportsTable.colAttachmentSet' | transloco }}
+        {{ 'supports-table.col-attachment-set' | transloco }}
       </th>
       <th id="arm_length" (dblclick)="onSupportNumberDoubleClick('armLength')" class="decimal-column">
-        {{ 'supportsTable.colArmLength' | transloco }}
+        {{ 'supports-table.col-arm-length' | transloco }}
       </th>
 
       <th id="chain_v" (dblclick)="onSupportNumberDoubleClick('chainV')" class="boolean-column">
-        {{ 'supportsTable.colChainV' | transloco }}
+        {{ 'supports-table.col-chain-v' | transloco }}
       </th>
       <th id="counter_weight" (dblclick)="onSupportNumberDoubleClick('counterWeight')" class="decimal-column">
-        {{ 'supportsTable.colCounterWeight' | transloco }}
+        {{ 'supports-table.col-counter-weight' | transloco }}
       </th>
       <th
         id="support_foot_altitude"
         (dblclick)="onSupportNumberDoubleClick('supportFootAltitude')"
         class="decimal-column"
       >
-        <ng-container>{{ 'supportsTable.colSuppFootAlt' | transloco }}</ng-container>
+        <ng-container>{{ 'supports-table.col-supp-foot-alt' | transloco }}</ng-container>
         <app-icon class="align-middle pl-1" icon="rocket_launch" />
       </th>
       <th id="attachment_position" (dblclick)="onSupportNumberDoubleClick('attachmentPosition')" class="decimal-column">
-        {{ 'supportsTable.colAttachmentPosition' | transloco }}
+        {{ 'supports-table.col-attachment-position' | transloco }}
       </th>
       <th id="chain_surface" (dblclick)="onSupportNumberDoubleClick('chainSurface')" class="decimal-column">
-        {{ 'supportsTable.colChainSurface' | transloco }}
+        {{ 'supports-table.col-chain-surface' | transloco }}
       </th>
       @if (mode() === 'view') {
-        <th id="tower_model">{{ 'supportsTable.colTower' | transloco }}</th>
-        <th id="latitude">{{ 'supportsTable.colLatitude' | transloco }}</th>
-        <th id="longitude">{{ 'supportsTable.colLongitude' | transloco }}</th>
-        <th id="azimuth">{{ 'supportsTable.colAzimuth' | transloco }}</th>
-        <th id="xLambert93" class="one-line-text">{{ 'supportsTable.colXLambert' | transloco }}</th>
-        <th id="yLambert93" class="one-line-text">{{ 'supportsTable.colYLambert' | transloco }}</th>
+        <th id="tower_model">{{ 'supports-table.col-tower' | transloco }}</th>
+        <th id="latitude">{{ 'supports-table.col-latitude' | transloco }}</th>
+        <th id="longitude">{{ 'supports-table.col-longitude' | transloco }}</th>
+        <th id="azimuth">{{ 'supports-table.col-azimuth' | transloco }}</th>
+        <th id="xLambert93" class="one-line-text">{{ 'supports-table.col-x-lambert' | transloco }}</th>
+        <th id="yLambert93" class="one-line-text">{{ 'supports-table.col-y-lambert' | transloco }}</th>
       }
 
       @if (mode() === 'create' || mode() === 'edit') {
-        <th class="sticky-right" id="actions">{{ 'supportsTable.colActions' | transloco }}</th>
+        <th class="sticky-right" id="actions">{{ 'supports-table.col-actions' | transloco }}</th>
       }
     </tr>
   </ng-template>
@@ -103,7 +103,7 @@
         @if (mode() !== 'view') {
           <input
             pInputText
-            [attr.aria-label]="'supportsTable.ariaSupportNumber' | transloco"
+            [attr.aria-label]="'supports-table.aria-support-number' | transloco"
             [ngModel]="support.number"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
             [id]="'supportNumber' + rowIndex"
@@ -122,7 +122,7 @@
               step="0.01"
               [min]="limits.spanLength.min"
               [max]="limits.spanLength.max"
-              [attr.aria-label]="'supportsTable.ariaSpanLength' | transloco"
+              [attr.aria-label]="'supports-table.aria-span-length' | transloco"
               [ngModel]="support.spanLength"
               [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
@@ -138,12 +138,12 @@
           </p-inputgroup>
           @if (spanLengthInput.dirty && spanLengthInput.errors?.['min']) {
             <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.spanLength.min }}
             </p-message>
           } @else if (spanLengthInput.dirty && spanLengthInput.errors?.['max']) {
             <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.spanLength.max }}
             </p-message>
           }
@@ -165,7 +165,7 @@
               step="0.01"
               [min]="limits.attachmentHeight.min"
               [max]="limits.attachmentHeight.max"
-              [attr.aria-label]="'supportsTable.ariaAttachmentHeight' | transloco"
+              [attr.aria-label]="'supports-table.ariaAttachmentHeight' | transloco"
               [ngModel]="support.attachmentHeight"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
@@ -181,12 +181,12 @@
           </p-inputgroup>
           @if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['min']) {
             <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.attachmentHeight.min }}
             </p-message>
           } @else if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['max']) {
             <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.attachmentHeight.max }}
             </p-message>
           }
@@ -208,7 +208,7 @@
               step="0.01"
               [min]="limits.spanAngle.min"
               [max]="limits.spanAngle.max"
-              [attr.aria-label]="'supportsTable.ariaSpanAngle' | transloco"
+              [attr.aria-label]="'supports-table.ariaSpanAngle' | transloco"
               [ngModel]="support.spanAngle"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
@@ -224,12 +224,12 @@
           </p-inputgroup>
           @if (spanAngleInput.dirty && spanAngleInput.errors?.['min']) {
             <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.spanAngle.min }}
             </p-message>
           } @else if (spanAngleInput.dirty && spanAngleInput.errors?.['max']) {
             <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.spanAngle.max }}
             </p-message>
           }
@@ -247,7 +247,7 @@
         @if (mode() !== 'view') {
           <p-select
             [options]="allChainsOptions()"
-            [attr.aria-label]="'supportsTable.ariaChainName' | transloco"
+            [attr.aria-label]="'supports-table.ariaChainName' | transloco"
             [ngModel]="support.chainName"
             optionLabel="chain_name"
             type="text"
@@ -279,7 +279,7 @@
               [min]="limits.chainLength.min"
               [max]="limits.chainLength.max"
               step="0.01"
-              [attr.aria-label]="'supportsTable.ariaChainLength' | transloco"
+              [attr.aria-label]="'supports-table.ariaChainLength' | transloco"
               [ngModel]="support.chainLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
               [id]="'chainLength' + rowIndex"
@@ -290,16 +290,16 @@
               "
               #chainLengthInput="ngModel"
             />
-            <p-inputgroup-addon>{{ 'supportsTable.unitMeter' | transloco }}</p-inputgroup-addon>
+            <p-inputgroup-addon>{{ 'supports-table.unitMeter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
           @if (chainLengthInput.dirty && chainLengthInput.errors?.['min']) {
             <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.chainLength.min }}
             </p-message>
           } @else if (chainLengthInput.dirty && chainLengthInput.errors?.['max']) {
             <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.chainLength.max }}
             </p-message>
           }
@@ -321,7 +321,7 @@
               [min]="limits.chainWeight.min"
               [max]="limits.chainWeight.max"
               step="0.01"
-              [attr.aria-label]="'supportsTable.ariaChainWeight' | transloco"
+              [attr.aria-label]="'supports-table.ariaChainWeight' | transloco"
               [ngModel]="support.chainWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
               [id]="'chainWeight' + rowIndex"
@@ -336,12 +336,12 @@
           </p-inputgroup>
           @if (chainWeightInput.dirty && chainWeightInput.errors?.['min']) {
             <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.chainWeight.min }}
             </p-message>
           } @else if (chainWeightInput.dirty && chainWeightInput.errors?.['max']) {
             <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.chainWeight.max }}
             </p-message>
           }
@@ -385,7 +385,7 @@
               [min]="limits.attachmentSet.min"
               [max]="limits.attachmentSet.max"
               [pKeyFilter]="onlyPositiveNumbers"
-              [attr.aria-label]="'supportsTable.ariaAttachmentSet' | transloco"
+              [attr.aria-label]="'supports-table.ariaAttachmentSet' | transloco"
               [ngModel]="support.attachmentSet"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
               [id]="'attachmentSet' + rowIndex"
@@ -402,7 +402,7 @@
                 btnSize="s"
                 [disabled]="!support.name || (catalogLoaded() && !supportFilterTable().includes(support.name))"
                 btnStyle="text"
-                [attr.aria-label]="'supportsTable.ariaOpenAttachmentModal' | transloco"
+                [attr.aria-label]="'supports-table.ariaOpenAttachmentModal' | transloco"
                 (click)="openAttachmentSetModal(support.uuid)"
                 data-testid="open-attachment-set-modal-btn"
               >
@@ -412,12 +412,12 @@
           </p-iconfield>
           @if (attachmentSetInput.dirty && attachmentSetInput.errors?.['min']) {
             <p-message [id]="'attachmentSetError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.attachmentSet.min }}
             </p-message>
           } @else if (attachmentSetInput.dirty && attachmentSetInput.errors?.['max']) {
             <p-message [id]="'attachmentSetError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.attachmentSet.max }}
             </p-message>
           }
@@ -434,7 +434,7 @@
               step="0.01"
               [min]="limits.armLength.min"
               [max]="limits.armLength.max"
-              [attr.aria-label]="'supportsTable.ariaArmLength' | transloco"
+              [attr.aria-label]="'supports-table.ariaArmLength' | transloco"
               [ngModel]="support.armLength"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
@@ -450,12 +450,12 @@
           </p-inputgroup>
           @if (armLengthInput.dirty && armLengthInput.errors?.['min']) {
             <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.armLength.min }}
             </p-message>
           } @else if (armLengthInput.dirty && armLengthInput.errors?.['max']) {
             <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.armLength.max }}
             </p-message>
           }
@@ -474,7 +474,7 @@
           <p-select
             [options]="optionsChainV"
             appendTo="body"
-            [attr.aria-label]="'supportsTable.ariaChainV' | transloco"
+            [attr.aria-label]="'supports-table.ariaChainV' | transloco"
             [ngModel]="support.chainV"
             optionLabel="label"
             optionValue="value"
@@ -509,7 +509,7 @@
               [min]="limits.counterWeight.min"
               [max]="limits.counterWeight.max"
               step="0.01"
-              [attr.aria-label]="'supportsTable.ariaCounterWeight' | transloco"
+              [attr.aria-label]="'supports-table.ariaCounterWeight' | transloco"
               [ngModel]="support.counterWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
               [id]="'counterWeight' + rowIndex"
@@ -524,12 +524,12 @@
           </p-inputgroup>
           @if (counterWeightInput.dirty && counterWeightInput.errors?.['min']) {
             <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.counterWeight.min }}
             </p-message>
           } @else if (counterWeightInput.dirty && counterWeightInput.errors?.['max']) {
             <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.counterWeight.max }}
             </p-message>
           }
@@ -551,7 +551,7 @@
               step="0.01"
               [min]="limits.supportFootAltitude.min"
               [max]="limits.supportFootAltitude.max"
-              [attr.aria-label]="'supportsTable.ariaSuppFootAlt' | transloco"
+              [attr.aria-label]="'supports-table.ariaSuppFootAlt' | transloco"
               [ngModel]="support.supportFootAltitude"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
@@ -569,12 +569,12 @@
           </p-inputgroup>
           @if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['min']) {
             <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.supportFootAltitude.min }}
             </p-message>
           } @else if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['max']) {
             <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.supportFootAltitude.max }}
             </p-message>
           }
@@ -592,7 +592,7 @@
           <p-select
             [options]="optionsAttachmentPosition"
             appendTo="body"
-            [attr.aria-label]="'supportsTable.ariaAttachmentPosition' | transloco"
+            [attr.aria-label]="'supports-table.ariaAttachmentPosition' | transloco"
             [ngModel]="support.attachmentPosition"
             optionLabel="label"
             optionValue="value"
@@ -613,7 +613,7 @@
               [min]="limits.chainSurface.min"
               [max]="limits.chainSurface.max"
               step="0.01"
-              [attr.aria-label]="'supportsTable.ariaChainSurface' | transloco"
+              [attr.aria-label]="'supports-table.ariaChainSurface' | transloco"
               [ngModel]="support.chainSurface"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
               [id]="'chainSurface' + rowIndex"
@@ -628,12 +628,12 @@
           </p-inputgroup>
           @if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['min']) {
             <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.minValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
               >&nbsp;{{ limits.chainSurface.min }}
             </p-message>
           } @else if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['max']) {
             <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'supportsTable.maxValue' | transloco }}</ng-container
+              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.chainSurface.max }}
             </p-message>
           }
@@ -729,7 +729,7 @@
                   data-testid="add-support-before-btn"
                 >
                   <app-icon icon="add" />
-                  <span>{{ 'supportsTable.addBefore' | transloco }}</span>
+                  <span>{{ 'supports-table.addBefore' | transloco }}</span>
                 </button>
                 <button
                   app-btn
@@ -739,7 +739,7 @@
                   data-testid="add-support-after-btn"
                 >
                   <app-icon icon="add" />
-                  <span>{{ 'supportsTable.addAfter' | transloco }}</span>
+                  <span>{{ 'supports-table.addAfter' | transloco }}</span>
                 </button>
                 <button
                   app-btn
@@ -749,7 +749,7 @@
                   data-testid="duplicate-support-btn"
                 >
                   <app-icon icon="content_copy" />
-                  <span>{{ 'supportsTable.duplicate' | transloco }}</span>
+                  <span>{{ 'common.duplicate' | transloco }}</span>
                 </button>
                 <button
                   app-btn
@@ -760,7 +760,7 @@
                   data-testid="delete-support-btn"
                 >
                   <app-icon icon="delete" />
-                  <span>{{ 'supportsTable.delete' | transloco }}</span>
+                  <span>{{ 'supports-table.delete' | transloco }}</span>
                 </button>
               </div>
             </ng-template>

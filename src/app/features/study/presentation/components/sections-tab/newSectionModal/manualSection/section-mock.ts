@@ -9,6 +9,6 @@ interface SelectOption {
 // TODO: adapter l'appelant de createSectionTypes
 /** Available section types: guard or phase. */
 export const createSectionTypes = (transloco: TranslocoService): SelectOption[] => [
-  { name: transloco.translate('sectionMock.guard'), code: 'guard' },
-  { name: transloco.translate('sectionMock.phase'), code: 'phase' }
+  { name: transloco.translate('common.section-type.guard'), code: 'guard' },
+  { name: transloco.translate('common.section-type.phase'), code: 'phase' }
 ];

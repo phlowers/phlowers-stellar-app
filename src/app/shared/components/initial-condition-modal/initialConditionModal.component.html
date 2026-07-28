@@ -235,15 +235,15 @@
     @if (mode() === 'view') {
       <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDelete()" data-testid="delete-btn">
         <app-icon icon="delete" />
-        <span>{{ 'common.actions.delete' | transloco }}</span>
+        <span>{{ 'common.delete' | transloco }}</span>
       </button>
       <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onDuplicate()">
         <app-icon icon="content_copy" />
-        <span>{{ 'common.actions.duplicate' | transloco }}</span>
+        <span>{{ 'common.duplicate' | transloco }}</span>
       </button>
       <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onModify()">
         <app-icon icon="edit" />
-        <span>{{ 'common.actions.edit' | transloco }}</span>
+        <span>{{ 'common.edit' | transloco }}</span>
       </button>
     } @else {
       <button
@@ -255,7 +255,7 @@
         data-testid="cancel-btn"
       >
         <app-icon icon="close" />
-        <span>{{ 'common.export-dialog.cancel' | transloco }}</span>
+        <span>{{ 'common.cancel' | transloco }}</span>
       </button>
       @if (!isInsideToolsDialog()) {
         <button
@@ -267,7 +267,7 @@
           data-testid="validate-btn"
         >
           <app-icon icon="check" />
-          <span>{{ 'common.actions.validate' | transloco }}</span>
+          <span>{{ 'common.validate' | transloco }}</span>
         </button>
       } @else {
         <button

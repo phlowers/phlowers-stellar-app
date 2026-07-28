@@ -6,20 +6,20 @@
     <h2>{{ 'shared.logged-layout.studies' | transloco }}</h2>
     <button app-btn type="submit" btnSize="m" (click)="isNewStudyModalOpen.set(true)" data-testid="create-study-btn">
       <app-icon icon="add" />
-      <span>{{ 'home.home.create-study' | transloco }}</span>
+      <span>{{ 'home.create-study' | transloco }}</span>
     </button>
   </div>
 </section>
 <p-tabs value="myStudies">
   <p-tablist>
-    <p-tab value="myStudies" data-testid="my-studies-tab">{{ 'studies.studies.tab-my-studies' | transloco }}</p-tab>
+    <p-tab value="myStudies" data-testid="my-studies-tab">{{ 'studies.tabs.my-studies' | transloco }}</p-tab>
     @if (false) {
       <p-tab value="searchStudy" disabled="true" data-testid="search-study-tab">{{
-        'studies.studies.tab-search-study' | transloco
+        'studies.tabs.search-study' | transloco
       }}</p-tab>
     }
     <p-tab value="importStudy" data-testid="import-study-tab">{{
-      'studies.studies.tab-import-study' | transloco
+      'studies.tabs.import-study' | transloco
     }}</p-tab>
   </p-tablist>
   <p-tabpanels>

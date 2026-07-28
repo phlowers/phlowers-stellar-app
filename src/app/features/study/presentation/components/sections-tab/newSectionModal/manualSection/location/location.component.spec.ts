@@ -27,11 +27,11 @@ describe('LocationComponent', () => {
           langs: {
             en: {
               'location.title': 'Support 1 coordinates:',
-              'location.labelLatitude': 'Latitude',
-              'location.labelLongitude': 'Longitude',
-              'location.labelAzimuth': 'Azimuth',
-              'location.maxValue': 'Maximum value:',
-              'location.minValue': 'Minimum value:'
+              'location.label-latitude': 'Latitude',
+              'location.label-longitude': 'Longitude',
+              'location.label-azimuth': 'Azimuth',
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:'
             }
           },
           translocoConfig: {

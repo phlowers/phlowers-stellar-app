@@ -124,17 +124,17 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       value: SpanAmountChoice;
     }[]
   >([
-    { label: this.translocoService.translate('studio.studioPage.oneSpanOption'), value: 'single' },
-    { label: this.translocoService.translate('studio.studioPage.twoSpansOption'), value: 'double' },
-    { label: this.translocoService.translate('studio.studioPage.allOption'), value: 'all' }
+    { label: this.translocoService.translate('studio.studio-page.one-span-option'), value: 'single' },
+    { label: this.translocoService.translate('studio.studio-page.two-spans-option'), value: 'double' },
+    { label: this.translocoService.translate('studio.studio-page.all-option'), value: 'all' }
   ]);
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
 
   // graph global param.
   globalStateOptions = [
-    { label: this.translocoService.translate('studio.studioPage.spanOption'), value: 'span' },
-    { label: this.translocoService.translate('studio.studioPage.maxSectionOption'), value: 'max_section' }
+    { label: this.translocoService.translate('studio.studio-page.span-option'), value: 'span' },
+    { label: this.translocoService.translate('studio.studio-page.max-section-option'), value: 'max_section' }
   ];
 
   globalState = signal<GlobalStateMode>('max_section');
@@ -188,7 +188,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));
     if (options.length) {
-      options.unshift({ label: this.translocoService.translate('studio.studioPage.notSelectedOption'), value: null });
+      options.unshift({ label: this.translocoService.translate('studio.studio-page.not-selected-option'), value: null });
     }
     return options;
   });
@@ -199,7 +199,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const obstacle = this.spanService.section()?.obstacles.find((o) => o.uuid === uuid);
     if (!obstacle) return [];
     return obstacle.positions.map((_, index) => ({
-      label: this.translocoService.translate('studio.studioPage.pointOption', { index: index + 1 }),
+      label: this.translocoService.translate('studio.studio-page.point-option', { index: index + 1 }),
       value: index
     }));
   });

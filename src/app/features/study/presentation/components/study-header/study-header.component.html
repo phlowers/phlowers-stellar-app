@@ -7,7 +7,7 @@
     app-btn
     btnSize="s"
     btnStyle="text"
-    [attr.aria-label]="'studyHeader.ariaModify' | transloco"
+    [attr.aria-label]="'study.header.aria-modify' | transloco"
     data-testid="modify-btn"
   >
     <app-icon icon="edit" />
@@ -24,7 +24,7 @@
     [class.study-header__accodion-btn--open]="isDetailOpen()"
     data-testid="details-toggle"
   >
-    {{ 'studyHeader.details' | transloco }}
+    {{ 'study.header.details' | transloco }}
     <app-icon icon="keyboard_arrow_down" iconRight />
   </button>
 
@@ -49,17 +49,17 @@
 
   <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study()?.uuid!)" data-testid="duplicate-btn">
     <app-icon icon="content_copy" />
-    <ng-container>{{ 'studyHeader.duplicate' | transloco }}</ng-container>
+    <ng-container>{{ 'study.header.duplicate' | transloco }}</ng-container>
   </button>
 
   <button app-btn btnSize="s" disabled btnStyle="text">
     <app-icon icon="public" />
-    <ng-container>{{ 'studyHeader.publish' | transloco }}</ng-container>
+    <ng-container>{{ 'study.header.publish' | transloco }}</ng-container>
   </button>
 
   <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog()" data-testid="export-btn">
     <app-icon icon="download" />
-    <ng-container>{{ 'studyHeader.export' | transloco }}</ng-container>
+    <ng-container>{{ 'study.header.export' | transloco }}</ng-container>
   </button>
 
   <p-accordion
@@ -74,7 +74,7 @@
           <p>
             {{ study()?.description }}
             @if (study() && !study()!.description) {
-              <em>{{ 'studyHeader.noDescription' | transloco }}</em>
+              <em>{{ 'study.header.no-description' | transloco }}</em>
             }
           </p>
         </div>

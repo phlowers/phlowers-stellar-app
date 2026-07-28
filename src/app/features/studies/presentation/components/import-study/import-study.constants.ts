@@ -15,5 +15,5 @@ export const errors = studyImportErrors;
  * @returns Transloco key string for the error
  */
 export const importErrorDetail = (type: keyof typeof errors): string => {
-  return errors[type] || 'studies.import-study.error-import';
+  return errors[type] || 'studies.import.error-import';
 };

@@ -12,13 +12,13 @@
 
 <p id="mandatory-parameter-15c" class="parameter-calculation-15-without-wind__mandatory-msg">
   <app-icon icon="info" />
-  <span>{{ 'field-measuring.parameter-calculation-15-without-wind.mandatory-msg' | transloco }}</span>
+  <span>{{ 'field-measuring.parameter-calculation-15.mandatory-msg' | transloco }}</span>
 </p>
 
 <div class="parameter-calculation-15-without-wind__form">
   <div class="updateMode">
     <p id="updateModeLabel" class="mb-0">
-      {{ 'field-measuring.parameter-calculation-15-without-wind.update-mode-label' | transloco }}
+      {{ 'field-measuring.parameter-calculation-15.update-mode-label' | transloco }}
     </p>
     <p-selectbutton
       [options]="updateModeOptions()"
@@ -35,7 +35,7 @@
   @if (measureData().updateMode15C === 'manual') {
     <div class="parameterPapoto">
       <label for="parameterPapoto-input">{{
-        'field-measuring.parameter-calculation-15-without-wind.parameter-papoto-label' | transloco
+        'field-measuring.parameter-calculation-15.parameter-papoto-label' | transloco
       }}</label>
       <p-inputgroup>
         <input
@@ -54,7 +54,7 @@
 
     <div class="parameterUncertaintyPapoto">
       <label for="parameterUncertaintyPapoto-input">{{
-        'field-measuring.parameter-calculation-15-without-wind.uncertainty-parameter-label' | transloco
+        'field-measuring.parameter-calculation-15.uncertainty-parameter-label' | transloco
       }}</label>
       <p-inputgroup>
         <input
@@ -111,7 +111,7 @@
     <dl class="contents">
       <div class="parameterPapoto">
         <dt id="parameterPapoto-display">
-          {{ 'field-measuring.parameter-calculation-15-without-wind.parameter-papoto-label' | transloco }}
+          {{ 'field-measuring.parameter-calculation-15.parameter-papoto-label' | transloco }}
         </dt>
         <dd data-testid="parameter-papoto-display">
           {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }}
@@ -122,7 +122,7 @@
       <div class="parameterUncertaintyPapoto">
         <dt id="parameterUncertaintyPapoto-display">
           <del>{{
-            'field-measuring.parameter-calculation-15-without-wind.uncertainty-parameter-label' | transloco
+            'field-measuring.parameter-calculation-15.uncertainty-parameter-label' | transloco
           }}</del>
         </dt>
         <dd>
@@ -141,7 +141,7 @@
       <div class="cableTemperatureUncertainty">
         <dt>
           <del>{{
-            'field-measuring.parameter-calculation-15-without-wind.uncertainty-cable-temperature-no-space' | transloco
+            'field-measuring.parameter-calculation-15.uncertainty-cable-temperature' | transloco
           }}</del>
         </dt>
         <dd>
@@ -162,7 +162,7 @@
   >
     <app-icon icon="rocket_launch" />
     <ng-container>{{
-      'field-measuring.parameter-calculation-15-without-wind.calculate-button' | transloco
+      'field-measuring.parameter-calculation-15.calculate-button' | transloco
     }}</ng-container>
   </button>
 </div>
@@ -170,12 +170,12 @@
 @if (measureData().outputs.parameter15C) {
   <div class="parameter-calculation-15-without-wind__results" [@expand]>
     <h2 class="parameter-calculation-15-without-wind__results__title">
-      {{ 'field-measuring.parameter-calculation-15-without-wind.results-title' | transloco }}
+      {{ 'common.results' | transloco }}
     </h2>
 
     <dl class="parameter-calculation-15-without-wind__results__list">
       <div class="parameter15CMinusUncertainty">
-        <dt>{{ 'field-measuring.parameter-calculation-15-without-wind.parameter-15c-minus-label' | transloco }}</dt>
+        <dt>{{ 'field-measuring.parameter-calculation-15.parameter-15c-minus-label' | transloco }}</dt>
         <dd data-testid="parameter-15c-minus">
           {{
             (truncate1Decimal(measureData().outputs.parameter15C?.parameter15CMinusUncertainty) | number: '1.0-1') ??
@@ -185,14 +185,14 @@
         </dd>
       </div>
       <div class="parameter15C">
-        <dt>{{ 'field-measuring.parameter-calculation-15-without-wind.parameter-15c-label' | transloco }}</dt>
+        <dt>{{ 'field-measuring.parameter-calculation-15.parameter-15c-label' | transloco }}</dt>
         <dd data-testid="parameter-15c">
           {{ (truncate1Decimal(measureData().outputs.parameter15C?.parameter15C) | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15CPlusUncertainty">
-        <dt>{{ 'field-measuring.parameter-calculation-15-without-wind.parameter-15c-plus-label' | transloco }}</dt>
+        <dt>{{ 'field-measuring.parameter-calculation-15.parameter-15c-plus-label' | transloco }}</dt>
         <dd data-testid="parameter-15c-plus">
           {{
             (truncate1Decimal(measureData().outputs.parameter15C?.parameter15CPlusUncertainty) | number: '1.0-1') ?? '-'
@@ -212,7 +212,7 @@
       >
         <app-icon icon="add_circle" />
         <ng-container>{{
-          'field-measuring.parameter-calculation-15-without-wind.create-initial-condition-button' | transloco
+          'field-measuring.parameter-calculation-15.create-initial-condition-button' | transloco
         }}</ng-container>
       </button>
 
@@ -225,7 +225,7 @@
       >
         <app-icon icon="add_circle" />
         <ng-container>{{
-          'field-measuring.parameter-calculation-15-without-wind.create-initial-condition-button' | transloco
+          'field-measuring.parameter-calculation-15.create-initial-condition-button' | transloco
         }}</ng-container>
       </button>
 
@@ -238,7 +238,7 @@
       >
         <app-icon icon="add_circle" />
         <ng-container>{{
-          'field-measuring.parameter-calculation-15-without-wind.create-initial-condition-button' | transloco
+          'field-measuring.parameter-calculation-15.create-initial-condition-button' | transloco
         }}</ng-container>
       </button>
     </div>

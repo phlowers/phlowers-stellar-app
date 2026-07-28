@@ -84,12 +84,12 @@ export class HomeComponent {
       // prettier-ignore
       if (updateAvailable) { //NOSONAR
         this.updateStatus.set('warning');
-        this.updateText('updateTitle', this.translocoService.translate('home.home.update-available'));
-        this.updateText('updateText', this.translocoService.translate('home.home.update-new-available'));
+        this.updateText('updateTitle', this.translocoService.translate('home.update-available'));
+        this.updateText('updateText', this.translocoService.translate('home.update-new-available'));
       } else {
         this.updateStatus.set('unknown');
-        this.updateText('updateTitle', this.translocoService.translate('home.home.update-title'));
-        this.updateText('updateText', this.translocoService.translate('home.home.update-text'));
+        this.updateText('updateTitle', this.translocoService.translate('home.update-title'));
+        this.updateText('updateText', this.translocoService.translate('home.update-text'));
       }
     });
 
@@ -116,15 +116,15 @@ export class HomeComponent {
 
   private buildDefaultTexts(): HomeTexts {
     return {
-      newsTitle: this.translocoService.translate('home.home.news-title'),
-      newsText: this.translocoService.translate('home.home.news-text'),
-      newsLinkText: this.translocoService.translate('home.home.news-link-text'),
-      updateTitle: this.translocoService.translate('home.home.update-title'),
-      updateText: this.translocoService.translate('home.home.update-text'),
-      updateLinkText: this.translocoService.translate('home.home.update-link-text'),
-      updateLinkExplicitText: this.translocoService.translate('home.home.update-link-explicit-text'),
-      serverTitle: this.translocoService.translate('home.home.server-title'),
-      serverText: this.translocoService.translate('home.home.server-text-default')
+      newsTitle: this.translocoService.translate('home.news-title'),
+      newsText: this.translocoService.translate('home.news-text'),
+      newsLinkText: this.translocoService.translate('home.news-link-text'),
+      updateTitle: this.translocoService.translate('home.update-title'),
+      updateText: this.translocoService.translate('home.update-text'),
+      updateLinkText: this.translocoService.translate('home.update-link-text'),
+      updateLinkExplicitText: this.translocoService.translate('home.update-link-explicit-text'),
+      serverTitle: this.translocoService.translate('home.server-title'),
+      serverText: this.translocoService.translate('home.server-text-default')
     };
   }
 
@@ -152,19 +152,19 @@ export class HomeComponent {
   private updateServerText(status: ServerStates): void {
     switch (status) {
       case 'offline':
-        this.updateText('serverText', this.translocoService.translate('home.home.server-offline'));
+        this.updateText('serverText', this.translocoService.translate('home.server-offline'));
         break;
       case 'unknown':
-        this.updateText('serverText', this.translocoService.translate('home.home.server-unknown'));
+        this.updateText('serverText', this.translocoService.translate('home.server-unknown'));
         break;
       case 'warning':
-        this.updateText('serverText', this.translocoService.translate('home.home.server-warning'));
+        this.updateText('serverText', this.translocoService.translate('home.server-warning'));
         break;
       case 'error':
-        this.updateText('serverText', this.translocoService.translate('home.home.server-error'));
+        this.updateText('serverText', this.translocoService.translate('home.server-error'));
         break;
       case 'success':
-        this.updateText('serverText', this.translocoService.translate('home.home.server-success'));
+        this.updateText('serverText', this.translocoService.translate('home.server-success'));
         break;
     }
   }

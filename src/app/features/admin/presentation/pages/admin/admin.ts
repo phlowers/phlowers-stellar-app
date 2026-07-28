@@ -78,13 +78,13 @@ export class AdminComponent {
 
   deleteAllStudies() {
     this.confirmationService.confirm({
-      message: this.translocoService.translate('admin.admin.delete-studies-confirm'),
+      message: this.translocoService.translate('admin.delete-studies-confirm'),
       accept: () => {
         this.studyService.deleteAllStudies();
         this.messageService.add({
           severity: 'success',
-          summary: this.translocoService.translate('admin.admin.delete-studies-summary'),
-          detail: this.translocoService.translate('admin.admin.delete-studies-detail')
+          summary: this.translocoService.translate('admin.delete-studies-summary'),
+          detail: this.translocoService.translate('admin.delete-studies-detail')
         });
       }
     });
@@ -92,13 +92,13 @@ export class AdminComponent {
 
   resetDatabase() {
     this.confirmationService.confirm({
-      message: this.translocoService.translate('admin.admin.reset-database-confirm'),
+      message: this.translocoService.translate('admin.reset-database-confirm'),
       accept: () => {
         this.storageService.resetDatabase();
         this.messageService.add({
           severity: 'success',
-          summary: this.translocoService.translate('admin.admin.reset-database-summary'),
-          detail: this.translocoService.translate('admin.admin.reset-database-detail')
+          summary: this.translocoService.translate('admin.reset-database-summary'),
+          detail: this.translocoService.translate('admin.reset-database-detail')
         });
       }
     });
@@ -106,7 +106,7 @@ export class AdminComponent {
 
   resetApp() {
     this.confirmationService.confirm({
-      message: this.translocoService.translate('admin.admin.reset-app-confirm'),
+      message: this.translocoService.translate('admin.reset-app-confirm'),
       accept: async () => {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const registration of registrations) {
@@ -115,8 +115,8 @@ export class AdminComponent {
         await caches.delete(CACHE_NAME);
         this.messageService.add({
           severity: 'success',
-          summary: this.translocoService.translate('admin.admin.reset-app-summary'),
-          detail: this.translocoService.translate('admin.admin.reset-app-detail')
+          summary: this.translocoService.translate('admin.reset-app-summary'),
+          detail: this.translocoService.translate('admin.reset-app-detail')
         });
         setTimeout(() => {
           this.window.location.assign('/');
@@ -134,11 +134,11 @@ export class AdminComponent {
     this.messageService.add({
       severity: 'success',
       summary: activate
-        ? this.translocoService.translate('admin.admin.python-logs-activated-summary')
-        : this.translocoService.translate('admin.admin.python-logs-deactivated-summary'),
+        ? this.translocoService.translate('admin.python-logs-activated-summary')
+        : this.translocoService.translate('admin.python-logs-deactivated-summary'),
       detail: activate
-        ? this.translocoService.translate('admin.admin.python-logs-activated-detail')
-        : this.translocoService.translate('admin.admin.python-logs-deactivated-detail')
+        ? this.translocoService.translate('admin.python-logs-activated-detail')
+        : this.translocoService.translate('admin.python-logs-deactivated-detail')
     });
   }
 }

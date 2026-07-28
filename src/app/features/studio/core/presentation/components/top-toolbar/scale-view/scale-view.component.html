@@ -10,7 +10,7 @@
   [attr.aria-expanded]="popoverOpen()"
   (click)="togglePopover($event)"
 >
-  <ng-container>{{ 'studio.scaleView.buttonLabel' | transloco }}</ng-container>
+  <ng-container>{{ 'studio.scale-view.button-label' | transloco }}</ng-container>
   <app-icon icon="image_aspect_ratio" />
 </button>
 
@@ -20,30 +20,30 @@
     class="view-config"
     [formGroup]="formScaleView"
     (ngSubmit)="onValidate()"
-    [attr.aria-label]="'studio.scaleView.formAriaLabel' | transloco"
+    [attr.aria-label]="'studio.scale-view.form-aria-label' | transloco"
   >
     <fieldset data-testid="scale-fieldset" class="view-config__section">
-      <legend class="view-config__legend">{{ 'studio.scaleView.scaleLegend' | transloco }}</legend>
+      <legend class="view-config__legend">{{ 'studio.scale-view.scale-legend' | transloco }}</legend>
 
       <div class="view-config__radio-group">
         <div data-testid="scale-radio-plan" class="view-config__radio-item">
           <p-radioButton name="scale" value="plan" formControlName="scale" inputId="plan"></p-radioButton>
-          <label for="plan">{{ 'studio.scaleView.scalePlan' | transloco }}</label>
+          <label for="plan">{{ 'studio.scale-view.scale-plan' | transloco }}</label>
         </div>
 
         <div data-testid="scale-radio-geo" class="view-config__radio-item">
           <p-radioButton name="scale" value="geo" formControlName="scale" inputId="geo"></p-radioButton>
-          <label for="geo">{{ 'studio.scaleView.scaleGeo' | transloco }}</label>
+          <label for="geo">{{ 'studio.scale-view.scale-geo' | transloco }}</label>
         </div>
 
         <div data-testid="scale-radio-celeste" class="view-config__radio-item">
           <p-radioButton name="scale" value="celeste" formControlName="scale" inputId="celeste"></p-radioButton>
-          <label for="celeste">{{ 'studio.scaleView.scaleCeleste' | transloco }}</label>
+          <label for="celeste">{{ 'studio.scale-view.scale-celeste' | transloco }}</label>
         </div>
 
         <div data-testid="scale-radio-auto" class="view-config__radio-item">
           <p-radioButton name="scale" value="auto" formControlName="scale" inputId="auto"></p-radioButton>
-          <label for="auto">{{ 'studio.scaleView.scaleAuto' | transloco }}</label>
+          <label for="auto">{{ 'studio.scale-view.scale-auto' | transloco }}</label>
         </div>
       </div>
     </fieldset>
@@ -52,7 +52,7 @@
 
     <fieldset data-testid="points-fieldset" class="view-config__section">
       <legend class="view-config__legend">
-        {{ 'studio.scaleView.pointsLegend' | transloco }}
+        {{ 'studio.scale-view.points-legend' | transloco }}
       </legend>
 
       <div class="view-config__controls flex flex-between items-center gap-8">
@@ -64,7 +64,7 @@
             [min]="scaleMin"
             [max]="scaleMax"
             class="view-config__slider"
-            [attr.aria-label]="'studio.scaleView.sliderAriaLabel' | transloco"
+            [attr.aria-label]="'studio.scale-view.slider-aria-label' | transloco"
           ></p-slider>
           <span class="view-config__limit" aria-hidden="true">{{ scaleMax }}</span>
         </div>
@@ -74,14 +74,14 @@
           formControlName="pointsCount"
           [min]="scaleMin"
           [max]="scaleMax"
-          [attr.aria-label]="'studio.scaleView.inputAriaLabel' | transloco"
+          [attr.aria-label]="'studio.scale-view.input-aria-label' | transloco"
         />
       </div>
     </fieldset>
 
     <footer class="view-config__footer">
       <button app-btn type="submit" data-testid="scale-validate-btn">
-        <ng-container>{{ 'common.actions.validate' | transloco }}</ng-container>
+        <ng-container>{{ 'common.validate' | transloco }}</ng-container>
         <app-icon icon="check" />
       </button>
     </footer>

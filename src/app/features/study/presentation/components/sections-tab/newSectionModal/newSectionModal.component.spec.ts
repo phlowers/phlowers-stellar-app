@@ -131,13 +131,13 @@ describe('NewSectionModalComponent (Jest)', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'newSectionModal.titleView': 'View a study section',
-              'newSectionModal.titleModify': 'Modify a study section',
-              'newSectionModal.titleCreate': 'Create a study section',
-              'newSectionModal.importError': 'The imported section could not be found. Please try again.',
-              'newSectionModal.createBtn': 'Create section',
-              'newSectionModal.updateBtn': 'Update section',
-              'newSectionModal.createSection': 'Create a section'
+              'section-modal.title-view': 'View a study section',
+              'section-modal.title-modify': 'Modify a study section',
+              'section-modal.title-create': 'Create a study section',
+              'section-import.import-error': 'The imported section could not be found. Please try again.',
+              'section-modal.create-btn': 'Create section',
+              'section-modal.update-btn': 'Update section',
+              'section-modal.create-section': 'Create a section'
             }
           },
           translocoConfig: {

@@ -316,7 +316,7 @@ export class ObstacleFormService {
 
       this.messageService.add({
         severity: 'success',
-        summary: this.translocoService.translate('common.notification.severity-success'),
+        summary: this.translocoService.translate('common.success'),
         detail: this.translocoService.translate('shared.obstacle-form-service.delete-detail')
       });
       return true;
@@ -327,7 +327,7 @@ export class ObstacleFormService {
       await this.resyncWorkerAfterDeleteRollback(section.obstacles ?? [], plotOptions);
       this.messageService.add({
         severity: 'error',
-        summary: this.translocoService.translate('shared.topbar.error'),
+        summary: this.translocoService.translate('common.error'),
         detail: this.translocoService.translate('shared.obstacle-form-service.delete-error-detail')
       });
       return false;
@@ -371,7 +371,7 @@ export class ObstacleFormService {
     this.spanService.section.set(updatedSection);
     this.messageService.add({
       severity: 'success',
-      summary: this.translocoService.translate('common.notification.severity-success'),
+      summary: this.translocoService.translate('common.success'),
       detail: this.translocoService.translate('shared.obstacle-form-service.conformity-saved-detail')
     });
   }
@@ -410,11 +410,11 @@ export class ObstacleFormService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(
-        this.translocoService.translate('studio.conformity.calculationFailedError', { errorMessage })
+        this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
       );
       this.messageService.add({
         severity: 'error',
-        summary: this.translocoService.translate('shared.topbar.error'),
+        summary: this.translocoService.translate('common.error'),
         detail: this.translocoService.translate('shared.obstacle-form-service.distance-calculation-error-detail')
       });
     } finally {
@@ -467,7 +467,7 @@ export class ObstacleFormService {
     await this.sectionService.createOrUpdateSection(study, section);
     this.messageService.add({
       severity: 'success',
-      summary: this.translocoService.translate('common.notification.severity-success'),
+      summary: this.translocoService.translate('common.success'),
       detail: this.translocoService.translate('shared.obstacle-form-service.save-detail')
     });
   }

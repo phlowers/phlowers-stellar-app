@@ -54,35 +54,35 @@ export class StudioTopToolbarComponent implements OnInit {
 
   tablesDropdown = computed<MenuItem[]>(() => [
     {
-      label: this.translocoService.translate('studio.topToolbar.loadsTableLabel'),
+      label: this.translocoService.translate('studio.top-toolbar.loads-table-label'),
       disabled: !this.hasCharges(),
       command: () => {
         this.toolbarDialogService.openTool('load-table');
       }
     },
     {
-      label: this.translocoService.translate('studio.topToolbar.l0TableLabel'),
+      label: this.translocoService.translate('studio.top-toolbar.l0-table-label'),
       disabled: false,
       command: () => {
         this.toolbarDialogService.openTool('l0-sum');
       }
     },
     {
-      label: this.translocoService.translate('studio.topToolbar.poseTableLabel'),
+      label: this.translocoService.translate('studio.top-toolbar.pose-table-label'),
       disabled: false,
       command: () => {
         this.toolbarDialogService.openTool('pose-table');
       }
     },
     {
-      label: this.translocoService.translate('studio.topToolbar.obstaclesTableLabel'),
+      label: this.translocoService.translate('studio.top-toolbar.obstacles-table-label'),
       disabled: true,
       command: () => {
         this.logger.log('Add action triggered');
       }
     },
     {
-      label: this.translocoService.translate('studio.topToolbar.groundsTableLabel'),
+      label: this.translocoService.translate('studio.top-toolbar.grounds-table-label'),
       disabled: true,
       command: () => {
         this.logger.log('Add action triggered');
@@ -124,8 +124,8 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: this.translocoService.translate('studio.topToolbar.profileOption'), value: 'profile' },
-    { label: this.translocoService.translate('studio.topToolbar.faceOption'), value: 'face' }
+    { label: this.translocoService.translate('studio.top-toolbar.profile-option'), value: 'profile' },
+    { label: this.translocoService.translate('studio.top-toolbar.face-option'), value: 'face' }
   ]);
 
   displayOptions = signal<
@@ -134,13 +134,13 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: this.translocoService.translate('studio.topToolbar.loadsOption'), value: 'loads' },
-    { label: this.translocoService.translate('studio.topToolbar.baseOption'), value: 'baseState' },
+    { label: this.translocoService.translate('studio.top-toolbar.loads-option'), value: 'loads' },
+    { label: this.translocoService.translate('studio.top-toolbar.base-option'), value: 'baseState' },
     {
-      label: this.translocoService.translate('studio.topToolbar.transparentBackgroundOption'),
+      label: this.translocoService.translate('studio.top-toolbar.transparent-background-option'),
       value: 'transparentBackground'
     },
-    { label: this.translocoService.translate('studio.topToolbar.measurementPointsOption'), value: 'measurePoints' }
+    { label: this.translocoService.translate('studio.top-toolbar.measurement-points-option'), value: 'measurePoints' }
   ]);
 
   selectedDisplayOptions = computed(() =>
@@ -183,7 +183,7 @@ export class StudioTopToolbarComponent implements OnInit {
   >([
     {
       id: 1,
-      label: this.translocoService.translate('studio.topToolbar.fieldMeasurementsTool'),
+      label: this.translocoService.translate('studio.top-toolbar.field-measurements-tool'),
       checked: false,
       disabled: false,
       action: () => {
@@ -192,7 +192,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 3,
-      label: this.translocoService.translate('studio.topToolbar.vtlAndGuyingTool'),
+      label: this.translocoService.translate('studio.top-toolbar.vtl-and-guying-tool'),
       checked: false,
       disabled: false,
       action: () => {
@@ -201,7 +201,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 4,
-      label: this.translocoService.translate('studio.topToolbar.cableMarkingTool'),
+      label: this.translocoService.translate('studio.top-toolbar.cable-marking-tool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -210,7 +210,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 5,
-      label: this.translocoService.translate('studio.topToolbar.strandRrtsTool'),
+      label: this.translocoService.translate('studio.top-toolbar.strand-rrts-tool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -219,7 +219,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 6,
-      label: this.translocoService.translate('studio.topToolbar.forestTrenchesTool'),
+      label: this.translocoService.translate('studio.top-toolbar.forest-trenches-tool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -228,7 +228,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 7,
-      label: this.translocoService.translate('studio.topToolbar.heightAndLateralDistanceTool'),
+      label: this.translocoService.translate('studio.top-toolbar.height-and-lateral-distance-tool'),
       checked: false,
       disabled: true,
       action: () => {
@@ -237,7 +237,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       id: 8,
-      label: this.translocoService.translate('studio.topToolbar.cableAdjustmentTool'),
+      label: this.translocoService.translate('studio.top-toolbar.cable-adjustment-tool'),
       checked: false,
       disabled: true,
       action: () => {

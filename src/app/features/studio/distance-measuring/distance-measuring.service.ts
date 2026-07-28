@@ -178,7 +178,7 @@ export class DistanceMeasuringService {
 
       if (addPointsError) {
         this.notificationService.error(
-          this.translocoService.translate('studio.distanceMeasuring.addMeasurementPointsError')
+          this.translocoService.translate('studio.distance-measuring.add-measurement-points-error')
         );
         return;
       }

@@ -61,7 +61,7 @@ export class ImportSectionComponent {
   readonly config = computed<ImportContextConfig>(() => ({
     ...createSectionImportConfig(this.transloco),
     successAction: {
-      label: this.transloco.translate('importSection.edit'),
+      label: this.transloco.translate('common.edit'),
       action: (outcome) => this.editRequested.emit(outcome.entityId!)
     }
   }));

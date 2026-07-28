@@ -103,25 +103,25 @@ export class SectionPlotCardComponent {
 
     return [
       {
-        title: this.translocoService.translate('studio.sectionPlotCard.vtlUnderChainTitle'),
+        title: this.translocoService.translate('studio.section-plot-card.vtl-under-chain-title'),
         fields: [
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.vLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.v-label'),
             value: this.getFormatedNumberIndex(vtl_under_chain?.[0]),
             unit: 'daN'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.tLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.t-label'),
             value: this.getFormatedNumberIndex(vtl_under_chain?.[1]),
             unit: 'daN'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.lLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.l-label'),
             value: this.getFormatedNumberIndex(vtl_under_chain?.[2]),
             unit: 'daN'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.resultantLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.resultant-label'),
             value: this.getFormatedNumberIndex(r_under_chain),
             unit: 'daN'
           }
@@ -131,7 +131,7 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.lineAngleLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.line-angle-label'),
             value: this.getFormatedNumberIndex(lineAngle),
             unit: 'gr'
           }
@@ -150,25 +150,25 @@ export class SectionPlotCardComponent {
 
     return [
       {
-        title: this.translocoService.translate('studio.sectionPlotCard.vtlUnderConsoleTitle'),
+        title: this.translocoService.translate('studio.section-plot-card.vtl-under-console-title'),
         fields: [
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.vLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.v-label'),
             value: this.getFormatedNumberIndex(vtl_under_console?.[0]),
             unit: 'daN'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.tLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.t-label'),
             value: this.getFormatedNumberIndex(vtl_under_console?.[1]),
             unit: 'daN'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.lLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.l-label'),
             value: this.getFormatedNumberIndex(vtl_under_console?.[2]),
             unit: 'daN'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.resultantLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.resultant-label'),
             value: this.getFormatedNumberIndex(r_under_console),
             unit: 'daN'
           }
@@ -178,27 +178,27 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.altSuppFootLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.alt-supp-foot-label'),
             value: this.getFormatedNumberIndex(groundAltitude),
             unit: 'm'
           }
         ]
       },
       {
-        title: this.translocoService.translate('studio.sectionPlotCard.chainDisplacementAccTitle'),
+        title: this.translocoService.translate('studio.section-plot-card.chain-displacement-acc-title'),
         fields: [
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.xLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.x-label'),
             value: this.getFormatedNumberIndex(displacement?.[0]),
             unit: 'm'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.yLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.y-label'),
             value: this.getFormatedNumberIndex(displacement?.[1]),
             unit: 'm'
           },
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.zLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.z-label'),
             value: this.getFormatedNumberIndex(displacement?.[2]),
             unit: 'm'
           }
@@ -208,7 +208,7 @@ export class SectionPlotCardComponent {
       {
         fields: [
           {
-            label: this.translocoService.translate('studio.sectionPlotCard.angleBalancementLabel'),
+            label: this.translocoService.translate('studio.section-plot-card.angle-balancement-label'),
             value: this.getFormatedNumberIndex(loadAngle),
             unit: '°'
           }
@@ -227,27 +227,27 @@ export class SectionPlotCardComponent {
     const tensionSup = litData?.output_parameters.tension_sup;
     return [
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.spanLengthLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.span-length-label'),
         value: this.getFormatedNumberIndex(spanLength),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.elevationLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.elevation-label'),
         value: this.getFormatedNumberIndex(elevation),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.parameterLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.parameter-label'),
         value: this.getParameterValue(parameter),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.suppTensionMaxLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.supp-tension-max-label'),
         value: this.getFormatedNumberIndex(tensionSup),
         unit: 'daN'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.naturalLengthL0Label'),
+        label: this.translocoService.translate('studio.section-plot-card.natural-length-l0-label'),
         value: this.getFormatedNumberIndex(L0),
         unit: 'm'
       }
@@ -267,42 +267,42 @@ export class SectionPlotCardComponent {
     const slopeRight = litData?.output_parameters.slope_right;
     return [
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.arrowF1Label'),
+        label: this.translocoService.translate('studio.section-plot-card.arrow-f1-label'),
         value: this.getFormatedNumberIndex(sag),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.arrowF2Label'),
+        label: this.translocoService.translate('studio.section-plot-card.arrow-f2-label'),
         value: this.getFormatedNumberIndex(sagS2),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.horizontalDistAccLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.horizontal-dist-acc-label'),
         value: this.getFormatedNumberIndex(horizontalDistance),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.arcLengthLaLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.arc-length-la-label'),
         value: this.getFormatedNumberIndex(arcLength),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.thT0Label'),
+        label: this.translocoService.translate('studio.section-plot-card.th-t0-label'),
         value: this.getFormatedNumberIndex(th),
         unit: 'daN'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.infTensionAccLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.inf-tension-acc-label'),
         value: this.getFormatedNumberIndex(tensionInf),
         unit: 'daN'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.cableSlopeLeftAttLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.cable-slope-left-att-label'),
         value: this.getFormatedNumberIndex(slopeLeft),
         unit: '°'
       },
       {
-        label: this.translocoService.translate('studio.sectionPlotCard.cableSlopeRightAttLabel'),
+        label: this.translocoService.translate('studio.section-plot-card.cable-slope-right-att-label'),
         value: this.getFormatedNumberIndex(slopeRight),
         unit: '°'
       }

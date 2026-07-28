@@ -29,7 +29,7 @@ export const PDF_LABEL_KEYS: PdfLabels = {
   resultant: 'studio.vtl-and-guying.resultant-label',
   guyingTitle: 'studio.vtl-and-guying.guying-title',
   guyingSpan: 'studio.vtl-guying-report.guying-span-label',
-  referenceSupport: 'studio.shared.referenceSupportLabel',
+  referenceSupport: 'studio.shared.reference-support-label',
   supportType: 'studio.vtl-guying-report.support-type-label',
   altitude: 'field-measuring.header.altitude-label',
   horizontalDistance: 'studio.vtl-and-guying.horizontal-distance-label',

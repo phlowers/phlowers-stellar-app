@@ -129,10 +129,10 @@ describe('NewChargeModalComponent (Jest)', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'common.actions.validate': 'Validate',
+              'common.validate': 'Validate',
               'shared.new-charge-modal.charge-name-error': 'The charge case name must be unique.',
               'shared.new-charge-modal.charge-name-label': 'Charge case name',
-              'shared.new-charge-modal.close': 'Close',
+              'common.close': 'Close',
               'shared.new-charge-modal.create-title': 'Create a charge case',
               'shared.new-charge-modal.default-name': 'CC',
               'shared.new-charge-modal.description-label': 'Description',

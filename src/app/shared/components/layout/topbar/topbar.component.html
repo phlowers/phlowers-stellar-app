@@ -30,14 +30,14 @@
     </span>
 
     <span class="calculation__txt" [class.show]="!workerReady() && !workerError()">{{
-      'shared.topbar.loading' | transloco
+      'common.loading' | transloco
     }}</span>
 
     <span class="calculation__txt" [class.show]="workerReady() && !workerError()">{{
-      'shared.topbar.ready' | transloco
+      'common.ready' | transloco
     }}</span>
 
-    <span class="calculation__txt" [class.show]="workerError()">{{ 'shared.topbar.error' | transloco }}</span>
+    <span class="calculation__txt" [class.show]="workerError()">{{ 'common.error' | transloco }}</span>
   </p>
 
   <p class="user" data-testid="user-info">{{ user()?.email ?? 'No user' }}</p>

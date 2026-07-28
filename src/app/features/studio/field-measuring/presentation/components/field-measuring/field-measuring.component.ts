@@ -262,8 +262,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     }
     this.messageService.add({
       severity: 'success',
-      summary: this.translocoService.translate('field-measuring.field-measuring.success-summary'),
-      detail: this.translocoService.translate('field-measuring.field-measuring.success-detail')
+      summary: this.translocoService.translate('common.success'),
+      detail: this.translocoService.translate('field-measuring.actions.success-detail')
     });
   }
 

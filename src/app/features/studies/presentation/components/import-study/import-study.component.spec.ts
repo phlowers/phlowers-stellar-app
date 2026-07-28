@@ -124,15 +124,15 @@ describe('ImportStudyComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studies.import-study.error-cable-not-found': 'Cable not found in database',
-              'studies.import-study.error-import': 'Error importing study',
-              'studies.import-study.error-delete': 'Error deleting study',
-              'studies.import-study.error-decode': 'Error decoding file',
-              'studies.import-study.error-parse': 'Error parsing file',
-              'studies.import-study.error-read': 'Error reading file',
-              'studies.import-study.success-detail': 'Study imported successfully',
-              'studies.import-study.collision-message': 'Study {{ label }} already exists. Do you want to replace it?',
-              'common.import.error.fileTypeNotAllowed': 'File type not allowed',
+              'studies.import.error-cable-not-found': 'Cable not found in database',
+              'studies.import.error-import': 'Error importing study',
+              'studies.import.error-delete': 'Error deleting study',
+              'studies.import.error-decode': 'Error decoding file',
+              'studies.import.error-parse': 'Error parsing file',
+              'studies.import.error-read': 'Error reading file',
+              'studies.import.success-detail': 'Study imported successfully',
+              'studies.import.collision-message': 'Study {{ label }} already exists. Do you want to replace it?',
+              'common.import.error.file-type-not-allowed': 'File type not allowed',
               'common.import.collision.yes': 'Yes',
               'common.import.collision.no': 'No'
             },

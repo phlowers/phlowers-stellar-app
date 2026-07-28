@@ -9,7 +9,7 @@
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
     <dt class="ambientTemp__label">
-      {{ 'field-measuring.temperature-calculation.ambient-temperature-c-label' | transloco }}
+      {{ 'field-measuring.temperature-calculation.ambient-temperature-label' | transloco }}
     </dt>
     <dd class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
   </dl>
@@ -172,13 +172,13 @@
     data-testid="calculate-temperature-btn"
   >
     <app-icon icon="rocket_launch" />
-    <ng-container>{{ 'field-measuring.shared.calculate-button' | transloco }}</ng-container>
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
   </button>
 </div>
 
 @if (measureData().outputs.cableTemperature) {
   <div class="temperature-calculation__results" [@expand]>
-    <h2 class="temperature-calculation__results__title">{{ 'field-measuring.shared.results-title' | transloco }}</h2>
+    <h2 class="temperature-calculation__results__title">{{ 'common.results' | transloco }}</h2>
 
     <dl class="temperature-calculation__results__list">
       <div class="cableTemperature">

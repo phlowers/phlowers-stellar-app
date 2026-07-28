@@ -9,8 +9,8 @@ import { SideTabComponent } from './side-tab/side-tab.component';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
   template: `<app-side-tabs>
-    <app-side-tab label="One">Content One</app-side-tab>
-    <app-side-tab label="Two">Content Two</app-side-tab>
+    <app-side-tab i18n label="One">Content One</app-side-tab>
+    <app-side-tab i18n label="Two">Content Two</app-side-tab>
   </app-side-tabs>`,
   imports: [SideTabsComponent, SideTabComponent],
   standalone: true
@@ -33,7 +33,7 @@ describe('SideTabsComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.sideTabs.foldBack': 'Fold back'
+              'studio.side-tabs.fold-back': 'Fold back'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

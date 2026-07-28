@@ -136,8 +136,8 @@ export class SupportsTableComponent implements OnInit {
   readonly truncateTwoDecimals = truncateTwoDecimals;
 
   optionsChainV = [
-    { label: this.transloco.translate('supportsTable.yes'), value: true },
-    { label: this.transloco.translate('supportsTable.no'), value: false }
+    { label: this.transloco.translate('common.yes'), value: true },
+    { label: this.transloco.translate('common.no'), value: false }
   ];
 
   constructor() {

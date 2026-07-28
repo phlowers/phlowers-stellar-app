@@ -360,7 +360,7 @@ export class VhlAndGuyingComponent {
     this.sectionService.createOrUpdateSection(study, section);
     this.messageService.add({
       severity: 'success',
-      summary: this.translocoService.translate('field-measuring.parameter-calculation-15-without-wind.success-summary'),
+      summary: this.translocoService.translate('common.success'),
       detail: this.translocoService.translate('studio.vtl-and-guying.saved-detail'),
       life: 3000
     });

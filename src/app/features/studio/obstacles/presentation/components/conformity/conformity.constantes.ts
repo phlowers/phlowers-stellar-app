@@ -13,9 +13,9 @@ export const CONFORMITY_BOUNDS = {
  */
 export function getAltitudeTypeLabels(transloco: TranslocoService): Record<string, string> {
   return {
-    absolute: transloco.translate('studio.shared.altitudeTypeAbsolute'),
-    relative: transloco.translate('studio.shared.altitudeTypeRelative'),
-    relative_cable: transloco.translate('studio.shared.altitudeTypeRelativeCable')
+    absolute: transloco.translate('studio.shared.altitude-type-absolute'),
+    relative: transloco.translate('studio.shared.altitude-type-relative'),
+    relative_cable: transloco.translate('studio.shared.altitude-type-relative-cable')
   };
 }
 
@@ -26,7 +26,7 @@ export function getAltitudeTypeLabels(transloco: TranslocoService): Record<strin
  */
 export function getLateralDistanceTypeLabels(transloco: TranslocoService): Record<string, string> {
   return {
-    SPAN_AXIS: transloco.translate('studio.shared.spanAxisOption')
+    SPAN_AXIS: transloco.translate('studio.shared.span-axis-option')
   };
 }
 
@@ -38,31 +38,31 @@ export function getLateralDistanceTypeLabels(transloco: TranslocoService): Recor
 export function getConformityCommonRows(transloco: TranslocoService): ResultRow[] {
   return [
     {
-      label: transloco.translate('studio.conformity.cableAltitudeLabel'),
+      label: transloco.translate('studio.conformity.cable-altitude-label'),
       overhangKey: 'overhangCableAltitude',
       lateralKey: 'lateralCableAltitude',
       unit: 'm'
     },
     {
-      label: transloco.translate('studio.conformity.cableLineAxisDistanceLabel'),
+      label: transloco.translate('studio.conformity.cable-line-axis-distance-label'),
       overhangKey: 'overhangCableLineAxisDistance',
       lateralKey: 'lateralCableLineAxisDistance',
       unit: 'm'
     },
     {
-      label: transloco.translate('studio.conformity.distanceToComplyLabel'),
+      label: transloco.translate('studio.conformity.distance-to-comply-label'),
       overhangKey: 'overhangDistanceToComply',
       lateralKey: 'lateralDistanceToComply',
       unit: 'm'
     },
     {
-      label: transloco.translate('studio.conformity.complianceAltitudeLabel'),
+      label: transloco.translate('studio.conformity.compliance-altitude-label'),
       overhangKey: 'overhangComplianceAltitude',
       lateralKey: null,
       unit: 'm'
     },
     {
-      label: transloco.translate('studio.conformity.complianceLineAxisDistanceLabel'),
+      label: transloco.translate('studio.conformity.compliance-line-axis-distance-label'),
       overhangKey: null,
       lateralKey: 'lateralComplianceLineAxisDistance',
       unit: 'm'
@@ -78,19 +78,19 @@ export function getConformityCommonRows(transloco: TranslocoService): ResultRow[
 export function getConformityCableTrackRows(transloco: TranslocoService): ResultRow[] {
   return [
     {
-      label: transloco.translate('studio.conformity.temperatureLabel'),
+      label: transloco.translate('studio.conformity.temperature-label'),
       overhangKey: 'overhangTemperature',
       lateralKey: 'lateralTemperature',
       unit: '°C'
     },
     {
-      label: transloco.translate('studio.conformity.windPressureLabel'),
+      label: transloco.translate('studio.conformity.wind-pressure-label'),
       overhangKey: 'overhangWindPressure',
       lateralKey: 'lateralWindPressure',
       unit: 'Pa'
     },
     {
-      label: transloco.translate('studio.conformity.minimalDistanceLabel'),
+      label: transloco.translate('studio.conformity.minimal-distance-label'),
       overhangKey: 'overhangMinimalDistance',
       lateralKey: 'lateralMinimalDistance',
       unit: 'm'

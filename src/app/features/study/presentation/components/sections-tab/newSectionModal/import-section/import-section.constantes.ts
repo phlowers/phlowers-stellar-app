@@ -13,11 +13,11 @@ export const createSectionImportConfig = (transloco: TranslocoService): ImportCo
   acceptedFiles: {
     extensions: ['.json'],
     mimeTypes: ['application/json'],
-    hint: transloco.translate('importSection.fileFormat')
+    hint: transloco.translate('section-import.from-file.file-format')
   },
   entityLabel: transloco.translate('importSection.entityLabel'),
   texts: {
-    description: transloco.translate('importSection.description'),
-    uploadPrompt: transloco.translate('importSection.uploadPrompt')
+    description: transloco.translate('section-import.from-file.description'),
+    uploadPrompt: transloco.translate('section-import.from-file.upload-prompt')
   }
 });

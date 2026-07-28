@@ -109,7 +109,7 @@ describe('VhlAndGuyingComponent', () => {
     const translations: Record<string, string> = {
       'studio.vtl-and-guying.suspension-label': 'Suspension',
       'studio.vtl-and-guying.anchor-label': 'Anchor',
-      'field-measuring.parameter-calculation-15-without-wind.success-summary': 'Successful',
+      'common.success': 'Successful',
       'studio.vtl-and-guying.saved-detail': 'VTL and guying saved'
     };
 

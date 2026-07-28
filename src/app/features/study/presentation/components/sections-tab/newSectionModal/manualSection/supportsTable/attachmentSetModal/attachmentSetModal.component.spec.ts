@@ -229,18 +229,18 @@ describe('AttachmentSetModalComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'attachmentSetModal.title': 'Attachment set',
-              'attachmentSetModal.chooseHint':
+              'attachment-modal.title': 'Attachment set',
+              'attachment-modal.chooseHint':
                 'Choose the attachment set in the list or on the graph to find the right arm length.',
-              'attachmentSetModal.labelSupportName': 'Support name',
-              'attachmentSetModal.labelAttachmentSet': 'Attachment set',
-              'attachmentSetModal.armLength': 'Arm length',
-              'attachmentSetModal.unitMeter': 'm',
-              'attachmentSetModal.heightBelowConsole': 'Height below console',
-              'attachmentSetModal.autoFillHint':
+              'attachment-modal.labelSupportName': 'Support name',
+              'attachment-modal.labelAttachmentSet': 'Attachment set',
+              'attachment-modal.armLength': 'Arm length',
+              'attachment-modal.unitMeter': 'm',
+              'attachment-modal.heightBelowConsole': 'Height below console',
+              'attachment-modal.autoFillHint':
                 'The attachment set and the arm length (m) will be automatically filled in the table.',
-              'attachmentSetModal.close': 'Close',
-              'attachmentSetModal.validate': 'Validate'
+              'attachment-modal.close': 'Close',
+              'attachment-modal.validate': 'Validate'
             }
           },
           translocoConfig: {

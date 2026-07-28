@@ -218,7 +218,7 @@ export class ConformityComponent implements OnDestroy {
 
   readonly pointOptions = computed(() =>
     this.positions().map((_, i) => ({
-      label: this.translocoService.translate('studio.conformity.pointOptionLabel', { index: i + 1 }),
+      label: this.translocoService.translate('studio.conformity.point-option-label', { index: i + 1 }),
       value: i
     }))
   );
@@ -520,7 +520,7 @@ export class ConformityComponent implements OnDestroy {
     if (!obstacle) return;
     const conformityType = this.conformityType();
     if (!conformityType) {
-      this.notificationService.error(this.translocoService.translate('studio.conformity.noConformityConfigError'));
+      this.notificationService.error(this.translocoService.translate('studio.conformity.no-conformity-config-error'));
       return;
     }
     // Map database value to Python worker expected value
@@ -598,7 +598,7 @@ export class ConformityComponent implements OnDestroy {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
       this.notificationService.error(
-        this.translocoService.translate('studio.conformity.calculationFailedError', { errorMessage })
+        this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
       );
     } finally {
       this.isCalculating.set(false);

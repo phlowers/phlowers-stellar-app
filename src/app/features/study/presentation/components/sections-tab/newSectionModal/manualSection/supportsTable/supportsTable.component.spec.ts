@@ -183,8 +183,8 @@ describe('SupportsTableComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'supportsTable.yes': 'Yes',
-              'supportsTable.no': 'No'
+              'common.yes': 'Yes',
+              'common.no': 'No'
             }
           },
           translocoConfig: {
