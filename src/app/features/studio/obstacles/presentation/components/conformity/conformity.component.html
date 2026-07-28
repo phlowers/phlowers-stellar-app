@@ -42,7 +42,9 @@
         <dt class="form__alt-type-obstacle-label">{{ 'studio.conformity.altitude-type-label' | transloco }}</dt>
         <dd class="form__alt-type-obstacle-input">{{ altitudeTypeLabel() }}</dd>
 
-        <dt class="form__lat-dist-type-obstacle-label">{{ 'studio.shared.lateral-distance-type-label' | transloco }}</dt>
+        <dt class="form__lat-dist-type-obstacle-label">
+          {{ 'studio.shared.lateral-distance-type-label' | transloco }}
+        </dt>
         <dd class="form__lat-dist-type-obstacle-input">{{ lateralDistanceTypeLabel() }}</dd>
 
         <dt class="form__alt-pt-obstacle-label">{{ 'studio.conformity.altitude-point-label' | transloco }}</dt>
@@ -265,11 +267,13 @@
             <th scope="col"></th>
             @for (col of selectedConformityColumns(); track col.value) {
               <th scope="col">
-                {{ col.label }} <ng-container>{{ 'studio.conformity.overhang-column-suffix' | transloco }}</ng-container>
+                {{ col.label }}
+                <ng-container>{{ 'studio.conformity.overhang-column-suffix' | transloco }}</ng-container>
               </th>
               @if (showLateralColumn()) {
                 <th scope="col">
-                  {{ col.label }} <ng-container>{{ 'studio.conformity.lateral-column-suffix' | transloco }}</ng-container>
+                  {{ col.label }}
+                  <ng-container>{{ 'studio.conformity.lateral-column-suffix' | transloco }}</ng-container>
                 </th>
               }
             }
@@ -285,7 +289,9 @@
                 @switch (getConformityCompliance(col.value)) {
                   @case (null) {
                     <div class="compliance">
-                      <span class="compliance__text">{{ 'studio.conformity.unknown-compliance-label' | transloco }}</span>
+                      <span class="compliance__text">{{
+                        'studio.conformity.unknown-compliance-label' | transloco
+                      }}</span>
                       <app-icon
                         icon="shield_question"
                         class="compliance__icon compliance__icon--unknown"

@@ -622,7 +622,7 @@ describe('AppComponent - automatic first-install resilience', () => {
     });
 
     // Patch the LoggerService used by AppComponent via DI override.
-     
+
     const { LoggerService } = await import('@core/services/logger/logger.service');
     TestBed.overrideProvider(LoggerService, {
       useValue: { error: loggerError, warn: loggerWarn, info: vi.fn(), debug: vi.fn() }

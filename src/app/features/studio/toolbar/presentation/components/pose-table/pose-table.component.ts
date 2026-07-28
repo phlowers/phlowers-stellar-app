@@ -233,10 +233,8 @@ export class PoseTableComponent {
     const errors = this.form.controls.lowestTemp.errors;
     if (errors?.['required']) return this.translocoService.translate('common.required');
     if (errors?.['maxTwoDecimals']) return this.translocoService.translate('studio.pose-table.max-two-decimals-error');
-    if (errors?.['min'])
-      return this.translocoService.translate('common.min-value') + ' ' + this.LOWEST_TEMP_MIN + '°C';
-    if (errors?.['max'])
-      return this.translocoService.translate('common.max-value') + ' ' + this.LOWEST_TEMP_MAX + '°C';
+    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.LOWEST_TEMP_MIN + '°C';
+    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.LOWEST_TEMP_MAX + '°C';
     return '';
   }
 
@@ -244,10 +242,8 @@ export class PoseTableComponent {
     const errors = this.form.controls.computingStep.errors;
     if (errors?.['required']) return this.translocoService.translate('common.required');
     if (errors?.['integer']) return this.translocoService.translate('studio.pose-table.integer-error');
-    if (errors?.['min'])
-      return this.translocoService.translate('common.min-value') + ' ' + this.COMPUTING_STEP_MIN;
-    if (errors?.['max'])
-      return this.translocoService.translate('common.max-value') + ' ' + this.COMPUTING_STEP_MAX;
+    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.COMPUTING_STEP_MIN;
+    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.COMPUTING_STEP_MAX;
     return '';
   }
 

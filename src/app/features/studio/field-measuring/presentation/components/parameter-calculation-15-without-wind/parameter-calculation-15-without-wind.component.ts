@@ -237,9 +237,7 @@ export class ParameterCalculation15WithoutWindComponent {
       await this.initialConditionService.setInitialCondition(study, section, newUuid);
       this.messageService.add({
         severity: 'success',
-        summary: this.translocoService.translate(
-          'common.success'
-        ),
+        summary: this.translocoService.translate('common.success'),
         detail: this.translocoService.translate(
           'field-measuring.parameter-calculation-15.success-detail-state-generated'
         ),
@@ -248,9 +246,7 @@ export class ParameterCalculation15WithoutWindComponent {
     } else {
       this.messageService.add({
         severity: 'success',
-        summary: this.translocoService.translate(
-          'common.success'
-        ),
+        summary: this.translocoService.translate('common.success'),
         detail: this.translocoService.translate('field-measuring.parameter-calculation-15.success-detail'),
         life: 3000
       });

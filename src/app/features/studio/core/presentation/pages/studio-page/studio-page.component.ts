@@ -188,7 +188,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));
     if (options.length) {
-      options.unshift({ label: this.translocoService.translate('studio.studio-page.not-selected-option'), value: null });
+      options.unshift({
+        label: this.translocoService.translate('studio.studio-page.not-selected-option'),
+        value: null
+      });
     }
     return options;
   });

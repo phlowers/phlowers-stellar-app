@@ -60,7 +60,9 @@
         (click)="service.setActivePoint($index)"
         data-testid="select-point"
       >
-        <span class="sr-only">{{ 'studio.distance-measuring.select-point-label' | transloco }}&nbsp;{{ $index + 1 }}</span>
+        <span class="sr-only"
+          >{{ 'studio.distance-measuring.select-point-label' | transloco }}&nbsp;{{ $index + 1 }}</span
+        >
       </button>
 
       <div class="distance-item__header">

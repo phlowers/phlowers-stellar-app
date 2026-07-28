@@ -61,12 +61,8 @@
       <button app-btn btnStyle="danger" (click)="deleteAllStudies()">
         {{ 'admin.delete-all-studies' | transloco }}
       </button>
-      <button app-btn btnStyle="danger" (click)="resetDatabase()">
-        {{ 'admin.reset-database' | transloco }}
-      </button>
-      <button app-btn btnStyle="danger" (click)="resetApp()">
-        {{ 'admin.reset-app-without-db' | transloco }}
-      </button>
+      <button app-btn btnStyle="danger" (click)="resetDatabase()">{{ 'admin.reset-database' | transloco }}</button>
+      <button app-btn btnStyle="danger" (click)="resetApp()">{{ 'admin.reset-app-without-db' | transloco }}</button>
     </div>
   </p-card>
 </div>
