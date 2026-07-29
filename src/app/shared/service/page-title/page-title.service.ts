@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { TranslocoService } from '@jsverse/transloco';
 import { catchError, filter, map, mergeMap, startWith } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 
@@ -15,6 +16,7 @@ export class PageTitleService {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
+  private readonly transloco = inject(TranslocoService);
 
   constructor() {
     this.router.events
@@ -33,7 +35,7 @@ export class PageTitleService {
       )
       .subscribe((title) => {
         if (title) {
-          const titleString = title;
+          const titleString = this.transloco.translate(title);
           this.pageTitleSubject.next(titleString);
           this.titleService.setTitle(titleString);
         }

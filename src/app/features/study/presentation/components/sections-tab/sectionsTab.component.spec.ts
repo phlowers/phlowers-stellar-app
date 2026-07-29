@@ -164,7 +164,6 @@ describe('SectionsTabComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'sectionsTab.actionAddIC': 'Add an initial condition',
               'common.delete': 'Delete',
               'common.duplicate': 'Duplicate',
               'common.edit': 'Edit',

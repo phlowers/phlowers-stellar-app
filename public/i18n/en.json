@@ -148,7 +148,9 @@
     "python-logs-activated-summary": "Python logs activated",
     "python-logs-deactivated-summary": "Python logs deactivated",
     "python-logs-activated-detail": "The python logs have been activated",
-    "python-logs-deactivated-detail": "The python logs have been deactivated"
+    "python-logs-deactivated-detail": "The python logs have been deactivated",
+    "debug-logs-on": "Enabled",
+    "debug-logs-off": "Disabled"
   },
   "shared": {
     "input-number": {
@@ -302,7 +304,8 @@
       "file-format": "File format: .json",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
       "upload-prompt": "Upload a JSON file",
-      "import-error": "The imported section could not be found. Please try again."
+      "import-error": "The imported section could not be found. Please try again.",
+      "entity-label": "Section"
     }
   },
   "studies": {

@@ -230,17 +230,17 @@ describe('AttachmentSetModalComponent', () => {
           langs: {
             en: {
               'attachment-modal.title': 'Attachment set',
-              'attachment-modal.chooseHint':
+              'attachment-modal.choose-hint':
                 'Choose the attachment set in the list or on the graph to find the right arm length.',
-              'attachment-modal.labelSupportName': 'Support name',
-              'attachment-modal.labelAttachmentSet': 'Attachment set',
-              'attachment-modal.armLength': 'Arm length',
-              'attachment-modal.unitMeter': 'm',
-              'attachment-modal.heightBelowConsole': 'Height below console',
-              'attachment-modal.autoFillHint':
+              'attachment-modal.label-support-name': 'Support name',
+              'attachment-modal.label-attachment-set': 'Attachment set',
+              'attachment-modal.arm-length': 'Arm length',
+              'common.meter': 'm',
+              'attachment-modal.height-below-console': 'Height below console',
+              'attachment-modal.auto-fill-hint':
                 'The attachment set and the arm length (m) will be automatically filled in the table.',
-              'attachment-modal.close': 'Close',
-              'attachment-modal.validate': 'Validate'
+              'common.close': 'Close',
+              'common.validate': 'Validate'
             }
           },
           translocoConfig: {

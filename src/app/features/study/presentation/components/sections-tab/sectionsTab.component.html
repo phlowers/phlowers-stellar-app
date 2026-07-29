@@ -67,9 +67,9 @@
           <dt class="section__title-type">{{ 'sections-tab.col-type' | transloco }}</dt>
           <dd class="section__text-type">
             @if (section.type === 'guard') {
-              <ng-container>{{ 'sections-tab.type-guard' | transloco }}</ng-container>
+              <ng-container>{{ 'common.section-type.guard' | transloco }}</ng-container>
             } @else {
-              <ng-container>{{ 'sections-tab.type-phase' | transloco }}</ng-container>
+              <ng-container>{{ 'common.section-type.phase' | transloco }}</ng-container>
             }
           </dd>
 
@@ -176,11 +176,11 @@
           <ng-template pTemplate="content">
             <button app-btn btnSize="s" btnStyle="text" (click)="viewSection(section)" data-testid="section-view-btn">
               <app-icon icon="visibility" />
-              <span>{{ 'sections-tab.action-view' | transloco }}</span>
+              <span>{{ 'common.view' | transloco }}</span>
             </button>
             <button app-btn btnSize="s" btnStyle="text" (click)="editSection(section)" data-testid="section-edit-btn">
               <app-icon icon="edit" />
-              <span>{{ 'sections-tab.action-edit' | transloco }}</span>
+              <span>{{ 'common.edit' | transloco }}</span>
             </button>
 
             <button
@@ -191,7 +191,7 @@
               (click)="openInitialConditionModal(section, createInitialCondition(section), 'create')"
             >
               <app-icon icon="add_circle" />
-              <span>{{ 'sections-tab.action-add-ic' | transloco }}</span>
+              <span>{{ 'sections-tab.add-initial-condition' | transloco }}</span>
             </button>
 
             <button
@@ -202,7 +202,7 @@
               data-testid="section-duplicate-btn"
             >
               <app-icon icon="content_copy" />
-              <span>{{ 'sections-tab.action-duplicate' | transloco }}</span>
+              <span>{{ 'common.duplicate' | transloco }}</span>
             </button>
 
             <button
@@ -214,7 +214,7 @@
               data-testid="section-delete-btn"
             >
               <app-icon icon="delete" />
-              <span>{{ 'sections-tab.action-delete' | transloco }}</span>
+              <span>{{ 'common.delete' | transloco }}</span>
             </button>
           </ng-template>
         </p-popover>

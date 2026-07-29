@@ -148,7 +148,9 @@
     "python-logs-activated-summary": "Les logs Python sont activés",
     "python-logs-deactivated-summary": "Les logs Python sont désactivés",
     "python-logs-activated-detail": "Les logs Python sont activés",
-    "python-logs-deactivated-detail": "Les logs Python sont désactivés"
+    "python-logs-deactivated-detail": "Les logs Python sont désactivés",
+    "debug-logs-on": "Activé",
+    "debug-logs-off": "Désactivé"
   },
   "shared": {
     "input-number": {
@@ -302,7 +304,8 @@
       "file-format": "Format de fichier : .json",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
       "upload-prompt": "Importer un fichier JSON",
-      "import-error": "Le canton importé est introuvable. Veuillez réessayer."
+      "import-error": "Le canton importé est introuvable. Veuillez réessayer.",
+      "entity-label": "Canton"
     }
   },
   "studies": {

@@ -165,7 +165,7 @@
               step="0.01"
               [min]="limits.attachmentHeight.min"
               [max]="limits.attachmentHeight.max"
-              [attr.aria-label]="'supports-table.ariaAttachmentHeight' | transloco"
+              [attr.aria-label]="'supports-table.aria-attachment-height' | transloco"
               [ngModel]="support.attachmentHeight"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
@@ -208,7 +208,7 @@
               step="0.01"
               [min]="limits.spanAngle.min"
               [max]="limits.spanAngle.max"
-              [attr.aria-label]="'supports-table.ariaSpanAngle' | transloco"
+              [attr.aria-label]="'supports-table.aria-span-angle' | transloco"
               [ngModel]="support.spanAngle"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
@@ -247,7 +247,7 @@
         @if (mode() !== 'view') {
           <p-select
             [options]="allChainsOptions()"
-            [attr.aria-label]="'supports-table.ariaChainName' | transloco"
+            [attr.aria-label]="'supports-table.aria-chain-name' | transloco"
             [ngModel]="support.chainName"
             optionLabel="chain_name"
             type="text"
@@ -279,7 +279,7 @@
               [min]="limits.chainLength.min"
               [max]="limits.chainLength.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.ariaChainLength' | transloco"
+              [attr.aria-label]="'supports-table.aria-chain-length' | transloco"
               [ngModel]="support.chainLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
               [id]="'chainLength' + rowIndex"
@@ -290,7 +290,7 @@
               "
               #chainLengthInput="ngModel"
             />
-            <p-inputgroup-addon>{{ 'supports-table.unitMeter' | transloco }}</p-inputgroup-addon>
+            <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
           @if (chainLengthInput.dirty && chainLengthInput.errors?.['min']) {
             <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
@@ -321,7 +321,7 @@
               [min]="limits.chainWeight.min"
               [max]="limits.chainWeight.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.ariaChainWeight' | transloco"
+              [attr.aria-label]="'supports-table.aria-chain-weight' | transloco"
               [ngModel]="support.chainWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
               [id]="'chainWeight' + rowIndex"
@@ -385,7 +385,7 @@
               [min]="limits.attachmentSet.min"
               [max]="limits.attachmentSet.max"
               [pKeyFilter]="onlyPositiveNumbers"
-              [attr.aria-label]="'supports-table.ariaAttachmentSet' | transloco"
+              [attr.aria-label]="'supports-table.aria-attachment-set' | transloco"
               [ngModel]="support.attachmentSet"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
               [id]="'attachmentSet' + rowIndex"
@@ -402,7 +402,7 @@
                 btnSize="s"
                 [disabled]="!support.name || (catalogLoaded() && !supportFilterTable().includes(support.name))"
                 btnStyle="text"
-                [attr.aria-label]="'supports-table.ariaOpenAttachmentModal' | transloco"
+                [attr.aria-label]="'supports-table.aria-open-attachment-modal' | transloco"
                 (click)="openAttachmentSetModal(support.uuid)"
                 data-testid="open-attachment-set-modal-btn"
               >
@@ -434,7 +434,7 @@
               step="0.01"
               [min]="limits.armLength.min"
               [max]="limits.armLength.max"
-              [attr.aria-label]="'supports-table.ariaArmLength' | transloco"
+              [attr.aria-label]="'supports-table.aria-arm-length' | transloco"
               [ngModel]="support.armLength"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
@@ -474,7 +474,7 @@
           <p-select
             [options]="optionsChainV"
             appendTo="body"
-            [attr.aria-label]="'supports-table.ariaChainV' | transloco"
+            [attr.aria-label]="'supports-table.aria-chain-v' | transloco"
             [ngModel]="support.chainV"
             optionLabel="label"
             optionValue="value"
@@ -509,7 +509,7 @@
               [min]="limits.counterWeight.min"
               [max]="limits.counterWeight.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.ariaCounterWeight' | transloco"
+              [attr.aria-label]="'supports-table.aria-counter-weight' | transloco"
               [ngModel]="support.counterWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
               [id]="'counterWeight' + rowIndex"
@@ -551,7 +551,7 @@
               step="0.01"
               [min]="limits.supportFootAltitude.min"
               [max]="limits.supportFootAltitude.max"
-              [attr.aria-label]="'supports-table.ariaSuppFootAlt' | transloco"
+              [attr.aria-label]="'supports-table.aria-supp-foot-alt' | transloco"
               [ngModel]="support.supportFootAltitude"
               (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
@@ -592,7 +592,7 @@
           <p-select
             [options]="optionsAttachmentPosition"
             appendTo="body"
-            [attr.aria-label]="'supports-table.ariaAttachmentPosition' | transloco"
+            [attr.aria-label]="'supports-table.aria-attachment-position' | transloco"
             [ngModel]="support.attachmentPosition"
             optionLabel="label"
             optionValue="value"
@@ -613,7 +613,7 @@
               [min]="limits.chainSurface.min"
               [max]="limits.chainSurface.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.ariaChainSurface' | transloco"
+              [attr.aria-label]="'supports-table.aria-chain-surface' | transloco"
               [ngModel]="support.chainSurface"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
               [id]="'chainSurface' + rowIndex"
@@ -729,7 +729,7 @@
                   data-testid="add-support-before-btn"
                 >
                   <app-icon icon="add" />
-                  <span>{{ 'supports-table.addBefore' | transloco }}</span>
+                  <span>{{ 'supports-table.add-before' | transloco }}</span>
                 </button>
                 <button
                   app-btn
@@ -739,7 +739,7 @@
                   data-testid="add-support-after-btn"
                 >
                   <app-icon icon="add" />
-                  <span>{{ 'supports-table.addAfter' | transloco }}</span>
+                  <span>{{ 'supports-table.add-after' | transloco }}</span>
                 </button>
                 <button
                   app-btn

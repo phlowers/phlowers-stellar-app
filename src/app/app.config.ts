@@ -26,6 +26,54 @@ import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
 import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strategy';
 import { LoggerService } from '@services/logger/logger.service';
 import { getAndClearBootstrapErrors } from '../bootstrap-logger';
+import { TranslocoService } from '@jsverse/transloco';
+import { firstValueFrom } from 'rxjs';
+
+/**
+ * Application initializer factory.
+ *
+ * Enforces the V2 startup sequence (§5.1 of connexion-gaia.md):
+ * 1. StorageService.setPersistentStorage()
+ * 2. StorageService.createDatabase()
+ * 3. AuthService.initialize() — cache-first: resolves instantly when a
+ *    previously-authenticated OIDC user is cached, running the network
+ *    resync in the background (does not block this initializer).
+ * In parallel with steps 1-3: TranslocoService.load() for the active lang,
+ * so the initial route navigation (blocked by withEnabledBlockingInitialNavigation)
+ * and any component reading translations imperatively never race the i18n HTTP load.
+ * Running it in parallel (rather than after) avoids adding extra bootstrap latency.
+ * 4. UpdateService.checkForUpdateOnce() — started in the background, not
+ *    awaited: the update/install prompt is not part of the critical
+ *    first-render path and must never delay it.
+ *
+ * Steps 5 (setupData) and 6 (WorkerPythonService.setup) are handled by AppComponent.ngOnInit
+ * after this initializer completes, with an explicit try/catch so step 6 always runs.
+ *
+ * Exported (rather than inlined) so it can be unit-tested in isolation.
+ */
+export async function initializeApp(): Promise<void> {
+  const logger = inject(LoggerService);
+  const storageService = inject(StorageService);
+  const authService = inject(AuthService);
+  const updateService = inject(UpdateService);
+  const translocoService = inject(TranslocoService);
+
+  // Flush any errors that occurred during bootstrap phase (e.g., Service Worker registration)
+  const bootstrapErrors = getAndClearBootstrapErrors();
+  for (const err of bootstrapErrors) {
+    logger.error(`Bootstrap error [${err.context}]`, err.error);
+  }
+
+  await Promise.all([
+    (async () => {
+      await storageService.setPersistentStorage();
+      await storageService.createDatabase();
+      await authService.initialize();
+    })(),
+    firstValueFrom(translocoService.load(translocoService.getActiveLang()))
+  ]);
+  void updateService.checkForUpdateOnce();
+}
 
 /** Root Angular application configuration with routing, HTTP, animations, PrimeNG theme, and markdown support. */
 export const appConfig: ApplicationConfig = {
@@ -50,38 +98,6 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: TitleStrategy, useClass: TranslocoTitleStrategy },
-    /**
-     * Application initializer.
-     *
-     * Enforces the V2 startup sequence (§5.1 of connexion-gaia.md):
-     * 1. StorageService.setPersistentStorage()
-     * 2. StorageService.createDatabase()
-     * 3. AuthService.initialize() — cache-first: resolves instantly when a
-     *    previously-authenticated OIDC user is cached, running the network
-     *    resync in the background (does not block this initializer).
-     * 4. UpdateService.checkForUpdateOnce() — started in the background, not
-     *    awaited: the update/install prompt is not part of the critical
-     *    first-render path and must never delay it.
-     *
-     * Steps 5 (setupData) and 6 (WorkerPythonService.setup) are handled by AppComponent.ngOnInit
-     * after this initializer completes, with an explicit try/catch so step 6 always runs.
-     */
-    provideAppInitializer(async () => {
-      const logger = inject(LoggerService);
-      const storageService = inject(StorageService);
-      const authService = inject(AuthService);
-      const updateService = inject(UpdateService);
-
-      // Flush any errors that occurred during bootstrap phase (e.g., Service Worker registration)
-      const bootstrapErrors = getAndClearBootstrapErrors();
-      for (const err of bootstrapErrors) {
-        logger.error(`Bootstrap error [${err.context}]`, err.error);
-      }
-
-      await storageService.setPersistentStorage();
-      await storageService.createDatabase();
-      await authService.initialize();
-      void updateService.checkForUpdateOnce();
-    })
+    provideAppInitializer(initializeApp)
   ]
 };
