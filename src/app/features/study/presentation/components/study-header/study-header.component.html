@@ -37,7 +37,7 @@
 
   <time [attr.datetime]="study()?.created_at_offline" class="study-header__time">
     <app-icon icon="schedule" />
-    {{ study()?.created_at_offline | date: dateFormat }}
+    {{ study()?.created_at_offline | date: dateFormat() }}
   </time>
   @if (study()?.shareable) {
     <hr class="study-header__separator" />

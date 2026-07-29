@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { AccordionModule } from 'primeng/accordion';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -44,7 +45,14 @@ export class StudyHeaderComponent {
   /** Emits when the user requests to modify the study metadata. */
   public openModifyStudyModal = output<void>();
   private readonly transloco = inject(TranslocoService);
-  public dateFormat = this.transloco.translate('study.header.date-format');
+  private readonly activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang()
+  });
+  /** Recomputed whenever the active language changes so the date format stays in sync. */
+  public dateFormat = computed<string>(() => {
+    this.activeLang();
+    return this.transloco.translate('study.header.date-format');
+  });
   private readonly studiesService = inject(StudiesService);
 
   toggleActiveDetail() {

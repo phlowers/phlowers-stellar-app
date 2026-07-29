@@ -2,17 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { TopbarComponent } from '../topbar/topbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { RouterModule } from '@angular/router';
-import { SidebarItem } from '../sidebar/sidebar.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoService } from '@jsverse/transloco';
-
-/** Navigation structure grouping main and footer sidebar items. */
-interface SidebarNavigation {
-  /** Primary navigation links. */
-  main: SidebarItem[];
-  /** Footer navigation links. */
-  footer: SidebarItem[];
-}
+import { SidebarNavigation } from './logged-layout.interfaces';
 
 @Component({
   selector: 'app-logged-layout',

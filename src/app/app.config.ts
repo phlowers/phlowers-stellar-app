@@ -25,6 +25,7 @@ import { UpdateService } from '@services/worker_update/worker_update.service';
 import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
 import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strategy';
 import { LoggerService } from '@services/logger/logger.service';
+import { AppConfigService } from '@core/config/app-config.service';
 import { getAndClearBootstrapErrors } from '../bootstrap-logger';
 import { TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
@@ -38,10 +39,14 @@ import { firstValueFrom } from 'rxjs';
  * 3. AuthService.initialize() — cache-first: resolves instantly when a
  *    previously-authenticated OIDC user is cached, running the network
  *    resync in the background (does not block this initializer).
- * In parallel with steps 1-3: TranslocoService.load() for the active lang,
- * so the initial route navigation (blocked by withEnabledBlockingInitialNavigation)
- * and any component reading translations imperatively never race the i18n HTTP load.
- * Running it in parallel (rather than after) avoids adding extra bootstrap latency.
+ * In parallel with steps 1-3: AppConfigService.loadDefaultLang() resolves the
+ * runtime-configured language (from assets/config/app-config.json, written
+ * post-deploy by Docker/Jenkins), then TranslocoService.load() fetches that
+ * language's translations, so the initial route navigation (blocked by
+ * withEnabledBlockingInitialNavigation) and any component reading translations
+ * imperatively never race the i18n HTTP load.
+ * Running both branches in parallel (rather than sequentially) avoids adding
+ * extra bootstrap latency.
  * 4. UpdateService.checkForUpdateOnce() — started in the background, not
  *    awaited: the update/install prompt is not part of the critical
  *    first-render path and must never delay it.
@@ -57,6 +62,7 @@ export async function initializeApp(): Promise<void> {
   const authService = inject(AuthService);
   const updateService = inject(UpdateService);
   const translocoService = inject(TranslocoService);
+  const appConfigService = inject(AppConfigService);
 
   // Flush any errors that occurred during bootstrap phase (e.g., Service Worker registration)
   const bootstrapErrors = getAndClearBootstrapErrors();
@@ -70,7 +76,11 @@ export async function initializeApp(): Promise<void> {
       await storageService.createDatabase();
       await authService.initialize();
     })(),
-    firstValueFrom(translocoService.load(translocoService.getActiveLang()))
+    (async () => {
+      const defaultLang = await appConfigService.loadDefaultLang();
+      translocoService.setActiveLang(defaultLang);
+      await firstValueFrom(translocoService.load(defaultLang));
+    })()
   ]);
   void updateService.checkForUpdateOnce();
 }

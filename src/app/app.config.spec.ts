@@ -11,6 +11,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { AuthService } from '@services/auth/auth.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { LoggerService } from '@services/logger/logger.service';
+import { AppConfigService } from '@core/config/app-config.service';
 import { TranslocoService } from '@jsverse/transloco';
 
 describe('initializeApp', () => {
@@ -18,7 +19,8 @@ describe('initializeApp', () => {
   let mockAuthService: { initialize: vi.Mock };
   let mockUpdateService: { checkForUpdateOnce: vi.Mock };
   let mockLoggerService: { error: vi.Mock };
-  let mockTranslocoService: { getActiveLang: vi.Mock; load: vi.Mock };
+  let mockTranslocoService: { setActiveLang: vi.Mock; load: vi.Mock };
+  let mockAppConfigService: { loadDefaultLang: vi.Mock };
   let translationLoad$: Subject<unknown>;
 
   beforeEach(() => {
@@ -32,9 +34,10 @@ describe('initializeApp', () => {
     mockUpdateService = { checkForUpdateOnce: vi.fn().mockResolvedValue(undefined) };
     mockLoggerService = { error: vi.fn() };
     mockTranslocoService = {
-      getActiveLang: vi.fn().mockReturnValue('en'),
+      setActiveLang: vi.fn(),
       load: vi.fn().mockReturnValue(translationLoad$)
     };
+    mockAppConfigService = { loadDefaultLang: vi.fn().mockResolvedValue('en') };
 
     TestBed.configureTestingModule({
       providers: [
@@ -42,7 +45,8 @@ describe('initializeApp', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: UpdateService, useValue: mockUpdateService },
         { provide: LoggerService, useValue: mockLoggerService },
-        { provide: TranslocoService, useValue: mockTranslocoService }
+        { provide: TranslocoService, useValue: mockTranslocoService },
+        { provide: AppConfigService, useValue: mockAppConfigService }
       ]
     });
   });
@@ -53,7 +57,9 @@ describe('initializeApp', () => {
       resolved = true;
     });
 
-    // Storage/auth chain already resolved (real microtasks), but translations haven't emitted yet.
+    // Storage/auth chain and AppConfigService already resolved (real microtasks),
+    // but translations haven't emitted yet.
+    await Promise.resolve();
     await Promise.resolve();
     await Promise.resolve();
     expect(resolved).toBe(false);
@@ -65,13 +71,17 @@ describe('initializeApp', () => {
     expect(resolved).toBe(true);
   });
 
-  it('should load translations for the active lang in parallel with storage/auth init', async () => {
+  it('should resolve the runtime language via AppConfigService and load its translations', async () => {
     const promise = TestBed.runInInjectionContext(() => initializeApp());
+    // Let AppConfigService.loadDefaultLang() resolve before load() is called/subscribed.
+    await Promise.resolve();
+    await Promise.resolve();
     translationLoad$.next({});
     translationLoad$.complete();
     await promise;
 
-    expect(mockTranslocoService.getActiveLang).toHaveBeenCalled();
+    expect(mockAppConfigService.loadDefaultLang).toHaveBeenCalled();
+    expect(mockTranslocoService.setActiveLang).toHaveBeenCalledWith('en');
     expect(mockTranslocoService.load).toHaveBeenCalledWith('en');
     expect(mockStorageService.setPersistentStorage).toHaveBeenCalled();
     expect(mockStorageService.createDatabase).toHaveBeenCalled();
@@ -91,6 +101,9 @@ describe('initializeApp', () => {
     );
 
     const promise = TestBed.runInInjectionContext(() => initializeApp());
+    // Let AppConfigService.loadDefaultLang() resolve before load() is called/subscribed.
+    await Promise.resolve();
+    await Promise.resolve();
     translationLoad$.next({});
     translationLoad$.complete();
     await promise;

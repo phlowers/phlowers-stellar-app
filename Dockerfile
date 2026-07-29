@@ -22,7 +22,7 @@ ARG DEFAULT_LANGUAGE=fr
 
 COPY --from=build /usr/src/app/dist /usr/share/nginx/html
 
-RUN echo "{\"defaultLang\": \"${DEFAULT_LANGUAGE}\"}" \
+RUN mkdir -p /usr/share/nginx/html/assets/config && echo "{\"defaultLang\": \"${DEFAULT_LANGUAGE}\"}" \
     > /usr/share/nginx/html/assets/config/app-config.json
 
 EXPOSE 80

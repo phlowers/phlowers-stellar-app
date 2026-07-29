@@ -69,58 +69,57 @@ Angular native i18n (`$localize`, `.xlf`, `i18n` attributes) has been fully repl
 
 ### Translation files
 
-Two flat JSON files, one per language:
+Two JSON files, one per language:
 ```
 public/i18n/en.json
 public/i18n/fr.json
 ```
 
-**Structure: always flat, never nested.**
+**Structure: nested by feature/component, never a flat dot-joined property.**
 
 ```json
 // ✅ CORRECT
-{ "study.tabs.sections": "Sections", "common.actions.save": "Save" }
+{ "sections-tab": { "col-name": "Section Name" }, "common": { "save": "Save" } }
 
-// ❌ FORBIDDEN — never nest objects
-{ "study": { "tabs": { "sections": "Sections" } } }
+// ❌ FORBIDDEN — never store the dotted path as a single flat property
+{ "sections-tab.col-name": "Section Name" }
 ```
 
 ### Key naming conventions
 
-Keys follow a **dotted namespace** structure. Always check `en.json` for an existing key before creating a new one.
+Keys are referenced in code as a **dot-path** into the nested JSON structure. Always check `en.json` for an existing key before creating a new one.
 
 | Namespace | Usage | Examples |
 |---|---|---|
-| `common.*` | Generic text reused across multiple features | `common.actions.save`, `common.actions.cancel`, `common.actions.delete` |
-| `domain.*` | Shared business vocabulary (study/studio) | `domain.altitude`, `domain.chainLength`, `domain.referenceSupport` |
+| `common.*` | Generic text reused across multiple features | `common.save`, `common.cancel`, `common.delete` |
 | `routes.*` | Browser tab titles (via `TranslocoTitleStrategy`) | `routes.login`, `routes.study`, `routes.admin` |
-| `pythonError.*` | Python engine error messages | `pythonError.solverError`, `pythonError.convergenceError` |
-| `<feature>.shared.*` | Text reused by multiple components within ONE feature | `study.shared.duplicate`, `fieldMeasuring.shared.skyCover.n1` |
-| `<feature>.<component>.*` | Text specific to a single component | `sectionsTab.colName`, `supportsTable.colNumber`, `manualSection.tabGeneral` |
+| `shared.python-errors.*` | Python engine error messages | `shared.python-errors.solver-error`, `shared.python-errors.convergence-error` |
+| `shared.<service-name>.*` | Text reused by multiple components, or produced by a service | `shared.obstacle-form-service.save-detail`, `shared.global-error-handler.unexpected-error` |
+| `<feature>.<component>.*` | Text specific to a single component | `sections-tab.col-name`, `supports-table.col-number`, `manual-section.tab-general` |
 
 **Key construction rules:**
-- Use `camelCase` for each segment: `sectionsTab.colName` not `sections-tab.col-name`
-- Be specific: `supportsTable.ariaChainName` not `supportsTable.aria1`
-- Aria labels: suffix `aria*` — `supportsTable.ariaOpenAttachmentModal`
-- Placeholder text: suffix `placeholder*` — `sectionsTab.placeholderViewIC`
-- Notification messages: `<feature>.notifications.*` — `study.notifications.sectionCreated`
-- Error messages from services: `<service>.errorName` — `sectionImport.fileReadError`
-- Interpolated values: use `{{ param }}` syntax — `"sectionImport.reprojectionInfo": "Error of {{ error }} m"`
+- Use `kebab-case` for each segment: `sections-tab.col-name` not `sectionsTab.colName`
+- Be specific: `supports-table.aria-chain-name` not `supports-table.aria-1`
+- Aria labels: prefix `aria-*` — `supports-table.aria-open-attachment-modal`
+- Placeholder text: prefix `placeholder-*` — `sections-tab.placeholder-view-ic`
+- Notification messages: `<feature>.notifications.*`
+- Error messages from services: `shared.<service-name>.*` — `shared.section-import.file-read-error`
+- Interpolated values: use `{{ param }}` syntax — `"studio.conformity.calculation-failed-error": "Calculation failed: {{ errorMessage }}"`
 
-**Before creating any key:** search `public/i18n/en.json` for the English text. If it exists under `common.*` or `domain.*`, reuse it — never duplicate.
+**Before creating any key:** search `public/i18n/en.json` for the English text. If it exists under `common.*`, reuse it — never duplicate.
 
 ### Template usage
 
 ```html
 <!-- Static text -->
-<span>{{ 'study.tabs.sections' | transloco }}</span>
+<span>{{ 'sections-tab.col-name' | transloco }}</span>
 
 <!-- Attribute binding -->
-<input [placeholder]="'sectionsTab.placeholderViewIC' | transloco">
-<button [attr.aria-label]="'supportsTable.ariaOpenAttachmentModal' | transloco">
+<input [placeholder]="'sections-tab.placeholder-view-ic' | transloco">
+<button [attr.aria-label]="'supports-table.aria-open-attachment-modal' | transloco">
 
 <!-- Interpolation with params -->
-<span>{{ 'sectionImport.reprojectionInfo' | transloco: { error: value } }}</span>
+<span>{{ 'studio.conformity.calculation-failed-error' | transloco: { errorMessage: value } }}</span>
 ```
 
 ### TypeScript usage
@@ -131,10 +130,10 @@ import { TranslocoService } from '@jsverse/transloco';
 private readonly transloco = inject(TranslocoService);
 
 // Simple key
-this.transloco.translate('study.notifications.sectionCreated')
+this.transloco.translate('shared.obstacle-form-service.save-detail')
 
 // With interpolation params
-this.transloco.translate('sectionImport.reprojectionInfo', { appName: env.appName, error: n.toFixed(1) })
+this.transloco.translate('studio.conformity.calculation-failed-error', { errorMessage })
 ```
 
 ### Required imports — checklist
@@ -162,8 +161,8 @@ private readonly transloco = inject(TranslocoService);
 ```typescript
 // my-feature.constantes.ts — export keys, not translated strings
 export const MY_ERROR_KEYS = {
-  notFound: 'myFeature.notFound',
-  invalid: 'myFeature.invalid',
+  notFound: 'my-feature.not-found',
+  invalid: 'my-feature.invalid',
 } as const;
 
 // my-feature.service.ts — translate via injected TranslocoService
@@ -177,8 +176,8 @@ this.transloco.translate(MY_ERROR_KEYS.notFound)
 ```typescript
 // my-feature.constantes.ts
 export const createMyOptions = (transloco: TranslocoService): SelectOption[] => [
-  { label: transloco.translate('myFeature.optionA'), value: 'A' },
-  { label: transloco.translate('myFeature.optionB'), value: 'B' },
+  { label: transloco.translate('my-feature.option-a'), value: 'A' },
+  { label: transloco.translate('my-feature.option-b'), value: 'B' },
 ];
 
 // component

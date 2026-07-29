@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@services/auth/auth.service';
 import { LOGIN_URL } from '@services/auth/auth.constants';
 
@@ -28,7 +28,7 @@ import { LOGIN_URL } from '@services/auth/auth.constants';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, ButtonModule, MessageModule, TranslocoModule],
+  imports: [ReactiveFormsModule, InputTextModule, ButtonModule, MessageModule, TranslocoPipe],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

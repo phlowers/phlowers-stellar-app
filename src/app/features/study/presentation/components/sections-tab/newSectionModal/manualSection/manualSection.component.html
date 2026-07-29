@@ -266,9 +266,9 @@
               </p-select>
             </div>
             <div class="flex flex-col [grid-area:b]">
-              <label for="linkName">{{ 'manual-section.label-link-id' | transloco }}</label>
+              <label for="linkIdr">{{ 'manual-section.label-link-id' | transloco }}</label>
               <p-select
-                inputId="linkName"
+                inputId="linkIdr"
                 [options]="uniqueLinkIdr()"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_idr"
@@ -285,9 +285,9 @@
               />
             </div>
             <div class="flex flex-col [grid-area:c]">
-              <label for="linkName">{{ 'manual-section.label-link-name' | transloco }}</label>
+              <label for="linkAdr">{{ 'manual-section.label-link-name' | transloco }}</label>
               <p-select
-                inputId="linkName"
+                inputId="linkAdr"
                 [options]="uniqueLinkAdr()"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_adr"
@@ -305,9 +305,9 @@
               />
             </div>
             <div class="flex flex-col [grid-area:d]">
-              <label for="linkLit">{{ 'manual-section.label-lit-id' | transloco }}</label>
+              <label for="litIdr">{{ 'manual-section.label-lit-id' | transloco }}</label>
               <p-select
-                inputId="linkLit"
+                inputId="litIdr"
                 [options]="uniqueLitIdr()"
                 [(ngModel)]="section().lit_code"
                 optionLabel="lit_idr"
@@ -325,9 +325,9 @@
             </div>
 
             <div class="flex flex-col [grid-area:e]">
-              <label for="linkLit">{{ 'manual-section.label-lit-name' | transloco }}</label>
+              <label for="litAdr">{{ 'manual-section.label-lit-name' | transloco }}</label>
               <p-select
-                inputId="linkLit"
+                inputId="litAdr"
                 [options]="uniqueLitAdr()"
                 [(ngModel)]="section().lit_name"
                 optionLabel="lit_adr"
