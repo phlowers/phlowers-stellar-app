@@ -13,10 +13,10 @@ import { PythonErrorCode } from './types';
  *
  * @remarks
  * This file must stay free of i18n usage: it is imported by `handle-task.ts`,
- * which runs inside the Pyodide Web Worker bundle. That bundle does not load the
- * `@angular/localize/init` polyfill (only the main "browser" build does), so evaluating
- * and crashes the worker before Pyodide can even start. Localized messages belong in
- * `python-error-messages.ts`, which must only be imported from main-thread code.
+ * which runs inside the Pyodide Web Worker bundle. That bundle runs outside any
+ * Angular injection context, so `TranslocoService` cannot be constructed there.
+ * Translated messages belong in `python-error-messages.ts`, which must only be
+ * imported from main-thread code.
  */
 export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> = {
   [PythonErrorCode.SolverError]: 'error',
