@@ -35,6 +35,7 @@ import { DividerModule } from 'primeng/divider';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DialogModule } from 'primeng/dialog';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 const modules = [
   RouterModule,
@@ -44,7 +45,8 @@ const modules = [
   ButtonComponent,
   IconComponent,
   DividerModule,
-  ProgressBarModule
+  ProgressBarModule,
+  TranslocoModule
 ];
 
 /**
@@ -78,6 +80,7 @@ export class AppComponent implements OnInit {
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly transloco = inject(TranslocoService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
 
   /** Guard against repeated automatic install triggers from the reactive effect. */
@@ -185,7 +188,7 @@ export class AppComponent implements OnInit {
    * can trigger another attempt on the next state change.
    */
   private tryAutomaticFirstInstall(): void {
-    const installFailedMessage = $localize`Initial application installation could not start. Please reload the page to try again.`;
+    const installFailedMessage = this.transloco.translate('app.install-failed');
 
     this.updateService
       .install()

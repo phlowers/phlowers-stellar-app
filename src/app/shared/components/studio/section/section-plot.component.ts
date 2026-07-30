@@ -44,11 +44,12 @@ import { DistanceMeasuringService } from '@features/studio/distance-measuring/di
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { ClickAnnotationEvent } from './section-plot.interfaces';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-section-plot',
   templateUrl: './section-plot.component.html',
-  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule, ProgressSpinnerModule],
+  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule, ProgressSpinnerModule, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
@@ -73,6 +74,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly distanceMeasuringService = inject(DistanceMeasuringService);
   private readonly documentRef = inject(DOCUMENT);
+  private readonly translocoService = inject(TranslocoService);
 
   // Signals
   protected readonly isPlotRefreshing = signal(false);
@@ -251,7 +253,8 @@ export class SectionPlotComponent implements OnDestroy {
         distanceMeasuringPoints,
         selectedDisplayOptions,
         cableModifications,
-        spanUuidToIndex
+        spanUuidToIndex,
+        translocoService: this.translocoService
       });
       if (plot) {
         this.addEventListenersToPlot(plot);

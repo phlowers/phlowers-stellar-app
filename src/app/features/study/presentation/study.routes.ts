@@ -12,7 +12,7 @@ export const studyRoutes: Routes = [
   { path: '', pathMatch: 'full', component: StudyComponent },
   {
     path: 'studio',
-    title: $localize`Studio`,
+    title: 'routes.studio',
     loadComponent: () =>
       import('@features/studio/core/presentation/pages/studio-page/studio-page.component').then(
         (m) => m.StudioPageComponent

@@ -12,6 +12,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { vi } from 'vitest';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 // Mock child component
 @Component({
@@ -175,7 +176,24 @@ describe('SupportsTableComponent', () => {
     mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, diagnostics: [] });
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, SupportsTableComponent, NoopAnimationsModule],
+      imports: [
+        FormsModule,
+        SupportsTableComponent,
+        NoopAnimationsModule,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.yes': 'Yes',
+              'common.no': 'No'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         { provide: ChainsService, useValue: mockChainsService },
         { provide: AttachmentService, useValue: mockAttachmentService },

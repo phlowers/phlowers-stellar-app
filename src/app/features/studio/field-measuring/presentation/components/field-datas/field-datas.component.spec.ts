@@ -5,6 +5,7 @@ import { createTestMeasureData } from '../../helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { SkyCover } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('FieldDatasComponent', () => {
   let component: FieldDatasComponent;
   let fixture: ComponentFixture<FieldDatasComponent>;
@@ -12,7 +13,14 @@ describe('FieldDatasComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FieldDatasComponent]
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        FieldDatasComponent
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldDatasComponent);

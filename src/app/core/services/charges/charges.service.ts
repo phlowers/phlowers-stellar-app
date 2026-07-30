@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { Charge, Section } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
@@ -37,6 +38,7 @@ import { MessageService } from 'primeng/api';
 export class ChargesService {
   private readonly studiesService = inject(StudiesService);
   private readonly messageService = inject(MessageService);
+  private readonly translocoService = inject(TranslocoService);
 
   /**
    * Helper method to get study and section, throwing errors if not found
@@ -84,8 +86,10 @@ export class ChargesService {
     await this.studiesService.updateStudy(study);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Successful`,
-      detail: existingCharge ? $localize`Charge updated` : $localize`Charge created`
+      summary: this.translocoService.translate('common.notification.successful'),
+      detail: existingCharge
+        ? this.translocoService.translate('shared.charges-service.update-detail')
+        : this.translocoService.translate('shared.charges-service.create-detail')
     });
   }
 
@@ -106,8 +110,8 @@ export class ChargesService {
     await this.studiesService.updateStudy(study);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`Charge deleted`,
+      summary: this.translocoService.translate('common.notification.successful'),
+      detail: this.translocoService.translate('shared.charges-service.delete-detail'),
       life: 500
     });
   }
@@ -132,7 +136,8 @@ export class ChargesService {
       uuid: uuidv4(),
       name: findDuplicateTitle(
         section.charges.map((c) => c.name),
-        charge.name
+        charge.name,
+        this.translocoService.translate('shared.duplicate.copy-suffix')
       )
     };
 

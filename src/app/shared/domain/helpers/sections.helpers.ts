@@ -24,10 +24,10 @@ import { v4 as uuidv4 } from 'uuid';
  *
  * @returns A new InitialCondition object with a generated UUID and sensible defaults
  */
-export const createEmptyInitialCondition = (): InitialCondition => {
+export const createEmptyInitialCondition = (icDefaultName = 'IC 1'): InitialCondition => {
   return {
     uuid: uuidv4(),
-    name: $localize`IC 1`,
+    name: icDefaultName,
     base_parameters: null,
     base_temperature: 15,
     cable_pretension: 0,

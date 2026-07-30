@@ -11,6 +11,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { BehaviorSubject } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 vi.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
@@ -133,7 +134,56 @@ describe('ObstaclesFormComponent', () => {
     mockNotificationService = { warningList: vi.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [ObstaclesFormComponent],
+      imports: [
+        ObstaclesFormComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.shared.altitude-type-absolute': 'Absolute',
+              'studio.shared.altitude-type-relative': 'Relative',
+              'studio.shared.altitude-type-relative-cable': 'Relative to cable',
+              'studio.shared.span-axis-option': 'Span axis',
+              'studio.obstacles-form.obstacle-must-be-saved-warning': 'obstacle must be saved',
+              'studio.obstacles-form.obstacle-type-not-eligible-warning':
+                "obstacle type '{{typeLabel}}' is not eligible for conformity control",
+              'studio.obstacles-form.tension-level-required-warning': 'study must have an electric tension level',
+              'studio.obstacles-form.single-condition-warning-summary':
+                'You cannot open conformity control because this condition is not met:',
+              'studio.obstacles-form.multiple-conditions-warning-summary':
+                'You cannot open conformity control because these conditions are not met:',
+              'shared.studio.zoom': 'Zoom',
+              'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
+              'studio.shared.span-label': 'Span',
+              'studio.obstacles-form.obstacle-type-label': 'Obstacle type',
+              'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+              'studio.shared.reference-support-label': 'Reference support',
+              'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
+              'studio.shared.lateral-distance-type-label': 'Lateral distance type',
+              'studio.obstacles-form.free-positioning-label': 'Free positioning',
+              'studio.obstacles-form.add-point-btn': 'Add point',
+              'studio.obstacles-form.select-point-label': 'Select point',
+              'studio.obstacles-form.point-label': 'Point',
+              'studio.obstacles-form.delete-point-aria-label': 'delete point',
+              'studio.obstacles-form.point-alt-label': 'Point alt.',
+              'common.meter': 'm',
+              'studio.obstacles-form.ref-support-dist-label': 'Ref. support dist.',
+              'studio.obstacles-form.line-axis-dist-label': 'Line axis dist.',
+              'studio.obstacles-form.delete-obstacle-aria-label': 'delete obstacle',
+              'studio.obstacles-form.calculate-and-save-btn': 'Calculate and save',
+              'studio.shared.oblique': 'Oblique',
+              'studio.shared.vertical': 'Vertical',
+              'studio.shared.horizontal': 'Horizontal',
+              'studio.obstacles-form.conformity-dialog-title': 'Conformity verifications',
+              'studio.shared.conformity-label': 'Conformity'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotSpanService, useValue: mockSpanService },
@@ -478,7 +528,56 @@ describe('ObstaclesFormComponent', () => {
       const getObstacleTypes = vi.fn();
       await TestBed.resetTestingModule()
         .configureTestingModule({
-          imports: [ObstaclesFormComponent],
+          imports: [
+            ObstaclesFormComponent,
+            TranslocoTestingModule.forRoot({
+              langs: {
+                en: {
+                  'studio.shared.altitude-type-absolute': 'Absolute',
+                  'studio.shared.altitude-type-relative': 'Relative',
+                  'studio.shared.altitude-type-relative-cable': 'Relative to cable',
+                  'studio.shared.span-axis-option': 'Span axis',
+                  'studio.obstacles-form.obstacle-must-be-saved-warning': 'obstacle must be saved',
+                  'studio.obstacles-form.obstacle-type-not-eligible-warning':
+                    "obstacle type '{{typeLabel}}' is not eligible for conformity control",
+                  'studio.obstacles-form.tension-level-required-warning': 'study must have an electric tension level',
+                  'studio.obstacles-form.single-condition-warning-summary':
+                    'You cannot open conformity control because this condition is not met:',
+                  'studio.obstacles-form.multiple-conditions-warning-summary':
+                    'You cannot open conformity control because these conditions are not met:',
+                  'shared.studio.zoom': 'Zoom',
+                  'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
+                  'studio.shared.span-label': 'Span',
+                  'studio.obstacles-form.obstacle-type-label': 'Obstacle type',
+                  'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+                  'studio.shared.reference-support-label': 'Reference support',
+                  'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
+                  'studio.shared.lateral-distance-type-label': 'Lateral distance type',
+                  'studio.obstacles-form.free-positioning-label': 'Free positioning',
+                  'studio.obstacles-form.add-point-btn': 'Add point',
+                  'studio.obstacles-form.select-point-label': 'Select point',
+                  'studio.obstacles-form.point-label': 'Point',
+                  'studio.obstacles-form.delete-point-aria-label': 'delete point',
+                  'studio.obstacles-form.point-alt-label': 'Point alt.',
+                  'common.meter': 'm',
+                  'studio.obstacles-form.ref-support-dist-label': 'Ref. support dist.',
+                  'studio.obstacles-form.line-axis-dist-label': 'Line axis dist.',
+                  'studio.obstacles-form.delete-obstacle-aria-label': 'delete obstacle',
+                  'studio.obstacles-form.calculate-and-save-btn': 'Calculate and save',
+                  'studio.shared.oblique': 'Oblique',
+                  'studio.shared.vertical': 'Vertical',
+                  'studio.shared.horizontal': 'Horizontal',
+                  'studio.obstacles-form.conformity-dialog-title': 'Conformity verifications',
+                  'studio.shared.conformity-label': 'Conformity'
+                }
+              },
+              translocoConfig: {
+                availableLangs: ['en'],
+                defaultLang: 'en'
+              },
+              preloadLangs: true
+            })
+          ],
           providers: [
             provideNoopAnimations(),
             { provide: PlotSpanService, useValue: mockSpanService },

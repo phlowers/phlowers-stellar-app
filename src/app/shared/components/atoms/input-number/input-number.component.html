@@ -35,8 +35,7 @@
         class="stepper__btn"
         [class.stepper__btn--disabled]="disabled() || isAtMin()"
         [disabled]="disabled() || isAtMin()"
-        [attr.aria-label]="'Reduce'"
-        i18n-aria-label
+        [attr.aria-label]="'shared.input-number.reduce' | transloco"
         data-testid="decrement-btn"
         (click)="decrement()"
       >
@@ -50,8 +49,7 @@
         class="stepper__btn"
         [class.stepper__btn--disabled]="disabled() || isAtMax()"
         [disabled]="disabled() || isAtMax()"
-        [attr.aria-label]="'Increase'"
-        i18n-aria-label
+        [attr.aria-label]="'shared.input-number.increase' | transloco"
         data-testid="increment-btn"
         (click)="increment()"
       >

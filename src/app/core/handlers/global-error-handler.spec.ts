@@ -9,6 +9,7 @@ import { GlobalErrorHandler } from './global-error-handler';
 import { LoggerService } from '@services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('GlobalErrorHandler', () => {
   let handler: GlobalErrorHandler;
   let loggerMock: { error: vi.Mock; warn: vi.Mock; info: vi.Mock; log: vi.Mock };
@@ -19,6 +20,13 @@ describe('GlobalErrorHandler', () => {
     notificationMock = { error: vi.fn() };
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {}, fr: {} },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [
         GlobalErrorHandler,
         { provide: LoggerService, useValue: loggerMock },

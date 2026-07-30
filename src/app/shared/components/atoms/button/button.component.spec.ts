@@ -14,9 +14,9 @@ class MockIconComponent {}
   imports: [ButtonComponent, MockIconComponent],
   template: `
     <button app-btn [btnSize]="size" [btnStyle]="style" [btnLoading]="loading" (click)="onButtonClick()">
-      <app-icon class="app-icon">Left Icon</app-icon>
+      <app-icon i18n class="app-icon">Left Icon</app-icon>
       Button Text
-      <app-icon class="app-icon" iconRight>Right Icon</app-icon>
+      <app-icon i18n class="app-icon" iconRight>Right Icon</app-icon>
     </button>
   `
 })
@@ -51,7 +51,7 @@ class TestHostWithIconsComponent {
 @Component({
   standalone: true,
   imports: [ButtonComponent],
-  template: `<button app-btn [btnLoading]="loading">Button Text</button>`
+  template: `<button i18n app-btn [btnLoading]="loading">Button Text</button>`
 })
 class TestHostNoIconsComponent {
   loading = false;
@@ -311,7 +311,7 @@ describe('ButtonComponent', () => {
         @Component({
           standalone: true,
           imports: [ButtonComponent],
-          template: `<button [${selector}] btnSize="s">Test</button>`
+          template: `<button i18n [${selector}] btnSize="s">Test</button>`
         })
         class TestSelectorComponent {}
 

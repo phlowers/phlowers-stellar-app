@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ErrorHandler, Injectable, Injector, inject } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 
@@ -37,8 +38,10 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (now - this.lastNotifiedAt >= NOTIFICATION_COOLDOWN_MS) {
       this.lastNotifiedAt = now;
       const notificationService = this.injector.get(NotificationService, null);
+      const translocoService = this.injector.get(TranslocoService, null);
+      const message = translocoService?.translate('shared.global-error-handler.unexpected-error');
       notificationService?.error(
-        $localize`An unexpected error occurred. Please reload the page if the problem persists.`
+        message ?? 'An unexpected error occurred. Please reload the page if the problem persists.'
       );
     }
   }

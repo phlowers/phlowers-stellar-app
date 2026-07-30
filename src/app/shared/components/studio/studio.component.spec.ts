@@ -10,6 +10,7 @@ import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnosti
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
 import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 
 // Stub child component to avoid pulling in its dependency tree
 @Component({
@@ -126,6 +127,7 @@ describe('StudioComponent', () => {
   let mockSpanService: {
     section: WritableSignal<Section | null>;
   };
+  const mockTranslocoService = { translate: (key: string) => key } as unknown as TranslocoService;
 
   beforeEach(async () => {
     mockPlotService = {
@@ -143,7 +145,13 @@ describe('StudioComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [StudioComponent],
+      imports: [
+        StudioComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {}, fr: {} },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: NotificationService, useValue: mockNotificationService },
@@ -190,25 +198,33 @@ describe('StudioComponent', () => {
     it('should call notificationService.error with formatted message on CALCULATION_ERROR', () => {
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.CALCULATION_ERROR));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, null)
+      );
     });
 
     it('should call notificationService.error with formatted message on NO_CABLE_FOUND', () => {
       mockPlotService.error.set(DataError.NO_CABLE_FOUND);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(DataError.NO_CABLE_FOUND));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(DataError.NO_CABLE_FOUND, mockTranslocoService, null)
+      );
     });
 
     it('should call notificationService.error with formatted message on SOLVER_DID_NOT_CONVERGE', () => {
       mockPlotService.error.set(TaskError.SOLVER_DID_NOT_CONVERGE);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE, mockTranslocoService, null)
+      );
     });
 
     it('should call notificationService.error with formatted message on PYODIDE_LOAD_ERROR', () => {
       mockPlotService.error.set(TaskError.PYODIDE_LOAD_ERROR);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.PYODIDE_LOAD_ERROR, mockTranslocoService, null)
+      );
     });
 
     it('should use pythonErrorCode message when a matching exception diagnostic is set', () => {
@@ -218,7 +234,7 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.error).toHaveBeenCalledWith(
-        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.SolverError)
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, PythonErrorCode.SolverError)
       );
       expect(mockNotificationService.warning).not.toHaveBeenCalled();
     });
@@ -230,7 +246,7 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledWith(
-        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.DataWarning)
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, PythonErrorCode.DataWarning)
       );
       expect(mockNotificationService.error).not.toHaveBeenCalled();
     });
@@ -247,7 +263,7 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledWith(
-        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.BalanceEngineWarning)
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, PythonErrorCode.BalanceEngineWarning)
       );
       expect(mockNotificationService.error).not.toHaveBeenCalled();
     });
@@ -272,7 +288,7 @@ describe('StudioComponent', () => {
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
       expect(mockNotificationService.warning).toHaveBeenCalledWith(
-        formatPythonError(PythonErrorCode.NoIntersectionPlaneWarning)
+        formatPythonError(PythonErrorCode.NoIntersectionPlaneWarning, mockTranslocoService)
       );
     });
 

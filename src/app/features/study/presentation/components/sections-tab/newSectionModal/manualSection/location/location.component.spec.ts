@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { LocationComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.component';
 import { LOCATION_CONFIG } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.constantes';
 
@@ -20,7 +21,25 @@ describe('LocationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LocationComponent],
+      imports: [
+        LocationComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'location.title': 'Support 1 coordinates:',
+              'location.label-latitude': 'Latitude',
+              'location.label-longitude': 'Longitude',
+              'location.label-azimuth': 'Azimuth',
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          }
+        })
+      ],
       providers: [provideNoopAnimations()]
     }).compileComponents();
 

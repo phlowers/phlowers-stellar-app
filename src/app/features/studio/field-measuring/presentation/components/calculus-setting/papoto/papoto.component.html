@@ -1,21 +1,28 @@
 <div class="papoto__btns">
-  <button app-btn aria-label="open PAPOTO help" i18n-aria-label (click)="openHelp()" data-testid="help-btn">
+  <button
+    app-btn
+    [attr.aria-label]="'field-measuring.papoto.open-help-aria-label' | transloco"
+    (click)="openHelp()"
+    data-testid="help-btn"
+  >
     <app-icon icon="help" aria-hidden="true" />
   </button>
 
   <button disabled app-btn btnStyle="outlined" data-testid="import-station-data-btn">
-    <ng-container i18n>Import station's datas</ng-container>
+    <ng-container>{{ 'field-measuring.papoto.import-station-data' | transloco }}</ng-container>
   </button>
 </div>
 
 <p id="mandatory-papoto" class="papoto__mandatory-msg">
   <app-icon icon="info" />
-  <span i18n>All fields are mandatory for calculus setting</span>
+  <span>{{ 'field-measuring.papoto.mandatory-msg' | transloco }}</span>
 </p>
 
 <div class="papoto__form">
   <div class="papoto__form__line1">
-    <label for="leftSupport" class="leftSupport__label" i18n> Left support </label>
+    <label for="leftSupport" class="leftSupport__label">{{
+      'field-measuring.papoto.left-support-label' | transloco
+    }}</label>
     <p-select
       inputId="leftSupport"
       [options]="retrievedLeftSupportOptions()"
@@ -30,7 +37,9 @@
       data-testid="left-support-select"
     />
 
-    <label for="spanLength" i18n class="spanLength__label"> Measured span length </label>
+    <label for="spanLength" class="spanLength__label">{{
+      'field-measuring.papoto.span-length-label' | transloco
+    }}</label>
     <p-inputgroup class="spanLength__input">
       <input
         id="spanLength"
@@ -46,7 +55,7 @@
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
     <p id="spanLength-calculated" class="spanLength__desc">
-      <ng-container i18n> Calculated value:</ng-container>
+      <ng-container>{{ 'field-measuring.papoto.calculated-value-label' | transloco }}</ng-container>
       @if (calculatedSpanLength() !== null) {
         {{ calculatedSpanLength() | number: '1.0-2' }} m
       } @else {
@@ -54,7 +63,9 @@
       }
     </p>
 
-    <label for="measuredElevationDifference" i18n class="MED__label"> Elevation diff. of measured attach. </label>
+    <label for="measuredElevationDifference" class="MED__label">{{
+      'field-measuring.papoto.elevation-diff-label' | transloco
+    }}</label>
     <p-inputgroup class="MED__input">
       <input
         id="measuredElevationDifference"
@@ -69,7 +80,7 @@
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
     <p id="measuredElevationDifference-calculated" class="MED__desc">
-      <ng-container i18n> Calculated value:</ng-container>
+      <ng-container>{{ 'field-measuring.papoto.calculated-value-label' | transloco }}</ng-container>
       @if (calculatedElevation() !== null) {
         {{ calculatedElevation() | number: '1.0-2' }} m
       } @else {
@@ -79,7 +90,7 @@
   </div>
 
   <div class="HL">
-    <label for="HL" i18n>HL</label>
+    <label for="HL">{{ 'field-measuring.papoto.hl-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="HL"
@@ -96,7 +107,7 @@
   </div>
 
   <div class="H1">
-    <label for="H1" i18n>H1</label>
+    <label for="H1">{{ 'field-measuring.papoto.h1-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="H1"
@@ -113,7 +124,7 @@
   </div>
 
   <div class="H2">
-    <label for="H2" i18n>H2</label>
+    <label for="H2">{{ 'field-measuring.papoto.h2-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="H2"
@@ -130,7 +141,7 @@
   </div>
 
   <div class="H3">
-    <label for="H3" i18n>H3</label>
+    <label for="H3">{{ 'field-measuring.papoto.h3-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="H3"
@@ -147,7 +158,7 @@
   </div>
 
   <div class="HR">
-    <label for="HR" i18n>HR</label>
+    <label for="HR">{{ 'field-measuring.papoto.hr-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="HR"
@@ -164,7 +175,7 @@
   </div>
 
   <div class="VL">
-    <label for="VL" i18n>VL</label>
+    <label for="VL">{{ 'field-measuring.papoto.vl-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="VL"
@@ -181,7 +192,7 @@
   </div>
 
   <div class="V1">
-    <label for="V1" i18n>V1</label>
+    <label for="V1">{{ 'field-measuring.papoto.v1-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="V1"
@@ -198,7 +209,7 @@
   </div>
 
   <div class="V2">
-    <label for="V2" i18n>V2</label>
+    <label for="V2">{{ 'field-measuring.papoto.v2-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="V2"
@@ -215,7 +226,7 @@
   </div>
 
   <div class="V3">
-    <label for="V3" i18n>V3</label>
+    <label for="V3">{{ 'field-measuring.papoto.v3-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="V3"
@@ -232,7 +243,7 @@
   </div>
 
   <div class="VR">
-    <label for="VR" i18n>VR</label>
+    <label for="VR">{{ 'field-measuring.papoto.vr-label' | transloco }}</label>
     <p-inputgroup>
       <input
         id="VR"
@@ -258,56 +269,56 @@
     data-testid="calculate-papoto-btn"
   >
     <app-icon icon="rocket_launch" />
-    <ng-container i18n>Calculate</ng-container>
+    <ng-container>{{ 'field-measuring.papoto.calculate-button' | transloco }}</ng-container>
   </button>
 </div>
 
 @if (measureData().outputs.papoto) {
   <div class="papoto__results" [@expand]>
-    <h2 class="papoto__results__title" i18n>Results:</h2>
+    <h2 class="papoto__results__title">{{ 'field-measuring.papoto.results-title' | transloco }}</h2>
 
     <dl class="papoto__results__list">
       <div class="param">
-        <dt i18n>Parameter</dt>
+        <dt>{{ 'field-measuring.papoto.parameter-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter">
           {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="incertainParam">
-        <dt i18n>uncertainty parameter</dt>
+        <dt>{{ 'field-measuring.papoto.uncertainty-parameter-label' | transloco }}</dt>
         <dd>{{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }} m</dd>
       </div>
 
       <div class="param12">
-        <dt i18n>Parameter 1-2</dt>
+        <dt>{{ 'field-measuring.papoto.parameter-1-2-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter-1-2">
           {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_2) | number: '1.0-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="param23">
-        <dt i18n>Parameter 2-3</dt>
+        <dt>{{ 'field-measuring.papoto.parameter-2-3-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter-2-3">
           {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_2_3) | number: '1.0-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="param13">
-        <dt i18n>Parameter 1-3</dt>
+        <dt>{{ 'field-measuring.papoto.parameter-1-3-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter-1-3">
           {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_3) | number: '1.0-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="crit">
-        <dt i18n>0.5% criterion</dt>
+        <dt>{{ 'field-measuring.papoto.criterion-label' | transloco }}</dt>
         <dd class="crit__result">
           @if (measureData().outputs.papoto?.checkValidity) {
-            <ng-container i18n>Yes</ng-container>
+            <ng-container>{{ 'common.yes' | transloco }}</ng-container>
             <app-icon icon="check" class="criterion-ok" />
           } @else {
-            <ng-container i18n>No</ng-container>
+            <ng-container>{{ 'common.no' | transloco }}</ng-container>
             <app-icon icon="close" class="criterion-ko" />
           }
         </dd>
@@ -318,13 +329,12 @@
 
 @if (papotoError()) {
   <div class="papoto__error">
-    <p i18n>An error occurred</p>
+    <p>{{ 'field-measuring.papoto.error-message' | transloco }}</p>
   </div>
 }
 
 <p-dialog
-  closeAriaLabel="Close"
-  i18n-closeAriaLabel
+  [closeAriaLabel]="'field-measuring.papoto.close-aria-label' | transloco"
   [(visible)]="papotoHelpDialog"
   [draggable]="true"
   appendTo="body"
@@ -333,7 +343,7 @@
   <ng-template #header>
     <p class="help-papoto-header">
       <app-icon icon="help" />
-      <span i18n>Help (PAPOTO)</span>
+      <span>{{ 'field-measuring.papoto.help-title' | transloco }}</span>
     </p>
   </ng-template>
 

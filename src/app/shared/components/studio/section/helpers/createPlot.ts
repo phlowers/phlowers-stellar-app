@@ -10,6 +10,7 @@ import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPo
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
+import { TranslocoService } from '@jsverse/transloco';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -69,6 +70,8 @@ export interface CreatePlotParams {
    * `'stable'`) and applies the layout camera instantly — no relayout animation.
    */
   pendingRestore?: boolean;
+  /** Transloco service instance used to translate modebar button labels at render time. */
+  translocoService?: TranslocoService;
 }
 
 const normalCamera = () => ({
@@ -158,7 +161,8 @@ const createScene = (
  * The custom replacements use `setDragmodeDirect()` to bypass `relayout` and preserve
  * the camera. Tests in `createPlot.spec.ts` guard against this regression.
  */
-const getConfig = () => {
+const getConfig = (translocoService?: TranslocoService) => {
+  const t = (key: string, fallback: string): string => (translocoService ? translocoService.translate(key) : fallback);
   /**
    * Switches the 3D scene dragmode by directly setting the internal
    * orbit-camera-controller mode. This bypasses Plotly.relayout and its
@@ -191,7 +195,7 @@ const getConfig = () => {
 
   const orbitButton: ModeBarButton = {
     name: 'customOrbitRotation',
-    title: $localize`Orbital rotation`,
+    title: t('shared.studio.orbital-rotation', 'Orbital rotation'),
     icon: Plotly.Icons['3d_rotate'] as Icon,
     attr: 'scene.dragmode',
     val: 'orbit',
@@ -202,7 +206,7 @@ const getConfig = () => {
 
   const turntableButton: ModeBarButton = {
     name: 'customTurntableRotation',
-    title: $localize`Turntable rotation`,
+    title: t('shared.studio.turntable-rotation', 'Turntable rotation'),
     icon: Plotly.Icons['z-axis'] as Icon,
     attr: 'scene.dragmode',
     val: 'turntable',
@@ -213,7 +217,7 @@ const getConfig = () => {
 
   const zoom3dButton: ModeBarButton = {
     name: 'customZoom3d',
-    title: $localize`Zoom`,
+    title: t('shared.studio.zoom', 'Zoom'),
     icon: Plotly.Icons['zoombox'] as Icon,
     attr: 'scene.dragmode',
     val: 'zoom',
@@ -224,7 +228,7 @@ const getConfig = () => {
 
   const pan3dButton: ModeBarButton = {
     name: 'customPan3d',
-    title: $localize`Pan`,
+    title: t('shared.studio.pan', 'Pan'),
     icon: Plotly.Icons['pan'] as Icon,
     attr: 'scene.dragmode',
     val: 'pan',
@@ -395,7 +399,7 @@ export const createPlot = (plotParams: CreatePlotParams) => {
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
-  return Plotly.react(plotParams.plotId, allData, baseLayout, getConfig());
+  return Plotly.react(plotParams.plotId, allData, baseLayout, getConfig(plotParams.translocoService));
 };
 
 /**

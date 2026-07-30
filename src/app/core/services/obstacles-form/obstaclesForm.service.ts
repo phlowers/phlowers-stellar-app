@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TranslocoService } from '@jsverse/transloco';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -37,6 +38,7 @@ export class ObstacleFormService {
   private readonly sectionService = inject(SectionService);
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   private readonly defaultPosition = { x: null, y: null, z: null } as const satisfies Position3D;
 
@@ -314,8 +316,8 @@ export class ObstacleFormService {
 
       this.messageService.add({
         severity: 'success',
-        summary: $localize`Success`,
-        detail: $localize`Obstacle deleted`
+        summary: this.translocoService.translate('common.success'),
+        detail: this.translocoService.translate('shared.obstacle-form-service.delete-detail')
       });
       return true;
     } catch {
@@ -325,8 +327,8 @@ export class ObstacleFormService {
       await this.resyncWorkerAfterDeleteRollback(section.obstacles ?? [], plotOptions);
       this.messageService.add({
         severity: 'error',
-        summary: $localize`Error`,
-        detail: $localize`Failed to delete obstacle`
+        summary: this.translocoService.translate('common.error'),
+        detail: this.translocoService.translate('shared.obstacle-form-service.delete-error-detail')
       });
       return false;
     }
@@ -369,8 +371,8 @@ export class ObstacleFormService {
     this.spanService.section.set(updatedSection);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Success`,
-      detail: $localize`Conformity data saved`
+      summary: this.translocoService.translate('common.success'),
+      detail: this.translocoService.translate('shared.obstacle-form-service.conformity-saved-detail')
     });
   }
 
@@ -407,11 +409,13 @@ export class ObstacleFormService {
       this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.calculationError.set($localize`Calculation failed: ${errorMessage}`);
+      this.calculationError.set(
+        this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
+      );
       this.messageService.add({
         severity: 'error',
-        summary: $localize`Error`,
-        detail: $localize`Failed to calculate obstacle distances`
+        summary: this.translocoService.translate('common.error'),
+        detail: this.translocoService.translate('shared.obstacle-form-service.distance-calculation-error-detail')
       });
     } finally {
       this.isCalculatingObstacle.set(false);
@@ -463,8 +467,8 @@ export class ObstacleFormService {
     await this.sectionService.createOrUpdateSection(study, section);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Success`,
-      detail: $localize`Obstacle saved`
+      summary: this.translocoService.translate('common.success'),
+      detail: this.translocoService.translate('shared.obstacle-form-service.save-detail')
     });
   }
 

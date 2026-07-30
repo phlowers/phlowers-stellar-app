@@ -7,6 +7,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CalculusSettingComponent } from './calculus-setting.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('CalculusSetting component', () => {
   let component: CalculusSettingComponent;
   let fixture: ComponentFixture<CalculusSettingComponent>;
@@ -14,7 +15,20 @@ describe('CalculusSetting component', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CalculusSettingComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'field-measuring.calculus-setting.papoto-radio-label': 'PAPOTO',
+              'field-measuring.calculus-setting.pep-radio-label': 'PEP',
+              'field-measuring.calculus-setting.tangent-aiming-radio-label': 'Tangent aiming'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        CalculusSettingComponent
+      ],
       providers: [provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 

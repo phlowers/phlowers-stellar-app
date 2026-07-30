@@ -18,13 +18,15 @@ import { MaintenanceService } from '@shared/catalog/services/maintenance.service
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import {
-  sectionImportErrors,
-  importSuccessDetail,
-  buildReprojectionInfoMessage,
-  geoLiaisonSupportCatalogMissingWarning
-} from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
+import { TranslocoService } from '@jsverse/transloco';
+import { environment } from '@src/environments/environment';
+import {
+  GEO_LIAISON_CATALOG_MISSING_KEY,
+  IMPORT_SUCCESS_KEY,
+  REPROJECTION_INFO_KEY,
+  SECTION_IMPORT_ERROR_KEYS
+} from './section-import.constantes';
 import {
   applyFootCoordinates,
   buildReprojectionAngles,
@@ -37,13 +39,6 @@ import {
   parseFloatOrNull,
   validateGeoLiaisonRawFields
 } from './section-import.helpers';
-
-// ---------------------------------------------------------------------------
-// Error catalog
-// ---------------------------------------------------------------------------
-
-// Re-export the error catalog so consumers can import from a single entry point.
-export { sectionImportErrors } from './section-import.constantes';
 
 // ---------------------------------------------------------------------------
 // Service
@@ -80,6 +75,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly attachmentService = inject(AttachmentService);
   private readonly chainsService = inject(ChainsService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly transloco = inject(TranslocoService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -150,7 +146,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (!study) {
       const error: ImportError = {
         code: 'PERSISTENCE_ERROR',
-        message: sectionImportErrors.sectionImportError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
         stage: 'PERSISTENCE'
       };
       throw error;
@@ -214,7 +210,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       this.logger.error('Error reading section file', err);
       const error: ImportError = {
         code: 'FILE_READ_ERROR',
-        message: sectionImportErrors.fileReadError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.fileReadError),
         stage: 'DECODING',
         cause: err
       };
@@ -228,7 +224,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       this.logger.error('Error parsing section JSON', err);
       const error: ImportError = {
         code: 'FILE_PARSE_ERROR',
-        message: sectionImportErrors.fileParseError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.fileParseError),
         stage: 'PARSING',
         cause: err
       };
@@ -240,7 +236,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       if (!this.isGeoLiaisonFormat(parsed)) {
         const error: ImportError = {
           code: 'VALIDATION_ERROR',
-          message: sectionImportErrors.geoLiaisonFormatError,
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.geoLiaisonFormatError),
           stage: 'VALIDATION'
         };
         throw error;
@@ -617,7 +613,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private buildLambertReprojectionError(): ImportError {
     return {
       code: 'MAPPING_ERROR',
-      message: sectionImportErrors.lambertReprojectionError,
+      message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.lambertReprojectionError),
       stage: 'MAPPING'
     };
   }
@@ -658,7 +654,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       const detail = fieldErrors.map((e) => `${e.field}: ${String(e.value)}`).join('; ');
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: `${sectionImportErrors.validationErrorRequiredFields}: ${detail}`,
+        message: `${this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorRequiredFields)}: ${detail}`,
         stage: 'VALIDATION'
       };
       throw error;
@@ -670,7 +666,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (missingFields.length > 0) {
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: `${sectionImportErrors.validationErrorRequiredFields}: ${missingFields.join(', ')}`,
+        message: `${this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorRequiredFields)}: ${missingFields.join(', ')}`,
         stage: 'VALIDATION'
       };
       throw error;
@@ -679,7 +675,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (hasSupportsBoundsErrors(section)) {
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: sectionImportErrors.validationErrorSupportsBounds,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorSupportsBounds),
         stage: 'VALIDATION'
       };
       throw error;
@@ -710,7 +706,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         this.logger.error('Error deleting existing section', err);
         const error: ImportError = {
           code: 'PERSISTENCE_ERROR',
-          message: sectionImportErrors.sectionDeleteError,
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionDeleteError),
           stage: 'PERSISTENCE',
           cause: err
         };
@@ -726,14 +722,14 @@ export class SectionImportService implements ImportAdapter<Section> {
         });
         const error: ImportError = {
           code: 'PERSISTENCE_ERROR',
-          message: sectionImportErrors.sectionImportError,
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
           stage: 'PERSISTENCE',
           cause: err
         };
         throw error;
       }
 
-      this.notificationService.success(importSuccessDetail);
+      this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
       this.notifyGpsReprojection(section);
       this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
       return section;
@@ -745,14 +741,14 @@ export class SectionImportService implements ImportAdapter<Section> {
       this.logger.error('Error persisting section', err);
       const error: ImportError = {
         code: 'PERSISTENCE_ERROR',
-        message: sectionImportErrors.sectionImportError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
         stage: 'PERSISTENCE',
         cause: err
       };
       throw error;
     }
 
-    this.notificationService.success(importSuccessDetail);
+    this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
     this.notifyGpsReprojection(section);
     this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
     return section;
@@ -764,7 +760,12 @@ export class SectionImportService implements ImportAdapter<Section> {
    */
   private notifyGpsReprojection(section: Section): void {
     if (section.mean_reprojection_diff_meters != null) {
-      this.notificationService.info(buildReprojectionInfoMessage(section.mean_reprojection_diff_meters));
+      this.notificationService.info(
+        this.transloco.translate(REPROJECTION_INFO_KEY, {
+          appName: environment.appName,
+          error: section.mean_reprojection_diff_meters.toFixed(1)
+        })
+      );
     }
   }
 
@@ -773,6 +774,6 @@ export class SectionImportService implements ImportAdapter<Section> {
       return;
     }
 
-    this.notificationService.warning(geoLiaisonSupportCatalogMissingWarning);
+    this.notificationService.warning(this.transloco.translate(GEO_LIAISON_CATALOG_MISSING_KEY));
   }
 }
