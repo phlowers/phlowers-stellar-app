@@ -66,6 +66,9 @@ export class PlotOptionsService {
 
   /**
    * Read the current camera state directly from the Plotly DOM element.
+   * Prefers the live WebGL scene camera (`_scene.getCamera()`): scroll-wheel zoom
+   * only mutates the WebGL camera and never syncs `_fullLayout.scene.camera`, so the
+   * layout camera can be stale after a wheel interaction (bug #1032).
    * @returns The current camera or null if the plot element is not yet mounted.
    */
   getCamera(): Camera | null {
@@ -73,7 +76,12 @@ export class PlotOptionsService {
     if (!plot) {
       return null;
     }
-    return (plot as HTMLElement & { _fullLayout?: { scene?: { camera?: Camera } } })._fullLayout?.scene?.camera ?? null;
+    const scene = (
+      plot as HTMLElement & {
+        _fullLayout?: { scene?: { camera?: Camera; _scene?: { getCamera?: () => Camera } } };
+      }
+    )._fullLayout?.scene;
+    return scene?._scene?.getCamera?.() ?? scene?.camera ?? null;
   }
 
   /**
