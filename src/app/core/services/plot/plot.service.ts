@@ -76,6 +76,7 @@ export class PlotService {
     this.diagnostics.set([]);
     this.litData.set(null);
     this.baseLitData.set(null);
+    this.distanceMeasuringPoints.set([]);
     this.loading.set(false);
     this.plotOptionsService.reset();
     this.spanService.reset();
@@ -197,17 +198,21 @@ export class PlotService {
     this.loading.set(false);
   };
 
+  /**
+   * Purge the Plotly instance attached to the plot DOM element.
+   *
+   * Must NOT mutate service state: it runs from SectionPlotComponent.ngOnDestroy,
+   * which fires whenever the studio template swaps the plot out for the loading
+   * spinner or the error image. Resetting loading/error here would immediately
+   * deactivate the branch that triggered the swap (e.g. the spinner cancels
+   * itself one frame after appearing — bug "no loading animation on studio
+   * reopen"). State cleanup belongs to resetAll.
+   */
   purgePlot = () => {
     if (!this.document.getElementById(PLOT_ID)) {
       return;
     }
     plotly.purge(PLOT_ID);
-    this.litData.set(null);
-    this.baseLitData.set(null);
-    this.distanceMeasuringPoints.set([]);
-    this.error.set(null);
-    this.diagnostics.set([]);
-    this.loading.set(false);
   };
 
   private async updateAspectRatio(
