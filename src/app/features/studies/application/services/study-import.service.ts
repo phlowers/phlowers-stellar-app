@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { ProtoV4Parameters, ProtoV4Support, Section, Study, Support } from '@shared/domain';
 import Papa from 'papaparse';
 import { StudiesService } from '@services/studies/studies.service';
@@ -41,6 +42,7 @@ export class StudyImportService implements ImportAdapter<Study> {
   private readonly notificationService = inject(NotificationService);
   private readonly cablesService = inject(CablesService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   // ---------------------------------------------------------------------------
   // ImportAdapter implementation
@@ -237,7 +239,7 @@ export class StudyImportService implements ImportAdapter<Study> {
             });
             return null;
           }
-          this.notificationService.success(importSuccessDetail);
+          this.notificationService.success(this.translocoService.translate(importSuccessDetail));
           return createdStudy;
         } catch (error: unknown) {
           await this.studiesService.createStudy(existingStudy, existingStudy.uuid).catch((restoreError: unknown) => {
@@ -255,7 +257,7 @@ export class StudyImportService implements ImportAdapter<Study> {
       return null;
     }
 
-    this.notificationService.success(importSuccessDetail);
+    this.notificationService.success(this.translocoService.translate(importSuccessDetail));
     return createdStudy;
   }
 
@@ -330,7 +332,7 @@ export class StudyImportService implements ImportAdapter<Study> {
     this.studiesService
       .createStudyFromProtoV4(supports, parameters)
       .then((study) => {
-        this.notificationService.success(importSuccessDetail);
+        this.notificationService.success(this.translocoService.translate(importSuccessDetail));
         resolve(study);
       })
       .catch((parseError: unknown) => {

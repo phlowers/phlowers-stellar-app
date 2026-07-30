@@ -11,10 +11,11 @@ import { PageTitleService } from '@shared/service/page-title/page-title.service'
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-topbar',
-  imports: [IconComponent],
+  imports: [IconComponent, TranslocoModule],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

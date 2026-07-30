@@ -10,10 +10,10 @@ import { studyImportErrors } from '@features/studies/application/services/study-
 export const errors = studyImportErrors;
 
 /**
- * Returns the localised error message for a given import error key.
+ * Returns the Transloco key for a given import error key.
  * @param type - Key identifying the error in the `errors` map
- * @returns Localised detail string for the error
+ * @returns Transloco key string for the error
  */
 export const importErrorDetail = (type: keyof typeof errors): string => {
-  return errors[type] || $localize`Error importing study`;
+  return errors[type] || 'studies.import.error-import';
 };

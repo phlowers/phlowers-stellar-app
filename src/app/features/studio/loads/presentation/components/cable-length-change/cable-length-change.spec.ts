@@ -17,6 +17,7 @@ import { LoadFormsService } from '../../services/loadForms.service';
 import { Section } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
   const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
@@ -94,7 +95,14 @@ describe('CableLengthChangeComponent', () => {
     } as unknown as vi.Mocked<LoadFormsService>;
 
     await TestBed.configureTestingModule({
-      imports: [CableLengthChangeComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        CableLengthChangeComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },

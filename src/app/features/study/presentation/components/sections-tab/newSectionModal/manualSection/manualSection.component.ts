@@ -26,7 +26,6 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@shared/types';
 import { StudioComponent } from '@shared/components/studio/studio.component';
 import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
-import { sectionTypes } from './section-mock';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -50,6 +49,8 @@ import {
 import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
 import { LineTableProperties } from './manualSection.interfaces';
 import { LocationData } from './location/location.interfaces';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { createSectionTypes } from './section-mock';
 
 /**
  * Manual section editor component.
@@ -77,13 +78,15 @@ import { LocationData } from './location/location.interfaces';
     ButtonComponent,
     PaginatorModule,
     NgxSliderModule,
-    LocationComponent
+    LocationComponent,
+    TranslocoModule
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManualSectionComponent implements OnInit {
+  private readonly transloco = inject(TranslocoService);
   tabValue = signal<string>('general');
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
@@ -91,10 +94,10 @@ export class ManualSectionComponent implements OnInit {
   locationChange = output<LocationData>();
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<CatalogCable[]>([]);
-  public sectionTypes = sectionTypes;
+  protected readonly sectionTypes = createSectionTypes(this.transloco);
   isNameUnique = input<boolean>();
-  currentPageReportTemplate = $localize`Support ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
-  readonly noVoltageLabel = $localize`NO VOLTAGE`;
+  currentPageReportTemplate = this.transloco.translate('manual-section.current-page-report');
+  readonly noVoltageLabel = this.transloco.translate('manual-section.no-voltage');
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);

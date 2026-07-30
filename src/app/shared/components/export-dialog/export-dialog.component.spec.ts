@@ -5,6 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ExportDialogComponent } from './export-dialog.component';
 import { StudiesService } from '@services/studies/studies.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('ExportDialogComponent', () => {
   let component: ExportDialogComponent;
   let fixture: ComponentFixture<ExportDialogComponent>;
@@ -20,7 +21,16 @@ describe('ExportDialogComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [ExportDialogComponent, ReactiveFormsModule, NoopAnimationsModule],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ExportDialogComponent,
+        ReactiveFormsModule,
+        NoopAnimationsModule
+      ],
       providers: [{ provide: StudiesService, useValue: mockStudiesService }]
     }).compileComponents();
 
@@ -83,7 +93,16 @@ describe('ExportDialogComponent', () => {
 
       await TestBed.resetTestingModule()
         .configureTestingModule({
-          imports: [ExportDialogComponent, ReactiveFormsModule, NoopAnimationsModule],
+          imports: [
+            TranslocoTestingModule.forRoot({
+              langs: { en: {} },
+              translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+              preloadLangs: true
+            }),
+            ExportDialogComponent,
+            ReactiveFormsModule,
+            NoopAnimationsModule
+          ],
           providers: [{ provide: StudiesService, useValue: mockStudiesService }]
         })
         .compileComponents();

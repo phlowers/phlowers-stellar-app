@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { UpdateService } from './worker_update.service';
 import { MessageService } from 'primeng/api';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('@src/environments/environment', () => ({
   environment: {
     version: '1.0.0',
@@ -66,6 +67,13 @@ describe('UpdateService', () => {
     globalThis.fetch = mockFetch;
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
     });
     service = TestBed.inject(UpdateService);

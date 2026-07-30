@@ -19,6 +19,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
+import { TranslocoModule } from '@jsverse/transloco';
 
 /**
  * Sortable, paginated table displaying a list of studies.
@@ -38,7 +39,8 @@ import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@share
     PopoverModule,
     DatePipe,
     CommonModule,
-    RouterLink
+    RouterLink,
+    TranslocoModule
   ],
   templateUrl: './studies-table.component.html',
   providers: [],
@@ -57,7 +59,6 @@ export class StudiesTableComponent {
   deleteStudy = output<string>();
   /** Emits the UUID of a study to duplicate. */
   duplicateStudy = output<string>();
-  currentPageReportTemplate = $localize`Study ${'{'}first} to ${'{'}last} of ${'{'}totalRecords}`;
 
   readonly studiesService = inject(StudiesService);
 

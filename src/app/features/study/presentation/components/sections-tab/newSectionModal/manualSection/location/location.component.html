@@ -1,6 +1,6 @@
-<p class="title" i18n="@@supportCoordinatesTitle" id="support1location">Support 1 coordinates:</p>
+<p class="title" id="support1location">{{ 'location.title' | transloco }}</p>
 
-<label class="label-lat" for="location-latitude" i18n>Latitude</label>
+<label class="label-lat" for="location-latitude">{{ 'location.label-latitude' | transloco }}</label>
 <p-inputgroup class="input-lat">
   <input
     pInputText
@@ -28,7 +28,7 @@
     variant="simple"
     class="error-lat"
   >
-    <ng-container i18n>Maximum value:</ng-container> {{ config.latitude.max }}
+    <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ config.latitude.max }}
   </p-message>
 }
 @if (isLatitudeUnderMin()) {
@@ -40,11 +40,11 @@
     variant="simple"
     class="error-lat"
   >
-    <ng-container i18n>Minimum value:</ng-container> {{ config.latitude.min }}
+    <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ config.latitude.min }}
   </p-message>
 }
 
-<label class="label-long" for="location-longitude" i18n>Longitude</label>
+<label class="label-long" for="location-longitude">{{ 'location.label-longitude' | transloco }}</label>
 <p-inputgroup class="input-long">
   <input
     pInputText
@@ -72,7 +72,7 @@
     variant="simple"
     class="error-long"
   >
-    <ng-container i18n>Maximum value:</ng-container> {{ config.longitude.max }}
+    <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ config.longitude.max }}
   </p-message>
 }
 @if (isLongitudeUnderMin()) {
@@ -84,11 +84,11 @@
     variant="simple"
     class="error-long"
   >
-    <ng-container i18n>Minimum value:</ng-container> {{ config.longitude.min }}
+    <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ config.longitude.min }}
   </p-message>
 }
 
-<label class="label-az" for="location-azimuth" i18n>Azimuth</label>
+<label class="label-az" for="location-azimuth">{{ 'location.label-azimuth' | transloco }}</label>
 <p-inputgroup class="input-az">
   <input
     pInputText
@@ -116,7 +116,7 @@
     variant="simple"
     class="error-az"
   >
-    <ng-container i18n>Maximum value:</ng-container> {{ config.azimuth.max }}
+    <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ config.azimuth.max }}
   </p-message>
 }
 @if (isAzimuthUnderMin()) {
@@ -128,6 +128,6 @@
     variant="simple"
     class="error-az"
   >
-    <ng-container i18n>Minimum value:</ng-container> {{ config.azimuth.min }}
+    <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ config.azimuth.min }}
   </p-message>
 }

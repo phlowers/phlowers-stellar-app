@@ -1,10 +1,17 @@
 import { vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { VtlGuyingReportService } from './vtl-guying-report.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
+
+const MOCK_TRANSLATIONS: Record<string, string> = {
+  'studio.vtl-guying-report.page-label': 'Page',
+  'studio.vtl-guying-report.report-generated-success': 'Report generated successfully',
+  'studio.vtl-guying-report.report-generation-failed': 'Failed to generate report'
+};
 
 vi.mock('jspdf', () => {
   const mockSave = vi.fn();
@@ -67,6 +74,7 @@ describe('VtlGuyingReportService', () => {
   let service: VtlGuyingReportService;
   let mockLogger: { error: ReturnType<typeof vi.fn>; log: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  let mockTranslocoService: { translate: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockLogger = {
@@ -79,11 +87,16 @@ describe('VtlGuyingReportService', () => {
       error: vi.fn()
     };
 
+    mockTranslocoService = {
+      translate: vi.fn((key: string) => MOCK_TRANSLATIONS[key] ?? key)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         VtlGuyingReportService,
         { provide: LoggerService, useValue: mockLogger },
-        { provide: NotificationService, useValue: mockNotificationService }
+        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: TranslocoService, useValue: mockTranslocoService }
       ]
     });
 

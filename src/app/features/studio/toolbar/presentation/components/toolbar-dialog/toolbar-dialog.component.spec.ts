@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { ToolbarDialogComponent } from './toolbar-dialog.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { MessageService } from 'primeng/api';
@@ -56,7 +57,13 @@ describe('ToolbarDialogComponent', () => {
     } as unknown as CablesService;
 
     await TestBed.configureTestingModule({
-      imports: [ToolbarDialogComponent],
+      imports: [
+        ToolbarDialogComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         provideAnimations(),
         provideHttpClient(),

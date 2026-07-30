@@ -9,6 +9,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { Section } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('Init component', () => {
   let component: InitComponent;
   let fixture: ComponentFixture<InitComponent>;
@@ -62,7 +63,14 @@ describe('Init component', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [InitComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        InitComponent
+      ],
       providers: [
         ToolbarDialogService,
         provideHttpClient(),

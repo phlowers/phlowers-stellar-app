@@ -39,6 +39,7 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 // Mock child component
 @Component({
@@ -194,7 +195,22 @@ describe('ManualSectionComponent', () => {
         ManualSectionComponent,
         MockSupportsTableComponent,
         MockStudioComponent,
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'manual-section.current-page-report': 'Current page report template',
+              'manual-section.no-voltage': 'No Voltage',
+              'common.section-type.guard': 'Guard',
+              'common.section-type.phase': 'Phase'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
       ],
       providers: [
         { provide: MaintenanceService, useValue: mockMaintenanceService },

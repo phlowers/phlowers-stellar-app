@@ -8,6 +8,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { StudiesService } from '@services/studies/studies.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -34,7 +35,8 @@ import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
     IconComponent,
     ButtonComponent,
     ToastModule,
-    FileUploadModule
+    FileUploadModule,
+    TranslocoModule
   ],
   templateUrl: './new-study-modal.component.html',
   styleUrl: './new-study-modal.component.scss',
@@ -61,6 +63,7 @@ export class NewStudyModalComponent {
   private readonly messageService = inject(MessageService);
   private readonly studiesService = inject(StudiesService);
   private readonly router = inject(Router);
+  private readonly translocoService = inject(TranslocoService);
 
   updateTitle(title: string) {
     this.title.set(title);
@@ -89,8 +92,8 @@ export class NewStudyModalComponent {
       this.router.navigate(['/study', uuid]);
       this.messageService.add({
         severity: 'success',
-        summary: $localize`Study created`,
-        detail: $localize`Study created successfully`
+        summary: this.translocoService.translate('shared.new-study-modal.study-created-summary'),
+        detail: this.translocoService.translate('shared.new-study-modal.study-created-detail')
       });
     } else {
       const study = await this.studiesService.getStudy(this.studyUuid());
@@ -106,8 +109,8 @@ export class NewStudyModalComponent {
       this.refreshStudy.emit(this.studyUuid());
       this.messageService.add({
         severity: 'success',
-        summary: $localize`Study updated`,
-        detail: $localize`Study updated successfully`
+        summary: this.translocoService.translate('shared.new-study-modal.study-updated-summary'),
+        detail: this.translocoService.translate('shared.new-study-modal.study-updated-detail')
       });
     }
     this.isOpenChange.emit(false);

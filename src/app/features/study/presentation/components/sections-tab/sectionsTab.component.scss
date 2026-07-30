@@ -10,21 +10,52 @@
 }
 
 .section {
+  %_push-interactive-content {
+    position: relative;
+    z-index: 1;
+  }
+
   display: grid;
   grid-template-columns: min-content 2fr auto 1fr 1fr 2fr 2fr min-content;
   grid-template-rows: repeat(2, auto);
   grid-template-areas:
+    'selectBtn . . . . . . .'
     'selector nameTitle typeTitle litTitle modifiedTitle initTitle chargesTitle actionTitle'
     'selector nameContent typeContent litContent modifiedContent initContent chargesContent actionContent';
   justify-items: start;
   align-items: start;
   gap: 0.25rem 1rem;
+  position: relative;
+  background-color: var(--grey-white);
+  transition: background-color 0.3s ease-in-out;
+
+  &:has(.section__select-btn:focus-visible) {
+    @extend %focus-state;
+  }
+
+  &:has(.section__select-btn:hover) {
+    background-color: var(--primary-50);
+  }
 
   dl {
     display: contents;
   }
 
+  &__select-btn {
+    grid-area: selectBtn;
+    height: 0rem;
+    width: 0rem;
+    text-indent: -999rem;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
+  }
+
   &__selector {
+    @extend %_push-interactive-content;
     grid-area: selector;
     justify-self: center;
     align-self: center;
@@ -76,14 +107,17 @@
   }
 
   &__content-init {
+    @extend %_push-interactive-content;
     grid-area: initContent;
   }
 
   &__content-charges {
+    @extend %_push-interactive-content;
     grid-area: chargesContent;
   }
 
   &__content-action {
+    @extend %_push-interactive-content;
     grid-area: actionContent;
     justify-self: center;
   }
@@ -108,8 +142,5 @@
 
 .sticky-btn-wrapper {
   @apply sticky text-right p-6 -bottom-6 -inset-x-6 -mx-6 flex gap-2 justify-end;
-  background-image: linear-gradient(
-    rgb(from var(--grey-white) r g b / 0),
-    rgb(from var(--grey-white) r g b / 0.9) 70%
-  );
+  background-image: linear-gradient(rgb(from var(--grey-white) r g b / 0), rgb(from var(--grey-white) r g b / 0.9) 70%);
 }

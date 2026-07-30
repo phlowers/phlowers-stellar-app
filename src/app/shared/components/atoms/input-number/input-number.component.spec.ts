@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { InputNumberComponent } from './input-number.component';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('InputNumberComponent', () => {
   let component: InputNumberComponent;
   let fixture: ComponentFixture<InputNumberComponent>;
@@ -11,7 +12,15 @@ describe('InputNumberComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InputNumberComponent, ReactiveFormsModule]
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        InputNumberComponent,
+        ReactiveFormsModule
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputNumberComponent);

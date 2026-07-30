@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { TestBed } from '@angular/core/testing';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import { PYTHON_ERROR_SEVERITY } from './python-error-severity';
 import { formatPythonError } from './python-error-messages';
 import { PythonErrorCode } from './types';
@@ -31,9 +33,14 @@ describe('PYTHON_ERROR_SEVERITY', () => {
   });
 
   it('should have both a severity and a localized message defined for every PythonErrorCode, keeping the two catalogs in sync', () => {
+    TestBed.configureTestingModule({
+      imports: [TranslocoTestingModule.forRoot({ langs: { en: {} } })]
+    });
+    const translocoService = TestBed.inject(TranslocoService);
+
     Object.values(PythonErrorCode).forEach((code) => {
       const severity = PYTHON_ERROR_SEVERITY[code];
-      const message = formatPythonError(code);
+      const message = formatPythonError(code, translocoService);
 
       expect(severity, `missing severity for ${code}`).toBeDefined();
       expect(['error', 'warning']).toContain(severity);

@@ -17,6 +17,7 @@ import { integerValidator } from './climate.helpers';
 import { climateConstraints } from './climate.constantes';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-climate',
@@ -28,7 +29,8 @@ import { MessageModule } from 'primeng/message';
     SelectModule,
     MessageModule,
     ButtonComponent,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   templateUrl: './climate.component.html',
   styleUrl: './climate.component.scss',
@@ -38,6 +40,7 @@ import { MessageModule } from 'primeng/message';
 export class ClimateComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
   readonly constraints = climateConstraints;
 
   readonly isSaving = signal(false);
@@ -89,8 +92,8 @@ export class ClimateComponent {
   chargeUuid = input.required<string>();
 
   symmetryOptions = [
-    { label: $localize`Symmetric`, value: SymmetryType.SYMMETRIC },
-    { label: $localize`Dis Symmetric`, value: SymmetryType.DIS_SYMMETRIC }
+    { label: this.translocoService.translate('loads.climate.symmetric-option'), value: SymmetryType.SYMMETRIC },
+    { label: this.translocoService.translate('loads.climate.dis-symmetric-option'), value: SymmetryType.DIS_SYMMETRIC }
   ];
 
   readonly frontierSupportOptions = signal<{ label: string; value: number }[]>([]);

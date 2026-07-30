@@ -29,6 +29,7 @@ import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock plotly
 vi.mock('plotly.js-dist-min', () => ({
   purge: vi.fn()
@@ -277,6 +278,13 @@ describe('PlotService', () => {
     } as unknown as vi.Mocked<CablesService>;
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

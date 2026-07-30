@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -16,7 +17,15 @@ import { SelectModule } from 'primeng/select';
 @Component({
   selector: 'app-export-dialog',
   standalone: true,
-  imports: [DialogModule, ReactiveFormsModule, InputTextModule, IconComponent, ButtonComponent, SelectModule],
+  imports: [
+    TranslocoPipe,
+    DialogModule,
+    ReactiveFormsModule,
+    InputTextModule,
+    IconComponent,
+    ButtonComponent,
+    SelectModule
+  ],
   templateUrl: './export-dialog.component.html',
   styleUrl: './export-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -54,6 +54,14 @@ public/service-worker.interfaces.js
 # Personal Copilot skills
 copilot-skills.md
 .github/personal-skills.md
+.agents/skills/cavecrew/
+.agents/skills/caveman/
+.agents/skills/caveman-commit/
+.agents/skills/caveman-compress/
+.agents/skills/caveman-help/
+.agents/skills/caveman-review/
+.agents/skills/caveman-stats/
+
 
 *.ipynb
 

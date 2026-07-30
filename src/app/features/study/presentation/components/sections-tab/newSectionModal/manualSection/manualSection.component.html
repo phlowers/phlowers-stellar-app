@@ -4,24 +4,26 @@
   class="{{ mode() === 'view' ? 'mt-0' : 'mt-4' }} h-full"
 >
   <p-tablist>
-    <p-tab (onSelect)="tabValue.set('general')" value="general" i18n data-testid="general-tab"> General </p-tab>
-    <p-tab (onSelect)="tabValue.set('supports')" value="supports" i18n data-testid="supports-tab">
-      Supports list
+    <p-tab (onSelect)="tabValue.set('general')" value="general" data-testid="general-tab">
+      {{ 'manual-section.tab-general' | transloco }}
     </p-tab>
-    <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" i18n data-testid="graphical-tab">
-      Graphical view
+    <p-tab (onSelect)="tabValue.set('supports')" value="supports" data-testid="supports-tab">
+      {{ 'manual-section.tab-supports' | transloco }}
+    </p-tab>
+    <p-tab (onSelect)="tabValue.set('graphical')" value="graphical" data-testid="graphical-tab">
+      {{ 'manual-section.tab-graphical' | transloco }}
     </p-tab>
   </p-tablist>
 
   <p-tabpanels class="grow">
     <p-tabpanel value="general">
       <div class="section-form-part">
-        <h3 class="title-underline" i18n>Section</h3>
+        <h3 class="title-underline">{{ 'manual-section.section-group' | transloco }}</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
             <div class="flex flex-col col-span-2">
-              <label for="sectionName" i18n>
-                Section name
+              <label for="sectionName">
+                {{ 'manual-section.label-section-name' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <input
@@ -37,15 +39,15 @@
                 data-testid="section-name-input"
               />
               @if (!isNameUnique()) {
-                <p-message id="section-name-error-message" severity="error" size="small" variant="simple" i18n
-                  >Section name must be unique.</p-message
-                >
+                <p-message id="section-name-error-message" severity="error" size="small" variant="simple">{{
+                  'manual-section.name-unique' | transloco
+                }}</p-message>
               }
             </div>
 
             <div class="flex flex-col">
-              <label for="sectionType" i18n>
-                Section type
+              <label for="sectionType">
+                {{ 'manual-section.label-section-type' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <p-select
@@ -66,7 +68,7 @@
             <div class="flex flex-col">
               @if (section().type === 'phase') {
                 <label for="electricPhaseNumber">
-                  <ng-container i18n>Electric phase number</ng-container>
+                  <ng-container>{{ 'manual-section.label-phase-number' | transloco }}</ng-container>
                 </label>
                 <p-select
                   inputId="electricPhaseNumber"
@@ -78,8 +80,8 @@
             </div>
 
             <div class="flex flex-col">
-              <label for="cableName" i18n>
-                Cable name
+              <label for="cableName">
+                {{ 'manual-section.label-cable-name' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <p-select
@@ -100,8 +102,8 @@
             </div>
 
             <div class="flex flex-col">
-              <label for="cableAmount" i18n>
-                Cable amount
+              <label for="cableAmount">
+                {{ 'manual-section.label-cable-amount' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <p-select
@@ -117,24 +119,24 @@
         } @else if (mode() === 'view') {
           <dl class="section-form-part-grid">
             <div class="col-span-2">
-              <dt i18n>Section name</dt>
+              <dt>{{ 'manual-section.label-section-name' | transloco }}</dt>
               <dd class="read-only-info">{{ section().name }}</dd>
             </div>
 
             <div>
-              <dt i18n>Section type</dt>
+              <dt>{{ 'manual-section.label-section-type' | transloco }}</dt>
               <dd class="read-only-info">
                 @if (section().type === 'phase') {
-                  <ng-container i18n>Phase</ng-container>
+                  <ng-container>{{ 'common.section-type.phase' | transloco }}</ng-container>
                 } @else if (section().type === 'guard') {
-                  <ng-container i18n>Guard</ng-container>
+                  <ng-container>{{ 'common.section-type.guard' | transloco }}</ng-container>
                 }
               </dd>
             </div>
 
             <div>
               @if (section().type === 'phase') {
-                <dt i18n>Electric phase number</dt>
+                <dt>{{ 'manual-section.label-phase-number' | transloco }}</dt>
                 <dd class="read-only-info">
                   {{ section().electric_phase_number }}
                 </dd>
@@ -142,12 +144,12 @@
             </div>
 
             <div>
-              <dt i18n>Cable name</dt>
+              <dt>{{ 'manual-section.label-cable-name' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cable_name }}</dd>
             </div>
 
             <div>
-              <dt i18n>Cable amount</dt>
+              <dt>{{ 'manual-section.label-cable-amount' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cables_amount }}</dd>
             </div>
           </dl>
@@ -155,11 +157,11 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline" i18n>Line team</h3>
+        <h3 class="title-underline">{{ 'manual-section.line-team-group' | transloco }}</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
             <div class="flex flex-col">
-              <label for="maintenanceCenter" i18n>Maintenance center</label>
+              <label for="maintenanceCenter">{{ 'manual-section.label-maintenance-center' | transloco }}</label>
               <p-select
                 inputId="maintenanceCenter"
                 [options]="uniqueMaintenanceCenters()"
@@ -177,7 +179,7 @@
             </div>
 
             <div class="flex flex-col">
-              <label for="maintRegionalTeam" i18n>Regional team</label>
+              <label for="maintRegionalTeam">{{ 'manual-section.label-regional-team' | transloco }}</label>
               <p-select
                 inputId="maintRegionalTeam"
                 [options]="uniqueRegionalTeams()"
@@ -195,7 +197,7 @@
             </div>
 
             <div class="flex flex-col">
-              <label for="maintenanceTeam" i18n>Maintenance team</label>
+              <label for="maintenanceTeam">{{ 'manual-section.label-maintenance-team' | transloco }}</label>
               <p-select
                 inputId="maintenanceTeam"
                 [options]="uniqueMaintenanceTeams()"
@@ -215,17 +217,17 @@
         } @else if (mode() === 'view') {
           <dl class="section-form-part-grid">
             <div>
-              <dt i18n>Maintenance center</dt>
+              <dt>{{ 'manual-section.label-maintenance-center' | transloco }}</dt>
               <dd class="read-only-info">{{ maintenanceCenterRead() }}</dd>
             </div>
 
             <div>
-              <dt i18n>Regional team</dt>
+              <dt>{{ 'manual-section.label-regional-team' | transloco }}</dt>
               <dd class="read-only-info">{{ regionalTeamRead() }}</dd>
             </div>
 
             <div>
-              <dt i18n>Maintenance team</dt>
+              <dt>{{ 'manual-section.label-maintenance-team' | transloco }}</dt>
               <dd class="read-only-info">{{ maintenanceTeamRead() }}</dd>
             </div>
           </dl>
@@ -233,12 +235,12 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline" i18n>Link</h3>
+        <h3 class="title-underline">{{ 'manual-section.link-group' | transloco }}</h3>
 
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid lines-form-grid">
             <div class="flex flex-col [grid-area:a]">
-              <label for="linkEtl" i18n>Electric tension level</label>
+              <label for="linkEtl">{{ 'manual-section.label-etl' | transloco }}</label>
               <p-select
                 inputId="linkEtl"
                 [options]="uniqueVoltageIdr()"
@@ -264,9 +266,9 @@
               </p-select>
             </div>
             <div class="flex flex-col [grid-area:b]">
-              <label for="linkName" i18n>Link - ID</label>
+              <label for="linkIdr">{{ 'manual-section.label-link-id' | transloco }}</label>
               <p-select
-                inputId="linkName"
+                inputId="linkIdr"
                 [options]="uniqueLinkIdr()"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_idr"
@@ -283,9 +285,9 @@
               />
             </div>
             <div class="flex flex-col [grid-area:c]">
-              <label for="linkName" i18n>Link - Name</label>
+              <label for="linkAdr">{{ 'manual-section.label-link-name' | transloco }}</label>
               <p-select
-                inputId="linkName"
+                inputId="linkAdr"
                 [options]="uniqueLinkAdr()"
                 [(ngModel)]="section().link_name"
                 optionLabel="link_adr"
@@ -303,9 +305,9 @@
               />
             </div>
             <div class="flex flex-col [grid-area:d]">
-              <label for="linkLit" i18n>LIT - ID</label>
+              <label for="litIdr">{{ 'manual-section.label-lit-id' | transloco }}</label>
               <p-select
-                inputId="linkLit"
+                inputId="litIdr"
                 [options]="uniqueLitIdr()"
                 [(ngModel)]="section().lit_code"
                 optionLabel="lit_idr"
@@ -323,9 +325,9 @@
             </div>
 
             <div class="flex flex-col [grid-area:e]">
-              <label for="linkLit" i18n>LIT - Name</label>
+              <label for="litAdr">{{ 'manual-section.label-lit-name' | transloco }}</label>
               <p-select
-                inputId="linkLit"
+                inputId="litAdr"
                 [options]="uniqueLitAdr()"
                 [(ngModel)]="section().lit_name"
                 optionLabel="lit_adr"
@@ -343,7 +345,7 @@
             </div>
 
             <div class="flex flex-col [grid-area:f]">
-              <label for="linkBm" i18n>Branch</label>
+              <label for="linkBm">{{ 'manual-section.label-branch' | transloco }}</label>
               <p-select
                 inputId="linkBm"
                 [options]="uniqueBranchIdr()"
@@ -365,34 +367,34 @@
         } @else if (mode() === 'view') {
           <dl class="section-form-part-grid lines-form-grid">
             <div class="[grid-area:a]">
-              <dt i18n>Electric tension level</dt>
+              <dt>{{ 'manual-section.label-etl' | transloco }}</dt>
               <dd class="read-only-info">
                 {{ section().voltage_idr === 'NO VOLTAGE' ? noVoltageLabel : section().voltage_idr }}
               </dd>
             </div>
 
             <div class="[grid-area:b]">
-              <dt i18n>Link - ID</dt>
+              <dt>{{ 'manual-section.label-link-id' | transloco }}</dt>
               <dd class="read-only-info">{{ section().link_name }}</dd>
             </div>
 
             <div class="[grid-area:c]">
-              <dt i18n>Link - Name</dt>
+              <dt>{{ 'manual-section.label-link-name' | transloco }}</dt>
               <dd class="read-only-info">{{ linkAdrRead() }}</dd>
             </div>
 
             <div class="[grid-area:d]">
-              <dt i18n>LIT - ID</dt>
+              <dt>{{ 'manual-section.label-lit-id' | transloco }}</dt>
               <dd class="read-only-info" data-testid="lit-code-view">{{ section().lit_code }}</dd>
             </div>
 
             <div class="[grid-area:e]">
-              <dt i18n>LIT - Name</dt>
+              <dt>{{ 'manual-section.label-lit-name' | transloco }}</dt>
               <dd class="read-only-info" data-testid="lit-name-view">{{ litAdrRead() }}</dd>
             </div>
 
             <div class="[grid-area:f]">
-              <dt i18n>Branch</dt>
+              <dt>{{ 'manual-section.label-branch' | transloco }}</dt>
               <dd class="read-only-info" data-testid="branch-idr-view">{{ section().branch_idr }}</dd>
             </div>
           </dl>
@@ -400,13 +402,12 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline" i18n>Comment</h3>
+        <h3 class="title-underline">{{ 'manual-section.comment-group' | transloco }}</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <textarea
             pTextarea
-            i18n-aria-label
             id="comment"
-            aria-label="comment"
+            [attr.aria-label]="'manual-section.aria-comment' | transloco"
             class="w-full"
             [(ngModel)]="section().comment"
             (ngModelChange)="onSectionChange()"
@@ -419,7 +420,7 @@
       <div class="flex justify-end pt-6">
         <button app-btn btnSize="m" btnStyle="outlined" (click)="onNextTab()" data-testid="next-tab-btn">
           <app-icon icon="chevron_right" />
-          <ng-container i18n>Next</ng-container>
+          <ng-container>{{ 'common.next' | transloco }}</ng-container>
         </button>
       </div>
     </p-tabpanel>
@@ -428,7 +429,7 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="flex gap-4 items-start">
             <div class="flex flex-col">
-              <label for="supportsAmount" i18n>Supports amount</label>
+              <label for="supportsAmount">{{ 'manual-section.label-supports-amount' | transloco }}</label>
               <div class="flex flex-row gap-2 justify-between items-start w-[9.375rem]">
                 <p-inputnumber
                   [min]="2"
@@ -438,8 +439,7 @@
                   buttonLayout="horizontal"
                   inputId="supportsAmount"
                   spinnerMode="horizontal"
-                  aria-label="supports amount"
-                  i18n-aria-label
+                  [attr.aria-label]="'supports-table.aria-supports-amount' | transloco"
                   (onBlur)="onSupportsAmountChangeBlur($event)"
                   (onInput)="onSupportsAmountChangeInput($event)"
                   data-testid="supports-amount-input"
@@ -466,8 +466,9 @@
           <div class="flex flex-row justify-between items-center mt-[-1rem]">
             <p class="flex flex-row gap-2 items-center mb-0">
               <app-icon icon="edit_arrow_down" />
-              <ng-container i18n>Double click on a column to copy the value to all supports</ng-container>
+              <ng-container>{{ 'manual-section.double-click-hint' | transloco }}</ng-container>
             </p>
+            <!-- TODO: STOP #2 — paginator interpolation -->
             <p-paginator
               (onPageChange)="onSupportsPageChange($event)"
               [totalRecords]="section().supports.length"
@@ -476,16 +477,16 @@
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
-              i18n-currentPageReportTemplate
               [currentPageReportTemplate]="currentPageReportTemplate"
             />
           </div>
         } @else if (mode() === 'view') {
           <div class="flex flex-row justify-between items-center">
             <dl>
-              <dt i18n>Supports amount</dt>
+              <dt>{{ 'manual-section.label-supports-amount' | transloco }}</dt>
               <dd class="read-only-info">{{ section().supports.length }}</dd>
             </dl>
+            <!-- TODO: STOP #2 — paginator interpolation -->
             <p-paginator
               (onPageChange)="onSupportsPageChange($event)"
               [totalRecords]="section().supports.length"
@@ -494,7 +495,6 @@
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
-              i18n-currentPageReportTemplate
               currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
             />
           </div>
@@ -515,11 +515,9 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <textarea
             pTextarea
-            i18n-aria-label
             id="supports-comment"
-            aria-label="supports comment"
-            i18n-placeholder
-            placeholder="Comment about the supports"
+            [attr.aria-label]="'manual-section.aria-supports-comment' | transloco"
+            [attr.placeholder]="'manual-section.placeholder-supports-comment' | transloco"
             class="w-full"
             [(ngModel)]="section().supports_comment"
             (ngModelChange)="onSectionChange()"
@@ -530,7 +528,7 @@
         <div class="flex justify-end pt-3 pb-4">
           <button app-btn btnSize="m" btnStyle="outlined" (click)="onPreviousTab()">
             <app-icon icon="chevron_left" />
-            <ng-container i18n>Previous</ng-container>
+            <ng-container>{{ 'common.previous' | transloco }}</ng-container>
           </button>
         </div>
       </div>

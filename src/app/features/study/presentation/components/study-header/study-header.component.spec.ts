@@ -4,6 +4,7 @@ import { MessageService } from 'primeng/api';
 
 import { StudyHeaderComponent } from './study-header.component';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('StudyHeader', () => {
   let component: StudyHeaderComponent;
   let fixture: ComponentFixture<StudyHeaderComponent>;
@@ -17,7 +18,14 @@ describe('StudyHeader', () => {
       add: vi.fn()
     } as unknown as vi.Mocked<MessageService>;
     await TestBed.configureTestingModule({
-      imports: [StudyHeaderComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        StudyHeaderComponent
+      ],
       providers: [provideNoopAnimations(), { provide: MessageService, useValue: mockMessageService }]
     }).compileComponents();
 
