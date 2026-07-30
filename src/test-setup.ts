@@ -65,7 +65,10 @@ if (typeof Blob !== 'undefined' && !('text' in Blob.prototype)) {
       return new Promise<string>((resolve, reject) => {
         const reader = new _OriginalFileReader();
         reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(reader.error);
+        reader.onerror = () => {
+          const error = reader.error instanceof Error ? reader.error : new Error(String(reader.error));
+          reject(error);
+        };
         reader.readAsText(this);
       });
     },
