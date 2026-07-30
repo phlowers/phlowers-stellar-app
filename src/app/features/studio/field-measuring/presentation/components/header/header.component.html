@@ -1,31 +1,31 @@
 <div class="header-grid">
   <dl class="contents">
     <div class="header-info">
-      <dt i18n>Link</dt>
+      <dt>{{ 'field-measuring.header.link-label' | transloco }}</dt>
       <dd>{{ measureData().link }}</dd>
     </div>
     <div class="header-info">
-      <dt i18n>Voltage</dt>
-      <dd i18n>{{ measureData().voltage }}</dd>
+      <dt>{{ 'field-measuring.header.voltage-label' | transloco }}</dt>
+      <dd>{{ measureData().voltage }}</dd>
     </div>
     <div class="header-info">
-      <dt i18n>Span type</dt>
+      <dt>{{ 'field-measuring.header.span-type-label' | transloco }}</dt>
       <dd class="capitalize">
         @if (measureData().spanType === 'phase') {
-          <ng-container i18n>Phase</ng-container>
+          <ng-container>{{ 'field-measuring.header.phase-label' | transloco }}</ng-container>
         } @else {
-          <ng-container i18n>Guard</ng-container>
+          <ng-container>{{ 'field-measuring.header.guard-label' | transloco }}</ng-container>
         }
       </dd>
     </div>
     <div class="header-info">
       @if (measureData().spanType === 'phase') {
-        <dt i18n>Phase number</dt>
+        <dt>{{ 'field-measuring.header.phase-number-label' | transloco }}</dt>
         <dd>{{ measureData().phaseNumber }}</dd>
       }
     </div>
     <div class="header-info">
-      <dt i18n>Cable amount</dt>
+      <dt>{{ 'field-measuring.header.cable-amount-label' | transloco }}</dt>
       <dd>{{ measureData().numberOfConductors }}</dd>
     </div>
   </dl>
@@ -33,7 +33,7 @@
   <!-- Location Fields Section -->
   <div class="form-field">
     <label for="portee">
-      <ng-container i18n>Span</ng-container>
+      <ng-container>{{ 'field-measuring.header.span-label' | transloco }}</ng-container>
       <sup class="mandatory">*</sup>
     </label>
     <p-select
@@ -52,7 +52,7 @@
   <div class="form-field">
     <label for="longitude">
       <span>
-        <ng-container i18n>Longitude</ng-container>
+        <ng-container>{{ 'field-measuring.header.longitude-label' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </span>
       <app-icon icon="help" class="help-icon" />
@@ -69,14 +69,14 @@
         (ngModelChange)="onFieldChange('longitude', $event)"
         required
       />
-      <p-inputgroup-addon i18n>°</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ 'field-measuring.header.degree-addon' | transloco }}</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 
   <div class="form-field">
     <label for="latitude">
       <span>
-        <ng-container i18n>Latitude</ng-container>
+        <ng-container>{{ 'field-measuring.header.latitude-label' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </span>
       <app-icon icon="help" class="help-icon" />
@@ -93,13 +93,13 @@
         (ngModelChange)="onFieldChange('latitude', $event)"
         required
       />
-      <p-inputgroup-addon i18n>°</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ 'field-measuring.header.degree-addon' | transloco }}</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 
   <div class="form-field">
     <label for="altitude">
-      <ng-container i18n>Altitude</ng-container>
+      <ng-container>{{ 'field-measuring.header.altitude-label' | transloco }}</ng-container>
       <sup class="mandatory">*</sup>
     </label>
     <p-inputgroup>
@@ -114,14 +114,14 @@
         (ngModelChange)="onFieldChange('altitude', $event)"
         required
       />
-      <p-inputgroup-addon i18n>m</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ 'field-measuring.header.meter-addon' | transloco }}</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 
   <div class="form-field">
     <label for="azimuth">
       <span>
-        <ng-container i18n>Azimuth (clockwise — 0° North/South) </ng-container>
+        <ng-container>{{ 'field-measuring.header.azimuth-label' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </span>
     </label>
@@ -136,7 +136,7 @@
         (ngModelChange)="onFieldChange('azimuth', $event)"
         required
       />
-      <p-inputgroup-addon i18n>°</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ 'field-measuring.header.degree-addon' | transloco }}</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 </div>

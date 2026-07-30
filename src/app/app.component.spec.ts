@@ -24,6 +24,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 class Worker {
   url: string;
@@ -130,7 +131,26 @@ describe('AppComponent', () => {
     } as unknown as ObstaclesService;
 
     await TestBed.configureTestingModule({
-      imports: [NoopAnimationsModule, AppComponent],
+      imports: [
+        NoopAnimationsModule,
+        AppComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'app.install-failed': 'Install failed',
+              'app.update': 'Update',
+              'app.new-version-available': 'New version available',
+              'app.version': 'Version',
+              'app.hash': 'Hash'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, { useValue: mockWorkerService });
@@ -253,7 +273,15 @@ describe('AppComponent - HTML rendering', () => {
     globalThis.Worker = Worker;
 
     await TestBed.configureTestingModule({
-      imports: [NoopAnimationsModule, AppComponent],
+      imports: [
+        NoopAnimationsModule,
+        AppComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, {
@@ -358,7 +386,15 @@ describe('AppComponent - auth-gated PWA flow', () => {
     globalThis.Worker = Worker;
 
     await TestBed.configureTestingModule({
-      imports: [NoopAnimationsModule, AppComponent],
+      imports: [
+        NoopAnimationsModule,
+        AppComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
 
@@ -530,7 +566,15 @@ describe('AppComponent - automatic first-install resilience', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [NoopAnimationsModule, AppComponent],
+      imports: [
+        NoopAnimationsModule,
+        AppComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
 
@@ -578,7 +622,7 @@ describe('AppComponent - automatic first-install resilience', () => {
     });
 
     // Patch the LoggerService used by AppComponent via DI override.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+
     const { LoggerService } = await import('@core/services/logger/logger.service');
     TestBed.overrideProvider(LoggerService, {
       useValue: { error: loggerError, warn: loggerWarn, info: vi.fn(), debug: vi.fn() }

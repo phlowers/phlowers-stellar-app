@@ -73,9 +73,9 @@
     <button type="button" (click)="toggleMenu()" class="stellar-sidebar__link" data-testid="sidebar-toggle">
       <app-icon icon="keyboard_double_arrow_right" />
       @if (expandedStatus() === true) {
-        <span i18n>Shrink menu</span>
+        <span>{{ 'shared.sidebar.shrink-menu' | transloco }}</span>
       } @else {
-        <span i18n>Menu</span>
+        <span>{{ 'shared.sidebar.menu' | transloco }}</span>
       }
     </button>
   </footer>

@@ -15,6 +15,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Subject } from 'rxjs';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 class MockMaintenanceService {
   ready = { next: vi.fn() };
   getMaintenance = vi.fn().mockResolvedValue([]);
@@ -159,7 +160,41 @@ describe('SectionsTabComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [SectionsTabComponent, NoopAnimationsModule],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.delete': 'Delete',
+              'common.duplicate': 'Duplicate',
+              'common.edit': 'Edit',
+              'common.view': 'View',
+              'sections-tab.actions': 'Actions',
+              'sections-tab.add-initial-condition': 'Add initial condition',
+              'sections-tab.aria-actions-for-section': 'Actions for section {{ name }}',
+              'sections-tab.aria-select-charge': 'Select charge case',
+              'sections-tab.aria-select-ic': 'Select initial conditions',
+              'sections-tab.aria-select-section': "select this study's section",
+              'sections-tab.charge-cases': 'Charge cases',
+              'sections-tab.col-last-modified': 'Last modified',
+              'sections-tab.col-lit': 'LIT',
+              'sections-tab.col-name': 'Section Name',
+              'sections-tab.col-type': 'Section type',
+              'sections-tab.create-section': 'Create a section',
+              'sections-tab.generate-state': 'Generate a state',
+              'sections-tab.ic-prefix': 'IC',
+              'sections-tab.initial-condition': 'Initial condition',
+              'sections-tab.no-section': 'No existing section',
+              'sections-tab.placeholder-view-ic': 'View initial conditions',
+              'common.section-type.guard': 'Guard',
+              'common.section-type.phase': 'Phase'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        SectionsTabComponent,
+        NoopAnimationsModule
+      ],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },

@@ -13,6 +13,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { LoginPageComponent } from './login-page.component';
 import { AuthService } from '@services/auth/auth.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 interface AuthServiceMock {
   oidcEnabled: WritableSignal<boolean>;
   modeResolved: WritableSignal<boolean>;
@@ -71,7 +72,14 @@ describe('LoginPageComponent', () => {
     routerMock = { navigate: vi.fn().mockResolvedValue(true) };
 
     await TestBed.configureTestingModule({
-      imports: [LoginPageComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        LoginPageComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: AuthService, useValue: authServiceMock },

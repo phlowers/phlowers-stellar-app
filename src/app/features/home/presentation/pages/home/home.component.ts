@@ -14,35 +14,10 @@ import { Study } from '@shared/domain';
 import TimeAgo from 'javascript-time-ago';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
-if (navigator.language.includes('fr')) {
-  TimeAgo.addLocale(fr);
-} else {
-  TimeAgo.addLocale(en);
-}
-
-const timeAgo = new TimeAgo(navigator.language);
-
-const defaultTexts = {
-  newsTitle: $localize`News`, // i18n Actualités
-  newsText: $localize`Welcome to Celeste! We are glad to present this new tool made with you.
-  Please contact us to share your ideas and feedbacks to help us upgrade this application!`,
-  /*
-  i18n
-  Bienvenue sur Céleste ! Nous sommes ravis de vous présenter cette nouvelle
-  version de l'outil co-construite avec vous. N'hésitez pas à contacter l'équipe Céleste pour nous
-  faire part de vos idées d'améliorations !
-  */
-  newsLinkText: $localize`View all news`, // i18n Consulter toutes les actualités
-
-  updateTitle: $localize`Changelogs`, // i18n Notes de mise à jour
-  updateText: $localize`View latest updates.`, // i18n Consulter les dernières mises à jour de l'application.
-  updateLinkText: $localize`Learn more`, // i18n Découvrir
-  updateLinkExplicitText: $localize`Learn more about latest updates`, // i18n Découvrir les dernières notes de mise à jour
-
-  serverTitle: $localize`Server state`, // i18n État des serveurs
-  serverText: $localize`Trying to reach the servers!` // i18n Nous essayons de contacter les serveurs
-};
+TimeAgo.addLocale(fr);
+TimeAgo.addLocale(en);
 
 /** Text content displayed on the home page cards and sections. */
 interface HomeTexts {
@@ -68,7 +43,7 @@ type ServerStates = CardState;
  */
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent],
+  imports: [RouterLink, ButtonComponent, IconComponent, CardInfoComponent, CardStudyComponent, TranslocoModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -77,9 +52,11 @@ export class HomeComponent {
   private readonly updateService = inject(UpdateService);
   private readonly onlineService = inject(OnlineService);
   private readonly studiesService = inject(StudiesService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly timeAgo = new TimeAgo(this.translocoService.getActiveLang());
   public latestStudies = signal<Study[]>([]);
 
-  public homeText = signal<HomeTexts>(defaultTexts);
+  public homeText = signal<HomeTexts>(this.buildDefaultTexts());
 
   private updateText(key: keyof HomeTexts, value: string) {
     this.homeText.update((current) => ({
@@ -107,15 +84,12 @@ export class HomeComponent {
       // prettier-ignore
       if (updateAvailable) { //NOSONAR
         this.updateStatus.set('warning');
-        this.updateText('updateTitle', $localize`Update available`); // i18n Mise à jour disponible !
-        this.updateText(
-          'updateText',
-          $localize`A new application update is available!`
-        ); // i18n Une nouvelle mise à jour de votre application est disponible !
+        this.updateText('updateTitle', this.translocoService.translate('home.update-available'));
+        this.updateText('updateText', this.translocoService.translate('home.update-new-available'));
       } else {
         this.updateStatus.set('unknown');
-        this.updateText('updateTitle', defaultTexts.updateTitle);
-        this.updateText('updateText', defaultTexts.updateText);
+        this.updateText('updateTitle', this.translocoService.translate('home.update-title'));
+        this.updateText('updateText', this.translocoService.translate('home.update-text'));
       }
     });
 
@@ -132,12 +106,26 @@ export class HomeComponent {
           this.latestStudies.set(
             studies?.map((study) => ({
               ...study,
-              updated_at_offline: timeAgo.format(new Date(study.updated_at_offline))
+              updated_at_offline: this.timeAgo.format(new Date(study.updated_at_offline))
             }))
           );
         });
       }
     });
+  }
+
+  private buildDefaultTexts(): HomeTexts {
+    return {
+      newsTitle: this.translocoService.translate('home.news-title'),
+      newsText: this.translocoService.translate('home.news-text'),
+      newsLinkText: this.translocoService.translate('home.news-link-text'),
+      updateTitle: this.translocoService.translate('home.update-title'),
+      updateText: this.translocoService.translate('home.update-text'),
+      updateLinkText: this.translocoService.translate('home.update-link-text'),
+      updateLinkExplicitText: this.translocoService.translate('home.update-link-explicit-text'),
+      serverTitle: this.translocoService.translate('home.server-title'),
+      serverText: this.translocoService.translate('home.server-text-default')
+    };
   }
 
   private getConnectivityStatus(isOnline: boolean, serverStatus: ServerStatus): ServerStates {
@@ -164,19 +152,19 @@ export class HomeComponent {
   private updateServerText(status: ServerStates): void {
     switch (status) {
       case 'offline':
-        this.updateText('serverText', $localize`Application in offline mode.`); // i18n Application en mode offline.
+        this.updateText('serverText', this.translocoService.translate('home.server-offline'));
         break;
       case 'unknown':
-        this.updateText('serverText', $localize`Cannot reach data. Please check your internet connectivity.`); // i18n Impossible d'accéder aux données. Vérifiez votre connexion à internet.
+        this.updateText('serverText', this.translocoService.translate('home.server-unknown'));
         break;
       case 'warning':
-        this.updateText('serverText', $localize`Trying to reach the servers.`); // i18n Nous essayons de contacter les serveurs.
+        this.updateText('serverText', this.translocoService.translate('home.server-warning'));
         break;
       case 'error':
-        this.updateText('serverText', $localize`An error occured while trying to reach servers.`); // i18n Une erreur a été rencontré lors de la connexion aux serveurs.
+        this.updateText('serverText', this.translocoService.translate('home.server-error'));
         break;
       case 'success':
-        this.updateText('serverText', $localize`Server connexion success!`); // i18n Connexion aux serveurs réussi !
+        this.updateText('serverText', this.translocoService.translate('home.server-success'));
         break;
     }
   }

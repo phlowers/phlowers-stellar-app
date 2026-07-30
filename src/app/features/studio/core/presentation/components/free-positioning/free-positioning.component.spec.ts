@@ -14,6 +14,7 @@ import { createPlotData } from '@shared/components/studio/section/helpers/create
 
 import Plotly from 'plotly.js-dist-min';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('@shared/components/studio/section/helpers/createPlotData');
 vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
@@ -141,7 +142,14 @@ describe('FreePositioningComponent', () => {
     loadingSignal.set(false);
 
     await TestBed.configureTestingModule({
-      imports: [FreePositioningComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        FreePositioningComponent
+      ],
       providers: [
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: PlotService, useValue: mockPlotService },

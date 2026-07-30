@@ -1,4 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { MessageService } from 'primeng/api';
 import type { AssetManifest, AppVersion } from './service-worker.interfaces';
@@ -88,6 +89,7 @@ export class UpdateService {
   readonly isFirstLaunch = computed<boolean>(() => this.pendingAction() === 'first-install');
 
   private readonly messageService = inject(MessageService);
+  private readonly translocoService = inject(TranslocoService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
 
   constructor() {
@@ -101,8 +103,8 @@ export class UpdateService {
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
-              summary: $localize`Update successful`,
-              detail: $localize`The application has been updated to the latest version`
+              summary: this.translocoService.translate('shared.update-service.update-success-summary'),
+              detail: this.translocoService.translate('shared.update-service.update-success-detail')
             });
             globalThis.location.href = '/';
             break;
@@ -112,16 +114,16 @@ export class UpdateService {
             await this.loadCurrentVersion();
             this.messageService.add({
               severity: 'success',
-              summary: $localize`Install successful`,
-              detail: $localize`The application has been installed`
+              summary: this.translocoService.translate('shared.update-service.install-success-summary'),
+              detail: this.translocoService.translate('shared.update-service.install-success-detail')
             });
             break;
           case 'error':
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'error',
-              summary: $localize`Update failed`,
-              detail: event.data.error ?? $localize`An unknown error occurred during the update`
+              summary: this.translocoService.translate('shared.update-service.update-failed-summary'),
+              detail: event.data.error ?? this.translocoService.translate('shared.update-service.update-failed-detail')
             });
             break;
         }
@@ -235,8 +237,8 @@ export class UpdateService {
     if (!silent) {
       this.messageService.add({
         severity: 'info',
-        summary: $localize`App version`,
-        detail: $localize`App version checked`
+        summary: this.translocoService.translate('admin.app-version'),
+        detail: this.translocoService.translate('shared.update-service.version-checked-detail')
       });
     }
   }

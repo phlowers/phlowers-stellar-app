@@ -24,6 +24,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
 import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Main studies listing page.
@@ -45,7 +46,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     StudiesTableComponent,
     ConfirmDialogModule,
     ImportStudyComponent,
-    ExportDialogComponent
+    ExportDialogComponent,
+    TranslocoModule
   ],
   templateUrl: './studies.component.html',
   providers: [MessageService, ConfirmationService],
@@ -57,6 +59,7 @@ export class StudiesComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly studiesService = inject(StudiesService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly rawStudies = toSignal(this.studiesService.studies, { initialValue: [] as Study[] });
   private readonly studiesReady = toSignal(this.studiesService.ready, { initialValue: false });
 
@@ -89,12 +92,12 @@ export class StudiesComponent {
   deleteStudy(uuid: string) {
     this.confirmationService.confirm({
       key: 'positionDialog',
-      message: $localize`Are you sure you want to delete this study?`,
+      message: this.translocoService.translate('studies.delete-confirm-message'),
       accept: () => {
         this.studiesService.deleteStudy(uuid);
       },
-      acceptLabel: $localize`Yes`,
-      rejectLabel: $localize`No`
+      acceptLabel: this.translocoService.translate('common.import.collision.yes'),
+      rejectLabel: this.translocoService.translate('common.import.collision.no')
     });
   }
 }

@@ -1,13 +1,13 @@
 <div class="import-study">
   <div class="my-8">
-    <p i18n class="text-l-600">You can import multiple files, they will be available in the “My studies” tab.</p>
+    <p class="text-l-600">{{ 'studies.import.description' | transloco }}</p>
   </div>
   <label for="study-file" class="import-study__tool">
     <app-icon icon="upload" class="import-study__tool__icon" />
 
     <span class="import-study__tool__txt">
-      <span i18n> Upload one or several files </span><br />
-      <span class="small-txt" i18n> File formats: .csv, .clst </span>
+      <span> {{ 'studies.import.upload-prompt' | transloco }} </span><br />
+      <span class="small-txt"> {{ 'studies.import.file-formats' | transloco }} </span>
     </span>
     <input
       id="study-file"
@@ -38,10 +38,9 @@
               app-btn
               btnStyle="base"
               btnSize="s"
-              i18n
               data-testid="open-imported-btn"
             >
-              Open
+              {{ 'common.import.action.open' | transloco }}
             </a>
           </div>
         </li>

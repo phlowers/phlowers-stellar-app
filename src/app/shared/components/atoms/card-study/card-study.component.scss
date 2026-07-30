@@ -8,8 +8,7 @@
 article {
   @apply relative flex flex-col w-full p-4 rounded-lg overflow-hidden;
   background-color: var(--grey-white);
-  box-shadow:
-    map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
+  box-shadow: map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3);
   transition: background-color 0.3s ease-in-out;
 
   &:hover {

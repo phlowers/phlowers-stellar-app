@@ -17,6 +17,7 @@ import { Study } from '@shared/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Form validation rules for initial condition fields. */
 const validators = {
@@ -49,12 +50,14 @@ const validators = {
     MessageModule,
     InputGroup,
     InputGroupAddon,
-    KeyFilterModule
+    KeyFilterModule,
+    TranslocoModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InitialConditionModalComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
   /** Whether the modal dialog is open. */
   isOpen = input<boolean>(false);
   /** Emits when the modal open state changes. */
@@ -197,7 +200,8 @@ export class InitialConditionModalComponent {
     const newUuid = uuidv4();
     const duplicatedName = findDuplicateTitle(
       this.initialConditions().map((ic) => ic.name),
-      this.initialCondition().name
+      this.initialCondition().name,
+      this.translocoService.translate('shared.duplicate.copy-suffix')
     );
     const duplicatedIc: InitialCondition = {
       ...this.initialCondition(),

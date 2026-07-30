@@ -1,7 +1,7 @@
 <div class="w-full h-full relative" [attr.aria-busy]="isPlotRefreshing()">
   @if (isPlotRefreshing()) {
     <div class="absolute inset-0 flex justify-center items-center z-10 pointer-events-none">
-      <p-progress-spinner ariaLabel="loading" i18n-ariaLabel="@@studio.plot.loading" />
+      <p-progress-spinner [ariaLabel]="'shared.studio.plot-loading' | transloco" />
     </div>
   }
   <div class="w-full h-full" id="plotly-output" data-testid="section-plot-container"></div>

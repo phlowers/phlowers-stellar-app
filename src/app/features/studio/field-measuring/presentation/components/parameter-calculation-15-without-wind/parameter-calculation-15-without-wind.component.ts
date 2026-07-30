@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, model, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -25,6 +26,7 @@ import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
@@ -38,7 +40,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
     IconComponent,
     ButtonComponent,
     InitialConditionModalComponent,
-    DecimalPipe
+    DecimalPipe,
+    TranslocoModule
   ],
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
@@ -71,10 +74,21 @@ export class ParameterCalculation15WithoutWindComponent {
   parameter15CError = signal<boolean>(false);
   readonly isCalculating = signal(false);
 
-  readonly updateModeOptions = [
-    { label: $localize`Auto`, value: 'auto' },
-    { label: $localize`Manual`, value: 'manual' }
-  ];
+  private readonly translocoService = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
+  readonly updateModeOptions = computed(() => {
+    this.activeLang();
+    return [
+      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      {
+        label: this.translocoService.translate('field-measuring.parameter-calculation-15.manual-option'),
+        value: 'manual'
+      }
+    ];
+  });
 
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly plotService = inject(PlotService);
@@ -223,15 +237,17 @@ export class ParameterCalculation15WithoutWindComponent {
       await this.initialConditionService.setInitialCondition(study, section, newUuid);
       this.messageService.add({
         severity: 'success',
-        summary: $localize`Successful`,
-        detail: $localize`Initial Condition added and state generated`,
+        summary: this.translocoService.translate('common.success'),
+        detail: this.translocoService.translate(
+          'field-measuring.parameter-calculation-15.success-detail-state-generated'
+        ),
         life: 3000
       });
     } else {
       this.messageService.add({
         severity: 'success',
-        summary: $localize`Successful`,
-        detail: $localize`Initial Condition added`,
+        summary: this.translocoService.translate('common.success'),
+        detail: this.translocoService.translate('field-measuring.parameter-calculation-15.success-detail'),
         life: 3000
       });
     }

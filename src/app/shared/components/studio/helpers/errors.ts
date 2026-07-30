@@ -1,14 +1,6 @@
 import { DataError, PythonErrorCode, TaskError } from '@core/services/worker_python/tasks/types';
 import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
-
-/** Map of known error codes to their localized display messages. */
-const ERROR_MESSAGES = {
-  [DataError.NO_CABLE_FOUND]: $localize`No cable found`,
-  [DataError.NO_INITIAL_CONDITION]: $localize`No valid initial condition selected`,
-  [TaskError.CALCULATION_ERROR]: $localize`Calculation error`,
-  [TaskError.SOLVER_DID_NOT_CONVERGE]: $localize`Calculation error: 'Solver did not converge'`,
-  [TaskError.PYODIDE_LOAD_ERROR]: $localize`Pyodide load error`
-} as const;
+import { TranslocoService } from '@jsverse/transloco';
 
 /**
  * Formats a `TaskError` or `DataError` into a localized human-readable string.
@@ -17,11 +9,21 @@ const ERROR_MESSAGES = {
  */
 export const formatStudioError = (
   error: TaskError | DataError | null,
+  translocoService: TranslocoService,
   diagnosticCode: PythonErrorCode | null = null
 ): string => {
-  const pythonMessage = formatPythonError(diagnosticCode);
+  const pythonMessage = formatPythonError(diagnosticCode, translocoService);
   if (pythonMessage !== null) {
     return pythonMessage;
   }
-  return ERROR_MESSAGES[error as keyof typeof ERROR_MESSAGES] ?? $localize`Unknown error`;
+  const errorMessages: Record<string, string> = {
+    [DataError.NO_CABLE_FOUND]: translocoService.translate('shared.studio.no-cable-found'),
+    [DataError.NO_INITIAL_CONDITION]: translocoService.translate('shared.studio.no-initial-condition'),
+    [TaskError.CALCULATION_ERROR]: translocoService.translate('shared.studio.calculation-error'),
+    [TaskError.SOLVER_DID_NOT_CONVERGE]: translocoService.translate('shared.studio.solver-did-not-converge'),
+    [TaskError.PYODIDE_LOAD_ERROR]: translocoService.translate('shared.studio.pyodide-load-error')
+  };
+  return (
+    errorMessages[error as keyof typeof errorMessages] ?? translocoService.translate('shared.studio.unknown-error')
+  );
 };

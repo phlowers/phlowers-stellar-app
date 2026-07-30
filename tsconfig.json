@@ -18,7 +18,6 @@
     "lib": ["ES2023", "dom", "dom.iterable"],
     "module": "esnext",
     "types": [
-      "@angular/localize",
       "vitest/globals"
     ],
     "baseUrl": ".",
@@ -48,7 +47,6 @@
     }
   },
   "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true

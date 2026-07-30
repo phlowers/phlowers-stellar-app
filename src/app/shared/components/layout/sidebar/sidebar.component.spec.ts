@@ -6,6 +6,7 @@ import { Component, ViewChild } from '@angular/core';
 import { SidebarComponent } from './sidebar.component';
 import { SidebarItem } from './sidebar.model';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock environment
 vi.mock('@src/environments/environment', () => ({
   environment: {
@@ -93,7 +94,19 @@ describe('SidebarComponent', () => {
     vi.spyOn(document, 'querySelector').mockReturnValue(mockBody);
 
     await TestBed.configureTestingModule({
-      imports: [TestHostComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.sidebar.menu': 'Menu',
+              'shared.sidebar.shrink-menu': 'Shrink menu'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        TestHostComponent
+      ],
       providers: [
         {
           provide: ActivatedRoute,

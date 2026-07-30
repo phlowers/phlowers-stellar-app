@@ -13,8 +13,7 @@
     ],
     "types": [
       "vitest/globals",
-      "node",
-      "@angular/localize"
+      "node"
     ],
     "paths": {
       "@src/*": [

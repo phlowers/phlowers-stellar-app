@@ -2,7 +2,60 @@ import { Section } from '@shared/domain';
 import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
-import { MEASURED_SOLAR_FLUX_BOUNDS } from './constants';
+import { TranslocoService } from '@jsverse/transloco';
+import {
+  SelectOption,
+  WIND_DIRECTION_OPTION_KEYS,
+  TIME_MODE_OPTION_KEYS,
+  SKY_COVER_OPTION_SOURCES,
+  LEFT_SUPPORT_OPTION_KEYS,
+  MEASURED_SOLAR_FLUX_BOUNDS
+} from './constants';
+
+/**
+ * Builds the wind direction select options with labels translated through Transloco.
+ * @param translocoService - Service used to resolve the translated labels
+ * @returns Wind direction `SelectOption[]` with translated labels
+ */
+export const buildWindDirectionOptions = (translocoService: TranslocoService): SelectOption[] =>
+  WIND_DIRECTION_OPTION_KEYS.map((option) => ({
+    value: option.value,
+    label: translocoService.translate(option.labelKey)
+  }));
+
+/**
+ * Builds the time mode (summer / winter) select options with labels translated through Transloco.
+ * @param translocoService - Service used to resolve the translated labels
+ * @returns Time mode `SelectOption[]` with translated labels
+ */
+export const buildTimeModeOptions = (translocoService: TranslocoService): SelectOption[] =>
+  TIME_MODE_OPTION_KEYS.map((option) => ({
+    value: option.value,
+    label: translocoService.translate(option.labelKey)
+  }));
+
+/**
+ * Builds the sky cover select options, translating only the entries that carry a translation key.
+ * @param translocoService - Service used to resolve the translated labels
+ * @returns Sky cover `SelectOption[]` with translated labels
+ */
+export const buildSkyCoverOptions = (translocoService: TranslocoService): SelectOption[] =>
+  SKY_COVER_OPTION_SOURCES.map((option) =>
+    'labelKey' in option
+      ? { value: option.value, label: translocoService.translate(option.labelKey) }
+      : { value: option.value, label: option.label }
+  );
+
+/**
+ * Builds the left support select options with labels translated through Transloco.
+ * @param translocoService - Service used to resolve the translated labels
+ * @returns Left support `SelectOption[]` with translated labels
+ */
+export const buildLeftSupportOptions = (translocoService: TranslocoService): SelectOption[] =>
+  LEFT_SUPPORT_OPTION_KEYS.map((option) => ({
+    value: option.value,
+    label: translocoService.translate(option.labelKey)
+  }));
 
 /**
  * Determines if the current date is in Daylight Saving Time (DST)

@@ -6,11 +6,12 @@ import { LOCATION_CONFIG, LOCATION_ERROR_IDS } from './location.constantes';
 import { LocationData } from './location.interfaces';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-location',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [InputTextModule, MessageModule, InputGroupModule, InputGroupAddonModule],
+  imports: [InputTextModule, MessageModule, InputGroupModule, InputGroupAddonModule, TranslocoModule],
   templateUrl: './location.component.html',
   styleUrl: './location.component.scss'
 })

@@ -3,12 +3,13 @@ import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { environment } from '@src/environments/environment';
 import { IconComponent } from '../../atoms/icon/icon.component';
+import { TranslocoModule } from '@jsverse/transloco';
 
 const version = environment.version;
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, IconComponent],
+  imports: [RouterLink, RouterLinkActive, IconComponent, TranslocoModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   encapsulation: ViewEncapsulation.None,

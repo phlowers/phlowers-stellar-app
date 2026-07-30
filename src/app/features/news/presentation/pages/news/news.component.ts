@@ -5,11 +5,12 @@ import { OnlineService } from '@services/online/online.service';
 import { MarkdownModule } from 'ngx-markdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { catchError, EMPTY, switchMap, tap } from 'rxjs';
+import { TranslocoModule } from '@jsverse/transloco';
 
 /** Displays news content fetched as markdown from the server. */
 @Component({
   selector: 'app-news',
-  imports: [MarkdownModule, ProgressSpinnerModule],
+  imports: [MarkdownModule, ProgressSpinnerModule, TranslocoModule],
   templateUrl: './news.component.html',
   styleUrl: './news.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

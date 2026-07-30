@@ -1,3 +1,4 @@
+import { TranslocoService } from '@jsverse/transloco';
 import { ResultRow } from './conformity.model';
 
 export const CONFORMITY_BOUNDS = {
@@ -5,56 +6,94 @@ export const CONFORMITY_BOUNDS = {
   lateralDistanceTemperature: { step: 0.01, min: 0, max: 250 }
 } as const;
 
-export const ALTITUDE_TYPE_LABELS: Record<string, string> = {
-  absolute: $localize`Absolute (NGF)`,
-  relative: $localize`Relative to support`,
-  relative_cable: $localize`Relative to cable attachment`
-};
+/**
+ * Built as a function (rather than a module-level constant) because the labels depend on
+ * `TranslocoService`, which requires an Angular injection context and cannot be used at module
+ * scope.
+ */
+export function getAltitudeTypeLabels(transloco: TranslocoService): Record<string, string> {
+  return {
+    absolute: transloco.translate('studio.shared.altitude-type-absolute'),
+    relative: transloco.translate('studio.shared.altitude-type-relative'),
+    relative_cable: transloco.translate('studio.shared.altitude-type-relative-cable')
+  };
+}
 
-export const LATERAL_DISTANCE_TYPE_LABELS: Record<string, string> = {
-  SPAN_AXIS: $localize`Span axis`
-};
+/**
+ * Built as a function (rather than a module-level constant) because the labels depend on
+ * `TranslocoService`, which requires an Angular injection context and cannot be used at module
+ * scope.
+ */
+export function getLateralDistanceTypeLabels(transloco: TranslocoService): Record<string, string> {
+  return {
+    SPAN_AXIS: transloco.translate('studio.shared.span-axis-option')
+  };
+}
 
-export const CONFORMITY_COMMON_ROWS: ResultRow[] = [
-  {
-    label: $localize`Cable altitude`,
-    overhangKey: 'overhangCableAltitude',
-    lateralKey: 'lateralCableAltitude',
-    unit: 'm'
-  },
-  {
-    label: $localize`Cable line axis distance`,
-    overhangKey: 'overhangCableLineAxisDistance',
-    lateralKey: 'lateralCableLineAxisDistance',
-    unit: 'm'
-  },
-  {
-    label: $localize`Distance to comply`,
-    overhangKey: 'overhangDistanceToComply',
-    lateralKey: 'lateralDistanceToComply',
-    unit: 'm'
-  },
-  { label: $localize`Compliance altitude`, overhangKey: 'overhangComplianceAltitude', lateralKey: null, unit: 'm' },
-  {
-    label: $localize`Compliance line axis distance`,
-    overhangKey: null,
-    lateralKey: 'lateralComplianceLineAxisDistance',
-    unit: 'm'
-  }
-];
+/**
+ * Built as a function (rather than a module-level constant) because the labels depend on
+ * `TranslocoService`, which requires an Angular injection context and cannot be used at module
+ * scope.
+ */
+export function getConformityCommonRows(transloco: TranslocoService): ResultRow[] {
+  return [
+    {
+      label: transloco.translate('studio.conformity.cable-altitude-label'),
+      overhangKey: 'overhangCableAltitude',
+      lateralKey: 'lateralCableAltitude',
+      unit: 'm'
+    },
+    {
+      label: transloco.translate('studio.conformity.cable-line-axis-distance-label'),
+      overhangKey: 'overhangCableLineAxisDistance',
+      lateralKey: 'lateralCableLineAxisDistance',
+      unit: 'm'
+    },
+    {
+      label: transloco.translate('studio.conformity.distance-to-comply-label'),
+      overhangKey: 'overhangDistanceToComply',
+      lateralKey: 'lateralDistanceToComply',
+      unit: 'm'
+    },
+    {
+      label: transloco.translate('studio.conformity.compliance-altitude-label'),
+      overhangKey: 'overhangComplianceAltitude',
+      lateralKey: null,
+      unit: 'm'
+    },
+    {
+      label: transloco.translate('studio.conformity.compliance-line-axis-distance-label'),
+      overhangKey: null,
+      lateralKey: 'lateralComplianceLineAxisDistance',
+      unit: 'm'
+    }
+  ];
+}
 
-export const CONFORMITY_CABLE_TRACK_ROWS: ResultRow[] = [
-  { label: $localize`Temperature`, overhangKey: 'overhangTemperature', lateralKey: 'lateralTemperature', unit: '°C' },
-  {
-    label: $localize`Wind pressure`,
-    overhangKey: 'overhangWindPressure',
-    lateralKey: 'lateralWindPressure',
-    unit: 'Pa'
-  },
-  {
-    label: $localize`Minimal distance`,
-    overhangKey: 'overhangMinimalDistance',
-    lateralKey: 'lateralMinimalDistance',
-    unit: 'm'
-  }
-];
+/**
+ * Built as a function (rather than a module-level constant) because the labels depend on
+ * `TranslocoService`, which requires an Angular injection context and cannot be used at module
+ * scope.
+ */
+export function getConformityCableTrackRows(transloco: TranslocoService): ResultRow[] {
+  return [
+    {
+      label: transloco.translate('studio.conformity.temperature-label'),
+      overhangKey: 'overhangTemperature',
+      lateralKey: 'lateralTemperature',
+      unit: '°C'
+    },
+    {
+      label: transloco.translate('studio.conformity.wind-pressure-label'),
+      overhangKey: 'overhangWindPressure',
+      lateralKey: 'lateralWindPressure',
+      unit: 'Pa'
+    },
+    {
+      label: transloco.translate('studio.conformity.minimal-distance-label'),
+      overhangKey: 'overhangMinimalDistance',
+      lateralKey: 'lateralMinimalDistance',
+      unit: 'm'
+    }
+  ];
+}

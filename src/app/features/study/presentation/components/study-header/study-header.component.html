@@ -7,8 +7,7 @@
     app-btn
     btnSize="s"
     btnStyle="text"
-    aria-label="modify"
-    i18n-aria-label
+    [attr.aria-label]="'study.header.aria-modify' | transloco"
     data-testid="modify-btn"
   >
     <app-icon icon="edit" />
@@ -17,7 +16,6 @@
   <hr class="study-header__separator" />
 
   <button
-    i18n
     app-btn
     btnSize="s"
     btnStyle="text"
@@ -26,7 +24,7 @@
     [class.study-header__accodion-btn--open]="isDetailOpen()"
     data-testid="details-toggle"
   >
-    Details
+    {{ 'study.header.details' | transloco }}
     <app-icon icon="keyboard_arrow_down" iconRight />
   </button>
 
@@ -39,7 +37,7 @@
 
   <time [attr.datetime]="study()?.created_at_offline" class="study-header__time">
     <app-icon icon="schedule" />
-    {{ study()?.created_at_offline | date: dateFormat }}
+    {{ study()?.created_at_offline | date: dateFormat() }}
   </time>
   @if (study()?.shareable) {
     <hr class="study-header__separator" />
@@ -51,17 +49,17 @@
 
   <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study()?.uuid!)" data-testid="duplicate-btn">
     <app-icon icon="content_copy" />
-    <ng-container i18n>Duplicate</ng-container>
+    <ng-container>{{ 'study.header.duplicate' | transloco }}</ng-container>
   </button>
 
   <button app-btn btnSize="s" disabled btnStyle="text">
     <app-icon icon="public" />
-    <ng-container i18n>Publish</ng-container>
+    <ng-container>{{ 'study.header.publish' | transloco }}</ng-container>
   </button>
 
   <button app-btn btnSize="s" btnStyle="text" (click)="openExportDialog()" data-testid="export-btn">
     <app-icon icon="download" />
-    <ng-container i18n>Export</ng-container>
+    <ng-container>{{ 'study.header.export' | transloco }}</ng-container>
   </button>
 
   <p-accordion
@@ -76,7 +74,7 @@
           <p>
             {{ study()?.description }}
             @if (study() && !study()!.description) {
-              <em i18n>There is no study description</em>
+              <em>{{ 'study.header.no-description' | transloco }}</em>
             }
           </p>
         </div>

@@ -13,6 +13,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { TranslocoModule } from '@jsverse/transloco';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { DistanceMeasuringService } from './distance-measuring.service';
@@ -29,6 +30,7 @@ import { DistanceMeasuringService } from './distance-measuring.service';
     InputGroupModule,
     InputGroupAddonModule,
     ToggleSwitchModule,
+    TranslocoModule,
     ButtonComponent,
     IconComponent,
     DecimalPipe

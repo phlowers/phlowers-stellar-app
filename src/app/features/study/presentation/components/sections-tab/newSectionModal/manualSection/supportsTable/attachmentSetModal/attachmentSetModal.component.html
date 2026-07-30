@@ -14,14 +14,14 @@
   data-testid="attachment-set-dialog"
 >
   <ng-template #header>
-    <p class="mb-0" i18n>Attachment set</p>
+    <p class="mb-0">{{ 'attachment-modal.title' | transloco }}</p>
   </ng-template>
   <ng-template #content>
     <div class="flex flex-row gap-4 h-full">
       <div class="flex flex-col gap-2">
-        <p i18n class="mb-0">Choose the attachment set in the list or on the graph to find the right arm length.</p>
+        <p class="mb-0">{{ 'attachment-modal.choose-hint' | transloco }}</p>
         <div class="flex flex-col gap-1">
-          <label for="supportName" i18n>Support name</label>
+          <label for="supportName">{{ 'attachment-modal.label-support-name' | transloco }}</label>
           <p-select
             inputId="supportName"
             [options]="supportsFilterTable()"
@@ -37,7 +37,7 @@
           />
         </div>
         <div class="flex flex-col gap-1">
-          <label for="attachmentSet" i18n>Attachment set</label>
+          <label for="attachmentSet">{{ 'attachment-modal.label-attachment-set' | transloco }}</label>
           <p-select
             [showClear]="true"
             inputId="attachmentSet"
@@ -52,19 +52,23 @@
         <p-divider class="!my-2" />
         <div class="flex flex-row gap-8">
           <div>
-            <p class="label mb-0" i18n>Arm length</p>
-            <span class="ml-2">{{ armLength() ?? '-' }} <ng-container i18n>m</ng-container></span>
+            <p class="label mb-0">{{ 'attachment-modal.arm-length' | transloco }}</p>
+            <span class="ml-2"
+              >{{ armLength() ?? '-' }} <ng-container>{{ 'common.meter' | transloco }}</ng-container></span
+            >
           </div>
           <div>
-            <p class="label mb-0" i18n>Height below console</p>
-            <span class="ml-2">{{ heightBelowConsole() || '-' }} <ng-container i18n>m</ng-container></span>
+            <p class="label mb-0">{{ 'attachment-modal.height-below-console' | transloco }}</p>
+            <span class="ml-2"
+              >{{ heightBelowConsole() || '-' }} <ng-container>{{ 'common.meter' | transloco }}</ng-container></span
+            >
           </div>
         </div>
         <div>
           <p class="text-sm flex items-start gap-1 text-black mt-2">
             <app-icon icon="info" />
-            <ng-container i18n>
-              The attachment set and the arm length (m) will be automatically filled in the table.
+            <ng-container>
+              {{ 'attachment-modal.auto-fill-hint' | transloco }}
             </ng-container>
           </p>
         </div>
@@ -84,7 +88,7 @@
   <ng-template #footer>
     <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onVisibleChange()" data-testid="close-btn">
       <app-icon icon="close" />
-      <ng-container i18n>Close</ng-container>
+      <ng-container>{{ 'common.close' | transloco }}</ng-container>
     </button>
     <button
       app-btn
@@ -96,7 +100,7 @@
       data-testid="validate-btn"
     >
       <app-icon icon="check" />
-      <ng-container i18n>Validate</ng-container>
+      <ng-container>{{ 'common.validate' | transloco }}</ng-container>
     </button>
   </ng-template>
 </p-dialog>

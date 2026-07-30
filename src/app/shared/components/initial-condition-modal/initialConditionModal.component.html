@@ -3,7 +3,7 @@
     <p class="text-l-600 mb-0 flex gap-2">
       @if (mode() === 'create') {
         <app-icon icon="add_circle" />
-        <span i18n>Create an initial condition</span>
+        <span>{{ 'shared.initial-condition-modal.create-title' | transloco }}</span>
       } @else if (mode() === 'edit') {
         <app-icon icon="edit" />
         <span>{{ initialCondition().name }}</span>
@@ -17,17 +17,17 @@
     <div class="form">
       <dl class="form__col">
         <div>
-          <dt i18n>Section name</dt>
+          <dt>{{ 'shared.initial-condition-modal.section-name' | transloco }}</dt>
           <dd class="read-only-info test">{{ section().name }}</dd>
         </div>
 
         <div>
-          <dt i18n>Cable name</dt>
+          <dt>{{ 'shared.initial-condition-modal.cable-name' | transloco }}</dt>
           <dd class="read-only-info test">{{ section().cable_name }}</dd>
         </div>
 
         <div>
-          <dt i18n>Cables amount</dt>
+          <dt>{{ 'shared.initial-condition-modal.cables-amount' | transloco }}</dt>
           <dd class="read-only-info test">{{ section().cables_amount }}</dd>
         </div>
       </dl>
@@ -38,7 +38,7 @@
         <div class="form__col form__col--right" [formGroup]="form">
           <div>
             <label for="initial-condition-name">
-              <ng-container i18n>Initial condition name </ng-container>
+              <ng-container>{{ 'shared.initial-condition-modal.ic-name-label' | transloco }}</ng-container>
               <sup class="mandatory">*</sup>
             </label>
             <input
@@ -53,14 +53,14 @@
               data-testid="ic-name-input"
             />
             @if (!isNameUnique()) {
-              <p-message id="initial-condition-name-error-message" severity="error" size="small" variant="simple" i18n>
-                Initial condition name must be unique.
+              <p-message id="initial-condition-name-error-message" severity="error" size="small" variant="simple">
+                {{ 'shared.initial-condition-modal.ic-name-unique-error' | transloco }}
               </p-message>
             }
           </div>
           <div>
             <label for="initial-condition-base-parameter">
-              <ng-container i18n>Base parameter</ng-container>
+              <ng-container>{{ 'shared.initial-condition-modal.base-parameter' | transloco }}</ng-container>
               <sup class="mandatory">*</sup>
             </label>
             <input
@@ -77,7 +77,7 @@
           </div>
           <div>
             <label for="initial-condition-base-temperature">
-              <ng-container i18n>Base temperature</ng-container>
+              <ng-container>{{ 'shared.initial-condition-modal.base-temperature' | transloco }}</ng-container>
               <sup class="mandatory">*</sup>
             </label>
             <p-inputgroup>
@@ -95,7 +95,9 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <label for="initial-condition-cable-pretension" i18n> Cable pretension </label>
+              <label for="initial-condition-cable-pretension">{{
+                'shared.initial-condition-modal.cable-pretension' | transloco
+              }}</label>
               <p-inputgroup>
                 <input
                   name="initial-condition-cable-pretension"
@@ -109,10 +111,12 @@
               </p-inputgroup>
             </div>
             <div>
-              <p class="font-bold mb-0" i18n>Extreme historical conditions incurred by the cable</p>
+              <p class="font-bold mb-0">{{ 'shared.initial-condition-modal.extreme-historical' | transloco }}</p>
             </div>
             <div>
-              <label for="initial-condition-min-temperature" i18n> Min temperature </label>
+              <label for="initial-condition-min-temperature">{{
+                'shared.initial-condition-modal.min-temperature' | transloco
+              }}</label>
               <p-inputgroup>
                 <input
                   name="initial-condition-min-temperature"
@@ -125,7 +129,9 @@
               </p-inputgroup>
             </div>
             <div>
-              <label for="initial-condition-max-wind-pressure" i18n> Max wind pressure </label>
+              <label for="initial-condition-max-wind-pressure">{{
+                'shared.initial-condition-modal.max-wind-pressure' | transloco
+              }}</label>
               <p-inputgroup>
                 <input
                   name="initial-condition-max-wind-pressure"
@@ -138,7 +144,9 @@
               </p-inputgroup>
             </div>
             <div>
-              <label for="initial-condition-max-frost-width" i18n> Max ice thickness </label>
+              <label for="initial-condition-max-frost-width">{{
+                'shared.initial-condition-modal.max-frost-width' | transloco
+              }}</label>
               <p-inputgroup>
                 <input
                   name="initial-condition-max-frost-width"
@@ -155,19 +163,19 @@
       } @else if (mode() === 'view') {
         <dl class="form__col form__col--right">
           <div>
-            <dt i18n>Initial condition name</dt>
+            <dt>{{ 'shared.initial-condition-modal.ic-name-view' | transloco }}</dt>
             <dd class="read-only-info test">{{ initialCondition().name }}</dd>
           </div>
 
           <div>
-            <dt i18n>Base parameter</dt>
+            <dt>{{ 'shared.initial-condition-modal.base-parameter' | transloco }}</dt>
             <dd class="read-only-info test">
               {{ initialCondition().base_parameters }}
             </dd>
           </div>
 
           <div>
-            <dt i18n>Base temperature (°C)</dt>
+            <dt>{{ 'shared.initial-condition-modal.base-temperature-unit' | transloco }}</dt>
             <dd class="read-only-info test">
               {{ initialCondition().base_temperature }}
               @if (isNumber(initialCondition().base_temperature)) {
@@ -177,7 +185,7 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <dt i18n>Cable pretension</dt>
+              <dt>{{ 'shared.initial-condition-modal.cable-pretension' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().cable_pretension }}
                 @if (isNumber(initialCondition().cable_pretension)) {
@@ -186,10 +194,12 @@
               </dd>
             </div>
             <div>
-              <dt class="extreme-historical-conditions" i18n>Extreme historical conditions incurred by the cable</dt>
+              <dt class="extreme-historical-conditions">
+                {{ 'shared.initial-condition-modal.extreme-historical' | transloco }}
+              </dt>
             </div>
             <div>
-              <dt i18n>Min temperature</dt>
+              <dt>{{ 'shared.initial-condition-modal.min-temperature' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().min_temperature }}
                 @if (isNumber(initialCondition().min_temperature)) {
@@ -198,7 +208,7 @@
               </dd>
             </div>
             <div>
-              <dt i18n>Max wind pressure</dt>
+              <dt>{{ 'shared.initial-condition-modal.max-wind-pressure' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().max_wind_pressure }}
                 @if (isNumber(initialCondition().max_wind_pressure)) {
@@ -207,7 +217,7 @@
               </dd>
             </div>
             <div>
-              <dt i18n>Max ice thickness</dt>
+              <dt>{{ 'shared.initial-condition-modal.max-frost-width' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().max_frost_width }}
                 @if (isNumber(initialCondition().max_frost_width)) {
@@ -225,15 +235,15 @@
     @if (mode() === 'view') {
       <button app-btn type="button" btnSize="m" btnStyle="danger" (click)="onDelete()" data-testid="delete-btn">
         <app-icon icon="delete" />
-        <span i18n>Delete</span>
+        <span>{{ 'common.delete' | transloco }}</span>
       </button>
       <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onDuplicate()">
         <app-icon icon="content_copy" />
-        <span i18n>Duplicate</span>
+        <span>{{ 'common.duplicate' | transloco }}</span>
       </button>
       <button app-btn type="button" btnSize="m" btnStyle="outlined" (click)="onModify()">
         <app-icon icon="edit" />
-        <span i18n>Edit</span>
+        <span>{{ 'common.edit' | transloco }}</span>
       </button>
     } @else {
       <button
@@ -245,7 +255,7 @@
         data-testid="cancel-btn"
       >
         <app-icon icon="close" />
-        <span i18n>Cancel</span>
+        <span>{{ 'common.cancel' | transloco }}</span>
       </button>
       @if (!isInsideToolsDialog()) {
         <button
@@ -257,7 +267,7 @@
           data-testid="validate-btn"
         >
           <app-icon icon="check" />
-          <span i18n>Validate</span>
+          <span>{{ 'common.validate' | transloco }}</span>
         </button>
       } @else {
         <button
@@ -269,7 +279,7 @@
           btnStyle="outlined"
         >
           <app-icon icon="play_circle" />
-          <span i18n>Create the IC and generate the state</span>
+          <span>{{ 'shared.initial-condition-modal.create-ic-and-state' | transloco }}</span>
         </button>
         <button
           app-btn
@@ -279,7 +289,7 @@
           (click)="onSubmit(false)"
         >
           <app-icon icon="check" />
-          <span i18n>Create the IC</span>
+          <span>{{ 'shared.initial-condition-modal.create-ic' | transloco }}</span>
         </button>
       }
     }

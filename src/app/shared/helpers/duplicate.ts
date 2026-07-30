@@ -8,8 +8,7 @@
  * @returns A new title with a unique copy suffix.
  */
 
-export const findDuplicateTitle = (existingTitles: string[], duplicatedTitle: string) => {
-  const copySuffix = $localize`Copy`;
+export const findDuplicateTitle = (existingTitles: string[], duplicatedTitle: string, copySuffix: string) => {
   const regex = new RegExp(/\s*\(Copy\s*\d+\)/); //NOSONAR
   const duplicateTitle = duplicatedTitle.replace(new RegExp(regex.source.replace('Copy', copySuffix), 'g'), '');
   let copyIndex = 1;

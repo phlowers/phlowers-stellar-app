@@ -5,6 +5,7 @@ import { vi, type MockInstance } from 'vitest';
 
 import { PrimeDebugComponent } from './prime-debug.component';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('PrimeDebugComponent', () => {
   let component: PrimeDebugComponent;
   let fixture: ComponentFixture<PrimeDebugComponent>;
@@ -12,7 +13,14 @@ describe('PrimeDebugComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PrimeDebugComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        PrimeDebugComponent
+      ],
       providers: [provideNoopAnimations()]
     }).compileComponents();
 

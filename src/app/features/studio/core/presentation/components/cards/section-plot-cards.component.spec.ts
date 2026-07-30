@@ -8,6 +8,7 @@ import { SectionPlotCardsComponent } from '@features/studio/core/presentation/co
 import { PlotOptions } from '@shared/types/plot.types';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 interface MockPlotService {
   litData: WritableSignal<GetSectionOutput | null>;
   section: WritableSignal<object | null>;
@@ -237,7 +238,15 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [SectionPlotCardsComponent, NoopAnimationsModule],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        SectionPlotCardsComponent,
+        NoopAnimationsModule
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },

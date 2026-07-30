@@ -12,6 +12,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { provideRouter } from '@angular/router';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
@@ -64,7 +65,42 @@ describe('HomeComponent', () => {
     } as unknown as vi.Mocked<StudiesService>;
 
     await TestBed.configureTestingModule({
-      imports: [HomeComponent, CardStudyComponent, CardInfoComponent, ButtonComponent, IconComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'home.create-study': 'Create a new study',
+              'home.go-to-studies': 'Go to my studies',
+              'home.my-last-studies': 'My last studies',
+              'home.news-link-text': 'View all news',
+              'home.news-text':
+                'Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!',
+              'home.news-title': 'News',
+              'home.no-recent-studies': 'No recent studies',
+              'home.server-error': 'An error occured while trying to reach servers.',
+              'home.server-offline': 'Application in offline mode.',
+              'home.server-success': 'Server connexion success!',
+              'home.server-text-default': 'Trying to reach the servers!',
+              'home.server-title': 'Server state',
+              'home.server-unknown': 'Cannot reach data. Please check your internet connectivity.',
+              'home.server-warning': 'Trying to reach the servers.',
+              'home.update-available': 'Update available',
+              'home.update-link-explicit-text': 'Learn more about latest updates',
+              'home.update-link-text': 'Learn more',
+              'home.update-new-available': 'A new application update is available!',
+              'home.update-text': 'View latest updates.',
+              'home.update-title': 'Changelogs'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        HomeComponent,
+        CardStudyComponent,
+        CardInfoComponent,
+        ButtonComponent,
+        IconComponent
+      ],
       providers: [
         provideRouter([]),
         { provide: UpdateService, useValue: updateServiceMock },

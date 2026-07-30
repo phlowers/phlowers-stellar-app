@@ -10,7 +10,7 @@
       @if (config().texts?.uploadPrompt; as prompt) {
         <span>{{ prompt }}</span>
       } @else {
-        <span i18n="Upload zone prompt@@import.upload.prompt">Upload one or several files</span>
+        <span>{{ 'common.import.upload-prompt' | transloco }}</span>
       }
       <br />
       <span class="small-txt">{{ config().acceptedFiles.hint }}</span>
@@ -26,7 +26,7 @@
       [accept]="acceptAttribute()"
       class="file-import__tool__input"
       data-testid="file-upload-input"
-      [attr.aria-label]="config().texts?.uploadPrompt"
+      [attr.aria-label]="config().texts?.uploadPrompt || ('common.import.upload-prompt' | transloco)"
     />
   </label>
 
@@ -46,10 +46,10 @@
                 app-btn
                 btnStyle="base"
                 btnSize="s"
-                i18n="Open imported entity@@import.action.open"
+                [attr.aria-label]="'common.import.action.open' | transloco"
                 data-testid="open-imported-btn"
               >
-                Open
+                {{ 'common.import.action.open' | transloco }}
               </a>
             </div>
           }

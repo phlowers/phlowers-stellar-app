@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
+import { TranslocoModule } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
 
 let nextId = 0;
 
 @Component({
   selector: 'app-input-number',
-  imports: [ReactiveFormsModule, IconComponent],
+  imports: [ReactiveFormsModule, TranslocoModule, IconComponent],
   templateUrl: './input-number.component.html',
   styleUrl: './input-number.component.scss',
   host: {

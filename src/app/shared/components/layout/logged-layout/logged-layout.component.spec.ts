@@ -5,6 +5,7 @@ import { OnlineService } from '@services/online/online.service';
 import { LoggedLayoutComponent } from './logged-layout.component';
 import { SidebarItem } from '../sidebar/sidebar.model';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
   selector: 'app-topbar',
   template: ''
@@ -30,7 +31,21 @@ describe('LoggedLayoutComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoggedLayoutComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.logged-layout.home': 'Home',
+              'shared.logged-layout.studies': 'Studies',
+              'shared.logged-layout.ver-maj': 'Ver.MAJ',
+              'shared.logged-layout.version-maj': 'Version / MAJ'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        LoggedLayoutComponent
+      ],
       providers: [OnlineService]
     })
       .overrideComponent(LoggedLayoutComponent, {
