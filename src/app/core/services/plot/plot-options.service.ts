@@ -66,7 +66,7 @@ export class PlotOptionsService {
 
   /**
    * Read the current camera state directly from the Plotly DOM element.
-   * See {@link getLiveCamera} for why this reads the live WebGL scene rather
+   * See getLiveCamera for why this reads the live WebGL scene rather
    * than relying on the last value written to the camera signal (bug #1032).
    * @returns The current camera or null if the plot element is not yet mounted.
    */
