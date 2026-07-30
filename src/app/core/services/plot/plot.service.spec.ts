@@ -711,9 +711,7 @@ describe('PlotService', () => {
       expect(service.baseLitData()).toEqual(mockGetSectionOutput);
       expect(service.error()).toBe(TaskError.CALCULATION_ERROR);
       expect(service.loading()).toBe(true);
-      expect(service.distanceMeasuringPoints()).toEqual([
-        { uuid: 'measure-group-1', points: [[1, 2, 3]] }
-      ]);
+      expect(service.distanceMeasuringPoints()).toEqual([{ uuid: 'measure-group-1', points: [[1, 2, 3]] }]);
     });
   });
 
