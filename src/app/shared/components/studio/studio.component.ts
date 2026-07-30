@@ -33,8 +33,8 @@ export class StudioComponent implements OnDestroy {
   /**
    * Whether the current section's plot data is available. Derived directly from
    * litData (rather than latched) so it correctly resets on every new section load —
-   * litData is nulled synchronously by initSectionStudio but left untouched by
-   * refreshProjection (support-range panning), so this stays true across pans
+   * litData is nulled synchronously by initSectionStudio, but refreshProjection does not
+   * clear it before recomputing (support-range panning), so this stays true across pans
    * and only drops while a genuinely new section is loading.
    */
   readonly plotInitialized = computed(() => this.plotService.litData() !== null);
