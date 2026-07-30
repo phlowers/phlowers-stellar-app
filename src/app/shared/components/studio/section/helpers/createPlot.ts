@@ -11,6 +11,7 @@ import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
 import { TranslocoService } from '@jsverse/transloco';
+import { getLiveCamera } from '@services/plot/plot-options.utils';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -343,29 +344,6 @@ const layout2d = (
       ...distanceAnnotations
     ]
   };
-};
-
-/**
- * Reads the current 3D camera directly from the Plotly DOM element's internal state.
- * This bypasses the Angular signal layer and always returns the live camera position
- * as Plotly knows it, even after the user has interacted with the plot.
- *
- * The WebGL scene camera (`_scene.getCamera()`) is the source of truth: scroll-wheel
- * zoom only mutates the WebGL camera and never syncs `_fullLayout.scene.camera`, so
- * reading the latter after a wheel zoom returns a stale value — feeding it back into
- * the layout on the next Plotly.react snaps the view back (bug #1032). The layout
- * camera is only used as a fallback before the gl scene exists.
- *
- * Returns null if the element does not exist or has no camera data yet.
- */
-const getLiveCamera = (documentRef: Document, plotId: string): Camera | null => {
-  const el = documentRef.getElementById(plotId) as
-    | (HTMLElement & {
-        _fullLayout?: { scene?: { camera?: Camera; _scene?: { getCamera?: () => Camera } } };
-      })
-    | null;
-  const scene = el?._fullLayout?.scene;
-  return scene?._scene?.getCamera?.() ?? scene?.camera ?? null;
 };
 
 /**
