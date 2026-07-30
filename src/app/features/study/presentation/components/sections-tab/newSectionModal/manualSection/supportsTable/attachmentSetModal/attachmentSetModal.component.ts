@@ -14,6 +14,7 @@ import { SupportPlotComponent } from '@shared/components/studio/support/support-
 import { LatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
 import { uniq } from 'lodash';
+import { TranslocoModule } from '@jsverse/transloco';
 
 /**
  * Modal dialog for selecting and configuring an attachment set for a support.
@@ -33,7 +34,8 @@ import { uniq } from 'lodash';
 
     IconFieldModule,
     InputIconModule,
-    SupportPlotComponent
+    SupportPlotComponent,
+    TranslocoModule
   ],
   styleUrls: ['./attachmentSetModal.component.scss'],
   templateUrl: './attachmentSetModal.component.html',

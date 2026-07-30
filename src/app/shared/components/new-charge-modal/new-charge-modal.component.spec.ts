@@ -10,6 +10,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 class MockChargesService {
   createOrUpdateCharge = vi.fn().mockResolvedValue(undefined);
 }
@@ -124,7 +125,27 @@ describe('NewChargeModalComponent (Jest)', () => {
     spanService.section.set(mockSection);
 
     await TestBed.configureTestingModule({
-      imports: [NewChargeModalComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.validate': 'Validate',
+              'shared.new-charge-modal.charge-name-error': 'The charge case name must be unique.',
+              'shared.new-charge-modal.charge-name-label': 'Charge case name',
+              'common.close': 'Close',
+              'shared.new-charge-modal.create-title': 'Create a charge case',
+              'shared.new-charge-modal.default-name': 'CC',
+              'shared.new-charge-modal.description-label': 'Description',
+              'shared.new-charge-modal.description-placeholder': 'Add a description to the charge case',
+              'shared.new-charge-modal.generalities': 'Generalities',
+              'shared.new-charge-modal.personnel-presence': 'Personnel presence'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        NewChargeModalComponent
+      ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

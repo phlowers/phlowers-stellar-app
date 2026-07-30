@@ -83,10 +83,10 @@ Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WAS
 
 ### i18n
 
-- [ ] No hardcoded text in templates (use `i18n` attribute)
-- [ ] No hardcoded text in TypeScript (use `$localize`)
-- [ ] No `TranslateService` / `translate` pipe usage
-- [ ] `npm run extract-i18n` ran if new `i18n` / `$localize` were added (`messages.xlf` / `messages.fr.xlf`)
+- [ ] No hardcoded user-facing text in templates (use the `transloco` pipe)
+- [ ] No hardcoded user-facing text in TypeScript (use `TranslocoService.translate()`)
+- [ ] No `$localize` / `i18n` attribute usage (Angular native i18n was fully replaced by Transloco)
+- [ ] New/changed translation keys added to **both** `public/i18n/en.json` and `public/i18n/fr.json`
 
 ### Dead Code
 

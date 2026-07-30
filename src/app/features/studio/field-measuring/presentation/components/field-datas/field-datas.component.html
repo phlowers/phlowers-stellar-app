@@ -1,11 +1,11 @@
 <p id="mandatory-data-field" class="field-datas__mandatory-msg">
   <app-icon icon="info" />
-  <span i18n>All fields are mandatory</span>
+  <span>{{ 'field-measuring.field-datas.mandatory-msg' | transloco }}</span>
 </p>
 
 <div class="field-datas__grid">
   <div class="name">
-    <label for="measureName" i18n>Measure name</label>
+    <label for="measureName">{{ 'field-measuring.field-datas.name-label' | transloco }}</label>
     <input
       pInputText
       id="measureName"
@@ -21,14 +21,14 @@
       data-testid="measure-name-input"
     />
     @if (isNameAlreadyTaken()) {
-      <p-message id="measure-name-error-message" severity="error" size="small" variant="simple" i18n
-        >Measure name must be unique.</p-message
-      >
+      <p-message id="measure-name-error-message" severity="error" size="small" variant="simple">{{
+        'field-measuring.shared.measure-name-unique-error' | transloco
+      }}</p-message>
     }
   </div>
 
   <div class="date">
-    <label for="date" i18n>Date</label>
+    <label for="date">{{ 'field-measuring.field-datas.date-label' | transloco }}</label>
     <p-datepicker
       appendTo="body"
       id="date"
@@ -45,9 +45,9 @@
 
   <div class="time">
     <div class="time__label">
-      <label for="time" id="timeLabel" i18n>Time</label>
+      <label for="time" id="timeLabel">{{ 'field-measuring.field-datas.time-label' | transloco }}</label>
       <p-selectbutton
-        [options]="timeModeOptions"
+        [options]="timeModeOptions()"
         [ngModel]="measureData().season"
         (onChange)="onFieldChange('season', $event.value)"
         optionLabel="label"
@@ -74,7 +74,7 @@
   </div>
 
   <div class="temperature">
-    <label for="ambientTemperature" i18n>Ambient temperature</label>
+    <label for="ambientTemperature">{{ 'field-measuring.field-datas.ambient-temperature-label' | transloco }}</label>
     <p-inputgroup>
       <input
         pInputText
@@ -94,7 +94,7 @@
 
   <div class="wind">
     <div class="wind__label">
-      <label for="windSpeed" id="wind" i18n>Wind speed</label>
+      <label for="windSpeed" id="wind">{{ 'field-measuring.shared.wind-speed-label' | transloco }}</label>
       <p-selectbutton
         [options]="windSpeedUnitOptions"
         [ngModel]="measureData().windSpeedUnit"
@@ -123,11 +123,11 @@
   </div>
 
   <div class="direction">
-    <label for="windDirection" i18n>Wind direction</label>
+    <label for="windDirection">{{ 'field-measuring.shared.wind-direction-label' | transloco }}</label>
     <p-select
       appendTo="body"
       id="windDirection"
-      [options]="windDirectionOptions"
+      [options]="windDirectionOptions()"
       optionLabel="label"
       optionValue="value"
       [ngModel]="measureData().windDirection"
@@ -140,11 +140,11 @@
   </div>
 
   <div class="sky">
-    <label for="skyCover" i18n>Sky cover</label>
+    <label for="skyCover">{{ 'field-measuring.shared.sky-cover-label' | transloco }}</label>
     <p-select
       appendTo="body"
       id="skyCover"
-      [options]="skyCoverOptions"
+      [options]="skyCoverOptions()"
       optionLabel="label"
       optionValue="value"
       [ngModel]="measureData().skyCover"

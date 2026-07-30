@@ -22,6 +22,7 @@ import { LogLevel, Task } from '@services/worker_python/tasks/types';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WINDOW } from '@core/tokens/window.token';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Name of the service worker cache used for app assets. */
 const CACHE_NAME = 'app-assets';
@@ -47,7 +48,8 @@ const CACHE_NAME = 'app-assets';
     ButtonComponent,
     ProgressSpinnerModule,
     DatePipe,
-    ToggleSwitch
+    ToggleSwitch,
+    TranslocoModule
   ],
   providers: [ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -61,6 +63,7 @@ export class AdminComponent {
   private readonly confirmationService = inject(ConfirmationService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly window = inject(WINDOW);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
@@ -68,20 +71,20 @@ export class AdminComponent {
   updateAvailable = false;
   newVersion = '';
   activateDebugLogsOptions = [
-    { label: $localize`ON`, value: LogLevel.DEBUG },
-    { label: $localize`OFF`, value: LogLevel.WARNING }
+    { label: this.translocoService.translate('admin.admin.on'), value: LogLevel.DEBUG },
+    { label: this.translocoService.translate('admin.admin.off'), value: LogLevel.WARNING }
   ];
   readonly activateDebugLogs = signal(false);
 
   deleteAllStudies() {
     this.confirmationService.confirm({
-      message: $localize`Are you sure you want to delete all studies?`,
+      message: this.translocoService.translate('admin.delete-studies-confirm'),
       accept: () => {
         this.studyService.deleteAllStudies();
         this.messageService.add({
           severity: 'success',
-          summary: $localize`Studies deleted`,
-          detail: $localize`All studies have been deleted`
+          summary: this.translocoService.translate('admin.delete-studies-summary'),
+          detail: this.translocoService.translate('admin.delete-studies-detail')
         });
       }
     });
@@ -89,13 +92,13 @@ export class AdminComponent {
 
   resetDatabase() {
     this.confirmationService.confirm({
-      message: $localize`Are you sure you want to reset the database?`,
+      message: this.translocoService.translate('admin.reset-database-confirm'),
       accept: () => {
         this.storageService.resetDatabase();
         this.messageService.add({
           severity: 'success',
-          summary: $localize`Database reset`,
-          detail: $localize`The database has been reset`
+          summary: this.translocoService.translate('admin.reset-database-summary'),
+          detail: this.translocoService.translate('admin.reset-database-detail')
         });
       }
     });
@@ -103,7 +106,7 @@ export class AdminComponent {
 
   resetApp() {
     this.confirmationService.confirm({
-      message: $localize`Are you sure you want to reset the app?`,
+      message: this.translocoService.translate('admin.reset-app-confirm'),
       accept: async () => {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const registration of registrations) {
@@ -112,8 +115,8 @@ export class AdminComponent {
         await caches.delete(CACHE_NAME);
         this.messageService.add({
           severity: 'success',
-          summary: $localize`App reset`,
-          detail: $localize`The app has been reset`
+          summary: this.translocoService.translate('admin.reset-app-summary'),
+          detail: this.translocoService.translate('admin.reset-app-detail')
         });
         setTimeout(() => {
           this.window.location.assign('/');
@@ -130,10 +133,12 @@ export class AdminComponent {
     localStorage.setItem('activateDebugLogs', activate.toString());
     this.messageService.add({
       severity: 'success',
-      summary: activate ? $localize`Python logs activated` : $localize`Python logs deactivated`,
+      summary: activate
+        ? this.translocoService.translate('admin.python-logs-activated-summary')
+        : this.translocoService.translate('admin.python-logs-deactivated-summary'),
       detail: activate
-        ? $localize`The python logs have been activated`
-        : $localize`The python logs have been deactivated`
+        ? this.translocoService.translate('admin.python-logs-activated-detail')
+        : this.translocoService.translate('admin.python-logs-deactivated-detail')
     });
   }
 }

@@ -5,10 +5,11 @@ import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingComponent } from './tangent-aiming/tangent-aiming.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-calculus-setting',
-  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingComponent],
+  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingComponent, TranslocoModule],
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

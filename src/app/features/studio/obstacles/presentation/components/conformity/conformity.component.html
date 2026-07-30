@@ -8,10 +8,12 @@
     [@.disabled]="!animationsReady()"
   >
     <fieldset>
-      <legend class="form__title-obstacle underline-text" i18n>Obstacle</legend>
+      <legend class="form__title-obstacle underline-text">{{ 'studio.conformity.obstacle-legend' | transloco }}</legend>
 
       @if (hasMultiplePoints()) {
-        <label for="selectedPoint" class="form__select-obstacle-label" i18n>Obstacle's point</label>
+        <label for="selectedPoint" class="form__select-obstacle-label">{{
+          'studio.conformity.obstacle-point-label' | transloco
+        }}</label>
         <p-select
           inputId="selectedPoint"
           formControlName="selectedPoint"
@@ -25,35 +27,41 @@
       }
 
       <dl>
-        <dt class="form__name-obstacle-label" i18n>Name</dt>
+        <dt class="form__name-obstacle-label">{{ 'studio.conformity.name-label' | transloco }}</dt>
         <dd class="form__name-obstacle-input">{{ obstacleData()?.name || '-' }}</dd>
 
-        <dt class="form__type-obstacle-label" i18n>Type</dt>
+        <dt class="form__type-obstacle-label">{{ 'studio.conformity.type-label' | transloco }}</dt>
         <dd class="form__type-obstacle-input">{{ obstacleData()?.type || '-' }}</dd>
 
-        <dt class="form__span-obstacle-label" i18n>Span</dt>
+        <dt class="form__span-obstacle-label">{{ 'studio.shared.span-label' | transloco }}</dt>
         <dd class="form__span-obstacle-input">{{ spanLabel() }}</dd>
 
-        <dt class="form__ref-supp-obstacle-label" i18n>Reference support</dt>
+        <dt class="form__ref-supp-obstacle-label">{{ 'studio.shared.reference-support-label' | transloco }}</dt>
         <dd class="form__ref-supp-obstacle-input">{{ referenceSupportLabel() }}</dd>
 
-        <dt class="form__alt-type-obstacle-label" i18n>Altitude type</dt>
+        <dt class="form__alt-type-obstacle-label">{{ 'studio.conformity.altitude-type-label' | transloco }}</dt>
         <dd class="form__alt-type-obstacle-input">{{ altitudeTypeLabel() }}</dd>
 
-        <dt class="form__lat-dist-type-obstacle-label" i18n>Lateral distance type</dt>
+        <dt class="form__lat-dist-type-obstacle-label">
+          {{ 'studio.shared.lateral-distance-type-label' | transloco }}
+        </dt>
         <dd class="form__lat-dist-type-obstacle-input">{{ lateralDistanceTypeLabel() }}</dd>
 
-        <dt class="form__alt-pt-obstacle-label" i18n>Altitude point</dt>
+        <dt class="form__alt-pt-obstacle-label">{{ 'studio.conformity.altitude-point-label' | transloco }}</dt>
         <dd class="form__alt-pt-obstacle-input" aria-live="polite">
           {{ activePoint()?.z !== null && activePoint()?.z !== undefined ? activePoint()!.z + ' m' : '-' }}
         </dd>
 
-        <dt class="form__ref-supp-distance-obstacle-label" i18n>Reference support distance</dt>
+        <dt class="form__ref-supp-distance-obstacle-label">
+          {{ 'studio.conformity.reference-support-distance-label' | transloco }}
+        </dt>
         <dd class="form__ref-supp-distance-obstacle-input" aria-live="polite">
           {{ activePoint()?.x !== null && activePoint()?.x !== undefined ? activePoint()!.x + ' m' : '-' }}
         </dd>
 
-        <dt class="form__dist-line-axis-obstacle-label" i18n>Distance to line axis</dt>
+        <dt class="form__dist-line-axis-obstacle-label">
+          {{ 'studio.conformity.distance-to-line-axis-label' | transloco }}
+        </dt>
         <dd class="form__dist-line-axis-obstacle-input" aria-live="polite">
           {{ activePoint()?.y !== null && activePoint()?.y !== undefined ? activePoint()!.y + ' m' : '-' }}
         </dd>
@@ -61,14 +69,14 @@
     </fieldset>
 
     <fieldset>
-      <legend class="form__title-form underline-text" i18n>Form</legend>
+      <legend class="form__title-form underline-text">{{ 'studio.conformity.form-legend' | transloco }}</legend>
 
       <dl class="contents">
-        <dt class="form__electric-tension-label" i18n>Electric tension</dt>
+        <dt class="form__electric-tension-label">{{ 'studio.conformity.electric-tension-label' | transloco }}</dt>
         <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
       </dl>
 
-      <label for="windZone" class="form__wind-label" i18n>Wind zone</label>
+      <label for="windZone" class="form__wind-label">{{ 'studio.conformity.wind-zone-label' | transloco }}</label>
       <p-select
         inputId="windZone"
         formControlName="windZone"
@@ -87,7 +95,7 @@
           [binary]="true"
           data-testid="conformity-wind-minus-checkbox"
         />
-        <label for="windMinus" i18n>Wind -</label>
+        <label for="windMinus">{{ 'studio.conformity.wind-minus-label' | transloco }}</label>
 
         @if (showRedZonePresence()) {
           <p-checkbox
@@ -96,11 +104,13 @@
             [binary]="true"
             data-testid="conformity-red-zone-checkbox"
           />
-          <label for="redZonePresence" i18n>Red zone presence</label>
+          <label for="redZonePresence">{{ 'studio.conformity.red-zone-presence-label' | transloco }}</label>
         }
       </div>
 
-      <label for="repartitionTemperature" class="form__distrib-temp-label" i18n>Repartition temperature</label>
+      <label for="repartitionTemperature" class="form__distrib-temp-label">{{
+        'studio.conformity.repartition-temperature-label' | transloco
+      }}</label>
       <p-inputgroup class="form__distrib-temp-input">
         <input
           id="repartitionTemperature"
@@ -125,7 +135,8 @@
           size="small"
           variant="simple"
         >
-          <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.repartitionTemperature.min }}
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+          {{ BOUNDS.repartitionTemperature.min }}
         </p-message>
       } @else if (form.controls.repartitionTemperature.errors?.['max']) {
         <p-message
@@ -135,7 +146,8 @@
           size="small"
           variant="simple"
         >
-          <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.repartitionTemperature.max }}
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+          {{ BOUNDS.repartitionTemperature.max }}
         </p-message>
       }
 
@@ -143,7 +155,7 @@
         @if (lateralTemperatureRuleName()) {
           {{ lateralTemperatureRuleName() }} —
         }
-        <ng-container i18n>Lateral distance temperature</ng-container>
+        <ng-container>{{ 'studio.conformity.lateral-distance-temperature-label' | transloco }}</ng-container>
       </label>
       <p-inputgroup class="form__lat-temp-input">
         <input
@@ -166,11 +178,13 @@
       <div class="form__lat-temp-compl">
         @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
           <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
-            <ng-container i18n>Minimum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.min }}
+            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+            {{ BOUNDS.lateralDistanceTemperature.min }}
           </p-message>
         } @else if (form.controls.lateralDistanceTemperature.errors?.['max']) {
           <p-message id="lateral-distance-temperature-max-error" severity="error" size="small" variant="simple">
-            <ng-container i18n>Maximum value:</ng-container> {{ BOUNDS.lateralDistanceTemperature.max }}
+            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+            {{ BOUNDS.lateralDistanceTemperature.max }}
           </p-message>
         }
         @if (lateralTemperatureHint()) {
@@ -178,7 +192,9 @@
         }
       </div>
 
-      <label for="conformityMultiselect" class="form__conformity-select-label" i18n>Conformity</label>
+      <label for="conformityMultiselect" class="form__conformity-select-label">{{
+        'studio.shared.conformity-label' | transloco
+      }}</label>
       <p-multiselect
         inputId="conformityMultiselect"
         formControlName="conformity"
@@ -200,20 +216,19 @@
       [disabled]="!canCalculate()"
       [btnLoading]="isCalculating()"
       data-testid="conformity-calculate-btn"
-      i18n
     >
-      Calculate
+      {{ 'common.calculate' | transloco }}
     </button>
   </form>
 }
 
 <output class="sr-only" aria-live="polite">
   @if (isCalculating()) {
-    <ng-container i18n>Calculating conformity…</ng-container>
+    <ng-container>{{ 'studio.conformity.calculating-text' | transloco }}</ng-container>
   } @else if (calculationError()) {
     {{ calculationError() }}
   } @else if (conformityResults()) {
-    <ng-container i18n>Conformity results updated.</ng-container>
+    <ng-container>{{ 'studio.conformity.results-updated-text' | transloco }}</ng-container>
   }
 </output>
 
@@ -221,10 +236,10 @@
   <div class="results" @expandHeight>
     <hr class="results__separator" />
 
-    <h2 class="results__title" i18n>Results:</h2>
+    <h2 class="results__title">{{ 'common.results' | transloco }}</h2>
 
     <figure class="results__figure">
-      <figcaption class="sr-only" i18n>Conformity visualisation graph</figcaption>
+      <figcaption class="sr-only">{{ 'studio.conformity.visualisation-graph-caption' | transloco }}</figcaption>
       <button
         app-btn
         btnStyle="text"
@@ -237,9 +252,9 @@
       >
         <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
         @if (isGraphEnlarged()) {
-          <ng-container i18n>Reduce graphic view</ng-container>
+          <ng-container>{{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}</ng-container>
         } @else {
-          <ng-container i18n>Enlarge graphic view</ng-container>
+          <ng-container>{{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}</ng-container>
         }
       </button>
       <div id="conformity-plot" class="results__plot"></div>
@@ -251,9 +266,15 @@
           <tr>
             <th scope="col"></th>
             @for (col of selectedConformityColumns(); track col.value) {
-              <th scope="col">{{ col.label }} <ng-container i18n>overhang</ng-container></th>
+              <th scope="col">
+                {{ col.label }}
+                <ng-container>{{ 'studio.conformity.overhang-column-suffix' | transloco }}</ng-container>
+              </th>
               @if (showLateralColumn()) {
-                <th scope="col">{{ col.label }} <ng-container i18n>lateral</ng-container></th>
+                <th scope="col">
+                  {{ col.label }}
+                  <ng-container>{{ 'studio.conformity.lateral-column-suffix' | transloco }}</ng-container>
+                </th>
               }
             }
           </tr>
@@ -262,13 +283,15 @@
           <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: commonRows }" />
 
           <tr>
-            <th scope="row" i18n>Conformity compliance</th>
+            <th scope="row">{{ 'studio.conformity.compliance-column-label' | transloco }}</th>
             @for (col of selectedConformityColumns(); track col.value) {
               <td [attr.colspan]="showLateralColumn() ? 2 : null">
                 @switch (getConformityCompliance(col.value)) {
                   @case (null) {
                     <div class="compliance">
-                      <span class="compliance__text" i18n>Unknown</span>
+                      <span class="compliance__text">{{
+                        'studio.conformity.unknown-compliance-label' | transloco
+                      }}</span>
                       <app-icon
                         icon="shield_question"
                         class="compliance__icon compliance__icon--unknown"
@@ -278,13 +301,13 @@
                   }
                   @case (true) {
                     <div class="compliance">
-                      <span class="compliance__text" i18n>Yes</span>
+                      <span class="compliance__text">{{ 'common.yes' | transloco }}</span>
                       <app-icon icon="check" class="compliance__icon compliance__icon--yes" aria-hidden="true" />
                     </div>
                   }
                   @default {
                     <div class="compliance">
-                      <span class="compliance__text" i18n>No</span>
+                      <span class="compliance__text">{{ 'common.no' | transloco }}</span>
                       <app-icon icon="close" class="compliance__icon compliance__icon--no" aria-hidden="true" />
                     </div>
                   }
@@ -295,7 +318,9 @@
 
           @if (conformityType() === 'cable_track') {
             <tr>
-              <th scope="colgroup" [attr.colspan]="totalColSpan()" i18n>Minimum distance case</th>
+              <th scope="colgroup" [attr.colspan]="totalColSpan()">
+                {{ 'studio.conformity.minimum-distance-case-label' | transloco }}
+              </th>
             </tr>
             <ng-container [ngTemplateOutlet]="dataRows" [ngTemplateOutletContext]="{ $implicit: cableTrackRows }" />
           }

@@ -22,10 +22,19 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { createInitialMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { MessageModule } from 'primeng/message';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-field-measuring-init',
-  imports: [IconComponent, InputText, SelectWithButtonsComponent, ReactiveFormsModule, ButtonComponent, MessageModule],
+  imports: [
+    IconComponent,
+    InputText,
+    SelectWithButtonsComponent,
+    ReactiveFormsModule,
+    ButtonComponent,
+    MessageModule,
+    TranslocoModule
+  ],
   templateUrl: './init.component.html',
   styleUrl: './init.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -39,6 +48,7 @@ export class InitComponent implements OnDestroy, OnInit {
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     effect(() => {
@@ -47,7 +57,8 @@ export class InitComponent implements OnDestroy, OnInit {
         this.toolbarDialogService.setTemplates({ header });
         const section = this.spanService.section();
         const measures = section?.field_measures;
-        const newMeasureName = $localize`TM ` + ((measures?.length || 0) + 1);
+        const newMeasureName =
+          this.translocoService.translate('field-measuring.init.tm-prefix') + ((measures?.length || 0) + 1);
         this.measures.set(
           measures?.map((measure) => ({
             label: measure.name || '',

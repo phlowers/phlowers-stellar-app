@@ -7,6 +7,7 @@ import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { signal } from '@angular/core';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
   let fixture: ComponentFixture<TopbarComponent>;
@@ -41,7 +42,15 @@ describe('TopbarComponent', () => {
     } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
-      imports: [TopbarComponent, IconComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        TopbarComponent,
+        IconComponent
+      ],
       providers: [
         { provide: PageTitleService, useValue: mockPageTitleService },
         { provide: AuthService, useValue: mockAuthService },

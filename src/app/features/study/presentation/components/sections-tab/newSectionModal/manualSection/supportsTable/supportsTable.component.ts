@@ -47,6 +47,7 @@ import {
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { LOCATION_CONFIG } from '../location/location.constantes';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Editable table of supports within a section.
@@ -72,7 +73,8 @@ import { LOCATION_CONFIG } from '../location/location.constantes';
     InputGroupAddonModule,
     KeyFilterModule,
     MessageModule,
-    PaginatorModule
+    PaginatorModule,
+    TranslocoModule
   ],
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss'],
@@ -115,6 +117,7 @@ export class SupportsTableComponent implements OnInit {
   readonly catalogLoaded = computed(() => this.allCatalogSupportNames() !== undefined);
   private readonly workerPythonService = inject(WorkerPythonService);
   readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
+  private readonly transloco = inject(TranslocoService);
   localization = signal<Localization | null>(null);
   localizationLoading = signal<boolean>(false);
   private readonly _localizationEffect = effect(() => {
@@ -133,8 +136,8 @@ export class SupportsTableComponent implements OnInit {
   readonly truncateTwoDecimals = truncateTwoDecimals;
 
   optionsChainV = [
-    { label: $localize`Yes`, value: true },
-    { label: $localize`No`, value: false }
+    { label: this.transloco.translate('common.yes'), value: true },
+    { label: this.transloco.translate('common.no'), value: false }
   ];
 
   constructor() {

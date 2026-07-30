@@ -14,6 +14,7 @@ import { StudiesComponent } from './studies.component';
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 describe('StudiesComponent', () => {
   let component: StudiesComponent;
@@ -73,7 +74,13 @@ describe('StudiesComponent', () => {
     } as unknown as vi.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudiesComponent],
+      imports: [
+        StudiesComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {}, fr: {} },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         { provide: StudiesService, useValue: mockStudiesService },
         { provide: ConfirmationService, useValue: mockConfirmationService },

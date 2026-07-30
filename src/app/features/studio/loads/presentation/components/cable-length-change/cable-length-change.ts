@@ -14,6 +14,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { CableLengthChangeFormControls, CableWidthType } from './cable-length-change.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { LoadFormsService } from '../../services/loadForms.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -24,7 +25,8 @@ import { LoadFormsService } from '../../services/loadForms.service';
     InputGroupAddonModule,
     SelectModule,
     ButtonComponent,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   templateUrl: './cable-length-change.html',
   styleUrl: './cable-length-change.scss',
@@ -38,6 +40,7 @@ export class CableLengthChangeComponent {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly cableModificationsService = inject(CableModificationsService);
   private readonly loadFormsService = inject(LoadFormsService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly isLoading = signal(false);
   readonly isCalculatingOnly = signal(false);
@@ -70,8 +73,14 @@ export class CableLengthChangeComponent {
   readonly supportRefOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
 
   readonly modificationTypeOptions = [
-    { label: $localize`Lengthening`, value: 'lengthening' as CableWidthType },
-    { label: $localize`Shortening`, value: 'shortening' as CableWidthType }
+    {
+      label: this.translocoService.translate('shared.studio.cable-mod-lengthening'),
+      value: 'lengthening' as CableWidthType
+    },
+    {
+      label: this.translocoService.translate('shared.studio.cable-mod-shortening'),
+      value: 'shortening' as CableWidthType
+    }
   ];
 
   hasSavedModification = signal<boolean>(true);

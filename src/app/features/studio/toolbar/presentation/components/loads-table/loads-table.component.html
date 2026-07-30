@@ -1,21 +1,21 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="assignment_turned_in" />
-    <span i18n>Loads table</span>
+    <span>{{ 'studio.top-toolbar.loads-table-label' | transloco }}</span>
   </p>
 </ng-template>
 
 <section class="base-info">
   @if (mode() === 'view') {
     <dl class="contents">
-      <dt i18n class="load-name-label">Load case name</dt>
+      <dt class="load-name-label">{{ 'studio.loads-table.load-case-name-label' | transloco }}</dt>
       <dd class="load-name-value">{{ name() }}</dd>
 
-      <dt i18n class="load-desc-label">Description</dt>
+      <dt class="load-desc-label">{{ 'shared.new-charge-modal.description-label' | transloco }}</dt>
       <dd class="load-desc-value">{{ description() || '-' }}</dd>
     </dl>
   } @else {
-    <label for="loadName" class="load-name-label" i18n>Load case name</label>
+    <label for="loadName" class="load-name-label">{{ 'studio.loads-table.load-case-name-label' | transloco }}</label>
     <input
       type="text"
       class="load-name-value"
@@ -28,9 +28,8 @@
       data-testid="load-name-input"
     />
 
-    <label for="description" class="load-desc-label" i18n>
-      Description
-      <span>{{ descriptionLength() }}/240</span>
+    <label for="description" class="load-desc-label">
+      {{ 'studio.loads-table.description-length-label' | transloco: { count: descriptionLength() } }}
     </label>
     <textarea
       pTextarea
@@ -44,7 +43,9 @@
     ></textarea>
   }
 
-  <label for="personnelPresence" class="load-person-label" i18n> Personnel presence </label>
+  <label for="personnelPresence" class="load-person-label">{{
+    'shared.new-charge-modal.personnel-presence' | transloco
+  }}</label>
   <p-toggleswitch
     inputId="personnelPresence"
     name="personnelPresence"
@@ -58,21 +59,21 @@
 
 @if (climateRows().length > 0) {
   <section>
-    <h2 class="title underline-text" i18n>Climate condition</h2>
+    <h2 class="title underline-text">{{ 'studio.studio-page.climate-condition-label' | transloco }}</h2>
 
     <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }" data-testid="climate-table">
       <ng-template pTemplate="header">
         <tr>
-          <th id="wind-pressure-col" i18n>Wind pressure</th>
-          <th id="cable-temp-col" i18n>Cable temp.</th>
-          <th id="ice-indicator-col" i18n>Ice indicator</th>
+          <th id="wind-pressure-col">{{ 'studio.conformity.wind-pressure-label' | transloco }}</th>
+          <th id="cable-temp-col">{{ 'studio.loads-table.cable-temp-label' | transloco }}</th>
+          <th id="ice-indicator-col">{{ 'studio.loads-table.ice-indicator-label' | transloco }}</th>
           @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
-            <th id="ice-thickness-col" i18n>Ice thickness</th>
+            <th id="ice-thickness-col">{{ 'loads.climate.ice-thickness-label' | transloco }}</th>
           }
           @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
-            <th id="frontier-support-col" i18n>Frontier support</th>
-            <th id="ice-before-col" i18n>Ice thickness before support frontier</th>
-            <th id="ice-after-col" i18n>Ice thickness after support frontier</th>
+            <th id="frontier-support-col">{{ 'loads.climate.frontier-support-label' | transloco }}</th>
+            <th id="ice-before-col">{{ 'studio.loads-table.ice-thickness-before-label' | transloco }}</th>
+            <th id="ice-after-col">{{ 'studio.loads-table.ice-thickness-after-label' | transloco }}</th>
           }
         </tr>
       </ng-template>
@@ -98,17 +99,17 @@
 
 @if (spanLoadRows().length > 0) {
   <section>
-    <h2 class="title underline-text" i18n>Load / Marking</h2>
+    <h2 class="title underline-text">{{ 'studio.studio-page.load-marking-label' | transloco }}</h2>
 
     <p-table [value]="spanLoadRows()" [tableStyle]="{ width: 'auto' }" data-testid="load-marking-table">
       <ng-template pTemplate="header">
         <tr>
-          <th id="index-col" i18n>N°</th>
-          <th id="span-col" i18n>Span</th>
-          <th id="ref-support-col" i18n>Ref. support</th>
-          <th id="type-col" i18n>Load type</th>
-          <th id="position-col" i18n>Distance to ref. support</th>
-          <th id="weight-col" i18n>Load</th>
+          <th id="index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
+          <th id="span-col">{{ 'studio.shared.span-label' | transloco }}</th>
+          <th id="ref-support-col">{{ 'studio.loads-table.ref-support-label' | transloco }}</th>
+          <th id="type-col">{{ 'loads.load-marking.load-type-label' | transloco }}</th>
+          <th id="position-col">{{ 'studio.loads-table.distance-to-ref-support-label' | transloco }}</th>
+          <th id="weight-col">{{ 'loads.load-marking.load-label' | transloco }}</th>
         </tr>
       </ng-template>
 
@@ -134,22 +135,22 @@
   @if (mode() === 'view') {
     <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
       <app-icon icon="description" />
-      <ng-container i18n>Report</ng-container>
+      <ng-container>{{ 'common.report' | transloco }}</ng-container>
     </button>
 
     <button app-btn type="button" (click)="switchToEditMode()" data-testid="modify-btn">
       <app-icon icon="edit" />
-      <ng-container i18n>Modify</ng-container>
+      <ng-container>{{ 'studio.loads-table.modify-btn' | transloco }}</ng-container>
     </button>
   } @else {
     <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()" data-testid="cancel-edit-btn">
       <app-icon icon="close" />
-      <ng-container i18n>Cancel</ng-container>
+      <ng-container>{{ 'common.cancel' | transloco }}</ng-container>
     </button>
 
     <button app-btn type="button" (click)="saveChanges()" [disabled]="!isFormValid()" data-testid="save-changes-btn">
       <app-icon icon="save" />
-      <ng-container i18n>Save</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
   }
 </ng-template>

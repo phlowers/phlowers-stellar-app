@@ -22,6 +22,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { OnlineService } from '@services/online/online.service';
 import { WINDOW } from '@core/tokens/window.token';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
@@ -88,6 +89,11 @@ describe('AdminComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
         AdminComponent,
         ToastModule,
         CardModule,
@@ -150,7 +156,7 @@ describe('AdminComponent', () => {
       component.deleteAllStudies();
 
       expect(confirmationServiceMock.confirm).toHaveBeenCalledWith({
-        message: expect.any(String), // $localize returns a string
+        message: expect.any(String),
         accept: expect.any(Function)
       });
     });

@@ -8,17 +8,17 @@
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
       <app-icon icon="add_circle" />
-      <span i18n>Create a charge case</span>
+      <span>{{ 'shared.new-charge-modal.create-title' | transloco }}</span>
     </p>
   </ng-template>
 
   <ng-template #content>
     <form class="flex flex-col gap-3">
-      <h3 class="section-title" i18n>Generalities</h3>
+      <h3 class="section-title">{{ 'shared.new-charge-modal.generalities' | transloco }}</h3>
 
       <div>
         <label for="chargeName" class="label">
-          <ng-container i18n>Charge case name</ng-container>
+          <ng-container>{{ 'shared.new-charge-modal.charge-name-label' | transloco }}</ng-container>
           <sup class="mandatory">*</sup>
         </label>
         <input
@@ -27,7 +27,6 @@
           id="chargeName"
           name="chargeName"
           maxlength="100"
-          i18n-placeholder
           [ngModel]="name()"
           (ngModelChange)="updateName($event)"
           [class.ng-invalid]="isNameDuplicate()"
@@ -43,16 +42,17 @@
             severity="error"
             size="small"
             variant="simple"
-            i18n
             data-testid="name-error"
           >
-            The charge case name must be unique.
+            {{ 'shared.new-charge-modal.charge-name-error' | transloco }}
           </p-message>
         }
       </div>
 
       <div class="personnel-presence">
-        <label for="personnelPresence" class="label" i18n> Personnel presence </label>
+        <label for="personnelPresence" class="label">{{
+          'shared.new-charge-modal.personnel-presence' | transloco
+        }}</label>
         <p-toggleswitch
           inputId="personnelPresence"
           name="personnelPresence"
@@ -64,14 +64,13 @@
 
       <div>
         <div class="label-container">
-          <label i18n for="description" class="label">Description</label>
+          <label for="description" class="label">{{ 'shared.new-charge-modal.description-label' | transloco }}</label>
           <span class="input-length">{{ descriptionLength() }}/240</span>
         </div>
         <textarea
           id="description"
           name="description"
-          i18n-placeholder
-          placeholder="Add a description to the charge case"
+          [placeholder]="'shared.new-charge-modal.description-placeholder' | transloco"
           class="block"
           pTextarea
           [ngModel]="description()"
@@ -89,7 +88,7 @@
   <ng-template #footer>
     <button app-btn type="button" btnSize="m" btnStyle="text" (click)="onClose()" data-testid="close-btn">
       <app-icon icon="close" />
-      <ng-container i18n>Close</ng-container>
+      <ng-container>{{ 'common.close' | transloco }}</ng-container>
     </button>
 
     <button
@@ -101,7 +100,7 @@
       data-testid="validate-btn"
     >
       <app-icon icon="check" />
-      <ng-container i18n>Validate</ng-container>
+      <ng-container>{{ 'common.validate' | transloco }}</ng-container>
     </button>
   </ng-template>
 </p-dialog>

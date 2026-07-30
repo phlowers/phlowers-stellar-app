@@ -1,18 +1,22 @@
 <p id="mandatory-temperature" class="temperature-calculation__mandatory-msg">
   <app-icon icon="info" />
-  <span i18n>All fields are mandatory for temperature calculation.</span>
+  <span>{{ 'field-measuring.temperature-calculation.mandatory-msg' | transloco }}</span>
 </p>
 
 <div class="temperature-calculation__form">
   <dl class="contents">
-    <dt i18n class="conductor__label">Cable name</dt>
+    <dt class="conductor__label">{{ 'field-measuring.temperature-calculation.cable-name-label' | transloco }}</dt>
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
-    <dt i18n class="ambientTemp__label">Ambient temperature (°C)</dt>
+    <dt class="ambientTemp__label">
+      {{ 'field-measuring.temperature-calculation.ambient-temperature-label' | transloco }}
+    </dt>
     <dd class="ambientTemp__value">{{ measureData().ambientTemperature }} °C</dd>
   </dl>
 
-  <label for="transit" i18n class="transit__label">Transit</label>
+  <label for="transit" class="transit__label">{{
+    'field-measuring.temperature-calculation.transit-label' | transloco
+  }}</label>
   <div class="transit__value">
     <p-inputgroup>
       <input
@@ -35,29 +39,35 @@
     </p-inputgroup>
     @if (measureData().transit! < transitBounds.min) {
       <p-message id="transit-error-min-message" severity="error" size="small" variant="simple">
-        <ng-container i18n>Minimum transit value:</ng-container> {{ transitBounds.min }} A.
+        <ng-container>{{ 'field-measuring.temperature-calculation.min-transit-value' | transloco }}</ng-container>
+        {{ transitBounds.min }} A.
       </p-message>
     } @else if (measureData().transit! > transitBounds.max) {
       <p-message id="transit-error-max-message" severity="error" size="small" variant="simple">
-        <ng-container i18n>Maximum transit value:</ng-container> {{ transitBounds.max }} A.
+        <ng-container>{{ 'field-measuring.temperature-calculation.max-transit-value' | transloco }}</ng-container>
+        {{ transitBounds.max }} A.
       </p-message>
     }
   </div>
 
   <dl class="contents with-mt-labels">
-    <dt for="windSpeed" i18n class="windSpeed__label">Wind speed</dt>
+    <dt for="windSpeed" class="windSpeed__label">{{ 'field-measuring.shared.wind-speed-label' | transloco }}</dt>
     <dd class="windSpeed__value">
       {{ measureData().windSpeed }}
       {{ measureData().windSpeedUnit === 'ms' ? 'm/s' : 'km/h' }}
     </dd>
 
-    <dt id="windDirection" i18n class="windDirection__label">Wind direction</dt>
+    <dt id="windDirection" class="windDirection__label">
+      {{ 'field-measuring.shared.wind-direction-label' | transloco }}
+    </dt>
     <dd class="windDirection__value">{{ localizedWindDirection() }}</dd>
 
     <dt class="windIncidence__label">
-      <p id="windIncidenceLabel" class="mb-0" i18n>Wind incidence (degrees)</p>
+      <p id="windIncidenceLabel" class="mb-0">
+        {{ 'field-measuring.temperature-calculation.wind-incidence-label' | transloco }}
+      </p>
       <p-selectbutton
-        [options]="windIncidenceModeOptions"
+        [options]="windIncidenceModeOptions()"
         [ngModel]="measureData().windIncidenceMode"
         (onChange)="updateField('windIncidenceMode', $event.value)"
         optionLabel="label"
@@ -73,20 +83,13 @@
           <p-progressspinner
             styleClass="wind-incidence-loader"
             strokeWidth="2"
-            ariaLabel="Computing wind incidence"
-            i18n-ariaLabel
+            [ariaLabel]="'field-measuring.temperature-calculation.computing-wind-incidence-aria-label' | transloco"
             data-testid="wind-incidence-spinner"
           />
         }
         @case ('missing-inputs') {
-          <p-message
-            severity="warn"
-            size="small"
-            variant="simple"
-            i18n
-            data-testid="wind-incidence-missing-inputs-warning"
-          >
-            Wind direction and azimuth are required.
+          <p-message severity="warn" size="small" variant="simple" data-testid="wind-incidence-missing-inputs-warning">
+            {{ 'field-measuring.temperature-calculation.missing-inputs-warning' | transloco }}
           </p-message>
         }
         @case ('value') {
@@ -99,72 +102,11 @@
     </dd>
   </dl>
 
-  <h3 class="solar underline-text justify-self-start" i18n>Solar flux :</h3>
+  <h3 class="solar underline-text justify-self-start">
+    {{ 'field-measuring.temperature-calculation.solar-flux-title' | transloco }}
+  </h3>
 
-  <div class="measuredDiffusedPlusDirectSolarFlux__label">
-    <label for="measuredDiffusedPlusDirectSolarFlux" class="measuredDiffusedPlusDirectSolarFlux__label__txt" i18n>
-      Measured solar beam (not required)
-    </label>
-
-    <button
-      app-btn
-      btnSize="s"
-      btnStyle="outlined"
-      class="measuredDiffusedPlusDirectSolarFlux__label__btn"
-      (click)="estimateSkyCover()"
-      [disabled]="!canEstimateSkyCover()"
-      [btnLoading]="isEstimatingSkyCover()"
-      data-testid="estimate-sky-cover-btn"
-    >
-      <ng-container i18n>Estimate</ng-container>
-    </button>
-  </div>
-  <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
-    <input
-      id="measuredDiffusedPlusDirectSolarFlux"
-      type="number"
-      pInputText
-      [ngModel]="measureData().measuredDiffusedPlusDirectSolarFlux"
-      (ngModelChange)="updateField('measuredDiffusedPlusDirectSolarFlux', $event)"
-      (input)="truncateNoDecimals($event)"
-      [min]="measuredSolarFluxBounds.min"
-      [max]="measuredSolarFluxBounds.max"
-      step="1"
-      aria-describedby="solar-fluxs-impact"
-      [ngClass]="{ 'ng-invalid ng-dirty': isMeasuredSolarFluxOutOfBounds() }"
-      [attr.aria-invalid]="isMeasuredSolarFluxOutOfBounds() || null"
-      [attr.aria-errormessage]="measuredSolarFluxErrorMessageId()"
-      data-testid="measured-solar-flux-input"
-    />
-    <p-inputgroup-addon>W/m²</p-inputgroup-addon>
-  </p-inputgroup>
-
-  <div class="solar-fluxs-impact">
-    @if (measureData().measuredDiffusedPlusDirectSolarFlux! < measuredSolarFluxBounds.min) {
-      <p-message
-        id="solar-fluxs-error-min-message"
-        severity="error"
-        size="small"
-        variant="simple"
-        data-testid="solar-fluxs-impact-error"
-      >
-        <ng-container i18n>Minimum solar beam value:</ng-container> {{ measuredSolarFluxBounds.min }} W/m².
-      </p-message>
-    } @else if (measureData().measuredDiffusedPlusDirectSolarFlux! > measuredSolarFluxBounds.max) {
-      <p-message
-        id="solar-fluxs-error-max-message"
-        severity="error"
-        size="small"
-        variant="simple"
-        data-testid="solar-fluxs-impact-error"
-      >
-        <ng-container i18n>Maximum solar beam value:</ng-container> {{ measuredSolarFluxBounds.max }} W/m².
-      </p-message>
-    }
-    <p id="solar-fluxs-impact" i18n>It won't be used in the calculation.</p>
-  </div>
-
-  <label for="skyCover" i18n class="skyCover__label">Sky cover</label>
+  <label for="skyCover" class="skyCover__label">{{ 'field-measuring.shared.sky-cover-label' | transloco }}</label>
   <p-select
     inputId="skyCover"
     [options]="skyCoverOptions()"
@@ -181,17 +123,44 @@
   />
 
   <dl class="contents">
-    <dt i18n class="diffusedSolarFlux__label">Diffuse solar radiation</dt>
+    <dt class="diffusedSolarFlux__label">
+      {{ 'field-measuring.temperature-calculation.diffuse-solar-radiation-label' | transloco }}
+    </dt>
     <dd class="diffusedSolarFlux__value">{{ measureData().diffusedSolarFlux | number: '1.0-2' }} W/m²</dd>
 
-    <dt i18n class="directSolarFlux__label">Beam solar radiation</dt>
+    <dt class="directSolarFlux__label">
+      {{ 'field-measuring.temperature-calculation.beam-solar-radiation-label' | transloco }}
+    </dt>
     <dd class="directSolarFlux__value">{{ measureData().directSolarFlux | number: '1.0-2' }} W/m²</dd>
 
-    <dt i18n class="diffusedPlusDirectSolarFlux__label">Diffuse + beam solar radiation</dt>
+    <dt class="diffusedPlusDirectSolarFlux__label">
+      {{ 'field-measuring.temperature-calculation.diffuse-plus-beam-label' | transloco }}
+    </dt>
     <dd class="diffusedPlusDirectSolarFlux__value">
       {{ measureData().diffusedPlusDirectSolarFlux | number: '1.0-2' }} W/m²
     </dd>
   </dl>
+
+  <label for="measuredDiffusedPlusDirectSolarFlux" class="measuredDiffusedPlusDirectSolarFlux__label">
+    {{ 'field-measuring.temperature-calculation.measured-solar-flux-label' | transloco }}
+  </label>
+  <p-inputgroup class="measuredDiffusedPlusDirectSolarFlux__value">
+    <input
+      id="measuredDiffusedPlusDirectSolarFlux"
+      type="number"
+      pInputText
+      [ngModel]="measureData().measuredDiffusedPlusDirectSolarFlux"
+      (ngModelChange)="updateField('measuredDiffusedPlusDirectSolarFlux', $event)"
+      [min]="0"
+      aria-describedby="solar-fluxs-impact"
+      data-testid="measured-solar-flux-input"
+    />
+    <p-inputgroup-addon>W/m²</p-inputgroup-addon>
+  </p-inputgroup>
+
+  <p id="solar-fluxs-impact" class="solar-fluxs-impact">
+    {{ 'field-measuring.temperature-calculation.wont-be-used-note' | transloco }}
+  </p>
 </div>
 
 <div class="text-right">
@@ -203,17 +172,17 @@
     data-testid="calculate-temperature-btn"
   >
     <app-icon icon="rocket_launch" />
-    <ng-container i18n>Calculate</ng-container>
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
   </button>
 </div>
 
 @if (measureData().outputs.cableTemperature) {
   <div class="temperature-calculation__results" [@expand]>
-    <h2 class="temperature-calculation__results__title" i18n>Results:</h2>
+    <h2 class="temperature-calculation__results__title">{{ 'common.results' | transloco }}</h2>
 
     <dl class="temperature-calculation__results__list">
       <div class="cableTemperature">
-        <dt i18n>Cable temperature</dt>
+        <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
         <dd>
           {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
           °C
@@ -221,7 +190,7 @@
       </div>
       <div class="uncertaintyCableTemperature">
         <dt>
-          <del i18n> Uncertainty cable temperature </del>
+          <del>{{ 'field-measuring.shared.uncertainty-cable-temperature' | transloco }}</del>
         </dt>
         <dd>
           <del>
@@ -231,7 +200,7 @@
         </dd>
       </div>
       <div class="solarFlux">
-        <dt i18n>Solar flux on the cable</dt>
+        <dt>{{ 'field-measuring.temperature-calculation.solar-flux-on-cable-label' | transloco }}</dt>
         <dd>
           {{ (measureData().outputs.cableTemperature?.cableSolarFlux | number: '1.0-3') ?? '-' }}
           W/m²
@@ -243,6 +212,6 @@
 
 @if (temperatureCalculationError()) {
   <div class="temperature-calculation__error" [@expandCollapse]>
-    <p i18n>An error occurred while calculating the temperature</p>
+    <p>{{ 'field-measuring.temperature-calculation.error-message' | transloco }}</p>
   </div>
 }

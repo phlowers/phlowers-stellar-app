@@ -9,11 +9,11 @@
     data-testid="reset-btn"
   >
     <app-icon icon="refresh" />
-    <ng-container i18n>Reset</ng-container>
+    <ng-container>{{ 'common.reset' | transloco }}</ng-container>
   </button>
 
   <div class="climate__divided-line">
-    <label for="windPressure" class="wind-label" i18n>Wind Pressure</label>
+    <label for="windPressure" class="wind-label">{{ 'loads.climate.wind-pressure-label' | transloco }}</label>
 
     <p-inputgroup>
       <input
@@ -37,25 +37,25 @@
       <div class="wind-error">
         @if (form.controls.windPressure.errors['min']) {
           <p-message id="windPressure-error-min" severity="error" size="small" variant="simple">
-            <ng-container i18n>Minimum value:</ng-container>
+            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
             {{ constraints.windPressure.min }}
           </p-message>
         }
         @if (form.controls.windPressure.errors['max']) {
           <p-message id="windPressure-error-max" severity="error" size="small" variant="simple">
-            <ng-container i18n>Maximum value:</ng-container>
+            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
             {{ constraints.windPressure.max }}
           </p-message>
         }
         @if (form.controls.windPressure.errors['integer']) {
-          <p-message id="windPressure-error-integer" severity="error" size="small" variant="simple" i18n>
-            Whole number required
+          <p-message id="windPressure-error-integer" severity="error" size="small" variant="simple">
+            {{ 'loads.climate.whole-number-required' | transloco }}
           </p-message>
         }
       </div>
     }
 
-    <label for="cableTemperature" class="temp-label" i18n>Cable Temperature</label>
+    <label for="cableTemperature" class="temp-label">{{ 'loads.climate.cable-temperature-label' | transloco }}</label>
 
     <p-inputgroup>
       <input
@@ -79,19 +79,19 @@
       <div class="temp-error">
         @if (form.controls.cableTemperature.errors['min']) {
           <p-message id="cableTemperature-error-min" severity="error" size="small" variant="simple">
-            <ng-container i18n>Minimum value:</ng-container>
+            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
             {{ constraints.cableTemperature.min }}
           </p-message>
         }
         @if (form.controls.cableTemperature.errors['max']) {
           <p-message id="cableTemperature-error-max" severity="error" size="small" variant="simple">
-            <ng-container i18n>Maximum value:</ng-container>
+            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
             {{ constraints.cableTemperature.max }}
           </p-message>
         }
         @if (form.controls.cableTemperature.errors['integer']) {
-          <p-message id="cableTemperature-error-integer" severity="error" size="small" variant="simple" i18n>
-            Whole number required
+          <p-message id="cableTemperature-error-integer" severity="error" size="small" variant="simple">
+            {{ 'loads.climate.whole-number-required' | transloco }}
           </p-message>
         }
       </div>
@@ -99,7 +99,7 @@
   </div>
 
   <div class="climate__form-item">
-    <label for="symmetryType" class="symmetry" i18n>Ice indicator</label>
+    <label for="symmetryType" class="symmetry">{{ 'loads.climate.ice-indicator-label' | transloco }}</label>
     <p-select
       inputId="symmetryType"
       [options]="symmetryOptions"
@@ -113,7 +113,7 @@
 
   @if (form.value.symmetryType === 'symmetric') {
     <div class="climate__form-item">
-      <label for="iceThickness" i18n>Ice thickness</label>
+      <label for="iceThickness">{{ 'loads.climate.ice-thickness-label' | transloco }}</label>
       <p-inputgroup>
         <input
           pInputText
@@ -132,20 +132,20 @@
       </p-inputgroup>
       @if (form.controls.iceThickness.errors?.['min']) {
         <p-message id="iceThickness-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container i18n>Minimum value:</ng-container>
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.min }}
         </p-message>
       }
       @if (form.controls.iceThickness.errors?.['max']) {
         <p-message id="iceThickness-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container i18n>Maximum value:</ng-container>
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
         </p-message>
       }
     </div>
   } @else if (form.value.symmetryType === 'dis_symmetric') {
     <div class="climate__form-item">
-      <label for="frontierSupportNumber" i18n>Frontier support</label>
+      <label for="frontierSupportNumber">{{ 'loads.climate.frontier-support-label' | transloco }}</label>
       <p-select
         inputId="frontierSupportNumber"
         [options]="frontierSupportOptions()"
@@ -156,7 +156,7 @@
     </div>
 
     <div class="climate__form-item">
-      <label for="iceThicknessBefore" i18n> Ice thickness before support frontier </label>
+      <label for="iceThicknessBefore">{{ 'loads.climate.ice-thickness-before-label' | transloco }}</label>
 
       <p-inputgroup>
         <input
@@ -176,20 +176,20 @@
 
       @if (form.controls.iceThicknessBefore.errors?.['min']) {
         <p-message id="iceThicknessBefore-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container i18n>Minimum value:</ng-container>
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.min }}
         </p-message>
       }
       @if (form.controls.iceThicknessBefore.errors?.['max']) {
         <p-message id="iceThicknessBefore-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container i18n>Maximum value:</ng-container>
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
         </p-message>
       }
     </div>
 
     <div class="climate__form-item">
-      <label for="iceThicknessAfter" i18n> Ice thickness after support frontier </label>
+      <label for="iceThicknessAfter">{{ 'loads.climate.ice-thickness-after-label' | transloco }}</label>
 
       <p-inputgroup>
         <input
@@ -209,13 +209,13 @@
 
       @if (form.controls.iceThicknessAfter.errors?.['min']) {
         <p-message id="iceThicknessAfter-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container i18n>Minimum value:</ng-container>
+          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.min }}
         </p-message>
       }
       @if (form.controls.iceThicknessAfter.errors?.['max']) {
         <p-message id="iceThicknessAfter-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container i18n>Maximum value:</ng-container>
+          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
         </p-message>
       }
@@ -228,8 +228,7 @@
       btnStyle="danger"
       type="button"
       (click)="deleteCharge()"
-      aria-label="erase load case"
-      i18n-aria-label
+      [attr.aria-label]="'loads.shared.erase-load-case-aria-label' | transloco"
     >
       <app-icon icon="delete" />
     </button>
@@ -244,7 +243,7 @@
       data-testid="save-btn"
     >
       <app-icon icon="save" />
-      <ng-container i18n>Save</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
 
     <button
@@ -256,7 +255,7 @@
       data-testid="calculate-btn"
     >
       <app-icon icon="rocket_launch" />
-      <ng-container i18n>Calculate</ng-container>
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </div>
 </form>

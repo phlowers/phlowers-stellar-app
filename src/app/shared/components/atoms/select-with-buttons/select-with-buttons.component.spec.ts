@@ -7,6 +7,7 @@ import { By } from '@angular/platform-browser';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { SelectWithButtonsComponent } from './select-with-buttons.component';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('SelectWithButtonsComponent', () => {
   let component: SelectWithButtonsComponent<Record<string, unknown>>;
   let fixture: ComponentFixture<SelectWithButtonsComponent<Record<string, unknown>>>;
@@ -36,7 +37,18 @@ describe('SelectWithButtonsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectWithButtonsComponent, FormsModule, SelectModule, DividerModule, NoopAnimationsModule],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        SelectWithButtonsComponent,
+        FormsModule,
+        SelectModule,
+        DividerModule,
+        NoopAnimationsModule
+      ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 

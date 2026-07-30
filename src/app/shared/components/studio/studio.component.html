@@ -7,8 +7,7 @@
     <div class="absolute inset-0 flex justify-center items-center">
       <img
         src="/img/rocket.webp"
-        alt="An error occurred"
-        i18n-alt="@@studio.error.image.alt"
+        [alt]="'shared.studio.error-image-alt' | transloco"
         class="max-w-sm opacity-80"
         data-testid="studio-error-image"
       />
@@ -16,7 +15,7 @@
   } @else {
     <figure class="contents m-0">
       <app-section-plot class="h-full" [litData]="plotService.litData()"></app-section-plot>
-      <figcaption i18n class="sr-only">Study's section graph view</figcaption>
+      <figcaption class="sr-only">{{ 'shared.studio.section-caption' | transloco }}</figcaption>
     </figure>
   }
 </div>

@@ -16,6 +16,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-papoto',
@@ -28,7 +29,8 @@ import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
     IconComponent,
     ButtonComponent,
     DialogModule,
-    CommonModule
+    CommonModule,
+    TranslocoModule
   ],
   templateUrl: './papoto.component.html',
   styleUrl: './papoto.component.scss',

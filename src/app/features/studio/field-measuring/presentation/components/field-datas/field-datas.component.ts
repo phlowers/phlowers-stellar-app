@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -8,8 +9,10 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { SelectModule } from 'primeng/select';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { TIME_MODE_OPTIONS, WIND_SPEED_UNIT_OPTIONS, WIND_DIRECTION_OPTIONS, SKY_COVER_OPTIONS } from '../../constants';
+import { WIND_SPEED_UNIT_OPTIONS } from '../../constants';
+import { buildTimeModeOptions, buildWindDirectionOptions, buildSkyCoverOptions } from '../../helpers';
 import { MessageModule } from 'primeng/message';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-field-datas',
@@ -22,7 +25,8 @@ import { MessageModule } from 'primeng/message';
     InputGroupAddonModule,
     SelectModule,
     IconComponent,
-    MessageModule
+    MessageModule,
+    TranslocoModule
   ],
   templateUrl: './field-datas.component.html',
   styleUrls: ['./field-datas.component.scss'],
@@ -40,10 +44,27 @@ export class FieldDatasComponent {
     value: FieldMeasure[keyof FieldMeasure];
   }>();
 
-  readonly timeModeOptions = TIME_MODE_OPTIONS;
+  private readonly translocoService = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
-  readonly windDirectionOptions = WIND_DIRECTION_OPTIONS;
-  readonly skyCoverOptions = SKY_COVER_OPTIONS;
+
+  readonly timeModeOptions = computed(() => {
+    this.activeLang();
+    return buildTimeModeOptions(this.translocoService);
+  });
+
+  readonly windDirectionOptions = computed(() => {
+    this.activeLang();
+    return buildWindDirectionOptions(this.translocoService);
+  });
+
+  readonly skyCoverOptions = computed(() => {
+    this.activeLang();
+    return buildSkyCoverOptions(this.translocoService);
+  });
 
   onFieldChange(field: keyof FieldMeasure, value: FieldMeasure[keyof FieldMeasure]): void {
     this.fieldChange.emit({ field, value });

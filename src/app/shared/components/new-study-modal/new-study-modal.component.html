@@ -3,7 +3,6 @@
   dismissableMask="true"
   [visible]="isOpen()"
   (visibleChange)="isOpenChange.emit(false)"
-  i18n-header
   [style]="{ width: '496px' }"
   [modal]="true"
 >
@@ -11,9 +10,9 @@
     <p class="text-l-600 mb-0 flex gap-2">
       <app-icon icon="edit" />
       @if (mode() === 'new') {
-        <span i18n>Create a new study</span>
+        <span>{{ 'shared.new-study-modal.create-title' | transloco }}</span>
       } @else {
-        <span i18n>Modify my study</span>
+        <span>{{ 'shared.new-study-modal.edit-title' | transloco }}</span>
       }
     </p>
   </ng-template>
@@ -22,8 +21,8 @@
     <form class="flex flex-col gap-6">
       <div>
         <div class="label-container">
-          <label i18n for="title" class="label">
-            Study name
+          <label for="title" class="label">
+            {{ 'shared.new-study-modal.study-name-label' | transloco }}
             <sup class="mandatory">*</sup>
           </label>
           <span class="input-length">{{ titleLength() }}/100</span>
@@ -34,8 +33,7 @@
           id="title"
           name="title"
           maxlength="100"
-          i18n-placeholder
-          placeholder="Study name"
+          [placeholder]="'shared.new-study-modal.study-name-label' | transloco"
           [ngModel]="title()"
           (ngModelChange)="updateTitle($event)"
           required
@@ -43,18 +41,19 @@
           fluid
           data-testid="study-title-input"
         />
-        <small id="title-description" class="text-s-600 ml-1" i18n> Give a name to your study </small>
+        <small id="title-description" class="text-s-600 ml-1">{{
+          'shared.new-study-modal.study-name-hint' | transloco
+        }}</small>
       </div>
       <div>
         <div class="label-container">
-          <label i18n for="description" class="label">Description</label>
+          <label for="description" class="label">{{ 'shared.new-study-modal.description-label' | transloco }}</label>
           <span class="input-length">{{ descriptionLength() }}/240</span>
         </div>
         <textarea
           id="description"
           name="description"
-          i18n-placeholder
-          placeholder="Enter description"
+          [placeholder]="'shared.new-study-modal.description-placeholder' | transloco"
           aria-describedby="description-description"
           class="block"
           pTextarea
@@ -80,7 +79,7 @@
       data-testid="cancel-btn"
     >
       <app-icon icon="close" />
-      <span i18n>Cancel</span>
+      <span>{{ 'common.cancel' | transloco }}</span>
     </button>
     <button
       app-btn
@@ -91,7 +90,7 @@
       data-testid="validate-btn"
     >
       <app-icon icon="check" />
-      <span i18n>Validate</span>
+      <span>{{ 'common.validate' | transloco }}</span>
     </button>
   </ng-template>
 </p-dialog>

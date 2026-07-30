@@ -1,16 +1,10 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { RouterModule } from '@angular/router';
-import { SidebarItem } from '../sidebar/sidebar.model';
-
-/** Navigation structure grouping main and footer sidebar items. */
-interface SidebarNavigation {
-  /** Primary navigation links. */
-  main: SidebarItem[];
-  /** Footer navigation links. */
-  footer: SidebarItem[];
-}
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoService } from '@jsverse/transloco';
+import { SidebarNavigation } from './logged-layout.interfaces';
 
 @Component({
   selector: 'app-logged-layout',
@@ -21,29 +15,37 @@ interface SidebarNavigation {
 })
 /** Main layout component for authenticated pages, including the sidebar and topbar. */
 export class LoggedLayoutComponent {
-  public readonly sideBarNav = signal<SidebarNavigation>({
-    main: [
-      {
-        id: 'sideB-home',
-        label: $localize`Home`,
-        route: '/',
-        icon: 'home'
-      },
-      {
-        id: 'sideB-studies',
-        label: $localize`Studies`,
-        route: '/studies',
-        icon: 'folder'
-      }
-    ],
-    footer: [
-      {
-        id: 'sideB-usrPref',
-        label: $localize`Version / MAJ`,
-        shortLabel: $localize`Ver.MAJ`,
-        route: '/admin',
-        icon: 'account_circle'
-      }
-    ]
+  private readonly translocoService = inject(TranslocoService);
+  private readonly _activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
+  public readonly sideBarNav = computed<SidebarNavigation>(() => {
+    this._activeLang(); // re-compute when language changes
+    return {
+      main: [
+        {
+          id: 'sideB-home',
+          label: this.translocoService.translate('shared.logged-layout.home'),
+          route: '/',
+          icon: 'home'
+        },
+        {
+          id: 'sideB-studies',
+          label: this.translocoService.translate('shared.logged-layout.studies'),
+          route: '/studies',
+          icon: 'folder'
+        }
+      ],
+      footer: [
+        {
+          id: 'sideB-usrPref',
+          label: this.translocoService.translate('shared.logged-layout.version-maj'),
+          shortLabel: this.translocoService.translate('shared.logged-layout.ver-maj'),
+          route: '/admin',
+          icon: 'account_circle'
+        }
+      ]
+    };
   });
 }

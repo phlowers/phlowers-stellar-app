@@ -12,12 +12,13 @@ import {
 import { Select, SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { DividerModule } from 'primeng/divider';
+import { TranslocoModule } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
 import { ButtonComponent } from '../button/button.component';
 
 @Component({
   selector: 'app-select-with-buttons',
-  imports: [SelectModule, FormsModule, DividerModule, IconComponent, ButtonComponent],
+  imports: [SelectModule, FormsModule, DividerModule, TranslocoModule, IconComponent, ButtonComponent],
   templateUrl: './select-with-buttons.component.html',
   styleUrl: './select-with-buttons.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

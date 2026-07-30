@@ -9,6 +9,7 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ScalingFactors } from '@shared/types/plot.types';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('ScaleViewComponent', () => {
   let component: ScaleViewComponent;
   let fixture: ComponentFixture<ScaleViewComponent>;
@@ -48,7 +49,28 @@ describe('ScaleViewComponent', () => {
     mockPopover = { toggle: vi.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [ScaleViewComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.validate': 'Validate',
+              'studio.scale-view.button-label': 'View',
+              'studio.scale-view.form-aria-label': 'View configuration',
+              'studio.scale-view.input-aria-label': 'Number of points per range',
+              'studio.scale-view.points-legend': 'Choose the number of points to display per range.',
+              'studio.scale-view.scale-auto': 'Auto',
+              'studio.scale-view.scale-celeste': 'Reduced in z (x, y, z/2)',
+              'studio.scale-view.scale-geo': 'Uniform (x, y, z)',
+              'studio.scale-view.scale-legend': 'Select the display scale.',
+              'studio.scale-view.scale-plan': 'Reduced in x (x/5, y, z)',
+              'studio.scale-view.slider-aria-label': 'Number of points per range'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ScaleViewComponent
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },

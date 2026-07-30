@@ -3,8 +3,7 @@
 
 .p-dialog.p-dialog {
   --p-dialog-border-radius: 0.25rem;
-  --p-dialog-shadow:
-    #{map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3)};
+  --p-dialog-shadow: #{map.get(app.$elevation, neutral-2), map.get(app.$elevation, neutral-3)};
   --p-dialog-color: var(--grey-750);
 
   --p-dialog-header-padding: 0.5rem 1rem;

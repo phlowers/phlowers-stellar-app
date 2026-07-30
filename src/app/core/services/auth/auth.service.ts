@@ -6,6 +6,7 @@
  */
 import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -55,6 +56,7 @@ export class AuthService {
 
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly storageService = inject(StorageService);
   private readonly authResyncService = inject(AuthResyncService);
   private readonly destroyRef = inject(DestroyRef);
@@ -288,7 +290,7 @@ export class AuthService {
    */
   async loginWithEmail(email: string): Promise<User> {
     if (this.oidcEnabled()) {
-      this.notificationService.error($localize`Email login is disabled because G@IA single sign-on is required.`);
+      this.notificationService.error(this.translocoService.translate('shared.auth-service.email-login-disabled'));
       throw new Error('Email login is disabled in OIDC mode');
     }
 

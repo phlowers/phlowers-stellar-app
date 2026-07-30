@@ -14,6 +14,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { Section, InitialCondition, Study } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock uuid
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
@@ -194,7 +195,31 @@ describe('StudyComponent', () => {
     } as unknown as vi.Mocked<CablesService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudyComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'study.notifications.duplicated': 'Study Duplicated',
+              'study.notifications.duplication-failed': 'Study Duplication Failed',
+              'study.notifications.ic-added': 'Initial Condition Added',
+              'study.notifications.ic-deleted': 'Initial Condition Deleted',
+              'study.notifications.ic-duplicated': 'Initial Condition Duplicated',
+              'study.notifications.ic-updated': 'Initial Condition Updated',
+              'study.notifications.section-created': 'Section Created',
+              'study.notifications.section-deleted': 'Section Deleted',
+              'study.notifications.section-duplicated': 'Section Duplicated',
+              'study.notifications.section-updated': 'Section Updated',
+              'study.tabs.ground-obstacles': 'Ground and obstacles',
+              'study.tabs.measurements': 'Measurements',
+              'study.tabs.saved-states': 'Saved states',
+              'study.tabs.sections': 'Sections'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        StudyComponent
+      ],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: StudiesService, useValue: mockStudiesService },

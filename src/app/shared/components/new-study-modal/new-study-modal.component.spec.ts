@@ -6,6 +6,7 @@ import { NewStudyModalComponent } from './new-study-modal.component';
 import { MessageService } from 'primeng/api';
 import { StudiesService } from '@services/studies/studies.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('NewStudyModalComponent', () => {
   let component: NewStudyModalComponent;
   let fixture: ComponentFixture<NewStudyModalComponent>;
@@ -43,7 +44,15 @@ describe('NewStudyModalComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [NewStudyModalComponent, BrowserAnimationsModule],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        NewStudyModalComponent,
+        BrowserAnimationsModule
+      ],
       providers: [
         {
           provide: ActivatedRoute,

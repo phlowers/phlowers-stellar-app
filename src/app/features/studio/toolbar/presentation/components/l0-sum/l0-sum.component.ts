@@ -9,6 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule } from '@jsverse/transloco';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
@@ -36,7 +37,15 @@ interface L0Row {
 
 @Component({
   selector: 'app-l0-sum-tool',
-  imports: [CommonModule, DialogModule, TableModule, ProgressSpinnerModule, ButtonComponent, IconComponent],
+  imports: [
+    CommonModule,
+    DialogModule,
+    TableModule,
+    ProgressSpinnerModule,
+    ButtonComponent,
+    IconComponent,
+    TranslocoModule
+  ],
   templateUrl: './l0-sum.component.html',
   styleUrls: ['./l0-sum.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

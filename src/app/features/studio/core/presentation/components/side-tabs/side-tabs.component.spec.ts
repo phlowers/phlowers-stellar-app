@@ -6,10 +6,11 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { SideTabComponent } from './side-tab/side-tab.component';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
   template: `<app-side-tabs>
-    <app-side-tab label="One">Content One</app-side-tab>
-    <app-side-tab label="Two">Content Two</app-side-tab>
+    <app-side-tab i18n label="One">Content One</app-side-tab>
+    <app-side-tab i18n label="Two">Content Two</app-side-tab>
   </app-side-tabs>`,
   imports: [SideTabsComponent, SideTabComponent],
   standalone: true
@@ -28,7 +29,18 @@ describe('SideTabsComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [TestHostComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.side-tabs.fold-back': 'Fold back'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        TestHostComponent
+      ],
       providers: [{ provide: PlotOptionsService, useValue: plotOptionsServiceMock }, SideTabsService]
     }).compileComponents();
 

@@ -11,6 +11,7 @@ import { StudiesService } from '@services/studies/studies.service';
 import { Section } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock uuid
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
@@ -104,6 +105,13 @@ describe('SectionService', () => {
     } as unknown as vi.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [SectionService, { provide: StudiesService, useValue: mockStudiesService }]
     });
 

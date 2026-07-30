@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChargesService } from '@services/charges/charges.service';
+import { TranslocoModule } from '@jsverse/transloco';
 import { Section, Study } from '@shared/domain';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -26,7 +27,8 @@ import { LoadFormsService } from '@features/studio/loads/presentation/services/l
     SelectModule,
     SelectWithButtonsComponent,
     ButtonComponent,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

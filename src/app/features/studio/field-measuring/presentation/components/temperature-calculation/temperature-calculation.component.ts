@@ -21,6 +21,7 @@ import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, Se
 import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -36,7 +37,8 @@ import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
     ProgressSpinnerModule,
     IconComponent,
     ButtonComponent,
-    DecimalPipe
+    DecimalPipe,
+    TranslocoModule
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
@@ -55,7 +57,7 @@ export class TemperatureCalculationComponent {
   // Available wind direction options.
   windDirectionOptions = input.required<{ label: string; value: string }[]>();
   // Available sky cover options.
-  skyCoverOptions = input.required<SelectOption<SkyCover>[]>();
+  skyCoverOptions = input.required<SelectOption[]>();
   // Field measure data model bound two-way.
   measureData = model.required<FieldMeasure>();
 
@@ -71,10 +73,21 @@ export class TemperatureCalculationComponent {
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
-  readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto' },
-    { label: $localize`Perpendicular`, value: 'perpendicular' }
-  ];
+  private readonly translocoService = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
+  readonly windIncidenceModeOptions = computed(() => {
+    this.activeLang();
+    return [
+      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      {
+        label: this.translocoService.translate('field-measuring.temperature-calculation.perpendicular-option'),
+        value: 'perpendicular'
+      }
+    ];
+  });
 
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly notificationService = inject(NotificationService);
@@ -212,10 +225,13 @@ export class TemperatureCalculationComponent {
       });
       if (error || result === undefined) {
         // Prefer the specific message matching the Python error raised by the task, if any.
-        const pythonErrorMessage = formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null);
+        const pythonErrorMessage = formatPythonError(
+          diagnostics.find((d) => d.origin === 'exception')?.code ?? null,
+          this.translocoService
+        );
         this.notificationService.error(
           pythonErrorMessage ??
-            $localize`Sky cover could not be estimated from the provided inputs. Please check the values and try again.`
+            this.translocoService.translate('field-measuring.temperature-calculation.sky-cover-estimation-error')
         );
         return;
       }

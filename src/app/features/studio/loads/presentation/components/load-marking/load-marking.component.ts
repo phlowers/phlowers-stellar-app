@@ -24,6 +24,7 @@ import { emptySpanLoad } from '../../helpers';
 import { LoadType, SpanLoad } from '@shared/domain/models/charge.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-load-marking',
@@ -36,7 +37,8 @@ import { LoadControlName, SpanFormControls, SupportOption } from './load-marking
     ButtonComponent,
     IconComponent,
     ToggleSwitchModule,
-    FormsModule
+    FormsModule,
+    TranslocoModule
   ],
   templateUrl: './load-marking.component.html',
   styleUrl: './load-marking.component.scss',
@@ -48,6 +50,7 @@ export class LoadMarkingComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly loadFormsService = inject(LoadFormsService);
+  private readonly translocoService = inject(TranslocoService);
   readonly chargeUuid = input<string | null>(null);
   readonly form = this.fb.group<SpanFormControls>({
     spanSelect: new FormControl<string | null>(null, {
@@ -141,8 +144,8 @@ export class LoadMarkingComponent {
   });
 
   loadTypeOptions = [
-    { label: $localize`Punctual charge`, value: 'punctual' },
-    { label: $localize`Marking`, value: 'marking' }
+    { label: this.translocoService.translate('loads.load-marking.punctual-charge-option'), value: 'punctual' },
+    { label: this.translocoService.translate('loads.load-marking.marking-option'), value: 'marking' }
   ];
 
   resetForm() {

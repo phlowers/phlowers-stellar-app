@@ -26,6 +26,7 @@ import { ToolbarDialogService } from '@features/studio/toolbar/presentation/serv
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -49,7 +50,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
     CheckboxModule,
     RouterLink,
     SelectWithButtonsComponent,
-    ToolbarDialogComponent
+    ToolbarDialogComponent,
+    TranslocoModule
   ],
   templateUrl: './sectionsTab.component.html',
   styleUrl: './sectionsTab.component.scss',
@@ -74,6 +76,14 @@ export class SectionsTabComponent {
   duplicateInitialCondition = output<DuplicateInitialConditionFunctionsInput>();
   /** Emits an initial condition to set as active. */
   setInitialCondition = output<InitialConditionFunctionsInput>();
+  readonly popover = viewChild<Popover>('popover');
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
+  readonly transloco = inject(TranslocoService);
+
+  private readonly plotService = inject(PlotService);
+  private readonly spanService = inject(PlotSpanService);
+  private readonly chargesService = inject(ChargesService);
+
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
   isNewSectionModalOpen = signal<boolean>(false);
@@ -81,18 +91,12 @@ export class SectionsTabComponent {
   isInitialConditionModalOpen = signal<boolean>(false);
   initialConditionModalMode = signal<CreateEditView>('create');
   selectedSection = signal<string>('');
-  readonly popover = viewChild<Popover>('popover');
-  private readonly toolbarDialogService = inject(ToolbarDialogService);
-
-  private readonly plotService = inject(PlotService);
-  private readonly spanService = inject(PlotSpanService);
-  private readonly chargesService = inject(ChargesService);
 
   createInitialCondition(section: Section): InitialCondition {
     const currentInitialConditions = section.initial_conditions;
     return {
       uuid: uuidv4(),
-      name: $localize`IC` + ' ' + (currentInitialConditions.length + 1),
+      name: this.transloco.translate('sections-tab.ic-prefix') + ' ' + (currentInitialConditions.length + 1),
       base_parameters: null,
       base_temperature: 15,
       cable_pretension: 0,

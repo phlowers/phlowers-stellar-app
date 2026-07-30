@@ -10,12 +10,31 @@ import { NotificationService } from '@services/notification/notification.service
 import { PythonErrorCode, Task, TaskError, TaskOutputs } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { SkyCover } from '@shared/domain';
-import {
-  WIND_DIRECTION_OPTIONS,
-  SKY_COVER_OPTIONS,
-  TRANSIT_BOUNDS,
-  MEASURED_SOLAR_FLUX_BOUNDS
-} from '@features/studio/field-measuring/presentation/constants';
+import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS } from '@features/studio/field-measuring/presentation/constants';
+
+const WIND_DIRECTION_OPTIONS = [
+  { label: 'North', value: 'North' },
+  { label: 'North-East', value: 'North-East' },
+  { label: 'East', value: 'East' },
+  { label: 'South-East', value: 'South-East' },
+  { label: 'South', value: 'South' },
+  { label: 'South-West', value: 'South-West' },
+  { label: 'West', value: 'West' },
+  { label: 'North-West', value: 'North-West' }
+];
+
+const SKY_COVER_OPTIONS = [
+  { label: 'N0', value: 'N0' },
+  { label: 'N1', value: 'N1' },
+  { label: 'N2', value: 'N2' },
+  { label: 'N3', value: 'N3' },
+  { label: 'N4', value: 'N4' },
+  { label: 'N5', value: 'N5' },
+  { label: 'N6', value: 'N6' },
+  { label: 'N7', value: 'N7' },
+  { label: 'N8', value: 'N8' }
+];
 
 describe('TemperatureCalculationComponent', () => {
   let component: TemperatureCalculationComponent;
@@ -38,7 +57,71 @@ describe('TemperatureCalculationComponent', () => {
     } as unknown as vi.Mocked<NotificationService>;
 
     await TestBed.configureTestingModule({
-      imports: [TemperatureCalculationComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.python-errors.solver-error': 'A solver error occurred.',
+              'shared.python-errors.suspected-chain-reversal':
+                'The insulator chain is suspected to have reversed (above horizontal position).',
+              'shared.python-errors.convergence-error': 'The solver failed to converge.',
+              'shared.python-errors.shape-error': 'A shape mismatch was detected in arrays.',
+              'shared.python-errors.data-warning': 'A data-related warning was raised.',
+              'shared.python-errors.balance-engine-warning': 'A balance engine warning was raised.',
+              'shared.python-errors.rts-data-not-available':
+                'RTS catalog data (rts_cable, rts_layer_*) is missing or contains NaN values.',
+              'shared.python-errors.no-intersection-plane-warning':
+                'The object position imposes a distance plane that does not intersect the cable.',
+              'shared.python-errors.no-intersection-plane-for-distance-error':
+                'No intersection plane was found for the distance calculation.',
+              'shared.python-errors.measurement-data-not-available': 'Measurement data is not available.',
+              'shared.python-errors.uncertainty-not-available': 'Uncertainty data is not available.',
+              'shared.python-errors.invalid-manipulation-index': 'The manipulation index provided is invalid.',
+              'shared.python-errors.invalid-manipulation-keys': 'The manipulation keys provided are invalid.',
+              'shared.python-errors.invalid-manipulation-range': 'The manipulation range provided is invalid.',
+              'shared.python-errors.support-out-of-range-error': 'The support is out of the valid range.',
+              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.',
+              'shared.python-errors.night-time-error':
+                'Sky cover cannot be estimated because the provided time is during the night.',
+              'field-measuring.shared.auto-option': 'Auto',
+              'field-measuring.shared.cable-temperature-label': 'Cable temperature',
+              'common.calculate': 'Calculate',
+              'common.results': 'Results:',
+              'field-measuring.shared.sky-cover-label': 'Sky cover',
+              'field-measuring.shared.uncertainty-cable-temperature': ' Uncertainty cable temperature ',
+              'field-measuring.shared.wind-direction-label': 'Wind direction',
+              'field-measuring.shared.wind-speed-label': 'Wind speed',
+              'field-measuring.temperature-calculation.ambient-temperature-label': 'Ambient temperature (\u00b0C)',
+              'field-measuring.temperature-calculation.beam-solar-radiation-label': 'Beam solar radiation',
+              'field-measuring.temperature-calculation.cable-name-label': 'Cable name',
+              'field-measuring.temperature-calculation.computing-wind-incidence-aria-label': 'Computing wind incidence',
+              'field-measuring.temperature-calculation.diffuse-plus-beam-label': 'Diffuse + beam solar radiation',
+              'field-measuring.temperature-calculation.diffuse-solar-radiation-label': 'Diffuse solar radiation',
+              'field-measuring.temperature-calculation.error-message':
+                'An error occurred while calculating the temperature',
+              'field-measuring.temperature-calculation.mandatory-msg':
+                'All fields are mandatory for temperature calculation.',
+              'field-measuring.temperature-calculation.max-transit-value': 'Maximum transit value:',
+              'field-measuring.temperature-calculation.measured-solar-flux-label':
+                ' Measured diffuse + beam solar radiation (not required) ',
+              'field-measuring.temperature-calculation.min-transit-value': 'Minimum transit value:',
+              'field-measuring.temperature-calculation.missing-inputs-warning':
+                ' Wind direction and azimuth are required. ',
+              'field-measuring.temperature-calculation.perpendicular-option': 'Perpendicular',
+              'field-measuring.temperature-calculation.sky-cover-estimation-error':
+                'Sky cover could not be estimated from the provided inputs. Please check the values and try again.',
+              'field-measuring.temperature-calculation.solar-flux-on-cable-label': 'Solar flux on the cable',
+              'field-measuring.temperature-calculation.solar-flux-title': 'Solar flux :',
+              'field-measuring.temperature-calculation.transit-label': 'Transit',
+              'field-measuring.temperature-calculation.wind-incidence-label': 'Wind incidence (degrees)',
+              'field-measuring.temperature-calculation.wont-be-used-note': "It won't be used in the calculation."
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        TemperatureCalculationComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },

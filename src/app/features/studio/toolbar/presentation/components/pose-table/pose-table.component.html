@@ -1,22 +1,26 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="table_chart" aria-hidden="true" />
-    <span i18n>Pose table</span>
+    <span>{{ 'studio.top-toolbar.pose-table-label' | transloco }}</span>
   </p>
 </ng-template>
 
 <form [formGroup]="form" (ngSubmit)="calculate()">
   <dl>
-    <dt i18n>Base parameter</dt>
+    <dt>{{ 'shared.initial-condition-modal.base-parameter' | transloco }}</dt>
     <dd data-testid="base-param-value">{{ baseParam() !== null ? (baseParam() | number: '1.0-2') + ' m' : '-' }}</dd>
 
-    <dt i18n>Base temperature</dt>
+    <dt>{{ 'shared.initial-condition-modal.base-temperature' | transloco }}</dt>
     <dd data-testid="base-temp-value">{{ baseTemp() !== null ? (baseTemp() | number: '1.0-1') + ' °C' : '-' }}</dd>
 
-    <dt i18n>Equivalent span</dt>
+    <dt>{{ 'studio.pose-table.equivalent-span-label' | transloco }}</dt>
     <dd>
       @if (!isPlotReady() || isCalculatingEquivalentSpan()) {
-        <app-icon class="spinner" icon="progress_activity" ariaLabel="waiting for calculation engine" i18n-ariaLabel />
+        <app-icon
+          class="spinner"
+          icon="progress_activity"
+          [ariaLabel]="'studio.pose-table.calculation-engine-waiting-label' | transloco"
+        />
       } @else {
         {{ equivalentSpan() !== null ? (equivalentSpan() | number: '1.0-1') + ' m' : '-' }}
       }
@@ -25,8 +29,7 @@
 
   <app-input-number
     formControlName="lowestTemp"
-    label="Lowest temperature (°C)"
-    i18n-label
+    [label]="'studio.pose-table.lowest-temperature-label' | transloco"
     [min]="LOWEST_TEMP_MIN"
     [max]="LOWEST_TEMP_MAX"
     [step]="LOWEST_TEMP_STEP"
@@ -37,8 +40,7 @@
 
   <app-input-number
     formControlName="computingStep"
-    label="Computing step (°C)"
-    i18n-label
+    [label]="'studio.pose-table.computing-step-label' | transloco"
     [min]="COMPUTING_STEP_MIN"
     [max]="COMPUTING_STEP_MAX"
     [isReadonly]="false"
@@ -54,7 +56,7 @@
     [btnLoading]="isBusy()"
   >
     <app-icon icon="rocket_launch" aria-hidden="true" />
-    <ng-container i18n>Calculate</ng-container>
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
   </button>
 </form>
 
@@ -62,26 +64,26 @@
   <div @expand>
     <hr />
 
-    <h2 i18n>Results:</h2>
+    <h2>{{ 'common.results' | transloco }}</h2>
 
     <table>
       <tbody>
         <tr>
-          <th scope="row" i18n>Temperature</th>
+          <th scope="row">{{ 'studio.conformity.temperature-label' | transloco }}</th>
           @for (temp of res.temperatures; track $index) {
             <td>{{ temp }} °C</td>
           }
         </tr>
 
         <tr>
-          <th scope="row" i18n>Pose parameter</th>
+          <th scope="row">{{ 'studio.pose-table.pose-parameter-label' | transloco }}</th>
           @for (param of res.poseParams; track $index) {
             <td>{{ param | number: '1.0-2' }} m</td>
           }
         </tr>
 
         <tr>
-          <th scope="row" i18n>Horizontal tension Th</th>
+          <th scope="row">{{ 'studio.pose-table.horizontal-tension-th-label' | transloco }}</th>
           @for (tension of res.horizontalTensions; track $index) {
             <td>{{ tension | number: '1.0-2' }} daN</td>
           }
@@ -94,8 +96,7 @@
     severity="error"
     class="calculation-error"
     data-testid="pose-table-error"
-    text="An error occurred while calculating the pose table"
-    i18n-text
+    [text]="'studio.pose-table.calculation-error-text' | transloco"
   />
 }
 
@@ -109,7 +110,7 @@
     (click)="save()"
   >
     <app-icon icon="save" aria-hidden="true" />
-    <ng-container i18n>Save</ng-container>
+    <ng-container>{{ 'common.save' | transloco }}</ng-container>
   </button>
 
   <button
@@ -120,6 +121,6 @@
     [btnLoading]="isBusy()"
   >
     <app-icon icon="description" aria-hidden="true" />
-    <ng-container i18n>Report</ng-container>
+    <ng-container>{{ 'common.report' | transloco }}</ng-container>
   </button>
 </ng-template>

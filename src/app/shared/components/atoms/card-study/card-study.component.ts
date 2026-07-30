@@ -3,10 +3,11 @@ import { TagComponent } from '@shared/components/atoms/tag/tag.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TagList } from '@shared/model/card-study.model';
 import { Router } from '@angular/router';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-card-study',
-  imports: [TagComponent, IconComponent],
+  imports: [TranslocoModule, TagComponent, IconComponent],
   templateUrl: './card-study.component.html',
   styleUrl: './card-study.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

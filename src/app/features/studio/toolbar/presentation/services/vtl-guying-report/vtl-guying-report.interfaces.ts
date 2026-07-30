@@ -63,3 +63,41 @@ export interface VtlGuyingReportData {
   /** Diagram image as base64 data URL. */
   diagramImageBase64: string;
 }
+
+/** Translated PDF report labels, resolved at report-generation time via TranslocoService. */
+export interface PdfLabels {
+  reportTitle: string;
+  studySectionTitle: string;
+  author: string;
+  date: string;
+  study: string;
+  section: string;
+  studyDescription: string;
+  sectionComment: string;
+  chargeName: string;
+  chargeDescription: string;
+  vtlWithoutGuyingTitle: string;
+  chargeV: string;
+  chargeH: string;
+  chargeL: string;
+  resultant: string;
+  guyingTitle: string;
+  guyingSpan: string;
+  referenceSupport: string;
+  supportType: string;
+  altitude: string;
+  horizontalDistance: string;
+  hasPulley: string;
+  yes: string;
+  no: string;
+  vtlWithGuyingTitle: string;
+  tensionInGuy: string;
+  guyAngle: string;
+  chargeVUnderConsole: string;
+  chargeHUnderConsole: string;
+  chargeLIfPulley: string;
+  comment: string;
+  vtlWithGuyingExplanation1: string;
+  vtlWithGuyingExplanation2: string;
+  pageLabel: string;
+}

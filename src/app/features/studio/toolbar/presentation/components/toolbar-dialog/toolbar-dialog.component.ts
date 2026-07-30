@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, Injector, inject } from '@angular/core';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
+import { TranslocoModule } from '@jsverse/transloco';
 import { DialogModule } from 'primeng/dialog';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 
 @Component({
   selector: 'app-toolbar-dialog',
-  imports: [DialogModule, NgComponentOutlet, NgTemplateOutlet],
+  imports: [DialogModule, NgComponentOutlet, NgTemplateOutlet, TranslocoModule],
   templateUrl: './toolbar-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
