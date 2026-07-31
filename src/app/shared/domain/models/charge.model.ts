@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { CableModification } from './cable-modification.model';
+
 /**
  * Data structure containing climate and span load information.
  *
@@ -15,6 +17,7 @@ export interface ChargeData {
   climate: ClimateCharge;
   /** Array of loads applied on spans */
   spanLoads: SpanLoad[];
+  cableModifParams: CableModification[];
 }
 
 /**
