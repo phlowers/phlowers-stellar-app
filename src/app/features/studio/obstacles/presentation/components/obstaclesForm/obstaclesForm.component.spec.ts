@@ -669,6 +669,48 @@ describe('ObstaclesFormComponent', () => {
 
       expect(obstaclesService.activePointIndex()).toBe(0);
     });
+
+    it('should leave the control untouched when input is cleared (NaN)', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(5.5);
+      input.value = '';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      expect(positionGroup.get('x')?.value).toBe(5.5);
+    });
+
+    it('should revert a cleared/invalid field to the persisted value on blur', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(5.5);
+      input.value = '';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(input.value).toBe('5.5');
+    });
+
+    it('should not alter a valid field value on blur', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      input.value = '7.2';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(input.value).toBe('7.2');
+    });
+
+    it('should revert to an empty string on blur when the control has no persisted value', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(null);
+      input.value = '';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(input.value).toBe('');
+    });
   });
 
   describe('initializes and resets form based on support uuid', () => {
@@ -961,14 +1003,104 @@ describe('ObstaclesFormComponent', () => {
       expect(positionGroup.get('y')?.value).toBe(7.8);
     });
 
-    it('should default to 0 when input value is not numeric', () => {
+    it('should leave the position unchanged when input value is not numeric', () => {
       const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
       input.value = 'not-a-number';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should leave the position unchanged when input is cleared to an empty string', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
+      input.value = '';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should not reset the altitude position to 0 when a lone "-" is typed mid-edit', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should not reset the ref distance position to 0 when a lone "-" is typed mid-edit', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(5.3);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      expect(positionGroup.get('x')?.value).toBe(5.3);
+    });
+
+    it('should not reset the axis distance position to 0 when a lone "-" is typed mid-edit', () => {
+      const input = getByTestId('point-axis-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('y')?.setValue(7.8);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'y');
+
+      expect(positionGroup.get('y')?.value).toBe(7.8);
+    });
+
+    it('should accept a full negative value typed progressively after a lone "-"', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+
+      input.value = '-5';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(-5);
+    });
+
+    it('should accept a full negative value replacing a selected altitude value', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      input.value = '-5.5';
 
       component.onPositionInput({ target: input } as unknown as Event, 'z');
 
       const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('z')?.value).toBe(0);
+      expect(positionGroup.get('z')?.value).toBe(-5.5);
+    });
+
+    it('should accept a full negative value replacing a selected ref distance value', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      input.value = '-5.3';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('x')?.value).toBe(-5.3);
+    });
+
+    it('should accept a full negative value replacing a selected axis distance value', () => {
+      const input = getByTestId('point-axis-distance') as HTMLInputElement;
+      input.value = '-7.8';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'y');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('y')?.value).toBe(-7.8);
     });
   });
 
