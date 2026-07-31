@@ -557,6 +557,20 @@ describe('createPlot', () => {
     });
   });
 
+  describe('config identity across renders', () => {
+    it('should pass the exact same config object to consecutive Plotly.react calls', () => {
+      // Plotly.react diffs the config: a new object (fresh button closures) on each call
+      // registers as a config change and downgrades the react into a full re-plot,
+      // wiping the 2D zoom/pan state that uirevision would preserve (bug #1032).
+      createPlot({ ...createDefaultParams(), view: '2d' });
+      createPlot({ ...createDefaultParams(), view: '2d', currentObstacleUuid: 'obstacle-1' });
+
+      const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
+      const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
+      expect(secondConfig).toBe(firstConfig);
+    });
+  });
+
   describe('modebar camera reset buttons removal', () => {
     it.each(['resetCameraDefault3d', 'resetCameraLastSave3d', 'resetScale2d', 'zoom3d', 'pan3d'])(
       'should include %s in modeBarButtonsToRemove',

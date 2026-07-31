@@ -162,7 +162,7 @@ const createScene = (
  * The custom replacements use `setDragmodeDirect()` to bypass `relayout` and preserve
  * the camera. Tests in `createPlot.spec.ts` guard against this regression.
  */
-const getConfig = (translocoService?: TranslocoService) => {
+const buildConfig = (translocoService?: TranslocoService) => {
   const t = (key: string, fallback: string): string => (translocoService ? translocoService.translate(key) : fallback);
   /**
    * Switches the 3D scene dragmode by directly setting the internal
@@ -261,6 +261,26 @@ const getConfig = (translocoService?: TranslocoService) => {
     ] as ModeBarDefaultButtons[],
     modeBarButtonsToAdd: [orbitButton, turntableButton, zoom3dButton, pan3dButton]
   };
+};
+
+/**
+ * Returns the Plotly config, reusing the same object across calls.
+ *
+ * `Plotly.react` diffs the config on every call: handing it a freshly built object
+ * (new button objects, new click closures) makes that diff report a change each time,
+ * which downgrades the react into a full re-plot and wipes all interactive GUI state —
+ * in particular the 2D zoom/pan ranges that `uirevision` would otherwise preserve
+ * (bug #1032). The config is therefore memoized on the translated button titles: the
+ * exact same object is returned until the active language actually changes them.
+ */
+let cachedConfig: { key: string; config: ReturnType<typeof buildConfig> } | null = null;
+const getConfig = (translocoService?: TranslocoService) => {
+  const config = buildConfig(translocoService);
+  const key = config.modeBarButtonsToAdd.map((button) => button.title).join('|');
+  if (cachedConfig?.key !== key) {
+    cachedConfig = { key, config };
+  }
+  return cachedConfig.config;
 };
 
 const layout3d = (
