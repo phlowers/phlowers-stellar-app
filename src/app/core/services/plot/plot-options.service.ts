@@ -11,7 +11,7 @@ import { DOCUMENT } from '@angular/common';
 import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
-import { checkIfProjectionNeedRefresh } from './plot-options.utils';
+import { checkIfProjectionNeedRefresh, getLiveCamera } from './plot-options.utils';
 
 /** Default plot options used when initializing or resetting the studio view. */
 const defaultPlotOptions: PlotOptions = {
@@ -66,14 +66,12 @@ export class PlotOptionsService {
 
   /**
    * Read the current camera state directly from the Plotly DOM element.
+   * See getLiveCamera for why this reads the live WebGL scene rather
+   * than relying on the last value written to the camera signal (bug #1032).
    * @returns The current camera or null if the plot element is not yet mounted.
    */
   getCamera(): Camera | null {
-    const plot = this.document.getElementById(PLOT_ID);
-    if (!plot) {
-      return null;
-    }
-    return (plot as HTMLElement & { _fullLayout?: { scene?: { camera?: Camera } } })._fullLayout?.scene?.camera ?? null;
+    return getLiveCamera(this.document, PLOT_ID);
   }
 
   /**

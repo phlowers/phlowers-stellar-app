@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { Camera } from 'plotly.js-dist-min';
 import { PlotOptions } from '@shared/types/plot.types';
 
 /**
@@ -40,4 +41,27 @@ export const checkIfProjectionNeedRefresh = (
     return true;
   }
   return false;
+};
+
+/**
+ * Reads the current 3D camera directly from a Plotly DOM element's internal state,
+ * bypassing whatever camera value the Angular signal layer last recorded.
+ *
+ * The WebGL scene camera (`_scene.getCamera()`) is the source of truth: scroll-wheel
+ * zoom only mutates the WebGL camera and never syncs `_fullLayout.scene.camera`, so
+ * reading the latter after a wheel zoom returns a stale value — feeding it back into
+ * the layout on the next Plotly.react snaps the view back (bug #1032). The layout
+ * camera is only used as a fallback before the gl scene exists.
+ * @param documentRef - The document to look up the plot element in.
+ * @param plotId - The DOM id of the Plotly chart container.
+ * @returns The live camera, or `null` if the element or its camera data doesn't exist yet.
+ */
+export const getLiveCamera = (documentRef: Document, plotId: string): Camera | null => {
+  const el = documentRef.getElementById(plotId) as
+    | (HTMLElement & {
+        _fullLayout?: { scene?: { camera?: Camera; _scene?: { getCamera?: () => Camera } } };
+      })
+    | null;
+  const scene = el?._fullLayout?.scene;
+  return scene?._scene?.getCamera?.() ?? scene?.camera ?? null;
 };

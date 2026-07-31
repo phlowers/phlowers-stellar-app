@@ -8,7 +8,7 @@
 /** Parses an optional numeric CSV cell. Returns `undefined` for empty / non-finite values. */
 export const toOptionalNumber = (value: string | number | undefined | null): number | undefined => {
   if (value === undefined || value === null || value === '') return undefined;
-  const n = typeof value === 'number' ? value : parseFloat(value);
+  const n = typeof value === 'number' ? value : Number.parseFloat(value);
   return Number.isFinite(n) ? n : undefined;
 };
 
