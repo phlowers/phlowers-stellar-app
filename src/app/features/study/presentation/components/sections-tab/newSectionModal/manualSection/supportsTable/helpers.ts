@@ -1,6 +1,6 @@
 import { CatalogChain } from '@shared/domain/models/catalog/catalog-chain.model';
 import { Support } from '@shared/domain';
-import { isNumber, uniq } from 'lodash';
+import { isNumber } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 /** Describes a field change to apply to a support identified by UUID. */
@@ -188,7 +188,7 @@ export const buildFieldChangeUpdates = (
  */
 export const findSupplementaryNames = (names: string[], catalogNames: string[]): string[] => {
   const lowerCaseCatalogNames = new Set(catalogNames.map((n) => n.toLowerCase()));
-  return uniq(names.filter((name) => name && !lowerCaseCatalogNames.has(name.toLowerCase())));
+  return [...new Set(names.filter((name) => name && !lowerCaseCatalogNames.has(name.toLowerCase())))];
 };
 
 /**

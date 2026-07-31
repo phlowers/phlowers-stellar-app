@@ -374,12 +374,28 @@ describe('StudioComponent', () => {
       expect(component.plotInitialized()).toBe(true);
     });
 
-    it('should remain true once set even if litData goes back to null', () => {
+    it('should reset to false when litData goes back to null (e.g. a new section starts loading)', () => {
       mockPlotService.litData.set(mockLitData);
       fixture.detectChanges();
       expect(component.plotInitialized()).toBe(true);
 
       mockPlotService.litData.set(null);
+      fixture.detectChanges();
+
+      expect(component.plotInitialized()).toBe(false);
+    });
+
+    it('should become true again once litData is repopulated for a subsequent section', () => {
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(true);
+
+      mockPlotService.litData.set(null);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(false);
+
+      const anotherLitData = { ...mockLitData };
+      mockPlotService.litData.set(anotherLitData);
       fixture.detectChanges();
 
       expect(component.plotInitialized()).toBe(true);
@@ -413,6 +429,23 @@ describe('StudioComponent', () => {
 
       const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
       expect(spinner).toBeFalsy();
+    });
+
+    it('should show spinner again when a subsequent section starts loading (reopening a studio)', () => {
+      mockPlotService.litData.set(mockLitData);
+      mockPlotService.loading.set(false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('p-progress-spinner')).toBeFalsy();
+
+      // A new section load begins: litData is nulled and loading flips true, as
+      // initSectionStudio does — this must show the spinner again, not stay hidden
+      // because a previous section already finished loading in this component instance.
+      mockPlotService.litData.set(null);
+      mockPlotService.loading.set(true);
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
+      expect(spinner).toBeTruthy();
     });
   });
 

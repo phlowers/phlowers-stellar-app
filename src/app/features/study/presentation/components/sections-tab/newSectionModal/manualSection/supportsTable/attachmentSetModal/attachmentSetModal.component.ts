@@ -13,7 +13,6 @@ import { InputIconModule } from 'primeng/inputicon';
 import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
 import { LatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
-import { uniq } from 'lodash';
 import { TranslocoModule } from '@jsverse/transloco';
 
 /**
@@ -89,7 +88,7 @@ export class AttachmentSetModalComponent {
         attachment.attachment_set_z
       ])
     );
-    this.attachmentSetNumbers.set(uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0)));
+    this.attachmentSetNumbers.set([...new Set(attachmentSets.map((attachment) => attachment.attachment_set ?? 0))]);
   }
 
   constructor() {

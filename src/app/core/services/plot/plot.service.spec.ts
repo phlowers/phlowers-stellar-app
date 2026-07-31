@@ -687,47 +687,16 @@ describe('PlotService', () => {
       expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
     });
 
-    it('should clear litData', () => {
-      service.litData.set(mockGetSectionOutput);
-      (document.getElementById as vi.Mock).mockReturnValue({
-        id: PLOT_ID
-      });
-
-      service.purgePlot();
-
-      expect(service.litData()).toBeNull();
-    });
-
-    it('should clear baseLitData', () => {
-      service.baseLitData.set(mockGetSectionOutput);
-      (document.getElementById as vi.Mock).mockReturnValue({
-        id: PLOT_ID
-      });
-
-      service.purgePlot();
-
-      expect(service.baseLitData()).toBeNull();
-    });
-
-    it('should clear all state when plotly-output exists', () => {
+    // purgePlot runs from SectionPlotComponent.ngOnDestroy, which fires whenever the
+    // studio template swaps the plot out for the loading spinner or the error image.
+    // Mutating loading/error/litData here would immediately deactivate the branch that
+    // triggered the swap (the spinner cancelled itself one frame after appearing on
+    // studio reopen), so purgePlot must leave all state signals untouched.
+    it('should not mutate state signals (loading, error, litData, baseLitData, distanceMeasuringPoints)', () => {
       service.litData.set(mockGetSectionOutput);
       service.baseLitData.set(mockGetSectionOutput);
       service.error.set(TaskError.CALCULATION_ERROR);
       service.loading.set(true);
-      (document.getElementById as vi.Mock).mockReturnValue({
-        id: PLOT_ID
-      });
-
-      service.purgePlot();
-
-      expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
-      expect(service.litData()).toBeNull();
-      expect(service.baseLitData()).toBeNull();
-      expect(service.error()).toBeNull();
-      expect(service.loading()).toBe(false);
-    });
-
-    it('should clear distanceMeasuringPoints', () => {
       service.distanceMeasuringPoints.set([
         { uuid: 'measure-group-1', points: [[1, 2, 3]] as [number, number, number][] }
       ]);
@@ -737,7 +706,12 @@ describe('PlotService', () => {
 
       service.purgePlot();
 
-      expect(service.distanceMeasuringPoints()).toEqual([]);
+      expect(plotly.purge).toHaveBeenCalledWith(PLOT_ID);
+      expect(service.litData()).toEqual(mockGetSectionOutput);
+      expect(service.baseLitData()).toEqual(mockGetSectionOutput);
+      expect(service.error()).toBe(TaskError.CALCULATION_ERROR);
+      expect(service.loading()).toBe(true);
+      expect(service.distanceMeasuringPoints()).toEqual([{ uuid: 'measure-group-1', points: [[1, 2, 3]] }]);
     });
   });
 
@@ -941,6 +915,17 @@ describe('PlotService', () => {
       expect(service.error()).toBeNull();
       expect(service.litData()).toBeNull();
       expect(service.loading()).toBe(false);
+    });
+
+    it('should clear distanceMeasuringPoints', () => {
+      (document.getElementById as vi.Mock).mockReturnValue(null);
+      service.distanceMeasuringPoints.set([
+        { uuid: 'measure-group-1', points: [[1, 2, 3]] as [number, number, number][] }
+      ]);
+
+      service.resetAll();
+
+      expect(service.distanceMeasuringPoints()).toEqual([]);
     });
   });
 
