@@ -7,7 +7,7 @@
 import '@angular/compiler';
 import '@analogjs/vitest-angular/setup-zone';
 import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
@@ -25,7 +25,7 @@ if (typeof (globalThis as Record<string, unknown>).$localize === 'undefined') {
 
 const testBed = getTestBed();
 if (!testBed.platform) {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
 }
 
 class MockResizeObserver {
@@ -80,7 +80,7 @@ if (typeof Blob !== 'undefined' && !('text' in Blob.prototype)) {
           const error = reader.error instanceof Error ? reader.error : new Error(String(reader.error));
           reject(error);
         };
-        reader.readAsText(this);
+        reader.readAsText(this); //NOSONAR — this *is* the Blob#text() polyfill, can't call this.text() here
       });
     },
     writable: true,

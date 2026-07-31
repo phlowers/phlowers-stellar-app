@@ -75,7 +75,7 @@ export function parseBooleanOrNull(value: unknown): boolean | null {
  * e.g. "FLAMAL73MENUE01" → "1", "FLAMAL73MENUE08" → "8", "FLAMAL73MENUE10" → "10".
  */
 export function extractBranchIdr(value: string): string {
-  return String(parseInt(value.slice(-2), 10));
+  return String(Number.parseInt(value.slice(-2), 10));
 }
 
 /**
