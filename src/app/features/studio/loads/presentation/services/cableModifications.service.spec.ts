@@ -7,7 +7,6 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { CableModificationsService } from './cableModifications.service';
-import { CableModificationParams } from './cableModifications.service.interfaces';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
