@@ -11,6 +11,7 @@ import { SpanLoad } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 import { type Mock } from 'vitest';
+import { TranslocoService } from '@jsverse/transloco';
 
 // Mock Plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -568,6 +569,29 @@ describe('createPlot', () => {
       const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
       const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
       expect(secondConfig).toBe(firstConfig);
+    });
+
+    it('should rebuild the config with the new button titles when the active language changes', () => {
+      const enTranslations: Record<string, string> = { 'shared.studio.orbital-rotation': 'Orbital rotation' };
+      const frTranslations: Record<string, string> = { 'shared.studio.orbital-rotation': 'Rotation orbitale' };
+      const enTransloco = {
+        translate: (key: string) => enTranslations[key] ?? key
+      } as unknown as TranslocoService;
+      const frTransloco = {
+        translate: (key: string) => frTranslations[key] ?? key
+      } as unknown as TranslocoService;
+
+      createPlot({ ...createDefaultParams(), view: '2d', translocoService: enTransloco });
+      createPlot({ ...createDefaultParams(), view: '2d', translocoService: frTransloco });
+
+      const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
+      const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
+
+      expect(secondConfig).not.toBe(firstConfig);
+      const orbitButton = (secondConfig.modeBarButtonsToAdd as { name: string; title: string }[]).find(
+        (btn) => btn.name === 'customOrbitRotation'
+      );
+      expect(orbitButton?.title).toBe('Rotation orbitale');
     });
   });
 
