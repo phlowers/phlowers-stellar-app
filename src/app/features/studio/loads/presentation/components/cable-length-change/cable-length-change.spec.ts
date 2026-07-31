@@ -91,7 +91,8 @@ describe('CableLengthChangeComponent', () => {
     } as unknown as vi.Mocked<CableModificationsService>;
 
     mockLoadFormsService = {
-      calculateLoad: vi.fn().mockResolvedValue(undefined)
+      calculateLoad: vi.fn().mockResolvedValue(undefined),
+      saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<LoadFormsService>;
 
     await TestBed.configureTestingModule({
@@ -142,7 +143,7 @@ describe('CableLengthChangeComponent', () => {
       component.form.controls.supportRef.setValue('LEFT');
 
       let resolveTask!: () => void;
-      mockCableModificationsService.calculate.mockImplementation(
+      mockLoadFormsService.calculateLoad.mockImplementation(
         () =>
           new Promise<void>((res) => {
             resolveTask = res;
@@ -156,28 +157,21 @@ describe('CableLengthChangeComponent', () => {
       expect(component.isCalculatingOnly()).toBe(false);
     });
 
-    it('should NOT set isCalculatingOnly when calculate() is called with params', async () => {
-      const params = {
+    it('should mirror the worker error into the local error signal after calculate', async () => {
+      mockPlotService.error.mockReturnValue('CALCULATION_ERROR');
+
+      component.form.patchValue({
         scope: 'support-uuid-1',
-        supportRef: 'LEFT' as const,
-        modificationType: 'lengthening' as const,
+        modificationType: 'lengthening',
         modifiedLengthCable: 1,
         distanceSupportRef: 5
-      };
+      });
+      component.form.controls.supportRef.enable();
+      component.form.controls.supportRef.setValue('LEFT');
 
-      let resolveTask!: () => void;
-      mockCableModificationsService.calculate.mockImplementation(
-        () =>
-          new Promise<void>((res) => {
-            resolveTask = res;
-          })
-      );
+      await component.calculateCableLength();
 
-      const promise = component.calculateCableLength(params);
-      expect(component.isCalculatingOnly()).toBe(false);
-      resolveTask();
-      await promise;
-      expect(component.isCalculatingOnly()).toBe(false);
+      expect(component.error()).toBe('CALCULATION_ERROR');
     });
   });
 
@@ -407,38 +401,28 @@ describe('CableLengthChangeComponent', () => {
     it('should not call calculate service if form is invalid', () => {
       component.form.controls.scope.setValue(null);
       component.calculateCableLength();
-      expect(mockCableModificationsService.calculate).not.toHaveBeenCalled();
+      expect(mockLoadFormsService.calculateLoad).not.toHaveBeenCalled();
     });
 
-    it('should call cableModificationsService.calculate with form values', () => {
+    it('should call loadFormsService.calculateLoad when the form is valid', () => {
       component.calculateCableLength();
-      expect(mockCableModificationsService.calculate).toHaveBeenCalledWith({
-        spanUuid: 'support-uuid-1',
-        supportRef: 'LEFT',
-        modificationType: 'lengthening',
-        modifiedLengthCable: 1,
-        distanceSupportRef: 5
-      });
+      expect(mockLoadFormsService.calculateLoad).toHaveBeenCalledOnce();
     });
 
-    it('should set isLoading to true during calculation then false after', async () => {
+    it('should set isCalculatingOnly to true during calculation then false after', async () => {
       let resolveTask!: () => void;
-      mockCableModificationsService.calculate.mockImplementation(
+      mockLoadFormsService.calculateLoad.mockImplementation(
         () =>
           new Promise((res) => {
             resolveTask = res;
           })
       );
-      component.calculateCableLength();
-      fixture.detectChanges();
-      // We wait for two microtasks to ensure the effect is processed
-      await new Promise((r) => setTimeout(r, 0));
-      await new Promise((r) => setTimeout(r, 0));
-      // True or false can be accepted according to the test environment
-      expect([true, false]).toContain(component.isLoading());
+
+      const promise = component.calculateCableLength();
+      expect(component.isCalculatingOnly()).toBe(true);
       resolveTask();
-      await fixture.whenStable();
-      expect(component.isLoading()).toBe(false);
+      await promise;
+      expect(component.isCalculatingOnly()).toBe(false);
     });
   });
 
@@ -451,10 +435,10 @@ describe('CableLengthChangeComponent', () => {
       component.form.controls.scope.setValue(null);
       component.form.controls.supportRef.setValue(null);
       await component.saveForm();
-      expect(mockCableModificationsService.save).not.toHaveBeenCalled();
+      expect(mockLoadFormsService.saveTemporaryLoadDataInSection).not.toHaveBeenCalled();
     });
 
-    it('should call calculate then save with form values', async () => {
+    it('should save through loadFormsService then reload the section from storage', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
         modificationType: 'shortening',
@@ -465,32 +449,23 @@ describe('CableLengthChangeComponent', () => {
       component.form.controls.supportRef.setValue('RIGHT');
 
       const callOrder: string[] = [];
-      mockCableModificationsService.calculate.mockImplementation(() => {
-        callOrder.push('calculate');
-        return Promise.resolve();
-      });
-      mockCableModificationsService.save.mockImplementation(() => {
+      mockPlotService.study.mockReturnValue({ uuid: 'study-uuid-1' } as unknown as Study);
+      mockLoadFormsService.saveTemporaryLoadDataInSection.mockImplementation(async () => {
         callOrder.push('save');
-        return Promise.resolve();
+      });
+      mockCableModificationsService.getStudy.mockImplementation(async () => {
+        callOrder.push('reload');
+        return {
+          sections: [{ ...mockSection, uuid: 'section-uuid-1', cable_modifications: [] }]
+        } as unknown as Study;
       });
 
       await component.saveForm();
 
-      expect(callOrder).toEqual(['calculate', 'save']);
-      expect(mockCableModificationsService.calculate).toHaveBeenCalledWith({
-        spanUuid: 'support-uuid-1',
-        supportRef: 'RIGHT',
-        modificationType: 'shortening',
-        modifiedLengthCable: 2,
-        distanceSupportRef: 8
-      });
-      expect(mockCableModificationsService.save).toHaveBeenCalledWith({
-        spanUuid: 'support-uuid-1',
-        supportRef: 'RIGHT',
-        modificationType: 'shortening',
-        modifiedLengthCable: 2,
-        distanceSupportRef: 8
-      });
+      expect(callOrder).toEqual(['save', 'reload']);
+      expect(mockLoadFormsService.saveTemporaryLoadDataInSection).toHaveBeenCalledOnce();
+      expect(mockSpanService.section.set).toHaveBeenCalled();
+      expect(component.hasSavedModification()).toBe(false);
     });
 
     it('should reset isDirtySinceLastSave after save', async () => {
@@ -509,7 +484,7 @@ describe('CableLengthChangeComponent', () => {
       expect(component.isDirtySinceLastSave()).toBe(false);
     });
 
-    it('should reset isLoading to false even if calculate throws', async () => {
+    it('should reset isLoading to false even if save throws', async () => {
       component.form.patchValue({
         scope: 'support-uuid-1',
         modificationType: 'shortening',
@@ -518,7 +493,7 @@ describe('CableLengthChangeComponent', () => {
       });
       component.form.controls.supportRef.enable();
       component.form.controls.supportRef.setValue('LEFT');
-      mockCableModificationsService.calculate.mockRejectedValue(new Error('worker error'));
+      mockLoadFormsService.saveTemporaryLoadDataInSection.mockRejectedValue(new Error('worker error'));
 
       await expect(component.saveForm()).rejects.toThrow('worker error');
 
