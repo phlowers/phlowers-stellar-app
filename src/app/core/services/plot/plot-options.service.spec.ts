@@ -86,6 +86,25 @@ describe('PlotOptionsService', () => {
       expect(service.getCamera()).toEqual(mockCamera);
     });
 
+    it('should prefer the live WebGL scene camera over the _fullLayout camera', () => {
+      // Scroll-wheel zoom only mutates the WebGL camera and never syncs
+      // _fullLayout.scene.camera, so the gl scene camera must win (bug #1032).
+      const glCamera: Camera = {
+        eye: { x: -1, y: 0.3, z: -1.2 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+      const staleCamera: Camera = {
+        eye: { x: -2.7, y: -0.3, z: -2.2 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+      document.getElementById = vi
+        .fn()
+        .mockReturnValue({ _fullLayout: { scene: { camera: staleCamera, _scene: { getCamera: () => glCamera } } } });
+      expect(service.getCamera()).toEqual(glCamera);
+    });
+
     it('should return null when the element has no _fullLayout', () => {
       document.getElementById = vi.fn().mockReturnValue({});
       expect(service.getCamera()).toBeNull();
