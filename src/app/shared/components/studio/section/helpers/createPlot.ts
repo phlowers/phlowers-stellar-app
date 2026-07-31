@@ -151,6 +151,16 @@ const createScene = (
   };
 };
 
+const BUTTON_TITLE_TRANSLATIONS = [
+  { key: 'shared.studio.orbital-rotation', fallback: 'Orbital rotation' },
+  { key: 'shared.studio.turntable-rotation', fallback: 'Turntable rotation' },
+  { key: 'shared.studio.zoom', fallback: 'Zoom' },
+  { key: 'shared.studio.pan', fallback: 'Pan' }
+] as const;
+
+const translateButtonTitles = (translocoService?: TranslocoService): string[] =>
+  BUTTON_TITLE_TRANSLATIONS.map(({ key, fallback }) => (translocoService ? translocoService.translate(key) : fallback));
+
 /**
  * Builds the Plotly config including custom orbit/turntable/zoom/pan modebar buttons.
  * Defined as a function so that `Plotly.Icons` is accessed at call-time
@@ -161,9 +171,14 @@ const createScene = (
  * which triggers `updateFx()` and resets the 3D camera (POV, angle, zoom) — bug #703.
  * The custom replacements use `setDragmodeDirect()` to bypass `relayout` and preserve
  * the camera. Tests in `createPlot.spec.ts` guard against this regression.
+ *
+ * @param titles - Pre-translated button titles (see `translateButtonTitles`), in
+ *   orbit/turntable/zoom/pan order. Translation happens once in `getConfig` so this
+ *   is only invoked — and new button/closure objects only allocated — when the
+ *   titles actually change (bug #1032).
  */
-const getConfig = (translocoService?: TranslocoService) => {
-  const t = (key: string, fallback: string): string => (translocoService ? translocoService.translate(key) : fallback);
+const buildConfig = (titles: string[]) => {
+  const [orbitTitle, turntableTitle, zoomTitle, panTitle] = titles;
   /**
    * Switches the 3D scene dragmode by directly setting the internal
    * orbit-camera-controller mode. This bypasses Plotly.relayout and its
@@ -196,7 +211,7 @@ const getConfig = (translocoService?: TranslocoService) => {
 
   const orbitButton: ModeBarButton = {
     name: 'customOrbitRotation',
-    title: t('shared.studio.orbital-rotation', 'Orbital rotation'),
+    title: orbitTitle,
     icon: Plotly.Icons['3d_rotate'] as Icon,
     attr: 'scene.dragmode',
     val: 'orbit',
@@ -207,7 +222,7 @@ const getConfig = (translocoService?: TranslocoService) => {
 
   const turntableButton: ModeBarButton = {
     name: 'customTurntableRotation',
-    title: t('shared.studio.turntable-rotation', 'Turntable rotation'),
+    title: turntableTitle,
     icon: Plotly.Icons['z-axis'] as Icon,
     attr: 'scene.dragmode',
     val: 'turntable',
@@ -218,7 +233,7 @@ const getConfig = (translocoService?: TranslocoService) => {
 
   const zoom3dButton: ModeBarButton = {
     name: 'customZoom3d',
-    title: t('shared.studio.zoom', 'Zoom'),
+    title: zoomTitle,
     icon: Plotly.Icons['zoombox'] as Icon,
     attr: 'scene.dragmode',
     val: 'zoom',
@@ -229,7 +244,7 @@ const getConfig = (translocoService?: TranslocoService) => {
 
   const pan3dButton: ModeBarButton = {
     name: 'customPan3d',
-    title: t('shared.studio.pan', 'Pan'),
+    title: panTitle,
     icon: Plotly.Icons['pan'] as Icon,
     attr: 'scene.dragmode',
     val: 'pan',
@@ -261,6 +276,26 @@ const getConfig = (translocoService?: TranslocoService) => {
     ] as ModeBarDefaultButtons[],
     modeBarButtonsToAdd: [orbitButton, turntableButton, zoom3dButton, pan3dButton]
   };
+};
+
+/**
+ * Returns the Plotly config, reusing the same object across calls.
+ *
+ * `Plotly.react` diffs the config on every call: handing it a freshly built object
+ * (new button objects, new click closures) makes that diff report a change each time,
+ * which downgrades the react into a full re-plot and wipes all interactive GUI state —
+ * in particular the 2D zoom/pan ranges that `uirevision` would otherwise preserve
+ * (bug #1032). The config is therefore memoized on the translated button titles: the
+ * exact same object is returned until the active language actually changes them.
+ */
+let cachedConfig: { key: string; config: ReturnType<typeof buildConfig> } | null = null;
+const getConfig = (translocoService?: TranslocoService) => {
+  const titles = translateButtonTitles(translocoService);
+  const key = titles.join('|');
+  if (cachedConfig?.key !== key) {
+    cachedConfig = { key, config: buildConfig(titles) };
+  }
+  return cachedConfig.config;
 };
 
 const layout3d = (

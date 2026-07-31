@@ -11,6 +11,7 @@ import { SpanLoad } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 import { type Mock } from 'vitest';
+import { TranslocoService } from '@jsverse/transloco';
 
 // Mock Plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -554,6 +555,43 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.uirevision).toBe('stable');
+    });
+  });
+
+  describe('config identity across renders', () => {
+    it('should pass the exact same config object to consecutive Plotly.react calls', () => {
+      // Plotly.react diffs the config: a new object (fresh button closures) on each call
+      // registers as a config change and downgrades the react into a full re-plot,
+      // wiping the 2D zoom/pan state that uirevision would preserve (bug #1032).
+      createPlot({ ...createDefaultParams(), view: '2d' });
+      createPlot({ ...createDefaultParams(), view: '2d', currentObstacleUuid: 'obstacle-1' });
+
+      const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
+      const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
+      expect(secondConfig).toBe(firstConfig);
+    });
+
+    it('should rebuild the config with the new button titles when the active language changes', () => {
+      const enTranslations: Record<string, string> = { 'shared.studio.orbital-rotation': 'Orbital rotation' };
+      const frTranslations: Record<string, string> = { 'shared.studio.orbital-rotation': 'Rotation orbitale' };
+      const enTransloco = {
+        translate: (key: string) => enTranslations[key] ?? key
+      } as unknown as TranslocoService;
+      const frTransloco = {
+        translate: (key: string) => frTranslations[key] ?? key
+      } as unknown as TranslocoService;
+
+      createPlot({ ...createDefaultParams(), view: '2d', translocoService: enTransloco });
+      createPlot({ ...createDefaultParams(), view: '2d', translocoService: frTransloco });
+
+      const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
+      const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
+
+      expect(secondConfig).not.toBe(firstConfig);
+      const orbitButton = (secondConfig.modeBarButtonsToAdd as { name: string; title: string }[]).find(
+        (btn) => btn.name === 'customOrbitRotation'
+      );
+      expect(orbitButton?.title).toBe('Rotation orbitale');
     });
   });
 
