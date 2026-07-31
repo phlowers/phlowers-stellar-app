@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@services/plot/plot.service';
@@ -10,6 +11,7 @@ import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { CableModificationsService } from './cableModifications.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -28,6 +30,7 @@ describe('LoadFormsService', () => {
   let mockChargesService: vi.Mocked<ChargesService>;
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
   let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
+  let mockCableModificationsService: Pick<CableModificationsService, 'previewCableModification' | 'clearPreview'>;
 
   const mockSection: Section = {
     uuid: 'section-uuid-1',
@@ -125,7 +128,8 @@ describe('LoadFormsService', () => {
         type: LoadType.PUNCTUAL,
         referenceSupport: 'LEFT'
       }
-    ]
+    ],
+    cableModifParams: []
   };
 
   const mockCharge: Charge = {
@@ -150,7 +154,10 @@ describe('LoadFormsService', () => {
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
-      section: createSignalMock<Section | null>(null)
+      section: createSignalMock<Section | null>(null),
+      getSupportIndex: vi.fn((supportUuid: string) =>
+        mockSection.supports.findIndex((support) => support.uuid === supportUuid)
+      )
     } as unknown as vi.Mocked<PlotSpanService>;
     plotOptionsServiceMock = {
       refreshCamera: vi.fn(),
@@ -171,6 +178,11 @@ describe('LoadFormsService', () => {
       syncObstacles: vi.fn().mockResolvedValue(null)
     };
 
+    mockCableModificationsService = {
+      previewCableModification: signal(null),
+      clearPreview: vi.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         LoadFormsService,
@@ -179,7 +191,8 @@ describe('LoadFormsService', () => {
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: ChargesService, useValue: mockChargesService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
-        { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        { provide: ObstacleStateService, useValue: mockObstacleStateService },
+        { provide: CableModificationsService, useValue: mockCableModificationsService }
       ]
     });
 
@@ -316,6 +329,22 @@ describe('LoadFormsService', () => {
       service.initTemporaryLoadData();
 
       expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
+    });
+
+    it('should initialize cableModifParams with an empty array when charge data omits them', () => {
+      const chargeWithoutCableModifications = {
+        ...mockCharge,
+        data: { ...mockChargeData, cableModifParams: undefined as unknown as ChargeData['cableModifParams'] }
+      };
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [chargeWithoutCableModifications]
+      } as Section);
+
+      service.initTemporaryLoadData();
+
+      expect(mockPlotService.temporaryLoadData?.cableModifParams).toEqual([]);
     });
 
     it('should call setLoads with empty array when charge has no span loads', async () => {
@@ -471,11 +500,10 @@ describe('LoadFormsService', () => {
       expect(mockObstacleStateService.syncObstacles).not.toHaveBeenCalled();
     });
 
-    it('should not call shortenLengthenCable when reapplyCableModifications is deactivated', async () => {
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        cable_modifications: [
+    it('should reapply saved cable modifications after a successful changeState', async () => {
+      mockPlotService.temporaryLoadData = {
+        ...mockChargeData,
+        cableModifParams: [
           {
             uuid: 'mod-1',
             spanUuid: 'support-uuid-1',
@@ -485,13 +513,16 @@ describe('LoadFormsService', () => {
             distanceSupportRef: 100
           }
         ]
+      };
+      mockSpanService.section.mockReturnValue({
+        ...mockSection
       } as Section);
       mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: { success: true }, error: null });
 
       await service.calculateLoad();
 
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
     });
 
     it('should set plotService.error and diagnostics when runTask returns an error', async () => {
@@ -551,10 +582,9 @@ describe('LoadFormsService', () => {
     });
 
     it('should skip cable modifications whose span uuid is not in the support list', async () => {
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        cable_modifications: [
+      mockPlotService.temporaryLoadData = {
+        ...mockChargeData,
+        cableModifParams: [
           {
             uuid: 'mod-orphan',
             spanUuid: 'unknown-support',
@@ -564,6 +594,10 @@ describe('LoadFormsService', () => {
             distanceSupportRef: 100
           }
         ]
+      };
+      mockSpanService.getSupportIndex.mockReturnValue(-1);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection
       } as Section);
 
       await service.calculateLoad();
@@ -576,7 +610,18 @@ describe('LoadFormsService', () => {
     it('should call deleteAllLoads and changeState with base climate', async () => {
       mockSpanService.section.mockReturnValue({
         ...mockSection,
-        initial_conditions: [{ uuid: 'ic-1', base_temperature: 20 }],
+        initial_conditions: [
+          {
+            uuid: 'ic-1',
+            name: 'Base initial condition',
+            base_parameters: 10,
+            base_temperature: 20,
+            cable_pretension: 15,
+            min_temperature: -5,
+            max_wind_pressure: 100,
+            max_frost_width: 2
+          }
+        ],
         selected_initial_condition_uuid: 'ic-1'
       });
       mockPlotService.temporaryLoadData = mockChargeData;
