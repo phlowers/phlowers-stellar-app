@@ -13,7 +13,6 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { Charge, Section, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { StudyEntity } from '@infrastructure/database';
@@ -109,14 +108,6 @@ const mockStudy: StudyEntity = {
   updated_at_offline: '2025-01-01T00:00:00.000Z',
   saved: true,
   sections: [mockSectionBase]
-};
-
-const mockParams: CableModificationParams = {
-  spanUuid: 'support-uuid-1',
-  supportRef: 'LEFT',
-  modificationType: 'lengthening',
-  modifiedLengthCable: 0.5,
-  distanceSupportRef: 10
 };
 
 describe('CableModificationsService', () => {
