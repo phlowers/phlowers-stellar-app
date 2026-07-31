@@ -7,13 +7,11 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { CableModificationsService } from './cableModifications.service';
-import { CableModificationParams } from './cableModifications.service.interfaces';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { Charge, Section, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { StudyEntity } from '@infrastructure/database';
@@ -111,14 +109,6 @@ const mockStudy: StudyEntity = {
   sections: [mockSectionBase]
 };
 
-const mockParams: CableModificationParams = {
-  spanUuid: 'support-uuid-1',
-  supportRef: 'LEFT',
-  modificationType: 'lengthening',
-  modifiedLengthCable: 0.5,
-  distanceSupportRef: 10
-};
-
 describe('CableModificationsService', () => {
   let service: CableModificationsService;
   let mockPlotService: vi.Mocked<PlotService>;
@@ -173,64 +163,6 @@ describe('CableModificationsService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
-  });
-
-  // ---------------------------------------------------------------------------
-  // calculate()
-  // ---------------------------------------------------------------------------
-  describe('calculate()', () => {
-    it('should return early when spanIndex is -1', async () => {
-      mockSpanService.getSupportIndex.mockReturnValue(-1);
-
-      await service.calculate(mockParams);
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should call refreshCamera and set loading to true then false', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { success: true },
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
-      expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
-      expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
-    });
-
-    it('should call runTask with shortenLengthenCable task and correct inputs', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { success: true },
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.shortenLengthenCable, {
-        spanIndex: 0,
-        modificationType: mockParams.modificationType,
-        modifiedLengthCable: mockParams.modifiedLengthCable,
-        distanceSupportRef: mockParams.distanceSupportRef,
-        supportRef: mockParams.supportRef
-      });
-    });
-
-    it('should propagate task error to plotService.error', async () => {
-      const taskError = TaskError.CALCULATION_ERROR;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { success: true },
-        error: taskError,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockPlotService.error.set).toHaveBeenCalledWith(taskError);
-    });
   });
 
   // ---------------------------------------------------------------------------

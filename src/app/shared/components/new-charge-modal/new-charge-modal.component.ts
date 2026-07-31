@@ -24,7 +24,8 @@ const newCharge = (currentCharges: Charge[], defaultNamePrefix: string): Charge 
     description: '',
     data: {
       climate: { ...defaultClimaticCharge },
-      spanLoads: []
+      spanLoads: [],
+      cableModifParams: []
     }
   };
 };
@@ -105,7 +106,8 @@ export class NewChargeModalComponent {
       description: this.description(),
       data: {
         climate: { ...defaultClimaticCharge },
-        spanLoads: []
+        spanLoads: [],
+        cableModifParams: []
       }
     };
 
