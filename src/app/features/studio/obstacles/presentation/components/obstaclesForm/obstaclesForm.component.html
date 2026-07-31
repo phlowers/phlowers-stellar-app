@@ -184,6 +184,7 @@
           <p-inputgroup class="obstacles-item__input">
             <input
               (input)="onPositionInput($event, 'z')"
+              (blur)="onPositionBlur($event, 'z')"
               pInputText
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
@@ -208,6 +209,7 @@
             <input
               pInputText
               (input)="onPositionInput($event, 'x')"
+              (blur)="onPositionBlur($event, 'x')"
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
               [id]="'distanceToRefSupport' + $index"
@@ -231,6 +233,7 @@
             <input
               pInputText
               (input)="onPositionInput($event, 'y')"
+              (blur)="onPositionBlur($event, 'y')"
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
               [id]="'distanceToLineAxis' + $index"

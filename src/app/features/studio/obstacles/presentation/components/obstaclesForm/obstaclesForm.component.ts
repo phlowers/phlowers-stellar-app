@@ -143,11 +143,32 @@ export class ObstaclesFormComponent {
   onPositionInput(event: Event, key: 'x' | 'y' | 'z') {
     const targetValue = (event.target as HTMLInputElement).value;
     const numericValue = Number.parseFloat(targetValue);
+    if (Number.isNaN(numericValue)) {
+      // Intermediate typing state (e.g. a lone "-" while entering a negative number) or a
+      // cleared/invalid field. A native `type="number"` input reports an empty string for
+      // both cases, so they can't be told apart here — leave the control untouched so the
+      // bound input value isn't overwritten mid-typing. `onPositionBlur` reconciles the
+      // displayed value with the persisted control value once typing is finished.
+      return;
+    }
     const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
     const positionGroup = this.obstacleFormService.positions.at(currentIndex);
-    if (positionGroup) {
-      positionGroup.get(key)?.setValue(Number.isNaN(numericValue) ? 0 : numericValue);
+    positionGroup?.get(key)?.setValue(numericValue);
+  }
+
+  /**
+   * Reverts a still-empty/invalid position field on blur so the UI can never keep displaying
+   * a blank input while the underlying `FormControl` (read by `calculateAndSave()`) silently
+   * retains the previous numeric value.
+   */
+  onPositionBlur(event: Event, key: 'x' | 'y' | 'z') {
+    const input = event.target as HTMLInputElement;
+    if (!Number.isNaN(Number.parseFloat(input.value))) {
+      return;
     }
+    const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
+    const persistedValue = this.obstacleFormService.positions.at(currentIndex)?.get(key)?.value;
+    input.value = persistedValue === null || persistedValue === undefined ? '' : String(persistedValue);
   }
 
   setCurrentObstaclePoint(index: number) {
