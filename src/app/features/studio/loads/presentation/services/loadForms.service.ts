@@ -48,7 +48,10 @@ export class LoadFormsService {
     }
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
+    const rawcableModif = newData.cableModifParams || [];
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
+    // newData.cableModifParams = recheckCableModification(rawcableModif, section?.supports ?? []);
+    newData.cableModifParams = rawcableModif;
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
@@ -131,6 +134,21 @@ export class LoadFormsService {
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: checkedSpanLoads
       });
+
+      this.plotService.temporaryLoadData?.cableModifParams.forEach(
+        async (cableModif) => {
+        const spanIndex = this.spanService.getSupportIndex(cableModif.spanUuid);
+
+        await this.workerPythonService.runTask(Task.shortenLengthenCable, {
+          spanIndex,
+          modificationType: cableModif.modificationType,
+          modifiedLengthCable: cableModif.modifiedLengthCable,
+          distanceSupportRef: cableModif.distanceSupportRef,
+          supportRef: cableModif.supportRef
+        });
+        }
+      )
+
       const {
         result: changeResult,
         error,
