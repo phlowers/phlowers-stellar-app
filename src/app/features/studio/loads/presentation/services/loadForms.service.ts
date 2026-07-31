@@ -48,10 +48,11 @@ export class LoadFormsService {
     }
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
-    const rawcableModif = newData.cableModifParams || [];
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
-    // newData.cableModifParams = recheckCableModification(rawcableModif, section?.supports ?? []);
-    newData.cableModifParams = rawcableModif;
+
+    // ideally, we want to recheck cableModifParams and create an initial state,
+    // but it is difficult to do due to spanUuid/supportUuid inconsistenct
+    newData.cableModifParams = newData.cableModifParams || [];
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).

@@ -426,12 +426,5 @@ export class CableLengthChangeComponent {
         break;
     }
 
-    // this.cableModificationsService.setPreview({
-    //   spanUuid: cableModification.spanUuid,
-    //   supportRef: cableModification.supportRef,
-    //   modificationType: cableModification.modificationType,
-    //   modifiedLengthCable: cableModification.modifiedLengthCable,
-    //   distanceSupportRef: cableModification.distanceSupportRef
-    // });
   }
 }
