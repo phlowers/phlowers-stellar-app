@@ -123,28 +123,28 @@ export class CableLengthChangeComponent {
 
   private readonly supportRefEffect = effect(() => {
     const value = this.cableModificationControlSignals.supportRef();
-    if (value !== undefined) {
+    if (value !== null) {
       this.onCableModificationControlChange('supportRef', value);
     }
   });
 
   private readonly modificationTypeEffect = effect(() => {
     const value = this.cableModificationControlSignals.modificationType();
-    if (value !== undefined) {
+    if (value !== null) {
       this.onCableModificationControlChange('modificationType', value);
     }
   });
 
   private readonly modifiedLengthCableEffect = effect(() => {
     const value = this.cableModificationControlSignals.modifiedLengthCable();
-    if (value !== undefined) {
+    if (value !== null) {
       this.onCableModificationControlChange('modifiedLengthCable', value);
     }
   });
 
   private readonly distanceSupportRefEffect = effect(() => {
     const value = this.cableModificationControlSignals.distanceSupportRef();
-    if (value !== undefined) {
+    if (value !== null) {
       this.onCableModificationControlChange('distanceSupportRef', value);
     }
   });
