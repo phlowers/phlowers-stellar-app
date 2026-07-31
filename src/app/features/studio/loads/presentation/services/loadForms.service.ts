@@ -10,6 +10,7 @@ import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { CableModification } from '@src/app/shared/domain';
 
 @Injectable({
   providedIn: 'root'
@@ -48,11 +49,12 @@ export class LoadFormsService {
     }
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
+    const rawCableModif = newData.cableModifParams || [];
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
-    // ideally, we want to recheck cableModifParams and create an initial state,
-    // but it is difficult to do due to spanUuid/supportUuid inconsistenct
-    newData.cableModifParams = newData.cableModifParams || [];
+    // ideally, we want to call recheckCableModif and create an initial state,
+    // but this cause inconsistencies with python task that only calls manipulations one by one
+    newData.cableModifParams = rawCableModif;
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
@@ -136,19 +138,18 @@ export class LoadFormsService {
         spanLoads: checkedSpanLoads
       });
 
-      this.plotService.temporaryLoadData?.cableModifParams.forEach(
-        async (cableModif) => {
+      this.plotService.temporaryLoadData?.cableModifParams.forEach(async (cableModif: CableModification) => {
         const spanIndex = this.spanService.getSupportIndex(cableModif.spanUuid);
-
-        await this.workerPythonService.runTask(Task.shortenLengthenCable, {
-          spanIndex,
-          modificationType: cableModif.modificationType,
-          modifiedLengthCable: cableModif.modifiedLengthCable,
-          distanceSupportRef: cableModif.distanceSupportRef,
-          supportRef: cableModif.supportRef
-        });
+        if (spanIndex >= 0) {
+          await this.workerPythonService.runTask(Task.shortenLengthenCable, {
+            spanIndex,
+            modificationType: cableModif.modificationType,
+            modifiedLengthCable: cableModif.modifiedLengthCable,
+            distanceSupportRef: cableModif.distanceSupportRef,
+            supportRef: cableModif.supportRef
+          });
         }
-      )
+      });
 
       const {
         result: changeResult,

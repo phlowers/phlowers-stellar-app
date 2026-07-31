@@ -177,6 +177,7 @@ export class CableLengthChangeComponent {
       const defaultUuid = section.supports?.[startIndex]?.uuid ?? section.supports?.[0]?.uuid ?? null;
       untracked(() => {
         this.form.controls.scope.setValue(defaultUuid);
+        if (defaultUuid) this.onScopeChange(defaultUuid);
       });
     });
 
@@ -184,10 +185,12 @@ export class CableLengthChangeComponent {
     // annotation on the section plot. Patches the scope control and re-runs the
     // existing pre-fill flow, then clears the signal so it can fire again.
     effect(() => {
+      // spanUuid is misleading: is actually same thing as supportUuid
       const spanUuid = this.cableModificationsService.selectedSpanUuid();
       if (!spanUuid) return;
       untracked(() => {
         this.form.controls.scope.setValue(spanUuid);
+        this.onScopeChange(spanUuid);
         this.cableModificationsService.clearSelectedSpan();
       });
     });
@@ -314,9 +317,7 @@ export class CableLengthChangeComponent {
 
   deleteForm(): void {
     const spanUuid = this.form.controls.scope.value;
-    const uuid = spanUuid
-      ? (this.findCableModification(spanUuid)?.uuid ?? null)
-      : null;
+    const uuid = spanUuid ? (this.findCableModification(spanUuid)?.uuid ?? null) : null;
     if (uuid) {
       this.cableModificationsService.delete(uuid).then(async () => {
         await this.reloadSectionFromDb();
@@ -351,7 +352,10 @@ export class CableLengthChangeComponent {
     return (
       this.plotService.temporaryLoadData?.cableModifParams?.find(
         (cableModification) => cableModification.spanUuid === spanUuid
-      ) ?? this.spanService.section()?.cable_modifications?.find((cableModification) => cableModification.spanUuid === spanUuid)
+      ) ??
+      this.spanService
+        .section()
+        ?.cable_modifications?.find((cableModification) => cableModification.spanUuid === spanUuid)
     );
   }
 
@@ -425,6 +429,5 @@ export class CableLengthChangeComponent {
         cableModification.distanceSupportRef = typeof value === 'number' ? value : 0;
         break;
     }
-
   }
 }
