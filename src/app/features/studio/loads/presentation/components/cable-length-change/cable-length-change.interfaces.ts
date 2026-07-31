@@ -3,6 +3,9 @@ import { FormControl } from '@angular/forms';
 /** Cable length modification type. */
 export type CableWidthType = 'lengthening' | 'shortening';
 
+export type CableModificationControlName =
+  'supportRef' | 'modificationType' | 'modifiedLengthCable' | 'distanceSupportRef';
+
 /** Typed form controls for the cable length change form. */
 export interface CableLengthChangeFormControls {
   /** Selected span UUID (scope). */

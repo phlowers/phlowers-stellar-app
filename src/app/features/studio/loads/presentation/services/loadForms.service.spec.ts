@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { LoadFormsService } from './loadForms.service';
 import { PlotService } from '@services/plot/plot.service';
@@ -10,6 +11,7 @@ import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { CableModificationsService } from './cableModifications.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -28,6 +30,7 @@ describe('LoadFormsService', () => {
   let mockChargesService: vi.Mocked<ChargesService>;
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
   let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
+  let mockCableModificationsService: Pick<CableModificationsService, 'previewCableModification' | 'clearPreview'>;
 
   const mockSection: Section = {
     uuid: 'section-uuid-1',
@@ -175,6 +178,11 @@ describe('LoadFormsService', () => {
       syncObstacles: vi.fn().mockResolvedValue(null)
     };
 
+    mockCableModificationsService = {
+      previewCableModification: signal(null),
+      clearPreview: vi.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         LoadFormsService,
@@ -183,7 +191,8 @@ describe('LoadFormsService', () => {
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: ChargesService, useValue: mockChargesService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
-        { provide: ObstacleStateService, useValue: mockObstacleStateService }
+        { provide: ObstacleStateService, useValue: mockObstacleStateService },
+        { provide: CableModificationsService, useValue: mockCableModificationsService }
       ]
     });
 

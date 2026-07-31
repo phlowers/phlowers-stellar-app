@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -11,6 +12,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { CableModification } from '@src/app/shared/domain';
+import { CableModificationsService } from './cableModifications.service';
 
 @Injectable({
   providedIn: 'root'
@@ -81,6 +83,7 @@ export class LoadFormsService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly cableModificationsService = inject(CableModificationsService);
   private readonly logger = inject(LoggerService);
   // private readonly obstacleStateService = inject(ObstacleStateService);
 
@@ -141,6 +144,14 @@ export class LoadFormsService {
       this.plotService.temporaryLoadData?.cableModifParams.forEach(async (cableModif: CableModification) => {
         const spanIndex = this.spanService.getSupportIndex(cableModif.spanUuid);
         if (spanIndex >= 0) {
+          this.cableModificationsService.previewCableModification.set({
+            uuid: this.cableModificationsService.previewCableModification()?.uuid ?? uuidv4(),
+            spanUuid: cableModif.spanUuid,
+            supportRef: cableModif.supportRef,
+            modificationType: cableModif.modificationType,
+            modifiedLengthCable: cableModif.modifiedLengthCable,
+            distanceSupportRef: cableModif.distanceSupportRef
+          });
           await this.workerPythonService.runTask(Task.shortenLengthenCable, {
             spanIndex,
             modificationType: cableModif.modificationType,
@@ -168,7 +179,6 @@ export class LoadFormsService {
       if (!changeResult?.success) {
         return;
       }
-
       // For me no need to re-sync obstacles here because the obstacles have already been updated before.
       // const obstacles = currentSection?.obstacles ?? [];
       // if (obstacles.length > 0) {

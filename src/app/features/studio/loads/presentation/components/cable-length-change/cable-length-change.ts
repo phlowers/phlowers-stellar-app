@@ -13,12 +13,14 @@ import { CableModification } from '@shared/domain';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { CableLengthChangeFormControls, CableWidthType } from './cable-length-change.interfaces';
+import {
+  CableLengthChangeFormControls,
+  CableWidthType,
+  CableModificationControlName
+} from './cable-length-change.interfaces';
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-
-type CableModificationControlName = 'supportRef' | 'modificationType' | 'modifiedLengthCable' | 'distanceSupportRef';
 
 @Component({
   selector: 'app-cable-length-change',
