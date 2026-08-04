@@ -50,13 +50,12 @@ npm run set-up-mechaphlowers
 
 #### Asset List Commands
 
-We have two commands for generating asset lists, one for each supported language:
+`npm run build` runs it automatically after `ng build`. It can also be run manually:
 
-- `npm run create-assets-list-for-service-worker:fr` - Generates the French asset list
-- `npm run create-assets-list-for-service-worker:en` - Generates the English asset list
+- `npm run create-assets-list-for-service-worker` - Generates the asset list for the single Transloco build output in `dist/`
 
-These commands run the Python script that:
-1. Recursively scans the build directory for the specified language
+This command runs the Python script that:
+1. Recursively scans the `dist/` build directory
 2. Creates a list of all files (excluding blacklisted items like the service worker itself)
 3. Includes Python packages from `public/pyodide/` (managed by `set_up_mechaphlowers.py`)
 4. Generates version information including:
