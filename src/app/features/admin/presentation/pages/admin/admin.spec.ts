@@ -299,4 +299,18 @@ describe('AdminComponent', () => {
       expect(vi.getTimerCount()).toBe(0);
     });
   });
+
+  describe('formatBuildDate', () => {
+    it('should return null when the value is missing', () => {
+      expect(component.formatBuildDate(undefined)).toBeNull();
+    });
+
+    it('should format a valid ISO date string', () => {
+      expect(component.formatBuildDate('2024-01-01T10:30:00Z')).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/);
+    });
+
+    it('should return the raw value when it cannot be parsed as a date (e.g. an unsubstituted {BUILD_TIME} placeholder)', () => {
+      expect(component.formatBuildDate('{BUILD_TIME}')).toBe('{BUILD_TIME}');
+    });
+  });
 });
