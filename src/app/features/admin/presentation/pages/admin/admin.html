@@ -25,8 +25,8 @@
       </tr>
       <tr>
         <td>{{ 'admin.build-datetime' | transloco }}</td>
-        <td>{{ updateService.currentVersion().build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
-        <td>{{ updateService.latestVersion()?.build_datetime_utc | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ formatBuildDate(updateService.currentVersion().build_datetime_utc) }}</td>
+        <td>{{ formatBuildDate(updateService.latestVersion()?.build_datetime_utc) }}</td>
       </tr>
       <tr>
         <td>{{ 'admin.build-version' | transloco }}</td>
