@@ -17,7 +17,7 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { OnlineService } from '@services/online/online.service';
 import { WINDOW } from '@core/tokens/window.token';
@@ -115,7 +115,7 @@ describe('AdminComponent', () => {
     })
       .overrideComponent(AdminComponent, {
         set: {
-          providers: [{ provide: ConfirmationService, useValue: confirmationServiceMock }]
+          providers: [{ provide: ConfirmationService, useValue: confirmationServiceMock }, DatePipe]
         }
       })
       .compileComponents();
