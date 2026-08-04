@@ -78,10 +78,15 @@ export class AdminComponent {
     if (!value) {
       return null;
     }
-    if (isNaN(new Date(value).getTime())) {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
       return value;
     }
-    return this.datePipe.transform(value, 'dd/MM/yyyy HH:mm');
+    try {
+      return this.datePipe.transform(value, 'dd/MM/yyyy HH:mm');
+    } catch {
+      return value;
+    }
   }
   updateAvailable = false;
   newVersion = '';
