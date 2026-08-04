@@ -47,11 +47,10 @@ const CACHE_NAME = 'app-assets';
     ConfirmDialogModule,
     ButtonComponent,
     ProgressSpinnerModule,
-    DatePipe,
     ToggleSwitch,
     TranslocoModule
   ],
-  providers: [ConfirmationService],
+  providers: [ConfirmationService, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminComponent {
@@ -64,9 +63,30 @@ export class AdminComponent {
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly window = inject(WINDOW);
   private readonly translocoService = inject(TranslocoService);
+  private readonly datePipe = inject(DatePipe);
 
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
+  }
+
+  /**
+   * Formats a build datetime for display, falling back to the raw value
+   * instead of throwing when it is missing/unparsable (e.g. an unsubstituted
+   * `{BUILD_TIME}` placeholder left by a build that skipped `set-env-variables`).
+   */
+  formatBuildDate(value: string | undefined): string | null {
+    if (!value) {
+      return null;
+    }
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      return value;
+    }
+    try {
+      return this.datePipe.transform(value, 'dd/MM/yyyy HH:mm');
+    } catch {
+      return value;
+    }
   }
   updateAvailable = false;
   newVersion = '';
