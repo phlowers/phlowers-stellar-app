@@ -94,8 +94,8 @@ def collect_data_file_hashes(directory):
     return hashes
 
 
-def main(language):
-    target_dir = f"dist/{language}"
+def main():
+    target_dir = "dist"
 
     package_json_file = "package.json"
     with open(package_json_file, "r") as f:
@@ -135,7 +135,7 @@ def main(language):
 
     print("-" * 50)
     print(f"Total files: {len(files)}")
-    output_file = f"dist/{language}/assets_list.json"
+    output_file = os.path.join(target_dir, "assets_list.json")
     csv_hashes = collect_data_file_hashes(target_dir)
     res = {
         "app_version": app_version,
@@ -147,9 +147,4 @@ def main(language):
 
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    if len(args) > 1 and args[0] == "--language":
-        language = args[1]
-    else:
-        raise ValueError("Language is required: --language en|fr")
-    main(language)
+    main()
