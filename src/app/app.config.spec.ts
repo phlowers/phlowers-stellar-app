@@ -18,7 +18,7 @@ describe('initializeApp', () => {
   let mockStorageService: { setPersistentStorage: vi.Mock; createDatabase: vi.Mock };
   let mockAuthService: { initialize: vi.Mock };
   let mockUpdateService: { checkForUpdateOnce: vi.Mock };
-  let mockLoggerService: { error: vi.Mock };
+  let mockLoggerService: { error: vi.Mock; warn: vi.Mock };
   let mockTranslocoService: { setActiveLang: vi.Mock; load: vi.Mock };
   let mockAppConfigService: { loadDefaultLang: vi.Mock };
   let translationLoad$: Subject<unknown>;
@@ -32,7 +32,7 @@ describe('initializeApp', () => {
     };
     mockAuthService = { initialize: vi.fn().mockResolvedValue(undefined) };
     mockUpdateService = { checkForUpdateOnce: vi.fn().mockResolvedValue(undefined) };
-    mockLoggerService = { error: vi.fn() };
+    mockLoggerService = { error: vi.fn(), warn: vi.fn() };
     mockTranslocoService = {
       setActiveLang: vi.fn(),
       load: vi.fn().mockReturnValue(translationLoad$)
@@ -51,33 +51,21 @@ describe('initializeApp', () => {
     });
   });
 
-  it('should not resolve until the translation file has finished loading', async () => {
+  it('should resolve without waiting for the translation file to finish loading', async () => {
     let resolved = false;
     const promise = TestBed.runInInjectionContext(() => initializeApp()).then(() => {
       resolved = true;
     });
 
-    // Storage/auth chain and AppConfigService already resolved (real microtasks),
-    // but translations haven't emitted yet.
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(resolved).toBe(false);
-
-    translationLoad$.next({});
-    translationLoad$.complete();
+    // translationLoad$ never emits (simulates a slow/stuck i18n fetch) —
+    // initializeApp must resolve anyway since the load is fire-and-forget.
     await promise;
 
     expect(resolved).toBe(true);
   });
 
-  it('should resolve the runtime language via AppConfigService and load its translations', async () => {
+  it('should resolve the runtime language via AppConfigService and start loading its translations', async () => {
     const promise = TestBed.runInInjectionContext(() => initializeApp());
-    // Let AppConfigService.loadDefaultLang() resolve before load() is called/subscribed.
-    await Promise.resolve();
-    await Promise.resolve();
-    translationLoad$.next({});
-    translationLoad$.complete();
     await promise;
 
     expect(mockAppConfigService.loadDefaultLang).toHaveBeenCalled();
@@ -86,6 +74,20 @@ describe('initializeApp', () => {
     expect(mockStorageService.setPersistentStorage).toHaveBeenCalled();
     expect(mockStorageService.createDatabase).toHaveBeenCalled();
     expect(mockAuthService.initialize).toHaveBeenCalled();
+  });
+
+  it('should log a warning if the background translation load fails, without rejecting', async () => {
+    const promise = TestBed.runInInjectionContext(() => initializeApp());
+    await promise;
+
+    translationLoad$.error(new Error('network error'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(mockLoggerService.warn).toHaveBeenCalledWith(
+      'AppConfig: translations failed to load in the background',
+      expect.any(Error)
+    );
   });
 
   it('should not await UpdateService.checkForUpdateOnce()', async () => {
@@ -101,11 +103,6 @@ describe('initializeApp', () => {
     );
 
     const promise = TestBed.runInInjectionContext(() => initializeApp());
-    // Let AppConfigService.loadDefaultLang() resolve before load() is called/subscribed.
-    await Promise.resolve();
-    await Promise.resolve();
-    translationLoad$.next({});
-    translationLoad$.complete();
     await promise;
 
     expect(mockUpdateService.checkForUpdateOnce).toHaveBeenCalled();

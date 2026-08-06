@@ -41,10 +41,12 @@ import { firstValueFrom } from 'rxjs';
  *    resync in the background (does not block this initializer).
  * In parallel with steps 1-3: AppConfigService.loadDefaultLang() resolves the
  * runtime-configured language (from assets/config/app-config.json, written
- * post-deploy by Docker/Jenkins), then TranslocoService.load() fetches that
- * language's translations, so the initial route navigation (blocked by
- * withEnabledBlockingInitialNavigation) and any component reading translations
- * imperatively never race the i18n HTTP load.
+ * post-deploy by Docker/Jenkins) and sets it active. The TranslocoService.load()
+ * HTTP fetch itself is NOT awaited — first render must never wait on it (i18n
+ * assets go through mod_auth_openidc like any other protected route and can
+ * stall for as long as an OIDC renegotiation takes). Components read
+ * translations reactively through the `transloco` pipe/directive, which loads
+ * on demand and re-renders once the data arrives, so nothing is blocked.
  * Running both branches in parallel (rather than sequentially) avoids adding
  * extra bootstrap latency.
  * 4. UpdateService.checkForUpdateOnce() — started in the background, not
@@ -79,7 +81,11 @@ export async function initializeApp(): Promise<void> {
     (async () => {
       const defaultLang = await appConfigService.loadDefaultLang();
       translocoService.setActiveLang(defaultLang);
-      await firstValueFrom(translocoService.load(defaultLang));
+      // Fire-and-forget: the `transloco` pipe loads reactively on its own once
+      // components request keys, so first render never waits on this fetch.
+      firstValueFrom(translocoService.load(defaultLang)).catch((err) => {
+        logger.warn('AppConfig: translations failed to load in the background', err);
+      });
     })()
   ]);
   void updateService.checkForUpdateOnce();
