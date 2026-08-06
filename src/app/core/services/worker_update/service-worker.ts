@@ -65,19 +65,22 @@ function isAuthErrorResponse(response: Response | undefined): response is Respon
 }
 
 /**
- * Restricts manifest-provided asset paths to same-origin, root-relative paths.
+ * Validates a manifest-provided path is same-origin/root-relative and returns
+ * its canonical form re-derived from the parsed `URL`, or `null` if invalid.
  * `assets_list.json` is untrusted network data — a poisoned/compromised
- * response must not be able to make the SW fetch and cache cross-origin
- * resources (client-side request forgery).
+ * response must not be able to make the SW fetch/cache cross-origin resources
+ * (client-side request forgery), so callers must use the returned value —
+ * never the raw `file` argument — to build the actual request.
  */
-function isValidAssetPath(file: string): boolean {
+function resolveAssetPath(file: string): string | null {
   if (!file.startsWith('/') || file.startsWith('//')) {
-    return false;
+    return null;
   }
   try {
-    return new URL(file, self.location.origin).origin === self.location.origin;
+    const url = new URL(file, self.location.origin);
+    return url.origin === self.location.origin ? url.pathname + url.search : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -102,13 +105,14 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
 
   await Promise.all(
     files.map(async (file) => {
-      if (!isValidAssetPath(file)) {
+      const assetPath = resolveAssetPath(file);
+      if (!assetPath) {
         controller.abort();
         throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
       }
       let response: Response;
       try {
-        response = await fetch(file, { cache: 'no-store', signal: controller.signal });
+        response = await fetch(assetPath, { cache: 'no-store', signal: controller.signal });
       } catch (error) {
         if (controller.signal.aborted) {
           // Aborted because another file already failed; that failure is what fails the precache.
@@ -119,13 +123,13 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
       }
       if (!response.ok) {
         controller.abort();
-        throw new Error(`Precache failed for ${file}: HTTP ${response.status}`);
+        throw new Error(`Precache failed for ${assetPath}: HTTP ${response.status}`);
       }
       if (controller.signal.aborted) {
         // Another file failed while this fetch was in flight — skip the write.
         return;
       }
-      await cache.put(file, response);
+      await cache.put(assetPath, response);
     })
   );
 }
