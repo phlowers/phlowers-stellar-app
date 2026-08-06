@@ -151,7 +151,10 @@ describe('Service Worker Functions', () => {
         })
       );
       for (const file of mockManifest.files) {
-        expect(mockFetch).toHaveBeenCalledWith(file, { cache: 'no-store' });
+        expect(mockFetch).toHaveBeenCalledWith(
+          file,
+          expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) })
+        );
         expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
       expect(mockCache.put).toHaveBeenCalledWith(
@@ -226,6 +229,36 @@ describe('Service Worker Functions', () => {
       });
 
       await expect(installApp()).rejects.toThrow(/Precache failed for .+: HTTP 502/);
+    });
+
+    it('should not write a still in-flight file to the cache once another file already failed', async () => {
+      let resolveStylesFetch!: (value: { ok: boolean; status: number }) => void;
+      const stylesFetch = new Promise<{ ok: boolean; status: number }>((resolve) => {
+        resolveStylesFetch = resolve;
+      });
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        }
+        if (url === '/app.js') {
+          return Promise.resolve({ ok: false, status: 502 });
+        }
+        if (url === '/styles.css') {
+          // Still in flight when /app.js fails.
+          return stylesFetch;
+        }
+        return Promise.resolve({ ok: true, status: 200 });
+      });
+
+      await expect(installApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
+
+      // Resolve the slow fetch only after installApp() has already rejected.
+      resolveStylesFetch({ ok: true, status: 200 });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(mockCache.put).not.toHaveBeenCalledWith('/styles.css', expect.anything());
     });
 
     it.each([
@@ -618,6 +651,7 @@ describe('Service Worker Functions', () => {
 
     it('should force reauth via /auth/relogin when a bare 401 has no cached shell', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 401 });
+      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -629,6 +663,7 @@ describe('Service Worker Functions', () => {
 
     it('should force reauth via /auth/relogin when a bare 403 has no cached shell', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 403 });
+      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 

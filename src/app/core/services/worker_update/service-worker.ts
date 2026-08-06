@@ -83,19 +83,43 @@ function isValidAssetPath(file: string): boolean {
  * broken assets must never be silently skipped. Compared to `Cache.addAll()`
  * (all-or-nothing, throws a generic `Failed to execute 'addAll' on 'Cache'`
  * error), this identifies exactly which file failed and why.
+ *
+ * A shared `AbortController` cancels the other in-flight fetches as soon as
+ * one file fails, and any fetch that resolves afterwards is skipped instead
+ * of being written to `cache` — otherwise `Promise.all` rejecting early
+ * would still let those in-flight operations complete in the background,
+ * leaving the cache partially populated despite the reported failure.
  */
 async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
   if (files.length === 0) {
     return;
   }
+  const controller = new AbortController();
+
   await Promise.all(
     files.map(async (file) => {
       if (!isValidAssetPath(file)) {
+        controller.abort();
         throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
       }
-      const response = await fetch(file, { cache: 'no-store' });
+      let response: Response;
+      try {
+        response = await fetch(file, { cache: 'no-store', signal: controller.signal });
+      } catch (error) {
+        if (controller.signal.aborted) {
+          // Aborted because another file already failed; that failure is what fails the precache.
+          return;
+        }
+        controller.abort();
+        throw error;
+      }
       if (!response.ok) {
+        controller.abort();
         throw new Error(`Precache failed for ${file}: HTTP ${response.status}`);
+      }
+      if (controller.signal.aborted) {
+        // Another file failed while this fetch was in flight — skip the write.
+        return;
       }
       await cache.put(file, response);
     })
