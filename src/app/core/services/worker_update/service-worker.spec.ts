@@ -66,7 +66,6 @@ describe('Service Worker Functions', () => {
     vi.clearAllMocks();
     mockCaches.open.mockResolvedValue(mockCache);
     mockCaches.delete.mockResolvedValue(true);
-    mockCache.addAll.mockResolvedValue(undefined);
     mockCache.keys.mockResolvedValue([]);
     (global.caches.match as vi.Mock).mockResolvedValue(null);
   });
@@ -78,9 +77,11 @@ describe('Service Worker Functions', () => {
     };
 
     beforeEach(() => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockManifest)
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
       });
     });
 
@@ -97,7 +98,10 @@ describe('Service Worker Functions', () => {
           })
         })
       );
-      expect(mockCache.addAll).toHaveBeenCalledWith(mockManifest.files);
+      for (const file of mockManifest.files) {
+        expect(mockFetch).toHaveBeenCalledWith(file, { cache: 'no-store' });
+        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+      }
       expect(mockCache.put).toHaveBeenCalledWith(
         '/app_version',
         expect.objectContaining({
@@ -124,7 +128,8 @@ describe('Service Worker Functions', () => {
 
       await installApp();
 
-      expect(mockCache.addAll).toHaveBeenCalledWith([]);
+      // Only the manifest itself was fetched — no per-file fetch for an empty list.
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -133,10 +138,32 @@ describe('Service Worker Functions', () => {
       await expect(installApp()).rejects.toThrow('Network error');
     });
 
-    it('should handle cache operations errors', async () => {
-      mockCache.addAll.mockRejectedValue(new Error('Cache add failed'));
+    it('should abort install when a single file fails to precache (e.g. 502 during a rolling redeploy)', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        }
+        if (url === '/app.js') {
+          return Promise.resolve({ ok: false, status: 502 });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
+      });
 
-      await expect(installApp()).rejects.toThrow('Cache add failed');
+      await expect(installApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
+
+      // A failed install must never mark itself as done.
+      expect(mockCache.put).not.toHaveBeenCalledWith('/app_version', expect.anything());
+    });
+
+    it('should throw identifying the file when every file fails to precache', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        }
+        return Promise.resolve({ ok: false, status: 502 });
+      });
+
+      await expect(installApp()).rejects.toThrow(/Precache failed for .+: HTTP 502/);
     });
   });
 
@@ -147,9 +174,11 @@ describe('Service Worker Functions', () => {
     };
 
     beforeEach(() => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockManifest)
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
       });
     });
 
@@ -159,9 +188,11 @@ describe('Service Worker Functions', () => {
       expect(result).toEqual(mockManifest);
       // Must delete the entire cache first
       expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
-      // Then reopen and addAll
+      // Then reopen and cache each file individually
       expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
-      expect(mockCache.addAll).toHaveBeenCalledWith(mockManifest.files);
+      for (const file of mockManifest.files) {
+        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+      }
       // Store new version
       expect(mockCache.put).toHaveBeenCalledWith(
         '/app_version',
@@ -176,15 +207,19 @@ describe('Service Worker Functions', () => {
         files: ['/index.html', '/pyodide/numpy.whl', '/pyodide/pandas.whl'],
         app_version: '1.1.0'
       };
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(manifestWithWheels)
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(manifestWithWheels) });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
       });
 
       await updateApp();
 
-      // All files including .whl should be in addAll (full reset)
-      expect(mockCache.addAll).toHaveBeenCalledWith(manifestWithWheels.files);
+      // All files including .whl should be individually re-fetched and cached (full reset)
+      for (const file of manifestWithWheels.files) {
+        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+      }
     });
 
     it('should handle empty files array', async () => {
@@ -198,7 +233,8 @@ describe('Service Worker Functions', () => {
 
       expect(result).toEqual(emptyManifest);
       expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
-      expect(mockCache.addAll).toHaveBeenCalledWith([]);
+      // Only the manifest itself was fetched — no per-file fetch for an empty list.
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -214,6 +250,24 @@ describe('Service Worker Functions', () => {
       });
 
       await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
+    });
+
+    it('should abort the update and roll back the temp cache when a single file fails to precache', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        }
+        if (url === '/app.js') {
+          return Promise.resolve({ ok: false, status: 502 });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
+      });
+
+      await expect(updateApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
+
+      // The temp cache is cleaned up but the live cache must never be touched.
+      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets-tmp');
+      expect(mockCaches.delete).not.toHaveBeenCalledWith('app-assets');
     });
   });
 

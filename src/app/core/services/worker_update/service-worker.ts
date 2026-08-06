@@ -57,6 +57,36 @@ function isRedirectResponse(response: Response): boolean {
 }
 
 /**
+ * True for a raw 401/403 straight from Apache/mod_auth_openidc (not converted
+ * to a redirect), which must never be shown to the user as-is.
+ */
+function isAuthErrorResponse(response: Response | undefined): response is Response {
+  return !!response && (response.status === 401 || response.status === 403);
+}
+
+/**
+ * Fetches and caches each file individually. Any single failure (e.g. a 502
+ * during a rolling redeploy) aborts the whole install/update — missing or
+ * broken assets must never be silently skipped. Compared to `Cache.addAll()`
+ * (all-or-nothing, throws a generic `Failed to execute 'addAll' on 'Cache'`
+ * error), this identifies exactly which file failed and why.
+ */
+async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
+  if (files.length === 0) {
+    return;
+  }
+  await Promise.all(
+    files.map(async (file) => {
+      const response = await fetch(file, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error(`Precache failed for ${file}: HTTP ${response.status}`);
+      }
+      await cache.put(file, response);
+    })
+  );
+}
+
+/**
  * Performs a full application installation by fetching the asset
  * manifest, caching all listed files, and storing the build version.
  * Notifies all controlled clients upon completion.
@@ -71,7 +101,7 @@ export async function installApp() {
   const filesToInstall = manifest.files || [];
   const buildVersion = manifest.app_version;
   const cache = await caches.open(CACHE_NAME);
-  await cache.addAll(filesToInstall);
+  await cacheFiles(cache, filesToInstall);
   await cache.put(
     APP_VERSION_CACHE_KEY,
     new Response(JSON.stringify(buildVersion), {
@@ -105,7 +135,7 @@ export async function updateApp() {
   try {
     await caches.delete(TEMP_CACHE_NAME);
     const tempCache = await caches.open(TEMP_CACHE_NAME);
-    await tempCache.addAll(files);
+    await cacheFiles(tempCache, files);
 
     const appVersion = manifest.app_version;
     await tempCache.put(
@@ -214,7 +244,15 @@ export async function handleFetch(event: FetchEvent) {
           }
           // 401/403/5xx (or any other non-ok): serve the cached shell if present.
           const cachedShell = await cache.match(indexUrl);
-          return cachedShell ?? networkResponse ?? Response.error();
+          if (cachedShell) {
+            return cachedShell;
+          }
+          // No cached shell (e.g. right after clearing site data): force reauth
+          // via /auth/relogin instead of leaking Apache's raw 401/403 body.
+          if (isAuthErrorResponse(networkResponse)) {
+            return Response.redirect(scope + 'auth/relogin', 302);
+          }
+          return networkResponse ?? Response.error();
         } catch {
           const cached = await cache.match(indexUrl);
           return cached ?? Response.error();
@@ -248,6 +286,11 @@ export async function handleFetch(event: FetchEvent) {
             // surfacing a technical error that would break the page.
             if (cachedResponse) {
               return cachedResponse;
+            }
+            // No cache: for a full-page navigation, force reauth instead of a raw
+            // 401/403 body. Non-navigate assets (e.g. a lazy chunk) are left as-is.
+            if (event.request.mode === 'navigate' && isAuthErrorResponse(networkResponse)) {
+              return Response.redirect(scope + 'auth/relogin', 302);
             }
             return networkResponse;
           } catch (error) {
