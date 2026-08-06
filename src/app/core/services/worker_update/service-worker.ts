@@ -57,6 +57,79 @@ function isRedirectResponse(response: Response): boolean {
 }
 
 /**
+ * True for a raw 401/403 straight from Apache/mod_auth_openidc (not converted
+ * to a redirect), which must never be shown to the user as-is.
+ */
+function isAuthErrorResponse(response: Response | undefined): response is Response {
+  return !!response && (response.status === 401 || response.status === 403);
+}
+
+/**
+ * Fetches and caches each file individually. Any single failure (e.g. a 502
+ * during a rolling redeploy) aborts the whole install/update — missing or
+ * broken assets must never be silently skipped. Compared to `Cache.addAll()`
+ * (all-or-nothing, throws a generic `Failed to execute 'addAll' on 'Cache'`
+ * error), this identifies exactly which file failed and why.
+ *
+ * A shared `AbortController` cancels the other in-flight fetches as soon as
+ * one file fails, and any fetch that resolves afterwards is skipped instead
+ * of being written to `cache` — otherwise `Promise.all` rejecting early
+ * would still let those in-flight operations complete in the background,
+ * leaving the cache partially populated despite the reported failure.
+ */
+async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
+  if (files.length === 0) {
+    return;
+  }
+  const controller = new AbortController();
+
+  await Promise.all(
+    files.map(async (file) => {
+      // Validated inline, in the same function that performs the fetch below:
+      // `assets_list.json` is untrusted network data, so a poisoned/compromised
+      // response must not be able to make the SW request/cache a cross-origin
+      // resource (client-side request forgery). `assetPath` — never the raw
+      // `file` argument — is what is passed to `fetch()`/`cache.put()`.
+      let assetPath = '';
+      if (file.startsWith('/') && !file.startsWith('//')) {
+        try {
+          const url = new URL(file, self.location.origin);
+          if (url.origin === self.location.origin) {
+            assetPath = url.pathname + url.search;
+          }
+        } catch {
+          assetPath = '';
+        }
+      }
+      if (!assetPath) {
+        controller.abort();
+        throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
+      }
+      let response: Response;
+      try {
+        response = await fetch(assetPath, { cache: 'no-store', signal: controller.signal });
+      } catch (error) {
+        if (controller.signal.aborted) {
+          // Aborted because another file already failed; that failure is what fails the precache.
+          return;
+        }
+        controller.abort();
+        throw error;
+      }
+      if (!response.ok) {
+        controller.abort();
+        throw new Error(`Precache failed for ${assetPath}: HTTP ${response.status}`);
+      }
+      if (controller.signal.aborted) {
+        // Another file failed while this fetch was in flight — skip the write.
+        return;
+      }
+      await cache.put(assetPath, response);
+    })
+  );
+}
+
+/**
  * Performs a full application installation by fetching the asset
  * manifest, caching all listed files, and storing the build version.
  * Notifies all controlled clients upon completion.
@@ -71,7 +144,7 @@ export async function installApp() {
   const filesToInstall = manifest.files || [];
   const buildVersion = manifest.app_version;
   const cache = await caches.open(CACHE_NAME);
-  await cache.addAll(filesToInstall);
+  await cacheFiles(cache, filesToInstall);
   await cache.put(
     APP_VERSION_CACHE_KEY,
     new Response(JSON.stringify(buildVersion), {
@@ -105,7 +178,7 @@ export async function updateApp() {
   try {
     await caches.delete(TEMP_CACHE_NAME);
     const tempCache = await caches.open(TEMP_CACHE_NAME);
-    await tempCache.addAll(files);
+    await cacheFiles(tempCache, files);
 
     const appVersion = manifest.app_version;
     await tempCache.put(
@@ -214,7 +287,15 @@ export async function handleFetch(event: FetchEvent) {
           }
           // 401/403/5xx (or any other non-ok): serve the cached shell if present.
           const cachedShell = await cache.match(indexUrl);
-          return cachedShell ?? networkResponse ?? Response.error();
+          if (cachedShell) {
+            return cachedShell;
+          }
+          // No cached shell (e.g. right after clearing site data): force reauth
+          // via /auth/relogin instead of leaking Apache's raw 401/403 body.
+          if (isAuthErrorResponse(networkResponse)) {
+            return Response.redirect(scope + 'auth/relogin', 302);
+          }
+          return networkResponse ?? Response.error();
         } catch {
           const cached = await cache.match(indexUrl);
           return cached ?? Response.error();
@@ -248,6 +329,11 @@ export async function handleFetch(event: FetchEvent) {
             // surfacing a technical error that would break the page.
             if (cachedResponse) {
               return cachedResponse;
+            }
+            // No cache: for a full-page navigation, force reauth instead of a raw
+            // 401/403 body. Non-navigate assets (e.g. a lazy chunk) are left as-is.
+            if (event.request.mode === 'navigate' && isAuthErrorResponse(networkResponse)) {
+              return Response.redirect(scope + 'auth/relogin', 302);
             }
             return networkResponse;
           } catch (error) {
