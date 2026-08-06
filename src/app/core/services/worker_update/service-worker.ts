@@ -65,26 +65,6 @@ function isAuthErrorResponse(response: Response | undefined): response is Respon
 }
 
 /**
- * Validates a manifest-provided path is same-origin/root-relative and returns
- * its canonical form re-derived from the parsed `URL`, or `null` if invalid.
- * `assets_list.json` is untrusted network data — a poisoned/compromised
- * response must not be able to make the SW fetch/cache cross-origin resources
- * (client-side request forgery), so callers must use the returned value —
- * never the raw `file` argument — to build the actual request.
- */
-function resolveAssetPath(file: string): string | null {
-  if (!file.startsWith('/') || file.startsWith('//')) {
-    return null;
-  }
-  try {
-    const url = new URL(file, self.location.origin);
-    return url.origin === self.location.origin ? url.pathname + url.search : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Fetches and caches each file individually. Any single failure (e.g. a 502
  * during a rolling redeploy) aborts the whole install/update — missing or
  * broken assets must never be silently skipped. Compared to `Cache.addAll()`
