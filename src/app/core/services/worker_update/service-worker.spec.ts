@@ -165,6 +165,24 @@ describe('Service Worker Functions', () => {
 
       await expect(installApp()).rejects.toThrow(/Precache failed for .+: HTTP 502/);
     });
+
+    it.each([
+      ['//evil.com/payload.js', 'protocol-relative URL'],
+      ['https://evil.com/payload.js', 'absolute cross-origin URL'],
+      ['/\\evil.com/payload.js', 'backslash trick'],
+      ['app.js', 'non-root-relative path']
+    ])('should reject a manifest file that is a %s (%s) without ever fetching it', async (file) => {
+      const maliciousManifest = { files: [file], app_version: '1.0.0' };
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(maliciousManifest) });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
+      });
+
+      await expect(installApp()).rejects.toThrow(/invalid or cross-origin asset path/);
+      expect(mockFetch).not.toHaveBeenCalledWith(file, expect.anything());
+    });
   });
 
   describe('updateApp', () => {

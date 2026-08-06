@@ -65,6 +65,23 @@ function isAuthErrorResponse(response: Response | undefined): response is Respon
 }
 
 /**
+ * Restricts manifest-provided asset paths to same-origin, root-relative paths.
+ * `assets_list.json` is untrusted network data — a poisoned/compromised
+ * response must not be able to make the SW fetch and cache cross-origin
+ * resources (client-side request forgery).
+ */
+function isValidAssetPath(file: string): boolean {
+  if (!file.startsWith('/') || file.startsWith('//')) {
+    return false;
+  }
+  try {
+    return new URL(file, self.location.origin).origin === self.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Fetches and caches each file individually. Any single failure (e.g. a 502
  * during a rolling redeploy) aborts the whole install/update — missing or
  * broken assets must never be silently skipped. Compared to `Cache.addAll()`
@@ -77,6 +94,9 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
   }
   await Promise.all(
     files.map(async (file) => {
+      if (!isValidAssetPath(file)) {
+        throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
+      }
       const response = await fetch(file, { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`Precache failed for ${file}: HTTP ${response.status}`);
