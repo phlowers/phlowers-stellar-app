@@ -61,19 +61,22 @@ function isAuthErrorResponse(response: Response | undefined): response is Respon
 }
 
 /**
- * Restricts manifest-provided asset paths to same-origin, root-relative paths.
+ * Validates a manifest-provided path is same-origin/root-relative and returns
+ * its canonical form re-derived from the parsed `URL`, or `null` if invalid.
  * `assets_list.json` is untrusted network data — a poisoned/compromised
- * response must not be able to make the SW fetch and cache cross-origin
- * resources (client-side request forgery).
+ * response must not be able to make the SW fetch/cache cross-origin resources
+ * (client-side request forgery), so callers must use the returned value —
+ * never the raw `file` argument — to build the actual request.
  */
-function isValidAssetPath(file: string): boolean {
+function resolveAssetPath(file: string): string | null {
   if (!file.startsWith('/') || file.startsWith('//')) {
-    return false;
+    return null;
   }
   try {
-    return new URL(file, self.location.origin).origin === self.location.origin;
+    const url = new URL(file, self.location.origin);
+    return url.origin === self.location.origin ? url.pathname + url.search : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
