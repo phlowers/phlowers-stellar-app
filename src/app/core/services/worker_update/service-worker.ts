@@ -65,26 +65,6 @@ function isAuthErrorResponse(response: Response | undefined): response is Respon
 }
 
 /**
- * Validates a manifest-provided path is same-origin/root-relative and returns
- * its canonical form re-derived from the parsed `URL`, or `null` if invalid.
- * `assets_list.json` is untrusted network data — a poisoned/compromised
- * response must not be able to make the SW fetch/cache cross-origin resources
- * (client-side request forgery), so callers must use the returned value —
- * never the raw `file` argument — to build the actual request.
- */
-function resolveAssetPath(file: string): string | null {
-  if (!file.startsWith('/') || file.startsWith('//')) {
-    return null;
-  }
-  try {
-    const url = new URL(file, self.location.origin);
-    return url.origin === self.location.origin ? url.pathname + url.search : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Fetches and caches each file individually. Any single failure (e.g. a 502
  * during a rolling redeploy) aborts the whole install/update — missing or
  * broken assets must never be silently skipped. Compared to `Cache.addAll()`
@@ -105,7 +85,22 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
 
   await Promise.all(
     files.map(async (file) => {
-      const assetPath = resolveAssetPath(file);
+      // Validated inline, in the same function that performs the fetch below:
+      // `assets_list.json` is untrusted network data, so a poisoned/compromised
+      // response must not be able to make the SW request/cache a cross-origin
+      // resource (client-side request forgery). `assetPath` — never the raw
+      // `file` argument — is what is passed to `fetch()`/`cache.put()`.
+      let assetPath = '';
+      if (file.startsWith('/') && !file.startsWith('//')) {
+        try {
+          const url = new URL(file, self.location.origin);
+          if (url.origin === self.location.origin) {
+            assetPath = url.pathname + url.search;
+          }
+        } catch {
+          assetPath = '';
+        }
+      }
       if (!assetPath) {
         controller.abort();
         throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
