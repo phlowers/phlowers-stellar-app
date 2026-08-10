@@ -341,44 +341,54 @@ describe('Service Worker Functions', () => {
       };
     });
 
-    it('should bypass /auth/userinfo completely (no cache access)', async () => {
+    it('should bypass /auth/userinfo completely (no respondWith, no cache access)', async () => {
       mockEvent.request.url = 'https://example.com/auth/userinfo';
-      mockFetch.mockResolvedValue({ ok: true, status: 200 });
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(mockEvent.respondWith).toHaveBeenCalled();
-      // Cache must not be accessed for bypass routes
+      // Plain return: the browser must handle the request natively.
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
     it('should bypass /auth/callback completely', async () => {
       mockEvent.request.url = 'https://example.com/auth/callback';
-      mockFetch.mockResolvedValue({ ok: true, status: 200 });
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(mockEvent.respondWith).toHaveBeenCalled();
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
-    it('should bypass /assets_list.json completely (no cache access)', async () => {
+    it('should bypass /auth/relogin completely (native browser handling of the redirect chain)', async () => {
+      mockEvent.request.url = 'https://example.com/auth/relogin';
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should bypass /assets_list.json completely (no respondWith, no cache access)', async () => {
       mockEvent.request.url = 'https://example.com/assets_list.json';
-      mockFetch.mockResolvedValue({ ok: true, status: 200 });
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(mockEvent.respondWith).toHaveBeenCalled();
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
-    it('should bypass /version.json completely (no cache access)', async () => {
+    it('should bypass /version.json completely (no respondWith, no cache access)', async () => {
       mockEvent.request.url = 'https://example.com/version.json';
-      mockFetch.mockResolvedValue({ ok: true, status: 200 });
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
-      expect(mockEvent.respondWith).toHaveBeenCalled();
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
   });
@@ -609,7 +619,9 @@ describe('Service Worker Functions', () => {
         clonedRequest,
         expect.objectContaining({
           method: 'GET',
-          headers: expect.any(Object)
+          headers: expect.any(Object),
+          // Cache-miss fallback must be bounded (fetchWithTimeout).
+          signal: expect.any(AbortSignal)
         })
       );
       expect(mockEvent.respondWith).toHaveBeenCalled();
