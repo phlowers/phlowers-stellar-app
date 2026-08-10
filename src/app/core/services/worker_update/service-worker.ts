@@ -91,7 +91,7 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
       // resource (client-side request forgery). `assetPath` — never the raw
       // `file` argument — is what is passed to `fetch()`/`cache.put()`.
       let assetPath = '';
-      if (file.startsWith('/') && !file.startsWith('//')) {
+      if (file.startsWith('/') && !file.startsWith('//') && !file.includes('\\')) {
         try {
           const url = new URL(file, self.location.origin);
           if (url.origin === self.location.origin) {
