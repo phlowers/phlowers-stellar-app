@@ -609,7 +609,9 @@ describe('Service Worker Functions', () => {
         clonedRequest,
         expect.objectContaining({
           method: 'GET',
-          headers: expect.any(Object)
+          headers: expect.any(Object),
+          // Cache-miss fallback must be bounded (fetchWithTimeout).
+          signal: expect.any(AbortSignal)
         })
       );
       expect(mockEvent.respondWith).toHaveBeenCalled();
