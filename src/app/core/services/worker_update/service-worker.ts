@@ -46,7 +46,7 @@ function shouldUseNetworkFirst(request: Request): boolean {
 
 /**
  * Returns true when a response is a redirect that the browser must be allowed
- * to follow (e.g. Apache's 302 to the G@IA OIDC login). Navigation requests
+ * to follow (e.g. Apache's 302 to the AuthProvider OIDC login). Navigation requests
  * are fetched with `redirect: 'manual'`, so a redirect surfaces here as an
  * `opaqueredirect` response (status 0). Such responses MUST be passed through
  * untouched so the browser performs the navigation instead of the SW
@@ -256,7 +256,7 @@ export async function handleFetch(event: FetchEvent) {
   // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
   // Plain return WITHOUT respondWith: the browser handles the request natively.
   // `respondWith(fetch(request))` is NOT equivalent — OIDC endpoints answer
-  // with cross-origin redirects to G@IA, and a SW-relayed fetch of a
+  // with cross-origin redirects to the AuthProvider, and a SW-relayed fetch of a
   // redirected navigation rejects ("Failed to fetch"), blanking the page
   // (incident 2026-08-10, evening: /auth/relogin navigation died in the SW).
   if (shouldBypassSW(url)) {
@@ -285,7 +285,7 @@ export async function handleFetch(event: FetchEvent) {
             await cache.put(indexUrl, networkResponse.clone());
             return networkResponse;
           }
-          // Preserve Apache/G@IA redirects (OIDC login flow): let the browser follow.
+          // Preserve Apache/AuthProvider redirects (OIDC login flow): let the browser follow.
           if (networkResponse && isRedirectResponse(networkResponse)) {
             return networkResponse;
           }
