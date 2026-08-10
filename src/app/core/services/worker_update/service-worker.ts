@@ -369,7 +369,7 @@ export async function handleFetch(event: FetchEvent) {
   // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
   // Plain return WITHOUT respondWith: the browser handles the request natively.
   // `respondWith(fetch(request))` is NOT equivalent — OIDC endpoints answer
-  // with cross-origin redirects to G@IA, and a SW-relayed fetch of a
+  // with cross-origin redirects to the AuthProvider, and a SW-relayed fetch of a
   // redirected navigation rejects ("Failed to fetch"), blanking the page
   // (incident 2026-08-10, evening: /auth/relogin navigation died in the SW).
   if (shouldBypassSW(url)) {
@@ -397,6 +397,10 @@ export async function handleFetch(event: FetchEvent) {
             },
             NAVIGATE_TIMEOUT_MS
           );
+          if (networkResponse?.ok) {
+            await cache.put(indexUrl, networkResponse.clone());
+            return networkResponse;
+          }
           // Preserve Apache/AuthProvider redirects (OIDC login flow): let the browser follow.
           if (networkResponse && isRedirectResponse(networkResponse)) {
             return networkResponse;
