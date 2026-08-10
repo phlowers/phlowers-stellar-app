@@ -52,4 +52,20 @@ describe('AppConfigService', () => {
 
     await expect(promise).resolves.toBe('fr');
   });
+
+  it('should fall back to "fr" when the request hangs beyond the timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      const promise = service.loadDefaultLang();
+
+      // Request stays pending: only the internal timeout can resolve the promise.
+      httpMock.expectOne('assets/config/app-config.json');
+      await vi.advanceTimersByTimeAsync(3000);
+
+      await expect(promise).resolves.toBe('fr');
+      expect(mockLoggerService.warn).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
