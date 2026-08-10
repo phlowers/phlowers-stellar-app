@@ -50,6 +50,16 @@ export class UpdateService {
   private static readonly FETCH_TIMEOUT_MS = 13000;
 
   /**
+   * True when a Service-Worker-reported failure looks like an auth/session
+   * problem (precache assets answered 401/403/5xx — typically a stale OIDC
+   * session). The generic "unknown error" message would loop the user through
+   * failing updates; pointing them to a re-login is actionable.
+   */
+  private static isAuthLikeFailure(error: unknown): boolean {
+    return typeof error === 'string' && /HTTP (401|403|5\d\d)/.test(error);
+  }
+
+  /**
    * True when the current runtime exposes a Service Worker API.
    * Centralizes the capability check so callers do not need to probe
    * `navigator.serviceWorker` themselves.
@@ -118,14 +128,18 @@ export class UpdateService {
               detail: this.translocoService.translate('shared.update-service.install-success-detail')
             });
             break;
-          case 'error':
+          case 'error': {
             this.updateLoading.set(false);
+            const detail = UpdateService.isAuthLikeFailure(event.data.error)
+              ? this.translocoService.translate('shared.update-service.update-failed-auth-detail')
+              : (event.data.error ?? this.translocoService.translate('shared.update-service.update-failed-detail'));
             this.messageService.add({
               severity: 'error',
               summary: this.translocoService.translate('shared.update-service.update-failed-summary'),
-              detail: event.data.error ?? this.translocoService.translate('shared.update-service.update-failed-detail')
+              detail
             });
             break;
+          }
         }
       }
     });

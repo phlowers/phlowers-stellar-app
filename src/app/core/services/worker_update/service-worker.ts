@@ -46,7 +46,7 @@ function shouldUseNetworkFirst(request: Request): boolean {
 
 /**
  * Returns true when a response is a redirect that the browser must be allowed
- * to follow (e.g. Apache's 302 to the G@IA OIDC login). Navigation requests
+ * to follow (e.g. Apache's 302 to the AuthProvider OIDC login). Navigation requests
  * are fetched with `redirect: 'manual'`, so a redirect surfaces here as an
  * `opaqueredirect` response (status 0). Such responses MUST be passed through
  * untouched so the browser performs the navigation instead of the SW
@@ -91,7 +91,7 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
       // resource (client-side request forgery). `assetPath` — never the raw
       // `file` argument — is what is passed to `fetch()`/`cache.put()`.
       let assetPath = '';
-      if (file.startsWith('/') && !file.startsWith('//')) {
+      if (file.startsWith('/') && !file.startsWith('//') && !file.includes('\\')) {
         try {
           const url = new URL(file, self.location.origin);
           if (url.origin === self.location.origin) {
@@ -254,8 +254,12 @@ export async function handleFetch(event: FetchEvent) {
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
 
   // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
+  // Plain return WITHOUT respondWith: the browser handles the request natively.
+  // `respondWith(fetch(request))` is NOT equivalent — OIDC endpoints answer
+  // with cross-origin redirects to the AuthProvider, and a SW-relayed fetch of a
+  // redirected navigation rejects ("Failed to fetch"), blanking the page
+  // (incident 2026-08-10, evening: /auth/relogin navigation died in the SW).
   if (shouldBypassSW(url)) {
-    event.respondWith(fetch(event.request));
     return;
   }
 
@@ -281,7 +285,7 @@ export async function handleFetch(event: FetchEvent) {
             await cache.put(indexUrl, networkResponse.clone());
             return networkResponse;
           }
-          // Preserve Apache/G@IA redirects (OIDC login flow): let the browser follow.
+          // Preserve Apache/AuthProvider redirects (OIDC login flow): let the browser follow.
           if (networkResponse && isRedirectResponse(networkResponse)) {
             return networkResponse;
           }
@@ -354,7 +358,10 @@ export async function handleFetch(event: FetchEvent) {
           return response;
         }
         const fetchRequest = event.request.clone();
-        return fetch(fetchRequest, NO_CACHE_INIT).catch((error) => {
+        // Bounded: an unbounded fetch here can hang behind an OIDC refresh
+        // pile-up on the server (headers-only timeout; body streaming of
+        // large files is unaffected once headers arrive).
+        return fetchWithTimeout(fetchRequest, NO_CACHE_INIT, NAVIGATE_TIMEOUT_MS).catch((error) => {
           console.error('Fetch failed:', error);
           return Response.error();
         });

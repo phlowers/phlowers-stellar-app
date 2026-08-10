@@ -188,6 +188,7 @@
       "install-success-detail": "The application has been installed",
       "update-failed-summary": "Update failed",
       "update-failed-detail": "An unknown error occurred during the update",
+      "update-failed-auth-detail": "The update could not be downloaded because your session has expired. Please sign in again, then retry the update",
       "version-checked-detail": "App version checked"
     },
     "obstacle-form-service": {
