@@ -38,7 +38,7 @@
     <button
       app-btn
       [btnLoading]="updateService.updateLoading()"
-      (click)="updateService.update()"
+      (click)="updateService.forceUpdateFromAdmin()"
       [disabled]="updateService.updateLoading()"
     >
       {{ 'admin.update-to-latest' | transloco }}

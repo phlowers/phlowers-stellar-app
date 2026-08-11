@@ -102,8 +102,7 @@ describe('AppComponent', () => {
       isFirstLaunch: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
-      update: vi.fn(),
-      install: vi.fn().mockResolvedValue(true)
+      installFirstLaunch: vi.fn().mockResolvedValue(true)
     } as unknown as UpdateService;
 
     mockMaintenanceService = {
@@ -318,8 +317,7 @@ describe('AppComponent - HTML rendering', () => {
         isFirstLaunch: signal(false),
         updateLoading: vi.fn().mockReturnValue(false),
         latestVersion: vi.fn().mockReturnValue(null),
-        update: vi.fn(),
-        install: vi.fn().mockResolvedValue(true)
+        installFirstLaunch: vi.fn().mockResolvedValue(true)
       }
     });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
@@ -427,8 +425,7 @@ describe('AppComponent - auth-gated PWA flow', () => {
         isFirstLaunch: signal(false),
         updateLoading: () => false,
         latestVersion: () => null,
-        update: vi.fn(),
-        install: installSpy
+        installFirstLaunch: installSpy
       }
     });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser } });
@@ -437,6 +434,7 @@ describe('AppComponent - auth-gated PWA flow', () => {
     });
     TestBed.overrideProvider(LinesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
     TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
+    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
     TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
     TestBed.overrideProvider(AttachmentService, {
       useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
@@ -602,8 +600,7 @@ describe('AppComponent - automatic first-install resilience', () => {
         isFirstLaunch: signal(false),
         updateLoading: () => false,
         latestVersion: () => null,
-        update: vi.fn(),
-        install: installSpy,
+        installFirstLaunch: installSpy,
         serviceWorkerSupported
       }
     });

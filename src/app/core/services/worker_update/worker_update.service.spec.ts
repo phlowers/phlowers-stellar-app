@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { UpdateService } from './worker_update.service';
 import { MessageService } from 'primeng/api';
+import { AuthService } from '@services/auth/auth.service';
+import { User } from '@shared/domain';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('@src/environments/environment', () => ({
@@ -18,7 +21,7 @@ describe('UpdateService', () => {
     getRegistration: vi.Mock;
     ready: Promise<ServiceWorkerRegistration>;
   };
-  let mockCaches: { open: vi.Mock; delete: vi.Mock };
+  let mockCaches: { open: vi.Mock; delete: vi.Mock; keys: vi.Mock };
   let mockCache: { match: vi.Mock };
   let mockFetch: vi.Mock & typeof fetch;
   let originalServiceWorker: ServiceWorkerContainer;
@@ -26,8 +29,12 @@ describe('UpdateService', () => {
   let originalFetch: typeof fetch;
   let mockMessageService: MessageService;
   let mockPostMessage: vi.Mock;
+  /** Authenticated by default; individual tests set it to null to prove the auth guard. */
+  let currentUser: ReturnType<typeof signal<User | null>>;
 
   beforeEach(() => {
+    currentUser = signal<User | null>({ email: 'user@example.com' } as User);
+
     mockMessageService = {
       add: vi.fn()
     } as unknown as MessageService;
@@ -53,7 +60,10 @@ describe('UpdateService', () => {
     };
     mockCaches = {
       open: vi.fn().mockResolvedValue(mockCache),
-      delete: vi.fn().mockResolvedValue(true)
+      delete: vi.fn().mockResolvedValue(true),
+      // Default: a legacy 'app-assets' cache exists; its content is driven
+      // by mockCache.match in individual tests (populated vs. empty).
+      keys: vi.fn().mockResolvedValue(['app-assets'])
     };
     originalCaches = globalThis.caches;
     Object.defineProperty(globalThis, 'caches', {
@@ -74,7 +84,11 @@ describe('UpdateService', () => {
           preloadLangs: true
         })
       ],
-      providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
+      providers: [
+        UpdateService,
+        { provide: MessageService, useValue: mockMessageService },
+        { provide: AuthService, useValue: { currentUser } }
+      ]
     });
     service = TestBed.inject(UpdateService);
     service.latestVersion.set(null);
@@ -332,17 +346,38 @@ describe('UpdateService', () => {
   });
 
   describe('isCachePopulated', () => {
-    it('should return true when cache has app_version entry', async () => {
+    it('should return true when a versioned app-assets cache has an app_version entry', async () => {
+      mockCaches.keys.mockResolvedValueOnce(['app-assets-v-abc123']);
+      mockCache.match.mockResolvedValueOnce(new Response('{}'));
+
+      const result = await service.isCachePopulated();
+
+      expect(result).toBe(true);
+      expect(mockCaches.open).toHaveBeenCalledWith('app-assets-v-abc123');
+      expect(mockCache.match).toHaveBeenCalledWith('/app_version');
+    });
+
+    it('should return true when the legacy app-assets cache has an app_version entry', async () => {
+      mockCaches.keys.mockResolvedValueOnce(['app-assets']);
       mockCache.match.mockResolvedValueOnce(new Response('{}'));
 
       const result = await service.isCachePopulated();
 
       expect(result).toBe(true);
       expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
-      expect(mockCache.match).toHaveBeenCalledWith('/app_version');
+    });
+
+    it('should return false when no app-assets cache exists at all', async () => {
+      mockCaches.keys.mockResolvedValueOnce(['some-other-cache', 'app-assets-control']);
+
+      const result = await service.isCachePopulated();
+
+      expect(result).toBe(false);
+      expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
     it('should return false when cache has no app_version entry', async () => {
+      mockCaches.keys.mockResolvedValueOnce(['app-assets']);
       mockCache.match.mockResolvedValueOnce(undefined);
 
       const result = await service.isCachePopulated();
@@ -351,7 +386,7 @@ describe('UpdateService', () => {
     });
 
     it('should return false when cache API throws', async () => {
-      mockCaches.open.mockRejectedValueOnce(new Error('Cache API unavailable'));
+      mockCaches.keys.mockRejectedValueOnce(new Error('Cache API unavailable'));
 
       const result = await service.isCachePopulated();
 
@@ -438,31 +473,129 @@ describe('UpdateService', () => {
     });
   });
 
-  describe('update', () => {
-    it('should set updateLoading to true and send message to service worker', async () => {
-      await service.update();
+  describe('confirmUpdate', () => {
+    it('should post an update message when pendingAction is update-available', async () => {
+      service.pendingAction.set('update-available');
 
+      const result = await service.confirmUpdate();
+
+      expect(result).toBe(true);
       expect(service.updateLoading()).toBe(true);
       expect(mockServiceWorker.getRegistration).toHaveBeenCalled();
-      expect(mockPostMessage).toHaveBeenCalledWith({
-        type: 'update'
-      });
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'update' });
+    });
+
+    it('should post an install message when pendingAction is first-install', async () => {
+      service.pendingAction.set('first-install');
+
+      const result = await service.confirmUpdate();
+
+      expect(result).toBe(true);
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'install' });
+    });
+
+    it('should do nothing when pendingAction is none', async () => {
+      service.pendingAction.set('none');
+
+      const result = await service.confirmUpdate();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('should refuse when the user is not authenticated', async () => {
+      currentUser.set(null);
+      service.pendingAction.set('update-available');
+
+      const result = await service.confirmUpdate();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
     });
 
     it('should reset updateLoading when no registration is found', async () => {
       mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
+      service.pendingAction.set('update-available');
 
-      await service.update();
+      await service.confirmUpdate();
 
       expect(service.updateLoading()).toBe(false);
     });
   });
 
-  describe('install', () => {
+  describe('forceUpdateFromAdmin', () => {
+    it('should post an update message when authenticated and an update is available', async () => {
+      service.pendingAction.set('update-available');
+
+      const result = await service.forceUpdateFromAdmin();
+
+      expect(result).toBe(true);
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'update' });
+    });
+
+    it('should refuse when the user is not authenticated', async () => {
+      currentUser.set(null);
+      service.pendingAction.set('update-available');
+
+      const result = await service.forceUpdateFromAdmin();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('should refuse when no update is pending', async () => {
+      service.pendingAction.set('none');
+
+      const result = await service.forceUpdateFromAdmin();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('should refuse a first-install pending action (not its purpose)', async () => {
+      service.pendingAction.set('first-install');
+
+      const result = await service.forceUpdateFromAdmin();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('installFirstLaunch', () => {
+    beforeEach(() => {
+      service.pendingAction.set('first-install');
+    });
+
+    it('should post an install message when authenticated and first-install is pending', async () => {
+      const result = await service.installFirstLaunch();
+
+      expect(result).toBe(true);
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'install' });
+    });
+
+    it('should refuse when the user is not authenticated', async () => {
+      currentUser.set(null);
+
+      const result = await service.installFirstLaunch();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('should refuse when pendingAction is not first-install', async () => {
+      service.pendingAction.set('update-available');
+
+      const result = await service.installFirstLaunch();
+
+      expect(result).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
     it('should reset updateLoading when no registration is found', async () => {
       mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
 
-      await service.install();
+      await service.installFirstLaunch();
 
       expect(service.updateLoading()).toBe(false);
     });

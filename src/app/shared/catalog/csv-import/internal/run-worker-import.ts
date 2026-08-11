@@ -12,11 +12,14 @@ import { openWorkerDb } from '../csv-import.worker-db';
 import { isJsonImportConfig, resolveCsvImportConfig } from '../configs';
 import type { StellarDexieHandle } from '../json-import.engine.interfaces';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-import.worker.interfaces';
+import { downloadAndHash } from './verified-download';
 
 /**
- * Handles one catalog import request inside the worker. Opens Dexie, resolves
- * the config for the requested catalog, dispatches to the CSV or JSON engine
- * depending on the config kind, then closes the database.
+ * Handles one catalog import request inside the worker. Downloads and
+ * SHA-256-hashes the catalog exactly once, verifies it against
+ * `request.expectedHash` (when provided) BEFORE touching Dexie, then opens
+ * Dexie, resolves the config for the requested catalog, and dispatches to
+ * the CSV or JSON engine depending on the config kind.
  *
  * @remarks
  * Exported so unit tests can drive it without spawning a real Web Worker.
@@ -28,22 +31,31 @@ export async function runWorkerImport(
   request: CsvImportWorkerRequest,
   post: (msg: CsvImportWorkerResponse) => void
 ): Promise<void> {
+  const { blob, hash } = await downloadAndHash(request.url);
+  if (request.expectedHash && request.expectedHash !== hash) {
+    throw new Error(
+      `Catalog hash mismatch for ${request.url}: expected ${request.expectedHash}, got ${hash} — refusing to import`
+    );
+  }
+
   const db = openWorkerDb();
   await db.open();
   try {
     const config = resolveCsvImportConfig(request.csvKey);
+    const post2 = (msg: CsvImportWorkerResponse) => post(msg.type === 'done' ? { ...msg, verifiedHash: hash } : msg);
     if (isJsonImportConfig(config)) {
-      await runJsonImport(request.url, config, { db: db as unknown as StellarDexieHandle }, post);
+      const payload: unknown = JSON.parse(await blob.text());
+      await runJsonImport(payload, config, { db: db as unknown as StellarDexieHandle }, post2);
       return;
     }
     await runCsvImport(
-      request.url,
+      blob,
       config,
       {
         papa: Papa,
         resolveTable: (tableName) => db[tableName] as Table<unknown, unknown>
       },
-      post,
+      post2,
       { chunkSize: request.chunkSize }
     );
   } finally {

@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import Papa from 'papaparse';
+import { createSHA256 } from 'hash-wasm';
 import type { CsvImportWorkerResponse } from './csv-import.worker.interfaces';
 
 const dexieState = vi.hoisted(() => {
@@ -70,6 +71,14 @@ describe('csv-import.worker - runWorkerImport', () => {
       await cb();
     });
     vi.mocked(Papa.parse).mockReset();
+    // Papa.parse is fully mocked below and ignores its first argument, so the
+    // actual downloaded content never matters here — only that the single
+    // verified download itself succeeds.
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('placeholder', { status: 200 }));
+  });
+
+  afterEach(() => {
+    vi.mocked(globalThis.fetch).mockRestore?.();
   });
 
   it('opens Dexie, dispatches to the cables config, and closes on success', async () => {
@@ -100,6 +109,44 @@ describe('csv-import.worker - runWorkerImport', () => {
     expect(dexieState.close).toHaveBeenCalled();
     expect(dexieState.tableState.clear).toHaveBeenCalledTimes(1);
     expect(messages.at(-1)).toMatchObject({ type: 'done', csvKey: 'cables', totalRows: 1 });
+  });
+
+  it('includes the verified SHA-256 hash of the downloaded content in the done message', async () => {
+    const { runWorkerImport } = await import('./csv-import.worker');
+    vi.mocked(Papa.parse).mockImplementation((...args: unknown[]) => {
+      const opts = args[1] as Papa.ParseConfig<Record<string, string>>;
+      const parser = {
+        pause: vi.fn(),
+        resume: vi.fn(() => opts.complete?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, undefined)),
+        abort: vi.fn()
+      } as unknown as Papa.Parser;
+      opts.chunk?.({ data: [], errors: [], meta: {} as Papa.ParseMeta }, parser);
+    });
+
+    const hasher = await createSHA256();
+    hasher.init();
+    hasher.update(new TextEncoder().encode('placeholder'));
+    const expectedDigest = hasher.digest('hex');
+
+    const messages: CsvImportWorkerResponse[] = [];
+    await runWorkerImport({ csvKey: 'cables', url: 'http://x/cables.csv' }, (m) => messages.push(m));
+
+    expect(messages.at(-1)).toMatchObject({ type: 'done', csvKey: 'cables', verifiedHash: expectedDigest });
+  });
+
+  it('rejects on a catalog hash mismatch before ever touching Dexie', async () => {
+    const { runWorkerImport } = await import('./csv-import.worker');
+
+    await expect(
+      runWorkerImport(
+        { csvKey: 'cables', url: 'http://x/cables.csv', expectedHash: 'not-the-real-hash' },
+        () => undefined
+      )
+    ).rejects.toThrow(/Catalog hash mismatch/);
+
+    expect(dexieState.open).not.toHaveBeenCalled();
+    expect(dexieState.tableState.clear).not.toHaveBeenCalled();
+    expect(Papa.parse).not.toHaveBeenCalled();
   });
 
   it('dispatches to the attachments config (grouped mode)', async () => {

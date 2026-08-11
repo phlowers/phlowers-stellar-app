@@ -191,7 +191,7 @@ export class AppComponent implements OnInit {
     const installFailedMessage = this.transloco.translate('app.install-failed');
 
     this.updateService
-      .install()
+      .installFirstLaunch()
       .then(async (started) => {
         if (started || this.destroyed) {
           return;
@@ -215,7 +215,7 @@ export class AppComponent implements OnInit {
         if (this.destroyed) {
           return;
         }
-        const retryStarted = await this.updateService.install().catch((err) => {
+        const retryStarted = await this.updateService.installFirstLaunch().catch((err) => {
           this.logger.error('Automatic first-install retry failed', err);
           return false;
         });

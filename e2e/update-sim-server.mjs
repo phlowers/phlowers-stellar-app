@@ -25,6 +25,17 @@ const csvVersions = {
   }
 };
 
+// Mirrors CATALOG_DATA_FILENAMES in create_assets_list_for_service_worker.py:
+// catalogs are described by data_hashes and must never appear in `files`.
+const CATALOG_DATA_FILENAMES = new Set([
+  'attachments.csv',
+  'cables.csv',
+  'chains.csv',
+  'lines.csv',
+  'maintenance-teams.csv',
+  'obstacle_configuration.json'
+]);
+
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
@@ -49,6 +60,9 @@ function listFilesRecursively(baseDir) {
       continue;
     }
     if (path.basename(relativePath) === 'assets_list.json') {
+      continue;
+    }
+    if (CATALOG_DATA_FILENAMES.has(path.basename(relativePath))) {
       continue;
     }
     files.push(relativePath);
