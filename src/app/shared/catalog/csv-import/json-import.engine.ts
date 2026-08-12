@@ -13,6 +13,8 @@ export interface JsonImportEngineDeps {
   db: StellarDexieHandle;
   /** Returns the current ISO 8601 timestamp (allows test injection). */
   now?: () => string;
+  /** Forwarded to the config's context; see `JsonImportContext.tableNamePrefix`. */
+  tableNamePrefix?: string;
 }
 
 /**
@@ -41,7 +43,7 @@ export async function runJsonImport(
   post: (msg: CsvImportWorkerResponse) => void
 ): Promise<JsonImportApplyResult> {
   const now = (deps.now ?? (() => new Date().toISOString()))();
-  const result = await config.apply(payload, { db: deps.db, now });
+  const result = await config.apply(payload, { db: deps.db, now, tableNamePrefix: deps.tableNamePrefix });
   post({ type: 'progress', csvKey: config.csvKey, processedRows: result.totalRows });
   post({ type: 'done', csvKey: config.csvKey, totalRows: result.totalRows, totalKeys: result.totalKeys });
   return result;

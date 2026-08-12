@@ -4,16 +4,21 @@ import path from 'node:path';
 import http from 'node:http';
 
 const PORT = Number(process.env.E2E_PORT || 4310);
-const DIST_DIR = path.resolve(process.cwd(), process.env.E2E_DIST_DIR || 'dist/en');
+// A single build output (no per-locale dist/en, dist/fr): translations are
+// runtime Transloco JSON, not build-time Angular i18n splitting.
+const DIST_DIR = path.resolve(process.cwd(), process.env.E2E_DIST_DIR || 'dist');
 
 if (!fs.existsSync(DIST_DIR)) {
   console.error(`[e2e-server] Dist directory does not exist: ${DIST_DIR}`);
-  console.error('[e2e-server] Run "npm run build:en" before Playwright e2e tests.');
+  console.error('[e2e-server] Run "npm run build" before Playwright e2e tests.');
   process.exit(1);
 }
 
 const state = {
-  scenario: 'v1'
+  scenario: 'v1',
+  // Simulates an authenticated test session for `/auth/userinfo` without any
+  // change to production auth code (see update-plan.md, Étape 6.3).
+  authenticated: true
 };
 
 const csvVersions = {
@@ -22,6 +27,52 @@ const csvVersions = {
   },
   v2: {
     cables: ['name,data_source,section,diameter', 'E2E_CABLE_V2,e2e,120,12'].join('\n')
+  },
+  v3: {
+    cables: ['name,data_source,section,diameter', 'E2E_CABLE_V3,e2e,140,14'].join('\n')
+  }
+};
+// Both scenarios reuse the v2 cable content: 'v2-broken' fails on an unrelated
+// app asset, 'v2-badhash' deliberately declares a wrong data_hashes entry.
+csvVersions['v2-broken'] = csvVersions.v2;
+csvVersions['v2-badhash'] = csvVersions.v2;
+
+const VALID_SCENARIOS = new Set(['v1', 'v2', 'v3', 'v2-broken', 'v2-badhash']);
+
+// Per-scenario application version stamp + which JS asset(s) the manifest lists.
+const SCENARIO_VERSIONS = {
+  v1: {
+    git_hash: 'e2e-hash-v1',
+    version: '1.0.0-e2e',
+    build_datetime_utc: '2026-03-10T09:00:00.000000+00:00',
+    asset: '/e2e-app-v1.js'
+  },
+  v2: {
+    git_hash: 'e2e-hash-v2',
+    version: '2.0.0-e2e',
+    build_datetime_utc: '2026-03-10T09:10:00.000000+00:00',
+    asset: '/e2e-app-v2.js'
+  },
+  v3: {
+    git_hash: 'e2e-hash-v3',
+    version: '3.0.0-e2e',
+    build_datetime_utc: '2026-03-10T09:20:00.000000+00:00',
+    asset: '/e2e-app-v3.js'
+  },
+  'v2-broken': {
+    git_hash: 'e2e-hash-v2-broken',
+    version: '2.0.0-e2e-broken',
+    build_datetime_utc: '2026-03-10T09:30:00.000000+00:00',
+    asset: '/e2e-app-v2.js',
+    // Listed in `files` but intentionally 404s (see the request handler below) to
+    // simulate a candidate asset failing precache before activation.
+    extraFile: '/e2e-app-v2-broken.js'
+  },
+  'v2-badhash': {
+    git_hash: 'e2e-hash-v2-badhash',
+    version: '2.0.0-e2e-badhash',
+    build_datetime_utc: '2026-03-10T09:40:00.000000+00:00',
+    asset: '/e2e-app-v2.js'
   }
 };
 
@@ -83,18 +134,27 @@ function readStaticCsvHash(fileName) {
 
 function currentManifest() {
   const scenario = state.scenario;
+  const versionInfo = SCENARIO_VERSIONS[scenario];
   const cablesCsv = csvVersions[scenario].cables;
-  const files = [...staticFiles, scenario === 'v1' ? '/e2e-app-v1.js' : '/e2e-app-v2.js'];
+  const files = [...staticFiles, versionInfo.asset];
+  if (versionInfo.extraFile) {
+    files.push(versionInfo.extraFile);
+  }
+
+  // 'v2-badhash' deliberately declares a hash that does not match the served
+  // content, to exercise the SHA-256 mismatch rejection (no partial promotion).
+  const cablesHash =
+    scenario === 'v2-badhash' ? sha256('TAMPERED_CONTENT_DOES_NOT_MATCH_SERVED_BYTES') : sha256(cablesCsv);
 
   return {
     app_version: {
-      git_hash: scenario === 'v1' ? 'e2e-hash-v1' : 'e2e-hash-v2',
-      build_datetime_utc: scenario === 'v1' ? '2026-03-10T09:00:00.000000+00:00' : '2026-03-10T09:10:00.000000+00:00',
-      version: scenario === 'v1' ? '1.0.0-e2e' : '2.0.0-e2e'
+      git_hash: versionInfo.git_hash,
+      build_datetime_utc: versionInfo.build_datetime_utc,
+      version: versionInfo.version
     },
     data_hashes: {
       'attachments.csv': readStaticCsvHash('attachments.csv'),
-      'cables.csv': sha256(cablesCsv),
+      'cables.csv': cablesHash,
       'chains.csv': readStaticCsvHash('chains.csv'),
       'lines.csv': readStaticCsvHash('lines.csv'),
       'maintenance-teams.csv': readStaticCsvHash('maintenance-teams.csv'),
@@ -131,8 +191,8 @@ const server = http.createServer((request, response) => {
   if (pathname === '/__e2e/scenario') {
     if (request.method === 'POST') {
       const requestedScenario = requestUrl.searchParams.get('v');
-      if (requestedScenario !== 'v1' && requestedScenario !== 'v2') {
-        send(response, 400, 'Invalid scenario, expected v1 or v2');
+      if (!VALID_SCENARIOS.has(requestedScenario)) {
+        send(response, 400, `Invalid scenario, expected one of: ${[...VALID_SCENARIOS].join(', ')}`);
         return;
       }
       state.scenario = requestedScenario;
@@ -141,6 +201,42 @@ const server = http.createServer((request, response) => {
     }
 
     send(response, 200, JSON.stringify({ scenario: state.scenario }), 'application/json; charset=utf-8');
+    return;
+  }
+
+  // Simulated authenticated test session, toggled by Playwright without any
+  // change to production auth code (Apache/mod_auth_openidc is not involved).
+  if (pathname === '/__e2e/auth') {
+    if (request.method === 'POST') {
+      const requestedAuth = requestUrl.searchParams.get('authenticated');
+      if (requestedAuth !== 'true' && requestedAuth !== 'false') {
+        send(response, 400, 'Invalid authenticated flag, expected true or false');
+        return;
+      }
+      state.authenticated = requestedAuth === 'true';
+      send(response, 200, JSON.stringify({ authenticated: state.authenticated }), 'application/json; charset=utf-8');
+      return;
+    }
+
+    send(response, 200, JSON.stringify({ authenticated: state.authenticated }), 'application/json; charset=utf-8');
+    return;
+  }
+
+  // Mirrors the shape of Apache/mod_auth_openidc's `/auth/userinfo` CGI
+  // endpoint (see auth.service.ts) in fallback mode (`oidcEnabled: false`).
+  if (pathname === '/auth/userinfo') {
+    const body = state.authenticated
+      ? {
+          authenticated: true,
+          oidcEnabled: false,
+          email: 'e2e-test@example.com',
+          sub: 'e2e-sub-001',
+          given_name: 'E2E',
+          family_name: 'Tester',
+          roles: ['admin']
+        }
+      : { authenticated: false, oidcEnabled: false };
+    send(response, 200, JSON.stringify(body), 'application/json; charset=utf-8');
     return;
   }
 
@@ -156,6 +252,18 @@ const server = http.createServer((request, response) => {
 
   if (pathname === '/e2e-app-v2.js') {
     send(response, 200, 'window.__E2E_APP_ASSET_VERSION = "v2";\n', 'application/javascript; charset=utf-8');
+    return;
+  }
+
+  if (pathname === '/e2e-app-v3.js') {
+    send(response, 200, 'window.__E2E_APP_ASSET_VERSION = "v3";\n', 'application/javascript; charset=utf-8');
+    return;
+  }
+
+  // Always 404s: simulates a candidate asset failing to precache (e.g. a 502
+  // during a rolling redeploy), listed in `files` only for the 'v2-broken' scenario.
+  if (pathname === '/e2e-app-v2-broken.js') {
+    send(response, 404, 'Not found (intentionally broken for e2e)');
     return;
   }
 

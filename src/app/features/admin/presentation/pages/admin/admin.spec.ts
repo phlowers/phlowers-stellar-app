@@ -234,6 +234,7 @@ describe('AdminComponent', () => {
       // Mock the caches API
       Object.defineProperty(globalThis, 'caches', {
         value: {
+          keys: vi.fn().mockResolvedValue([]),
           delete: vi.fn().mockResolvedValue(undefined)
         },
         writable: true
@@ -265,7 +266,19 @@ describe('AdminComponent', () => {
       });
     });
 
-    it('should delete cache and reload when confirmed', async () => {
+    it('should delete all app caches (legacy, control, versioned) and reload when confirmed', async () => {
+      // Setup caches.keys() to return a mix of app and other caches.
+      const cacheNames = [
+        'app-assets',
+        'app-assets-control',
+        'app-assets-v-abc123',
+        'app-assets-v-def456',
+        'app-assets-candidate-xyz789',
+        'other-cache-1',
+        'other-cache-2'
+      ];
+      (globalThis.caches.keys as vi.Mock).mockResolvedValue(cacheNames);
+
       component.resetApp();
 
       // Get the accept callback from the confirmation call
@@ -275,7 +288,21 @@ describe('AdminComponent', () => {
       // Execute the accept callback
       await acceptCallback();
 
+      // Verify caches.keys() was called.
+      expect(globalThis.caches.keys).toHaveBeenCalled();
+
+      // Verify that only app-related caches are deleted.
       expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets-control');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets-v-abc123');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets-v-def456');
+      expect(globalThis.caches.delete).toHaveBeenCalledWith('app-assets-candidate-xyz789');
+
+      // Verify that other caches are not deleted.
+      expect(globalThis.caches.delete).not.toHaveBeenCalledWith('other-cache-1');
+      expect(globalThis.caches.delete).not.toHaveBeenCalledWith('other-cache-2');
+
+      // Verify success message and redirect.
       expect(messageServiceMock.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: expect.any(String),
@@ -289,11 +316,12 @@ describe('AdminComponent', () => {
       expect(locationAssignMock).toHaveBeenCalledWith('/');
     });
 
-    it('should not delete cache when confirmation is cancelled', () => {
+    it('should not delete any cache when confirmation is cancelled', () => {
       component.resetApp();
 
       // Don't call the accept callback
 
+      expect(globalThis.caches.keys).not.toHaveBeenCalled();
       expect(globalThis.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
       expect(vi.getTimerCount()).toBe(0);

@@ -16,6 +16,11 @@ import {
   CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
   METADATA_SCHEMA
 } from '@infrastructure/database/schemas';
+import { STAGING_TABLE_PREFIX } from '@infrastructure/database/app-database.versions';
+
+function toStagingSchema(schema: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.entries(schema).map(([table, index]) => [`${STAGING_TABLE_PREFIX}${table}`, index]));
+}
 
 const dexieState = vi.hoisted(() => ({
   instances: [] as { name: string; versionCalls: { version: number; schema?: Record<string, string> }[] }[]
@@ -160,5 +165,55 @@ describe('AppDatabase', () => {
         ...METADATA_SCHEMA
       }
     });
+  });
+
+  it('should register version 8 schema with staging counterparts for every catalog table', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    expect(dexieState.instances[0].versionCalls[7]).toEqual({
+      version: 8,
+      schema: {
+        ...USER_SCHEMA_V3,
+        ...STUDY_SCHEMA,
+        catAttachments: null,
+        ...CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
+        ...CATALOG_CABLE_SCHEMA,
+        ...CATALOG_CHAIN_SCHEMA,
+        ...CATALOG_LINE_SCHEMA,
+        ...CATALOG_MAINTENANCE_SCHEMA,
+        ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+        ...CATALOG_OBSTACLE_CONFIGURATION_SCHEMA,
+        ...CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA,
+        ...CATALOG_OBSTACLE_DISTANCE_SCHEMA,
+        ...CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
+        ...CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
+        ...METADATA_SCHEMA,
+        ...toStagingSchema(CATALOG_SUPPORT_ATTACHMENT_SCHEMA),
+        ...toStagingSchema(CATALOG_CABLE_SCHEMA),
+        ...toStagingSchema(CATALOG_CHAIN_SCHEMA),
+        ...toStagingSchema(CATALOG_LINE_SCHEMA),
+        ...toStagingSchema(CATALOG_MAINTENANCE_SCHEMA),
+        ...toStagingSchema(CATALOG_OBSTACLE_TYPE_SCHEMA),
+        ...toStagingSchema(CATALOG_OBSTACLE_CONFIGURATION_SCHEMA),
+        ...toStagingSchema(CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA),
+        ...toStagingSchema(CATALOG_OBSTACLE_DISTANCE_SCHEMA),
+        ...toStagingSchema(CATALOG_OBSTACLE_WIND_ZONE_SCHEMA),
+        ...toStagingSchema(CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA)
+      }
+    });
+  });
+
+  it('should never register a staging counterpart for users or studies', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const v8Schema = dexieState.instances[0].versionCalls[7].schema ?? {};
+    const stagingTableNames = Object.keys(v8Schema).filter((name) => name.startsWith(STAGING_TABLE_PREFIX));
+    expect(stagingTableNames).not.toContain(`${STAGING_TABLE_PREFIX}users`);
+    expect(stagingTableNames).not.toContain(`${STAGING_TABLE_PREFIX}studies`);
+    expect(stagingTableNames).toHaveLength(11);
   });
 });

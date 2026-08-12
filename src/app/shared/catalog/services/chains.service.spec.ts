@@ -8,14 +8,12 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { ChainsService } from './chains.service';
 import { StorageService } from '@services/storage/storage.service';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 describe('ChainsService', () => {
   let service: ChainsService;
   let storageService: StorageService;
   let csvImportClient: { importCsv: vi.Mock };
-  let logger: { error: vi.Mock };
   let chainsTable: { toArray: vi.Mock };
 
   beforeEach(() => {
@@ -27,13 +25,11 @@ describe('ChainsService', () => {
     csvImportClient = {
       importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'chains', totalRows: 0, totalKeys: 0 })
     };
-    logger = { error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         ChainsService,
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: CsvImportClientService, useValue: csvImportClient },
-        { provide: LoggerService, useValue: logger }
+        { provide: CsvImportClientService, useValue: csvImportClient }
       ]
     });
     service = TestBed.inject(ChainsService);
@@ -64,12 +60,15 @@ describe('ChainsService', () => {
   describe('importFromFile', () => {
     it('delegates to CsvImportClientService with the chains key', async () => {
       await service.importFromFile();
-      expect(csvImportClient.importCsv).toHaveBeenCalledWith('chains');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('chains', { expectedHash: undefined });
     });
-    it('logs and swallows errors from the client', async () => {
+    it('forwards expectedHash to CsvImportClientService', async () => {
+      await service.importFromFile('abc123');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('chains', { expectedHash: 'abc123' });
+    });
+    it('propagates errors from the client instead of swallowing them', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
-      await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing chains', expect.any(Error));
+      await expect(service.importFromFile()).rejects.toThrow('worker boom');
     });
   });
 });

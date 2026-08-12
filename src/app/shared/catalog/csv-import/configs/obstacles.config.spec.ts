@@ -240,6 +240,18 @@ describe('obstacles.config - createObstaclesConfig', () => {
     expect(config.filename).toBe('obstacle_configuration.json');
   });
 
+  it('declares its 6 live table names for generic staging promotion', () => {
+    const config = createObstaclesConfig();
+    expect(config.tableNames).toEqual([
+      'catObstacleTypes',
+      'catObstacleConfigurations',
+      'catObstacleDistances',
+      'catObstacleRuleDefinitions',
+      'catObstacleWindZones',
+      'catObstacleConformityConfig'
+    ]);
+  });
+
   describe('apply', () => {
     /** Builds an in-memory fake Dexie handle capturing writes per table. */
     function makeFakeDb() {
@@ -330,6 +342,45 @@ describe('obstacles.config - createObstaclesConfig', () => {
       // Type and configuration still written
       expect(calls['catObstacleTypes'].bulkPut[0]).toHaveLength(1);
       expect(calls['catObstacleConfigurations'].bulkPut[0]).toHaveLength(1);
+    });
+
+    it('writes to the staging-prefixed tables when ctx.tableNamePrefix is set', async () => {
+      const config = createObstaclesConfig();
+      const calls: Record<string, { clears: number; bulkPut: unknown[][]; put: unknown[] }> = {};
+      const stagingNames = config.tableNames.map((name) => `staging_${name}`);
+      for (const name of stagingNames) {
+        calls[name] = { clears: 0, bulkPut: [], put: [] };
+      }
+      const makeTable = (name: string) => ({
+        clear: vi.fn(async () => {
+          calls[name].clears += 1;
+        }),
+        bulkPut: vi.fn(async (items: unknown[]) => {
+          calls[name].bulkPut.push(items);
+        }),
+        put: vi.fn(async (item: unknown) => {
+          calls[name].put.push(item);
+        })
+      });
+      const tables = Object.fromEntries(stagingNames.map((n) => [n, makeTable(n)]));
+      const db = {
+        ...tables,
+        transaction: vi.fn(async (_mode: string, _tables: unknown[], cb: () => Promise<void>) => {
+          await cb();
+        })
+      };
+
+      await config.apply(validPayload, {
+        db: db as never,
+        now: '2026-06-05',
+        tableNamePrefix: 'staging_'
+      } as JsonImportContext);
+
+      for (const name of stagingNames) {
+        expect(calls[name].clears).toBe(1);
+      }
+      expect(calls['staging_catObstacleTypes'].bulkPut[0]).toHaveLength(3);
+      expect(calls['staging_catObstacleConformityConfig'].put).toHaveLength(1);
     });
   });
 });

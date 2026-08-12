@@ -13,13 +13,61 @@ import { isJsonImportConfig, resolveCsvImportConfig } from '../configs';
 import type { StellarDexieHandle } from '../json-import.engine.interfaces';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-import.worker.interfaces';
 import { downloadAndHash } from './verified-download';
+import { STAGING_TABLE_PREFIX } from '@infrastructure/database/app-database.versions';
+
+/** Shape of a `metadata` row (mirrors `MetadataEntity`, kept local to avoid a runtime import). */
+interface MetadataRow {
+  key: string;
+  value: string;
+  updated_at: string;
+}
+
+/**
+ * Promotes the staging table(s) of one catalog to their live counterparts,
+ * and records the verified hash — all inside a single Dexie transaction.
+ *
+ * @remarks
+ * This is the ONLY place `live` catalog tables are ever mutated by the
+ * import pipeline: the catalog's data and its recorded `catalog_hash:<file>`
+ * always change together, or not at all. Staging tables are cleared at the
+ * end of the same transaction so a retried import always starts from empty
+ * staging.
+ */
+async function promoteStagingToLive(
+  db: StellarDexieHandle,
+  tableNames: string[],
+  metadataKey: string,
+  verifiedHash: string
+): Promise<void> {
+  const liveTables = tableNames.map((name) => db[name] as Table<unknown, unknown>);
+  const stagingTables = tableNames.map((name) => db[`${STAGING_TABLE_PREFIX}${name}`] as Table<unknown, unknown>);
+  const metadataTable = db['metadata'] as Table<MetadataRow, string>;
+
+  await db.transaction('rw', [...liveTables, ...stagingTables, metadataTable], async () => {
+    for (let i = 0; i < tableNames.length; i++) {
+      const stagedRows = await stagingTables[i].toArray();
+      await liveTables[i].clear();
+      if (stagedRows.length > 0) {
+        await liveTables[i].bulkPut(stagedRows);
+      }
+      await stagingTables[i].clear();
+    }
+    await metadataTable.put({
+      key: metadataKey,
+      value: verifiedHash,
+      updated_at: new Date().toISOString()
+    });
+  });
+}
 
 /**
  * Handles one catalog import request inside the worker. Downloads and
  * SHA-256-hashes the catalog exactly once, verifies it against
- * `request.expectedHash` (when provided) BEFORE touching Dexie, then opens
- * Dexie, resolves the config for the requested catalog, and dispatches to
- * the CSV or JSON engine depending on the config kind.
+ * `request.expectedHash` (when provided) BEFORE touching Dexie, imports the
+ * verified content into staging table(s) only, then promotes staging to
+ * live (+ records the hash) in a single transaction. The `done` message is
+ * only sent to the caller once promotion has fully succeeded, so a consumer
+ * never sees "done" for a catalog that isn't actually live yet.
  *
  * @remarks
  * Exported so unit tests can drive it without spawning a real Web Worker.
@@ -42,22 +90,50 @@ export async function runWorkerImport(
   await db.open();
   try {
     const config = resolveCsvImportConfig(request.csvKey);
-    const post2 = (msg: CsvImportWorkerResponse) => post(msg.type === 'done' ? { ...msg, verifiedHash: hash } : msg);
+
+    // The engine's own 'done' is never forwarded as-is: it only reflects
+    // staging having been fully written, not yet promoted to live.
+    let stagedDone: CsvImportWorkerResponse | null = null;
+    const stagingPost = (msg: CsvImportWorkerResponse) => {
+      if (msg.type === 'done') {
+        stagedDone = msg;
+        return;
+      }
+      post(msg);
+    };
+
+    let tableNames: string[];
     if (isJsonImportConfig(config)) {
       const payload: unknown = JSON.parse(await blob.text());
-      await runJsonImport(payload, config, { db: db as unknown as StellarDexieHandle }, post2);
-      return;
+      await runJsonImport(
+        payload,
+        config,
+        { db: db as unknown as StellarDexieHandle, tableNamePrefix: STAGING_TABLE_PREFIX },
+        stagingPost
+      );
+      tableNames = config.tableNames;
+    } else {
+      await runCsvImport(
+        blob,
+        config,
+        {
+          papa: Papa,
+          resolveTable: (tableName) => db[`${STAGING_TABLE_PREFIX}${tableName}`] as Table<unknown, unknown>
+        },
+        stagingPost,
+        { chunkSize: request.chunkSize }
+      );
+      tableNames = [config.tableName];
     }
-    await runCsvImport(
-      blob,
-      config,
-      {
-        papa: Papa,
-        resolveTable: (tableName) => db[tableName] as Table<unknown, unknown>
-      },
-      post2,
-      { chunkSize: request.chunkSize }
+
+    await promoteStagingToLive(
+      db as unknown as StellarDexieHandle,
+      tableNames,
+      `catalog_hash:${config.filename}`,
+      hash
     );
+
+    post({ ...(stagedDone as CsvImportWorkerResponse), verifiedHash: hash });
   } finally {
     db.close();
   }

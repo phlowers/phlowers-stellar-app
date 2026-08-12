@@ -65,8 +65,13 @@ export async function runCsvImport<TRow>(
   const seenKeys = new Set<string>();
   const chunkSize = overrides.chunkSize ?? config.chunkSize ?? DEFAULT_CHUNK_SIZE;
 
+  // PapaParse's local-file overload types its `source` parameter as `File`
+  // (not `Blob`); wrap the already-downloaded, already-verified Blob in a
+  // real File so the call is properly typed without an unsafe cast.
+  const sourceFile = new File([source], config.filename);
+
   await new Promise<void>((resolve, reject) => {
-    deps.papa.parse<TRow>(source, {
+    deps.papa.parse<TRow>(sourceFile, {
       header: true,
       skipEmptyLines: true,
       delimiter: config.delimiter,
