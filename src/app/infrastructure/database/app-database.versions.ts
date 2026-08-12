@@ -25,7 +25,7 @@ import {
 } from './schemas';
 
 /**
- * Prefix used for the staging counterpart of every catalog table (Étape 4.2
+ * Prefix used for the staging counterpart of every catalog table (Step 4.2
  * of the atomic catalog update). Shared with `run-worker-import.ts`, which
  * imports into `${STAGING_TABLE_PREFIX}<table>` and only promotes to the
  * live table inside a single Dexie transaction once the download has been

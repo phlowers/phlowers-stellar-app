@@ -22,6 +22,35 @@ interface MetadataRow {
   updated_at: string;
 }
 
+/** Rows promoted per round-trip — bounds peak memory regardless of catalog size. */
+const PROMOTION_BATCH_SIZE = 2000;
+
+/**
+ * Copies `stagingTable` into `liveTable` (already cleared) in bounded
+ * batches, deleting each promoted batch from staging as it goes.
+ *
+ * @remarks
+ * Never materializes the full table: each iteration reads at most
+ * `PROMOTION_BATCH_SIZE` rows via a cursor, so staging always shrinks from
+ * the front and the same rows are never re-scanned.
+ */
+async function promoteTableInBatches(
+  liveTable: Table<unknown, unknown>,
+  stagingTable: Table<unknown, unknown>
+): Promise<void> {
+  for (;;) {
+    const batch: { key: unknown; row: unknown }[] = [];
+    await stagingTable.limit(PROMOTION_BATCH_SIZE).each((row, cursor) => {
+      batch.push({ key: cursor.primaryKey, row });
+    });
+    if (batch.length === 0) {
+      break;
+    }
+    await liveTable.bulkPut(batch.map((entry) => entry.row));
+    await stagingTable.bulkDelete(batch.map((entry) => entry.key));
+  }
+}
+
 /**
  * Promotes the staging table(s) of one catalog to their live counterparts,
  * and records the verified hash — all inside a single Dexie transaction.
@@ -29,9 +58,8 @@ interface MetadataRow {
  * @remarks
  * This is the ONLY place `live` catalog tables are ever mutated by the
  * import pipeline: the catalog's data and its recorded `catalog_hash:<file>`
- * always change together, or not at all. Staging tables are cleared at the
- * end of the same transaction so a retried import always starts from empty
- * staging.
+ * always change together, or not at all. Staging tables end up empty once
+ * fully promoted, so a retried import always starts from empty staging.
  */
 async function promoteStagingToLive(
   db: StellarDexieHandle,
@@ -45,12 +73,8 @@ async function promoteStagingToLive(
 
   await db.transaction('rw', [...liveTables, ...stagingTables, metadataTable], async () => {
     for (let i = 0; i < tableNames.length; i++) {
-      const stagedRows = await stagingTables[i].toArray();
       await liveTables[i].clear();
-      if (stagedRows.length > 0) {
-        await liveTables[i].bulkPut(stagedRows);
-      }
-      await stagingTables[i].clear();
+      await promoteTableInBatches(liveTables[i], stagingTables[i]);
     }
     await metadataTable.put({
       key: metadataKey,
@@ -133,7 +157,10 @@ export async function runWorkerImport(
       hash
     );
 
-    post({ ...(stagedDone as CsvImportWorkerResponse), verifiedHash: hash });
+    if (!stagedDone || stagedDone.type !== 'done') {
+      throw new Error(`Catalog import for ${config.filename} completed without a done message`);
+    }
+    post({ ...stagedDone, verifiedHash: hash });
   } finally {
     db.close();
   }

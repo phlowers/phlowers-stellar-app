@@ -17,7 +17,7 @@ if (!fs.existsSync(DIST_DIR)) {
 const state = {
   scenario: 'v1',
   // Simulates an authenticated test session for `/auth/userinfo` without any
-  // change to production auth code (see update-plan.md, Étape 6.3).
+  // change to production auth code (see update-plan.md, Step 6.3).
   authenticated: true
 };
 

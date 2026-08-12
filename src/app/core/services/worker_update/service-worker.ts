@@ -410,8 +410,7 @@ export async function handleFetch(event: FetchEvent) {
         // Bounded: an unbounded fetch here can hang behind an OIDC refresh
         // pile-up on the server (headers-only timeout; body streaming of
         // large files is unaffected once headers arrive).
-        return fetchWithTimeout(fetchRequest, NO_CACHE_INIT, NAVIGATE_TIMEOUT_MS).catch((error) => {
-          console.error('Fetch failed:', error);
+        return fetchWithTimeout(fetchRequest, NO_CACHE_INIT, NAVIGATE_TIMEOUT_MS).catch(() => {
           return Response.error();
         });
       })()

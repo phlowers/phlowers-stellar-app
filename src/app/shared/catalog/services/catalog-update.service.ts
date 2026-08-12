@@ -30,7 +30,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
  * matches what is stored — only a changed catalog is fetched and imported.
  *
  * Each catalog service's `importFromFile(expectedHash)` now propagates
- * failures instead of swallowing them (see Étape 4.2/4.3): the underlying
+ * failures instead of swallowing them (see Step 4.2/4.3): the underlying
  * Web Worker verifies the SHA-256 hash and atomically promotes staging to
  * live (recording the hash) only on success, so a rejected promise here
  * always means the catalog's stored hash was correctly left untouched.
