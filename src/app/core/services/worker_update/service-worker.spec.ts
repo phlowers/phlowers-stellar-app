@@ -115,10 +115,7 @@ function expectNoCacheWrites(): void {
 describe('Service Worker Functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCaches.open.mockResolvedValue(mockCache);
-    mockCaches.delete.mockResolvedValue(true);
-    mockCache.keys.mockResolvedValue([]);
-    (global.caches.match as vi.Mock).mockResolvedValue(null);
+    cacheStore = new Map();
   });
 
   describe('installApp', () => {
@@ -150,14 +147,16 @@ describe('Service Worker Functions', () => {
           })
         })
       );
+      const versionCache = cacheStore.get(versionCacheName)!;
+      expect(versionCache).toBeDefined();
       for (const file of mockManifest.files) {
         expect(mockFetch).toHaveBeenCalledWith(
           file,
           expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) })
         );
-        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+        expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
-      expect(mockCache.put).toHaveBeenCalledWith(
+      expect(versionCache.put).toHaveBeenCalledWith(
         '/app_version',
         expect.objectContaining({
           headers: { 'content-type': 'application/json' }
@@ -193,8 +192,9 @@ describe('Service Worker Functions', () => {
 
       await expect(installApp()).rejects.toThrow(/manifest is empty or missing \/index\.html/i);
 
-      // Only the manifest itself was fetched — no per-file fetch for an empty list.
+      // Only the manifest itself was fetched — no per-file fetch, no cache ever opened.
       expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -204,6 +204,7 @@ describe('Service Worker Functions', () => {
     });
 
     it('should abort install when a single file fails to precache (e.g. 502 during a rolling redeploy)', async () => {
+      const versionCache = await mockCaches.open(versionCacheName);
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
           return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
@@ -216,8 +217,10 @@ describe('Service Worker Functions', () => {
 
       await expect(installApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
 
-      // A failed install must never mark itself as done.
-      expect(mockCache.put).not.toHaveBeenCalledWith('/app_version', expect.anything());
+      // A failed install must never mark itself as done, and the incomplete
+      // candidate cache must be deleted so it never lingers.
+      expect(versionCache!.put).not.toHaveBeenCalledWith('/app_version', expect.anything());
+      expect(mockCaches.delete).toHaveBeenCalledWith(versionCacheName);
     });
 
     it('should throw identifying the file when every file fails to precache', async () => {
@@ -232,6 +235,7 @@ describe('Service Worker Functions', () => {
     });
 
     it('should not write a still in-flight file to the cache once another file already failed', async () => {
+      const versionCache = await mockCaches.open(versionCacheName);
       let resolveStylesFetch!: (value: { ok: boolean; status: number }) => void;
       const stylesFetch = new Promise<{ ok: boolean; status: number }>((resolve) => {
         resolveStylesFetch = resolve;
@@ -258,7 +262,7 @@ describe('Service Worker Functions', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      expect(mockCache.put).not.toHaveBeenCalledWith('/styles.css', expect.anything());
+      expect(versionCache!.put).not.toHaveBeenCalledWith('/styles.css', expect.anything());
     });
 
     it.each([
@@ -267,7 +271,7 @@ describe('Service Worker Functions', () => {
       ['/\\evil.com/payload.js', 'backslash trick'],
       ['app.js', 'non-root-relative path']
     ])('should reject a manifest file that is a %s (%s) without ever fetching it', async (file) => {
-      const maliciousManifest = { files: [file], app_version: '1.0.0' };
+      const maliciousManifest = { files: ['/index.html', file], app_version: mockManifest.app_version };
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
           return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(maliciousManifest) });
@@ -300,12 +304,10 @@ describe('Service Worker Functions', () => {
       const result = await updateApp();
 
       expect(result).toEqual(mockManifest);
-      // Must delete the entire cache first
-      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
-      // Then reopen and cache each file individually
-      expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
+      const versionCache = cacheStore.get(versionCacheName)!;
+      expect(versionCache).toBeDefined();
       for (const file of mockManifest.files) {
-        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+        expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
       // Store new version
       expect(versionCache.put).toHaveBeenCalledWith(
@@ -341,9 +343,10 @@ describe('Service Worker Functions', () => {
 
       await updateApp();
 
+      const versionCache = cacheStore.get('app-assets-v-v2-wheels-hash')!;
       // All files including .whl should be individually re-fetched and cached (full reset)
       for (const file of manifestWithWheels.files) {
-        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+        expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
     });
 
@@ -357,12 +360,9 @@ describe('Service Worker Functions', () => {
         json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
-      const result = await updateApp();
-
-      expect(result).toEqual(emptyManifest);
-      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
-      // Only the manifest itself was fetched — no per-file fetch for an empty list.
+      await expect(updateApp()).rejects.toThrow(/manifest is empty or missing \/index\.html/i);
       expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -380,7 +380,11 @@ describe('Service Worker Functions', () => {
       await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
     });
 
-    it('should abort the update and roll back the temp cache when a single file fails to precache', async () => {
+    it('should delete the incomplete candidate cache and never touch the previously active version when a file fails to precache', async () => {
+      // Simulate an already-active version to prove it is left untouched.
+      await seedControlState({ active: 'app-assets-v-current', previous: null });
+      const activeCache = await mockCaches.open('app-assets-v-current');
+
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
           return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
@@ -393,9 +397,14 @@ describe('Service Worker Functions', () => {
 
       await expect(updateApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
 
-      // The temp cache is cleaned up but the live cache must never be touched.
-      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets-tmp');
-      expect(mockCaches.delete).not.toHaveBeenCalledWith('app-assets');
+      // The failed candidate cache is cleaned up...
+      expect(mockCaches.delete).toHaveBeenCalledWith(versionCacheName);
+      // ...but the currently active version is never touched, and activation
+      // (the control pointer write) never happens on a failed precache.
+      expect(mockCaches.delete).not.toHaveBeenCalledWith('app-assets-v-current');
+      expect(activeCache!.put).not.toHaveBeenCalled();
+      const controlCache = cacheStore.get(CONTROL_CACHE_NAME)!;
+      expect(controlCache.put).not.toHaveBeenCalled();
     });
   });
 
@@ -651,7 +660,6 @@ describe('Service Worker Functions', () => {
 
     it('should force reauth via /auth/relogin when a bare 401 has no cached shell', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 401 });
-      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -663,7 +671,6 @@ describe('Service Worker Functions', () => {
 
     it('should force reauth via /auth/relogin when a bare 403 has no cached shell', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 403 });
-      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 

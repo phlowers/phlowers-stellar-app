@@ -9,8 +9,6 @@ import { AuthService } from '@services/auth/auth.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
 import { StorageService } from '@services/storage/storage.service';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { NotificationService } from '@services/notification/notification.service';
-import { TranslocoService } from '@jsverse/transloco';
 import type { AssetManifest } from '@services/worker_update/service-worker.interfaces';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -47,8 +45,6 @@ export class CatalogUpdateService {
   private readonly updateService = inject(UpdateService);
   private readonly storageService = inject(StorageService);
   private readonly logger = inject(LoggerService);
-  private readonly notificationService = inject(NotificationService);
-  private readonly transloco = inject(TranslocoService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
@@ -90,12 +86,10 @@ export class CatalogUpdateService {
 
     if (hashEntries.length === 0) {
       // Legacy fallback for a manifest without per-file hashes: import everything.
-      const failedCatalogs = await this.importAllCatalogs();
-      this.notifyCatalogFailures(failedCatalogs);
+      await this.importAllCatalogs();
       return;
     }
 
-    const failedCatalogs: string[] = [];
     for (const [fileName, importFn] of Object.entries(this.importers)) {
       const latestHash = dataHashes[fileName];
       if (!latestHash) {
@@ -112,10 +106,8 @@ export class CatalogUpdateService {
         await importFn(latestHash);
       } catch (error) {
         this.logger.error(`Error updating catalog '${fileName}'`, error);
-        failedCatalogs.push(fileName);
       }
     }
-    this.notifyCatalogFailures(failedCatalogs);
   }
 
   private async fetchLatestManifestSafe(): Promise<AssetManifest | null> {
@@ -127,28 +119,13 @@ export class CatalogUpdateService {
     }
   }
 
-  private async importAllCatalogs(): Promise<string[]> {
-    const failedCatalogs: string[] = [];
+  private async importAllCatalogs(): Promise<void> {
     for (const [fileName, importFn] of Object.entries(this.importers)) {
       try {
         await importFn();
       } catch (error) {
         this.logger.error(`Error importing catalog '${fileName}' (legacy fallback, no hash)`, error);
-        failedCatalogs.push(fileName);
       }
     }
-    return failedCatalogs;
-  }
-
-  private notifyCatalogFailures(failedCatalogs: string[]): void {
-    if (failedCatalogs.length === 0) {
-      return;
-    }
-
-    this.notificationService.warning(
-      this.transloco.translate('shared.catalog-update-service.import-failed', {
-        catalogs: failedCatalogs.join(', ')
-      })
-    );
   }
 }
