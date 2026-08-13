@@ -1,4 +1,4 @@
-import type { AssetManifest, AppVersion } from './service-worker.interfaces';
+import type { AppVersion, AssetManifest, CacheControlState } from './service-worker.interfaces';
 
 /**
  * Pre-migration single-cache name. Recognized as the active version's cache
@@ -11,16 +11,6 @@ const CONTROL_CACHE_NAME = 'app-assets-control';
 const CONTROL_KEY = '/control';
 const APP_VERSION_CACHE_KEY = '/app_version';
 const NAVIGATE_TIMEOUT_MS = 13000;
-
-/**
- * Activation pointer: which immutable, version-named cache is currently
- * active, and which one is kept as a rollback target. `previous` is `null`
- * until a first activation has succeeded.
- */
-interface CacheControlState {
-  active: string;
-  previous: string | null;
-}
 
 /**
  * Fetch with an AbortController timeout.
