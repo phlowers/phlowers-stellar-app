@@ -4,6 +4,11 @@ export interface AppVersion {
   version: string;
 }
 
+export interface CacheControlState {
+  active: string;
+  previous: string | null;
+}
+
 export interface AssetManifest {
   app_version: AppVersion;
   /**
