@@ -24,14 +24,38 @@ const LIVE_TABLE_NAMES = [
 
 const dexieState = vi.hoisted(() => {
   function createTableMock() {
-    return {
-      clear: vi.fn().mockResolvedValue(undefined),
+    const deletedKeys = new Set<unknown>();
+    const tableMock = {
+      clear: vi.fn(function () {
+        deletedKeys.clear();
+        return Promise.resolve(undefined);
+      }),
       bulkGet: vi.fn().mockResolvedValue([]),
       bulkPut: vi.fn().mockResolvedValue(undefined),
       bulkAdd: vi.fn().mockResolvedValue(undefined),
       put: vi.fn().mockResolvedValue(undefined),
-      toArray: vi.fn().mockResolvedValue([])
+      bulkDelete: vi.fn(function (keys: unknown[]) {
+        keys.forEach((key) => deletedKeys.add(key));
+        return Promise.resolve(undefined);
+      }),
+      toArray: vi.fn().mockResolvedValue([]),
+      // Primary key = position within the full `toArray()` result, so it stays
+      // stable across batches even when rows carry no `id` field of their own.
+      limit: vi.fn(function (n: number) {
+        const eachFn = async (callback: (row: unknown, cursor: { primaryKey: unknown }) => void) => {
+          const allRows = await tableMock.toArray();
+          const remaining = (allRows as unknown[])
+            .map((row, index) => ({ row, index }))
+            .filter(({ index }) => !deletedKeys.has(index));
+          const toProcess = remaining.slice(0, n);
+          for (const { row, index } of toProcess) {
+            callback(row, { primaryKey: index });
+          }
+        };
+        return { each: eachFn };
+      })
     };
+    return tableMock;
   }
   const liveTableNames = [
     'catSupportAttachments',
@@ -140,9 +164,10 @@ describe('csv-import.worker - runWorkerImport', () => {
 
     expect(dexieState.open).toHaveBeenCalled();
     expect(dexieState.close).toHaveBeenCalled();
-    // Import writes to staging only — cleared once by the engine at start,
-    // once more by the promotion step once staging has been copied to live.
-    expect(dexieState.tables.staging_catCables.clear).toHaveBeenCalledTimes(2);
+    // Import writes to staging only — cleared once by the engine at start;
+    // the promotion step then empties staging batch-by-batch via bulkDelete
+    // (bounded memory), not a second clear().
+    expect(dexieState.tables.staging_catCables.clear).toHaveBeenCalledTimes(1);
     expect(dexieState.tables.staging_catCables.bulkPut).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ name: 'FAKE_X' })])
     );
