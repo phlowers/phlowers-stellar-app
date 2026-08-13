@@ -48,7 +48,9 @@ describe('CatalogUpdateService', () => {
     metadataGet = vi.fn().mockResolvedValue(undefined);
     logger = { error: vi.fn(), warn: vi.fn() };
     notificationService = { warning: vi.fn() };
-    transloco = { translate: vi.fn((key: string, params?: Record<string, unknown>) => `${key}:${params?.['catalogs'] ?? ''}`) };
+    transloco = {
+      translate: vi.fn((key: string, params?: Record<string, unknown>) => `${key}:${params?.['catalogs'] ?? ''}`)
+    };
     maintenanceImport = vi.fn().mockResolvedValue(undefined);
     linesImport = vi.fn().mockResolvedValue(undefined);
     cablesImport = vi.fn().mockResolvedValue(undefined);
@@ -166,9 +168,7 @@ describe('CatalogUpdateService', () => {
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('cables.csv'), expect.any(Error));
     expect(notificationService.warning).toHaveBeenCalledTimes(1);
-    expect(notificationService.warning).toHaveBeenCalledWith(
-      expect.stringContaining('cables.csv, chains.csv')
-    );
+    expect(notificationService.warning).toHaveBeenCalledWith(expect.stringContaining('cables.csv, chains.csv'));
     expect(chainsImport).toHaveBeenCalledWith('NEW-CHAINS');
   });
 
