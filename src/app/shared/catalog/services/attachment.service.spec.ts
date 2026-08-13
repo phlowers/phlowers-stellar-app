@@ -501,15 +501,19 @@ describe('AttachmentService', () => {
 
       await service.importFromFile();
 
-      expect(csvImportClient.importCsv).toHaveBeenCalledWith('attachments');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('attachments', { expectedHash: undefined });
       expect(namesSpy).toHaveBeenCalled();
       sub.unsubscribe();
     });
 
-    it('logs and swallows when the client throws', async () => {
+    it('forwards expectedHash to CsvImportClientService', async () => {
+      await service.importFromFile('abc123');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('attachments', { expectedHash: 'abc123' });
+    });
+
+    it('propagates errors from the client instead of swallowing them', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('boom'));
-      await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing attachments', expect.any(Error));
+      await expect(service.importFromFile()).rejects.toThrow('boom');
     });
   });
 

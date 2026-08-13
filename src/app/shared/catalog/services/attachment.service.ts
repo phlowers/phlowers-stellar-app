@@ -271,21 +271,18 @@ export class AttachmentService {
    * writes grouped `CatalogSupportAttachmentEntity` rows to IndexedDB
    * incrementally. The main thread never holds the raw CSV in memory.
    *
-   * Errors are logged via `LoggerService` but **not** rethrown: this method
-   * is invoked at app bootstrap from `AppComponent` (not by an explicit user
-   * action), so a rejection would abort the whole catalog import flow.
-   * Consumers that trigger imports interactively must catch failures
-   * themselves and notify the user.
+   * Errors are propagated (never swallowed): the `CatalogUpdateService`
+   * orchestrator is responsible for logging a failure and continuing with
+   * other catalogs. Consumers that trigger imports interactively must catch
+   * failures themselves and notify the user.
    *
-   * @returns Promise that resolves when import is complete (or has failed)
+   * @param expectedHash - SHA-256 hex digest the downloaded file must match
+   * (see `CatalogUpdateService`). Verified by the worker before any Dexie mutation.
+   * @returns Promise that resolves when import is complete
    */
-  async importFromFile(): Promise<void> {
-    try {
-      await this.csvImportClient.importCsv('attachments');
-      this._refresh$.next();
-    } catch (error) {
-      this.logger.error('Error importing attachments', error);
-    }
+  async importFromFile(expectedHash?: string): Promise<void> {
+    await this.csvImportClient.importCsv('attachments', { expectedHash });
+    this._refresh$.next();
   }
 
   /**

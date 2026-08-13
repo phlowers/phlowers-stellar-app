@@ -6,6 +6,11 @@ export interface AppVersion {
 
 export interface AssetManifest {
   app_version: AppVersion;
+  /**
+   * Application code assets to precache (HTML/JS/CSS/i18n/WASM/wheels).
+   * Never includes catalog data files (CSV/JSON under `/data/`) — those are
+   * described by `data_hashes` and updated independently of the app version.
+   */
   files: string[];
   data_hashes?: Record<string, string>;
 }

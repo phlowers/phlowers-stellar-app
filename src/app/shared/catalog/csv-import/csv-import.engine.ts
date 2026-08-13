@@ -28,23 +28,26 @@ export interface CsvImportEngineResult {
 }
 
 /**
- * Streams a CSV through PapaParse and drives a `CsvImportConfig` to
- * persist the data into a Dexie table chunk-by-chunk.
+ * Streams an already-downloaded CSV `Blob` through PapaParse and drives a
+ * `CsvImportConfig` to persist the data into a Dexie table chunk-by-chunk.
  *
  * @remarks
  * - Pure function: takes deps explicitly, does not touch globals.
+ * - Never re-downloads: `source` is the exact content already fetched (and
+ *   SHA-256-verified) by the caller (see `run-worker-import.ts`) — a
+ *   catalog must be fetched over the network exactly once.
  * - Pauses the parser per chunk to back-pressure IndexedDB writes.
  * - Posts a `progress` message after every chunk and a `done` message at the
  *   end. Errors abort the parser and bubble up as a rejected promise.
  *
- * @param url - Absolute URL to the CSV file (downloaded by PapaParse).
+ * @param source - The downloaded CSV content (never re-fetched).
  * @param config - Catalog-specific row mapping & merge logic.
  * @param deps - Injected dependencies (Papa, table resolver, clock).
  * @param post - Callback used to forward worker messages to the main thread.
  * @returns Total rows and keys processed.
  */
 export async function runCsvImport<TRow>(
-  url: string,
+  source: Blob,
   config: CsvImportConfig<TRow>,
   deps: CsvImportEngineDeps,
   post: (msg: CsvImportWorkerResponse) => void,
@@ -62,9 +65,13 @@ export async function runCsvImport<TRow>(
   const seenKeys = new Set<string>();
   const chunkSize = overrides.chunkSize ?? config.chunkSize ?? DEFAULT_CHUNK_SIZE;
 
+  // PapaParse's local-file overload types its `source` parameter as `File`
+  // (not `Blob`); wrap the already-downloaded, already-verified Blob in a
+  // real File so the call is properly typed without an unsafe cast.
+  const sourceFile = new File([source], config.filename);
+
   await new Promise<void>((resolve, reject) => {
-    deps.papa.parse<TRow>(url, {
-      download: true,
+    deps.papa.parse<TRow>(sourceFile, {
       header: true,
       skipEmptyLines: true,
       delimiter: config.delimiter,

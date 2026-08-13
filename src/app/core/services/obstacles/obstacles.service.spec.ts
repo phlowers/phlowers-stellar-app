@@ -8,7 +8,6 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { ObstaclesService } from './obstacles.service';
 import { StorageService } from '@services/storage/storage.service';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 import type { CatalogObstacleTypeEntity } from '@infrastructure/database';
 
@@ -16,7 +15,6 @@ describe('ObstaclesService', () => {
   let service: ObstaclesService;
   let storageService: StorageService;
   let csvImportClient: { importCsv: vi.Mock };
-  let logger: { error: vi.Mock };
   let table: { toArray: vi.Mock; where: vi.Mock };
   let firstFn: vi.Mock;
 
@@ -33,13 +31,11 @@ describe('ObstaclesService', () => {
     csvImportClient = {
       importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'obstacles', totalRows: 0, totalKeys: 0 })
     };
-    logger = { error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         ObstaclesService,
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: CsvImportClientService, useValue: csvImportClient },
-        { provide: LoggerService, useValue: logger }
+        { provide: CsvImportClientService, useValue: csvImportClient }
       ]
     });
     service = TestBed.inject(ObstaclesService);
@@ -114,12 +110,11 @@ describe('ObstaclesService', () => {
   describe('importFromFile', () => {
     it('delegates to CsvImportClientService with the obstacles key', async () => {
       await service.importFromFile();
-      expect(csvImportClient.importCsv).toHaveBeenCalledWith('obstacles');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('obstacles', { expectedHash: undefined });
     });
-    it('logs and swallows errors from the client', async () => {
+    it('propagates errors from the client instead of swallowing them', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
-      await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing obstacle configuration', expect.any(Error));
+      await expect(service.importFromFile()).rejects.toThrow('worker boom');
     });
   });
 });

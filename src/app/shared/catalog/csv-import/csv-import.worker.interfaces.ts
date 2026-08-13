@@ -14,6 +14,13 @@ export interface CsvImportWorkerRequest {
   url: string;
   /** Optional PapaParse chunk size in bytes (overrides config default). */
   chunkSize?: number;
+  /**
+   * SHA-256 hex digest the downloaded content must match (e.g. from the
+   * asset manifest's `data_hashes`). When provided, the worker verifies it
+   * BEFORE any Dexie mutation and rejects on mismatch — the catalog is never
+   * partially or incorrectly promoted.
+   */
+  expectedHash?: string;
 }
 
 /** Emitted after each processed chunk. */
@@ -29,6 +36,8 @@ export interface CsvImportDoneMessage {
   csvKey: CsvKey;
   totalRows: number;
   totalKeys: number;
+  /** SHA-256 hex digest of the content that was actually downloaded and imported. */
+  verifiedHash?: string;
 }
 
 /** Failure message — caller is expected to terminate the worker. */

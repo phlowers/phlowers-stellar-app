@@ -43,6 +43,14 @@ export const createObstaclesConfig = (): JsonImportConfig => ({
   kind: 'json',
   csvKey: 'obstacles',
   filename: 'obstacle_configuration.json',
+  tableNames: [
+    'catObstacleTypes',
+    'catObstacleConfigurations',
+    'catObstacleDistances',
+    'catObstacleRuleDefinitions',
+    'catObstacleWindZones',
+    'catObstacleConformityConfig'
+  ],
   apply: applyObstacleConfiguration
 });
 
@@ -57,12 +65,16 @@ async function applyObstacleConfiguration(payload: unknown, ctx: JsonImportConte
   const conformityConfig = buildConformityConfig(payload);
 
   const db = ctx.db;
-  const typesTable = db['catObstacleTypes'] as Table<CatalogObstacleTypeEntity, string>;
-  const configurationsTable = db['catObstacleConfigurations'] as Table<CatalogObstacleConfigurationEntity, string>;
-  const distancesTable = db['catObstacleDistances'] as Table<CatalogObstacleDistanceEntity, [string, string]>;
-  const rulesTable = db['catObstacleRuleDefinitions'] as Table<CatalogObstacleRuleDefinitionEntity, string>;
-  const windZonesTable = db['catObstacleWindZones'] as Table<CatalogObstacleWindZoneEntity, string>;
-  const conformityConfigTable = db['catObstacleConformityConfig'] as Table<
+  const prefix = ctx.tableNamePrefix ?? '';
+  const typesTable = db[`${prefix}catObstacleTypes`] as Table<CatalogObstacleTypeEntity, string>;
+  const configurationsTable = db[`${prefix}catObstacleConfigurations`] as Table<
+    CatalogObstacleConfigurationEntity,
+    string
+  >;
+  const distancesTable = db[`${prefix}catObstacleDistances`] as Table<CatalogObstacleDistanceEntity, [string, string]>;
+  const rulesTable = db[`${prefix}catObstacleRuleDefinitions`] as Table<CatalogObstacleRuleDefinitionEntity, string>;
+  const windZonesTable = db[`${prefix}catObstacleWindZones`] as Table<CatalogObstacleWindZoneEntity, string>;
+  const conformityConfigTable = db[`${prefix}catObstacleConformityConfig`] as Table<
     CatalogObstacleConformityConfigEntity,
     string
   >;

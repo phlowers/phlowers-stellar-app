@@ -25,6 +25,20 @@ import {
 } from './schemas';
 
 /**
+ * Prefix used for the staging counterpart of every catalog table (Step 4.2
+ * of the atomic catalog update). Shared with `run-worker-import.ts`, which
+ * imports into `${STAGING_TABLE_PREFIX}<table>` and only promotes to the
+ * live table inside a single Dexie transaction once the download has been
+ * fully verified.
+ */
+export const STAGING_TABLE_PREFIX = 'staging_';
+
+/** Derives a staging schema (same indexes, table names prefixed) from a live catalog schema. */
+function toStagingSchema(schema: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.entries(schema).map(([table, index]) => [`${STAGING_TABLE_PREFIX}${table}`, index]));
+}
+
+/**
  * Declares every historical version of the Stellar IndexedDB schema on a Dexie
  * instance.
  *
@@ -134,5 +148,39 @@ export function applyStellarDbVersions(db: Dexie): void {
     ...CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
     ...CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
     ...METADATA_SCHEMA
+  });
+
+  // V8: adds a staging counterpart for every catalog table (Étape 4.2 of the
+  // atomic catalog update). A catalog is imported into its staging table(s)
+  // first; only a single Dexie transaction promotes staging -> live and
+  // writes the recorded hash, so a catalog's active data and its hash always
+  // change together or not at all. `users`/`studies` are untouched.
+  db.version(8).stores({
+    ...USER_SCHEMA_V3,
+    ...STUDY_SCHEMA,
+    catAttachments: null,
+    ...CATALOG_SUPPORT_ATTACHMENT_SCHEMA,
+    ...CATALOG_CABLE_SCHEMA,
+    ...CATALOG_CHAIN_SCHEMA,
+    ...CATALOG_LINE_SCHEMA,
+    ...CATALOG_MAINTENANCE_SCHEMA,
+    ...CATALOG_OBSTACLE_TYPE_SCHEMA,
+    ...CATALOG_OBSTACLE_CONFIGURATION_SCHEMA,
+    ...CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA,
+    ...CATALOG_OBSTACLE_DISTANCE_SCHEMA,
+    ...CATALOG_OBSTACLE_WIND_ZONE_SCHEMA,
+    ...CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA,
+    ...METADATA_SCHEMA,
+    ...toStagingSchema(CATALOG_SUPPORT_ATTACHMENT_SCHEMA),
+    ...toStagingSchema(CATALOG_CABLE_SCHEMA),
+    ...toStagingSchema(CATALOG_CHAIN_SCHEMA),
+    ...toStagingSchema(CATALOG_LINE_SCHEMA),
+    ...toStagingSchema(CATALOG_MAINTENANCE_SCHEMA),
+    ...toStagingSchema(CATALOG_OBSTACLE_TYPE_SCHEMA),
+    ...toStagingSchema(CATALOG_OBSTACLE_CONFIGURATION_SCHEMA),
+    ...toStagingSchema(CATALOG_OBSTACLE_RULE_DEFINITION_SCHEMA),
+    ...toStagingSchema(CATALOG_OBSTACLE_DISTANCE_SCHEMA),
+    ...toStagingSchema(CATALOG_OBSTACLE_WIND_ZONE_SCHEMA),
+    ...toStagingSchema(CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA)
   });
 }

@@ -1,10 +1,26 @@
-import type { AssetManifest } from './service-worker.interfaces';
+import type { AssetManifest, AppVersion } from './service-worker.interfaces';
 
-const CACHE_NAME = 'app-assets';
+/**
+ * Pre-migration single-cache name. Recognized as the active version's cache
+ * until the first successful install/update under the new versioned scheme
+ * activates a real version cache and captures it as `previous`.
+ */
+const LEGACY_CACHE_NAME = 'app-assets';
+/** Small cache holding only the activation pointer (see `CacheControlState`). */
+const CONTROL_CACHE_NAME = 'app-assets-control';
+const CONTROL_KEY = '/control';
 const APP_VERSION_CACHE_KEY = '/app_version';
-/** Timeout (ms) for network-first fetch before falling back to cache. */
-const NETWORK_FIRST_TIMEOUT_MS = 3000;
 const NAVIGATE_TIMEOUT_MS = 13000;
+
+/**
+ * Activation pointer: which immutable, version-named cache is currently
+ * active, and which one is kept as a rollback target. `previous` is `null`
+ * until a first activation has succeeded.
+ */
+interface CacheControlState {
+  active: string;
+  previous: string | null;
+}
 
 /**
  * Fetch with an AbortController timeout.
@@ -13,7 +29,7 @@ const NAVIGATE_TIMEOUT_MS = 13000;
 function fetchWithTimeout(
   input: RequestInfo | URL,
   init?: RequestInit,
-  timeoutMs = NETWORK_FIRST_TIMEOUT_MS
+  timeoutMs = NAVIGATE_TIMEOUT_MS
 ): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -32,16 +48,6 @@ function fetchLatestManifest() {
       pragma: 'no-cache'
     }
   });
-}
-
-function shouldUseNetworkFirst(request: Request): boolean {
-  if (request.mode === 'navigate') {
-    return true;
-  }
-  const url = new URL(request.url);
-  const path = url.pathname;
-  // Note: /assets_list.json and /version.json are handled by shouldBypassSW() before reaching this function.
-  return path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.css');
 }
 
 /**
@@ -131,8 +137,8 @@ async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
 
 /**
  * Performs a full application installation by fetching the asset
- * manifest, caching all listed files, and storing the build version.
- * Notifies all controlled clients upon completion.
+ * manifest, precaching it into its own immutable version cache, and
+ * activating it. Notifies all controlled clients upon completion.
  * @returns The installed asset manifest.
  */
 export async function installApp() {
@@ -141,27 +147,20 @@ export async function installApp() {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
   }
   const manifest: AssetManifest = await response.json();
-  const filesToInstall = manifest.files || [];
-  const buildVersion = manifest.app_version;
-  const cache = await caches.open(CACHE_NAME);
-  await cacheFiles(cache, filesToInstall);
-  await cache.put(
-    APP_VERSION_CACHE_KEY,
-    new Response(JSON.stringify(buildVersion), {
-      headers: {
-        'content-type': 'application/json'
-      }
-    })
-  );
+  const cacheName = await precacheVersion(manifest);
+  await activateVersion(cacheName);
   return manifest;
 }
 
 /**
  * Updates the cached application assets to the latest manifest.
- * Caches new assets into a temporary cache first, then atomically
- * swaps it with the old cache to avoid leaving the app with a
- * partial/empty cache if the download fails mid-way.
- * The IndexedDB database is preserved.
+ * @remarks
+ * Precaches the new version into its own immutable, uniquely named cache
+ * (leaving the currently active version fully intact), then atomically
+ * switches the active pointer. The previous version is retained for
+ * rollback instead of being deleted, so a crash/interruption at any point
+ * before activation never leaves the app without a complete offline
+ * version. The IndexedDB database is preserved.
  * @returns The updated asset manifest.
  */
 export async function updateApp() {
@@ -170,44 +169,9 @@ export async function updateApp() {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
   }
   const manifest: AssetManifest = await response.json();
-  const files = manifest.files || [];
-
-  const TEMP_CACHE_NAME = `${CACHE_NAME}-tmp`;
-
-  // Cache into a temporary cache first so the old cache remains intact on failure.
-  try {
-    await caches.delete(TEMP_CACHE_NAME);
-    const tempCache = await caches.open(TEMP_CACHE_NAME);
-    await cacheFiles(tempCache, files);
-
-    const appVersion = manifest.app_version;
-    await tempCache.put(
-      APP_VERSION_CACHE_KEY,
-      new Response(JSON.stringify(appVersion), {
-        headers: {
-          'content-type': 'application/json'
-        }
-      })
-    );
-
-    // Swap: delete old cache and rename temp cache.
-    await caches.delete(CACHE_NAME);
-    const finalCache = await caches.open(CACHE_NAME);
-    const tempKeys = await tempCache.keys();
-    for (const request of tempKeys) {
-      const cached = await tempCache.match(request);
-      if (cached) {
-        await finalCache.put(request, cached);
-      }
-    }
-    await caches.delete(TEMP_CACHE_NAME);
-
-    return manifest;
-  } catch (error) {
-    // Rollback: clean up the temporary cache so it doesn't linger.
-    await caches.delete(TEMP_CACHE_NAME);
-    throw error;
-  }
+  const cacheName = await precacheVersion(manifest);
+  await activateVersion(cacheName);
+  return manifest;
 }
 
 const NO_CACHE_INIT: RequestInit = {
@@ -217,6 +181,120 @@ const NO_CACHE_INIT: RequestInit = {
     'cache-control': 'no-cache'
   }
 };
+
+/** Deterministic, unique cache name for one application version. */
+function cacheNameForVersion(appVersion: AppVersion): string {
+  const identifier = appVersion?.git_hash || appVersion?.version || appVersion?.build_datetime_utc || 'unknown';
+  return `app-assets-v-${identifier}`;
+}
+
+/** Reads the activation pointer, or `null` if none has ever been written. */
+async function readControlState(): Promise<CacheControlState | null> {
+  const controlCache = await caches.open(CONTROL_CACHE_NAME);
+  const response = await controlCache.match(CONTROL_KEY);
+  if (!response) {
+    return null;
+  }
+  try {
+    return (await response.json()) as CacheControlState;
+  } catch {
+    return null;
+  }
+}
+
+/** Overwrites the activation pointer in a single cache write. */
+async function writeControlState(state: CacheControlState): Promise<void> {
+  const controlCache = await caches.open(CONTROL_CACHE_NAME);
+  await controlCache.put(
+    CONTROL_KEY,
+    new Response(JSON.stringify(state), { headers: { 'content-type': 'application/json' } })
+  );
+}
+
+/**
+ * Downloads and fully precaches one application version into its own
+ * immutable, uniquely named cache. Does NOT activate it — the caller
+ * decides when (and if) to switch the active pointer via
+ * `activateVersion()`. A manifest with no files or missing `/index.html` is
+ * refused outright; a partially precached version (a file failed) is
+ * deleted so it never lingers half-written.
+ */
+async function precacheVersion(manifest: AssetManifest): Promise<string> {
+  const files = manifest.files || [];
+  if (files.length === 0 || !files.includes('/index.html')) {
+    throw new Error(
+      'Application manifest is empty or missing /index.html — refusing to precache an incomplete version'
+    );
+  }
+  const cacheName = cacheNameForVersion(manifest.app_version);
+  const cache = await caches.open(cacheName);
+  try {
+    await cacheFiles(cache, files);
+    await cache.put(
+      APP_VERSION_CACHE_KEY,
+      new Response(JSON.stringify(manifest.app_version), {
+        headers: { 'content-type': 'application/json' }
+      })
+    );
+  } catch (error) {
+    await caches.delete(cacheName);
+    throw error;
+  }
+  return cacheName;
+}
+
+/**
+ * Atomically switches the active application version to `cacheName`
+ * (already fully precached by `precacheVersion()`). The previously active
+ * version — or the pre-migration legacy cache on first activation — is kept
+ * as `previous` for rollback; anything older is deleted best-effort.
+ * Cleanup failures must never invalidate the activation itself, which has
+ * already happened (the pointer write below) by the time cleanup runs.
+ */
+async function activateVersion(cacheName: string): Promise<void> {
+  const previousState = await readControlState();
+  let previousActive = previousState?.active ?? null;
+  if (!previousActive && (await caches.has(LEGACY_CACHE_NAME))) {
+    previousActive = LEGACY_CACHE_NAME;
+  }
+
+  await writeControlState({ active: cacheName, previous: previousActive });
+
+  try {
+    const allCacheNames = await caches.keys();
+    for (const name of allCacheNames) {
+      if (name === cacheName || name === previousActive || name === CONTROL_CACHE_NAME) {
+        continue;
+      }
+      if (name.startsWith('app-assets')) {
+        await caches.delete(name);
+      }
+    }
+  } catch {
+    // Best-effort cleanup only — must never undo the activation above.
+  }
+}
+
+/**
+ * Resolves the single complete application cache to read from: the active
+ * version, falling back to the previous version, then to the pre-migration
+ * legacy cache. Returns `null` when nothing has ever been installed yet
+ * (first launch, before `installApp()` runs). Never mixes assets from two
+ * different versions within one request.
+ */
+async function resolveActiveCache(): Promise<Cache | null> {
+  const state = await readControlState();
+  if (state?.active && (await caches.has(state.active))) {
+    return caches.open(state.active);
+  }
+  if (state?.previous && (await caches.has(state.previous))) {
+    return caches.open(state.previous);
+  }
+  if (await caches.has(LEGACY_CACHE_NAME)) {
+    return caches.open(LEGACY_CACHE_NAME);
+  }
+  return null;
+}
 
 /**
  * Returns true for URL paths that must be bypassed completely by the SW
@@ -263,15 +341,18 @@ export async function handleFetch(event: FetchEvent) {
     return;
   }
 
-  if (url === scope) {
-    // Home page: network-first so Apache can redirect when the OIDC session
-    // expires. On any non-redirect error (401/403/5xx) we fall back to the
-    // cached shell so the user never sees a raw technical page; the app then
-    // re-evaluates auth on the main thread.
+  if (url === scope || event.request.mode === 'navigate') {
+    // Navigations (home + SPA deep links): the network is queried FIRST but
+    // only so Apache can redirect when the OIDC session expires — its 200
+    // body is NEVER served nor cached when an installed shell exists.
+    // Serving/caching the fresh index.html here would silently switch the
+    // app to a newly deployed version, bypassing the user-confirmed update
+    // flow: the shell must only change through installApp()/updateApp().
     event.respondWith(
       (async () => {
-        const cache = await caches.open(CACHE_NAME);
+        const cache = await resolveActiveCache();
         const indexUrl = scope + 'index.html';
+        const cachedShell = cache ? await cache.match(indexUrl) : undefined;
         try {
           const networkResponse = await fetchWithTimeout(
             event.request.clone(),
@@ -281,18 +362,20 @@ export async function handleFetch(event: FetchEvent) {
             },
             NAVIGATE_TIMEOUT_MS
           );
-          if (networkResponse?.ok) {
-            await cache.put(indexUrl, networkResponse.clone());
-            return networkResponse;
-          }
           // Preserve Apache/AuthProvider redirects (OIDC login flow): let the browser follow.
           if (networkResponse && isRedirectResponse(networkResponse)) {
             return networkResponse;
           }
-          // 401/403/5xx (or any other non-ok): serve the cached shell if present.
-          const cachedShell = await cache.match(indexUrl);
+          // Session is valid (200) or server errored (401/403/5xx): always
+          // serve the INSTALLED shell so the running version never changes
+          // without user confirmation.
           if (cachedShell) {
             return cachedShell;
+          }
+          // No installed shell yet (first launch before install): serve the
+          // network copy WITHOUT caching it — installApp() owns the cache.
+          if (networkResponse?.ok) {
+            return networkResponse;
           }
           // No cached shell (e.g. right after clearing site data): force reauth
           // via /auth/relogin instead of leaking Apache's raw 401/403 body.
@@ -301,8 +384,7 @@ export async function handleFetch(event: FetchEvent) {
           }
           return networkResponse ?? Response.error();
         } catch {
-          const cached = await cache.match(indexUrl);
-          return cached ?? Response.error();
+          return cachedShell ?? Response.error();
         }
       })()
     );
@@ -310,50 +392,17 @@ export async function handleFetch(event: FetchEvent) {
     // redirect to the backend
     event.respondWith(fetch(event.request.clone()));
   } else {
-    // all other requests
-    if (shouldUseNetworkFirst(event.request)) {
-      event.respondWith(
-        (async () => {
-          const cache = await caches.open(CACHE_NAME);
-          // Look up a cached fallback first. If we have one, the short network
-          // timeout is safe (we can serve cache on abort). If we DON'T have a
-          // cached copy, aborting at 3s would break the page (e.g. first-time
-          // lazy-chunk loads on a slow network), so we wait for the real fetch.
-          const cachedResponse = await cache.match(event.request);
-          try {
-            const networkResponse = cachedResponse
-              ? await fetchWithTimeout(event.request.clone(), NO_CACHE_INIT)
-              : await fetch(event.request.clone(), NO_CACHE_INIT);
-            // Only cache successful (2xx) responses — never cache 3xx redirects.
-            if (networkResponse?.ok) {
-              await cache.put(event.request, networkResponse.clone());
-              return networkResponse;
-            }
-            // Non-ok (401/403/5xx) for a code asset: prefer a cached copy over
-            // surfacing a technical error that would break the page.
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // No cache: for a full-page navigation, force reauth instead of a raw
-            // 401/403 body. Non-navigate assets (e.g. a lazy chunk) are left as-is.
-            if (event.request.mode === 'navigate' && isAuthErrorResponse(networkResponse)) {
-              return Response.redirect(scope + 'auth/relogin', 302);
-            }
-            return networkResponse;
-          } catch (error) {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            console.error('Network-first fetch failed and no cache available:', error);
-            return Response.error();
-          }
-        })()
-      );
-      return;
-    }
-
+    // All other requests (including precached js/css/html assets): CACHE-FIRST.
+    // Code assets must always come from the installed cache so the app never
+    // mixes bundles from two deployed versions nor upgrades silently; the
+    // network is only a fallback for genuinely uncached resources.
     event.respondWith(
-      caches.match(event.request).then((response) => {
+      (async () => {
+        // Resolved to a single version cache (never the global caches.match()
+        // search across every cache name) so a stale `previous`/legacy cache
+        // can never leak an asset from a different version into this response.
+        const cache = await resolveActiveCache();
+        const response = cache ? await cache.match(event.request) : undefined;
         if (response) {
           return response;
         }
@@ -361,11 +410,10 @@ export async function handleFetch(event: FetchEvent) {
         // Bounded: an unbounded fetch here can hang behind an OIDC refresh
         // pile-up on the server (headers-only timeout; body streaming of
         // large files is unaffected once headers arrive).
-        return fetchWithTimeout(fetchRequest, NO_CACHE_INIT, NAVIGATE_TIMEOUT_MS).catch((error) => {
-          console.error('Fetch failed:', error);
+        return fetchWithTimeout(fetchRequest, NO_CACHE_INIT, NAVIGATE_TIMEOUT_MS).catch(() => {
           return Response.error();
         });
-      })
+      })()
     );
   }
 }
