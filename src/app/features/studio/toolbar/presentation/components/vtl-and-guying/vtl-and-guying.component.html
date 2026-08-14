@@ -64,21 +64,21 @@
         </header>
         <dl class="vtl-guying__vtl-fields">
           <div class="vtl-guying__vtl-field">
-            <dt i18n>Charge V</dt>
-            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeV | number: '1.0-3') ?? '-' }}&nbsp;daN</dd>
+            <dt>{{ 'studio.vtl-and-guying.charge-v-label' | transloco }}</dt>
+            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeV | number: '1.0-1') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
-            <dt i18n>Charge T</dt>
-            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeH | number: '1.0-3') ?? '-' }}&nbsp;daN</dd>
+            <dt>{{ 'studio.vtl-and-guying.charge-t-label' | transloco }}</dt>
+            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeH | number: '1.0-1') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
-            <dt i18n>Charge L</dt>
-            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeL | number: '1.0-3') ?? '-' }}&nbsp;daN</dd>
+            <dt>{{ 'studio.vtl-and-guying.charge-l-label' | transloco }}</dt>
+            <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeL | number: '1.0-1') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
             <dt i18n>Resultant</dt>
             <dd class="vtl-guying__vtl-value">
-              {{ (vtlWithoutGuying()?.resultant | number: '1.0-3') ?? '-' }}&nbsp;daN
+              {{ (vtlWithoutGuying()?.resultant | number: '1.0-1') ?? '-' }}&nbsp;daN
             </dd>
           </div>
         </dl>
@@ -156,7 +156,7 @@
             <div class="vtl-guying__result-field tensionInGuy">
               <dt i18n>Tension in the guy line</dt>
               <dd class="vtl-guying__result-value">
-                {{ (results()?.tensionInGuy | number: '1.0-3') ?? '-' }}&nbsp;daN
+                {{ (results()?.tensionInGuy | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field guyAngle">
@@ -166,19 +166,19 @@
             <div class="vtl-guying__result-field chargeVUnderConsole">
               <dt i18n>Charge V under console</dt>
               <dd class="vtl-guying__result-value">
-                {{ (results()?.chargeVUnderConsole | number: '1.0-3') ?? '-' }}&nbsp;daN
+                {{ (results()?.chargeVUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field chargeHUnderConsole">
               <dt i18n>Charge T under console</dt>
               <dd class="vtl-guying__result-value">
-                {{ (results()?.chargeHUnderConsole | number: '1.0-3') ?? '-' }}&nbsp;daN
+                {{ (results()?.chargeHUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field chargeLIfPulley">
               <dt i18n>Charge L (if pulley)</dt>
               <dd class="vtl-guying__result-value">
-                {{ (results()?.chargeLIfPulley | number: '1.0-3') ?? '-' }}&nbsp;daN
+                {{ (results()?.chargeLIfPulley | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field comment">
