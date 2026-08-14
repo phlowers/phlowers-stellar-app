@@ -82,7 +82,7 @@ export class SectionPlotCardComponent {
 
   cardColor = computed(() => (this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'));
 
-  private readonly getFormatedNumberIndex = (value: number[] | undefined, decimalPlaces = 1): number | string => {
+  private readonly getFormatedNumberIndex = (value: number[] | undefined, decimalPlaces = 2): number | string => {
     if (value === undefined) {
       return '-';
     }
