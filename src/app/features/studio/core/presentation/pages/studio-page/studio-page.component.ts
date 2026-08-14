@@ -47,7 +47,7 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesFormComponent } from '@features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component';
-import { STUDIO_SLIDER_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
+import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { CableLengthChangeComponent } from '@features/studio/loads/presentation/components/cable-length-change/cable-length-change';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { CableSpanManipComponent } from '@features/studio/loads/presentation/components/cable-span-manip/cable-span-manip';
@@ -58,6 +58,8 @@ import { Camera } from 'plotly.js-dist-min';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { Section, Study } from '@shared/domain';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -72,6 +74,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     DecimalPipe,
     FormsModule,
     NgxSliderModule,
+    TranslocoModule,
     InputNumberModule,
     RadioButtonModule,
     SelectModule,
@@ -111,6 +114,8 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
   ]
 })
 export class StudioPageComponent implements OnInit, OnDestroy {
+  private readonly translocoService = inject(TranslocoService);
+
   sidebarWidth = signal(300);
   sidebarOpen = signal(false);
   spanAmountChoiceOptions = signal<
@@ -119,17 +124,17 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       value: SpanAmountChoice;
     }[]
   >([
-    { label: $localize`One span`, value: 'single' },
-    { label: $localize`Two spans`, value: 'double' },
-    { label: $localize`All`, value: 'all' }
+    { label: this.translocoService.translate('studio.studio-page.one-span-option'), value: 'single' },
+    { label: this.translocoService.translate('studio.studio-page.two-spans-option'), value: 'double' },
+    { label: this.translocoService.translate('studio.studio-page.all-option'), value: 'all' }
   ]);
   isNewChargeModalOpen = signal(false);
   isFreePositioningToolOpen = signal(false);
 
   // graph global param.
   globalStateOptions = [
-    { label: $localize`Span`, value: 'span' },
-    { label: $localize`Max section`, value: 'max_section' }
+    { label: this.translocoService.translate('studio.studio-page.span-option'), value: 'span' },
+    { label: this.translocoService.translate('studio.studio-page.max-section-option'), value: 'max_section' }
   ];
 
   globalState = signal<GlobalStateMode>('max_section');
@@ -183,7 +188,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       .filter((o) => visibleSupportUuids.has(o.supportUuid))
       .map((o) => ({ label: o.name, value: o.uuid }));
     if (options.length) {
-      options.unshift({ label: $localize`Not selected`, value: null });
+      options.unshift({
+        label: this.translocoService.translate('studio.studio-page.not-selected-option'),
+        value: null
+      });
     }
     return options;
   });
@@ -193,7 +201,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     if (!uuid) return [];
     const obstacle = this.spanService.section()?.obstacles.find((o) => o.uuid === uuid);
     if (!obstacle) return [];
-    return obstacle.positions.map((_, index) => ({ label: $localize`Point ${index + 1}`, value: index }));
+    return obstacle.positions.map((_, index) => ({
+      label: this.translocoService.translate('studio.studio-page.point-option', { index: index + 1 }),
+      value: index
+    }));
   });
 
   toggleSidebar() {
@@ -277,57 +288,91 @@ export class StudioPageComponent implements OnInit, OnDestroy {
         switchMap(() => from(this.studiesService.getStudyAsObservable(studyUuid))),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((study) => {
-        if (study) {
-          this.plotService.study.set(study);
-          const section = study.sections.find((s) => s.uuid === sectionUuid);
-          if (section) {
-            this.spanService.section.set(section);
-            if (this.previousSectionUuid() !== section.uuid) {
-              this.activeSectionUuid.set(sectionUuid);
-              this.isViewReady.set(false);
-              const maxSupport = section.supports.length - 1;
-              const vs = this.persistenceService.load(sectionUuid) ?? section.studio_view_state;
-              if (vs) {
-                const start =
-                  vs.startSupport !== undefined && vs.startSupport >= 0 && vs.startSupport < maxSupport
-                    ? vs.startSupport
-                    : 0;
-                const end =
-                  vs.endSupport !== undefined && vs.endSupport > start && vs.endSupport <= maxSupport
-                    ? vs.endSupport
-                    : maxSupport;
-                this.plotService.plotOptionsChange({ startSupport: start, endSupport: end });
-                if (vs.camera) {
-                  this.plotOptionsService.camera.set(vs.camera as Camera);
-                  // Also set as pending restore so SectionPlotComponent can apply it
-                  // directly via Plotly.relayout after the first render, guaranteeing
-                  // the camera is used even if layout-camera application is unreliable.
-                  this.plotOptionsService.pendingCameraRestore.set(vs.camera as Camera);
-                }
-                if (vs.scalingFactors) {
-                  this.plotOptionsService.setScalingFactors(vs.scalingFactors);
-                }
-                if (vs.resolution !== undefined) {
-                  this.resolutionService.setResolution(vs.resolution);
-                  void this.resolutionService.applyResolution(vs.resolution);
-                }
-              } else {
-                this.plotService.plotOptionsChange({
-                  endSupport: maxSupport,
-                  startSupport: 0
-                });
-              }
-              this.previousSectionUuid.set(section.uuid);
-              this.isViewReady.set(true);
-            }
-          } else {
-            this.router.navigate(['/studies']);
-          }
-        } else {
-          this.router.navigate(['/studies']);
-        }
-      });
+      .subscribe((study) => this.handleLoadedStudy(study, sectionUuid));
+  }
+
+  private handleLoadedStudy(study: Study | null | undefined, sectionUuid: string): void {
+    if (!study) {
+      this.router.navigate(['/studies']);
+      return;
+    }
+    this.plotService.study.set(study);
+    this.tryInitializeSection(study, sectionUuid);
+  }
+
+  private tryInitializeSection(study: Study, sectionUuid: string): void {
+    const section = study.sections.find((s: Section) => s.uuid === sectionUuid);
+    if (!section) {
+      this.router.navigate(['/studies']);
+      return;
+    }
+    this.spanService.section.set(section);
+    if (this.previousSectionUuid() === section.uuid) {
+      return; // Section already active, skip re-initialization
+    }
+    this.initializeNewSection(section, sectionUuid);
+  }
+
+  private initializeNewSection(section: Section, sectionUuid: string): void {
+    this.activeSectionUuid.set(sectionUuid);
+    this.isViewReady.set(false);
+
+    const maxSupport = section.supports.length - 1;
+    const viewState = this.persistenceService.load(sectionUuid) ?? section.studio_view_state;
+    const { startSupport, endSupport } = this.getValidatedSupportBounds(maxSupport, viewState);
+
+    this.plotService.plotOptionsChange({ startSupport, endSupport });
+    this.restoreCamera(viewState);
+    this.restoreScalingFactors(viewState);
+    this.restoreResolution(viewState);
+
+    this.previousSectionUuid.set(section.uuid);
+    this.isViewReady.set(true);
+  }
+
+  private getValidatedSupportBounds(
+    maxSupport: number,
+    viewState: StudioViewState | null | undefined
+  ): { startSupport: number; endSupport: number } {
+    if (!viewState) {
+      return { startSupport: 0, endSupport: maxSupport };
+    }
+
+    const start =
+      viewState.startSupport !== undefined && viewState.startSupport >= 0 && viewState.startSupport < maxSupport
+        ? viewState.startSupport
+        : 0;
+
+    const end =
+      viewState.endSupport !== undefined && viewState.endSupport > start && viewState.endSupport <= maxSupport
+        ? viewState.endSupport
+        : maxSupport;
+
+    return { startSupport: start, endSupport: end };
+  }
+
+  private restoreCamera(viewState: StudioViewState | null | undefined): void {
+    if (!viewState?.camera) {
+      return;
+    }
+    this.plotOptionsService.camera.set(viewState.camera as Camera);
+    // Also set as pending restore so SectionPlotComponent can apply it
+    // directly via Plotly.relayout after the first render, guaranteeing
+    // the camera is used even if layout-camera application is unreliable.
+    this.plotOptionsService.pendingCameraRestore.set(viewState.camera as Camera);
+  }
+
+  private restoreScalingFactors(viewState: StudioViewState | null | undefined): void {
+    if (viewState?.scalingFactors) {
+      this.plotOptionsService.setScalingFactors(viewState.scalingFactors);
+    }
+  }
+
+  private restoreResolution(viewState: StudioViewState | null | undefined): void {
+    if (viewState?.resolution !== undefined) {
+      this.resolutionService.setResolution(viewState.resolution);
+      void this.resolutionService.applyResolution(viewState.resolution);
+    }
   }
 
   ngOnDestroy(): void {
@@ -385,7 +430,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const diff = Math.abs(options.endSupport - options.startSupport);
     const spanAmount = this.getSpanAmount(diff);
     this.spanService.spanAmountChoice.set(spanAmount);
-  }, STUDIO_SLIDER_DEBOUNCE_DELAY);
+  }, STUDIO_PLOT_DEBOUNCE_DELAY);
 
   private getSpanAmount(diff: number): SpanAmountChoice {
     if (diff === 1) return 'single';

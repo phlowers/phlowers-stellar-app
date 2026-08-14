@@ -28,8 +28,8 @@
   &:enabled {
     &:focus,
     &:active {
-      outline: var(--p-inputtext-focus-ring-width)
-        var(--p-inputtext-focus-ring-style) var(--p-inputtext-focus-ring-color);
+      outline: var(--p-inputtext-focus-ring-width) var(--p-inputtext-focus-ring-style)
+        var(--p-inputtext-focus-ring-color);
       box-shadow: inset 0rem 0rem 0rem rgb(0, 0, 0, 0);
     }
   }
@@ -62,11 +62,4 @@
   &:disabled {
     color: var(--p-inputtext-disabled-color);
   }
-}
-
-.input-error-message {
-  @extend %text-l-600;
-  display: block;
-  color: var(--error-600);
-  padding: 0.25rem 0.5rem;
 }

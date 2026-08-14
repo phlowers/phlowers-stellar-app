@@ -9,6 +9,7 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ScalingFactors } from '@shared/types/plot.types';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('ScaleViewComponent', () => {
   let component: ScaleViewComponent;
   let fixture: ComponentFixture<ScaleViewComponent>;
@@ -48,7 +49,28 @@ describe('ScaleViewComponent', () => {
     mockPopover = { toggle: vi.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [ScaleViewComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.validate': 'Validate',
+              'studio.scale-view.button-label': 'View',
+              'studio.scale-view.form-aria-label': 'View configuration',
+              'studio.scale-view.input-aria-label': 'Number of points per range',
+              'studio.scale-view.points-legend': 'Choose the number of points to display per range.',
+              'studio.scale-view.scale-auto': 'Auto',
+              'studio.scale-view.scale-celeste': 'Reduced in z (x, y, z/2)',
+              'studio.scale-view.scale-geo': 'Uniform (x, y, z)',
+              'studio.scale-view.scale-legend': 'Select the display scale.',
+              'studio.scale-view.scale-plan': 'Reduced in x (x/5, y, z)',
+              'studio.scale-view.slider-aria-label': 'Number of points per range'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ScaleViewComponent
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },
@@ -329,18 +351,18 @@ describe('ScaleViewComponent', () => {
         component.popoverOpen.set(true);
         fixture.detectChanges();
 
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
+        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"]');
         expect(btn.classList).toContain('view-button--active');
       });
 
       it('inner button should NOT have view-button--active class when popover is closed', () => {
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
+        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"]');
         expect(btn.classList).not.toContain('view-button--active');
       });
 
       it('clicking the inner button should call togglePopover', () => {
         const spy = vi.spyOn(component, 'togglePopover');
-        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"] button');
+        const btn = fixture.nativeElement.querySelector('[data-testid="scale-view-trigger"]');
 
         btn.click();
 
@@ -358,7 +380,7 @@ describe('ScaleViewComponent', () => {
         // Click the real trigger button so event.target is a DOM element (not null),
         // preventing absolutePosition from throwing in JSDOM.
         const innerViewBtn = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-          '[data-testid="scale-view-trigger"] button'
+          '[data-testid="scale-view-trigger"]'
         );
         innerViewBtn?.click();
         fixture.detectChanges();

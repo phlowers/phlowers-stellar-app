@@ -12,12 +12,11 @@ import { PythonErrorCode } from './types';
  * Map of each `PythonErrorCode` to the severity it should be surfaced with (error vs warning toast).
  *
  * @remarks
- * This file must stay free of `$localize`/i18n usage: it is imported by `handle-task.ts`,
- * which runs inside the Pyodide Web Worker bundle. That bundle does not load the
- * `@angular/localize/init` polyfill (only the main "browser" build does), so evaluating
- * a `$localize` tagged template at module load time there throws `ReferenceError: $localize is not defined`
- * and crashes the worker before Pyodide can even start. Localized messages belong in
- * `python-error-messages.ts`, which must only be imported from main-thread code.
+ * This file must stay free of i18n usage: it is imported by `handle-task.ts`,
+ * which runs inside the Pyodide Web Worker bundle. That bundle runs outside any
+ * Angular injection context, so `TranslocoService` cannot be constructed there.
+ * Translated messages belong in `python-error-messages.ts`, which must only be
+ * imported from main-thread code.
  */
 export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> = {
   [PythonErrorCode.SolverError]: 'error',
@@ -27,7 +26,7 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.DataWarning]: 'warning',
   [PythonErrorCode.BalanceEngineWarning]: 'warning',
   [PythonErrorCode.RtsDataNotAvailable]: 'error',
-  [PythonErrorCode.UserWarning]: 'warning',
+  [PythonErrorCode.NoIntersectionPlaneWarning]: 'warning',
   [PythonErrorCode.MeasurementDataNotAvailable]: 'error',
   [PythonErrorCode.UncertaintyNotAvailable]: 'error',
   [PythonErrorCode.InvalidManipulationIndex]: 'error',
@@ -35,5 +34,6 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.InvalidManipulationRange]: 'error',
   [PythonErrorCode.NoIntersectionPlaneForDistanceError]: 'warning',
   [PythonErrorCode.SupportOutOfRangeError]: 'error',
-  [PythonErrorCode.GeneratedPointsNoneError]: 'error'
+  [PythonErrorCode.GeneratedPointsNoneError]: 'error',
+  [PythonErrorCode.NightTimeError]: 'error'
 };

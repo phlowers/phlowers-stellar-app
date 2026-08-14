@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -28,22 +35,29 @@ import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
-  ALTITUDE_TYPE_LABELS,
   CONFORMITY_BOUNDS,
-  CONFORMITY_CABLE_TRACK_ROWS,
-  CONFORMITY_COMMON_ROWS,
-  LATERAL_DISTANCE_TYPE_LABELS
+  getAltitudeTypeLabels,
+  getConformityCableTrackRows,
+  getConformityCommonRows,
+  getLateralDistanceTypeLabels
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
 import { ConformityPlotResponse } from './conformity-plot.model';
-import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
-import { createConformityPlot, CONFORMITY_PLOT_ID, purgeConformityPlot } from './helpers/createConformityPlot';
+import {
+  createConformityPlot,
+  CONFORMITY_PLOT_ID,
+  purgeConformityPlot,
+  resizeConformityPlot
+} from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-conformity',
@@ -60,16 +74,30 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
     ButtonComponent,
     DecimalPipe,
     NgTemplateOutlet,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   templateUrl: './conformity.component.html',
   styleUrl: './conformity.component.scss',
+  host: { '[class.graph-enlarged]': 'isGraphEnlarged()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('expandHeight', [
       transition(':enter', [
         style({ height: 0, overflow: 'hidden', opacity: 0 }),
         animate('300ms ease-out', style({ height: '*', overflow: 'hidden', opacity: 1 }))
+      ])
+    ]),
+    // Collapse/expand the form and result table when the graph is enlarged/reduced, so the figure
+    // grows into their space instead of them vanishing abruptly.
+    trigger('collapse', [
+      transition(':enter', [
+        style({ height: 0, opacity: 0, marginBottom: 0, overflow: 'hidden' }),
+        animate('300ms ease', style({ height: '*', opacity: 1, marginBottom: '*' }))
+      ]),
+      transition(':leave', [
+        style({ height: '*', opacity: 1, marginBottom: '*', overflow: 'hidden' }),
+        animate('300ms ease', style({ height: 0, opacity: 0, marginBottom: 0 }))
       ])
     ])
   ]
@@ -80,13 +108,29 @@ export class ConformityComponent implements OnDestroy {
   private readonly spanService = inject(PlotSpanService);
   private readonly storageService = inject(StorageService);
   private readonly notificationService = inject(NotificationService);
+  private readonly workerPythonService = inject(WorkerPythonService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly isOpen = input<boolean>(false);
 
   readonly isCalculating = signal(false);
   readonly calculationError = signal<string | null>(null);
+
+  /** Whether the results graph is enlarged to fill the modal (hiding the form and result table). */
+  readonly isGraphEnlarged = signal(false);
+
+  /** Gates the form's collapse/expand animation. Off for the first render so the enter animation
+   * doesn't fire (and collapse the form) as the PrimeNG dialog opens; enabled once the view is in
+   * place so later enlarge/reduce toggles still animate. */
+  readonly animationsReady = signal(false);
+  private readonly enableAnimations = afterNextRender(() => this.animationsReady.set(true), {
+    injector: this.injector
+  });
+
+  /** Keeps the Plotly plot sized to its container while the enlarge/reduce CSS transition runs. */
+  private plotResizeObserver?: ResizeObserver;
 
   private readonly _conformityResults = signal<Record<string, ConformityRuleResult> | null>(null);
   /** Computed results, set only by `calculate`. Null hides the results section. */
@@ -173,7 +217,10 @@ export class ConformityComponent implements OnDestroy {
   readonly hasMultiplePoints = computed(() => this.positions().length > 1);
 
   readonly pointOptions = computed(() =>
-    this.positions().map((_, i) => ({ label: $localize`Point ${i + 1}`, value: i }))
+    this.positions().map((_, i) => ({
+      label: this.translocoService.translate('studio.conformity.point-option-label', { index: i + 1 }),
+      value: i
+    }))
   );
 
   readonly activePoint = computed(() => {
@@ -195,14 +242,17 @@ export class ConformityComponent implements OnDestroy {
     return voltage ?? '-';
   });
 
+  private readonly altitudeTypeLabels = getAltitudeTypeLabels(this.translocoService);
+  private readonly lateralDistanceTypeLabels = getLateralDistanceTypeLabels(this.translocoService);
+
   readonly altitudeTypeLabel = computed(() => {
     const type = this.obstacleData()?.altitudeType;
-    return type ? (ALTITUDE_TYPE_LABELS[type] ?? type) : '-';
+    return type ? (this.altitudeTypeLabels[type] ?? type) : '-';
   });
 
   readonly lateralDistanceTypeLabel = computed(() => {
     const type = this.obstacleData()?.lateralDistanceType;
-    return type ? (LATERAL_DISTANCE_TYPE_LABELS[type] ?? type) : '-';
+    return type ? (this.lateralDistanceTypeLabels[type] ?? type) : '-';
   });
 
   readonly referenceSupportLabel = computed(() => {
@@ -211,8 +261,8 @@ export class ConformityComponent implements OnDestroy {
     return this.obstacleFormService.supportsOptions().find((o) => o.value === ref)?.label ?? ref;
   });
 
-  readonly commonRows = CONFORMITY_COMMON_ROWS;
-  readonly cableTrackRows = CONFORMITY_CABLE_TRACK_ROWS;
+  readonly commonRows = getConformityCommonRows(this.translocoService);
+  readonly cableTrackRows = getConformityCableTrackRows(this.translocoService);
 
   readonly BOUNDS = CONFORMITY_BOUNDS;
   readonly truncateTwoDecimals = truncateTwoDecimals;
@@ -254,6 +304,15 @@ export class ConformityComponent implements OnDestroy {
         .then((c) => c?.repartition_temperature_default ?? null) ?? Promise.resolve(null as number | null)
     ),
     { initialValue: null as number | null }
+  );
+
+  private readonly intermediatePointsConfig = toSignal(
+    from(
+      this.storageService.db?.catObstacleConformityConfig
+        .get(OBSTACLE_CONFORMITY_CONFIG_KEY)
+        .then((c) => c?.intermediate_point_positions ?? []) ?? Promise.resolve([] as number[])
+    ),
+    { initialValue: [] as number[] }
   );
 
   private readonly lateralTemperatureConfig = toSignal(
@@ -396,6 +455,7 @@ export class ConformityComponent implements OnDestroy {
         this._conformityResults.set(null);
         this._conformityPlotData.set(null);
         this._ruleColorsByType.set({});
+        this.isGraphEnlarged.set(false);
       });
   });
 
@@ -410,13 +470,17 @@ export class ConformityComponent implements OnDestroy {
     const ruleColors = this._ruleColorsByType();
     const conformityType = this.conformityType();
     if (!data) {
-      untracked(() => purgeConformityPlot(this.document));
+      untracked(() => {
+        this.disconnectPlotResize();
+        purgeConformityPlot(this.document);
+      });
       return;
     }
     afterNextRender(
       () => {
         if (this.document.getElementById(CONFORMITY_PLOT_ID)) {
           createConformityPlot(this.document, data, { selectedRuleTypes, ruleColors, conformityType });
+          this.observePlotResize();
         }
       },
       { injector: this.injector }
@@ -454,11 +518,18 @@ export class ConformityComponent implements OnDestroy {
     if (!this.canCalculate()) return;
     const obstacle = this.obstacleData();
     if (!obstacle) return;
+    const conformityType = this.conformityType();
+    if (!conformityType) {
+      this.notificationService.error(this.translocoService.translate('studio.conformity.no-conformity-config-error'));
+      return;
+    }
+    // Map database value to Python worker expected value
+    // const conformityPlot: 'vegetation' | 'cable_track' | 'overhang' = conformityType: conformityType;
     const v = this.form.getRawValue();
-    const point = this.activePoint();
     const db = this.storageService.db;
     const selectedRuleTypes = v.conformity ?? [];
     const obstacleType = obstacle.type ?? '';
+    const electricTension = this.spanService.section()?.voltage_idr;
 
     this.isCalculating.set(true);
     this.calculationError.set(null);
@@ -477,28 +548,22 @@ export class ConformityComponent implements OnDestroy {
           : Promise.resolve([])
       ]);
 
-      // TODO: replace with actual Pyodide/Python calculation
-      // eslint-disable-next-line no-console
-      console.log('--- Conformity calculation inputs ---', {
-        obstacle: {
-          uuid: obstacle.uuid,
-          name: obstacle.name,
-          type: obstacle.type,
-          altitudeType: obstacle.altitudeType,
-          lateralDistanceType: obstacle.lateralDistanceType,
-          referenceSupport: obstacle.referenceSupport,
-          allPositions: obstacle.positions,
-          activePoint: point
-        },
-        electricTension: this.spanService.section()?.voltage_idr ?? null,
+      if (!electricTension) throw new Error('Missing electric tension');
+
+      const conformityInputs: TaskInputs[Task.getConformity] = {
+        obstacle,
+        electricTension,
         form: {
           windZone: v.windZone,
           windPressure: this.effectiveWindPressure(),
-          windMinus: v.windMinus,
-          redZonePresence: v.redZonePresence,
+          windMinus: v.windMinus ?? false,
+          redZonePresence: v.redZonePresence ?? false,
           repartitionTemperature: v.repartitionTemperature,
           lateralDistanceTemperature: v.lateralDistanceTemperature,
-          selectedConformityRules: selectedRuleTypes
+          selectedConformityRules: selectedRuleTypes,
+          conformity: v.conformity,
+          conformityPlot: conformityType,
+          intermediatePoints: this.intermediatePointsConfig()
         },
         rulesClimaticConditions: rules.map((r) => ({
           ruleType: r.rule_type,
@@ -511,20 +576,30 @@ export class ConformityComponent implements OnDestroy {
           lateral: d.lateral,
           overhang: d.overhang
         }))
-      });
+      };
 
-      const isCableTrack = this.conformityType() === 'cable_track';
-      const results: Record<string, ConformityRuleResult> = {};
-      selectedRuleTypes.forEach((ruleType, index) => {
-        results[ruleType] = this.generateMockResult(isCableTrack, index === 0);
-      });
+      const { result: conformityTaskOutput, error: conformityTaskError } = await this.workerPythonService.runTask(
+        Task.getConformity,
+        conformityInputs
+      );
+      if (conformityTaskError || !conformityTaskOutput) {
+        throw new Error(conformityTaskError ?? 'Conformity task failed');
+      }
+
+      const plotData: ConformityPlotResponse = {
+        obstacle: conformityTaskOutput.obstacle,
+        conformity: conformityTaskOutput.conformity
+      };
+      const results: Record<string, ConformityRuleResult> = conformityTaskOutput.results;
       this._conformityResults.set(results);
       this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
-      this._conformityPlotData.set(CONFORMITY_PLOT_MOCK);
+      this._conformityPlotData.set(plotData);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
-      this.notificationService.error($localize`Calculation failed: ${errorMessage}`);
+      this.notificationService.error(
+        this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
+      );
     } finally {
       this.isCalculating.set(false);
     }
@@ -553,7 +628,22 @@ export class ConformityComponent implements OnDestroy {
     return result;
   }
 
+  /** Observe the plot container so Plotly follows its animated size (idempotent per plot div). */
+  private observePlotResize(): void {
+    if (this.plotResizeObserver || typeof ResizeObserver === 'undefined') return;
+    const element = this.document.getElementById(CONFORMITY_PLOT_ID);
+    if (!element) return;
+    this.plotResizeObserver = new ResizeObserver(() => resizeConformityPlot(this.document));
+    this.plotResizeObserver.observe(element);
+  }
+
+  private disconnectPlotResize(): void {
+    this.plotResizeObserver?.disconnect();
+    this.plotResizeObserver = undefined;
+  }
+
   ngOnDestroy(): void {
+    this.disconnectPlotResize();
     purgeConformityPlot(this.document);
   }
 
@@ -566,5 +656,12 @@ export class ConformityComponent implements OnDestroy {
 
   getConformityCompliance(ruleValue: string): boolean | null {
     return this._conformityResults()?.[ruleValue]?.conformityCompliance ?? null;
+  }
+
+  /** Toggle the results graph between its in-flow size and filling the whole modal, then resize
+   * the Plotly plot to match its new container once the layout change has been rendered. */
+  toggleGraphSize(): void {
+    this.isGraphEnlarged.update((enlarged) => !enlarged);
+    afterNextRender(() => resizeConformityPlot(this.document), { injector: this.injector });
   }
 }

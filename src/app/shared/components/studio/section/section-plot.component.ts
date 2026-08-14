@@ -1,5 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  DOCUMENT
+} from '@angular/core';
+
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { applyRestoreCamera, createPlot } from './helpers/createPlot';
 import { SelectModule } from 'primeng/select';
@@ -34,11 +44,12 @@ import { DistanceMeasuringService } from '@features/studio/distance-measuring/di
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { ClickAnnotationEvent } from './section-plot.interfaces';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-section-plot',
   templateUrl: './section-plot.component.html',
-  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule, ProgressSpinnerModule],
+  imports: [SelectModule, FormsModule, KeyFilterModule, MessageModule, ProgressSpinnerModule, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
@@ -63,6 +74,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly distanceMeasuringService = inject(DistanceMeasuringService);
   private readonly documentRef = inject(DOCUMENT);
+  private readonly translocoService = inject(TranslocoService);
 
   // Signals
   protected readonly isPlotRefreshing = signal(false);
@@ -157,6 +169,14 @@ export class SectionPlotComponent implements OnDestroy {
     return appendExistingObstaclesWithFormObstacle(existingObstacles, currentObstacle);
   }
 
+  /**
+   * Checks if the selected measurement support is visible in the current span window.
+   */
+  private isMeasureSupportVisible(visibleMeasureSupportUuids: Set<string>): boolean {
+    const measureSupportUuid = this.distanceMeasuringService.selectedSupportUuid();
+    return !!measureSupportUuid && visibleMeasureSupportUuids.has(measureSupportUuid);
+  }
+
   /** Rebuilds and redraws the section plot with the latest data, options, and obstacles. */
   async refreshPlot(): Promise<void> {
     const litData = this.plotService.litData();
@@ -194,11 +214,9 @@ export class SectionPlotComponent implements OnDestroy {
       const visibleMeasureSupportUuids = new Set(
         (section?.supports ?? []).slice(plotOptions.startSupport, plotOptions.endSupport).map((s) => s.uuid)
       );
-      const measureSupportUuid = this.distanceMeasuringService.selectedSupportUuid();
-      const distanceMeasuringPoints =
-        measureSupportUuid && visibleMeasureSupportUuids.has(measureSupportUuid)
-          ? this.plotService.distanceMeasuringPoints()
-          : [];
+      const distanceMeasuringPoints = this.isMeasureSupportVisible(visibleMeasureSupportUuids)
+        ? this.plotService.distanceMeasuringPoints()
+        : [];
       const savedCableModifications = section?.cable_modifications ?? [];
       const preview = this.cableModificationsService.previewCableModification();
       // The preview (current Calculate input) takes precedence over the saved
@@ -235,7 +253,8 @@ export class SectionPlotComponent implements OnDestroy {
         distanceMeasuringPoints,
         selectedDisplayOptions,
         cableModifications,
-        spanUuidToIndex
+        spanUuidToIndex,
+        translocoService: this.translocoService
       });
       if (plot) {
         this.addEventListenersToPlot(plot);

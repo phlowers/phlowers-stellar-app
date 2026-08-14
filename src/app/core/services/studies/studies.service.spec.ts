@@ -14,6 +14,7 @@ import { ProtoV4Parameters, ProtoV4Support, Support } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { liveQuery } from 'dexie';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
 }));
@@ -106,6 +107,22 @@ describe('StudiesService', () => {
     } as unknown as vi.Mocked<StorageService>;
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.duplicate.copy-suffix': 'Copy',
+              'shared.sections-helpers.ic-default-name': 'IC 1',
+              'shared.studies-service.imported-from-protov4': 'Study imported from protoV4',
+              'shared.studies-service.unauthorized-error':
+                'You cannot update a study that you did not create, please duplicate it instead.',
+              'shared.studies-service.unauthorized-summary': 'Unauthorized'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [
         StudiesService,
         { provide: StorageService, useValue: mockStorageService },

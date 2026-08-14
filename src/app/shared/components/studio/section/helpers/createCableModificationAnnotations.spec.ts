@@ -26,8 +26,8 @@ const makeModification = (overrides: Partial<CableModification> = {}): CableModi
   uuid: 'mod-1',
   spanUuid: 'span-1',
   supportRef: 'LEFT',
-  widthCable: 'lengthening',
-  sizeCable: 1,
+  modificationType: 'lengthening',
+  modifiedLengthCable: 1,
   distanceSupportRef: 0,
   ...overrides
 });
@@ -281,7 +281,7 @@ describe('createCableModificationAnnotations', () => {
     it('should emit a label annotation per modification with the right text', () => {
       const lengthening = createCableModificationAnnotations(
         makePlotParams(),
-        [makeModification({ widthCable: 'lengthening' })],
+        [makeModification({ modificationType: 'lengthening' })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
       expect(lengthening).toHaveLength(2);
@@ -289,7 +289,7 @@ describe('createCableModificationAnnotations', () => {
 
       const shortening = createCableModificationAnnotations(
         makePlotParams(),
-        [makeModification({ widthCable: 'shortening' })],
+        [makeModification({ modificationType: 'shortening' })],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
       expect(shortening[1].text).toBe(getCableModificationLabel('shortening'));

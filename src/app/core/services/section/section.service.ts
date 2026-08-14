@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { Section } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
@@ -21,6 +22,7 @@ import { cloneDeep } from 'lodash';
  */
 export class SectionService {
   private readonly studiesService = inject(StudiesService);
+  private readonly translocoService = inject(TranslocoService);
 
   /**
    * Create or update a section in a study
@@ -70,7 +72,8 @@ export class SectionService {
       uuid: uuidv4(),
       name: findDuplicateTitle(
         study.sections.map((s) => s.name),
-        section.name
+        section.name,
+        this.translocoService.translate('shared.duplicate.copy-suffix')
       ),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

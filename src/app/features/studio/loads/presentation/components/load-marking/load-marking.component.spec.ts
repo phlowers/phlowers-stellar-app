@@ -6,8 +6,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 import { SpanOption } from '@src/app/shared/types/plot.types';
-import { Section } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 const mockSpanOptions: SpanOption[] = [
   { label: '1 - 2', value: 'support-1' },
   { label: '2 - 3', value: 'support-2' }
@@ -60,8 +60,7 @@ describe('LoadMarkingComponent', () => {
     mockSpanService = {
       getSpanOptions: signal<SpanOption[]>(mockSpanOptions),
       getSupportIndex: vi.fn().mockReturnValue(0),
-      getSupportOptions: vi.fn().mockReturnValue(mockSupportOptions),
-      section: signal<Section | null>(null)
+      getSupportOptions: vi.fn().mockReturnValue(mockSupportOptions)
     };
 
     mockLoadFormsService = {
@@ -75,7 +74,14 @@ describe('LoadMarkingComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [LoadMarkingComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        LoadMarkingComponent
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
@@ -85,6 +91,7 @@ describe('LoadMarkingComponent', () => {
 
     fixture = TestBed.createComponent(LoadMarkingComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('chargeUuid', 'test-charge-uuid');
     fixture.detectChanges();
   });
 
@@ -164,24 +171,6 @@ describe('LoadMarkingComponent', () => {
       component.resetForm();
       fixture.detectChanges();
 
-      expect(component.form.get('spanSelect')?.value).toBeNull();
-      expect(component.form.get('referenceSupport')?.disabled).toBe(true);
-      expect(mockLoadFormsService['initTemporaryLoadData']).toHaveBeenCalled();
-    });
-
-    it('resets form immediately regardless of loading state', () => {
-      // Set loading to true
-      (mockPlotService.loading as ReturnType<typeof signal<boolean>>).set(true);
-
-      component.form.controls.spanSelect.setValue('support-1');
-      component.form.controls.referenceSupport.enable();
-      component.form.controls.referenceSupport.setValue('LEFT');
-      fixture.detectChanges();
-
-      component.resetForm();
-      fixture.detectChanges();
-
-      // Verify form is reset immediately, even though loading is true
       expect(component.form.get('spanSelect')?.value).toBeNull();
       expect(component.form.get('referenceSupport')?.disabled).toBe(true);
       expect(mockLoadFormsService['initTemporaryLoadData']).toHaveBeenCalled();
@@ -654,119 +643,6 @@ describe('LoadMarkingComponent', () => {
       expect(
         (mockLoadFormsService['selectedSpanSupportUuid'] as ReturnType<typeof signal<string | null>>)()
       ).toBeNull();
-    });
-  });
-
-  describe('_reloadOnChargeChange effect', () => {
-    it('should reset form when selected charge UUID changes', () => {
-      const mockSectionWithCharge: Section = {
-        uuid: 'section-uuid-1',
-        name: 'Test Section',
-        cable_name: 'Test Cable',
-        supports: [
-          {
-            uuid: 'support-1',
-            number: '1',
-            name: 'Support 1',
-            spanLength: 100,
-            spanAngle: 0
-          } as Section['supports'][0]
-        ],
-        obstacles: [],
-        initial_conditions: [],
-        charges: [
-          {
-            uuid: 'charge-uuid-1',
-            name: 'Charge 1',
-            personnelPresence: false,
-            description: '',
-            data: createTemporaryLoadData()
-          },
-          {
-            uuid: 'charge-uuid-2',
-            name: 'Charge 2',
-            personnelPresence: false,
-            description: '',
-            data: createTemporaryLoadData()
-          }
-        ],
-        selected_charge_uuid: 'charge-uuid-1'
-      } as Section;
-
-      // Set initial section with charge-uuid-1
-      (mockSpanService.section as ReturnType<typeof signal<Section | null>>).set(mockSectionWithCharge);
-      TestBed.flushEffects();
-      fixture.detectChanges();
-
-      // Set form values
-      component.form.controls.spanSelect.setValue('support-1');
-      component.form.controls.referenceSupport.enable();
-      component.form.controls.referenceSupport.setValue('LEFT');
-      fixture.detectChanges();
-
-      // Change the selected charge UUID
-      (mockSpanService.section as ReturnType<typeof signal<Section | null>>).set({
-        ...mockSectionWithCharge,
-        selected_charge_uuid: 'charge-uuid-2'
-      });
-      TestBed.flushEffects();
-      fixture.detectChanges();
-
-      // Verify form was reset
-      expect(component.form.get('spanSelect')?.value).toBeNull();
-      expect(component.form.get('referenceSupport')?.disabled).toBe(true);
-    });
-
-    it('should not reset form when charge UUID stays the same', () => {
-      const mockSectionWithCharge: Section = {
-        uuid: 'section-uuid-1',
-        name: 'Test Section',
-        cable_name: 'Test Cable',
-        supports: [
-          {
-            uuid: 'support-1',
-            number: '1',
-            name: 'Support 1',
-            spanLength: 100,
-            spanAngle: 0
-          } as Section['supports'][0]
-        ],
-        obstacles: [],
-        initial_conditions: [],
-        charges: [
-          {
-            uuid: 'charge-uuid-1',
-            name: 'Charge 1',
-            personnelPresence: false,
-            description: '',
-            data: createTemporaryLoadData()
-          }
-        ],
-        selected_charge_uuid: 'charge-uuid-1'
-      } as Section;
-
-      // Set initial section
-      (mockSpanService.section as ReturnType<typeof signal<Section | null>>).set(mockSectionWithCharge);
-      TestBed.flushEffects();
-      fixture.detectChanges();
-
-      // Set form values
-      component.form.controls.spanSelect.setValue('support-1');
-      component.form.controls.referenceSupport.enable();
-      component.form.controls.referenceSupport.setValue('LEFT');
-      fixture.detectChanges();
-
-      // Update section without changing charge UUID
-      (mockSpanService.section as ReturnType<typeof signal<Section | null>>).set({
-        ...mockSectionWithCharge,
-        name: 'Updated Section Name'
-      });
-      TestBed.flushEffects();
-      fixture.detectChanges();
-
-      // Verify form was NOT reset
-      expect(component.form.get('spanSelect')?.value).toBe('support-1');
-      expect(component.form.get('referenceSupport')?.value).toBe('LEFT');
     });
   });
 });

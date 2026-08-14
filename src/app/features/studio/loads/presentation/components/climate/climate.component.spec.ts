@@ -16,6 +16,7 @@ import { LoadFormsService } from '../../services/loadForms.service';
 import { signal } from '@angular/core';
 import { Charge, SymmetryType } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('getBaseClimate', () => {
   it('should return base climate with temperature from selected initial condition', () => {
     const section = {
@@ -107,10 +108,7 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal(null),
       workerReady: signal(false),
-      litData: signal(null),
-      baseLitData: signal(null),
-      loading: signal(false),
-      litDataCache: new Map()
+      litData: signal(null)
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
@@ -122,7 +120,38 @@ describe('ClimateComponent effect edge cases', () => {
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'loads.climate.cable-temperature-label': 'Cable Temperature',
+              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'loads.climate.frontier-support-label': 'Frontier support',
+              'loads.climate.ice-indicator-label': 'Ice indicator',
+              'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
+              'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
+              'loads.climate.ice-thickness-label': 'Ice thickness',
+              'loads.climate.symmetric-option': 'Symmetric',
+              'loads.climate.whole-number-required': 'Whole number required',
+              'loads.climate.wind-pressure-label': 'Wind Pressure',
+              'common.calculate': 'Calculate',
+              'loads.shared.erase-load-case-aria-label': 'erase load case',
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.reset': 'Reset',
+              'common.save': 'Save'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ReactiveFormsModule,
+        SelectModule,
+        InputText,
+        ButtonComponent,
+        IconComponent,
+        ClimateComponent
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },
@@ -146,10 +175,7 @@ describe('ClimateComponent effect edge cases', () => {
     const plotServiceMock = {
       study: signal({ uuid: 'study-uuid-1' }),
       workerReady: signal(false),
-      litData: signal(null),
-      baseLitData: signal(null),
-      loading: signal(false),
-      litDataCache: new Map()
+      litData: signal(null)
     } as unknown as PlotService;
     const spanServiceMock = {
       section: signal({ uuid: 'section-uuid-1', supports: [] })
@@ -161,7 +187,38 @@ describe('ClimateComponent effect edge cases', () => {
     } as unknown as ChargesService;
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'loads.climate.cable-temperature-label': 'Cable Temperature',
+              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'loads.climate.frontier-support-label': 'Frontier support',
+              'loads.climate.ice-indicator-label': 'Ice indicator',
+              'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
+              'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
+              'loads.climate.ice-thickness-label': 'Ice thickness',
+              'loads.climate.symmetric-option': 'Symmetric',
+              'loads.climate.whole-number-required': 'Whole number required',
+              'loads.climate.wind-pressure-label': 'Wind Pressure',
+              'common.calculate': 'Calculate',
+              'loads.shared.erase-load-case-aria-label': 'erase load case',
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.reset': 'Reset',
+              'common.save': 'Save'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ReactiveFormsModule,
+        SelectModule,
+        InputText,
+        ButtonComponent,
+        IconComponent,
+        ClimateComponent
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },
@@ -252,7 +309,38 @@ describe('ClimateComponent', () => {
     } as unknown as LoadFormsService;
 
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, SelectModule, InputText, ButtonComponent, IconComponent, ClimateComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'loads.climate.cable-temperature-label': 'Cable Temperature',
+              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'loads.climate.frontier-support-label': 'Frontier support',
+              'loads.climate.ice-indicator-label': 'Ice indicator',
+              'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
+              'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
+              'loads.climate.ice-thickness-label': 'Ice thickness',
+              'loads.climate.symmetric-option': 'Symmetric',
+              'loads.climate.whole-number-required': 'Whole number required',
+              'loads.climate.wind-pressure-label': 'Wind Pressure',
+              'common.calculate': 'Calculate',
+              'loads.shared.erase-load-case-aria-label': 'erase load case',
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'common.reset': 'Reset',
+              'common.save': 'Save'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ReactiveFormsModule,
+        SelectModule,
+        InputText,
+        ButtonComponent,
+        IconComponent,
+        ClimateComponent
+      ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
         { provide: PlotSpanService, useValue: spanServiceMock },
@@ -338,10 +426,12 @@ describe('ClimateComponent', () => {
   });
 
   describe('deleteCharge', () => {
-    it('should call loadFormsService.deleteLoad', async () => {
+    it('should call loadFormsService.deleteLoad then chargesService.deleteCharge', async () => {
       const loadFormsService = TestBed.inject(LoadFormsService);
+      const chargesService = TestBed.inject(ChargesService);
       await component.deleteCharge();
       expect(loadFormsService.deleteLoad).toHaveBeenCalled();
+      expect(chargesService.deleteCharge).toHaveBeenCalledWith('study-uuid-1', 'section-uuid-1', 'test-charge-uuid');
     });
 
     it('should throw error when study is not found', async () => {

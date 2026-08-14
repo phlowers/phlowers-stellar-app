@@ -11,7 +11,6 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { Task } from '@services/worker_python/tasks/types';
 import { CableModification } from '@shared/domain';
 import { CableModificationParams } from './cableModifications.service.interfaces';
 
@@ -85,47 +84,6 @@ export class CableModificationsService {
 
   /** Fetch a study by UUID from IndexedDB. */
   getStudy = (studyUuid: string) => this.studiesService.getStudy(studyUuid);
-
-  /**
-   * Run the cable modification calculation via the Python worker and update the plot state.
-   * @param params Cable modification input parameters
-   */
-  calculate = async (params: CableModificationParams): Promise<void> => {
-    const spanIndex = this.spanService.getSupportIndex(params.spanUuid);
-    if (spanIndex < 0) {
-      return;
-    }
-
-    // Overlay a preview modification so the section plot icon moves to the
-    // horizontal-abscissa point (x-distance from the reference support)
-    // matching the form values being calculated, even though nothing has been
-    // persisted yet.
-    this.previewCableModification.set({
-      uuid: this.previewCableModification()?.uuid ?? uuidv4(),
-      spanUuid: params.spanUuid,
-      supportRef: params.supportRef,
-      widthCable: params.widthCable,
-      sizeCable: params.sizeCable,
-      distanceSupportRef: params.distanceSupportRef
-    });
-
-    this.plotOptionsService.refreshCamera();
-    this.plotService.loading.set(true);
-
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.cableModification, {
-      spanIndex,
-      widthCable: params.widthCable,
-      sizeCable: params.sizeCable,
-      distanceSupportRef: params.distanceSupportRef,
-      supportRef: params.supportRef
-    });
-
-    this.plotService.litData.set(result?.current ?? null);
-    this.plotService.baseLitData.set(result?.base ?? null);
-    this.plotService.error.set(error);
-    this.plotService.diagnostics.set(diagnostics);
-    this.plotService.loading.set(false);
-  };
 
   /**
    * Persist a cable modification in the current section.

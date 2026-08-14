@@ -16,7 +16,7 @@
       data-testid="cable-length-change-zoom"
     >
       <app-icon icon="filter_center_focus" aria-hidden="true" />
-      <ng-container i18n>Zoom</ng-container>
+      <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
     </button>
 
     <button
@@ -29,12 +29,12 @@
       data-testid="cable-length-change-reset"
     >
       <app-icon icon="refresh" />
-      <ng-container i18n>Reset</ng-container>
+      <ng-container>{{ 'common.reset' | transloco }}</ng-container>
     </button>
   </div>
 
   <div>
-    <label for="scope" i18n>Span</label>
+    <label for="scope">{{ 'loads.shared.span-label' | transloco }}</label>
     <p-select
       inputId="scope"
       [options]="spansOptions()"
@@ -48,7 +48,7 @@
   </div>
 
   <div>
-    <label for="supportRef" i18n>Reference support</label>
+    <label for="supportRef">{{ 'loads.shared.reference-support-label' | transloco }}</label>
     <p-select
       inputId="supportRef"
       [options]="supportRefOptions()"
@@ -61,12 +61,12 @@
   </div>
 
   <div class="col-span-2">
-    <label for="widthCable" i18n>Cable modification</label>
+    <label for="modificationType">{{ 'loads.cable-length-change.cable-modification-label' | transloco }}</label>
     <p-select
-      inputId="widthCable"
+      inputId="modificationType"
       fluid
-      [options]="widthCableOptions"
-      formControlName="widthCable"
+      [options]="modificationTypeOptions"
+      formControlName="modificationType"
       optionLabel="label"
       optionValue="value"
       data-testid="cable-length-change-width-cable"
@@ -74,17 +74,17 @@
   </div>
 
   <div>
-    <label for="sizeCable" i18n>Cable length mod.</label>
+    <label for="modifiedLengthCable">{{ 'loads.cable-length-change.cable-length-mod-label' | transloco }}</label>
     <p-inputgroup>
       <input
         pInputText
         type="number"
-        id="sizeCable"
+        id="modifiedLengthCable"
         fluid
         min="0"
         max="1000"
         step="0.01"
-        formControlName="sizeCable"
+        formControlName="modifiedLengthCable"
         data-testid="cable-length-change-size-cable"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
@@ -92,7 +92,7 @@
   </div>
 
   <div>
-    <label for="distanceSupportRef" i18n>Dist. to ref. support</label>
+    <label for="distanceSupportRef">{{ 'loads.cable-length-change.dist-to-ref-support-label' | transloco }}</label>
     <p-inputgroup>
       <input
         pInputText
@@ -114,8 +114,7 @@
       app-btn
       btnStyle="danger"
       type="button"
-      aria-label="delete cable length change"
-      i18n-aria-label
+      [attr.aria-label]="'loads.cable-length-change.delete-aria-label' | transloco"
       (click)="deleteForm()"
       [disabled]="hasSavedModification()"
       data-testid="cable-length-change-delete"
@@ -132,19 +131,19 @@
       data-testid="cable-length-change-save"
     >
       <app-icon icon="save" />
-      <ng-container i18n>Save</ng-container>
+      <ng-container>{{ 'common.save' | transloco }}</ng-container>
     </button>
 
     <button
       app-btn
-      [disabled]="true"
+      [disabled]="isFormInvalid() || isLoading()"
       [btnLoading]="isCalculatingOnly()"
       type="button"
-      (click)="calculate()"
+      (click)="calculateCableLength()"
       data-testid="cable-length-change-calculate"
     >
       <app-icon icon="rocket_launch" />
-      <ng-container i18n>Calculate</ng-container>
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </div>
 

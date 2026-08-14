@@ -12,6 +12,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { User } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 interface UserinfoBody extends Partial<OidcClaims> {
   authenticated: boolean;
   oidcEnabled: boolean;
@@ -91,6 +92,13 @@ describe('AuthService', () => {
     };
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [
         AuthService,
         { provide: StorageService, useValue: mockStorageService },
@@ -120,6 +128,11 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValue(userinfoOk({ authenticated: true, oidcEnabled: true, ...testClaims }));
 
       await service.initialize();
+      // No cached user: the network probe now runs in the background (never
+      // blocks APP_INITIALIZER) — flush microtasks/macrotasks before asserting.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.oidcEnabled()).toBe(true);
       expect(service.modeResolved()).toBe(true);
@@ -135,6 +148,10 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValue(userinfoOk({ authenticated: false, oidcEnabled: false }));
 
       await service.initialize();
+      // No cached user: the network probe now runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.oidcEnabled()).toBe(false);
       expect(service.modeResolved()).toBe(true);
@@ -149,6 +166,11 @@ describe('AuthService', () => {
       usersTableMock.toArray.mockResolvedValue([testEmailOnlyUser]);
 
       await service.initialize();
+      // Email-only cache has no `sub`: the fast path is skipped and the mode/cache
+      // fallback resolution now runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.currentUser()).toEqual(testEmailOnlyUser);
     });
@@ -176,6 +198,23 @@ describe('AuthService', () => {
       expect(service.oidcEnabled()).toBe(true);
       expect(service.currentUser()).toBeNull();
     });
+
+    it('should clear a user optimistically restored by the guard before the mode resolved', async () => {
+      mockFetch.mockResolvedValue(userinfoOk({ authenticated: false, oidcEnabled: true }));
+      usersTableMock.toArray.mockResolvedValue([testEmailOnlyUser]);
+      // Simulates tryRestoreFromCache having restored the cached email-only
+      // user while the mode probe was still in flight.
+      service.currentUser.set(testEmailOnlyUser);
+
+      await service.initialize();
+      // The mode/cache resolution runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(service.oidcEnabled()).toBe(true);
+      expect(service.currentUser()).toBeNull();
+    });
   });
 
   describe('initialize — network failure (offline)', () => {
@@ -184,6 +223,12 @@ describe('AuthService', () => {
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
+      // Cache-first: the cached OIDC user is trusted immediately; the network
+      // resync runs in the background, so flush microtasks before asserting
+      // the mode has resolved.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Cache-first: the cached OIDC user is available immediately.
       expect(service.currentUser()).toEqual(testOidcUser);
@@ -222,6 +267,10 @@ describe('AuthService', () => {
       mockFetch.mockResolvedValue(userinfoStatus(401));
 
       await service.initialize();
+      // No cached user: the network probe now runs in the background — flush it.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(service.oidcEnabled()).toBe(true);
       expect(service.modeResolved()).toBe(true);
@@ -258,6 +307,11 @@ describe('AuthService', () => {
       usersTableMock.toArray.mockResolvedValue([testOidcUser]);
 
       await service.initialize();
+      // Cache-first trusts the cached user momentarily, then the background
+      // resync observes the 403 mismatch and drops it. Flush microtasks.
+      await Promise.resolve();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Cache-first: the previously-authenticated user renders immediately.
       // Apache remains the authoritative enforcement layer for any real
@@ -506,12 +560,26 @@ describe('AuthService', () => {
       expect(service.currentUser()).toBeNull();
     });
 
-    it('should reject an email-only cached user when oidcEnabled=true', async () => {
+    it('should reject an email-only cached user when the resolved mode is OIDC', async () => {
       service.oidcEnabled.set(true);
+      service.modeResolved.set(true);
       usersTableMock.toArray.mockResolvedValue([testEmailOnlyUser]);
       const result = await service.tryRestoreFromCache();
       expect(result).toBe(false);
       expect(service.currentUser()).toBeNull();
+    });
+
+    it('should restore an email-only cached user while the mode is still unresolved', async () => {
+      // Regression test: on a fresh page load `oidcEnabled` holds its strict
+      // default (true) until the /auth/userinfo probe lands. The guard must
+      // not discard a cached fallback-mode user on that default, otherwise
+      // every full reload bounces to /login (dev-mode race).
+      service.oidcEnabled.set(true);
+      service.modeResolved.set(false);
+      usersTableMock.toArray.mockResolvedValue([testEmailOnlyUser]);
+      const result = await service.tryRestoreFromCache();
+      expect(result).toBe(true);
+      expect(service.currentUser()).toEqual(testEmailOnlyUser);
     });
 
     it('should accept an email-only cached user in fallback mode', async () => {

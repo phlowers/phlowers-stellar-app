@@ -6,6 +6,7 @@
  */
 import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
@@ -43,20 +44,19 @@ export class AuthService {
   private static readonly SERVER_MISMATCH_STATUS_CODES = new Set([401, 403]);
 
   /**
-   * Timeout (ms) for the `/auth/userinfo` probe, so a slow/unreachable
-   * network never blocks startup.
+   * Timeout (ms) for the `/auth/userinfo` probe so a slow or unreachable
+   * server never blocks startup.
    *
-   * Deliberately set above Apache's own observed OIDC refresh-token retry
-   * window (`oidc_refresh_token_cache_get` backs off in ~0.5s steps for up
-   * to ~5s before giving up with `invalid_grant`/502 — see connexion-gaia.md
-   * §6): a shorter client timeout races against that window and aborts the
-   * request right as Apache might have been about to answer, which only
-   * makes the perceived slowness worse without gaining anything.
+   * MUST stay strictly greater than Apache's `OIDCHTTPTimeoutLong` (10s in
+   * `httpd-oidc.conf.template`): a shorter client timeout races Apache's own
+   * outgoing call to G@IA and aborts the request right as Apache might have
+   * been about to answer. 13s leaves a ~3s margin.
    */
-  private static readonly USERINFO_PROBE_TIMEOUT_MS = 8000;
+  private static readonly USERINFO_PROBE_TIMEOUT_MS = 13000;
 
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly storageService = inject(StorageService);
   private readonly authResyncService = inject(AuthResyncService);
   private readonly destroyRef = inject(DestroyRef);
@@ -102,13 +102,6 @@ export class AuthService {
   async initialize(): Promise<void> {
     const cached = await this.loadCachedUser();
 
-    // Fast path: a previously-authenticated OIDC user (proven by the presence
-    // of a `sub` claim) is valid offline regardless of the server mode, which
-    // is not yet known at this point. Publish it immediately so the app
-    // starts instantly from cache, then resync with the server in the
-    // background without making the caller (APP_INITIALIZER) wait for it.
-    // Skipped when a server mismatch is already proven while online (defence
-    // in depth): that case must go through the authoritative probe below.
     if (cached?.sub && !this.shouldForceServerResync()) {
       this.currentUser.set(cached);
       void this.refreshFromNetwork().catch((err) => {
@@ -117,10 +110,23 @@ export class AuthService {
       return;
     }
 
-    // No proven-OIDC cached user: the mode (OIDC vs fallback) is still
-    // unknown, so the network probe (bounded by a timeout, see
-    // `probeUserinfo`) must run before deciding whether an email-only cached
-    // user (fallback mode) may be trusted.
+    // IMPORTANT: never await the network probe here. This method is called
+    // from APP_INITIALIZER and Angular renders nothing until it resolves.
+    // probeUserinfo() can take up to USERINFO_PROBE_TIMEOUT_MS (13s) on a
+    // slow/unreachable server — that must never turn into a blank white
+    // screen. The auth guard and the login page already tolerate the
+    // transient "unresolved" state (IndexedDB fallback, `modeResolved`
+    // signal), so resolving in the background is safe.
+    void this.resolveModeAndUserFromNetwork(cached);
+  }
+
+  /**
+   * Background counterpart of `initialize()` for the "no proven-OIDC cached
+   * user" path: probes the server to discover the auth mode and any active
+   * session, then falls back to the IndexedDB cache. Never awaited by the
+   * caller so it cannot delay the app's first render.
+   */
+  private async resolveModeAndUserFromNetwork(cached: User | null): Promise<void> {
     const claims = await this.probeUserinfo();
 
     // 1. Active OIDC session — authoritative path.
@@ -141,11 +147,12 @@ export class AuthService {
     }
 
     // 2a. In OIDC mode (or when mode is unknown), reject stale email-only
-    // users that were created in fallback mode. Only previously-OIDC users
-    // (those that have a `sub` claim) are accepted offline — already handled
-    // by the fast path above, so reaching here means `cached.sub` is absent.
+    // users that were created in fallback mode. Also clear `currentUser` in
+    // case the auth guard optimistically restored the cached user while the
+    // mode was still unresolved (see `tryRestoreFromCache`).
     if (this.oidcEnabled() && !cached.sub) {
       this.logger.warn('AuthService: stale email-only cached user ignored because OIDC mode is required');
+      this.currentUser.set(null);
       return;
     }
 
@@ -160,6 +167,11 @@ export class AuthService {
   async refreshFromNetwork(): Promise<User | null> {
     const claims = await this.probeUserinfo();
     if (!claims) {
+      // Background reconciliation of the offline-first fast path: a proven
+      // server mismatch (401/403) is recorded via `serverSessionInvalid`
+      // (see `probeUserinfo`), but the cache-first user is intentionally kept
+      // visible so startup stays instant. Apache remains the authoritative
+      // enforcement layer for any real protected request from this point on.
       return null;
     }
     const user = await this.upsertUser(claims);
@@ -194,8 +206,8 @@ export class AuthService {
   private async probeUserinfo(): Promise<OidcClaims | null> {
     let response: Response;
     const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort('AuthService: userinfo probe timed out'),
+    const timeoutId = setTimeout(
+      () => controller.abort(new DOMException('userinfo probe timeout', 'TimeoutError')),
       AuthService.USERINFO_PROBE_TIMEOUT_MS
     );
     try {
@@ -207,7 +219,7 @@ export class AuthService {
       this.modeResolved.set(true);
       return null;
     } finally {
-      clearTimeout(timer);
+      clearTimeout(timeoutId);
     }
 
     if (response.status === 401) {
@@ -278,7 +290,7 @@ export class AuthService {
    */
   async loginWithEmail(email: string): Promise<User> {
     if (this.oidcEnabled()) {
-      this.notificationService.error($localize`Email login is disabled because G@IA single sign-on is required.`);
+      this.notificationService.error(this.translocoService.translate('shared.auth-service.email-login-disabled'));
       throw new Error('Email login is disabled in OIDC mode');
     }
 
@@ -299,7 +311,13 @@ export class AuthService {
    * Used as a safety net by the auth guard in case the APP_INITIALIZER
    * signal was not yet visible when the guard evaluated. Honours the
    * current OIDC mode: stale email-only users are rejected when OIDC is
-   * required.
+   * required — but only once the mode has actually been resolved by the
+   * server probe. While the mode is still unknown, `oidcEnabled` holds its
+   * strict default (`true`) and rejecting on it would race the in-flight
+   * `/auth/userinfo` probe, kicking a valid fallback-mode user back to the
+   * login page on every full reload. Restoring optimistically is safe:
+   * Apache remains the authoritative enforcement layer, and
+   * `resolveModeAndUserFromNetwork` re-evaluates once the probe lands.
    *
    * @returns `true` if a cached user was found and restored.
    */
@@ -312,7 +330,7 @@ export class AuthService {
     if (!cachedUser) {
       return false;
     }
-    if (this.oidcEnabled() && !cachedUser.sub) {
+    if (this.modeResolved() && this.oidcEnabled() && !cachedUser.sub) {
       return false;
     }
     this.currentUser.set(cachedUser);

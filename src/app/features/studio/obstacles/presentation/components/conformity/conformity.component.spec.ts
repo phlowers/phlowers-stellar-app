@@ -8,13 +8,17 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
-import { createConformityPlot, purgeConformityPlot } from './helpers/createConformityPlot';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+import { createConformityPlot, purgeConformityPlot, resizeConformityPlot } from './helpers/createConformityPlot';
 import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('./helpers/createConformityPlot');
 
 const mockCreateConformityPlot = vi.mocked(createConformityPlot);
 const mockPurgeConformityPlot = vi.mocked(purgeConformityPlot);
+const mockResizeConformityPlot = vi.mocked(resizeConformityPlot);
 
 /** Shape of the in-memory data backing the mock Dexie database. */
 interface DbData {
@@ -139,7 +143,7 @@ describe('ConformityComponent', () => {
   };
   let mockSpanService: { section: typeof sectionSignal; getSpanOptions: ReturnType<typeof vi.fn> };
   let mockNotification: { error: ReturnType<typeof vi.fn> };
-
+  let mockWorkerPython: { runTask: ReturnType<typeof vi.fn> };
   /**
    * Configures the TestBed and creates the component, then flushes the async Dexie-backed
    * signals (wind zones, conformity config, options) so derived state is fully resolved.
@@ -167,14 +171,106 @@ describe('ConformityComponent', () => {
     };
     mockNotification = { error: vi.fn() };
 
+    mockWorkerPython = {
+      runTask: vi.fn().mockImplementation((_task: Task, inputs: { form: { selectedConformityRules?: string[] } }) => {
+        const rules = inputs.form.selectedConformityRules ?? [];
+        const results = Object.fromEntries(
+          rules.map((ruleType) => [
+            ruleType,
+            {
+              overhangCableAltitude: 42,
+              lateralCableAltitude: 38,
+              overhangCableLineAxisDistance: 150,
+              lateralCableLineAxisDistance: 120,
+              overhangDistanceToComply: 5,
+              lateralDistanceToComply: 3,
+              overhangComplianceAltitude: 7,
+              lateralComplianceLineAxisDistance: 4,
+              conformityCompliance: true
+            }
+          ])
+        );
+        return Promise.resolve({
+          result: {
+            obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+            conformity: CONFORMITY_PLOT_MOCK.conformity,
+            results
+          },
+          error: null
+        });
+      })
+    };
+
     await TestBed.configureTestingModule({
-      imports: [ConformityComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.shared.altitude-type-absolute': 'Absolute (NGF)',
+              'studio.shared.altitude-type-relative': 'Relative to support',
+              'studio.shared.altitude-type-relative-cable': 'Relative to cable attachment',
+              'studio.shared.span-axis-option': 'Span axis',
+              'studio.conformity.cable-altitude-label': 'Cable altitude',
+              'studio.conformity.cable-line-axis-distance-label': 'Cable line axis distance',
+              'studio.conformity.distance-to-comply-label': 'Distance to comply',
+              'studio.conformity.compliance-altitude-label': 'Compliance altitude',
+              'studio.conformity.compliance-line-axis-distance-label': 'Compliance line axis distance',
+              'studio.conformity.temperature-label': 'Temperature',
+              'studio.conformity.wind-pressure-label': 'Wind pressure',
+              'studio.conformity.minimal-distance-label': 'Minimal distance',
+              'studio.conformity.altitude-point-label': 'Altitude point',
+              'studio.conformity.altitude-type-label': 'Altitude type',
+              'common.calculate': 'Calculate',
+              'studio.conformity.calculating-text': 'Calculating conformity\u2026',
+              'studio.conformity.calculation-failed-error': 'Calculation failed: {{ errorMessage }}',
+              'studio.conformity.compliance-column-label': 'Conformity compliance',
+              'common.no': 'No',
+              'common.yes': 'Yes',
+              'studio.conformity.distance-to-line-axis-label': 'Distance to line axis',
+              'studio.conformity.electric-tension-label': 'Electric tension',
+              'studio.conformity.enlarge-graphic-view-btn': 'Enlarge graphic view',
+              'studio.conformity.form-legend': 'Form',
+              'studio.conformity.lateral-column-suffix': 'lateral',
+              'studio.conformity.lateral-distance-temperature-label': 'Lateral distance temperature',
+              'common.max-value': 'Maximum value:',
+              'common.min-value': 'Minimum value:',
+              'studio.conformity.minimum-distance-case-label': 'Minimum distance case',
+              'studio.conformity.name-label': 'Name',
+              'studio.conformity.no-conformity-config-error':
+                'Cannot calculate conformity: obstacle type has no conformity configuration',
+              'studio.conformity.obstacle-legend': 'Obstacle',
+              'studio.conformity.obstacle-point-label': "Obstacle's point",
+              'studio.conformity.overhang-column-suffix': 'overhang',
+              'studio.conformity.point-option-label': 'Point {{ index }}',
+              'studio.conformity.red-zone-presence-label': 'Red zone presence',
+              'studio.conformity.reduce-graphic-view-btn': 'Reduce graphic view',
+              'studio.conformity.reference-support-distance-label': 'Reference support distance',
+              'studio.conformity.repartition-temperature-label': 'Repartition temperature',
+              'studio.conformity.results-updated-text': 'Conformity results updated.',
+              'studio.conformity.type-label': 'Type',
+              'studio.conformity.unknown-compliance-label': 'Unknown',
+              'studio.conformity.visualisation-graph-caption': 'Conformity visualisation graph',
+              'studio.conformity.wind-minus-label': 'Wind -',
+              'studio.conformity.wind-zone-label': 'Wind zone',
+              'studio.shared.conformity-label': 'Conformity',
+              'studio.shared.lateral-distance-type-label': 'Lateral distance type',
+              'studio.shared.reference-support-label': 'Reference support',
+              'common.results': 'Results:',
+              'studio.shared.span-label': 'Span'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        ConformityComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: ObstacleFormService, useValue: mockFormService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
-        { provide: NotificationService, useValue: mockNotification }
+        { provide: NotificationService, useValue: mockNotification },
+        { provide: WorkerPythonService, useValue: mockWorkerPython }
       ]
     }).compileComponents();
 
@@ -579,6 +675,7 @@ describe('ConformityComponent', () => {
 
     it('should not render the plot when the #conformity-plot div is not present in the DOM', async () => {
       await createComponent();
+      mockCreateConformityPlot.mockClear();
       vi.spyOn(document, 'getElementById').mockReturnValue(null);
 
       await component.calculate();
@@ -611,6 +708,38 @@ describe('ConformityComponent', () => {
       fixture.destroy();
 
       expect(mockPurgeConformityPlot).toHaveBeenCalledWith(document);
+    });
+  });
+
+  describe('graph enlarge toggle', () => {
+    it('should toggle the enlarged state and resize the plot on each click', async () => {
+      await createComponent();
+      mockResizeConformityPlot.mockClear();
+      expect(component.isGraphEnlarged()).toBe(false);
+
+      component.toggleGraphSize();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.isGraphEnlarged()).toBe(true);
+      expect(mockResizeConformityPlot).toHaveBeenCalledWith(document);
+
+      component.toggleGraphSize();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.isGraphEnlarged()).toBe(false);
+      expect(mockResizeConformityPlot).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reset the enlarged state when the modal closes', async () => {
+      await createComponent();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      component.isGraphEnlarged.set(true);
+
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+
+      expect(component.isGraphEnlarged()).toBe(false);
     });
   });
 
@@ -704,6 +833,13 @@ describe('ConformityComponent', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
       await fixture.whenStable();
+
+      // The auto-calculate effect kicks off calculate(), whose async db/worker chain resolves
+      // over several microtask + change-detection cycles.
+      for (let i = 0; i < 3; i++) {
+        fixture.detectChanges();
+        await fixture.whenStable();
+      }
 
       expect(component.conformityResults()).not.toBeNull();
     });

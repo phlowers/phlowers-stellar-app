@@ -6,6 +6,7 @@ import { Component, ViewChild } from '@angular/core';
 import { SidebarComponent } from './sidebar.component';
 import { SidebarItem } from './sidebar.model';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock environment
 vi.mock('@src/environments/environment', () => ({
   environment: {
@@ -93,7 +94,19 @@ describe('SidebarComponent', () => {
     vi.spyOn(document, 'querySelector').mockReturnValue(mockBody);
 
     await TestBed.configureTestingModule({
-      imports: [TestHostComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.sidebar.menu': 'Menu',
+              'shared.sidebar.shrink-menu': 'Shrink menu'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        TestHostComponent
+      ],
       providers: [
         {
           provide: ActivatedRoute,
@@ -168,6 +181,8 @@ describe('SidebarComponent', () => {
   });
 
   it('should not show version when appVersionDisplay is false', () => {
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
     hostComponent.appVersionDisplay = false;
     hostFixture.detectChanges();
 
@@ -252,6 +267,8 @@ describe('SidebarComponent', () => {
   // Additional tests to verify input binding changes
   it('should respond to changes in input properties', () => {
     // Change the logo text
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
     hostComponent.logoText = 'New App Name';
     hostFixture.detectChanges();
 
@@ -261,6 +278,8 @@ describe('SidebarComponent', () => {
 
   it('should update displayed links when input links change', () => {
     // Add a new link to mainLinks
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
     hostComponent.mainLinks = [
       ...hostComponent.mainLinks,
       {

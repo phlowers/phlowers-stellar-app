@@ -20,10 +20,19 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { isEqual } from 'lodash';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-header',
-  imports: [FormsModule, SelectModule, InputTextModule, InputGroupModule, InputGroupAddonModule, IconComponent],
+  imports: [
+    FormsModule,
+    SelectModule,
+    InputTextModule,
+    InputGroupModule,
+    InputGroupAddonModule,
+    IconComponent,
+    TranslocoModule
+  ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

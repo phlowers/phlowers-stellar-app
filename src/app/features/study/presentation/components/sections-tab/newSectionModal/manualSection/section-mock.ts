@@ -1,3 +1,5 @@
+import { TranslocoService } from '@jsverse/transloco';
+
 /** Option item for a dropdown select with display name and code. */
 interface SelectOption {
   name: string;
@@ -5,7 +7,7 @@ interface SelectOption {
 }
 
 /** Available section types: guard or phase. */
-export const sectionTypes: SelectOption[] = [
-  { name: $localize`Guard`, code: 'guard' },
-  { name: $localize`Phase`, code: 'phase' }
+export const createSectionTypes = (transloco: TranslocoService): SelectOption[] => [
+  { name: transloco.translate('common.section-type.guard'), code: 'guard' },
+  { name: transloco.translate('common.section-type.phase'), code: 'phase' }
 ];

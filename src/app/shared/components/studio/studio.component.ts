@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnDestroy } from '@angular/core';
 import { SectionPlotComponent } from './section/section-plot.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { PlotService } from '@services/plot/plot.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -11,7 +11,7 @@ import { formatPythonError } from '@core/services/worker_python/tasks/python-err
 @Component({
   selector: 'app-studio',
   templateUrl: './studio.component.html',
-  imports: [SectionPlotComponent, ProgressSpinnerModule],
+  imports: [SectionPlotComponent, ProgressSpinnerModule, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /**
@@ -27,9 +27,17 @@ export class StudioComponent implements OnDestroy {
   protected readonly plotService = inject(PlotService);
   private readonly notificationService = inject(NotificationService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly translocoService = inject(TranslocoService);
 
   // State
-  readonly plotInitialized = signal(false);
+  /**
+   * Whether the current section's plot data is available. Derived directly from
+   * litData (rather than latched) so it correctly resets on every new section load —
+   * litData is nulled synchronously by initSectionStudio, but refreshProjection does not
+   * clear it before recomputing (support-range panning), so this stays true across pans
+   * and only drops while a genuinely new section is loading.
+   */
+  readonly plotInitialized = computed(() => this.plotService.litData() !== null);
 
   constructor() {
     effect(() => {
@@ -38,7 +46,7 @@ export class StudioComponent implements OnDestroy {
       const exceptionDiagnostic = diagnostics.find((diagnostic) => diagnostic.origin === 'exception') ?? null;
 
       if (error !== null) {
-        const message = formatStudioError(error, exceptionDiagnostic?.code ?? null);
+        const message = formatStudioError(error, this.translocoService, exceptionDiagnostic?.code ?? null);
         if (exceptionDiagnostic?.severity === 'warning') {
           this.notificationService.warning(message);
         } else {
@@ -48,17 +56,11 @@ export class StudioComponent implements OnDestroy {
 
       for (const diagnostic of diagnostics) {
         if (diagnostic.origin === 'warning') {
-          const message = formatPythonError(diagnostic.code);
+          const message = formatPythonError(diagnostic.code, this.translocoService);
           if (message !== null) {
             this.notificationService.warning(message);
           }
         }
-      }
-    });
-
-    effect(() => {
-      if (this.plotService.litData() !== null) {
-        this.plotInitialized.set(true);
       }
     });
 

@@ -11,6 +11,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { BehaviorSubject } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 vi.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
@@ -133,7 +134,56 @@ describe('ObstaclesFormComponent', () => {
     mockNotificationService = { warningList: vi.fn() };
 
     await TestBed.configureTestingModule({
-      imports: [ObstaclesFormComponent],
+      imports: [
+        ObstaclesFormComponent,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'studio.shared.altitude-type-absolute': 'Absolute',
+              'studio.shared.altitude-type-relative': 'Relative',
+              'studio.shared.altitude-type-relative-cable': 'Relative to cable',
+              'studio.shared.span-axis-option': 'Span axis',
+              'studio.obstacles-form.obstacle-must-be-saved-warning': 'obstacle must be saved',
+              'studio.obstacles-form.obstacle-type-not-eligible-warning':
+                "obstacle type '{{typeLabel}}' is not eligible for conformity control",
+              'studio.obstacles-form.tension-level-required-warning': 'study must have an electric tension level',
+              'studio.obstacles-form.single-condition-warning-summary':
+                'You cannot open conformity control because this condition is not met:',
+              'studio.obstacles-form.multiple-conditions-warning-summary':
+                'You cannot open conformity control because these conditions are not met:',
+              'shared.studio.zoom': 'Zoom',
+              'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
+              'studio.shared.span-label': 'Span',
+              'studio.obstacles-form.obstacle-type-label': 'Obstacle type',
+              'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+              'studio.shared.reference-support-label': 'Reference support',
+              'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
+              'studio.shared.lateral-distance-type-label': 'Lateral distance type',
+              'studio.obstacles-form.free-positioning-label': 'Free positioning',
+              'studio.obstacles-form.add-point-btn': 'Add point',
+              'studio.obstacles-form.select-point-label': 'Select point',
+              'studio.obstacles-form.point-label': 'Point',
+              'studio.obstacles-form.delete-point-aria-label': 'delete point',
+              'studio.obstacles-form.point-alt-label': 'Point alt.',
+              'common.meter': 'm',
+              'studio.obstacles-form.ref-support-dist-label': 'Ref. support dist.',
+              'studio.obstacles-form.line-axis-dist-label': 'Line axis dist.',
+              'studio.obstacles-form.delete-obstacle-aria-label': 'delete obstacle',
+              'studio.obstacles-form.calculate-and-save-btn': 'Calculate and save',
+              'studio.shared.oblique': 'Oblique',
+              'studio.shared.vertical': 'Vertical',
+              'studio.shared.horizontal': 'Horizontal',
+              'studio.obstacles-form.conformity-dialog-title': 'Conformity verifications',
+              'studio.shared.conformity-label': 'Conformity'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotSpanService, useValue: mockSpanService },
@@ -269,7 +319,7 @@ describe('ObstaclesFormComponent', () => {
       expect(button?.tagName).toBe('BUTTON');
     });
 
-    it('should render the open-conformity-modal (AT-CCGLA) button as enabled', () => {
+    it('should render the open-conformity-modal (Conformity) button as enabled', () => {
       const button = getByTestId('open-conformity-modal') as HTMLButtonElement;
       expect(button).toBeTruthy();
       expect(button.disabled).toBe(false);
@@ -478,7 +528,56 @@ describe('ObstaclesFormComponent', () => {
       const getObstacleTypes = vi.fn();
       await TestBed.resetTestingModule()
         .configureTestingModule({
-          imports: [ObstaclesFormComponent],
+          imports: [
+            ObstaclesFormComponent,
+            TranslocoTestingModule.forRoot({
+              langs: {
+                en: {
+                  'studio.shared.altitude-type-absolute': 'Absolute',
+                  'studio.shared.altitude-type-relative': 'Relative',
+                  'studio.shared.altitude-type-relative-cable': 'Relative to cable',
+                  'studio.shared.span-axis-option': 'Span axis',
+                  'studio.obstacles-form.obstacle-must-be-saved-warning': 'obstacle must be saved',
+                  'studio.obstacles-form.obstacle-type-not-eligible-warning':
+                    "obstacle type '{{typeLabel}}' is not eligible for conformity control",
+                  'studio.obstacles-form.tension-level-required-warning': 'study must have an electric tension level',
+                  'studio.obstacles-form.single-condition-warning-summary':
+                    'You cannot open conformity control because this condition is not met:',
+                  'studio.obstacles-form.multiple-conditions-warning-summary':
+                    'You cannot open conformity control because these conditions are not met:',
+                  'shared.studio.zoom': 'Zoom',
+                  'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
+                  'studio.shared.span-label': 'Span',
+                  'studio.obstacles-form.obstacle-type-label': 'Obstacle type',
+                  'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+                  'studio.shared.reference-support-label': 'Reference support',
+                  'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
+                  'studio.shared.lateral-distance-type-label': 'Lateral distance type',
+                  'studio.obstacles-form.free-positioning-label': 'Free positioning',
+                  'studio.obstacles-form.add-point-btn': 'Add point',
+                  'studio.obstacles-form.select-point-label': 'Select point',
+                  'studio.obstacles-form.point-label': 'Point',
+                  'studio.obstacles-form.delete-point-aria-label': 'delete point',
+                  'studio.obstacles-form.point-alt-label': 'Point alt.',
+                  'common.meter': 'm',
+                  'studio.obstacles-form.ref-support-dist-label': 'Ref. support dist.',
+                  'studio.obstacles-form.line-axis-dist-label': 'Line axis dist.',
+                  'studio.obstacles-form.delete-obstacle-aria-label': 'delete obstacle',
+                  'studio.obstacles-form.calculate-and-save-btn': 'Calculate and save',
+                  'studio.shared.oblique': 'Oblique',
+                  'studio.shared.vertical': 'Vertical',
+                  'studio.shared.horizontal': 'Horizontal',
+                  'studio.obstacles-form.conformity-dialog-title': 'Conformity verifications',
+                  'studio.shared.conformity-label': 'Conformity'
+                }
+              },
+              translocoConfig: {
+                availableLangs: ['en'],
+                defaultLang: 'en'
+              },
+              preloadLangs: true
+            })
+          ],
           providers: [
             provideNoopAnimations(),
             { provide: PlotSpanService, useValue: mockSpanService },
@@ -570,6 +669,48 @@ describe('ObstaclesFormComponent', () => {
 
       expect(obstaclesService.activePointIndex()).toBe(0);
     });
+
+    it('should leave the control untouched when input is cleared (NaN)', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(5.5);
+      input.value = '';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      expect(positionGroup.get('x')?.value).toBe(5.5);
+    });
+
+    it('should revert a cleared/invalid field to the persisted value on blur', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(5.5);
+      input.value = '';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(input.value).toBe('5.5');
+    });
+
+    it('should not alter a valid field value on blur', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      input.value = '7.2';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(input.value).toBe('7.2');
+    });
+
+    it('should revert to an empty string on blur when the control has no persisted value', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(null);
+      input.value = '';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(input.value).toBe('');
+    });
   });
 
   describe('initializes and resets form based on support uuid', () => {
@@ -635,25 +776,33 @@ describe('ObstaclesFormComponent', () => {
   describe('free positioning toggle', () => {
     it('should be disabled when no support is selected', () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
-      expect(toggle.getAttribute('ng-reflect-disabled')).toBe('true');
+      expect(toggle.getAttribute('data-p-disabled')).toBe('true');
     });
 
     it('should be enabled when a support is selected', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-      fixture.detectChanges();
 
-      const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
-      expect(toggle.getAttribute('ng-reflect-disabled')).toBe('false');
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+
+      const toggle = localFixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('data-p-disabled')).toBe('false');
     });
 
-    it('should reflect isFreePositioningMode value', () => {
+    it('should reflect isFreePositioningMode value', async () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
-      expect(toggle.getAttribute('ng-reflect-model')).toBe('false');
+      expect(toggle.getAttribute('data-p-checked')).toBe('false');
 
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       mockPlotOptionsService.isFreePositioningMode.set(true);
-      fixture.detectChanges();
 
-      expect(toggle.getAttribute('ng-reflect-model')).toBe('true');
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+      await Promise.resolve();
+      localFixture.detectChanges();
+
+      const localToggle = localFixture.nativeElement.querySelector('p-toggleswitch');
+      expect(localToggle.getAttribute('data-p-checked')).toBe('true');
     });
   });
 
@@ -854,14 +1003,104 @@ describe('ObstaclesFormComponent', () => {
       expect(positionGroup.get('y')?.value).toBe(7.8);
     });
 
-    it('should default to 0 when input value is not numeric', () => {
+    it('should leave the position unchanged when input value is not numeric', () => {
       const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
       input.value = 'not-a-number';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should leave the position unchanged when input is cleared to an empty string', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
+      input.value = '';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should not reset the altitude position to 0 when a lone "-" is typed mid-edit', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+    });
+
+    it('should not reset the ref distance position to 0 when a lone "-" is typed mid-edit', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('x')?.setValue(5.3);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      expect(positionGroup.get('x')?.value).toBe(5.3);
+    });
+
+    it('should not reset the axis distance position to 0 when a lone "-" is typed mid-edit', () => {
+      const input = getByTestId('point-axis-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('y')?.setValue(7.8);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'y');
+
+      expect(positionGroup.get('y')?.value).toBe(7.8);
+    });
+
+    it('should accept a full negative value typed progressively after a lone "-"', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get('z')?.setValue(12.5);
+
+      input.value = '-';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+      expect(positionGroup.get('z')?.value).toBe(12.5);
+
+      input.value = '-5';
+      component.onPositionInput({ target: input } as unknown as Event, 'z');
+
+      expect(positionGroup.get('z')?.value).toBe(-5);
+    });
+
+    it('should accept a full negative value replacing a selected altitude value', () => {
+      const input = getByTestId('point-altitude') as HTMLInputElement;
+      input.value = '-5.5';
 
       component.onPositionInput({ target: input } as unknown as Event, 'z');
 
       const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('z')?.value).toBe(0);
+      expect(positionGroup.get('z')?.value).toBe(-5.5);
+    });
+
+    it('should accept a full negative value replacing a selected ref distance value', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      input.value = '-5.3';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'x');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('x')?.value).toBe(-5.3);
+    });
+
+    it('should accept a full negative value replacing a selected axis distance value', () => {
+      const input = getByTestId('point-axis-distance') as HTMLInputElement;
+      input.value = '-7.8';
+
+      component.onPositionInput({ target: input } as unknown as Event, 'y');
+
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      expect(positionGroup.get('y')?.value).toBe(-7.8);
     });
   });
 
@@ -897,7 +1136,7 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
-  describe('conformity modal (AT-CCGLA button)', () => {
+  describe('conformity modal (Conformity button)', () => {
     /** Sets up the form/section so every openConformityModal precondition is satisfied. */
     const satisfyAllConditions = () => {
       mockObstacleFormService.form.controls.uuid.setValue('obstacle-1');
@@ -953,7 +1192,7 @@ describe('ObstaclesFormComponent', () => {
       expect(component.isConformityModalOpen()).toBe(true);
     });
 
-    it('should call openConformityModal when the AT-CCGLA button is clicked', () => {
+    it('should call openConformityModal when the Conformity button is clicked', () => {
       const spy = vi.spyOn(component, 'openConformityModal').mockResolvedValue();
 
       (getByTestId('open-conformity-modal') as HTMLButtonElement).click();

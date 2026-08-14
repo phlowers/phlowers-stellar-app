@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -7,7 +7,7 @@ import { CardState } from '@shared/model/card-info.model';
 
 @Component({
   selector: 'app-card-info',
-  imports: [CommonModule, RouterLink, IconComponent, ButtonComponent],
+  imports: [RouterLink, IconComponent, ButtonComponent],
   templateUrl: './card-info.component.html',
   styleUrl: './card-info.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

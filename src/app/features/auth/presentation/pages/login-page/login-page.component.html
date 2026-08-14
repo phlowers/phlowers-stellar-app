@@ -3,60 +3,37 @@
     <img
       class="login-page__logo"
       src="in-app-logo/stellar-logo-expanded.svg"
-      alt="Stellar"
-      i18n-alt="@@login.logoAlt"
+      [alt]="'auth.login-page.logo-alt' | transloco"
     />
 
-    <h1 class="login-page__title" i18n="@@login.title" data-testid="login-title">Sign in</h1>
+    <h1 class="login-page__title" data-testid="login-title">{{ 'auth.login-page.title' | transloco }}</h1>
 
     @if (isResolvingMode()) {
-      <p
-        class="login-page__subtitle"
-        role="status"
-        aria-live="polite"
-        data-testid="login-resolving"
-        i18n="@@login.resolvingMode"
-      >
-        Checking sign-in mode…
-      </p>
+      <output class="login-page__subtitle" aria-live="polite" data-testid="login-resolving">
+        {{ 'auth.login-page.resolving-mode' | transloco }}
+      </output>
     } @else if (showOidcRedirecting()) {
-      <p
-        class="login-page__subtitle"
-        role="status"
-        aria-live="polite"
-        data-testid="login-redirecting"
-        i18n="@@login.redirectingToGaia"
-      >
-        Redirecting to G&#64;IA for sign in…
-      </p>
+      <output class="login-page__subtitle" aria-live="polite" data-testid="login-redirecting">
+        {{ 'auth.login-page.redirecting-to-gaia' | transloco }}
+      </output>
     } @else if (showOfflineOidcWaiting()) {
-      <p
-        class="login-page__subtitle"
-        role="status"
-        aria-live="polite"
-        data-testid="login-offline-waiting"
-        i18n="@@login.offlineWaitingForGaia"
-      >
-        You are offline. Reconnect to continue with G&#64;IA sign in.
-      </p>
+      <output class="login-page__subtitle" aria-live="polite" data-testid="login-offline-waiting">
+        {{ 'auth.login-page.offline-waiting-for-gaia' | transloco }}
+      </output>
     } @else {
-      <p class="login-page__subtitle" i18n="@@login.subtitle" data-testid="login-subtitle">
-        Enter your email address to continue.
+      <p class="login-page__subtitle" data-testid="login-subtitle">
+        {{ 'auth.login-page.subtitle' | transloco }}
       </p>
 
       @if (submitError()) {
-        <p-message
-          severity="error"
-          [text]="submitError()!"
-          data-testid="login-error"
-          role="alert"
-          aria-live="assertive"
-        />
+        <p-message severity="error" data-testid="login-error" role="alert" aria-live="assertive">
+          {{ submitError()! }}
+        </p-message>
       }
 
       <form class="login-page__form" [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="login-form">
         <div class="login-page__field">
-          <label class="login-page__label" for="login-email" i18n="@@login.emailLabel"> Email </label>
+          <label class="login-page__label" for="login-email">{{ 'auth.login-page.email-label' | transloco }}</label>
           @let showEmailErrors = emailControl.touched && emailControl.invalid;
           <input
             id="login-email"
@@ -72,23 +49,16 @@
           @if (showEmailErrors) {
             <small id="login-email-error" class="login-page__error" data-testid="email-error" role="alert">
               @if (emailControl.hasError('required')) {
-                <ng-container i18n="@@login.emailRequired">Email is required.</ng-container>
+                {{ 'auth.login-page.email-required' | transloco }}
               } @else if (emailControl.hasError('email')) {
-                <ng-container i18n="@@login.emailInvalid">Please enter a valid email address.</ng-container>
+                {{ 'auth.login-page.email-invalid' | transloco }}
               }
             </small>
           }
         </div>
 
-        <button
-          class="login-page__submit"
-          type="submit"
-          pButton
-          [disabled]="isSubmitting()"
-          data-testid="submit-btn"
-          i18n="@@login.submitBtn"
-        >
-          Sign in
+        <button class="login-page__submit" type="submit" pButton [disabled]="isSubmitting()" data-testid="submit-btn">
+          {{ 'auth.login-page.submit-btn' | transloco }}
         </button>
       </form>
     }

@@ -10,6 +10,7 @@ import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnosti
 import { Section } from '@shared/domain';
 import { formatStudioError } from './helpers/errors';
 import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 
 // Stub child component to avoid pulling in its dependency tree
 @Component({
@@ -126,6 +127,7 @@ describe('StudioComponent', () => {
   let mockSpanService: {
     section: WritableSignal<Section | null>;
   };
+  const mockTranslocoService = { translate: (key: string) => key } as unknown as TranslocoService;
 
   beforeEach(async () => {
     mockPlotService = {
@@ -143,7 +145,13 @@ describe('StudioComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [StudioComponent],
+      imports: [
+        StudioComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {}, fr: {} },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: NotificationService, useValue: mockNotificationService },
@@ -190,25 +198,33 @@ describe('StudioComponent', () => {
     it('should call notificationService.error with formatted message on CALCULATION_ERROR', () => {
       mockPlotService.error.set(TaskError.CALCULATION_ERROR);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.CALCULATION_ERROR));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, null)
+      );
     });
 
     it('should call notificationService.error with formatted message on NO_CABLE_FOUND', () => {
       mockPlotService.error.set(DataError.NO_CABLE_FOUND);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(DataError.NO_CABLE_FOUND));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(DataError.NO_CABLE_FOUND, mockTranslocoService, null)
+      );
     });
 
     it('should call notificationService.error with formatted message on SOLVER_DID_NOT_CONVERGE', () => {
       mockPlotService.error.set(TaskError.SOLVER_DID_NOT_CONVERGE);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.SOLVER_DID_NOT_CONVERGE, mockTranslocoService, null)
+      );
     });
 
     it('should call notificationService.error with formatted message on PYODIDE_LOAD_ERROR', () => {
       mockPlotService.error.set(TaskError.PYODIDE_LOAD_ERROR);
       fixture.detectChanges();
-      expect(mockNotificationService.error).toHaveBeenCalledWith(formatStudioError(TaskError.PYODIDE_LOAD_ERROR));
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        formatStudioError(TaskError.PYODIDE_LOAD_ERROR, mockTranslocoService, null)
+      );
     });
 
     it('should use pythonErrorCode message when a matching exception diagnostic is set', () => {
@@ -218,7 +234,7 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.error).toHaveBeenCalledWith(
-        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.SolverError)
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, PythonErrorCode.SolverError)
       );
       expect(mockNotificationService.warning).not.toHaveBeenCalled();
     });
@@ -230,7 +246,7 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledWith(
-        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.DataWarning)
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, PythonErrorCode.DataWarning)
       );
       expect(mockNotificationService.error).not.toHaveBeenCalled();
     });
@@ -247,7 +263,7 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledWith(
-        formatStudioError(TaskError.CALCULATION_ERROR, PythonErrorCode.BalanceEngineWarning)
+        formatStudioError(TaskError.CALCULATION_ERROR, mockTranslocoService, PythonErrorCode.BalanceEngineWarning)
       );
       expect(mockNotificationService.error).not.toHaveBeenCalled();
     });
@@ -262,16 +278,28 @@ describe('StudioComponent', () => {
 
     it('should call notificationService.warning once for a captured warning diagnostic', () => {
       mockPlotService.diagnostics.set([
-        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' }
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: boom'
+        }
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
-      expect(mockNotificationService.warning).toHaveBeenCalledWith(formatPythonError(PythonErrorCode.UserWarning));
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(
+        formatPythonError(PythonErrorCode.NoIntersectionPlaneWarning, mockTranslocoService)
+      );
     });
 
     it('should call notificationService.warning once per captured warning diagnostic', () => {
       mockPlotService.diagnostics.set([
-        { code: PythonErrorCode.UserWarning, severity: 'warning', origin: 'warning', rawText: 'UserWarning: boom' },
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: boom'
+        },
         { code: PythonErrorCode.DataWarning, severity: 'warning', origin: 'warning', rawText: 'DataWarning: boom' }
       ]);
       fixture.detectChanges();
@@ -346,12 +374,28 @@ describe('StudioComponent', () => {
       expect(component.plotInitialized()).toBe(true);
     });
 
-    it('should remain true once set even if litData goes back to null', () => {
+    it('should reset to false when litData goes back to null (e.g. a new section starts loading)', () => {
       mockPlotService.litData.set(mockLitData);
       fixture.detectChanges();
       expect(component.plotInitialized()).toBe(true);
 
       mockPlotService.litData.set(null);
+      fixture.detectChanges();
+
+      expect(component.plotInitialized()).toBe(false);
+    });
+
+    it('should become true again once litData is repopulated for a subsequent section', () => {
+      mockPlotService.litData.set(mockLitData);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(true);
+
+      mockPlotService.litData.set(null);
+      fixture.detectChanges();
+      expect(component.plotInitialized()).toBe(false);
+
+      const anotherLitData = { ...mockLitData };
+      mockPlotService.litData.set(anotherLitData);
       fixture.detectChanges();
 
       expect(component.plotInitialized()).toBe(true);
@@ -385,6 +429,23 @@ describe('StudioComponent', () => {
 
       const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
       expect(spinner).toBeFalsy();
+    });
+
+    it('should show spinner again when a subsequent section starts loading (reopening a studio)', () => {
+      mockPlotService.litData.set(mockLitData);
+      mockPlotService.loading.set(false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('p-progress-spinner')).toBeFalsy();
+
+      // A new section load begins: litData is nulled and loading flips true, as
+      // initSectionStudio does — this must show the spinner again, not stay hidden
+      // because a previous section already finished loading in this component instance.
+      mockPlotService.litData.set(null);
+      mockPlotService.loading.set(true);
+      fixture.detectChanges();
+
+      const spinner = fixture.nativeElement.querySelector('p-progress-spinner');
+      expect(spinner).toBeTruthy();
     });
   });
 

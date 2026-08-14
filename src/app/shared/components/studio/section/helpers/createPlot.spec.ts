@@ -11,6 +11,7 @@ import { SpanLoad } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 import { type Mock } from 'vitest';
+import { TranslocoService } from '@jsverse/transloco';
 
 // Mock Plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -491,6 +492,25 @@ describe('createPlot', () => {
       expect(layoutArg.scene.camera).toEqual(domCamera);
     });
 
+    it('should prefer the live WebGL scene camera over the _fullLayout camera', () => {
+      // Scroll-wheel zoom only mutates the WebGL camera and never syncs
+      // _fullLayout.scene.camera, so the gl scene camera must win (bug #1032).
+      const glCamera = { center: { x: 0, y: 0, z: 0 }, eye: { x: -1, y: 0.3, z: -1.2 }, up: { x: 0, y: 0, z: 1 } };
+      const staleLayoutCamera = {
+        center: { x: 0, y: 0, z: 0 },
+        eye: { x: -2.7, y: -0.3, z: -2.2 },
+        up: { x: 0, y: 0, z: 1 }
+      };
+      (mockElement as HTMLElement & { _fullLayout?: unknown })._fullLayout = {
+        scene: { camera: staleLayoutCamera, _scene: { getCamera: () => glCamera } }
+      };
+
+      createPlot({ ...createDefaultParams(), view: '3d', camera: null });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.scene.camera).toEqual(glCamera);
+    });
+
     it('should pass plotParams camera when DOM _fullLayout has no camera', () => {
       (mockElement as HTMLElement & { _fullLayout?: unknown })._fullLayout = { scene: {} };
 
@@ -538,41 +558,53 @@ describe('createPlot', () => {
     });
   });
 
+  describe('config identity across renders', () => {
+    it('should pass the exact same config object to consecutive Plotly.react calls', () => {
+      // Plotly.react diffs the config: a new object (fresh button closures) on each call
+      // registers as a config change and downgrades the react into a full re-plot,
+      // wiping the 2D zoom/pan state that uirevision would preserve (bug #1032).
+      createPlot({ ...createDefaultParams(), view: '2d' });
+      createPlot({ ...createDefaultParams(), view: '2d', currentObstacleUuid: 'obstacle-1' });
+
+      const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
+      const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
+      expect(secondConfig).toBe(firstConfig);
+    });
+
+    it('should rebuild the config with the new button titles when the active language changes', () => {
+      const enTranslations: Record<string, string> = { 'shared.studio.orbital-rotation': 'Orbital rotation' };
+      const frTranslations: Record<string, string> = { 'shared.studio.orbital-rotation': 'Rotation orbitale' };
+      const enTransloco = {
+        translate: (key: string) => enTranslations[key] ?? key
+      } as unknown as TranslocoService;
+      const frTransloco = {
+        translate: (key: string) => frTranslations[key] ?? key
+      } as unknown as TranslocoService;
+
+      createPlot({ ...createDefaultParams(), view: '2d', translocoService: enTransloco });
+      createPlot({ ...createDefaultParams(), view: '2d', translocoService: frTransloco });
+
+      const firstConfig = (Plotly.react as Mock).mock.calls[0][3];
+      const secondConfig = (Plotly.react as Mock).mock.calls[1][3];
+
+      expect(secondConfig).not.toBe(firstConfig);
+      const orbitButton = (secondConfig.modeBarButtonsToAdd as { name: string; title: string }[]).find(
+        (btn) => btn.name === 'customOrbitRotation'
+      );
+      expect(orbitButton?.title).toBe('Rotation orbitale');
+    });
+  });
+
   describe('modebar camera reset buttons removal', () => {
-    it('should include resetCameraDefault3d in modeBarButtonsToRemove', () => {
-      createPlot({ ...createDefaultParams() });
+    it.each(['resetCameraDefault3d', 'resetCameraLastSave3d', 'resetScale2d', 'zoom3d', 'pan3d'])(
+      'should include %s in modeBarButtonsToRemove',
+      (buttonName) => {
+        createPlot({ ...createDefaultParams() });
 
-      const configArg = (Plotly.react as Mock).mock.calls[0][3];
-      expect(configArg.modeBarButtonsToRemove).toContain('resetCameraDefault3d');
-    });
-
-    it('should include resetCameraLastSave3d in modeBarButtonsToRemove', () => {
-      createPlot({ ...createDefaultParams() });
-
-      const configArg = (Plotly.react as Mock).mock.calls[0][3];
-      expect(configArg.modeBarButtonsToRemove).toContain('resetCameraLastSave3d');
-    });
-
-    it('should include resetScale2d in modeBarButtonsToRemove', () => {
-      createPlot({ ...createDefaultParams() });
-
-      const configArg = (Plotly.react as Mock).mock.calls[0][3];
-      expect(configArg.modeBarButtonsToRemove).toContain('resetScale2d');
-    });
-
-    it('should include zoom3d in modeBarButtonsToRemove', () => {
-      createPlot({ ...createDefaultParams() });
-
-      const configArg = (Plotly.react as Mock).mock.calls[0][3];
-      expect(configArg.modeBarButtonsToRemove).toContain('zoom3d');
-    });
-
-    it('should include pan3d in modeBarButtonsToRemove', () => {
-      createPlot({ ...createDefaultParams() });
-
-      const configArg = (Plotly.react as Mock).mock.calls[0][3];
-      expect(configArg.modeBarButtonsToRemove).toContain('pan3d');
-    });
+        const configArg = (Plotly.react as Mock).mock.calls[0][3];
+        expect(configArg.modeBarButtonsToRemove).toContain(buttonName);
+      }
+    );
   });
 
   describe('custom zoom/pan modebar buttons', () => {

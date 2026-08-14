@@ -12,6 +12,7 @@ import { StudyImportService } from '@features/studies/application/services/study
 import { errors, importErrorDetail } from './import-study.constants';
 import { IMPORT_ADAPTER_TOKEN, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
@@ -22,7 +23,7 @@ import { GenericImportEngineService } from '@shared/import/application/services/
  */
 @Component({
   selector: 'app-import-study',
-  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent],
+  imports: [IconComponent, DividerModule, RouterLink, ButtonComponent, TranslocoModule],
   providers: [GenericImportEngineService, { provide: IMPORT_ADAPTER_TOKEN, useExisting: StudyImportService }],
   templateUrl: './import-study.component.html',
   styleUrl: './import-study.component.scss',
@@ -39,6 +40,7 @@ export class ImportStudyComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   async deleteStudy(uuid: string): Promise<void> {
     await this.studiesService.deleteStudy(uuid);
@@ -80,7 +82,7 @@ export class ImportStudyComponent {
       // Notify once if any files were rejected due to type mismatch (mirrors original behaviour).
       const typeErrors = outcomes.filter((o) => o.status === 'error' && o.error?.code === 'FILE_TYPE_NOT_ALLOWED');
       if (typeErrors.length > 0) {
-        this.notificationService.error(errors.fileTypeNotAllowed);
+        this.notificationService.error(this.translocoService.translate(errors.fileTypeNotAllowed));
         this.erroredFiles.update((prev) => [...prev, ...typeErrors.map((o) => o.fileName)]);
       }
 
@@ -92,7 +94,7 @@ export class ImportStudyComponent {
           ]);
         } else if (outcome.status === 'error' && outcome.error?.code !== 'FILE_TYPE_NOT_ALLOWED') {
           const errorKey = outcome.error?.code as keyof typeof errors;
-          this.notificationService.error(importErrorDetail(errorKey));
+          this.notificationService.error(this.translocoService.translate(importErrorDetail(errorKey)));
           this.erroredFiles.update((prev) => [...prev, outcome.fileName]);
         }
       }
@@ -108,11 +110,11 @@ export class ImportStudyComponent {
       new Promise((resolve) =>
         this.confirmationService.confirm({
           key: 'positionDialog',
-          message: $localize`Study ${label} already exists. Do you want to replace it?`,
+          message: this.translocoService.translate('studies.import.collision-message', { label }),
           accept: () => resolve(true),
           reject: () => resolve(false),
-          acceptLabel: $localize`Yes`,
-          rejectLabel: $localize`No`
+          acceptLabel: this.translocoService.translate('common.import.collision.yes'),
+          rejectLabel: this.translocoService.translate('common.import.collision.no')
         })
       );
   }
@@ -128,6 +130,6 @@ export class ImportStudyComponent {
     this.logger.error('Error in loadFiles', error);
     this.loading.set(false);
     const errorType = this.getErrorType(error);
-    this.notificationService.error(importErrorDetail(errorType));
+    this.notificationService.error(this.translocoService.translate(importErrorDetail(errorType)));
   }
 }

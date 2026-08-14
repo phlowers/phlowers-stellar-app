@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { ToolbarDialogComponent } from './toolbar-dialog.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { MessageService } from 'primeng/api';
@@ -55,7 +57,13 @@ describe('ToolbarDialogComponent', () => {
     } as unknown as CablesService;
 
     await TestBed.configureTestingModule({
-      imports: [ToolbarDialogComponent],
+      imports: [
+        ToolbarDialogComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+        })
+      ],
       providers: [
         provideAnimations(),
         provideHttpClient(),
@@ -105,8 +113,8 @@ describe('ToolbarDialogComponent', () => {
       toolbarDialogService.isOpen.set(true);
       fixture.detectChanges();
 
-      const dialog = fixture.nativeElement.querySelector('p-dialog');
-      expect(dialog.getAttribute('ng-reflect-visible')).toBe('true');
+      const dialog = fixture.debugElement.query(By.css('p-dialog'));
+      expect(dialog.componentInstance.visible).toBe(true);
     });
 
     it('should display dialog in init phase when tool with initComponent is opened', () => {

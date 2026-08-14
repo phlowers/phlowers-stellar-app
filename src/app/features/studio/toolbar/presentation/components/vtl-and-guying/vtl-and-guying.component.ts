@@ -33,6 +33,7 @@ import { SectionService } from '@services/section/section.service';
 import { MessageService } from 'primeng/api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { VtlGuyingReportService } from '../../services/vtl-guying-report/vtl-guying-report.service';
 import { VtlGuyingReportData } from '../../services/vtl-guying-report/vtl-guying-report.interfaces';
 
@@ -60,7 +61,8 @@ interface SupportOption {
     InputGroupModule,
     InputGroupAddonModule,
     InputTextModule,
-    CardComponent
+    CardComponent,
+    TranslocoModule
   ],
   templateUrl: './vtl-and-guying.component.html',
   styleUrls: ['./vtl-and-guying.component.scss'],
@@ -80,6 +82,7 @@ export class VhlAndGuyingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly logger = inject(LoggerService);
   private readonly vtlGuyingReportService = inject(VtlGuyingReportService);
+  private readonly translocoService = inject(TranslocoService);
 
   form: FormGroup<{
     selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
@@ -90,7 +93,7 @@ export class VhlAndGuyingComponent {
     comment: FormControl<VtlAndGuying['comment']>;
   }>;
 
-  readonly supportType = signal<'Suspension' | 'Anchor' | null>(null);
+  readonly supportType = signal<string | null>(null);
   readonly supportOptions = signal<SupportOption[]>([]);
   readonly vtlWithoutGuying = signal<{
     chargeV: number | undefined;
@@ -194,8 +197,10 @@ export class VhlAndGuyingComponent {
       return;
     }
     const supportType =
-      this.spanService.section()?.supports[supportIndex].chainV === true ? $localize`Suspension` : $localize`Anchor`;
-    this.supportType.set(supportType as 'Suspension' | 'Anchor');
+      this.spanService.section()?.supports[supportIndex].chainV === true
+        ? this.translocoService.translate('studio.vtl-and-guying.suspension-label')
+        : this.translocoService.translate('studio.vtl-and-guying.anchor-label');
+    this.supportType.set(supportType);
   }
 
   private updateVtlWithoutGuying(): void {
@@ -355,8 +360,8 @@ export class VhlAndGuyingComponent {
     this.sectionService.createOrUpdateSection(study, section);
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Successful`,
-      detail: $localize`VTL and guying saved`,
+      summary: this.translocoService.translate('common.success'),
+      detail: this.translocoService.translate('studio.vtl-and-guying.saved-detail'),
       life: 3000
     });
     this.toolbarDialogService.closeTool();

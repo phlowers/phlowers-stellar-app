@@ -7,14 +7,12 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { CableModificationsService } from './cableModifications.service';
-import { CableModificationParams } from './cableModifications.service.interfaces';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
-import { Task, GetSectionOutput, GetSectionWithBaseOutput, TaskError } from '@services/worker_python/tasks/types';
-import { Section } from '@shared/domain';
+import { Charge, Section, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { StudyEntity } from '@infrastructure/database';
 
@@ -26,6 +24,25 @@ function createSignalMock<T>(initialValue: T) {
   });
   return fn;
 }
+
+const mockChargeData: Charge = {
+  uuid: 'charge-uuid-1',
+  name: 'Charge 1',
+  personnelPresence: true,
+  description: 'Test charge description',
+  data: {
+    climate: {
+      windPressure: 0,
+      cableTemperature: 15,
+      symmetryType: SymmetryType.SYMMETRIC,
+      iceThickness: 0,
+      frontierSupportNumber: null,
+      iceThicknessBefore: null,
+      iceThicknessAfter: null
+    },
+    spanLoads: []
+  }
+};
 
 const mockSectionBase: Section = {
   uuid: 'section-uuid-1',
@@ -65,8 +82,8 @@ const mockSectionBase: Section = {
   obstacles: [],
   initial_conditions: [],
   selected_initial_condition_uuid: undefined,
-  charges: [],
-  selected_charge_uuid: null,
+  charges: [mockChargeData],
+  selected_charge_uuid: 'charge-uuid-1',
   field_measures: [],
   selected_field_measure_uuid: undefined,
   vtl_and_guying: undefined,
@@ -90,14 +107,6 @@ const mockStudy: StudyEntity = {
   updated_at_offline: '2025-01-01T00:00:00.000Z',
   saved: true,
   sections: [mockSectionBase]
-};
-
-const mockParams: CableModificationParams = {
-  spanUuid: 'support-uuid-1',
-  supportRef: 'LEFT',
-  widthCable: 'lengthening',
-  sizeCable: 0.5,
-  distanceSupportRef: 10
 };
 
 describe('CableModificationsService', () => {
@@ -157,92 +166,6 @@ describe('CableModificationsService', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // calculate()
-  // ---------------------------------------------------------------------------
-  describe('calculate()', () => {
-    it('should return early when spanIndex is -1', async () => {
-      mockSpanService.getSupportIndex.mockReturnValue(-1);
-
-      await service.calculate(mockParams);
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should call refreshCamera and set loading to true then false', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: {} as GetSectionOutput, base: null },
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(plotOptionsServiceMock.refreshCamera).toHaveBeenCalled();
-      expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
-      expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
-    });
-
-    it('should call runTask with cableModification task and correct inputs', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current: {} as GetSectionOutput, base: null },
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.cableModification, {
-        spanIndex: 0,
-        widthCable: mockParams.widthCable,
-        sizeCable: mockParams.sizeCable,
-        distanceSupportRef: mockParams.distanceSupportRef,
-        supportRef: mockParams.supportRef
-      });
-    });
-
-    it('should update litData and baseLitData from task result', async () => {
-      const current = { spans: [[]] } as unknown as GetSectionOutput;
-      const base = { spans: [[]] } as unknown as GetSectionOutput;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { current, base },
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(current);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(base);
-    });
-
-    it('should set litData and baseLitData to null when result is null', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null as unknown as GetSectionWithBaseOutput,
-        error: null,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockPlotService.litData.set).toHaveBeenCalledWith(null);
-      expect(mockPlotService.baseLitData.set).toHaveBeenCalledWith(null);
-    });
-
-    it('should propagate task error to plotService.error', async () => {
-      const taskError = TaskError.CALCULATION_ERROR;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null as unknown as GetSectionWithBaseOutput,
-        error: taskError,
-        diagnostics: []
-      });
-
-      await service.calculate(mockParams);
-
-      expect(mockPlotService.error.set).toHaveBeenCalledWith(taskError);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // save()
   // ---------------------------------------------------------------------------
   describe('save()', () => {
@@ -252,8 +175,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -266,8 +189,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -280,8 +203,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -295,8 +218,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'su',
         supportRef: 'LEFT',
-        widthCable: 'lengthening',
-        sizeCable: 1,
+        modificationType: 'lengthening',
+        modifiedLengthCable: 1,
         distanceSupportRef: 5
       });
 
@@ -307,8 +230,8 @@ describe('CableModificationsService', () => {
       const modification = {
         spanUuid: 'support-uuid-1',
         supportRef: 'LEFT' as const,
-        widthCable: 'lengthening' as const,
-        sizeCable: 0.5,
+        modificationType: 'lengthening' as const,
+        modifiedLengthCable: 0.5,
         distanceSupportRef: 10
       };
 
@@ -325,8 +248,8 @@ describe('CableModificationsService', () => {
       const modification = {
         spanUuid: 'support-uuid-1',
         supportRef: 'LEFT' as const,
-        widthCable: 'lengthening' as const,
-        sizeCable: 0.5,
+        modificationType: 'lengthening' as const,
+        modifiedLengthCable: 0.5,
         distanceSupportRef: 10
       };
 
@@ -349,8 +272,8 @@ describe('CableModificationsService', () => {
                 uuid: existingUuid,
                 spanUuid: 'support-uuid-1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 0.1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 0.1,
                 distanceSupportRef: 5
               }
             ]
@@ -363,8 +286,8 @@ describe('CableModificationsService', () => {
       await service.save({
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
-        widthCable: 'shortening',
-        sizeCable: 0.9,
+        modificationType: 'shortening',
+        modifiedLengthCable: 0.9,
         distanceSupportRef: 20
       });
 
@@ -372,7 +295,7 @@ describe('CableModificationsService', () => {
       const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_modifications).toHaveLength(1);
       expect(section?.cable_modifications[0].uuid).toBe(existingUuid);
-      expect(section?.cable_modifications[0].sizeCable).toBe(0.9);
+      expect(section?.cable_modifications[0].modifiedLengthCable).toBe(0.9);
       expect(section?.cable_modifications[0].supportRef).toBe('RIGHT');
     });
 
@@ -388,8 +311,8 @@ describe('CableModificationsService', () => {
                 uuid: existingUuid,
                 spanUuid: 'support-uuid-1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 0.1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 0.1,
                 distanceSupportRef: 5
               }
             ]
@@ -402,15 +325,15 @@ describe('CableModificationsService', () => {
         uuid: existingUuid,
         spanUuid: 'support-uuid-1',
         supportRef: 'RIGHT',
-        widthCable: 'shortening',
-        sizeCable: 0.9,
+        modificationType: 'shortening',
+        modifiedLengthCable: 0.9,
         distanceSupportRef: 20
       });
 
       const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
       const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
       expect(section?.cable_modifications).toHaveLength(1);
-      expect(section?.cable_modifications[0].sizeCable).toBe(0.9);
+      expect(section?.cable_modifications[0].modifiedLengthCable).toBe(0.9);
     });
   });
 
@@ -466,8 +389,8 @@ describe('CableModificationsService', () => {
                 uuid,
                 spanUuid: 'support-uuid-1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 1,
                 distanceSupportRef: 5
               }
             ],
@@ -499,16 +422,16 @@ describe('CableModificationsService', () => {
                 uuid,
                 spanUuid: 'su1',
                 supportRef: 'LEFT',
-                widthCable: 'lengthening',
-                sizeCable: 1,
+                modificationType: 'lengthening',
+                modifiedLengthCable: 1,
                 distanceSupportRef: 5
               },
               {
                 uuid: otherId,
                 spanUuid: 'su1',
                 supportRef: 'RIGHT',
-                widthCable: 'shortening',
-                sizeCable: 2,
+                modificationType: 'shortening',
+                modifiedLengthCable: 2,
                 distanceSupportRef: 3
               }
             ],

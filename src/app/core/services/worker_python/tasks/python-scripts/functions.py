@@ -62,6 +62,7 @@ def get_and_clear_warnings() -> list[str]:
 
 from stellar_engine.pyodide_utils import js_to_python  # noqa: E402
 
+
 # log utils functions
 def set_log_level(js_inputs: dict):
     python_inputs = js_to_python(js_inputs)
@@ -78,6 +79,7 @@ def set_log_level(js_inputs: dict):
 
 
 import mechaphlowers as mph  # noqa: E402
+
 
 # initialization functions
 def init_config():

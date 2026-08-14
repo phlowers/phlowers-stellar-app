@@ -10,6 +10,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { NotificationService } from '@services/notification/notification.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('DistanceMeasuringComponent', () => {
   let component: DistanceMeasuringComponent;
   let fixture: ComponentFixture<DistanceMeasuringComponent>;
@@ -54,7 +55,35 @@ describe('DistanceMeasuringComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [DistanceMeasuringComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'shared.studio.zoom': 'Zoom',
+              'studio.distance-measuring.add-measurement-points-error': 'Failed to add measurement points',
+              'studio.distance-measuring.angle-123-label': 'Angle 1-2-3',
+              'common.calculate': 'Calculate',
+              'studio.distance-measuring.delete-points-aria-label': 'delete points',
+              'studio.distance-measuring.distance-12-label': 'Distance 1-2',
+              'studio.distance-measuring.distance-23-label': 'Distance 2-3',
+              'studio.distance-measuring.free-positioning-label': 'Free positioning',
+              'studio.distance-measuring.line-axis-dist-label': 'Line axis dist.',
+              'common.meter': 'm',
+              'studio.distance-measuring.never-saved-hint': "This tab's data is never saved",
+              'studio.distance-measuring.point-alt-label': 'Point alt.',
+              'studio.distance-measuring.point-label': 'Point',
+              'studio.distance-measuring.ref-support-dist-label': 'Ref. support dist.',
+              'studio.distance-measuring.reference-hint': 'Reference support is left and altitude is taken absolute',
+              'common.results': 'Results:',
+              'studio.distance-measuring.select-point-label': 'Select point',
+              'studio.studio-page.span-option': 'Span'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        DistanceMeasuringComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
@@ -114,7 +143,7 @@ describe('DistanceMeasuringComponent', () => {
 
   it('should keep the free-positioning toggle disabled', () => {
     const toggle = getByTestId('free-positioning-toggle');
-    expect(toggle?.getAttribute('ng-reflect-disabled')).toBe('true');
+    expect(toggle?.getAttribute('data-p-disabled')).toBe('true');
   });
 
   it('should disable Calculate until all points are filled', () => {

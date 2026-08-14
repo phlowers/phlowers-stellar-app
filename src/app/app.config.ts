@@ -4,10 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, inject, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import {
+  provideRouter,
+  TitleStrategy,
+  withEnabledBlockingInitialNavigation,
+  withInMemoryScrolling
+} from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
@@ -17,6 +22,74 @@ import { StorageService } from '@services/storage/storage.service';
 import { AuthService } from '@services/auth/auth.service';
 import { authSessionInterceptor } from '@services/auth/auth-session.interceptor';
 import { UpdateService } from '@services/worker_update/worker_update.service';
+import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
+import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strategy';
+import { LoggerService } from '@services/logger/logger.service';
+import { AppConfigService } from '@core/config/app-config.service';
+import { getAndClearBootstrapErrors } from '../bootstrap-logger';
+import { TranslocoService } from '@jsverse/transloco';
+import { firstValueFrom } from 'rxjs';
+
+/**
+ * Application initializer factory.
+ *
+ * Enforces the V2 startup sequence (§5.1 of connexion-gaia.md):
+ * 1. StorageService.setPersistentStorage()
+ * 2. StorageService.createDatabase()
+ * 3. AuthService.initialize() — cache-first: resolves instantly when a
+ *    previously-authenticated OIDC user is cached, running the network
+ *    resync in the background (does not block this initializer).
+ * In parallel with steps 1-3: AppConfigService.loadDefaultLang() resolves the
+ * runtime-configured language (from assets/config/app-config.json, written
+ * post-deploy by Docker/Jenkins) and sets it active. The TranslocoService.load()
+ * HTTP fetch itself is NOT awaited — first render must never wait on it (i18n
+ * assets go through mod_auth_openidc like any other protected route and can
+ * stall for as long as an OIDC renegotiation takes). Components read
+ * translations reactively through the `transloco` pipe/directive, which loads
+ * on demand and re-renders once the data arrives, so nothing is blocked.
+ * Running both branches in parallel (rather than sequentially) avoids adding
+ * extra bootstrap latency.
+ * 4. UpdateService.checkForUpdateOnce() — started in the background, not
+ *    awaited: the update/install prompt is not part of the critical
+ *    first-render path and must never delay it.
+ *
+ * Steps 5 (setupData) and 6 (WorkerPythonService.setup) are handled by AppComponent.ngOnInit
+ * after this initializer completes, with an explicit try/catch so step 6 always runs.
+ *
+ * Exported (rather than inlined) so it can be unit-tested in isolation.
+ */
+export async function initializeApp(): Promise<void> {
+  const logger = inject(LoggerService);
+  const storageService = inject(StorageService);
+  const authService = inject(AuthService);
+  const updateService = inject(UpdateService);
+  const translocoService = inject(TranslocoService);
+  const appConfigService = inject(AppConfigService);
+
+  // Flush any errors that occurred during bootstrap phase (e.g., Service Worker registration)
+  const bootstrapErrors = getAndClearBootstrapErrors();
+  for (const err of bootstrapErrors) {
+    logger.error(`Bootstrap error [${err.context}]`, err.error);
+  }
+
+  await Promise.all([
+    (async () => {
+      await storageService.setPersistentStorage();
+      await storageService.createDatabase();
+      await authService.initialize();
+    })(),
+    (async () => {
+      const defaultLang = await appConfigService.loadDefaultLang();
+      translocoService.setActiveLang(defaultLang);
+      // Fire-and-forget: the `transloco` pipe loads reactively on its own once
+      // components request keys, so first render never waits on this fetch.
+      firstValueFrom(translocoService.load(defaultLang)).catch((err) => {
+        logger.warn('AppConfig: translations failed to load in the background', err);
+      });
+    })()
+  ]);
+  void updateService.checkForUpdateOnce();
+}
 
 /** Root Angular application configuration with routing, HTTP, animations, PrimeNG theme, and markdown support. */
 export const appConfig: ApplicationConfig = {
@@ -39,30 +112,8 @@ export const appConfig: ApplicationConfig = {
     }),
     provideMarkdown(),
     MessageService,
-    /**
-     * Application initializer.
-     *
-     * Enforces the V2 startup sequence (§5.1 of connexion-gaia.md):
-     * 1. StorageService.setPersistentStorage()
-     * 2. StorageService.createDatabase()
-     * 3. AuthService.initialize() — cache-first: resolves instantly when a
-     *    previously-authenticated OIDC user is cached, running the network
-     *    resync in the background (does not block this initializer).
-     * 4. UpdateService.checkForUpdateOnce() — started in the background, not
-     *    awaited: the update/install prompt is not part of the critical
-     *    first-render path and must never delay it.
-     *
-     * Steps 5 (setupData) and 6 (WorkerPythonService.setup) are handled by AppComponent.ngOnInit
-     * after this initializer completes, with an explicit try/catch so step 6 always runs.
-     */
-    provideAppInitializer(async () => {
-      const storageService = inject(StorageService);
-      const authService = inject(AuthService);
-      const updateService = inject(UpdateService);
-      await storageService.setPersistentStorage();
-      await storageService.createDatabase();
-      await authService.initialize();
-      void updateService.checkForUpdateOnce();
-    })
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: TitleStrategy, useClass: TranslocoTitleStrategy },
+    provideAppInitializer(initializeApp)
   ]
 };

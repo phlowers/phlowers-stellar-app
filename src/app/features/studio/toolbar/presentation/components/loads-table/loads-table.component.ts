@@ -11,6 +11,7 @@ import {
 import { DecimalPipe } from '@angular/common';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { FormsModule } from '@angular/forms';
+import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -53,7 +54,8 @@ interface SpanLoadRow {
     InputTextModule,
     TextareaModule,
     FormsModule,
-    TableModule
+    TableModule,
+    TranslocoModule
   ],
   templateUrl: './loads-table.component.html',
   styleUrl: './loads-table.component.scss',
@@ -68,6 +70,7 @@ export class LoadsTableComponent {
   private readonly chargesService = inject(ChargesService);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly translocoService = inject(TranslocoService);
 
   mode = signal<'view' | 'edit'>('view');
   name = signal<string>('');
@@ -240,18 +243,18 @@ export class LoadsTableComponent {
   getSymmetryLabel(type: SymmetryType): string {
     switch (type) {
       case SymmetryType.SYMMETRIC:
-        return $localize`Symmetric`;
+        return this.translocoService.translate('studio.loads-table.symmetric-label');
       case SymmetryType.DIS_SYMMETRIC:
-        return $localize`Dis Symmetric`;
+        return this.translocoService.translate('studio.loads-table.dis-symmetric-label');
     }
   }
 
   getLoadTypeLabel(type: string): string {
     switch (type) {
       case LoadType.PUNCTUAL:
-        return $localize`Punctual load`;
+        return this.translocoService.translate('studio.loads-table.punctual-load-label');
       case LoadType.MARKING:
-        return $localize`Marking`;
+        return this.translocoService.translate('studio.loads-table.marking-label');
       default:
         return type;
     }

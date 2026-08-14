@@ -10,6 +10,8 @@ import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPo
 import { createObstaclesAnnotations } from './obstacles';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
+import { TranslocoService } from '@jsverse/transloco';
+import { getLiveCamera } from '@services/plot/plot-options.utils';
 
 /**
  * Parameters required to create or update a Plotly section plot.
@@ -69,6 +71,8 @@ export interface CreatePlotParams {
    * `'stable'`) and applies the layout camera instantly — no relayout animation.
    */
   pendingRestore?: boolean;
+  /** Transloco service instance used to translate modebar button labels at render time. */
+  translocoService?: TranslocoService;
 }
 
 const normalCamera = () => ({
@@ -147,6 +151,16 @@ const createScene = (
   };
 };
 
+const BUTTON_TITLE_TRANSLATIONS = [
+  { key: 'shared.studio.orbital-rotation', fallback: 'Orbital rotation' },
+  { key: 'shared.studio.turntable-rotation', fallback: 'Turntable rotation' },
+  { key: 'shared.studio.zoom', fallback: 'Zoom' },
+  { key: 'shared.studio.pan', fallback: 'Pan' }
+] as const;
+
+const translateButtonTitles = (translocoService?: TranslocoService): string[] =>
+  BUTTON_TITLE_TRANSLATIONS.map(({ key, fallback }) => (translocoService ? translocoService.translate(key) : fallback));
+
 /**
  * Builds the Plotly config including custom orbit/turntable/zoom/pan modebar buttons.
  * Defined as a function so that `Plotly.Icons` is accessed at call-time
@@ -157,8 +171,14 @@ const createScene = (
  * which triggers `updateFx()` and resets the 3D camera (POV, angle, zoom) — bug #703.
  * The custom replacements use `setDragmodeDirect()` to bypass `relayout` and preserve
  * the camera. Tests in `createPlot.spec.ts` guard against this regression.
+ *
+ * @param titles - Pre-translated button titles (see `translateButtonTitles`), in
+ *   orbit/turntable/zoom/pan order. Translation happens once in `getConfig` so this
+ *   is only invoked — and new button/closure objects only allocated — when the
+ *   titles actually change (bug #1032).
  */
-const getConfig = () => {
+const buildConfig = (titles: string[]) => {
+  const [orbitTitle, turntableTitle, zoomTitle, panTitle] = titles;
   /**
    * Switches the 3D scene dragmode by directly setting the internal
    * orbit-camera-controller mode. This bypasses Plotly.relayout and its
@@ -191,7 +211,7 @@ const getConfig = () => {
 
   const orbitButton: ModeBarButton = {
     name: 'customOrbitRotation',
-    title: $localize`Orbital rotation`,
+    title: orbitTitle,
     icon: Plotly.Icons['3d_rotate'] as Icon,
     attr: 'scene.dragmode',
     val: 'orbit',
@@ -202,7 +222,7 @@ const getConfig = () => {
 
   const turntableButton: ModeBarButton = {
     name: 'customTurntableRotation',
-    title: $localize`Turntable rotation`,
+    title: turntableTitle,
     icon: Plotly.Icons['z-axis'] as Icon,
     attr: 'scene.dragmode',
     val: 'turntable',
@@ -213,7 +233,7 @@ const getConfig = () => {
 
   const zoom3dButton: ModeBarButton = {
     name: 'customZoom3d',
-    title: $localize`Zoom`,
+    title: zoomTitle,
     icon: Plotly.Icons['zoombox'] as Icon,
     attr: 'scene.dragmode',
     val: 'zoom',
@@ -224,7 +244,7 @@ const getConfig = () => {
 
   const pan3dButton: ModeBarButton = {
     name: 'customPan3d',
-    title: $localize`Pan`,
+    title: panTitle,
     icon: Plotly.Icons['pan'] as Icon,
     attr: 'scene.dragmode',
     val: 'pan',
@@ -256,6 +276,26 @@ const getConfig = () => {
     ] as ModeBarDefaultButtons[],
     modeBarButtonsToAdd: [orbitButton, turntableButton, zoom3dButton, pan3dButton]
   };
+};
+
+/**
+ * Returns the Plotly config, reusing the same object across calls.
+ *
+ * `Plotly.react` diffs the config on every call: handing it a freshly built object
+ * (new button objects, new click closures) makes that diff report a change each time,
+ * which downgrades the react into a full re-plot and wipes all interactive GUI state —
+ * in particular the 2D zoom/pan ranges that `uirevision` would otherwise preserve
+ * (bug #1032). The config is therefore memoized on the translated button titles: the
+ * exact same object is returned until the active language actually changes them.
+ */
+let cachedConfig: { key: string; config: ReturnType<typeof buildConfig> } | null = null;
+const getConfig = (translocoService?: TranslocoService) => {
+  const titles = translateButtonTitles(translocoService);
+  const key = titles.join('|');
+  if (cachedConfig?.key !== key) {
+    cachedConfig = { key, config: buildConfig(titles) };
+  }
+  return cachedConfig.config;
 };
 
 const layout3d = (
@@ -342,21 +382,6 @@ const layout2d = (
 };
 
 /**
- * Reads the current 3D camera directly from the Plotly DOM element's internal state.
- * This bypasses the Angular signal layer and always returns the live camera position
- * as Plotly knows it, even after the user has interacted with the plot.
- * Returns null if the element does not exist or has no camera data yet.
- */
-const getLiveCamera = (documentRef: Document, plotId: string): Camera | null => {
-  const el = documentRef.getElementById(plotId) as
-    | (HTMLElement & {
-        _fullLayout?: { scene?: { camera?: Camera } };
-      })
-    | null;
-  return el?._fullLayout?.scene?.camera ?? null;
-};
-
-/**
  * Creates or updates a Plotly plot in the DOM element identified by `plotParams.plotId`.
  * Selects the appropriate 2D or 3D layout and uses `Plotly.react` for efficient updates
  * without resetting the camera or zoom.
@@ -395,7 +420,7 @@ export const createPlot = (plotParams: CreatePlotParams) => {
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does
-  return Plotly.react(plotParams.plotId, allData, baseLayout, getConfig());
+  return Plotly.react(plotParams.plotId, allData, baseLayout, getConfig(plotParams.translocoService));
 };
 
 /**

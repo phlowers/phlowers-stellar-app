@@ -13,6 +13,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { LoginPageComponent } from './login-page.component';
 import { AuthService } from '@services/auth/auth.service';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 interface AuthServiceMock {
   oidcEnabled: WritableSignal<boolean>;
   modeResolved: WritableSignal<boolean>;
@@ -45,6 +46,13 @@ describe('LoginPageComponent', () => {
     });
   });
 
+  afterEach(() => {
+    // vi.spyOn() on the shared component prototype (redirectToOidcLogin, reloadToHome)
+    // returns the SAME spy instance across tests if not restored, accumulating call
+    // counts across describe blocks. Restore all spies after every test.
+    vi.restoreAllMocks();
+  });
+
   /**
    * Build the component with the given resolved auth mode.
    * Default: mode resolved + fallback (email form rendered).
@@ -64,7 +72,14 @@ describe('LoginPageComponent', () => {
     routerMock = { navigate: vi.fn().mockResolvedValue(true) };
 
     await TestBed.configureTestingModule({
-      imports: [LoginPageComponent],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        LoginPageComponent
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: AuthService, useValue: authServiceMock },

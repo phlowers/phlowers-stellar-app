@@ -15,11 +15,12 @@ import { StudiesService } from '@services/studies/studies.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { BehaviorSubject } from 'rxjs';
-import { Section } from '@shared/domain';
+import { Section, SkyCover } from '@shared/domain';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
 
+import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
   selector: 'app-button',
   standalone: true,
@@ -141,6 +142,26 @@ describe('FieldMeasuringComponent', () => {
     } as unknown as CablesService;
 
     await TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.export': 'Export',
+              'common.report': 'Report',
+              'common.save': 'Save',
+              'field-measuring.actions.success-detail': 'Data saved successfully',
+              'common.success': 'Success',
+              'field-measuring.tabs.parameter-15c': 'Parameter at 15\u00b0C without wind',
+              'field-measuring.tabs.parameter-calculation': 'Parameter calculation',
+              'field-measuring.tabs.temperature-calculation': 'Temperature calculation',
+              'field-measuring.tabs.terrain-data': 'Terrain data',
+              'field-measuring.shared.dialog-title': 'Compute base parameter from terrain measurement'
+            }
+          },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [
         ToolbarDialogService,
         provideAnimations(),
@@ -159,6 +180,7 @@ describe('FieldMeasuringComponent', () => {
         set: {
           imports: [
             TabsModule,
+            TranslocoModule,
             MockButtonComponent,
             MockIconComponent,
             MockHeaderComponent,
@@ -371,7 +393,7 @@ describe('FieldMeasuringComponent', () => {
       windSpeed: 10,
       ambientTemperature: 20,
       windDirection: 'North',
-      skyCover: 'N5'
+      skyCover: SkyCover.N5
     };
 
     it('should return true when transit is null (progressive save allowed)', () => {

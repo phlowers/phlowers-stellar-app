@@ -3,7 +3,9 @@ import { ComponentRef } from '@angular/core';
 import { FieldDatasComponent } from './field-datas.component';
 import { createTestMeasureData } from '../../helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { SkyCover } from '@shared/domain';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('FieldDatasComponent', () => {
   let component: FieldDatasComponent;
   let fixture: ComponentFixture<FieldDatasComponent>;
@@ -11,7 +13,14 @@ describe('FieldDatasComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FieldDatasComponent]
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        FieldDatasComponent
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldDatasComponent);
@@ -156,7 +165,7 @@ describe('FieldDatasComponent', () => {
         ambientTemperature: 25,
         windSpeed: 10,
         windDirection: 'North',
-        skyCover: '0 (clear)'
+        skyCover: SkyCover.N0
       };
 
       componentRef.setInput('measureData', data);

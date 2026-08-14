@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { UpdateService } from './worker_update.service';
 import { MessageService } from 'primeng/api';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('@src/environments/environment', () => ({
   environment: {
     version: '1.0.0',
@@ -66,6 +67,13 @@ describe('UpdateService', () => {
     globalThis.fetch = mockFetch;
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [UpdateService, { provide: MessageService, useValue: mockMessageService }]
     });
     service = TestBed.inject(UpdateService);
@@ -276,16 +284,7 @@ describe('UpdateService', () => {
 
       await service.loadCurrentVersion();
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/version.json',
-        expect.objectContaining({
-          cache: 'no-store',
-          headers: expect.objectContaining({
-            'cache-control': 'no-cache',
-            pragma: 'no-cache'
-          })
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledWith('/version.json', expect.objectContaining({ signal: expect.anything() }));
       expect(service.currentVersion()).toEqual(serverVersion);
     });
 
@@ -520,7 +519,26 @@ describe('UpdateService', () => {
       });
 
       expect(service.updateLoading()).toBe(false);
-      expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', detail: 'Update failed: network error' })
+      );
+    });
+
+    it('should show the re-login message when the error reports an auth-like HTTP status', async () => {
+      service.updateLoading.set(true);
+
+      await messageHandler({
+        data: {
+          message: 'error',
+          error: 'Precache failed for /main.js: HTTP 502'
+        }
+      });
+
+      expect(service.updateLoading()).toBe(false);
+      // TranslocoTestingModule returns the key itself for unknown translations.
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', detail: 'shared.update-service.update-failed-auth-detail' })
+      );
     });
   });
 

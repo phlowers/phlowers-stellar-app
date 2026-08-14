@@ -10,6 +10,7 @@ import {
   computed,
   untracked
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -17,13 +18,7 @@ import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import {
-  WIND_DIRECTION_OPTIONS,
-  SKY_COVER_OPTIONS,
-  LEFT_SUPPORT_OPTIONS,
-  SelectOption,
-  TRANSIT_BOUNDS
-} from '../../constants';
+import { SelectOption, TRANSIT_BOUNDS } from '../../constants';
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
 import { PlotService } from '@services/plot/plot.service';
@@ -33,12 +28,18 @@ import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { InitialCondition } from '@shared/domain';
 import { ParameterCalculation15WithoutWindComponent } from '../parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
-import { createInitialMeasureData } from '../../helpers';
+import {
+  createInitialMeasureData,
+  buildWindDirectionOptions,
+  buildSkyCoverOptions,
+  buildLeftSupportOptions
+} from '../../helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber } from 'lodash';
 import { MessageService } from 'primeng/api';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Main field measuring tool component with tabs for terrain data, parameter calculation, temperature, and parameter at 15°C. */
 @Component({
@@ -52,7 +53,8 @@ import { LoggerService } from '@core/services/logger/logger.service';
     FieldDatasComponent,
     CalculusSettingComponent,
     TemperatureCalculationComponent,
-    ParameterCalculation15WithoutWindComponent
+    ParameterCalculation15WithoutWindComponent,
+    TranslocoModule
   ],
   templateUrl: './field-measuring.component.html',
   styleUrls: ['./field-measuring.component.scss'],
@@ -86,9 +88,6 @@ export class FieldMeasuringComponent implements OnDestroy {
     'terrainData'
   );
 
-  readonly windDirectionOptions = signal<SelectOption[]>(WIND_DIRECTION_OPTIONS);
-  readonly skyCoverOptions = signal<SelectOption[]>(SKY_COVER_OPTIONS);
-  readonly leftSupportOptions = signal<SelectOption[]>(LEFT_SUPPORT_OPTIONS);
   readonly cableOptions = signal<SelectOption[]>([]);
 
   readonly sectionService = inject(SectionService);
@@ -97,6 +96,25 @@ export class FieldMeasuringComponent implements OnDestroy {
   readonly cableService = inject(CablesService);
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
+  readonly windDirectionOptions = computed(() => {
+    this.activeLang();
+    return buildWindDirectionOptions(this.translocoService);
+  });
+
+  readonly skyCoverOptions = computed(() => {
+    this.activeLang();
+    return buildSkyCoverOptions(this.translocoService);
+  });
+
+  readonly leftSupportOptions = computed(() => {
+    this.activeLang();
+    return buildLeftSupportOptions(this.translocoService);
+  });
 
   constructor() {
     effect(() => {
@@ -244,8 +262,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     }
     this.messageService.add({
       severity: 'success',
-      summary: $localize`Success`,
-      detail: $localize`Data saved successfully`
+      summary: this.translocoService.translate('common.success'),
+      detail: this.translocoService.translate('field-measuring.actions.success-detail')
     });
   }
 

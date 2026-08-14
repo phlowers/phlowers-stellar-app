@@ -164,10 +164,14 @@ describe('WorkerService', () => {
     };
 
     // Mock the Worker constructor
-    (global as unknown as { Worker: vi.Mock }).Worker = vi.fn().mockImplementation(() => mockWorker);
+    (global as unknown as { Worker: vi.Mock }).Worker = vi.fn().mockImplementation(function () {
+      return mockWorker;
+    });
 
     // Mock URL constructor
-    (global as unknown as { URL: vi.Mock }).URL = vi.fn().mockImplementation(() => 'mocked-url');
+    (global as unknown as { URL: vi.Mock }).URL = vi.fn().mockImplementation(function () {
+      return 'mocked-url';
+    });
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(WorkerPythonService);

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, Signal, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  Signal,
+  signal,
+  untracked
+} from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -14,6 +24,7 @@ import { emptySpanLoad } from '../../helpers';
 import { LoadType, SpanLoad } from '@shared/domain/models/charge.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-load-marking',
@@ -26,7 +37,8 @@ import { LoadControlName, SpanFormControls, SupportOption } from './load-marking
     ButtonComponent,
     IconComponent,
     ToggleSwitchModule,
-    FormsModule
+    FormsModule,
+    TranslocoModule
   ],
   templateUrl: './load-marking.component.html',
   styleUrl: './load-marking.component.scss',
@@ -38,7 +50,8 @@ export class LoadMarkingComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly loadFormsService = inject(LoadFormsService);
-
+  private readonly translocoService = inject(TranslocoService);
+  readonly chargeUuid = input<string | null>(null);
   readonly form = this.fb.group<SpanFormControls>({
     spanSelect: new FormControl<string | null>(null, {
       validators: [Validators.required]
@@ -94,6 +107,14 @@ export class LoadMarkingComponent {
     this.onSpanSelectChange(value ?? null);
   });
 
+  private readonly chargeChangeEffect = effect(() => {
+    this.chargeUuid(); // Tracking: when the UUID changes, the effect rerun
+    untracked(() => {
+      this.form.reset();
+      this.form.controls.referenceSupport.disable();
+    });
+  });
+
   private readonly externalSpanSelectionEffect = effect(() => {
     const uuid = this.loadFormsService.selectedSpanSupportUuid();
     if (uuid) {
@@ -123,18 +144,9 @@ export class LoadMarkingComponent {
   });
 
   loadTypeOptions = [
-    { label: $localize`Punctual charge`, value: 'punctual' },
-    { label: $localize`Marking`, value: 'marking' }
+    { label: this.translocoService.translate('loads.load-marking.punctual-charge-option'), value: 'punctual' },
+    { label: this.translocoService.translate('loads.load-marking.marking-option'), value: 'marking' }
   ];
-
-  private _previousChargeUuid: string | null | undefined = undefined;
-
-  private readonly _reloadOnChargeChange = effect(() => {
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    if (chargeUuid === this._previousChargeUuid) return;
-    this._previousChargeUuid = chargeUuid;
-    untracked(() => this.resetForm());
-  });
 
   resetForm() {
     this.form.reset();

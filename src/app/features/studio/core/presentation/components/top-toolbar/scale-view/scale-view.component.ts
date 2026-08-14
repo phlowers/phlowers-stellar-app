@@ -5,7 +5,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Popover, PopoverModule } from 'primeng/popover';
 import { RadioButton } from 'primeng/radiobutton';
 import { SliderModule } from 'primeng/slider';
-import { Button } from 'primeng/button';
 
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -14,13 +13,13 @@ import { PlotResolutionService } from '@services/plot/plot-resolution.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ScalingFactors } from '@shared/types/plot.types';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-scale-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    Button,
     IconComponent,
     InputNumberComponent,
     SliderModule,
@@ -28,7 +27,8 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     PopoverModule,
     ReactiveFormsModule,
     Popover,
-    ButtonComponent
+    ButtonComponent,
+    TranslocoModule
   ],
   templateUrl: './scale-view.component.html',
   styleUrls: ['./scale-view.component.scss']

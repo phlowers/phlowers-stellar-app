@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute, Event as RouterEvent } from '@angular/router';
+import { TranslocoService } from '@jsverse/transloco';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { PageTitleService } from './page-title.service';
 
@@ -9,6 +10,7 @@ describe('PageTitleService', () => {
   let mockRouter: Partial<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockTitleService: Partial<Title>;
+  let mockTranslocoService: Partial<TranslocoService>;
   let routerEventsSubject: BehaviorSubject<RouterEvent>;
 
   const createService = (): PageTitleService => {
@@ -29,12 +31,17 @@ describe('PageTitleService', () => {
       getTitle: vi.fn().mockReturnValue('')
     };
 
+    mockTranslocoService = {
+      translate: vi.fn((key: string) => key)
+    };
+
     TestBed.configureTestingModule({
       providers: [
         PageTitleService,
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: Title, useValue: mockTitleService }
+        { provide: Title, useValue: mockTitleService },
+        { provide: TranslocoService, useValue: mockTranslocoService }
       ]
     });
 
@@ -79,6 +86,9 @@ describe('PageTitleService', () => {
         setTitle: vi.fn(),
         getTitle: vi.fn().mockReturnValue('')
       };
+      const localTranslocoService = {
+        translate: vi.fn((key: string) => key)
+      };
 
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
@@ -86,7 +96,8 @@ describe('PageTitleService', () => {
           PageTitleService,
           { provide: Router, useValue: localRouter },
           { provide: ActivatedRoute, useValue: localRoute },
-          { provide: Title, useValue: localTitleService }
+          { provide: Title, useValue: localTitleService },
+          { provide: TranslocoService, useValue: localTranslocoService }
         ]
       });
 
@@ -104,6 +115,7 @@ describe('PageTitleService', () => {
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
+      TestBed.overrideProvider(TranslocoService, { useValue: mockTranslocoService });
       const testService = TestBed.inject(PageTitleService);
 
       testService.pageTitle$.subscribe(() => {
@@ -121,6 +133,7 @@ describe('PageTitleService', () => {
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
+      TestBed.overrideProvider(TranslocoService, { useValue: mockTranslocoService });
       const testService = TestBed.inject(PageTitleService);
 
       testService.pageTitle$.subscribe(() => {
@@ -137,6 +150,7 @@ describe('PageTitleService', () => {
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
+      TestBed.overrideProvider(TranslocoService, { useValue: mockTranslocoService });
       const testService = TestBed.inject(PageTitleService);
 
       testService.pageTitle$.subscribe(() => {
@@ -156,6 +170,7 @@ describe('PageTitleService', () => {
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: nonPrimaryRoute });
+      TestBed.overrideProvider(TranslocoService, { useValue: mockTranslocoService });
       const testService = TestBed.inject(PageTitleService);
 
       testService.pageTitle$.subscribe(() => {
@@ -176,6 +191,7 @@ describe('PageTitleService', () => {
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
+      TestBed.overrideProvider(TranslocoService, { useValue: mockTranslocoService });
       const testService = TestBed.inject(PageTitleService);
       expect(testService.getCurrentTitle()).toBe(testTitle);
     });
@@ -194,6 +210,7 @@ describe('PageTitleService', () => {
       };
 
       TestBed.overrideProvider(ActivatedRoute, { useValue: testRoute });
+      TestBed.overrideProvider(TranslocoService, { useValue: mockTranslocoService });
       TestBed.inject(PageTitleService);
 
       // Should not throw error

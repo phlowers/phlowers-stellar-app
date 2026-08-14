@@ -1,5 +1,9 @@
 @use 'abstract.extracts' as app;
 
+.scale-view-trigger {
+  border-radius: 0.125rem;
+}
+
 .view-config {
   padding: 1.5rem;
   max-width: 37.5rem;

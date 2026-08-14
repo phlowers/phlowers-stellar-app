@@ -13,7 +13,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
 import { LatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { DerivedSupportAttachmentFields } from '@shared/catalog/services/attachment.interfaces';
-import { uniq } from 'lodash';
+import { TranslocoModule } from '@jsverse/transloco';
 
 /**
  * Modal dialog for selecting and configuring an attachment set for a support.
@@ -33,7 +33,8 @@ import { uniq } from 'lodash';
 
     IconFieldModule,
     InputIconModule,
-    SupportPlotComponent
+    SupportPlotComponent,
+    TranslocoModule
   ],
   styleUrls: ['./attachmentSetModal.component.scss'],
   templateUrl: './attachmentSetModal.component.html',
@@ -87,7 +88,7 @@ export class AttachmentSetModalComponent {
         attachment.attachment_set_z
       ])
     );
-    this.attachmentSetNumbers.set(uniq(attachmentSets.map((attachment) => attachment.attachment_set ?? 0)));
+    this.attachmentSetNumbers.set([...new Set(attachmentSets.map((attachment) => attachment.attachment_set ?? 0))]);
   }
 
   constructor() {
@@ -103,20 +104,17 @@ export class AttachmentSetModalComponent {
           this.supportName.set(name);
         }
         const attachmentSet = support?.attachmentSet;
-        if (attachmentSet) {
+        if (attachmentSet != null) {
           this.attachmentSet.set(attachmentSet);
-          const armLength = support?.armLength ?? undefined;
-          const heightBelowConsole = support?.heightBelowConsole ?? undefined;
+          // Keep file-imported tower model as fallback, then try to override with catalog values.
+          // Per US RG.CAN.SUP-NOM.1, catalog values take priority if support+set exists in catalog.
+          // armLength/heightBelowConsole must come from the catalog only: they are left unset here
+          // (already reset to undefined above) and only ever populated by backfillDerivedFields.
           const towerModel = support?.towerModel ?? undefined;
-          this.armLength.set(armLength);
-          this.heightBelowConsole.set(heightBelowConsole);
           this.towerModel.set(towerModel);
-          // Backfill any catalog-derived field the support is missing (e.g. an attachment set
-          // assigned via inline edit / column copy before these fields were resolved). Resolving
-          // them all together keeps arm length / height / tower consistent — a tower-only backfill
-          // would leave the others undefined and validate() would emit 0.
-          if (name && (armLength == null || heightBelowConsole == null || !towerModel)) {
-            void this.backfillDerivedFields(name, attachmentSet, requestId);
+          // Try to resolve and override with catalog-derived fields (pass false to always overwrite)
+          if (name) {
+            void this.backfillDerivedFields(name, attachmentSet, requestId, false);
           }
         }
       }
@@ -129,23 +127,32 @@ export class AttachmentSetModalComponent {
   }
 
   /**
-   * Fills the catalog-derived fields (tower model, arm length, height below console) that the
-   * support does not already carry. Only empty signals are set, so user-edited values are kept.
+   * Fills the catalog-derived fields (tower model, arm length, height below console).
+   * When `onlyIfEmpty` is false (modal opening), all catalog values override file-imported values
+   * to ensure US RG.CAN.SUP-NOM.1 compliance (catalog-only values, never file values).
+   * When `onlyIfEmpty` is true, only empty signals are set, so user-edited values are kept.
    * The `requestId` (assigned by the open effect) guards against stale resolutions: the result is
    * dropped if a newer open/close or a user name/set change invalidated it while the lookup was in flight.
    */
-  private async backfillDerivedFields(supportName: string, attachmentSet: number, requestId: number): Promise<void> {
+  private async backfillDerivedFields(
+    supportName: string,
+    attachmentSet: number,
+    requestId: number,
+    onlyIfEmpty = true
+  ): Promise<void> {
     const derivedFields = await this.attachmentService.resolveDerivedSupportFields(supportName, attachmentSet);
     if (!this.derivedFieldsRequests.isCurrent(requestId) || !this.isOpen() || !derivedFields) {
       return;
     }
-    this.applyDerivedFields(derivedFields, true);
+    this.applyDerivedFields(derivedFields, onlyIfEmpty);
   }
 
   /**
    * Fans a resolved `DerivedSupportAttachmentFields` out into the tower model, arm length and
    * height-below-console signals. When `onlyIfEmpty` is true (backfill), each signal is set only if
    * still empty so user-edited values survive; otherwise (a fresh selection) all three are overwritten.
+   * For towerModel specifically, only overwrite if the catalog has an actual non-null value,
+   * preserving the file-imported fallback when the catalog has no tower model.
    */
   private applyDerivedFields(derivedFields: DerivedSupportAttachmentFields, onlyIfEmpty: boolean): void {
     if (!onlyIfEmpty || this.armLength() == null) {
@@ -155,7 +162,11 @@ export class AttachmentSetModalComponent {
       this.heightBelowConsole.set(derivedFields.heightBelowConsole ?? undefined);
     }
     if (!onlyIfEmpty || !this.towerModel()) {
-      this.towerModel.set(derivedFields.towerModel ?? undefined);
+      // Only overwrite with catalog tower model if it has an actual value,
+      // preserving the file-imported fallback when catalog has none.
+      if (derivedFields.towerModel != null) {
+        this.towerModel.set(derivedFields.towerModel);
+      }
     }
   }
 

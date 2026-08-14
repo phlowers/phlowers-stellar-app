@@ -8,6 +8,7 @@ import { computed, inject, Injectable, signal, Signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { v4 as uuidv4 } from 'uuid';
+import { TranslocoService } from '@jsverse/transloco';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -43,6 +44,7 @@ export class DistanceMeasuringService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   private readonly emptyPosition = { x: null, y: null, z: null } as const satisfies Position3D;
 
@@ -175,7 +177,9 @@ export class DistanceMeasuringService {
       });
 
       if (addPointsError) {
-        this.notificationService.error($localize`Failed to add measurement points`);
+        this.notificationService.error(
+          this.translocoService.translate('studio.distance-measuring.add-measurement-points-error')
+        );
         return;
       }
 

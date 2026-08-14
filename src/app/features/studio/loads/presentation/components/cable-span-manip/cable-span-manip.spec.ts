@@ -8,6 +8,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { Section } from '@shared/domain';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -72,7 +73,17 @@ describe('CableSpanManipComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [CableSpanManipComponent],
+      imports: [
+        CableSpanManipComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },

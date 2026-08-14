@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
 import { NgTemplateOutlet } from '@angular/common';
+import { TranslocoModule } from '@jsverse/transloco';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -21,7 +22,7 @@ const REFRESH_STUDIO_DELAY = 400;
 /** Component hosting a set of collapsible side tabs with panel content. */
 @Component({
   selector: 'app-side-tabs',
-  imports: [NgTemplateOutlet, ButtonComponent, IconComponent],
+  imports: [NgTemplateOutlet, ButtonComponent, IconComponent, TranslocoModule],
   templateUrl: './side-tabs.component.html',
   styleUrl: './side-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -68,7 +69,9 @@ export class SideTabsComponent {
   private focusPanel(i: number) {
     setTimeout(() => {
       const el = this.panels()[i]?.nativeElement;
-      el?.focus({ preventScroll: true });
+      if (typeof el?.focus === 'function') {
+        el.focus({ preventScroll: true });
+      }
     });
   }
 

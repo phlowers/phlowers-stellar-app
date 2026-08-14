@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output } f
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ChargesService } from '@services/charges/charges.service';
-import { PlotService } from '@services/plot/plot.service';
+import { TranslocoModule } from '@jsverse/transloco';
 import { Section, Study } from '@shared/domain';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -27,7 +27,8 @@ import { LoadFormsService } from '@features/studio/loads/presentation/services/l
     SelectModule,
     SelectWithButtonsComponent,
     ButtonComponent,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -64,7 +65,6 @@ export class StudioMenuBarComponent {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly chargesService = inject(ChargesService);
   private readonly loadFormsService = inject(LoadFormsService);
-  private readonly plotService = inject(PlotService);
 
   launchChargeFunction(
     functionToLaunch: (studyUuid: string, sectionUuid: string, value: string) => void,
@@ -84,22 +84,12 @@ export class StudioMenuBarComponent {
     const isSelectedCharge = charge.value === this.selectedChargeCaseUuid();
     if (isSelectedCharge) {
       await this.loadFormsService.deleteLoad();
-    } else {
-      await this.chargesService.deleteCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', charge.value);
     }
+    await this.chargesService.deleteCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', charge.value);
   }
 
   duplicateChargeCase(charge?: { label: string; value: string }) {
-    const chargeUuid = charge?.value ?? '';
-    if (!chargeUuid) return;
-    const litDataSnapshot = this.plotService.litData();
-    this.chargesService
-      .duplicateCharge(this.study()?.uuid ?? '', this.section()?.uuid ?? '', chargeUuid)
-      .then((newCharge) => {
-        if (litDataSnapshot) {
-          this.plotService.litDataCache.set(newCharge.uuid, litDataSnapshot);
-        }
-      });
+    this.launchChargeFunction(this.chargesService.duplicateCharge.bind(this.chargesService), charge?.value ?? '');
   }
 
   viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit') {

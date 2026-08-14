@@ -15,6 +15,7 @@ import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain'
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { CABLE_SPAN_MANIP_DEFAULTS, CableSpanManipFormControls } from './cable-span-manip.interfaces';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-cable-span-manip',
@@ -27,7 +28,8 @@ import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
     SelectModule,
     MessageModule,
     ButtonComponent,
-    IconComponent
+    IconComponent,
+    TranslocoModule
   ],
   templateUrl: './cable-span-manip.html',
   styleUrl: './cable-span-manip.scss',
@@ -40,6 +42,7 @@ export class CableSpanManipComponent implements OnInit {
   private readonly spanService = inject(PlotSpanService);
   private readonly cableSpanManipService = inject(CableSpanManipService);
   private readonly chainsService = inject(ChainsService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly isLoading = signal(false);
   readonly isCalculating = computed(() => this.plotService.loading());
@@ -98,18 +101,33 @@ export class CableSpanManipComponent implements OnInit {
   readonly chainNameOptions = signal<{ label: string; value: string }[]>([]);
 
   readonly cableManipTypeOptions = [
-    { label: $localize`With a crane`, value: 'with_a_crane' as CableManipType },
-    { label: $localize`Temporary support`, value: 'temporary_support' as CableManipType }
+    {
+      label: this.translocoService.translate('loads.cable-span-manip.with-a-crane-option'),
+      value: 'with_a_crane' as CableManipType
+    },
+    {
+      label: this.translocoService.translate('loads.cable-span-manip.temporary-support-option'),
+      value: 'temporary_support' as CableManipType
+    }
   ];
 
   readonly cableManipMethodOptions = [
-    { label: $localize`Clamp`, value: 'clamp' as CableManipMethod },
-    { label: $localize`Pulley`, value: 'pulley' as CableManipMethod }
+    {
+      label: this.translocoService.translate('loads.cable-span-manip.clamp-option'),
+      value: 'clamp' as CableManipMethod
+    },
+    {
+      label: this.translocoService.translate('loads.cable-span-manip.pulley-option'),
+      value: 'pulley' as CableManipMethod
+    }
   ];
 
   readonly anchoringOptions = [
-    { label: $localize`With sling`, value: 'with_sling' as AnchoringType },
-    { label: $localize`With chain`, value: 'with_chain' as AnchoringType }
+    {
+      label: this.translocoService.translate('loads.cable-span-manip.with-sling-option'),
+      value: 'with_sling' as AnchoringType
+    },
+    { label: this.translocoService.translate('loads.shared.with-chain-option'), value: 'with_chain' as AnchoringType }
   ];
 
   // Signals derived from form values to drive conditional template rendering

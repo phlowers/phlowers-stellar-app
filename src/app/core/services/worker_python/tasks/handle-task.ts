@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -52,6 +52,14 @@ const tasks: Record<
     function: 'temperature_calculation',
     externalPackages: []
   },
+  [Task.diffuseAndBeamRadiationsCalculation]: {
+    function: 'compute_diffuse_and_beam_radiations',
+    externalPackages: []
+  },
+  [Task.estimateSkyCover]: {
+    function: 'estimate_sky_cover',
+    externalPackages: []
+  },
   [Task.calculateParameter15CWithoutWind]: {
     function: 'parameter_15_without_wind',
     externalPackages: []
@@ -80,8 +88,8 @@ const tasks: Record<
     function: 'clear_obstacles',
     externalPackages: []
   },
-  [Task.cableModification]: {
-    function: 'cable_modification',
+  [Task.shortenLengthenCable]: {
+    function: 'shorten_lengthen_cable',
     externalPackages: []
   },
   [Task.getAspectRatio]: {
@@ -135,6 +143,10 @@ const tasks: Record<
   [Task.clearMeasureDistanceAnglePoints]: {
     function: 'clear_measure_distance_angle_points',
     externalPackages: []
+  },
+  [Task.getConformity]: {
+    function: 'get_conformity',
+    externalPackages: []
   }
 };
 
@@ -167,19 +179,23 @@ function collectWarningDiagnostics(
   }
 
   const diagnostics: PythonDiagnostic[] = [];
+  const seenCodes = new Set<PythonErrorCode>();
   for (const warningText of capturedWarnings) {
     const matchedCode = Object.values(PythonErrorCode).find((code) => warningText.includes(code)) ?? null;
-    if (matchedCode) {
+    const isDuplicate = matchedCode !== null && seenCodes.has(matchedCode);
+
+    if (matchedCode && !isDuplicate) {
       diagnostics.push({
         code: matchedCode,
         severity: PYTHON_ERROR_SEVERITY[matchedCode],
         origin: 'warning',
         rawText: warningText
       });
+      seenCodes.add(matchedCode);
     }
     log?.(
       'debug',
-      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}`
+      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}${isDuplicate ? ' (duplicate, skipped)' : ''}`
     );
   }
   return diagnostics;

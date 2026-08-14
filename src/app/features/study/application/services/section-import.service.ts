@@ -12,14 +12,21 @@ import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/impor
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@core/services/worker_python/tasks/types';
+import { Task, Localization } from '@core/services/worker_python/tasks/types';
 import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { sectionImportErrors, importSuccessDetail, buildReprojectionInfoMessage } from './section-import.constantes';
 import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
-import { Localization } from '@core/services/worker_python/tasks/types';
+import { TranslocoService } from '@jsverse/transloco';
+import { environment } from '@src/environments/environment';
+import {
+  GEO_LIAISON_CATALOG_MISSING_KEY,
+  IMPORT_SUCCESS_KEY,
+  REPROJECTION_INFO_KEY,
+  SECTION_IMPORT_ERROR_KEYS
+} from './section-import.constantes';
 import {
   applyFootCoordinates,
   buildReprojectionAngles,
@@ -32,13 +39,6 @@ import {
   parseFloatOrNull,
   validateGeoLiaisonRawFields
 } from './section-import.helpers';
-
-// ---------------------------------------------------------------------------
-// Error catalog
-// ---------------------------------------------------------------------------
-
-// Re-export the error catalog so consumers can import from a single entry point.
-export { sectionImportErrors } from './section-import.constantes';
 
 // ---------------------------------------------------------------------------
 // Service
@@ -73,7 +73,9 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly logger = inject(LoggerService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly attachmentService = inject(AttachmentService);
+  private readonly chainsService = inject(ChainsService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly transloco = inject(TranslocoService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -144,14 +146,14 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (!study) {
       const error: ImportError = {
         code: 'PERSISTENCE_ERROR',
-        message: sectionImportErrors.sectionImportError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
         stage: 'PERSISTENCE'
       };
       throw error;
     }
 
     // Stage: DECODING + PARSING
-    const { section, isGeoLiaison, rawGeoLiaison } = await this.parseJsonFile(file);
+    const { section, isGeoLiaison, rawGeoLiaison, hasCatalogFallbackWarnings } = await this.parseJsonFile(file);
 
     // Stage: VALIDATION
     // GeoLiaison: validate on the raw JSON so error messages show original field names
@@ -164,7 +166,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Stage: COLLISION_CHECK + PERSISTENCE
-    return this.persistSection(section, study, collisionResolver);
+    return this.persistSection(section, study, collisionResolver, isGeoLiaison && hasCatalogFallbackWarnings);
   }
 
   // ---------------------------------------------------------------------------
@@ -195,9 +197,12 @@ export class SectionImportService implements ImportAdapter<Section> {
   // Private — parsing
   // ---------------------------------------------------------------------------
 
-  private async parseJsonFile(
-    file: File
-  ): Promise<{ section: Section; isGeoLiaison: boolean; rawGeoLiaison?: GeoLiaisonFormat }> {
+  private async parseJsonFile(file: File): Promise<{
+    section: Section;
+    isGeoLiaison: boolean;
+    rawGeoLiaison?: GeoLiaisonFormat;
+    hasCatalogFallbackWarnings: boolean;
+  }> {
     let text: string;
     try {
       text = await file.text();
@@ -205,7 +210,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       this.logger.error('Error reading section file', err);
       const error: ImportError = {
         code: 'FILE_READ_ERROR',
-        message: sectionImportErrors.fileReadError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.fileReadError),
         stage: 'DECODING',
         cause: err
       };
@@ -219,7 +224,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       this.logger.error('Error parsing section JSON', err);
       const error: ImportError = {
         code: 'FILE_PARSE_ERROR',
-        message: sectionImportErrors.fileParseError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.fileParseError),
         stage: 'PARSING',
         cause: err
       };
@@ -231,31 +236,34 @@ export class SectionImportService implements ImportAdapter<Section> {
       if (!this.isGeoLiaisonFormat(parsed)) {
         const error: ImportError = {
           code: 'VALIDATION_ERROR',
-          message: sectionImportErrors.geoLiaisonFormatError,
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.geoLiaisonFormatError),
           stage: 'VALIDATION'
         };
         throw error;
       }
       const rawGeoLiaison = parsed as unknown as GeoLiaisonFormat;
-      const section = await this.mapGeoLiaisonToSection(rawGeoLiaison);
-      return { section, isGeoLiaison: true, rawGeoLiaison };
+      const { section, hasCatalogFallbackWarnings } = await this.mapGeoLiaisonToSection(rawGeoLiaison);
+      return { section, isGeoLiaison: true, rawGeoLiaison, hasCatalogFallbackWarnings };
     }
 
-    return { section: this.mapToSection(parsed), isGeoLiaison: false };
+    return { section: this.mapToSection(parsed), isGeoLiaison: false, hasCatalogFallbackWarnings: false };
   }
 
   // ---------------------------------------------------------------------------
   // Private — GeoLiaison mapping
   // ---------------------------------------------------------------------------
 
-  private async mapGeoLiaisonToSection(raw: GeoLiaisonFormat): Promise<Section> {
+  private async mapGeoLiaisonToSection(raw: GeoLiaisonFormat): Promise<{
+    section: Section;
+    hasCatalogFallbackWarnings: boolean;
+  }> {
     const canton = raw.cantons[0];
     const general = canton.general;
     const portees = canton['portee unitaire'] ?? [];
 
     // Sort portees by PORTEE_UNITAIRE_ORDRE (ascending)
     const sortedPortees = [...portees].sort(
-      (a, b) => parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
+      (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
     );
 
     const firstPortee = sortedPortees[0];
@@ -279,15 +287,14 @@ export class SectionImportService implements ImportAdapter<Section> {
       : undefined;
 
     const supports = this.mapGeoLiaisonSupports(sortedPortees);
-
-    // Persist new support names in the local catalog (RG.CAN.ATT)
     const accroches =
       sortedPortees.length === 0
         ? []
-        : [
-            ...sortedPortees.map((p) => p['accroche depart']),
-            sortedPortees[sortedPortees.length - 1]['accroche arrivee']
-          ];
+        : [...sortedPortees.map((p) => p['accroche depart']), sortedPortees.at(-1)!['accroche arrivee']];
+    const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } =
+      await this.resolveGeoLiaisonCatalogFields(supports, accroches);
+
+    // Persist new support names in the local catalog (RG.CAN.ATT)
     const supportNameEntries: SupportNameEntry[] = accroches
       .map((a) => ({ supportName: a.SUPPORT_IDR || a.SUPPORT_ADR || '', supportTower: a.SUPPORT_TOWER ?? null }))
       .filter((e) => !!e.supportName);
@@ -296,39 +303,165 @@ export class SectionImportService implements ImportAdapter<Section> {
     const lambertX = accroches.map((a) => parseFloatOrNull(a.PIED_X_LAMBERT93));
     const lambertY = accroches.map((a) => parseFloatOrNull(a.PIED_Y_LAMBERT93));
     const { supports: reprojectedSupports, meanReprojectionDiffMeters } = await this.applyLambertReprojection(
-      supports,
+      supportsWithCatalogResolution,
       lambertX,
       lambertY
     );
 
     return {
-      ...createEmptySection(),
-      uuid: general.CANTON_CUR.trim(),
-      name: buildSectionName(
-        appartenance?.BRANCHE_IDR ?? null,
-        general.CANTON_TYPE,
-        general.PHASE_ELECTRIQUE_NUMERO,
-        supports
-      ),
-      cable_name: general.CABLE_ADR ?? undefined,
-      type: general.CANTON_TYPE?.toLowerCase() ?? '',
-      cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
-      electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
-      lit_name: appartenance?.LIT_ADR ?? undefined,
-      lit_code: appartenance?.LIT_IDR ?? undefined,
-      link_name: appartenance?.LIAISON_IDR ?? undefined,
-      branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
-      voltage_idr: undefined,
-      maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
-      maintenance_center_names: cmDesignation ? [cmDesignation] : [],
-      maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
-      regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
-      regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
-      initial_conditions: [],
-      selected_initial_condition_uuid: undefined,
-      supports: reprojectedSupports,
-      mean_reprojection_diff_meters: meanReprojectionDiffMeters
+      section: {
+        ...createEmptySection(),
+        uuid: general.CANTON_CUR.trim(),
+        name: buildSectionName(
+          appartenance?.BRANCHE_IDR ?? null,
+          general.CANTON_TYPE,
+          general.PHASE_ELECTRIQUE_NUMERO,
+          supportsWithCatalogResolution
+        ),
+        cable_name: general.CABLE_ADR ?? undefined,
+        type: general.CANTON_TYPE?.toLowerCase() ?? '',
+        cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
+        electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
+        lit_name: appartenance?.LIT_ADR ?? undefined,
+        lit_code: appartenance?.LIT_IDR ?? undefined,
+        link_name: appartenance?.LIAISON_IDR ?? undefined,
+        branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
+        voltage_idr: undefined,
+        maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
+        maintenance_center_names: cmDesignation ? [cmDesignation] : [],
+        maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
+        regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
+        regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
+        initial_conditions: [],
+        selected_initial_condition_uuid: undefined,
+        supports: reprojectedSupports,
+        mean_reprojection_diff_meters: meanReprojectionDiffMeters
+      },
+      hasCatalogFallbackWarnings
     };
+  }
+
+  /**
+   * Resolves every support field the local catalogs are authoritative for: the attachment fields
+   * against the attachment catalog, then the chain details against the chain catalog.
+   */
+  private async resolveGeoLiaisonCatalogFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
+    const { supports: supportsWithAttachments, hasCatalogFallbackWarnings } =
+      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+
+    return {
+      supports: await this.resolveGeoLiaisonCatalogChainFields(supportsWithAttachments, accroches),
+      hasCatalogFallbackWarnings
+    };
+  }
+
+  /**
+   * Overrides each support's chain details with the chain catalog entry matching `CHAINE_DRN_IDR`.
+   *
+   * The catalog is authoritative whenever it holds the chain: `chainLength`, `chainWeight`,
+   * `chainV` and `chainSurface` are all taken from the catalog entry, including when its value is
+   * `0`. Chains absent from the catalog keep the GeoLiaison file values mapped by
+   * `mapAccrocheToSupport`. `counterWeight` (`CONTREPOIDS`) has no catalog counterpart and is
+   * always kept from the file.
+   */
+  private async resolveGeoLiaisonCatalogChainFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<Support[]> {
+    let catalogChains: Awaited<ReturnType<ChainsService['getChains']>>;
+    try {
+      catalogChains = await this.chainsService.getChains();
+    } catch (err) {
+      this.logger.warn('Error reading chain catalog, keeping GeoLiaison file chain values', err);
+      return supports;
+    }
+    if (!catalogChains || catalogChains.length === 0) {
+      return supports;
+    }
+
+    const catalogChainsByName = new Map(catalogChains.map((chain) => [chain.chain_name, chain]));
+
+    return supports.map((support, index) => {
+      const chainName = accroches[index]?.CHAINE_DRN_IDR?.trim();
+      if (!chainName) {
+        this.logger.warn(`Support #${index}: missing CHAINE_DRN_IDR, keeping GeoLiaison file chain values`);
+        return support;
+      }
+
+      const catalogChain = catalogChainsByName.get(chainName);
+      if (!catalogChain) {
+        this.logger.warn(
+          `Support #${index}: chain "${chainName}" not found in the chain catalog, keeping GeoLiaison file chain values`
+        );
+        return support;
+      }
+
+      return {
+        ...support,
+        chainName: catalogChain.chain_name,
+        chainLength: catalogChain.mean_length,
+        chainWeight: catalogChain.mean_mass,
+        chainV: catalogChain.v_chain,
+        chainSurface: catalogChain.chain_surface
+      };
+    });
+  }
+
+  /**
+   * Resolves each support's name/attachmentSet/armLength/heightBelowConsole against the local
+   * attachment catalog (RG.CAN.SUP-NOM/SET/BRA).
+   *
+   * `AttachmentService.resolveGeoLiaisonCatalogAttachment` already guarantees a complete
+   * (L/X/Y/Z) entry when it returns one, so an `undefined` result is the single signal that the
+   * support is absent from the catalog — in that case the GeoLiaison file values are kept as-is,
+   * including `armLength` (`LONGUEUR_BRAS`) and `heightBelowConsole` (`HAUTEUR_SOUS_CONSOLE`).
+   */
+  private async resolveGeoLiaisonCatalogSupportFields(
+    supports: Support[],
+    accroches: GeoLiaisonAccroche[]
+  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
+    let hasCatalogFallbackWarnings = false;
+
+    const resolvedSupports = await Promise.all(
+      supports.map(async (support, index) => {
+        const accroche = accroches[index];
+        if (!accroche) {
+          return support;
+        }
+
+        const catalogEntry = await this.attachmentService.resolveGeoLiaisonCatalogAttachment(
+          accroche.SUPPORT_IDR,
+          accroche.SUPPORT_ADR,
+          support.attachmentSet
+        );
+
+        if (!catalogEntry) {
+          hasCatalogFallbackWarnings = true;
+          // Support absent from catalog: keep the GeoLiaison file values for armLength
+          // (LONGUEUR_BRAS) and heightBelowConsole (HAUTEUR_SOUS_CONSOLE) already mapped
+          // into `support` by `mapAccrocheToSupport`.
+          // Fall back to SUPPORT_ADR if SUPPORT_IDR is missing, as it's already used
+          // in the catalog lookup and elsewhere as a secondary identifier.
+          return {
+            ...support,
+            name: accroche.SUPPORT_IDR ?? accroche.SUPPORT_ADR ?? null
+          };
+        }
+
+        return {
+          ...support,
+          name: accroche.SUPPORT_IDR ?? accroche.SUPPORT_ADR ?? null,
+          attachmentSet: catalogEntry.attachment_set ?? null,
+          armLength: catalogEntry.cross_arm_length ?? null,
+          heightBelowConsole: catalogEntry.attachment_altitude ?? null
+        };
+      })
+    );
+
+    return { supports: resolvedSupports, hasCatalogFallbackWarnings };
   }
 
   private mapGeoLiaisonSupports(sortedPortees: GeoLiaisonPortee[]): Support[] {
@@ -342,7 +475,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Last support comes from 'accroche arrivee' of the last portee
     // spanLength must be null on the last support (no span after it)
-    const lastPortee = sortedPortees[sortedPortees.length - 1];
+    const lastPortee = sortedPortees.at(-1)!;
     const lastSupport = this.mapAccrocheToSupport(lastPortee['accroche arrivee'], lastPortee);
     lastSupport.spanLength = null;
     supports.push(lastSupport);
@@ -396,7 +529,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     lambertX: (number | null)[],
     lambertY: (number | null)[]
   ): Promise<{ supports: Support[]; meanReprojectionDiffMeters: number | null }> {
-    if (lambertX.some((x) => x === null) || lambertY.some((y) => y === null)) {
+    if (lambertX.includes(null) || lambertY.includes(null)) {
       this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
       return { supports, meanReprojectionDiffMeters: null };
     }
@@ -480,7 +613,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private buildLambertReprojectionError(): ImportError {
     return {
       code: 'MAPPING_ERROR',
-      message: sectionImportErrors.lambertReprojectionError,
+      message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.lambertReprojectionError),
       stage: 'MAPPING'
     };
   }
@@ -521,7 +654,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       const detail = fieldErrors.map((e) => `${e.field}: ${String(e.value)}`).join('; ');
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: `${sectionImportErrors.validationErrorRequiredFields}: ${detail}`,
+        message: `${this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorRequiredFields)}: ${detail}`,
         stage: 'VALIDATION'
       };
       throw error;
@@ -533,7 +666,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (missingFields.length > 0) {
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: `${sectionImportErrors.validationErrorRequiredFields}: ${missingFields.join(', ')}`,
+        message: `${this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorRequiredFields)}: ${missingFields.join(', ')}`,
         stage: 'VALIDATION'
       };
       throw error;
@@ -542,7 +675,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (hasSupportsBoundsErrors(section)) {
       const error: ImportError = {
         code: 'VALIDATION_ERROR',
-        message: sectionImportErrors.validationErrorSupportsBounds,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorSupportsBounds),
         stage: 'VALIDATION'
       };
       throw error;
@@ -556,7 +689,8 @@ export class SectionImportService implements ImportAdapter<Section> {
   private async persistSection(
     section: Section,
     study: Study,
-    collisionResolver: UUIDCollisionResolver
+    collisionResolver: UUIDCollisionResolver,
+    hasCatalogFallbackWarnings: boolean
   ): Promise<Section | null> {
     const existingSection = study.sections.find((s) => s.uuid === section.uuid);
 
@@ -572,7 +706,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         this.logger.error('Error deleting existing section', err);
         const error: ImportError = {
           code: 'PERSISTENCE_ERROR',
-          message: sectionImportErrors.sectionDeleteError,
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionDeleteError),
           stage: 'PERSISTENCE',
           cause: err
         };
@@ -588,15 +722,16 @@ export class SectionImportService implements ImportAdapter<Section> {
         });
         const error: ImportError = {
           code: 'PERSISTENCE_ERROR',
-          message: sectionImportErrors.sectionImportError,
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
           stage: 'PERSISTENCE',
           cause: err
         };
         throw error;
       }
 
-      this.notificationService.success(importSuccessDetail);
+      this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
       this.notifyGpsReprojection(section);
+      this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
       return section;
     }
 
@@ -606,15 +741,16 @@ export class SectionImportService implements ImportAdapter<Section> {
       this.logger.error('Error persisting section', err);
       const error: ImportError = {
         code: 'PERSISTENCE_ERROR',
-        message: sectionImportErrors.sectionImportError,
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
         stage: 'PERSISTENCE',
         cause: err
       };
       throw error;
     }
 
-    this.notificationService.success(importSuccessDetail);
+    this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
     this.notifyGpsReprojection(section);
+    this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
     return section;
   }
 
@@ -624,7 +760,20 @@ export class SectionImportService implements ImportAdapter<Section> {
    */
   private notifyGpsReprojection(section: Section): void {
     if (section.mean_reprojection_diff_meters != null) {
-      this.notificationService.info(buildReprojectionInfoMessage(section.mean_reprojection_diff_meters));
+      this.notificationService.info(
+        this.transloco.translate(REPROJECTION_INFO_KEY, {
+          appName: environment.appName,
+          error: section.mean_reprojection_diff_meters.toFixed(1)
+        })
+      );
     }
+  }
+
+  private notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings: boolean): void {
+    if (!hasCatalogFallbackWarnings) {
+      return;
+    }
+
+    this.notificationService.warning(this.transloco.translate(GEO_LIAISON_CATALOG_MISSING_KEY));
   }
 }

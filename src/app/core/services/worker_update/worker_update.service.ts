@@ -1,4 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { MessageService } from 'primeng/api';
 import type { AssetManifest, AppVersion } from './service-worker.interfaces';
@@ -40,18 +41,23 @@ export class UpdateService {
   private static readonly hasServiceWorker = 'serviceWorker' in navigator;
 
   /**
-   * Timeout (ms) for the `/version.json` fetch, so a slow/unreachable network
-   * never hangs startup.
-   *
-   * `/version.json` is bypassed by the Service Worker cache but is still an
-   * application route behind Apache's OIDC catch-all `<Location />`, so it
-   * is subject to the same OIDC refresh-token retry window as `/auth/userinfo`
-   * (`oidc_refresh_token_cache_get` backs off in ~0.5s steps for up to ~5s
-   * before giving up — see connexion-gaia.md §6 and `AuthService.USERINFO_PROBE_TIMEOUT_MS`).
-   * Kept above that window with margin so a shorter client timeout never
-   * races against Apache right when it might have answered.
+   * Timeout (ms) for update-related network fetches (`/assets_list.json`,
+   * `/version.json`) so a slow or unreachable server never hangs the update
+   * layer. Kept strictly greater than Apache's `OIDCHTTPTimeoutLong` (10s in
+   * `httpd-oidc.conf.template`) for the same reason as the auth probe: a
+   * shorter client timeout races Apache's own outgoing call to G@IA.
    */
-  private static readonly VERSION_FETCH_TIMEOUT_MS = 8000;
+  private static readonly FETCH_TIMEOUT_MS = 13000;
+
+  /**
+   * True when a Service-Worker-reported failure looks like an auth/session
+   * problem (precache assets answered 401/403/5xx — typically a stale OIDC
+   * session). The generic "unknown error" message would loop the user through
+   * failing updates; pointing them to a re-login is actionable.
+   */
+  private static isAuthLikeFailure(error: unknown): boolean {
+    return typeof error === 'string' && /HTTP (401|403|5\d\d)/.test(error);
+  }
 
   /**
    * True when the current runtime exposes a Service Worker API.
@@ -93,6 +99,7 @@ export class UpdateService {
   readonly isFirstLaunch = computed<boolean>(() => this.pendingAction() === 'first-install');
 
   private readonly messageService = inject(MessageService);
+  private readonly translocoService = inject(TranslocoService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
 
   constructor() {
@@ -106,8 +113,8 @@ export class UpdateService {
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
-              summary: $localize`Update successful`,
-              detail: $localize`The application has been updated to the latest version`
+              summary: this.translocoService.translate('shared.update-service.update-success-summary'),
+              detail: this.translocoService.translate('shared.update-service.update-success-detail')
             });
             globalThis.location.href = '/';
             break;
@@ -117,18 +124,22 @@ export class UpdateService {
             await this.loadCurrentVersion();
             this.messageService.add({
               severity: 'success',
-              summary: $localize`Install successful`,
-              detail: $localize`The application has been installed`
+              summary: this.translocoService.translate('shared.update-service.install-success-summary'),
+              detail: this.translocoService.translate('shared.update-service.install-success-detail')
             });
             break;
-          case 'error':
+          case 'error': {
             this.updateLoading.set(false);
+            const detail = UpdateService.isAuthLikeFailure(event.data.error)
+              ? this.translocoService.translate('shared.update-service.update-failed-auth-detail')
+              : (event.data.error ?? this.translocoService.translate('shared.update-service.update-failed-detail'));
             this.messageService.add({
               severity: 'error',
-              summary: $localize`Update failed`,
-              detail: event.data.error ?? $localize`An unknown error occurred during the update`
+              summary: this.translocoService.translate('shared.update-service.update-failed-summary'),
+              detail
             });
             break;
+          }
         }
       }
     });
@@ -180,9 +191,15 @@ export class UpdateService {
   }
 
   private async fetchManifest(): Promise<AssetManifest | null> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(new DOMException('assets_list.json fetch timeout', 'TimeoutError')),
+      UpdateService.FETCH_TIMEOUT_MS
+    );
     try {
       const response = await fetch('/assets_list.json', {
         cache: 'no-store',
+        signal: controller.signal,
         headers: {
           'cache-control': 'no-cache',
           pragma: 'no-cache'
@@ -197,6 +214,8 @@ export class UpdateService {
       return data;
     } catch {
       return null;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -232,8 +251,8 @@ export class UpdateService {
     if (!silent) {
       this.messageService.add({
         severity: 'info',
-        summary: $localize`App version`,
-        detail: $localize`App version checked`
+        summary: this.translocoService.translate('admin.app-version'),
+        detail: this.translocoService.translate('shared.update-service.version-checked-detail')
       });
     }
   }
@@ -249,9 +268,6 @@ export class UpdateService {
    */
   async checkForUpdateOnce(): Promise<void> {
     try {
-      // Load the build-time version file (served from SW cache or network).
-      await this.loadCurrentVersion();
-
       const cachePopulated = await this.isCachePopulated();
       const latestVersion = await this.getLatestVersion();
 
@@ -342,18 +358,18 @@ export class UpdateService {
    */
   async loadCurrentVersion(): Promise<void> {
     const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort('UpdateService: version.json fetch timed out'),
-      UpdateService.VERSION_FETCH_TIMEOUT_MS
+    const timeoutId = setTimeout(
+      () => controller.abort(new DOMException('version.json fetch timeout', 'TimeoutError')),
+      UpdateService.FETCH_TIMEOUT_MS
     );
     try {
       const response = await fetch('/version.json', {
         cache: 'no-store',
+        signal: controller.signal,
         headers: {
           'cache-control': 'no-cache',
           pragma: 'no-cache'
-        },
-        signal: controller.signal
+        }
       });
       if (response.ok) {
         const version = (await response.json()) as AppVersion;
@@ -362,7 +378,7 @@ export class UpdateService {
     } catch {
       // Keep environment-based fallback already set in the signal.
     } finally {
-      clearTimeout(timer);
+      clearTimeout(timeoutId);
     }
   }
 

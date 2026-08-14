@@ -12,7 +12,8 @@ import { ImportContextConfig } from '@shared/import/domain/import-contracts.inte
 import { SectionImportService } from '@features/study/application/services/section-import.service';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { SECTION_IMPORT_CONFIG } from './import-section.constantes';
+import { createSectionImportConfig } from './import-section.constantes';
+import { TranslocoService } from '@jsverse/transloco';
 
 /**
  * Host wrapper that provides the `SectionImportService` adapter and
@@ -54,11 +55,13 @@ export class ImportSectionComponent {
    */
   readonly editRequested = output<string>();
 
+  private readonly transloco = inject(TranslocoService);
+
   /** Full config including successAction, built as a computed signal. */
   readonly config = computed<ImportContextConfig>(() => ({
-    ...SECTION_IMPORT_CONFIG,
+    ...createSectionImportConfig(this.transloco),
     successAction: {
-      label: $localize`Edit`,
+      label: this.transloco.translate('common.edit'),
       action: (outcome) => this.editRequested.emit(outcome.entityId!)
     }
   }));

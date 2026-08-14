@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
 
 // Test host component to test the CardComponent with different inputs
 @Component({
-  template: `<app-card [role]="testRole">Test Content</app-card>`,
+  template: `<app-card i18n [role]="testRole">Test Content</app-card>`,
   standalone: true,
   imports: [CardComponent]
 })
@@ -25,6 +25,7 @@ describe('CardComponent', () => {
 
     fixture = TestBed.createComponent(CardComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('role', 'button');
   });
 
   it('should create', () => {

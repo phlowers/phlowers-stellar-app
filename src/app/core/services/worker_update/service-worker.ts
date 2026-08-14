@@ -4,6 +4,7 @@ const CACHE_NAME = 'app-assets';
 const APP_VERSION_CACHE_KEY = '/app_version';
 /** Timeout (ms) for network-first fetch before falling back to cache. */
 const NETWORK_FIRST_TIMEOUT_MS = 3000;
+const NAVIGATE_TIMEOUT_MS = 13000;
 
 /**
  * Fetch with an AbortController timeout.
@@ -44,6 +45,91 @@ function shouldUseNetworkFirst(request: Request): boolean {
 }
 
 /**
+ * Returns true when a response is a redirect that the browser must be allowed
+ * to follow (e.g. Apache's 302 to the AuthProvider OIDC login). Navigation requests
+ * are fetched with `redirect: 'manual'`, so a redirect surfaces here as an
+ * `opaqueredirect` response (status 0). Such responses MUST be passed through
+ * untouched so the browser performs the navigation instead of the SW
+ * swallowing it and serving the cached shell.
+ */
+function isRedirectResponse(response: Response): boolean {
+  return response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400);
+}
+
+/**
+ * True for a raw 401/403 straight from Apache/mod_auth_openidc (not converted
+ * to a redirect), which must never be shown to the user as-is.
+ */
+function isAuthErrorResponse(response: Response | undefined): response is Response {
+  return !!response && (response.status === 401 || response.status === 403);
+}
+
+/**
+ * Fetches and caches each file individually. Any single failure (e.g. a 502
+ * during a rolling redeploy) aborts the whole install/update — missing or
+ * broken assets must never be silently skipped. Compared to `Cache.addAll()`
+ * (all-or-nothing, throws a generic `Failed to execute 'addAll' on 'Cache'`
+ * error), this identifies exactly which file failed and why.
+ *
+ * A shared `AbortController` cancels the other in-flight fetches as soon as
+ * one file fails, and any fetch that resolves afterwards is skipped instead
+ * of being written to `cache` — otherwise `Promise.all` rejecting early
+ * would still let those in-flight operations complete in the background,
+ * leaving the cache partially populated despite the reported failure.
+ */
+async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
+  if (files.length === 0) {
+    return;
+  }
+  const controller = new AbortController();
+
+  await Promise.all(
+    files.map(async (file) => {
+      // Validated inline, in the same function that performs the fetch below:
+      // `assets_list.json` is untrusted network data, so a poisoned/compromised
+      // response must not be able to make the SW request/cache a cross-origin
+      // resource (client-side request forgery). `assetPath` — never the raw
+      // `file` argument — is what is passed to `fetch()`/`cache.put()`.
+      let assetPath = '';
+      if (file.startsWith('/') && !file.startsWith('//') && !file.includes('\\')) {
+        try {
+          const url = new URL(file, self.location.origin);
+          if (url.origin === self.location.origin) {
+            assetPath = url.pathname + url.search;
+          }
+        } catch {
+          assetPath = '';
+        }
+      }
+      if (!assetPath) {
+        controller.abort();
+        throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
+      }
+      let response: Response;
+      try {
+        response = await fetch(assetPath, { cache: 'no-store', signal: controller.signal });
+      } catch (error) {
+        if (controller.signal.aborted) {
+          // Aborted because another file already failed; that failure is what fails the precache.
+          return;
+        }
+        controller.abort();
+        throw error;
+      }
+      if (!response.ok) {
+        controller.abort();
+        throw new Error(`Precache failed for ${assetPath}: HTTP ${response.status}`);
+      }
+      if (controller.signal.aborted) {
+        // Another file failed while this fetch was in flight — skip the write.
+        return;
+      }
+      await cache.put(assetPath, response);
+    })
+  );
+}
+
+/**
  * Performs a full application installation by fetching the asset
  * manifest, caching all listed files, and storing the build version.
  * Notifies all controlled clients upon completion.
@@ -58,7 +144,7 @@ export async function installApp() {
   const filesToInstall = manifest.files || [];
   const buildVersion = manifest.app_version;
   const cache = await caches.open(CACHE_NAME);
-  await cache.addAll(filesToInstall);
+  await cacheFiles(cache, filesToInstall);
   await cache.put(
     APP_VERSION_CACHE_KEY,
     new Response(JSON.stringify(buildVersion), {
@@ -92,7 +178,7 @@ export async function updateApp() {
   try {
     await caches.delete(TEMP_CACHE_NAME);
     const tempCache = await caches.open(TEMP_CACHE_NAME);
-    await tempCache.addAll(files);
+    await cacheFiles(tempCache, files);
 
     const appVersion = manifest.app_version;
     await tempCache.put(
@@ -168,26 +254,52 @@ export async function handleFetch(event: FetchEvent) {
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
 
   // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
+  // Plain return WITHOUT respondWith: the browser handles the request natively.
+  // `respondWith(fetch(request))` is NOT equivalent — OIDC endpoints answer
+  // with cross-origin redirects to the AuthProvider, and a SW-relayed fetch of a
+  // redirected navigation rejects ("Failed to fetch"), blanking the page
+  // (incident 2026-08-10, evening: /auth/relogin navigation died in the SW).
   if (shouldBypassSW(url)) {
-    event.respondWith(fetch(event.request));
     return;
   }
 
   if (url === scope) {
-    // Home page: network-first so Apache can redirect when OIDC session expires.
-    // 3xx responses are passed through without caching.
+    // Home page: network-first so Apache can redirect when the OIDC session
+    // expires. On any non-redirect error (401/403/5xx) we fall back to the
+    // cached shell so the user never sees a raw technical page; the app then
+    // re-evaluates auth on the main thread.
     event.respondWith(
       (async () => {
         const cache = await caches.open(CACHE_NAME);
         const indexUrl = scope + 'index.html';
         try {
-          const networkResponse = await fetchWithTimeout(event.request.clone());
+          const networkResponse = await fetchWithTimeout(
+            event.request.clone(),
+            {
+              redirect: 'manual',
+              cache: 'no-store'
+            },
+            NAVIGATE_TIMEOUT_MS
+          );
           if (networkResponse?.ok) {
             await cache.put(indexUrl, networkResponse.clone());
             return networkResponse;
           }
-          // 3xx or non-ok: return directly without caching (preserves Apache redirects).
-          return networkResponse;
+          // Preserve Apache/AuthProvider redirects (OIDC login flow): let the browser follow.
+          if (networkResponse && isRedirectResponse(networkResponse)) {
+            return networkResponse;
+          }
+          // 401/403/5xx (or any other non-ok): serve the cached shell if present.
+          const cachedShell = await cache.match(indexUrl);
+          if (cachedShell) {
+            return cachedShell;
+          }
+          // No cached shell (e.g. right after clearing site data): force reauth
+          // via /auth/relogin instead of leaking Apache's raw 401/403 body.
+          if (isAuthErrorResponse(networkResponse)) {
+            return Response.redirect(scope + 'auth/relogin', 302);
+          }
+          return networkResponse ?? Response.error();
         } catch {
           const cached = await cache.match(indexUrl);
           return cached ?? Response.error();
@@ -215,6 +327,17 @@ export async function handleFetch(event: FetchEvent) {
             // Only cache successful (2xx) responses — never cache 3xx redirects.
             if (networkResponse?.ok) {
               await cache.put(event.request, networkResponse.clone());
+              return networkResponse;
+            }
+            // Non-ok (401/403/5xx) for a code asset: prefer a cached copy over
+            // surfacing a technical error that would break the page.
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // No cache: for a full-page navigation, force reauth instead of a raw
+            // 401/403 body. Non-navigate assets (e.g. a lazy chunk) are left as-is.
+            if (event.request.mode === 'navigate' && isAuthErrorResponse(networkResponse)) {
+              return Response.redirect(scope + 'auth/relogin', 302);
             }
             return networkResponse;
           } catch (error) {
@@ -235,7 +358,10 @@ export async function handleFetch(event: FetchEvent) {
           return response;
         }
         const fetchRequest = event.request.clone();
-        return fetch(fetchRequest, NO_CACHE_INIT).catch((error) => {
+        // Bounded: an unbounded fetch here can hang behind an OIDC refresh
+        // pile-up on the server (headers-only timeout; body streaming of
+        // large files is unaffected once headers arrive).
+        return fetchWithTimeout(fetchRequest, NO_CACHE_INIT, NAVIGATE_TIMEOUT_MS).catch((error) => {
           console.error('Fetch failed:', error);
           return Response.error();
         });

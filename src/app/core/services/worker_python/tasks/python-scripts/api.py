@@ -6,9 +6,10 @@
 
 import logging
 
-from stellar_engine.core import geometry, pose_table
+from stellar_engine.core import geometry, manipulations, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
+from stellar_engine.core.conformity import simulation as conformity_simulation
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     guying,
@@ -16,14 +17,19 @@ from stellar_engine.tools import (
     temperature,
     papoto,
 )
-from stellar_engine.plot import plot_2d, plot_settings, run_solver, supports_coords
+from stellar_engine.plot import (
+    plot_2d,
+    plot_settings,
+    run_solver,
+    supports_coords,
+)
 import stellar_engine.plot.obstacles as obst
 
 from mechaphlowers import SectionStudy
 from mechaphlowers.config import options
 from stellar_engine.utils import get_section_middle_span, make_debug_log
 
-from stellar_engine.pyodide_utils import js_to_python, default_converter
+from stellar_engine.pyodide_utils import js_to_python, date_converter
 
 logger = logging.getLogger("stellar_engine")
 debug_log = make_debug_log(logger, prefix="API")
@@ -32,7 +38,8 @@ study: SectionStudy
 base_study: SectionStudy
 
 
-#---------------------------tools----------------
+# ---------------------------tools----------------
+
 
 @debug_log
 def calculate_guying(js_inputs):
@@ -43,10 +50,10 @@ def calculate_guying(js_inputs):
 
     return guying.calculate_guying(inputs, engine=study.balance_engine)
 
+
 @debug_log
 def get_support_coordinates(js_inputs):
     return supports_coords.get_support_coordinates(js_to_python(js_inputs))
-
 
 
 @debug_log
@@ -55,9 +62,8 @@ def get_pose_table(js_inputs):
     return pose_table.get_pose_table(js_to_python(js_inputs), study.balance_engine)
 
 
+# ---------------------------measures----------------
 
-
-#---------------------------measures----------------
 
 @debug_log
 def parameter_15_without_wind(js_inputs):
@@ -71,8 +77,15 @@ def parameter_15_without_wind(js_inputs):
 def temperature_calculation(js_inputs):
     global study
     return temperature.temperature_calculation(
-        inputs=js_inputs.to_py(default_converter=default_converter),
+        inputs=js_inputs.to_py(default_converter=date_converter),
         engine=study.balance_engine,
+    )
+
+
+@debug_log
+def compute_diffuse_and_beam_radiations(js_inputs):
+    return temperature.compute_diffuse_and_beam_radiations(
+        inputs=js_inputs.to_py(default_converter=date_converter),
     )
 
 
@@ -81,15 +94,20 @@ def calculate_papoto(js_inputs):
     return papoto.calculate_papoto(inputs=js_inputs.to_py())
 
 
-
 @debug_log
 def get_wind_incidence(js_inputs):
     python_inputs = js_to_python(js_inputs)
     return temperature.get_wind_attack_angle(python_inputs)
 
 
+@debug_log
+def estimate_sky_cover(js_inputs):
+    return temperature.compute_nebulosity(
+        inputs=js_inputs.to_py(default_converter=date_converter),
+    )
 
-#---------------------------study core----------------
+
+# ---------------------------study core----------------
 
 
 @debug_log
@@ -111,6 +129,7 @@ def change_state(js_inputs):
         reload = change_state_inputs["reload"]
     else:
         reload = False
+    logger.debug(f"Reload value: {reload}")
     return run_solver.change_state(change_state_inputs, study, reload=reload)
 
 
@@ -138,7 +157,8 @@ def get_equivalent_span():
     return {"equivalentSpan": pose_table.get_equivalent_span(study.balance_engine)}
 
 
-#---------------------------obstacles----------------
+# ---------------------------obstacles----------------
+
 
 @debug_log
 def extract_obstacles_inputs(js_inputs):
@@ -199,7 +219,7 @@ def clear_obstacles():
     return {"success": True}
 
 
-#---------------------------loads----------------
+# ---------------------------loads----------------
 
 
 @debug_log
@@ -224,7 +244,8 @@ def set_loads(js_inputs):
     return loads.apply_span_loads(study, python_inputs["spanLoads"])
 
 
-#---------------------------distance measurement----------------
+# ---------------------------distance measurement----------------
+
 
 @debug_log
 def measure_distance(js_inputs):
@@ -232,7 +253,9 @@ def measure_distance(js_inputs):
     python_inputs = js_to_python(js_inputs)
     support_index = python_inputs["supportIndex"]
     logger.debug(f"python_inputs for measure_distance: {python_inputs}")
-    return geometry.measure_distance_angle(inputs=python_inputs, study=study, support_index=support_index)
+    return geometry.measure_distance_angle(
+        inputs=python_inputs, study=study, support_index=support_index
+    )
 
 
 @debug_log
@@ -240,8 +263,13 @@ def add_measure_distance_angle_points(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
     support_index = python_inputs["supportIndex"]
-    logger.debug(f"python_inputs for add_measure_distance_angle_points: {python_inputs}")
-    return geometry.add_measure_distance_angle_points(inputs=python_inputs, study=study, support_index=support_index)
+    logger.debug(
+        f"python_inputs for add_measure_distance_angle_points: {python_inputs}"
+    )
+    return geometry.add_measure_distance_angle_points(
+        inputs=python_inputs, study=study, support_index=support_index
+    )
+
 
 @debug_log
 def clear_measure_distance_angle_points():
@@ -250,7 +278,8 @@ def clear_measure_distance_angle_points():
     return geometry.clear_measure_distance_angle_points(study=study)
 
 
-#---------------------------localization----------------
+# ---------------------------localization----------------
+
 
 @debug_log
 def compute_localization(js_inputs):
@@ -267,8 +296,21 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
+# ---------------------------conformity----------------
 
-#--------------------------config----------------
+
+@debug_log
+def get_conformity(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    logger.debug(f"python_inputs for get_conformity: {python_inputs}")
+    out = conformity_simulation.get_conformity(python_inputs, study)
+    logger.debug(f"Conformity output: {out}")
+    return out
+
+
+# --------------------------config----------------
+
 
 @debug_log
 def get_config():
@@ -281,3 +323,9 @@ def set_resolution(js_inputs):
     resolution = python_inputs["resolution"]
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
+
+
+@debug_log
+def shorten_lengthen_cable(js_inputs):
+    global study
+    return manipulations.modify_cable(js_to_python(js_inputs), study)

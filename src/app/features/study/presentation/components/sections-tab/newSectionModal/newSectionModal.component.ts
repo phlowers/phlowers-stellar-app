@@ -10,7 +10,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { ManualSectionComponent } from './manualSection/manualSection.component';
-import { CommonModule } from '@angular/common';
+
 import { Section, Study } from '@shared/domain';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -22,6 +22,7 @@ import { SectionSourceMode } from './newSectionModal.interfaces';
 import { cloneDeep } from 'lodash';
 import { LocationData } from './manualSection/location/location.interfaces';
 import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -43,10 +44,10 @@ import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
     DividerModule,
     SelectModule,
     ManualSectionComponent,
-    CommonModule,
     IconComponent,
     ButtonComponent,
-    ImportSectionComponent
+    ImportSectionComponent,
+    TranslocoModule
   ],
   templateUrl: './newSectionModal.component.html',
   styleUrl: './newSectionModal.component.scss',
@@ -86,14 +87,15 @@ export class NewSectionModalComponent {
 
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
+  private readonly transloco = inject(TranslocoService);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
-      return $localize`View a study section`;
+      return this.transloco.translate('section-modal.title-view');
     } else if (this.mode() === 'edit') {
-      return $localize`Modify a study section`;
+      return this.transloco.translate('section-modal.title-modify');
     }
-    return $localize`Create a study section`;
+    return this.transloco.translate('section-modal.title-create');
   });
 
   constructor() {
@@ -188,7 +190,7 @@ export class NewSectionModalComponent {
 
     const section = this.study()?.sections.find((s) => s.uuid === sectionUuid);
     if (!section) {
-      this.notificationService.error($localize`The imported section could not be found. Please try again.`);
+      this.notificationService.error(this.transloco.translate('section-import.import-error'));
       return;
     }
 

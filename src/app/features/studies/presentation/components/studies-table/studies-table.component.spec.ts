@@ -11,6 +11,7 @@ import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
 import { Study } from '@shared/domain';
 import { MessageService } from 'primeng/api';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 describe('StudiesTableComponent', () => {
   let component: StudiesTableComponent;
@@ -54,7 +55,13 @@ describe('StudiesTableComponent', () => {
     } as unknown as vi.Mocked<MessageService>;
 
     await TestBed.configureTestingModule({
-      imports: [StudiesTableComponent],
+      imports: [
+        StudiesTableComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {}, fr: {} },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
+        })
+      ],
       providers: [{ provide: MessageService, useValue: mockMessageService }, provideRouter([])]
     }).compileComponents();
 

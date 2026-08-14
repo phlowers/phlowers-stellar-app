@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -39,6 +39,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 // Constants
 const PLOT_CONFIG = {
@@ -100,7 +101,7 @@ interface PlotElement extends HTMLElement {
 @Component({
   selector: 'app-free-positioning',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule],
+  imports: [FormsModule, DialogModule, InputNumberModule, ProgressSpinnerModule, TranslocoModule],
   templateUrl: './free-positioning.component.html',
   styleUrl: './free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -120,11 +121,12 @@ export class FreePositioningComponent implements OnDestroy {
 
   getErrorString = computed(() => {
     const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
-    return formatStudioError(this.plotService.error(), exceptionDiagnostic?.code ?? null);
+    return formatStudioError(this.plotService.error(), this.translocoService, exceptionDiagnostic?.code ?? null);
   });
 
   // Dependencies
   readonly plotService = inject(PlotService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   readonly sideTabsService = inject(SideTabsService);

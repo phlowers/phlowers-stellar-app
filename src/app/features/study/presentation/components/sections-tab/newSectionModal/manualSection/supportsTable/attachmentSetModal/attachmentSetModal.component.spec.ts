@@ -33,6 +33,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { of } from 'rxjs';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 import { AttachmentSetModalComponent } from './attachmentSetModal.component';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
@@ -87,6 +88,17 @@ describe('AttachmentSetModalComponent', () => {
       support_order: 1,
       attachment_altitude: 8.5,
       cross_arm_length: 2.0,
+      created_at: '2023-01-01',
+      updated_at: '2023-01-01',
+      support_tower: 'Tower Model'
+    },
+    {
+      uuid: '4',
+      support_name: 'Test Support',
+      attachment_set: 1,
+      support_order: 1,
+      attachment_altitude: 10.0,
+      cross_arm_length: 2.5,
       created_at: '2023-01-01',
       updated_at: '2023-01-01',
       support_tower: 'Tower Model'
@@ -210,7 +222,33 @@ describe('AttachmentSetModalComponent', () => {
     } as unknown as vi.Mocked<WorkerPythonService>;
 
     await TestBed.configureTestingModule({
-      imports: [AttachmentSetModalComponent, BrowserAnimationsModule, FormsModule],
+      imports: [
+        AttachmentSetModalComponent,
+        BrowserAnimationsModule,
+        FormsModule,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'attachment-modal.title': 'Attachment set',
+              'attachment-modal.choose-hint':
+                'Choose the attachment set in the list or on the graph to find the right arm length.',
+              'attachment-modal.label-support-name': 'Support name',
+              'attachment-modal.label-attachment-set': 'Attachment set',
+              'attachment-modal.arm-length': 'Arm length',
+              'common.meter': 'm',
+              'attachment-modal.height-below-console': 'Height below console',
+              'attachment-modal.auto-fill-hint':
+                'The attachment set and the arm length (m) will be automatically filled in the table.',
+              'common.close': 'Close',
+              'common.validate': 'Validate'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          }
+        })
+      ],
       providers: [
         {
           provide: AttachmentService,
@@ -446,11 +484,13 @@ describe('AttachmentSetModalComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      // Verify supportName is not set (resetValues(true) clears it)
+      // Support has no name, so no catalog lookup is possible.
+      // File-imported towerModel is kept as fallback, but armLength/heightBelowConsole must come
+      // from the catalog only and stay unset.
       expect(component.supportName()).toBeUndefined();
       expect(component.attachmentSet()).toBe(1);
-      expect(component.armLength()).toBe(2.5);
-      expect(component.heightBelowConsole()).toBe(10.0);
+      expect(component.armLength()).toBeUndefined();
+      expect(component.heightBelowConsole()).toBeUndefined();
       expect(component.towerModel()).toBe('Tower Model');
     });
 
@@ -498,14 +538,16 @@ describe('AttachmentSetModalComponent', () => {
       expect(component.towerModel()).toBe('Tower Model');
     });
 
-    it('keeps the existing derived values without a catalog lookup when the support already has them', async () => {
-      // mockSupport already carries armLength, heightBelowConsole and towerModel.
+    it('ALWAYS resolves catalog-derived fields to ensure catalog values override file-imported values (US RG.CAN.SUP-NOM.1)', async () => {
+      // mockSupport carries armLength/heightBelowConsole/towerModel from import file,
+      // but the catalog lookup MUST be called to replace them with catalog-only values.
+      // This ensures that file-imported values (e.g., placeholder 999.9) are never displayed.
       fixture.componentRef.setInput('support', mockSupport);
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(attachmentServiceMock.getDerivedSupportFields).not.toHaveBeenCalled();
+      expect(attachmentServiceMock.getDerivedSupportFields).toHaveBeenCalledWith('Test Support', 1);
       expect(component.armLength()).toBe(2.5);
       expect(component.heightBelowConsole()).toBe(10.0);
       expect(component.towerModel()).toBe('Tower Model');

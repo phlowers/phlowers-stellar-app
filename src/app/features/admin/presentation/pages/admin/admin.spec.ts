@@ -17,11 +17,12 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { OnlineService } from '@services/online/online.service';
 import { WINDOW } from '@core/tokens/window.token';
 
+import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
@@ -88,6 +89,11 @@ describe('AdminComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
         AdminComponent,
         ToastModule,
         CardModule,
@@ -109,7 +115,7 @@ describe('AdminComponent', () => {
     })
       .overrideComponent(AdminComponent, {
         set: {
-          providers: [{ provide: ConfirmationService, useValue: confirmationServiceMock }]
+          providers: [{ provide: ConfirmationService, useValue: confirmationServiceMock }, DatePipe]
         }
       })
       .compileComponents();
@@ -150,7 +156,7 @@ describe('AdminComponent', () => {
       component.deleteAllStudies();
 
       expect(confirmationServiceMock.confirm).toHaveBeenCalledWith({
-        message: expect.any(String), // $localize returns a string
+        message: expect.any(String),
         accept: expect.any(Function)
       });
     });
@@ -291,6 +297,20 @@ describe('AdminComponent', () => {
       expect(globalThis.caches.delete).not.toHaveBeenCalled();
       expect(messageServiceMock.add).not.toHaveBeenCalled();
       expect(vi.getTimerCount()).toBe(0);
+    });
+  });
+
+  describe('formatBuildDate', () => {
+    it('should return null when the value is missing', () => {
+      expect(component.formatBuildDate(undefined)).toBeNull();
+    });
+
+    it('should format a valid ISO date string', () => {
+      expect(component.formatBuildDate('2024-01-01T10:30:00Z')).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/);
+    });
+
+    it('should return the raw value when it cannot be parsed as a date (e.g. an unsubstituted {BUILD_TIME} placeholder)', () => {
+      expect(component.formatBuildDate('{BUILD_TIME}')).toBe('{BUILD_TIME}');
     });
   });
 });

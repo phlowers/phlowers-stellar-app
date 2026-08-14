@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ProtoV4Parameters, ProtoV4Support, Support, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
@@ -55,6 +56,7 @@ export class StudiesService {
   private readonly storageService = inject(StorageService);
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     this.storageService.ready$.subscribe((value) => {
@@ -128,7 +130,11 @@ export class StudiesService {
     const userEmail = await this.getUserEmail();
     const allStudies = (await this.db?.studies.toArray()) ?? [];
     const allStudyTitles = allStudies.map((studyItem) => studyItem.title);
-    const duplicateTitle = findDuplicateTitle(allStudyTitles, study.title);
+    const duplicateTitle = findDuplicateTitle(
+      allStudyTitles,
+      study.title,
+      this.translocoService.translate('shared.duplicate.copy-suffix')
+    );
     const newStudy = {
       ...study,
       title: duplicateTitle,
@@ -175,10 +181,10 @@ export class StudiesService {
   async updateStudy(study: { uuid: string; author_email: string } & Partial<StudyEntity>, overrideAuthorCheck = false) {
     const userEmail = await this.getUserEmail();
     if (!overrideAuthorCheck && userEmail !== study.author_email) {
-      const errorMessage = $localize`You cannot update a study that you did not create, please duplicate it instead.`;
+      const errorMessage = this.translocoService.translate('shared.studies-service.unauthorized-error');
       this.messageService.add({
         severity: 'error',
-        summary: $localize`Unauthorized`,
+        summary: this.translocoService.translate('shared.studies-service.unauthorized-summary'),
         detail: errorMessage
       });
       throw new Error(errorMessage);
@@ -201,7 +207,7 @@ export class StudiesService {
       ...createEmptyStudy(),
       author_email: '',
       title: parameters.project_name,
-      description: $localize`Study imported from protoV4`,
+      description: this.translocoService.translate('shared.studies-service.imported-from-protov4'),
       shareable: false,
       sections: [section]
     });
@@ -341,7 +347,7 @@ export class StudiesService {
   private buildInitialCondition(parameters: ProtoV4Parameters): InitialCondition {
     return {
       uuid: uuidv4(),
-      name: $localize`IC 1`,
+      name: this.translocoService.translate('shared.sections-helpers.ic-default-name'),
       base_parameters: parameters.parameter,
       base_temperature: parameters.temperature_reference,
       cable_pretension: parameters.cra,

@@ -460,15 +460,9 @@ def main() -> None:
         return
 
     ver = pyodide_version()
-    mech = (
-        f"{parse_wheel(local_wheel.name)[1]} (local)"
-        if local_wheel
-        else json.loads(PACKAGE_JSON.read_text())
-        .get("config", {})
-        .get("mechaphlowers", "?")
-    )
+
     print("=" * 50)
-    print(f"Pyodide: {ver} | Mechaphlowers: {mech}")
+    print(f"Pyodide: {ver}")
     print("=" * 50)
 
     if PYODIDE_DIR.exists():

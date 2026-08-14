@@ -5,18 +5,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { TranslocoService } from '@jsverse/transloco';
 import { ImportContextConfig } from '@shared/import/domain/import-contracts.interfaces';
 
 /** Accepted file specification and UI texts for section JSON imports. */
-export const SECTION_IMPORT_CONFIG: ImportContextConfig = {
+export const createSectionImportConfig = (transloco: TranslocoService): ImportContextConfig => ({
   acceptedFiles: {
     extensions: ['.json'],
     mimeTypes: ['application/json'],
-    hint: $localize`File format: .json`
+    hint: transloco.translate('section-import.from-file.file-format')
   },
-  entityLabel: $localize`Section`,
+  entityLabel: transloco.translate('importSection.entityLabel'),
   texts: {
-    description: $localize`You can import a section from a JSON file. It will be added to the current study.`,
-    uploadPrompt: $localize`Upload a JSON file`
+    description: transloco.translate('section-import.from-file.description'),
+    uploadPrompt: transloco.translate('section-import.from-file.upload-prompt')
   }
-};
+});

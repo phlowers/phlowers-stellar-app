@@ -5,16 +5,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PageTitleService } from '@shared/service/page-title/page-title.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-topbar',
-  imports: [CommonModule, IconComponent],
+  imports: [IconComponent, TranslocoModule],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

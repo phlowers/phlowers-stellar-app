@@ -5,6 +5,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MessageModule } from 'primeng/message';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { Charge } from '@shared/domain';
@@ -15,15 +16,16 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { defaultClimaticCharge } from '@shared/domain/helpers/climate.helpers';
 
 /** Creates a new charge with default climate values and an auto-generated name. */
-const newCharge = (currentCharges: Charge[]): Charge => {
+const newCharge = (currentCharges: Charge[], defaultNamePrefix: string): Charge => {
   return {
     uuid: uuidv4(),
-    name: $localize`CC` + ' ' + (currentCharges.length + 1),
+    name: defaultNamePrefix + ' ' + (currentCharges.length + 1),
     personnelPresence: true,
     description: '',
     data: {
       climate: { ...defaultClimaticCharge },
-      spanLoads: []
+      spanLoads: [],
+      cableModifParams: []
     }
   };
 };
@@ -38,7 +40,8 @@ const newCharge = (currentCharges: Charge[]): Charge => {
     ToggleSwitchModule,
     IconComponent,
     ButtonComponent,
-    MessageModule
+    MessageModule,
+    TranslocoModule
   ],
   templateUrl: './new-charge-modal.component.html',
   styleUrl: './new-charge-modal.component.scss',
@@ -67,11 +70,15 @@ export class NewChargeModalComponent {
   private readonly chargesService = inject(ChargesService);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     effect(() => {
       if (this.isOpen()) {
-        const emptyCase = newCharge(this.spanService.section()?.charges ?? []);
+        const emptyCase = newCharge(
+          this.spanService.section()?.charges ?? [],
+          this.translocoService.translate('shared.new-charge-modal.default-name')
+        );
         this.name.set(emptyCase.name);
         this.personnelPresence.set(emptyCase.personnelPresence);
         this.description.set(emptyCase.description);
@@ -99,7 +106,8 @@ export class NewChargeModalComponent {
       description: this.description(),
       data: {
         climate: { ...defaultClimaticCharge },
-        spanLoads: []
+        spanLoads: [],
+        cableModifParams: []
       }
     };
 

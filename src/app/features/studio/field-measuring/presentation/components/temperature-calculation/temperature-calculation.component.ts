@@ -14,9 +14,14 @@ import { MessageModule } from 'primeng/message';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { SkyCover } from '@shared/domain';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS } from '../../constants';
+import { NotificationService } from '@services/notification/notification.service';
+import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, SelectOption } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
+import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
+import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -32,7 +37,8 @@ import { Task } from '@services/worker_python/tasks/types';
     ProgressSpinnerModule,
     IconComponent,
     ButtonComponent,
-    DecimalPipe
+    DecimalPipe,
+    TranslocoModule
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
@@ -46,28 +52,45 @@ import { Task } from '@services/worker_python/tasks/types';
     ])
   ]
 })
-/** Component for computing cable temperature based on environmental conditions and transit data. */
+// Component for computing cable temperature based on environmental conditions and transit data.
 export class TemperatureCalculationComponent {
-  /** Available wind direction options. */
+  // Available wind direction options.
   windDirectionOptions = input.required<{ label: string; value: string }[]>();
-  /** Available sky cover options. */
-  skyCoverOptions = input.required<{ label: string; value: string }[]>();
-  /** Field measure data model bound two-way. */
+  // Available sky cover options.
+  skyCoverOptions = input.required<SelectOption[]>();
+  // Field measure data model bound two-way.
   measureData = model.required<FieldMeasure>();
 
   temperatureCalculationError = signal<boolean>(false);
   readonly isCalculating = signal(false);
+  readonly isEstimatingSkyCover = signal(false);
 
   readonly transitBounds = TRANSIT_BOUNDS;
 
+  readonly measuredSolarFluxBounds = MEASURED_SOLAR_FLUX_BOUNDS;
+
+  readonly truncateNoDecimals = truncateNoDecimals;
+
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
-  readonly windIncidenceModeOptions = [
-    { label: $localize`Auto`, value: 'auto' },
-    { label: $localize`Perpendicular`, value: 'perpendicular' }
-  ];
+  private readonly translocoService = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.translocoService.langChanges$, {
+    initialValue: this.translocoService.getActiveLang()
+  });
+
+  readonly windIncidenceModeOptions = computed(() => {
+    this.activeLang();
+    return [
+      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      {
+        label: this.translocoService.translate('field-measuring.temperature-calculation.perpendicular-option'),
+        value: 'perpendicular'
+      }
+    ];
+  });
 
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly notificationService = inject(NotificationService);
   private readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
 
   readonly isWindIncidenceLoading = computed(() => !this.workerReady());
@@ -115,9 +138,38 @@ export class TemperatureCalculationComponent {
     return transit !== null && (transit < this.transitBounds.min || transit > this.transitBounds.max);
   });
 
+  // Id of the transit error message to link via `aria-errormessage`, or null when in bounds.
+  transitErrorMessageId = computed<string | null>(() => {
+    const transit = this.measureData().transit;
+    if (transit === null) return null;
+    if (transit < this.transitBounds.min) return 'transit-error-min-message';
+    if (transit > this.transitBounds.max) return 'transit-error-max-message';
+    return null;
+  });
+
+  isMeasuredSolarFluxOutOfBounds = computed(() => {
+    const value = this.measureData().measuredDiffusedPlusDirectSolarFlux;
+    return value !== null && (value < this.measuredSolarFluxBounds.min || value > this.measuredSolarFluxBounds.max);
+  });
+
+  // Id of the measured solar flux error message to link via `aria-errormessage`, or null when in bounds.
+  measuredSolarFluxErrorMessageId = computed<string | null>(() => {
+    const value = this.measureData().measuredDiffusedPlusDirectSolarFlux;
+    if (value === null) return null;
+    if (value < this.measuredSolarFluxBounds.min) return 'solar-fluxs-error-min-message';
+    if (value > this.measuredSolarFluxBounds.max) return 'solar-fluxs-error-max-message';
+    return null;
+  });
+
   isFormValid = computed(() => {
     const data = this.measureData();
-    return data.cableName !== null && data.transit !== null && data.skyCover !== null && !this.isTransitOutOfBounds();
+    return (
+      data.cableName !== null &&
+      data.transit !== null &&
+      data.skyCover !== null &&
+      !this.isTransitOutOfBounds() &&
+      !this.isMeasuredSolarFluxOutOfBounds()
+    );
   });
 
   localizedWindDirection = computed(() => {
@@ -138,6 +190,55 @@ export class TemperatureCalculationComponent {
 
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));
+  }
+
+  // Whether all inputs required to estimate the sky cover from the measured solar beam are available.
+  readonly canEstimateSkyCover = computed(() => {
+    const { longitude, latitude, date, time, measuredDiffusedPlusDirectSolarFlux } = this.measureData();
+    return (
+      this.workerReady() &&
+      longitude !== null &&
+      longitude !== undefined &&
+      latitude !== null &&
+      latitude !== undefined &&
+      date !== null &&
+      date !== undefined &&
+      time !== null &&
+      time !== undefined &&
+      measuredDiffusedPlusDirectSolarFlux !== null &&
+      measuredDiffusedPlusDirectSolarFlux !== undefined &&
+      !this.isMeasuredSolarFluxOutOfBounds()
+    );
+  });
+
+  // Estimates the sky cover from the measured solar beam; the user can still override the selection afterwards.
+  async estimateSkyCover(): Promise<void> {
+    const { longitude, latitude, date, time, measuredDiffusedPlusDirectSolarFlux } = this.measureData();
+    this.isEstimatingSkyCover.set(true);
+    try {
+      const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.estimateSkyCover, {
+        longitude: longitude!,
+        latitude: latitude!,
+        date: date ?? null,
+        time: time ?? null,
+        measuredSolarRadiation: measuredDiffusedPlusDirectSolarFlux!
+      });
+      if (error || result === undefined) {
+        // Prefer the specific message matching the Python error raised by the task, if any.
+        const pythonErrorMessage = formatPythonError(
+          diagnostics.find((d) => d.origin === 'exception')?.code ?? null,
+          this.translocoService
+        );
+        this.notificationService.error(
+          pythonErrorMessage ??
+            this.translocoService.translate('field-measuring.temperature-calculation.sky-cover-estimation-error')
+        );
+        return;
+      }
+      this.measureData.update((d) => ({ ...d, skyCover: result.skyCover }));
+    } finally {
+      this.isEstimatingSkyCover.set(false);
+    }
   }
 
   async calculateTemperature() {
@@ -162,7 +263,7 @@ export class TemperatureCalculationComponent {
         windSpeed: data.windSpeed ?? 0,
         windSpeedUnit: data.windSpeedUnit ?? 'kmh',
         windDirection: data.windDirection ?? 'North',
-        skyCover: data.skyCover ?? ''
+        skyCover: data.skyCover!
       });
       if (error) {
         this.temperatureCalculationError.set(true);
@@ -176,4 +277,94 @@ export class TemperatureCalculationComponent {
       this.isCalculating.set(false);
     }
   }
+
+  private async computeDiffuseAndBeamRadiation(): Promise<void> {
+    const data = this.measureData();
+    this.isCalculating.set(true);
+    try {
+      const { result, error } = await this.workerPythonService.runTask(Task.diffuseAndBeamRadiationsCalculation, {
+        longitude: data.longitude || 0,
+        latitude: data.latitude || 0,
+        date: data.date ?? null,
+        time: data.time ?? null,
+        skyCover: data.skyCover!
+      });
+      if (!error && result !== undefined) {
+        this.measureData.update((d) => ({
+          ...d,
+          diffusedSolarFlux: result.diffuseRadiation,
+          directSolarFlux: result.beamRadiation,
+          diffusedPlusDirectSolarFlux: result.diffusePlusBeamRadiation
+        }));
+      }
+    } finally {
+      this.isCalculating.set(false);
+    }
+  }
+
+  private readonly lastDiffuseAndBeamRadiationInput = signal<{
+    longitude: number;
+    latitude: number;
+    date: Date | null;
+    time: Date | null;
+    skyCover: SkyCover;
+  } | null>(null);
+
+  private resetSolarFluxResults(): void {
+    const { diffusedSolarFlux, directSolarFlux, diffusedPlusDirectSolarFlux } = this.measureData();
+    if (diffusedSolarFlux !== null || directSolarFlux !== null || diffusedPlusDirectSolarFlux != null) {
+      this.measureData.update((d) => ({
+        ...d,
+        diffusedSolarFlux: null,
+        directSolarFlux: null,
+        diffusedPlusDirectSolarFlux: null
+      }));
+    }
+  }
+
+  private readonly diffuseAndBeamRadiationEffect = effect(() => {
+    const isWorkerReady = this.workerReady();
+    const { longitude, latitude, date, time, skyCover } = this.measureData();
+
+    if (
+      !isWorkerReady ||
+      longitude === null ||
+      longitude === undefined ||
+      latitude === null ||
+      latitude === undefined ||
+      date === null ||
+      date === undefined ||
+      time === null ||
+      time === undefined ||
+      skyCover === undefined ||
+      skyCover === null
+    ) {
+      this.lastDiffuseAndBeamRadiationInput.set(null);
+      this.resetSolarFluxResults();
+      return;
+    }
+
+    const lastInput = this.lastDiffuseAndBeamRadiationInput();
+    const hasSameInput =
+      lastInput !== null &&
+      lastInput.longitude === longitude &&
+      lastInput.latitude === latitude &&
+      lastInput.date === date &&
+      lastInput.time === time &&
+      lastInput.skyCover === skyCover;
+
+    if (hasSameInput) {
+      return;
+    }
+
+    this.lastDiffuseAndBeamRadiationInput.set({
+      longitude,
+      latitude,
+      date,
+      time,
+      skyCover
+    });
+
+    void this.computeDiffuseAndBeamRadiation();
+  });
 }

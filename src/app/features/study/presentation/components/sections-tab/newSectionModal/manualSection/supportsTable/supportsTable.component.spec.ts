@@ -12,6 +12,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { vi } from 'vitest';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 // Mock child component
 @Component({
@@ -40,6 +41,8 @@ const mockAttachmentService = {
   getAttachmentDetails: vi.fn().mockResolvedValue(undefined),
   getDerivedSupportFields: vi.fn().mockResolvedValue(undefined),
   getDerivedSupportFieldsBySet: vi.fn().mockResolvedValue(new Map()),
+  resolveGeoLiaisonCatalogAttachment: vi.fn().mockResolvedValue(undefined),
+  getCompleteAttachmentSetsBySupportName: vi.fn().mockResolvedValue([]),
   // Mirrors the real wrapper: applies the (name, set) guard and delegates to getDerivedSupportFields
   // (returning its promise directly to preserve tick timing), so tests can keep asserting on it.
   resolveDerivedSupportFields: vi
@@ -173,7 +176,24 @@ describe('SupportsTableComponent', () => {
     mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: null, diagnostics: [] });
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, SupportsTableComponent, NoopAnimationsModule],
+      imports: [
+        FormsModule,
+        SupportsTableComponent,
+        NoopAnimationsModule,
+        TranslocoTestingModule.forRoot({
+          langs: {
+            en: {
+              'common.yes': 'Yes',
+              'common.no': 'No'
+            }
+          },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         { provide: ChainsService, useValue: mockChainsService },
         { provide: AttachmentService, useValue: mockAttachmentService },
@@ -545,6 +565,47 @@ describe('SupportsTableComponent', () => {
         support: { chainName: 'Non-existent Chain' }
       });
     });
+
+    it('should block non-catalog attachment sets when the row is in catalog-restricted mode', async () => {
+      mockAttachmentService.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Support 1',
+        support_tower: 'T1',
+        attachment_set: 1,
+        attachment_altitude: 10,
+        cross_arm_length: 2,
+        attachment_set_x: 1,
+        attachment_set_y: 1,
+        attachment_set_z: 10
+      });
+      mockAttachmentService.getCompleteAttachmentSetsBySupportName.mockResolvedValue([1, 2]);
+
+      await component.onSupportFieldChange('support1', 'name', 'Support 1');
+      vi.clearAllMocks();
+
+      await component.onSupportFieldChange('support1', 'attachmentSet', 9);
+
+      expect(component.supportChange.emit).not.toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { attachmentSet: 9 }
+      });
+    });
+
+    it('should allow free attachment-set input when catalog match is unresolved (fallback branch)', async () => {
+      mockAttachmentService.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+
+      await component.onSupportFieldChange('support1', 'name', 'Support 1');
+      vi.clearAllMocks();
+
+      await component.onSupportFieldChange('support1', 'attachmentSet', 9);
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { attachmentSet: 9 }
+      });
+    });
   });
 
   // Regression tests for #657 (tower model) plus the arm-length / height-below-
@@ -664,6 +725,11 @@ describe('SupportsTableComponent', () => {
       const first = component.onSupportFieldChange('support1', 'attachmentSet', 1);
       const second = component.onSupportFieldChange('support1', 'attachmentSet', 2);
 
+      // onSupportFieldChange now awaits a catalog-restriction refresh before launching
+      // derived-field lookup, so let pending microtasks run before resolving promises.
+      await Promise.resolve();
+      await Promise.resolve();
+
       // The newer lookup (set 2) resolves first; the older one (set 1) resolves late.
       resolvers[1]();
       resolvers[0]();
@@ -743,6 +809,18 @@ describe('SupportsTableComponent', () => {
 
       expect(component.supportForAttachmentSetModal()).toEqual(mockSupports[0]);
       expect(component.attachmentSetModalOpen()).toBe(true);
+    });
+  });
+
+  describe('attachment set eye button availability', () => {
+    it('disables the eye button for support names not in catalog when catalog is loaded', async () => {
+      distinctSupportNamesSubject.next(['Support 1']);
+      fixture.detectChanges();
+      await Promise.resolve();
+
+      const buttons = fixture.debugElement.queryAll(By.css('[data-testid="open-attachment-set-modal-btn"]'));
+      const secondRowButton = buttons[1].nativeElement as HTMLButtonElement;
+      expect(secondRowButton.disabled).toBe(true);
     });
   });
 
@@ -1060,7 +1138,7 @@ describe('SupportsTableComponent', () => {
       expect(component.catalogLoaded()).toBe(true);
       expect(component.supportFilterTable()).toContain('Support 1');
       const name = 'Support 1';
-      const isDisabled = !name || (component.catalogLoaded() && !component.supportFilterTable().includes(name));
+      const isDisabled = !name;
       expect(isDisabled).toBe(false);
     });
 
@@ -1076,9 +1154,7 @@ describe('SupportsTableComponent', () => {
       fixture.detectChanges();
       // Verify the condition: !null = true → always disabled
       const name: string | null = null;
-      expect(!name || (component.catalogLoaded() && !component.supportFilterTable().includes(name as string))).toBe(
-        true
-      );
+      expect(!name).toBe(true);
     });
   });
 

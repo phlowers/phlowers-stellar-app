@@ -13,6 +13,7 @@ import { CABLE_SUPPORT_MANIP_BOUNDS } from './cable-support-manip.constantes';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 import { NotificationService } from '@services/notification/notification.service';
 import { Section } from '@shared/domain';
 
@@ -63,7 +64,17 @@ describe('CableSupportManipComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [CableSupportManipComponent],
+      imports: [
+        CableSupportManipComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: {
+            availableLangs: ['en'],
+            defaultLang: 'en'
+          },
+          preloadLangs: true
+        })
+      ],
       providers: [
         provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },

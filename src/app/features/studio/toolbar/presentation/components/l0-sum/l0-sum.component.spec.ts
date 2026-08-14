@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { SortEvent } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -53,11 +54,24 @@ describe('L0SumComponent', () => {
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService }
+      ],
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+        })
       ]
     })
       .overrideComponent(L0SumComponent, {
         set: {
-          imports: [CommonModule, TableModule, ProgressSpinnerModule, MockButtonComponent, MockIconComponent]
+          imports: [
+            CommonModule,
+            TableModule,
+            ProgressSpinnerModule,
+            TranslocoModule,
+            MockButtonComponent,
+            MockIconComponent
+          ]
         }
       })
       .compileComponents();

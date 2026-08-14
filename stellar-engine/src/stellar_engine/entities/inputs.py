@@ -295,6 +295,34 @@ class TemperatureCalculationInputs:
 
 
 @dataclass
+class DiffuseAndBeamRadiationInputs:
+    date: datetime.datetime
+    time: datetime.datetime
+    longitude: float
+    latitude: float
+    skyCover: Literal[
+        "N0",
+        "N1",
+        "N2",
+        "N3",
+        "N4",
+        "N5",
+        "N6",
+        "N7",
+        "N8",
+    ]
+
+
+@dataclass
+class SkyCoverEstimationInputs:
+    date: datetime.datetime
+    time: datetime.datetime
+    longitude: float
+    latitude: float
+    measuredSolarRadiation: float
+
+
+@dataclass
 class WindAngleCalculationInputs:
     azimuth: float
     windDirection: str
@@ -309,6 +337,15 @@ class ClimateCharge:
     frontierSupportNumber: int
     iceThicknessBefore: float
     iceThicknessAfter: float
+
+
+@dataclass
+class ModifyCableInputs:
+    spanIndex: int
+    modificationType: Literal['lengthening', 'shortening']
+    modifiedLengthCable: float
+    distanceSupportRef: float
+    supportRef: Literal['LEFT', 'RIGHT']
 
 
 @dataclass

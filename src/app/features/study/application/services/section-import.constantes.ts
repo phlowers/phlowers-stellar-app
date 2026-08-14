@@ -5,28 +5,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { environment } from '@src/environments/environment';
+/** Transloco translation keys for section import error messages. */
+export const SECTION_IMPORT_ERROR_KEYS = {
+  fileTypeNotAllowed: 'section-import.file-type-not-allowed',
+  fileReadError: 'section-import.file-read-error',
+  fileParseError: 'section-import.file-parse-error',
+  validationErrorRequiredFields: 'section-import.validation-required-fields',
+  validationErrorSupportsBounds: 'section-import.validation-supports-bounds',
+  sectionImportError: 'section-import.import-error',
+  sectionDeleteError: 'section-import.delete-error',
+  geoLiaisonFormatError: 'section-import.geo-liaison-format-error',
+  lambertReprojectionError: 'section-import.lambert-reprojection-error'
+} as const;
 
-/** Localized error messages for section import failures. */
-export const sectionImportErrors = {
-  fileTypeNotAllowed: $localize`File type not allowed`,
-  fileReadError: $localize`Error reading file`,
-  fileParseError: $localize`Error parsing file`,
-  validationErrorRequiredFields: $localize`Section is missing required fields`,
-  validationErrorSupportsBounds: $localize`Section has supports with values out of bounds`,
-  sectionImportError: $localize`Error importing section`,
-  sectionDeleteError: $localize`Error deleting section`,
-  geoLiaisonFormatError: $localize`The geolink file to import is invalid.`,
-  lambertReprojectionError: $localize`Error computing GPS coordinates from Lambert93 data`
-};
+/** Transloco translation key for the GeoLiaison catalog-missing warning. */
+export const GEO_LIAISON_CATALOG_MISSING_KEY = 'section-import.catalog-missing-warning';
 
-/**
- * Builds the localized info toast detail shown after a GeoLiaison import whenever the
- * Lambert93-to-GPS reprojection was computed, reporting the mean absolute error (in meters)
- * between the surveyed Lambert93 foot coordinates and the app's span/angle data model.
- */
-export const buildReprojectionInfoMessage = (meanReprojectionDiffMeters: number): string =>
-  $localize`Reprojection using ${environment.appName} data model seems to add a mean absolute error of ${meanReprojectionDiffMeters.toFixed(1)} m`;
+/** Transloco translation key for the Lambert93-to-GPS reprojection info toast. */
+export const REPROJECTION_INFO_KEY = 'section-import.reprojection-info';
 
-/** Localised success message shown after a successful section import. */
-export const importSuccessDetail = $localize`Section imported successfully`;
+/** Transloco translation key for the section import success toast. */
+export const IMPORT_SUCCESS_KEY = 'section-import.import-success';

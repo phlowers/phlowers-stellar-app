@@ -86,7 +86,7 @@ def get_coordinates(
         study.balance_engine.balance_model.vhl_under_console().vhl
     )
 
-    loads_coords: dict = study.position_engine.get_loads_coords(
+    loads_coords: dict = study.position_engine.get_loads_coords_group_points(
         project=project, frame_index=middle_span
     )
 

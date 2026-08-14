@@ -4,17 +4,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import '@angular/localize/init';
 import '@angular/compiler';
 import '@analogjs/vitest-angular/setup-zone';
 import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
+// Polyfill $localize for tests. Angular's i18n uses this at compile time.
+// In tests, we just return the string as-is since we're not extracting i18n strings.
+if (typeof (globalThis as Record<string, unknown>).$localize === 'undefined') {
+  (globalThis as Record<string, unknown>).$localize = (strings: TemplateStringsArray, ...values: unknown[]): string => {
+    let result = strings[0];
+    for (let i = 0; i < values.length; i++) {
+      result += String(values[i]) + strings[i + 1];
+    }
+    return result;
+  };
+}
+
 const testBed = getTestBed();
 if (!testBed.platform) {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
 }
 
 class MockResizeObserver {
@@ -65,8 +76,11 @@ if (typeof Blob !== 'undefined' && !('text' in Blob.prototype)) {
       return new Promise<string>((resolve, reject) => {
         const reader = new _OriginalFileReader();
         reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsText(this);
+        reader.onerror = () => {
+          const error = reader.error instanceof Error ? reader.error : new Error(String(reader.error));
+          reject(error);
+        };
+        reader.readAsText(this); //NOSONAR — this *is* the Blob#text() polyfill, can't call this.text() here
       });
     },
     writable: true,

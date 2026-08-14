@@ -1,18 +1,18 @@
-<p-button
+<button
+  app-btn
+  type="button"
+  btnStyle="outlined"
+  btnSize="s"
   data-testid="scale-view-trigger"
-  i18n-label="@@scaleView.button.label"
-  label="View"
-  variant="outlined"
-  size="small"
-  [styleClass]="popoverOpen() ? 'view-button--active' : ''"
+  class="scale-view-trigger"
+  [class.view-button--active]="popoverOpen()"
   aria-haspopup="dialog"
   [attr.aria-expanded]="popoverOpen()"
-  (onClick)="togglePopover($event)"
+  (click)="togglePopover($event)"
 >
-  <ng-template #icon>
-    <app-icon icon="image_aspect_ratio" />
-  </ng-template>
-</p-button>
+  <ng-container>{{ 'studio.scale-view.button-label' | transloco }}</ng-container>
+  <app-icon icon="image_aspect_ratio" />
+</button>
 
 <p-popover appendTo="body" styleClass="scale-view-popover" #popover (onHide)="popoverOpen.set(false)">
   <form
@@ -20,31 +20,30 @@
     class="view-config"
     [formGroup]="formScaleView"
     (ngSubmit)="onValidate()"
-    i18n-aria-label="@@scaleView.form.ariaLabel"
-    aria-label="View configuration"
+    [attr.aria-label]="'studio.scale-view.form-aria-label' | transloco"
   >
     <fieldset data-testid="scale-fieldset" class="view-config__section">
-      <legend class="view-config__legend" i18n="@@scaleView.scale.legend">Select the display scale.</legend>
+      <legend class="view-config__legend">{{ 'studio.scale-view.scale-legend' | transloco }}</legend>
 
       <div class="view-config__radio-group">
         <div data-testid="scale-radio-plan" class="view-config__radio-item">
           <p-radioButton name="scale" value="plan" formControlName="scale" inputId="plan"></p-radioButton>
-          <label for="plan" i18n="@@scaleView.scale.plan">Reduced in x (x/5, y, z)</label>
+          <label for="plan">{{ 'studio.scale-view.scale-plan' | transloco }}</label>
         </div>
 
         <div data-testid="scale-radio-geo" class="view-config__radio-item">
           <p-radioButton name="scale" value="geo" formControlName="scale" inputId="geo"></p-radioButton>
-          <label for="geo" i18n="@@scaleView.scale.geo">Uniform (x, y, z)</label>
+          <label for="geo">{{ 'studio.scale-view.scale-geo' | transloco }}</label>
         </div>
 
         <div data-testid="scale-radio-celeste" class="view-config__radio-item">
           <p-radioButton name="scale" value="celeste" formControlName="scale" inputId="celeste"></p-radioButton>
-          <label for="celeste" i18n="@@scaleView.scale.celeste">Reduced in z (x, y, z/2)</label>
+          <label for="celeste">{{ 'studio.scale-view.scale-celeste' | transloco }}</label>
         </div>
 
         <div data-testid="scale-radio-auto" class="view-config__radio-item">
           <p-radioButton name="scale" value="auto" formControlName="scale" inputId="auto"></p-radioButton>
-          <label for="auto" i18n="@@scaleView.scale.auto">Auto</label>
+          <label for="auto">{{ 'studio.scale-view.scale-auto' | transloco }}</label>
         </div>
       </div>
     </fieldset>
@@ -52,8 +51,8 @@
     <hr class="view-config__divider" aria-hidden="true" />
 
     <fieldset data-testid="points-fieldset" class="view-config__section">
-      <legend class="view-config__legend" i18n="@@scaleView.points.legend">
-        Choose the number of points to display per range.
+      <legend class="view-config__legend">
+        {{ 'studio.scale-view.points-legend' | transloco }}
       </legend>
 
       <div class="view-config__controls flex flex-between items-center gap-8">
@@ -65,8 +64,7 @@
             [min]="scaleMin"
             [max]="scaleMax"
             class="view-config__slider"
-            i18n-aria-label="@@scaleView.slider.ariaLabel"
-            aria-label="Number of points per range"
+            [attr.aria-label]="'studio.scale-view.slider-aria-label' | transloco"
           ></p-slider>
           <span class="view-config__limit" aria-hidden="true">{{ scaleMax }}</span>
         </div>
@@ -76,15 +74,14 @@
           formControlName="pointsCount"
           [min]="scaleMin"
           [max]="scaleMax"
-          i18n-aria-label="@@scaleView.input.ariaLabel"
-          aria-label="Number of points per range"
+          [attr.aria-label]="'studio.scale-view.input-aria-label' | transloco"
         />
       </div>
     </fieldset>
 
     <footer class="view-config__footer">
       <button app-btn type="submit" data-testid="scale-validate-btn">
-        <ng-container i18n="@@scaleView.validate.label">Validate</ng-container>
+        <ng-container>{{ 'common.validate' | transloco }}</ng-container>
         <app-icon icon="check" />
       </button>
     </footer>

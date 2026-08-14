@@ -39,13 +39,25 @@ known `PythonErrorCode` enum values as a substring. This means:
    The string value **must** be the exact substring that appears in the
    Python exception message or `warnings.warn(...)` text (e.g. `MyNewError`).
 
-2. **Add its localized message** in python-error-messages.ts, in `PYTHON_ERROR_MESSAGES`:
+2. **Add its translation key** in python-error-messages.ts, in `PYTHON_ERROR_KEYS`, then add the
+   corresponding entry to both `public/i18n/en.json` and `public/i18n/fr.json` under `shared.python-errors.*`:
 
    ```typescript
-   const PYTHON_ERROR_MESSAGES: Record<PythonErrorCode, string> = {
+   const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
      // ...
-     [PythonErrorCode.MyNewError]: $localize`A description shown to the user.`
+     [PythonErrorCode.MyNewError]: 'shared.python-errors.my-new-error'
    };
+   ```
+
+   ```json
+   // public/i18n/en.json and public/i18n/fr.json
+   {
+     "shared": {
+       "python-errors": {
+         "my-new-error": "A description shown to the user."
+       }
+     }
+   }
    ```
 
 3. **Classify its severity** in python-error-severity.ts, in `PYTHON_ERROR_SEVERITY`:
@@ -58,15 +70,13 @@ known `PythonErrorCode` enum values as a substring. This means:
    ```
 
    > **Important:** `python-error-severity.ts` must never import or use
-   > `$localize`/i18n. It is imported by `handle-task.ts`, which runs inside
-   > the Pyodide Web Worker bundle — a bundle that does **not** load the
-   > `@angular/localize/init` polyfill (only the main "browser" build does).
-   > Evaluating a `$localize` tagged template at module-load time in that
-   > context throws `ReferenceError: $localize is not defined` and crashes
-   > the worker before Pyodide can even start. Localized messages belong in
-   > `python-error-messages.ts` instead, which must only ever be imported
-   > from main-thread code (components/services), never from `handle-task.ts`
-   > or anything else bundled into `worker-python.ts`. See [Part 2, section 2.7](#27--the-worker-bundle-and-localize)
+   > `TranslocoService`/i18n. It is imported by `handle-task.ts`, which runs
+   > inside the Pyodide Web Worker bundle — a bundle that has **no Angular
+   > injector**, so `TranslocoService` cannot be instantiated there.
+   > Translated messages belong in `python-error-messages.ts` instead, which
+   > must only ever be imported from main-thread code (components/services),
+   > never from `handle-task.ts` or anything else bundled into
+   > `worker-python.ts`. See [Part 2, section 2.7](#27--the-worker-bundle-and-transloco)
    > for details.
 
    - `'error'` — shown as a blocking error notification
@@ -90,11 +100,9 @@ known `PythonErrorCode` enum values as a substring. This means:
    warnings.warn("MyNewError: something to flag")
    ```
 
-5. **Run i18n extraction** after adding a new `$localize` message:
-
-   ```bash
-   npm run extract-i18n
-   ```
+5. **Double-check the translation keys** you added in step 2 exist with matching values in both
+   `public/i18n/en.json` and `public/i18n/fr.json` — Transloco silently falls back to the raw key
+   string if a translation is missing in one of the languages.
 
 6. **Add/update tests**:
    - python-error-severity.spec.ts
@@ -292,30 +300,29 @@ without double-toasting: the exception branch only looks at
 `origin === 'warning'`, so the same diagnostic is never processed by both
 paths.
 
-### 2.7 — The worker bundle and `$localize`
+### 2.7 — The worker bundle and Transloco
 
 `worker-python.ts` is bundled by Angular as a **separate Web Worker chunk**
 (triggered by the `new Worker(new URL('./worker-python', import.meta.url))`
 call in `worker-python.service.ts`). This chunk only gets the code it
-transitively imports — it does **not** get the app's `polyfills` array
-(`zone.js`, `@angular/localize/init`) that `angular.json` only wires up for
-the main `browser` entry point (`src/main.ts`).
+transitively imports — it does **not** run inside an Angular injection
+context, so services obtained via `inject()` (like `TranslocoService`)
+cannot be constructed there.
 
 This means **any module imported (even transitively) by `handle-task.ts` or
-`worker-python.ts` must not evaluate a `$localize` tagged template at module
-load time**, or the whole worker script throws
-`ReferenceError: $localize is not defined` before Pyodide even starts
-loading — which looks like "Pyodide is not loading" from the outside.
+`worker-python.ts` must not depend on `TranslocoService`** (directly or via a
+helper that calls `translate()`), or the worker script throws at
+construction/call time — which looks like "Pyodide is not loading" from the
+outside.
 
 This is why:
 
 - `python-error-severity.ts` (severity map, plain string literals) is a
-  **separate file** from `python-error-messages.ts` (localized display
-  strings, `$localize`-based) — `handle-task.ts` only imports the former.
+  **separate file** from `python-error-messages.ts` (translation-key map,
+  `TranslocoService`-based) — `handle-task.ts` only imports the former.
 - `python-error-messages.ts` must only ever be imported from main-thread code
   (`studio.component.ts`, `errors.ts`, `free-positioning.component.ts`, …),
   never from `handle-task.ts`, `worker-python.ts`, or any file they import.
 
 If you need to add worker-side logic that depends on a new file, check its
-import chain does not reach a `$localize` usage — grep for `$localize` in any
-new file imported by `handle-task.ts`/`worker-python.ts` before merging.
+import chain does not reach a `TranslocoService` usage before merging.

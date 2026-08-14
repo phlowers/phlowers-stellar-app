@@ -12,6 +12,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
 import { ImportContextConfig, ImportOutcome, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Generic import UI component shared across all import contexts (Study, Section, …).
@@ -41,7 +42,7 @@ import { NotificationService } from '@core/services/notification/notification.se
 @Component({
   selector: 'app-import',
   standalone: true,
-  imports: [IconComponent, ButtonComponent, RouterLink],
+  imports: [TranslocoPipe, IconComponent, ButtonComponent, RouterLink],
   providers: [GenericImportEngineService],
   templateUrl: './import.component.html',
   styleUrl: './import.component.scss',
@@ -87,6 +88,7 @@ export class ImportComponent {
   private readonly engine = inject(GenericImportEngineService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     effect(() => {
@@ -122,7 +124,8 @@ export class ImportComponent {
       for (const outcome of results) {
         if (outcome.status === 'error') {
           const detail = `${outcome.fileName}: ${outcome.error?.message ?? ''}`;
-          this.notificationService.error(detail, $localize`:@@importErrorFileSummary:Error reading the input file`);
+          const summary = this.translocoService.translate('common.import.error.file-summary');
+          this.notificationService.error(detail, summary);
         }
       }
     } finally {
@@ -132,16 +135,22 @@ export class ImportComponent {
 
   private makeCollisionResolver(): UUIDCollisionResolver {
     const entityLabel = this.config().entityLabel;
-    return (uuid, label) =>
-      new Promise<boolean>((resolve) =>
+    return (uuid, label) => {
+      const messageTemplate = this.translocoService.translate('common.import.collision.message');
+      const message = `${entityLabel} ${label} ${messageTemplate}`;
+      const acceptLabel = this.translocoService.translate('common.import.collision.yes');
+      const rejectLabel = this.translocoService.translate('common.import.collision.no');
+
+      return new Promise<boolean>((resolve) =>
         this.confirmationService.confirm({
           key: 'positionDialog',
-          message: $localize`:@@importCollisionMessage:${entityLabel} ${label} already exists. Do you want to replace it?`,
+          message,
           accept: () => resolve(true),
           reject: () => resolve(false),
-          acceptLabel: $localize`:@@importYesLabel:Yes`,
-          rejectLabel: $localize`:@@importNoLabel:No`
+          acceptLabel,
+          rejectLabel
         })
       );
+    };
   }
 }

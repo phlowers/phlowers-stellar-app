@@ -14,9 +14,9 @@ class MockIconComponent {}
   imports: [ButtonComponent, MockIconComponent],
   template: `
     <button app-btn [btnSize]="size" [btnStyle]="style" [btnLoading]="loading" (click)="onButtonClick()">
-      <app-icon class="app-icon">Left Icon</app-icon>
+      <app-icon i18n class="app-icon">Left Icon</app-icon>
       Button Text
-      <app-icon class="app-icon" iconRight>Right Icon</app-icon>
+      <app-icon i18n class="app-icon" iconRight>Right Icon</app-icon>
     </button>
   `
 })
@@ -51,7 +51,7 @@ class TestHostWithIconsComponent {
 @Component({
   standalone: true,
   imports: [ButtonComponent],
-  template: `<button app-btn [btnLoading]="loading">Button Text</button>`
+  template: `<button i18n app-btn [btnLoading]="loading">Button Text</button>`
 })
 class TestHostNoIconsComponent {
   loading = false;
@@ -311,7 +311,7 @@ describe('ButtonComponent', () => {
         @Component({
           standalone: true,
           imports: [ButtonComponent],
-          template: `<button [${selector}] btnSize="s">Test</button>`
+          template: `<button i18n [${selector}] btnSize="s">Test</button>`
         })
         class TestSelectorComponent {}
 
@@ -361,26 +361,33 @@ describe('ButtonComponent', () => {
     });
 
     it('should handle rapid loading state changes', () => {
+      // Not loading: click is allowed
       hostFixture = TestBed.createComponent(TestHostComponent);
       hostComponent = hostFixture.componentInstance;
-
-      // Start not loading
       hostComponent.loading = false;
       hostFixture.detectChanges();
-      expect(hostComponent.clickCount).toBe(0);
 
-      // Enable loading
+      let buttonElement = hostFixture.nativeElement.querySelector('button');
+      buttonElement.click();
+      expect(hostComponent.clickCount).toBe(1);
+
+      // Loading: click is prevented
+      hostFixture = TestBed.createComponent(TestHostComponent);
+      hostComponent = hostFixture.componentInstance;
       hostComponent.loading = true;
       hostFixture.detectChanges();
 
-      const buttonElement = hostFixture.nativeElement.querySelector('button');
+      buttonElement = hostFixture.nativeElement.querySelector('button');
       buttonElement.click();
       expect(hostComponent.clickCount).toBe(0);
 
-      // Disable loading
+      // Loading disabled again: click is allowed
+      hostFixture = TestBed.createComponent(TestHostComponent);
+      hostComponent = hostFixture.componentInstance;
       hostComponent.loading = false;
       hostFixture.detectChanges();
 
+      buttonElement = hostFixture.nativeElement.querySelector('button');
       buttonElement.click();
       expect(hostComponent.clickCount).toBe(1);
     });

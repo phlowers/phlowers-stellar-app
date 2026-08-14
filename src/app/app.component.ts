@@ -4,7 +4,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  OnInit,
+  signal,
+  untracked
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
@@ -26,6 +35,7 @@ import { DividerModule } from 'primeng/divider';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DialogModule } from 'primeng/dialog';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 const modules = [
   RouterModule,
@@ -35,7 +45,8 @@ const modules = [
   ButtonComponent,
   IconComponent,
   DividerModule,
-  ProgressBarModule
+  ProgressBarModule,
+  TranslocoModule
 ];
 
 /**
@@ -69,6 +80,7 @@ export class AppComponent implements OnInit {
   private readonly obstacleTypesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly transloco = inject(TranslocoService);
   private readonly csvImporters: Record<string, () => Promise<void>>;
 
   /** Guard against repeated automatic install triggers from the reactive effect. */
@@ -103,7 +115,9 @@ export class AppComponent implements OnInit {
       if (action === 'first-install') {
         // First install runs automatically once the user is authenticated.
         this.isUpdateDialogOpen.set(false);
-        if (!this.autoInstallTriggered()) {
+        // Read the guard untracked: resetting it to false on a failure path must not
+        // re-trigger this effect (it would otherwise loop while pendingAction stays 'first-install').
+        if (!untracked(this.autoInstallTriggered)) {
           this.autoInstallTriggered.set(true);
           this.tryAutomaticFirstInstall();
         }
@@ -174,7 +188,7 @@ export class AppComponent implements OnInit {
    * can trigger another attempt on the next state change.
    */
   private tryAutomaticFirstInstall(): void {
-    const installFailedMessage = $localize`Initial application installation could not start. Please reload the page to try again.`;
+    const installFailedMessage = this.transloco.translate('app.install-failed');
 
     this.updateService
       .install()
@@ -234,10 +248,31 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.workerService.setup();
+    this.deferHeavyStartupWork();
+  }
 
-    this.setupData().catch((err) => {
-      this.logger.error('Error during data setup', err);
-    });
+  /**
+   * Defers Pyodide worker boot (numpy/pandas/pydantic wasm wheels) and the
+   * catalog CSV import until the browser is idle, so they never compete with
+   * the critical rendering path (shell JS/CSS) right after bootstrap. Falls
+   * back to a macrotask when `requestIdleCallback` is unavailable (Safari).
+   */
+  private deferHeavyStartupWork(): void {
+    const runHeavyStartup = () => {
+      this.workerService.setup();
+      this.setupData().catch((err) => {
+        this.logger.error('Error during data setup', err);
+      });
+    };
+
+    const idleGlobal = globalThis as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+
+    if (typeof idleGlobal.requestIdleCallback === 'function') {
+      idleGlobal.requestIdleCallback(runHeavyStartup, { timeout: 2000 });
+    } else {
+      setTimeout(runHeavyStartup, 0);
+    }
   }
 }

@@ -13,22 +13,9 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
-      "i18n": {
-        "sourceLocale": "en-US",
-        "locales": {
-          "fr": {
-            "translation": "assets/i18n/messages.fr.xlf",
-            "baseHref": "/"
-          },
-          "en": {
-            "translation": "assets/i18n/messages.xlf",
-            "baseHref": "/"
-          }
-        }
-      },
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "preserveSymlinks": true,
             "allowedCommonJsDependencies": [
@@ -52,8 +39,7 @@
             },
             "index": "src/index.html",
             "polyfills": [
-              "zone.js",
-              "@angular/localize/init"
+              "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -71,15 +57,12 @@
                 "src/styles/abstracts"
               ]
             },
-            "scripts": [
-              "./node_modules/plotly.js-dist-min/plotly.min.js"
-            ],
+            "scripts": [],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
             "fr": {
               "baseHref": "/",
-              "localize": ["fr"],
               "optimization": {
                   "scripts": true,
                   "styles": {
@@ -91,7 +74,6 @@
             },
             "en": {
               "baseHref": "/",
-              "localize": ["en"],
               "optimization": {
                   "scripts": true,
                   "styles": {
@@ -102,7 +84,6 @@
               }
             },
             "production": {
-              "localize": ["fr"],
               "baseHref": "/",
               "extractLicenses": false,
               "sourceMap": true,
@@ -135,6 +116,20 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.development.ts"
+                },
+                {
+                  "replace": "src/app/dev-routes.ts",
+                  "with": "src/app/dev-routes.development.ts"
+                }
+              ],
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "dev-assets"
                 }
               ]
             },
@@ -166,18 +161,6 @@
           },
           "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-          "builder": "ng-extract-i18n-merge:ng-extract-i18n-merge",
-          "options": {
-            "buildTarget": "phlowers-stellar-app:build",
-            "format": "xlf2",
-            "outputPath": "src/translations",
-            "targetFiles": [
-              "messages.fr.xlf",
-              "messages.xlf"
-            ]
-          }
-        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
@@ -195,5 +178,31 @@
     "schematicCollections": [
       "angular-eslint"
     ]
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
+    }
   }
 }
