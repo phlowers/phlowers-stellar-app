@@ -124,7 +124,8 @@ describe('LoadsTableComponent', () => {
           supportUuid: 'support-uuid-2',
           referenceSupport: 'RIGHT'
         }
-      ]
+      ],
+      cableModifParams: []
     }
   };
 
@@ -684,6 +685,19 @@ describe('LoadsTableComponent', () => {
       const el = getByTestId('load-description-input');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('TEXTAREA');
+    });
+
+    it('should render punctual load weights to one decimal and marking weights as a dash', () => {
+      component.spanLoads.set([{ ...mockCharge.data.spanLoads[0], loadWeight: 100.16 }, mockCharge.data.spanLoads[1]]);
+      fixture.detectChanges();
+
+      const table = getByTestId('load-marking-table');
+      const rows = table?.querySelectorAll('tbody tr');
+      const punctualWeight = rows?.[0]?.lastElementChild?.textContent?.replace(/\s/g, ' ');
+      const markingWeight = rows?.[1]?.lastElementChild?.textContent?.trim();
+
+      expect(punctualWeight).toBe('100.2 daN');
+      expect(markingWeight).toBe('-');
     });
   });
 });
