@@ -12,6 +12,8 @@ import { StudiesService } from '@services/studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
+import { sanitizeSectionGeometry } from './section-geometry.helpers';
+import { SectionUpdateResult } from './section-geometry.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -25,28 +27,33 @@ export class SectionService {
   private readonly translocoService = inject(TranslocoService);
 
   /**
-   * Create or update a section in a study
+   * Create or update a section in a study. Obstacles and loads referencing a support/span
+   * that no longer exists in the section geometry are pruned before persisting.
    * @param study The study containing the section
    * @param section The section to create or update
-   * @returns Promise that resolves when the operation is complete
+   * @returns Promise resolving with whether obstacles/loads were removed to match the geometry
    */
-  async createOrUpdateSection(study: StudyEntity, section: Section): Promise<void> {
+  async createOrUpdateSection(study: StudyEntity, section: Section): Promise<SectionUpdateResult> {
     const existingSection = study.sections.find((s) => s?.uuid === section?.uuid);
     const studyKeep = cloneDeep(study);
 
+    const { section: sanitizedSection, removedGeometryBoundObjects } = sanitizeSectionGeometry(section);
+
     const nowDate = new Date().toISOString();
-    section.updated_at = nowDate;
+    sanitizedSection.updated_at = nowDate;
     if (existingSection) {
-      study.sections = study.sections.map((s) => (s?.uuid === section?.uuid ? section : s));
+      study.sections = study.sections.map((s) => (s?.uuid === sanitizedSection?.uuid ? sanitizedSection : s));
     } else {
-      section.created_at = nowDate;
-      study.sections = [...study.sections, section];
+      sanitizedSection.created_at = nowDate;
+      study.sections = [...study.sections, sanitizedSection];
     }
 
     await this.studiesService.updateStudy(study).catch((error: Error) => {
       study.sections = studyKeep.sections;
       throw error;
     });
+
+    return { removedGeometryBoundObjects };
   }
 
   /**

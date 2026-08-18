@@ -18,6 +18,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
+import { alignSectionSpanLoadsToSupports } from './plot-section-loads.helpers';
 import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
@@ -142,7 +143,10 @@ export class PlotService {
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
     }
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.initLit, { section, cable });
+    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.initLit, {
+      section: alignSectionSpanLoadsToSupports(section),
+      cable
+    });
     this.error.set(error);
     this.diagnostics.set(diagnostics);
 
