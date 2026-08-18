@@ -12,8 +12,8 @@ import { StudiesService } from '@services/studies/studies.service';
 import { v4 as uuidv4 } from 'uuid';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
-import { sanitizeSectionGeometry } from '@services/section/section-geometry.helpers';
-import { SectionUpdateResult } from '@services/section/section-geometry.interfaces';
+import { sanitizeSectionGeometry } from './section-geometry.helpers';
+import { SectionUpdateResult } from './section-geometry.interfaces';
 
 @Injectable({
   providedIn: 'root'
