@@ -56,7 +56,11 @@ describe('StudyComponent', () => {
   let mockInitialConditionService: vi.Mocked<InitialConditionService>;
   let mockCablesService: vi.Mocked<CablesService>;
   let mockRouter: vi.Mocked<Router>;
-  let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  let mockNotificationService: {
+    success: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    warning: ReturnType<typeof vi.fn>;
+  };
   let readySubject: BehaviorSubject<boolean>;
   let paramsSubject: BehaviorSubject<{ uuid: string }>;
 
@@ -170,7 +174,7 @@ describe('StudyComponent', () => {
     } as unknown as vi.Mocked<Router>;
 
     mockSectionService = {
-      createOrUpdateSection: vi.fn().mockResolvedValue(undefined),
+      createOrUpdateSection: vi.fn().mockResolvedValue({ removedGeometryBoundObjects: false }),
       deleteSection: vi.fn().mockResolvedValue(undefined),
       duplicateSection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<SectionService>;
@@ -185,7 +189,8 @@ describe('StudyComponent', () => {
 
     mockNotificationService = {
       success: vi.fn(),
-      error: vi.fn()
+      error: vi.fn(),
+      warning: vi.fn()
     };
 
     mockCablesService = {
@@ -201,6 +206,8 @@ describe('StudyComponent', () => {
             en: {
               'study.notifications.duplicated': 'Study Duplicated',
               'study.notifications.duplication-failed': 'Study Duplication Failed',
+              'study.notifications.geometry-objects-updated':
+                'Obstacles and loads have been updated to match the section geometry',
               'study.notifications.ic-added': 'Initial Condition Added',
               'study.notifications.ic-deleted': 'Initial Condition Deleted',
               'study.notifications.ic-duplicated': 'Initial Condition Duplicated',
@@ -406,6 +413,26 @@ describe('StudyComponent', () => {
 
       expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
       expect(mockNotificationService.success).not.toHaveBeenCalled();
+    });
+
+    it('should not show the geometry warning toast when no object was removed', async () => {
+      mockSectionService.createOrUpdateSection = vi.fn().mockResolvedValue({ removedGeometryBoundObjects: false });
+
+      await component.createOrUpdateSection(mockSection);
+
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
+      expect(mockNotificationService.warning).not.toHaveBeenCalled();
+    });
+
+    it('should show the geometry warning toast when obstacles/loads were removed', async () => {
+      mockSectionService.createOrUpdateSection = vi.fn().mockResolvedValue({ removedGeometryBoundObjects: true });
+
+      await component.createOrUpdateSection(mockSection);
+
+      expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
+      expect(mockNotificationService.warning).toHaveBeenCalledWith(
+        'Obstacles and loads have been updated to match the section geometry'
+      );
     });
   });
 
