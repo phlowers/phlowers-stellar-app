@@ -8,14 +8,12 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { MaintenanceService } from './maintenance.service';
 import { StorageService } from '@services/storage/storage.service';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 describe('MaintenanceService', () => {
   let service: MaintenanceService;
   let storageService: StorageService;
   let csvImportClient: { importCsv: vi.Mock };
-  let logger: { error: vi.Mock };
   let table: { toArray: vi.Mock };
 
   beforeEach(() => {
@@ -27,13 +25,11 @@ describe('MaintenanceService', () => {
     csvImportClient = {
       importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'maintenance', totalRows: 0, totalKeys: 0 })
     };
-    logger = { error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         MaintenanceService,
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: CsvImportClientService, useValue: csvImportClient },
-        { provide: LoggerService, useValue: logger }
+        { provide: CsvImportClientService, useValue: csvImportClient }
       ]
     });
     service = TestBed.inject(MaintenanceService);
@@ -64,12 +60,11 @@ describe('MaintenanceService', () => {
   describe('importFromFile', () => {
     it('delegates to CsvImportClientService with the maintenance key', async () => {
       await service.importFromFile();
-      expect(csvImportClient.importCsv).toHaveBeenCalledWith('maintenance');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('maintenance', { expectedHash: undefined });
     });
-    it('logs and swallows errors from the client', async () => {
+    it('propagates errors from the client instead of swallowing them', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
-      await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing maintenance teams', expect.any(Error));
+      await expect(service.importFromFile()).rejects.toThrow('worker boom');
     });
   });
 });

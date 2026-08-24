@@ -18,12 +18,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { UpdateService, type PendingPwaAction } from '@services/worker_update/worker_update.service';
 import { AuthService } from '@services/auth/auth.service';
 import { User } from '@shared/domain';
-import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
-import { LinesService } from '@shared/catalog/services/lines.service';
-import { CablesService } from '@shared/catalog/services/cables.service';
-import { ChainsService } from '@shared/catalog/services/chains.service';
-import { AttachmentService } from '@shared/catalog/services/attachment.service';
-import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { CatalogUpdateService } from '@shared/catalog/services/catalog-update.service';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 
 class Worker {
@@ -48,12 +43,7 @@ describe('AppComponent', () => {
   let mockStorageService: StorageService;
   let mockWorkerService: WorkerPythonService;
   let mockUpdateService: UpdateService;
-  let mockMaintenanceService: MaintenanceService;
-  let mockLinesService: LinesService;
-  let mockCablesService: CablesService;
-  let mockChainsService: ChainsService;
-  let mockAttachmentService: AttachmentService;
-  let mockObstaclesService: ObstaclesService;
+  let mockCatalogUpdateService: { updateCatalogsIfNeeded: ReturnType<typeof vi.fn> };
 
   const mockDb = {
     users: {
@@ -102,33 +92,8 @@ describe('AppComponent', () => {
       isFirstLaunch: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
-      update: vi.fn(),
-      install: vi.fn().mockResolvedValue(true)
+      installFirstLaunch: vi.fn().mockResolvedValue(true)
     } as unknown as UpdateService;
-
-    mockMaintenanceService = {
-      importFromFile: vi.fn().mockResolvedValue(undefined)
-    } as unknown as MaintenanceService;
-
-    mockLinesService = {
-      importFromFile: vi.fn().mockResolvedValue(undefined)
-    } as unknown as LinesService;
-
-    mockCablesService = {
-      importFromFile: vi.fn().mockResolvedValue(undefined)
-    } as unknown as CablesService;
-
-    mockChainsService = {
-      importFromFile: vi.fn().mockResolvedValue(undefined)
-    } as unknown as ChainsService;
-
-    mockAttachmentService = {
-      importFromFile: vi.fn().mockResolvedValue(undefined)
-    } as unknown as AttachmentService;
-
-    mockObstaclesService = {
-      importFromFile: vi.fn().mockResolvedValue(undefined)
-    } as unknown as ObstaclesService;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -154,24 +119,12 @@ describe('AppComponent', () => {
       providers: [provideRouter([]), provideHttpClient()]
     }).compileComponents();
     TestBed.overrideProvider(WorkerPythonService, { useValue: mockWorkerService });
-    TestBed.overrideProvider(StorageService, {
-      useValue: {
-        setPersistentStorage: vi.fn().mockResolvedValue(undefined),
-        createDatabase: vi.fn().mockResolvedValue(undefined),
-        ready$: new BehaviorSubject<boolean>(true),
-        db: mockDb
-      }
-    });
     TestBed.overrideProvider(StorageService, { useValue: mockStorageService });
     TestBed.overrideProvider(NotificationService, { useValue: mockNotificationService });
     TestBed.overrideProvider(UpdateService, { useValue: mockUpdateService });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
-    TestBed.overrideProvider(MaintenanceService, { useValue: mockMaintenanceService });
-    TestBed.overrideProvider(LinesService, { useValue: mockLinesService });
-    TestBed.overrideProvider(CablesService, { useValue: mockCablesService });
-    TestBed.overrideProvider(ChainsService, { useValue: mockChainsService });
-    TestBed.overrideProvider(AttachmentService, { useValue: mockAttachmentService });
-    TestBed.overrideProvider(ObstaclesService, { useValue: mockObstaclesService });
+    mockCatalogUpdateService = { updateCatalogsIfNeeded: vi.fn().mockResolvedValue(undefined) };
+    TestBed.overrideProvider(CatalogUpdateService, { useValue: mockCatalogUpdateService });
     TestBed.overrideComponent(AppComponent, { set: { template: '' } });
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
@@ -185,77 +138,13 @@ describe('AppComponent', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
   });
 
-  it('should never call users.clear() in any scenario', async () => {
-    await component.setupData();
-    expect(mockDb.users.clear).not.toHaveBeenCalled();
-  });
-
-  describe('setupData', () => {
-    it('should skip import when stored hash matches latest hash', async () => {
-      // @ts-expect-error vitest mock on service method
-      mockUpdateService.getLatestAssetList.mockResolvedValue({
-        data_hashes: { 'lines.csv': 'hash-1' }
-      });
-      mockDb.metadata.get.mockResolvedValue({ value: 'hash-1' });
-
-      await component.setupData();
-
-      expect(mockDb.metadata.get).toHaveBeenCalledWith('catalog_hash:lines.csv');
-      expect(mockLinesService.importFromFile).not.toHaveBeenCalled();
-    });
-
-    it('should import and update metadata when hash changes', async () => {
-      // @ts-expect-error vitest mock on service method
-      mockUpdateService.getLatestAssetList.mockResolvedValue({
-        data_hashes: { 'lines.csv': 'new-hash' }
-      });
-      mockDb.metadata.get.mockResolvedValue({ value: 'old-hash' });
-
-      await component.setupData();
-
-      expect(mockLinesService.importFromFile).toHaveBeenCalledTimes(1);
-      expect(mockDb.metadata.put).toHaveBeenCalledWith({
-        key: 'catalog_hash:lines.csv',
-        value: 'new-hash',
-        updated_at: expect.any(String)
-      });
-    });
-
-    it('should import all catalogs when manifest has no data_hashes', async () => {
-      // @ts-expect-error vitest mock on service method
-      mockUpdateService.getLatestAssetList.mockResolvedValue({});
-
-      await component.setupData();
-
-      expect(mockMaintenanceService.importFromFile).toHaveBeenCalledTimes(1);
-      expect(mockLinesService.importFromFile).toHaveBeenCalledTimes(1);
-      expect(mockCablesService.importFromFile).toHaveBeenCalledTimes(1);
-      expect(mockChainsService.importFromFile).toHaveBeenCalledTimes(1);
-      expect(mockAttachmentService.importFromFile).toHaveBeenCalledTimes(1);
-      expect(mockObstaclesService.importFromFile).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('ngOnInit — deferred startup work', () => {
     it('should call workerService.setup() once the browser is idle', async () => {
-      const setupDataSpy = vi.spyOn(component, 'setupData').mockResolvedValue(undefined);
-
       component.ngOnInit();
-      // Heavy startup work (Pyodide worker + catalog import) is deferred via
+      // Heavy startup work (Pyodide worker) is deferred via
       // requestIdleCallback (falls back to setTimeout(0) under jsdom) so it
       // never competes with the critical rendering path — flush it here.
       await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
-      expect(setupDataSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('should call workerService.setup() even if setupData() fails', async () => {
-      vi.spyOn(component, 'setupData').mockRejectedValue(new Error('setup failed'));
-
-      component.ngOnInit();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await fixture.whenStable();
 
       expect(mockWorkerService.setup).toHaveBeenCalledTimes(1);
     });
@@ -318,24 +207,12 @@ describe('AppComponent - HTML rendering', () => {
         isFirstLaunch: signal(false),
         updateLoading: vi.fn().mockReturnValue(false),
         latestVersion: vi.fn().mockReturnValue(null),
-        update: vi.fn(),
-        install: vi.fn().mockResolvedValue(true)
+        installFirstLaunch: vi.fn().mockResolvedValue(true)
       }
     });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
-    TestBed.overrideProvider(MaintenanceService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(LinesService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(AttachmentService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(ObstaclesService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    TestBed.overrideProvider(CatalogUpdateService, {
+      useValue: { updateCatalogsIfNeeded: vi.fn().mockResolvedValue(undefined) }
     });
 
     fixture = TestBed.createComponent(AppComponent);
@@ -376,6 +253,7 @@ describe('AppComponent - auth-gated PWA flow', () => {
   let pendingAction: ReturnType<typeof signal<PendingPwaAction>>;
   let currentUser: ReturnType<typeof signal<User | null>>;
   let installSpy: ReturnType<typeof vi.fn>;
+  let mockCatalogUpdateService: { updateCatalogsIfNeeded: ReturnType<typeof vi.fn> };
 
   const setup = async () => {
     pendingAction = signal<PendingPwaAction>('none');
@@ -427,23 +305,12 @@ describe('AppComponent - auth-gated PWA flow', () => {
         isFirstLaunch: signal(false),
         updateLoading: () => false,
         latestVersion: () => null,
-        update: vi.fn(),
-        install: installSpy
+        installFirstLaunch: installSpy
       }
     });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser } });
-    TestBed.overrideProvider(MaintenanceService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(LinesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(AttachmentService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(ObstaclesService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
+    mockCatalogUpdateService = { updateCatalogsIfNeeded: vi.fn().mockResolvedValue(undefined) };
+    TestBed.overrideProvider(CatalogUpdateService, { useValue: mockCatalogUpdateService });
     TestBed.overrideComponent(AppComponent, { set: { template: '' } });
 
     fixture = TestBed.createComponent(AppComponent);
@@ -516,6 +383,34 @@ describe('AppComponent - auth-gated PWA flow', () => {
 
     expect(installSpy).toHaveBeenCalledTimes(1);
     expect(component.isUpdateDialogOpen()).toBe(false);
+  });
+
+  it('should never trigger catalog updates while the user is not authenticated', async () => {
+    pendingAction.set('update-available');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(mockCatalogUpdateService.updateCatalogsIfNeeded).not.toHaveBeenCalled();
+  });
+
+  it('should trigger catalog updates exactly once when the user becomes authenticated', async () => {
+    currentUser.set({ email: 'user@example.com' } as User);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(mockCatalogUpdateService.updateCatalogsIfNeeded).toHaveBeenCalledTimes(1);
+  });
+
+  it('should trigger catalog updates regardless of the pending application-update action', async () => {
+    currentUser.set({ email: 'user@example.com' } as User);
+    pendingAction.set('update-available');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(mockCatalogUpdateService.updateCatalogsIfNeeded).toHaveBeenCalledTimes(1);
+    expect(component.isUpdateDialogOpen()).toBe(true);
   });
 });
 
@@ -602,23 +497,13 @@ describe('AppComponent - automatic first-install resilience', () => {
         isFirstLaunch: signal(false),
         updateLoading: () => false,
         latestVersion: () => null,
-        update: vi.fn(),
-        install: installSpy,
+        installFirstLaunch: installSpy,
         serviceWorkerSupported
       }
     });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser } });
-    TestBed.overrideProvider(MaintenanceService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(LinesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(CablesService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(ChainsService, { useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) } });
-    TestBed.overrideProvider(AttachmentService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
-    });
-    TestBed.overrideProvider(ObstaclesService, {
-      useValue: { importFromFile: vi.fn().mockResolvedValue(undefined) }
+    TestBed.overrideProvider(CatalogUpdateService, {
+      useValue: { updateCatalogsIfNeeded: vi.fn().mockResolvedValue(undefined) }
     });
 
     // Patch the LoggerService used by AppComponent via DI override.

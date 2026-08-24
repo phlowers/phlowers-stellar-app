@@ -20,6 +20,12 @@ export interface CsvImportClientOptions {
   onProgress?: (processedRows: number) => void;
   /** PapaParse chunk size in bytes (overrides config default). */
   chunkSize?: number;
+  /**
+   * SHA-256 hex digest the downloaded catalog must match (e.g. from the
+   * asset manifest's `data_hashes`). When provided, the worker verifies it
+   * before writing anything to Dexie and rejects on mismatch.
+   */
+  expectedHash?: string;
 }
 
 /**
@@ -46,7 +52,12 @@ export class CsvImportClientService {
   async importCsv(csvKey: CsvKey, options: CsvImportClientOptions = {}): Promise<CsvImportDoneMessage> {
     const config = resolveCsvImportConfig(csvKey);
     const url = `${globalThis.location.origin}/data/${config.filename}`;
-    const request: CsvImportWorkerRequest = { csvKey, url, chunkSize: options.chunkSize };
+    const request: CsvImportWorkerRequest = {
+      csvKey,
+      url,
+      chunkSize: options.chunkSize,
+      expectedHash: options.expectedHash
+    };
 
     return new Promise<CsvImportDoneMessage>((resolve, reject) => {
       const worker = new Worker(new URL('./csv-import.worker', import.meta.url), { type: 'module' });
