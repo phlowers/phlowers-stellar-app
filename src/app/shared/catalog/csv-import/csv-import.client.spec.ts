@@ -97,6 +97,16 @@ describe('CsvImportClientService', () => {
     await promise;
   });
 
+  it('forwards expectedHash into the request so the worker can verify the catalog before importing', async () => {
+    const promise = service.importCsv('cables', { expectedHash: 'abc123' });
+    const worker = FakeWorker.instances[0];
+    expect(worker.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ csvKey: 'cables', expectedHash: 'abc123' })
+    );
+    worker.emit({ type: 'done', csvKey: 'cables', totalRows: 0, totalKeys: 0, verifiedHash: 'abc123' });
+    await expect(promise).resolves.toMatchObject({ verifiedHash: 'abc123' });
+  });
+
   it('invokes onProgress for every progress message', async () => {
     const onProgress = vi.fn();
     const promise = service.importCsv('cables', { onProgress });

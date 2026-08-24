@@ -24,8 +24,10 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { WINDOW } from '@core/tokens/window.token';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
-/** Name of the service worker cache used for app assets. */
-const CACHE_NAME = 'app-assets';
+/** Pre-migration legacy cache name (kept for cleanup). */
+const LEGACY_CACHE_NAME = 'app-assets';
+/** Control cache holding the activation pointer. */
+const CONTROL_CACHE_NAME = 'app-assets-control';
 
 /**
  * Administration page component.
@@ -128,11 +130,26 @@ export class AdminComponent {
     this.confirmationService.confirm({
       message: this.translocoService.translate('admin.reset-app-confirm'),
       accept: async () => {
+        // Unregister all service workers.
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const registration of registrations) {
           await registration.unregister();
         }
-        await caches.delete(CACHE_NAME);
+
+        // Delete all application caches: legacy, control, and all versioned caches.
+        // IndexedDB and catalogs are preserved.
+        const cacheNames = await caches.keys();
+        for (const name of cacheNames) {
+          if (
+            name === LEGACY_CACHE_NAME ||
+            name === CONTROL_CACHE_NAME ||
+            name.startsWith('app-assets-v-') ||
+            name.startsWith('app-assets-candidate-')
+          ) {
+            await caches.delete(name);
+          }
+        }
+
         this.messageService.add({
           severity: 'success',
           summary: this.translocoService.translate('admin.reset-app-summary'),

@@ -17,6 +17,12 @@ export interface JsonImportContext {
   db: StellarDexieHandle;
   /** ISO 8601 timestamp captured once at engine start. */
   now: string;
+  /**
+   * Prefix prepended to every table name the config writes to (e.g.
+   * `'staging_'` during import). Defaults to `''` (live tables) when
+   * omitted, so existing callers/tests are unaffected.
+   */
+  tableNamePrefix?: string;
 }
 
 /** Aggregated outcome returned by a JSON import application step. */
@@ -42,6 +48,12 @@ export interface JsonImportConfig {
   csvKey: CsvKey;
   /** Filename under `/data/` (no leading slash). */
   filename: string;
+  /**
+   * Every live Dexie table name this config writes to. Used generically by
+   * `run-worker-import.helpers.ts` to promote the matching staging tables (and
+   * only those) to live in a single transaction once import succeeds.
+   */
+  tableNames: string[];
   /**
    * Validate and persist the parsed JSON payload to Dexie. Implementations
    * must write atomically (single `db.transaction` call) and return the

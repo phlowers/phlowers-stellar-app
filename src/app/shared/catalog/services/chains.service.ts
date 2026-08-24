@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
@@ -27,7 +26,6 @@ export class ChainsService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly logger = inject(LoggerService);
   private readonly csvImportClient = inject(CsvImportClientService);
 
   constructor() {
@@ -43,12 +41,13 @@ export class ChainsService {
 
   /**
    * Import chain catalog data from `chains.csv` via the generic Web Worker.
+   *
+   * @param expectedHash - SHA-256 hex digest the downloaded file must match
+   * (see `CatalogUpdateService`). Verified by the worker before any Dexie
+   * mutation; errors are propagated (never swallowed) so a caller can decide
+   * whether to continue with other catalogs.
    */
-  async importFromFile(): Promise<void> {
-    try {
-      await this.csvImportClient.importCsv('chains');
-    } catch (error) {
-      this.logger.error('Error importing chains', error);
-    }
+  async importFromFile(expectedHash?: string): Promise<void> {
+    await this.csvImportClient.importCsv('chains', { expectedHash });
   }
 }

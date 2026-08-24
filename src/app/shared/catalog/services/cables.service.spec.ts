@@ -8,7 +8,6 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { CablesService } from './cables.service';
 import { StorageService } from '@services/storage/storage.service';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 import type { CatalogCableEntity } from '@infrastructure/database';
 
@@ -21,7 +20,6 @@ describe('CablesService', () => {
   let service: CablesService;
   let storageService: StorageService;
   let csvImportClient: { importCsv: vi.Mock };
-  let logger: { error: vi.Mock; warn: vi.Mock; log: vi.Mock; info: vi.Mock };
   let cablesTable: MockTable;
   let firstFn: vi.Mock;
 
@@ -38,14 +36,12 @@ describe('CablesService', () => {
     csvImportClient = {
       importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'cables', totalRows: 0, totalKeys: 0 })
     };
-    logger = { error: vi.fn(), warn: vi.fn(), log: vi.fn(), info: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         CablesService,
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: CsvImportClientService, useValue: csvImportClient },
-        { provide: LoggerService, useValue: logger }
+        { provide: CsvImportClientService, useValue: csvImportClient }
       ]
     });
     service = TestBed.inject(CablesService);
@@ -94,12 +90,11 @@ describe('CablesService', () => {
   describe('importFromFile', () => {
     it('delegates to CsvImportClientService with the cables key', async () => {
       await service.importFromFile();
-      expect(csvImportClient.importCsv).toHaveBeenCalledWith('cables');
+      expect(csvImportClient.importCsv).toHaveBeenCalledWith('cables', { expectedHash: undefined });
     });
-    it('logs and swallows errors from the client', async () => {
+    it('propagates errors from the client instead of swallowing them', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
-      await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing cables', expect.any(Error));
+      await expect(service.importFromFile()).rejects.toThrow('worker boom');
     });
   });
 });

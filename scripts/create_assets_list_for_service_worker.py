@@ -37,6 +37,18 @@ blacklist = [
     "service-worker.js",
 ]
 
+# Catalog data files (CSV/JSON under dist/data) are described by data_hashes
+# and updated independently of the app version — they must never be part of
+# the applicative manifest (files), which drives the atomic app update.
+CATALOG_DATA_FILENAMES = {
+    "attachments.csv",
+    "cables.csv",
+    "chains.csv",
+    "lines.csv",
+    "maintenance-teams.csv",
+    "obstacle_configuration.json",
+}
+
 
 def list_files_recursively(directory):
     """
@@ -137,10 +149,27 @@ def main():
     print(f"Total files: {len(files)}")
     output_file = os.path.join(target_dir, "assets_list.json")
     csv_hashes = collect_data_file_hashes(target_dir)
+
+    missing_hashes = CATALOG_DATA_FILENAMES - csv_hashes.keys()
+    if missing_hashes:
+        print(f"Error: missing data hash for catalog file(s): {sorted(missing_hashes)}")
+        sys.exit(1)
+
+    app_files = [
+        file
+        for file in files
+        if os.path.basename(file) not in blacklist
+        and os.path.basename(file) not in CATALOG_DATA_FILENAMES
+    ]
+
+    if "/index.html" not in app_files:
+        print("Error: /index.html is missing from the application manifest.")
+        sys.exit(1)
+
     res = {
         "app_version": app_version,
         "data_hashes": csv_hashes,
-        "files": [file for file in files if os.path.basename(file) not in blacklist],
+        "files": app_files,
     }
     with open(output_file, "w") as f:
         json.dump(res, f, indent=2)

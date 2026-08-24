@@ -1,20 +1,38 @@
 import { installApp, updateApp, handleFetch, handleMessage } from './service-worker';
 
-// Mock browser APIs
-const mockCache = {
-  open: vi.fn(),
-  match: vi.fn(),
-  addAll: vi.fn(),
-  put: vi.fn(),
-  add: vi.fn(),
-  keys: vi.fn(),
-  delete: vi.fn()
-};
+// In-memory Cache Storage mock: each cache name maps to its own instance with
+// independent put/match/keys/delete spies, so tests can exercise the SW's
+// versioned-cache activation scheme (control cache vs. per-version caches vs.
+// the pre-migration legacy cache) instead of a single shared cache object.
+interface MockCacheInstance {
+  match: ReturnType<typeof vi.fn>;
+  put: ReturnType<typeof vi.fn>;
+  keys: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+}
+
+function createMockCacheInstance(): MockCacheInstance {
+  return {
+    match: vi.fn().mockResolvedValue(undefined),
+    put: vi.fn().mockResolvedValue(undefined),
+    keys: vi.fn().mockResolvedValue([]),
+    delete: vi.fn().mockResolvedValue(undefined)
+  };
+}
+
+let cacheStore: Map<string, MockCacheInstance>;
 
 const mockCaches = {
-  open: vi.fn().mockResolvedValue(mockCache),
-  match: vi.fn(),
-  delete: vi.fn().mockResolvedValue(true)
+  open: vi.fn(async (name: string) => {
+    if (!cacheStore.has(name)) {
+      cacheStore.set(name, createMockCacheInstance());
+    }
+    return cacheStore.get(name);
+  }),
+  delete: vi.fn(async (name: string) => cacheStore.delete(name)),
+  has: vi.fn(async (name: string) => cacheStore.has(name)),
+  keys: vi.fn(async () => Array.from(cacheStore.keys())),
+  match: vi.fn()
 };
 
 const mockFetch = vi.fn();
@@ -30,11 +48,7 @@ const mockSelf = {
 };
 
 // Mock global objects
-global.caches = {
-  ...mockCaches,
-  match: vi.fn(),
-  delete: mockCaches.delete
-} as unknown as CacheStorage;
+global.caches = mockCaches as unknown as CacheStorage;
 global.fetch = mockFetch as unknown as typeof fetch;
 global.Response = class MockResponse {
   constructor(body?: string | null, init?: Record<string, unknown>) {
@@ -64,20 +78,52 @@ Object.defineProperty(global, 'self', {
   writable: true
 });
 
+/** Mirrors CONTROL_CACHE_NAME in service-worker.ts. */
+const CONTROL_CACHE_NAME = 'app-assets-control';
+/** Mirrors CONTROL_KEY in service-worker.ts. */
+const CONTROL_KEY = '/control';
+/** Mirrors LEGACY_CACHE_NAME in service-worker.ts. */
+const LEGACY_CACHE_NAME = 'app-assets';
+
+/**
+ * Seeds the activation pointer so `resolveActiveCache()` resolves to a
+ * specific version cache without going through a real install/update.
+ */
+async function seedControlState(state: { active: string; previous: string | null }): Promise<void> {
+  const controlCache = await mockCaches.open(CONTROL_CACHE_NAME);
+  controlCache!.match.mockImplementation(async (key: string) =>
+    key === CONTROL_KEY ? { json: vi.fn().mockResolvedValue(state) } : undefined
+  );
+}
+
+/**
+ * Seeds the pre-migration legacy cache directly (no control state) — the
+ * simplest way to make `resolveActiveCache()` resolve to "an installed shell
+ * exists" without asserting on the exact versioned cache-naming scheme.
+ */
+async function seedLegacyCache(): Promise<MockCacheInstance> {
+  return (await mockCaches.open(LEGACY_CACHE_NAME))!;
+}
+
+/** Asserts that no cache anywhere received a write — install/update alone own precaching. */
+function expectNoCacheWrites(): void {
+  for (const cache of cacheStore.values()) {
+    expect(cache.put).not.toHaveBeenCalled();
+  }
+}
+
 describe('Service Worker Functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCaches.open.mockResolvedValue(mockCache);
-    mockCaches.delete.mockResolvedValue(true);
-    mockCache.keys.mockResolvedValue([]);
-    (global.caches.match as vi.Mock).mockResolvedValue(null);
+    cacheStore = new Map();
   });
 
   describe('installApp', () => {
     const mockManifest = {
       files: ['/index.html', '/app.js', '/styles.css'],
-      app_version: '1.0.0'
+      app_version: { git_hash: 'v1-hash', version: '1.0.0', build_datetime_utc: '2024-01-01T00:00:00.000000+00:00' }
     };
+    const versionCacheName = 'app-assets-v-v1-hash';
 
     beforeEach(() => {
       mockFetch.mockImplementation((url: string) => {
@@ -101,18 +147,27 @@ describe('Service Worker Functions', () => {
           })
         })
       );
+      const versionCache = cacheStore.get(versionCacheName)!;
+      expect(versionCache).toBeDefined();
       for (const file of mockManifest.files) {
         expect(mockFetch).toHaveBeenCalledWith(
           file,
           expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) })
         );
-        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+        expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
-      expect(mockCache.put).toHaveBeenCalledWith(
+      expect(versionCache.put).toHaveBeenCalledWith(
         '/app_version',
         expect.objectContaining({
           headers: { 'content-type': 'application/json' }
         })
+      );
+
+      // Activation: the pointer now points at the newly precached version.
+      const controlCache = cacheStore.get(CONTROL_CACHE_NAME)!;
+      expect(controlCache.put).toHaveBeenCalledWith(
+        CONTROL_KEY,
+        expect.objectContaining({ headers: { 'content-type': 'application/json' } })
       );
     });
 
@@ -125,17 +180,21 @@ describe('Service Worker Functions', () => {
       await expect(installApp()).rejects.toThrow('Manifest fetch failed with status 404');
     });
 
-    it('should handle empty files array', async () => {
-      const emptyManifest = { files: [], app_version: '1.0.0' };
+    it('should reject an empty manifest instead of activating an incomplete version', async () => {
+      const emptyManifest = {
+        files: [],
+        app_version: { git_hash: 'v1-empty', version: '1.0.0', build_datetime_utc: '2024-01-01T00:00:00.000000+00:00' }
+      };
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
-      await installApp();
+      await expect(installApp()).rejects.toThrow(/manifest is empty or missing \/index\.html/i);
 
-      // Only the manifest itself was fetched — no per-file fetch for an empty list.
+      // Only the manifest itself was fetched — no per-file fetch, no cache ever opened.
       expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -145,6 +204,7 @@ describe('Service Worker Functions', () => {
     });
 
     it('should abort install when a single file fails to precache (e.g. 502 during a rolling redeploy)', async () => {
+      const versionCache = await mockCaches.open(versionCacheName);
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
           return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
@@ -157,8 +217,10 @@ describe('Service Worker Functions', () => {
 
       await expect(installApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
 
-      // A failed install must never mark itself as done.
-      expect(mockCache.put).not.toHaveBeenCalledWith('/app_version', expect.anything());
+      // A failed install must never mark itself as done, and the incomplete
+      // candidate cache must be deleted so it never lingers.
+      expect(versionCache!.put).not.toHaveBeenCalledWith('/app_version', expect.anything());
+      expect(mockCaches.delete).toHaveBeenCalledWith(versionCacheName);
     });
 
     it('should throw identifying the file when every file fails to precache', async () => {
@@ -173,6 +235,7 @@ describe('Service Worker Functions', () => {
     });
 
     it('should not write a still in-flight file to the cache once another file already failed', async () => {
+      const versionCache = await mockCaches.open(versionCacheName);
       let resolveStylesFetch!: (value: { ok: boolean; status: number }) => void;
       const stylesFetch = new Promise<{ ok: boolean; status: number }>((resolve) => {
         resolveStylesFetch = resolve;
@@ -199,7 +262,7 @@ describe('Service Worker Functions', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      expect(mockCache.put).not.toHaveBeenCalledWith('/styles.css', expect.anything());
+      expect(versionCache!.put).not.toHaveBeenCalledWith('/styles.css', expect.anything());
     });
 
     it.each([
@@ -208,7 +271,7 @@ describe('Service Worker Functions', () => {
       ['/\\evil.com/payload.js', 'backslash trick'],
       ['app.js', 'non-root-relative path']
     ])('should reject a manifest file that is a %s (%s) without ever fetching it', async (file) => {
-      const maliciousManifest = { files: [file], app_version: '1.0.0' };
+      const maliciousManifest = { files: ['/index.html', file], app_version: mockManifest.app_version };
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
           return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(maliciousManifest) });
@@ -224,8 +287,9 @@ describe('Service Worker Functions', () => {
   describe('updateApp', () => {
     const mockManifest = {
       files: ['/index.html', '/app.js', '/pyodide/file1.whl'],
-      app_version: '1.1.0'
+      app_version: { git_hash: 'v2-hash', version: '1.1.0', build_datetime_utc: '2024-02-01T00:00:00.000000+00:00' }
     };
+    const versionCacheName = 'app-assets-v-v2-hash';
 
     beforeEach(() => {
       mockFetch.mockImplementation((url: string) => {
@@ -236,30 +300,39 @@ describe('Service Worker Functions', () => {
       });
     });
 
-    it('should perform a full cache reset and re-cache all files', async () => {
+    it('should precache the new version into its own cache and activate it', async () => {
       const result = await updateApp();
 
       expect(result).toEqual(mockManifest);
-      // Must delete the entire cache first
-      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
-      // Then reopen and cache each file individually
-      expect(mockCaches.open).toHaveBeenCalledWith('app-assets');
+      const versionCache = cacheStore.get(versionCacheName)!;
+      expect(versionCache).toBeDefined();
       for (const file of mockManifest.files) {
-        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+        expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
       // Store new version
-      expect(mockCache.put).toHaveBeenCalledWith(
+      expect(versionCache.put).toHaveBeenCalledWith(
         '/app_version',
         expect.objectContaining({
           headers: { 'content-type': 'application/json' }
         })
       );
+      const controlCache = cacheStore.get(CONTROL_CACHE_NAME)!;
+      expect(controlCache.put).toHaveBeenCalledWith(
+        CONTROL_KEY,
+        expect.objectContaining({ headers: { 'content-type': 'application/json' } })
+      );
+      // The old destructive delete-then-copy scheme must be gone.
+      expect(mockCaches.delete).not.toHaveBeenCalledWith(LEGACY_CACHE_NAME);
     });
 
     it('should re-download Python wheels (no incremental caching)', async () => {
       const manifestWithWheels = {
         files: ['/index.html', '/pyodide/numpy.whl', '/pyodide/pandas.whl'],
-        app_version: '1.1.0'
+        app_version: {
+          git_hash: 'v2-wheels-hash',
+          version: '1.1.0',
+          build_datetime_utc: '2024-02-01T00:00:00.000000+00:00'
+        }
       };
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
@@ -270,25 +343,26 @@ describe('Service Worker Functions', () => {
 
       await updateApp();
 
+      const versionCache = cacheStore.get('app-assets-v-v2-wheels-hash')!;
       // All files including .whl should be individually re-fetched and cached (full reset)
       for (const file of manifestWithWheels.files) {
-        expect(mockCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
+        expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
       }
     });
 
-    it('should handle empty files array', async () => {
-      const emptyManifest = { files: [], app_version: '1.1.0' };
+    it('should reject an empty manifest instead of activating an incomplete version', async () => {
+      const emptyManifest = {
+        files: [],
+        app_version: { git_hash: 'v2-empty', version: '1.1.0', build_datetime_utc: '2024-02-01T00:00:00.000000+00:00' }
+      };
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue(emptyManifest)
       });
 
-      const result = await updateApp();
-
-      expect(result).toEqual(emptyManifest);
-      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets');
-      // Only the manifest itself was fetched — no per-file fetch for an empty list.
+      await expect(updateApp()).rejects.toThrow(/manifest is empty or missing \/index\.html/i);
       expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockCaches.open).not.toHaveBeenCalled();
     });
 
     it('should handle fetch manifest errors', async () => {
@@ -306,7 +380,11 @@ describe('Service Worker Functions', () => {
       await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
     });
 
-    it('should abort the update and roll back the temp cache when a single file fails to precache', async () => {
+    it('should delete the incomplete candidate cache and never touch the previously active version when a file fails to precache', async () => {
+      // Simulate an already-active version to prove it is left untouched.
+      await seedControlState({ active: 'app-assets-v-current', previous: null });
+      const activeCache = await mockCaches.open('app-assets-v-current');
+
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
           return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
@@ -319,9 +397,14 @@ describe('Service Worker Functions', () => {
 
       await expect(updateApp()).rejects.toThrow('Precache failed for /app.js: HTTP 502');
 
-      // The temp cache is cleaned up but the live cache must never be touched.
-      expect(mockCaches.delete).toHaveBeenCalledWith('app-assets-tmp');
-      expect(mockCaches.delete).not.toHaveBeenCalledWith('app-assets');
+      // The failed candidate cache is cleaned up...
+      expect(mockCaches.delete).toHaveBeenCalledWith(versionCacheName);
+      // ...but the currently active version is never touched, and activation
+      // (the control pointer write) never happens on a failed precache.
+      expect(mockCaches.delete).not.toHaveBeenCalledWith('app-assets-v-current');
+      expect(activeCache!.put).not.toHaveBeenCalled();
+      const controlCache = cacheStore.get(CONTROL_CACHE_NAME)!;
+      expect(controlCache.put).not.toHaveBeenCalled();
     });
   });
 
@@ -418,11 +501,11 @@ describe('Service Worker Functions', () => {
       const responsePromise = mockEvent.respondWith.mock.calls[0][0];
       await responsePromise;
 
-      expect(mockCache.put).not.toHaveBeenCalled();
+      expectNoCacheWrites();
     });
   });
 
-  describe('handleFetch — home page network-first with 3xx passthrough', () => {
+  describe('handleFetch — home page navigation with 3xx passthrough', () => {
     let mockEvent: { respondWith: ReturnType<typeof vi.fn>; request: { url: string; clone: ReturnType<typeof vi.fn> } };
 
     beforeEach(() => {
@@ -445,25 +528,45 @@ describe('Service Worker Functions', () => {
       const response = await responsePromise;
 
       expect(response).toBe(redirectResponse);
-      expect(mockCache.put).not.toHaveBeenCalled();
+      expectNoCacheWrites();
     });
 
-    it('should cache 200 home page response', async () => {
+    it('should serve the installed cached shell on a 200 without re-caching it (no silent update)', async () => {
+      // A fresh index.html from a newly deployed version must NEVER replace
+      // the installed shell outside the user-confirmed update flow.
+      const okResponse = { ok: true, status: 200, clone: vi.fn().mockReturnThis() };
+      const cachedShell = { ok: true, status: 200, from: 'installed-cache' };
+      mockFetch.mockResolvedValue(okResponse);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedShell);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(cachedShell);
+      expectNoCacheWrites();
+    });
+
+    it('should serve the network 200 without caching it when no shell is installed yet (first launch)', async () => {
       const okResponse = { ok: true, status: 200, clone: vi.fn().mockReturnThis() };
       mockFetch.mockResolvedValue(okResponse);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
       const responsePromise = mockEvent.respondWith.mock.calls[0][0];
-      await responsePromise;
+      const response = await responsePromise;
 
-      expect(mockCache.put).toHaveBeenCalled();
+      expect(response).toBe(okResponse);
+      expectNoCacheWrites();
     });
 
     it('should fall back to cache when network fails for home page', async () => {
       mockFetch.mockRejectedValue(new Error('Network down'));
       const cachedIndex = { ok: true, status: 200 };
-      mockCache.match.mockResolvedValue(cachedIndex);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedIndex);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -471,6 +574,23 @@ describe('Service Worker Functions', () => {
       const response = await responsePromise;
 
       expect(response).toBe(cachedIndex);
+    });
+
+    it('should serve the installed shell for SPA deep-link navigations (no silent update)', async () => {
+      mockEvent.request.url = 'https://example.com/studies/42';
+      (mockEvent.request as { mode?: string }).mode = 'navigate';
+      const okResponse = { ok: true, status: 200, clone: vi.fn().mockReturnThis() };
+      const cachedShell = { ok: true, status: 200, from: 'installed-cache' };
+      mockFetch.mockResolvedValue(okResponse);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedShell);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      const response = await mockEvent.respondWith.mock.calls[0][0];
+
+      expect(response).toBe(cachedShell);
+      expectNoCacheWrites();
     });
   });
 
@@ -490,20 +610,22 @@ describe('Service Worker Functions', () => {
     it('should serve the cached shell when the server returns 502', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 502 });
       const cachedShell = { ok: true, status: 200 };
-      mockCache.match.mockResolvedValue(cachedShell);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedShell);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
       const response = await mockEvent.respondWith.mock.calls[0][0];
 
       expect(response).toBe(cachedShell);
-      expect(mockCache.put).not.toHaveBeenCalled();
+      expectNoCacheWrites();
     });
 
     it('should serve the cached shell when the server returns a bare 401', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 401 });
       const cachedShell = { ok: true, status: 200 };
-      mockCache.match.mockResolvedValue(cachedShell);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedShell);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -515,7 +637,8 @@ describe('Service Worker Functions', () => {
     it('should still pass a 302 redirect through even with a cached shell (OIDC flow)', async () => {
       const redirectResponse = { ok: false, status: 302 };
       mockFetch.mockResolvedValue(redirectResponse);
-      mockCache.match.mockResolvedValue({ ok: true, status: 200 });
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue({ ok: true, status: 200 });
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -527,7 +650,6 @@ describe('Service Worker Functions', () => {
     it('should return the network error response when 5xx and no cached shell', async () => {
       const errorResponse = { ok: false, status: 503 };
       mockFetch.mockResolvedValue(errorResponse);
-      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -538,7 +660,6 @@ describe('Service Worker Functions', () => {
 
     it('should force reauth via /auth/relogin when a bare 401 has no cached shell', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 401 });
-      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -550,7 +671,6 @@ describe('Service Worker Functions', () => {
 
     it('should force reauth via /auth/relogin when a bare 403 has no cached shell', async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 403 });
-      mockCache.match.mockResolvedValue(undefined);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -598,22 +718,24 @@ describe('Service Worker Functions', () => {
     it('should handle other requests with cache hit', async () => {
       mockEvent.request.url = 'https://example.com/image.png';
       const mockResponse = new Response('console.log("test");');
-      (global.caches.match as vi.Mock).mockResolvedValue(mockResponse);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(mockResponse);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
+      await mockEvent.respondWith.mock.calls[0][0];
 
-      expect(global.caches.match as vi.Mock).toHaveBeenCalledWith(mockEvent.request);
+      expect(legacyCache.match).toHaveBeenCalledWith(mockEvent.request);
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
     it('should handle other requests with cache miss', async () => {
       mockEvent.request.url = 'https://example.com/image.png';
-      (global.caches.match as vi.Mock).mockResolvedValue(null);
       mockFetch.mockResolvedValue(new Response('console.log("test");'));
       const clonedRequest = { url: 'https://example.com/image.png' };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
+      await mockEvent.respondWith.mock.calls[0][0];
 
       expect(mockFetch).toHaveBeenCalledWith(
         clonedRequest,
@@ -629,7 +751,6 @@ describe('Service Worker Functions', () => {
 
     it('should handle fetch errors gracefully', async () => {
       mockEvent.request.url = 'https://example.com/image.png';
-      (global.caches.match as vi.Mock).mockResolvedValue(null);
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await handleFetch(mockEvent as unknown as FetchEvent);
@@ -637,7 +758,26 @@ describe('Service Worker Functions', () => {
       expect(mockEvent.respondWith).toHaveBeenCalled();
     });
 
-    it('should use network-first and cache successful js responses', async () => {
+    it('should serve js assets cache-first without hitting the network (no silent update)', async () => {
+      // Bundles from a newly deployed version must never replace the
+      // installed ones outside the user-confirmed update flow.
+      mockEvent.request.url = 'https://example.com/app.js';
+      const cachedResponse = { ok: true, from: 'installed-cache' };
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedResponse);
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).toHaveBeenCalled();
+      const responsePromise = mockEvent.respondWith.mock.calls[0][0];
+      const response = await responsePromise;
+
+      expect(response).toBe(cachedResponse);
+      expect(mockFetch).not.toHaveBeenCalled();
+      expectNoCacheWrites();
+    });
+
+    it('should fetch uncached js from the network without writing it to the cache', async () => {
       mockEvent.request.url = 'https://example.com/app.js';
       const clonedRequest = { url: 'https://example.com/app.js' };
       const networkResponse = {
@@ -661,17 +801,14 @@ describe('Service Worker Functions', () => {
           headers: expect.any(Object)
         })
       );
-      expect(mockCache.put).toHaveBeenCalledWith(mockEvent.request, expect.any(Object));
-      expect(networkResponse.clone).toHaveBeenCalled();
+      expectNoCacheWrites();
     });
 
-    it('should use network-first and fall back to cache on network failure', async () => {
+    it('should serve css assets cache-first on cache hit', async () => {
       mockEvent.request.url = 'https://example.com/styles.css';
-      const clonedRequest = { url: 'https://example.com/styles.css' };
       const cachedResponse = { from: 'cache' };
-      mockEvent.request.clone.mockReturnValue(clonedRequest);
-      mockFetch.mockRejectedValue(new Error('Network down'));
-      mockCache.match.mockResolvedValue(cachedResponse as unknown as globalThis.Response);
+      const legacyCache = await seedLegacyCache();
+      legacyCache.match.mockResolvedValue(cachedResponse as unknown as globalThis.Response);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
 
@@ -680,14 +817,12 @@ describe('Service Worker Functions', () => {
       const response = await responsePromise;
 
       expect(response).toBe(cachedResponse);
-      expect(mockCache.match).toHaveBeenCalledWith(mockEvent.request);
+      expect(legacyCache.match).toHaveBeenCalledWith(mockEvent.request);
     });
 
-    it('should NOT pass an AbortSignal to fetch when there is no cached fallback', async () => {
-      // Regression guard for the login-then-chunk-load bug: when the cache
-      // is empty (first install), the SW must not artificially abort the
-      // network request after 3s. It should issue a plain fetch that waits
-      // for the real network response.
+    it('should pass a bounded AbortSignal to the cache-miss network fallback', async () => {
+      // A cache-miss fetch must never hang indefinitely behind an OIDC
+      // refresh pile-up on the server (headers-only 13s bound).
       mockEvent.request.url = 'https://example.com/chunk-KJVBLZQZ.js';
       const clonedRequest = { url: 'https://example.com/chunk-KJVBLZQZ.js' };
       const networkResponse = {
@@ -695,28 +830,6 @@ describe('Service Worker Functions', () => {
         clone: vi.fn().mockReturnValue({ ok: true })
       };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
-      mockCache.match.mockResolvedValue(undefined);
-      mockFetch.mockResolvedValue(networkResponse as unknown as globalThis.Response);
-
-      await handleFetch(mockEvent as unknown as FetchEvent);
-      await mockEvent.respondWith.mock.calls[0][0];
-
-      const fetchInit = mockFetch.mock.calls[0][1] as RequestInit;
-      expect(fetchInit.signal).toBeUndefined();
-    });
-
-    it('should pass an AbortSignal to fetch when a cached fallback exists', async () => {
-      // The 3s timeout is still desirable when we have a safe cache fallback,
-      // because it lets offline users get a fast response.
-      mockEvent.request.url = 'https://example.com/styles.css';
-      const clonedRequest = { url: 'https://example.com/styles.css' };
-      const cachedResponse = { from: 'cache' };
-      const networkResponse = {
-        ok: true,
-        clone: vi.fn().mockReturnValue({ ok: true })
-      };
-      mockEvent.request.clone.mockReturnValue(clonedRequest);
-      mockCache.match.mockResolvedValue(cachedResponse as unknown as globalThis.Response);
       mockFetch.mockResolvedValue(networkResponse as unknown as globalThis.Response);
 
       await handleFetch(mockEvent as unknown as FetchEvent);
@@ -733,7 +846,6 @@ describe('Service Worker Functions', () => {
       mockEvent.request.url = 'https://example.com/chunk-4MWGN5E4.js';
       const clonedRequest = { url: 'https://example.com/chunk-4MWGN5E4.js' };
       mockEvent.request.clone.mockReturnValue(clonedRequest);
-      mockCache.match.mockResolvedValue(undefined);
       mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
 
       await handleFetch(mockEvent as unknown as FetchEvent);
@@ -756,7 +868,14 @@ describe('Service Worker Functions', () => {
     });
 
     it('should handle update message type', async () => {
-      const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
+      const mockManifest = {
+        files: ['/index.html', '/app.js'],
+        app_version: {
+          git_hash: 'msg-update-hash',
+          version: '1.1.0',
+          build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
+        }
+      };
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
@@ -766,25 +885,31 @@ describe('Service Worker Functions', () => {
 
       expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'update_complete',
-        latest_version: '1.1.0',
+        latest_version: mockManifest.app_version,
         data_hashes: {}
       });
     });
 
     it('should handle install message type', async () => {
       mockEvent.data.type = 'install';
-      const mockManifest = { files: ['/app.js'], app_version: '1.0.0' };
+      const mockManifest = {
+        files: ['/index.html', '/app.js'],
+        app_version: {
+          git_hash: 'msg-install-hash',
+          version: '1.0.0',
+          build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
+        }
+      };
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
       });
-      mockCache.addAll.mockResolvedValue(undefined);
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
       expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'install_complete',
-        latest_version: '1.0.0',
+        latest_version: mockManifest.app_version,
         data_hashes: {}
       });
     });
@@ -812,7 +937,14 @@ describe('Service Worker Functions', () => {
     it('should handle missing event source', async () => {
       mockEvent.source = null;
       mockEvent.data.type = 'update';
-      const mockManifest = { files: ['/app.js'], app_version: '1.1.0' };
+      const mockManifest = {
+        files: ['/index.html', '/app.js'],
+        app_version: {
+          git_hash: 'msg-nosource-hash',
+          version: '1.1.0',
+          build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
+        }
+      };
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)

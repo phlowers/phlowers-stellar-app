@@ -153,6 +153,9 @@
     "debug-logs-off": "Disabled"
   },
   "shared": {
+    "catalog-update-service": {
+      "import-failed": "Some reference data could not be updated: {{ catalogs }}"
+    },
     "input-number": {
       "reduce": "Reduce",
       "increase": "Increase"

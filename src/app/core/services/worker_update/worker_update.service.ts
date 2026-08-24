@@ -4,6 +4,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { MessageService } from 'primeng/api';
 import type { AssetManifest, AppVersion } from './service-worker.interfaces';
 import { environment } from '@src/environments/environment';
+import { AuthService } from '@services/auth/auth.service';
 
 /**
  * Pending PWA action determined by `checkForUpdateOnce` or `checkAppVersion`.
@@ -30,8 +31,8 @@ export type PendingPwaAction = 'none' | 'first-install' | 'update-available';
  *   this.showUpdatePrompt();
  * }
  *
- * // Trigger an update
- * await this.updateService.update();
+ * // Trigger an update after user confirmation
+ * await this.updateService.confirmUpdate();
  * ```
  *
  * @category Services
@@ -100,6 +101,8 @@ export class UpdateService {
 
   private readonly messageService = inject(MessageService);
   private readonly translocoService = inject(TranslocoService);
+  /** Read-only: install/update must never be authorized for an unauthenticated user. */
+  private readonly authService = inject(AuthService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
 
   constructor() {
@@ -148,13 +151,28 @@ export class UpdateService {
   /**
    * Check whether the Service Worker cache has been populated (i.e. app is installed).
    *
-   * @returns Promise resolving to true if the SW cache contains a version entry
+   * @remarks
+   * Scans every `app-assets*` cache (the pre-migration legacy cache, or any
+   * versioned `app-assets-v-*` cache written by the atomic activation
+   * scheme in `service-worker.ts`) rather than a single fixed name, so an
+   * install is correctly detected regardless of which cache name the
+   * currently active version happens to use.
+   *
+   * @returns Promise resolving to true if any such cache contains a version entry
    */
   async isCachePopulated(): Promise<boolean> {
     try {
-      const cache = await caches.open('app-assets');
-      const cachedResponse = await cache.match('/app_version');
-      return cachedResponse !== undefined;
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        if (name === 'app-assets' || name.startsWith('app-assets-v-')) {
+          const cache = await caches.open(name);
+          const cachedResponse = await cache.match('/app_version');
+          if (cachedResponse !== undefined) {
+            return true;
+          }
+        }
+      }
+      return false;
     } catch {
       return false;
     }
@@ -302,47 +320,63 @@ export class UpdateService {
   }
 
   /**
-   * Trigger an application update via the Service Worker.
+   * Confirm the pending action (install or update) after explicit user
+   * validation from the update popup.
    *
    * @remarks
-   * Sends an update message to the Service Worker which will download
-   * and cache the new version. A page reload is required after completion.
+   * Never authorized for an unauthenticated user, and never for a stale/
+   * mismatched `pendingAction` (e.g. a leftover 'update-available' after the
+   * server already reports 'none'). Must be called from a UI button — no
+   * automatic install/update is allowed through this path.
    *
-   * @returns `true` if the message was successfully posted to an active
-   * Service Worker, `false` otherwise (e.g. SW unavailable, no registration,
-   * no active worker yet, or an error occurred while posting).
+   * @returns `true` if the underlying install/update message was posted
+   * successfully, `false` otherwise (unauthenticated, wrong pending action,
+   * or the same failure modes as `postMessageToSW`).
    */
-  async update(): Promise<boolean> {
+  async confirmUpdate(): Promise<boolean> {
+    if (!this.authService.currentUser()) {
+      return false;
+    }
+    if (this.pendingAction() === 'first-install') {
+      return this.postMessageToSW('install');
+    }
+    if (this.pendingAction() === 'update-available') {
+      return this.postMessageToSW('update');
+    }
+    return false;
+  }
+
+  /**
+   * Force an application update from the administration page.
+   *
+   * @remarks
+   * A deliberate, explicit user action (admin clicking the update button) —
+   * distinct from the popup, but still requires an authenticated user and a
+   * detected update (`pendingAction === 'update-available'`).
+   *
+   * @returns `true` if the update message was posted successfully, `false` otherwise.
+   */
+  async forceUpdateFromAdmin(): Promise<boolean> {
+    if (!this.authService.currentUser() || this.pendingAction() !== 'update-available') {
+      return false;
+    }
     return this.postMessageToSW('update');
   }
 
   /**
-   * Confirm the pending action (install or update) after user validation.
-   *
-   * Must be called from a UI button — no automatic install/update is allowed.
-   *
-   * @returns `true` if the underlying install/update message was posted
-   * successfully, `false` otherwise.
-   */
-  async confirmUpdate(): Promise<boolean> {
-    if (this.pendingAction() === 'first-install') {
-      return this.install();
-    }
-    return this.update();
-  }
-
-  /**
-   * Trigger an initial application installation via the Service Worker.
+   * Trigger the first-time application installation.
    *
    * @remarks
-   * Used for first-time installations to cache all application assets.
+   * The only action allowed to run automatically (without an explicit user
+   * click) — but only once the user is authenticated and the Service Worker
+   * cache is confirmed empty (`pendingAction === 'first-install'`).
    *
-   * @returns `true` if the install message was successfully posted to an
-   * active Service Worker, `false` otherwise (e.g. SW unavailable, no
-   * registration returned yet, no active worker, or an error occurred while
-   * posting).
+   * @returns `true` if the install message was posted successfully, `false` otherwise.
    */
-  async install(): Promise<boolean> {
+  async installFirstLaunch(): Promise<boolean> {
+    if (!this.authService.currentUser() || this.pendingAction() !== 'first-install') {
+      return false;
+    }
     return this.postMessageToSW('install');
   }
 
