@@ -66,61 +66,18 @@ function isAuthErrorResponse(response: Response | undefined): response is Respon
  * broken assets must never be silently skipped. Compared to `Cache.addAll()`
  * (all-or-nothing, throws a generic `Failed to execute 'addAll' on 'Cache'`
  * error), this identifies exactly which file failed and why.
- *
- * A shared `AbortController` cancels the other in-flight fetches as soon as
- * one file fails, and any fetch that resolves afterwards is skipped instead
- * of being written to `cache` — otherwise `Promise.all` rejecting early
- * would still let those in-flight operations complete in the background,
- * leaving the cache partially populated despite the reported failure.
  */
 async function cacheFiles(cache: Cache, files: string[]): Promise<void> {
   if (files.length === 0) {
     return;
   }
-  const controller = new AbortController();
-
   await Promise.all(
     files.map(async (file) => {
-      // Validated inline, in the same function that performs the fetch below:
-      // `assets_list.json` is untrusted network data, so a poisoned/compromised
-      // response must not be able to make the SW request/cache a cross-origin
-      // resource (client-side request forgery). `assetPath` — never the raw
-      // `file` argument — is what is passed to `fetch()`/`cache.put()`.
-      let assetPath = '';
-      if (file.startsWith('/') && !file.startsWith('//') && !file.includes('\\')) {
-        try {
-          const url = new URL(file, self.location.origin);
-          if (url.origin === self.location.origin) {
-            assetPath = url.pathname + url.search;
-          }
-        } catch {
-          assetPath = '';
-        }
-      }
-      if (!assetPath) {
-        controller.abort();
-        throw new Error(`Precache rejected for ${file}: invalid or cross-origin asset path`);
-      }
-      let response: Response;
-      try {
-        response = await fetch(assetPath, { cache: 'no-store', signal: controller.signal });
-      } catch (error) {
-        if (controller.signal.aborted) {
-          // Aborted because another file already failed; that failure is what fails the precache.
-          return;
-        }
-        controller.abort();
-        throw error;
-      }
+      const response = await fetch(file, { cache: 'no-store' });
       if (!response.ok) {
-        controller.abort();
-        throw new Error(`Precache failed for ${assetPath}: HTTP ${response.status}`);
+        throw new Error(`Precache failed for ${file}: HTTP ${response.status}`);
       }
-      if (controller.signal.aborted) {
-        // Another file failed while this fetch was in flight — skip the write.
-        return;
-      }
-      await cache.put(assetPath, response);
+      await cache.put(file, response);
     })
   );
 }
@@ -137,8 +94,18 @@ export async function installApp() {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
   }
   const manifest: AssetManifest = await response.json();
-  const cacheName = await precacheVersion(manifest);
-  await activateVersion(cacheName);
+  const filesToInstall = manifest.files || [];
+  const buildVersion = manifest.app_version;
+  const cache = await caches.open(CACHE_NAME);
+  await cacheFiles(cache, filesToInstall);
+  await cache.put(
+    APP_VERSION_CACHE_KEY,
+    new Response(JSON.stringify(buildVersion), {
+      headers: {
+        'content-type': 'application/json'
+      }
+    })
+  );
   return manifest;
 }
 
@@ -159,9 +126,44 @@ export async function updateApp() {
     throw new Error(`Manifest fetch failed with status ${response.status}`);
   }
   const manifest: AssetManifest = await response.json();
-  const cacheName = await precacheVersion(manifest);
-  await activateVersion(cacheName);
-  return manifest;
+  const files = manifest.files || [];
+
+  const TEMP_CACHE_NAME = `${CACHE_NAME}-tmp`;
+
+  // Cache into a temporary cache first so the old cache remains intact on failure.
+  try {
+    await caches.delete(TEMP_CACHE_NAME);
+    const tempCache = await caches.open(TEMP_CACHE_NAME);
+    await cacheFiles(tempCache, files);
+
+    const appVersion = manifest.app_version;
+    await tempCache.put(
+      APP_VERSION_CACHE_KEY,
+      new Response(JSON.stringify(appVersion), {
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    );
+
+    // Swap: delete old cache and rename temp cache.
+    await caches.delete(CACHE_NAME);
+    const finalCache = await caches.open(CACHE_NAME);
+    const tempKeys = await tempCache.keys();
+    for (const request of tempKeys) {
+      const cached = await tempCache.match(request);
+      if (cached) {
+        await finalCache.put(request, cached);
+      }
+    }
+    await caches.delete(TEMP_CACHE_NAME);
+
+    return manifest;
+  } catch (error) {
+    // Rollback: clean up the temporary cache so it doesn't linger.
+    await caches.delete(TEMP_CACHE_NAME);
+    throw error;
+  }
 }
 
 const NO_CACHE_INIT: RequestInit = {
@@ -356,16 +358,10 @@ export async function handleFetch(event: FetchEvent) {
           if (networkResponse && isRedirectResponse(networkResponse)) {
             return networkResponse;
           }
-          // Session is valid (200) or server errored (401/403/5xx): always
-          // serve the INSTALLED shell so the running version never changes
-          // without user confirmation.
+          // 401/403/5xx (or any other non-ok): serve the cached shell if present.
+          const cachedShell = await cache.match(indexUrl);
           if (cachedShell) {
             return cachedShell;
-          }
-          // No installed shell yet (first launch before install): serve the
-          // network copy WITHOUT caching it — installApp() owns the cache.
-          if (networkResponse?.ok) {
-            return networkResponse;
           }
           // No cached shell (e.g. right after clearing site data): force reauth
           // via /auth/relogin instead of leaking Apache's raw 401/403 body.
@@ -382,10 +378,48 @@ export async function handleFetch(event: FetchEvent) {
     // redirect to the backend
     event.respondWith(fetch(event.request.clone()));
   } else {
-    // All other requests (including precached js/css/html assets): CACHE-FIRST.
-    // Code assets must always come from the installed cache so the app never
-    // mixes bundles from two deployed versions nor upgrades silently; the
-    // network is only a fallback for genuinely uncached resources.
+    // all other requests
+    if (shouldUseNetworkFirst(event.request)) {
+      event.respondWith(
+        (async () => {
+          const cache = await caches.open(CACHE_NAME);
+          // Look up a cached fallback first. If we have one, the short network
+          // timeout is safe (we can serve cache on abort). If we DON'T have a
+          // cached copy, aborting at 3s would break the page (e.g. first-time
+          // lazy-chunk loads on a slow network), so we wait for the real fetch.
+          const cachedResponse = await cache.match(event.request);
+          try {
+            const networkResponse = cachedResponse
+              ? await fetchWithTimeout(event.request.clone(), NO_CACHE_INIT)
+              : await fetch(event.request.clone(), NO_CACHE_INIT);
+            // Only cache successful (2xx) responses — never cache 3xx redirects.
+            if (networkResponse?.ok) {
+              await cache.put(event.request, networkResponse.clone());
+              return networkResponse;
+            }
+            // Non-ok (401/403/5xx) for a code asset: prefer a cached copy over
+            // surfacing a technical error that would break the page.
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // No cache: for a full-page navigation, force reauth instead of a raw
+            // 401/403 body. Non-navigate assets (e.g. a lazy chunk) are left as-is.
+            if (event.request.mode === 'navigate' && isAuthErrorResponse(networkResponse)) {
+              return Response.redirect(scope + 'auth/relogin', 302);
+            }
+            return networkResponse;
+          } catch (error) {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            console.error('Network-first fetch failed and no cache available:', error);
+            return Response.error();
+          }
+        })()
+      );
+      return;
+    }
+
     event.respondWith(
       (async () => {
         // Resolved to a single version cache (never the global caches.match()
