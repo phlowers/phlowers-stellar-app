@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { createSHA256 } from 'hash-wasm';
-import { downloadAndHash } from './verified-download';
+import { downloadAndHash } from './verified-download.helpers';
 
 async function sha256Hex(text: string): Promise<string> {
   const hasher = await createSHA256();

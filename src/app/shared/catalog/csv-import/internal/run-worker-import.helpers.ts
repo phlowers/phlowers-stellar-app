@@ -12,7 +12,7 @@ import { openWorkerDb } from '../csv-import.worker-db';
 import { isJsonImportConfig, resolveCsvImportConfig } from '../configs';
 import type { StellarDexieHandle } from '../json-import.engine.interfaces';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-import.worker.interfaces';
-import { downloadAndHash } from './verified-download';
+import { downloadAndHash } from './verified-download.helpers';
 import { STAGING_TABLE_PREFIX } from '@infrastructure/database/app-database.versions';
 
 /** Shape of a `metadata` row (mirrors `MetadataEntity`, kept local to avoid a runtime import). */

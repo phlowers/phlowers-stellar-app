@@ -24,7 +24,7 @@ export interface DownloadAndHashResult {
  * A single network round-trip serves both hash verification and parsing —
  * the catalog must never be downloaded twice, and its active version must
  * never be replaced by content that has not been fully downloaded and
- * verified first (see `run-worker-import.ts`).
+ * verified first (see `run-worker-import.helpers.ts`).
  */
 export async function downloadAndHash(
   url: string,

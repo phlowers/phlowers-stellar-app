@@ -50,7 +50,7 @@ export interface JsonImportConfig {
   filename: string;
   /**
    * Every live Dexie table name this config writes to. Used generically by
-   * `run-worker-import.ts` to promote the matching staging tables (and
+   * `run-worker-import.helpers.ts` to promote the matching staging tables (and
    * only those) to live in a single transaction once import succeeds.
    */
   tableNames: string[];

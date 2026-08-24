@@ -101,6 +101,8 @@ export class AppComponent implements OnInit {
       if (!untracked(this.catalogUpdateTriggered)) {
         this.catalogUpdateTriggered.set(true);
         this.catalogUpdateService.updateCatalogsIfNeeded().catch((err) => {
+          // Reset the guard so a later effect run (e.g. next auth change) can retry.
+          this.catalogUpdateTriggered.set(false);
           this.logger.error('Catalog update failed', err);
         });
       }

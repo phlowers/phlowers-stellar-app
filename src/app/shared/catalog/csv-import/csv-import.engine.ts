@@ -34,7 +34,7 @@ export interface CsvImportEngineResult {
  * @remarks
  * - Pure function: takes deps explicitly, does not touch globals.
  * - Never re-downloads: `source` is the exact content already fetched (and
- *   SHA-256-verified) by the caller (see `run-worker-import.ts`) — a
+ *   SHA-256-verified) by the caller (see `run-worker-import.helpers.ts`) — a
  *   catalog must be fetched over the network exactly once.
  * - Pauses the parser per chunk to back-pressure IndexedDB writes.
  * - Posts a `progress` message after every chunk and a `done` message at the

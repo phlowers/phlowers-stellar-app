@@ -23,7 +23,7 @@ export interface JsonImportEngineDeps {
  *
  * @remarks
  * - Never fetches: `payload` is the exact content already downloaded (and
- *   SHA-256-verified) by the caller (see `run-worker-import.ts`) — a
+ *   SHA-256-verified) by the caller (see `run-worker-import.helpers.ts`) — a
  *   catalog must be fetched over the network exactly once.
  * - Deterministic when `deps.now` is injected; otherwise falls back to `Date`.
  * - Posts a single `progress` message (1 chunk = whole file) and a `done`
