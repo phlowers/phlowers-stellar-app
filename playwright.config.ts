@@ -23,7 +23,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       E2E_PORT: String(PORT),
-      E2E_DIST_DIR: process.env.E2E_DIST_DIR || 'dist/en'
+      // Single build output (no per-locale dist/en, dist/fr — see update-sim-server.mjs).
+      E2E_DIST_DIR: process.env.E2E_DIST_DIR || 'dist'
     }
   }
 });

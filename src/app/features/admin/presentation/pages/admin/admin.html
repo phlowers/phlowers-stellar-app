@@ -6,6 +6,7 @@
       [btnLoading]="updateService.updateLoading()"
       (click)="updateService.checkAppVersion()"
       [disabled]="updateService.updateLoading()"
+      data-testid="check-app-version-btn"
     >
       {{ 'admin.check-app-version' | transloco }}
     </button>
@@ -38,8 +39,9 @@
     <button
       app-btn
       [btnLoading]="updateService.updateLoading()"
-      (click)="updateService.update()"
+      (click)="updateService.forceUpdateFromAdmin()"
       [disabled]="updateService.updateLoading()"
+      data-testid="force-update-btn"
     >
       {{ 'admin.update-to-latest' | transloco }}
     </button>

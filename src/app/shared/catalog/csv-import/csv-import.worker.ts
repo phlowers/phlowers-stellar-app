@@ -6,10 +6,10 @@
  */
 /// <reference lib="webworker" />
 
-import { runWorkerImport } from './internal/run-worker-import';
+import { runWorkerImport } from './internal/run-worker-import.helpers';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from './csv-import.worker.interfaces';
 
-export { runWorkerImport } from './internal/run-worker-import';
+export { runWorkerImport } from './internal/run-worker-import.helpers';
 
 /**
  * Web Worker entry point. Only registers the `message` listener when running

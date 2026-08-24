@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { CatalogCableEntity } from '@infrastructure/database';
@@ -36,7 +35,6 @@ export class CablesService {
   public readonly ready = new BehaviorSubject<boolean>(false);
 
   private readonly storageService = inject(StorageService);
-  private readonly logger = inject(LoggerService);
   private readonly csvImportClient = inject(CsvImportClientService);
 
   constructor() {
@@ -61,17 +59,15 @@ export class CablesService {
    * @remarks
    * Delegates to `CsvImportClientService` which streams the file
    * through a dedicated Web Worker and persists rows to IndexedDB.
-   * Errors are logged via `LoggerService` but **not** surfaced through
-   * `NotificationService`: this method is invoked at app bootstrap from
-   * `AppComponent` (not by an explicit user action), so a toast would be
-   * misleading. Consumers that trigger imports interactively must catch the
-   * promise themselves and notify the user.
+   * Errors are propagated (never swallowed): the `CatalogUpdateService`
+   * orchestrator is responsible for logging a failure and continuing with
+   * other catalogs. Consumers that trigger imports interactively must catch
+   * the promise themselves and notify the user.
+   *
+   * @param expectedHash - SHA-256 hex digest the downloaded file must match
+   * (see `CatalogUpdateService`). Verified by the worker before any Dexie mutation.
    */
-  async importFromFile(): Promise<void> {
-    try {
-      await this.csvImportClient.importCsv('cables');
-    } catch (error) {
-      this.logger.error('Error importing cables', error);
-    }
+  async importFromFile(expectedHash?: string): Promise<void> {
+    await this.csvImportClient.importCsv('cables', { expectedHash });
   }
 }

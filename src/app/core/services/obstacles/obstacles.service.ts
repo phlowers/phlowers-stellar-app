@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
 import { CatalogObstacleTypeEntity } from '@infrastructure/database';
@@ -36,7 +35,6 @@ export class ObstaclesService {
   activePointIndex = signal<number | null>(null);
 
   private readonly storageService = inject(StorageService);
-  private readonly logger = inject(LoggerService);
   private readonly csvImportClient = inject(CsvImportClientService);
 
   constructor() {
@@ -76,12 +74,13 @@ export class ObstaclesService {
    * via the generic catalog import Web Worker. Persists obstacle types,
    * per-obstacle configuration, regulatory rules, conformity distances and
    * wind zones atomically.
+   *
+   * @param expectedHash - SHA-256 hex digest the downloaded file must match
+   * (see `CatalogUpdateService`). Verified by the worker before any Dexie
+   * mutation; errors are propagated (never swallowed) so a caller can decide
+   * whether to continue with other catalogs.
    */
-  async importFromFile(): Promise<void> {
-    try {
-      await this.csvImportClient.importCsv('obstacles');
-    } catch (error) {
-      this.logger.error('Error importing obstacle configuration', error);
-    }
+  async importFromFile(expectedHash?: string): Promise<void> {
+    await this.csvImportClient.importCsv('obstacles', { expectedHash });
   }
 }
