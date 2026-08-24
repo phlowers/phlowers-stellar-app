@@ -133,13 +133,13 @@
       [ngModel]="measureData().measuredDiffusedPlusDirectSolarFlux"
       (ngModelChange)="updateField('measuredDiffusedPlusDirectSolarFlux', $event)"
       [min]="0"
-      aria-describedby="solar-fluxs-impact"
+      aria-describedby="solar-flux-impact"
       data-testid="measured-solar-flux-input"
     />
     <p-inputgroup-addon>W/m²</p-inputgroup-addon>
   </p-inputgroup>
 
-  <p id="solar-fluxs-impact" class="solar-fluxs-impact">
+  <p id="solar-flux-impact" class="solar-flux-impact">
     {{ 'field-measuring.temperature-calculation.wont-be-used-note' | transloco }}
   </p>
 

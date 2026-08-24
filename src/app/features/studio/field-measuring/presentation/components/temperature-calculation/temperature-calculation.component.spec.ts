@@ -261,6 +261,56 @@ describe('TemperatureCalculationComponent', () => {
     });
   });
 
+  describe('canEstimateSkyCover', () => {
+    beforeEach(() => {
+      component.updateField('longitude', 2.3522);
+      component.updateField('latitude', 48.8566);
+      component.updateField('date', new Date('2026-07-23'));
+      component.updateField('time', new Date('2026-07-23T12:00:00'));
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', 800);
+      workerReadySubject.next(true);
+    });
+
+    it('should return true when the worker is ready and all required fields are set', () => {
+      expect(component.canEstimateSkyCover()).toBe(true);
+    });
+
+    it('should return false when the worker is not ready', () => {
+      workerReadySubject.next(false);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+
+    it('should return false when longitude is null', () => {
+      component.updateField('longitude', null);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+
+    it('should return false when latitude is null', () => {
+      component.updateField('latitude', null);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+
+    it('should return false when date is null', () => {
+      component.updateField('date', null);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+
+    it('should return false when time is null', () => {
+      component.updateField('time', null);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+
+    it('should return false when measuredDiffusedPlusDirectSolarFlux is null', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', null);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+
+    it('should return false when measuredDiffusedPlusDirectSolarFlux is out of bounds', () => {
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', MEASURED_SOLAR_FLUX_BOUNDS.max + 1);
+      expect(component.canEstimateSkyCover()).toBe(false);
+    });
+  });
+
   describe('isCalculating signal', () => {
     it('should start as false', () => {
       expect(component.isCalculating()).toBe(false);
@@ -304,6 +354,60 @@ describe('TemperatureCalculationComponent', () => {
 
       await expect(component.calculateTemperature()).rejects.toThrow('unexpected');
       expect(component.isCalculating()).toBe(false);
+    });
+  });
+
+  describe('isEstimatingSkyCover signal', () => {
+    beforeEach(() => {
+      component.updateField('longitude', 2.3522);
+      component.updateField('latitude', 48.8566);
+      component.updateField('date', new Date('2026-07-23'));
+      component.updateField('time', new Date('2026-07-23T12:00:00'));
+      component.updateField('measuredDiffusedPlusDirectSolarFlux', 800);
+    });
+
+    it('should start as false', () => {
+      expect(component.isEstimatingSkyCover()).toBe(false);
+    });
+
+    it('should be true during estimation and false after', async () => {
+      let resolveTask!: (value: {
+        result: TaskOutputs[Task.estimateSkyCover];
+        error: TaskError | null;
+        diagnostics: PythonDiagnostic[];
+      }) => void;
+      workerPythonServiceMock.runTask.mockReturnValueOnce(
+        new Promise((res) => {
+          resolveTask = res;
+        })
+      );
+
+      const estimatePromise = component.estimateSkyCover();
+      expect(component.isEstimatingSkyCover()).toBe(true);
+
+      resolveTask({ result: { skyCover: SkyCover.N3 }, error: null, diagnostics: [] });
+      await estimatePromise;
+
+      expect(component.isEstimatingSkyCover()).toBe(false);
+    });
+
+    it('should reset to false even when the task returns an error', async () => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: undefined as unknown as TaskOutputs[Task.estimateSkyCover],
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: []
+      });
+
+      await component.estimateSkyCover();
+
+      expect(component.isEstimatingSkyCover()).toBe(false);
+    });
+
+    it('should reset to false even when estimation throws', async () => {
+      workerPythonServiceMock.runTask.mockRejectedValue(new Error('unexpected'));
+
+      await expect(component.estimateSkyCover()).rejects.toThrow('unexpected');
+      expect(component.isEstimatingSkyCover()).toBe(false);
     });
   });
 
@@ -439,6 +543,87 @@ describe('TemperatureCalculationComponent', () => {
       const el = getByTestId('calculate-temperature-btn');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
+    });
+
+    it('should render estimate-sky-cover-btn', () => {
+      const el = getByTestId('estimate-sky-cover-btn');
+      expect(el).toBeTruthy();
+      expect(el?.tagName).toBe('BUTTON');
+    });
+
+    describe('estimate sky cover button', () => {
+      const makeEstimable = () => {
+        componentRef.setInput(
+          'measureData',
+          createTestMeasureData({
+            longitude: 2.3522,
+            latitude: 48.8566,
+            date: new Date('2026-07-23'),
+            time: new Date('2026-07-23T12:00:00'),
+            measuredDiffusedPlusDirectSolarFlux: 800
+          })
+        );
+        workerReadySubject.next(true);
+        fixture.detectChanges();
+      };
+
+      it('should be disabled when canEstimateSkyCover is false', () => {
+        const btn = getByTestId('estimate-sky-cover-btn') as HTMLButtonElement;
+        expect(component.canEstimateSkyCover()).toBe(false);
+        expect(btn.disabled).toBe(true);
+      });
+
+      it('should be enabled when canEstimateSkyCover is true', () => {
+        makeEstimable();
+        const btn = getByTestId('estimate-sky-cover-btn') as HTMLButtonElement;
+        expect(component.canEstimateSkyCover()).toBe(true);
+        expect(btn.disabled).toBe(false);
+      });
+
+      it('should call estimateSkyCover when clicked', () => {
+        makeEstimable();
+        const spy = vi.spyOn(component, 'estimateSkyCover').mockResolvedValue();
+        const btn = getByTestId('estimate-sky-cover-btn') as HTMLButtonElement;
+
+        btn.click();
+
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not call estimateSkyCover when clicked while disabled', () => {
+        const spy = vi.spyOn(component, 'estimateSkyCover').mockResolvedValue();
+        const btn = getByTestId('estimate-sky-cover-btn') as HTMLButtonElement;
+
+        btn.click();
+
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it('should show the loading state while isEstimatingSkyCover is true', async () => {
+        makeEstimable();
+        let resolveTask!: (value: {
+          result: TaskOutputs[Task.estimateSkyCover];
+          error: TaskError | null;
+          diagnostics: PythonDiagnostic[];
+        }) => void;
+        workerPythonServiceMock.runTask.mockReturnValueOnce(
+          new Promise((res) => {
+            resolveTask = res;
+          })
+        );
+
+        const estimatePromise = component.estimateSkyCover();
+        fixture.detectChanges();
+
+        const btn = getByTestId('estimate-sky-cover-btn') as HTMLButtonElement;
+        expect(btn.classList.contains('app-btn-loading')).toBe(true);
+
+        resolveTask({ result: { skyCover: SkyCover.N3 }, error: null, diagnostics: [] });
+        await estimatePromise;
+        fixture.detectChanges();
+
+        expect(btn.classList.contains('app-btn-loading')).toBe(false);
+      });
     });
 
     describe('wind incidence area', () => {
