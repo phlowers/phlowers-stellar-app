@@ -18,7 +18,13 @@ import { MaintenanceService } from '@shared/catalog/services/maintenance.service
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee, StartGps } from './section-import.interfaces';
+import {
+  GeoLiaisonAccroche,
+  GeoLiaisonCanton,
+  GeoLiaisonFormat,
+  GeoLiaisonPortee,
+  StartGps
+} from './section-import.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
 import {
