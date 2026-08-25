@@ -8,6 +8,7 @@ import {
   TemplateRef,
   viewChild
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { FormsModule } from '@angular/forms';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
@@ -46,6 +47,7 @@ interface SpanLoadRow {
 @Component({
   selector: 'app-loads-table',
   imports: [
+    DecimalPipe,
     IconComponent,
     ButtonComponent,
     ToggleSwitchModule,
