@@ -82,11 +82,11 @@ export class SectionPlotCardComponent {
 
   cardColor = computed(() => (this.type() === 'support' ? 'icon-wrapper--support' : 'icon-wrapper--line'));
 
-  private readonly getFormatedNumberIndex = (value: number[] | undefined): number | string => {
+  private readonly getFormatedNumberIndex = (value: number[] | undefined, decimalPlaces = 1): number | string => {
     if (value === undefined) {
       return '-';
     }
-    return round(value?.[this.index()], 2);
+    return round(value?.[this.index()], decimalPlaces);
   };
 
   private readonly getParameterValue = (value: number[] | undefined): number | string => {
