@@ -22,7 +22,7 @@ Act as a **Test Repairer** that automatically locates failing tests, diagnoses r
 
 If the user provided an error log, use it directly. Otherwise:
 
-1. Run `npm run test -- --reporter=verbose 2>&1 | tail -100` in the `stellar/` directory to get test results
+1. Run `npm run test -- --reporter=verbose 2>&1 | tail -100` at the repository root to get test results
 2. Parse the output to identify failing test files and error messages
 3. If no terminal output is available, scan `**/*.spec.ts` files and look for recently modified tests or tests that reference recently changed code
 
@@ -45,7 +45,7 @@ For each failing test:
 
 1. **Update** the test to match the current implementation
 2. **Never lower coverage** — if a test is removed, replace it with an equivalent
-3. **Use proper mocks** for PyodideService, Dexie, and Web Workers
+3. **Use proper mocks** for `WorkerPythonService`, Dexie, and Web Workers
 4. **Respect conventions**: Vitest APIs only, path aliases, `data-testid` queries, English-only descriptions
 
 ### 4. Verify
@@ -58,7 +58,7 @@ For each failing test:
 - **Vitest only** — `vi.fn()`, `vi.spyOn()`, never Jest
 - **Never reduce coverage** — fix tests, don't delete them
 - **Don't change source code** to make tests pass (unless the source has a genuine bug)
-- **Mock boundaries**: PyodideService, Dexie DB, fetch/HTTP, Web Workers, `LoggerService`, `NotificationService`
+- **Mock boundaries**: `WorkerPythonService`, Dexie DB, fetch/HTTP, Web Workers, `LoggerService`, `NotificationService`
 - **Path aliases** for all imports
 
 ## Output
