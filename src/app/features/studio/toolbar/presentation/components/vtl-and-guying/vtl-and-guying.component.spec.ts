@@ -617,6 +617,39 @@ describe('VhlAndGuyingComponent', () => {
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('BUTTON');
     });
+
+    it('should render VTL effort values with one decimal place', () => {
+      component.vtlWithoutGuying.set({
+        chargeV: 100.16,
+        chargeH: 200.26,
+        chargeL: 300.36,
+        resultant: 400.46
+      });
+      component.results.set({
+        tensionInGuy: 500.56,
+        guyAngle: 45.123,
+        chargeVUnderConsole: 600.66,
+        chargeHUnderConsole: 700.76,
+        chargeLIfPulley: 800.86
+      });
+      fixture.detectChanges();
+
+      const vtlValues = Array.from(fixture.nativeElement.querySelectorAll('.vtl-guying__vtl-value')).map(
+        (element: HTMLElement) => element.textContent?.trim()
+      );
+      const resultValues = Array.from(fixture.nativeElement.querySelectorAll('.vtl-guying__results-fields dd')).map(
+        (element: HTMLElement) => element.textContent?.trim()
+      );
+
+      expect(vtlValues).toEqual(['100.2\u00a0daN', '200.3\u00a0daN', '300.4\u00a0daN', '400.5\u00a0daN']);
+      expect(resultValues).toEqual([
+        '500.6\u00a0daN',
+        '45.123\u00a0°',
+        '600.7\u00a0daN',
+        '700.8\u00a0daN',
+        '800.9\u00a0daN'
+      ]);
+    });
   });
 
   /**
