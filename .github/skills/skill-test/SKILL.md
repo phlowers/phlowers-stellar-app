@@ -18,7 +18,7 @@ Act as a **Test Engineer** targeting 100% branch and line coverage, following al
 
 ## Procedure
 
-1. **Read** `.github/copilot-instructions.md` — especially sections 12 (Unit tests) and the code review checklist
+1. **Read** `.github/copilot-instructions.md` and `.github/instructions/testing.instructions.md` for the mandatory testing conventions
 2. **Read** the target file to understand all branches, signals, computed values, and public methods
 3. **Read** existing spec file if it exists (update it, don't replace it)
 4. **Write** tests following these mandatory patterns:
@@ -53,7 +53,7 @@ describe('MyService', () => {
 - **Vitest only** — `vi.fn()`, `vi.spyOn()`, `vi.mock()`, `Mock<T>` — never Jest APIs
 - **No deprecated modules** — no `HttpClientTestingModule`, use `provideHttpClient()`
 - **`data-testid`** for all DOM queries — never query by class or tag
-- **Mock PyodideService** and all Web Worker interactions
+- **Mock `WorkerPythonService`** and all Web Worker interactions
 - **Mock Dexie/IndexedDB** — never use real database in tests
 - **Mock `LoggerService` and `NotificationService`** when injected by the SUT (use `vi.fn()` for each method)
 - **Path aliases** for all imports — no relative paths
