@@ -155,7 +155,7 @@ dd {
       grid-area: measuredDiffusedPlusDirectSolarFlux__value;
     }
 
-    .solar-fluxs-impact {
+    .solar-flux-impact {
       @apply self-start;
       grid-area: measuredDiffusedPlusDirectSolarFluxInfo;
       @extend %text-s-600, %label-spacing;
