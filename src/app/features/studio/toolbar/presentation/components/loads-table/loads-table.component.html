@@ -123,7 +123,7 @@
           @if (row.type === LoadType.MARKING) {
             <td>-</td>
           } @else {
-            <td>{{ row.loadWeight }}&nbsp;daN</td>
+            <td>{{ row.loadWeight | number: '1.0-1' }}&nbsp;daN</td>
           }
         </tr>
       </ng-template>
