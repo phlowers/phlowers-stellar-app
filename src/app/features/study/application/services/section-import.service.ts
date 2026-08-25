@@ -18,7 +18,7 @@ import { MaintenanceService } from '@shared/catalog/services/maintenance.service
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
+import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee, StartGps } from './section-import.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
 import {
@@ -39,12 +39,6 @@ import {
   parseFloatOrNull,
   validateGeoLiaisonRawFields
 } from './section-import.helpers';
-
-interface StartGps {
-  startLatitude: number;
-  startLongitude: number;
-  startAzimuth: number;
-}
 
 // ---------------------------------------------------------------------------
 // Service
@@ -308,11 +302,11 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     const lambertX = accroches.map((a) => parseFloatOrNull(a.PIED_X_LAMBERT93));
     const lambertY = accroches.map((a) => parseFloatOrNull(a.PIED_Y_LAMBERT93));
-    const { supports: reprojectedSupports, meanReprojectionDiffMeters, startGps } = await this.applyLambertReprojection(
-      supportsWithCatalogResolution,
-      lambertX,
-      lambertY
-    );
+    const {
+      supports: reprojectedSupports,
+      meanReprojectionDiffMeters,
+      startGps
+    } = await this.applyLambertReprojection(supportsWithCatalogResolution, lambertX, lambertY);
 
     return {
       section: {

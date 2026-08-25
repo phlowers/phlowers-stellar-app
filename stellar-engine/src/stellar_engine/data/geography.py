@@ -94,7 +94,7 @@ def import_lambert(inputs: dict) -> dict:
     # convert from [0, 360] to [-180, 180]
     azimuth_pi_minus_pi = np.where(azimuth <= 180, azimuth, azimuth - 360)
     # convert from anticlockwise to clockwise
-    azimuth_clockwise = - azimuth_pi_minus_pi
+    azimuth_clockwise = -azimuth_pi_minus_pi
     return {
         "latitude": latitude.tolist(),
         "longitude": longitude.tolist(),
