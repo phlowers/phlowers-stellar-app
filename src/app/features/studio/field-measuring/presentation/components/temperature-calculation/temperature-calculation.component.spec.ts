@@ -606,6 +606,13 @@ describe('TemperatureCalculationComponent', () => {
           error: TaskError | null;
           diagnostics: PythonDiagnostic[];
         }) => void;
+        // Setting skyCover below also satisfies diffuseAndBeamRadiationEffect's inputs, which fires a
+        // second runTask call; give it a resolved default so it doesn't hit the unmocked vi.fn().
+        workerPythonServiceMock.runTask.mockResolvedValue({
+          result: { diffuseRadiation: 0, beamRadiation: 0, diffusePlusBeamRadiation: 0 },
+          error: null,
+          diagnostics: []
+        });
         workerPythonServiceMock.runTask.mockReturnValueOnce(
           new Promise((res) => {
             resolveTask = res;
@@ -620,6 +627,7 @@ describe('TemperatureCalculationComponent', () => {
 
         resolveTask({ result: { skyCover: SkyCover.N3 }, error: null, diagnostics: [] });
         await estimatePromise;
+        await fixture.whenStable();
         fixture.detectChanges();
 
         expect(btn.classList.contains('app-btn-loading')).toBe(false);
