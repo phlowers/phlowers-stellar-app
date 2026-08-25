@@ -91,13 +91,16 @@ def import_lambert(inputs: dict) -> dict:
         np.array(lambert_data.lambert_x), np.array(lambert_data.lambert_y)
     )
     azimuth = get_azimuth_from_gps(latitude, longitude, unit="deg")
-
+    # convert from [0, 360] to [-180, 180]
+    azimuth_pi_minus_pi = np.where(azimuth <= 180, azimuth, azimuth - 360)
+    # convert from anticlockwise to clockwise
+    azimuth_clockwise = - azimuth_pi_minus_pi
     return {
         "latitude": latitude.tolist(),
         "longitude": longitude.tolist(),
         "lambert_x": lambert_data.lambert_x,
         "lambert_y": lambert_data.lambert_y,
-        "azimuth": azimuth.tolist(),
+        "azimuth": azimuth_clockwise.tolist(),
     }
 
 
