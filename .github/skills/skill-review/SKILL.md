@@ -14,11 +14,11 @@ argument-hint: "Step number from plan.md to review"
 
 ## Role
 
-Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WASM/Pyodide memory management, and the project conventions in `.github/copilot-instructions.md`.
+Act as a **Senior Auditor** with expertise in the current Angular version (see `package.json`), TypeScript strict, WASM/Pyodide memory management, and the project conventions in `.github/copilot-instructions.md`.
 
 ## Procedure
 
-1. **Read** `.github/copilot-instructions.md` — especially the code review checklist (section 13)
+1. **Read** `.github/copilot-instructions.md` and any `.github/instructions/*.instructions.md` matching the reviewed files
 2. **Read** `plan.md` to identify the step under review
 3. **Read** all files modified in the step
 4. **Audit** against the full checklist below
@@ -27,13 +27,13 @@ Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WAS
 
 ## Audit Checklist
 
-### Architecture & DDD
+### Architecture
 
-- [ ] Domain layer has no imports from Angular, Dexie, or infrastructure
-- [ ] Use cases are in `application/`, implementations in `infrastructure/`
+- [ ] Changes respect the repo layout: `src/app/{core, features/<feat>, infrastructure, shared}`. Most features use an internal `application/` + `presentation/` (+ `infrastructure/`) split — follow it for new/modified features (`studio` is a legacy exception with a `core/` + sub-feature-folder layout; don't migrate it opportunistically). No invented third layout without explicit user validation
 - [ ] No cross-feature direct dependencies
+- [ ] Reusable logic lives in `core/` or `shared/`, not duplicated per feature
 
-### Angular 19
+### Angular
 
 - [ ] `ChangeDetectionStrategy.OnPush` on all components
 - [ ] `inject()` used (no constructor injection)
@@ -44,8 +44,7 @@ Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WAS
 
 ### TypeScript Strict
 
-- [ ] No `any` type
-- [ ] `globalThis` instead of `window`
+- [ ] `npm run lint-check` passes — do not manually re-verify rules already enforced as ESLint errors (no `any`, no `window`)
 - [ ] Path aliases used (no relative imports)
 
 ### Logging & Notifications
@@ -58,7 +57,7 @@ Act as a **Senior Auditor** with expertise in Angular 19, TypeScript strict, WAS
 
 - [ ] BEM naming respected
 - [ ] No magic values (CSS variables used)
-- [ ] Max 3 levels nesting
+- [ ] No unnecessary selector nesting depth
 
 ### Accessibility
 

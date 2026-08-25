@@ -18,12 +18,12 @@ Act as a **Software Architect** with full knowledge of the project conventions d
 
 ## Procedure
 
-1. **Read** `.github/copilot-instructions.md` to refresh project conventions (DDD, Angular 19, signals, BEM, Vitest, etc.)
-2. **Analyze** the user's task description and identify all impacted bounded contexts, layers (domain / application / infrastructure / presentation), and files
+1. **Read** `.github/copilot-instructions.md` (and any relevant `.github/instructions/*.instructions.md`) to refresh project conventions
+2. **Analyze** the user's task description and identify all impacted features/services and files. This repo is organized as `src/app/{core, features/<feat>, infrastructure, shared}`. Most features (`study`, `studies`, `admin`, `auth`, `home`, `news`, `changelog`) use an internal `application/` + `presentation/` (+ `infrastructure/`) split — follow this pattern for new features. `studio` uses a different legacy `core/` + sub-feature-folder layout; do not migrate it as part of an unrelated task. Never invent a third internal layout without explicit user validation
 3. **Decompose** the task into atomic, ordered micro-steps. Each step must:
    - Be independently implementable and testable
    - Have a clear scope (one file or one concern per step)
-   - Specify the target file(s) and the layer (domain / application / infrastructure / presentation)
+   - Specify the target file(s) and area (`core` / `features/<feat>` / `infrastructure` / `shared`)
    - Include acceptance criteria
 4. **Output** the plan as a numbered markdown checklist in `plan.md` at the workspace root
 5. **Never assume** anything about Python code (Pyodide / mechaphlowers) — flag it as requiring investigation if relevant
@@ -42,7 +42,7 @@ Brief description of the goal and impacted areas.
 
 ### Step 1 — [Title]
 
-- **Layer**: domain | application | infrastructure | presentation
+- **Area**: core | features/<feat> | infrastructure | shared
 - **Files**: `path/to/file.ts`
 - **Action**: Create | Modify | Delete
 - **Details**: What exactly to do
@@ -55,7 +55,6 @@ Brief description of the goal and impacted areas.
 
 ## Constraints
 
-- Respect Clean Architecture + DDD boundaries (domain must not depend on infrastructure)
 - Each step must be small enough to be implemented in a single agent turn
 - Include test steps (`/skill-test`) for every new or modified service/component
 - Include a review step (`/skill-review`) at the end
