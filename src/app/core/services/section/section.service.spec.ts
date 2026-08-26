@@ -248,6 +248,42 @@ describe('SectionService', () => {
         })
       );
     });
+
+    it('should return removedGeometryBoundObjects=false when the geometry did not change', async () => {
+      const result = await service.createOrUpdateSection(mockStudy, { ...mockSection });
+
+      expect(result).toEqual({ removedGeometryBoundObjects: false });
+    });
+
+    it('should remove obstacles/loads referencing a deleted support and return removedGeometryBoundObjects=true', async () => {
+      const supports = [{ uuid: 'sup-1' }, { uuid: 'sup-2' }] as Section['supports'];
+      const obstacle = {
+        uuid: 'obs-1',
+        supportUuid: 'deleted-support',
+        supportIndex: 0,
+        name: 'Obstacle',
+        type: 'tree',
+        altitudeType: 'absolute',
+        referenceSupport: 'LEFT',
+        lateralDistanceType: 'SPAN_AXIS',
+        positions: []
+      } as unknown as Section['obstacles'][number];
+
+      const updatedSection: Section = {
+        ...mockSection,
+        supports,
+        obstacles: [obstacle]
+      };
+
+      const result = await service.createOrUpdateSection(mockStudy, updatedSection);
+
+      expect(result).toEqual({ removedGeometryBoundObjects: true });
+      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sections: expect.arrayContaining([expect.objectContaining({ uuid: mockSection.uuid, obstacles: [] })])
+        })
+      );
+    });
   });
 
   describe('deleteSection', () => {
