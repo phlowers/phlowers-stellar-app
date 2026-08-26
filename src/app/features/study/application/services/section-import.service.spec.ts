@@ -17,9 +17,11 @@ import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/s
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
+import fakeGeoLiaisonCanton101To103 from './section-import.fixtures/fake-canton.json';
 
 const geoLiaisonSupportCatalogMissingWarning =
   'The attachment support from the geolink file is not present in the application support catalog';
@@ -152,11 +154,11 @@ const buildValidGeoLiaisonPayload = (): Record<string, unknown> => ({
           {
             LIT_ADR: 'LitName',
             LIT_IDR: 'LIT001',
-            BRANCHE_IDR: 'FLAMAL73MENUE01',
+            BRANCHE_IDR: 'TESTLINE73STB01',
             TENSION_ELECTRIQUE_IDR: '225kV',
             TENSION_ELECTRIQUE_ADR: '225 KV',
             LIAISON_IDR: 'LIA001',
-            LIAISON_ADR: 'Liaison 225kV Flamal-Menuet'
+            LIAISON_ADR: 'Liaison 225kV Site-Alpha-Site-Beta'
           }
         ]
       },
@@ -195,6 +197,7 @@ describe('SectionImportService', () => {
     resolveGeoLiaisonCatalogAttachment: ReturnType<typeof vi.fn>;
   };
   let chainsServiceMock: { getChains: ReturnType<typeof vi.fn> };
+  let linesServiceMock: { getLines: ReturnType<typeof vi.fn> };
   let workerPythonServiceMock: { runTask: ReturnType<typeof vi.fn> };
 
   /** Default successful runTask mock: returns arrays matching the length of the input arrays. */
@@ -288,6 +291,10 @@ describe('SectionImportService', () => {
       getChains: vi.fn().mockResolvedValue([])
     };
 
+    linesServiceMock = {
+      getLines: vi.fn().mockResolvedValue([])
+    };
+
     workerPythonServiceMock = {
       runTask: vi.fn(mockSuccessfulRunTask)
     };
@@ -301,6 +308,7 @@ describe('SectionImportService', () => {
         { provide: MaintenanceService, useValue: maintenanceServiceMock },
         { provide: AttachmentService, useValue: attachmentServiceMock },
         { provide: ChainsService, useValue: chainsServiceMock },
+        { provide: LinesService, useValue: linesServiceMock },
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
         {
           provide: TranslocoService,
@@ -566,6 +574,49 @@ describe('SectionImportService', () => {
       });
       expect(loggerSpy.error).toHaveBeenCalledWith('Error persisting section', expect.any(Error));
     });
+
+    it('should restore the existing section when re-creation fails after a collision replacement', async () => {
+      const existing = { ...createEmptySection(), uuid: 'sec-uuid-1', name: 'Existing' } as Section;
+      service.setStudyContext(buildMockStudy([existing]));
+      sectionServiceMock.createOrUpdateSection
+        .mockRejectedValueOnce(new Error('persist failed'))
+        .mockResolvedValueOnce(undefined);
+      const file = makeJsonFile(buildValidSectionPayload());
+
+      await expect(service.processFile(file, alwaysAccept)).rejects.toMatchObject({
+        code: 'PERSISTENCE_ERROR',
+        stage: 'PERSISTENCE'
+      });
+
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(2);
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenNthCalledWith(2, expect.anything(), existing);
+      expect(loggerSpy.error).toHaveBeenCalledWith('Error persisting section', expect.any(Error));
+      expect(loggerSpy.error).not.toHaveBeenCalledWith(
+        'Failed to restore section after failed replacement',
+        expect.anything()
+      );
+    });
+
+    it('should log an error when restoring the existing section also fails after a collision replacement', async () => {
+      const existing = { ...createEmptySection(), uuid: 'sec-uuid-1', name: 'Existing' } as Section;
+      service.setStudyContext(buildMockStudy([existing]));
+      sectionServiceMock.createOrUpdateSection
+        .mockRejectedValueOnce(new Error('persist failed'))
+        .mockRejectedValueOnce(new Error('restore failed'));
+      const file = makeJsonFile(buildValidSectionPayload());
+
+      await expect(service.processFile(file, alwaysAccept)).rejects.toMatchObject({
+        code: 'PERSISTENCE_ERROR',
+        stage: 'PERSISTENCE'
+      });
+
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(2);
+      expect(loggerSpy.error).toHaveBeenCalledWith('Error persisting section', expect.any(Error));
+      expect(loggerSpy.error).toHaveBeenCalledWith(
+        'Failed to restore section after failed replacement',
+        expect.any(Error)
+      );
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -628,7 +679,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-SET19-3-SET19');
+      expect(result?.name).toBe('TESTLINE73STB01-PHASE1-1-SET19-3-SET19');
       expect(result?.cable_name).toBe('GeoSection');
       expect(result?.type).toBe('phase');
       expect(result?.cables_amount).toBe(2);
@@ -642,7 +693,49 @@ describe('SectionImportService', () => {
       expect(result?.lit_name).toBe('LitName');
       expect(result?.lit_code).toBe('LIT001');
       expect(result?.link_name).toBe('LIA001');
+      // BRANCHE_IDR='TESTLINE73STB01' is passed through extractBranchIdr(): last 2 chars '01' -> '1'.
       expect(result?.branch_idr).toBe('1');
+      expect(result?.voltage_idr).toBeUndefined();
+    });
+
+    it('should map branch_idr to undefined when BRANCHE_IDR is absent', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const appartenance = ((payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>)[
+        'appartenance'
+      ] as Record<string, unknown>[];
+      appartenance[0]['BRANCHE_IDR'] = null;
+
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.branch_idr).toBeUndefined();
+    });
+
+    it('should resolve voltage_idr from the line catalog, matching TENSION_ELECTRIQUE_IDR/_ADR regardless of spacing/casing', async () => {
+      linesServiceMock.getLines.mockResolvedValue([{ voltage_idr: '225 KV' }, { voltage_idr: '400 KV' }]);
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      // TENSION_ELECTRIQUE_IDR='225kV' normalizes to '225KV', matching catalog entry '225 KV'.
+      expect(result?.voltage_idr).toBe('225 KV');
+    });
+
+    it('should fall back to TENSION_ELECTRIQUE_ADR when TENSION_ELECTRIQUE_IDR has no catalog match', async () => {
+      const payload = buildValidGeoLiaisonPayload();
+      const cantons = payload['cantons'] as { general: { appartenance: Record<string, unknown>[] } }[];
+      cantons[0].general.appartenance[0]['TENSION_ELECTRIQUE_IDR'] = 'unknown-format';
+      linesServiceMock.getLines.mockResolvedValue([{ voltage_idr: '225 KV' }]);
+      const file = makeJsonFile(payload);
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.voltage_idr).toBe('225 KV');
+    });
+
+    it('should leave voltage_idr undefined when no catalog line matches either candidate', async () => {
+      linesServiceMock.getLines.mockResolvedValue([{ voltage_idr: '63 KV' }]);
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
       expect(result?.voltage_idr).toBeUndefined();
     });
 
@@ -989,8 +1082,8 @@ describe('SectionImportService', () => {
               appartenance: [
                 {
                   LIT_ADR: 'LIT 400kV',
-                  LIT_IDR: 'FLAMAL73MENUE',
-                  BRANCHE_IDR: 'FLAMAL73MENUE01',
+                  LIT_IDR: 'TESTLINE73STB',
+                  BRANCHE_IDR: 'TESTLINE73STB01',
                   TENSION_ELECTRIQUE_ADR: '400 KV'
                 }
               ]
@@ -1000,9 +1093,9 @@ describe('SectionImportService', () => {
                 PORTEE_UNITAIRE_ORDRE: '7.5',
                 PORTEE_LONGUEUR: '444.1',
                 PORTEE_AZIMUT: '107.821',
-                CM_DESIGNATION: 'CM-NTR',
-                EEL_DESIGNATION: 'NORMANDIE',
-                GMR_DESIGNATION: 'GMR NORMANDIE',
+                CM_DESIGNATION: 'CM_01',
+                EEL_DESIGNATION: 'EEL_01',
+                GMR_DESIGNATION: 'GMR_01',
                 PORTEE_UNITAIRE_DESIGNATION: 'Position 1',
                 'accroche depart': nullAccroche(),
                 'accroche arrivee': nullAccroche()
@@ -1020,8 +1113,313 @@ describe('SectionImportService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // GeoLiaison format — Lambert93 to GPS reprojection
+  // GeoLiaison format — full Section/Support object snapshots
+  //
+  // These guard the ENTIRE mapped object against silent regressions (e.g. a mapping
+  // line being accidentally removed, such as `branch_idr` in the past). Any field that
+  // stops being mapped/overridden will fall back to its `createEmptySection()`/
+  // `createEmptySupport()` default and break these tests.
   // -------------------------------------------------------------------------
+
+  describe('processFile() — GeoLiaison format — full object snapshots', () => {
+    beforeEach(() => {
+      service.setStudyContext(buildMockStudy());
+    });
+
+    it('should return the complete mapped Section and Support objects (catalog fallback)', async () => {
+      // Default mocks: attachment/chain catalogs return no match -> supports keep GeoLiaison file values.
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+      expect(result).not.toBeNull();
+
+      const { uuid, created_at, updated_at, supports, ...restSection } = result as Section;
+      expect(uuid).toBe('geo-uuid-1');
+      expect(typeof created_at).toBe('string');
+      expect(typeof updated_at).toBe('string');
+
+      const expectedSupportBase = {
+        name: 'Support_IDR_A',
+        spanAngle: 5.0,
+        attachmentSet: 19,
+        attachmentHeight: 25.0,
+        heightBelowConsole: 2.5,
+        towerModel: 'TowerX',
+        cableType: null,
+        armLength: 3.0,
+        chainName: 'ChainA_IDR',
+        chainLength: 5.0,
+        chainWeight: 50.0,
+        chainV: false,
+        counterWeight: 0,
+        supportFootAltitude: 100.0,
+        chainSurface: 0.5,
+        spanAzimut: 180.5
+      };
+      const expectedSupports = [
+        {
+          ...expectedSupportBase,
+          number: '1',
+          spanLength: 565.49,
+          attachmentPosition: '1',
+          footLatitude: 45,
+          footLongitude: 3
+        },
+        {
+          ...expectedSupportBase,
+          number: '2',
+          spanLength: 565.49,
+          attachmentPosition: '2',
+          footLatitude: 46,
+          footLongitude: 4
+        },
+        {
+          ...expectedSupportBase,
+          number: '3',
+          spanLength: null,
+          attachmentPosition: '2',
+          footLatitude: 47,
+          footLongitude: 5
+        }
+      ];
+
+      expect(supports).toHaveLength(3);
+      supports.forEach((support, i) => {
+        const { uuid: supportUuid, ...supportRest } = support;
+        expect(typeof supportUuid).toBe('string');
+        expect(supportRest).toEqual(expectedSupports[i]);
+      });
+
+      const {
+        uuid: _du,
+        created_at: _dc,
+        updated_at: _dup,
+        supports: _ds,
+        ...emptySectionDefaults
+      } = createEmptySection();
+      const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(123456.0 - (100 + i), 789012.0 - (200 + i)));
+      const expectedMeanDiff = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
+
+      expect(restSection).toEqual({
+        ...emptySectionDefaults,
+        name: 'TESTLINE73STB01-PHASE1-1-SET19-3-SET19',
+        cable_name: 'GeoSection',
+        type: 'phase',
+        cables_amount: 2,
+        electric_phase_number: 1,
+        lit_name: 'LitName',
+        lit_code: 'LIT001',
+        link_name: 'LIA001',
+        branch_idr: '1',
+        voltage_idr: undefined,
+        maintenance_center_id: 'MC_ID_01',
+        maintenance_center_names: ['CM_01'],
+        maintenance_team_id: 'EEL_ID_01',
+        regional_team_id: 'GMR_ID_01',
+        regional_maintenance_center_names: ['GMR_01'],
+        initial_conditions: [],
+        selected_initial_condition_uuid: undefined,
+        start_latitude: 45,
+        start_longitude: 3,
+        start_azimuth: 0,
+        mean_reprojection_diff_meters: expectedMeanDiff
+      });
+    });
+
+    it('should return the complete mapped Support objects when both the attachment and chain catalogs resolve', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Catalog Support Name',
+        support_tower: 'Catalog Tower',
+        attachment_set: 42,
+        cross_arm_length: 8.8,
+        attachment_altitude: 88.8,
+        attachment_set_x: 1,
+        attachment_set_y: 2,
+        attachment_set_z: 3
+      });
+      chainsServiceMock.getChains.mockResolvedValue([
+        {
+          uuid: 'chain-1',
+          chain_name: 'ChainA_IDR',
+          mean_length: 7.7,
+          mean_mass: 707.8,
+          v_chain: true,
+          chain_type: 'suspension',
+          chain_surface: 2.91
+        }
+      ]);
+
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      const expectedSupportBase = {
+        name: 'Support_IDR_A',
+        spanAngle: 5.0,
+        attachmentSet: 42,
+        attachmentHeight: 25.0,
+        heightBelowConsole: 88.8,
+        towerModel: 'TowerX',
+        cableType: null,
+        armLength: 8.8,
+        chainName: 'ChainA_IDR',
+        chainLength: 7.7,
+        chainWeight: 707.8,
+        chainV: true,
+        counterWeight: 0,
+        supportFootAltitude: 100.0,
+        chainSurface: 2.91,
+        spanAzimut: 180.5
+      };
+      const expectedSupports = [
+        {
+          ...expectedSupportBase,
+          number: '1',
+          spanLength: 565.49,
+          attachmentPosition: '1',
+          footLatitude: 45,
+          footLongitude: 3
+        },
+        {
+          ...expectedSupportBase,
+          number: '2',
+          spanLength: 565.49,
+          attachmentPosition: '2',
+          footLatitude: 46,
+          footLongitude: 4
+        },
+        {
+          ...expectedSupportBase,
+          number: '3',
+          spanLength: null,
+          attachmentPosition: '2',
+          footLatitude: 47,
+          footLongitude: 5
+        }
+      ];
+
+      expect(result?.supports).toHaveLength(3);
+      result?.supports.forEach((support, i) => {
+        const { uuid: supportUuid, ...supportRest } = support;
+        expect(typeof supportUuid).toBe('string');
+        expect(supportRest).toEqual(expectedSupports[i]);
+      });
+    });
+
+    it('should correctly map a fully synthetic GeoLiaison canton export (regression guard)', async () => {
+      const file = makeJsonFile(fakeGeoLiaisonCanton101To103);
+
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result).not.toBeNull();
+      expect(result?.uuid).toBe('FAKE-CANTON-0001');
+      expect(result?.name).toBe('FAKEBR00LINE04-PHASE3-101-SET11-103-SET33');
+      expect(result?.cable_name).toBe('FAKECABLE-000');
+      expect(result?.type).toBe('phase');
+      expect(result?.cables_amount).toBe(2);
+      expect(result?.electric_phase_number).toBe(3);
+      expect(result?.lit_name).toBe('LIT 225kV NO FAKE-SITE-A-FAKE-SITE-B');
+      expect(result?.lit_code).toBe('FAKEBR00LINE');
+      expect(result?.link_name).toBe('FAKEBR00LINE');
+      expect(result?.branch_idr).toBe('4');
+      expect(result?.voltage_idr).toBeUndefined();
+      expect(result?.maintenance_center_names).toEqual(['FAKE-CM-01']);
+      expect(result?.maintenance_center_id).toBeUndefined();
+      expect(result?.maintenance_team_id).toBeUndefined();
+      expect(result?.regional_team_id).toBeUndefined();
+      expect(result?.regional_maintenance_center_names).toEqual(['FAKE-GMR-ZONE']);
+
+      const expectedSupports = [
+        {
+          number: '101',
+          name: 'FAKE-SUP-101',
+          spanLength: 200,
+          spanAngle: 0,
+          attachmentSet: 11,
+          attachmentHeight: 15,
+          heightBelowConsole: 5,
+          towerModel: 'FAKE-SUP-101.tower',
+          cableType: null,
+          armLength: 1.2,
+          chainName: 'FAKECHAIN-A',
+          chainLength: 1,
+          chainWeight: 45,
+          chainV: false,
+          counterWeight: null,
+          supportFootAltitude: 10,
+          attachmentPosition: '6',
+          chainSurface: 0.09,
+          spanAzimut: 10,
+          footLongitude: 3,
+          footLatitude: 45
+        },
+        {
+          number: '102',
+          name: 'FAKE-SUP-102',
+          spanLength: 150,
+          spanAngle: 0,
+          attachmentSet: 22,
+          attachmentHeight: 25,
+          heightBelowConsole: 5,
+          towerModel: 'FAKE-SUP-102.tower',
+          cableType: null,
+          armLength: 1.5,
+          chainName: 'FAKECHAIN-B',
+          chainLength: 1.1,
+          chainWeight: 50,
+          chainV: false,
+          counterWeight: null,
+          supportFootAltitude: 20,
+          attachmentPosition: '6',
+          chainSurface: 0.1,
+          spanAzimut: 20,
+          footLongitude: 4,
+          footLatitude: 46
+        },
+        {
+          number: '103',
+          name: 'FAKE-SUP-103',
+          spanLength: null,
+          spanAngle: 5,
+          attachmentSet: 33,
+          attachmentHeight: 35,
+          heightBelowConsole: 5,
+          towerModel: 'FAKE-SUP-103.tower',
+          cableType: null,
+          armLength: 2,
+          chainName: 'FAKECHAIN-C',
+          chainLength: 2.2,
+          chainWeight: 100,
+          chainV: false,
+          counterWeight: null,
+          supportFootAltitude: 30,
+          attachmentPosition: '6',
+          chainSurface: 0.2,
+          spanAzimut: 20,
+          footLongitude: 5,
+          footLatitude: 47
+        }
+      ];
+
+      expect(result?.supports).toHaveLength(3);
+      result?.supports.forEach((support, i) => {
+        const { uuid: supportUuid, ...supportRest } = support;
+        expect(typeof supportUuid).toBe('string');
+        expect(supportRest).toEqual(expectedSupports[i]);
+      });
+
+      const lambertX = [100.0, 110.0, 120.0];
+      const lambertY = [200.0, 210.0, 220.0];
+      const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(lambertX[i] - (100 + i), lambertY[i] - (200 + i)));
+      const expectedMeanDiff = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
+      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(expectedMeanDiff, 6);
+
+      expect(result?.start_latitude).toBe(45);
+      expect(result?.start_longitude).toBe(3);
+      expect(result?.start_azimuth).toBe(0);
+    });
+  });
 
   describe('processFile() — Lambert93 to GPS reprojection', () => {
     beforeEach(() => {
@@ -1101,10 +1499,10 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
-      // BRANCHE_IDR='FLAMAL73MENUE01', CANTON_TYPE='PHASE', PHASE='1'
+      // BRANCHE_IDR='TESTLINE73STB01', CANTON_TYPE='PHASE', PHASE='1'
       // supports[0].number='1', attachmentSet=19
       // supports[2].number='3', attachmentSet=19
-      expect(result?.name).toBe('FLAMAL73MENUE01-PHASE1-1-SET19-3-SET19');
+      expect(result?.name).toBe('TESTLINE73STB01-PHASE1-1-SET19-3-SET19');
     });
 
     it('should omit phase number when CANTON_TYPE is GARDE', async () => {
@@ -1116,7 +1514,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.name).toBe('FLAMAL73MENUE01-GARDE-1-SET19-3-SET19');
+      expect(result?.name).toBe('TESTLINE73STB01-GARDE-1-SET19-3-SET19');
     });
 
     it('should omit the branch prefix when BRANCHE_IDR is null', async () => {
@@ -1205,6 +1603,133 @@ describe('SectionImportService', () => {
 
       const result = await service.processFile(file, neverAccept);
       expect(result).not.toBeNull();
+      expect(result?.uuid).toBe('sec-uuid-1');
+    });
+
+    it('should build the complete merged Section object, preserving unknown extra fields (full snapshot)', async () => {
+      service.setStudyContext(buildMockStudy());
+      const payload: Record<string, unknown> = {
+        uuid: 'sec-uuid-legacy-1',
+        name: 'Legacy Section',
+        type: 'phase',
+        cables_amount: 3,
+        cable_name: 'ASTER570',
+        branch_idr: '5',
+        voltage_idr: '225kV',
+        someUnknownField: 'should be preserved',
+        supports: [
+          {
+            uuid: 'sup-uuid-1',
+            number: '1',
+            name: 'S1',
+            spanLength: 100,
+            spanAngle: 0,
+            attachmentSet: 10,
+            attachmentHeight: 20,
+            heightBelowConsole: 2,
+            towerModel: 'T1',
+            cableType: null,
+            armLength: 3,
+            chainName: 'C1',
+            chainLength: 5,
+            chainWeight: 50,
+            chainV: true,
+            counterWeight: 1,
+            supportFootAltitude: 100,
+            attachmentPosition: '1',
+            chainSurface: 0.5,
+            spanAzimut: 10,
+            footLongitude: 3,
+            footLatitude: 45
+          },
+          {
+            uuid: 'sup-uuid-2',
+            number: '2',
+            name: 'S2',
+            spanLength: null,
+            spanAngle: 0,
+            attachmentSet: 11,
+            attachmentHeight: 21,
+            heightBelowConsole: 3,
+            towerModel: 'T2',
+            cableType: null,
+            armLength: 4,
+            chainName: 'C2',
+            chainLength: 6,
+            chainWeight: 60,
+            chainV: false,
+            counterWeight: 2,
+            supportFootAltitude: 110,
+            attachmentPosition: '2',
+            chainSurface: 0.6,
+            spanAzimut: 20,
+            footLongitude: 4,
+            footLatitude: 46
+          }
+        ]
+      };
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      const { uuid, created_at, updated_at, ...rest } = result as unknown as Record<string, unknown>;
+      expect(uuid).toBe('sec-uuid-legacy-1');
+      expect(typeof created_at).toBe('string');
+      expect(typeof updated_at).toBe('string');
+
+      const { uuid: _pu, ...expectedRest } = payload;
+      const {
+        uuid: _du,
+        created_at: _dc,
+        updated_at: _dup,
+        supports: _ds,
+        ...emptySectionDefaults
+      } = createEmptySection();
+
+      expect(rest).toEqual({ ...emptySectionDefaults, ...expectedRest });
+    });
+
+    it('should map supports to an empty array when the "supports" key is absent', async () => {
+      service.setStudyContext(buildMockStudy());
+      const { supports: _supports, ...payloadWithoutSupports } = buildValidSectionPayload();
+
+      const result = await service.processFile(makeJsonFile(payloadWithoutSupports), neverAccept);
+
+      expect(result?.supports).toEqual([]);
+    });
+
+    it('should map supports to an empty array when "supports" is an empty array', async () => {
+      service.setStudyContext(buildMockStudy());
+      const payload = { ...buildValidSectionPayload(), supports: [] };
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      expect(result?.supports).toEqual([]);
+    });
+
+    it('should map supports to an empty array when "supports" is not an array', async () => {
+      service.setStudyContext(buildMockStudy());
+      const payload = { ...buildValidSectionPayload(), supports: 'not-an-array' };
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      expect(result?.supports).toEqual([]);
+    });
+
+    it('should keep a non-string uuid unchanged (no trim applied)', async () => {
+      service.setStudyContext(buildMockStudy());
+      const payload = { ...buildValidSectionPayload(), uuid: 12345 };
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      expect(result?.uuid).toBe(12345);
+    });
+
+    it('should trim a string uuid with surrounding whitespace', async () => {
+      service.setStudyContext(buildMockStudy());
+      const payload = { ...buildValidSectionPayload(), uuid: '  sec-uuid-1  ' };
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
       expect(result?.uuid).toBe('sec-uuid-1');
     });
   });

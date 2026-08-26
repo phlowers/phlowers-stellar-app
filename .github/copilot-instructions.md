@@ -117,6 +117,11 @@ Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
   rendering it with `[innerHTML]` or interpolating it into a DOM attribute.
 - Treat OIDC claims and tokens as sensitive: never log them via `LoggerService`, never persist
   them in Dexie.
+- Never copy real/PO-provided production data (real line/site names, internal database IDs or
+  UUIDs, GPS/Lambert coordinates, maintenance team or organization names, etc.) into test
+  fixtures, specs, or documentation — even as a one-off "realistic" example. Always hand-craft
+  fully synthetic values (fake names, out-of-range coordinates, placeholder IDs) before
+  committing, and double-check any fixture built from a pasted external file for real identifiers.
 
 ---
 
