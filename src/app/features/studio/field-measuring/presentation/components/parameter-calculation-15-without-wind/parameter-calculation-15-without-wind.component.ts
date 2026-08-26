@@ -126,14 +126,24 @@ export class ParameterCalculation15WithoutWindComponent {
       this.measureData.update((d) => ({
         ...d,
         [field]: value,
-        // Pre-fill manual fields from Auto only on first switch to manual; never overwrite existing manual data.
+        // On switch to manual, fill only fields still unset from Auto; never overwrite existing manual values.
         manualParameterCalculation15CWithoutWind:
-          value === 'manual' && d.manualParameterCalculation15CWithoutWind == null
+          value === 'manual'
             ? {
-                parameterPapoto: d.outputs.papoto?.parameter ?? null,
-                parameterUncertaintyPapoto: d.parameterUncertaintyPapoto ?? null,
-                cableTemperatureCalibration: d.outputs.cableTemperature?.cableTemperature ?? null,
-                cableTemperatureCalibrationUncertainty: d.outputs.cableTemperature?.cableTemperatureUncertainty ?? null
+                parameterPapoto:
+                  d.manualParameterCalculation15CWithoutWind?.parameterPapoto ?? d.outputs.papoto?.parameter ?? null,
+                parameterUncertaintyPapoto:
+                  d.manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ??
+                  d.outputs.papoto?.uncertainty ??
+                  null,
+                cableTemperatureCalibration:
+                  d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ??
+                  d.outputs.cableTemperature?.cableTemperature ??
+                  null,
+                cableTemperatureCalibrationUncertainty:
+                  d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibrationUncertainty ??
+                  d.outputs.cableTemperature?.cableTemperatureUncertainty ??
+                  null
               }
             : d.manualParameterCalculation15CWithoutWind
       }));

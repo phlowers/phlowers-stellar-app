@@ -149,7 +149,6 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
   it('should pre-fill manual fields from Auto values on first switch to manual', () => {
     component.measureData.update((d) => ({
       ...d,
-      parameterUncertaintyPapoto: 12,
       outputs: {
         ...d.outputs,
         papoto: {
@@ -158,7 +157,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
           parameter_2_3: 0,
           parameter_1_3: 0,
           checkValidity: true,
-          uncertainty: 0
+          uncertainty: 12
         },
         cableTemperature: { cableSolarFlux: 0, cableTemperature: 45, cableTemperatureUncertainty: 3 }
       }
