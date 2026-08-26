@@ -146,6 +146,79 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(component.measureData().updateMode15C).toBe('auto');
   });
 
+  it('should pre-fill manual fields from Auto values on first switch to manual', () => {
+    component.measureData.update((d) => ({
+      ...d,
+      outputs: {
+        ...d.outputs,
+        papoto: {
+          parameter: 1900,
+          parameter_1_2: 0,
+          parameter_2_3: 0,
+          parameter_1_3: 0,
+          checkValidity: true,
+          uncertainty: 12
+        },
+        cableTemperature: { cableSolarFlux: 0, cableTemperature: 45, cableTemperatureUncertainty: 3 }
+      }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    expect(component.measureData().manualParameterCalculation15CWithoutWind).toEqual({
+      parameterPapoto: 1900,
+      parameterUncertaintyPapoto: 12,
+      cableTemperatureCalibration: 45,
+      cableTemperatureCalibrationUncertainty: 3
+    });
+  });
+
+  it('should not reset manual values when switching to Auto and back to Manual', () => {
+    component.updateMeasureData('updateMode15C', 'manual');
+    component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+
+    component.updateMeasureData('updateMode15C', 'auto');
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    expect(component.measureData().manualParameterCalculation15CWithoutWind).toEqual(
+      expect.objectContaining({
+        parameterPapoto: 1700,
+        cableTemperatureCalibration: 45,
+        cableTemperatureCalibrationUncertainty: 3
+      })
+    );
+  });
+
+  it('should not overwrite an already-saved manual value with the current Auto value on later toggles', () => {
+    component.updateMeasureData('updateMode15C', 'manual');
+    component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+
+    // Auto output changes while user is in manual mode
+    component.measureData.update((d) => ({
+      ...d,
+      outputs: {
+        ...d.outputs,
+        papoto: {
+          parameter: 9999,
+          parameter_1_2: 0,
+          parameter_2_3: 0,
+          parameter_1_3: 0,
+          checkValidity: true,
+          uncertainty: 0
+        }
+      }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'auto');
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    expect(component.measureData().manualParameterCalculation15CWithoutWind?.parameterPapoto).toBe(1700);
+  });
+
   describe('isCalculating signal', () => {
     it('should start as false', () => {
       expect(component.isCalculating()).toBe(false);
@@ -235,8 +308,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
   it('should validate form correctly for manual mode', () => {
     component.updateMeasureData('updateMode15C', 'manual');
-    // After setting to manual, manualParameterCalculation15CWithoutWind is set to null
-    // So isFormValid should be false
+    // Default test data has no Auto output, so the pre-filled manual fields are still null
     expect(component.isFormValid()).toBe(false);
 
     // Now set the required fields using the correct method
