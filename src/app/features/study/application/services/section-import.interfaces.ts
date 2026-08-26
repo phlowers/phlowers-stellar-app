@@ -75,3 +75,9 @@ export interface GeoLiaisonFieldError {
   readonly field: string;
   readonly value: string | null;
 }
+
+export interface StartGps {
+  startLatitude: number;
+  startLongitude: number;
+  startAzimuth: number;
+}
