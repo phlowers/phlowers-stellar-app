@@ -18,7 +18,13 @@ import { MaintenanceService } from '@shared/catalog/services/maintenance.service
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import { GeoLiaisonAccroche, GeoLiaisonCanton, GeoLiaisonFormat, GeoLiaisonPortee } from './section-import.interfaces';
+import {
+  GeoLiaisonAccroche,
+  GeoLiaisonCanton,
+  GeoLiaisonFormat,
+  GeoLiaisonPortee,
+  StartGps
+} from './section-import.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
 import {
@@ -302,11 +308,11 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     const lambertX = accroches.map((a) => parseFloatOrNull(a.PIED_X_LAMBERT93));
     const lambertY = accroches.map((a) => parseFloatOrNull(a.PIED_Y_LAMBERT93));
-    const { supports: reprojectedSupports, meanReprojectionDiffMeters } = await this.applyLambertReprojection(
-      supportsWithCatalogResolution,
-      lambertX,
-      lambertY
-    );
+    const {
+      supports: reprojectedSupports,
+      meanReprojectionDiffMeters,
+      startGps
+    } = await this.applyLambertReprojection(supportsWithCatalogResolution, lambertX, lambertY);
 
     return {
       section: {
@@ -334,6 +340,9 @@ export class SectionImportService implements ImportAdapter<Section> {
         regional_maintenance_center_names: gmrDesignation ? [gmrDesignation] : [],
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
+        start_latitude: startGps?.startLatitude ?? null,
+        start_longitude: startGps?.startLongitude ?? null,
+        start_azimuth: startGps?.startAzimuth ?? null,
         supports: reprojectedSupports,
         mean_reprojection_diff_meters: meanReprojectionDiffMeters
       },
@@ -528,10 +537,14 @@ export class SectionImportService implements ImportAdapter<Section> {
     supports: Support[],
     lambertX: (number | null)[],
     lambertY: (number | null)[]
-  ): Promise<{ supports: Support[]; meanReprojectionDiffMeters: number | null }> {
+  ): Promise<{
+    supports: Support[];
+    meanReprojectionDiffMeters: number | null;
+    startGps: StartGps | null;
+  }> {
     if (lambertX.includes(null) || lambertY.includes(null)) {
       this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
-      return { supports, meanReprojectionDiffMeters: null };
+      return { supports, meanReprojectionDiffMeters: null, startGps: null };
     }
 
     const lambert_x = lambertX as number[];
@@ -550,7 +563,15 @@ export class SectionImportService implements ImportAdapter<Section> {
       reconstructed.lambert_y
     );
 
-    return { supports: updatedSupports, meanReprojectionDiffMeters };
+    return {
+      supports: updatedSupports,
+      meanReprojectionDiffMeters,
+      startGps: {
+        startLatitude: localization.latitude[0],
+        startLongitude: localization.longitude[0],
+        startAzimuth: localization.azimuth[0]
+      }
+    };
   }
 
   /** Call 1 — bootstrap: direct conversion of the raw Lambert93 arrays to get a start point. */
