@@ -86,7 +86,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
             en: {
               'studio.section-plot-card.alt-supp-foot-label': 'Alt. supp foot:',
               'studio.section-plot-card.angle-balancement-label': 'Angle balancement:',
-              'studio.section-plot-card.arc-length-la-label': 'Arc length LA:',
+              'studio.section-plot-card.arc-length-la-label': 'Arc length (L):',
               'studio.section-plot-card.arrow-f1-label': 'Arrow F1:',
               'studio.section-plot-card.arrow-f2-label': 'Arrow F2:',
               'studio.section-plot-card.cable-slope-left-att-label': 'Cable slope left att.:',
@@ -94,17 +94,17 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
               'studio.section-plot-card.chain-displacement-acc-title': 'Chain displacement acc.',
               'studio.section-plot-card.elevation-label': 'Elevation:',
               'studio.section-plot-card.expand-details-aria-label': 'Expand details',
-              'studio.section-plot-card.horizontal-dist-acc-label': 'Horizontal dist. acc.:',
-              'studio.section-plot-card.inf-tension-acc-label': 'Inf tension acc.:',
+              'studio.section-plot-card.horizontal-dist-acc-label': 'Horizontal dist. between attach.:',
+              'studio.section-plot-card.inf-tension-acc-label': 'Attach. tension inf.:',
               'studio.section-plot-card.l-label': 'L:',
               'studio.section-plot-card.line-angle-label': 'Line angle:',
-              'studio.section-plot-card.natural-length-l0-label': 'Natural length L0:',
+              'studio.section-plot-card.natural-length-l0-label': 'Nat. length (L0):',
               'studio.section-plot-card.parameter-label': 'Parameter:',
               'studio.section-plot-card.resultant-label': 'Resultant:',
               'studio.section-plot-card.span-length-label': 'Span length:',
-              'studio.section-plot-card.supp-tension-max-label': 'Supp tension (Max):',
+              'studio.section-plot-card.supp-tension-max-label': 'Attach. tension sup. (Tmax):',
               'studio.section-plot-card.t-label': 'T:',
-              'studio.section-plot-card.th-t0-label': 'Th - T0:',
+              'studio.section-plot-card.th-t0-label': 'Horizontal tension (T0):',
               'studio.section-plot-card.v-label': 'V:',
               'studio.section-plot-card.vtl-under-chain-title': 'VTL (under chain)',
               'studio.section-plot-card.vtl-under-console-title': 'VTL (under console)',
@@ -258,10 +258,39 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     const spanExpandedData = component.spanExpandedData();
 
     expect(support.length).toBe(2);
-    expect(spanData.length).toBe(5);
+    expect(spanData.length).toBe(6);
     expect(support[0].fields.length).toBe(4);
     expect(spanData[0].label).toContain('Span length');
-    expect(spanExpandedData.length).toBe(8);
+    expect(spanExpandedData.length).toBe(7);
+  });
+
+  it('should provide span data fields in the exact expected order', () => {
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
+
+    expect(component.spanData().map((field) => field.label)).toEqual([
+      'Span length:',
+      'Elevation:',
+      'Parameter:',
+      'Horizontal tension (T0):',
+      'Attach. tension sup. (Tmax):',
+      'Attach. tension inf.:'
+    ]);
+  });
+
+  it('should provide span expanded data fields in the exact expected order', () => {
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
+
+    expect(component.spanExpandedData().map((field) => field.label)).toEqual([
+      'Arrow F1:',
+      'Arrow F2:',
+      'Horizontal dist. between attach.:',
+      'Nat. length (L0):',
+      'Arc length (L):',
+      'Cable slope left att.:',
+      'Cable slope right att.:'
+    ]);
   });
 
   describe('HTML rendering', () => {
