@@ -222,9 +222,10 @@ export class SectionPlotCardComponent {
     const litData = this.litData();
     const spanLength = litData?.output_parameters.span_length;
     const elevation = litData?.output_parameters.elevation;
-    const L0 = litData?.output_parameters.L0;
     const parameter = litData?.output_parameters.parameter;
+    const tensionHor = litData?.output_parameters.T_h;
     const tensionSup = litData?.output_parameters.tension_sup;
+    const tensionInf = litData?.output_parameters.tension_inf;
     return [
       {
         label: this.translocoService.translate('studio.section-plot-card.span-length-label'),
@@ -242,14 +243,19 @@ export class SectionPlotCardComponent {
         unit: 'm'
       },
       {
+        label: this.translocoService.translate('studio.section-plot-card.th-t0-label'),
+        value: this.getFormatedNumberIndex(tensionHor),
+        unit: 'daN'
+      },
+      {
         label: this.translocoService.translate('studio.section-plot-card.supp-tension-max-label'),
         value: this.getFormatedNumberIndex(tensionSup),
         unit: 'daN'
       },
       {
-        label: this.translocoService.translate('studio.section-plot-card.natural-length-l0-label'),
-        value: this.getFormatedNumberIndex(L0),
-        unit: 'm'
+        label: this.translocoService.translate('studio.section-plot-card.inf-tension-acc-label'),
+        value: this.getFormatedNumberIndex(tensionInf),
+        unit: 'daN'
       }
     ];
   });
@@ -260,9 +266,8 @@ export class SectionPlotCardComponent {
     const sag = litData?.output_parameters.sag;
     const sagS2 = litData?.output_parameters.sag_s2;
     const horizontalDistance = litData?.output_parameters.horizontal_distance;
+    const L0 = litData?.output_parameters.L0;
     const arcLength = litData?.output_parameters.arc_length;
-    const th = litData?.output_parameters.T_h;
-    const tensionInf = litData?.output_parameters.tension_inf;
     const slopeLeft = litData?.output_parameters.slope_left;
     const slopeRight = litData?.output_parameters.slope_right;
     return [
@@ -282,19 +287,14 @@ export class SectionPlotCardComponent {
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.section-plot-card.arc-length-la-label'),
-        value: this.getFormatedNumberIndex(arcLength),
+        label: this.translocoService.translate('studio.section-plot-card.natural-length-l0-label'),
+        value: this.getFormatedNumberIndex(L0),
         unit: 'm'
       },
       {
-        label: this.translocoService.translate('studio.section-plot-card.th-t0-label'),
-        value: this.getFormatedNumberIndex(th),
-        unit: 'daN'
-      },
-      {
-        label: this.translocoService.translate('studio.section-plot-card.inf-tension-acc-label'),
-        value: this.getFormatedNumberIndex(tensionInf),
-        unit: 'daN'
+        label: this.translocoService.translate('studio.section-plot-card.arc-length-la-label'),
+        value: this.getFormatedNumberIndex(arcLength),
+        unit: 'm'
       },
       {
         label: this.translocoService.translate('studio.section-plot-card.cable-slope-left-att-label'),
