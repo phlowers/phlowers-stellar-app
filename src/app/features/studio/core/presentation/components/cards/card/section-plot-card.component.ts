@@ -223,7 +223,7 @@ export class SectionPlotCardComponent {
     const spanLength = litData?.output_parameters.span_length;
     const elevation = litData?.output_parameters.elevation;
     const parameter = litData?.output_parameters.parameter;
-    const th = litData?.output_parameters.T_h;
+    const tensionHor = litData?.output_parameters.T_h;
     const tensionSup = litData?.output_parameters.tension_sup;
     const tensionInf = litData?.output_parameters.tension_inf;
     return [
@@ -244,7 +244,7 @@ export class SectionPlotCardComponent {
       },
       {
         label: this.translocoService.translate('studio.section-plot-card.th-t0-label'),
-        value: this.getFormatedNumberIndex(th),
+        value: this.getFormatedNumberIndex(tensionHor),
         unit: 'daN'
       },
       {
