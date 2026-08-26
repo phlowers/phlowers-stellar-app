@@ -362,6 +362,7 @@
       "section-created": "Section Created",
       "section-deleted": "Section Deleted",
       "section-duplicated": "Section Duplicated",
+      "geometry-objects-updated": "Obstacles and loads have been updated to match the section geometry",
       "ic-updated": "Initial Condition Updated",
       "ic-added": "Initial Condition Added",
       "ic-deleted": "Initial Condition Deleted",

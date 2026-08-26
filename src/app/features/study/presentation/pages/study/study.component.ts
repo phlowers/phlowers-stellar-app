@@ -138,13 +138,17 @@ export class StudyComponent implements OnInit {
 
     const existingSection = studyWithSections.sections.find((s) => s?.uuid === section?.uuid);
 
-    await this.sectionService.createOrUpdateSection(studyWithSections, section);
+    const { removedGeometryBoundObjects } = await this.sectionService.createOrUpdateSection(studyWithSections, section);
 
     this.notificationService.success(
       existingSection
         ? this.transloco.translate('study.notifications.section-updated')
         : this.transloco.translate('study.notifications.section-created')
     );
+
+    if (removedGeometryBoundObjects) {
+      this.notificationService.warning(this.transloco.translate('study.notifications.geometry-objects-updated'));
+    }
   }
 
   async deleteSection(section: Section) {
