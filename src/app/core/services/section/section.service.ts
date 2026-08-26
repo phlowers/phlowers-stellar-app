@@ -31,7 +31,9 @@ export class SectionService {
    * that no longer exists in the section geometry are pruned before persisting.
    * @param study The study containing the section
    * @param section The section to create or update
-   * @returns Promise resolving with whether obstacles/loads were removed to match the geometry
+   * @returns Promise resolving with `removedGeometryBoundObjects`, which is only `true` when an
+   * obstacle or a non-zero (user-defined) span load was pruned; stale zero-weight span loads are
+   * removed silently and do not set the flag.
    */
   async createOrUpdateSection(study: StudyEntity, section: Section): Promise<SectionUpdateResult> {
     const existingSection = study.sections.find((s) => s?.uuid === section?.uuid);

@@ -4,10 +4,35 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Section } from '@shared/domain';
-import { SectionGeometrySanitizeResult } from './section-geometry.interfaces';
+import { Charge, Section } from '@shared/domain';
+import { Obstacle } from '@shared/domain/models/obstacle.model';
+import { SanitizedCharges, SectionGeometrySanitizeResult } from './section-geometry.interfaces';
 
 const isUserDefinedSpanLoad = (loadWeight: number): boolean => loadWeight !== 0;
+
+/** Keeps only obstacles whose span (identified by its starting support) still exists. */
+const sanitizeObstacles = (obstacles: Obstacle[], spanStartSupportUuids: Set<string>): Obstacle[] =>
+  obstacles.filter((obstacle) => spanStartSupportUuids.has(obstacle.supportUuid));
+
+/** Prunes stale span loads from every charge, tracking whether a user-defined one was removed. */
+const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): SanitizedCharges => {
+  let chargesChanged = false;
+  let removedUserDefinedSpanLoad = false;
+
+  const sanitizedCharges = charges.map((charge) => {
+    const sanitizedSpanLoads = charge.data.spanLoads.filter((load) => allSupportUuids.has(load.supportUuid));
+    if (sanitizedSpanLoads.length === charge.data.spanLoads.length) {
+      return charge;
+    }
+    chargesChanged = true;
+    removedUserDefinedSpanLoad ||= charge.data.spanLoads.some(
+      (load) => !allSupportUuids.has(load.supportUuid) && isUserDefinedSpanLoad(load.loadWeight)
+    );
+    return { ...charge, data: { ...charge.data, spanLoads: sanitizedSpanLoads } };
+  });
+
+  return { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad };
+};
 
 /**
  * Removes obstacles and span loads that reference a support/span no longer present in the
@@ -25,21 +50,11 @@ export const sanitizeSectionGeometry = (section: Section): SectionGeometrySaniti
   const spanStartSupportUuids = new Set(section.supports.slice(0, -1).map((support) => support.uuid));
   const allSupportUuids = new Set(section.supports.map((support) => support.uuid));
 
-  const sanitizedObstacles = section.obstacles.filter((obstacle) => spanStartSupportUuids.has(obstacle.supportUuid));
-
-  let chargesChanged = false;
-  let removedUserDefinedSpanLoad = false;
-  const sanitizedCharges = section.charges.map((charge) => {
-    const sanitizedSpanLoads = charge.data.spanLoads.filter((load) => allSupportUuids.has(load.supportUuid));
-    if (sanitizedSpanLoads.length === charge.data.spanLoads.length) {
-      return charge;
-    }
-    chargesChanged = true;
-    removedUserDefinedSpanLoad ||= charge.data.spanLoads.some(
-      (load) => !allSupportUuids.has(load.supportUuid) && isUserDefinedSpanLoad(load.loadWeight)
-    );
-    return { ...charge, data: { ...charge.data, spanLoads: sanitizedSpanLoads } };
-  });
+  const sanitizedObstacles = sanitizeObstacles(section.obstacles, spanStartSupportUuids);
+  const { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad } = sanitizeCharges(
+    section.charges,
+    allSupportUuids
+  );
 
   const removedGeometryBoundObjects =
     sanitizedObstacles.length !== section.obstacles.length || removedUserDefinedSpanLoad;
