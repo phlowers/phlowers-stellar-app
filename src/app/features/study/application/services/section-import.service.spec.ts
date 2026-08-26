@@ -1047,6 +1047,15 @@ describe('SectionImportService', () => {
       expect(result?.mean_reprojection_diff_meters).toBeCloseTo(expectedMean, 6);
     });
 
+    it('should persist the first validated localization point as the section start location', async () => {
+      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const result = await service.processFile(file, neverAccept);
+
+      expect(result?.start_latitude).toBe(45);
+      expect(result?.start_longitude).toBe(3);
+      expect(result?.start_azimuth).toBe(0);
+    });
+
     it('should throw an ImportError and abort the import when a reprojection task fails', async () => {
       workerPythonServiceMock.runTask.mockImplementation((task: Task) => {
         if (task === Task.importLambert) {
