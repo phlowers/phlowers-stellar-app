@@ -264,6 +264,35 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
     expect(spanExpandedData.length).toBe(7);
   });
 
+  it('should provide span data fields in the exact expected order', () => {
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
+
+    expect(component.spanData().map((field) => field.label)).toEqual([
+      'Span length:',
+      'Elevation:',
+      'Parameter:',
+      'Horizontal tension (T0):',
+      'Attach. tension sup. (Tmax):',
+      'Attach. tension inf.:'
+    ]);
+  });
+
+  it('should provide span expanded data fields in the exact expected order', () => {
+    fixture.componentRef.setInput('index', 0);
+    fixture.componentRef.setInput('litData', mockLitData);
+
+    expect(component.spanExpandedData().map((field) => field.label)).toEqual([
+      'Arrow F1:',
+      'Arrow F2:',
+      'Horizontal dist. between attach.:',
+      'Nat. length (L0):',
+      'Arc length (L):',
+      'Cable slope left att.:',
+      'Cable slope right att.:'
+    ]);
+  });
+
   describe('HTML rendering', () => {
     const getByTestId = (testId: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
