@@ -24,15 +24,20 @@ export class LocationComponent {
 
   protected readonly config = LOCATION_CONFIG;
 
-  protected readonly latitudeValue = linkedSignal<number | null>(
-    () => this.initialLatitude() ?? LOCATION_CONFIG.latitude.default
+  // Mirrors exactly what is in the DOM, so re-rendering `[value]` never fights an in-progress keystroke.
+  protected readonly latitudeText = linkedSignal<string>(() =>
+    String(this.initialLatitude() ?? LOCATION_CONFIG.latitude.default)
   );
-  protected readonly longitudeValue = linkedSignal<number | null>(
-    () => this.initialLongitude() ?? LOCATION_CONFIG.longitude.default
+  protected readonly longitudeText = linkedSignal<string>(() =>
+    String(this.initialLongitude() ?? LOCATION_CONFIG.longitude.default)
   );
-  protected readonly azimuthValue = linkedSignal<number | null>(
-    () => this.initialAzimuth() ?? LOCATION_CONFIG.azimuth.default
+  protected readonly azimuthText = linkedSignal<string>(() =>
+    String(this.initialAzimuth() ?? LOCATION_CONFIG.azimuth.default)
   );
+
+  protected readonly latitudeValue = computed<number | null>(() => this.parseInputValue(this.latitudeText()));
+  protected readonly longitudeValue = computed<number | null>(() => this.parseInputValue(this.longitudeText()));
+  protected readonly azimuthValue = computed<number | null>(() => this.parseInputValue(this.azimuthText()));
 
   protected readonly isLatitudeOverMax = computed(() => {
     const v = this.latitudeValue();
@@ -111,17 +116,14 @@ export class LocationComponent {
   }
 
   onLatitudeInput(event: Event): void {
-    this.latitudeValue.set(this.parseInputValue((event.target as HTMLInputElement).value));
+    this.latitudeText.set((event.target as HTMLInputElement).value);
   }
 
   onLongitudeInput(event: Event): void {
-    this.longitudeValue.set(this.parseInputValue((event.target as HTMLInputElement).value));
+    this.longitudeText.set((event.target as HTMLInputElement).value);
   }
 
   onAzimuthInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const truncated = truncateOneDecimalValue(input.value);
-    input.value = truncated;
-    this.azimuthValue.set(this.parseInputValue(truncated));
+    this.azimuthText.set(truncateOneDecimalValue((event.target as HTMLInputElement).value));
   }
 }
