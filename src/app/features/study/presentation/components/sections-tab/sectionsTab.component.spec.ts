@@ -14,6 +14,7 @@ import { ToolbarDialogService } from '@features/studio/toolbar/presentation/serv
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Subject } from 'rxjs';
+import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 class MockMaintenanceService {
@@ -184,7 +185,8 @@ describe('SectionsTabComponent', () => {
               'sections-tab.ic-prefix': 'IC',
               'sections-tab.initial-condition': 'Initial condition',
               'sections-tab.no-section': 'No existing section',
-              'sections-tab.placeholder-view-ic': 'View initial conditions',
+              'sections-tab.placeholder-view-ic': 'Select IC',
+              'sections-tab.placeholder-view-cc': 'Select CC',
               'common.section-type.guard': 'Guard',
               'common.section-type.phase': 'Phase'
             }
@@ -232,6 +234,32 @@ describe('SectionsTabComponent', () => {
 
     const sectionName = fixture.debugElement.query(By.css('.section__text-name'));
     expect(sectionName?.nativeElement?.textContent).toContain('My Section');
+  });
+
+  it('should pass the translated placeholder to the initial condition select', () => {
+    fixture.componentRef.setInput('study', { sections: [mockSection] });
+    fixture.detectChanges();
+
+    const selectWithButtons = fixture.debugElement.query(By.directive(SelectWithButtonsComponent));
+    expect(selectWithButtons.componentInstance.placeholder()).toBe('Select IC');
+  });
+
+  it('should pass the translated placeholder to the charge case select', () => {
+    const sectionWithCharges: Section = {
+      ...mockSection,
+      charges: [
+        {
+          uuid: 'charge-1',
+          name: 'Charge 1'
+        } as Section['charges'][number]
+      ]
+    };
+    fixture.componentRef.setInput('study', { sections: [sectionWithCharges] });
+    fixture.detectChanges();
+
+    const selectsWithButtons = fixture.debugElement.queryAll(By.directive(SelectWithButtonsComponent));
+    const chargeSelect = selectsWithButtons[selectsWithButtons.length - 1];
+    expect(chargeSelect.componentInstance.placeholder()).toBe('Select CC');
   });
 
   it('should open new section modal in create mode when clicking "Add a section"', () => {

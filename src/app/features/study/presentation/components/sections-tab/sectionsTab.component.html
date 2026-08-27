@@ -143,6 +143,7 @@
           <p class="mb-0 section__title-charges">{{ 'sections-tab.charge-cases' | transloco }}</p>
           <div class="section__content-charges w-[12.5rem]">
             <app-select-with-buttons
+              [placeholder]="'sections-tab.placeholder-view-cc' | transloco"
               [options]="getChargesOptions(section)"
               [selectedOption]="section.selected_charge_uuid"
               (selectOption)="selectChargeCase($event, section)"
