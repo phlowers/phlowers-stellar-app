@@ -1,0 +1,25 @@
+<div class="relative w-full h-full">
+  @if (plotService.loading()) {
+    <div class="h-full flex justify-center items-center">
+      <p-progress-spinner ariaLabel="loading" />
+    </div>
+  } @else if (plotService.error()) {
+    <div class="absolute inset-0 flex justify-center items-center">
+      <p class="free-positioning-error">
+        {{ getErrorString() }}
+      </p>
+    </div>
+  } @else {
+    <div class="flex flex-col h-full">
+      <dl>
+        <dt>{{ 'studio.free-positioning.x-label' | transloco }}</dt>
+        <dd>{{ mousePosition()?.x || 'N/A' }}</dd>
+
+        <dt>{{ 'studio.free-positioning.z-label' | transloco }}</dt>
+        <dd>{{ mousePosition()?.z || 'N/A' }}</dd>
+      </dl>
+
+      <div id="plotly-output-floor-free-positioning" class="border border-gray-300 rounded-md grow" style="box-sizing: content-box"></div>
+    </div>
+  }
+</div>

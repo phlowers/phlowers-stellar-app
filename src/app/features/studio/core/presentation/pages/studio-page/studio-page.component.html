@@ -11,7 +11,11 @@
 <div class="graph-tools">
   <div class="graph-tools__left">
     @if (plotOptionsService.isFreePositioningMode()) {
-      <app-free-positioning class="plot-view" />
+      @if (plotOptionsService.freePositioningSource() === 'floor') {
+        <app-floor-free-positioning class="plot-view" />
+      } @else {
+        <app-free-positioning class="plot-view" />
+      }
     } @else {
       <app-studio class="plot-view" [isPreview]="false" />
     }
@@ -342,6 +346,10 @@
 
     <app-side-tab label="Obstacles">
       <ng-template><app-obstacles-form /></ng-template>
+    </app-side-tab>
+
+    <app-side-tab [label]="'studio.studio-page.floor-sidetab-label' | transloco">
+      <ng-template><app-floor /></ng-template>
     </app-side-tab>
 
     <app-side-tab [label]="'studio.studio-page.distances-label' | transloco">

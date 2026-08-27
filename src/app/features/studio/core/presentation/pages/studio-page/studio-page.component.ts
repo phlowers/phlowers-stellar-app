@@ -54,6 +54,8 @@ import { CableSpanManipComponent } from '@features/studio/loads/presentation/com
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
+import { FloorComponent } from '@src/app/features/studio/floor/presentation/floor.component';
+import { FloorFreePositioningComponent } from '@src/app/features/studio/floor/presentation/components/floor-free-positioning/floor-free-positioning.component';
 import { Camera } from 'plotly.js-dist-min';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -98,7 +100,9 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     FreePositioningComponent,
     CableSpanManipComponent,
     CableSupportManipComponent,
-    DistanceMeasuringComponent
+    DistanceMeasuringComponent,
+    FloorComponent,
+    FloorFreePositioningComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',

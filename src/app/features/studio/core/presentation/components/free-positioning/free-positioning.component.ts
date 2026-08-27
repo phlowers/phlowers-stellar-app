@@ -593,7 +593,7 @@ export class FreePositioningComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Safety net: always leave the mode when this component is destroyed
-    this.plotOptionsService.isFreePositioningMode.set(false);
+    this.plotOptionsService.setFreePositioningMode(false, 'obstacle');
     this.destroyAllPlots();
   }
 }

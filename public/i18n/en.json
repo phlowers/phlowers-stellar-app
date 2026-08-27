@@ -864,7 +864,8 @@
       "span-option": "Span",
       "max-section-option": "Max section",
       "not-selected-option": "Not selected",
-      "distances-label": "Distances"
+      "distances-label": "Distances",
+      "floor-sidetab-label": "Floor"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",
@@ -940,6 +941,16 @@
       "distance-23-label": "Distance 2-3",
       "angle-123-label": "Angle 1-2-3",
       "add-measurement-points-error": "Failed to add measurement points"
+    },
+    "floor": {
+      "reference-support-point-title": "Reference support point",
+      "closing-support-point-title": "Closing support point",
+      "point-title": "Point {{distance}} m",
+      "point-alt-label": "Alt. point.",
+      "ref-support-dist-label": "Ref. supp. dist.",
+      "free-positioning-label": "Free positioning",
+      "add-point-btn": "Add point",
+      "delete-point-aria-label": "delete point"
     },
     "l0-sum": {
       "natural-lengths-title": "Natural lengths L0",

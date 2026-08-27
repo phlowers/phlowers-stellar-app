@@ -864,7 +864,8 @@
       "span-option": "Portée",
       "max-section-option": "Max canton",
       "not-selected-option": "Non sélectionné",
-      "distances-label": "Distances"
+      "distances-label": "Distances",
+      "floor-sidetab-label": "Sol"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",
@@ -940,6 +941,16 @@
       "distance-23-label": "Distance 2-3",
       "angle-123-label": "Angle 1-2-3",
       "add-measurement-points-error": "Échec de l'ajout des points de mesure"
+    },
+    "floor": {
+      "reference-support-point-title": "Point du support de référence",
+      "closing-support-point-title": "Point du support de fermeture",
+      "point-title": "Point {{distance}} m",
+      "point-alt-label": "Alt. point",
+      "ref-support-dist-label": "Dist. supp. réf.",
+      "free-positioning-label": "Positionnement libre",
+      "add-point-btn": "Ajouter un point",
+      "delete-point-aria-label": "supprimer le point"
     },
     "l0-sum": {
       "natural-lengths-title": "Longueurs naturelles L0",

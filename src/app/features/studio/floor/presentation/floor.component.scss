@@ -1,0 +1,152 @@
+@use 'abstract.extracts' as app;
+
+%_align-end {
+  align-self: end;
+}
+
+%_align-center {
+  align-self: center;
+}
+
+%_align-top {
+  align-self: start;
+}
+
+:host {
+  @apply block px-4 h-full;
+  width: 25rem;
+}
+
+.floor-form {
+  @apply flex flex-col gap-3;
+
+  &__span-selection {
+    @apply grid grid-cols-2;
+    grid-column-gap: 0.625rem;
+    grid-template-areas:
+      'labelSpan labelRefSupport'
+      'inputSpan inputRefSupport';
+  }
+
+  &__field {
+    @apply flex flex-row items-center justify-between;
+
+    &__toggle {
+      @apply flex flex-row items-center gap-2;
+    }
+  }
+
+  &__points {
+    @apply flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden;
+  }
+
+  // at root to keep SCSS reading natural without adding unnecessary nesting levels or specificity.
+  @at-root {
+    .floor-item {
+      %_content-hover-select {
+        @apply relative;
+        z-index: 1;
+      }
+
+      @apply relative p-2;
+      border: 0.0625rem solid rgb(255 255 255 / 0);
+      border-radius: 0.25rem;
+      transition:
+        border-color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+
+      &--active {
+        border-color: var(--main-primary);
+      }
+
+      &:hover {
+        background-color: var(--primary-100);
+      }
+
+      &__select {
+        @apply overflow-hidden;
+
+        &,
+        &::after {
+          @apply absolute inset-0;
+        }
+
+        &::after {
+          content: '';
+        }
+
+        &:focus-visible::after {
+          @extend %focus-state;
+        }
+      }
+
+      &__header {
+        @apply flex flex-row justify-between items-center mb-1;
+      }
+
+      &__title {
+        @extend %text-l-400;
+        margin: 0;
+      }
+
+      &__form {
+        @apply grid grid-cols-2;
+        grid-template-areas:
+          'altPointLabel distRefLabel'
+          'altPointInput distRefInput';
+        column-gap: 0.625rem;
+      }
+
+      &__label,
+      &__input,
+      &__erase-btn {
+        @extend %_content-hover-select;
+      }
+    }
+  }
+}
+
+input {
+  @apply w-full;
+}
+
+// grid positioning
+.span-label {
+  grid-area: labelSpan;
+  @extend %_align-end;
+}
+
+.span-select {
+  grid-area: inputSpan;
+  @extend %_align-top;
+}
+
+.reference-support-label {
+  grid-area: labelRefSupport;
+  @extend %_align-end;
+}
+
+.reference-support-select {
+  grid-area: inputRefSupport;
+  @extend %_align-top;
+}
+
+.alt-point-label {
+  grid-area: altPointLabel;
+  @extend %_align-end;
+}
+
+.alt-point-input {
+  grid-area: altPointInput;
+  @extend %_align-center;
+}
+
+.dist-ref-label {
+  grid-area: distRefLabel;
+  @extend %_align-end;
+}
+
+.dist-ref-input {
+  grid-area: distRefInput;
+  @extend %_align-center;
+}
