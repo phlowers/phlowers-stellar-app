@@ -101,8 +101,10 @@ export class LocationComponent {
   }
 
   private parseInputValue(raw: string): number | null {
-    if (raw.trim() === '') return null;
-    const parsed = Number(raw);
+    const trimmed = raw.trim();
+    if (trimmed === '') return null;
+    // Accept localized comma decimal separators (e.g. "45,15") in addition to dots.
+    const parsed = Number(trimmed.replace(',', '.'));
     return Number.isNaN(parsed) ? null : parsed;
   }
 
