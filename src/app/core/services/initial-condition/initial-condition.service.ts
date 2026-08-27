@@ -5,10 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { Section, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 import { StudiesService } from '@services/studies/studies.service';
 import { cloneDeep } from 'lodash';
+import { findDuplicateTitle } from '@shared/helpers/duplicate';
 
 /**
  * Input parameters for initial condition operations.
@@ -60,6 +62,7 @@ export interface DuplicateInitialConditionFunctionsInput extends InitialConditio
 })
 export class InitialConditionService {
   private readonly studiesService = inject(StudiesService);
+  private readonly translocoService = inject(TranslocoService);
 
   /**
    * Helper method to clone a study, apply modifications, and update it
@@ -173,7 +176,12 @@ export class InitialConditionService {
                 ...(s.initial_conditions || []),
                 {
                   ...initialCondition,
-                  uuid: newUuid
+                  uuid: newUuid,
+                  name: findDuplicateTitle(
+                    (s.initial_conditions || []).map((ic) => ic.name),
+                    initialCondition.name,
+                    this.translocoService.translate('shared.duplicate.copy-suffix')
+                  )
                 }
               ]
             }
