@@ -10,6 +10,7 @@ import { InitialConditionService } from './initial-condition.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Section, InitialCondition } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
+import { TranslocoTestingModule } from '@jsverse/transloco';
 
 // Mock uuid
 vi.mock('uuid', () => ({
@@ -108,6 +109,13 @@ describe('InitialConditionService', () => {
     } as unknown as vi.Mocked<StudiesService>;
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
       providers: [InitialConditionService, { provide: StudiesService, useValue: mockStudiesService }]
     });
 
@@ -193,15 +201,10 @@ describe('InitialConditionService', () => {
   });
 
   describe('duplicateInitialCondition', () => {
-    it('should duplicate an initial condition with a new UUID', async () => {
+    it('should duplicate an initial condition with a new UUID and a unique name', async () => {
       const newUuid = 'new-ic-uuid';
-      const duplicatedIc: InitialCondition = {
-        ...mockInitialCondition,
-        uuid: newUuid,
-        name: 'Initial Condition 1 (Copy 1)'
-      };
 
-      const result = await service.duplicateInitialCondition(mockStudy, mockSection, duplicatedIc, newUuid);
+      const result = await service.duplicateInitialCondition(mockStudy, mockSection, mockInitialCondition, newUuid);
 
       expect(result).toBe(newUuid);
       expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
