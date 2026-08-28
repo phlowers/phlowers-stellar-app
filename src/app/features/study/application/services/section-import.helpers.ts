@@ -60,19 +60,28 @@ export function parseFloatOrNull(value: unknown): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
-/** Converts a JSON string/boolean/null value to `boolean | null`. */
+/** Converts a JSON string/boolean/null value to `boolean | null`. Case-insensitive on string values. */
 export function parseBooleanOrNull(value: unknown): boolean | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean') return value;
-  if (value === 'true' || value === '1' || value === 'OUI') return true;
-  if (value === 'false' || value === '0' || value === 'NON') return false;
+  const normalized = typeof value === 'string' ? value.toUpperCase() : value;
+  if (normalized === 'TRUE' || normalized === '1' || normalized === 'OUI') return true;
+  if (normalized === 'FALSE' || normalized === '0' || normalized === 'NON') return false;
   return null;
+}
+
+/**
+ * Normalizes a voltage string for catalog matching: strips all whitespace and uppercases it,
+ * so e.g. "225kV" and "225 KV" compare equal.
+ */
+export function normalizeVoltage(value: string | null | undefined): string {
+  return (value ?? '').replace(/\s+/g, '').toUpperCase();
 }
 
 /**
  * Extracts the branch number from a BRANCHE_IDR string.
  * Rule RG.CAN.BRA — takes the last 2 characters (always digits) and converts them to an integer string.
- * e.g. "FLAMAL73MENUE01" → "1", "FLAMAL73MENUE08" → "8", "FLAMAL73MENUE10" → "10".
+ * e.g. "TESTLINE73STB01" → "1", "TESTLINE73STB08" → "8", "TESTLINE73STB10" → "10".
  */
 export function extractBranchIdr(value: string): string {
   return String(Number.parseInt(value.slice(-2), 10));

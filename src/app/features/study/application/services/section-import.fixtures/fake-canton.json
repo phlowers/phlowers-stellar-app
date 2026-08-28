@@ -1,0 +1,123 @@
+{
+  "cantons": [
+    {
+      "general": {
+        "CANTON_CUR": "FAKE-CANTON-0001",
+        "CABLE_ADR": "FAKECABLE-000",
+        "CANTON_TYPE": "PHASE",
+        "FAISCEAU_CABLES_NOMBRE": "2.0",
+        "PHASE_ELECTRIQUE_NUMERO": "3",
+        "appartenance": [
+          {
+            "LIT_ADR": "LIT 225kV NO FAKE-SITE-A-FAKE-SITE-B",
+            "LIT_IDR": "FAKEBR00LINE",
+            "BRANCHE_IDR": "FAKEBR00LINE04",
+            "TENSION_ELECTRIQUE_IDR": "9",
+            "TENSION_ELECTRIQUE_ADR": "225 KV",
+            "LIAISON_IDR": "FAKEBR00LINE"
+          }
+        ]
+      },
+      "portee unitaire": [
+        {
+          "PORTEE_UNITAIRE_ORDRE": "2.5",
+          "PORTEE_LONGUEUR": "150.00",
+          "PORTEE_AZIMUT": "20.0000",
+          "CM_DESIGNATION": "FAKE-CM-01",
+          "EEL_DESIGNATION": "FAKE-EEL-ZONE",
+          "GMR_DESIGNATION": "FAKE-GMR-ZONE",
+          "PORTEE_UNITAIRE_DESIGNATION": "Position 6 - Phase 3",
+          "accroche arrivee": {
+            "ACCROCHE_CABLE_Z_LAMBERT93": "35.00",
+            "ACCROCHE_SET": "33",
+            "ANGLE_LIGNE": "5.00",
+            "CHAINE_DRN_IDR": "FAKECHAIN-C",
+            "CHAINE_DRN_LONGUEUR": "2.20",
+            "CHAINE_DRN_POIDS": "100.0",
+            "CHAINE_DRN_SURFACE": "0.20",
+            "CHAINE_EN_V": "NON",
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "2.00",
+            "PIED_X_LAMBERT93": "120.0000",
+            "PIED_Y_LAMBERT93": "220.0000",
+            "PIED_Z_LAMBERT93": "30.00",
+            "SUPPORT_ADR": "FAKE-SUP-103",
+            "SUPPORT_IDR": "FAKE-SUP-103",
+            "SUPPORT_NUMERO": "103",
+            "SUPPORT_TOWER": "FAKE-SUP-103.tower"
+          },
+          "accroche depart": {
+            "ACCROCHE_CABLE_Z_LAMBERT93": "25.00",
+            "ACCROCHE_SET": "22",
+            "ANGLE_LIGNE": "0.0",
+            "CHAINE_DRN_IDR": "FAKECHAIN-B",
+            "CHAINE_DRN_LONGUEUR": "1.10",
+            "CHAINE_DRN_POIDS": "50.0",
+            "CHAINE_DRN_SURFACE": "0.10",
+            "CHAINE_EN_V": "NON",
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.50",
+            "PIED_X_LAMBERT93": "110.0000",
+            "PIED_Y_LAMBERT93": "210.0000",
+            "PIED_Z_LAMBERT93": "20.00",
+            "SUPPORT_ADR": "FAKE-SUP-102",
+            "SUPPORT_IDR": "FAKE-SUP-102",
+            "SUPPORT_NUMERO": "102",
+            "SUPPORT_TOWER": "FAKE-SUP-102.tower"
+          }
+        },
+        {
+          "PORTEE_UNITAIRE_ORDRE": "1.5",
+          "PORTEE_LONGUEUR": "200.00",
+          "PORTEE_AZIMUT": "10.0000",
+          "CM_DESIGNATION": "FAKE-CM-01",
+          "EEL_DESIGNATION": "FAKE-EEL-ZONE",
+          "GMR_DESIGNATION": "FAKE-GMR-ZONE",
+          "PORTEE_UNITAIRE_DESIGNATION": "Position 6 - Phase 3",
+          "accroche arrivee": {
+            "ACCROCHE_CABLE_Z_LAMBERT93": "25.00",
+            "ACCROCHE_SET": "22",
+            "ANGLE_LIGNE": "0.0",
+            "CHAINE_DRN_IDR": "FAKECHAIN-B",
+            "CHAINE_DRN_LONGUEUR": "1.10",
+            "CHAINE_DRN_POIDS": "50.0",
+            "CHAINE_DRN_SURFACE": "0.10",
+            "CHAINE_EN_V": "NON",
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.50",
+            "PIED_X_LAMBERT93": "110.0000",
+            "PIED_Y_LAMBERT93": "210.0000",
+            "PIED_Z_LAMBERT93": "20.00",
+            "SUPPORT_ADR": "FAKE-SUP-102",
+            "SUPPORT_IDR": "FAKE-SUP-102",
+            "SUPPORT_NUMERO": "102",
+            "SUPPORT_TOWER": "FAKE-SUP-102.tower"
+          },
+          "accroche depart": {
+            "ACCROCHE_CABLE_Z_LAMBERT93": "15.00",
+            "ACCROCHE_SET": "11",
+            "ANGLE_LIGNE": "0.0",
+            "CHAINE_DRN_IDR": "FAKECHAIN-A",
+            "CHAINE_DRN_LONGUEUR": "1.00",
+            "CHAINE_DRN_POIDS": "45.0",
+            "CHAINE_DRN_SURFACE": "0.09",
+            "CHAINE_EN_V": "NON",
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.20",
+            "PIED_X_LAMBERT93": "100.0000",
+            "PIED_Y_LAMBERT93": "200.0000",
+            "PIED_Z_LAMBERT93": "10.00",
+            "SUPPORT_ADR": "FAKE-SUP-101",
+            "SUPPORT_IDR": "FAKE-SUP-101",
+            "SUPPORT_NUMERO": "101",
+            "SUPPORT_TOWER": "FAKE-SUP-101.tower"
+          }
+        }
+      ]
+    }
+  ]
+}
