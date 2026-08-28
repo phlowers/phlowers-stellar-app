@@ -55,7 +55,7 @@ class MockNotificationService {
   success = vi.fn();
 }
 
-describe('NewSectionModalComponent (Jest)', () => {
+describe('NewSectionModalComponent', () => {
   let component: NewSectionModalComponent;
   let fixture: ComponentFixture<NewSectionModalComponent>;
 
