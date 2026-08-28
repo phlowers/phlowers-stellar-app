@@ -233,6 +233,7 @@
       "cables-amount": "Cables amount",
       "ic-name-label": "Initial condition name",
       "ic-name-unique-error": "Initial condition name must be unique.",
+      "whole-number-required": "Whole number required.",
       "base-parameter": "Base parameter",
       "base-temperature": "Base temperature",
       "cable-pretension": "Cable pretension",
