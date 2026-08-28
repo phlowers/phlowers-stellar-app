@@ -17,9 +17,11 @@ import { hasSupportsBoundsErrors } from '@features/study/presentation/components
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import {
   GeoLiaisonAccroche,
+  GeoLiaisonAppartenance,
   GeoLiaisonCanton,
   GeoLiaisonFormat,
   GeoLiaisonPortee,
@@ -41,6 +43,7 @@ import {
   extractAttachmentPosition,
   extractBranchIdr,
   getMissingRequiredFields,
+  normalizeVoltage,
   parseBooleanOrNull,
   parseFloatOrNull,
   validateGeoLiaisonRawFields
@@ -80,6 +83,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly chainsService = inject(ChainsService);
+  private readonly linesService = inject(LinesService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly transloco = inject(TranslocoService);
 
@@ -314,6 +318,8 @@ export class SectionImportService implements ImportAdapter<Section> {
       startGps
     } = await this.applyLambertReprojection(supportsWithCatalogResolution, lambertX, lambertY);
 
+    const voltageIdr = await this.resolveGeoLiaisonCatalogVoltage(appartenance);
+
     return {
       section: {
         ...createEmptySection(),
@@ -332,7 +338,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         lit_code: appartenance?.LIT_IDR ?? undefined,
         link_name: appartenance?.LIAISON_IDR ?? undefined,
         branch_idr: appartenance?.BRANCHE_IDR ? extractBranchIdr(appartenance.BRANCHE_IDR) : undefined,
-        voltage_idr: undefined,
+        voltage_idr: voltageIdr,
         maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
         maintenance_center_names: cmDesignation ? [cmDesignation] : [],
         maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
@@ -353,7 +359,44 @@ export class SectionImportService implements ImportAdapter<Section> {
   /**
    * Resolves every support field the local catalogs are authoritative for: the attachment fields
    * against the attachment catalog, then the chain details against the chain catalog.
+   *
+   * Resolves `voltage_idr` against the line catalog (RG.CAN.TEN).
+   *
+   * `TENSION_ELECTRIQUE_IDR` and `TENSION_ELECTRIQUE_ADR` are compared, in order, to each
+   * catalog line's `voltage_idr` after normalizing both sides (whitespace stripped, uppercased)
+   * so formats such as "225kV" and "225 KV" match. The catalog's own `voltage_idr` value is
+   * returned (not the raw GeoLiaison value) so it matches the `branch_idr`-style `p-select`
+   * `optionValue` exactly. Returns `undefined` when no candidate matches.
    */
+  private async resolveGeoLiaisonCatalogVoltage(
+    appartenance: GeoLiaisonAppartenance | undefined
+  ): Promise<string | undefined> {
+    const candidates = [appartenance?.TENSION_ELECTRIQUE_IDR, appartenance?.TENSION_ELECTRIQUE_ADR].filter(
+      (v): v is string => !!v
+    );
+    if (candidates.length === 0) return undefined;
+
+    let catalogLines: Awaited<ReturnType<LinesService['getLines']>>;
+    try {
+      catalogLines = await this.linesService.getLines();
+    } catch (err) {
+      this.logger.warn('Error reading line catalog, cannot resolve voltage_idr', err);
+      return undefined;
+    }
+    if (!catalogLines || catalogLines.length === 0) return undefined;
+
+    for (const candidate of candidates) {
+      const normalizedCandidate = normalizeVoltage(candidate);
+      const match = catalogLines.find((line) => normalizeVoltage(line.voltage_idr) === normalizedCandidate);
+      if (match) return match.voltage_idr;
+    }
+
+    this.logger.warn(
+      `Voltage candidates "${candidates.join('", "')}" not found in the line catalog, voltage_idr left unresolved`
+    );
+    return undefined;
+  }
+
   private async resolveGeoLiaisonCatalogFields(
     supports: Support[],
     accroches: GeoLiaisonAccroche[]
