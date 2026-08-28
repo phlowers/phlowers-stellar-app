@@ -18,8 +18,11 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { initialConditionConstraints } from './initialConditionModal.constantes';
-import { getErrorIds, integerValidator } from './initialConditionModal.helpers';
+import { initialConditionConstraints } from '@shared/components/initial-condition-modal/initialConditionModal.constantes';
+import {
+  getErrorIds,
+  integerValidator
+} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
 
 /** Form validation rules for initial condition fields. */
 const validators = {
@@ -155,9 +158,8 @@ export class InitialConditionModalComponent {
 
   getNameErrorIds(): string | null {
     const ids: string[] = [];
-    const requiredId = this.getErrorIds('name', ['required']);
-    if (requiredId) {
-      ids.push(requiredId);
+    if (this.form.controls.name.errors?.['required']) {
+      ids.push('initial-condition-name-error-required');
     }
     if (!this.isNameUnique()) {
       ids.push('initial-condition-name-error-message');

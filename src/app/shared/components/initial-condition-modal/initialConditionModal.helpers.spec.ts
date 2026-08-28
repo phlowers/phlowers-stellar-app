@@ -1,5 +1,8 @@
 import { FormBuilder, Validators } from '@angular/forms';
-import { getErrorIds, integerValidator } from './initialConditionModal.helpers';
+import {
+  getErrorIds,
+  integerValidator
+} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
 
 describe('integerValidator', () => {
   const fb = new FormBuilder();

@@ -91,8 +91,7 @@
               <p-message id="base_parameters-error-min" severity="error" size="small" variant="simple">
                 <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ constraints.base_parameters.min }}.
               </p-message>
-            }
-            @if (form.controls.base_parameters.errors?.['max']) {
+            } @else if (form.controls.base_parameters.errors?.['max']) {
               <p-message id="base_parameters-error-max" severity="error" size="small" variant="simple">
                 <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ constraints.base_parameters.max }}.
               </p-message>
@@ -122,14 +121,12 @@
                 <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                 {{ constraints.base_temperature.min }}.
               </p-message>
-            }
-            @if (form.controls.base_temperature.errors?.['max']) {
+            } @else if (form.controls.base_temperature.errors?.['max']) {
               <p-message id="base_temperature-error-max" severity="error" size="small" variant="simple">
                 <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                 {{ constraints.base_temperature.max }}.
               </p-message>
-            }
-            @if (form.controls.base_temperature.errors?.['integer']) {
+            } @else if (form.controls.base_temperature.errors?.['integer']) {
               <p-message id="base_temperature-error-integer" severity="error" size="small" variant="simple">
                 {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
               </p-message>
@@ -158,8 +155,7 @@
                   <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                   {{ constraints.cable_pretension.min }}.
                 </p-message>
-              }
-              @if (form.controls.cable_pretension.errors?.['max']) {
+              } @else if (form.controls.cable_pretension.errors?.['max']) {
                 <p-message id="cable_pretension-error-max" severity="error" size="small" variant="simple">
                   <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ constraints.cable_pretension.max }}.
@@ -190,14 +186,12 @@
                   <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                   {{ constraints.min_temperature.min }}.
                 </p-message>
-              }
-              @if (form.controls.min_temperature.errors?.['max']) {
+              } @else if (form.controls.min_temperature.errors?.['max']) {
                 <p-message id="min_temperature-error-max" severity="error" size="small" variant="simple">
                   <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ constraints.min_temperature.max }}.
                 </p-message>
-              }
-              @if (form.controls.min_temperature.errors?.['integer']) {
+              } @else if (form.controls.min_temperature.errors?.['integer']) {
                 <p-message id="min_temperature-error-integer" severity="error" size="small" variant="simple">
                   {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
                 </p-message>
@@ -224,14 +218,12 @@
                   <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                   {{ constraints.max_wind_pressure.min }}.
                 </p-message>
-              }
-              @if (form.controls.max_wind_pressure.errors?.['max']) {
+              } @else if (form.controls.max_wind_pressure.errors?.['max']) {
                 <p-message id="max_wind_pressure-error-max" severity="error" size="small" variant="simple">
                   <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ constraints.max_wind_pressure.max }}.
                 </p-message>
-              }
-              @if (form.controls.max_wind_pressure.errors?.['integer']) {
+              } @else if (form.controls.max_wind_pressure.errors?.['integer']) {
                 <p-message id="max_wind_pressure-error-integer" severity="error" size="small" variant="simple">
                   {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
                 </p-message>
@@ -258,8 +250,7 @@
                   <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
                   {{ constraints.max_frost_width.min }}.
                 </p-message>
-              }
-              @if (form.controls.max_frost_width.errors?.['max']) {
+              } @else if (form.controls.max_frost_width.errors?.['max']) {
                 <p-message id="max_frost_width-error-max" severity="error" size="small" variant="simple">
                   <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ constraints.max_frost_width.max }}.
