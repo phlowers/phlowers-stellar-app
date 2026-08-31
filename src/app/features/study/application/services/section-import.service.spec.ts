@@ -900,6 +900,60 @@ describe('SectionImportService', () => {
       ).toHaveLength(1);
     });
 
+    it('should never fall back to SUPPORT_ADR when SUPPORT_IDR is present, keeping the file values', async () => {
+      // SUPPORT_IDR is a placeholder absent from the catalog while SUPPORT_ADR would match a
+      // catalog row. The lookup must be attempted with SUPPORT_IDR only (no ADR fallback), so the
+      // file's own armLength/heightBelowConsole survive instead of being overridden by the catalog.
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+
+      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+
+      // Every catalog lookup was called with a null ADR argument (SUPPORT_IDR is present).
+      expect(attachmentServiceMock.resolveGeoLiaisonCatalogAttachment).toHaveBeenCalled();
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mock.calls.forEach((call) => {
+        expect(call[0]).toBe('Support_IDR_A');
+        expect(call[1]).toBeNull();
+      });
+
+      expect(result?.supports[0].attachmentSet).toBe(19);
+      expect(result?.supports[0].armLength).toBe(3.0);
+      expect(result?.supports[0].heightBelowConsole).toBe(2.5);
+    });
+
+    it('should fall back to SUPPORT_ADR and apply catalog values only when SUPPORT_IDR is absent', async () => {
+      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Support A',
+        support_tower: 'Tower X',
+        attachment_set: 7,
+        cross_arm_length: 9.9,
+        attachment_altitude: 99.9,
+        attachment_set_x: 1,
+        attachment_set_y: 2,
+        attachment_set_z: 99.9
+      });
+
+      const payload = buildValidGeoLiaisonPayload();
+      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      portees.forEach((portee) => {
+        (portee['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = null;
+        (portee['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = null;
+      });
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      // SUPPORT_IDR absent: the ADR is passed as the fallback identifier.
+      expect(attachmentServiceMock.resolveGeoLiaisonCatalogAttachment).toHaveBeenCalledWith(null, 'Support A', 19);
+
+      // The catalog values apply, and the support name falls back to SUPPORT_ADR.
+      expect(result?.supports[0].name).toBe('Support A');
+      expect(result?.supports[0].attachmentSet).toBe(7);
+      expect(result?.supports[0].armLength).toBe(9.9);
+      expect(result?.supports[0].heightBelowConsole).toBe(99.9);
+    });
+
     it('should accept zero values from catalog when complete geometry is present', async () => {
       attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
         uuid: 'cat-1',

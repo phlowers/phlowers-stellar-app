@@ -470,6 +470,11 @@ export class SectionImportService implements ImportAdapter<Section> {
    * (L/X/Y/Z) entry when it returns one, so an `undefined` result is the single signal that the
    * support is absent from the catalog — in that case the GeoLiaison file values are kept as-is,
    * including `armLength` (`LONGUEUR_BRAS`) and `heightBelowConsole` (`HAUTEUR_SOUS_CONSOLE`).
+   *
+   * The SUPPORT_ADR fallback is only attempted when SUPPORT_IDR is absent. When SUPPORT_IDR is
+   * present (even a placeholder value not registered in the catalog), the file values take
+   * priority: we must not silently resolve against an SUPPORT_ADR catalog match, which would
+   * override the file's own armLength/heightBelowConsole.
    */
   private async resolveGeoLiaisonCatalogSupportFields(
     supports: Support[],
@@ -484,9 +489,10 @@ export class SectionImportService implements ImportAdapter<Section> {
           return support;
         }
 
+        const hasSupportIdr = !!accroche.SUPPORT_IDR?.trim();
         const catalogEntry = await this.attachmentService.resolveGeoLiaisonCatalogAttachment(
           accroche.SUPPORT_IDR,
-          accroche.SUPPORT_ADR,
+          hasSupportIdr ? null : accroche.SUPPORT_ADR,
           support.attachmentSet
         );
 
