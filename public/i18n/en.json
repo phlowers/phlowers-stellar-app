@@ -43,7 +43,8 @@
     "import": {
       "upload-prompt": "Upload one or several files",
       "action": {
-        "open": "Open"
+        "open": "Open",
+        "consult": "Consult"
       },
       "collision": {
         "message": "already exists. Do you want to replace it?",
