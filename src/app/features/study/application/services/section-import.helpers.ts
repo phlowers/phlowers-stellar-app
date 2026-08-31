@@ -6,7 +6,7 @@
  */
 import { isNil } from 'lodash';
 import { Section, Support } from '@shared/domain';
-import { GeoLiaisonAccroche, GeoLiaisonFieldError, GeoLiaisonFormat } from './section-import.interfaces';
+import { Accroche, FieldError, CantonFormat } from './section-import.interfaces';
 
 // ---------------------------------------------------------------------------
 // Lambert93 to GPS reprojection helpers
@@ -98,7 +98,7 @@ export function extractAttachmentPosition(value: string | null): string | null {
 }
 
 /**
- * Builds the section name from GeoLiaison data components.
+ * Builds the section name from canton data components.
  * Rule RG.CAN.NOM:
  * {BRANCHE_IDR}-{CANTON_TYPE}{PHASE_ELECTRIQUE_NUMERO}-{startNum}-SET{startSet}-{endNum}-SET{endSet}
  * No separator between CANTON_TYPE and PHASE_ELECTRIQUE_NUMERO.
@@ -138,7 +138,7 @@ export function buildSectionName(
 // ---------------------------------------------------------------------------
 
 /**
- * Validates required fields directly on the raw GeoLiaison JSON before mapping.
+ * Validates required fields directly on the raw canton JSON before mapping.
  * Only checks fields explicitly marked "Oui" (mandatory) in the US contract interface.
  * Operates on original JSON key names so error messages show exactly what the user
  * sees in their file (e.g. `ANGLE_LIGNE: null`).
@@ -152,9 +152,9 @@ export function buildSectionName(
  *                            CHAINE_DRN_LONGUEUR, CHAINE_DRN_POIDS,
  *                            HAUTEUR_SOUS_CONSOLE, LONGUEUR_BRAS, PIED_Z_LAMBERT93
  */
-export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFieldError[] {
+export function validateCantonRawFields(raw: CantonFormat): FieldError[] {
   const seen = new Set<string>();
-  const errors: GeoLiaisonFieldError[] = [];
+  const errors: FieldError[] = [];
 
   const report = (field: string, value: string | null): void => {
     if (!seen.has(field)) {
@@ -186,7 +186,7 @@ export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFi
   }
 
   // Accroche-level required fields ("Oui" in US contract interface)
-  const acrocheNumericRequired: readonly (keyof GeoLiaisonAccroche)[] = [
+  const acrocheNumericRequired: readonly (keyof Accroche)[] = [
     'ACCROCHE_CABLE_Z_LAMBERT93',
     'ANGLE_LIGNE',
     'CHAINE_DRN_LONGUEUR',
@@ -196,7 +196,7 @@ export function validateGeoLiaisonRawFields(raw: GeoLiaisonFormat): GeoLiaisonFi
     'PIED_Z_LAMBERT93'
   ];
 
-  const checkAccroche = (accroche: GeoLiaisonAccroche): void => {
+  const checkAccroche = (accroche: Accroche): void => {
     for (const field of acrocheNumericRequired) {
       if (parseFloatOrNull(accroche[field]) === null) report(field, accroche[field] ?? null);
     }

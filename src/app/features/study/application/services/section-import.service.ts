@@ -19,18 +19,11 @@ import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import {
-  GeoLiaisonAccroche,
-  GeoLiaisonAppartenance,
-  GeoLiaisonCanton,
-  GeoLiaisonFormat,
-  GeoLiaisonPortee,
-  StartGps
-} from './section-import.interfaces';
+import { Accroche, Appartenance, Canton, CantonFormat, Portee, StartGps } from './section-import.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
 import {
-  GEO_LIAISON_CATALOG_MISSING_KEY,
+  CANTON_CATALOG_MISSING_KEY,
   IMPORT_SUCCESS_KEY,
   REPROJECTION_INFO_KEY,
   SECTION_IMPORT_ERROR_KEYS
@@ -46,7 +39,7 @@ import {
   normalizeVoltage,
   parseBooleanOrNull,
   parseFloatOrNull,
-  validateGeoLiaisonRawFields
+  validateCantonRawFields
 } from './section-import.helpers';
 
 // ---------------------------------------------------------------------------
@@ -58,7 +51,7 @@ import {
  *
  * Implements `ImportAdapter` for `Section` entities.
  * Accepts `.json` files containing a single serialized section object
- * or a GeoLiaison canton export (structure `cantons > general + portee unitaire`).
+ * or a canton export (structure `cantons > general + portee unitaire`).
  *
  * ### Study context
  * Before processing files, the host component **must** call
@@ -114,7 +107,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
   /**
    * Checks whether the UUID encoded in the JSON file collides with an existing
-   * section in the current study. Supports both legacy Section JSON and GeoLiaison format.
+   * section in the current study. Supports both legacy Section JSON and canton format.
    *
    * @returns Collision info `{ uuid, label }` or `null` if no collision.
    */
@@ -127,8 +120,8 @@ export class SectionImportService implements ImportAdapter<Section> {
       const parsed = JSON.parse(text) as Record<string, unknown>;
 
       let uuid: string;
-      if (this.isGeoLiaisonFormat(parsed)) {
-        const cantons = parsed['cantons'] as GeoLiaisonCanton[];
+      if (this.isCantonFormat(parsed)) {
+        const cantons = parsed['cantons'] as Canton[];
         uuid = cantons[0].general.CANTON_CUR.trim();
       } else {
         uuid = typeof parsed['uuid'] === 'string' ? parsed['uuid'].trim() : '';
@@ -163,20 +156,20 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Stage: DECODING + PARSING
-    const { section, isGeoLiaison, rawGeoLiaison, hasCatalogFallbackWarnings } = await this.parseJsonFile(file);
+    const { section, isCanton, rawCanton, hasCatalogFallbackWarnings } = await this.parseJsonFile(file);
 
     // Stage: VALIDATION
-    // GeoLiaison: validate on the raw JSON so error messages show original field names
+    // Canton: validate on the raw JSON so error messages show original field names
     // and values (e.g. "SUPPORT_NUMERO: null").
     // Legacy Section: validate on the mapped model (JSON keys already match model names).
-    if (isGeoLiaison && rawGeoLiaison) {
-      this.validateGeoLiaisonSection(rawGeoLiaison);
+    if (isCanton && rawCanton) {
+      this.validateCantonSection(rawCanton);
     } else {
       this.validateSection(section);
     }
 
     // Stage: COLLISION_CHECK + PERSISTENCE
-    return this.persistSection(section, study, collisionResolver, isGeoLiaison && hasCatalogFallbackWarnings);
+    return this.persistSection(section, study, collisionResolver, isCanton && hasCatalogFallbackWarnings);
   }
 
   // ---------------------------------------------------------------------------
@@ -189,10 +182,10 @@ export class SectionImportService implements ImportAdapter<Section> {
   }
 
   /**
-   * Returns `true` when the raw object is a valid GeoLiaison format
+   * Returns `true` when the raw object is a valid canton format
    * (has `cantons[0].general.CANTON_CUR`).
    */
-  private isGeoLiaisonFormat(raw: unknown): boolean {
+  private isCantonFormat(raw: unknown): boolean {
     if (typeof raw !== 'object' || raw === null) return false;
     const r = raw as Record<string, unknown>;
     if (!Array.isArray(r['cantons']) || (r['cantons'] as unknown[]).length === 0) return false;
@@ -209,8 +202,8 @@ export class SectionImportService implements ImportAdapter<Section> {
 
   private async parseJsonFile(file: File): Promise<{
     section: Section;
-    isGeoLiaison: boolean;
-    rawGeoLiaison?: GeoLiaisonFormat;
+    isCanton: boolean;
+    rawCanton?: CantonFormat;
     hasCatalogFallbackWarnings: boolean;
   }> {
     let text: string;
@@ -241,29 +234,29 @@ export class SectionImportService implements ImportAdapter<Section> {
       throw error;
     }
 
-    // GeoLiaison format detection (RG.CAN.OUV-BTN.3)
+    // Canton format detection (RG.CAN.OUV-BTN.3)
     if (this.hasCantons(parsed)) {
-      if (!this.isGeoLiaisonFormat(parsed)) {
+      if (!this.isCantonFormat(parsed)) {
         const error: ImportError = {
           code: 'VALIDATION_ERROR',
-          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.geoLiaisonFormatError),
+          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.cantonFormatError),
           stage: 'VALIDATION'
         };
         throw error;
       }
-      const rawGeoLiaison = parsed as unknown as GeoLiaisonFormat;
-      const { section, hasCatalogFallbackWarnings } = await this.mapGeoLiaisonToSection(rawGeoLiaison);
-      return { section, isGeoLiaison: true, rawGeoLiaison, hasCatalogFallbackWarnings };
+      const rawCanton = parsed as unknown as CantonFormat;
+      const { section, hasCatalogFallbackWarnings } = await this.mapCantonToSection(rawCanton);
+      return { section, isCanton: true, rawCanton, hasCatalogFallbackWarnings };
     }
 
-    return { section: this.mapToSection(parsed), isGeoLiaison: false, hasCatalogFallbackWarnings: false };
+    return { section: this.mapToSection(parsed), isCanton: false, hasCatalogFallbackWarnings: false };
   }
 
   // ---------------------------------------------------------------------------
-  // Private — GeoLiaison mapping
+  // Private — Canton mapping
   // ---------------------------------------------------------------------------
 
-  private async mapGeoLiaisonToSection(raw: GeoLiaisonFormat): Promise<{
+  private async mapCantonToSection(raw: CantonFormat): Promise<{
     section: Section;
     hasCatalogFallbackWarnings: boolean;
   }> {
@@ -296,13 +289,15 @@ export class SectionImportService implements ImportAdapter<Section> {
       ? allMaintenance.find((m) => m.regional_team === gmrDesignation)
       : undefined;
 
-    const supports = this.mapGeoLiaisonSupports(sortedPortees);
+    const supports = this.mapCantonSupports(sortedPortees);
     const accroches =
       sortedPortees.length === 0
         ? []
         : [...sortedPortees.map((p) => p['accroche depart']), sortedPortees.at(-1)!['accroche arrivee']];
-    const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } =
-      await this.resolveGeoLiaisonCatalogFields(supports, accroches);
+    const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } = await this.resolveCatalogFields(
+      supports,
+      accroches
+    );
 
     // Persist new support names in the local catalog (RG.CAN.ATT)
     const supportNameEntries: SupportNameEntry[] = accroches
@@ -318,7 +313,7 @@ export class SectionImportService implements ImportAdapter<Section> {
       startGps
     } = await this.applyLambertReprojection(supportsWithCatalogResolution, lambertX, lambertY);
 
-    const voltageIdr = await this.resolveGeoLiaisonCatalogVoltage(appartenance);
+    const voltageIdr = await this.resolveCatalogVoltage(appartenance);
 
     return {
       section: {
@@ -365,12 +360,10 @@ export class SectionImportService implements ImportAdapter<Section> {
    * `TENSION_ELECTRIQUE_IDR` and `TENSION_ELECTRIQUE_ADR` are compared, in order, to each
    * catalog line's `voltage_idr` after normalizing both sides (whitespace stripped, uppercased)
    * so formats such as "225kV" and "225 KV" match. The catalog's own `voltage_idr` value is
-   * returned (not the raw GeoLiaison value) so it matches the `branch_idr`-style `p-select`
+   * returned (not the raw canton value) so it matches the `branch_idr`-style `p-select`
    * `optionValue` exactly. Returns `undefined` when no candidate matches.
    */
-  private async resolveGeoLiaisonCatalogVoltage(
-    appartenance: GeoLiaisonAppartenance | undefined
-  ): Promise<string | undefined> {
+  private async resolveCatalogVoltage(appartenance: Appartenance | undefined): Promise<string | undefined> {
     const candidates = [appartenance?.TENSION_ELECTRIQUE_IDR, appartenance?.TENSION_ELECTRIQUE_ADR].filter(
       (v): v is string => !!v
     );
@@ -397,15 +390,17 @@ export class SectionImportService implements ImportAdapter<Section> {
     return undefined;
   }
 
-  private async resolveGeoLiaisonCatalogFields(
+  private async resolveCatalogFields(
     supports: Support[],
-    accroches: GeoLiaisonAccroche[]
+    accroches: Accroche[]
   ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
-    const { supports: supportsWithAttachments, hasCatalogFallbackWarnings } =
-      await this.resolveGeoLiaisonCatalogSupportFields(supports, accroches);
+    const { supports: supportsWithAttachments, hasCatalogFallbackWarnings } = await this.resolveCatalogSupportFields(
+      supports,
+      accroches
+    );
 
     return {
-      supports: await this.resolveGeoLiaisonCatalogChainFields(supportsWithAttachments, accroches),
+      supports: await this.resolveCatalogChainFields(supportsWithAttachments, accroches),
       hasCatalogFallbackWarnings
     };
   }
@@ -415,19 +410,16 @@ export class SectionImportService implements ImportAdapter<Section> {
    *
    * The catalog is authoritative whenever it holds the chain: `chainLength`, `chainWeight`,
    * `chainV` and `chainSurface` are all taken from the catalog entry, including when its value is
-   * `0`. Chains absent from the catalog keep the GeoLiaison file values mapped by
+   * `0`. Chains absent from the catalog keep the canton file values mapped by
    * `mapAccrocheToSupport`. `counterWeight` (`CONTREPOIDS`) has no catalog counterpart and is
    * always kept from the file.
    */
-  private async resolveGeoLiaisonCatalogChainFields(
-    supports: Support[],
-    accroches: GeoLiaisonAccroche[]
-  ): Promise<Support[]> {
+  private async resolveCatalogChainFields(supports: Support[], accroches: Accroche[]): Promise<Support[]> {
     let catalogChains: Awaited<ReturnType<ChainsService['getChains']>>;
     try {
       catalogChains = await this.chainsService.getChains();
     } catch (err) {
-      this.logger.warn('Error reading chain catalog, keeping GeoLiaison file chain values', err);
+      this.logger.warn('Error reading chain catalog, keeping canton file chain values', err);
       return supports;
     }
     if (!catalogChains || catalogChains.length === 0) {
@@ -439,14 +431,14 @@ export class SectionImportService implements ImportAdapter<Section> {
     return supports.map((support, index) => {
       const chainName = accroches[index]?.CHAINE_DRN_IDR?.trim();
       if (!chainName) {
-        this.logger.warn(`Support #${index}: missing CHAINE_DRN_IDR, keeping GeoLiaison file chain values`);
+        this.logger.warn(`Support #${index}: missing CHAINE_DRN_IDR, keeping canton file chain values`);
         return support;
       }
 
       const catalogChain = catalogChainsByName.get(chainName);
       if (!catalogChain) {
         this.logger.warn(
-          `Support #${index}: chain "${chainName}" not found in the chain catalog, keeping GeoLiaison file chain values`
+          `Support #${index}: chain "${chainName}" not found in the chain catalog, keeping canton file chain values`
         );
         return support;
       }
@@ -466,19 +458,19 @@ export class SectionImportService implements ImportAdapter<Section> {
    * Resolves each support's name/attachmentSet/armLength/heightBelowConsole against the local
    * attachment catalog (RG.CAN.SUP-NOM/SET/BRA).
    *
-   * `AttachmentService.resolveGeoLiaisonCatalogAttachment` already guarantees a complete
+   * `AttachmentService.resolveCatalogAttachment` already guarantees a complete
    * (L/X/Y/Z) entry when it returns one, so an `undefined` result is the single signal that the
-   * support is absent from the catalog — in that case the GeoLiaison file values are kept as-is,
+   * support is absent from the catalog — in that case the canton file values are kept as-is,
    * including `armLength` (`LONGUEUR_BRAS`) and `heightBelowConsole` (`HAUTEUR_SOUS_CONSOLE`).
    *
    * The SUPPORT_ADR fallback is only attempted when SUPPORT_IDR is absent. When SUPPORT_IDR is
    * present (even a placeholder value not registered in the catalog), the file values take
-   * priority: we must not silently resolve against an SUPPORT_ADR catalog match, which would
+   * priority: we must not silently resolve against a SUPPORT_ADR catalog match, which would
    * override the file's own armLength/heightBelowConsole.
    */
-  private async resolveGeoLiaisonCatalogSupportFields(
+  private async resolveCatalogSupportFields(
     supports: Support[],
-    accroches: GeoLiaisonAccroche[]
+    accroches: Accroche[]
   ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
     let hasCatalogFallbackWarnings = false;
 
@@ -490,7 +482,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         }
 
         const hasSupportIdr = !!accroche.SUPPORT_IDR?.trim();
-        const catalogEntry = await this.attachmentService.resolveGeoLiaisonCatalogAttachment(
+        const catalogEntry = await this.attachmentService.resolveCatalogAttachment(
           accroche.SUPPORT_IDR,
           hasSupportIdr ? null : accroche.SUPPORT_ADR,
           support.attachmentSet
@@ -498,7 +490,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
         if (!catalogEntry) {
           hasCatalogFallbackWarnings = true;
-          // Support absent from catalog: keep the GeoLiaison file values for armLength
+          // Support absent from catalog: keep the canton file values for armLength
           // (LONGUEUR_BRAS) and heightBelowConsole (HAUTEUR_SOUS_CONSOLE) already mapped
           // into `support` by `mapAccrocheToSupport`.
           // Fall back to SUPPORT_ADR if SUPPORT_IDR is missing, as it's already used
@@ -522,7 +514,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     return { supports: resolvedSupports, hasCatalogFallbackWarnings };
   }
 
-  private mapGeoLiaisonSupports(sortedPortees: GeoLiaisonPortee[]): Support[] {
+  private mapCantonSupports(sortedPortees: Portee[]): Support[] {
     if (sortedPortees.length === 0) return [];
 
     const supports: Support[] = [];
@@ -541,7 +533,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     return supports;
   }
 
-  private mapAccrocheToSupport(accroche: GeoLiaisonAccroche, portee: GeoLiaisonPortee): Support {
+  private mapAccrocheToSupport(accroche: Accroche, portee: Portee): Support {
     return {
       ...createEmptySupport(),
       spanLength: parseFloatOrNull(portee.PORTEE_LONGUEUR),
@@ -718,8 +710,8 @@ export class SectionImportService implements ImportAdapter<Section> {
   // Private — validation
   // ---------------------------------------------------------------------------
 
-  private validateGeoLiaisonSection(raw: GeoLiaisonFormat): void {
-    const fieldErrors = validateGeoLiaisonRawFields(raw);
+  private validateCantonSection(raw: CantonFormat): void {
+    const fieldErrors = validateCantonRawFields(raw);
     if (fieldErrors.length > 0) {
       const detail = fieldErrors.map((e) => `${e.field}: ${String(e.value)}`).join('; ');
       const error: ImportError = {
@@ -801,7 +793,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
       this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
       this.notifyGpsReprojection(section);
-      this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
+      this.notifyCatalogFallbackWarnings(hasCatalogFallbackWarnings);
       return section;
     }
 
@@ -820,7 +812,7 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
     this.notifyGpsReprojection(section);
-    this.notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings);
+    this.notifyCatalogFallbackWarnings(hasCatalogFallbackWarnings);
     return section;
   }
 
@@ -839,11 +831,11 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
   }
 
-  private notifyGeoLiaisonCatalogFallbackWarnings(hasCatalogFallbackWarnings: boolean): void {
+  private notifyCatalogFallbackWarnings(hasCatalogFallbackWarnings: boolean): void {
     if (!hasCatalogFallbackWarnings) {
       return;
     }
 
-    this.notificationService.warning(this.transloco.translate(GEO_LIAISON_CATALOG_MISSING_KEY));
+    this.notificationService.warning(this.transloco.translate(CANTON_CATALOG_MISSING_KEY));
   }
 }

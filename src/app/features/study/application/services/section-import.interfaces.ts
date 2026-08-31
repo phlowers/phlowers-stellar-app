@@ -6,10 +6,10 @@
  */
 
 // ---------------------------------------------------------------------------
-// GeoLiaison type interfaces
+// Canton import type interfaces
 // ---------------------------------------------------------------------------
 
-export interface GeoLiaisonAccroche {
+export interface Accroche {
   ANGLE_LIGNE: string | null;
   ACCROCHE_SET: string | null;
   ACCROCHE_CABLE_Z_LAMBERT93: string | null;
@@ -31,7 +31,7 @@ export interface GeoLiaisonAccroche {
   SUPPORT_TOWER: string | null;
 }
 
-export interface GeoLiaisonPortee {
+export interface Portee {
   PORTEE_UNITAIRE_ORDRE: string | null;
   PORTEE_LONGUEUR: string | null;
   PORTEE_AZIMUT: string | null;
@@ -39,11 +39,11 @@ export interface GeoLiaisonPortee {
   EEL_DESIGNATION: string | null;
   GMR_DESIGNATION: string | null;
   PORTEE_UNITAIRE_DESIGNATION: string | null;
-  'accroche depart': GeoLiaisonAccroche;
-  'accroche arrivee': GeoLiaisonAccroche;
+  'accroche depart': Accroche;
+  'accroche arrivee': Accroche;
 }
 
-export interface GeoLiaisonAppartenance {
+export interface Appartenance {
   LIT_ADR: string | null;
   LIT_IDR: string | null;
   BRANCHE_IDR: string | null;
@@ -53,25 +53,25 @@ export interface GeoLiaisonAppartenance {
   LIAISON_ADR: string | null;
 }
 
-export interface GeoLiaisonGeneral {
+export interface General {
   CANTON_CUR: string;
   CABLE_ADR: string | null;
   CANTON_TYPE: string | null;
   FAISCEAU_CABLES_NOMBRE: string | null;
   PHASE_ELECTRIQUE_NUMERO: string | null;
-  appartenance: GeoLiaisonAppartenance[];
+  appartenance: Appartenance[];
 }
 
-export interface GeoLiaisonCanton {
-  general: GeoLiaisonGeneral;
-  'portee unitaire': GeoLiaisonPortee[];
+export interface Canton {
+  general: General;
+  'portee unitaire': Portee[];
 }
 
-export interface GeoLiaisonFormat {
-  cantons: GeoLiaisonCanton[];
+export interface CantonFormat {
+  cantons: Canton[];
 }
 
-export interface GeoLiaisonFieldError {
+export interface FieldError {
   readonly field: string;
   readonly value: string | null;
 }
