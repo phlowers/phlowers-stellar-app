@@ -18,16 +18,62 @@ import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { initialConditionConstraints } from '@shared/components/initial-condition-modal/initialConditionModal.constantes';
+import {
+  getErrorIds,
+  integerValidator
+} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
 
 /** Form validation rules for initial condition fields. */
 const validators = {
   name: ['', [Validators.required, Validators.maxLength(40)]],
-  base_parameters: [null, [Validators.required, Validators.min(20), Validators.max(5000)]],
-  base_temperature: [15, [Validators.required, Validators.min(-50), Validators.max(250)]],
-  cable_pretension: [0, [Validators.min(0), Validators.max(100)]],
-  min_temperature: [15, [Validators.min(-50), Validators.max(250)]],
-  max_wind_pressure: [0, [Validators.min(0), Validators.max(3000)]],
-  max_frost_width: [0, [Validators.min(0), Validators.max(20)]]
+  base_parameters: [
+    null,
+    [
+      Validators.required,
+      Validators.min(initialConditionConstraints.base_parameters.min),
+      Validators.max(initialConditionConstraints.base_parameters.max)
+    ]
+  ],
+  base_temperature: [
+    15,
+    [
+      Validators.required,
+      Validators.min(initialConditionConstraints.base_temperature.min),
+      Validators.max(initialConditionConstraints.base_temperature.max),
+      integerValidator
+    ]
+  ],
+  cable_pretension: [
+    0,
+    [
+      Validators.min(initialConditionConstraints.cable_pretension.min),
+      Validators.max(initialConditionConstraints.cable_pretension.max)
+    ]
+  ],
+  min_temperature: [
+    15,
+    [
+      Validators.min(initialConditionConstraints.min_temperature.min),
+      Validators.max(initialConditionConstraints.min_temperature.max),
+      integerValidator
+    ]
+  ],
+  max_wind_pressure: [
+    0,
+    [
+      Validators.min(initialConditionConstraints.max_wind_pressure.min),
+      Validators.max(initialConditionConstraints.max_wind_pressure.max),
+      integerValidator
+    ]
+  ],
+  max_frost_width: [
+    0,
+    [
+      Validators.min(initialConditionConstraints.max_frost_width.min),
+      Validators.max(initialConditionConstraints.max_frost_width.max)
+    ]
+  ]
 };
 
 /**
@@ -92,6 +138,7 @@ export class InitialConditionModalComponent {
   isCableNarcisse = signal<boolean>(false);
   isNameUnique = signal<boolean>(true);
   public onlyPositiveNumbers = /^[0-9]*$/;
+  readonly constraints = initialConditionConstraints;
   private readonly fb = inject(FormBuilder);
   private readonly cablesService = inject(CablesService);
 
@@ -103,6 +150,21 @@ export class InitialConditionModalComponent {
 
   checkNameUniqueness(name: string) {
     return !this.initialConditions().find((ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid);
+  }
+
+  getErrorIds(controlName: string, errorTypes: string[]): string | null {
+    return getErrorIds(this.form, controlName, errorTypes);
+  }
+
+  getNameErrorIds(): string | null {
+    const ids: string[] = [];
+    if (this.form.controls.name.errors?.['required']) {
+      ids.push('initial-condition-name-error-required');
+    }
+    if (!this.isNameUnique()) {
+      ids.push('initial-condition-name-error-message');
+    }
+    return ids.length > 0 ? ids.join(' ') : null;
   }
 
   constructor() {
