@@ -234,6 +234,7 @@
       "cables-amount": "Nombre de câbles",
       "ic-name-label": "Nom de condition initiale",
       "ic-name-unique-error": "Le nom de la condition initiale doit être unique.",
+      "whole-number-required": "Nombre entier requis.",
       "base-parameter": "Paramètre de base",
       "base-temperature": "Température de base",
       "cable-pretension": "Pré-tension du câble",
