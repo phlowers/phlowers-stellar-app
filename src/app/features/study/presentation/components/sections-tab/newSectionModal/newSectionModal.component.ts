@@ -186,6 +186,19 @@ export class NewSectionModalComponent {
    * Resets the import list, then reopens the modal in edit mode for the imported section.
    */
   onImportedSectionEditRequested(sectionUuid: string): void {
+    this.reopenImportedSection(sectionUuid, 'edit');
+  }
+
+  /**
+   * Handles the `viewRequested` event emitted by `ImportSectionComponent`.
+   * Resets the import list, then reopens the modal in read-only view mode for the imported section.
+   */
+  onImportedSectionViewRequested(sectionUuid: string): void {
+    this.reopenImportedSection(sectionUuid, 'view');
+  }
+
+  /** Resets the import list, then reopens the modal in the given mode for the imported section. */
+  private reopenImportedSection(sectionUuid: string, mode: 'edit' | 'view'): void {
     this.importResetToken.update((t) => t + 1);
 
     const section = this.study()?.sections.find((s) => s.uuid === sectionUuid);
@@ -196,7 +209,7 @@ export class NewSectionModalComponent {
 
     this.source.set('manual');
     this.setSection.emit(cloneDeep(section));
-    this.setMode.emit('edit');
+    this.setMode.emit(mode);
     this.isOpenChange.emit(false);
     Promise.resolve().then(() => this.isOpenChange.emit(true));
   }

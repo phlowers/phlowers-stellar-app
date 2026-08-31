@@ -248,10 +248,10 @@ export interface ImportContextConfig {
    */
   readonly navigationRoute?: (entityId: string) => string;
   /**
-   * If provided, renders an action button for each successfully imported entity
-   * instead of (or alongside) a navigation link.
+   * If provided, renders one action button per entry for each successfully
+   * imported entity, instead of (or alongside) a navigation link.
    *
-   * The callback receives the full `ImportOutcome` for the file so the caller
+   * Each callback receives the full `ImportOutcome` for the file so the caller
    * can act on the entity UUID, label, etc.
    *
    * Mutually exclusive in intent with `navigationRoute` (configure only one per
@@ -259,14 +259,16 @@ export interface ImportContextConfig {
    *
    * @example
    * ```typescript
-   * successAction: {
-   *   label: 'Edit',
-   *   action: (outcome) => this.onEditRequested(outcome.entityId!)
-   * }
+   * successActions: [
+   *   { label: 'View', action: (outcome) => this.onViewRequested(outcome.entityId!) },
+   *   { label: 'Edit', action: (outcome) => this.onEditRequested(outcome.entityId!) }
+   * ]
    * ```
    */
-  readonly successAction?: {
+  readonly successActions?: readonly {
     readonly label: string;
     readonly action: (outcome: ImportOutcome) => void;
-  };
+    /** Optional stable test id applied to the rendered button. */
+    readonly testId?: string;
+  }[];
 }
