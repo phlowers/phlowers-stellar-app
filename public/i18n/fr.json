@@ -43,7 +43,8 @@
     "import": {
       "upload-prompt": "Télécharger un ou plusieurs fichiers",
       "action": {
-        "open": "Ouvrir"
+        "open": "Ouvrir",
+        "consult": "Consulter"
       },
       "collision": {
         "message": "existe déjà. Voulez-vous le remplacer ?",

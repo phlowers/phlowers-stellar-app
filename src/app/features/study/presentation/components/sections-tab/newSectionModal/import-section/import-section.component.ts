@@ -55,15 +55,29 @@ export class ImportSectionComponent {
    */
   readonly editRequested = output<string>();
 
+  /**
+   * Emitted when the user clicks the View button on a successfully imported section.
+   * Carries the UUID of the imported section.
+   */
+  readonly viewRequested = output<string>();
+
   private readonly transloco = inject(TranslocoService);
 
-  /** Full config including successAction, built as a computed signal. */
+  /** Full config including success actions, built as a computed signal. */
   readonly config = computed<ImportContextConfig>(() => ({
     ...createSectionImportConfig(this.transloco),
-    successAction: {
-      label: this.transloco.translate('common.edit'),
-      action: (outcome) => this.editRequested.emit(outcome.entityId!)
-    }
+    successActions: [
+      {
+        label: this.transloco.translate('common.edit'),
+        action: (outcome) => this.editRequested.emit(outcome.entityId!),
+        testId: 'edit-imported-btn'
+      },
+      {
+        label: this.transloco.translate('common.import.action.consult'),
+        action: (outcome) => this.viewRequested.emit(outcome.entityId!),
+        testId: 'view-imported-btn'
+      }
+    ]
   }));
 
   private readonly sectionImportService = inject(SectionImportService);
@@ -79,9 +93,5 @@ export class ImportSectionComponent {
 
   onImportCompleted(outcomes: ImportOutcome[]): void {
     this.importCompleted.emit(outcomes);
-  }
-
-  onSuccessActionTriggered(outcome: ImportOutcome): void {
-    this.editRequested.emit(outcome.entityId!);
   }
 }
