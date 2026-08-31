@@ -61,12 +61,6 @@ export class ImportComponent {
   /** Emitted after each file batch is processed with the full outcome list. */
   readonly importCompleted = output<ImportOutcome[]>();
 
-  /**
-   * Emitted when the user clicks the success action button (e.g. Edit).
-   * Carries the full `ImportOutcome` of the clicked item.
-   */
-  readonly successActionTriggered = output<ImportOutcome>();
-
   /** True while the engine is processing files. */
   readonly isLoading = signal(false);
 
@@ -102,10 +96,9 @@ export class ImportComponent {
     (event.target as HTMLInputElement).value = '';
   }
 
-  /** Handles the success action button click: invokes the config callback and emits the output. */
-  onSuccessAction(outcome: ImportOutcome): void {
-    this.config().successAction!.action(outcome);
-    this.successActionTriggered.emit(outcome);
+  /** Handles a success action button click by invoking its config callback. */
+  onSuccessAction(action: NonNullable<ImportContextConfig['successActions']>[number], outcome: ImportOutcome): void {
+    action.action(outcome);
   }
 
   /**

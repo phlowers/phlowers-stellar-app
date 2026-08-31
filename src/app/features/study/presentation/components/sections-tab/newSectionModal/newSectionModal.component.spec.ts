@@ -523,4 +523,30 @@ describe('NewSectionModalComponent', () => {
       expect(spy).not.toHaveBeenCalled();
     });
   });
+
+  // -------------------------------------------------------------------------
+  // onImportedSectionViewRequested
+  // -------------------------------------------------------------------------
+
+  describe('onImportedSectionViewRequested', () => {
+    const importedSection: Section = { ...mockSection, uuid: 'imported-uuid', name: 'Imported Section' };
+
+    it('should emit setSection with the found section and setMode("view")', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [importedSection] });
+      const setSectionSpy = vi.spyOn(component.setSection, 'emit');
+      const setModeSpy = vi.spyOn(component.setMode, 'emit');
+      component.onImportedSectionViewRequested('imported-uuid');
+      expect(setSectionSpy).toHaveBeenCalledWith(importedSection);
+      expect(setModeSpy).toHaveBeenCalledWith('view');
+    });
+
+    it('should call notificationService.error and NOT emit setSection when uuid is not found', () => {
+      fixture.componentRef.setInput('study', { ...mockStudy, sections: [] });
+      const notificationService = TestBed.inject(NotificationService) as unknown as MockNotificationService;
+      const setSectionSpy = vi.spyOn(component.setSection, 'emit');
+      component.onImportedSectionViewRequested('unknown-uuid');
+      expect(notificationService.error).toHaveBeenCalled();
+      expect(setSectionSpy).not.toHaveBeenCalled();
+    });
+  });
 });
