@@ -62,7 +62,7 @@ describe('ImportSectionComponent', () => {
           langs: {
             en: {
               'common.edit': 'Edit',
-              'common.view': 'View'
+              'common.import.action.consult': 'Consult'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -179,8 +179,8 @@ describe('ImportSectionComponent', () => {
       expect(component.config().successActions).toHaveLength(2);
     });
 
-    it('should expose "View" and "Edit" as success action labels', () => {
-      expect(component.config().successActions?.map((a) => a.label)).toEqual(['View', 'Edit']);
+    it('should expose "Edit" and "Consult" as success action labels', () => {
+      expect(component.config().successActions?.map((a) => a.label)).toEqual(['Edit', 'Consult']);
     });
   });
 
@@ -203,7 +203,7 @@ describe('ImportSectionComponent', () => {
       const emitted: string[] = [];
       component.viewRequested.subscribe((id) => emitted.push(id));
 
-      const viewAction = component.config().successActions?.find((a) => a.label === 'View');
+      const viewAction = component.config().successActions?.find((a) => a.label === 'Consult');
       viewAction?.action({ fileName: 'ok.json', status: 'success', entityId: 'section-uuid-2' });
 
       expect(emitted).toEqual(['section-uuid-2']);

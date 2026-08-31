@@ -56,14 +56,14 @@
 
           @if (config().successActions?.length && outcome.entityId) {
             <div class="file-import__list__btns">
-              @for (action of config().successActions; track action.label) {
+              @for (action of config().successActions; track action.testId ?? $index) {
                 <button
                   app-btn
                   type="button"
                   btnStyle="base"
                   btnSize="s"
                   (click)="onSuccessAction(action, outcome)"
-                  [attr.data-testid]="action.testId ?? 'action-imported-btn'"
+                  [attr.data-testid]="action.testId ?? 'action-imported-btn-' + $index"
                 >
                   {{ action.label }}
                 </button>

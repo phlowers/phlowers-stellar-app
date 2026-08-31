@@ -68,14 +68,14 @@ export class ImportSectionComponent {
     ...createSectionImportConfig(this.transloco),
     successActions: [
       {
-        label: this.transloco.translate('common.view'),
-        action: (outcome) => this.viewRequested.emit(outcome.entityId!),
-        testId: 'view-imported-btn'
-      },
-      {
         label: this.transloco.translate('common.edit'),
         action: (outcome) => this.editRequested.emit(outcome.entityId!),
         testId: 'edit-imported-btn'
+      },
+      {
+        label: this.transloco.translate('common.import.action.consult'),
+        action: (outcome) => this.viewRequested.emit(outcome.entityId!),
+        testId: 'view-imported-btn'
       }
     ]
   }));
