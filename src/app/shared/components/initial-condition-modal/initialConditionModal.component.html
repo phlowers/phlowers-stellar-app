@@ -1,4 +1,10 @@
-<p-dialog data-testid="ic-modal" dismissableMask="true" [visible]="isOpen()" (visibleChange)="onVisibleChange($event)">
+<p-dialog
+  data-testid="ic-modal"
+  dismissableMask="true"
+  [style]="{ width: '48rem' }"
+  [visible]="isOpen()"
+  (visibleChange)="onVisibleChange($event)"
+>
   <ng-template #header>
     <p class="text-l-600 mb-0 flex gap-2">
       @if (mode() === 'create') {
@@ -46,12 +52,17 @@
               type="text"
               required
               id="initial-condition-name"
-              [attr.aria-invalid]="!isNameUnique()"
-              aria-errormessage="initial-condition-name-error-message"
+              [attr.aria-invalid]="form.controls.name.invalid || !isNameUnique()"
+              [attr.aria-errormessage]="getNameErrorIds()"
               pInputText
               formControlName="name"
               data-testid="ic-name-input"
             />
+            @if (form.controls.name.errors?.['required']) {
+              <p-message id="initial-condition-name-error-required" severity="error" size="small" variant="simple">
+                {{ 'common.required' | transloco }}
+              </p-message>
+            }
             @if (!isNameUnique()) {
               <p-message id="initial-condition-name-error-message" severity="error" size="small" variant="simple">
                 {{ 'shared.initial-condition-modal.ic-name-unique-error' | transloco }}
@@ -73,7 +84,18 @@
               pInputText
               formControlName="base_parameters"
               data-testid="base-parameter-input"
+              [attr.aria-invalid]="form.controls.base_parameters.invalid || null"
+              [attr.aria-errormessage]="getErrorIds('base_parameters', ['min', 'max'])"
             />
+            @if (form.controls.base_parameters.errors?.['min']) {
+              <p-message id="base_parameters-error-min" severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ constraints.base_parameters.min }}.
+              </p-message>
+            } @else if (form.controls.base_parameters.errors?.['max']) {
+              <p-message id="base_parameters-error-max" severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ constraints.base_parameters.max }}.
+              </p-message>
+            }
           </div>
           <div>
             <label for="initial-condition-base-temperature">
@@ -89,9 +111,26 @@
                 pInputText
                 formControlName="base_temperature"
                 data-testid="base-temperature-input"
+                [attr.aria-invalid]="form.controls.base_temperature.invalid || null"
+                [attr.aria-errormessage]="getErrorIds('base_temperature', ['min', 'max', 'integer'])"
               />
               <p-inputgroup-addon>°C</p-inputgroup-addon>
             </p-inputgroup>
+            @if (form.controls.base_temperature.errors?.['min']) {
+              <p-message id="base_temperature-error-min" severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+                {{ constraints.base_temperature.min }}.
+              </p-message>
+            } @else if (form.controls.base_temperature.errors?.['max']) {
+              <p-message id="base_temperature-error-max" severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+                {{ constraints.base_temperature.max }}.
+              </p-message>
+            } @else if (form.controls.base_temperature.errors?.['integer']) {
+              <p-message id="base_temperature-error-integer" severity="error" size="small" variant="simple">
+                {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
+              </p-message>
+            }
           </div>
           @if (isCableNarcisse()) {
             <div>
@@ -106,9 +145,22 @@
                   pInputText
                   formControlName="cable_pretension"
                   data-testid="cable-pretension-input"
+                  [attr.aria-invalid]="form.controls.cable_pretension.invalid || null"
+                  [attr.aria-errormessage]="getErrorIds('cable_pretension', ['min', 'max'])"
                 />
                 <p-inputgroup-addon>%CRA</p-inputgroup-addon>
               </p-inputgroup>
+              @if (form.controls.cable_pretension.errors?.['min']) {
+                <p-message id="cable_pretension-error-min" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+                  {{ constraints.cable_pretension.min }}.
+                </p-message>
+              } @else if (form.controls.cable_pretension.errors?.['max']) {
+                <p-message id="cable_pretension-error-max" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+                  {{ constraints.cable_pretension.max }}.
+                </p-message>
+              }
             </div>
             <div>
               <p class="font-bold mb-0">{{ 'shared.initial-condition-modal.extreme-historical' | transloco }}</p>
@@ -124,9 +176,26 @@
                   id="initial-condition-min-temperature"
                   pInputText
                   formControlName="min_temperature"
+                  [attr.aria-invalid]="form.controls.min_temperature.invalid || null"
+                  [attr.aria-errormessage]="getErrorIds('min_temperature', ['min', 'max', 'integer'])"
                 />
                 <p-inputgroup-addon>°C</p-inputgroup-addon>
               </p-inputgroup>
+              @if (form.controls.min_temperature.errors?.['min']) {
+                <p-message id="min_temperature-error-min" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+                  {{ constraints.min_temperature.min }}.
+                </p-message>
+              } @else if (form.controls.min_temperature.errors?.['max']) {
+                <p-message id="min_temperature-error-max" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+                  {{ constraints.min_temperature.max }}.
+                </p-message>
+              } @else if (form.controls.min_temperature.errors?.['integer']) {
+                <p-message id="min_temperature-error-integer" severity="error" size="small" variant="simple">
+                  {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
+                </p-message>
+              }
             </div>
             <div>
               <label for="initial-condition-max-wind-pressure">{{
@@ -139,9 +208,26 @@
                   id="initial-condition-max-wind-pressure"
                   pInputText
                   formControlName="max_wind_pressure"
+                  [attr.aria-invalid]="form.controls.max_wind_pressure.invalid || null"
+                  [attr.aria-errormessage]="getErrorIds('max_wind_pressure', ['min', 'max', 'integer'])"
                 />
                 <p-inputgroup-addon>Pa</p-inputgroup-addon>
               </p-inputgroup>
+              @if (form.controls.max_wind_pressure.errors?.['min']) {
+                <p-message id="max_wind_pressure-error-min" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+                  {{ constraints.max_wind_pressure.min }}.
+                </p-message>
+              } @else if (form.controls.max_wind_pressure.errors?.['max']) {
+                <p-message id="max_wind_pressure-error-max" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+                  {{ constraints.max_wind_pressure.max }}.
+                </p-message>
+              } @else if (form.controls.max_wind_pressure.errors?.['integer']) {
+                <p-message id="max_wind_pressure-error-integer" severity="error" size="small" variant="simple">
+                  {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
+                </p-message>
+              }
             </div>
             <div>
               <label for="initial-condition-max-frost-width">{{
@@ -154,9 +240,22 @@
                   id="initial-condition-max-frost-width"
                   pInputText
                   formControlName="max_frost_width"
+                  [attr.aria-invalid]="form.controls.max_frost_width.invalid || null"
+                  [attr.aria-errormessage]="getErrorIds('max_frost_width', ['min', 'max'])"
                 />
                 <p-inputgroup-addon>cm</p-inputgroup-addon>
               </p-inputgroup>
+              @if (form.controls.max_frost_width.errors?.['min']) {
+                <p-message id="max_frost_width-error-min" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+                  {{ constraints.max_frost_width.min }}.
+                </p-message>
+              } @else if (form.controls.max_frost_width.errors?.['max']) {
+                <p-message id="max_frost_width-error-max" severity="error" size="small" variant="simple">
+                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+                  {{ constraints.max_frost_width.max }}.
+                </p-message>
+              }
             </div>
           }
         </div>
