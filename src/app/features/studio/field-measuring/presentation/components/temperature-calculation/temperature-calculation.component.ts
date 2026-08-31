@@ -246,7 +246,7 @@ export class TemperatureCalculationComponent {
     this.temperatureCalculationError.set(false);
     this.measureData.update((d) => ({
       ...d,
-      outputs: { ...d.outputs, cableTemperature: null }
+      outputs: { ...d.outputs, cableTemperature: null, cableTemperatureUncertainty: null }
     }));
     this.isCalculating.set(true);
     try {
