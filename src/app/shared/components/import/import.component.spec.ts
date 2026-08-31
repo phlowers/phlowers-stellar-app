@@ -49,10 +49,13 @@ const WITH_NAV_CONFIG: ImportContextConfig = {
 
 const WITH_ACTION_CONFIG: ImportContextConfig = {
   ...BASIC_CONFIG,
-  successAction: {
-    label: 'Edit',
-    action: vi.fn()
-  }
+  successActions: [
+    {
+      label: 'Edit',
+      action: vi.fn(),
+      testId: 'edit-imported-btn'
+    }
+  ]
 };
 
 const WITH_TEXTS_CONFIG: ImportContextConfig = {
@@ -238,14 +241,14 @@ describe('ImportComponent', () => {
   // HTML rendering — edit action
   // -------------------------------------------------------------------------
 
-  describe('HTML rendering — edit action', () => {
-    it('should NOT render edit-imported-btn when config has no successAction', () => {
+  describe('HTML rendering — success actions', () => {
+    it('should NOT render edit-imported-btn when config has no successActions', () => {
       component.outcomes.set([makeOutcomeSuccess()]);
       fixture.detectChanges();
       expect(getByTestId(fixture, 'edit-imported-btn')).toBeNull();
     });
 
-    it('should render edit-imported-btn when config has successAction and entityId is present', () => {
+    it('should render edit-imported-btn when config has successActions and entityId is present', () => {
       fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
       component.outcomes.set([makeOutcomeSuccess()]);
       fixture.detectChanges();
@@ -254,7 +257,7 @@ describe('ImportComponent', () => {
       expect(btn?.tagName).toBe('BUTTON');
     });
 
-    it('should display the successAction label on the button', () => {
+    it('should display the action label on the button', () => {
       fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
       component.outcomes.set([makeOutcomeSuccess()]);
       fixture.detectChanges();
@@ -269,22 +272,17 @@ describe('ImportComponent', () => {
       expect(getByTestId(fixture, 'edit-imported-btn')).toBeNull();
     });
 
-    it('should emit successActionTriggered with the outcome when Edit is clicked', () => {
+    it('should invoke the action callback with the outcome when the button is clicked', () => {
       fixture.componentRef.setInput('config', WITH_ACTION_CONFIG);
       const outcome = makeOutcomeSuccess();
       component.outcomes.set([outcome]);
       fixture.detectChanges();
 
-      const emitted: ImportOutcome[] = [];
-      component.successActionTriggered.subscribe((o) => emitted.push(o));
-
       const btn = getByTestId(fixture, 'edit-imported-btn') as HTMLButtonElement;
       btn.click();
 
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0]).toEqual(outcome);
-      expect(WITH_ACTION_CONFIG.successAction!.action).toHaveBeenCalledOnce();
-      expect(WITH_ACTION_CONFIG.successAction!.action).toHaveBeenCalledWith(outcome);
+      expect(WITH_ACTION_CONFIG.successActions![0].action).toHaveBeenCalledOnce();
+      expect(WITH_ACTION_CONFIG.successActions![0].action).toHaveBeenCalledWith(outcome);
     });
   });
 

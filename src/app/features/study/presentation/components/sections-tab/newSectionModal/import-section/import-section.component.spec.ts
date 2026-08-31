@@ -61,7 +61,8 @@ describe('ImportSectionComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'common.edit': 'Edit'
+              'common.edit': 'Edit',
+              'common.view': 'View'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -173,28 +174,39 @@ describe('ImportSectionComponent', () => {
       expect(component.config().navigationRoute).toBeUndefined();
     });
 
-    it('should have a successAction defined', () => {
-      expect(component.config().successAction).toBeDefined();
+    it('should have success actions defined', () => {
+      expect(component.config().successActions).toBeDefined();
+      expect(component.config().successActions).toHaveLength(2);
     });
 
-    it('should have "Edit" as successAction label', () => {
-      expect(component.config().successAction?.label).toBe('Edit');
+    it('should expose "View" and "Edit" as success action labels', () => {
+      expect(component.config().successActions?.map((a) => a.label)).toEqual(['View', 'Edit']);
     });
   });
 
   // -------------------------------------------------------------------------
-  // editRequested output
+  // success action callbacks
   // -------------------------------------------------------------------------
 
-  describe('editRequested output', () => {
-    it('should emit the entityId when onSuccessActionTriggered is called', () => {
+  describe('success action callbacks', () => {
+    it('should emit editRequested with the entityId when the Edit action runs', () => {
       const emitted: string[] = [];
       component.editRequested.subscribe((id) => emitted.push(id));
 
-      component.onSuccessActionTriggered({ fileName: 'ok.json', status: 'success', entityId: 'section-uuid-1' });
+      const editAction = component.config().successActions?.find((a) => a.label === 'Edit');
+      editAction?.action({ fileName: 'ok.json', status: 'success', entityId: 'section-uuid-1' });
 
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0]).toBe('section-uuid-1');
+      expect(emitted).toEqual(['section-uuid-1']);
+    });
+
+    it('should emit viewRequested with the entityId when the View action runs', () => {
+      const emitted: string[] = [];
+      component.viewRequested.subscribe((id) => emitted.push(id));
+
+      const viewAction = component.config().successActions?.find((a) => a.label === 'View');
+      viewAction?.action({ fileName: 'ok.json', status: 'success', entityId: 'section-uuid-2' });
+
+      expect(emitted).toEqual(['section-uuid-2']);
     });
   });
 
