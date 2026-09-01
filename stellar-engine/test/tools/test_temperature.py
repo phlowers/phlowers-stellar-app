@@ -45,6 +45,10 @@ def test_temp_calculation(balance_engine_base: BalanceEngine):
     result = temperature_calculation(inputs, engine=balance_engine_base)
     assert "cableTemperature" in result
     np.testing.assert_allclose(result["cableTemperature"], 15.1, atol=1e-1)
+    assert "cableTemperatureUncertainty" in result
+    np.testing.assert_allclose(
+        result["cableTemperatureUncertainty"], 1.06, atol=1e-1
+    )
 
 
 def test_diffuse_and_beam_radiation() -> None:
