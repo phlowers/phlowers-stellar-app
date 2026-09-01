@@ -44,8 +44,8 @@ import {
   getSupportFieldValues,
   SUPPORT_FIELD_LIMITS
 } from './helpers';
-import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
+import { TwoDecimalValidatorDirective } from '@shared/directives/decimalValidator.directive';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -74,7 +74,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     KeyFilterModule,
     MessageModule,
     PaginatorModule,
-    TranslocoModule
+    TranslocoModule,
+    TwoDecimalValidatorDirective
   ],
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss'],
@@ -132,8 +133,6 @@ export class SupportsTableComponent implements OnInit {
   readonly limits = SUPPORT_FIELD_LIMITS;
 
   public onlyPositiveNumbers = /^\d*$/;
-
-  readonly truncateTwoDecimals = truncateTwoDecimals;
 
   optionsChainV = [
     { label: this.transloco.translate('common.yes'), value: true },

@@ -24,6 +24,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
 import type { CableSupportManipItem } from '@shared/domain';
 import {
@@ -425,9 +426,6 @@ export class CableSupportManipComponent {
   }
 
   getErrorIds(controlName: keyof CableSupportManipFormControls, errorTypes: string[]): string | null {
-    const control = this.form.get(controlName);
-    if (!control?.errors) return null;
-    const ids = errorTypes.filter((type) => control.errors?.[type]).map((type) => `${controlName}-error-${type}`);
-    return ids.length > 0 ? ids.join(' ') : null;
+    return getControlErrorIds(this.form, controlName, errorTypes);
   }
 }

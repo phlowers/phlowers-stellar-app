@@ -34,6 +34,9 @@
     "results": "Résultats :",
     "min-value": "Valeur minimale :",
     "max-value": "Valeur maximale :",
+    "one-decimal-error": "Valeur à 1 décimale maximum",
+    "two-decimals-error": "Valeur à 2 décimales maximum",
+    "no-decimal-error": "Nombre entier requis",
     "meter": "m",
     "required": "Requis",
     "section-type": {

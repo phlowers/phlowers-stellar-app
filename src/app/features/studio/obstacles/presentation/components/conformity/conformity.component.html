@@ -122,7 +122,6 @@
           formControlName="repartitionTemperature"
           [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="repartitionTemperatureErrorId()"
-          (input)="truncateTwoDecimals($event)"
           data-testid="conformity-repartition-temperature-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
@@ -149,6 +148,16 @@
           <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ BOUNDS.repartitionTemperature.max }}
         </p-message>
+      } @else if (form.controls.repartitionTemperature.errors?.['twoDecimal']) {
+        <p-message
+          id="repartition-temperature-twoDecimal-error"
+          class="form__distrib-temp-error"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ 'common.two-decimals-error' | transloco }}
+        </p-message>
       }
 
       <label for="lateralDistanceTemperature" class="form__lat-temp-label">
@@ -169,7 +178,6 @@
           [attr.aria-describedby]="lateralTemperatureHint() ? 'lateral-distance-hint' : null"
           [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
-          (input)="truncateTwoDecimals($event)"
           data-testid="conformity-lateral-temperature-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
@@ -185,6 +193,10 @@
           <p-message id="lateral-distance-temperature-max-error" severity="error" size="small" variant="simple">
             <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
             {{ BOUNDS.lateralDistanceTemperature.max }}
+          </p-message>
+        } @else if (form.controls.lateralDistanceTemperature.errors?.['twoDecimal']) {
+          <p-message id="lateral-distance-temperature-twoDecimal-error" severity="error" size="small" variant="simple">
+            {{ 'common.two-decimals-error' | transloco }}
           </p-message>
         }
         @if (lateralTemperatureHint()) {

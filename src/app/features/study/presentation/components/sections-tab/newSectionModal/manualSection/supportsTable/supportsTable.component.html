@@ -167,7 +167,7 @@
               [max]="limits.attachmentHeight.max"
               [attr.aria-label]="'supports-table.aria-attachment-height' | transloco"
               [ngModel]="support.attachmentHeight"
-              (input)="truncateTwoDecimals($event)"
+              appTwoDecimals
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
               [id]="'attachmentHeight' + rowIndex"
               data-testid="attachment-height-input"
@@ -188,6 +188,10 @@
             <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.attachmentHeight.max }}
+            </p-message>
+          } @else if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['twoDecimal']) {
+            <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.two-decimals-error' | transloco }}
             </p-message>
           }
         } @else {
@@ -210,7 +214,7 @@
               [max]="limits.spanAngle.max"
               [attr.aria-label]="'supports-table.aria-span-angle' | transloco"
               [ngModel]="support.spanAngle"
-              (input)="truncateTwoDecimals($event)"
+              appTwoDecimals
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
               [id]="'spanAngle' + rowIndex"
               data-testid="span-angle-input"
@@ -231,6 +235,10 @@
             <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.spanAngle.max }}
+            </p-message>
+          } @else if (spanAngleInput.dirty && spanAngleInput.errors?.['twoDecimal']) {
+            <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.two-decimals-error' | transloco }}
             </p-message>
           }
         } @else {
@@ -436,7 +444,7 @@
               [max]="limits.armLength.max"
               [attr.aria-label]="'supports-table.aria-arm-length' | transloco"
               [ngModel]="support.armLength"
-              (input)="truncateTwoDecimals($event)"
+              appTwoDecimals
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
               [id]="'armLength' + rowIndex"
               data-testid="arm-length-input"
@@ -457,6 +465,10 @@
             <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.armLength.max }}
+            </p-message>
+          } @else if (armLengthInput.dirty && armLengthInput.errors?.['twoDecimal']) {
+            <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.two-decimals-error' | transloco }}
             </p-message>
           }
         } @else {
@@ -553,7 +565,7 @@
               [max]="limits.supportFootAltitude.max"
               [attr.aria-label]="'supports-table.aria-supp-foot-alt' | transloco"
               [ngModel]="support.supportFootAltitude"
-              (input)="truncateTwoDecimals($event)"
+              appTwoDecimals
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
               [id]="'supportFootAltitude' + rowIndex"
               data-testid="support-foot-altitude-input"
@@ -576,6 +588,10 @@
             <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.max-value' | transloco }}</ng-container
               >&nbsp;{{ limits.supportFootAltitude.max }}
+            </p-message>
+          } @else if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['twoDecimal']) {
+            <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.two-decimals-error' | transloco }}
             </p-message>
           }
         } @else {

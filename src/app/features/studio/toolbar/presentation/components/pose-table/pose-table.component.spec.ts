@@ -230,7 +230,7 @@ describe('PoseTableComponent', () => {
 
     it('is invalid when value is decimal', () => {
       component.form.controls.computingStep.setValue(3.5);
-      expect(component.form.controls.computingStep.hasError('integer')).toBe(true);
+      expect(component.form.controls.computingStep.hasError('noDecimal')).toBe(true);
     });
 
     it('is valid when value is a whole number', () => {

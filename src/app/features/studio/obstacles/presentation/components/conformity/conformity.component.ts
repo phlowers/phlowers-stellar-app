@@ -34,7 +34,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
-import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
+import { twoDecimalValidator } from '@shared/helpers/numberValidators';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
   CONFORMITY_BOUNDS,
@@ -152,7 +152,8 @@ export class ConformityComponent implements OnDestroy {
       [
         Validators.required,
         Validators.min(CONFORMITY_BOUNDS.repartitionTemperature.min),
-        Validators.max(CONFORMITY_BOUNDS.repartitionTemperature.max)
+        Validators.max(CONFORMITY_BOUNDS.repartitionTemperature.max),
+        twoDecimalValidator
       ]
     ],
     lateralDistanceTemperature: [
@@ -160,7 +161,8 @@ export class ConformityComponent implements OnDestroy {
       [
         Validators.required,
         Validators.min(CONFORMITY_BOUNDS.lateralDistanceTemperature.min),
-        Validators.max(CONFORMITY_BOUNDS.lateralDistanceTemperature.max)
+        Validators.max(CONFORMITY_BOUNDS.lateralDistanceTemperature.max),
+        twoDecimalValidator
       ]
     ],
     conformity: this.fb.control<string[] | null>(null, Validators.required)
@@ -265,13 +267,13 @@ export class ConformityComponent implements OnDestroy {
   readonly cableTrackRows = getConformityCableTrackRows(this.translocoService);
 
   readonly BOUNDS = CONFORMITY_BOUNDS;
-  readonly truncateTwoDecimals = truncateTwoDecimals;
 
   readonly repartitionTemperatureErrorId = computed(() => {
     this.formValue();
     const errors = this.form.controls.repartitionTemperature.errors;
     if (errors?.['min']) return 'repartition-temperature-min-error';
     if (errors?.['max']) return 'repartition-temperature-max-error';
+    if (errors?.['twoDecimal']) return 'repartition-temperature-twoDecimal-error';
     return null;
   });
 
@@ -280,6 +282,7 @@ export class ConformityComponent implements OnDestroy {
     const errors = this.form.controls.lateralDistanceTemperature.errors;
     if (errors?.['min']) return 'lateral-distance-temperature-min-error';
     if (errors?.['max']) return 'lateral-distance-temperature-max-error';
+    if (errors?.['twoDecimal']) return 'lateral-distance-temperature-twoDecimal-error';
     return null;
   });
 
