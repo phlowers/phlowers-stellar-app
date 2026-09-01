@@ -300,6 +300,7 @@ describe('SectionPlotComponent', () => {
   const mockFloorFormService = {
     savedFloorUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
+    activeSavedPointIndex: signal<number | null>(null),
     selectFloorPoint: vi.fn()
   };
 

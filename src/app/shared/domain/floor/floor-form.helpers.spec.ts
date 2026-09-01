@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { mapFloorToObstacle } from './floor-form.helpers';
+import { computeFloorClearance, mapFloorToObstacle } from './floor-form.helpers';
 import { FLOOR_OBSTACLE_TYPE } from './floor-form.constantes';
 import { LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { Floor } from '@shared/domain/models/floor.model';
@@ -57,5 +57,107 @@ describe('mapFloorToObstacle', () => {
     const partial: Floor = { ...floor, points: [{ distanceToRefSupport: null, altitude: null }] };
 
     expect(mapFloorToObstacle(partial, 0).positions).toEqual([{ x: null, y: 0, z: null }]);
+  });
+});
+
+describe('computeFloorClearance', () => {
+  // Cable sagging from 20 m at both supports down to 5 m at mid-span.
+  const saggingCable = [
+    [0, 0, 20],
+    [50, 0, 5],
+    [100, 0, 20]
+  ];
+
+  it('should find the sag between two floor points, not just the clearance at them', () => {
+    const flatFloor = [
+      [0, 0, 0],
+      [100, 0, 0]
+    ];
+
+    // At both floor points the cable is 20 m up; the real minimum sits mid-span, between them.
+    expect(computeFloorClearance(flatFloor, saggingCable)).toEqual({
+      minVerticalDistance: 5,
+      floorAltitude: 0,
+      cableAltitude: 5
+    });
+  });
+
+  it('should interpolate the floor altitude under the narrowest cable point', () => {
+    const slopedFloor = [
+      [0, 0, 0],
+      [100, 0, 10]
+    ];
+
+    // Mid-span the floor has climbed to 5 m, where the cable also sits: no clearance left.
+    expect(computeFloorClearance(slopedFloor, saggingCable)).toEqual({
+      minVerticalDistance: 0,
+      floorAltitude: 5,
+      cableAltitude: 5
+    });
+  });
+
+  it('should interpolate the cable altitude above the highest floor point', () => {
+    const moundFloor = [
+      [0, 0, 0],
+      [25, 0, 14],
+      [100, 0, 0]
+    ];
+    const gentleCable = [
+      [0, 0, 20],
+      [50, 0, 15],
+      [100, 0, 20]
+    ];
+
+    // The mound at 25 m is the worst point: the cable is only at 17.5 m there.
+    expect(computeFloorClearance(moundFloor, gentleCable)).toEqual({
+      minVerticalDistance: 3.5,
+      floorAltitude: 14,
+      cableAltitude: 17.5
+    });
+  });
+
+  it('should report a negative clearance where the cable dips below the floor', () => {
+    const flatFloor = [
+      [0, 0, 8],
+      [100, 0, 8]
+    ];
+
+    expect(computeFloorClearance(flatFloor, saggingCable)?.minVerticalDistance).toBe(-3);
+  });
+
+  it('should read a span running along y, or backwards, the same way', () => {
+    const floorAlongY = [
+      [0, 100, 0],
+      [0, 0, 0]
+    ];
+    const cableAlongY = [
+      [0, 0, 20],
+      [0, 50, 5],
+      [0, 100, 20]
+    ];
+
+    expect(computeFloorClearance(floorAlongY, cableAlongY)?.minVerticalDistance).toBe(5);
+  });
+
+  it('should return no clearance without two points on each curve or with a zero-length floor', () => {
+    expect(computeFloorClearance([[0, 0, 0]], saggingCable)).toBeNull();
+    expect(
+      computeFloorClearance(
+        [
+          [0, 0, 0],
+          [100, 0, 0]
+        ],
+        [[0, 0, 20]]
+      )
+    ).toBeNull();
+    expect(
+      computeFloorClearance(
+        [
+          [10, 0, 0],
+          [10, 0, 5]
+        ],
+        saggingCable
+      )
+    ).toBeNull();
   });
 });

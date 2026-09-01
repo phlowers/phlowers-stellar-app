@@ -19,7 +19,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { TranslocoService } from '@jsverse/transloco';
 import { Section } from '@shared/domain';
 import { Floor } from '@shared/domain/models/floor.model';
-import { Distance } from '@services/worker_python/tasks/types';
+import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 
 const floor: Floor = {
   uuid: 'floor-1',
@@ -27,10 +27,17 @@ const floor: Floor = {
   referenceSupport: 'LEFT',
   points: [
     { distanceToRefSupport: 0, altitude: 10 },
-    { distanceToRefSupport: 50, altitude: 20 },
+    { distanceToRefSupport: 30, altitude: 20 },
     { distanceToRefSupport: 100, altitude: 12 }
   ]
 };
+
+// The saved floor as the engine projects it: [x, y, z] along the span axis.
+const floorPolyline = [
+  [0, 0, 10],
+  [30, 0, 20],
+  [100, 0, 12]
+];
 
 const section = {
   supports: [
@@ -40,25 +47,17 @@ const section = {
   floors: [floor]
 } as unknown as Section;
 
-/** Builds a worker distance payload for the saved floor, one entry per [pointIndex, verticalDistance]. */
-const distancesFor = (...points: [number, number][]): Distance[] => [
-  {
-    obstacleUuid: 'floor-1',
-    points: points.map(([pointIndex, distanceVertical]) => ({
-      pointIndex,
-      distanceVertical,
-      distanceHorizontal: 0,
-      distanceDiagonal: Math.abs(distanceVertical),
-      linePoint: [0, 0, 0],
-      virtualPointHorizontal: [0, 0, 0],
-      virtualPointVertical: [0, 0, 0]
-    }))
-  } as unknown as Distance
-];
+/** Builds the engine's rendered geometry: the floor polyline and the span's cable polyline. */
+const litDataFor = (cablePoints: number[][], floorPoints = floorPolyline): GetSectionOutput =>
+  ({
+    coords: { spans: [cablePoints] },
+    obstacles: [{ uuid: 'floor-1', points: floorPoints }]
+  }) as unknown as GetSectionOutput;
 
 describe('FloorFormService', () => {
   let service: FloorFormService;
   let distancesSignal: ReturnType<typeof signal<Distance[]>>;
+  let litDataSignal: ReturnType<typeof signal<GetSectionOutput | null>>;
   let sectionSignal: ReturnType<typeof signal<Section | null>>;
   let distanceTypeSignal: ReturnType<typeof signal<string | null>>;
   let obstaclesServiceMock: {
@@ -78,6 +77,7 @@ describe('FloorFormService', () => {
   beforeEach(() => {
     sectionSignal = signal<Section | null>(section);
     distancesSignal = signal<Distance[]>([]);
+    litDataSignal = signal<GetSectionOutput | null>(null);
     distanceTypeSignal = signal<string | null>(null);
     obstaclesServiceMock = {
       selectedMeasureUuid: signal<string | null>(null),
@@ -104,13 +104,26 @@ describe('FloorFormService', () => {
         },
         {
           provide: PlotService,
-          useValue: { plotOptionsChange: vi.fn(), study: signal(null), refreshProjection: vi.fn() }
+          useValue: {
+            plotOptionsChange: vi.fn(),
+            study: signal({ uuid: 'study-1' }),
+            refreshProjection: vi.fn(),
+            litData: litDataSignal
+          }
         },
         { provide: PlotOptionsService, useValue: { camera: signal(null), plotOptions: signal({}) } },
         { provide: SectionService, useValue: { createOrUpdateSection: vi.fn() } },
         { provide: NotificationService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: LoggerService, useValue: { warn: vi.fn() } },
-        { provide: ObstacleStateService, useValue: { distances: distancesSignal, distanceType: distanceTypeSignal } },
+        {
+          provide: ObstacleStateService,
+          useValue: {
+            distances: distancesSignal,
+            distanceType: distanceTypeSignal,
+            addSingleObstacle: vi.fn(),
+            deleteObstacle: vi.fn()
+          }
+        },
         { provide: ObstaclesService, useValue: obstaclesServiceMock },
         { provide: TranslocoService, useValue: { translate: vi.fn((key: string) => key) } }
       ]
@@ -121,41 +134,52 @@ describe('FloorFormService', () => {
   });
 
   describe('results', () => {
+    // Cable hanging from 40 m at both supports down to its lowest point at mid-span (x = 65).
+    const saggingCable = [
+      [0, 0, 40],
+      [65, 0, 20],
+      [100, 0, 40]
+    ];
+
     it('should be empty while no floor is open', () => {
-      expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
-    });
-
-    it('should be empty when the worker has no distances for the saved floor', () => {
-      openSavedFloor();
-      distancesSignal.set(distancesFor());
+      litDataSignal.set(litDataFor(saggingCable));
 
       expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
     });
 
-    it('should report the narrowest point and the cable altitude above it', () => {
+    it('should be empty while the section is not projected yet', () => {
       openSavedFloor();
-      distancesSignal.set(distancesFor([0, 8], [1, 3], [2, 6]));
 
-      // Point 1 is the closest to the cable; its floor altitude is 20, so the cable sits at 23.
-      expect(service.results()).toEqual({ minVerticalDistance: 3, floorAltitude: 20, cableAltitude: 23 });
+      expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
+    });
+
+    it('should be empty when the projection carries no geometry for the saved floor', () => {
+      openSavedFloor();
+      litDataSignal.set({ coords: { spans: [saggingCable] }, obstacles: [] } as unknown as GetSectionOutput);
+
+      expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
+    });
+
+    it('should report the narrowest clearance even when it falls between two floor points', () => {
+      openSavedFloor();
+      litDataSignal.set(litDataFor(saggingCable));
+
+      // The cable is 10.77 m above the nearest floor point (x = 30) but only 4 m above the floor
+      // where it sags lowest (x = 65), halfway between that point and the closing support.
+      expect(service.results()).toEqual({ minVerticalDistance: 4, floorAltitude: 16, cableAltitude: 20 });
     });
 
     it('should keep the negative distance and a cable altitude below the floor when the cable dips under it', () => {
       openSavedFloor();
-      distancesSignal.set(distancesFor([0, 8], [1, -2.5], [2, 6]));
+      litDataSignal.set(
+        litDataFor([
+          [0, 0, 40],
+          [65, 0, 14],
+          [100, 0, 40]
+        ])
+      );
 
-      // Signed distances: the worst case is the most negative one, not the smallest magnitude.
-      expect(service.results()).toEqual({ minVerticalDistance: -2.5, floorAltitude: 20, cableAltitude: 17.5 });
-    });
-
-    it('should ignore distances belonging to other obstacles', () => {
-      openSavedFloor();
-      distancesSignal.set([
-        ...distancesFor([0, 8]),
-        { obstacleUuid: 'other', points: [{ pointIndex: 0, distanceVertical: -99 }] } as unknown as Distance
-      ]);
-
-      expect(service.results().minVerticalDistance).toBe(8);
+      expect(service.results()).toEqual({ minVerticalDistance: -2, floorAltitude: 16, cableAltitude: 14 });
     });
   });
 
@@ -202,7 +226,7 @@ describe('FloorFormService', () => {
 
       expect(service.points.value).toEqual([
         { altitude: 10, distanceToRefSupport: 0 },
-        { altitude: 20, distanceToRefSupport: 50 },
+        { altitude: 20, distanceToRefSupport: 30 },
         { altitude: 12, distanceToRefSupport: 100 }
       ]);
     });
@@ -218,6 +242,61 @@ describe('FloorFormService', () => {
 
       expect(service.points.at(0).controls.distanceToRefSupport.value).toBe(0);
       expect(service.points.at(-1).controls.distanceToRefSupport.value).toBe(100);
+    });
+  });
+
+  describe('reference support flip', () => {
+    // A span holds a single floor profile, so flipping the side must re-read the saved one from the
+    // other end, not hide it and let a save create a second floor for the same span.
+    const flipToRight = () => {
+      openSavedFloor();
+      service.form.controls.referenceSupport.setValue('RIGHT');
+      TestBed.flushEffects();
+    };
+
+    it('should keep the saved floor open', () => {
+      flipToRight();
+
+      expect(service.isFloorSaved()).toBe(true);
+      expect(service.savedFloorUuid()).toBe('floor-1');
+    });
+
+    it('should mirror the saved point distances and reverse their order', () => {
+      flipToRight();
+
+      expect(service.points.value).toEqual([
+        { altitude: 12, distanceToRefSupport: 0 },
+        { altitude: 20, distanceToRefSupport: 70 },
+        { altitude: 10, distanceToRefSupport: 100 }
+      ]);
+    });
+
+    it('should report the active point at its index in the saved point order', () => {
+      flipToRight();
+
+      service.setActivePoint(0);
+
+      expect(service.activeSavedPointIndex()).toBe(2);
+      expect(obstaclesServiceMock.setSelectedMeasure).toHaveBeenCalledWith('floor-1', 2);
+    });
+
+    it('should replace the saved floor on save instead of adding a second one for the span', async () => {
+      flipToRight();
+
+      await service.calculateAndSave();
+
+      expect(sectionSignal()?.floors).toEqual([
+        {
+          uuid: 'floor-1',
+          supportUuid: 's0',
+          referenceSupport: 'RIGHT',
+          points: [
+            { altitude: 12, distanceToRefSupport: 0 },
+            { altitude: 20, distanceToRefSupport: 70 },
+            { altitude: 10, distanceToRefSupport: 100 }
+          ]
+        }
+      ]);
     });
   });
 
@@ -317,12 +396,12 @@ describe('FloorFormService', () => {
     it('should re-sort free points by distance and follow the active one to its new index', () => {
       openSavedFloor();
       service.addPoint();
-      // Points are [ref(0), new(empty), 50, closing(100)]; placing the new one past 50 must re-sort.
+      // Points are [ref(0), new(empty), 30, closing(100)]; placing the new one past 30 must re-sort.
       expect(service.activePointIndex()).toBe(1);
 
       service.setFreePointPosition(1, { distanceToRefSupport: 70, altitude: 14 });
 
-      expect(service.points.value.map((point) => point.distanceToRefSupport)).toEqual([0, 50, 70, 100]);
+      expect(service.points.value.map((point) => point.distanceToRefSupport)).toEqual([0, 30, 70, 100]);
       expect(service.activePointIndex()).toBe(2);
     });
   });
@@ -365,6 +444,39 @@ describe('FloorFormService', () => {
 
     it('should render an empty string when there is no distance yet', () => {
       expect(service.formatDistance(null)).toBe('');
+    });
+  });
+
+  describe('eraseFloor', () => {
+    it('should remove the floor from the section', async () => {
+      openSavedFloor();
+
+      await service.eraseFloor();
+
+      expect(sectionSignal()?.floors).toEqual([]);
+    });
+
+    it('should drop the quick-measures selection pointing at the erased floor', async () => {
+      openSavedFloor();
+      service.setActivePoint(1);
+
+      await service.eraseFloor();
+
+      // A dangling uuid would stop reading as a floor while staying truthy, leaving the obstacle
+      // distance-type radios enabled on a measure that no longer exists.
+      expect(obstaclesServiceMock.selectedMeasureUuid()).toBeNull();
+      expect(obstaclesServiceMock.activePointIndex()).toBeNull();
+      expect(distanceTypeSignal()).toBeNull();
+    });
+
+    it('should leave a selection pointing at another measure untouched', async () => {
+      openSavedFloor();
+      obstaclesServiceMock.setSelectedMeasure('obstacle-1', 0);
+
+      await service.eraseFloor();
+
+      expect(obstaclesServiceMock.selectedMeasureUuid()).toBe('obstacle-1');
+      expect(obstaclesServiceMock.activePointIndex()).toBe(0);
     });
   });
 });

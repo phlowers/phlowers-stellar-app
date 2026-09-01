@@ -24,8 +24,8 @@ import {
   SpanSupports,
   SupportOption
 } from '@shared/domain/floor/floor-form.interfaces';
-import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
-import { Floor } from '@shared/domain/models/floor.model';
+import { computeFloorClearance, mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
+import { Floor, FloorPoint } from '@shared/domain/models/floor.model';
 
 /** Service owning the floor tab's reactive form, so both the form UI and the free-positioning plot can share it. */
 @Injectable({
@@ -76,51 +76,78 @@ export class FloorFormService {
   /** Signal indicating if the floor calculation/save is in progress. */
   readonly isCalculating = signal(false);
 
-  /** The floor already saved (if any) for the currently selected span and reference support. */
+  // A span holds at most one floor profile, whichever reference support it was saved with: keying it
+  // on the reference support too would hide the floor when the user flips the side and let a save
+  // create a second floor for the same span (the upsert replaces by uuid).
   readonly savedFloor = computed<Floor | undefined>(() => {
     const supportUuid = this.spanValue();
-    const referenceSupport = this.referenceSupportValue();
-    if (!supportUuid || !referenceSupport) {
+    if (!supportUuid) {
       return undefined;
     }
-    return this.spanService
-      .section()
-      ?.floors?.find((floor) => floor.supportUuid === supportUuid && floor.referenceSupport === referenceSupport);
+    return this.spanService.section()?.floors?.find((floor) => floor.supportUuid === supportUuid);
   });
 
-  /** Whether the currently selected span/reference support already has a saved floor — used to enable the erase button. */
+  // Saved points expressed from the currently selected reference support: flipping the side mirrors
+  // the distances along the span and reverses the order, so the same profile is edited from the
+  // other end instead of being read as if it had been measured from it.
+  private readonly orientedFloorPoints = computed<FloorPoint[] | undefined>(() => {
+    const floor = this.savedFloor();
+    const referenceSupport = this.referenceSupportValue();
+    if (!floor) {
+      return undefined;
+    }
+    const { spanLength } = this.spanSupports();
+    if (!referenceSupport || referenceSupport === floor.referenceSupport || spanLength == null) {
+      return floor.points;
+    }
+    return floor.points
+      .map((point) => ({
+        ...point,
+        distanceToRefSupport: point.distanceToRefSupport == null ? null : spanLength - point.distanceToRefSupport
+      }))
+      .reverse();
+  });
+
+  // Whether the currently selected span already has a saved floor — used to enable the erase button.
   readonly isFloorSaved = computed(() => !!this.savedFloor());
 
-  /** UUID of the saved floor for the current span/reference support, or `null` — used to link the plot's floor markers to the form. */
+  // UUID of the saved floor for the current span, or `null` — used to link the plot's floor markers to the form.
   readonly savedFloorUuid = computed<string | null>(() => this.savedFloor()?.uuid ?? null);
 
+  // Active point index expressed in the saved floor's own point order, which the plot traces and the
+  // worker distances are indexed on: while the form reads the profile from the other end, the two
+  // orders are mirrored.
+  readonly activeSavedPointIndex = computed<number | null>(() => {
+    const floor = this.savedFloor();
+    const index = this.activePointIndex();
+    this.pointsVersion();
+    if (!floor || index === null) {
+      return null;
+    }
+    return this.referenceSupportValue() === floor.referenceSupport ? index : this.points.length - 1 - index;
+  });
+
   /**
-   * Vertical-distance results for the saved floor, derived reactively from the obstacle worker's
-   * distances (floors are registered as a specific obstacle type to reuse its distance-to-cable
-   * calculation — see `mapFloorToObstacle`). Updates automatically after `calculateAndSave()` or
-   * on section load (once floors are synced alongside obstacles).
+   * Vertical-clearance results for the saved floor, derived reactively from the engine's rendered
+   * geometry: the floor polyline (`litData.obstacles`, positioned by the same obstacle tasks — see
+   * `mapFloorToObstacle`) against the span's catenary (`litData.coords.spans`).
+   *
+   * The worker's per-point distances are not enough here: they only cover the floor's own points,
+   * while the narrowest clearance usually falls between them, where the cable sags (a floor holding
+   * just its two support points would report the clearance at the supports). `computeFloorClearance`
+   * compares the two curves over the whole span instead. Updates automatically after
+   * `calculateAndSave()` or on section load (once floors are projected alongside obstacles).
    */
   readonly results = computed<FloorResults>(() => {
     const floor = this.savedFloor();
-    const pointDistances = floor
-      ? this.obstacleStateService
-          .distances()
-          .filter((distance) => distance.obstacleUuid === floor.uuid)
-          .flatMap((distance) => distance.points)
-      : [];
-    if (!floor || !pointDistances.length) {
+    const litData = this.plotService.litData();
+    if (!floor || !litData) {
       return { minVerticalDistance: null, floorAltitude: null, cableAltitude: null };
     }
-    const minPointDistance = pointDistances.reduce(
-      (min, point) => (point.distanceVertical < min.distanceVertical ? point : min),
-      pointDistances[0]
-    );
-    const floorAltitude = floor.points[minPointDistance.pointIndex]?.altitude ?? null;
-    return {
-      minVerticalDistance: minPointDistance.distanceVertical,
-      floorAltitude,
-      cableAltitude: floorAltitude != null ? floorAltitude + minPointDistance.distanceVertical : null
-    };
+    const floorPoints = litData.obstacles?.find((obstacle) => obstacle.uuid === floor.uuid)?.points;
+    const cablePoints = litData.coords?.spans?.[this.spanService.getSupportIndex(floor.supportUuid)];
+    const clearance = floorPoints && cablePoints ? computeFloorClearance(floorPoints, cablePoints) : null;
+    return clearance ?? { minVerticalDistance: null, floorAltitude: null, cableAltitude: null };
   });
 
   /** Whether the form holds enough data (span, reference support, and every point filled in) to calculate and save. */
@@ -215,14 +242,17 @@ export class FloorFormService {
     }
   });
 
-  /** Rebuilds the points form array from the saved floor whenever one exists for the selected span/reference support, so re-opening the studio restores its points. */
+  // Rebuilds the points form array from the saved floor whenever one exists for the selected span, so
+  // re-opening the studio restores its points and flipping the reference support re-reads them from
+  // the other end.
   private readonly loadSavedFloorEffect = effect(() => {
     const floor = this.savedFloor();
+    const floorPoints = this.orientedFloorPoints();
     untracked(() => {
       while (this.points.length > 0) {
         this.points.removeAt(0, { emitEvent: false });
       }
-      const points = floor?.points ?? [null, null];
+      const points = floorPoints ?? [null, null];
       for (const point of points) {
         const group = this.createPointGroup();
         group.controls.altitude.setValue(point?.altitude ?? null, { emitEvent: false });
@@ -292,17 +322,19 @@ export class FloorFormService {
   setActivePoint(index: number): void {
     this.activePointIndex.set(index);
     const floorUuid = this.savedFloorUuid();
-    if (!floorUuid) {
+    const savedIndex = this.activeSavedPointIndex();
+    if (!floorUuid || savedIndex === null) {
       return;
     }
-    this.obstaclesService.setSelectedMeasure(floorUuid, index);
+    this.obstaclesService.setSelectedMeasure(floorUuid, savedIndex);
     this.obstacleStateService.distanceType.set('vertical');
   }
 
   /**
    * Selects a floor point picked from the plot or from the quick-measures selects. If the point's
-   * floor is already open in the form, it activates it directly; otherwise it switches the form to
-   * that floor's span/reference support and activates the point once the form finishes loading
+   * floor is already open in the form from the side it was saved with, it activates it directly;
+   * otherwise it switches the form to that floor's span/reference support — the point index comes
+   * from the stored point order — and activates the point once the form finishes loading
    * (see `loadSavedFloorEffect`).
    */
   selectFloorPoint(floorUuid: string, pointIndex: number): void {
@@ -448,7 +480,8 @@ export class FloorFormService {
   }
 
   /**
-   * Calculates and saves the floor for the currently selected span and reference support.
+   * Calculates and saves the floor for the currently selected span, from the currently selected
+   * reference support (it replaces the span's saved floor, whichever side that one was saved with).
    *
    * The floor is registered through the same obstacle tasks used for actual obstacles
    * (`addSingleObstacle` + `refreshProjection`), reusing their distance-to-cable calculation
@@ -486,7 +519,7 @@ export class FloorFormService {
     }
   }
 
-  /** Erases the floor saved for the currently selected span and reference support. No-op if none is saved. */
+  // Erases the floor saved for the currently selected span. No-op if none is saved.
   async eraseFloor(): Promise<void> {
     const floor = this.savedFloor();
     const study = this.plotService.study();
@@ -500,6 +533,13 @@ export class FloorFormService {
       this.spanService.section.set(updatedSection);
       await this.sectionService.createOrUpdateSection(study, updatedSection);
       await this.plotService.refreshProjection();
+      // Drop the shared quick-measures selection when it points at the floor just deleted: it would
+      // otherwise keep a dangling uuid, no longer read as a floor but still truthy enough to leave
+      // the obstacle distance-type radios enabled. Same reset as deleting an obstacle.
+      if (this.obstaclesService.selectedMeasureUuid() === floor.uuid) {
+        this.obstaclesService.setSelectedMeasure(null, null);
+        this.obstacleStateService.distanceType.set(null);
+      }
       this.notificationService.success(this.translocoService.translate('shared.floor-form-service.delete-detail'));
     } catch (error) {
       this.logger.warn('Failed to delete floor', error);

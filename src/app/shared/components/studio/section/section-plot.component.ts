@@ -122,7 +122,7 @@ export class SectionPlotComponent implements OnDestroy {
     cableModifications: this.spanService.section()?.cable_modifications ?? [],
     floors: this.spanService.section()?.floors ?? [],
     selectedFloorUuid: this.floorFormService.savedFloorUuid(),
-    selectedFloorPointIndex: this.floorFormService.activePointIndex(),
+    selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex(),
     previewCableModification: this.cableModificationsService.previewCableModification()
   }));
 
@@ -252,7 +252,7 @@ export class SectionPlotComponent implements OnDestroy {
         supports,
         floors: section?.floors ?? [],
         selectedFloorUuid: this.floorFormService.savedFloorUuid(),
-        selectedFloorPointIndex: this.floorFormService.activePointIndex(),
+        selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex(),
         camera: pendingCamera ?? camera,
         pendingRestore: !!pendingCamera,
         aspectRatio,
@@ -363,7 +363,7 @@ export class SectionPlotComponent implements OnDestroy {
       return;
     }
     const floorUuid = this.floorFormService.savedFloorUuid();
-    const pointIndex = this.floorFormService.activePointIndex();
+    const pointIndex = this.floorFormService.activeSavedPointIndex();
     if (!floorUuid || pointIndex === null) {
       return;
     }

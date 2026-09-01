@@ -19,6 +19,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
 import { FloorPointFormGroup } from '@shared/domain/floor/floor-form.interfaces';
 import { FLOOR_FREE_POSITIONING_PLOT_ID } from './floor-free-positioning.component.constantes';
+import { PlotElement, PlotLayout } from './floor-free-positioning.component.interfaces';
 
 vi.mock('@shared/components/studio/section/helpers/createPlotData');
 vi.mock('plotly.js-dist-min', () => ({
@@ -33,10 +34,11 @@ vi.mock('plotly.js-dist-min', () => ({
   purge: vi.fn()
 }));
 
-const mockCreatePlotData = createPlotData as vi.MockedFunction<typeof createPlotData>;
+const mockCreatePlotData = vi.mocked(createPlotData);
 
 /** Identity axes: 1 pixel = 1 unit, so pixel maths in the tests reads as plain coordinates. */
-const makePlotElement = () =>
+// `_fullLayout` is required here — tests override its axes — while it stays optional on `PlotElement`.
+const makePlotElement = (): PlotElement & { _fullLayout: PlotLayout } =>
   ({
     clientWidth: 500,
     clientHeight: 300,
@@ -45,7 +47,7 @@ const makePlotElement = () =>
       xaxis: { p2c: (v: number) => v, c2p: (v: number) => v },
       yaxis: { p2c: (v: number) => v, c2p: (v: number) => v }
     }
-  }) as unknown as Parameters<FloorFreePositioningComponent['createPlot']>[0];
+  }) as unknown as PlotElement & { _fullLayout: PlotLayout };
 
 const clickAt = (x: number, y: number) => ({ layerX: x, layerY: y }) as unknown as MouseEvent;
 
@@ -238,7 +240,7 @@ describe('FloorFreePositioningComponent', () => {
     it('should paint the active point red and the others black', () => {
       activePointIndex.set(1);
 
-      expect(component['getAnnotations']().map((a) => a.font.color)).toEqual(['black', 'red', 'black']);
+      expect(component['getAnnotations']().map((a) => a.font?.color)).toEqual(['black', 'red', 'black']);
     });
 
     it('should skip points that are not filled in yet', () => {
