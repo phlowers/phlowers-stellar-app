@@ -109,13 +109,15 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         wind_angle=np.array([wind_angle]),
         nebulosity=np.array([sky_cover]),
     )
-    temperature_result = thermal_engine.steady_temperature()
+    temperature_result = thermal_engine.steady_temperature(
+        return_uncertainty=True
+    )
     return {
         "cableSolarFlux": None,
         "cableTemperature": temperature_result.data["core_temperature"].iloc[
             0
         ],
-        "cableTemperatureUncertainty": 0,
+        "cableTemperatureUncertainty": temperature_result.uncertainty[0],
     }
 
 
