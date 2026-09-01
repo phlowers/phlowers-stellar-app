@@ -22,6 +22,7 @@ import { LoadFormsService } from '@features/studio/loads/presentation/services/l
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
+import { FloorFormService } from '@services/floor-form/floor-form.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -282,9 +283,9 @@ describe('SectionPlotComponent', () => {
   };
 
   const mockObstaclesService = {
-    selectedObstacleUuid: signal<string | null>(null),
+    selectedMeasureUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
-    setSelectedObstacle: vi.fn()
+    setSelectedMeasure: vi.fn()
   };
 
   const mockObstacleStateService = {
@@ -294,6 +295,12 @@ describe('SectionPlotComponent', () => {
 
   const mockDistanceMeasuringService = {
     selectedSupportUuid: signal<string | null>(null)
+  };
+
+  const mockFloorFormService = {
+    savedFloorUuid: signal<string | null>(null),
+    activePointIndex: signal<number | null>(null),
+    selectFloorPoint: vi.fn()
   };
 
   const createFormGet =
@@ -356,7 +363,8 @@ describe('SectionPlotComponent', () => {
         { provide: LoadFormsService, useValue: mockLoadFormsService },
         { provide: CableModificationsService, useValue: mockCableModificationsService },
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
-        { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService }
+        { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService },
+        { provide: FloorFormService, useValue: mockFloorFormService }
       ]
     }).compileComponents();
 
@@ -484,7 +492,7 @@ describe('SectionPlotComponent', () => {
       sectionSignal.set(sectionWithObstacles);
       litDataSignal.set(mockLitData);
 
-      mockObstaclesService.selectedObstacleUuid.set('obs-1');
+      mockObstaclesService.selectedMeasureUuid.set('obs-1');
 
       await component.refreshPlot();
 
@@ -877,11 +885,13 @@ describe('SectionPlotComponent', () => {
       await component.refreshPlot();
 
       expect(mockCreatePlot).toHaveBeenCalledTimes(2);
-      expect(mockPlotElement.removeAllListeners).toHaveBeenCalledTimes(4);
+      expect(mockPlotElement.removeAllListeners).toHaveBeenCalledTimes(6);
       expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(1, 'plotly_clickannotation');
       expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(2, 'plotly_relayout');
-      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(3, 'plotly_clickannotation');
-      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(4, 'plotly_relayout');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(3, 'plotly_click');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(4, 'plotly_clickannotation');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(5, 'plotly_relayout');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(6, 'plotly_click');
     });
 
     it('should preserve obstacle data across refreshes', async () => {
@@ -1156,6 +1166,70 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
 
       expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addEventListenersToPlot — floor point click', () => {
+    let capturedFloorHandler:
+      ((event: { points?: { data?: { name?: string }; customdata?: [string, number] }[] }) => void) | null = null;
+
+    const makePlotCapturingClick = () => {
+      capturedFloorHandler = null;
+      return {
+        removeAllListeners: vi.fn(),
+        on: (event: string, fn: (event: unknown) => void) => {
+          if (event === 'plotly_click') {
+            capturedFloorHandler = fn as typeof capturedFloorHandler;
+          }
+        }
+      } as unknown as PlotlyHTMLElement;
+    };
+
+    beforeEach(() => {
+      mockFloorFormService.selectFloorPoint.mockClear();
+      mockSideTabsService.sideTabs.set(null);
+    });
+
+    it('should select the clicked floor point in the floor form', () => {
+      component.addEventListenersToPlot(makePlotCapturingClick());
+
+      capturedFloorHandler!({ points: [{ data: { name: 'floor' }, customdata: ['floor-1', 2] }] });
+
+      expect(mockFloorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-1', 2);
+    });
+
+    it('should open the floor side tab when a floor point is clicked', () => {
+      component.addEventListenersToPlot(makePlotCapturingClick());
+
+      capturedFloorHandler!({ points: [{ data: { name: 'floor' }, customdata: ['floor-1', 2] }] });
+
+      expect(mockSideTabsService.sideTabs()).toBe(2);
+    });
+
+    it('should select the point when the click lands on the floor ribbon', () => {
+      // The ribbon is the easy 3D hit target and carries the same customdata as the markers.
+      component.addEventListenersToPlot(makePlotCapturingClick());
+
+      capturedFloorHandler!({ points: [{ data: { name: 'floor-ribbon' }, customdata: ['floor-1', 1] }] });
+
+      expect(mockFloorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-1', 1);
+      expect(mockSideTabsService.sideTabs()).toBe(2);
+    });
+
+    it('should ignore clicks on non-floor traces', () => {
+      component.addEventListenersToPlot(makePlotCapturingClick());
+
+      capturedFloorHandler!({ points: [{ data: { name: 'span' }, customdata: ['floor-1', 2] }] });
+
+      expect(mockFloorFormService.selectFloorPoint).not.toHaveBeenCalled();
+    });
+
+    it('should ignore floor clicks without customdata', () => {
+      component.addEventListenersToPlot(makePlotCapturingClick());
+
+      capturedFloorHandler!({ points: [{ data: { name: 'floor' } }] });
+
+      expect(mockFloorFormService.selectFloorPoint).not.toHaveBeenCalled();
     });
   });
 

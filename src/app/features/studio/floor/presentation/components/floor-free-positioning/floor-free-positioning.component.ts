@@ -25,9 +25,10 @@ import {
   DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY,
   FLOOR_FREE_POSITIONING_PLOT_ID,
   getFloorFreePositioningPlotConfig,
-  getFloorFreePositioningPlotLayout
+  getFloorFreePositioningPlotLayout,
+  POINT_SELECTION_PIXEL_RADIUS
 } from './floor-free-positioning.component.constantes';
-import { MousePosition, PlotAnnotation, PlotElement } from './floor-free-positioning.component.interfaces';
+import { MousePosition, PlotAnnotation, PlotElement, PlotLayout } from './floor-free-positioning.component.interfaces';
 
 /**
  * Floor tab counterpart to `FreePositioningComponent`: a single profile plot (distance to ref. support / altitude)
@@ -153,6 +154,14 @@ export class FloorFreePositioningComponent implements OnDestroy {
     const plotHeight = plotElement.clientHeight - layout.margin.t - layout.margin.b;
     if (x < 0 || x > plotWidth || y < 0 || y > plotHeight) return;
 
+    // Clicking on (or very near) an existing point selects it instead of moving the active one,
+    // keeping this plot's selection in sync with the floor form's point list.
+    const nearestPointIndex = this.findPointAtPixel(layout, x, y);
+    if (nearestPointIndex !== null) {
+      this.floorFormService.setActivePoint(nearestPointIndex);
+      return;
+    }
+
     const activeIndex = this.floorFormService.activePointIndex();
     if (activeIndex === null || !this.floorFormService.pointsView()[activeIndex]?.meta.removable) return;
 
@@ -160,6 +169,23 @@ export class FloorFreePositioningComponent implements OnDestroy {
       distanceToRefSupport: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
       altitude: Number.parseFloat(layout.yaxis.p2c(y).toFixed(2))
     });
+  }
+
+  /** Returns the index of the floor point whose marker is within {@link POINT_SELECTION_PIXEL_RADIUS} of the click, or `null`. */
+  private findPointAtPixel(layout: PlotLayout, x: number, y: number): number | null {
+    let nearestIndex: number | null = null;
+    let nearestDistance = POINT_SELECTION_PIXEL_RADIUS;
+    this.floorFormService.pointsView().forEach(({ group }, index) => {
+      const distance = group.controls.distanceToRefSupport.value;
+      const altitude = group.controls.altitude.value;
+      if (distance === null || altitude === null) return;
+      const pixelDistance = Math.hypot(layout.xaxis.c2p(distance) - x, layout.yaxis.c2p(altitude) - y);
+      if (pixelDistance <= nearestDistance) {
+        nearestDistance = pixelDistance;
+        nearestIndex = index;
+      }
+    });
+    return nearestIndex;
   }
 
   private updateSelectedPositionMarkers(): void {

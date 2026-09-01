@@ -17,6 +17,9 @@ export const PLOT_CONFIG = {
 export const DEBOUNCED_REFRESH_STUDIO_DELAY = 400;
 export const DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY = 100;
 
+/** Click-to-select radius (pixels) for picking an existing floor point instead of placing the active one. */
+export const POINT_SELECTION_PIXEL_RADIUS = 12;
+
 export const FLOOR_FREE_POSITIONING_PLOT_ID = 'plotly-output-floor-free-positioning';
 
 export const getFloorFreePositioningPlotLayout = (): Partial<Plotly.Layout> => ({

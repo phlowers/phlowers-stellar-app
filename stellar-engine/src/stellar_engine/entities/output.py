@@ -158,7 +158,9 @@ def format_distances_for_plot(distances):
                         "virtualPointVertical": v_proj.tolist(),
                         "distanceDiagonal": dist_result.distance_3d,
                         "distanceHorizontal": dist_result.distance_projection_u,
-                        "distanceVertical": dist_result.distance_projection_v,
+                        # Signed: v_plane always points up, so this is cable_z - point_z.
+                        # Negative means the cable passes below the point (e.g. under the floor).
+                        "distanceVertical": dist_result.signed_distance_projection_v,
                     }
                 )
             except (ValueError, AttributeError) as e:

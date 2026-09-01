@@ -4,6 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, untracked } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
@@ -31,6 +32,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
     ToggleSwitchModule,
     ButtonComponent,
     IconComponent,
+    DecimalPipe,
     TranslocoModule
   ],
   templateUrl: './floor.component.html',

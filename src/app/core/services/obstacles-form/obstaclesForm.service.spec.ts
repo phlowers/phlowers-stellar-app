@@ -178,8 +178,8 @@ describe('ObstacleFormService', () => {
   let mockObstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
     setCurrentPointIndex: vi.Mock;
-    selectedObstacleUuid: ReturnType<typeof signal<string | null>>;
-    setSelectedObstacle: vi.Mock;
+    selectedMeasureUuid: ReturnType<typeof signal<string | null>>;
+    setSelectedMeasure: vi.Mock;
   };
   let mockSectionService: { createOrUpdateSection: vi.Mock };
   let mockMessageService: { add: vi.Mock };
@@ -222,9 +222,9 @@ describe('ObstacleFormService', () => {
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
       setCurrentPointIndex: vi.fn(),
-      selectedObstacleUuid: signal<string | null>(null),
-      setSelectedObstacle: vi.fn().mockImplementation((uuid: string | null, pointIndex: number | null) => {
-        mockObstaclesService.selectedObstacleUuid.set(uuid);
+      selectedMeasureUuid: signal<string | null>(null),
+      setSelectedMeasure: vi.fn().mockImplementation((uuid: string | null, pointIndex: number | null) => {
+        mockObstaclesService.selectedMeasureUuid.set(uuid);
         mockObstaclesService.activePointIndex.set(pointIndex);
       })
     };
@@ -585,7 +585,7 @@ describe('ObstacleFormService', () => {
           detail: expect.any(String)
         })
       );
-      expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith(null, null);
+      expect(mockObstaclesService.setSelectedMeasure).toHaveBeenCalledWith(null, null);
     });
 
     it('should call refreshProjection after successful deletion', async () => {
@@ -629,7 +629,7 @@ describe('ObstacleFormService', () => {
         obstacles,
         plotOptionsServiceMock.plotOptions()
       );
-      expect(mockObstaclesService.setSelectedObstacle).not.toHaveBeenCalledWith(null, null);
+      expect(mockObstaclesService.setSelectedMeasure).not.toHaveBeenCalledWith(null, null);
       expect(mockMessageService.add).toHaveBeenCalledWith(
         expect.objectContaining({
           severity: 'error',
@@ -777,7 +777,7 @@ describe('ObstacleFormService', () => {
         expect.objectContaining({ obstacles: updatedSection?.obstacles })
       );
       expect(mockPlotService.refreshProjection).toHaveBeenCalled();
-      expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('new-uuid', 0);
+      expect(mockObstaclesService.setSelectedMeasure).toHaveBeenCalledWith('new-uuid', 0);
     });
 
     it('should update existing obstacle and save when obstacle exists for support', async () => {
@@ -812,7 +812,7 @@ describe('ObstacleFormService', () => {
         expect.objectContaining({ obstacles: expect.any(Array) })
       );
       expect(mockPlotService.refreshProjection).toHaveBeenCalled();
-      expect(mockObstaclesService.setSelectedObstacle).toHaveBeenCalledWith('obs-1', 0);
+      expect(mockObstaclesService.setSelectedMeasure).toHaveBeenCalledWith('obs-1', 0);
     });
 
     it('should set results from Python distance data for the last point', async () => {
@@ -884,7 +884,7 @@ describe('ObstacleFormService', () => {
       ];
 
       mockObstacleStateService.distances.set(mockDistances);
-      mockObstaclesService.selectedObstacleUuid.set('existing-obs-uuid');
+      mockObstaclesService.selectedMeasureUuid.set('existing-obs-uuid');
       mockObstaclesService.activePointIndex.set(0);
 
       expect(service.results().oblique).toBe(100);
@@ -938,8 +938,8 @@ describe('ObstacleFormService', () => {
       mockPlotService.study.set(mockStudy);
 
       await service.calculateAndSave();
-      // calculateAndSave calls setSelectedObstacle(uuid, lastPointIndex=1)
-      // the mock updates selectedObstacleUuid and activePointIndex accordingly
+      // calculateAndSave calls setSelectedMeasure(uuid, lastPointIndex=1)
+      // the mock updates selectedMeasureUuid and activePointIndex accordingly
 
       expect(service.results().oblique).toBe(20);
       expect(service.results().horizontal).toBe(6);

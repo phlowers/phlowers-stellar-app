@@ -202,6 +202,12 @@
       "distance-calculation-error-detail": "Failed to calculate obstacle distances",
       "save-detail": "Obstacle saved"
     },
+    "floor-form-service": {
+      "delete-detail": "Floor deleted",
+      "delete-error-detail": "Failed to delete floor",
+      "save-detail": "Floor saved",
+      "save-error-detail": "Failed to save floor"
+    },
     "auth-service": {
       "email-login-disabled": "Email login is disabled because G@IA single sign-on is required."
     },
@@ -865,6 +871,7 @@
       "max-section-option": "Max section",
       "not-selected-option": "Not selected",
       "distances-label": "Distances",
+      "floor-option": "floor {{ span }}",
       "floor-sidetab-label": "Floor"
     },
     "obstacles-form": {
@@ -950,7 +957,12 @@
       "ref-support-dist-label": "Ref. supp. dist.",
       "free-positioning-label": "Free positioning",
       "add-point-btn": "Add point",
-      "delete-point-aria-label": "delete point"
+      "delete-point-aria-label": "delete point",
+      "delete-floor-aria-label": "delete floor",
+      "calculate-and-save-btn": "Calculate and save",
+      "min-vertical-distance-label": "Min. vert. dist.",
+      "floor-altitude-label": "Point alt.",
+      "cable-altitude-label": "Cable alt."
     },
     "l0-sum": {
       "natural-lengths-title": "Natural lengths L0",

@@ -8,8 +8,11 @@ import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
 import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPointsTraces';
 import { createObstaclesAnnotations } from './obstacles';
+import { createFloorTraces } from './createFloorTraces';
+import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
+import { DistanceType } from './distance.types';
 import { TranslocoService } from '@jsverse/transloco';
 import { getLiveCamera } from '@services/plot/plot-options.utils';
 
@@ -42,10 +45,16 @@ export interface CreatePlotParams {
   endSupport: number;
   /** List of obstacles to annotate on the plot. */
   obstacles: Obstacle[];
-  /** UUID of the currently selected obstacle, or `null`. */
+  /** Floors to render as their own line/ribbon traces (not as obstacle annotations). */
+  floors?: Floor[];
+  /** UUID of the currently selected obstacle (floors are registered as obstacles), or `null`. */
   currentObstacleUuid: string | null;
   /** Index of the currently selected obstacle position point. */
   currentObstaclePointIndex: number;
+  /** UUID of the floor whose point is active in the floor form, or `null`. */
+  selectedFloorUuid?: string | null;
+  /** Index of the active floor point within the selected floor, or `null`. */
+  selectedFloorPointIndex?: number | null;
   /** Domain support models for altitude lookups. */
   supports?: Support[];
   /** Computed aspect ratio from Python's getAspectRatio. Used for 3D scene aspectratio/aspectmode. */
@@ -55,7 +64,7 @@ export interface CreatePlotParams {
   /** Distance data from Python calculation for drawing distance lines. */
   distances: Distance[];
   /** Which distance type is currently selected for visualization. */
-  distanceType: 'oblique' | 'vertical' | 'horizontal' | null;
+  distanceType: DistanceType | null;
   /** Registered distance/angle measurement point groups, rendered like obstacles. */
   distanceMeasuringPoints?: ObstacleOutput['obstacles'];
   /** Currently selected display overlay toggles (loads, base state, background, measure points). */
@@ -416,7 +425,18 @@ export const createPlot = (plotParams: CreatePlotParams) => {
     resolvedParams.view === '3d'
       ? layout3d(resolvedParams, distanceAnnotations)
       : layout2d(resolvedParams, distanceAnnotations);
-  const allData = [...resolvedParams.data, ...distanceTraces, ...distanceMeasuringPointsTraces];
+  const floorTraces = createFloorTraces({
+    litData: resolvedParams.litData,
+    floors: resolvedParams.floors,
+    supports: resolvedParams.supports,
+    startSupport: resolvedParams.startSupport,
+    endSupport: resolvedParams.endSupport,
+    view: resolvedParams.view,
+    side: resolvedParams.side,
+    selectedFloorUuid: resolvedParams.selectedFloorUuid ?? null,
+    selectedPointIndex: resolvedParams.selectedFloorPointIndex ?? null
+  });
+  const allData = [...resolvedParams.data, ...distanceTraces, ...distanceMeasuringPointsTraces, ...floorTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
   // It will create the plot if it doesn't exist, or update it if it does

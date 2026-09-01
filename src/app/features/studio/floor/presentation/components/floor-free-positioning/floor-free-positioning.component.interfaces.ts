@@ -19,9 +19,11 @@ export interface PlotLayout {
   };
   xaxis: {
     p2c: (value: number) => number;
+    c2p: (value: number) => number;
   };
   yaxis: {
     p2c: (value: number) => number;
+    c2p: (value: number) => number;
   };
 }
 

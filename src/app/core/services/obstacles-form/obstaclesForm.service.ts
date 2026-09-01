@@ -134,7 +134,7 @@ export class ObstacleFormService {
    */
   readonly results = computed(() => {
     const distances = this.obstacleStateService.distances();
-    const obstacleUuid = this.obstaclesService.selectedObstacleUuid();
+    const obstacleUuid = this.obstaclesService.selectedMeasureUuid();
     const pointIndex = this.obstaclesService.activePointIndex();
 
     if (!distances.length || !obstacleUuid || pointIndex === null) {
@@ -285,7 +285,7 @@ export class ObstacleFormService {
       return;
     }
     this.resetFormForNewObstacle(null);
-    this.obstaclesService.setSelectedObstacle(null, null);
+    this.obstaclesService.setSelectedMeasure(null, null);
   }
 
   private async removeObstacleFromSection(obstacleUuid: string): Promise<boolean> {
@@ -406,7 +406,7 @@ export class ObstacleFormService {
 
       // 5. Update UI selection
       const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
-      this.obstaclesService.setSelectedObstacle(obstacle.uuid, lastPointIndex);
+      this.obstaclesService.setSelectedMeasure(obstacle.uuid, lastPointIndex);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(

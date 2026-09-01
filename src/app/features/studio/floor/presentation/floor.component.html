@@ -1,4 +1,18 @@
 <form [formGroup]="floorFormService.form" class="floor-form" data-testid="floor-form">
+  <button
+    app-btn
+    type="button"
+    btnStyle="outlined"
+    btnSize="s"
+    class="floor-form__zoom-btn"
+    [disabled]="!floorFormService.spanValue()"
+    (click)="floorFormService.returnToSpan()"
+    data-testid="return-to-span"
+  >
+    <app-icon icon="filter_center_focus" aria-hidden="true" />
+    <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
+  </button>
+
   <div class="floor-form__span-selection">
     <label class="span-label" for="floorSpan">{{ 'studio.shared.span-label' | transloco }}</label>
     <p-select
@@ -62,7 +76,8 @@
           >
             <span class="sr-only">{{
               point.meta.titleKey
-                | transloco: { distance: floorFormService.formatDistance(point.group.controls.distanceToRefSupport.value) }
+                | transloco
+                  : { distance: floorFormService.formatDistance(point.group.controls.distanceToRefSupport.value) }
             }}</span>
           </button>
 
@@ -132,4 +147,85 @@
       }
     </ul>
   }
+
+  <div class="floor-form__sticky">
+    <div class="floor-form__sticky__btns">
+      <button
+        app-btn
+        btnStyle="danger"
+        type="button"
+        [disabled]="!floorFormService.isFloorSaved()"
+        (click)="floorFormService.eraseFloor()"
+        [attr.aria-label]="'studio.floor.delete-floor-aria-label' | transloco"
+        data-testid="delete-floor"
+      >
+        <app-icon icon="delete" aria-hidden="true" />
+      </button>
+
+      <button
+        app-btn
+        type="button"
+        (click)="floorFormService.calculateAndSave()"
+        [disabled]="!floorFormService.canCalculateAndSave()"
+        [btnLoading]="floorFormService.isCalculating()"
+        data-testid="calculate-save"
+      >
+        <app-icon icon="rocket_launch" aria-hidden="true" />
+        <ng-container>{{ 'studio.floor.calculate-and-save-btn' | transloco }}</ng-container>
+      </button>
+    </div>
+
+    <hr class="floor-form__sticky__divider" />
+
+    <div class="floor-form__sticky__results" data-testid="results">
+      <h2 class="floor-form__sticky__results__title">{{ 'common.results' | transloco }}</h2>
+
+      <dl class="floor-form__sticky__results__grid">
+        <div class="floor-form__sticky__results__grid__item">
+          <dt class="floor-form__sticky__results__grid__item__term">
+            {{ 'studio.floor.min-vertical-distance-label' | transloco }}
+          </dt>
+          <dd class="floor-form__sticky__results__grid__item__def">
+            <span data-testid="result-min-vertical-distance">
+              {{
+                floorFormService.results().minVerticalDistance !== null
+                  ? (floorFormService.results().minVerticalDistance | number: '1.0-2') + ' m'
+                  : '-'
+              }}
+            </span>
+          </dd>
+        </div>
+
+        <div class="floor-form__sticky__results__grid__item">
+          <dt class="floor-form__sticky__results__grid__item__term">
+            {{ 'studio.floor.floor-altitude-label' | transloco }}
+          </dt>
+          <dd class="floor-form__sticky__results__grid__item__def">
+            <span data-testid="result-floor-altitude">
+              {{
+                floorFormService.results().floorAltitude !== null
+                  ? (floorFormService.results().floorAltitude | number: '1.0-2') + ' m'
+                  : '-'
+              }}
+            </span>
+          </dd>
+        </div>
+
+        <div class="floor-form__sticky__results__grid__item">
+          <dt class="floor-form__sticky__results__grid__item__term">
+            {{ 'studio.floor.cable-altitude-label' | transloco }}
+          </dt>
+          <dd class="floor-form__sticky__results__grid__item__def">
+            <span data-testid="result-cable-altitude">
+              {{
+                floorFormService.results().cableAltitude !== null
+                  ? (floorFormService.results().cableAltitude | number: '1.0-2') + ' m'
+                  : '-'
+              }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
 </form>

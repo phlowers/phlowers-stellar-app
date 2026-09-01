@@ -202,6 +202,12 @@
       "distance-calculation-error-detail": "Échec du calcul des distances des obstacles",
       "save-detail": "Obstacle enregistré"
     },
+    "floor-form-service": {
+      "delete-detail": "Sol supprimé",
+      "delete-error-detail": "Échec de la suppression du sol",
+      "save-detail": "Sol enregistré",
+      "save-error-detail": "Échec de l'enregistrement du sol"
+    },
     "auth-service": {
       "email-login-disabled": "La connexion par e-mail est désactivée car l'authentification unique G@IA est requise."
     },
@@ -865,6 +871,7 @@
       "max-section-option": "Max canton",
       "not-selected-option": "Non sélectionné",
       "distances-label": "Distances",
+      "floor-option": "sol {{ span }}",
       "floor-sidetab-label": "Sol"
     },
     "obstacles-form": {
@@ -950,7 +957,12 @@
       "ref-support-dist-label": "Dist. supp. réf.",
       "free-positioning-label": "Positionnement libre",
       "add-point-btn": "Ajouter un point",
-      "delete-point-aria-label": "supprimer le point"
+      "delete-point-aria-label": "supprimer le point",
+      "delete-floor-aria-label": "supprimer le sol",
+      "calculate-and-save-btn": "Calculer et enregistrer",
+      "min-vertical-distance-label": "Dist. vert. min.",
+      "floor-altitude-label": "Alt. point",
+      "cable-altitude-label": "Alt. câble"
     },
     "l0-sum": {
       "natural-lengths-title": "Longueurs naturelles L0",

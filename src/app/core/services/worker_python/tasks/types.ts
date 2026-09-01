@@ -512,6 +512,7 @@ export interface DistancePoint {
   virtualPointVertical: [number, number, number];
   distanceDiagonal: number;
   distanceHorizontal: number;
+  // Signed: negative when the cable passes below the point (e.g. under the floor).
   distanceVertical: number;
 }
 

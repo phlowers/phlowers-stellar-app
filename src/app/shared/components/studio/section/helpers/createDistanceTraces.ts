@@ -2,7 +2,7 @@ import { Dash } from 'plotly.js-dist-min';
 import { Distance, DistancePoint, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
-import { Coord3, PointVisuals } from './distance.types';
+import { Coord3, DistanceType, PointVisuals } from './distance.types';
 
 const DISTANCE_COLOR = '#674883';
 const DISTANCE_LINE_WIDTH = 4;
@@ -103,7 +103,7 @@ const createTextTrace = (mid: { x: number; y: number }, text: string): DataObjec
 const createPointVisuals = (
   obstacleCoord: Coord3,
   distancePoint: DistancePoint,
-  distanceType: 'oblique' | 'vertical' | 'horizontal',
+  distanceType: DistanceType,
   view: string,
   side: string
 ): PointVisuals => {
@@ -172,7 +172,7 @@ const createPointVisuals = (
 const buildDistanceVisuals = (
   distances: Distance[],
   currentObstaclePointIndex: number,
-  distanceType: 'oblique' | 'vertical' | 'horizontal',
+  distanceType: DistanceType,
   litData: GetSectionOutput,
   view: string,
   side: string

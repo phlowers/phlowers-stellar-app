@@ -9,6 +9,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Distance, Task } from '@services/worker_python/tasks/types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PlotOptions } from '@shared/types/plot.types';
+import { DistanceType } from '@shared/components/studio/section/helpers/distance.types';
 
 /**
  * Manages obstacle state in the Pyodide middleware.
@@ -35,7 +36,7 @@ export class ObstacleStateService {
   readonly distances = signal<Distance[]>([]);
 
   /** Distance type currently selected for display. */
-  readonly distanceType = signal<'oblique' | 'vertical' | 'horizontal' | null>(null);
+  readonly distanceType = signal<DistanceType | null>(null);
 
   /**
    * Register obstacles in bulk in the middleware state for the current view range.

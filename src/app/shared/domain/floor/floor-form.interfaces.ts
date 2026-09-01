@@ -29,3 +29,13 @@ export interface FloorPointMeta {
   /** Whether this point can be deleted (true for free points, false for the fixed reference/closing points). */
   removable: boolean;
 }
+
+/** Vertical-distance results for a floor, evaluated at the point where the cable comes closest to the ground. */
+export interface FloorResults {
+  /** Vertical distance from the floor to the cable at its narrowest point (meters). Negative when the cable dips below the floor. */
+  minVerticalDistance: number | null;
+  /** Altitude of the floor point where the minimum vertical distance occurs (meters). */
+  floorAltitude: number | null;
+  /** Altitude of the cable where the minimum vertical distance occurs (meters). */
+  cableAltitude: number | null;
+}
