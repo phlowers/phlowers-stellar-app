@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable } from '@angular/core';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
@@ -32,7 +31,6 @@ export class LinesService {
   readonly imported$ = this._imported$.asObservable();
 
   private readonly storageService = inject(StorageService);
-  private readonly logger = inject(LoggerService);
   private readonly csvImportClient = inject(CsvImportClientService);
 
   constructor() {
@@ -55,11 +53,7 @@ export class LinesService {
    * Import line catalog data from `lines.csv` via the generic Web Worker.
    */
   async importFromFile(expectedHash?: string): Promise<void> {
-    try {
-      await this.csvImportClient.importCsv('lines', { expectedHash });
-      this._imported$.next();
-    } catch (error) {
-      this.logger.error('Error importing lines', error);
-    }
+    await this.csvImportClient.importCsv('lines', { expectedHash });
+    this._imported$.next();
   }
 }

@@ -55,6 +55,8 @@ export class FloorFreePositioningComponent implements OnDestroy {
   readonly plot = signal<PlotlyHTMLElement | null>(null);
   readonly mousePosition = signal<MousePosition | null>(null);
 
+  private detachEventListeners: (() => void) | null = null;
+
   readonly getErrorString = () => {
     const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
     return formatStudioError(this.plotService.error(), this.translocoService, exceptionDiagnostic?.code ?? null);
@@ -123,6 +125,8 @@ export class FloorFreePositioningComponent implements OnDestroy {
   }
 
   private destroyPlot(): void {
+    this.detachEventListeners?.();
+    this.detachEventListeners = null;
     const plot = this.plot();
     if (plot) {
       Plotly.purge(plot);
@@ -216,16 +220,25 @@ export class FloorFreePositioningComponent implements OnDestroy {
       .filter((annotation): annotation is PlotAnnotation => annotation !== null);
   }
 
+  // The plot container is a static template element that survives Plotly.purge(), so listeners
+  // must be removed on every recreation — otherwise each refresh adds another click handler.
   private attachEventListeners(plotElement: PlotElement | null): void {
     if (!plotElement) return;
 
-    plotElement.addEventListener('mousemove', (evt) => {
+    const onMouseMove = (evt: MouseEvent) => {
       this.handleMouseMove(evt, plotElement);
-    });
-
-    plotElement.addEventListener('click', (evt) => {
+    };
+    const onClick = (evt: MouseEvent) => {
       this.handleClick(evt, plotElement);
-    });
+    };
+
+    plotElement.addEventListener('mousemove', onMouseMove);
+    plotElement.addEventListener('click', onClick);
+
+    this.detachEventListeners = () => {
+      plotElement.removeEventListener('mousemove', onMouseMove);
+      plotElement.removeEventListener('click', onClick);
+    };
   }
 
   async createPlot(litData: GetSectionOutput, selectedSpan: number, supports: Support[]): Promise<void> {

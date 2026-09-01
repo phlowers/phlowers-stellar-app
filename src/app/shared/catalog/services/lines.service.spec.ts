@@ -8,14 +8,12 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { LinesService } from './lines.service';
 import { StorageService } from '@services/storage/storage.service';
-import { LoggerService } from '@core/services/logger/logger.service';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 
 describe('LinesService', () => {
   let service: LinesService;
   let storageService: StorageService;
   let csvImportClient: { importCsv: vi.Mock };
-  let logger: { error: vi.Mock };
   let linesTable: { count: vi.Mock; toArray: vi.Mock };
 
   beforeEach(() => {
@@ -30,13 +28,11 @@ describe('LinesService', () => {
     csvImportClient = {
       importCsv: vi.fn().mockResolvedValue({ type: 'done', csvKey: 'lines', totalRows: 0, totalKeys: 0 })
     };
-    logger = { error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         LinesService,
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: CsvImportClientService, useValue: csvImportClient },
-        { provide: LoggerService, useValue: logger }
+        { provide: CsvImportClientService, useValue: csvImportClient }
       ]
     });
     service = TestBed.inject(LinesService);
@@ -74,10 +70,9 @@ describe('LinesService', () => {
       await service.importFromFile();
       expect(csvImportClient.importCsv).toHaveBeenCalledWith('lines', { expectedHash: undefined });
     });
-    it('logs and swallows errors from the client', async () => {
+    it('propagates errors from the client so CatalogUpdateService can flag the catalog', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
-      await expect(service.importFromFile()).resolves.toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith('Error importing lines', expect.any(Error));
+      await expect(service.importFromFile()).rejects.toThrow('worker boom');
     });
     it('emits on imported$ after a successful import', async () => {
       let count = 0;
@@ -89,7 +84,7 @@ describe('LinesService', () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
       let count = 0;
       service.imported$.subscribe(() => count++);
-      await service.importFromFile();
+      await expect(service.importFromFile()).rejects.toThrow('worker boom');
       expect(count).toBe(0);
     });
   });

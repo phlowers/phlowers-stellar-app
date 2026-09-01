@@ -284,9 +284,19 @@ export class FloorFormService {
     }
   }
 
-  /** Sets the point that the plot click should edit and highlight. */
+  /**
+   * Sets the point that the plot click should edit and highlight, and mirrors it in quick-measures
+   * and the plot's distance layer — both read the selection from `ObstaclesService`, so selecting a
+   * point from the form must sync it too, not only a plot/quick-measures click (`selectFloorPoint`).
+   */
   setActivePoint(index: number): void {
     this.activePointIndex.set(index);
+    const floorUuid = this.savedFloorUuid();
+    if (!floorUuid) {
+      return;
+    }
+    this.obstaclesService.setSelectedMeasure(floorUuid, index);
+    this.obstacleStateService.distanceType.set('vertical');
   }
 
   /**
@@ -349,7 +359,7 @@ export class FloorFormService {
     if (activeIndex === index) {
       this.activePointIndex.set(null);
     } else if (activeIndex > index) {
-      this.activePointIndex.set(activeIndex - 1);
+      this.setActivePoint(activeIndex - 1);
     }
   }
 
@@ -412,7 +422,7 @@ export class FloorFormService {
     if (activeControl) {
       const newActiveIndex = sorted.indexOf(activeControl);
       if (newActiveIndex !== activeIndex) {
-        this.activePointIndex.set(newActiveIndex);
+        this.setActivePoint(newActiveIndex);
       }
     }
     this.pointsVersion.update((version) => version + 1);

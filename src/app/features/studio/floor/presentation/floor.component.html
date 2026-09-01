@@ -177,15 +177,15 @@
 
     <hr class="floor-form__sticky__divider" />
 
-    <div class="floor-form__sticky__results" data-testid="results">
-      <h2 class="floor-form__sticky__results__title">{{ 'common.results' | transloco }}</h2>
+    <div class="floor-form__results" data-testid="results">
+      <h2 class="floor-form__results__title">{{ 'common.results' | transloco }}</h2>
 
-      <dl class="floor-form__sticky__results__grid">
-        <div class="floor-form__sticky__results__grid__item">
-          <dt class="floor-form__sticky__results__grid__item__term">
+      <dl class="floor-form__results__grid">
+        <div class="floor-form__results__grid__item">
+          <dt>
             {{ 'studio.floor.min-vertical-distance-label' | transloco }}
           </dt>
-          <dd class="floor-form__sticky__results__grid__item__def">
+          <dd>
             <span data-testid="result-min-vertical-distance">
               {{
                 floorFormService.results().minVerticalDistance !== null
@@ -196,11 +196,11 @@
           </dd>
         </div>
 
-        <div class="floor-form__sticky__results__grid__item">
-          <dt class="floor-form__sticky__results__grid__item__term">
+        <div class="floor-form__results__grid__item">
+          <dt>
             {{ 'studio.floor.floor-altitude-label' | transloco }}
           </dt>
-          <dd class="floor-form__sticky__results__grid__item__def">
+          <dd>
             <span data-testid="result-floor-altitude">
               {{
                 floorFormService.results().floorAltitude !== null
@@ -211,11 +211,11 @@
           </dd>
         </div>
 
-        <div class="floor-form__sticky__results__grid__item">
-          <dt class="floor-form__sticky__results__grid__item__term">
+        <div class="floor-form__results__grid__item">
+          <dt>
             {{ 'studio.floor.cable-altitude-label' | transloco }}
           </dt>
-          <dd class="floor-form__sticky__results__grid__item__def">
+          <dd>
             <span data-testid="result-cable-altitude">
               {{
                 floorFormService.results().cableAltitude !== null

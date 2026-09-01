@@ -18,6 +18,7 @@ import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
 import { FloorPointFormGroup } from '@shared/domain/floor/floor-form.interfaces';
+import { FLOOR_FREE_POSITIONING_PLOT_ID } from './floor-free-positioning.component.constantes';
 
 vi.mock('@shared/components/studio/section/helpers/createPlotData');
 vi.mock('plotly.js-dist-min', () => ({
@@ -259,6 +260,26 @@ describe('FloorFreePositioningComponent', () => {
       component['handleMouseMove'](clickAt(42, 8), null);
 
       expect(component.mousePosition()).toBeNull();
+    });
+  });
+
+  describe('plot event listeners', () => {
+    it('should not stack click handlers when the plot is recreated', async () => {
+      const plotElement = document.createElement('div');
+      plotElement.id = FLOOR_FREE_POSITIONING_PLOT_ID;
+      document.body.appendChild(plotElement);
+      mockCreatePlotData.mockReturnValue([{}] as unknown as ReturnType<typeof createPlotData>);
+      const litData = {} as Parameters<FloorFreePositioningComponent['createPlot']>[0];
+
+      await component.createPlot(litData, 0, []);
+      component['destroyPlot']();
+      await component.createPlot(litData, 0, []);
+
+      const handleClick = vi.spyOn(component as never, 'handleClick');
+      plotElement.dispatchEvent(new MouseEvent('click'));
+
+      expect(handleClick).toHaveBeenCalledTimes(1);
+      plotElement.remove();
     });
   });
 

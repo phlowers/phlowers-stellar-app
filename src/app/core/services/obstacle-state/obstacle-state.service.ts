@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Distance, Task } from '@services/worker_python/tasks/types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
@@ -31,6 +32,7 @@ import { DistanceType } from '@shared/components/studio/section/helpers/distance
 })
 export class ObstacleStateService {
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly logger = inject(LoggerService);
 
   /** Distance results from the last `calculateDistances()` call. */
   readonly distances = signal<Distance[]>([]);
@@ -45,8 +47,12 @@ export class ObstacleStateService {
    * @param plotOptions - Current view options used to filter by span range.
    */
   async addBulkObstacles(obstacles: Obstacle[], plotOptions: PlotOptions): Promise<void> {
+    const registrable = obstacles.filter((obstacle) => this.hasKnownSupport(obstacle));
+    if (registrable.length === 0) {
+      return;
+    }
     await this.workerPythonService.runTaskWithTimeout(Task.addBulkObstacles, {
-      obstacles,
+      obstacles: registrable,
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
       view: plotOptions.view
@@ -60,6 +66,9 @@ export class ObstacleStateService {
    * @param plotOptions - Current view options used to filter by span range.
    */
   async addSingleObstacle(obstacle: Obstacle, plotOptions: PlotOptions): Promise<void> {
+    if (!this.hasKnownSupport(obstacle)) {
+      return;
+    }
     await this.workerPythonService.runTaskWithTimeout(Task.addSingleObstacle, {
       obstacle,
       startSupport: plotOptions.startSupport,
@@ -106,6 +115,17 @@ export class ObstacleStateService {
     }
 
     await this.addBulkObstacles(obstacles, plotOptions);
+  }
+
+  // An obstacle whose support was deleted or renumbered after it was saved keeps a stale
+  // supportUuid, so its supportIndex resolves to -1. Registering it would place it on a
+  // non-existent span and corrupt the worker's distance calculations.
+  private hasKnownSupport(obstacle: Obstacle): boolean {
+    if (obstacle.supportIndex >= 0) {
+      return true;
+    }
+    this.logger.warn('skipping obstacle with unknown support: ', obstacle.uuid, obstacle.supportUuid);
+    return false;
   }
 
   /** Reset all obstacle state signals to their defaults. */

@@ -113,6 +113,30 @@ describe('ObstacleStateService', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('should drop obstacles whose support no longer exists', async () => {
+      const orphan = { ...mockObstacle, uuid: 'obs-orphan', supportIndex: -1 };
+      await service.addBulkObstacles([mockObstacle, orphan], mockPlotOptions);
+
+      expect(mockWorkerPythonService.runTaskWithTimeout).toHaveBeenCalledWith(
+        Task.addBulkObstacles,
+        expect.objectContaining({ obstacles: [mockObstacle] })
+      );
+    });
+
+    it('should not dispatch when every obstacle has an unknown support', async () => {
+      await service.addBulkObstacles([{ ...mockObstacle, supportIndex: -1 }], mockPlotOptions);
+
+      expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addSingleObstacle', () => {
+    it('should not dispatch when the support no longer exists', async () => {
+      await service.addSingleObstacle({ ...mockObstacle, supportIndex: -1 }, mockPlotOptions);
+
+      expect(mockWorkerPythonService.runTaskWithTimeout).not.toHaveBeenCalled();
+    });
   });
 
   describe('deleteObstacle', () => {

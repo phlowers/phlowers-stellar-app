@@ -116,6 +116,8 @@ export class FreePositioningComponent implements OnDestroy {
   options = signal<Options>({});
   plotFace = signal<PlotlyHTMLElement | null>(null);
   plotProfile = signal<PlotlyHTMLElement | null>(null);
+
+  private readonly detachEventListeners = new Map<Side, () => void>();
   profileMousePosition = signal<MousePosition | null>(null);
   faceMousePosition = signal<MousePosition | null>(null);
 
@@ -222,6 +224,9 @@ export class FreePositioningComponent implements OnDestroy {
    * Destroys all plot instances
    */
   private destroyAllPlots(): void {
+    this.detachEventListeners.forEach((detach) => detach());
+    this.detachEventListeners.clear();
+
     const facePlot = this.plotFace();
     const profilePlot = this.plotProfile();
 
@@ -514,15 +519,24 @@ export class FreePositioningComponent implements OnDestroy {
   /**
    * Attaches event listeners to the plot
    */
+  // The plot containers are static template elements that survive Plotly.purge(), so listeners
+  // must be removed on every recreation — otherwise each refresh adds another click handler.
   private attachEventListeners(type: Side, plotElement: PlotElement | null): void {
     if (!plotElement) return;
 
-    plotElement.addEventListener('mousemove', (evt) => {
+    const onMouseMove = (evt: MouseEvent) => {
       this.handleMouseMove(evt, type, plotElement);
-    });
-
-    plotElement.addEventListener('click', (evt) => {
+    };
+    const onClick = (evt: MouseEvent) => {
       this.handleClick(evt, type, plotElement);
+    };
+
+    plotElement.addEventListener('mousemove', onMouseMove);
+    plotElement.addEventListener('click', onClick);
+
+    this.detachEventListeners.set(type, () => {
+      plotElement.removeEventListener('mousemove', onMouseMove);
+      plotElement.removeEventListener('click', onClick);
     });
   }
 

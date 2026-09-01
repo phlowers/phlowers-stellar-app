@@ -112,6 +112,19 @@ describe('FloorFormService — plot/form point selection', () => {
     expect(service.activePointIndex()).toBe(2);
   });
 
+  it('should mirror a point selected from the form into quick-measures and the plot', () => {
+    service.form.controls.span.setValue('s0');
+    service.form.controls.referenceSupport.enable();
+    service.form.controls.referenceSupport.setValue('LEFT');
+    TestBed.flushEffects();
+
+    service.setActivePoint(1);
+
+    const obstaclesService = TestBed.inject(ObstaclesService);
+    expect(obstaclesService.setSelectedMeasure).toHaveBeenCalledWith('floor-1', 1);
+    expect(TestBed.inject(ObstacleStateService).distanceType()).toBe('vertical');
+  });
+
   it('should switch span/reference support then activate the point for a floor not yet open', () => {
     expect(service.form.controls.span.value).toBeNull();
 

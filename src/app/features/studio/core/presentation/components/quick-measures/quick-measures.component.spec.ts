@@ -29,7 +29,10 @@ describe('QuickMeasuresComponent', () => {
     setExistingObstacle: ReturnType<typeof vi.fn>;
     results: ReturnType<typeof signal<{ oblique: number | null; vertical: number | null; horizontal: number | null }>>;
   };
-  let obstacleStateService: { distanceType: ReturnType<typeof signal<string | null>>; distances: ReturnType<typeof signal<Distance[]>> };
+  let obstacleStateService: {
+    distanceType: ReturnType<typeof signal<string | null>>;
+    distances: ReturnType<typeof signal<Distance[]>>;
+  };
   let floorFormService: { selectFloorPoint: ReturnType<typeof vi.fn> };
 
   const sectionWithFloor = () =>
@@ -51,7 +54,9 @@ describe('QuickMeasuresComponent', () => {
 
   beforeEach(async () => {
     spanService = new SpanServiceMock();
-    plotOptionsServiceMock = { plotOptions: vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 3 }) };
+    plotOptionsServiceMock = {
+      plotOptions: vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 3 })
+    };
     obstacleFormService = {
       setExistingObstacle: vi.fn(),
       results: signal<{ oblique: number | null; vertical: number | null; horizontal: number | null }>({
