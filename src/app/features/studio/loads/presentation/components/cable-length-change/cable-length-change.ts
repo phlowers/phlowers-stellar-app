@@ -9,6 +9,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { MessageModule } from 'primeng/message';
 import { CableModification } from '@shared/domain';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -22,6 +23,7 @@ import { CableModificationsService } from '../../services/cableModifications.ser
 import { LoadFormsService } from '../../services/loadForms.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { twoDecimalValidator } from '@shared/helpers/numberValidators';
+import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -31,6 +33,7 @@ import { twoDecimalValidator } from '@shared/helpers/numberValidators';
     InputGroupModule,
     InputGroupAddonModule,
     SelectModule,
+    MessageModule,
     ButtonComponent,
     IconComponent,
     TranslocoModule
@@ -349,6 +352,10 @@ export class CableLengthChangeComponent {
 
   isFormInvalid(): boolean {
     return this.form.invalid;
+  }
+
+  getErrorIds(controlName: string, errorTypes: string[]): string | null {
+    return getControlErrorIds(this.form, controlName, errorTypes);
   }
 
   private findCableModification(spanUuid: string): CableModification | undefined {

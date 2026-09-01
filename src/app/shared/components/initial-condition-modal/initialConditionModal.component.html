@@ -112,7 +112,7 @@
                 formControlName="base_temperature"
                 data-testid="base-temperature-input"
                 [attr.aria-invalid]="form.controls.base_temperature.invalid || null"
-                [attr.aria-errormessage]="getErrorIds('base_temperature', ['min', 'max', 'integer'])"
+                [attr.aria-errormessage]="getErrorIds('base_temperature', ['min', 'max', 'noDecimal'])"
               />
               <p-inputgroup-addon>°C</p-inputgroup-addon>
             </p-inputgroup>
@@ -126,8 +126,8 @@
                 <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                 {{ constraints.base_temperature.max }}.
               </p-message>
-            } @else if (form.controls.base_temperature.errors?.['integer']) {
-              <p-message id="base_temperature-error-integer" severity="error" size="small" variant="simple">
+            } @else if (form.controls.base_temperature.errors?.['noDecimal']) {
+              <p-message id="base_temperature-error-noDecimal" severity="error" size="small" variant="simple">
                 {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
               </p-message>
             }
@@ -177,7 +177,7 @@
                   pInputText
                   formControlName="min_temperature"
                   [attr.aria-invalid]="form.controls.min_temperature.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('min_temperature', ['min', 'max', 'integer'])"
+                  [attr.aria-errormessage]="getErrorIds('min_temperature', ['min', 'max', 'noDecimal'])"
                 />
                 <p-inputgroup-addon>°C</p-inputgroup-addon>
               </p-inputgroup>
@@ -191,8 +191,8 @@
                   <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ constraints.min_temperature.max }}.
                 </p-message>
-              } @else if (form.controls.min_temperature.errors?.['integer']) {
-                <p-message id="min_temperature-error-integer" severity="error" size="small" variant="simple">
+              } @else if (form.controls.min_temperature.errors?.['noDecimal']) {
+                <p-message id="min_temperature-error-noDecimal" severity="error" size="small" variant="simple">
                   {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
                 </p-message>
               }
@@ -209,7 +209,7 @@
                   pInputText
                   formControlName="max_wind_pressure"
                   [attr.aria-invalid]="form.controls.max_wind_pressure.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('max_wind_pressure', ['min', 'max', 'integer'])"
+                  [attr.aria-errormessage]="getErrorIds('max_wind_pressure', ['min', 'max', 'noDecimal'])"
                 />
                 <p-inputgroup-addon>Pa</p-inputgroup-addon>
               </p-inputgroup>
@@ -223,8 +223,8 @@
                   <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
                   {{ constraints.max_wind_pressure.max }}.
                 </p-message>
-              } @else if (form.controls.max_wind_pressure.errors?.['integer']) {
-                <p-message id="max_wind_pressure-error-integer" severity="error" size="small" variant="simple">
+              } @else if (form.controls.max_wind_pressure.errors?.['noDecimal']) {
+                <p-message id="max_wind_pressure-error-noDecimal" severity="error" size="small" variant="simple">
                   {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
                 </p-message>
               }

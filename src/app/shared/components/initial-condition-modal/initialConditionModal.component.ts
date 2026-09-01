@@ -20,10 +20,7 @@ import { noDecimalValidator, oneDecimalValidator, twoDecimalValidator } from '@s
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { initialConditionConstraints } from '@shared/components/initial-condition-modal/initialConditionModal.constantes';
-import {
-  getErrorIds,
-  integerValidator
-} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
+import { getErrorIds } from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
 
 /** Form validation rules for initial condition fields. */
 const validators = {

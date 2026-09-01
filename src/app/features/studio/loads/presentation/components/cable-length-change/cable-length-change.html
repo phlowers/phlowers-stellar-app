@@ -86,9 +86,26 @@
         step="0.01"
         formControlName="modifiedLengthCable"
         data-testid="cable-length-change-size-cable"
+        [attr.aria-invalid]="form.controls.modifiedLengthCable.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('modifiedLengthCable', ['min', 'max', 'twoDecimal'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.modifiedLengthCable.errors?.['min']) {
+    <p-message id="modifiedLengthCable-error-min" severity="error" size="small" variant="simple">
+      <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+      0
+    </p-message>
+    } @else if (form.controls.modifiedLengthCable.errors?.['max']) {
+    <p-message id="modifiedLengthCable-error-max" severity="error" size="small" variant="simple">
+      <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+      1000
+    </p-message>
+    } @else if (form.controls.modifiedLengthCable.errors?.['twoDecimal']) {
+    <p-message id="modifiedLengthCable-error-twoDecimal" severity="error" size="small" variant="simple">
+      {{ 'common.two-decimals-error' | transloco }}
+    </p-message>
+    }
   </div>
 
   <div>
@@ -104,9 +121,26 @@
         step="0.01"
         formControlName="distanceSupportRef"
         data-testid="cable-length-change-distance-support-ref"
+        [attr.aria-invalid]="form.controls.distanceSupportRef.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('distanceSupportRef', ['min', 'max', 'twoDecimal'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.distanceSupportRef.errors?.['min']) {
+    <p-message id="distanceSupportRef-error-min" severity="error" size="small" variant="simple">
+      <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
+      0
+    </p-message>
+    } @else if (form.controls.distanceSupportRef.errors?.['max']) {
+    <p-message id="distanceSupportRef-error-max" severity="error" size="small" variant="simple">
+      <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
+      5000
+    </p-message>
+    } @else if (form.controls.distanceSupportRef.errors?.['twoDecimal']) {
+    <p-message id="distanceSupportRef-error-twoDecimal" severity="error" size="small" variant="simple">
+      {{ 'common.two-decimals-error' | transloco }}
+    </p-message>
+    }
   </div>
 
   <div class="cable-length-change__btns">

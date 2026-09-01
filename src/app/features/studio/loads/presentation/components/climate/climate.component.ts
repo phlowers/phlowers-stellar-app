@@ -193,8 +193,6 @@ export class ClimateComponent {
     } as ChargeData;
   }
 
-
-
   async deleteCharge(): Promise<void> {
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
