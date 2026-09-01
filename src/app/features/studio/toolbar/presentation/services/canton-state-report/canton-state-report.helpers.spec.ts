@@ -60,6 +60,8 @@ function createMockParams(): SectionOutputParameters {
     slope_right: [2.1, 2.2, 2.3],
     utilization_rate: [40, 55, 70],
     line_angle: [0, 5, 10],
+    // Axis-major: [V-per-support, H-per-support, L-per-support]. Four supports so tests can
+    // assert values beyond index 2 (the range that was silently dropped by the old bug).
     vtl_under_chain: [
       [1, 2, 3, 4],
       [11, 12, 13, 14],
@@ -70,13 +72,15 @@ function createMockParams(): SectionOutputParameters {
       [110, 210, 310, 410],
       [120, 220, 320, 420]
     ],
-    ground_altitude: [500, 501, 502],
+    r_under_chain: [31, 32, 33, 34],
+    r_under_console: [130, 230, 330, 430],
     displacement: [
-      [1, 2, 3],
-      [4, 5, 6],
-      [7, 8, 9]
+      [1.0, 0.12, 0.41, 0.65],
+      [-0.47, -0.56, -0.08, -1.60],
+      [-0.11, -1.25, -1.31, -1.21]
     ],
-    load_angle: [0.1, 0.2, 0.3]
+    ground_altitude: [500, 501, 502, 503],
+    load_angle: [0.1, 0.2, 0.3, 0.4]
   } as unknown as SectionOutputParameters;
 }
 
@@ -160,14 +164,43 @@ describe('canton-state-report.helpers', () => {
 
       expect(rows).toHaveLength(3);
       expect(rows[0].supportNumber).toBe('10');
+      // Axis-major read: vChain = V[0], hChain = H[0], lChain = L[0], rChain = r_under_chain[0].
       expect(rows[0].vChain).toBe(1);
-      expect(rows[0].hChain).toBe(2);
-      expect(rows[0].lChain).toBe(3);
-      expect(rows[0].rChain).toBe(4);
+      expect(rows[0].hChain).toBe(11);
+      expect(rows[0].lChain).toBe(21);
+      expect(rows[0].rChain).toBe(31);
       expect(rows[0].vConsole).toBe(100);
-      expect(rows[0].displacementX).toBe(1);
-      expect(rows[0].displacementZ).toBe(3);
+      expect(rows[0].hConsole).toBe(110);
+      expect(rows[0].lConsole).toBe(120);
+      expect(rows[0].rConsole).toBe(130);
+      expect(rows[0].displacementX).toBe(1.0);
+      expect(rows[0].displacementY).toBe(-0.47);
+      expect(rows[0].displacementZ).toBe(-0.11);
       expect(rows[2].loadAngle).toBe(0.3);
+    });
+
+    it('should populate displacement/chain/console values for supports beyond index 2 (axis-major regression)', () => {
+      const supports = [
+        createMockSupport('10'),
+        createMockSupport('20'),
+        createMockSupport('30'),
+        createMockSupport('40')
+      ];
+      const rows = buildSupportRows(createMockParams(), supports, 0, 3);
+
+      expect(rows).toHaveLength(4);
+      expect(rows[3].supportNumber).toBe('40');
+      expect(rows[3].vChain).toBe(4);
+      expect(rows[3].hChain).toBe(14);
+      expect(rows[3].lChain).toBe(24);
+      expect(rows[3].rChain).toBe(34);
+      expect(rows[3].vConsole).toBe(400);
+      expect(rows[3].hConsole).toBe(410);
+      expect(rows[3].lConsole).toBe(420);
+      expect(rows[3].rConsole).toBe(430);
+      expect(rows[3].displacementX).toBe(0.65);
+      expect(rows[3].displacementY).toBe(-1.60);
+      expect(rows[3].displacementZ).toBe(-1.21);
     });
   });
 

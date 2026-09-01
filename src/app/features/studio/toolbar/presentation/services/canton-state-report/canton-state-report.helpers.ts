@@ -107,24 +107,27 @@ export function buildSupportRows(
 ): SupportReportRow[] {
   const rows: SupportReportRow[] = [];
   for (let j = startSupport; j <= endSupport; j += 1) {
-    const chain = params.vtl_under_chain?.[j] ?? [];
-    const consoleVtl = params.vtl_under_console?.[j] ?? [];
-    const displacement = params.displacement?.[j] ?? [];
+    // vtl_under_chain / vtl_under_console are axis-major: [V[], H[], L[]] with one value per
+    // support — not support-major. The R component is a separate flat per-support array.
+    // displacement is also axis-major: [X[], Y[], Z[]] with one value per support.
+    const chain = params.vtl_under_chain;
+    const consoleVtl = params.vtl_under_console;
+    const disp = params.displacement;
     rows.push({
       supportNumber: supports[j]?.number ?? '-',
-      vChain: chain[0] ?? null,
-      hChain: chain[1] ?? null,
-      lChain: chain[2] ?? null,
-      rChain: chain[3] ?? null,
+      vChain: at(chain?.[0], j),
+      hChain: at(chain?.[1], j),
+      lChain: at(chain?.[2], j),
+      rChain: at(params.r_under_chain, j),
       lineAngle: at(params.line_angle, j),
-      vConsole: consoleVtl[0] ?? null,
-      hConsole: consoleVtl[1] ?? null,
-      lConsole: consoleVtl[2] ?? null,
-      rConsole: consoleVtl[3] ?? null,
+      vConsole: at(consoleVtl?.[0], j),
+      hConsole: at(consoleVtl?.[1], j),
+      lConsole: at(consoleVtl?.[2], j),
+      rConsole: at(params.r_under_console, j),
       footAltitude: at(params.ground_altitude, j),
-      displacementX: displacement[0] ?? null,
-      displacementY: displacement[1] ?? null,
-      displacementZ: displacement[2] ?? null,
+      displacementX: at(disp?.[0], j),
+      displacementY: at(disp?.[1], j),
+      displacementZ: at(disp?.[2], j),
       loadAngle: at(params.load_angle, j)
     });
   }
