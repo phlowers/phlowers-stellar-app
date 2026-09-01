@@ -16,18 +16,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@shared/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
+import { noDecimalValidator, oneDecimalValidator, twoDecimalValidator } from '@shared/helpers/numberValidators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Form validation rules for initial condition fields. */
 const validators = {
   name: ['', [Validators.required, Validators.maxLength(40)]],
-  base_parameters: [null, [Validators.required, Validators.min(20), Validators.max(5000)]],
-  base_temperature: [15, [Validators.required, Validators.min(-50), Validators.max(250)]],
-  cable_pretension: [0, [Validators.min(0), Validators.max(100)]],
-  min_temperature: [15, [Validators.min(-50), Validators.max(250)]],
-  max_wind_pressure: [0, [Validators.min(0), Validators.max(3000)]],
-  max_frost_width: [0, [Validators.min(0), Validators.max(20)]]
+  base_parameters: [null, [Validators.required, Validators.min(20), Validators.max(5000), twoDecimalValidator]],
+  base_temperature: [15, [Validators.required, Validators.min(-50), Validators.max(250), noDecimalValidator]],
+  cable_pretension: [0, [Validators.min(0), Validators.max(100), oneDecimalValidator]],
+  min_temperature: [15, [Validators.min(-50), Validators.max(250), noDecimalValidator]],
+  max_wind_pressure: [0, [Validators.min(0), Validators.max(3000), noDecimalValidator]],
+  max_frost_width: [0, [Validators.min(0), Validators.max(20), oneDecimalValidator]]
 };
 
 /**

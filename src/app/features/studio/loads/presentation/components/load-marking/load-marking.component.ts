@@ -16,12 +16,15 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
 import { LoadType, SpanLoad } from '@shared/domain/models/charge.model';
+import { oneDecimalValidator } from '@shared/helpers/numberValidators';
+import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -34,6 +37,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     InputGroupModule,
     InputGroupAddonModule,
     SelectModule,
+    MessageModule,
     ButtonComponent,
     IconComponent,
     ToggleSwitchModule,
@@ -66,8 +70,8 @@ export class LoadMarkingComponent {
       nonNullable: true,
       validators: [Validators.required]
     }),
-    loadPosition: new FormControl<number>(0, { nonNullable: true }),
-    loadWeight: new FormControl<number>(0, { nonNullable: true })
+    loadPosition: new FormControl<number>(0, { nonNullable: true, validators: [oneDecimalValidator] }),
+    loadWeight: new FormControl<number>(0, { nonNullable: true, validators: [oneDecimalValidator] })
   });
 
   readonly spansOptions = computed(() => {
@@ -185,6 +189,10 @@ export class LoadMarkingComponent {
 
   isFormInvalid(): boolean {
     return this.form.invalid;
+  }
+
+  getErrorIds(controlName: keyof SpanFormControls, errorTypes: string[]): string | null {
+    return getControlErrorIds(this.form, controlName, errorTypes);
   }
 
   zoomToSpan(): void {

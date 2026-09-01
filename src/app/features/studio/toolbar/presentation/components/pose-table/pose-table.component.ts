@@ -32,6 +32,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task } from '@services/worker_python/tasks/types';
 import { MessageModule } from 'primeng/message';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
+import { noDecimalValidator } from '@shared/helpers/numberValidators';
 
 @Component({
   selector: 'app-pose-table',
@@ -108,7 +109,7 @@ export class PoseTableComponent {
         Validators.required,
         Validators.min(this.COMPUTING_STEP_MIN),
         Validators.max(this.COMPUTING_STEP_MAX),
-        PoseTableComponent.integerValidator
+        noDecimalValidator
       ]
     })
   });
@@ -241,7 +242,7 @@ export class PoseTableComponent {
   getComputingStepError(): string {
     const errors = this.form.controls.computingStep.errors;
     if (errors?.['required']) return this.translocoService.translate('common.required');
-    if (errors?.['integer']) return this.translocoService.translate('studio.pose-table.integer-error');
+    if (errors?.['noDecimal']) return this.translocoService.translate('studio.pose-table.integer-error');
     if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.COMPUTING_STEP_MIN;
     if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.COMPUTING_STEP_MAX;
     return '';
@@ -252,9 +253,5 @@ export class PoseTableComponent {
     const str = control.value.toString();
     const sep = str.indexOf('.');
     return sep !== -1 && str.length - sep - 1 > 2 ? { maxTwoDecimals: true } : null;
-  }
-
-  private static integerValidator(control: AbstractControl): ValidationErrors | null {
-    return control.value !== null && !Number.isInteger(control.value) ? { integer: true } : null;
   }
 }

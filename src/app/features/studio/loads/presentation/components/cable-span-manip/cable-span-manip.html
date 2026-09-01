@@ -69,11 +69,10 @@
       step="0.01"
       [attr.min]="distRefSupportMin()"
       [attr.max]="distRefSupportMax()"
-      (input)="truncateTwoDecimals($event)"
       formControlName="distanceToRefSupport"
       data-testid="cable-span-manip-dist-ref-support"
       [attr.aria-invalid]="form.controls.distanceToRefSupport.invalid || null"
-      [attr.aria-errormessage]="getErrorIds('distanceToRefSupport', ['min', 'max'])"
+      [attr.aria-errormessage]="getErrorIds('distanceToRefSupport', ['min', 'max', 'twoDecimal'])"
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
@@ -86,6 +85,10 @@
   <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
     <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
     {{ distRefSupportMax() }}
+  </p-message>
+  } @else if (form.controls.distanceToRefSupport.errors?.['twoDecimal']) {
+  <p-message id="distanceToRefSupport-error-twoDecimal" severity="error" size="small" variant="simple">
+    {{ 'common.two-decimals-error' | transloco }}
   </p-message>
   }
 
@@ -135,11 +138,10 @@
           step="0.01"
           min="-100"
           max="5000"
-          (input)="truncateTwoDecimals($event)"
           formControlName="longitudinalDistance"
           data-testid="cable-span-manip-longitudinal-dist"
           [attr.aria-invalid]="form.controls.longitudinalDistance.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('longitudinalDistance', ['min', 'max'])"
+          [attr.aria-errormessage]="getErrorIds('longitudinalDistance', ['min', 'max', 'twoDecimal'])"
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
@@ -164,6 +166,16 @@
       >
         <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
         5000
+      </p-message>
+      } @else if (form.controls.longitudinalDistance.errors?.['twoDecimal']) {
+      <p-message
+        id="longitudinalDistance-error-twoDecimal"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-1"
+      >
+        {{ 'common.two-decimals-error' | transloco }}
       </p-message>
       } } @else {
       <dl class="contents">
@@ -191,11 +203,10 @@
           step="0.01"
           min="-100"
           max="100"
-          (input)="truncateTwoDecimals($event)"
           formControlName="lateralDistance"
           data-testid="cable-span-manip-lateral-dist"
           [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max'])"
+          [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max', 'twoDecimal'])"
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
@@ -221,6 +232,16 @@
         <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
         100
       </p-message>
+      } @else if (form.controls.lateralDistance.errors?.['twoDecimal']) {
+      <p-message
+        id="lateralDistance-error-twoDecimal"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-2"
+      >
+        {{ 'common.two-decimals-error' | transloco }}
+      </p-message>
       }
 
       <label for="altitude" class="third-1-line__label-3"
@@ -234,11 +255,10 @@
           step="0.01"
           min="-100"
           max="9000"
-          (input)="truncateTwoDecimals($event)"
           formControlName="altitude"
           data-testid="cable-span-manip-altitude"
           [attr.aria-invalid]="form.controls.altitude.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('altitude', ['min', 'max'])"
+          [attr.aria-errormessage]="getErrorIds('altitude', ['min', 'max', 'twoDecimal'])"
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
@@ -251,6 +271,16 @@
       <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
         <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
         9000
+      </p-message>
+      } @else if (form.controls.altitude.errors?.['twoDecimal']) {
+      <p-message
+        id="altitude-error-twoDecimal"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-3"
+      >
+        {{ 'common.two-decimals-error' | transloco }}
       </p-message>
       }
     </div>
@@ -301,12 +331,18 @@
         pInputText
         id="chainLength"
         step="0.01"
-        (input)="truncateTwoDecimals($event)"
         formControlName="chainLength"
         data-testid="cable-span-manip-chain-length"
+        [attr.aria-invalid]="form.controls.chainLength.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('chainLength', ['twoDecimal'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.chainLength.errors?.['twoDecimal']) {
+    <p-message id="chainLength-error-twoDecimal" severity="error" size="small" variant="simple">
+      {{ 'common.two-decimals-error' | transloco }}
+    </p-message>
+    }
 
     <label for="chainWeight" class="split-2-line__label-2"
       >{{ 'loads.cable-span-manip.chain-weight-label' | transloco }}</label
@@ -317,12 +353,18 @@
         pInputText
         id="chainWeight"
         step="0.01"
-        (input)="truncateTwoDecimals($event)"
         formControlName="chainWeight"
         data-testid="cable-span-manip-chain-weight"
+        [attr.aria-invalid]="form.controls.chainWeight.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('chainWeight', ['twoDecimal'])"
       />
       <p-inputgroup-addon>kg</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.chainWeight.errors?.['twoDecimal']) {
+    <p-message id="chainWeight-error-twoDecimal" severity="error" size="small" variant="simple">
+      {{ 'common.two-decimals-error' | transloco }}
+    </p-message>
+    }
 
     <label for="chainSurface" class="split-2-line__label-3"
       >{{ 'loads.cable-span-manip.chain-surface-label' | transloco }}</label
@@ -333,12 +375,18 @@
         pInputText
         id="chainSurface"
         step="0.01"
-        (input)="truncateTwoDecimals($event)"
         formControlName="chainSurface"
         data-testid="cable-span-manip-chain-surface"
+        [attr.aria-invalid]="form.controls.chainSurface.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('chainSurface', ['twoDecimal'])"
       />
       <p-inputgroup-addon>m²</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.chainSurface.errors?.['twoDecimal']) {
+    <p-message id="chainSurface-error-twoDecimal" severity="error" size="small" variant="simple">
+      {{ 'common.two-decimals-error' | transloco }}
+    </p-message>
+    }
 
     <label for="counterWeight" class="split-2-line__label-4"
       >{{ 'loads.cable-span-manip.counter-weight-label' | transloco }}</label
@@ -349,12 +397,18 @@
         pInputText
         id="counterWeight"
         step="0.01"
-        (input)="truncateTwoDecimals($event)"
         formControlName="counterWeight"
         data-testid="cable-span-manip-counter-weight"
+        [attr.aria-invalid]="form.controls.counterWeight.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('counterWeight', ['twoDecimal'])"
       />
       <p-inputgroup-addon>kg</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.counterWeight.errors?.['twoDecimal']) {
+    <p-message id="counterWeight-error-twoDecimal" severity="error" size="small" variant="simple">
+      {{ 'common.two-decimals-error' | transloco }}
+    </p-message>
+    }
   </div>
   } @else if (isWithSling()) {
   <label for="slingLength">{{ 'loads.cable-span-manip.sling-length-label' | transloco }}</label>
@@ -366,11 +420,10 @@
       step="0.01"
       min="0"
       max="99"
-      (input)="truncateTwoDecimals($event)"
       formControlName="slingLength"
       data-testid="cable-span-manip-sling-length"
       [attr.aria-invalid]="form.controls.slingLength.invalid || null"
-      [attr.aria-errormessage]="getErrorIds('slingLength', ['min', 'max'])"
+      [attr.aria-errormessage]="getErrorIds('slingLength', ['min', 'max', 'twoDecimal'])"
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
@@ -383,6 +436,10 @@
   <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
     <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
     99
+  </p-message>
+  } @else if (form.controls.slingLength.errors?.['twoDecimal']) {
+  <p-message id="slingLength-error-twoDecimal" severity="error" size="small" variant="simple">
+    {{ 'common.two-decimals-error' | transloco }}
   </p-message>
   } }
 

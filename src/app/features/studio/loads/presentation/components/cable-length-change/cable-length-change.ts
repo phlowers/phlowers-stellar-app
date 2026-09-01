@@ -21,6 +21,7 @@ import {
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { twoDecimalValidator } from '@shared/helpers/numberValidators';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -62,10 +63,10 @@ export class CableLengthChangeComponent {
     ),
     modificationType: new FormControl<CableWidthType | null>('lengthening', { validators: [Validators.required] }),
     modifiedLengthCable: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(0), Validators.max(1000)]
+      validators: [Validators.required, Validators.min(0), Validators.max(1000), twoDecimalValidator]
     }),
     distanceSupportRef: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(0), Validators.max(5000)]
+      validators: [Validators.required, Validators.min(0), Validators.max(5000), twoDecimalValidator]
     })
   });
 

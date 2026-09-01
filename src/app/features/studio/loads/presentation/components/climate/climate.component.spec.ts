@@ -480,21 +480,21 @@ describe('ClimateComponent', () => {
     });
   });
 
-  describe('integerValidator', () => {
+  describe('noDecimalValidator', () => {
     it('should return null for null values', () => {
       component.form.controls.windPressure.setValue(null);
       // The validator allows null (line 25 coverage)
       const errors = component.form.controls.windPressure.errors;
-      // required error will be present, but not integer error
-      expect(errors?.['integer']).toBeUndefined();
+      // required error will be present, but not noDecimal error
+      expect(errors?.['noDecimal']).toBeUndefined();
     });
 
-    it('should return integer error for non-integer values', () => {
+    it('should return noDecimal error for non-integer values', () => {
       component.form.controls.windPressure.setValue(10.5);
       component.form.controls.windPressure.updateValueAndValidity();
 
       const errors = component.form.controls.windPressure.errors;
-      expect(errors?.['integer']).toBe(true);
+      expect(errors?.['noDecimal']).toBe(true);
     });
 
     it('should return null for valid integer values', () => {
@@ -502,7 +502,7 @@ describe('ClimateComponent', () => {
       component.form.controls.windPressure.updateValueAndValidity();
 
       const errors = component.form.controls.windPressure.errors;
-      expect(errors?.['integer']).toBeUndefined();
+      expect(errors?.['noDecimal']).toBeUndefined();
     });
   });
 

@@ -28,7 +28,7 @@
         step="1"
         required
         [attr.aria-invalid]="form.controls.windPressure.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('windPressure', ['min', 'max', 'integer'])"
+        [attr.aria-errormessage]="getErrorIds('windPressure', ['min', 'max', 'noDecimal'])"
       />
       <p-inputgroup-addon>Pa</p-inputgroup-addon>
     </p-inputgroup>
@@ -47,9 +47,9 @@
             {{ constraints.windPressure.max }}
           </p-message>
         }
-        @if (form.controls.windPressure.errors['integer']) {
-          <p-message id="windPressure-error-integer" severity="error" size="small" variant="simple">
-            {{ 'loads.climate.whole-number-required' | transloco }}
+        @if (form.controls.windPressure.errors['noDecimal']) {
+          <p-message id="windPressure-error-noDecimal" severity="error" size="small" variant="simple">
+            {{ 'common.no-decimal-error' | transloco }}
           </p-message>
         }
       </div>
@@ -70,7 +70,7 @@
         step="1"
         required
         [attr.aria-invalid]="form.controls.cableTemperature.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('cableTemperature', ['min', 'max', 'integer'])"
+        [attr.aria-errormessage]="getErrorIds('cableTemperature', ['min', 'max', 'noDecimal'])"
       />
       <p-inputgroup-addon>°C</p-inputgroup-addon>
     </p-inputgroup>
@@ -89,9 +89,9 @@
             {{ constraints.cableTemperature.max }}
           </p-message>
         }
-        @if (form.controls.cableTemperature.errors['integer']) {
-          <p-message id="cableTemperature-error-integer" severity="error" size="small" variant="simple">
-            {{ 'loads.climate.whole-number-required' | transloco }}
+        @if (form.controls.cableTemperature.errors['noDecimal']) {
+          <p-message id="cableTemperature-error-noDecimal" severity="error" size="small" variant="simple">
+            {{ 'common.no-decimal-error' | transloco }}
           </p-message>
         }
       </div>
@@ -125,7 +125,7 @@
           step="0.1"
           required
           [attr.aria-invalid]="form.controls.iceThickness.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max'])"
+          [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max', 'oneDecimal'])"
           data-testid="ice-thickness-input"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
@@ -140,6 +140,11 @@
         <p-message id="iceThickness-error-max" severity="error" size="small" variant="simple" class="pt-1">
           <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
+        </p-message>
+      }
+      @if (form.controls.iceThickness.errors?.['oneDecimal']) {
+        <p-message id="iceThickness-error-oneDecimal" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.one-decimal-error' | transloco }}
         </p-message>
       }
     </div>
@@ -169,7 +174,7 @@
           step="0.1"
           required
           [attr.aria-invalid]="form.controls.iceThicknessBefore.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('iceThicknessBefore', ['min', 'max'])"
+          [attr.aria-errormessage]="getErrorIds('iceThicknessBefore', ['min', 'max', 'oneDecimal'])"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
@@ -184,6 +189,11 @@
         <p-message id="iceThicknessBefore-error-max" severity="error" size="small" variant="simple" class="pt-1">
           <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
+        </p-message>
+      }
+      @if (form.controls.iceThicknessBefore.errors?.['oneDecimal']) {
+        <p-message id="iceThicknessBefore-error-oneDecimal" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.one-decimal-error' | transloco }}
         </p-message>
       }
     </div>
@@ -202,7 +212,7 @@
           step="0.1"
           required
           [attr.aria-invalid]="form.controls.iceThicknessAfter.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('iceThicknessAfter', ['min', 'max'])"
+          [attr.aria-errormessage]="getErrorIds('iceThicknessAfter', ['min', 'max', 'oneDecimal'])"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
@@ -217,6 +227,11 @@
         <p-message id="iceThicknessAfter-error-max" severity="error" size="small" variant="simple" class="pt-1">
           <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
           {{ constraints.iceThickness.max }}
+        </p-message>
+      }
+      @if (form.controls.iceThicknessAfter.errors?.['oneDecimal']) {
+        <p-message id="iceThicknessAfter-error-oneDecimal" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.one-decimal-error' | transloco }}
         </p-message>
       }
     </div>
