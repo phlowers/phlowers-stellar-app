@@ -125,6 +125,8 @@ def import_lambert_and_validate(inputs: dict):
     dist_diff = np.linalg.norm([lat_diff, lon_diff], axis=0)
     mean_gps_diff = np.mean(dist_diff)
 
+    print(f"azimuth : {result_loc['azimuth']}")
+
     logger.debug(
         f"Latitude difference between imported Lambert and section data: {lat_diff}"
     )
@@ -133,3 +135,101 @@ def import_lambert_and_validate(inputs: dict):
     )
 
     return {"localization": result_loc, "meanGpsDiff": mean_gps_diff}
+
+
+def import_lambert_pyproj_poc(inputs: dict) -> dict:
+    """POC: convert Lambert93 coordinates to GPS decimal degrees and derive
+    the azimuth using pyproj instead of mechaphlowers.
+
+    Both the coordinate conversion and the azimuth are geodesic (WGS84
+    ellipsoid), so they are valid anywhere on the globe. The reported azimuth
+    is the geodesic bearing converted to the flat-plane (Lambert93 grid)
+    azimuth by removing the meridian convergence, so it matches the flat
+    convention referenced by the application.
+    """
+    from pyproj import Geod, Proj, Transformer
+
+    lambert_data = Lambert93Data.from_dict(inputs)
+    lambert_x = np.array(lambert_data.lambert_x, dtype=np.float64)
+    lambert_y = np.array(lambert_data.lambert_y, dtype=np.float64)
+
+    # EPSG:2154 (Lambert93) -> EPSG:4326 (WGS84 lon/lat)
+    transformer = Transformer.from_crs(
+        "EPSG:2154", "EPSG:4326", always_xy=True
+    )
+    longitude, latitude = transformer.transform(lambert_x, lambert_y)
+    longitude = np.atleast_1d(np.asarray(longitude, dtype=np.float64))
+    latitude = np.atleast_1d(np.asarray(latitude, dtype=np.float64))
+
+    # Geodesic bearing between consecutive points (clockwise from true north).
+    geod = Geod(ellps="WGS84")
+    geodesic_azimuth, _, _ = geod.inv(
+        longitude[:-1], latitude[:-1], longitude[1:], latitude[1:]
+    )
+    geodesic_azimuth = np.atleast_1d(geodesic_azimuth)
+
+    # Convert to the flat-plane (Lambert93 grid) azimuth by removing the
+    # meridian convergence at each origin point.
+    proj = Proj("EPSG:2154")
+    convergence = np.array(
+        [
+            proj.get_factors(lon, lat).meridian_convergence
+            for lon, lat in zip(longitude[:-1], latitude[:-1])
+        ]
+    )
+    flat_azimuth = geodesic_azimuth - convergence
+
+    return {
+        "latitude": latitude.tolist(),
+        "longitude": longitude.tolist(),
+        "lambert_x": lambert_data.lambert_x,
+        "lambert_y": lambert_data.lambert_y,
+        "azimuth": flat_azimuth.tolist(),
+    }
+
+
+def import_lambert_and_validate_pyproj_poc(inputs: dict) -> dict:
+    """POC replacement for :func:`import_lambert_and_validate` using pyproj.
+
+    The flat approximation is performed directly in GPS: each subsequent point
+    is reconstructed geodesically from the previous one, using the input span
+    length and the geodesic azimuth. This is valid anywhere on the globe. The
+    reconstructed points are compared against the directly converted
+    Lambert93 -> GPS points.
+    """
+    from pyproj import Geod
+
+    result_loc = import_lambert_pyproj_poc(inputs)
+    section_data = SectionGeoData.from_dict(inputs)
+
+    latitude = np.array(result_loc["latitude"], dtype=np.float64)
+    longitude = np.array(result_loc["longitude"], dtype=np.float64)
+
+    # Geodesic bearing between consecutive points, used for reconstruction.
+    geod = Geod(ellps="WGS84")
+    geodesic_azimuth, _, _ = geod.inv(
+        longitude[:-1], latitude[:-1], longitude[1:], latitude[1:]
+    )
+    geodesic_azimuth = np.atleast_1d(geodesic_azimuth)
+
+    # Span lengths, dropping the trailing NaN (unused last span).
+    span_length = np.array(section_data.spanLength, dtype=np.float64)[
+        : geodesic_azimuth.size
+    ]
+
+    # Flat approximation in GPS: reconstruct each next point geodesically from
+    # the previous one using the input span length and the geodesic azimuth.
+    reconstructed_lon, reconstructed_lat, _ = geod.fwd(
+        longitude[:-1], latitude[:-1], geodesic_azimuth, span_length
+    )
+
+    lat_diff = abs(np.atleast_1d(reconstructed_lat) - latitude[1:])
+    lon_diff = abs(np.atleast_1d(reconstructed_lon) - longitude[1:])
+    dist_diff = np.linalg.norm([lat_diff, lon_diff], axis=0)
+    mean_gps_diff = float(np.mean(dist_diff))
+
+    return {
+        "localization": result_loc,
+        "meanGpsDiff": mean_gps_diff,
+        "azimuth": result_loc["azimuth"],
+    }

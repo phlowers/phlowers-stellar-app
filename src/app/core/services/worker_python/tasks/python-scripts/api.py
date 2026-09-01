@@ -288,12 +288,12 @@ def compute_localization(js_inputs):
 
 @debug_log
 def import_lambert(js_inputs):
-    return geography.import_lambert(js_to_python(js_inputs))
+    return geography.import_lambert_pyproj_poc(js_to_python(js_inputs))
 
 
 @debug_log
 def import_lambert_and_validate(js_inputs):
-    return geography.import_lambert_and_validate(js_to_python(js_inputs))
+    return geography.import_lambert_and_validate_pyproj_poc(js_to_python(js_inputs))
 
 
 # ---------------------------conformity----------------
