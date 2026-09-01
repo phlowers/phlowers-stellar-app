@@ -118,14 +118,17 @@ export function drawWrappingBulletItem(
   return Math.max(lines.length, 1) * LINE_HEIGHT;
 }
 
-/** Draws the PDF header: title + app name + date + separator line. Returns the next Y position. */
-export function drawHeader(doc: jsPDF, date: string, reportTitle: string): number {
+/**
+ * Draws the PDF header: title + app name + date + separator line. Returns the next Y position.
+ * `pageWidth` defaults to the portrait A4 width; pass the landscape width (297) for landscape pages.
+ */
+export function drawHeader(doc: jsPDF, date: string, reportTitle: string, pageWidth: number = PAGE_SIZE.width): number {
   let y = PAGE_MARGIN.top;
 
   // App name (top right) — size: FONT_SIZES.appName, bold
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.appName);
-  doc.text(APP_NAME, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
+  doc.text(APP_NAME, pageWidth - PAGE_MARGIN.right, y, { align: 'right' });
   y += 2;
 
   // Report title (top left, bold) — size: FONT_SIZES.title
@@ -135,20 +138,28 @@ export function drawHeader(doc: jsPDF, date: string, reportTitle: string): numbe
   doc.text(reportTitle, PAGE_MARGIN.left, y);
 
   // Date (top right, same line as title) — size: FONT_SIZES.title
-  doc.text(date, PAGE_SIZE.width - PAGE_MARGIN.right, y, { align: 'right' });
+  doc.text(date, pageWidth - PAGE_MARGIN.right, y, { align: 'right' });
 
   // Main separator line — gap of 3 mm below title text
   y += 3;
   doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
+  doc.line(PAGE_MARGIN.left, y, pageWidth - PAGE_MARGIN.right, y);
   y += LINE_HEIGHT;
 
   return y;
 }
 
-/** Draws the page footer (page number). */
-export function drawFooter(doc: jsPDF, pageFooter: string): void {
+/**
+ * Draws the page footer (page number). `pageWidth`/`pageHeight` default to portrait A4 dimensions;
+ * pass the landscape dimensions (297 × 210) for landscape pages.
+ */
+export function drawFooter(
+  doc: jsPDF,
+  pageFooter: string,
+  pageWidth: number = PAGE_SIZE.width,
+  pageHeight: number = PAGE_SIZE.height
+): void {
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.footer);
-  doc.text(pageFooter, PAGE_SIZE.width - PAGE_MARGIN.right, PAGE_SIZE.height - 8, { align: 'right' });
+  doc.text(pageFooter, pageWidth - PAGE_MARGIN.right, pageHeight - 8, { align: 'right' });
 }
