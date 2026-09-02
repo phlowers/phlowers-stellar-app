@@ -206,6 +206,19 @@ describe('FloorFreePositioningComponent', () => {
       expect(plotContainer()).toBeNull();
     });
 
+    it('should overlay the spinner over the plot container while the plot itself is being built', () => {
+      fixture.detectChanges();
+
+      expect(query('p-progress-spinner')).not.toBeNull();
+      // The container has to stay mounted: createPlot() looks it up by id.
+      expect(plotContainer()).not.toBeNull();
+
+      component.isLoading.set(false);
+      fixture.detectChanges();
+
+      expect(query('p-progress-spinner')).toBeNull();
+    });
+
     it('should render the plot container and an N/A readout before the mouse enters the plot', () => {
       fixture.detectChanges();
 

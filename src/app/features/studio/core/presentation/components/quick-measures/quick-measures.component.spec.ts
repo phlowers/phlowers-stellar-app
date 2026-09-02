@@ -73,9 +73,9 @@ describe('QuickMeasuresComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.studio-page.not-selected-option': 'Not selected',
-              'studio.studio-page.point-option': 'Point {{ index }}',
-              'studio.studio-page.floor-option': 'floor {{ span }}',
+              'studio.quick-measures.not-selected-option': 'Not selected',
+              'studio.quick-measures.point-option': 'Point {{ index }}',
+              'studio.quick-measures.floor-option': 'floor {{ span }}',
               'studio.floor.point-title': 'Point {{ distance }} m'
             }
           },

@@ -852,8 +852,6 @@
       "working-load-unknown-aria-label": "working load is unknown",
       "strand-cut-aria-label": "strand is cut",
       "strand-not-cut-aria-label": "strand is not cut",
-      "select-obstacle-aria-label": "select an obstacle",
-      "select-obstacle-point-aria-label": "select an obstacle's point",
       "previous-support-aria-label": "Previous support",
       "next-support-aria-label": "Next support",
       "climate-condition-label": "Climate condition",
@@ -866,13 +864,17 @@
       "one-span-option": "One span",
       "two-spans-option": "Two spans",
       "all-option": "All",
-      "point-option": "Point {{ index }}",
       "span-option": "Span",
       "max-section-option": "Max section",
-      "not-selected-option": "Not selected",
       "distances-label": "Distances",
-      "floor-option": "floor {{ span }}",
       "floor-sidetab-label": "Floor"
+    },
+    "quick-measures": {
+      "select-obstacle-aria-label": "select an obstacle or a floor",
+      "select-obstacle-point-aria-label": "select an obstacle's or floor's point",
+      "not-selected-option": "Not selected",
+      "point-option": "Point {{ index }}",
+      "floor-option": "floor {{ span }}"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",

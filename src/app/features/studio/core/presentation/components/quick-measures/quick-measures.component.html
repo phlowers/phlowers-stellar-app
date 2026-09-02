@@ -1,5 +1,5 @@
 <p-select
-  [ariaLabel]="'studio.studio-page.select-obstacle-aria-label' | transloco"
+  [ariaLabel]="'studio.quick-measures.select-obstacle-aria-label' | transloco"
   styleClass="quick-measures__select"
   [options]="filteredObstaclesOptions()"
   [ngModel]="obstaclesService.selectedMeasureUuid()"
@@ -11,7 +11,7 @@
 @if (obstaclePointOptions().length > 1) {
   <p-select
     @pointSelect
-    [ariaLabel]="'studio.studio-page.select-obstacle-point-aria-label' | transloco"
+    [ariaLabel]="'studio.quick-measures.select-obstacle-point-aria-label' | transloco"
     styleClass="quick-measures__select"
     [options]="obstaclePointOptions()"
     [ngModel]="obstaclesService.activePointIndex()"

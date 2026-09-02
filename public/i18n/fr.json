@@ -852,8 +852,6 @@
       "working-load-unknown-aria-label": "le taux de travail est inconnu",
       "strand-cut-aria-label": "le brin est coupé",
       "strand-not-cut-aria-label": "le brin n'est pas coupé",
-      "select-obstacle-aria-label": "sélectionner un obstacle",
-      "select-obstacle-point-aria-label": "Sélectionner le point d'un obstacle",
       "previous-support-aria-label": "Support précédent",
       "next-support-aria-label": "Support suivant",
       "climate-condition-label": "Condition climatique",
@@ -866,13 +864,17 @@
       "one-span-option": "Une portée",
       "two-spans-option": "Deux portées",
       "all-option": "Toutes",
-      "point-option": "Point {{ index }}",
       "span-option": "Portée",
       "max-section-option": "Max canton",
-      "not-selected-option": "Non sélectionné",
       "distances-label": "Distances",
-      "floor-option": "sol {{ span }}",
       "floor-sidetab-label": "Sol"
+    },
+    "quick-measures": {
+      "select-obstacle-aria-label": "sélectionner un obstacle ou un sol",
+      "select-obstacle-point-aria-label": "Sélectionner le point d'un obstacle ou d'un sol",
+      "not-selected-option": "Non sélectionné",
+      "point-option": "Point {{ index }}",
+      "floor-option": "sol {{ span }}"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",

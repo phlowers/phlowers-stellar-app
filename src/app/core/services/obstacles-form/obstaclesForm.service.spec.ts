@@ -865,6 +865,33 @@ describe('ObstacleFormService', () => {
       expect(service.results().horizontal).toBeNull();
     });
 
+    it('should return null results when the selected measure is a floor, not the edited obstacle', () => {
+      const mockDistances: Distance[] = [
+        {
+          obstacleUuid: 'floor-1',
+          points: [
+            {
+              pointIndex: 0,
+              linePoint: [10, 0, 5],
+              virtualPointHorizontal: [10, 5, 0],
+              virtualPointVertical: [10, 0, 5],
+              distanceDiagonal: 100,
+              distanceHorizontal: 50,
+              distanceVertical: 30,
+              signedDistanceVertical: 30
+            }
+          ]
+        }
+      ];
+
+      mockSpanService.section.set({ ...mockSection, floors: [{ uuid: 'floor-1' }] } as unknown as Section);
+      mockObstacleStateService.distances.set(mockDistances);
+      mockObstaclesService.selectedMeasureUuid.set('floor-1');
+      mockObstaclesService.activePointIndex.set(0);
+
+      expect(service.results()).toEqual({ oblique: null, vertical: null, horizontal: null });
+    });
+
     it('should derive results from distances when obstacle is selected after re-open', () => {
       // Simulates re-opening a study: distances restored by refreshSection, then user selects an obstacle
       const mockDistances: Distance[] = [

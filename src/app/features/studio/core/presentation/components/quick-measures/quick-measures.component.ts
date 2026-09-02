@@ -72,13 +72,13 @@ export class QuickMeasuresComponent {
       if (!visibleSupportUuids.has(floor.supportUuid)) continue;
       const spanLabel = spanOptions.find((option) => option.value === floor.supportUuid)?.label ?? '';
       options.push({
-        label: this.translocoService.translate('studio.studio-page.floor-option', { span: spanLabel }),
+        label: this.translocoService.translate('studio.quick-measures.floor-option', { span: spanLabel }),
         value: floor.uuid
       });
     }
     if (options.length) {
       options.unshift({
-        label: this.translocoService.translate('studio.studio-page.not-selected-option'),
+        label: this.translocoService.translate('studio.quick-measures.not-selected-option'),
         value: null
       });
     }
@@ -108,7 +108,7 @@ export class QuickMeasuresComponent {
     const obstacle = section?.obstacles.find((o) => o.uuid === uuid);
     if (!obstacle) return [];
     return obstacle.positions.map((_, index) => ({
-      label: this.translocoService.translate('studio.studio-page.point-option', { index: index + 1 }),
+      label: this.translocoService.translate('studio.quick-measures.point-option', { index: index + 1 }),
       value: index
     }));
   });

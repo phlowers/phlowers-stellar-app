@@ -5,11 +5,18 @@
     </div>
   } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">
-      <p class="free-positioning-error">
+      <p class="free-positioning-error" role="alert" aria-live="assertive">
         {{ getErrorString() }}
       </p>
     </div>
   } @else {
+    <!-- Overlay, not a branch: the plot container must stay in the DOM for createPlot() to find it by id -->
+    @if (isLoading()) {
+      <div class="absolute inset-0 z-10 flex justify-center items-center">
+        <p-progress-spinner [ariaLabel]="'common.loading' | transloco" />
+      </div>
+    }
+
     <div class="flex flex-col h-full">
       <dl>
         <dt>{{ 'studio.free-positioning.x-label' | transloco }}</dt>
