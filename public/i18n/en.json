@@ -301,9 +301,9 @@
     "validation-supports-bounds": "Section has supports with values out of bounds",
     "import-error": "Error importing section",
     "delete-error": "Error deleting section",
-    "canton-format-error": "The canton file to import is invalid.",
+    "section-format-error": "The section file to import is invalid.",
     "lambert-reprojection-error": "Error computing GPS coordinates from Lambert93 data",
-    "catalog-missing-warning": "The attachment support from the canton file is not present in the application support catalog",
+    "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog",
     "import-success": "Section imported successfully",
     "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
     "from-file": {

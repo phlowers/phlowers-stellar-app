@@ -194,7 +194,7 @@ describe('vtl-guying-report helpers', () => {
       expect(doc.splitTextToSize).toHaveBeenCalled();
     });
 
-    it('should wrap a long study title without overflowing Canton column', () => {
+    it('should wrap a long study title without overflowing section column', () => {
       const doc = createMockDoc();
       (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValueOnce(['line1', 'line2']);
       const data = createMockReportData({ studyTitle: 'A'.repeat(100) });

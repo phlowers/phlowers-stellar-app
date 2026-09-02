@@ -6,7 +6,7 @@
  */
 import { isNil } from 'lodash';
 import { Section, Support } from '@shared/domain';
-import { Accroche, FieldError, CantonFormat } from './section-import.interfaces';
+import { FieldError, SectionImportFile, Attachment } from './section-import.interfaces';
 
 // ---------------------------------------------------------------------------
 // Lambert93 to GPS reprojection helpers
@@ -152,7 +152,7 @@ export function buildSectionName(
  *                            CHAINE_DRN_LONGUEUR, CHAINE_DRN_POIDS,
  *                            HAUTEUR_SOUS_CONSOLE, LONGUEUR_BRAS, PIED_Z_LAMBERT93
  */
-export function validateCantonRawFields(raw: CantonFormat): FieldError[] {
+export function validateImportedSectionFields(raw: SectionImportFile): FieldError[] {
   const seen = new Set<string>();
   const errors: FieldError[] = [];
 
@@ -163,9 +163,9 @@ export function validateCantonRawFields(raw: CantonFormat): FieldError[] {
     }
   };
 
-  const canton = raw.cantons[0];
-  const general = canton.general;
-  const portees = [...(canton['portee unitaire'] ?? [])].sort(
+  const section = raw.cantons[0];
+  const general = section.general;
+  const spans = [...(section['portee unitaire'] ?? [])].sort(
     (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
   );
 
@@ -180,13 +180,13 @@ export function validateCantonRawFields(raw: CantonFormat): FieldError[] {
     report('FAISCEAU_CABLES_NOMBRE', general.FAISCEAU_CABLES_NOMBRE ?? null);
   }
 
-  if (portees.length === 0) {
+  if (spans.length === 0) {
     errors.push({ field: 'portee unitaire', value: null });
     return errors;
   }
 
-  // Accroche-level required fields ("Oui" in US contract interface)
-  const acrocheNumericRequired: readonly (keyof Accroche)[] = [
+  // Attachment-level required fields ("Oui" in US contract interface)
+  const ATTACHMENT_NUMERIC_REQUIRED: readonly (keyof Attachment)[] = [
     'ACCROCHE_CABLE_Z_LAMBERT93',
     'ANGLE_LIGNE',
     'CHAINE_DRN_LONGUEUR',
@@ -196,30 +196,30 @@ export function validateCantonRawFields(raw: CantonFormat): FieldError[] {
     'PIED_Z_LAMBERT93'
   ];
 
-  const checkAccroche = (accroche: Accroche): void => {
-    for (const field of acrocheNumericRequired) {
-      if (parseFloatOrNull(accroche[field]) === null) report(field, accroche[field] ?? null);
+  const checkAttachment = (attachment: Attachment): void => {
+    for (const field of ATTACHMENT_NUMERIC_REQUIRED) {
+      if (parseFloatOrNull(attachment[field]) === null) report(field, attachment[field] ?? null);
     }
-    if (typeof accroche.SUPPORT_NUMERO !== 'string' || !accroche.SUPPORT_NUMERO) {
-      report('SUPPORT_NUMERO', accroche.SUPPORT_NUMERO ?? null);
+    if (typeof attachment.SUPPORT_NUMERO !== 'string' || !attachment.SUPPORT_NUMERO) {
+      report('SUPPORT_NUMERO', attachment.SUPPORT_NUMERO ?? null);
     }
   };
 
-  portees.forEach((portee, i) => {
-    const isLast = i === portees.length - 1;
+  spans.forEach((span, i) => {
+    const isLast = i === spans.length - 1;
 
     // portee unitaire — PORTEE_LONGUEUR and PORTEE_AZIMUT are "Oui" in US
-    if (parseFloatOrNull(portee.PORTEE_LONGUEUR) === null) {
-      report('PORTEE_LONGUEUR', portee.PORTEE_LONGUEUR ?? null);
+    if (parseFloatOrNull(span.PORTEE_LONGUEUR) === null) {
+      report('PORTEE_LONGUEUR', span.PORTEE_LONGUEUR ?? null);
     }
-    if (parseFloatOrNull(portee.PORTEE_AZIMUT) === null) {
-      report('PORTEE_AZIMUT', portee.PORTEE_AZIMUT ?? null);
+    if (parseFloatOrNull(span.PORTEE_AZIMUT) === null) {
+      report('PORTEE_AZIMUT', span.PORTEE_AZIMUT ?? null);
     }
 
     // Every depart accroche produces a mapped support
-    checkAccroche(portee['accroche depart']);
+    checkAttachment(span['accroche depart']);
     // The arrivee of the last portée also produces a mapped support
-    if (isLast) checkAccroche(portee['accroche arrivee']);
+    if (isLast) checkAttachment(span['accroche arrivee']);
   });
 
   return errors;

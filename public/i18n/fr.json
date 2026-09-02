@@ -301,7 +301,7 @@
     "validation-supports-bounds": "Le canton contient des supports avec des valeurs hors limites",
     "import-error": "Erreur lors de l'importation du canton",
     "delete-error": "Erreur lors de la suppression du canton",
-    "canton-format-error": "Fichier de canton à importer non conforme.",
+    "section-format-error": "Fichier de canton à importer non conforme.",
     "lambert-reprojection-error": "Erreur lors du calcul des coordonnées GPS à partir des données Lambert93",
     "catalog-missing-warning": "Le support d'accrochage du fichier de canton n'est pas présent au catalogue des supports de l'application",
     "import-success": "Canton importé avec succès",
