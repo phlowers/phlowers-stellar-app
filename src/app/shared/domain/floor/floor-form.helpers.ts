@@ -17,7 +17,15 @@ const toProfile = (points: number[][], origin: number[], ux: number, uy: number)
   points.map((point) => ({ t: (point[0] - origin[0]) * ux + (point[1] - origin[1]) * uy, z: point[2] }));
 
 // Altitude of a profile at abscissa `t`, linearly interpolated, clamped to its ends.
-const altitudeAt = (profile: Profile, t: number): number => {
+//
+// A vertical segment (points sharing the same abscissa — the form clamps free points inclusively to
+// the endpoints, so a floor may hold two points at the same distance) has no single altitude there:
+// `worst` picks the one giving the narrowest clearance, the highest floor against the lowest cable.
+const altitudeAt = (profile: Profile, t: number, worst: (...z: number[]) => number): number => {
+  const coincident = profile.filter((point) => point.t === t);
+  if (coincident.length > 0) {
+    return worst(...coincident.map((point) => point.z));
+  }
   const next = profile.findIndex((point) => point.t >= t);
   if (next < 0) {
     return profile.at(-1)!.z;
@@ -25,9 +33,9 @@ const altitudeAt = (profile: Profile, t: number): number => {
   if (next === 0) {
     return profile[0].z;
   }
+  // `t` falls strictly between the two: coincident points are handled above, so the width is never 0.
   const [before, after] = [profile[next - 1], profile[next]];
-  const width = after.t - before.t;
-  return width === 0 ? after.z : before.z + ((after.z - before.z) * (t - before.t)) / width;
+  return before.z + ((after.z - before.z) * (t - before.t)) / (after.t - before.t);
 };
 
 /**
@@ -66,8 +74,8 @@ export function computeFloorClearance(floorPoints: number[][], cablePoints: numb
   ];
   let narrowest: FloorClearance | null = null;
   for (const t of abscissae) {
-    const floorAltitude = altitudeAt(floorProfile, t);
-    const cableAltitude = altitudeAt(cableProfile, t);
+    const floorAltitude = altitudeAt(floorProfile, t, Math.max);
+    const cableAltitude = altitudeAt(cableProfile, t, Math.min);
     const minVerticalDistance = cableAltitude - floorAltitude;
     if (!narrowest || minVerticalDistance < narrowest.minVerticalDistance) {
       narrowest = { minVerticalDistance, floorAltitude, cableAltitude };

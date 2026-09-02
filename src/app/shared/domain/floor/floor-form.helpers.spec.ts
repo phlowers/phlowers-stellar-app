@@ -170,6 +170,24 @@ describe('computeFloorClearance', () => {
     });
   });
 
+  it('should measure a vertical wall at its top, not at the point it shares its abscissa with', () => {
+    // The form clamps free points inclusively, so two points can share an abscissa: reading the
+    // first one only would ignore the wall and report the clearance to the ground beside it.
+    const walledFloor = [
+      [0, 0, 0],
+      [0, 0, 16],
+      [10, 0, 0],
+      [100, 0, 0]
+    ];
+
+    // The wall top is 4 m under the cable, closer than the 5 m left over the sag at mid-span.
+    expect(computeFloorClearance(walledFloor, saggingCable)).toEqual({
+      minVerticalDistance: 4,
+      floorAltitude: 16,
+      cableAltitude: 20
+    });
+  });
+
   it('should report a negative clearance where the cable dips below the floor', () => {
     const flatFloor = [
       [0, 0, 8],

@@ -63,7 +63,7 @@ describe('FloorFormService', () => {
   let obstaclesServiceMock: {
     selectedMeasureUuid: ReturnType<typeof signal<string | null>>;
     activePointIndex: ReturnType<typeof signal<number | null>>;
-    setSelectedMeasure: ReturnType<typeof vi.fn>;
+    setSelectedMeasure: (uuid: string | null, pointIndex: number | null) => void;
   };
 
   /** Opens the saved floor in the form (span + reference support), as selecting it in the UI would. */
@@ -483,6 +483,20 @@ describe('FloorFormService', () => {
       expect(obstaclesServiceMock.selectedMeasureUuid()).toBeNull();
       expect(obstaclesServiceMock.activePointIndex()).toBeNull();
       expect(distanceTypeSignal()).toBeNull();
+    });
+
+    it('should do nothing while a calculate-and-save is in flight', async () => {
+      openSavedFloor();
+      service.isCalculating.set(true);
+
+      await service.eraseFloor();
+
+      // The erase button is disabled meanwhile, so this only guards the race the disabled state hides.
+      expect(sectionSignal()?.floors).toEqual([floor]);
+      const obstacleState = TestBed.inject(ObstacleStateService) as unknown as {
+        deleteObstacle: ReturnType<typeof vi.fn>;
+      };
+      expect(obstacleState.deleteObstacle).not.toHaveBeenCalled();
     });
 
     it('should leave a selection pointing at another measure untouched', async () => {

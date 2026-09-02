@@ -530,12 +530,14 @@ export class FloorFormService {
     }
   }
 
-  // Erases the floor saved for the currently selected span. No-op if none is saved.
+  // Erases the floor saved for the currently selected span. No-op if none is saved, or while a
+  // calculate-and-save is in flight: erasing under it would race the in-flight worker registration
+  // and section write, which would put the floor back after the delete.
   async eraseFloor(): Promise<void> {
     const floor = this.savedFloor();
     const study = this.plotService.study();
     const section = this.spanService.section();
-    if (!floor || !study || !section) {
+    if (!floor || !study || !section || this.isCalculating()) {
       return;
     }
     const updatedSection = { ...section, floors: (section.floors ?? []).filter((f) => f.uuid !== floor.uuid) };

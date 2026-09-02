@@ -154,7 +154,7 @@
         app-btn
         btnStyle="danger"
         type="button"
-        [disabled]="!floorFormService.isFloorSaved()"
+        [disabled]="!floorFormService.isFloorSaved() || floorFormService.isCalculating()"
         (click)="floorFormService.eraseFloor()"
         [attr.aria-label]="'studio.floor.delete-floor-aria-label' | transloco"
         data-testid="delete-floor"
