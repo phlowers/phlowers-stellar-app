@@ -272,7 +272,7 @@ export class SupportsTableComponent implements OnInit {
     }
 
     const matchedEntry = await this.attachmentService
-      .resolveGeoLiaisonCatalogAttachment(supportName, null, attachmentSet)
+      .resolveCatalogAttachment(supportName, null, attachmentSet)
       .catch(() => undefined);
     if (!this.restrictionRequests.isCurrent(uuid, requestId)) {
       return;

@@ -6,10 +6,10 @@
  */
 
 // ---------------------------------------------------------------------------
-// GeoLiaison type interfaces
+// Canton import type interfaces
 // ---------------------------------------------------------------------------
 
-export interface GeoLiaisonAccroche {
+export interface Attachment {
   ANGLE_LIGNE: string | null;
   ACCROCHE_SET: string | null;
   ACCROCHE_CABLE_Z_LAMBERT93: string | null;
@@ -31,7 +31,8 @@ export interface GeoLiaisonAccroche {
   SUPPORT_TOWER: string | null;
 }
 
-export interface GeoLiaisonPortee {
+/** Represents a basic span (portée unitaire) in the external French canton format. */
+export interface Span {
   PORTEE_UNITAIRE_ORDRE: string | null;
   PORTEE_LONGUEUR: string | null;
   PORTEE_AZIMUT: string | null;
@@ -39,11 +40,14 @@ export interface GeoLiaisonPortee {
   EEL_DESIGNATION: string | null;
   GMR_DESIGNATION: string | null;
   PORTEE_UNITAIRE_DESIGNATION: string | null;
-  'accroche depart': GeoLiaisonAccroche;
-  'accroche arrivee': GeoLiaisonAccroche;
+  /** French key from external data source (starting attachment point). */
+  'accroche depart': Attachment;
+  /** French key from external data source (ending attachment point). */
+  'accroche arrivee': Attachment;
 }
 
-export interface GeoLiaisonAppartenance {
+/** Represents membership/affiliation data from the external French canton format. */
+export interface Appartenance {
   LIT_ADR: string | null;
   LIT_IDR: string | null;
   BRANCHE_IDR: string | null;
@@ -53,25 +57,29 @@ export interface GeoLiaisonAppartenance {
   LIAISON_ADR: string | null;
 }
 
-export interface GeoLiaisonGeneral {
+export interface General {
   CANTON_CUR: string;
   CABLE_ADR: string | null;
   CANTON_TYPE: string | null;
   FAISCEAU_CABLES_NOMBRE: string | null;
   PHASE_ELECTRIQUE_NUMERO: string | null;
-  appartenance: GeoLiaisonAppartenance[];
+  /** French key from external data source (membership/affiliation array). */
+  appartenance: Appartenance[];
 }
 
-export interface GeoLiaisonCanton {
-  general: GeoLiaisonGeneral;
-  'portee unitaire': GeoLiaisonPortee[];
+/** Represents a single section from an external French data source file. */
+export interface ImportedSection {
+  general: General;
+  /** French key from external data source (array of basic spans). */
+  'portee unitaire': Span[];
 }
 
-export interface GeoLiaisonFormat {
-  cantons: GeoLiaisonCanton[];
+/** Represents a complete external section import file structure. */
+export interface SectionImportFile {
+  cantons: ImportedSection[];
 }
 
-export interface GeoLiaisonFieldError {
+export interface FieldError {
   readonly field: string;
   readonly value: string | null;
 }

@@ -159,6 +159,6 @@ export interface Section {
   start_azimuth: number | null;
   /** Saved studio view state (camera, scale, resolution, span selection). */
   studio_view_state?: StudioViewState;
-  /** Mean absolute error (meters) between surveyed Lambert93 foot coordinates and the app's span/angle data model reprojection, computed on GeoLiaison import */
+  /** Mean absolute error (meters) between surveyed Lambert93 foot coordinates and the app's span/angle data model reprojection, computed on canton import */
   mean_reprojection_diff_meters: number | null;
 }

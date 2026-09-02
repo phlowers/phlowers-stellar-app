@@ -41,7 +41,7 @@ const mockAttachmentService = {
   getAttachmentDetails: vi.fn().mockResolvedValue(undefined),
   getDerivedSupportFields: vi.fn().mockResolvedValue(undefined),
   getDerivedSupportFieldsBySet: vi.fn().mockResolvedValue(new Map()),
-  resolveGeoLiaisonCatalogAttachment: vi.fn().mockResolvedValue(undefined),
+  resolveCatalogAttachment: vi.fn().mockResolvedValue(undefined),
   getCompleteAttachmentSetsBySupportName: vi.fn().mockResolvedValue([]),
   // Mirrors the real wrapper: applies the (name, set) guard and delegates to getDerivedSupportFields
   // (returning its promise directly to preserve tick timing), so tests can keep asserting on it.
@@ -567,7 +567,7 @@ describe('SupportsTableComponent', () => {
     });
 
     it('should block non-catalog attachment sets when the row is in catalog-restricted mode', async () => {
-      mockAttachmentService.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+      mockAttachmentService.resolveCatalogAttachment.mockResolvedValue({
         uuid: 'cat-1',
         created_at: 'c',
         updated_at: 'u',
@@ -594,7 +594,7 @@ describe('SupportsTableComponent', () => {
     });
 
     it('should allow free attachment-set input when catalog match is unresolved (fallback branch)', async () => {
-      mockAttachmentService.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+      mockAttachmentService.resolveCatalogAttachment.mockResolvedValue(undefined);
 
       await component.onSupportFieldChange('support1', 'name', 'Support 1');
       vi.clearAllMocks();
