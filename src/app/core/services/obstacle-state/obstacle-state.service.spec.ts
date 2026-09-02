@@ -45,7 +45,8 @@ const mockDistance: Distance = {
       virtualPointVertical: [10, 0, 15],
       distanceDiagonal: 50,
       distanceHorizontal: 30,
-      distanceVertical: 40
+      distanceVertical: 40,
+      signedDistanceVertical: 40
     }
   ]
 };

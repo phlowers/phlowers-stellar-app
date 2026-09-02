@@ -105,7 +105,8 @@ const createPointVisuals = (
   distancePoint: DistancePoint,
   distanceType: DistanceType,
   view: string,
-  side: string
+  side: string,
+  isFloor: boolean
 ): PointVisuals => {
   const { linePoint, virtualPointHorizontal, virtualPointVertical } = distancePoint;
   const traces: DataObject[] = [];
@@ -135,7 +136,9 @@ const createPointVisuals = (
   let distanceValue: number;
   if (distanceType === 'vertical') {
     solidMid = midpoint3d(virtualPointVertical, obstacleCoord);
-    distanceValue = distancePoint.distanceVertical;
+    // Only floors show the sign: a cable dipping under the floor reads as a negative clearance,
+    // while obstacles keep the non-negative distance they have always displayed.
+    distanceValue = isFloor ? distancePoint.signedDistanceVertical : distancePoint.distanceVertical;
   } else if (distanceType === 'horizontal') {
     solidMid = midpoint3d(virtualPointHorizontal, obstacleCoord);
     distanceValue = distancePoint.distanceHorizontal;
@@ -175,7 +178,8 @@ const buildDistanceVisuals = (
   distanceType: DistanceType,
   litData: GetSectionOutput,
   view: string,
-  side: string
+  side: string,
+  isFloor: boolean
 ): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {
   const traces: DataObject[] = [];
   const annotations: Partial<Plotly.Annotations>[] = [];
@@ -197,7 +201,7 @@ const buildDistanceVisuals = (
         continue;
       }
 
-      const result = createPointVisuals(obstacleCoord as Coord3, distancePoint, distanceType, view, side);
+      const result = createPointVisuals(obstacleCoord as Coord3, distancePoint, distanceType, view, side, isFloor);
       traces.push(...result.traces);
       if (result.annotation) {
         annotations.push(result.annotation);
@@ -216,14 +220,17 @@ const buildDistanceVisuals = (
 export const createDistanceVisuals = (
   plotParams: CreatePlotParams
 ): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {
-  const { distances, distanceType, litData, view, side, currentObstacleUuid, currentObstaclePointIndex } = plotParams;
+  const { distances, distanceType, litData, view, side, currentObstacleUuid, currentObstaclePointIndex, floors } =
+    plotParams;
 
   if (!distances?.length || !litData?.obstacles?.length || !distanceType || !currentObstacleUuid) {
     return { traces: [], annotations: [] };
   }
 
+  // Floors are registered as obstacles, so the selected uuid is what tells them apart here.
+  const isFloor = !!floors?.some((floor) => floor.uuid === currentObstacleUuid);
   const selectedDistances = distances.filter((d) => d.obstacleUuid === currentObstacleUuid);
-  return buildDistanceVisuals(selectedDistances, currentObstaclePointIndex, distanceType, litData, view, side);
+  return buildDistanceVisuals(selectedDistances, currentObstaclePointIndex, distanceType, litData, view, side, isFloor);
 };
 
 /**

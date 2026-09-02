@@ -113,19 +113,31 @@ export class QuickMeasuresComponent {
     }));
   });
 
-  /** Cable altitude right above the selected floor point ('Alt. cable' row), read from the worker distances. */
-  floorCableAltitude = computed<number | null>(() => {
+  /** Worker distance computed for the selected floor point, feeding both floor rows. */
+  private readonly floorDistancePoint = computed(() => {
     const uuid = this.obstaclesService.selectedMeasureUuid();
     const pointIndex = this.obstaclesService.activePointIndex();
     if (!uuid || pointIndex === null) return null;
-    const point = this.obstacleStateService
-      .distances()
-      .filter((distance) => distance.obstacleUuid === uuid)
-      .flatMap((distance) => distance.points)
-      .find((p) => p.pointIndex === pointIndex);
-    // virtualPointVertical sits on the cable right above the point, so its z is the cable altitude.
-    return point?.virtualPointVertical?.[2] ?? null;
+    return (
+      this.obstacleStateService
+        .distances()
+        .filter((distance) => distance.obstacleUuid === uuid)
+        .flatMap((distance) => distance.points)
+        .find((p) => p.pointIndex === pointIndex) ?? null
+    );
   });
+
+  /** Cable altitude right above the selected floor point ('Alt. cable' row), read from the worker distances. */
+  floorCableAltitude = computed<number | null>(
+    // virtualPointVertical sits on the cable right above the point, so its z is the cable altitude.
+    () => this.floorDistancePoint()?.virtualPointVertical?.[2] ?? null
+  );
+
+  /**
+   * Vertical clearance for the selected floor point, signed: negative when the cable dips below the
+   * floor. Obstacles keep the non-negative `results().vertical` instead.
+   */
+  floorVerticalDistance = computed<number | null>(() => this.floorDistancePoint()?.signedDistanceVertical ?? null);
 
   onObstacleSelect(uuid: string | null) {
     this.obstacleStateService.distanceType.set(null);

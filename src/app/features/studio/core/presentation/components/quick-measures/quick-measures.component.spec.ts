@@ -373,4 +373,20 @@ describe('QuickMeasuresComponent', () => {
       expect(component.floorCableAltitude()).toBeNull();
     });
   });
+
+  describe('floorVerticalDistance', () => {
+    it('should keep the sign so a cable dipping below the floor reads as negative', () => {
+      // Obstacles read the non-negative `results().vertical`; only floors show the signed variant.
+      spanService.section.set(sectionWithFloor());
+      obstaclesService.setSelectedMeasure('floor-0', 0);
+      obstacleStateService.distances.set([
+        {
+          obstacleUuid: 'floor-0',
+          points: [{ pointIndex: 0, distanceVertical: 3.2, signedDistanceVertical: -3.2 }]
+        }
+      ] as unknown as Distance[]);
+
+      expect(component.floorVerticalDistance()).toBeCloseTo(-3.2);
+    });
+  });
 });

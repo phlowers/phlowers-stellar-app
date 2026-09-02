@@ -25,7 +25,9 @@ const makeDistance = (overrides: Partial<Distance> = {}): Distance => ({
       virtualPointVertical: [120, 0, 40],
       distanceDiagonal: 234,
       distanceHorizontal: 20,
-      distanceVertical: 35
+      distanceVertical: 35,
+      // Cable below the point: the signed variant is what a floor displays, obstacles keep 35.
+      signedDistanceVertical: -35
     }
   ],
   ...overrides
@@ -417,6 +419,18 @@ describe('createDistanceAnnotations', () => {
     it('should show distanceVertical formatted to 2 decimal places', () => {
       const result = createDistanceAnnotations(basePlotParams({ distanceType: 'vertical' }));
       expect(result[0].text).toBe('35.00 m');
+    });
+
+    it('should show the signed distance when the selected measure is a floor', () => {
+      // Floors are registered as obstacles, so only the uuid tells them apart: they display the
+      // signed clearance (negative under the cable) while obstacles keep the non-negative one.
+      const result = createDistanceAnnotations(
+        basePlotParams({
+          distanceType: 'vertical',
+          floors: [{ uuid: 'obstacle_mock' }] as unknown as CreatePlotParams['floors']
+        })
+      );
+      expect(result[0].text).toBe('-35.00 m');
     });
 
     it('should place annotation at midpoint of virtualPointVertical → obstacleCoord in 3D', () => {

@@ -827,7 +827,8 @@ describe('ObstacleFormService', () => {
               virtualPointVertical: [10, 0, 5],
               distanceDiagonal: 42,
               distanceHorizontal: 10,
-              distanceVertical: 5
+              distanceVertical: 5,
+              signedDistanceVertical: 5
             }
           ]
         }
@@ -877,7 +878,8 @@ describe('ObstacleFormService', () => {
               virtualPointVertical: [10, 0, 5],
               distanceDiagonal: 100,
               distanceHorizontal: 50,
-              distanceVertical: 30
+              distanceVertical: 30,
+              signedDistanceVertical: 30
             }
           ]
         }
@@ -906,7 +908,8 @@ describe('ObstacleFormService', () => {
               virtualPointVertical: [1, 0, 1],
               distanceDiagonal: 10,
               distanceHorizontal: 3,
-              distanceVertical: 4
+              distanceVertical: 4,
+              signedDistanceVertical: 4
             }
           ]
         },
@@ -920,7 +923,8 @@ describe('ObstacleFormService', () => {
               virtualPointVertical: [2, 0, 1],
               distanceDiagonal: 20,
               distanceHorizontal: 6,
-              distanceVertical: 8
+              distanceVertical: 8,
+              signedDistanceVertical: 8
             }
           ]
         }

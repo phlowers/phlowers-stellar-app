@@ -107,14 +107,27 @@ const createFloorRibbonTrace = (points: Coord3[], floor: Floor, view: View): Dat
   if (view !== '3d' || points.length < 2) {
     return null;
   }
+  // Widen perpendicular to the span's horizontal direction, not along global Y: a span running
+  // along Y would otherwise produce collinear vertices, i.e. zero-area triangles and no hit target.
+  const [x0, y0] = points[0];
+  const [xN, yN] = points.at(-1)!;
+  const dx = xN - x0;
+  const dy = yN - y0;
+  const len = Math.hypot(dx, dy);
+  // Degenerate (all points stacked vertically): any horizontal direction works, keep Y.
+  const [offX, offY] =
+    len === 0
+      ? [0, FLOOR_RIBBON_HALF_WIDTH]
+      : [(-dy / len) * FLOOR_RIBBON_HALF_WIDTH, (dx / len) * FLOOR_RIBBON_HALF_WIDTH];
+
   const xs: number[] = [];
   const ys: number[] = [];
   const zs: number[] = [];
   const hovertext: string[] = [];
   const customdata: [string, number][] = [];
   points.forEach(([cx, cy, cz], index) => {
-    xs.push(cx, cx);
-    ys.push(cy + FLOOR_RIBBON_HALF_WIDTH, cy - FLOOR_RIBBON_HALF_WIDTH);
+    xs.push(cx + offX, cx - offX);
+    ys.push(cy + offY, cy - offY);
     zs.push(cz + FLOOR_RIBBON_Z_OFFSET, cz + FLOOR_RIBBON_Z_OFFSET);
     hovertext.push(floorPointName(floor, index), floorPointName(floor, index));
     customdata.push([floor.uuid, index], [floor.uuid, index]);

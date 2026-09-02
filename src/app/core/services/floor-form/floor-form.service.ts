@@ -278,9 +278,15 @@ export class FloorFormService {
       const controls = this.points.controls;
       const referencePoint = controls[0];
       const closingPoint = controls.at(-1);
-      referencePoint.controls.altitude.setValue(reference?.supportFootAltitude ?? null, { emitEvent: false });
+      // Only the supports that actually carry a foot altitude drive their endpoint: without one the
+      // field stays editable (see `pointsMeta`), so the saved/typed value must survive.
+      if (reference?.supportFootAltitude != null) {
+        referencePoint.controls.altitude.setValue(reference.supportFootAltitude, { emitEvent: false });
+      }
       referencePoint.controls.distanceToRefSupport.setValue(0, { emitEvent: false });
-      closingPoint?.controls.altitude.setValue(closing?.supportFootAltitude ?? null, { emitEvent: false });
+      if (closing?.supportFootAltitude != null) {
+        closingPoint?.controls.altitude.setValue(closing.supportFootAltitude, { emitEvent: false });
+      }
       closingPoint?.controls.distanceToRefSupport.setValue(spanLength, { emitEvent: false });
       if (!reference && !closing) {
         this.activePointIndex.set(null);

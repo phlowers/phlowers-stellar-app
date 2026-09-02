@@ -27,8 +27,8 @@
         {{ 'studio.shared.vertical' | transloco }}
       </dt>
       <dd class="quick-measures__list__value" data-testid="floor-distance-vertical-value">
-        @if (obstacleFormService.results().vertical !== null) {
-          {{ obstacleFormService.results().vertical | number: '1.0-2' }} m
+        @if (floorVerticalDistance() !== null) {
+          {{ floorVerticalDistance() | number: '1.0-2' }} m
         } @else {
           -
         }

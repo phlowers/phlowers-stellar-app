@@ -134,6 +134,33 @@ describe('createFloorTraces', () => {
     ]);
   });
 
+  it('should widen the ribbon perpendicular to the span, not along global Y', () => {
+    // A span running along Y would collapse to zero-area triangles if widened along Y.
+    const alongY = {
+      obstacles: [
+        {
+          uuid: 'floor-1',
+          points: [
+            [0, 0, 10],
+            [0, 25, 12]
+          ]
+        }
+      ]
+    } as unknown as GetSectionOutput;
+    const ribbon = build({
+      litData: alongY,
+      floors: [floor],
+      supports,
+      startSupport: 0,
+      endSupport: 2,
+      view: '3d',
+      side: 'profile'
+    }).find((t) => t.type === 'mesh3d') as { x?: number[]; y?: number[] };
+
+    expect(ribbon.x).toEqual([-10, 10, -10, 10]);
+    expect(ribbon.y).toEqual([0, 0, 25, 25]);
+  });
+
   it('should recess the ribbon below the markers so they stay hoverable', () => {
     const ribbon = build({
       litData,

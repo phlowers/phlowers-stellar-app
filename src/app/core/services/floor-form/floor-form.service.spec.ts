@@ -243,6 +243,22 @@ describe('FloorFormService', () => {
       expect(service.points.at(0).controls.distanceToRefSupport.value).toBe(0);
       expect(service.points.at(-1).controls.distanceToRefSupport.value).toBe(100);
     });
+
+    it('should keep the saved endpoint altitudes when the supports carry no foot altitude', () => {
+      // Without a foot altitude the endpoint stays editable (see `pointsMeta`), so the saved value
+      // must survive instead of being wiped to null.
+      sectionSignal.set({
+        ...section,
+        supports: [
+          { uuid: 's0', spanLength: 100, supportFootAltitude: null },
+          { uuid: 's1', spanLength: null, supportFootAltitude: null }
+        ]
+      } as unknown as Section);
+      openSavedFloor();
+
+      expect(service.points.at(0).controls.altitude.value).toBe(10);
+      expect(service.points.at(-1).controls.altitude.value).toBe(12);
+    });
   });
 
   describe('reference support flip', () => {
