@@ -8,8 +8,8 @@
 // ─── PDF LAYOUT OVERVIEW ─────────────────────────────────────────────────────
 //  Page 1 — A4 portrait (210 × 297 mm):
 //    drawHeader()               → report title + date + separator   (shared primitive)
-//    drawCartoucheSection()     → study & canton metadata bullets
-//    drawCantonStateSection()   → max parameter + max stress rate
+//    drawCartoucheSection()     → study & section metadata bullets
+//    drawSectionStateSection()   → max parameter + max stress rate
 //  Following pages — A4 landscape (297 × 210 mm):
 //    drawResultTablesSection()  → transposed result tables (≤ 5 columns each, 2 tables / page)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,14 +39,14 @@ import {
   TABLE_TEXT_BASELINE_OFFSET,
   TABLE_VERTICAL_GAP,
   UNITS
-} from './canton-state-report.constantes';
+} from './section-state-report.constantes';
 import {
-  CantonReportLabels,
-  CantonStateReportData,
   PdfTableModel,
+  SectionReportLabels,
+  SectionStateReportData,
   SpanReportRow,
   SupportReportRow
-} from './canton-state-report.interfaces';
+} from './section-state-report.interfaces';
 
 /** Maximum number of wrapped lines rendered inside a single table cell. */
 const MAX_CELL_LINES = 2;
@@ -180,11 +180,11 @@ function drawSectionTitle(doc: jsPDF, title: string, startY: number): number {
   return startY + LINE_HEIGHT + 2;
 }
 
-/** Draws the study & canton metadata section (page 1, portrait). Returns the next Y position. */
+/** Draws the study & section metadata section (page 1, portrait). Returns the next Y position. */
 export function drawCartoucheSection(
   doc: jsPDF,
-  data: CantonStateReportData,
-  labels: CantonReportLabels,
+  data: SectionStateReportData,
+  labels: SectionReportLabels,
   startY: number
 ): number {
   let y = drawSectionTitle(doc, labels.cartoucheTitle, startY);
@@ -195,9 +195,9 @@ export function drawCartoucheSection(
   y += LINE_HEIGHT;
   y += drawWrappingBulletItem(doc, labels.study, data.studyTitle || '-', leftX, y, wrapWidth);
   y += drawWrappingBulletItem(doc, labels.studyDescription, data.studyDescription || '-', leftX, y, wrapWidth);
-  drawBulletItem(doc, labels.canton, data.cantonName || '-', leftX, y);
+  drawBulletItem(doc, labels.section, data.sectionName || '-', leftX, y);
   y += LINE_HEIGHT;
-  y += drawWrappingBulletItem(doc, labels.cantonComment, data.cantonComment || '-', leftX, y, wrapWidth);
+  y += drawWrappingBulletItem(doc, labels.sectionComment, data.sectionComment || '-', leftX, y, wrapWidth);
   drawBulletItem(doc, labels.initialCondition, data.icName || '-', leftX, y);
   y += LINE_HEIGHT;
   drawBulletItem(doc, labels.chargeName, data.chargeName || '-', leftX, y);
@@ -209,19 +209,19 @@ export function drawCartoucheSection(
   return y + LINE_HEIGHT;
 }
 
-/** Draws the canton state section (page 1, portrait): max parameter + max stress rate. */
-export function drawCantonStateSection(
+/** Draws the section state section (page 1, portrait): max parameter + max stress rate. */
+export function drawSectionStateSection(
   doc: jsPDF,
-  data: CantonStateReportData,
-  labels: CantonReportLabels,
+  data: SectionStateReportData,
+  labels: SectionReportLabels,
   startY: number
 ): number {
-  let y = drawSectionTitle(doc, labels.cantonStateTitle, startY);
+  let y = drawSectionTitle(doc, labels.sectionStateTitle, startY);
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
 
-  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, UNITS.meters, 0), leftX, y, true);
-  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, UNITS.percent, 1), rightX, y, true);
+  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, UNITS.meters, 0), leftX, y, false);
+  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, UNITS.percent, 1), rightX, y, false);
   y += LINE_HEIGHT;
 
   return y;
@@ -267,7 +267,13 @@ export function computeLabelColWidth(doc: jsPDF, tables: PdfTableModel[]): numbe
 }
 
 /** Draws one transposed result table (metric rows × up to 5 value columns). Returns the next Y. */
-export function drawTable(doc: jsPDF, table: PdfTableModel, startY: number, pageWidth: number, labelColWidth: number): number {
+export function drawTable(
+  doc: jsPDF,
+  table: PdfTableModel,
+  startY: number,
+  pageWidth: number,
+  labelColWidth: number
+): number {
   const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
   const valueColWidth = (contentWidth - labelColWidth) / MAX_COLS_PER_TABLE;
   const numCols = table.rows[0]?.values.length ?? 0;

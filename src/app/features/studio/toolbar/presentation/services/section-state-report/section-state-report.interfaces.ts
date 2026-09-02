@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-/** One row of per-span computed results for the canton state report tables. */
+/** One row of per-span computed results for the section state report tables. */
 export interface SpanReportRow {
   /** Span label built from the two bounding support numbers (e.g. "42 - 43"). */
   spanNumber: string;
@@ -25,7 +25,7 @@ export interface SpanReportRow {
   utilizationRate: number | null;
 }
 
-/** One row of per-support computed results for the canton state report tables. */
+/** One row of per-support computed results for the section state report tables. */
 export interface SupportReportRow {
   /** Original support number (not truncated). */
   supportNumber: string;
@@ -45,8 +45,8 @@ export interface SupportReportRow {
   loadAngle: number | null;
 }
 
-/** Data required to generate the canton state PDF report. */
-export interface CantonStateReportData {
+/** Data required to generate the section state PDF report. */
+export interface SectionStateReportData {
   /** Study author email or name. */
   author: string;
   /** Report generation date (formatted string). */
@@ -55,10 +55,10 @@ export interface CantonStateReportData {
   studyTitle: string;
   /** Study description. */
   studyDescription: string;
-  /** Section (canton) name. */
-  cantonName: string;
-  /** Section (canton) comment. */
-  cantonComment: string;
+  /** Section name. */
+  sectionName: string;
+  /** Section comment. */
+  sectionComment: string;
   /** Selected initial condition name. */
   icName: string;
   /** Selected charge name. */
@@ -66,9 +66,9 @@ export interface CantonStateReportData {
   /** Selected charge description. */
   chargeDescription: string;
 
-  /** Maximum cable sag parameter over the selected canton (m). */
+  /** Maximum cable sag parameter over the selected section (m). */
   maxParameter: number | null;
-  /** Maximum utilization (stress) rate over the selected canton (%). */
+  /** Maximum utilization (stress) rate over the selected section (%). */
   maxStressRate: number | null;
 
   /** Per-span result rows for the selected span range. */
@@ -89,18 +89,18 @@ export interface PdfTableModel {
 }
 
 /** Translated PDF report labels, resolved at report-generation time via TranslocoService. */
-export interface CantonReportLabels {
+export interface SectionReportLabels {
   reportTitle: string;
   cartoucheTitle: string;
   author: string;
   study: string;
   studyDescription: string;
-  canton: string;
-  cantonComment: string;
+  section: string;
+  sectionComment: string;
   initialCondition: string;
   chargeName: string;
   chargeDescription: string;
-  cantonStateTitle: string;
+  sectionStateTitle: string;
   maxParameter: string;
   maxStressRate: string;
   spansTitle: string;

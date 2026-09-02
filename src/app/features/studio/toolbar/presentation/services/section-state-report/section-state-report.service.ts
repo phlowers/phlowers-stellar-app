@@ -15,33 +15,33 @@ import { PdfBaseService } from '@shared/pdf/pdf-base.service';
 import { PAGE_SIZE } from '@shared/pdf/pdf-layout.constantes';
 import { drawFooter, drawHeader } from '@shared/pdf/pdf-primitives.helpers';
 
-import { LANDSCAPE_PAGE, PDF_LABEL_KEYS, SPAN_METRICS, SUPPORT_METRICS } from './canton-state-report.constantes';
+import { LANDSCAPE_PAGE, PDF_LABEL_KEYS, SPAN_METRICS, SUPPORT_METRICS } from './section-state-report.constantes';
 import {
   buildTables,
   computeLabelColWidth,
-  drawCantonStateSection,
   drawCartoucheSection,
-  drawResultTablesSection
-} from './canton-state-report.helpers';
-import { CantonReportLabels, CantonStateReportData } from './canton-state-report.interfaces';
+  drawResultTablesSection,
+  drawSectionStateSection
+} from './section-state-report.helpers';
+import { SectionReportLabels, SectionStateReportData } from './section-state-report.interfaces';
 
-/** Service responsible for generating the canton state PDF report. */
+/** Service responsible for generating the section state PDF report. */
 @Injectable({ providedIn: 'root' })
-export class CantonStateReportService extends PdfBaseService {
+export class SectionStateReportService extends PdfBaseService {
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
 
   /** Resolves all fixed PDF report labels via TranslocoService at report-generation time. */
-  private buildLabels(): CantonReportLabels {
-    const entries = Object.entries(PDF_LABEL_KEYS) as [keyof CantonReportLabels, string][];
+  private buildLabels(): SectionReportLabels {
+    const entries = Object.entries(PDF_LABEL_KEYS) as [keyof SectionReportLabels, string][];
     return entries.reduce((labels, [field, key]) => {
       labels[field] = this.translocoService.translate(key);
       return labels;
-    }, {} as CantonReportLabels);
+    }, {} as SectionReportLabels);
   }
 
   /** Draws a footer on every page, using portrait dimensions for page 1 and landscape for the rest. */
-  private addPageFooters(doc: jsPDF, labels: CantonReportLabels): void {
+  private addPageFooters(doc: jsPDF, labels: SectionReportLabels): void {
     const totalPages = doc.getNumberOfPages();
     for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
       doc.setPage(pageNumber);
@@ -57,17 +57,17 @@ export class CantonStateReportService extends PdfBaseService {
     return value.replace(/[/\\:*?"<>|]/g, '-');
   }
 
-  /** Generates and downloads the canton state PDF report. */
-  async generateReport(data: CantonStateReportData): Promise<void> {
+  /** Generates and downloads the section state PDF report. */
+  async generateReport(data: SectionStateReportData): Promise<void> {
     try {
       const doc = await this.createDoc();
       const labels = this.buildLabels();
       const translate = (key: string): string => this.translocoService.translate(key);
 
-      // Page 1 — portrait: header, cartouche, canton state
+      // Page 1 — portrait: header, cartouche, section state
       let y = drawHeader(doc, data.date || '-', labels.reportTitle);
       y = drawCartoucheSection(doc, data, labels, y);
-      drawCantonStateSection(doc, data, labels, y);
+      drawSectionStateSection(doc, data, labels, y);
 
       // Following pages — landscape: span then support result tables, sharing one label column width
       const spanTables = buildTables(data.spans, SPAN_METRICS, translate);
@@ -86,18 +86,18 @@ export class CantonStateReportService extends PdfBaseService {
 
       this.addPageFooters(doc, labels);
 
-      const filename = `Rapport Etat de canton_${this.sanitize(data.cantonName)}_${this.sanitize(
+      const filename = `${this.sanitize(labels.reportTitle)}_${this.sanitize(data.sectionName)}_${this.sanitize(
         data.chargeName
       )}_${this.sanitize(data.date)}.pdf`;
       doc.save(filename);
 
       this.notificationService.success(
-        this.translocoService.translate('studio.canton-state-report.report-generated-success')
+        this.translocoService.translate('studio.section-state-report.report-generated-success')
       );
     } catch (error) {
-      this.logger.error('Failed to generate canton state report', error);
+      this.logger.error('Failed to generate section state report', error);
       this.notificationService.error(
-        this.translocoService.translate('studio.canton-state-report.report-generation-failed')
+        this.translocoService.translate('studio.section-state-report.report-generation-failed')
       );
     }
   }

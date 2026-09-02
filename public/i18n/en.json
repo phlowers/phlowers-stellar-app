@@ -760,7 +760,7 @@
       "staff-absent": "Staff is absent",
       "save-state": "Save state",
       "generate-report": "Report",
-      "generate-report-aria-label": "Generate the canton state report"
+      "generate-report-aria-label": "Generate the section state report"
     },
     "side-tabs": {
       "fold-back": "Fold back"
@@ -1014,19 +1014,19 @@
       "report-generated-success": "Report generated successfully",
       "report-generation-failed": "Failed to generate report"
     },
-    "canton-state-report": {
-      "title": "Canton state report",
-      "cartouche-title": "Study and canton",
+    "section-state-report": {
+      "title": "Section state report",
+      "cartouche-title": "Study and section",
       "author-label": "Author",
       "study-label": "Study",
       "description-label": "Description",
-      "canton-label": "Canton",
+      "section-label": "Section",
       "comment-label": "Comment",
       "initial-condition-label": "Initial condition",
       "charge-name-label": "Load case",
       "charge-description-label": "Load case description",
-      "canton-state-title": "Canton state",
-      "max-parameter-label": "Max. canton parameter",
+      "section-state-title": "Section state",
+      "max-parameter-label": "Max. section parameter",
       "max-stress-rate-label": "Max. stress rate",
       "spans-title": "Span calculation results",
       "supports-title": "Support calculation results",

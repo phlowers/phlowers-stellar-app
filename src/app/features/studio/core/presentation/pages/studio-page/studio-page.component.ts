@@ -61,13 +61,13 @@ import { StudioViewPersistenceService } from '@services/plot/studio-view-persist
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Section, Study } from '@shared/domain';
 import { NotificationService } from '@core/services/notification/notification.service';
-import { CantonStateReportService } from '@features/studio/toolbar/presentation/services/canton-state-report/canton-state-report.service';
+import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 import {
   buildSpanRows,
   buildSupportRows,
   maxOf
-} from '@features/studio/toolbar/presentation/services/canton-state-report/canton-state-report.helpers';
-import { CantonStateReportData } from '@features/studio/toolbar/presentation/services/canton-state-report/canton-state-report.interfaces';
+} from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
+import { SectionStateReportData } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.interfaces';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -235,7 +235,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly persistenceService = inject(StudioViewPersistenceService);
   private readonly notificationService = inject(NotificationService);
-  private readonly cantonStateReportService = inject(CantonStateReportService);
+  private readonly sectionStateReportService = inject(SectionStateReportService);
 
   previousSectionUuid = signal<string | null>(null);
   private readonly activeSectionUuid = signal<string | null>(null);
@@ -464,14 +464,14 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.isNewChargeModalOpen.set(true);
   }
 
-  /** Builds the canton state report data from the current state and triggers PDF generation. */
+  /** Builds the section state report data from the current state and triggers PDF generation. */
   async onGenerateReport(): Promise<void> {
     const study = this.plotService.study();
     const section = this.spanService.section();
     const litData = this.plotService.litData();
 
     if (!section || !litData) {
-      this.notificationService.warning(this.translocoService.translate('studio.canton-state-report.warning-no-data'));
+      this.notificationService.warning(this.translocoService.translate('studio.section-state-report.warning-no-data'));
       return;
     }
 
@@ -484,13 +484,13 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     );
     const charge = section.charges.find((c) => c.uuid === section.selected_charge_uuid);
 
-    const data: CantonStateReportData = {
+    const data: SectionStateReportData = {
       author: study?.author_email ?? '-',
-      date: new Date().toLocaleDateString('fr-FR'),
+      date: new Date().toLocaleDateString(this.getLocaleForDate()),
       studyTitle: study?.title ?? '-',
       studyDescription: study?.description ?? '',
-      cantonName: section.name ?? '-',
-      cantonComment: section.comment ?? '',
+      sectionName: section.name ?? '-',
+      sectionComment: section.comment ?? '',
       icName: initialCondition?.name ?? '-',
       chargeName: charge?.name ?? '-',
       chargeDescription: charge?.description ?? '',
@@ -500,7 +500,12 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       supports: buildSupportRows(params, supports, startSupport, endSupport)
     };
 
-    await this.cantonStateReportService.generateReport(data);
+    await this.sectionStateReportService.generateReport(data);
+  }
+
+  private getLocaleForDate(): string {
+    const activeLang = this.translocoService.getActiveLang();
+    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   onSelectSpanAmount(value: string) {

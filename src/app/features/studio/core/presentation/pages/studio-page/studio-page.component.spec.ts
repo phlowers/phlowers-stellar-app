@@ -30,7 +30,7 @@ import { Camera } from 'plotly.js-dist-min';
 import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { NotificationService } from '@core/services/notification/notification.service';
-import { CantonStateReportService } from '@features/studio/toolbar/presentation/services/canton-state-report/canton-state-report.service';
+import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 interface SignalFn<T> {
@@ -109,7 +109,7 @@ describe('StudioPageComponent', () => {
   let obstacleFormService: vi.Mocked<ObstacleFormService>;
   let mockObstacleStateService: { distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> };
   let mockNotificationService: { warning: ReturnType<typeof vi.fn> };
-  let mockCantonStateReportService: { generateReport: ReturnType<typeof vi.fn> };
+  let mockSectionStateReportService: { generateReport: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
@@ -141,7 +141,7 @@ describe('StudioPageComponent', () => {
     } as unknown as vi.Mocked<ObstacleFormService>;
     mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
     mockNotificationService = { warning: vi.fn() };
-    mockCantonStateReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
+    mockSectionStateReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -206,7 +206,7 @@ describe('StudioPageComponent', () => {
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
         { provide: StudioViewPersistenceService, useValue: mockPersistenceService },
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: CantonStateReportService, useValue: mockCantonStateReportService },
+        { provide: SectionStateReportService, useValue: mockSectionStateReportService },
         provideHttpClient(),
         provideHttpClientTesting(),
         {
@@ -1357,13 +1357,13 @@ describe('StudioPageComponent', () => {
       await component.onGenerateReport();
 
       expect(mockNotificationService.warning).toHaveBeenCalled();
-      expect(mockCantonStateReportService.generateReport).not.toHaveBeenCalled();
+      expect(mockSectionStateReportService.generateReport).not.toHaveBeenCalled();
     });
 
     it('should build the report data and delegate to the report service', async () => {
       plotOptionsServiceMock.plotOptions.mockReturnValue({ startSupport: 0, endSupport: 1 });
       spanService.section.set({
-        name: 'Canton A',
+        name: 'Section A',
         comment: 'A comment',
         supports: [{ number: '1' }, { number: '2' }],
         initial_conditions: [{ uuid: 'ic-1', name: 'IC 1' }],
@@ -1376,9 +1376,9 @@ describe('StudioPageComponent', () => {
       await component.onGenerateReport();
 
       expect(mockNotificationService.warning).not.toHaveBeenCalled();
-      expect(mockCantonStateReportService.generateReport).toHaveBeenCalledTimes(1);
-      const data = mockCantonStateReportService.generateReport.mock.calls[0][0];
-      expect(data.cantonName).toBe('Canton A');
+      expect(mockSectionStateReportService.generateReport).toHaveBeenCalledTimes(1);
+      const data = mockSectionStateReportService.generateReport.mock.calls[0][0];
+      expect(data.sectionName).toBe('Section A');
       expect(data.chargeName).toBe('Charge 1');
       expect(data.icName).toBe('IC 1');
       expect(data.maxParameter).toBe(20);

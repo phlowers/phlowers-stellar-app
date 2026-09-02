@@ -12,13 +12,14 @@ import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 
-import { CantonStateReportService } from './canton-state-report.service';
-import { CantonStateReportData, SpanReportRow, SupportReportRow } from './canton-state-report.interfaces';
+import { SectionStateReportService } from './section-state-report.service';
+import { SectionStateReportData, SpanReportRow, SupportReportRow } from './section-state-report.interfaces';
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
-  'studio.canton-state-report.page-label': 'Page',
-  'studio.canton-state-report.report-generated-success': 'Report generated successfully',
-  'studio.canton-state-report.report-generation-failed': 'Failed to generate report'
+  'studio.section-state-report.title': 'Rapport État de canton',
+  'studio.section-state-report.page-label': 'Page',
+  'studio.section-state-report.report-generated-success': 'Report generated successfully',
+  'studio.section-state-report.report-generation-failed': 'Failed to generate report'
 };
 
 vi.mock('jspdf', () => {
@@ -89,14 +90,14 @@ function createSupportRow(index: number): SupportReportRow {
   };
 }
 
-function createMockReportData(): CantonStateReportData {
+function createMockReportData(): SectionStateReportData {
   return {
     author: 'test@example.com',
     date: '2026-05-20',
     studyTitle: 'Test Study',
     studyDescription: 'Description',
-    cantonName: 'Section A',
-    cantonComment: 'Comment',
+    sectionName: 'Section A',
+    sectionComment: 'Comment',
     icName: 'IC 1',
     chargeName: 'Charge 1',
     chargeDescription: 'Charge desc',
@@ -107,8 +108,8 @@ function createMockReportData(): CantonStateReportData {
   };
 }
 
-describe('CantonStateReportService', () => {
-  let service: CantonStateReportService;
+describe('SectionStateReportService', () => {
+  let service: SectionStateReportService;
   let mockLogger: { error: ReturnType<typeof vi.fn>; log: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let mockTranslocoService: { translate: ReturnType<typeof vi.fn> };
@@ -122,14 +123,14 @@ describe('CantonStateReportService', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        CantonStateReportService,
+        SectionStateReportService,
         { provide: LoggerService, useValue: mockLogger },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: TranslocoService, useValue: mockTranslocoService }
       ]
     });
 
-    service = TestBed.inject(CantonStateReportService);
+    service = TestBed.inject(SectionStateReportService);
   });
 
   afterEach(() => {
@@ -184,12 +185,12 @@ describe('CantonStateReportService', () => {
       });
     });
 
-    it('should name the file with canton, charge and date', async () => {
+    it('should name the file with section, charge and date', async () => {
       const data = createMockReportData();
       await service.generateReport(data);
 
       const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { save: ReturnType<typeof vi.fn> } };
-      expect(__mockDoc.save).toHaveBeenCalledWith('Rapport Etat de canton_Section A_Charge 1_2026-05-20.pdf');
+      expect(__mockDoc.save).toHaveBeenCalledWith('Rapport État de canton_Section A_Charge 1_2026-05-20.pdf');
     });
 
     it('should sanitize illegal filename characters (slashes in localized date)', async () => {
@@ -197,7 +198,7 @@ describe('CantonStateReportService', () => {
       await service.generateReport(data);
 
       const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { save: ReturnType<typeof vi.fn> } };
-      expect(__mockDoc.save).toHaveBeenCalledWith('Rapport Etat de canton_Section A_Charge 1_20-05-2026.pdf');
+      expect(__mockDoc.save).toHaveBeenCalledWith('Rapport État de canton_Section A_Charge 1_20-05-2026.pdf');
     });
 
     it('should log and notify error when PDF generation fails', async () => {

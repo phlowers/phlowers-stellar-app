@@ -1014,18 +1014,18 @@
       "report-generated-success": "Rapport généré avec succès",
       "report-generation-failed": "Échec de la génération du rapport"
     },
-    "canton-state-report": {
-      "title": "Rapport Etat de canton",
+    "section-state-report": {
+      "title": "Rapport État de canton",
       "cartouche-title": "Étude et canton",
       "author-label": "Auteur",
       "study-label": "Étude",
       "description-label": "Description",
-      "canton-label": "Canton",
+      "section-label": "Canton",
       "comment-label": "Commentaire",
       "initial-condition-label": "Condition initiale",
       "charge-name-label": "Cas de charge",
       "charge-description-label": "Description du cas de charge",
-      "canton-state-title": "Etat du canton",
+      "section-state-title": "État du canton",
       "max-parameter-label": "Paramètre max. canton",
       "max-stress-rate-label": "Taux de travail max.",
       "spans-title": "Résultats des calculs sur les portées",

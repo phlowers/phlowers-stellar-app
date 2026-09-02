@@ -40,7 +40,7 @@ export class StudioMenuBarComponent {
   study = input.required<Study | null>();
   /** Emits when the user requests to open the new charge modal. */
   openNewChargeModal = output<void>();
-  /** Emits when the user requests to generate the canton state report. */
+  /** Emits when the user requests to generate the section state report. */
   generateReport = output<void>();
   charges = computed(
     () =>

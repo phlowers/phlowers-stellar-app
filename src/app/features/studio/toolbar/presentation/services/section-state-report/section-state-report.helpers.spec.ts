@@ -11,7 +11,7 @@ import type jsPDF from 'jspdf';
 import { Support } from '@shared/domain';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 
-import { SPAN_METRICS, SUPPORT_METRICS } from './canton-state-report.constantes';
+import { SPAN_METRICS, SUPPORT_METRICS } from './section-state-report.constantes';
 import {
   buildSpanRows,
   buildSupportRows,
@@ -22,8 +22,8 @@ import {
   drawTable,
   formatCell,
   maxOf
-} from './canton-state-report.helpers';
-import { PdfTableModel, SpanReportRow } from './canton-state-report.interfaces';
+} from './section-state-report.helpers';
+import { PdfTableModel, SpanReportRow } from './section-state-report.interfaces';
 
 function createMockDoc() {
   return {
@@ -76,7 +76,7 @@ function createMockParams(): SectionOutputParameters {
     r_under_console: [130, 230, 330, 430],
     displacement: [
       [1.0, 0.12, 0.41, 0.65],
-      [-0.47, -0.56, -0.08, -1.60],
+      [-0.47, -0.56, -0.08, -1.6],
       [-0.11, -1.25, -1.31, -1.21]
     ],
     ground_altitude: [500, 501, 502, 503],
@@ -84,7 +84,7 @@ function createMockParams(): SectionOutputParameters {
   } as unknown as SectionOutputParameters;
 }
 
-describe('canton-state-report.helpers', () => {
+describe('section-state-report.helpers', () => {
   describe('maxOf', () => {
     it('should return the maximum value of the array', () => {
       expect(maxOf([1, 9, 3])).toBe(9);
@@ -199,7 +199,7 @@ describe('canton-state-report.helpers', () => {
       expect(rows[3].lConsole).toBe(420);
       expect(rows[3].rConsole).toBe(430);
       expect(rows[3].displacementX).toBe(0.65);
-      expect(rows[3].displacementY).toBe(-1.60);
+      expect(rows[3].displacementY).toBe(-1.6);
       expect(rows[3].displacementZ).toBe(-1.21);
     });
   });
@@ -233,7 +233,12 @@ describe('canton-state-report.helpers', () => {
       doc.getTextWidth = vi.fn().mockReturnValueOnce(10).mockReturnValueOnce(40).mockReturnValueOnce(15);
       const tables: PdfTableModel[] = [
         { rows: [{ label: 'Short', values: ['1'] }] },
-        { rows: [{ label: 'Angle balancement', values: ['2'] }, { label: 'Also short', values: ['3'] }] }
+        {
+          rows: [
+            { label: 'Angle balancement', values: ['2'] },
+            { label: 'Also short', values: ['3'] }
+          ]
+        }
       ];
 
       const width = computeLabelColWidth(doc as unknown as jsPDF, tables);

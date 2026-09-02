@@ -67,11 +67,7 @@ export function registerNunitoFont(doc: jsPDF, regularB64: string, boldB64: stri
 }
 
 /** Formats a numeric value to fixed decimals with unit, or returns "-" if null/undefined. */
-export function formatValue(
-  value: number | null | undefined,
-  unit: string,
-  decimals: number = DECIMAL_PLACES
-): string {
+export function formatValue(value: number | null | undefined, unit: string, decimals: number = DECIMAL_PLACES): string {
   if (value === null || value === undefined) {
     return '-';
   }
