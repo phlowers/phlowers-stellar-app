@@ -77,6 +77,26 @@ export function computeFloorClearance(floorPoints: number[][], cablePoints: numb
 }
 
 /**
+ * Re-expresses `[x, y, z]` polylines along one span's axis: the returned x is the distance from
+ * `origin` measured towards `target` — the feet of the span's reference and closing supports — and
+ * the lateral component is dropped, since only the profile is drawn.
+ *
+ * The engine frames its output on the current view (absolute section coordinates in 3D, the viewed
+ * range's middle span in 2D), while floor points are distances to the reference support. Projecting
+ * on that axis puts both in the same frame, and reverses it for a floor referenced from the right.
+ */
+export function projectOnSpanAxis(polylines: number[][][], origin: number[], target: number[]): number[][][] {
+  const [dx, dy] = [target[0] - origin[0], target[1] - origin[1]];
+  const spanLength = Math.hypot(dx, dy);
+  if (spanLength === 0) {
+    return polylines;
+  }
+  return polylines.map((points) =>
+    toProfile(points, origin, dx / spanLength, dy / spanLength).map(({ t, z }) => [t, 0, z])
+  );
+}
+
+/**
  * Maps a `Floor` to an `Obstacle`-shaped object so it can be registered through the existing
  * obstacle tasks (`addSingleObstacle`/`deleteObstacle`/`refreshProjection`) and reuse their
  * per-point vertical-distance-to-cable calculation, instead of duplicating it for floors.

@@ -479,4 +479,52 @@ describe('FloorFormService', () => {
       expect(obstaclesServiceMock.activePointIndex()).toBe(0);
     });
   });
+
+  describe('rollback on failure', () => {
+    const failPersistence = () => {
+      const sectionService = TestBed.inject(SectionService) as unknown as {
+        createOrUpdateSection: ReturnType<typeof vi.fn>;
+      };
+      sectionService.createOrUpdateSection.mockRejectedValue(new Error('persistence down'));
+      return TestBed.inject(ObstacleStateService) as unknown as {
+        addSingleObstacle: ReturnType<typeof vi.fn>;
+      };
+    };
+
+    it('should keep the previously saved floor when the save fails', async () => {
+      openSavedFloor();
+      const obstacleState = failPersistence();
+      service.points.at(0).controls.altitude.setValue(99);
+
+      await service.calculateAndSave();
+
+      // A section already holding the new floor would report an unsaved floor as saved.
+      expect(sectionSignal()?.floors).toEqual([floor]);
+      // The worker keeps the floor the failed save registered: re-register the previous one over it.
+      expect(obstacleState.addSingleObstacle).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          uuid: 'floor-1',
+          positions: [
+            { x: 0, y: 0, z: 10 },
+            { x: 30, y: 0, z: 20 },
+            { x: 100, y: 0, z: 12 }
+          ]
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should keep the floor when the erase fails', async () => {
+      openSavedFloor();
+      const obstacleState = failPersistence();
+
+      await service.eraseFloor();
+
+      expect(sectionSignal()?.floors).toEqual([floor]);
+      expect(obstacleState.addSingleObstacle).toHaveBeenCalledWith(
+        expect.objectContaining({ uuid: 'floor-1' }),
+        expect.anything()
+      );
+    });
+  });
 });

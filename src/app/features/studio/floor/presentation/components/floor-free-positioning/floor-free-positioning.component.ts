@@ -8,6 +8,7 @@ import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, signal, 
 import { toSignal } from '@angular/core/rxjs-interop';
 import Plotly, { PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
+import { projectOnSpanAxis } from '@shared/domain/floor/floor-form.helpers';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { Support } from '@shared/domain';
 import { PlotService } from '@services/plot/plot.service';
@@ -67,13 +68,15 @@ export class FloorFreePositioningComponent implements OnDestroy {
     initialValue: this.floorFormService.points.value
   });
 
-  /** Recreates the plot whenever the worker output, plot options, or lit data change. */
+  /** Recreates the plot whenever the worker output, lit data, or the span/side being edited change. */
   private readonly recreatePlotEffect = effect(() => {
-    const plotOptions = this.plotOptionsService.plotOptions();
     const workerReady = this.plotService.workerReady();
     const litData = this.plotService.litData();
+    // The plot draws the span the form edits, from its reference support: both frame its geometry.
+    this.floorFormService.spanValue();
+    this.floorFormService.referenceSupportValue();
 
-    if (workerReady && litData && plotOptions) {
+    if (workerReady && litData) {
       untracked(() => this.recreatePlot());
     }
   });
@@ -99,7 +102,9 @@ export class FloorFreePositioningComponent implements OnDestroy {
 
   recreatePlot = debounce(async () => {
     this.destroyPlot();
-    const startSupport = this.plotOptionsService.plotOptions().startSupport;
+    // The span being edited, not the plot options' range: the form drives this plot, and the studio
+    // view may well sit on another span (or on the whole section).
+    const spanIndex = this.spanService.getSupportIndex(this.floorFormService.spanValue() ?? '');
     this.isLoading.set(true);
 
     const currentLitData = this.plotService.litData();
@@ -109,7 +114,7 @@ export class FloorFreePositioningComponent implements OnDestroy {
     }
 
     const supports = this.spanService.section()?.supports ?? [];
-    await this.createPlot(currentLitData, startSupport, supports);
+    await this.createPlot(currentLitData, spanIndex, supports);
     this.isLoading.set(false);
   }, DEBOUNCED_REFRESH_STUDIO_DELAY);
 
@@ -241,10 +246,41 @@ export class FloorFreePositioningComponent implements OnDestroy {
     };
   }
 
+  /**
+   * Re-expresses the engine's coordinates as distances to the floor's reference support, so the
+   * drawn span shares the frame the form's points, its annotations and the clicks it saves use.
+   * `null` when the span's supports aren't in the output (nothing plottable then).
+   */
+  private toReferenceSupportFrame(litData: GetSectionOutput, spanIndex: number): GetSectionOutput | null {
+    const { coords } = litData;
+    const fromRight = this.floorFormService.referenceSupportValue() === 'RIGHT';
+    // Support feet: the first point of a support polyline, the only one on the support axis (the
+    // ones above it carry the crossarm's lateral offset).
+    const origin = coords?.supports?.[fromRight ? spanIndex + 1 : spanIndex]?.[0];
+    const target = coords?.supports?.[fromRight ? spanIndex : spanIndex + 1]?.[0];
+    if (!origin || !target) {
+      return null;
+    }
+    return {
+      ...litData,
+      coords: {
+        ...coords,
+        spans: projectOnSpanAxis(coords.spans, origin, target),
+        supports: projectOnSpanAxis(coords.supports, origin, target),
+        insulators: projectOnSpanAxis(coords.insulators, origin, target)
+      }
+    };
+  }
+
   async createPlot(litData: GetSectionOutput, selectedSpan: number, supports: Support[]): Promise<void> {
     try {
+      const framedLitData = this.toReferenceSupportFrame(litData, selectedSpan);
+      if (!framedLitData) {
+        return;
+      }
+
       const plotData = createPlotData(
-        litData,
+        framedLitData,
         {
           view: '2d',
           side: 'profile',

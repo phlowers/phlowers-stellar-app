@@ -498,21 +498,25 @@ export class FloorFormService {
     }
 
     this.isCalculating.set(true);
+    const previousFloor = this.savedFloor();
+    const floor = this.buildFloorFromForm();
     try {
-      const floor = this.buildFloorFromForm();
       const updatedFloors = [...(section.floors ?? []).filter((f) => f.uuid !== floor.uuid), floor];
       const updatedSection = { ...section, floors: updatedFloors };
-      this.spanService.section.set(updatedSection);
 
       const obstacle = mapFloorToObstacle(floor, this.spanService.getSupportIndex(floor.supportUuid));
       await this.obstacleStateService.addSingleObstacle(obstacle, this.plotOptionsService.plotOptions());
 
       await this.sectionService.createOrUpdateSection(study, updatedSection);
+      // Publish the section only once the worker and IndexedDB both hold the floor: `savedFloor()`
+      // drives the "saved" UI state, which must not outlive a failed save.
+      this.spanService.section.set(updatedSection);
       await this.plotService.refreshProjection();
 
       this.notificationService.success(this.translocoService.translate('shared.floor-form-service.save-detail'));
     } catch (error) {
       this.logger.warn('Failed to save floor', error);
+      await this.restoreWorkerFloor(previousFloor, floor.uuid);
       this.notificationService.error(this.translocoService.translate('shared.floor-form-service.save-error-detail'));
     } finally {
       this.isCalculating.set(false);
@@ -530,8 +534,8 @@ export class FloorFormService {
     const updatedSection = { ...section, floors: (section.floors ?? []).filter((f) => f.uuid !== floor.uuid) };
     try {
       await this.obstacleStateService.deleteObstacle(floor.uuid, this.plotOptionsService.plotOptions());
-      this.spanService.section.set(updatedSection);
       await this.sectionService.createOrUpdateSection(study, updatedSection);
+      this.spanService.section.set(updatedSection);
       await this.plotService.refreshProjection();
       // Drop the shared quick-measures selection when it points at the floor just deleted: it would
       // otherwise keep a dangling uuid, no longer read as a floor but still truthy enough to leave
@@ -543,7 +547,26 @@ export class FloorFormService {
       this.notificationService.success(this.translocoService.translate('shared.floor-form-service.delete-detail'));
     } catch (error) {
       this.logger.warn('Failed to delete floor', error);
+      await this.restoreWorkerFloor(floor, floor.uuid);
       this.notificationService.error(this.translocoService.translate('shared.floor-form-service.delete-error-detail'));
+    }
+  }
+
+  // The worker keeps whatever a failed save or erase already registered, while the section stays on
+  // its previous state: put the previously saved floor back (same uuid, so it overwrites), or drop
+  // the one just registered when there was none, so distances match the section again.
+  private async restoreWorkerFloor(previousFloor: Floor | undefined, uuid: string): Promise<void> {
+    const plotOptions = this.plotOptionsService.plotOptions();
+    try {
+      if (previousFloor) {
+        const obstacle = mapFloorToObstacle(previousFloor, this.spanService.getSupportIndex(previousFloor.supportUuid));
+        await this.obstacleStateService.addSingleObstacle(obstacle, plotOptions);
+      } else {
+        await this.obstacleStateService.deleteObstacle(uuid, plotOptions);
+      }
+      await this.plotService.refreshProjection();
+    } catch (error) {
+      this.logger.warn('Failed to restore floor worker state after rollback', error);
     }
   }
 }

@@ -282,6 +282,17 @@ describe('PlotOptionsService', () => {
       expect(service.freePositioningSource()).toBe('floor');
     });
 
+    it('should keep the mode a new source just took over when the previous one is destroyed', () => {
+      service.setFreePositioningMode(true, 'floor');
+      service.setFreePositioningMode(true, 'obstacle');
+
+      // The floor plot component is destroyed by the handover: its ngOnDestroy safety net fires last.
+      service.setFreePositioningMode(false, 'floor');
+
+      expect(service.isFreePositioningMode()).toBe(true);
+      expect(service.freePositioningSource()).toBe('obstacle');
+    });
+
     it('should clear the source on reset', () => {
       service.setFreePositioningMode(true, 'floor');
 

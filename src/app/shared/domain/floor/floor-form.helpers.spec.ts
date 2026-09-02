@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { computeFloorClearance, mapFloorToObstacle } from './floor-form.helpers';
+import { computeFloorClearance, mapFloorToObstacle, projectOnSpanAxis } from './floor-form.helpers';
 import { FLOOR_OBSTACLE_TYPE } from './floor-form.constantes';
 import { LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { Floor } from '@shared/domain/models/floor.model';
@@ -57,6 +57,60 @@ describe('mapFloorToObstacle', () => {
     const partial: Floor = { ...floor, points: [{ distanceToRefSupport: null, altitude: null }] };
 
     expect(mapFloorToObstacle(partial, 0).positions).toEqual([{ x: null, y: 0, z: null }]);
+  });
+});
+
+describe('projectOnSpanAxis', () => {
+  // Second span of a section, as the engine frames it in 3D: absolute coordinates, 500 m in.
+  const spanFrom500 = [
+    [
+      [500, 0, 40],
+      [700, 0, 20],
+      [900, 0, 40]
+    ]
+  ];
+
+  it('should express the points as distances to the reference support', () => {
+    expect(projectOnSpanAxis(spanFrom500, [500, 0, 0], [900, 0, 0])).toEqual([
+      [
+        [0, 0, 40],
+        [200, 0, 20],
+        [400, 0, 40]
+      ]
+    ]);
+  });
+
+  it('should reverse the axis when the reference support is the right one', () => {
+    expect(projectOnSpanAxis(spanFrom500, [900, 0, 0], [500, 0, 0])).toEqual([
+      [
+        [400, 0, 40],
+        [200, 0, 20],
+        [0, 0, 40]
+      ]
+    ]);
+  });
+
+  it('should measure along the span axis on a section that changes direction', () => {
+    // Same span rotated 90°: the distances to the reference support are unchanged.
+    const rotated = [
+      [
+        [100, 500, 40],
+        [100, 700, 20],
+        [100, 900, 40]
+      ]
+    ];
+
+    expect(projectOnSpanAxis(rotated, [100, 500, 0], [100, 900, 0])).toEqual([
+      [
+        [0, 0, 40],
+        [200, 0, 20],
+        [400, 0, 40]
+      ]
+    ]);
+  });
+
+  it('should leave the points untouched when both supports sit on the same axis', () => {
+    expect(projectOnSpanAxis(spanFrom500, [500, 0, 0], [500, 0, 0])).toBe(spanFrom500);
   });
 });
 

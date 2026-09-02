@@ -51,6 +51,39 @@ const makePlotElement = (): PlotElement & { _fullLayout: PlotLayout } =>
 
 const clickAt = (x: number, y: number) => ({ layerX: x, layerY: y }) as unknown as MouseEvent;
 
+/** Engine output as the 3D view frames it: absolute section coordinates, the second span 500 m in. */
+const litDataFixture = () =>
+  ({
+    coords: {
+      spans: [
+        [
+          [0, 0, 40],
+          [500, 0, 40]
+        ],
+        [
+          [500, 0, 40],
+          [700, 0, 20],
+          [900, 0, 40]
+        ]
+      ],
+      supports: [
+        [
+          [0, 0, 20],
+          [0, 0, 40]
+        ],
+        [
+          [500, 0, 20],
+          [500, 0, 40]
+        ],
+        [
+          [900, 0, 20],
+          [900, 0, 40]
+        ]
+      ],
+      insulators: [[], [], []]
+    }
+  }) as unknown as Parameters<FloorFreePositioningComponent['createPlot']>[0];
+
 describe('FloorFreePositioningComponent', () => {
   let component: FloorFreePositioningComponent;
   let fixture: ComponentFixture<FloorFreePositioningComponent>;
@@ -61,6 +94,8 @@ describe('FloorFreePositioningComponent', () => {
   const mockFloorFormService = {
     points: null as unknown as FormArray<FloorPointFormGroup>,
     activePointIndex: null as unknown as ReturnType<typeof signal<number | null>>,
+    spanValue: signal<string | null>('s1'),
+    referenceSupportValue: signal<'LEFT' | 'RIGHT' | null>('LEFT'),
     pointsView: vi.fn(),
     setActivePoint: vi.fn(),
     setFreePointPosition: vi.fn()
@@ -94,6 +129,8 @@ describe('FloorFreePositioningComponent', () => {
 
     mockFloorFormService.points = points;
     mockFloorFormService.activePointIndex = activePointIndex;
+    mockFloorFormService.spanValue.set('s1');
+    mockFloorFormService.referenceSupportValue.set('LEFT');
     refreshPointsView();
 
     await TestBed.configureTestingModule({
@@ -116,7 +153,10 @@ describe('FloorFreePositioningComponent', () => {
             loading: signal(false)
           }
         },
-        { provide: PlotSpanService, useValue: { section: signal({ supports: [] }) } },
+        {
+          provide: PlotSpanService,
+          useValue: { section: signal({ supports: [] }), getSupportIndex: vi.fn(() => 1) }
+        },
         { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: FloorFormService, useValue: mockFloorFormService },
         { provide: SideTabsService, useValue: { sideTabs: signal<number | null>(null) } },
@@ -265,17 +305,46 @@ describe('FloorFreePositioningComponent', () => {
     });
   });
 
+  describe('createPlot — reference support frame', () => {
+    /** Span x coordinates handed to Plotly for the edited span. */
+    const plottedSpanX = () => {
+      const [framedLitData] = mockCreatePlotData.mock.calls[0];
+      return framedLitData.coords.spans[1].map((point) => point[0]);
+    };
+
+    it('should draw the edited span as distances to its reference support', async () => {
+      await component.createPlot(litDataFixture(), 1, []);
+
+      // Without the transform these would be the engine's absolute 500..900.
+      expect(plottedSpanX()).toEqual([0, 200, 400]);
+    });
+
+    it('should reverse the axis for a floor referenced from the right support', async () => {
+      mockFloorFormService.referenceSupportValue.set('RIGHT');
+
+      await component.createPlot(litDataFixture(), 1, []);
+
+      expect(plottedSpanX()).toEqual([400, 200, 0]);
+    });
+
+    it('should skip the plot when the span supports are missing from the output', async () => {
+      await component.createPlot(litDataFixture(), 5, []);
+
+      expect(mockCreatePlotData).not.toHaveBeenCalled();
+    });
+  });
+
   describe('plot event listeners', () => {
     it('should not stack click handlers when the plot is recreated', async () => {
       const plotElement = document.createElement('div');
       plotElement.id = FLOOR_FREE_POSITIONING_PLOT_ID;
       document.body.appendChild(plotElement);
       mockCreatePlotData.mockReturnValue([{}] as unknown as ReturnType<typeof createPlotData>);
-      const litData = {} as Parameters<FloorFreePositioningComponent['createPlot']>[0];
+      const litData = litDataFixture();
 
-      await component.createPlot(litData, 0, []);
+      await component.createPlot(litData, 1, []);
       component['destroyPlot']();
-      await component.createPlot(litData, 0, []);
+      await component.createPlot(litData, 1, []);
 
       const handleClick = vi.spyOn(component as never, 'handleClick');
       plotElement.dispatchEvent(new MouseEvent('click'));

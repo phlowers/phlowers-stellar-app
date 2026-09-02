@@ -104,8 +104,16 @@ export class PlotOptionsService {
     this.aspectRatio.set(ratio);
   }
 
-  /** Turns free positioning mode on for the given feature, or off (source is cleared either way when disabling). */
+  /**
+   * Turns free positioning mode on for the given feature, or off (source is cleared either way when
+   * disabling). Only the feature currently owning the mode can turn it off: handing it over destroys
+   * the previous plot component, whose `ngOnDestroy` safety net would otherwise close the mode the
+   * new one just opened.
+   */
   setFreePositioningMode(enabled: boolean, source: 'obstacle' | 'floor'): void {
+    if (!enabled && untracked(() => this.freePositioningSource()) !== source) {
+      return;
+    }
     this.isFreePositioningMode.set(enabled);
     this.freePositioningSource.set(enabled ? source : null);
   }
