@@ -31,7 +31,12 @@ export interface CreateFloorTracesParams {
   selectedFloorUuid?: string | null;
   /** Index of the active point within the selected floor, or `null`. */
   selectedPointIndex?: number | null;
+  /** Builds the localized hover label of a point from its distance to the reference support. */
+  pointLabel: FloorPointLabel;
 }
+
+/** Formats a floor point's hover label — localized by the caller, so this helper holds no UI text. */
+export type FloorPointLabel = (distanceToRefSupport: number | null) => string;
 
 const FLOOR_COLOR = '#f6ab4d';
 /** Highlight color for the floor point currently active in the floor form. */
@@ -59,21 +64,20 @@ const mapCoord = (coord: Coord3, view: View, side: Side): { x: number; y: number
   };
 };
 
-const floorPointName = (floor: Floor, index: number): string => {
-  const dist = floor.points[index]?.distanceToRefSupport;
-  return dist == null ? 'point' : `point ${dist.toFixed(2)}`;
-};
+const floorPointName = (floor: Floor, index: number, pointLabel: FloorPointLabel): string =>
+  pointLabel(floor.points[index]?.distanceToRefSupport ?? null);
 
 const createFloorLineTrace = (
   points: Coord3[],
   floor: Floor,
   view: View,
   side: Side,
-  selectedPointIndex: number | null
+  selectedPointIndex: number | null,
+  pointLabel: FloorPointLabel
 ): DataObject => {
   const is3d = view === '3d';
   const mapped = points.map((point) => mapCoord(point, view, side));
-  const hovertext = points.map((_, index) => floorPointName(floor, index));
+  const hovertext = points.map((_, index) => floorPointName(floor, index, pointLabel));
   const baseSize = is3d ? FLOOR_MARKER_SIZE_3D : FLOOR_MARKER_SIZE_2D;
   const selectedSize = is3d ? FLOOR_SELECTED_MARKER_SIZE_3D : FLOOR_SELECTED_MARKER_SIZE_2D;
   const markerSize = points.map((_, index) => (index === selectedPointIndex ? selectedSize : baseSize));
@@ -103,7 +107,12 @@ const createFloorLineTrace = (
  * than the thin markers), so each vertex carries the same hovertext/customdata as its
  * source point — hovering or clicking the ribbon resolves to the nearest floor point.
  */
-const createFloorRibbonTrace = (points: Coord3[], floor: Floor, view: View): DataObject | null => {
+const createFloorRibbonTrace = (
+  points: Coord3[],
+  floor: Floor,
+  view: View,
+  pointLabel: FloorPointLabel
+): DataObject | null => {
   if (view !== '3d' || points.length < 2) {
     return null;
   }
@@ -129,7 +138,7 @@ const createFloorRibbonTrace = (points: Coord3[], floor: Floor, view: View): Dat
     xs.push(cx + offX, cx - offX);
     ys.push(cy + offY, cy - offY);
     zs.push(cz + FLOOR_RIBBON_Z_OFFSET, cz + FLOOR_RIBBON_Z_OFFSET);
-    hovertext.push(floorPointName(floor, index), floorPointName(floor, index));
+    hovertext.push(floorPointName(floor, index, pointLabel), floorPointName(floor, index, pointLabel));
     customdata.push([floor.uuid, index], [floor.uuid, index]);
   });
 
@@ -168,7 +177,7 @@ const createFloorRibbonTrace = (points: Coord3[], floor: Floor, view: View): Dat
 /**
  * Builds Plotly traces for every floor whose span is inside the visible support window.
  * Each floor renders as a `#f6ab4d` line linking its points (like a cable), with the point
- * name (`point {distance to ref support}`) shown only on hover, plus a 3D ribbon for depth.
+ * name built by `pointLabel` shown only on hover, plus a 3D ribbon for depth.
  * The point matching `selectedPointIndex` on the `selectedFloorUuid` floor is highlighted.
  */
 export const createFloorTraces = ({
@@ -180,7 +189,8 @@ export const createFloorTraces = ({
   view,
   side,
   selectedFloorUuid = null,
-  selectedPointIndex = null
+  selectedPointIndex = null,
+  pointLabel
 }: CreateFloorTracesParams): DataObject[] => {
   if (!floors?.length || !litData?.obstacles?.length) {
     return [];
@@ -200,8 +210,8 @@ export const createFloorTraces = ({
       continue;
     }
     const activePointIndex = floor.uuid === selectedFloorUuid ? selectedPointIndex : null;
-    traces.push(createFloorLineTrace(points, floor, view, side, activePointIndex));
-    const ribbon = createFloorRibbonTrace(points, floor, view);
+    traces.push(createFloorLineTrace(points, floor, view, side, activePointIndex, pointLabel));
+    const ribbon = createFloorRibbonTrace(points, floor, view, pointLabel);
     if (ribbon) {
       traces.push(ribbon);
     }

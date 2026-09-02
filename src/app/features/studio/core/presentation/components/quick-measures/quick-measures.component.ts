@@ -137,7 +137,10 @@ export class QuickMeasuresComponent {
    * Vertical clearance for the selected floor point, signed: negative when the cable dips below the
    * floor. Obstacles keep the non-negative `results().vertical` instead.
    */
-  floorVerticalDistance = computed<number | null>(() => this.floorDistancePoint()?.signedDistanceVertical ?? null);
+  floorVerticalDistance = computed<number | null>(() => {
+    const point = this.floorDistancePoint();
+    return point?.signedDistanceVertical ?? point?.distanceVertical ?? null;
+  });
 
   onObstacleSelect(uuid: string | null) {
     this.obstacleStateService.distanceType.set(null);

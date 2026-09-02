@@ -36,8 +36,12 @@ describe('createFloorTraces', () => {
   } as unknown as GetSectionOutput;
 
   // Cast the union `DataObject[]` to plottable traces so scatter props (x/y/z/mode/marker/...) are readable.
-  const build = (params: Parameters<typeof createFloorTraces>[0]): Partial<PlotData>[] =>
-    createFloorTraces(params) as unknown as Partial<PlotData>[];
+  const build = (params: Omit<Parameters<typeof createFloorTraces>[0], 'pointLabel'>): Partial<PlotData>[] =>
+    createFloorTraces({
+      // Stands in for the transloco label the app passes (`studio.floor.point-title`).
+      pointLabel: (distance) => (distance == null ? 'point' : `point ${distance.toFixed(2)}`),
+      ...params
+    }) as unknown as Partial<PlotData>[];
 
   it('should return [] when there are no floors', () => {
     expect(

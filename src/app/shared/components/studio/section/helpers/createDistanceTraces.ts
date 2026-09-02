@@ -137,8 +137,9 @@ const createPointVisuals = (
   if (distanceType === 'vertical') {
     solidMid = midpoint3d(virtualPointVertical, obstacleCoord);
     // Only floors show the sign: a cable dipping under the floor reads as a negative clearance,
-    // while obstacles keep the non-negative distance they have always displayed.
-    distanceValue = isFloor ? distancePoint.signedDistanceVertical : distancePoint.distanceVertical;
+    // while obstacles keep the non-negative distance they have always displayed. An engine build
+    // predating the signed field falls back to it rather than taking the whole render down.
+    distanceValue = (isFloor ? distancePoint.signedDistanceVertical : undefined) ?? distancePoint.distanceVertical;
   } else if (distanceType === 'horizontal') {
     solidMid = midpoint3d(virtualPointHorizontal, obstacleCoord);
     distanceValue = distancePoint.distanceHorizontal;

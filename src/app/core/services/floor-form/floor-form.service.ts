@@ -246,6 +246,7 @@ export class FloorFormService {
   // re-opening the studio restores its points and flipping the reference support re-reads them from
   // the other end.
   private readonly loadSavedFloorEffect = effect(() => {
+    this.spanValue();
     const floor = this.savedFloor();
     const floorPoints = this.orientedFloorPoints();
     untracked(() => {

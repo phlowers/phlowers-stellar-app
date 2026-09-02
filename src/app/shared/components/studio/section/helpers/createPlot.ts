@@ -8,7 +8,7 @@ import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
 import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPointsTraces';
 import { createObstaclesAnnotations } from './obstacles';
-import { createFloorTraces } from './createFloorTraces';
+import { createFloorTraces, FloorPointLabel } from './createFloorTraces';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
@@ -398,6 +398,14 @@ const layout2d = (
  * @param plotParams - The full set of parameters describing the plot data, layout, and options.
  * @returns The Plotly promise returned by `Plotly.react`, or `undefined` if the target element is not found.
  */
+// Same label as the quick-measures point select, so both name a floor point identically.
+const floorPointLabel =
+  (translocoService?: TranslocoService): FloorPointLabel =>
+  (distance) => {
+    const value = (distance ?? 0).toFixed(2);
+    return translocoService?.translate('studio.floor.point-title', { distance: value }) ?? `point ${value}`;
+  };
+
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!plotParams.documentRef.getElementById(plotParams.plotId)) {
@@ -434,7 +442,8 @@ export const createPlot = (plotParams: CreatePlotParams) => {
     view: resolvedParams.view,
     side: resolvedParams.side,
     selectedFloorUuid: resolvedParams.selectedFloorUuid ?? null,
-    selectedPointIndex: resolvedParams.selectedFloorPointIndex ?? null
+    selectedPointIndex: resolvedParams.selectedFloorPointIndex ?? null,
+    pointLabel: floorPointLabel(resolvedParams.translocoService)
   });
   const allData = [...resolvedParams.data, ...distanceTraces, ...distanceMeasuringPointsTraces, ...floorTraces];
 
