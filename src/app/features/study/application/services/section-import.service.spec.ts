@@ -227,7 +227,7 @@ describe('SectionImportService', () => {
             lambert_x: lambertX,
             lambert_y: inputs['lambert_y']
           },
-          meanGpsDiff: 0.0001
+          meanGpsDiffMeter: 0.0001
         },
         error: null,
         pythonErrorCode: null
@@ -1196,9 +1196,6 @@ describe('SectionImportService', () => {
         supports: _ds,
         ...emptySectionDefaults
       } = createEmptySection();
-      const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(123456.0 - (100 + i), 789012.0 - (200 + i)));
-      const expectedMeanDiff = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
-
       expect(restSection).toEqual({
         ...emptySectionDefaults,
         name: 'TESTLINE73STB01-PHASE1-1-SET19-3-SET19',
@@ -1221,7 +1218,7 @@ describe('SectionImportService', () => {
         start_latitude: 45,
         start_longitude: 3,
         start_azimuth: 0,
-        mean_reprojection_diff_meters: expectedMeanDiff
+        mean_reprojection_diff_meters: 0.0001
       });
     });
 
@@ -1409,11 +1406,7 @@ describe('SectionImportService', () => {
         expect(supportRest).toEqual(expectedSupports[i]);
       });
 
-      const lambertX = [100.0, 110.0, 120.0];
-      const lambertY = [200.0, 210.0, 220.0];
-      const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(lambertX[i] - (100 + i), lambertY[i] - (200 + i)));
-      const expectedMeanDiff = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
-      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(expectedMeanDiff, 6);
+      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
 
       expect(result?.start_latitude).toBe(45);
       expect(result?.start_longitude).toBe(3);
@@ -1426,23 +1419,19 @@ describe('SectionImportService', () => {
       service.setStudyContext(buildMockStudy());
     });
 
-    it('should call importLambert, importLambertAndValidate and computeLocalization in order', async () => {
+    it('should call importLambert and importLambertAndValidate in order', async () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       await service.processFile(file, neverAccept);
 
       const calledTasks = workerPythonServiceMock.runTask.mock.calls.map((call) => call[0]);
-      expect(calledTasks).toEqual([Task.importLambert, Task.importLambertAndValidate, Task.computeLocalization]);
+      expect(calledTasks).toEqual([Task.importLambert, Task.importLambertAndValidate]);
     });
 
-    it('should store mean_reprojection_diff_meters computed from the raw Lambert93 input vs. computeLocalization output', async () => {
+    it('should store mean_reprojection_diff_meters from the validation task meanGpsDiffMeter', async () => {
       const file = makeJsonFile(buildValidGeoLiaisonPayload());
       const result = await service.processFile(file, neverAccept);
 
-      // 3 supports: raw lambert_x = [123456, 123456, 123456], reconstructed lambert_x = [100, 101, 102]
-      // raw lambert_y = [789012, 789012, 789012], reconstructed lambert_y = [200, 201, 202]
-      const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(123456.0 - (100 + i), 789012.0 - (200 + i)));
-      const expectedMean = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
-      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(expectedMean, 6);
+      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
     });
 
     it('should persist the first validated localization point as the section start location', async () => {

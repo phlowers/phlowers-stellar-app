@@ -37,7 +37,13 @@ try {
   const start = performance.now();
   pyodide = await loadPyodide({
     indexURL: self.name + 'pyodide/',
-    packages: allPythonPackages
+    packages: allPythonPackages,
+    // Explicitly forward Python's stdout/stderr (used by the `logging` module
+    // in functions.py/api.py) through the worker's log bridge. Pyodide's
+    // implicit default stdout wiring is version-dependent and is not
+    // guaranteed to reach the browser console from inside a Web Worker.
+    stdout: (msg) => log('debug', msg),
+    stderr: (msg) => log('error', msg)
   });
   const loadEnd = performance.now();
   const loadTime = loadEnd - start;

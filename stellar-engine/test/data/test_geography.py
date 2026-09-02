@@ -11,7 +11,6 @@ from stellar_engine.data.geography import (
     compute_localization,
     import_lambert,
     import_lambert_and_validate,
-    import_lambert_and_validate_pyproj_poc,
 )
 
 
@@ -31,10 +30,22 @@ def test_compute_localization():
         "lambert_y",
         "azimuth",
     }
+    print(result)
     assert expected_keys == set(result.keys())
     assert result["latitude"][0] == inputs["startLatitude"]
     assert result["longitude"][0] == inputs["startLongitude"]
     assert result["azimuth"][0] == inputs["startAzimuth"]
+
+    np.testing.assert_allclose(
+        result["latitude"],
+        [48.8566, 48.856636683993784, 48.855891713451356, 48.855146365504844],
+        rtol=1e-6,
+    )
+    np.testing.assert_allclose(
+        result["longitude"],
+        [2.3522, 2.3590134705562726, 2.3657329387442005, 2.372452211109954],
+        rtol=1e-6,
+    )
 
 
 def test_import_lambert():
@@ -64,6 +75,18 @@ def test_import_lambert():
     }
     assert expected_keys == set(result.keys())
 
+    # here just no regression values with hardcoded expected results
+    np.testing.assert_allclose(
+        result["longitude"],
+        [2.3522000, 2.3522000, 2.3512505, 2.3483616, 2.3425608],
+        rtol=1e-6,
+    )
+    np.testing.assert_allclose(
+        result["latitude"],
+        [48.8566000, 48.8592980, 48.8628406, 48.8669159, 48.8707312],
+        rtol=1e-6,
+    )
+
 
 def test_import_lambert_and_validate():
     inputs = {
@@ -81,8 +104,6 @@ def test_import_lambert_and_validate():
             6863184.61650681,
             6863612.38205321,
         ],
-        "startLatitude": 48.8566,
-        "startLongitude": 2.3522,
         "startAzimuth": 0,
         "spanLength": [
             300.0,
@@ -96,10 +117,10 @@ def test_import_lambert_and_validate():
     result = import_lambert_and_validate(inputs)
     expected_keys = {
         "localization",
-        "meanGpsDiff",
+        "meanGpsDiffMeter",
     }
     assert expected_keys == set(result.keys())
-    assert result["meanGpsDiff"] < 1e-5
+    assert result["meanGpsDiffMeter"] < 1.0  # 1 meter
 
 
 def test_import_lambert_and_validate_true_value():
@@ -112,59 +133,26 @@ def test_import_lambert_and_validate_true_value():
             6847542.8023,
             6847418.6947,
         ],
-        "startLatitude": 48.6251325661418,
-        "startLongitude": -1.9515076083443268,
-        "startAzimuth": -115.9970179559439,
+        "startAzimuth": -119.53,
         "spanLength": [
             251.85,
             np.nan,
         ],  # last value not taken into account
-        "lineAngle": [23.89, 10.0], # should not taken into account ifonly one span 
+        "lineAngle": [
+            23.89,
+            10.0,
+        ],  # should not taken into account if only one span
     }
     result = import_lambert_and_validate(inputs)
     expected_keys = {
         "localization",
-        "meanGpsDiff",
-    }
-    # azimuth_error = abs(result["azimuth"] - 119.53)
-    # print(f"Azimuth error: {azimuth_error}")
-    # assert azimuth_error < 1e-2
-    assert expected_keys == set(result.keys())
-    print(result["meanGpsDiff"])
-    assert result["meanGpsDiff"] < 1e-5
-
-
-def test_import_lambert_and_validate_true_value_pyproj_poc():
-    inputs = {
-        "lambert_x": [
-            335314.673,
-            335533.8218,
-        ],
-        "lambert_y": [
-            6847542.8023,
-            6847418.6947,
-        ],
-        "startLatitude": 48.6251325661418,
-        "startLongitude": -1.9515076083443268,
-        "startAzimuth": -115.9970179559439,
-        "spanLength": [
-            251.85,
-            np.nan,
-        ],  # last value not taken into account
-        "lineAngle": [23.89, 10.0],  # should not taken into account if only one span
-    }
-    result = import_lambert_and_validate_pyproj_poc(inputs)
-    expected_keys = {
-        "localization",
-        "meanGpsDiff",
-        "azimuth",
+        "meanGpsDiffMeter",
     }
     assert expected_keys == set(result.keys())
-    print(result["meanGpsDiff"])
+    print(result["meanGpsDiffMeter"])
     # GPS difference on the reconstructed second point.
-    assert result["meanGpsDiff"] < 1e-6
+    assert result["meanGpsDiffMeter"] < 0.1  # 10 cm
     # Flat-plane azimuth of the first span compared to the reference value.
-    azimuth_error = abs(result["azimuth"][0] - 119.53)
+    azimuth_error = abs(result["localization"]["azimuth"][0] - 119.53)
     print(f"Azimuth error: {azimuth_error}")
     assert azimuth_error < 1e-2
-    

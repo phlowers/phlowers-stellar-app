@@ -442,8 +442,6 @@ export interface TaskInputs {
   [Task.importLambertAndValidate]: {
     lambert_x: number[];
     lambert_y: number[];
-    startLatitude: number;
-    startLongitude: number;
     startAzimuth: number;
     spanLength: number[];
     lineAngle: number[];
@@ -755,7 +753,7 @@ export interface TaskOutputs {
   [Task.importLambert]: Localization;
   [Task.importLambertAndValidate]: {
     localization: Localization;
-    meanGpsDiff: number;
+    meanGpsDiffMeter: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;

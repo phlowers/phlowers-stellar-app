@@ -39,7 +39,6 @@ import {
   applyFootCoordinates,
   buildReprojectionAngles,
   buildSectionName,
-  computeMeanReprojectionDiffMeters,
   extractAttachmentPosition,
   extractBranchIdr,
   getMissingRequiredFields,
@@ -565,16 +564,15 @@ export class SectionImportService implements ImportAdapter<Section> {
 
   /**
    * Converts each support's raw Lambert93 foot coordinates to GPS (`footLatitude`/`footLongitude`)
-   * and computes the mean absolute error (meters) between the surveyed Lambert93 positions and
-   * the app's span/angle data model reprojection.
+   * and reports the mean GPS reprojection error (meters) returned by the validation task.
    *
-   * Uses only the existing `Task.importLambert`, `Task.importLambertAndValidate` and
-   * `Task.computeLocalization` Python tasks — no new conversion logic is introduced.
+   * Uses only the existing `Task.importLambert` and `Task.importLambertAndValidate` Python
+   * tasks — no new conversion logic is introduced.
    * If any support is missing its raw Lambert93 coordinates, the whole reprojection is skipped
    * (supports are returned unchanged, `meanReprojectionDiffMeters` is `null`) rather than blocking the import.
    *
    * @throws An `ImportError` (`MAPPING_ERROR`/`MAPPING`) if the worker reports an error or returns
-   *   no result for any of the three calls.
+   *   no result for either call.
    */
   private async applyLambertReprojection(
     supports: Support[],
@@ -595,20 +593,19 @@ export class SectionImportService implements ImportAdapter<Section> {
     const { spanLength, lineAngle } = buildReprojectionAngles(supports);
 
     const start = await this.bootstrapLambertStartPoint(lambert_x, lambert_y);
-    const localization = await this.validateLambertLocalization(lambert_x, lambert_y, start, spanLength, lineAngle);
-    const reconstructed = await this.reconstructLocalization(start, spanLength, lineAngle);
-
-    const updatedSupports = applyFootCoordinates(supports, localization.latitude, localization.longitude);
-    const meanReprojectionDiffMeters = computeMeanReprojectionDiffMeters(
+    const { localization, meanGpsDiffMeter } = await this.validateLambertLocalization(
       lambert_x,
       lambert_y,
-      reconstructed.lambert_x,
-      reconstructed.lambert_y
+      start,
+      spanLength,
+      lineAngle
     );
+
+    const updatedSupports = applyFootCoordinates(supports, localization.latitude, localization.longitude);
 
     return {
       supports: updatedSupports,
-      meanReprojectionDiffMeters,
+      meanReprojectionDiffMeters: meanGpsDiffMeter,
       startGps: {
         startLatitude: localization.latitude[0],
         startLongitude: localization.longitude[0],
@@ -640,38 +637,18 @@ export class SectionImportService implements ImportAdapter<Section> {
     start: { startLatitude: number; startLongitude: number; startAzimuth: number },
     spanLength: number[],
     lineAngle: number[]
-  ): Promise<Localization> {
+  ): Promise<{ localization: Localization; meanGpsDiffMeter: number }> {
     const validated = await this.workerPythonService.runTask(Task.importLambertAndValidate, {
       lambert_x,
       lambert_y,
-      ...start,
+      startAzimuth: start.startAzimuth,
       spanLength,
       lineAngle
     });
     if (validated.error || !validated.result) {
       throw this.buildLambertReprojectionError();
     }
-    return validated.result.localization;
-  }
-
-  /**
-   * Call 3 — reprojection using only the app's span/angle data model (no surveyed Lambert93 input),
-   * used to compare against the surveyed coordinates in meters.
-   */
-  private async reconstructLocalization(
-    start: { startLatitude: number; startLongitude: number; startAzimuth: number },
-    spanLength: number[],
-    lineAngle: number[]
-  ): Promise<Localization> {
-    const reconstructed = await this.workerPythonService.runTask(Task.computeLocalization, {
-      ...start,
-      spanLength,
-      lineAngle
-    });
-    if (reconstructed.error || !reconstructed.result) {
-      throw this.buildLambertReprojectionError();
-    }
-    return reconstructed.result;
+    return validated.result;
   }
 
   private buildLambertReprojectionError(): ImportError {

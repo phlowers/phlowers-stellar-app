@@ -24,17 +24,17 @@ handler.setFormatter(formatter)
 mph_logger = logging.getLogger("mechaphlowers")
 mph_logger.handlers.clear()
 mph_logger.propagate = True
-mph_logger.setLevel(logging.WARNING)
+mph_logger.setLevel(logging.DEBUG)
 mph_logger.addHandler(handler)
 
 # stellar_engine logger
 stellar_logger = logging.getLogger("stellar_engine")
-stellar_logger.setLevel(logging.WARNING)
+stellar_logger.setLevel(logging.DEBUG)
 stellar_logger.addHandler(handler)
 
 # logger for this file
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 # Capture Python warnings (e.g. warnings.warn() raised inside mechaphlowers)
