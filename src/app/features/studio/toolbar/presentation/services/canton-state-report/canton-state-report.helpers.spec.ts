@@ -129,7 +129,7 @@ describe('canton-state-report.helpers', () => {
     });
 
     it('should format numeric values with their unit', () => {
-      expect(formatCell(row, SPAN_METRICS[1])).toBe('100.000 m');
+      expect(formatCell(row, SPAN_METRICS[1])).toBe('100.00 m');
     });
 
     it('should return a dash for null numeric values', () => {

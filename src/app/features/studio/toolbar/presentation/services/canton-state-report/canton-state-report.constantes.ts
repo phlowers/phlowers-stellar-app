@@ -33,17 +33,19 @@ export const UNITS = {
   meters: 'm',
   daN: 'daN',
   degrees: '°',
-  grad: 'grad',
+  grad: 'gr',
   percent: '%'
 } as const;
 
 /**
  * Descriptor for one metric row of a result table.
  * `unit` is `null` for the (string) identifier row (span/support number).
+ * `decimals` is the number of decimal places to render (unused/0 when `unit` is `null`).
  */
 export interface MetricDescriptor<T> {
   labelKey: string;
   unit: string | null;
+  decimals: number;
   field: keyof T;
 }
 
@@ -55,40 +57,55 @@ export interface MetricDescriptor<T> {
  * types.ts but the US places them in the span table — validate against real engine output.
  */
 export const SPAN_METRICS: MetricDescriptor<SpanReportRow>[] = [
-  { labelKey: 'studio.canton-state-report.span-number', unit: null, field: 'spanNumber' },
-  { labelKey: 'studio.canton-state-report.span-length', unit: UNITS.meters, field: 'spanLength' },
-  { labelKey: 'studio.canton-state-report.elevation', unit: UNITS.meters, field: 'elevation' },
-  { labelKey: 'studio.canton-state-report.parameter', unit: UNITS.meters, field: 'parameter' },
-  { labelKey: 'studio.canton-state-report.horizontal-tension', unit: UNITS.daN, field: 'horizontalTension' },
-  { labelKey: 'studio.canton-state-report.tension-sup', unit: UNITS.daN, field: 'tensionSup' },
-  { labelKey: 'studio.canton-state-report.tension-inf', unit: UNITS.daN, field: 'tensionInf' },
-  { labelKey: 'studio.canton-state-report.sag-f1', unit: UNITS.meters, field: 'sagF1' },
-  { labelKey: 'studio.canton-state-report.sag-f2', unit: UNITS.meters, field: 'sagF2' },
-  { labelKey: 'studio.canton-state-report.horizontal-distance', unit: UNITS.meters, field: 'horizontalDistance' },
-  { labelKey: 'studio.canton-state-report.natural-length', unit: UNITS.meters, field: 'naturalLength' },
-  { labelKey: 'studio.canton-state-report.arc-length', unit: UNITS.meters, field: 'arcLength' },
-  { labelKey: 'studio.canton-state-report.slope-left', unit: UNITS.degrees, field: 'slopeLeft' },
-  { labelKey: 'studio.canton-state-report.slope-right', unit: UNITS.degrees, field: 'slopeRight' },
-  { labelKey: 'studio.canton-state-report.utilization-rate', unit: UNITS.percent, field: 'utilizationRate' }
+  { labelKey: 'studio.canton-state-report.span-number', unit: null, decimals: 0, field: 'spanNumber' },
+  { labelKey: 'studio.canton-state-report.span-length', unit: UNITS.meters, decimals: 2, field: 'spanLength' },
+  { labelKey: 'studio.canton-state-report.elevation', unit: UNITS.meters, decimals: 2, field: 'elevation' },
+  { labelKey: 'studio.canton-state-report.parameter', unit: UNITS.meters, decimals: 0, field: 'parameter' },
+  {
+    labelKey: 'studio.canton-state-report.horizontal-tension',
+    unit: UNITS.daN,
+    decimals: 1,
+    field: 'horizontalTension'
+  },
+  { labelKey: 'studio.canton-state-report.tension-sup', unit: UNITS.daN, decimals: 1, field: 'tensionSup' },
+  { labelKey: 'studio.canton-state-report.tension-inf', unit: UNITS.daN, decimals: 1, field: 'tensionInf' },
+  { labelKey: 'studio.canton-state-report.sag-f1', unit: UNITS.meters, decimals: 2, field: 'sagF1' },
+  { labelKey: 'studio.canton-state-report.sag-f2', unit: UNITS.meters, decimals: 2, field: 'sagF2' },
+  {
+    labelKey: 'studio.canton-state-report.horizontal-distance',
+    unit: UNITS.meters,
+    decimals: 2,
+    field: 'horizontalDistance'
+  },
+  { labelKey: 'studio.canton-state-report.natural-length', unit: UNITS.meters, decimals: 2, field: 'naturalLength' },
+  { labelKey: 'studio.canton-state-report.arc-length', unit: UNITS.meters, decimals: 2, field: 'arcLength' },
+  { labelKey: 'studio.canton-state-report.slope-left', unit: UNITS.degrees, decimals: 1, field: 'slopeLeft' },
+  { labelKey: 'studio.canton-state-report.slope-right', unit: UNITS.degrees, decimals: 1, field: 'slopeRight' },
+  {
+    labelKey: 'studio.canton-state-report.utilization-rate',
+    unit: UNITS.percent,
+    decimals: 1,
+    field: 'utilizationRate'
+  }
 ];
 
 /** Per-support metric rows (transposed table: one row per metric, one column per support). */
 export const SUPPORT_METRICS: MetricDescriptor<SupportReportRow>[] = [
-  { labelKey: 'studio.canton-state-report.support-number', unit: null, field: 'supportNumber' },
-  { labelKey: 'studio.canton-state-report.v-chain', unit: UNITS.daN, field: 'vChain' },
-  { labelKey: 'studio.canton-state-report.h-chain', unit: UNITS.daN, field: 'hChain' },
-  { labelKey: 'studio.canton-state-report.l-chain', unit: UNITS.daN, field: 'lChain' },
-  { labelKey: 'studio.canton-state-report.r-chain', unit: UNITS.daN, field: 'rChain' },
-  { labelKey: 'studio.canton-state-report.line-angle', unit: UNITS.grad, field: 'lineAngle' },
-  { labelKey: 'studio.canton-state-report.v-console', unit: UNITS.daN, field: 'vConsole' },
-  { labelKey: 'studio.canton-state-report.h-console', unit: UNITS.daN, field: 'hConsole' },
-  { labelKey: 'studio.canton-state-report.l-console', unit: UNITS.daN, field: 'lConsole' },
-  { labelKey: 'studio.canton-state-report.r-console', unit: UNITS.daN, field: 'rConsole' },
-  { labelKey: 'studio.canton-state-report.foot-altitude', unit: UNITS.meters, field: 'footAltitude' },
-  { labelKey: 'studio.canton-state-report.displacement-x', unit: UNITS.meters, field: 'displacementX' },
-  { labelKey: 'studio.canton-state-report.displacement-y', unit: UNITS.meters, field: 'displacementY' },
-  { labelKey: 'studio.canton-state-report.displacement-z', unit: UNITS.meters, field: 'displacementZ' },
-  { labelKey: 'studio.canton-state-report.load-angle', unit: UNITS.degrees, field: 'loadAngle' }
+  { labelKey: 'studio.canton-state-report.support-number', unit: null, decimals: 0, field: 'supportNumber' },
+  { labelKey: 'studio.canton-state-report.v-chain', unit: UNITS.daN, decimals: 1, field: 'vChain' },
+  { labelKey: 'studio.canton-state-report.h-chain', unit: UNITS.daN, decimals: 1, field: 'hChain' },
+  { labelKey: 'studio.canton-state-report.l-chain', unit: UNITS.daN, decimals: 1, field: 'lChain' },
+  { labelKey: 'studio.canton-state-report.r-chain', unit: UNITS.daN, decimals: 1, field: 'rChain' },
+  { labelKey: 'studio.canton-state-report.line-angle', unit: UNITS.grad, decimals: 1, field: 'lineAngle' },
+  { labelKey: 'studio.canton-state-report.v-console', unit: UNITS.daN, decimals: 1, field: 'vConsole' },
+  { labelKey: 'studio.canton-state-report.h-console', unit: UNITS.daN, decimals: 1, field: 'hConsole' },
+  { labelKey: 'studio.canton-state-report.l-console', unit: UNITS.daN, decimals: 1, field: 'lConsole' },
+  { labelKey: 'studio.canton-state-report.r-console', unit: UNITS.daN, decimals: 1, field: 'rConsole' },
+  { labelKey: 'studio.canton-state-report.foot-altitude', unit: UNITS.meters, decimals: 2, field: 'footAltitude' },
+  { labelKey: 'studio.canton-state-report.displacement-x', unit: UNITS.meters, decimals: 2, field: 'displacementX' },
+  { labelKey: 'studio.canton-state-report.displacement-y', unit: UNITS.meters, decimals: 2, field: 'displacementY' },
+  { labelKey: 'studio.canton-state-report.displacement-z', unit: UNITS.meters, decimals: 2, field: 'displacementZ' },
+  { labelKey: 'studio.canton-state-report.load-angle', unit: UNITS.degrees, decimals: 1, field: 'loadAngle' }
 ];
 
 /** Transloco translation keys for the report's fixed labels. */

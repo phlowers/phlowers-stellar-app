@@ -140,7 +140,7 @@ export function formatCell<T>(row: T, metric: MetricDescriptor<T>): string {
   if (metric.unit === null) {
     return typeof raw === 'string' && raw !== '' ? raw : '-';
   }
-  return formatValue(raw as number | null, metric.unit);
+  return formatValue(raw as number | null, metric.unit, metric.decimals);
 }
 
 /** Splits an array into chunks of at most `size` items. */
@@ -220,8 +220,8 @@ export function drawCantonStateSection(
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
 
-  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, UNITS.meters), leftX, y, true);
-  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, UNITS.percent), rightX, y, true);
+  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, UNITS.meters, 0), leftX, y, true);
+  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, UNITS.percent, 1), rightX, y, true);
   y += LINE_HEIGHT;
 
   return y;

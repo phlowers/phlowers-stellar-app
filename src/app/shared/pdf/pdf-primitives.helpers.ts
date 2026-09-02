@@ -67,11 +67,15 @@ export function registerNunitoFont(doc: jsPDF, regularB64: string, boldB64: stri
 }
 
 /** Formats a numeric value to fixed decimals with unit, or returns "-" if null/undefined. */
-export function formatValue(value: number | null | undefined, unit: string): string {
+export function formatValue(
+  value: number | null | undefined,
+  unit: string,
+  decimals: number = DECIMAL_PLACES
+): string {
   if (value === null || value === undefined) {
     return '-';
   }
-  return `${value.toFixed(DECIMAL_PLACES)} ${unit}`;
+  return `${value.toFixed(decimals)} ${unit}`;
 }
 
 /** Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true). */
