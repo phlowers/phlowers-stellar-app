@@ -115,9 +115,10 @@ describe('createFloorTraces', () => {
     expect(ribbon).toBeDefined();
   });
 
-  it('should give the ribbon the same hover payload as its source point, twice per vertex pair', () => {
+  it('should carry one hover payload per ribbon triangle, reaching the closing point', () => {
     // The ribbon covers far more screen area than the markers, so it is what the mouse actually
-    // hits in gl3d: each of a point's two vertices must resolve back to that point.
+    // hits in gl3d — and Plotly indexes a mesh3d hit by face, not by vertex. With a payload per
+    // vertex, a two-point floor resolved both faces to point 0 and the last point was unclickable.
     const ribbon = build({
       litData,
       floors: [floor],
@@ -126,16 +127,21 @@ describe('createFloorTraces', () => {
       endSupport: 2,
       view: '3d',
       side: 'profile'
-    }).find((t) => t.type === 'mesh3d') as { hovertext?: string[]; customdata?: unknown; hoverinfo?: string };
+    }).find((t) => t.type === 'mesh3d') as {
+      hovertext?: string[];
+      customdata?: unknown;
+      hoverinfo?: string;
+      i?: number[];
+    };
 
     expect(ribbon.hoverinfo).toBe('text');
-    expect(ribbon.hovertext).toEqual(['point 0.00', 'point 0.00', 'point 25.00', 'point 25.00']);
+    expect(ribbon.hovertext).toEqual(['point 0.00', 'point 25.00']);
     expect(ribbon.customdata).toEqual([
       ['floor-1', 0],
-      ['floor-1', 0],
-      ['floor-1', 1],
       ['floor-1', 1]
     ]);
+    // One entry per face, so every triangle index has a payload.
+    expect(ribbon.hovertext?.length).toBe(ribbon.i?.length);
   });
 
   it('should widen the ribbon perpendicular to the span, not along global Y', () => {

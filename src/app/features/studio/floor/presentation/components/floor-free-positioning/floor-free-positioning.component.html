@@ -1,7 +1,7 @@
 <div class="relative w-full h-full">
   @if (plotService.loading()) {
     <div class="h-full flex justify-center items-center">
-      <p-progress-spinner ariaLabel="loading" />
+      <p-progress-spinner [ariaLabel]="'common.loading' | transloco" />
     </div>
   } @else if (plotService.error()) {
     <div class="absolute inset-0 flex justify-center items-center">

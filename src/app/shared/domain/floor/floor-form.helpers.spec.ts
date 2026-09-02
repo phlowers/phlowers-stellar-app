@@ -132,7 +132,8 @@ describe('computeFloorClearance', () => {
     expect(computeFloorClearance(flatFloor, saggingCable)).toEqual({
       minVerticalDistance: 5,
       floorAltitude: 0,
-      cableAltitude: 5
+      cableAltitude: 5,
+      minVerticalPosition: 50
     });
   });
 
@@ -146,7 +147,8 @@ describe('computeFloorClearance', () => {
     expect(computeFloorClearance(slopedFloor, saggingCable)).toEqual({
       minVerticalDistance: 0,
       floorAltitude: 5,
-      cableAltitude: 5
+      cableAltitude: 5,
+      minVerticalPosition: 50
     });
   });
 
@@ -166,7 +168,8 @@ describe('computeFloorClearance', () => {
     expect(computeFloorClearance(moundFloor, gentleCable)).toEqual({
       minVerticalDistance: 3.5,
       floorAltitude: 14,
-      cableAltitude: 17.5
+      cableAltitude: 17.5,
+      minVerticalPosition: 25
     });
   });
 
@@ -184,7 +187,8 @@ describe('computeFloorClearance', () => {
     expect(computeFloorClearance(walledFloor, saggingCable)).toEqual({
       minVerticalDistance: 4,
       floorAltitude: 16,
-      cableAltitude: 20
+      cableAltitude: 20,
+      minVerticalPosition: 0
     });
   });
 

@@ -73,9 +73,28 @@
     &__grid {
       @apply grid grid-cols-3;
       column-gap: 1rem;
+      grid-template-areas:
+        'minVertDist minVertDist minVertDist'
+        'altPoint altCable distRefSupp';
 
       &__item {
         @apply flex flex-col;
+
+        &--minVertDist {
+          grid-area: minVertDist;
+        }
+
+        &--altPoint {
+          grid-area: altPoint;
+        }
+
+        &--altCable {
+          grid-area: altCable;
+        }
+
+        &--distRefSupp {
+          grid-area: distRefSupp;
+        }
       }
     }
 

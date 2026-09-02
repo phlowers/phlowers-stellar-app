@@ -7,6 +7,8 @@ export interface FloorClearance {
   minVerticalDistance: number;
   floorAltitude: number;
   cableAltitude: number;
+  /** Abscissa of that narrowest point along the span, from the floor's own reference support (meters). */
+  minVerticalPosition: number;
 }
 
 // A 3D polyline reduced to (abscissa along the span, altitude).
@@ -78,7 +80,7 @@ export function computeFloorClearance(floorPoints: number[][], cablePoints: numb
     const cableAltitude = altitudeAt(cableProfile, t, Math.min);
     const minVerticalDistance = cableAltitude - floorAltitude;
     if (!narrowest || minVerticalDistance < narrowest.minVerticalDistance) {
-      narrowest = { minVerticalDistance, floorAltitude, cableAltitude };
+      narrowest = { minVerticalDistance, floorAltitude, cableAltitude, minVerticalPosition: t };
     }
   }
   return narrowest;

@@ -144,20 +144,35 @@ describe('FloorFormService', () => {
     it('should be empty while no floor is open', () => {
       litDataSignal.set(litDataFor(saggingCable));
 
-      expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
+      expect(service.results()).toEqual({
+        minVerticalDistance: null,
+        floorAltitude: null,
+        cableAltitude: null,
+        minVerticalPosition: null
+      });
     });
 
     it('should be empty while the section is not projected yet', () => {
       openSavedFloor();
 
-      expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
+      expect(service.results()).toEqual({
+        minVerticalDistance: null,
+        floorAltitude: null,
+        cableAltitude: null,
+        minVerticalPosition: null
+      });
     });
 
     it('should be empty when the projection carries no geometry for the saved floor', () => {
       openSavedFloor();
       litDataSignal.set({ coords: { spans: [saggingCable] }, obstacles: [] } as unknown as GetSectionOutput);
 
-      expect(service.results()).toEqual({ minVerticalDistance: null, floorAltitude: null, cableAltitude: null });
+      expect(service.results()).toEqual({
+        minVerticalDistance: null,
+        floorAltitude: null,
+        cableAltitude: null,
+        minVerticalPosition: null
+      });
     });
 
     it('should report the narrowest clearance even when it falls between two floor points', () => {
@@ -166,7 +181,12 @@ describe('FloorFormService', () => {
 
       // The cable is 10.77 m above the nearest floor point (x = 30) but only 4 m above the floor
       // where it sags lowest (x = 65), halfway between that point and the closing support.
-      expect(service.results()).toEqual({ minVerticalDistance: 4, floorAltitude: 16, cableAltitude: 20 });
+      expect(service.results()).toEqual({
+        minVerticalDistance: 4,
+        floorAltitude: 16,
+        cableAltitude: 20,
+        minVerticalPosition: 65
+      });
     });
 
     it('should keep the negative distance and a cable altitude below the floor when the cable dips under it', () => {
@@ -179,7 +199,27 @@ describe('FloorFormService', () => {
         ])
       );
 
-      expect(service.results()).toEqual({ minVerticalDistance: -2, floorAltitude: 16, cableAltitude: 14 });
+      expect(service.results()).toEqual({
+        minVerticalDistance: -2,
+        floorAltitude: 16,
+        cableAltitude: 14,
+        minVerticalPosition: 65
+      });
+    });
+
+    it('should mirror the position, and only it, when the floor is read from the other support', () => {
+      openSavedFloor();
+      litDataSignal.set(litDataFor(saggingCable));
+      service.form.controls.referenceSupport.setValue('RIGHT');
+      TestBed.flushEffects();
+
+      // Same geometry seen from the closing support: the narrowest point is 35 m away from it.
+      expect(service.results()).toEqual({
+        minVerticalDistance: 4,
+        floorAltitude: 16,
+        cableAltitude: 20,
+        minVerticalPosition: 35
+      });
     });
   });
 

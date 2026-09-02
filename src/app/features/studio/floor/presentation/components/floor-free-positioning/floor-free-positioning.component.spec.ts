@@ -106,6 +106,14 @@ describe('FloorFreePositioningComponent', () => {
     setFreePositioningMode: vi.fn()
   };
 
+  const mockPlotService = {
+    workerReady: signal(false),
+    litData: signal(null),
+    error: signal<unknown>(null),
+    diagnostics: signal([]),
+    loading: signal(false)
+  };
+
   /** Rebuilds pointsView from the current form array; middle points are the removable (free) ones. */
   const refreshPointsView = () =>
     mockFloorFormService.pointsView.mockReturnValue(
@@ -115,9 +123,43 @@ describe('FloorFreePositioningComponent', () => {
       }))
     );
 
+  /** `stubTemplate: false` keeps the real template, so its branches and bindings get compiled and rendered. */
+  const configureTestBed = async (stubTemplate = true) => {
+    const testBed = TestBed.configureTestingModule({
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        }),
+        FloorFreePositioningComponent
+      ],
+      providers: [
+        { provide: PlotService, useValue: mockPlotService },
+        {
+          provide: PlotSpanService,
+          useValue: { section: signal({ supports: [] }), getSupportIndex: vi.fn(() => 1) }
+        },
+        { provide: PlotOptionsService, useValue: mockPlotOptionsService },
+        { provide: FloorFormService, useValue: mockFloorFormService },
+        { provide: SideTabsService, useValue: { sideTabs: signal<number | null>(null) } },
+        { provide: LoggerService, useValue: { warn: vi.fn(), error: vi.fn() } }
+      ]
+    });
+    if (stubTemplate) {
+      testBed.overrideComponent(FloorFreePositioningComponent, { set: { template: '<div></div>' } });
+    }
+    await testBed.compileComponents();
+
+    fixture = TestBed.createComponent(FloorFreePositioningComponent);
+    component = fixture.componentInstance;
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
     mockCreatePlotData.mockReturnValue([]);
+    mockPlotService.loading.set(false);
+    mockPlotService.error.set(null);
 
     fb = new FormBuilder();
     points = fb.array([
@@ -133,41 +175,56 @@ describe('FloorFreePositioningComponent', () => {
     mockFloorFormService.referenceSupportValue.set('LEFT');
     refreshPointsView();
 
-    await TestBed.configureTestingModule({
-      imports: [
-        TranslocoTestingModule.forRoot({
-          langs: { en: {} },
-          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
-          preloadLangs: true
-        }),
-        FloorFreePositioningComponent
-      ],
-      providers: [
-        {
-          provide: PlotService,
-          useValue: {
-            workerReady: signal(false),
-            litData: signal(null),
-            error: signal(null),
-            diagnostics: signal([]),
-            loading: signal(false)
-          }
-        },
-        {
-          provide: PlotSpanService,
-          useValue: { section: signal({ supports: [] }), getSupportIndex: vi.fn(() => 1) }
-        },
-        { provide: PlotOptionsService, useValue: mockPlotOptionsService },
-        { provide: FloorFormService, useValue: mockFloorFormService },
-        { provide: SideTabsService, useValue: { sideTabs: signal<number | null>(null) } },
-        { provide: LoggerService, useValue: { warn: vi.fn(), error: vi.fn() } }
-      ]
-    })
-      .overrideComponent(FloorFreePositioningComponent, { set: { template: '<div></div>' } })
-      .compileComponents();
+    await configureTestBed();
+  });
 
-    fixture = TestBed.createComponent(FloorFreePositioningComponent);
-    component = fixture.componentInstance;
+  describe('template rendering', () => {
+    /** The real template, so its branches and bindings are compiled rather than stubbed away. */
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await configureTestBed(false);
+    });
+
+    const query = (selector: string) => fixture.nativeElement.querySelector(selector) as HTMLElement | null;
+    const plotContainer = () => query(`#${FLOOR_FREE_POSITIONING_PLOT_ID}`);
+
+    it('should show only the spinner while the section is loading', () => {
+      mockPlotService.loading.set(true);
+
+      fixture.detectChanges();
+
+      expect(query('p-progress-spinner')).not.toBeNull();
+      expect(plotContainer()).toBeNull();
+    });
+
+    it('should show only the error message when the section failed', () => {
+      mockPlotService.error.set({ message: 'boom' });
+
+      fixture.detectChanges();
+
+      expect(query('.free-positioning-error')).not.toBeNull();
+      expect(plotContainer()).toBeNull();
+    });
+
+    it('should render the plot container and an N/A readout before the mouse enters the plot', () => {
+      fixture.detectChanges();
+
+      expect(plotContainer()).not.toBeNull();
+      expect(fixture.nativeElement.querySelectorAll('dd')).toHaveLength(2);
+      expect(query('dl')?.textContent).toContain('N/A');
+    });
+
+    it('should display the hovered coordinates in the readout', () => {
+      fixture.detectChanges();
+
+      component.mousePosition.set({ x: '12.34', z: '56.78' });
+      fixture.detectChanges();
+
+      const readouts = [...fixture.nativeElement.querySelectorAll('dd')].map((dd: HTMLElement) =>
+        dd.textContent?.trim()
+      );
+      expect(readouts).toEqual(['12.34', '56.78']);
+    });
   });
 
   describe('handleClick — placing the active free point', () => {
@@ -363,6 +420,35 @@ describe('FloorFreePositioningComponent', () => {
       expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(false, 'floor');
       expect(Plotly.purge).toHaveBeenCalled();
       expect(component.plot()).toBeNull();
+    });
+
+    it('should cancel the pending debounced work', () => {
+      const cancelRecreate = vi.spyOn(component.recreatePlot, 'cancel');
+      const cancelMarkers = vi.spyOn(component.debounceUpdateSelectedPositionMarkers, 'cancel');
+
+      component.ngOnDestroy();
+
+      expect(cancelRecreate).toHaveBeenCalled();
+      expect(cancelMarkers).toHaveBeenCalled();
+    });
+
+    it('should not publish a plot whose newPlot resolves after destruction', async () => {
+      // The container id is global: a plot published post-destroy would attach this destroyed
+      // instance's listeners to the element a newly mounted one already owns.
+      const plotElement = document.createElement('div');
+      plotElement.id = FLOOR_FREE_POSITIONING_PLOT_ID;
+      document.body.appendChild(plotElement);
+      mockCreatePlotData.mockReturnValue([{}] as unknown as ReturnType<typeof createPlotData>);
+
+      const pending = component.createPlot(litDataFixture(), 1, []);
+      component.ngOnDestroy();
+      await pending;
+
+      expect(component.plot()).toBeNull();
+      const handleClick = vi.spyOn(component as never, 'handleClick');
+      plotElement.dispatchEvent(new MouseEvent('click'));
+      expect(handleClick).not.toHaveBeenCalled();
+      plotElement.remove();
     });
   });
 });

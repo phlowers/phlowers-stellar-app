@@ -181,48 +181,55 @@
       <h2 class="floor-form__results__title">{{ 'common.results' | transloco }}</h2>
 
       <dl class="floor-form__results__grid">
-        <div class="floor-form__results__grid__item">
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--minVertDist">
           <dt>
             {{ 'studio.floor.min-vertical-distance-label' | transloco }}
           </dt>
-          <dd>
-            <span data-testid="result-min-vertical-distance">
-              {{
-                floorFormService.results().minVerticalDistance !== null
-                  ? (floorFormService.results().minVerticalDistance | number: '1.0-2') + ' m'
-                  : '-'
-              }}
-            </span>
+          <dd data-testid="result-min-vertical-distance">
+            {{
+              floorFormService.results().minVerticalDistance !== null
+                ? (floorFormService.results().minVerticalDistance | number: '1.0-2') + ' m'
+                : '-'
+            }}
           </dd>
         </div>
 
-        <div class="floor-form__results__grid__item">
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--altPoint">
           <dt>
             {{ 'studio.floor.floor-altitude-label' | transloco }}
           </dt>
-          <dd>
-            <span data-testid="result-floor-altitude">
-              {{
-                floorFormService.results().floorAltitude !== null
-                  ? (floorFormService.results().floorAltitude | number: '1.0-2') + ' m'
-                  : '-'
-              }}
-            </span>
+          <dd data-testid="result-floor-altitude">
+            {{
+              floorFormService.results().floorAltitude !== null
+                ? (floorFormService.results().floorAltitude | number: '1.0-2') + ' m'
+                : '-'
+            }}
           </dd>
         </div>
 
-        <div class="floor-form__results__grid__item">
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--altCable">
           <dt>
             {{ 'studio.floor.cable-altitude-label' | transloco }}
           </dt>
-          <dd>
-            <span data-testid="result-cable-altitude">
-              {{
-                floorFormService.results().cableAltitude !== null
-                  ? (floorFormService.results().cableAltitude | number: '1.0-2') + ' m'
-                  : '-'
-              }}
-            </span>
+          <dd data-testid="result-cable-altitude">
+            {{
+              floorFormService.results().cableAltitude !== null
+                ? (floorFormService.results().cableAltitude | number: '1.0-2') + ' m'
+                : '-'
+            }}
+          </dd>
+        </div>
+
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--distRefSupp">
+          <dt>
+            {{ 'studio.floor.min-vertical-position-label' | transloco }}
+          </dt>
+          <dd data-testid="result-min-vertical-position">
+            {{
+              floorFormService.results().minVerticalPosition !== null
+                ? (floorFormService.results().minVerticalPosition | number: '1.0-2') + ' m'
+                : '-'
+            }}
           </dd>
         </div>
       </dl>

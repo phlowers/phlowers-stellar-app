@@ -139,15 +139,34 @@ export class FloorFormService {
    * `calculateAndSave()` or on section load (once floors are projected alongside obstacles).
    */
   readonly results = computed<FloorResults>(() => {
+    const noResults: FloorResults = {
+      minVerticalDistance: null,
+      floorAltitude: null,
+      cableAltitude: null,
+      minVerticalPosition: null
+    };
     const floor = this.savedFloor();
     const litData = this.plotService.litData();
     if (!floor || !litData) {
-      return { minVerticalDistance: null, floorAltitude: null, cableAltitude: null };
+      return noResults;
     }
     const floorPoints = litData.obstacles?.find((obstacle) => obstacle.uuid === floor.uuid)?.points;
     const cablePoints = litData.coords?.spans?.[this.spanService.getSupportIndex(floor.supportUuid)];
     const clearance = floorPoints && cablePoints ? computeFloorClearance(floorPoints, cablePoints) : null;
-    return clearance ?? { minVerticalDistance: null, floorAltitude: null, cableAltitude: null };
+    if (!clearance) {
+      return noResults;
+    }
+    // Distance and altitudes are geometry: the same whichever side the profile is read from. Only the
+    // position moves, since it is measured from the floor's own reference support while the form shows
+    // distances from the selected one — mirror it along the span when they differ, as `orientedFloorPoints`
+    // does for the points themselves.
+    const { spanLength } = this.spanSupports();
+    const referenceSupport = this.referenceSupportValue();
+    const isMirrored = referenceSupport && referenceSupport !== floor.referenceSupport && spanLength != null;
+    return {
+      ...clearance,
+      minVerticalPosition: isMirrored ? spanLength - clearance.minVerticalPosition : clearance.minVerticalPosition
+    };
   });
 
   /** Whether the form holds enough data (span, reference support, and every point filled in) to calculate and save. */

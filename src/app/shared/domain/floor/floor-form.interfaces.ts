@@ -38,4 +38,6 @@ export interface FloorResults {
   floorAltitude: number | null;
   /** Altitude of the cable where the minimum vertical distance occurs (meters). */
   cableAltitude: number | null;
+  /** Distance from the selected reference support to where the minimum vertical distance occurs (meters). */
+  minVerticalPosition: number | null;
 }

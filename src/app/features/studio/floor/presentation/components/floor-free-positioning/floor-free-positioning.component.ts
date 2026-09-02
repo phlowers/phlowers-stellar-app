@@ -57,6 +57,7 @@ export class FloorFreePositioningComponent implements OnDestroy {
   readonly mousePosition = signal<MousePosition | null>(null);
 
   private detachEventListeners: (() => void) | null = null;
+  private destroyed = false;
 
   readonly getErrorString = () => {
     const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
@@ -307,6 +308,11 @@ export class FloorFreePositioningComponent implements OnDestroy {
         { ...getFloorFreePositioningPlotLayout(), annotations: this.getAnnotations() },
         getFloorFreePositioningPlotConfig()
       );
+      // Destroyed while newPlot was in flight: the container id is global, so a newly mounted
+      // instance may already own it — publishing this plot would attach listeners to its element.
+      if (this.destroyed) {
+        return;
+      }
       this.attachEventListeners(plotElement);
       this.plot.set(plot);
     } catch (error) {
@@ -316,6 +322,9 @@ export class FloorFreePositioningComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Safety net: always leave the mode when this component is destroyed
+    this.destroyed = true;
+    this.recreatePlot.cancel();
+    this.debounceUpdateSelectedPositionMarkers.cancel();
     this.plotOptionsService.setFreePositioningMode(false, 'floor');
     this.destroyPlot();
   }

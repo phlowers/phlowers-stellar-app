@@ -960,9 +960,10 @@
       "delete-point-aria-label": "delete point",
       "delete-floor-aria-label": "delete floor",
       "calculate-and-save-btn": "Calculate and save",
-      "min-vertical-distance-label": "Min. vert. dist.",
+      "min-vertical-distance-label": "Minimum vertical distance",
       "floor-altitude-label": "Point alt.",
-      "cable-altitude-label": "Cable alt."
+      "cable-altitude-label": "Cable alt.",
+      "min-vertical-position-label": "Ref. supp. dist."
     },
     "l0-sum": {
       "natural-lengths-title": "Natural lengths L0",

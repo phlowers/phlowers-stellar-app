@@ -104,8 +104,9 @@ const createFloorLineTrace = (
 /**
  * Builds a mesh3d strip around the floor polyline so it reads with some depth in 3D.
  * The ribbon is what the mouse actually lands on in gl3d (it covers far more screen area
- * than the thin markers), so each vertex carries the same hovertext/customdata as its
- * source point — hovering or clicking the ribbon resolves to the nearest floor point.
+ * than the thin markers), so hovering or clicking it resolves to a floor point. Plotly
+ * indexes a mesh3d hit by *face*, not by vertex, so hovertext/customdata carry one entry
+ * per triangle: the two triangles of segment `p` resolve to points `p` and `p + 1`.
  */
 const createFloorRibbonTrace = (
   points: Coord3[],
@@ -132,19 +133,17 @@ const createFloorRibbonTrace = (
   const xs: number[] = [];
   const ys: number[] = [];
   const zs: number[] = [];
-  const hovertext: string[] = [];
-  const customdata: [string, number][] = [];
-  points.forEach(([cx, cy, cz], index) => {
+  points.forEach(([cx, cy, cz]) => {
     xs.push(cx + offX, cx - offX);
     ys.push(cy + offY, cy - offY);
     zs.push(cz + FLOOR_RIBBON_Z_OFFSET, cz + FLOOR_RIBBON_Z_OFFSET);
-    hovertext.push(floorPointName(floor, index, pointLabel), floorPointName(floor, index, pointLabel));
-    customdata.push([floor.uuid, index], [floor.uuid, index]);
   });
 
   const iIdx: number[] = [];
   const jIdx: number[] = [];
   const kIdx: number[] = [];
+  const hovertext: string[] = [];
+  const customdata: [string, number][] = [];
   for (let p = 0; p < points.length - 1; p++) {
     const front0 = 2 * p;
     const back0 = 2 * p + 1;
@@ -153,6 +152,10 @@ const createFloorRibbonTrace = (
     iIdx.push(front0, back0);
     jIdx.push(back0, back1);
     kIdx.push(front1, front1);
+    // One payload per triangle, in the same order: first triangle resolves to p, second to p + 1,
+    // so the polyline's closing point stays reachable from the ribbon.
+    hovertext.push(floorPointName(floor, p, pointLabel), floorPointName(floor, p + 1, pointLabel));
+    customdata.push([floor.uuid, p], [floor.uuid, p + 1]);
   }
 
   return {
