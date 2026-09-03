@@ -126,10 +126,10 @@ export class AttachmentService {
   }
 
   /**
-   * Resolves a GeoLiaison support/set lookup against the catalog, trying SUPPORT_IDR first
+   * Resolves a canton support/set lookup against the catalog, trying SUPPORT_IDR first
    * and SUPPORT_ADR as fallback. Returns only complete L/X/Y/Z entries.
    */
-  async resolveGeoLiaisonCatalogAttachment(
+  async resolveCatalogAttachment(
     supportIdr: string | null | undefined,
     supportAdr: string | null | undefined,
     attachmentSet: number | null | undefined

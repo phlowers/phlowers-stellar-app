@@ -14,12 +14,12 @@ export const SECTION_IMPORT_ERROR_KEYS = {
   validationErrorSupportsBounds: 'section-import.validation-supports-bounds',
   sectionImportError: 'section-import.import-error',
   sectionDeleteError: 'section-import.delete-error',
-  geoLiaisonFormatError: 'section-import.geo-liaison-format-error',
+  sectionFormatError: 'section-import.section-format-error',
   lambertReprojectionError: 'section-import.lambert-reprojection-error'
 } as const;
 
-/** Transloco translation key for the GeoLiaison catalog-missing warning. */
-export const GEO_LIAISON_CATALOG_MISSING_KEY = 'section-import.catalog-missing-warning';
+/** Transloco translation key for the section catalog-missing warning. */
+export const SECTION_CATALOG_MISSING_KEY = 'section-import.catalog-missing-warning';
 
 /** Transloco translation key for the Lambert93-to-GPS reprojection info toast. */
 export const REPROJECTION_INFO_KEY = 'section-import.reprojection-info';
