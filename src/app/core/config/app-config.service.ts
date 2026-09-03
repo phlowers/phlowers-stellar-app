@@ -13,12 +13,13 @@ const FALLBACK_LANG = 'fr';
 const LOAD_TIMEOUT_MS = 3000;
 
 /**
- * Loads runtime application configuration from `assets/config/app-config.json`,
- * written post-deploy (Docker/Jenkins) so the default UI language can be
- * changed without a rebuild.
+ * Loads runtime application configuration from `assets/config/app-config.json`.
+ * A default copy is checked into `public/assets/config/app-config.json`; the
+ * Docker image regenerates it at build time from the `DEFAULT_LANGUAGE` build
+ * arg (see `Dockerfile`), so changing the language for a deployment requires
+ * rebuilding the image.
  *
- * Falls back silently to `'fr'` if the file is absent or malformed (e.g. in
- * local development, where the file is not generated).
+ * Falls back silently to `'fr'` if the file is absent or malformed.
  */
 @Injectable({ providedIn: 'root' })
 export class AppConfigService {
