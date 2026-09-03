@@ -729,4 +729,22 @@ describe('StudioMenuBarComponent', () => {
       expect(icName!.textContent).toContain('Initial Condition 1');
     });
   });
+
+  describe('UC: generate report button', () => {
+    it('should render an always-active generate report button', () => {
+      const btn = getByTestId('generate-report-btn') as HTMLButtonElement | null;
+      expect(btn).toBeTruthy();
+      expect(btn!.disabled).toBe(false);
+    });
+
+    it('should emit generateReport when the button is clicked', () => {
+      const emitSpy = vi.fn();
+      component.generateReport.subscribe(emitSpy);
+
+      const btn = getByTestId('generate-report-btn') as HTMLButtonElement;
+      btn.click();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

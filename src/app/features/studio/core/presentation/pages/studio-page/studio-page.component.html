@@ -2,6 +2,7 @@
 
 <app-studio-menu-bar
   (openNewChargeModal)="openNewChargeModal()"
+  (generateReport)="onGenerateReport()"
   [section]="spanService.section()"
   [study]="plotService.study()"
 ></app-studio-menu-bar>
