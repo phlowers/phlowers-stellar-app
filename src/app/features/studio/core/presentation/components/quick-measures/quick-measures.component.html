@@ -1,10 +1,10 @@
 <p-select
   [ariaLabel]="'studio.quick-measures.select-obstacle-aria-label' | transloco"
   styleClass="quick-measures__select"
-  [options]="filteredObstaclesOptions()"
+  [options]="filteredMeasureOptions()"
   [ngModel]="obstaclesService.selectedMeasureUuid()"
   (ngModelChange)="onObstacleSelect($event)"
-  [disabled]="!filteredObstaclesOptions().length"
+  [disabled]="!filteredMeasureOptions().length"
   data-testid="quick-measures-select-obstacle"
 />
 

@@ -201,7 +201,7 @@ export const createFloorTraces = ({
   // A floor is attached to its span's left support, which starts a span to the right;
   // endSupport belongs to the next span, so the slice excludes it — same rule as obstacles.
   const visibleSupportUuids = new Set((supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid));
-  const pointsByUuid = new Map(litData.obstacles.map((o) => [o.uuid, o.points as Coord3[]]));
+  const pointsByUuid = new Map(litData.obstacles.map((o) => [o.uuid, o.points]));
 
   const traces: DataObject[] = [];
   for (const floor of floors) {

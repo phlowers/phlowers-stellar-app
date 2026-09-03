@@ -102,9 +102,9 @@ describe('QuickMeasuresComponent', () => {
     obstaclesService.setSelectedMeasure(null, null);
   });
 
-  describe('filteredObstaclesOptions', () => {
+  describe('filteredMeasureOptions', () => {
     it('should return empty array when section is null', () => {
-      expect(component.filteredObstaclesOptions()).toEqual([]);
+      expect(component.filteredMeasureOptions()).toEqual([]);
     });
 
     it('should include only obstacles whose supportUuid falls within the slider range (endSupport exclusive)', () => {
@@ -117,7 +117,7 @@ describe('QuickMeasuresComponent', () => {
         ]
       } as unknown as Section);
 
-      expect(component.filteredObstaclesOptions()).toEqual([
+      expect(component.filteredMeasureOptions()).toEqual([
         { label: 'Not selected', value: null },
         { label: 'Obstacle A', value: 'obs-0' },
         { label: 'Obstacle B', value: 'obs-1' },
@@ -135,7 +135,7 @@ describe('QuickMeasuresComponent', () => {
         ]
       } as unknown as Section);
 
-      expect(component.filteredObstaclesOptions()).toEqual([
+      expect(component.filteredMeasureOptions()).toEqual([
         { label: 'Not selected', value: null },
         { label: 'Obstacle B', value: 'obs-1' }
       ]);
@@ -144,7 +144,7 @@ describe('QuickMeasuresComponent', () => {
     it('should include visible floors labeled with their span supports', () => {
       spanService.section.set(sectionWithFloor());
 
-      expect(component.filteredObstaclesOptions()).toEqual([
+      expect(component.filteredMeasureOptions()).toEqual([
         { label: 'Not selected', value: null },
         { label: 'Obstacle A', value: 'obs-0' },
         { label: 'floor 1 - 2', value: 'floor-0' }
@@ -155,7 +155,7 @@ describe('QuickMeasuresComponent', () => {
       plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 3 });
       spanService.section.set(sectionWithFloor());
 
-      expect(component.filteredObstaclesOptions()).toEqual([]);
+      expect(component.filteredMeasureOptions()).toEqual([]);
     });
   });
 

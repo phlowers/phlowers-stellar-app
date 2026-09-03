@@ -59,7 +59,7 @@ export class QuickMeasuresComponent {
   protected readonly obstacleStateService = inject(ObstacleStateService);
 
   /** Obstacles and floors attached to a support inside the visible span window (endSupport exclusive). */
-  filteredObstaclesOptions = computed(() => {
+  filteredMeasureOptions = computed(() => {
     const section = this.spanService.section();
     if (!section) return [];
     const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
