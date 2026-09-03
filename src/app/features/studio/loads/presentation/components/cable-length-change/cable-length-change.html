@@ -91,15 +91,14 @@
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    @if (form.controls.modifiedLengthCable.errors?.['min']) {
-    <p-message id="modifiedLengthCable-error-min" severity="error" size="small" variant="simple">
-      <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-      0
-    </p-message>
-    } @else if (form.controls.modifiedLengthCable.errors?.['max']) {
-    <p-message id="modifiedLengthCable-error-max" severity="error" size="small" variant="simple">
-      <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-      1000
+    @if (form.controls.modifiedLengthCable.errors?.['min'] || form.controls.modifiedLengthCable.errors?.['max']) {
+    <p-message
+      [id]="form.controls.modifiedLengthCable.errors?.['min'] ? 'modifiedLengthCable-error-min' : 'modifiedLengthCable-error-max'"
+      severity="error"
+      size="small"
+      variant="simple"
+    >
+      {{ 'common.out-of-bound-error' | transloco: { min: 0, max: 1000 } }}
     </p-message>
     } @else if (form.controls.modifiedLengthCable.errors?.['twoDecimal']) {
     <p-message id="modifiedLengthCable-error-twoDecimal" severity="error" size="small" variant="simple">
@@ -126,15 +125,14 @@
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    @if (form.controls.distanceSupportRef.errors?.['min']) {
-    <p-message id="distanceSupportRef-error-min" severity="error" size="small" variant="simple">
-      <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-      0
-    </p-message>
-    } @else if (form.controls.distanceSupportRef.errors?.['max']) {
-    <p-message id="distanceSupportRef-error-max" severity="error" size="small" variant="simple">
-      <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-      5000
+    @if (form.controls.distanceSupportRef.errors?.['min'] || form.controls.distanceSupportRef.errors?.['max']) {
+    <p-message
+      [id]="form.controls.distanceSupportRef.errors?.['min'] ? 'distanceSupportRef-error-min' : 'distanceSupportRef-error-max'"
+      severity="error"
+      size="small"
+      variant="simple"
+    >
+      {{ 'common.out-of-bound-error' | transloco: { min: 0, max: 5000 } }}
     </p-message>
     } @else if (form.controls.distanceSupportRef.errors?.['twoDecimal']) {
     <p-message id="distanceSupportRef-error-twoDecimal" severity="error" size="small" variant="simple">

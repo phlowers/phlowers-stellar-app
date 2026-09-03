@@ -76,15 +76,14 @@
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
-  @if (form.controls.distanceToRefSupport.errors?.['min']) {
-  <p-message id="distanceToRefSupport-error-min" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-    {{ distRefSupportMin() }}
-  </p-message>
-  } @else if (form.controls.distanceToRefSupport.errors?.['max']) {
-  <p-message id="distanceToRefSupport-error-max" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-    {{ distRefSupportMax() }}
+  @if (form.controls.distanceToRefSupport.errors?.['min'] || form.controls.distanceToRefSupport.errors?.['max']) {
+  <p-message
+    [id]="form.controls.distanceToRefSupport.errors?.['min'] ? 'distanceToRefSupport-error-min' : 'distanceToRefSupport-error-max'"
+    severity="error"
+    size="small"
+    variant="simple"
+  >
+    {{ 'common.out-of-bound-error' | transloco: { min: distRefSupportMin(), max: distRefSupportMax() } }}
   </p-message>
   } @else if (form.controls.distanceToRefSupport.errors?.['twoDecimal']) {
   <p-message id="distanceToRefSupport-error-twoDecimal" severity="error" size="small" variant="simple">
@@ -145,27 +144,15 @@
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.longitudinalDistance.errors?.['min']) {
+      @if (form.controls.longitudinalDistance.errors?.['min'] || form.controls.longitudinalDistance.errors?.['max']) {
       <p-message
-        id="longitudinalDistance-error-min"
+        [id]="form.controls.longitudinalDistance.errors?.['min'] ? 'longitudinalDistance-error-min' : 'longitudinalDistance-error-max'"
         severity="error"
         size="small"
         variant="simple"
         class="third-1-line__error-1"
       >
-        <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-        -100
-      </p-message>
-      } @else if (form.controls.longitudinalDistance.errors?.['max']) {
-      <p-message
-        id="longitudinalDistance-error-max"
-        severity="error"
-        size="small"
-        variant="simple"
-        class="third-1-line__error-1"
-      >
-        <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-        5000
+        {{ 'common.out-of-bound-error' | transloco: { min: -100, max: 5000 } }}
       </p-message>
       } @else if (form.controls.longitudinalDistance.errors?.['twoDecimal']) {
       <p-message
@@ -210,27 +197,15 @@
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.lateralDistance.errors?.['min']) {
+      @if (form.controls.lateralDistance.errors?.['min'] || form.controls.lateralDistance.errors?.['max']) {
       <p-message
-        id="lateralDistance-error-min"
+        [id]="form.controls.lateralDistance.errors?.['min'] ? 'lateralDistance-error-min' : 'lateralDistance-error-max'"
         severity="error"
         size="small"
         variant="simple"
         class="third-1-line__error-2"
       >
-        <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-        -100
-      </p-message>
-      } @else if (form.controls.lateralDistance.errors?.['max']) {
-      <p-message
-        id="lateralDistance-error-max"
-        severity="error"
-        size="small"
-        variant="simple"
-        class="third-1-line__error-2"
-      >
-        <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-        100
+        {{ 'common.out-of-bound-error' | transloco: { min: -100, max: 100 } }}
       </p-message>
       } @else if (form.controls.lateralDistance.errors?.['twoDecimal']) {
       <p-message
@@ -262,15 +237,15 @@
         />
         <p-inputgroup-addon>m</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.altitude.errors?.['min']) {
-      <p-message id="altitude-error-min" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-        <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-        -100
-      </p-message>
-      } @else if (form.controls.altitude.errors?.['max']) {
-      <p-message id="altitude-error-max" severity="error" size="small" variant="simple" class="third-1-line__error-3">
-        <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-        9000
+      @if (form.controls.altitude.errors?.['min'] || form.controls.altitude.errors?.['max']) {
+      <p-message
+        [id]="form.controls.altitude.errors?.['min'] ? 'altitude-error-min' : 'altitude-error-max'"
+        severity="error"
+        size="small"
+        variant="simple"
+        class="third-1-line__error-3"
+      >
+        {{ 'common.out-of-bound-error' | transloco: { min: -100, max: 9000 } }}
       </p-message>
       } @else if (form.controls.altitude.errors?.['twoDecimal']) {
       <p-message
@@ -427,15 +402,14 @@
     />
     <p-inputgroup-addon>m</p-inputgroup-addon>
   </p-inputgroup>
-  @if (form.controls.slingLength.errors?.['min']) {
-  <p-message id="slingLength-error-min" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-    0
-  </p-message>
-  } @else if (form.controls.slingLength.errors?.['max']) {
-  <p-message id="slingLength-error-max" severity="error" size="small" variant="simple">
-    <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-    99
+  @if (form.controls.slingLength.errors?.['min'] || form.controls.slingLength.errors?.['max']) {
+  <p-message
+    [id]="form.controls.slingLength.errors?.['min'] ? 'slingLength-error-min' : 'slingLength-error-max'"
+    severity="error"
+    size="small"
+    variant="simple"
+  >
+    {{ 'common.out-of-bound-error' | transloco: { min: 0, max: 99 } }}
   </p-message>
   } @else if (form.controls.slingLength.errors?.['twoDecimal']) {
   <p-message id="slingLength-error-twoDecimal" severity="error" size="small" variant="simple">

@@ -76,7 +76,9 @@ describe('CableSpanManipComponent', () => {
       imports: [
         CableSpanManipComponent,
         TranslocoTestingModule.forRoot({
-          langs: { en: {} },
+          langs: {
+            en: { common: { 'out-of-bound-error': 'Value must be between {{ min }} and {{ max }}' } }
+          },
           translocoConfig: {
             availableLangs: ['en'],
             defaultLang: 'en'
@@ -231,6 +233,183 @@ describe('CableSpanManipComponent', () => {
     it('should render the longitudinal distance input when cableManipType is with_a_crane', () => {
       expect(getByTestId('cable-span-manip-longitudinal-dist')).toBeTruthy();
       expect(getByTestId('cable-span-manip-longitudinal-dist-readonly')).toBeNull();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // HTML rendering — validation error messages
+  // ---------------------------------------------------------------------------
+  describe('HTML rendering - validation error messages', () => {
+    // p-message error blocks are identified by their `id` attribute, not `data-testid`.
+    const getById = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`#${id}`);
+
+    it('should not render any distanceToRefSupport error message when the value is valid', () => {
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.onScopeChange('support-uuid-1');
+      component.form.controls.distanceToRefSupport.setValue(10);
+      fixture.detectChanges();
+      expect(getById('distanceToRefSupport-error-min')).toBeNull();
+      expect(getById('distanceToRefSupport-error-max')).toBeNull();
+      expect(getById('distanceToRefSupport-error-twoDecimal')).toBeNull();
+    });
+
+    it('should render the min error message when distanceToRefSupport is below the dynamic minimum', () => {
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.onScopeChange('support-uuid-1');
+      component.form.controls.distanceToRefSupport.setValue(-999);
+      fixture.detectChanges();
+      const message = getById('distanceToRefSupport-error-min');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain(String(component.distRefSupportMin()));
+    });
+
+    it('should render the max error message when distanceToRefSupport is above the dynamic maximum', () => {
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.onScopeChange('support-uuid-1');
+      component.form.controls.distanceToRefSupport.setValue(999);
+      fixture.detectChanges();
+      const message = getById('distanceToRefSupport-error-max');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain(String(component.distRefSupportMax()));
+    });
+
+    it('should render the twoDecimal error message when distanceToRefSupport has more than two decimals', () => {
+      component.form.controls.scope.setValue('support-uuid-1');
+      component.onScopeChange('support-uuid-1');
+      component.form.controls.distanceToRefSupport.setValue(1.234);
+      fixture.detectChanges();
+      expect(getById('distanceToRefSupport-error-twoDecimal')).toBeTruthy();
+    });
+
+    it('should render the min error message when longitudinalDistance is below -100', () => {
+      component.form.controls.longitudinalDistance.setValue(-101);
+      fixture.detectChanges();
+      const message = getById('longitudinalDistance-error-min');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('-100');
+    });
+
+    it('should render the max error message when longitudinalDistance is above 5000', () => {
+      component.form.controls.longitudinalDistance.setValue(5001);
+      fixture.detectChanges();
+      const message = getById('longitudinalDistance-error-max');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('5000');
+    });
+
+    it('should render the twoDecimal error message when longitudinalDistance has more than two decimals', () => {
+      component.form.controls.longitudinalDistance.setValue(1.234);
+      fixture.detectChanges();
+      expect(getById('longitudinalDistance-error-twoDecimal')).toBeTruthy();
+    });
+
+    it('should render the min error message when lateralDistance is below -100', () => {
+      component.form.controls.lateralDistance.setValue(-101);
+      fixture.detectChanges();
+      const message = getById('lateralDistance-error-min');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('-100');
+    });
+
+    it('should render the max error message when lateralDistance is above 100', () => {
+      component.form.controls.lateralDistance.setValue(101);
+      fixture.detectChanges();
+      const message = getById('lateralDistance-error-max');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('100');
+    });
+
+    it('should render the twoDecimal error message when lateralDistance has more than two decimals', () => {
+      component.form.controls.lateralDistance.setValue(1.234);
+      fixture.detectChanges();
+      expect(getById('lateralDistance-error-twoDecimal')).toBeTruthy();
+    });
+
+    it('should render the min error message when altitude is below -100', () => {
+      component.form.controls.altitude.setValue(-101);
+      fixture.detectChanges();
+      const message = getById('altitude-error-min');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('-100');
+    });
+
+    it('should render the max error message when altitude is above 9000', () => {
+      component.form.controls.altitude.setValue(9001);
+      fixture.detectChanges();
+      const message = getById('altitude-error-max');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('9000');
+    });
+
+    it('should render the twoDecimal error message when altitude has more than two decimals', () => {
+      component.form.controls.altitude.setValue(1.234);
+      fixture.detectChanges();
+      expect(getById('altitude-error-twoDecimal')).toBeTruthy();
+    });
+
+    it('should render the min error message when slingLength is below 0', () => {
+      component.form.controls.slingLength.setValue(-1);
+      fixture.detectChanges();
+      const message = getById('slingLength-error-min');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('0');
+    });
+
+    it('should render the max error message when slingLength is above 99', () => {
+      component.form.controls.slingLength.setValue(100);
+      fixture.detectChanges();
+      const message = getById('slingLength-error-max');
+      expect(message).toBeTruthy();
+      expect(message?.textContent).toContain('99');
+    });
+
+    it('should render the twoDecimal error message when slingLength has more than two decimals', () => {
+      component.form.controls.slingLength.setValue(1.234);
+      fixture.detectChanges();
+      expect(getById('slingLength-error-twoDecimal')).toBeTruthy();
+    });
+
+    it('should not render any sling length error message once the value becomes valid again', () => {
+      component.form.controls.slingLength.setValue(100);
+      fixture.detectChanges();
+      expect(getById('slingLength-error-max')).toBeTruthy();
+      component.form.controls.slingLength.setValue(5);
+      fixture.detectChanges();
+      expect(getById('slingLength-error-max')).toBeNull();
+    });
+
+    describe('chain fields (anchoring = with_chain)', () => {
+      beforeEach(() => {
+        fixture = TestBed.createComponent(CableSpanManipComponent);
+        component = fixture.componentInstance;
+        component.form.controls.anchoring.enable();
+        component.form.controls.anchoring.setValue('with_chain');
+        fixture.detectChanges();
+      });
+
+      it('should render the twoDecimal error message when chainLength has more than two decimals', () => {
+        component.form.controls.chainLength.setValue(1.234);
+        fixture.detectChanges();
+        expect(getById('chainLength-error-twoDecimal')).toBeTruthy();
+      });
+
+      it('should render the twoDecimal error message when chainWeight has more than two decimals', () => {
+        component.form.controls.chainWeight.setValue(1.234);
+        fixture.detectChanges();
+        expect(getById('chainWeight-error-twoDecimal')).toBeTruthy();
+      });
+
+      it('should render the twoDecimal error message when chainSurface has more than two decimals', () => {
+        component.form.controls.chainSurface.setValue(1.234);
+        fixture.detectChanges();
+        expect(getById('chainSurface-error-twoDecimal')).toBeTruthy();
+      });
+
+      it('should render the twoDecimal error message when counterWeight has more than two decimals', () => {
+        component.form.controls.counterWeight.setValue(1.234);
+        fixture.detectChanges();
+        expect(getById('counterWeight-error-twoDecimal')).toBeTruthy();
+      });
     });
   });
 

@@ -45,7 +45,7 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
-import { TwoDecimalValidatorDirective } from '@shared/directives/decimalValidator.directive';
+import { twoDecimalValidator } from '@shared/helpers/numberValidators';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -74,8 +74,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     KeyFilterModule,
     MessageModule,
     PaginatorModule,
-    TranslocoModule,
-    TwoDecimalValidatorDirective
+    TranslocoModule
   ],
   templateUrl: './supportsTable.component.html',
   styleUrls: ['./supportsTable.component.scss'],
@@ -131,6 +130,8 @@ export class SupportsTableComponent implements OnInit {
     value: String(index + 1)
   }));
   readonly limits = SUPPORT_FIELD_LIMITS;
+  /** Exposed for template use, mirrors the shared reactive-forms validator (see cable-span-manip). */
+  readonly twoDecimalValidator = twoDecimalValidator;
 
   public onlyPositiveNumbers = /^\d*$/;
 

@@ -35,16 +35,17 @@
 
     @if (form.controls.windPressure.errors) {
       <div class="wind-error">
-        @if (form.controls.windPressure.errors['min']) {
-          <p-message id="windPressure-error-min" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-            {{ constraints.windPressure.min }}
-          </p-message>
-        }
-        @if (form.controls.windPressure.errors['max']) {
-          <p-message id="windPressure-error-max" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-            {{ constraints.windPressure.max }}
+        @if (form.controls.windPressure.errors['min'] || form.controls.windPressure.errors['max']) {
+          <p-message
+            [id]="form.controls.windPressure.errors['min'] ? 'windPressure-error-min' : 'windPressure-error-max'"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            {{
+              'common.out-of-bound-error'
+                | transloco: { min: constraints.windPressure.min, max: constraints.windPressure.max }
+            }}
           </p-message>
         }
         @if (form.controls.windPressure.errors['noDecimal']) {
@@ -77,16 +78,19 @@
 
     @if (form.controls.cableTemperature.errors) {
       <div class="temp-error">
-        @if (form.controls.cableTemperature.errors['min']) {
-          <p-message id="cableTemperature-error-min" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-            {{ constraints.cableTemperature.min }}
-          </p-message>
-        }
-        @if (form.controls.cableTemperature.errors['max']) {
-          <p-message id="cableTemperature-error-max" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-            {{ constraints.cableTemperature.max }}
+        @if (form.controls.cableTemperature.errors['min'] || form.controls.cableTemperature.errors['max']) {
+          <p-message
+            [id]="
+              form.controls.cableTemperature.errors['min'] ? 'cableTemperature-error-min' : 'cableTemperature-error-max'
+            "
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            {{
+              'common.out-of-bound-error'
+                | transloco: { min: constraints.cableTemperature.min, max: constraints.cableTemperature.max }
+            }}
           </p-message>
         }
         @if (form.controls.cableTemperature.errors['noDecimal']) {
@@ -130,16 +134,18 @@
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.iceThickness.errors?.['min']) {
-        <p-message id="iceThickness-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-          {{ constraints.iceThickness.min }}
-        </p-message>
-      }
-      @if (form.controls.iceThickness.errors?.['max']) {
-        <p-message id="iceThickness-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-          {{ constraints.iceThickness.max }}
+      @if (form.controls.iceThickness.errors?.['min'] || form.controls.iceThickness.errors?.['max']) {
+        <p-message
+          [id]="form.controls.iceThickness.errors?.['min'] ? 'iceThickness-error-min' : 'iceThickness-error-max'"
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          {{
+            'common.out-of-bound-error'
+              | transloco: { min: constraints.iceThickness.min, max: constraints.iceThickness.max }
+          }}
         </p-message>
       }
       @if (form.controls.iceThickness.errors?.['oneDecimal']) {
@@ -179,16 +185,22 @@
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
 
-      @if (form.controls.iceThicknessBefore.errors?.['min']) {
-        <p-message id="iceThicknessBefore-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-          {{ constraints.iceThickness.min }}
-        </p-message>
-      }
-      @if (form.controls.iceThicknessBefore.errors?.['max']) {
-        <p-message id="iceThicknessBefore-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-          {{ constraints.iceThickness.max }}
+      @if (form.controls.iceThicknessBefore.errors?.['min'] || form.controls.iceThicknessBefore.errors?.['max']) {
+        <p-message
+          [id]="
+            form.controls.iceThicknessBefore.errors?.['min']
+              ? 'iceThicknessBefore-error-min'
+              : 'iceThicknessBefore-error-max'
+          "
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          {{
+            'common.out-of-bound-error'
+              | transloco: { min: constraints.iceThickness.min, max: constraints.iceThickness.max }
+          }}
         </p-message>
       }
       @if (form.controls.iceThicknessBefore.errors?.['oneDecimal']) {
@@ -217,16 +229,22 @@
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
 
-      @if (form.controls.iceThicknessAfter.errors?.['min']) {
-        <p-message id="iceThicknessAfter-error-min" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-          {{ constraints.iceThickness.min }}
-        </p-message>
-      }
-      @if (form.controls.iceThicknessAfter.errors?.['max']) {
-        <p-message id="iceThicknessAfter-error-max" severity="error" size="small" variant="simple" class="pt-1">
-          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-          {{ constraints.iceThickness.max }}
+      @if (form.controls.iceThicknessAfter.errors?.['min'] || form.controls.iceThicknessAfter.errors?.['max']) {
+        <p-message
+          [id]="
+            form.controls.iceThicknessAfter.errors?.['min']
+              ? 'iceThicknessAfter-error-min'
+              : 'iceThicknessAfter-error-max'
+          "
+          severity="error"
+          size="small"
+          variant="simple"
+          class="pt-1"
+        >
+          {{
+            'common.out-of-bound-error'
+              | transloco: { min: constraints.iceThickness.min, max: constraints.iceThickness.max }
+          }}
         </p-message>
       }
       @if (form.controls.iceThicknessAfter.errors?.['oneDecimal']) {

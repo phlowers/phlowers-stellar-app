@@ -34,6 +34,7 @@
     "results": "Results:",
     "min-value": "Minimum value:",
     "max-value": "Maximum value:",
+    "out-of-bound-error": "Value must be between {{ min }} and {{ max }}",
     "one-decimal-error": "Maximum 1 decimal place",
     "two-decimals-error": "Maximum 2 decimal places",
     "no-decimal-error": "Whole number required",
