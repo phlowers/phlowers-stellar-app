@@ -25,7 +25,7 @@ describe('ScaleViewComponent', () => {
     setScalingFactors: ReturnType<typeof vi.fn>;
     scalingFactors: ReturnType<typeof signal<ScalingFactors>>;
   };
-  let mockPopover: { toggle: vi.Mock };
+  let mockPopover: { toggle: vi.Mock; hide: vi.Mock };
   let scalingFactorsSignal: ReturnType<typeof signal<ScalingFactors>>;
 
   beforeEach(async () => {
@@ -46,7 +46,7 @@ describe('ScaleViewComponent', () => {
       scalingFactors: scalingFactorsSignal
     };
 
-    mockPopover = { toggle: vi.fn() };
+    mockPopover = { toggle: vi.fn(), hide: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -229,7 +229,17 @@ describe('ScaleViewComponent', () => {
       await component.onValidate();
 
       expect(component.popoverOpen()).toBe(false);
-      expect(mockPopover.toggle).toHaveBeenCalled();
+      expect(mockPopover.hide).toHaveBeenCalled();
+    });
+
+    // Regression for bug #1146: onValidate must NOT call toggle() with a synthetic
+    // event. Doing so left PrimeNG with a null target and crashed on the hide-animation
+    // end (`show(null)` reading `event.currentTarget`). It must close via hide() instead.
+    it('should close the popover via hide(), never toggle() (no synthetic event)', async () => {
+      await component.onValidate();
+
+      expect(mockPopover.hide).toHaveBeenCalledTimes(1);
+      expect(mockPopover.toggle).not.toHaveBeenCalled();
     });
 
     it('should call setResolution with the current pointsControl value', async () => {
