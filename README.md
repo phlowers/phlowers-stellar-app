@@ -32,11 +32,18 @@ Run `npm run test` to execute the unit tests.
 
 #### Running local documentation
 
-Go to `docs-sphinx` folder and run 
+The documentation is built with Sphinx. First, go to the `docs-sphinx` folder and prepare the Python environment:
+
 ```shell
-uv venv --python 3.13 # to create a venv 
-source .venv/bin/activate # to activate it.
-uv pip install -r requirements.txt # to install the dependencies. 
+uv venv --python 3.13              # create a venv
+source .venv/bin/activate          # activate it
+uv pip install -r requirements.txt # install Sphinx and dependencies
 ```
 
-You can now run `npm run docs` to build or directly `npm run autodocs` to build and serve the documentation on `http://localhost:8000/` with live reload on changes.
+Once the environment is ready, you can use the following npm scripts from the project root:
+
+- `npm run docs` — cleans and builds the static HTML documentation in `docs-sphinx/build/html`.
+- `npm run autodocs` — builds and serves the documentation on `http://localhost:8000/` with live reload on changes.
+- `npm run docs:open` — builds the documentation and opens `docs-sphinx/build/html/index.html` in your default browser.
+
+Use `npm run autodocs` during active writing so changes are rebuilt and reloaded automatically.
