@@ -31,6 +31,7 @@ import { ConformityComponent } from '../conformity/conformity.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { obstaclePositionConstraints } from '@shared/domain/obstacles/obstacle-form.constants';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -70,6 +71,7 @@ export class ObstaclesFormComponent {
   readonly isConformityModalOpen = signal(false);
   readonly conformityRef = viewChild(ConformityComponent);
   readonly obstacleTypeOptions = signal<{ label: string; value: string }[]>([]);
+  readonly obstaclePositionConstraints = obstaclePositionConstraints;
   readonly isCalculating = computed(
     () => this.obstacleFormService.isCalculatingObstacle() || this.plotService.loading()
   );

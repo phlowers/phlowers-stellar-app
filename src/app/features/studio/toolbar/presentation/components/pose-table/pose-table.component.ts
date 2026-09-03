@@ -10,18 +10,12 @@ import {
   untracked,
   viewChild
 } from '@angular/core';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { SectionService } from '@services/section/section.service';
+import { maxTwoDecimalsValidator, integerValidator } from '@shared/helpers/form-validators';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { InputNumberComponent } from '@shared/components/atoms/input-number/input-number.component';
@@ -99,7 +93,7 @@ export class PoseTableComponent {
         Validators.required,
         Validators.min(this.LOWEST_TEMP_MIN),
         Validators.max(this.LOWEST_TEMP_MAX),
-        PoseTableComponent.maxTwoDecimalsValidator
+        maxTwoDecimalsValidator
       ]
     }),
     computingStep: new FormControl<number>(this.COMPUTING_STEP_DEFAULT, {
@@ -108,7 +102,7 @@ export class PoseTableComponent {
         Validators.required,
         Validators.min(this.COMPUTING_STEP_MIN),
         Validators.max(this.COMPUTING_STEP_MAX),
-        PoseTableComponent.integerValidator
+        integerValidator
       ]
     })
   });
@@ -231,30 +225,21 @@ export class PoseTableComponent {
 
   getLowestTempError(): string {
     const errors = this.form.controls.lowestTemp.errors;
-    if (errors?.['required']) return this.translocoService.translate('common.required');
     if (errors?.['maxTwoDecimals']) return this.translocoService.translate('studio.pose-table.max-two-decimals-error');
-    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.LOWEST_TEMP_MIN + '°C';
-    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.LOWEST_TEMP_MAX + '°C';
-    return '';
+    return this.getRangeError(errors, this.LOWEST_TEMP_MIN, this.LOWEST_TEMP_MAX, '°C');
   }
 
   getComputingStepError(): string {
     const errors = this.form.controls.computingStep.errors;
-    if (errors?.['required']) return this.translocoService.translate('common.required');
     if (errors?.['integer']) return this.translocoService.translate('studio.pose-table.integer-error');
-    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.COMPUTING_STEP_MIN;
-    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.COMPUTING_STEP_MAX;
+    return this.getRangeError(errors, this.COMPUTING_STEP_MIN, this.COMPUTING_STEP_MAX);
+  }
+
+  /** Builds the error message shared by every range-constrained control: required, min, max. */
+  private getRangeError(errors: ValidationErrors | null, min: number, max: number, unit = ''): string {
+    if (errors?.['required']) return this.translocoService.translate('common.required');
+    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + min + unit;
+    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + max + unit;
     return '';
-  }
-
-  private static maxTwoDecimalsValidator(control: AbstractControl): ValidationErrors | null {
-    if (control.value === null) return null;
-    const str = control.value.toString();
-    const sep = str.indexOf('.');
-    return sep !== -1 && str.length - sep - 1 > 2 ? { maxTwoDecimals: true } : null;
-  }
-
-  private static integerValidator(control: AbstractControl): ValidationErrors | null {
-    return control.value !== null && !Number.isInteger(control.value) ? { integer: true } : null;
   }
 }

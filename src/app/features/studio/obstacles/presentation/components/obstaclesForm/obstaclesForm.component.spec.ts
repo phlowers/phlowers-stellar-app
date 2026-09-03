@@ -174,7 +174,10 @@ describe('ObstaclesFormComponent', () => {
               'studio.shared.vertical': 'Vertical',
               'studio.shared.horizontal': 'Horizontal',
               'studio.obstacles-form.conformity-dialog-title': 'Conformity verifications',
-              'studio.shared.conformity-label': 'Conformity'
+              'studio.shared.conformity-label': 'Conformity',
+              'common.min-value-compact': 'Min:',
+              'common.max-value-compact': 'Max:',
+              'common.max-two-decimals-error': 'Max 2 decimals'
             }
           },
           translocoConfig: {
@@ -1101,6 +1104,44 @@ describe('ObstaclesFormComponent', () => {
 
       const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
       expect(positionGroup.get('y')?.value).toBe(-7.8);
+    });
+  });
+
+  describe('point field validation errors', () => {
+    const setErrors = (key: 'x' | 'y' | 'z', errors: Record<string, boolean> | null) => {
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      positionGroup.get(key)?.setErrors(errors);
+      fixture.detectChanges();
+    };
+
+    it('should show no error message when the field is valid', () => {
+      setErrors('z', null);
+      expect(getByTestId('point-altitude-error')?.textContent?.trim()).toBe('');
+    });
+
+    it('should show the min error message alone for the altitude field', () => {
+      setErrors('z', { min: true });
+      expect(getByTestId('point-altitude-error')?.textContent).toContain('-100');
+      expect(getByTestId('point-altitude-error')?.textContent).not.toContain('9000');
+    });
+
+    it('should show the max error message alone for the ref distance field', () => {
+      setErrors('x', { max: true });
+      expect(getByTestId('point-ref-distance-error')?.textContent).toContain('5000');
+      expect(getByTestId('point-ref-distance-error')?.textContent).not.toContain('-50');
+    });
+
+    it('should show the decimals error message alone for the axis distance field', () => {
+      setErrors('y', { maxTwoDecimals: true });
+      expect(getByTestId('point-axis-distance-error')?.textContent).toContain('decimal');
+    });
+
+    it('should only show one message at a time when multiple errors are present (min takes priority)', () => {
+      setErrors('z', { min: true, max: true, maxTwoDecimals: true });
+      const text = getByTestId('point-altitude-error')?.textContent ?? '';
+      expect(text).toContain('-100');
+      expect(text).not.toContain('9000');
+      expect(text.toLowerCase()).not.toContain('decimal');
     });
   });
 

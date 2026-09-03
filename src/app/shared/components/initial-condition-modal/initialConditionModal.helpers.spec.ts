@@ -1,32 +1,6 @@
 import { FormBuilder, Validators } from '@angular/forms';
-import {
-  getErrorIds,
-  integerValidator
-} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
-
-describe('integerValidator', () => {
-  const fb = new FormBuilder();
-
-  it('should return null when value is null', () => {
-    const control = fb.control(null);
-    expect(integerValidator(control)).toBeNull();
-  });
-
-  it('should return null when value is undefined', () => {
-    const control = fb.control(undefined);
-    expect(integerValidator(control)).toBeNull();
-  });
-
-  it('should return null for an integer value', () => {
-    const control = fb.control(15);
-    expect(integerValidator(control)).toBeNull();
-  });
-
-  it('should return an integer error for a decimal value', () => {
-    const control = fb.control(15.5);
-    expect(integerValidator(control)).toEqual({ integer: true });
-  });
-});
+import { getErrorIds } from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
+import { integerValidator } from '@shared/helpers/form-validators';
 
 describe('getErrorIds', () => {
   const fb = new FormBuilder();

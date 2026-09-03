@@ -16,7 +16,12 @@ import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
-import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domain/obstacles/obstacle-form.constants';
+import {
+  DEBOUNCED_UPDATE_POINT_DELAY,
+  defaultObstacleForm,
+  obstaclePositionConstraints
+} from '@shared/domain/obstacles/obstacle-form.constants';
+import { maxTwoDecimalsValidator } from '@shared/helpers/form-validators';
 import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -59,8 +64,8 @@ export class ObstacleFormService {
     return positions.map((position) => this.createPositionGroup(position));
   }
 
-  get positions(): FormArray {
-    return this.form.get('positions') as FormArray;
+  get positions(): FormArray<PositionFormGroup> {
+    return this.form.get('positions') as FormArray<PositionFormGroup>;
   }
 
   private readonly positionsSnapshot = toSignal(this.positions.valueChanges as Observable<Position3D[]>, {
@@ -69,9 +74,30 @@ export class ObstacleFormService {
 
   createPositionGroup(position: Position3D = this.defaultPosition): PositionFormGroup {
     return this.fb.group({
-      x: [position.x],
-      y: [position.y],
-      z: [position.z]
+      x: [
+        position.x,
+        [
+          Validators.min(obstaclePositionConstraints.x.min),
+          Validators.max(obstaclePositionConstraints.x.max),
+          maxTwoDecimalsValidator
+        ]
+      ],
+      y: [
+        position.y,
+        [
+          Validators.min(obstaclePositionConstraints.y.min),
+          Validators.max(obstaclePositionConstraints.y.max),
+          maxTwoDecimalsValidator
+        ]
+      ],
+      z: [
+        position.z,
+        [
+          Validators.min(obstaclePositionConstraints.z.min),
+          Validators.max(obstaclePositionConstraints.z.max),
+          maxTwoDecimalsValidator
+        ]
+      ]
     });
   }
 
