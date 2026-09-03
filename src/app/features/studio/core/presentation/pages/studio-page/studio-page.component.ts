@@ -60,6 +60,14 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Section, Study } from '@shared/domain';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
+import {
+  buildSpanRows,
+  buildSupportRows,
+  maxOf
+} from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
+import { SectionStateReportData } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.interfaces';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -226,6 +234,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly logger = inject(LoggerService);
   private readonly persistenceService = inject(StudioViewPersistenceService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly sectionStateReportService = inject(SectionStateReportService);
 
   previousSectionUuid = signal<string | null>(null);
   private readonly activeSectionUuid = signal<string | null>(null);
@@ -452,6 +462,50 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   openNewChargeModal() {
     this.isNewChargeModalOpen.set(true);
+  }
+
+  /** Builds the section state report data from the current state and triggers PDF generation. */
+  async onGenerateReport(): Promise<void> {
+    const study = this.plotService.study();
+    const section = this.spanService.section();
+    const litData = this.plotService.litData();
+
+    if (!section || !litData) {
+      this.notificationService.warning(this.translocoService.translate('studio.section-state-report.warning-no-data'));
+      return;
+    }
+
+    const params = litData.output_parameters;
+    const supports = section.supports;
+    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
+
+    const initialCondition = section.initial_conditions.find(
+      (ic) => ic.uuid === section.selected_initial_condition_uuid
+    );
+    const charge = section.charges.find((c) => c.uuid === section.selected_charge_uuid);
+
+    const data: SectionStateReportData = {
+      author: study?.author_email ?? '-',
+      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      studyTitle: study?.title ?? '-',
+      studyDescription: study?.description ?? '',
+      sectionName: section.name ?? '-',
+      sectionComment: section.comment ?? '',
+      icName: initialCondition?.name ?? '-',
+      chargeName: charge?.name ?? '-',
+      chargeDescription: charge?.description ?? '',
+      maxParameter: maxOf(params.parameter),
+      maxStressRate: maxOf(params.utilization_rate),
+      spans: buildSpanRows(params, supports, startSupport, endSupport),
+      supports: buildSupportRows(params, supports, startSupport, endSupport)
+    };
+
+    await this.sectionStateReportService.generateReport(data);
+  }
+
+  private getLocaleForDate(): string {
+    const activeLang = this.translocoService.getActiveLang();
+    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   onSelectSpanAmount(value: string) {
