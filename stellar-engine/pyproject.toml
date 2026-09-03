@@ -26,7 +26,6 @@ keywords = ["stellar", "phlowers", "mechaphlowers"]
 
 dependencies = [
     "mechaphlowers==0.11.2",
-    "pyproj==3.7.2",
 ]
 
 [project.urls]
