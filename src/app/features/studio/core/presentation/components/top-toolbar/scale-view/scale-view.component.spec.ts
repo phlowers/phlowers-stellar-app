@@ -232,7 +232,7 @@ describe('ScaleViewComponent', () => {
       expect(mockPopover.hide).toHaveBeenCalled();
     });
 
-    // Regression for bug #1146: onValidate must NOT call toggle() with a synthetic
+    // Regression for bug #1148: onValidate must NOT call toggle() with a synthetic
     // event. Doing so left PrimeNG with a null target and crashed on the hide-animation
     // end (`show(null)` reading `event.currentTarget`). It must close via hide() instead.
     it('should close the popover via hide(), never toggle() (no synthetic event)', async () => {
@@ -509,7 +509,7 @@ describe('ScaleViewComponent', () => {
 
     it('should not emit valueChanges when the scale radio is updated by sync', () => {
       const emittedValues: string[] = [];
-      const sub = component.formScaleView.get('scale')!.valueChanges.subscribe((v) => emittedValues.push(v));
+      const sub = component.formScaleView.get('scale')!.valueChanges.subscribe((v) => emittedValues.push(v as string));
 
       scalingFactorsSignal.set({ x: 0.2, y: 1, z: 1, aspectMode: 'manual' });
       fixture.detectChanges();
