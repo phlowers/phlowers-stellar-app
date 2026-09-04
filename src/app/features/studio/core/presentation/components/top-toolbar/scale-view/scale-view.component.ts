@@ -141,7 +141,11 @@ export class ScaleViewComponent {
   }
 
   public async onValidate(): Promise<void> {
-    this.togglePopover(new Event('click'));
+    // Close via the Popover's own hide() API. Passing a synthetic `new Event('click')`
+    // to toggle() left PrimeNG with a null target, crashing on the hide-animation end
+    // (`show(null)` reading `event.currentTarget`) — bug #1146.
+    this.popover()?.hide();
+    this.popoverOpen.set(false);
 
     const resolution = this.pointsControl.value;
     const scale = this.formScaleView.get('scale')?.value as string;

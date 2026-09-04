@@ -19,7 +19,15 @@ extensions = [
     "myst_parser",  # Support for Markdown files
     "sphinx_design",  # Grid, cards, tabs, badges, etc.
     "sphinx_copybutton",  # Copy button on code blocks
+    "sphinx_simplepdf",  # PDF generation via WeasyPrint
 ]
+
+# Sphinx-SimplePDF configuration
+simplepdf_file_name = "stellar_documentation.pdf"
+simplepdf_vars = {
+    "primary": "#1F4E79",
+    "links": "#1F4E79",
+}
 
 # sphinx-js configuration for TypeScript
 js_language = "typescript"

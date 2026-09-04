@@ -184,7 +184,7 @@ describe('AttachmentService', () => {
     });
   });
 
-  describe('resolveGeoLiaisonCatalogAttachment', () => {
+  describe('resolveCatalogAttachment', () => {
     it('resolves using SUPPORT_IDR first and requires complete L/X/Y/Z', async () => {
       mockTable.get.mockResolvedValue({
         uuid: 'g',
@@ -204,7 +204,7 @@ describe('AttachmentService', () => {
         ]
       });
 
-      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', 'SUPPORT_ADR_1', 4);
+      const result = await service.resolveCatalogAttachment('SUPPORT_IDR_1', 'SUPPORT_ADR_1', 4);
       expect(result?.support_name).toBe('SUPPORT_IDR_1');
       expect(mockTable.get).toHaveBeenCalledWith('SUPPORT_IDR_1');
     });
@@ -228,7 +228,7 @@ describe('AttachmentService', () => {
         ]
       });
 
-      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', 'SUPPORT_ADR_1', 4);
+      const result = await service.resolveCatalogAttachment('SUPPORT_IDR_1', 'SUPPORT_ADR_1', 4);
       expect(result?.support_name).toBe('SUPPORT_ADR_1');
     });
 
@@ -251,7 +251,7 @@ describe('AttachmentService', () => {
         ]
       });
 
-      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', null, 4);
+      const result = await service.resolveCatalogAttachment('SUPPORT_IDR_1', null, 4);
       expect(result).toBeUndefined();
     });
 
@@ -274,7 +274,7 @@ describe('AttachmentService', () => {
         ]
       });
 
-      const result = await service.resolveGeoLiaisonCatalogAttachment('SUPPORT_IDR_1', null, 0);
+      const result = await service.resolveCatalogAttachment('SUPPORT_IDR_1', null, 0);
       expect(result).toBeDefined();
       expect(result?.attachment_set).toBe(0);
     });

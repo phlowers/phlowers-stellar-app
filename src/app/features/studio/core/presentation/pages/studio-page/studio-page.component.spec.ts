@@ -29,6 +29,8 @@ import { Section, Study } from '@shared/domain';
 import { Camera } from 'plotly.js-dist-min';
 import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 interface SignalFn<T> {
@@ -106,6 +108,8 @@ describe('StudioPageComponent', () => {
   let obstaclesService: ObstaclesService;
   let obstacleFormService: vi.Mocked<ObstacleFormService>;
   let mockObstacleStateService: { distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> };
+  let mockNotificationService: { warning: ReturnType<typeof vi.fn> };
+  let mockSectionStateReportService: { generateReport: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
@@ -136,6 +140,8 @@ describe('StudioPageComponent', () => {
       clearPositions: vi.fn()
     } as unknown as vi.Mocked<ObstacleFormService>;
     mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
+    mockNotificationService = { warning: vi.fn() };
+    mockSectionStateReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -199,6 +205,8 @@ describe('StudioPageComponent', () => {
         { provide: ObstacleFormService, useValue: obstacleFormService },
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
         { provide: StudioViewPersistenceService, useValue: mockPersistenceService },
+        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: SectionStateReportService, useValue: mockSectionStateReportService },
         provideHttpClient(),
         provideHttpClientTesting(),
         {
@@ -1338,6 +1346,43 @@ describe('StudioPageComponent', () => {
       component.globalState.set('span');
       // findMiddleSpan(0,4) = [2,3] → index 2 → 30
       expect(component.globalStressRate()).toBe(30);
+    });
+  });
+
+  describe('onGenerateReport', () => {
+    it('should warn and not generate when there is no computed data', async () => {
+      spanService.section.set({ supports: [] } as unknown as Section);
+      plotService.litData.set(null);
+
+      await component.onGenerateReport();
+
+      expect(mockNotificationService.warning).toHaveBeenCalled();
+      expect(mockSectionStateReportService.generateReport).not.toHaveBeenCalled();
+    });
+
+    it('should build the report data and delegate to the report service', async () => {
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ startSupport: 0, endSupport: 1 });
+      spanService.section.set({
+        name: 'Section A',
+        comment: 'A comment',
+        supports: [{ number: '1' }, { number: '2' }],
+        initial_conditions: [{ uuid: 'ic-1', name: 'IC 1' }],
+        selected_initial_condition_uuid: 'ic-1',
+        charges: [{ uuid: 'ch-1', name: 'Charge 1', description: 'desc' }],
+        selected_charge_uuid: 'ch-1'
+      } as unknown as Section);
+      plotService.litData.set({ output_parameters: { parameter: [10, 20], utilization_rate: [30, 40] } });
+
+      await component.onGenerateReport();
+
+      expect(mockNotificationService.warning).not.toHaveBeenCalled();
+      expect(mockSectionStateReportService.generateReport).toHaveBeenCalledTimes(1);
+      const data = mockSectionStateReportService.generateReport.mock.calls[0][0];
+      expect(data.sectionName).toBe('Section A');
+      expect(data.chargeName).toBe('Charge 1');
+      expect(data.icName).toBe('IC 1');
+      expect(data.maxParameter).toBe(20);
+      expect(data.maxStressRate).toBe(40);
     });
   });
 });

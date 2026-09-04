@@ -6,7 +6,7 @@
  */
 import { Section, Support } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
-import { GeoLiaisonAccroche, GeoLiaisonFormat } from './section-import.interfaces';
+import { Attachment, SectionImportFile } from './section-import.interfaces';
 import {
   applyFootCoordinates,
   buildReprojectionAngles,
@@ -18,7 +18,7 @@ import {
   normalizeVoltage,
   parseBooleanOrNull,
   parseFloatOrNull,
-  validateGeoLiaisonRawFields
+  validateImportedSectionFields
 } from './section-import.helpers';
 
 /** Builds a minimal Support for helper tests, overriding only the fields under test. */
@@ -27,8 +27,8 @@ const buildSupport = (overrides: Partial<Support> = {}): Support => ({
   ...overrides
 });
 
-/** Builds a minimal valid GeoLiaisonAccroche for helper tests, overriding only the fields under test. */
-const buildAccroche = (overrides: Partial<GeoLiaisonAccroche> = {}): GeoLiaisonAccroche =>
+/** Builds a minimal valid Accroche for helper tests, overriding only the fields under test. */
+const buildAccroche = (overrides: Partial<Attachment> = {}): Attachment =>
   ({
     ANGLE_LIGNE: '5.0',
     ACCROCHE_SET: '19',
@@ -50,15 +50,15 @@ const buildAccroche = (overrides: Partial<GeoLiaisonAccroche> = {}): GeoLiaisonA
     SUPPORT_NUMERO: '1',
     SUPPORT_TOWER: 'TowerX',
     ...overrides
-  }) as GeoLiaisonAccroche;
+  }) as Attachment;
 
-/** Builds a minimal valid GeoLiaisonFormat payload for helper tests. */
-const buildGeoLiaisonFormat = (overrides: {
+/** Builds a minimal valid SectionImportFile payload for helper tests. */
+const buildSectionImportFile = (overrides: {
   general?: Record<string, unknown>;
   portee?: Record<string, unknown>;
-  depart?: Partial<GeoLiaisonAccroche>;
-  arrivee?: Partial<GeoLiaisonAccroche>;
-}): GeoLiaisonFormat =>
+  depart?: Partial<Attachment>;
+  arrivee?: Partial<Attachment>;
+}): SectionImportFile =>
   ({
     cantons: [
       {
@@ -80,7 +80,7 @@ const buildGeoLiaisonFormat = (overrides: {
         ]
       }
     ]
-  }) as unknown as GeoLiaisonFormat;
+  }) as unknown as SectionImportFile;
 
 describe('extractBranchIdr', () => {
   it('should return "1" for "TESTLINE73STB01"', () => {
@@ -300,52 +300,52 @@ describe('computeMeanReprojectionDiffMeters', () => {
   });
 });
 
-describe('validateGeoLiaisonRawFields', () => {
+describe('validateImportedSectionFields', () => {
   it('should return no errors for a fully valid payload', () => {
-    expect(validateGeoLiaisonRawFields(buildGeoLiaisonFormat({}))).toEqual([]);
+    expect(validateImportedSectionFields(buildSectionImportFile({}))).toEqual([]);
   });
 
   it('should report CABLE_ADR when missing', () => {
-    const errors = validateGeoLiaisonRawFields(buildGeoLiaisonFormat({ general: { CABLE_ADR: null } }));
+    const errors = validateImportedSectionFields(buildSectionImportFile({ general: { CABLE_ADR: null } }));
     expect(errors).toContainEqual({ field: 'CABLE_ADR', value: null });
   });
 
   it('should report CANTON_TYPE when missing', () => {
-    const errors = validateGeoLiaisonRawFields(buildGeoLiaisonFormat({ general: { CANTON_TYPE: null } }));
+    const errors = validateImportedSectionFields(buildSectionImportFile({ general: { CANTON_TYPE: null } }));
     expect(errors).toContainEqual({ field: 'CANTON_TYPE', value: null });
   });
 
   it('should report FAISCEAU_CABLES_NOMBRE when missing', () => {
-    const errors = validateGeoLiaisonRawFields(buildGeoLiaisonFormat({ general: { FAISCEAU_CABLES_NOMBRE: null } }));
+    const errors = validateImportedSectionFields(buildSectionImportFile({ general: { FAISCEAU_CABLES_NOMBRE: null } }));
     expect(errors).toContainEqual({ field: 'FAISCEAU_CABLES_NOMBRE', value: null });
   });
 
   it('should report a single "portee unitaire" error when the portee array is empty', () => {
-    const payload = buildGeoLiaisonFormat({});
+    const payload = buildSectionImportFile({});
     payload.cantons[0]['portee unitaire'] = [];
-    expect(validateGeoLiaisonRawFields(payload)).toEqual([{ field: 'portee unitaire', value: null }]);
+    expect(validateImportedSectionFields(payload)).toEqual([{ field: 'portee unitaire', value: null }]);
   });
 
   it('should report PORTEE_LONGUEUR and PORTEE_AZIMUT when missing', () => {
-    const errors = validateGeoLiaisonRawFields(
-      buildGeoLiaisonFormat({ portee: { PORTEE_LONGUEUR: null, PORTEE_AZIMUT: null } })
+    const errors = validateImportedSectionFields(
+      buildSectionImportFile({ portee: { PORTEE_LONGUEUR: null, PORTEE_AZIMUT: null } })
     );
     expect(errors).toContainEqual({ field: 'PORTEE_LONGUEUR', value: null });
     expect(errors).toContainEqual({ field: 'PORTEE_AZIMUT', value: null });
   });
 
   it('should report a missing required accroche field on the depart accroche', () => {
-    const errors = validateGeoLiaisonRawFields(buildGeoLiaisonFormat({ depart: { ANGLE_LIGNE: null } }));
+    const errors = validateImportedSectionFields(buildSectionImportFile({ depart: { ANGLE_LIGNE: null } }));
     expect(errors).toContainEqual({ field: 'ANGLE_LIGNE', value: null });
   });
 
   it('should report SUPPORT_NUMERO when missing on the depart accroche', () => {
-    const errors = validateGeoLiaisonRawFields(buildGeoLiaisonFormat({ depart: { SUPPORT_NUMERO: null } }));
+    const errors = validateImportedSectionFields(buildSectionImportFile({ depart: { SUPPORT_NUMERO: null } }));
     expect(errors).toContainEqual({ field: 'SUPPORT_NUMERO', value: null });
   });
 
   it('should not check the arrivee accroche of a non-last portee', () => {
-    const payload = buildGeoLiaisonFormat({});
+    const payload = buildSectionImportFile({});
     // Add a second, valid portee so the first one (index 0) is no longer the last.
     payload.cantons[0]['portee unitaire'].push({
       PORTEE_UNITAIRE_ORDRE: '2',
@@ -353,26 +353,26 @@ describe('validateGeoLiaisonRawFields', () => {
       PORTEE_AZIMUT: '20.0',
       'accroche depart': buildAccroche({ SUPPORT_NUMERO: '3' }),
       'accroche arrivee': buildAccroche({ SUPPORT_NUMERO: '4' })
-    } as unknown as GeoLiaisonFormat['cantons'][0]['portee unitaire'][0]);
+    } as unknown as SectionImportFile['cantons'][0]['portee unitaire'][0]);
     (payload.cantons[0]['portee unitaire'][0]['accroche arrivee'] as unknown as Record<string, unknown>)[
       'ANGLE_LIGNE'
     ] = null;
 
-    const errors = validateGeoLiaisonRawFields(payload);
+    const errors = validateImportedSectionFields(payload);
     expect(errors).toEqual([]);
   });
 
   it('should deduplicate the same missing field reported across multiple portees', () => {
-    const payload = buildGeoLiaisonFormat({ depart: { ANGLE_LIGNE: null } });
+    const payload = buildSectionImportFile({ depart: { ANGLE_LIGNE: null } });
     payload.cantons[0]['portee unitaire'].push({
       PORTEE_UNITAIRE_ORDRE: '2',
       PORTEE_LONGUEUR: '50.0',
       PORTEE_AZIMUT: '20.0',
       'accroche depart': buildAccroche({ SUPPORT_NUMERO: '3', ANGLE_LIGNE: null }),
       'accroche arrivee': buildAccroche({ SUPPORT_NUMERO: '4' })
-    } as unknown as GeoLiaisonFormat['cantons'][0]['portee unitaire'][0]);
+    } as unknown as SectionImportFile['cantons'][0]['portee unitaire'][0]);
 
-    const errors = validateGeoLiaisonRawFields(payload);
+    const errors = validateImportedSectionFields(payload);
     expect(errors.filter((e) => e.field === 'ANGLE_LIGNE')).toHaveLength(1);
   });
 });

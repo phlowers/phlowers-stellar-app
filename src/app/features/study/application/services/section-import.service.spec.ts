@@ -21,10 +21,10 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
-import fakeGeoLiaisonCanton101To103 from './section-import.fixtures/fake-canton.json';
+import fakeCanton101To103 from './section-import.fixtures/fake-canton.json';
 
-const geoLiaisonSupportCatalogMissingWarning =
-  'The attachment support from the geolink file is not present in the application support catalog';
+const sectionSupportCatalogMissingWarning =
+  'The attachment support from the section file is not present in the application support catalog';
 
 const sectionImportTranslations: Record<string, string> = {
   'section-import.file-type-not-allowed': 'File type not allowed',
@@ -34,9 +34,9 @@ const sectionImportTranslations: Record<string, string> = {
   'section-import.validation-supports-bounds': 'Section has supports with values out of bounds',
   'section-import.import-error': 'Error importing section',
   'section-import.delete-error': 'Error deleting section',
-  'section-import.geo-liaison-format-error': 'The geolink file to import is invalid.',
+  'section-import.section-format-error': 'The section file to import is invalid.',
   'section-import.lambert-reprojection-error': 'Error computing GPS coordinates from Lambert93 data',
-  'section-import.catalog-missing-warning': geoLiaisonSupportCatalogMissingWarning,
+  'section-import.catalog-missing-warning': sectionSupportCatalogMissingWarning,
   'section-import.import-success': 'Section imported successfully'
 };
 
@@ -98,8 +98,8 @@ const buildValidSectionPayload = (): Partial<Section> & Record<string, unknown> 
   ]
 });
 
-/** Builds a minimal accroche object for GeoLiaison tests. */
-const buildAccroche = (overrides: Record<string, string | null> = {}): Record<string, string | null> => ({
+/** Builds a minimal accroche object for canton import tests. */
+const buildAttachment = (overrides: Record<string, string | null> = {}): Record<string, string | null> => ({
   ANGLE_LIGNE: '5.0',
   ACCROCHE_SET: '19',
   ACCROCHE_CABLE_Z_LAMBERT93: '25.0',
@@ -122,8 +122,8 @@ const buildAccroche = (overrides: Record<string, string | null> = {}): Record<st
   ...overrides
 });
 
-/** Builds a minimal portee object for GeoLiaison tests. */
-const buildPortee = (
+/** Builds a minimal portee object for canton import tests. */
+const buildSpan = (
   ordre: string,
   designation: string,
   departOverrides: Record<string, string | null> = {},
@@ -136,12 +136,12 @@ const buildPortee = (
   EEL_DESIGNATION: 'EEL_01',
   GMR_DESIGNATION: 'GMR_01',
   PORTEE_UNITAIRE_DESIGNATION: designation,
-  'accroche depart': buildAccroche({ SUPPORT_NUMERO: ordre, ...departOverrides }),
-  'accroche arrivee': buildAccroche({ SUPPORT_NUMERO: String(Number(ordre) + 1), ...arriveeOverrides })
+  'accroche depart': buildAttachment({ SUPPORT_NUMERO: ordre, ...departOverrides }),
+  'accroche arrivee': buildAttachment({ SUPPORT_NUMERO: String(Number(ordre) + 1), ...arriveeOverrides })
 });
 
-/** Builds a valid GeoLiaison payload with 2 portees. */
-const buildValidGeoLiaisonPayload = (): Record<string, unknown> => ({
+/** Builds a valid canton payload with 2 spans. */
+const buildValidSectionImportPayload = (): Record<string, unknown> => ({
   cantons: [
     {
       general: {
@@ -163,8 +163,8 @@ const buildValidGeoLiaisonPayload = (): Record<string, unknown> => ({
         ]
       },
       'portee unitaire': [
-        buildPortee('2', 'Position 2 - Phase A', { SUPPORT_NUMERO: '2' }, { SUPPORT_NUMERO: '3' }),
-        buildPortee('1', 'Position 1 - Phase A', { SUPPORT_NUMERO: '1' }, { SUPPORT_NUMERO: '2' })
+        buildSpan('2', 'Position 2 - Phase A', { SUPPORT_NUMERO: '2' }, { SUPPORT_NUMERO: '3' }),
+        buildSpan('1', 'Position 1 - Phase A', { SUPPORT_NUMERO: '1' }, { SUPPORT_NUMERO: '2' })
       ]
     }
   ]
@@ -194,7 +194,7 @@ describe('SectionImportService', () => {
   let maintenanceServiceMock: { getMaintenance: ReturnType<typeof vi.fn> };
   let attachmentServiceMock: {
     addSupportNamesIfAbsent: ReturnType<typeof vi.fn>;
-    resolveGeoLiaisonCatalogAttachment: ReturnType<typeof vi.fn>;
+    resolveCatalogAttachment: ReturnType<typeof vi.fn>;
   };
   let chainsServiceMock: { getChains: ReturnType<typeof vi.fn> };
   let linesServiceMock: { getLines: ReturnType<typeof vi.fn> };
@@ -284,7 +284,7 @@ describe('SectionImportService', () => {
 
     attachmentServiceMock = {
       addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined),
-      resolveGeoLiaisonCatalogAttachment: vi.fn().mockResolvedValue(undefined)
+      resolveCatalogAttachment: vi.fn().mockResolvedValue(undefined)
     };
 
     chainsServiceMock = {
@@ -580,7 +580,7 @@ describe('SectionImportService', () => {
       service.setStudyContext(buildMockStudy([existing]));
       sectionServiceMock.createOrUpdateSection
         .mockRejectedValueOnce(new Error('persist failed'))
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ removedGeometryBoundObjects: false });
       const file = makeJsonFile(buildValidSectionPayload());
 
       await expect(service.processFile(file, alwaysAccept)).rejects.toMatchObject({
@@ -632,43 +632,43 @@ describe('SectionImportService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // GeoLiaison format — checkCollision()
+  // Canton format — checkCollision()
   // -------------------------------------------------------------------------
 
-  describe('checkCollision() — GeoLiaison format', () => {
-    it('should detect UUID from CANTON_CUR in GeoLiaison format', async () => {
+  describe('checkCollision() — canton format', () => {
+    it('should detect UUID from CANTON_CUR in canton format', async () => {
       const existing = {
         ...createEmptySection(),
         uuid: 'geo-uuid-1',
         name: 'Existing GeoSection'
       } as Section;
       service.setStudyContext(buildMockStudy([existing]));
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
 
       const result = await service.checkCollision(file);
       expect(result).toEqual({ uuid: 'geo-uuid-1', label: 'Existing GeoSection' });
     });
 
-    it('should return null for GeoLiaison file with no matching UUID in study', async () => {
+    it('should return null for canton file with no matching UUID in study', async () => {
       service.setStudyContext(buildMockStudy());
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
 
       expect(await service.checkCollision(file)).toBeNull();
     });
   });
 
   // -------------------------------------------------------------------------
-  // GeoLiaison format — processFile()
+  // Canton format — processFile()
   // -------------------------------------------------------------------------
 
-  describe('processFile() — GeoLiaison format', () => {
+  describe('processFile() — canton format', () => {
     beforeEach(() => {
       service.setStudyContext(buildMockStudy());
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue(undefined);
     });
 
     it('should map UUID from CANTON_CUR', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result).not.toBeNull();
@@ -676,7 +676,7 @@ describe('SectionImportService', () => {
     });
 
     it('should map section fields from general', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.name).toBe('TESTLINE73STB01-PHASE1-1-SET19-3-SET19');
@@ -687,7 +687,7 @@ describe('SectionImportService', () => {
     });
 
     it('should map appartenance fields', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.lit_name).toBe('LitName');
@@ -699,7 +699,7 @@ describe('SectionImportService', () => {
     });
 
     it('should map branch_idr to undefined when BRANCHE_IDR is absent', async () => {
-      const payload = buildValidGeoLiaisonPayload();
+      const payload = buildValidSectionImportPayload();
       const appartenance = ((payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>)[
         'appartenance'
       ] as Record<string, unknown>[];
@@ -713,7 +713,7 @@ describe('SectionImportService', () => {
 
     it('should resolve voltage_idr from the line catalog, matching TENSION_ELECTRIQUE_IDR/_ADR regardless of spacing/casing', async () => {
       linesServiceMock.getLines.mockResolvedValue([{ voltage_idr: '225 KV' }, { voltage_idr: '400 KV' }]);
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       // TENSION_ELECTRIQUE_IDR='225kV' normalizes to '225KV', matching catalog entry '225 KV'.
@@ -721,9 +721,9 @@ describe('SectionImportService', () => {
     });
 
     it('should fall back to TENSION_ELECTRIQUE_ADR when TENSION_ELECTRIQUE_IDR has no catalog match', async () => {
-      const payload = buildValidGeoLiaisonPayload();
-      const cantons = payload['cantons'] as { general: { appartenance: Record<string, unknown>[] } }[];
-      cantons[0].general.appartenance[0]['TENSION_ELECTRIQUE_IDR'] = 'unknown-format';
+      const payload = buildValidSectionImportPayload();
+      const sections = payload['cantons'] as { general: { appartenance: Record<string, unknown>[] } }[];
+      sections[0].general.appartenance[0]['TENSION_ELECTRIQUE_IDR'] = 'unknown-format';
       linesServiceMock.getLines.mockResolvedValue([{ voltage_idr: '225 KV' }]);
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
@@ -733,14 +733,14 @@ describe('SectionImportService', () => {
 
     it('should leave voltage_idr undefined when no catalog line matches either candidate', async () => {
       linesServiceMock.getLines.mockResolvedValue([{ voltage_idr: '63 KV' }]);
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.voltage_idr).toBeUndefined();
     });
 
     it('should lookup maintenance IDs from MaintenanceService', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.maintenance_center_id).toBe('MC_ID_01');
@@ -751,16 +751,16 @@ describe('SectionImportService', () => {
     });
 
     it('should use CM_DESIGNATION/EEL_DESIGNATION/GMR_DESIGNATION from the first portee (sorted)', async () => {
-      const payload = buildValidGeoLiaisonPayload();
+      const payload = buildValidSectionImportPayload();
       // Portee with ordre=1 has CM_DESIGNATION CM_01, ordre=2 also has CM_01 in default builder.
       // Override ordre=1 portee to use a different CM to confirm first portee (ordre=1) is used.
-      const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+      const spans = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
         string,
         unknown
       >[];
       // portee at index 1 has ordre=1 (unsorted), override its CM to something else
-      portees[1] = { ...portees[1], CM_DESIGNATION: 'CM_FIRST' };
-      portees[0] = { ...portees[0], CM_DESIGNATION: 'CM_SECOND' };
+      spans[1] = { ...spans[1], CM_DESIGNATION: 'CM_FIRST' };
+      spans[0] = { ...spans[0], CM_DESIGNATION: 'CM_SECOND' };
 
       maintenanceServiceMock.getMaintenance.mockResolvedValue([
         { ...mockMaintenanceData[0], maintenance_center: 'CM_FIRST', maintenance_center_id: 'MC_FIRST_ID' }
@@ -774,7 +774,7 @@ describe('SectionImportService', () => {
     });
 
     it('should sort supports by PORTEE_UNITAIRE_ORDRE ascending', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       // Payload has ordre=2 first, ordre=1 second. After sort, support[0] comes from portee ordre=1.
@@ -782,10 +782,10 @@ describe('SectionImportService', () => {
     });
 
     it('should create a support from accroche arrivee of the last portee', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
-      // 2 portees → 2 (depart) + 1 (arrivee of last) = 3 supports
+      // 2 spans → 2 (depart) + 1 (arrivee of last) = 3 supports
       expect(result?.supports.length).toBe(3);
       // Last support is from arrivee of portee ordre=2
       const lastSupport = result?.supports[result.supports.length - 1];
@@ -793,7 +793,7 @@ describe('SectionImportService', () => {
     });
 
     it('should parse numeric string fields to numbers', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       const firstSupport = result?.supports[0];
@@ -807,7 +807,7 @@ describe('SectionImportService', () => {
     });
 
     it('should extract attachmentPosition from PORTEE_UNITAIRE_DESIGNATION', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       // First portee (ordre=1) has designation "Position 1 - Phase A"
@@ -815,14 +815,14 @@ describe('SectionImportService', () => {
     });
 
     it('should map cable_name from CABLE_ADR', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.cable_name).toBe('GeoSection');
     });
 
     it('should always keep support name equal to SUPPORT_IDR in both catalog and fallback branches', async () => {
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValueOnce({
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValueOnce({
         uuid: 'cat-1',
         created_at: 'c',
         updated_at: 'u',
@@ -836,7 +836,7 @@ describe('SectionImportService', () => {
         attachment_set_z: 40
       });
 
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.supports[0].name).toBe('Support_IDR_A');
@@ -844,7 +844,7 @@ describe('SectionImportService', () => {
     });
 
     it('should prioritize catalog attachmentSet/armLength/heightBelowConsole over file values when complete', async () => {
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue({
         uuid: 'cat-1',
         created_at: 'c',
         updated_at: 'u',
@@ -858,11 +858,11 @@ describe('SectionImportService', () => {
         attachment_set_z: 99.9
       });
 
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
-      (portees[0]['accroche depart'] as Record<string, unknown>)['ACCROCHE_SET'] = '19';
-      (portees[0]['accroche depart'] as Record<string, unknown>)['LONGUEUR_BRAS'] = '3.0';
-      (portees[0]['accroche depart'] as Record<string, unknown>)['HAUTEUR_SOUS_CONSOLE'] = '2.5';
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      (spans[0]['accroche depart'] as Record<string, unknown>)['ACCROCHE_SET'] = '19';
+      (spans[0]['accroche depart'] as Record<string, unknown>)['LONGUEUR_BRAS'] = '3.0';
+      (spans[0]['accroche depart'] as Record<string, unknown>)['HAUTEUR_SOUS_CONSOLE'] = '2.5';
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
       const support = result?.supports[0];
@@ -873,35 +873,89 @@ describe('SectionImportService', () => {
     });
 
     it('should keep file attachmentSet and file armLength/heightBelowConsole and warn once when SUPPORT_IDR is absent from catalog', async () => {
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue(undefined);
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
 
       expect(result?.supports[0].attachmentSet).toBe(19);
       expect(result?.supports[0].armLength).toBe(3.0);
       expect(result?.supports[0].heightBelowConsole).toBe(2.5);
       expect(messageServiceMock.add).toHaveBeenCalledWith(
-        expect.objectContaining({ severity: 'warn', detail: geoLiaisonSupportCatalogMissingWarning })
+        expect.objectContaining({ severity: 'warn', detail: sectionSupportCatalogMissingWarning })
       );
     });
 
     it('should keep file attachmentSet and file armLength/heightBelowConsole and warn once when matching support exists but attachment set is absent', async () => {
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue(undefined);
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue(undefined);
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
 
       expect(result?.supports[0].attachmentSet).toBe(19);
       expect(result?.supports[0].armLength).toBe(3.0);
       expect(result?.supports[0].heightBelowConsole).toBe(2.5);
       expect(
         messageServiceMock.add.mock.calls.filter((call) =>
-          [geoLiaisonSupportCatalogMissingWarning].includes(call[0].detail as string)
+          [sectionSupportCatalogMissingWarning].includes(call[0].detail as string)
         )
       ).toHaveLength(1);
     });
 
+    it('should never fall back to SUPPORT_ADR when SUPPORT_IDR is present, keeping the file values', async () => {
+      // SUPPORT_IDR is a placeholder absent from the catalog while SUPPORT_ADR would match a
+      // catalog row. The lookup must be attempted with SUPPORT_IDR only (no ADR fallback), so the
+      // file's own armLength/heightBelowConsole survive instead of being overridden by the catalog.
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue(undefined);
+
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
+
+      // Every catalog lookup was called with a null ADR argument (SUPPORT_IDR is present).
+      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalled();
+      attachmentServiceMock.resolveCatalogAttachment.mock.calls.forEach((call) => {
+        expect(call[0]).toBe('Support_IDR_A');
+        expect(call[1]).toBeNull();
+      });
+
+      expect(result?.supports[0].attachmentSet).toBe(19);
+      expect(result?.supports[0].armLength).toBe(3.0);
+      expect(result?.supports[0].heightBelowConsole).toBe(2.5);
+    });
+
+    it('should fall back to SUPPORT_ADR and apply catalog values only when SUPPORT_IDR is absent', async () => {
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue({
+        uuid: 'cat-1',
+        created_at: 'c',
+        updated_at: 'u',
+        support_name: 'Support A',
+        support_tower: 'Tower X',
+        attachment_set: 7,
+        cross_arm_length: 9.9,
+        attachment_altitude: 99.9,
+        attachment_set_x: 1,
+        attachment_set_y: 2,
+        attachment_set_z: 99.9
+      });
+
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      spans.forEach((span) => {
+        (span['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = null;
+        (span['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = null;
+      });
+
+      const result = await service.processFile(makeJsonFile(payload), neverAccept);
+
+      // SUPPORT_IDR absent: the ADR is passed as the fallback identifier.
+      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith(null, 'Support A', 19);
+
+      // The catalog values apply, and the support name falls back to SUPPORT_ADR.
+      expect(result?.supports[0].name).toBe('Support A');
+      expect(result?.supports[0].attachmentSet).toBe(7);
+      expect(result?.supports[0].armLength).toBe(9.9);
+      expect(result?.supports[0].heightBelowConsole).toBe(99.9);
+    });
+
     it('should accept zero values from catalog when complete geometry is present', async () => {
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue({
         uuid: 'cat-1',
         created_at: 'c',
         updated_at: 'u',
@@ -915,7 +969,7 @@ describe('SectionImportService', () => {
         attachment_set_z: 0
       });
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
 
       expect(result?.supports[0].attachmentSet).toBe(0);
       expect(result?.supports[0].armLength).toBe(0);
@@ -935,7 +989,7 @@ describe('SectionImportService', () => {
         }
       ]);
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
       const support = result?.supports[0];
 
       expect(support?.chainName).toBe('ChainA_IDR');
@@ -958,7 +1012,7 @@ describe('SectionImportService', () => {
         }
       ]);
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
       const support = result?.supports[0];
 
       // File carries CHAINE_DRN_SURFACE 0.5 / LONGUEUR 5.0 / POIDS 50.0: the catalog still wins.
@@ -980,7 +1034,7 @@ describe('SectionImportService', () => {
         }
       ]);
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
       const support = result?.supports[0];
 
       expect(support?.chainName).toBe('ChainA_IDR');
@@ -993,7 +1047,7 @@ describe('SectionImportService', () => {
     it('should keep file chain details when the chain catalog is empty', async () => {
       chainsServiceMock.getChains.mockResolvedValue([]);
 
-      const result = await service.processFile(makeJsonFile(buildValidGeoLiaisonPayload()), neverAccept);
+      const result = await service.processFile(makeJsonFile(buildValidSectionImportPayload()), neverAccept);
 
       expect(result?.supports[0].chainLength).toBe(5.0);
       expect(result?.supports[0].chainSurface).toBe(0.5);
@@ -1012,9 +1066,9 @@ describe('SectionImportService', () => {
         }
       ]);
 
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
-      (portees[1]['accroche depart'] as Record<string, unknown>)['CONTREPOIDS'] = '42';
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      (spans[1]['accroche depart'] as Record<string, unknown>)['CONTREPOIDS'] = '42';
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
 
@@ -1023,7 +1077,7 @@ describe('SectionImportService', () => {
 
     it('should handle null maintenance lookup gracefully when no match found', async () => {
       maintenanceServiceMock.getMaintenance.mockResolvedValue([]);
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.maintenance_center_id).toBeUndefined();
@@ -1031,8 +1085,8 @@ describe('SectionImportService', () => {
       expect(result?.regional_team_id).toBeUndefined();
     });
 
-    it('should NOT create any initial condition on GeoLiaison import', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+    it('should NOT create any initial condition on canton import', async () => {
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.initial_conditions).toHaveLength(0);
@@ -1040,16 +1094,16 @@ describe('SectionImportService', () => {
     });
 
     it('should set spanLength to null on the last support', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       const lastSupport = result?.supports[result.supports.length - 1];
       expect(lastSupport?.spanLength).toBeNull();
     });
 
-    it('should fail with field names in the error when accroche fields are null (real-world GeoLiaison file)', async () => {
+    it('should fail with field names in the error when accroche fields are null (real-world canton file)', async () => {
       // Mimics a real CDG19 file where all accroche fields are null
-      const nullAccroche = () => ({
+      const nullAttachment = () => ({
         ANGLE_LIGNE: null,
         ACCROCHE_SET: '19',
         ACCROCHE_CABLE_Z_LAMBERT93: null,
@@ -1097,8 +1151,8 @@ describe('SectionImportService', () => {
                 EEL_DESIGNATION: 'EEL_01',
                 GMR_DESIGNATION: 'GMR_01',
                 PORTEE_UNITAIRE_DESIGNATION: 'Position 1',
-                'accroche depart': nullAccroche(),
-                'accroche arrivee': nullAccroche()
+                'accroche depart': nullAttachment(),
+                'accroche arrivee': nullAttachment()
               }
             ]
           }
@@ -1113,7 +1167,7 @@ describe('SectionImportService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // GeoLiaison format — full Section/Support object snapshots
+  // Canton format — full Section/Support object snapshots
   //
   // These guard the ENTIRE mapped object against silent regressions (e.g. a mapping
   // line being accidentally removed, such as `branch_idr` in the past). Any field that
@@ -1121,14 +1175,14 @@ describe('SectionImportService', () => {
   // `createEmptySupport()` default and break these tests.
   // -------------------------------------------------------------------------
 
-  describe('processFile() — GeoLiaison format — full object snapshots', () => {
+  describe('processFile() — canton format — full object snapshots', () => {
     beforeEach(() => {
       service.setStudyContext(buildMockStudy());
     });
 
     it('should return the complete mapped Section and Support objects (catalog fallback)', async () => {
-      // Default mocks: attachment/chain catalogs return no match -> supports keep GeoLiaison file values.
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      // Default mocks: attachment/chain catalogs return no match -> supports keep canton file values.
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
       expect(result).not.toBeNull();
 
@@ -1223,7 +1277,7 @@ describe('SectionImportService', () => {
     });
 
     it('should return the complete mapped Support objects when both the attachment and chain catalogs resolve', async () => {
-      attachmentServiceMock.resolveGeoLiaisonCatalogAttachment.mockResolvedValue({
+      attachmentServiceMock.resolveCatalogAttachment.mockResolvedValue({
         uuid: 'cat-1',
         created_at: 'c',
         updated_at: 'u',
@@ -1248,7 +1302,7 @@ describe('SectionImportService', () => {
         }
       ]);
 
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       const expectedSupportBase = {
@@ -1304,8 +1358,8 @@ describe('SectionImportService', () => {
       });
     });
 
-    it('should correctly map a fully synthetic GeoLiaison canton export (regression guard)', async () => {
-      const file = makeJsonFile(fakeGeoLiaisonCanton101To103);
+    it('should correctly map a fully synthetic canton export (regression guard)', async () => {
+      const file = makeJsonFile(fakeCanton101To103);
 
       const result = await service.processFile(file, neverAccept);
 
@@ -1435,7 +1489,7 @@ describe('SectionImportService', () => {
     });
 
     it('should persist the first validated localization point as the section start location', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.start_latitude).toBe(45);
@@ -1451,7 +1505,7 @@ describe('SectionImportService', () => {
         return mockSuccessfulRunTask(task, {});
       });
 
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
         code: 'MAPPING_ERROR',
         stage: 'MAPPING'
@@ -1460,9 +1514,9 @@ describe('SectionImportService', () => {
     });
 
     it('should skip reprojection and still persist the section when a support has no raw Lambert93 coordinates', async () => {
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
-      (portees[0]['accroche depart'] as Record<string, unknown>)['PIED_X_LAMBERT93'] = null;
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      (spans[0]['accroche depart'] as Record<string, unknown>)['PIED_X_LAMBERT93'] = null;
 
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
@@ -1476,16 +1530,16 @@ describe('SectionImportService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // GeoLiaison format — section name building (RG.CAN.NOM)
+  // Canton format — section name building (RG.CAN.NOM)
   // -------------------------------------------------------------------------
 
-  describe('processFile() — GeoLiaison section name (RG.CAN.NOM)', () => {
+  describe('processFile() — canton section name (RG.CAN.NOM)', () => {
     beforeEach(() => {
       service.setStudyContext(buildMockStudy());
     });
 
     it('should build the name from all components: branche-type+phase-startNum-SET-endNum-SET', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       // BRANCHE_IDR='TESTLINE73STB01', CANTON_TYPE='PHASE', PHASE='1'
@@ -1495,7 +1549,7 @@ describe('SectionImportService', () => {
     });
 
     it('should omit phase number when CANTON_TYPE is GARDE', async () => {
-      const payload = buildValidGeoLiaisonPayload();
+      const payload = buildValidSectionImportPayload();
       const general = (payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>;
       general['CANTON_TYPE'] = 'GARDE';
       general['PHASE_ELECTRIQUE_NUMERO'] = null;
@@ -1507,7 +1561,7 @@ describe('SectionImportService', () => {
     });
 
     it('should omit the branch prefix when BRANCHE_IDR is null', async () => {
-      const payload = buildValidGeoLiaisonPayload();
+      const payload = buildValidSectionImportPayload();
       const appartenance = ((payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>)[
         'appartenance'
       ] as Record<string, unknown>[];
@@ -1520,14 +1574,14 @@ describe('SectionImportService', () => {
     });
 
     it('should truncate support numbers to 5 characters', async () => {
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
         string,
         unknown
       >[];
       // Override SUPPORT_NUMERO on accroche depart of portee ordre=1 and arrivee of portee ordre=2
-      (portees[1]['accroche depart'] as Record<string, unknown>)['SUPPORT_NUMERO'] = 'ABCDE12345';
-      (portees[0]['accroche arrivee'] as Record<string, unknown>)['SUPPORT_NUMERO'] = 'ZYXWV99999';
+      (spans[1]['accroche depart'] as Record<string, unknown>)['SUPPORT_NUMERO'] = 'ABCDE12345';
+      (spans[0]['accroche arrivee'] as Record<string, unknown>)['SUPPORT_NUMERO'] = 'ZYXWV99999';
 
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
@@ -1537,14 +1591,14 @@ describe('SectionImportService', () => {
     });
 
     it('should omit SET parts when ACCROCHE_SET is null', async () => {
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
         string,
         unknown
       >[];
       // Null out ACCROCHE_SET on the first departure and last arrival accroches
-      (portees[1]['accroche depart'] as Record<string, unknown>)['ACCROCHE_SET'] = null;
-      (portees[0]['accroche arrivee'] as Record<string, unknown>)['ACCROCHE_SET'] = null;
+      (spans[1]['accroche depart'] as Record<string, unknown>)['ACCROCHE_SET'] = null;
+      (spans[0]['accroche arrivee'] as Record<string, unknown>)['ACCROCHE_SET'] = null;
 
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
@@ -1554,11 +1608,11 @@ describe('SectionImportService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // GeoLiaison format — invalid file (RG.CAN.OUV-BTN.3)
+  // Canton format — invalid file (RG.CAN.OUV-BTN.3)
   // -------------------------------------------------------------------------
 
-  describe('processFile() — invalid GeoLiaison format', () => {
-    it('should throw VALIDATION_ERROR with GeoLiaison message when cantons present but CANTON_CUR missing', async () => {
+  describe('processFile() — invalid canton format', () => {
+    it('should throw VALIDATION_ERROR with canton message when cantons present but CANTON_CUR missing', async () => {
       service.setStudyContext(buildMockStudy());
       const invalidPayload = {
         cantons: [
@@ -1574,7 +1628,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(invalidPayload);
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
         code: 'VALIDATION_ERROR',
-        message: 'The geolink file to import is invalid.',
+        message: 'The section file to import is invalid.',
         stage: 'VALIDATION'
       });
     });
@@ -1732,19 +1786,19 @@ describe('SectionImportService', () => {
       service.setStudyContext(buildMockStudy());
     });
 
-    it('should call addSupportNamesIfAbsent with SupportNameEntry[] from GeoLiaison accroches', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+    it('should call addSupportNamesIfAbsent with SupportNameEntry[] from canton accroches', async () => {
+      const file = makeJsonFile(buildValidSectionImportPayload());
       await service.processFile(file, neverAccept);
 
       expect(attachmentServiceMock.addSupportNamesIfAbsent).toHaveBeenCalledTimes(1);
 
-      // Payload has 2 portees:
-      // portee ordre=1: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='1')
-      // portee ordre=2: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='2')
-      // arrivee of last portee (ordre=2): SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='3')
-      // After sort by ordre: portee1 first, portee2 last
+      // Payload has 2 spans:
+      // span ordre=1: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='1')
+      // span ordre=2: depart SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='2')
+      // arrivee of last span (ordre=2): SUPPORT_IDR='Support_IDR_A' (SUPPORT_NUMERO='3')
+      // After sort by ordre: span1 first, span2 last
       const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
-      expect(called.length).toBe(3);
+      expect(called).toHaveLength(3);
       expect(called.every((e: SupportNameEntry) => e.supportName === 'Support_IDR_A')).toBe(true);
       expect(called.every((e: SupportNameEntry) => e.supportTower === 'TowerX')).toBe(true);
     });
@@ -1758,9 +1812,9 @@ describe('SectionImportService', () => {
 
     it('should use SUPPORT_ADR as fallback when SUPPORT_IDR is empty string', async () => {
       // Override SUPPORT_IDR to empty string — ?? would not fall back, || does
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
-      portees.forEach((p) => {
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      spans.forEach((p) => {
         (p['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
         (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
       });
@@ -1769,14 +1823,14 @@ describe('SectionImportService', () => {
       await service.processFile(file, neverAccept);
 
       const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
-      expect(called.length).toBe(3);
+      expect(called).toHaveLength(3);
       expect(called.every((e: SupportNameEntry) => e.supportName === 'Support A')).toBe(true);
     });
 
     it('should filter out entries where both SUPPORT_IDR and SUPPORT_ADR are empty string', async () => {
-      const payload = buildValidGeoLiaisonPayload();
-      const portees = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
-      portees.forEach((p) => {
+      const payload = buildValidSectionImportPayload();
+      const spans = (payload.cantons as Record<string, unknown>[])[0]['portee unitaire'] as Record<string, unknown>[];
+      spans.forEach((p) => {
         (p['accroche depart'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
         (p['accroche depart'] as Record<string, unknown>)['SUPPORT_ADR'] = '';
         (p['accroche arrivee'] as Record<string, unknown>)['SUPPORT_IDR'] = '';
@@ -1787,7 +1841,7 @@ describe('SectionImportService', () => {
       await service.processFile(file, neverAccept);
 
       const called = attachmentServiceMock.addSupportNamesIfAbsent.mock.calls[0][0] as SupportNameEntry[];
-      expect(called.length).toBe(0);
+      expect(called).toHaveLength(0);
     });
   });
 });
