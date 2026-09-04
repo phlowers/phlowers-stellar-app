@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ValidatorFn, Validators } from '@angular/forms';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 
 /** Input bounds for cable-support manipulation numeric fields. */
 export const CABLE_SUPPORT_MANIP_BOUNDS = {
@@ -15,8 +16,9 @@ export const CABLE_SUPPORT_MANIP_BOUNDS = {
 } as const;
 
 /**
- * Produces [required, min, max] ValidatorFns that are active only when guard() returns true.
- * Intended for numeric fields that are conditionally mandatory based on a reactive signal.
+ * Produces [required, min, max, maxDecimals] ValidatorFns; required/min/max are active only when
+ * guard() returns true, while the two-decimal format check always applies.
+ * Intended for distance fields that are conditionally mandatory based on a reactive signal.
  */
 export function conditionalRangeValidators(
   guard: () => boolean,
@@ -25,6 +27,7 @@ export function conditionalRangeValidators(
   return [
     (ctrl) => (guard() ? Validators.required(ctrl) : null),
     (ctrl) => (guard() ? Validators.min(bounds.min)(ctrl) : null),
-    (ctrl) => (guard() ? Validators.max(bounds.max)(ctrl) : null)
+    (ctrl) => (guard() ? Validators.max(bounds.max)(ctrl) : null),
+    maxDecimalsValidator(2)
   ];
 }

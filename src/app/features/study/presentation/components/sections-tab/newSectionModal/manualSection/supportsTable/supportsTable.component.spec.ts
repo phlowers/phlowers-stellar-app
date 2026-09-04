@@ -184,7 +184,8 @@ describe('SupportsTableComponent', () => {
           langs: {
             en: {
               'common.yes': 'Yes',
-              'common.no': 'No'
+              'common.no': 'No',
+              'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}'
             }
           },
           translocoConfig: {
@@ -1104,6 +1105,19 @@ describe('SupportsTableComponent', () => {
 
     it('should render span-angle-input for each support', () => {
       expect(getAllByTestId('span-angle-input').length).toBe(mockSupports.length);
+    });
+
+    it('should show the maxDecimals error message when span angle has more than two decimals', () => {
+      const input = getByTestId('span-angle-input') as HTMLInputElement;
+      input.value = '90.123';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#spanAngleError0')?.textContent).toContain('Max decimals: 2');
+    });
+
+    it('should not show the maxDecimals error message when span angle is untouched', () => {
+      expect(fixture.nativeElement.querySelector('#spanAngleError0')).toBeNull();
     });
 
     it('should render chain-name-select for each support', () => {

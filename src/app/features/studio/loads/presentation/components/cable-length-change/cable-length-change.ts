@@ -9,6 +9,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { MessageModule } from 'primeng/message';
 import { CableModification } from '@shared/domain';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -21,6 +22,8 @@ import {
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
+import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -30,6 +33,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     InputGroupModule,
     InputGroupAddonModule,
     SelectModule,
+    MessageModule,
     ButtonComponent,
     IconComponent,
     TranslocoModule
@@ -62,10 +66,10 @@ export class CableLengthChangeComponent {
     ),
     modificationType: new FormControl<CableWidthType | null>('lengthening', { validators: [Validators.required] }),
     modifiedLengthCable: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(0), Validators.max(1000)]
+      validators: [Validators.required, Validators.min(0), Validators.max(1000), maxDecimalsValidator(2)]
     }),
     distanceSupportRef: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(0), Validators.max(5000)]
+      validators: [Validators.required, Validators.min(0), Validators.max(5000), maxDecimalsValidator(2)]
     })
   });
 
@@ -348,6 +352,10 @@ export class CableLengthChangeComponent {
 
   isFormInvalid(): boolean {
     return this.form.invalid;
+  }
+
+  getErrorIds(controlName: string, errorTypes: string[]): string | null {
+    return getControlErrorIds(this.form, controlName, errorTypes);
   }
 
   private findCableModification(spanUuid: string): CableModification | undefined {

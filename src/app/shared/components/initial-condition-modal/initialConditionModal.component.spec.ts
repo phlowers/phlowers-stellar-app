@@ -530,6 +530,46 @@ describe('InitialConditionModalComponent', () => {
     });
   });
 
+  describe('HTML rendering - base_temperature error messages', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('mode', 'create');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+    });
+
+    it('should render the min error message when base_temperature is below the minimum', () => {
+      component.form.controls.base_temperature.setValue(-100);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-min')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-max')).toBeNull();
+    });
+
+    it('should render the max error message when base_temperature is above the maximum', () => {
+      component.form.controls.base_temperature.setValue(1000);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-max')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-min')).toBeNull();
+    });
+
+    it('should render the maxDecimals error message when base_temperature has decimals', () => {
+      component.form.controls.base_temperature.setValue(15.5);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-maxDecimals')).toBeTruthy();
+    });
+
+    it('should not render any error message when base_temperature is valid', () => {
+      component.form.controls.base_temperature.setValue(15);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-min')).toBeNull();
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-max')).toBeNull();
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-maxDecimals')).toBeNull();
+    });
+  });
+
   describe('onSubmit with generateState', () => {
     it('should pass generateState true when submitted with true', () => {
       fixture.componentRef.setInput('mode', 'create');
