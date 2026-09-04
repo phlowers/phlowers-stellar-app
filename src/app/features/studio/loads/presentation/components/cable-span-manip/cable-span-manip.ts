@@ -14,6 +14,16 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { CABLE_SPAN_MANIP_DEFAULTS, CableSpanManipFormControls } from './cable-span-manip.interfaces';
+import {
+  ALTITUDE_MAX,
+  ALTITUDE_MIN,
+  LATERAL_DISTANCE_MAX,
+  LATERAL_DISTANCE_MIN,
+  LONGITUDINAL_DISTANCE_MAX,
+  LONGITUDINAL_DISTANCE_MIN,
+  SLING_LENGTH_MAX,
+  SLING_LENGTH_MIN
+} from './cable-span-manip.constantes';
 import { twoDecimalValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -63,10 +73,15 @@ export class CableSpanManipComponent implements OnInit {
     cableManipMethod: new FormControl<CableManipMethod | null>({ value: 'clamp', disabled: true }),
     longitudinalDistance: new FormControl<number | null>(0),
     lateralDistance: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(-100), Validators.max(100), twoDecimalValidator]
+      validators: [
+        Validators.required,
+        Validators.min(LATERAL_DISTANCE_MIN),
+        Validators.max(LATERAL_DISTANCE_MAX),
+        twoDecimalValidator
+      ]
     }),
     altitude: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(-100), Validators.max(9000), twoDecimalValidator]
+      validators: [Validators.required, Validators.min(ALTITUDE_MIN), Validators.max(ALTITUDE_MAX), twoDecimalValidator]
     }),
     anchoring: new FormControl<AnchoringType | null>({ value: 'with_sling', disabled: true }),
     chainName: new FormControl<string | null>(null),
@@ -100,6 +115,15 @@ export class CableSpanManipComponent implements OnInit {
   readonly spansOptions = this.spanService.getSpanOptions;
   readonly supportRefOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
   readonly chainNameOptions = signal<{ label: string; value: string }[]>([]);
+
+  readonly longitudinalDistanceMin = LONGITUDINAL_DISTANCE_MIN;
+  readonly longitudinalDistanceMax = LONGITUDINAL_DISTANCE_MAX;
+  readonly lateralDistanceMin = LATERAL_DISTANCE_MIN;
+  readonly lateralDistanceMax = LATERAL_DISTANCE_MAX;
+  readonly altitudeMin = ALTITUDE_MIN;
+  readonly altitudeMax = ALTITUDE_MAX;
+  readonly slingLengthMin = SLING_LENGTH_MIN;
+  readonly slingLengthMax = SLING_LENGTH_MAX;
 
   readonly cableManipTypeOptions = [
     {
@@ -163,8 +187,8 @@ export class CableSpanManipComponent implements OnInit {
     // Dynamic validators for longitudinalDistance — required only when using a crane
     this.form.controls.longitudinalDistance.setValidators([
       (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.min(-100)(ctrl) : null),
-      (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.max(5000)(ctrl) : null),
+      (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.min(LONGITUDINAL_DISTANCE_MIN)(ctrl) : null),
+      (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.max(LONGITUDINAL_DISTANCE_MAX)(ctrl) : null),
       twoDecimalValidator
     ]);
     effect(() => {
@@ -192,8 +216,8 @@ export class CableSpanManipComponent implements OnInit {
     ]);
     this.form.controls.slingLength.setValidators([
       (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.min(0)(ctrl) : null),
-      (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.max(99)(ctrl) : null),
+      (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.min(SLING_LENGTH_MIN)(ctrl) : null),
+      (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.max(SLING_LENGTH_MAX)(ctrl) : null),
       twoDecimalValidator
     ]);
     effect(() => {

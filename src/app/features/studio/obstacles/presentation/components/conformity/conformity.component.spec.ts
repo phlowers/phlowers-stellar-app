@@ -578,6 +578,20 @@ describe('ConformityComponent', () => {
       expect(component.lateralDistanceTemperatureErrorId()).toBe('lateral-distance-temperature-min-error');
     });
 
+    it('should expose a twoDecimal error id for repartition temperature with more than two decimals', async () => {
+      await createComponent();
+      component.form.controls.repartitionTemperature.setValue(1.234);
+      fixture.detectChanges();
+      expect(component.repartitionTemperatureErrorId()).toBe('repartition-temperature-twoDecimal-error');
+    });
+
+    it('should expose a twoDecimal error id for lateral distance temperature with more than two decimals', async () => {
+      await createComponent();
+      component.form.controls.lateralDistanceTemperature.setValue(1.234);
+      fixture.detectChanges();
+      expect(component.lateralDistanceTemperatureErrorId()).toBe('lateral-distance-temperature-twoDecimal-error');
+    });
+
     it('should return null error id when the value is valid', async () => {
       await createComponent();
       component.form.controls.repartitionTemperature.setValue(20);

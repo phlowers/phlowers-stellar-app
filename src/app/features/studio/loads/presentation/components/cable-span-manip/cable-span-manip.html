@@ -135,8 +135,8 @@
           pInputText
           id="longitudinalDistance"
           step="0.01"
-          min="-100"
-          max="5000"
+          [attr.min]="longitudinalDistanceMin"
+          [attr.max]="longitudinalDistanceMax"
           formControlName="longitudinalDistance"
           data-testid="cable-span-manip-longitudinal-dist"
           [attr.aria-invalid]="form.controls.longitudinalDistance.invalid || null"
@@ -152,7 +152,7 @@
         variant="simple"
         class="third-1-line__error-1"
       >
-        {{ 'common.out-of-bound-error' | transloco: { min: -100, max: 5000 } }}
+        {{ 'common.out-of-bound-error' | transloco: { min: longitudinalDistanceMin, max: longitudinalDistanceMax } }}
       </p-message>
       } @else if (form.controls.longitudinalDistance.errors?.['twoDecimal']) {
       <p-message
@@ -188,8 +188,8 @@
           pInputText
           id="lateralDistance"
           step="0.01"
-          min="-100"
-          max="100"
+          [attr.min]="lateralDistanceMin"
+          [attr.max]="lateralDistanceMax"
           formControlName="lateralDistance"
           data-testid="cable-span-manip-lateral-dist"
           [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
@@ -205,7 +205,7 @@
         variant="simple"
         class="third-1-line__error-2"
       >
-        {{ 'common.out-of-bound-error' | transloco: { min: -100, max: 100 } }}
+        {{ 'common.out-of-bound-error' | transloco: { min: lateralDistanceMin, max: lateralDistanceMax } }}
       </p-message>
       } @else if (form.controls.lateralDistance.errors?.['twoDecimal']) {
       <p-message
@@ -228,8 +228,8 @@
           pInputText
           id="altitude"
           step="0.01"
-          min="-100"
-          max="9000"
+          [attr.min]="altitudeMin"
+          [attr.max]="altitudeMax"
           formControlName="altitude"
           data-testid="cable-span-manip-altitude"
           [attr.aria-invalid]="form.controls.altitude.invalid || null"
@@ -245,7 +245,7 @@
         variant="simple"
         class="third-1-line__error-3"
       >
-        {{ 'common.out-of-bound-error' | transloco: { min: -100, max: 9000 } }}
+        {{ 'common.out-of-bound-error' | transloco: { min: altitudeMin, max: altitudeMax } }}
       </p-message>
       } @else if (form.controls.altitude.errors?.['twoDecimal']) {
       <p-message
@@ -393,8 +393,8 @@
       pInputText
       id="slingLength"
       step="0.01"
-      min="0"
-      max="99"
+      [attr.min]="slingLengthMin"
+      [attr.max]="slingLengthMax"
       formControlName="slingLength"
       data-testid="cable-span-manip-sling-length"
       [attr.aria-invalid]="form.controls.slingLength.invalid || null"
@@ -409,7 +409,7 @@
     size="small"
     variant="simple"
   >
-    {{ 'common.out-of-bound-error' | transloco: { min: 0, max: 99 } }}
+    {{ 'common.out-of-bound-error' | transloco: { min: slingLengthMin, max: slingLengthMax } }}
   </p-message>
   } @else if (form.controls.slingLength.errors?.['twoDecimal']) {
   <p-message id="slingLength-error-twoDecimal" severity="error" size="small" variant="simple">
