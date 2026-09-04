@@ -16,9 +16,11 @@
   [rows]="rows()"
   [rowsPerPageOptions]="rowsPerPageOptions()"
   [first]="first()"
+  [loading]="pageLoading()"
   class="mb-4"
   [class.support-table--view]="mode() === 'view'"
   paginatorStyleClass="!hidden"
+  [attr.aria-busy]="pageLoading()"
   [attr.aria-describedby]="localizationLoading() ? 'localization-status' : null"
   data-testid="supports-table"
 >
@@ -102,7 +104,7 @@
       <td [class.integer-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
           <input
-            pInputText
+            class="p-inputtext p-component"
             [attr.aria-label]="'supports-table.aria-support-number' | transloco"
             [ngModel]="support.number"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'number', $event)"
@@ -115,9 +117,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               step="0.01"
               [min]="limits.spanLength.min"
@@ -134,8 +136,8 @@
               "
               #spanLengthInput="ngModel"
             />
-            <p-inputgroup-addon>m</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">m</span>
+          </div>
           @if (spanLengthInput.dirty && spanLengthInput.errors?.['min']) {
             <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -158,9 +160,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               step="0.01"
               [min]="limits.attachmentHeight.min"
@@ -177,8 +179,8 @@
               "
               #attachmentHeightInput="ngModel"
             />
-            <p-inputgroup-addon>m</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">m</span>
+          </div>
           @if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['min']) {
             <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -201,9 +203,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               step="0.01"
               [min]="limits.spanAngle.min"
@@ -220,8 +222,8 @@
               "
               #spanAngleInput="ngModel"
             />
-            <p-inputgroup-addon>Gr</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">Gr</span>
+          </div>
           @if (spanAngleInput.dirty && spanAngleInput.errors?.['min']) {
             <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -272,9 +274,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               [min]="limits.chainLength.min"
               [max]="limits.chainLength.max"
@@ -290,8 +292,8 @@
               "
               #chainLengthInput="ngModel"
             />
-            <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">{{ 'common.meter' | transloco }}</span>
+          </div>
           @if (chainLengthInput.dirty && chainLengthInput.errors?.['min']) {
             <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -314,9 +316,9 @@
       </td>
       <td class="decimal-column">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               [min]="limits.chainWeight.min"
               [max]="limits.chainWeight.max"
@@ -332,8 +334,8 @@
               "
               #chainWeightInput="ngModel"
             />
-            <p-inputgroup-addon>kg</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">kg</span>
+          </div>
           @if (chainWeightInput.dirty && chainWeightInput.errors?.['min']) {
             <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -379,8 +381,7 @@
         @if (mode() !== 'view') {
           <p-iconfield>
             <input
-              class="w-full"
-              pInputText
+              class="w-full p-inputtext p-component"
               type="number"
               [min]="limits.attachmentSet.min"
               [max]="limits.attachmentSet.max"
@@ -427,9 +428,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               step="0.01"
               [min]="limits.armLength.min"
@@ -446,8 +447,8 @@
               "
               #armLengthInput="ngModel"
             />
-            <p-inputgroup-addon>m</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">m</span>
+          </div>
           @if (armLengthInput.dirty && armLengthInput.errors?.['min']) {
             <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -502,9 +503,9 @@
       </td>
       <td class="decimal-column">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               [min]="limits.counterWeight.min"
               [max]="limits.counterWeight.max"
@@ -520,8 +521,8 @@
               "
               #counterWeightInput="ngModel"
             />
-            <p-inputgroup-addon>kg</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">kg</span>
+          </div>
           @if (counterWeightInput.dirty && counterWeightInput.errors?.['min']) {
             <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -544,9 +545,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               step="0.01"
               [min]="limits.supportFootAltitude.min"
@@ -565,8 +566,8 @@
               "
               #supportFootAltitudeInput="ngModel"
             />
-            <p-inputgroup-addon>m</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">m</span>
+          </div>
           @if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['min']) {
             <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container
@@ -606,9 +607,9 @@
       </td>
       <td [class.decimal-column]="mode() !== 'view'">
         @if (mode() !== 'view') {
-          <p-inputgroup>
+          <div class="p-inputgroup">
             <input
-              pInputText
+              class="p-inputtext p-component"
               type="number"
               [min]="limits.chainSurface.min"
               [max]="limits.chainSurface.max"
@@ -624,8 +625,8 @@
               "
               #chainSurfaceInput="ngModel"
             />
-            <p-inputgroup-addon>m²</p-inputgroup-addon>
-          </p-inputgroup>
+            <span class="p-inputgroupaddon">m²</span>
+          </div>
           @if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['min']) {
             <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
               <ng-container>{{ 'common.min-value' | transloco }}</ng-container

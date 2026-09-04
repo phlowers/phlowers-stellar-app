@@ -96,7 +96,6 @@ export class ManualSectionComponent implements OnInit {
   cablesFilterTable = signal<CatalogCable[]>([]);
   protected readonly sectionTypes = createSectionTypes(this.transloco);
   isNameUnique = input<boolean>();
-  currentPageReportTemplate = this.transloco.translate('manual-section.current-page-report');
   readonly noVoltageLabel = this.transloco.translate('manual-section.no-voltage');
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
@@ -128,6 +127,7 @@ export class ManualSectionComponent implements OnInit {
   firstSupport = signal<number>(0);
   rowsSupport = signal<number>(DEFAULT_TABLE_ROWS_PER_PAGE);
   rowsSupportOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
+  supportsPageLoading = signal<boolean>(false);
 
   maintenanceTeamRead = signal<string>('');
   maintenanceCenterRead = signal<string>('');
@@ -385,8 +385,32 @@ export class ManualSectionComponent implements OnInit {
   }
 
   onSupportsPageChange(event: { rows?: number; page?: number }) {
-    this.rowsSupport.set(event.rows ?? 5);
-    this.firstSupport.set((event.page ?? 0) * (event.rows ?? 5));
+    const rows = event.rows ?? DEFAULT_TABLE_ROWS_PER_PAGE;
+    const first = (event.page ?? 0) * rows;
+
+    // Building a page of edit-mode rows is synchronous and blocks the main thread, so nothing
+    // repaints between the click and the new rows. For large pages, show the table's loading mask
+    // and let the browser paint it (rAF fires before the paint, the timeout after) before starting
+    // the blocking render.
+    // ponytail: page-size threshold, not a measurement — small pages render faster than the extra
+    // frame would cost. Time the previous render instead if the rows-per-page options change.
+    if (rows <= DEFAULT_TABLE_ROWS_PER_PAGE) {
+      this.applySupportsPage(first, rows);
+      return;
+    }
+
+    this.supportsPageLoading.set(true);
+    requestAnimationFrame(() =>
+      setTimeout(() => {
+        this.applySupportsPage(first, rows);
+        this.supportsPageLoading.set(false);
+      })
+    );
+  }
+
+  private applySupportsPage(first: number, rows: number) {
+    this.rowsSupport.set(rows);
+    this.firstSupport.set(first);
   }
 
   debounceUpdateSliderOptions = debounce((key: 'endSupport' | 'startSupport', value: number) => {
