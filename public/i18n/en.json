@@ -202,6 +202,12 @@
       "distance-calculation-error-detail": "Failed to calculate obstacle distances",
       "save-detail": "Obstacle saved"
     },
+    "floor-form-service": {
+      "delete-detail": "Floor deleted",
+      "delete-error-detail": "Failed to delete floor",
+      "save-detail": "Floor saved",
+      "save-error-detail": "Failed to save floor"
+    },
     "auth-service": {
       "email-login-disabled": "Email login is disabled because G@IA single sign-on is required."
     },
@@ -364,7 +370,7 @@
       "section-created": "Section Created",
       "section-deleted": "Section Deleted",
       "section-duplicated": "Section Duplicated",
-      "geometry-objects-updated": "Obstacles and loads have been updated to match the section geometry",
+      "geometry-objects-updated": "Obstacles, floors and loads have been updated to match the section geometry",
       "ic-updated": "Initial Condition Updated",
       "ic-added": "Initial Condition Added",
       "ic-deleted": "Initial Condition Deleted",
@@ -848,8 +854,6 @@
       "working-load-unknown-aria-label": "working load is unknown",
       "strand-cut-aria-label": "strand is cut",
       "strand-not-cut-aria-label": "strand is not cut",
-      "select-obstacle-aria-label": "select an obstacle",
-      "select-obstacle-point-aria-label": "select an obstacle's point",
       "previous-support-aria-label": "Previous support",
       "next-support-aria-label": "Next support",
       "climate-condition-label": "Climate condition",
@@ -862,11 +866,17 @@
       "one-span-option": "One span",
       "two-spans-option": "Two spans",
       "all-option": "All",
-      "point-option": "Point {{ index }}",
       "span-option": "Span",
       "max-section-option": "Max section",
+      "distances-label": "Distances",
+      "floor-sidetab-label": "Floor"
+    },
+    "quick-measures": {
+      "select-obstacle-aria-label": "select an obstacle or a floor",
+      "select-obstacle-point-aria-label": "select an obstacle's or floor's point",
       "not-selected-option": "Not selected",
-      "distances-label": "Distances"
+      "point-option": "Point {{ index }}",
+      "floor-option": "floor {{ span }}"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",
@@ -942,6 +952,22 @@
       "distance-23-label": "Distance 2-3",
       "angle-123-label": "Angle 1-2-3",
       "add-measurement-points-error": "Failed to add measurement points"
+    },
+    "floor": {
+      "reference-support-point-title": "Reference support point",
+      "closing-support-point-title": "Closing support point",
+      "point-title": "Point {{distance}} m",
+      "point-alt-label": "Alt. point.",
+      "ref-support-dist-label": "Ref. supp. dist.",
+      "free-positioning-label": "Free positioning",
+      "add-point-btn": "Add point",
+      "delete-point-aria-label": "delete point",
+      "delete-floor-aria-label": "delete floor",
+      "calculate-and-save-btn": "Calculate and save",
+      "min-vertical-distance-label": "Minimum vertical distance",
+      "floor-altitude-label": "Point alt.",
+      "cable-altitude-label": "Cable alt.",
+      "min-vertical-position-label": "Ref. supp. dist."
     },
     "l0-sum": {
       "natural-lengths-title": "Natural lengths L0",

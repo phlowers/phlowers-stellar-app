@@ -230,18 +230,8 @@ describe('AppComponent - HTML rendering', () => {
   });
 
   describe('HTML rendering - login dialog removed', () => {
-    it('should NOT render user-login-dialog', () => {
-      const el = getByTestId('user-login-dialog');
-      expect(el).toBeNull();
-    });
-
-    it('should NOT render email-input', () => {
-      const el = getByTestId('email-input');
-      expect(el).toBeNull();
-    });
-
-    it('should NOT render user-save-btn', () => {
-      const el = getByTestId('user-save-btn');
+    it.each([['user-login-dialog'], ['email-input'], ['user-save-btn']])('should NOT render %s', (testId: string) => {
+      const el = getByTestId(testId);
       expect(el).toBeNull();
     });
   });
@@ -522,7 +512,6 @@ describe('AppComponent - automatic first-install resilience', () => {
     if (originalServiceWorker) {
       Object.defineProperty(navigator, 'serviceWorker', originalServiceWorker);
     } else {
-      // @ts-expect-error cleanup
       delete (navigator as { serviceWorker?: unknown }).serviceWorker;
     }
   });

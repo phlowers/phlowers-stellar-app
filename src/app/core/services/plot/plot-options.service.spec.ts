@@ -252,6 +252,57 @@ describe('PlotOptionsService', () => {
     });
   });
 
+  describe('setFreePositioningMode', () => {
+    it('should start with no free positioning source', () => {
+      expect(service.isFreePositioningMode()).toBe(false);
+      expect(service.freePositioningSource()).toBeNull();
+    });
+
+    it('should record which feature drives the mode, so the matching plot renders', () => {
+      service.setFreePositioningMode(true, 'floor');
+
+      expect(service.isFreePositioningMode()).toBe(true);
+      expect(service.freePositioningSource()).toBe('floor');
+    });
+
+    it('should clear the source when the mode is turned off', () => {
+      service.setFreePositioningMode(true, 'obstacle');
+
+      service.setFreePositioningMode(false, 'obstacle');
+
+      expect(service.isFreePositioningMode()).toBe(false);
+      expect(service.freePositioningSource()).toBeNull();
+    });
+
+    it('should switch the source when another feature takes over', () => {
+      service.setFreePositioningMode(true, 'obstacle');
+
+      service.setFreePositioningMode(true, 'floor');
+
+      expect(service.freePositioningSource()).toBe('floor');
+    });
+
+    it('should keep the mode a new source just took over when the previous one is destroyed', () => {
+      service.setFreePositioningMode(true, 'floor');
+      service.setFreePositioningMode(true, 'obstacle');
+
+      // The floor plot component is destroyed by the handover: its ngOnDestroy safety net fires last.
+      service.setFreePositioningMode(false, 'floor');
+
+      expect(service.isFreePositioningMode()).toBe(true);
+      expect(service.freePositioningSource()).toBe('obstacle');
+    });
+
+    it('should clear the source on reset', () => {
+      service.setFreePositioningMode(true, 'floor');
+
+      service.reset();
+
+      expect(service.isFreePositioningMode()).toBe(false);
+      expect(service.freePositioningSource()).toBeNull();
+    });
+  });
+
   describe('pendingCameraRestore', () => {
     it('should initialize to null', () => {
       expect(service.pendingCameraRestore()).toBeNull();

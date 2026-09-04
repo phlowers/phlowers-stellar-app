@@ -5,7 +5,6 @@ import {
   effect,
   ElementRef,
   inject,
-  signal,
   viewChildren
 } from '@angular/core';
 import { SideTabComponent } from './side-tab/side-tab.component';
@@ -32,15 +31,12 @@ export class SideTabsComponent {
   readonly panels = viewChildren<ElementRef<HTMLElement>>('panelRef');
   readonly btns = viewChildren<ElementRef<HTMLButtonElement>>('btnRef');
 
-  public panelWidth = signal<string>('0px');
-
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly sideTabsService = inject(SideTabsService);
 
   constructor() {
     effect(() => {
       const toggle = this.sideTabsService.sideTabs();
-      this.updateWidth();
 
       if (toggle !== null && isNumber(toggle)) {
         this.focusPanel(toggle);
@@ -48,21 +44,6 @@ export class SideTabsComponent {
       setTimeout(() => {
         this.plotOptionsService.refreshCamera();
       }, REFRESH_STUDIO_DELAY);
-    });
-  }
-
-  private updateWidth() {
-    const idx = this.sideTabsService.sideTabs();
-    if (idx === null) {
-      this.panelWidth.set('0px');
-      return;
-    }
-
-    setTimeout(() => {
-      const el = this.panels()[idx as number]?.nativeElement;
-      if (el) {
-        this.panelWidth.set(`${el.offsetWidth}px`);
-      }
     });
   }
 
@@ -115,7 +96,6 @@ export class SideTabsComponent {
       case 'Escape':
         if (this.sideTabsService.sideTabs() !== null) {
           this.sideTabsService.sideTabs.set(null);
-          this.panelWidth.set('0px');
           this.focusButton(i);
         }
         event.preventDefault();

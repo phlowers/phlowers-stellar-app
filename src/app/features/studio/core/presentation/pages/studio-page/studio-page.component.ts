@@ -34,6 +34,7 @@ import { StudioTopToolbarComponent } from '@features/studio/core/presentation/co
 import { StudioMenuBarComponent } from '@features/studio/core/presentation/components/menu-bar/menu-bar.component';
 import { SectionPlotCardsComponent } from '@features/studio/core/presentation/components/cards/section-plot-cards.component';
 import { SideTabsComponent } from '@features/studio/core/presentation/components/side-tabs/side-tabs.component';
+import { QuickMeasuresComponent } from '@features/studio/core/presentation/components/quick-measures/quick-measures.component';
 import { SideTabComponent } from '@features/studio/core/presentation/components/side-tabs/side-tab/side-tab.component';
 import { FreePositioningComponent } from '@features/studio/core/presentation/components/free-positioning/free-positioning.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
@@ -54,6 +55,8 @@ import { CableSpanManipComponent } from '@features/studio/loads/presentation/com
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
+import { FloorComponent } from '@src/app/features/studio/floor/presentation/floor.component';
+import { FloorFreePositioningComponent } from '@src/app/features/studio/floor/presentation/components/floor-free-positioning/floor-free-positioning.component';
 import { Camera } from 'plotly.js-dist-min';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -97,6 +100,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     StudioMenuBarComponent,
     SectionPlotCardsComponent,
     SideTabsComponent,
+    QuickMeasuresComponent,
     SideTabComponent,
     ClimateComponent,
     LoadMarkingComponent,
@@ -106,7 +110,9 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     FreePositioningComponent,
     CableSpanManipComponent,
     CableSupportManipComponent,
-    DistanceMeasuringComponent
+    DistanceMeasuringComponent,
+    FloorComponent,
+    FloorFreePositioningComponent
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',
@@ -187,34 +193,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  filteredObstaclesOptions = computed(() => {
-    const section = this.spanService.section();
-    if (!section) return [];
-    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    const visibleSupportUuids = new Set(section.supports.slice(startSupport, endSupport).map((s) => s.uuid));
-    const options: { label: string; value: string | null }[] = section.obstacles
-      .filter((o) => visibleSupportUuids.has(o.supportUuid))
-      .map((o) => ({ label: o.name, value: o.uuid }));
-    if (options.length) {
-      options.unshift({
-        label: this.translocoService.translate('studio.studio-page.not-selected-option'),
-        value: null
-      });
-    }
-    return options;
-  });
-
-  obstaclePointOptions = computed(() => {
-    const uuid = this.obstaclesService.selectedObstacleUuid();
-    if (!uuid) return [];
-    const obstacle = this.spanService.section()?.obstacles.find((o) => o.uuid === uuid);
-    if (!obstacle) return [];
-    return obstacle.positions.map((_, index) => ({
-      label: this.translocoService.translate('studio.studio-page.point-option', { index: index + 1 }),
-      value: index
-    }));
-  });
-
   toggleSidebar() {
     this.sidebarOpen.set(!this.sidebarOpen());
     this.sidebarWidth.set(this.sidebarOpen() ? 300 : 0);
@@ -251,7 +229,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
         this.previousEndSupport !== null &&
         (this.previousStartSupport !== startSupport || this.previousEndSupport !== endSupport)
       ) {
-        this.obstaclesService.setSelectedObstacle(null, null);
+        this.obstaclesService.setSelectedMeasure(null, null);
         this.obstacleStateService.distanceType.set(null);
       }
       this.previousStartSupport = startSupport;
@@ -390,7 +368,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.saveViewState();
     this.plotService.isStudioActive.set(false);
     this.plotService.resetAll();
-    this.obstaclesService.setSelectedObstacle(null, null);
+    this.obstaclesService.setSelectedMeasure(null, null);
     this.obstacleFormService.clearPositions();
   }
 
@@ -525,16 +503,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
         startSupport: newStartSupport,
         endSupport: newEndSupport
       });
-    }
-  }
-
-  onObstacleSelect(uuid: string | null) {
-    this.obstacleStateService.distanceType.set(null);
-    const obstacle = uuid ? this.spanService.section()?.obstacles.find((o) => o.uuid === uuid) : null;
-    const pointIndex = obstacle?.positions.length === 1 ? 0 : null;
-    this.obstaclesService.setSelectedObstacle(uuid, pointIndex);
-    if (obstacle) {
-      this.obstacleFormService.setExistingObstacle(obstacle, pointIndex ?? 0);
     }
   }
 

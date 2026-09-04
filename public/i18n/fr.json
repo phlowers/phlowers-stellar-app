@@ -202,6 +202,12 @@
       "distance-calculation-error-detail": "Échec du calcul des distances des obstacles",
       "save-detail": "Obstacle enregistré"
     },
+    "floor-form-service": {
+      "delete-detail": "Sol supprimé",
+      "delete-error-detail": "Échec de la suppression du sol",
+      "save-detail": "Sol enregistré",
+      "save-error-detail": "Échec de l'enregistrement du sol"
+    },
     "auth-service": {
       "email-login-disabled": "La connexion par e-mail est désactivée car l'authentification unique G@IA est requise."
     },
@@ -364,7 +370,7 @@
       "section-created": "Canton créé",
       "section-deleted": "Canton supprimé",
       "section-duplicated": "Canton dupliqué",
-      "geometry-objects-updated": "Les obstacles et charges ont été mis à jour pour correspondre à la géométrie du canton",
+      "geometry-objects-updated": "Les obstacles, sols et charges ont été mis à jour pour correspondre à la géométrie du canton",
       "ic-updated": "Condition initiale mise à jour",
       "ic-added": "Condition initiale ajoutée",
       "ic-deleted": "Condition initiale supprimée",
@@ -848,8 +854,6 @@
       "working-load-unknown-aria-label": "le taux de travail est inconnu",
       "strand-cut-aria-label": "le brin est coupé",
       "strand-not-cut-aria-label": "le brin n'est pas coupé",
-      "select-obstacle-aria-label": "sélectionner un obstacle",
-      "select-obstacle-point-aria-label": "Sélectionner le point d'un obstacle",
       "previous-support-aria-label": "Support précédent",
       "next-support-aria-label": "Support suivant",
       "climate-condition-label": "Condition climatique",
@@ -862,11 +866,17 @@
       "one-span-option": "Une portée",
       "two-spans-option": "Deux portées",
       "all-option": "Toutes",
-      "point-option": "Point {{ index }}",
       "span-option": "Portée",
       "max-section-option": "Max canton",
+      "distances-label": "Distances",
+      "floor-sidetab-label": "Sol"
+    },
+    "quick-measures": {
+      "select-obstacle-aria-label": "sélectionner un obstacle ou un sol",
+      "select-obstacle-point-aria-label": "Sélectionner le point d'un obstacle ou d'un sol",
       "not-selected-option": "Non sélectionné",
-      "distances-label": "Distances"
+      "point-option": "Point {{ index }}",
+      "floor-option": "sol {{ span }}"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",
@@ -942,6 +952,22 @@
       "distance-23-label": "Distance 2-3",
       "angle-123-label": "Angle 1-2-3",
       "add-measurement-points-error": "Échec de l'ajout des points de mesure"
+    },
+    "floor": {
+      "reference-support-point-title": "Point du support de référence",
+      "closing-support-point-title": "Point du support de fermeture",
+      "point-title": "Point {{distance}} m",
+      "point-alt-label": "Alt. point",
+      "ref-support-dist-label": "Dist. supp. réf.",
+      "free-positioning-label": "Positionnement libre",
+      "add-point-btn": "Ajouter un point",
+      "delete-point-aria-label": "supprimer le point",
+      "delete-floor-aria-label": "supprimer le sol",
+      "calculate-and-save-btn": "Calculer et enregistrer",
+      "min-vertical-distance-label": "Distance verticale minimum",
+      "floor-altitude-label": "Alt. point",
+      "cable-altitude-label": "Alt. câble",
+      "min-vertical-position-label": "Dist. supp. réf."
     },
     "l0-sum": {
       "natural-lengths-title": "Longueurs naturelles L0",

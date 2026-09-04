@@ -512,7 +512,10 @@ export interface DistancePoint {
   virtualPointVertical: [number, number, number];
   distanceDiagonal: number;
   distanceHorizontal: number;
+  // Non-negative, as obstacles have always exposed it.
   distanceVertical: number;
+  // Same distance, signed: negative when the cable passes below the point. Read by floors only.
+  signedDistanceVertical: number;
 }
 
 export interface Distance {
