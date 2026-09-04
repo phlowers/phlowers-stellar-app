@@ -8,6 +8,7 @@
 import numpy as np
 
 from stellar_engine.data.geography import (
+    compute_errors,
     compute_localization,
     import_lambert,
     import_lambert_and_validate,
@@ -30,7 +31,6 @@ def test_compute_localization():
         "lambert_y",
         "azimuth",
     }
-    print(result)
     assert expected_keys == set(result.keys())
     assert result["latitude"][0] == inputs["startLatitude"]
     assert result["longitude"][0] == inputs["startLongitude"]
@@ -156,3 +156,75 @@ def test_import_lambert_and_validate_true_value():
     azimuth_error = abs(result["localization"]["azimuth"][0] - 119.53)
     print(f"Azimuth error: {azimuth_error}")
     assert azimuth_error < 1e-2
+
+
+def test_compute_errors_zero_distance():
+    """Identical original and reconstructed points should yield 0 m distance."""
+    latitude = np.array([48.8566, 48.856636683993784])
+    longitude = np.array([2.3522, 2.3522446])
+
+    lat_diff, lon_diff, dist_diff_meter, mean_gps_diff = compute_errors(
+        latitude,
+        longitude,
+        longitude[1:],  # reconstructed_lon
+        latitude[1:],  # reconstructed_lat
+    )
+
+    assert lat_diff.shape == (1,)
+    assert lon_diff.shape == (1,)
+    assert dist_diff_meter.shape == (1,)
+    np.testing.assert_allclose(dist_diff_meter, [0.0], atol=1e-6)
+    np.testing.assert_allclose(mean_gps_diff, 0.0, atol=1e-6)
+
+
+def test_compute_errors_single_offset():
+    """A known geodesic offset is reported in meters."""
+    latitude = np.array([48.8566, 48.8566])
+    longitude = np.array([2.3522, 2.3532])
+    # Reconstructed point is ~1° east in longitude, i.e. ~73 km at this latitude.
+    reconstructed_lat = np.array([48.8566])
+    reconstructed_lon = np.array([3.3522])
+
+    lat_diff, lon_diff, dist_diff_meter, mean_gps_diff = compute_errors(
+        latitude,
+        longitude,
+        reconstructed_lon,
+        reconstructed_lat,
+    )
+
+    assert lat_diff.shape == (1,)
+    assert lon_diff.shape == (1,)
+    assert dist_diff_meter.shape == (1,)
+    np.testing.assert_allclose(
+        dist_diff_meter,
+        [73_307.716579],
+        rtol=1e-6,
+    )
+    np.testing.assert_allclose(mean_gps_diff, 73_307.716579, rtol=1e-6)
+    assert lat_diff[0] == abs(reconstructed_lat[0] - latitude[1])
+    assert lon_diff[0] == abs(reconstructed_lon[0] - longitude[1])
+
+
+def test_compute_errors_multi_points():
+    """Distance is computed for each reconstructed support and averaged."""
+    latitude = np.array([0.0, 0.0, 0.0])
+    longitude = np.array([0.0, 0.001, 0.002])
+    reconstructed_lat = np.array([0.0, 0.0])
+    reconstructed_lon = np.array([-0.001, 0.001])
+
+    lat_diff, lon_diff, dist_diff_meter, mean_gps_diff = compute_errors(
+        latitude,
+        longitude,
+        reconstructed_lon,
+        reconstructed_lat,
+    )
+
+    assert lat_diff.shape == (2,)
+    assert lon_diff.shape == (2,)
+    assert dist_diff_meter.shape == (2,)
+    np.testing.assert_allclose(
+        dist_diff_meter,
+        [222.638982, 111.319491],
+        rtol=1e-6,
+    )
+    np.testing.assert_allclose(mean_gps_diff, 166.979236, rtol=1e-6)

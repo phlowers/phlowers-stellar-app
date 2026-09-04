@@ -355,22 +355,23 @@ wheels = [
 
 [[package]]
 name = "mechaphlowers"
-version = "0.11.2"
+version = "0.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "pandas" },
-    { name = "pandera" },
+    { name = "pandera", extra = ["pandas"] },
     { name = "pint" },
     { name = "plotly" },
     { name = "pydantic" },
+    { name = "pyproj" },
     { name = "pyyaml" },
     { name = "thermohl" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/d1/401b1a0d7e8b221b8df57ae78c517696ada6ae3252a0b246c0520dba1b68/mechaphlowers-0.11.2.tar.gz", hash = "sha256:d68065e0570c0d4940b66059b157d9c5a81b045bda6d5c41249c45faa97da5cf", size = 173454 }
+sdist = { url = "https://files.pythonhosted.org/packages/1a/ff/25eec2e3bd4a1b1f1eaf1098d4a27fade977817c83d92ee7cd463ad76b16/mechaphlowers-0.12.0.tar.gz", hash = "sha256:5abef88c40819f90ffa3442d81f2a1059f1a1b81b3d7efdd427c0655f42743d7", size = 174774 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/58/c7863399b360f462464acfc9343d73b7398cef5e819a71bd1819e428dc6c/mechaphlowers-0.11.2-py3-none-any.whl", hash = "sha256:492149a0970974295cd215cba755d08fc67dbed9e43972eed5b3bc8cd167082e", size = 208310 },
+    { url = "https://files.pythonhosted.org/packages/28/c5/d5a8615ae8e8c2400eb832a09f06ce0353e17732822ca34f6b849cf6104a/mechaphlowers-0.12.0-py3-none-any.whl", hash = "sha256:4657ee016a72468a0371296bc155dd82b419b23900286e8b4ab6cdba04d404d0", size = 210279 },
 ]
 
 [[package]]
@@ -483,19 +484,24 @@ wheels = [
 
 [[package]]
 name = "pandera"
-version = "0.23.1"
+version = "0.33.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy" },
     { name = "packaging" },
-    { name = "pandas" },
     { name = "pydantic" },
     { name = "typeguard" },
+    { name = "typing-extensions" },
     { name = "typing-inspect" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/70/1a/bcb3daa41bf6a46dc7c218cb0558922f1e711176bbb4ce649ed610a35f3f/pandera-0.23.1.tar.gz", hash = "sha256:2afed504ad61bbd2960dc7f85dd6be0b28d230a626f392b8ba05c291b970ae06", size = 513325 }
+sdist = { url = "https://files.pythonhosted.org/packages/47/7a/702612a2b5e3335722395d6de71206549f64a43588527f411ff60a7c3456/pandera-0.33.1.tar.gz", hash = "sha256:909e2e269a3f9c17d94c11268f92a5f48e889af633ea1414053993874d613626", size = 976019 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/9e/79bb285d4dbee32f4786b659bfbddb2d56edf3c9bc2b7ed16474903584ed/pandera-0.23.1-py3-none-any.whl", hash = "sha256:37f75cfb5e34db88afc07adf3ea07ba8738bca709f0e67799c8f1b2fc6b9c977", size = 264213 },
+    { url = "https://files.pythonhosted.org/packages/d2/84/107a480f7aa34a6878fb4fb85cda66f37e8aaee769c5917e3eaa2d55222e/pandera-0.33.1-py3-none-any.whl", hash = "sha256:8283bc12f7c85f0b429107d71b55150205f7e5ca59d68117aff971273a3bd2d8", size = 501976 },
+]
+
+[package.optional-dependencies]
+pandas = [
+    { name = "numpy" },
+    { name = "pandas" },
 ]
 
 [[package]]
@@ -899,7 +905,6 @@ name = "stellar-engine"
 source = { editable = "." }
 dependencies = [
     { name = "mechaphlowers" },
-    { name = "pyproj" },
 ]
 
 [package.dev-dependencies]
@@ -929,10 +934,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "mechaphlowers", specifier = "==0.11.2" },
-    { name = "pyproj", specifier = "==3.7.2" },
-]
+requires-dist = [{ name = "mechaphlowers", specifier = "==0.12.0" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -971,16 +973,16 @@ wheels = [
 
 [[package]]
 name = "thermohl"
-version = "1.9.0"
+version = "1.9.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/d8/4c575e57630fdd99ffc4a8b8b9cbfdbb417cc82fcf22d9f966f2a2446811/thermohl-1.9.0.tar.gz", hash = "sha256:4cbecf879654348a24d8596ea71db7abc9d245355ff77d471990d9c0f17233df", size = 1075892 }
+sdist = { url = "https://files.pythonhosted.org/packages/04/e6/befaf8b078d79ab167a152e412a34b07de2a3d22e260063f6f298b2fa88f/thermohl-1.9.2.tar.gz", hash = "sha256:fb54a00af0ce4432b5e1bcce6aa8c3ad3d0894b3831772b0b84059fa12082bb8", size = 1081164 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/ca/026ab95c81993749bf9dfcf8decee567c25812f6f812f8b7939d478ea79e/thermohl-1.9.0-py3-none-any.whl", hash = "sha256:5ef52099766961734a3d746dd7eced6c998361061e2c5b101480a57c711a387e", size = 80205 },
+    { url = "https://files.pythonhosted.org/packages/b9/de/e2abc543136a8b8d61e05ce8d4465674ccb8871f623295d547cbcd8dab93/thermohl-1.9.2-py3-none-any.whl", hash = "sha256:6d7e1f7911676b6ec0f2eccb388baf087c7d797a411269c05edbdec46b8c931b", size = 82141 },
 ]
 
 [[package]]

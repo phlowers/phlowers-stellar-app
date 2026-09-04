@@ -163,7 +163,7 @@ def compute_localization(inputs: SectionGeoData) -> dict:
     Azimuths follow the flat-plane (Lambert93 grid) convention: the accumulated
     grid azimuth is converted to a geodesic azimuth by adding the meridian
     convergence before each geodesic step, mirroring
-    :func:`import_lambert_pyproj_poc` which removes it.
+    :func:`import_lambert` which removes it.
 
     Expects an already-built :class:`SectionGeoData`::
 
@@ -171,8 +171,8 @@ def compute_localization(inputs: SectionGeoData) -> dict:
             startLatitude=float,  # decimal degrees
             startLongitude=float,  # decimal degrees
             startAzimuth=float,  # flat-plane azimuth (deg), at start point
-            spanLength=list[float],  # span length (m), size N-1
-            lineAngle=list[float],  # flat deflection angle (deg), size N-1
+            spanLength=list[float],  # span length (m), size N (last unused)
+            lineAngle=list[float],  # flat deflection angle (deg), size N (last unused)
         )
 
     Returns a dict::
@@ -239,10 +239,17 @@ def compute_localization(inputs: SectionGeoData) -> dict:
 
 
 def compute_errors(latitude, longitude, reconstructed_lon, reconstructed_lat):
-    lat_diff = abs(np.atleast_1d(reconstructed_lat) - latitude[1:])
-    lon_diff = abs(np.atleast_1d(reconstructed_lon) - longitude[1:])
-    dist_diff = np.linalg.norm([lat_diff, lon_diff], axis=0)
-    dist_diff_meter = dist_diff / 0.01 * 1.11e3
+    geod = Geod(ellps="WGS84")
+    lat_orig = np.atleast_1d(latitude[1:])
+    lon_orig = np.atleast_1d(longitude[1:])
+    lat_recon = np.atleast_1d(reconstructed_lat)
+    lon_recon = np.atleast_1d(reconstructed_lon)
+
+    _, _, dist_diff_meter = geod.inv(lon_orig, lat_orig, lon_recon, lat_recon)
+    dist_diff_meter = np.atleast_1d(dist_diff_meter)
+
+    lat_diff = abs(lat_recon - lat_orig)
+    lon_diff = abs(lon_recon - lon_orig)
     mean_gps_diff = float(np.mean(dist_diff_meter))
     return lat_diff, lon_diff, dist_diff_meter, mean_gps_diff
 
