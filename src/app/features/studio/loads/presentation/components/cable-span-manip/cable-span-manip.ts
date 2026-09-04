@@ -24,7 +24,7 @@ import {
   SLING_LENGTH_MAX,
   SLING_LENGTH_MIN
 } from './cable-span-manip.constantes';
-import { twoDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -77,11 +77,16 @@ export class CableSpanManipComponent implements OnInit {
         Validators.required,
         Validators.min(LATERAL_DISTANCE_MIN),
         Validators.max(LATERAL_DISTANCE_MAX),
-        twoDecimalValidator
+        maxDecimalsValidator(2)
       ]
     }),
     altitude: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(ALTITUDE_MIN), Validators.max(ALTITUDE_MAX), twoDecimalValidator]
+      validators: [
+        Validators.required,
+        Validators.min(ALTITUDE_MIN),
+        Validators.max(ALTITUDE_MAX),
+        maxDecimalsValidator(2)
+      ]
     }),
     anchoring: new FormControl<AnchoringType | null>({ value: 'with_sling', disabled: true }),
     chainName: new FormControl<string | null>(null),
@@ -181,15 +186,17 @@ export class CableSpanManipComponent implements OnInit {
       Validators.required,
       (ctrl) => Validators.min(this.distRefSupportMin())(ctrl),
       (ctrl) => Validators.max(this.distRefSupportMax())(ctrl),
-      twoDecimalValidator
+      maxDecimalsValidator(2)
     ]);
 
     // Dynamic validators for longitudinalDistance — required only when using a crane
     this.form.controls.longitudinalDistance.setValidators([
       (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.required(ctrl) : null),
-      (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.min(LONGITUDINAL_DISTANCE_MIN)(ctrl) : null),
-      (ctrl) => (this.cableManipTypeSignal() === 'with_a_crane' ? Validators.max(LONGITUDINAL_DISTANCE_MAX)(ctrl) : null),
-      twoDecimalValidator
+      (ctrl) =>
+        this.cableManipTypeSignal() === 'with_a_crane' ? Validators.min(LONGITUDINAL_DISTANCE_MIN)(ctrl) : null,
+      (ctrl) =>
+        this.cableManipTypeSignal() === 'with_a_crane' ? Validators.max(LONGITUDINAL_DISTANCE_MAX)(ctrl) : null,
+      maxDecimalsValidator(2)
     ]);
     effect(() => {
       this.cableManipTypeSignal();
@@ -207,18 +214,18 @@ export class CableSpanManipComponent implements OnInit {
     for (const field of chainNumericFields) {
       this.form.controls[field].setValidators([
         (ctrl) => (this.anchoringSignal() === 'with_chain' ? Validators.required(ctrl) : null),
-        twoDecimalValidator
+        maxDecimalsValidator(2)
       ]);
     }
     this.form.controls.chainLength.setValidators([
       (ctrl) => (this.anchoringSignal() === 'with_chain' ? Validators.required(ctrl) : null),
-      twoDecimalValidator
+      maxDecimalsValidator(2)
     ]);
     this.form.controls.slingLength.setValidators([
       (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.required(ctrl) : null),
       (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.min(SLING_LENGTH_MIN)(ctrl) : null),
       (ctrl) => (this.anchoringSignal() === 'with_sling' ? Validators.max(SLING_LENGTH_MAX)(ctrl) : null),
-      twoDecimalValidator
+      maxDecimalsValidator(2)
     ]);
     effect(() => {
       this.anchoringSignal();

@@ -636,12 +636,12 @@ describe('LoadMarkingComponent', () => {
   });
 
   describe('Error messages', () => {
-    describe('loadPosition oneDecimal error', () => {
+    describe('loadPosition maxDecimals error', () => {
       it('does not render the error message when loadPosition has no more than one decimal', () => {
         component.form.controls.loadPosition.setValue(2.1);
         fixture.detectChanges();
 
-        expect(getById('loadPosition-error-oneDecimal')).toBeNull();
+        expect(getById('loadPosition-error-maxDecimals')).toBeNull();
         const input = getByTestId('load-position') as HTMLInputElement;
         expect(input.getAttribute('aria-invalid')).toBeNull();
         expect(input.getAttribute('aria-errormessage')).toBeNull();
@@ -651,31 +651,31 @@ describe('LoadMarkingComponent', () => {
         component.form.controls.loadPosition.setValue(2.13);
         fixture.detectChanges();
 
-        expect(getById('loadPosition-error-oneDecimal')).toBeTruthy();
+        expect(getById('loadPosition-error-maxDecimals')).toBeTruthy();
         const input = getByTestId('load-position') as HTMLInputElement;
         expect(input.getAttribute('aria-invalid')).toBe('true');
-        expect(input.getAttribute('aria-errormessage')).toBe('loadPosition-error-oneDecimal');
+        expect(input.getAttribute('aria-errormessage')).toBe('loadPosition-error-maxDecimals');
       });
 
       it('hides the error message again once loadPosition becomes valid', () => {
         component.form.controls.loadPosition.setValue(2.13);
         fixture.detectChanges();
-        expect(getById('loadPosition-error-oneDecimal')).toBeTruthy();
+        expect(getById('loadPosition-error-maxDecimals')).toBeTruthy();
 
         component.form.controls.loadPosition.setValue(2.1);
         fixture.detectChanges();
 
-        expect(getById('loadPosition-error-oneDecimal')).toBeNull();
+        expect(getById('loadPosition-error-maxDecimals')).toBeNull();
       });
     });
 
-    describe('loadWeight oneDecimal error', () => {
+    describe('loadWeight maxDecimals error', () => {
       it('does not render the error message when loadWeight has no more than one decimal', () => {
         component.form.controls.type.setValue(LoadType.PUNCTUAL);
         component.form.controls.loadWeight.setValue(10.5);
         fixture.detectChanges();
 
-        expect(getById('loadWeight-error-oneDecimal')).toBeNull();
+        expect(getById('loadWeight-error-maxDecimals')).toBeNull();
         const input = getByTestId('load-weight') as HTMLInputElement;
         expect(input.getAttribute('aria-invalid')).toBeNull();
         expect(input.getAttribute('aria-errormessage')).toBeNull();
@@ -686,10 +686,10 @@ describe('LoadMarkingComponent', () => {
         component.form.controls.loadWeight.setValue(10.55);
         fixture.detectChanges();
 
-        expect(getById('loadWeight-error-oneDecimal')).toBeTruthy();
+        expect(getById('loadWeight-error-maxDecimals')).toBeTruthy();
         const input = getByTestId('load-weight') as HTMLInputElement;
         expect(input.getAttribute('aria-invalid')).toBe('true');
-        expect(input.getAttribute('aria-errormessage')).toBe('loadWeight-error-oneDecimal');
+        expect(input.getAttribute('aria-errormessage')).toBe('loadWeight-error-maxDecimals');
       });
 
       it('does not render the loadWeight error message when type is marking, even if the underlying value is invalid', () => {
@@ -698,7 +698,7 @@ describe('LoadMarkingComponent', () => {
         fixture.detectChanges();
 
         expect(getByTestId('load-weight')).toBeNull();
-        expect(getById('loadWeight-error-oneDecimal')).toBeNull();
+        expect(getById('loadWeight-error-maxDecimals')).toBeNull();
       });
     });
   });

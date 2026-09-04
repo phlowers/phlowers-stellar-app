@@ -34,7 +34,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
-import { twoDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
   CONFORMITY_BOUNDS,
@@ -153,7 +153,7 @@ export class ConformityComponent implements OnDestroy {
         Validators.required,
         Validators.min(CONFORMITY_BOUNDS.repartitionTemperature.min),
         Validators.max(CONFORMITY_BOUNDS.repartitionTemperature.max),
-        twoDecimalValidator
+        maxDecimalsValidator(2)
       ]
     ],
     lateralDistanceTemperature: [
@@ -162,7 +162,7 @@ export class ConformityComponent implements OnDestroy {
         Validators.required,
         Validators.min(CONFORMITY_BOUNDS.lateralDistanceTemperature.min),
         Validators.max(CONFORMITY_BOUNDS.lateralDistanceTemperature.max),
-        twoDecimalValidator
+        maxDecimalsValidator(2)
       ]
     ],
     conformity: this.fb.control<string[] | null>(null, Validators.required)
@@ -273,7 +273,7 @@ export class ConformityComponent implements OnDestroy {
     const errors = this.form.controls.repartitionTemperature.errors;
     if (errors?.['min']) return 'repartition-temperature-min-error';
     if (errors?.['max']) return 'repartition-temperature-max-error';
-    if (errors?.['twoDecimal']) return 'repartition-temperature-twoDecimal-error';
+    if (errors?.['maxDecimals'] !== undefined) return 'repartition-temperature-maxDecimals-error';
     return null;
   });
 
@@ -282,7 +282,7 @@ export class ConformityComponent implements OnDestroy {
     const errors = this.form.controls.lateralDistanceTemperature.errors;
     if (errors?.['min']) return 'lateral-distance-temperature-min-error';
     if (errors?.['max']) return 'lateral-distance-temperature-max-error';
-    if (errors?.['twoDecimal']) return 'lateral-distance-temperature-twoDecimal-error';
+    if (errors?.['maxDecimals'] !== undefined) return 'lateral-distance-temperature-maxDecimals-error';
     return null;
   });
 

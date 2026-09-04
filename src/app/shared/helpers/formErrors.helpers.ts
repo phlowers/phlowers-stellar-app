@@ -6,6 +6,7 @@
  */
 
 import { AbstractControl } from '@angular/forms';
+import { NumberInputErrorParams } from './formErrors.interfaces';
 
 /**
  * Builds the space-separated list of `<controlName>-error-<type>` ids for the active errors of
@@ -23,4 +24,26 @@ export function getControlErrorIds(
   }
   const ids = errorTypes.filter((type) => control.errors?.[type]).map((type) => `${controlName}-error-${type}`);
   return ids.length > 0 ? ids.join(' ') : null;
+}
+
+/**
+ * Resolves the single Transloco key (and interpolation params) to display for a number input's
+ * active `min` / `max` / `maxDecimals` validation error, in that priority order. Returns null
+ * when none of these errors are active.
+ */
+export function getNumberInputErrorParams(control: AbstractControl | null): NumberInputErrorParams | null {
+  const errors = control?.errors;
+  if (!errors) {
+    return null;
+  }
+  if (errors['min']) {
+    return { key: 'common.min-value-error', params: { min: errors['min'].min } };
+  }
+  if (errors['max']) {
+    return { key: 'common.max-value-error', params: { max: errors['max'].max } };
+  }
+  if (errors['maxDecimals']) {
+    return { key: 'common.max-decimals-error', params: { maxDecimals: errors['maxDecimals'].maxDecimals } };
+  }
+  return null;
 }

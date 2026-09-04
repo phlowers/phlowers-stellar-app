@@ -77,7 +77,13 @@ describe('CableSpanManipComponent', () => {
         CableSpanManipComponent,
         TranslocoTestingModule.forRoot({
           langs: {
-            en: { common: { 'out-of-bound-error': 'Value must be between {{ min }} and {{ max }}' } }
+            en: {
+              common: {
+                'min-value-error': 'Min. value: {{ min }}',
+                'max-value-error': 'Max. value: {{ max }}',
+                'max-decimals-error': 'Max decimals: {{ maxDecimals }}'
+              }
+            }
           },
           translocoConfig: {
             availableLangs: ['en'],
@@ -250,7 +256,7 @@ describe('CableSpanManipComponent', () => {
       fixture.detectChanges();
       expect(getById('distanceToRefSupport-error-min')).toBeNull();
       expect(getById('distanceToRefSupport-error-max')).toBeNull();
-      expect(getById('distanceToRefSupport-error-twoDecimal')).toBeNull();
+      expect(getById('distanceToRefSupport-error-maxDecimals')).toBeNull();
     });
 
     it('should render the min error message when distanceToRefSupport is below the dynamic minimum', () => {
@@ -273,12 +279,12 @@ describe('CableSpanManipComponent', () => {
       expect(message?.textContent).toContain(String(component.distRefSupportMax()));
     });
 
-    it('should render the twoDecimal error message when distanceToRefSupport has more than two decimals', () => {
+    it('should render the maxDecimals error message when distanceToRefSupport has more than two decimals', () => {
       component.form.controls.scope.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       component.form.controls.distanceToRefSupport.setValue(1.234);
       fixture.detectChanges();
-      expect(getById('distanceToRefSupport-error-twoDecimal')).toBeTruthy();
+      expect(getById('distanceToRefSupport-error-maxDecimals')).toBeTruthy();
     });
 
     it('should render the min error message when longitudinalDistance is below -100', () => {
@@ -297,10 +303,10 @@ describe('CableSpanManipComponent', () => {
       expect(message?.textContent).toContain('5000');
     });
 
-    it('should render the twoDecimal error message when longitudinalDistance has more than two decimals', () => {
+    it('should render the maxDecimals error message when longitudinalDistance has more than two decimals', () => {
       component.form.controls.longitudinalDistance.setValue(1.234);
       fixture.detectChanges();
-      expect(getById('longitudinalDistance-error-twoDecimal')).toBeTruthy();
+      expect(getById('longitudinalDistance-error-maxDecimals')).toBeTruthy();
     });
 
     it('should render the min error message when lateralDistance is below -100', () => {
@@ -319,10 +325,10 @@ describe('CableSpanManipComponent', () => {
       expect(message?.textContent).toContain('100');
     });
 
-    it('should render the twoDecimal error message when lateralDistance has more than two decimals', () => {
+    it('should render the maxDecimals error message when lateralDistance has more than two decimals', () => {
       component.form.controls.lateralDistance.setValue(1.234);
       fixture.detectChanges();
-      expect(getById('lateralDistance-error-twoDecimal')).toBeTruthy();
+      expect(getById('lateralDistance-error-maxDecimals')).toBeTruthy();
     });
 
     it('should render the min error message when altitude is below -100', () => {
@@ -341,10 +347,10 @@ describe('CableSpanManipComponent', () => {
       expect(message?.textContent).toContain('9000');
     });
 
-    it('should render the twoDecimal error message when altitude has more than two decimals', () => {
+    it('should render the maxDecimals error message when altitude has more than two decimals', () => {
       component.form.controls.altitude.setValue(1.234);
       fixture.detectChanges();
-      expect(getById('altitude-error-twoDecimal')).toBeTruthy();
+      expect(getById('altitude-error-maxDecimals')).toBeTruthy();
     });
 
     it('should render the min error message when slingLength is below 0', () => {
@@ -363,10 +369,10 @@ describe('CableSpanManipComponent', () => {
       expect(message?.textContent).toContain('99');
     });
 
-    it('should render the twoDecimal error message when slingLength has more than two decimals', () => {
+    it('should render the maxDecimals error message when slingLength has more than two decimals', () => {
       component.form.controls.slingLength.setValue(1.234);
       fixture.detectChanges();
-      expect(getById('slingLength-error-twoDecimal')).toBeTruthy();
+      expect(getById('slingLength-error-maxDecimals')).toBeTruthy();
     });
 
     it('should not render any sling length error message once the value becomes valid again', () => {
@@ -387,28 +393,28 @@ describe('CableSpanManipComponent', () => {
         fixture.detectChanges();
       });
 
-      it('should render the twoDecimal error message when chainLength has more than two decimals', () => {
+      it('should render the maxDecimals error message when chainLength has more than two decimals', () => {
         component.form.controls.chainLength.setValue(1.234);
         fixture.detectChanges();
-        expect(getById('chainLength-error-twoDecimal')).toBeTruthy();
+        expect(getById('chainLength-error-maxDecimals')).toBeTruthy();
       });
 
-      it('should render the twoDecimal error message when chainWeight has more than two decimals', () => {
+      it('should render the maxDecimals error message when chainWeight has more than two decimals', () => {
         component.form.controls.chainWeight.setValue(1.234);
         fixture.detectChanges();
-        expect(getById('chainWeight-error-twoDecimal')).toBeTruthy();
+        expect(getById('chainWeight-error-maxDecimals')).toBeTruthy();
       });
 
-      it('should render the twoDecimal error message when chainSurface has more than two decimals', () => {
+      it('should render the maxDecimals error message when chainSurface has more than two decimals', () => {
         component.form.controls.chainSurface.setValue(1.234);
         fixture.detectChanges();
-        expect(getById('chainSurface-error-twoDecimal')).toBeTruthy();
+        expect(getById('chainSurface-error-maxDecimals')).toBeTruthy();
       });
 
-      it('should render the twoDecimal error message when counterWeight has more than two decimals', () => {
+      it('should render the maxDecimals error message when counterWeight has more than two decimals', () => {
         component.form.controls.counterWeight.setValue(1.234);
         fixture.detectChanges();
-        expect(getById('counterWeight-error-twoDecimal')).toBeTruthy();
+        expect(getById('counterWeight-error-maxDecimals')).toBeTruthy();
       });
     });
   });

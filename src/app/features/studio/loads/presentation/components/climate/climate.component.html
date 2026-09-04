@@ -28,35 +28,29 @@
         step="1"
         required
         [attr.aria-invalid]="form.controls.windPressure.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('windPressure', ['min', 'max', 'noDecimal'])"
+        [attr.aria-errormessage]="getErrorIds('windPressure', ['min', 'max', 'maxDecimals'])"
       />
       <p-inputgroup-addon>Pa</p-inputgroup-addon>
     </p-inputgroup>
 
     @if (form.controls.windPressure.errors) {
       <div class="wind-error">
-        @if (form.controls.windPressure.errors['min'] || form.controls.windPressure.errors['max']) {
-          <p-message
-            [id]="form.controls.windPressure.errors['min'] ? 'windPressure-error-min' : 'windPressure-error-max'"
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{
-              'common.out-of-bound-error'
-                | transloco: { min: constraints.windPressure.min, max: constraints.windPressure.max }
-            }}
+        @if (form.controls.windPressure.errors['min']; as minError) {
+          <p-message id="windPressure-error-min" severity="error" size="small" variant="simple">
+            {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+          </p-message>
+        } @else if (form.controls.windPressure.errors['max']; as maxError) {
+          <p-message id="windPressure-error-max" severity="error" size="small" variant="simple">
+            {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
           </p-message>
         }
-        @if (form.controls.windPressure.errors['noDecimal']) {
-          <p-message id="windPressure-error-noDecimal" severity="error" size="small" variant="simple">
-            {{ 'common.no-decimal-error' | transloco }}
+        @if (form.controls.windPressure.errors['maxDecimals']; as maxDecimals) {
+          <p-message id="windPressure-error-maxDecimals" severity="error" size="small" variant="simple">
+            {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
           </p-message>
         }
       </div>
     }
-
-    <label for="cableTemperature" class="temp-label">{{ 'loads.climate.cable-temperature-label' | transloco }}</label>
 
     <p-inputgroup>
       <input
@@ -71,31 +65,25 @@
         step="1"
         required
         [attr.aria-invalid]="form.controls.cableTemperature.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('cableTemperature', ['min', 'max', 'noDecimal'])"
+        [attr.aria-errormessage]="getErrorIds('cableTemperature', ['min', 'max', 'maxDecimals'])"
       />
       <p-inputgroup-addon>°C</p-inputgroup-addon>
     </p-inputgroup>
 
     @if (form.controls.cableTemperature.errors) {
       <div class="temp-error">
-        @if (form.controls.cableTemperature.errors['min'] || form.controls.cableTemperature.errors['max']) {
-          <p-message
-            [id]="
-              form.controls.cableTemperature.errors['min'] ? 'cableTemperature-error-min' : 'cableTemperature-error-max'
-            "
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{
-              'common.out-of-bound-error'
-                | transloco: { min: constraints.cableTemperature.min, max: constraints.cableTemperature.max }
-            }}
+        @if (form.controls.cableTemperature.errors['min']; as minError) {
+          <p-message id="cableTemperature-error-min" severity="error" size="small" variant="simple">
+            {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+          </p-message>
+        } @else if (form.controls.cableTemperature.errors['max']; as maxError) {
+          <p-message id="cableTemperature-error-max" severity="error" size="small" variant="simple">
+            {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
           </p-message>
         }
-        @if (form.controls.cableTemperature.errors['noDecimal']) {
-          <p-message id="cableTemperature-error-noDecimal" severity="error" size="small" variant="simple">
-            {{ 'common.no-decimal-error' | transloco }}
+        @if (form.controls.cableTemperature.errors['maxDecimals']; as maxDecimals) {
+          <p-message id="cableTemperature-error-maxDecimals" severity="error" size="small" variant="simple">
+            {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
           </p-message>
         }
       </div>
@@ -129,28 +117,23 @@
           step="0.1"
           required
           [attr.aria-invalid]="form.controls.iceThickness.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max', 'oneDecimal'])"
+          [attr.aria-errormessage]="getErrorIds('iceThickness', ['min', 'max', 'maxDecimals'])"
           data-testid="ice-thickness-input"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.iceThickness.errors?.['min'] || form.controls.iceThickness.errors?.['max']) {
-        <p-message
-          [id]="form.controls.iceThickness.errors?.['min'] ? 'iceThickness-error-min' : 'iceThickness-error-max'"
-          severity="error"
-          size="small"
-          variant="simple"
-          class="pt-1"
-        >
-          {{
-            'common.out-of-bound-error'
-              | transloco: { min: constraints.iceThickness.min, max: constraints.iceThickness.max }
-          }}
+      @if (form.controls.iceThickness.errors?.['min']; as minError) {
+        <p-message id="iceThickness-error-min" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+        </p-message>
+      } @else if (form.controls.iceThickness.errors?.['max']; as maxError) {
+        <p-message id="iceThickness-error-max" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
         </p-message>
       }
-      @if (form.controls.iceThickness.errors?.['oneDecimal']) {
-        <p-message id="iceThickness-error-oneDecimal" severity="error" size="small" variant="simple" class="pt-1">
-          {{ 'common.one-decimal-error' | transloco }}
+      @if (form.controls.iceThickness.errors?.['maxDecimals']; as maxDecimals) {
+        <p-message id="iceThickness-error-maxDecimals" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
         </p-message>
       }
     </div>
@@ -180,32 +163,29 @@
           step="0.1"
           required
           [attr.aria-invalid]="form.controls.iceThicknessBefore.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('iceThicknessBefore', ['min', 'max', 'oneDecimal'])"
+          [attr.aria-errormessage]="getErrorIds('iceThicknessBefore', ['min', 'max', 'maxDecimals'])"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
 
-      @if (form.controls.iceThicknessBefore.errors?.['min'] || form.controls.iceThicknessBefore.errors?.['max']) {
+      @if (form.controls.iceThicknessBefore.errors?.['min']; as minError) {
+        <p-message id="iceThicknessBefore-error-min" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+        </p-message>
+      } @else if (form.controls.iceThicknessBefore.errors?.['max']; as maxError) {
+        <p-message id="iceThicknessBefore-error-max" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+        </p-message>
+      }
+      @if (form.controls.iceThicknessBefore.errors?.['maxDecimals']; as maxDecimals) {
         <p-message
-          [id]="
-            form.controls.iceThicknessBefore.errors?.['min']
-              ? 'iceThicknessBefore-error-min'
-              : 'iceThicknessBefore-error-max'
-          "
+          id="iceThicknessBefore-error-maxDecimals"
           severity="error"
           size="small"
           variant="simple"
           class="pt-1"
         >
-          {{
-            'common.out-of-bound-error'
-              | transloco: { min: constraints.iceThickness.min, max: constraints.iceThickness.max }
-          }}
-        </p-message>
-      }
-      @if (form.controls.iceThicknessBefore.errors?.['oneDecimal']) {
-        <p-message id="iceThicknessBefore-error-oneDecimal" severity="error" size="small" variant="simple" class="pt-1">
-          {{ 'common.one-decimal-error' | transloco }}
+          {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
         </p-message>
       }
     </div>
@@ -224,32 +204,23 @@
           step="0.1"
           required
           [attr.aria-invalid]="form.controls.iceThicknessAfter.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('iceThicknessAfter', ['min', 'max', 'oneDecimal'])"
+          [attr.aria-errormessage]="getErrorIds('iceThicknessAfter', ['min', 'max', 'maxDecimals'])"
         />
         <p-inputgroup-addon>cm</p-inputgroup-addon>
       </p-inputgroup>
 
-      @if (form.controls.iceThicknessAfter.errors?.['min'] || form.controls.iceThicknessAfter.errors?.['max']) {
-        <p-message
-          [id]="
-            form.controls.iceThicknessAfter.errors?.['min']
-              ? 'iceThicknessAfter-error-min'
-              : 'iceThicknessAfter-error-max'
-          "
-          severity="error"
-          size="small"
-          variant="simple"
-          class="pt-1"
-        >
-          {{
-            'common.out-of-bound-error'
-              | transloco: { min: constraints.iceThickness.min, max: constraints.iceThickness.max }
-          }}
+      @if (form.controls.iceThicknessAfter.errors?.['min']; as minError) {
+        <p-message id="iceThicknessAfter-error-min" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+        </p-message>
+      } @else if (form.controls.iceThicknessAfter.errors?.['max']; as maxError) {
+        <p-message id="iceThicknessAfter-error-max" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
         </p-message>
       }
-      @if (form.controls.iceThicknessAfter.errors?.['oneDecimal']) {
-        <p-message id="iceThicknessAfter-error-oneDecimal" severity="error" size="small" variant="simple" class="pt-1">
-          {{ 'common.one-decimal-error' | transloco }}
+      @if (form.controls.iceThicknessAfter.errors?.['maxDecimals']; as maxDecimals) {
+        <p-message id="iceThicknessAfter-error-maxDecimals" severity="error" size="small" variant="simple" class="pt-1">
+          {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
         </p-message>
       }
     </div>

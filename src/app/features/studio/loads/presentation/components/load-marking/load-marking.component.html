@@ -75,13 +75,13 @@
         formControlName="loadPosition"
         data-testid="load-position"
         [attr.aria-invalid]="form.controls.loadPosition.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('loadPosition', ['oneDecimal'])"
+        [attr.aria-errormessage]="getErrorIds('loadPosition', ['maxDecimals'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    @if (form.controls.loadPosition.errors?.['oneDecimal']) {
-      <p-message id="loadPosition-error-oneDecimal" severity="error" size="small" variant="simple">
-        {{ 'common.one-decimal-error' | transloco }}
+    @if (form.controls.loadPosition.errors?.['maxDecimals']; as maxDecimals) {
+      <p-message id="loadPosition-error-maxDecimals" severity="error" size="small" variant="simple">
+        {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
       </p-message>
     }
   </div>
@@ -98,13 +98,13 @@
           formControlName="loadWeight"
           data-testid="load-weight"
           [attr.aria-invalid]="form.controls.loadWeight.invalid || null"
-          [attr.aria-errormessage]="getErrorIds('loadWeight', ['oneDecimal'])"
+          [attr.aria-errormessage]="getErrorIds('loadWeight', ['maxDecimals'])"
         />
         <p-inputgroup-addon>daN</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.loadWeight.errors?.['oneDecimal']) {
-        <p-message id="loadWeight-error-oneDecimal" severity="error" size="small" variant="simple">
-          {{ 'common.one-decimal-error' | transloco }}
+      @if (form.controls.loadWeight.errors?.['maxDecimals']; as maxDecimals) {
+        <p-message id="loadWeight-error-maxDecimals" severity="error" size="small" variant="simple">
+          {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
         </p-message>
       }
     </div>

@@ -10,14 +10,7 @@ import {
   untracked,
   viewChild
 } from '@angular/core';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -32,7 +25,8 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task } from '@services/worker_python/tasks/types';
 import { MessageModule } from 'primeng/message';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
-import { noDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
+import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 
 @Component({
   selector: 'app-pose-table',
@@ -100,7 +94,7 @@ export class PoseTableComponent {
         Validators.required,
         Validators.min(this.LOWEST_TEMP_MIN),
         Validators.max(this.LOWEST_TEMP_MAX),
-        PoseTableComponent.maxTwoDecimalsValidator
+        maxDecimalsValidator(2)
       ]
     }),
     computingStep: new FormControl<number>(this.COMPUTING_STEP_DEFAULT, {
@@ -109,7 +103,7 @@ export class PoseTableComponent {
         Validators.required,
         Validators.min(this.COMPUTING_STEP_MIN),
         Validators.max(this.COMPUTING_STEP_MAX),
-        noDecimalValidator
+        maxDecimalsValidator(0)
       ]
     })
   });
@@ -231,27 +225,16 @@ export class PoseTableComponent {
   }
 
   getLowestTempError(): string {
-    const errors = this.form.controls.lowestTemp.errors;
-    if (errors?.['required']) return this.translocoService.translate('common.required');
-    if (errors?.['maxTwoDecimals']) return this.translocoService.translate('studio.pose-table.max-two-decimals-error');
-    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.LOWEST_TEMP_MIN + '°C';
-    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.LOWEST_TEMP_MAX + '°C';
-    return '';
+    const control = this.form.controls.lowestTemp;
+    if (control.errors?.['required']) return this.translocoService.translate('common.required');
+    const numberError = getNumberInputErrorParams(control);
+    return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
   }
 
   getComputingStepError(): string {
-    const errors = this.form.controls.computingStep.errors;
-    if (errors?.['required']) return this.translocoService.translate('common.required');
-    if (errors?.['noDecimal']) return this.translocoService.translate('studio.pose-table.integer-error');
-    if (errors?.['min']) return this.translocoService.translate('common.min-value') + ' ' + this.COMPUTING_STEP_MIN;
-    if (errors?.['max']) return this.translocoService.translate('common.max-value') + ' ' + this.COMPUTING_STEP_MAX;
-    return '';
-  }
-
-  private static maxTwoDecimalsValidator(control: AbstractControl): ValidationErrors | null {
-    if (control.value === null) return null;
-    const str = control.value.toString();
-    const sep = str.indexOf('.');
-    return sep !== -1 && str.length - sep - 1 > 2 ? { maxTwoDecimals: true } : null;
+    const control = this.form.controls.computingStep;
+    if (control.errors?.['required']) return this.translocoService.translate('common.required');
+    const numberError = getNumberInputErrorParams(control);
+    return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
   }
 }

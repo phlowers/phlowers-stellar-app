@@ -73,36 +73,39 @@
                 formControlName="vertDisplacement"
                 data-testid="cable-support-manip-vert-displacement"
                 [attr.aria-invalid]="form.controls.vertDisplacement.invalid || null"
-                [attr.aria-errormessage]="getErrorIds('vertDisplacement', ['min', 'max', 'twoDecimal'])"
+                [attr.aria-errormessage]="getErrorIds('vertDisplacement', ['min', 'max', 'maxDecimals'])"
               />
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
-            @if (form.controls.vertDisplacement.errors?.['min'] || form.controls.vertDisplacement.errors?.['max']) {
+            @if (form.controls.vertDisplacement.errors?.['min']; as minError) {
               <p-message
-                [id]="
-                  form.controls.vertDisplacement.errors?.['min']
-                    ? 'vertDisplacement-error-min'
-                    : 'vertDisplacement-error-max'
-                "
+                id="vertDisplacement-error-min"
                 severity="error"
                 size="small"
                 variant="simple"
                 class="crane-divide__error1"
               >
-                {{
-                  'common.out-of-bound-error'
-                    | transloco: { min: BOUNDS.vertDisplacement.min, max: BOUNDS.vertDisplacement.max }
-                }}
+                {{ 'common.min-value-error' | transloco: { min: minError.min } }}
               </p-message>
-            } @else if (form.controls.vertDisplacement.errors?.['twoDecimal']) {
+            } @else if (form.controls.vertDisplacement.errors?.['max']; as maxError) {
               <p-message
-                id="vertDisplacement-error-twoDecimal"
+                id="vertDisplacement-error-max"
                 severity="error"
                 size="small"
                 variant="simple"
                 class="crane-divide__error1"
               >
-                {{ 'common.two-decimals-error' | transloco }}
+                {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+              </p-message>
+            } @else if (form.controls.vertDisplacement.errors?.['maxDecimals']; as maxDecimals) {
+              <p-message
+                id="vertDisplacement-error-maxDecimals"
+                severity="error"
+                size="small"
+                variant="simple"
+                class="crane-divide__error1"
+              >
+                {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
               </p-message>
             }
 
@@ -135,29 +138,21 @@
               formControlName="lateralDistance"
               data-testid="cable-support-manip-lateral-distance"
               [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max', 'twoDecimal'])"
+              [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max', 'maxDecimals'])"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (form.controls.lateralDistance.errors?.['min'] || form.controls.lateralDistance.errors?.['max']) {
-            <p-message
-              [id]="
-                form.controls.lateralDistance.errors?.['min']
-                  ? 'lateralDistance-error-min'
-                  : 'lateralDistance-error-max'
-              "
-              severity="error"
-              size="small"
-              variant="simple"
-            >
-              {{
-                'common.out-of-bound-error'
-                  | transloco: { min: BOUNDS.lateralDistance.min, max: BOUNDS.lateralDistance.max }
-              }}
+          @if (form.controls.lateralDistance.errors?.['min']; as minError) {
+            <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple">
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (form.controls.lateralDistance.errors?.['twoDecimal']) {
-            <p-message id="lateralDistance-error-twoDecimal" severity="error" size="small" variant="simple">
-              {{ 'common.two-decimals-error' | transloco }}
+          } @else if (form.controls.lateralDistance.errors?.['max']; as maxError) {
+            <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple">
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.lateralDistance.errors?.['maxDecimals']; as maxDecimals) {
+            <p-message id="lateralDistance-error-maxDecimals" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
             </p-message>
           }
         </div>
@@ -187,22 +182,21 @@
               formControlName="ropeLength"
               data-testid="cable-support-manip-rope-length"
               [attr.aria-invalid]="form.controls.ropeLength.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('ropeLength', ['min', 'max', 'twoDecimal'])"
+              [attr.aria-errormessage]="getErrorIds('ropeLength', ['min', 'max', 'maxDecimals'])"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (form.controls.ropeLength.errors?.['min'] || form.controls.ropeLength.errors?.['max']) {
-            <p-message
-              [id]="form.controls.ropeLength.errors?.['min'] ? 'ropeLength-error-min' : 'ropeLength-error-max'"
-              severity="error"
-              size="small"
-              variant="simple"
-            >
-              {{ 'common.out-of-bound-error' | transloco: { min: BOUNDS.ropeLength.min, max: BOUNDS.ropeLength.max } }}
+          @if (form.controls.ropeLength.errors?.['min']; as minError) {
+            <p-message id="ropeLength-error-min" severity="error" size="small" variant="simple">
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (form.controls.ropeLength.errors?.['twoDecimal']) {
-            <p-message id="ropeLength-error-twoDecimal" severity="error" size="small" variant="simple">
-              {{ 'common.two-decimals-error' | transloco }}
+          } @else if (form.controls.ropeLength.errors?.['max']; as maxError) {
+            <p-message id="ropeLength-error-max" severity="error" size="small" variant="simple">
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.ropeLength.errors?.['maxDecimals']; as maxDecimals) {
+            <p-message id="ropeLength-error-maxDecimals" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
             </p-message>
           }
         </div>
@@ -222,29 +216,21 @@
               formControlName="shiftingClampLength"
               data-testid="cable-support-manip-shifting-clamp-length"
               [attr.aria-invalid]="form.controls.shiftingClampLength.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('shiftingClampLength', ['min', 'max', 'twoDecimal'])"
+              [attr.aria-errormessage]="getErrorIds('shiftingClampLength', ['min', 'max', 'maxDecimals'])"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (form.controls.shiftingClampLength.errors?.['min'] || form.controls.shiftingClampLength.errors?.['max']) {
-            <p-message
-              [id]="
-                form.controls.shiftingClampLength.errors?.['min']
-                  ? 'shiftingClampLength-error-min'
-                  : 'shiftingClampLength-error-max'
-              "
-              severity="error"
-              size="small"
-              variant="simple"
-            >
-              {{
-                'common.out-of-bound-error'
-                  | transloco: { min: BOUNDS.shiftingClampLength.min, max: BOUNDS.shiftingClampLength.max }
-              }}
+          @if (form.controls.shiftingClampLength.errors?.['min']; as minError) {
+            <p-message id="shiftingClampLength-error-min" severity="error" size="small" variant="simple">
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (form.controls.shiftingClampLength.errors?.['twoDecimal']) {
-            <p-message id="shiftingClampLength-error-twoDecimal" severity="error" size="small" variant="simple">
-              {{ 'common.two-decimals-error' | transloco }}
+          } @else if (form.controls.shiftingClampLength.errors?.['max']; as maxError) {
+            <p-message id="shiftingClampLength-error-max" severity="error" size="small" variant="simple">
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.shiftingClampLength.errors?.['maxDecimals']; as maxDecimals) {
+            <p-message id="shiftingClampLength-error-maxDecimals" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
             </p-message>
           }
         </div>
@@ -316,37 +302,26 @@
                   formControlName="manip2ShiftingClampLength"
                   data-testid="cable-support-manip-manip2-shifting-clamp-length"
                   [attr.aria-invalid]="form.controls.manip2ShiftingClampLength.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max', 'twoDecimal'])"
+                  [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max', 'maxDecimals'])"
                 />
                 <p-inputgroup-addon>m</p-inputgroup-addon>
               </p-inputgroup>
-              @if (
-                form.controls.manip2ShiftingClampLength.errors?.['min'] ||
-                form.controls.manip2ShiftingClampLength.errors?.['max']
-              ) {
-                <p-message
-                  [id]="
-                    form.controls.manip2ShiftingClampLength.errors?.['min']
-                      ? 'manip2ShiftingClampLength-error-min'
-                      : 'manip2ShiftingClampLength-error-max'
-                  "
-                  severity="error"
-                  size="small"
-                  variant="simple"
-                >
-                  {{
-                    'common.out-of-bound-error'
-                      | transloco: { min: BOUNDS.shiftingClampLength.min, max: BOUNDS.shiftingClampLength.max }
-                  }}
+              @if (form.controls.manip2ShiftingClampLength.errors?.['min']; as minError) {
+                <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
+                  {{ 'common.min-value-error' | transloco: { min: minError.min } }}
                 </p-message>
-              } @else if (form.controls.manip2ShiftingClampLength.errors?.['twoDecimal']) {
+              } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']; as maxError) {
+                <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
+                  {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+                </p-message>
+              } @else if (form.controls.manip2ShiftingClampLength.errors?.['maxDecimals']; as maxDecimals) {
                 <p-message
-                  id="manip2ShiftingClampLength-error-twoDecimal"
+                  id="manip2ShiftingClampLength-error-maxDecimals"
                   severity="error"
                   size="small"
                   variant="simple"
                 >
-                  {{ 'common.two-decimals-error' | transloco }}
+                  {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
                 </p-message>
               }
             </div>

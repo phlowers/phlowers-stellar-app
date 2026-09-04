@@ -23,7 +23,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
 import { LoadType, SpanLoad } from '@shared/domain/models/charge.model';
-import { oneDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
@@ -70,8 +70,8 @@ export class LoadMarkingComponent {
       nonNullable: true,
       validators: [Validators.required]
     }),
-    loadPosition: new FormControl<number>(0, { nonNullable: true, validators: [oneDecimalValidator] }),
-    loadWeight: new FormControl<number>(0, { nonNullable: true, validators: [oneDecimalValidator] })
+    loadPosition: new FormControl<number>(0, { nonNullable: true, validators: [maxDecimalsValidator(1)] }),
+    loadWeight: new FormControl<number>(0, { nonNullable: true, validators: [maxDecimalsValidator(1)] })
   });
 
   readonly spansOptions = computed(() => {

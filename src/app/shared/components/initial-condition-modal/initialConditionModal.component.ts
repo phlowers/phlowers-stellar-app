@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@shared/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
-import { noDecimalValidator, oneDecimalValidator, twoDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { initialConditionConstraints } from '@shared/components/initial-condition-modal/initialConditionModal.constantes';
@@ -31,7 +31,7 @@ const validators = {
       Validators.required,
       Validators.min(initialConditionConstraints.base_parameters.min),
       Validators.max(initialConditionConstraints.base_parameters.max),
-      twoDecimalValidator
+      maxDecimalsValidator(2)
     ]
   ],
   base_temperature: [
@@ -40,7 +40,7 @@ const validators = {
       Validators.required,
       Validators.min(initialConditionConstraints.base_temperature.min),
       Validators.max(initialConditionConstraints.base_temperature.max),
-      noDecimalValidator
+      maxDecimalsValidator(0)
     ]
   ],
   cable_pretension: [
@@ -48,7 +48,7 @@ const validators = {
     [
       Validators.min(initialConditionConstraints.cable_pretension.min),
       Validators.max(initialConditionConstraints.cable_pretension.max),
-      oneDecimalValidator
+      maxDecimalsValidator(1)
     ]
   ],
   min_temperature: [
@@ -56,7 +56,7 @@ const validators = {
     [
       Validators.min(initialConditionConstraints.min_temperature.min),
       Validators.max(initialConditionConstraints.min_temperature.max),
-      noDecimalValidator
+      maxDecimalsValidator(0)
     ]
   ],
   max_wind_pressure: [
@@ -64,7 +64,7 @@ const validators = {
     [
       Validators.min(initialConditionConstraints.max_wind_pressure.min),
       Validators.max(initialConditionConstraints.max_wind_pressure.max),
-      noDecimalValidator
+      maxDecimalsValidator(0)
     ]
   ],
   max_frost_width: [
@@ -72,7 +72,7 @@ const validators = {
     [
       Validators.min(initialConditionConstraints.max_frost_width.min),
       Validators.max(initialConditionConstraints.max_frost_width.max),
-      oneDecimalValidator
+      maxDecimalsValidator(1)
     ]
   ]
 };

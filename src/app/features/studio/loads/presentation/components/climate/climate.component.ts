@@ -17,7 +17,7 @@ import { climateConstraints } from './climate.constantes';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { MessageModule } from 'primeng/message';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { noDecimalValidator, oneDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 
 @Component({
@@ -62,7 +62,7 @@ export class ClimateComponent {
         Validators.required,
         Validators.min(this.constraints.windPressure.min),
         Validators.max(this.constraints.windPressure.max),
-        noDecimalValidator
+        maxDecimalsValidator(0)
       ]
     ],
     cableTemperature: [
@@ -71,7 +71,7 @@ export class ClimateComponent {
         Validators.required,
         Validators.min(this.constraints.cableTemperature.min),
         Validators.max(this.constraints.cableTemperature.max),
-        noDecimalValidator
+        maxDecimalsValidator(0)
       ]
     ],
     symmetryType: [defaultClimaticCharge.symmetryType, Validators.required],
@@ -80,7 +80,7 @@ export class ClimateComponent {
       [
         Validators.min(this.constraints.iceThickness.min),
         Validators.max(this.constraints.iceThickness.max),
-        oneDecimalValidator
+        maxDecimalsValidator(1)
       ]
     ],
     frontierSupportNumber: [defaultClimaticCharge.frontierSupportNumber],
@@ -89,7 +89,7 @@ export class ClimateComponent {
       [
         Validators.min(this.constraints.iceThickness.min),
         Validators.max(this.constraints.iceThickness.max),
-        oneDecimalValidator
+        maxDecimalsValidator(1)
       ]
     ],
     iceThicknessAfter: [
@@ -97,7 +97,7 @@ export class ClimateComponent {
       [
         Validators.min(this.constraints.iceThickness.min),
         Validators.max(this.constraints.iceThickness.max),
-        oneDecimalValidator
+        maxDecimalsValidator(1)
       ]
     ]
   });

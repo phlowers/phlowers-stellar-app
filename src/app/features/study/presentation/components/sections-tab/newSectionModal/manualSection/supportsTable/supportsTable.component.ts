@@ -45,7 +45,7 @@ import {
   SUPPORT_FIELD_LIMITS
 } from './helpers';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
-import { twoDecimalValidator } from '@shared/helpers/numberValidators';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -131,7 +131,7 @@ export class SupportsTableComponent implements OnInit {
   }));
   readonly limits = SUPPORT_FIELD_LIMITS;
   /** Exposed for template use, mirrors the shared reactive-forms validator (see cable-span-manip). */
-  readonly twoDecimalValidator = twoDecimalValidator;
+  readonly maxTwoDecimalsValidator = maxDecimalsValidator(2);
 
   public onlyPositiveNumbers = /^\d*$/;
 

@@ -87,22 +87,21 @@
         formControlName="modifiedLengthCable"
         data-testid="cable-length-change-size-cable"
         [attr.aria-invalid]="form.controls.modifiedLengthCable.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('modifiedLengthCable', ['min', 'max', 'twoDecimal'])"
+        [attr.aria-errormessage]="getErrorIds('modifiedLengthCable', ['min', 'max', 'maxDecimals'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    @if (form.controls.modifiedLengthCable.errors?.['min'] || form.controls.modifiedLengthCable.errors?.['max']) {
-    <p-message
-      [id]="form.controls.modifiedLengthCable.errors?.['min'] ? 'modifiedLengthCable-error-min' : 'modifiedLengthCable-error-max'"
-      severity="error"
-      size="small"
-      variant="simple"
-    >
-      {{ 'common.out-of-bound-error' | transloco: { min: 0, max: 1000 } }}
+    @if (form.controls.modifiedLengthCable.errors?.['min']; as minError) {
+    <p-message id="modifiedLengthCable-error-min" severity="error" size="small" variant="simple">
+      {{ 'common.min-value-error' | transloco: { min: minError.min } }}
     </p-message>
-    } @else if (form.controls.modifiedLengthCable.errors?.['twoDecimal']) {
-    <p-message id="modifiedLengthCable-error-twoDecimal" severity="error" size="small" variant="simple">
-      {{ 'common.two-decimals-error' | transloco }}
+    } @else if (form.controls.modifiedLengthCable.errors?.['max']; as maxError) {
+    <p-message id="modifiedLengthCable-error-max" severity="error" size="small" variant="simple">
+      {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+    </p-message>
+    } @else if (form.controls.modifiedLengthCable.errors?.['maxDecimals']; as maxDecimals) {
+    <p-message id="modifiedLengthCable-error-maxDecimals" severity="error" size="small" variant="simple">
+      {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
     </p-message>
     }
   </div>
@@ -121,22 +120,21 @@
         formControlName="distanceSupportRef"
         data-testid="cable-length-change-distance-support-ref"
         [attr.aria-invalid]="form.controls.distanceSupportRef.invalid || null"
-        [attr.aria-errormessage]="getErrorIds('distanceSupportRef', ['min', 'max', 'twoDecimal'])"
+        [attr.aria-errormessage]="getErrorIds('distanceSupportRef', ['min', 'max', 'maxDecimals'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
-    @if (form.controls.distanceSupportRef.errors?.['min'] || form.controls.distanceSupportRef.errors?.['max']) {
-    <p-message
-      [id]="form.controls.distanceSupportRef.errors?.['min'] ? 'distanceSupportRef-error-min' : 'distanceSupportRef-error-max'"
-      severity="error"
-      size="small"
-      variant="simple"
-    >
-      {{ 'common.out-of-bound-error' | transloco: { min: 0, max: 5000 } }}
+    @if (form.controls.distanceSupportRef.errors?.['min']; as minError) {
+    <p-message id="distanceSupportRef-error-min" severity="error" size="small" variant="simple">
+      {{ 'common.min-value-error' | transloco: { min: minError.min } }}
     </p-message>
-    } @else if (form.controls.distanceSupportRef.errors?.['twoDecimal']) {
-    <p-message id="distanceSupportRef-error-twoDecimal" severity="error" size="small" variant="simple">
-      {{ 'common.two-decimals-error' | transloco }}
+    } @else if (form.controls.distanceSupportRef.errors?.['max']; as maxError) {
+    <p-message id="distanceSupportRef-error-max" severity="error" size="small" variant="simple">
+      {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+    </p-message>
+    } @else if (form.controls.distanceSupportRef.errors?.['maxDecimals']; as maxDecimals) {
+    <p-message id="distanceSupportRef-error-maxDecimals" severity="error" size="small" variant="simple">
+      {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
     </p-message>
     }
   </div>

@@ -5,38 +5,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-/** Validator that rejects non-integer numeric values. */
-export function noDecimalValidator(control: AbstractControl): ValidationErrors | null {
-  if (control.value === null || control.value === undefined) {
-    return null;
-  }
-  const value = control.value;
-  if (!Number.isInteger(value)) {
-    return { noDecimal: true };
-  }
-  return null;
-}
-
-export function twoDecimalValidator(control: AbstractControl): ValidationErrors | null {
-  if (control.value === null || control.value === undefined) {
-    return null;
-  }
-  const value = control.value;
-  if (!/^-?\d+(\.\d{1,2})?$/.test(value.toString())) {
-    return { twoDecimal: true };
-  }
-  return null;
-}
-
-export function oneDecimalValidator(control: AbstractControl): ValidationErrors | null {
-  if (control.value === null || control.value === undefined) {
-    return null;
-  }
-  const value = control.value;
-  if (!/^-?\d+(\.\d{1})?$/.test(value.toString())) {
-    return { oneDecimal: true };
-  }
-  return null;
+/**
+ * Validator factory rejecting values with more than `maxDecimals` decimal places. The error
+ * count is nested (`{ maxDecimals: { maxDecimals } }`, mirroring `Validators.min`/`max`) rather
+ * than used directly as the error value, because `0` decimals would otherwise be a falsy error
+ * value and break both `AbstractControl.hasError()` and template truthy checks.
+ */
+export function maxDecimalsValidator(maxDecimals: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (control.value === null || control.value === undefined) {
+      return null;
+    }
+    const pattern = maxDecimals === 0 ? /^-?\d+$/ : new RegExp(`^-?\\d+(\\.\\d{1,${maxDecimals}})?$`);
+    return pattern.test(control.value.toString()) ? null : { maxDecimals: { maxDecimals } };
+  };
 }

@@ -553,11 +553,11 @@ describe('InitialConditionModalComponent', () => {
       expect(fixture.nativeElement.querySelector('#base_temperature-error-min')).toBeNull();
     });
 
-    it('should render the noDecimal error message when base_temperature has decimals', () => {
+    it('should render the maxDecimals error message when base_temperature has decimals', () => {
       component.form.controls.base_temperature.setValue(15.5);
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector('#base_temperature-error-noDecimal')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-maxDecimals')).toBeTruthy();
     });
 
     it('should not render any error message when base_temperature is valid', () => {
@@ -566,7 +566,7 @@ describe('InitialConditionModalComponent', () => {
 
       expect(fixture.nativeElement.querySelector('#base_temperature-error-min')).toBeNull();
       expect(fixture.nativeElement.querySelector('#base_temperature-error-max')).toBeNull();
-      expect(fixture.nativeElement.querySelector('#base_temperature-error-noDecimal')).toBeNull();
+      expect(fixture.nativeElement.querySelector('#base_temperature-error-maxDecimals')).toBeNull();
     });
   });
 

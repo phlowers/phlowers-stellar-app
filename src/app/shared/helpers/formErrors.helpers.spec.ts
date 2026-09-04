@@ -6,7 +6,7 @@
  */
 
 import { FormControl, FormGroup } from '@angular/forms';
-import { getControlErrorIds } from './formErrors.helpers';
+import { getControlErrorIds, getNumberInputErrorParams } from './formErrors.helpers';
 
 describe('getControlErrorIds', () => {
   it('should return null when the control does not exist', () => {
@@ -51,5 +51,53 @@ describe('getControlErrorIds', () => {
     const form = new FormGroup({ name: control });
 
     expect(getControlErrorIds(form, 'name', ['pattern'])).toBe('name-error-pattern');
+  });
+});
+
+describe('getNumberInputErrorParams', () => {
+  it('should return null when the control has no errors', () => {
+    expect(getNumberInputErrorParams(new FormControl(5))).toBeNull();
+  });
+
+  it('should return null when the control is null', () => {
+    expect(getNumberInputErrorParams(null)).toBeNull();
+  });
+
+  it('should return the min-value-error key and bound when the min error is active', () => {
+    const control = new FormControl(5);
+    control.setErrors({ min: { min: 10, actual: 5 } });
+
+    expect(getNumberInputErrorParams(control)).toEqual({ key: 'common.min-value-error', params: { min: 10 } });
+  });
+
+  it('should return the max-value-error key and bound when the max error is active', () => {
+    const control = new FormControl(50);
+    control.setErrors({ max: { max: 20, actual: 50 } });
+
+    expect(getNumberInputErrorParams(control)).toEqual({ key: 'common.max-value-error', params: { max: 20 } });
+  });
+
+  it('should return the max-decimals-error key and bound when the maxDecimals error is active', () => {
+    const control = new FormControl(1.234);
+    control.setErrors({ maxDecimals: { maxDecimals: 2 } });
+
+    expect(getNumberInputErrorParams(control)).toEqual({
+      key: 'common.max-decimals-error',
+      params: { maxDecimals: 2 }
+    });
+  });
+
+  it('should prioritize min over max and maxDecimals when multiple errors are active', () => {
+    const control = new FormControl(5);
+    control.setErrors({ min: { min: 10, actual: 5 }, max: { max: 20, actual: 5 }, maxDecimals: { maxDecimals: 2 } });
+
+    expect(getNumberInputErrorParams(control)).toEqual({ key: 'common.min-value-error', params: { min: 10 } });
+  });
+
+  it('should prioritize max over maxDecimals when both are active', () => {
+    const control = new FormControl(50);
+    control.setErrors({ max: { max: 20, actual: 50 }, maxDecimals: { maxDecimals: 2 } });
+
+    expect(getNumberInputErrorParams(control)).toEqual({ key: 'common.max-value-error', params: { max: 20 } });
   });
 });
