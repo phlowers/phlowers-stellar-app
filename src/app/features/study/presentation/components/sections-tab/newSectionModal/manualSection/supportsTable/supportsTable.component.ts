@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@shared/types';
-import { InputTextModule } from 'primeng/inputtext';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
 import { Section, Support, CatalogChain } from '@shared/domain';
@@ -27,8 +26,6 @@ import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { isNumber } from 'lodash';
@@ -61,7 +58,6 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     DecimalPipe,
     FormsModule,
     TableModule,
-    InputTextModule,
     PopoverModule,
     ButtonComponent,
     IconComponent,
@@ -69,8 +65,6 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     AttachmentSetModalComponent,
     IconFieldModule,
     InputIconModule,
-    InputGroupModule,
-    InputGroupAddonModule,
     KeyFilterModule,
     MessageModule,
     PaginatorModule,
@@ -106,6 +100,8 @@ export class SupportsTableComponent implements OnInit {
   supportForAttachmentSetModal = signal<Support | undefined>(undefined);
   first = input.required<number>();
   rows = input.required<number>();
+  /** Shows the table's loading mask while the parent builds a new page of rows. */
+  pageLoading = input<boolean>(false);
   rowsPerPageOptions = signal(TABLE_ROWS_PER_PAGE_OPTIONS);
   supportFilterTable = signal<string[]>([]);
   supplementarySupportFilterTable = signal<string[]>([]);

@@ -40,6 +40,7 @@ import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { DEFAULT_TABLE_ROWS_PER_PAGE } from '@shared/constants/tablePagination';
 
 // Mock child component
 @Component({
@@ -673,11 +674,36 @@ describe('ManualSectionComponent', () => {
       expect(component.firstSupport()).toBe(20);
     });
 
+    // Was 5, which is not in TABLE_ROWS_PER_PAGE_OPTIONS and would have left the paginator
+    // showing a page size it cannot select. The fallback is now the real default.
     it('falls back to defaults when the event is empty', () => {
       component.onSupportsPageChange({});
 
-      expect(component.rowsSupport()).toBe(5);
+      expect(component.rowsSupport()).toBe(DEFAULT_TABLE_ROWS_PER_PAGE);
       expect(component.firstSupport()).toBe(0);
+    });
+
+    it('applies a small page synchronously, without the loader', () => {
+      component.onSupportsPageChange({ rows: 10, page: 3 });
+
+      expect(component.supportsPageLoading()).toBe(false);
+      expect(component.firstSupport()).toBe(30);
+    });
+
+    // A large page blocks the main thread while rows are built, so the mask has to be painted
+    // before the render starts — the page must NOT be applied in the click handler itself.
+    it('shows the loader and defers the render for a large page', async () => {
+      component.onSupportsPageChange({ rows: 50, page: 2 });
+
+      expect(component.supportsPageLoading()).toBe(true);
+      expect(component.firstSupport()).toBe(0);
+
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(component.supportsPageLoading()).toBe(false);
+      expect(component.rowsSupport()).toBe(50);
+      expect(component.firstSupport()).toBe(100);
     });
   });
 
