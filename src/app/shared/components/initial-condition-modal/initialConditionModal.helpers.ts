@@ -1,15 +1,4 @@
-import { AbstractControl, FormGroup, ValidationErrors } from '@angular/forms';
-
-/** Validator that rejects non-integer numeric values. */
-export function integerValidator(control: AbstractControl): ValidationErrors | null {
-  if (control.value === null || control.value === undefined) {
-    return null;
-  }
-  if (!Number.isInteger(control.value)) {
-    return { integer: true };
-  }
-  return null;
-}
+import { FormGroup } from '@angular/forms';
 
 /**
  * Builds the space-separated list of error message element ids for a given control,

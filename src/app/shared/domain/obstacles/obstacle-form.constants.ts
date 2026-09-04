@@ -15,3 +15,10 @@ export const defaultObstacleForm: ObstacleFormData = {
   lateralDistanceType: LateralDistanceType.SPAN_AXIS,
   positions: []
 };
+
+/** Min/max constraints for obstacle point coordinates (RG.OBS.POZ.1 / POX.1 / POY.1). */
+export const obstaclePositionConstraints = {
+  z: { min: -100, max: 9000 },
+  x: { min: -50, max: 5000 },
+  y: { min: -100, max: 100 }
+} as const;

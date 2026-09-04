@@ -19,10 +19,8 @@ import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { initialConditionConstraints } from '@shared/components/initial-condition-modal/initialConditionModal.constantes';
-import {
-  getErrorIds,
-  integerValidator
-} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
+import { getErrorIds } from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
+import { integerValidator } from '@shared/helpers/form-validators';
 
 /** Form validation rules for initial condition fields. */
 const validators = {

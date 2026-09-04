@@ -295,6 +295,30 @@ describe('ObstacleFormService', () => {
       expect(group.get('y')?.value).toBe(2);
       expect(group.get('z')?.value).toBe(3);
     });
+    it('should not error when values are within range with 2 decimals', () => {
+      const group = service.createPositionGroup({ x: 5000, y: 100, z: 9000 });
+      expect(group.get('x')?.errors).toBeNull();
+      expect(group.get('y')?.errors).toBeNull();
+      expect(group.get('z')?.errors).toBeNull();
+    });
+    it('should set a min error when values are below their range', () => {
+      const group = service.createPositionGroup({ x: -50.01, y: -100.01, z: -100.01 });
+      expect(group.get('x')?.errors?.['min']).toBeTruthy();
+      expect(group.get('y')?.errors?.['min']).toBeTruthy();
+      expect(group.get('z')?.errors?.['min']).toBeTruthy();
+    });
+    it('should set a max error when values are above their range', () => {
+      const group = service.createPositionGroup({ x: 5000.01, y: 100.01, z: 9000.01 });
+      expect(group.get('x')?.errors?.['max']).toBeTruthy();
+      expect(group.get('y')?.errors?.['max']).toBeTruthy();
+      expect(group.get('z')?.errors?.['max']).toBeTruthy();
+    });
+    it('should set a maxTwoDecimals error when values have more than 2 decimal places', () => {
+      const group = service.createPositionGroup({ x: 1.234, y: 1.234, z: 1.234 });
+      expect(group.get('x')?.errors?.['maxTwoDecimals']).toBeTruthy();
+      expect(group.get('y')?.errors?.['maxTwoDecimals']).toBeTruthy();
+      expect(group.get('z')?.errors?.['maxTwoDecimals']).toBeTruthy();
+    });
   });
 
   describe('buildPositionControls', () => {
@@ -1128,6 +1152,19 @@ describe('ObstacleFormService', () => {
         lateralDistanceType: LateralDistanceType.SPAN_AXIS
       });
       expect(service.canCalculateAndSave()).toBe(true);
+    });
+    it('should return false when a position coordinate is out of range', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: 2, z: 9000.5 });
+      service.form.patchValue({
+        name: 'Obstacle',
+        supportUuid: 'sup-1',
+        type: 'House',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      expect(service.canCalculateAndSave()).toBe(false);
     });
   });
 

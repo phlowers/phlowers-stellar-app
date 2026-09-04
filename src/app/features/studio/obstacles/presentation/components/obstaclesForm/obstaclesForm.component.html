@@ -193,10 +193,30 @@
               class="alt-point-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
+              [attr.aria-invalid]="obstacle.controls.z.invalid || null"
+              [attr.aria-errormessage]="obstacle.controls.z.invalid ? 'altitudePoint' + $index + '-error' : null"
               data-testid="point-altitude"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
+
+          <div [id]="'altitudePoint' + $index + '-error'" class="alt-point-error" data-testid="point-altitude-error">
+            @if (obstacle.controls.z.errors?.['min']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.min-value-compact' | transloco }}</ng-container>
+                {{ obstaclePositionConstraints.z.min }}.
+              </p-message>
+            } @else if (obstacle.controls.z.errors?.['max']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-value-compact' | transloco }}</ng-container>
+                {{ obstaclePositionConstraints.z.max }}.
+              </p-message>
+            } @else if (obstacle.controls.z.errors?.['maxTwoDecimals']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-two-decimals-error' | transloco }}</ng-container>
+              </p-message>
+            }
+          </div>
 
           <label
             [for]="'distanceToRefSupport' + $index"
@@ -217,10 +237,34 @@
               class="dist-ref-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
+              [attr.aria-invalid]="obstacle.controls.x.invalid || null"
+              [attr.aria-errormessage]="obstacle.controls.x.invalid ? 'distanceToRefSupport' + $index + '-error' : null"
               data-testid="point-ref-distance"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
+
+          <div
+            [id]="'distanceToRefSupport' + $index + '-error'"
+            class="dist-ref-error"
+            data-testid="point-ref-distance-error"
+          >
+            @if (obstacle.controls.x.errors?.['min']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.min-value-compact' | transloco }}</ng-container>
+                {{ obstaclePositionConstraints.x.min }}.
+              </p-message>
+            } @else if (obstacle.controls.x.errors?.['max']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-value-compact' | transloco }}</ng-container>
+                {{ obstaclePositionConstraints.x.max }}.
+              </p-message>
+            } @else if (obstacle.controls.x.errors?.['maxTwoDecimals']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-two-decimals-error' | transloco }}</ng-container>
+              </p-message>
+            }
+          </div>
 
           <label
             [for]="'distanceToLineAxis' + $index"
@@ -241,10 +285,34 @@
               class="dist-axis-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
+              [attr.aria-invalid]="obstacle.controls.y.invalid || null"
+              [attr.aria-errormessage]="obstacle.controls.y.invalid ? 'distanceToLineAxis' + $index + '-error' : null"
               data-testid="point-axis-distance"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
+
+          <div
+            [id]="'distanceToLineAxis' + $index + '-error'"
+            class="dist-axis-error"
+            data-testid="point-axis-distance-error"
+          >
+            @if (obstacle.controls.y.errors?.['min']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.min-value-compact' | transloco }}</ng-container>
+                {{ obstaclePositionConstraints.y.min }}.
+              </p-message>
+            } @else if (obstacle.controls.y.errors?.['max']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-value-compact' | transloco }}</ng-container>
+                {{ obstaclePositionConstraints.y.max }}.
+              </p-message>
+            } @else if (obstacle.controls.y.errors?.['maxTwoDecimals']) {
+              <p-message severity="error" size="small" variant="simple">
+                <ng-container>{{ 'common.max-two-decimals-error' | transloco }}</ng-container>
+              </p-message>
+            }
+          </div>
         </div>
       </li>
     }

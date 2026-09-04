@@ -56,6 +56,17 @@ Rules:
 - Re-export from the feature's public entry point when consumers need access.
 - Helpers must be **pure functions** (no side effects, no DI) so they can be tested in isolation.
 
+### Reusable form validators — reuse before creating
+
+Generic `AbstractControl` validators (integer, max-decimals, range, etc.) that are not tied to one
+specific feature's domain must live in `@shared/helpers/form-validators.ts`, with tests in the
+co-located `form-validators.spec.ts`.
+
+- Before writing a new validator, check `@shared/helpers/form-validators.ts` for an existing one.
+- Never duplicate a validator as a private/static method in a component — import it instead.
+- A validator only stays local to a feature's `.helpers.ts` file if its logic is genuinely specific
+  to that feature's domain and not reusable elsewhere.
+
 ---
 
 ## UUID
