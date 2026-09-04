@@ -52,7 +52,7 @@ cd docs-sphinx
 make simplepdf
 ```
 
-The generated PDF is written to `docs-sphinx/build/simplepdf/Stellar.pdf`.
+The generated PDF is written to `docs-sphinx/build/simplepdf/` folder.
 
 > **Note:** Sphinx-SimplePDF relies on [WeasyPrint](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html), which requires native libraries. On Debian/Ubuntu install `libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0`; on Fedora install `pango`; on macOS run `brew install pango`.
 >

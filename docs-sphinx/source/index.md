@@ -14,10 +14,10 @@ Stellar is a web application built with Angular for power line mechanical analys
 This documentation is automatically generated from the TypeScript source code
 using [sphinx-js](https://sphinx-js.readthedocs.io/).
 
-- [Get Started](user_docs/getting_started) — Learn how to set up and use the Stellar application.
-- [User Guide](user_docs/user_guide/index) — Learn how to navigate the interface and use the main features.
-- [Developer Guide](user_docs/developer_guide/index) — Set up your development environment, understand the architecture and contribute to Stellar.
-- [API Reference](api/index) — Browse the TypeScript API documentation generated from the source code.
+ - {doc}`Get Started <user_docs/getting_started>` — Learn how to set up and use the Stellar application.
+ - {doc}`User Guide <user_docs/user_guide/index>` — Learn how to navigate the interface and use the main features.
+ - {doc}`Developer Guide <user_docs/developer_guide/index>` — Set up your development environment, understand the architecture and contribute to Stellar.
+ - {doc}`API Reference <api/index>` — Browse the TypeScript API documentation generated from the source code.
 
 
 ```{toctree}

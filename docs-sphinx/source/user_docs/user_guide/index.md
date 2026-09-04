@@ -6,8 +6,8 @@ html_theme.sidebar_secondary.remove: true
 
 Step-by-step guides for using the Stellar application.
 
-- [Welcome](welcome) — Introduction to the Stellar application and its main features.
-- [Application Update](application_update) — Understand how app files and catalog data are updated safely.
+ - {doc}`Welcome <welcome>` — Introduction to the Stellar application and its main features.
+ - {doc}`Application Update <application_update>` — Understand how app files and catalog data are updated safely.
 
 ```{toctree}
 :maxdepth: 2
