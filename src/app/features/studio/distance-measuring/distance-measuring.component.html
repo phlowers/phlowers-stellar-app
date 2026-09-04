@@ -1,7 +1,22 @@
 <p id="distance-measuring-hint" class="distance-measuring__hint">
   {{ 'studio.distance-measuring.never-saved-hint' | transloco }}
 </p>
+
 <p class="distance-measuring__hint">{{ 'studio.distance-measuring.reference-hint' | transloco }}</p>
+
+<button
+  app-btn
+  type="button"
+  btnStyle="outlined"
+  btnSize="s"
+  [disabled]="!service.selectedSupportUuid()"
+  (click)="service.zoomToSpan()"
+  data-testid="zoom-to-span"
+  class="distance-measuring__zoom-btn"
+>
+  <app-icon icon="filter_center_focus" aria-hidden="true" />
+  <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
+</button>
 
 <div class="distance-measuring__span-cols">
   <label for="distanceSpan" class="span-label">{{ 'studio.studio-page.span-option' | transloco }}</label>
@@ -17,20 +32,6 @@
     aria-describedby="distance-measuring-hint"
     data-testid="span-select"
   />
-
-  <button
-    app-btn
-    type="button"
-    btnStyle="outlined"
-    btnSize="m"
-    [disabled]="!service.selectedSupportUuid()"
-    (click)="service.zoomToSpan()"
-    data-testid="zoom-to-span"
-    class="span-zoom"
-  >
-    <app-icon icon="filter_center_focus" aria-hidden="true" />
-    <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
-  </button>
 </div>
 
 <div class="distance-measuring__free-positioning">
