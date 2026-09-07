@@ -29,7 +29,9 @@ bootstrapApplication(AppComponent, {
     provideTransloco({
       config: {
         availableLangs: ['en', 'fr'],
-        // Overridden at startup by AppConfigService.loadDefaultLang() (assets/config/app-config.json).
+        // Overridden at startup by AppConfigService.loadDefaultLang(), which reads
+        // assets/config/app-config.json (regenerated at Docker build time from the
+        // DEFAULT_LANGUAGE build arg, see Dockerfile).
         defaultLang: 'fr',
         // Remove this option if your application doesn't support changing language in runtime.
         reRenderOnLangChange: true,
