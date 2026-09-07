@@ -40,7 +40,7 @@ import { firstValueFrom } from 'rxjs';
  *    previously-authenticated OIDC user is cached, running the network
  *    resync in the background (does not block this initializer).
  * In parallel with steps 1-3: AppConfigService.loadDefaultLang() resolves the
- * runtime-configured language (from assets/config/app-config.json, regenerated
+ * runtime-configured language, here with a static configuration at startup (from assets/config/app-config.json, regenerated
  * at Docker build time from the DEFAULT_LANGUAGE build arg) and sets it active.
  * The TranslocoService.load()
  * HTTP fetch itself is NOT awaited — first render must never wait on it (i18n

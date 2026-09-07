@@ -19,7 +19,7 @@ const LOAD_TIMEOUT_MS = 3000;
  * arg (see `Dockerfile`), so changing the language for a deployment requires
  * rebuilding the image.
  *
- * Falls back silently to `'fr'` if the file is absent or malformed.
+ * Falls back with a log warning to `'fr'` if the file is absent or malformed.
  */
 @Injectable({ providedIn: 'root' })
 export class AppConfigService {
