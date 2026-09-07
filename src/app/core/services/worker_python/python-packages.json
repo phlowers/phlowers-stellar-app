@@ -4,6 +4,11 @@
     "name": "annotated_types",
     "source": "cdn"
   },
+  "certifi": {
+    "file_name": "certifi-2026.1.4-py3-none-any.whl",
+    "name": "certifi",
+    "source": "cdn"
+  },
   "flexcache": {
     "file_name": "flexcache-0.3-cp313-none-any.whl",
     "name": "flexcache",
@@ -15,7 +20,7 @@
     "source": "local"
   },
   "mechaphlowers": {
-    "file_name": "mechaphlowers-0.11.2-cp313-none-any.whl",
+    "file_name": "mechaphlowers-0.12.0-cp313-none-any.whl",
     "name": "mechaphlowers",
     "source": "local"
   },
@@ -25,27 +30,27 @@
     "source": "local"
   },
   "numpy": {
-    "file_name": "numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl",
+    "file_name": "numpy-2.2.5-cp313-cp313-pyemscripten_2025_0_wasm32.whl",
     "name": "numpy",
     "source": "cdn"
   },
   "packaging": {
-    "file_name": "packaging-24.2-py3-none-any.whl",
+    "file_name": "packaging-26.2-py3-none-any.whl",
     "name": "packaging",
     "source": "cdn"
   },
   "pandas": {
-    "file_name": "pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl",
+    "file_name": "pandas-2.3.3-cp313-cp313-pyemscripten_2025_0_wasm32.whl",
     "name": "pandas",
     "source": "cdn"
   },
   "pandera": {
-    "file_name": "pandera-0.23.1-cp313-none-any.whl",
+    "file_name": "pandera-0.33.1-cp313-none-any.whl",
     "name": "pandera",
     "source": "local"
   },
   "pint": {
-    "file_name": "pint-0.25-cp313-none-any.whl",
+    "file_name": "pint-0.25.3-cp313-none-any.whl",
     "name": "pint",
     "source": "local"
   },
@@ -60,13 +65,18 @@
     "source": "local"
   },
   "pydantic": {
-    "file_name": "pydantic-2.10.6-py3-none-any.whl",
+    "file_name": "pydantic-2.12.5-py3-none-any.whl",
     "name": "pydantic",
     "source": "cdn"
   },
   "pydantic-core": {
-    "file_name": "pydantic_core-2.27.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
+    "file_name": "pydantic_core-2.41.5-cp313-cp313-pyemscripten_2025_0_wasm32.whl",
     "name": "pydantic_core",
+    "source": "cdn"
+  },
+  "pyproj": {
+    "file_name": "pyproj-3.7.2-cp313-cp313-pyemscripten_2025_0_wasm32.whl",
+    "name": "pyproj",
     "source": "cdn"
   },
   "python-dateutil": {
@@ -80,8 +90,8 @@
     "source": "cdn"
   },
   "pyyaml": {
-    "file_name": "pyyaml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
-    "name": "pyyaml",
+    "file_name": "PyYAML-6.0.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "name": "PyYAML",
     "source": "cdn"
   },
   "six": {
@@ -90,7 +100,7 @@
     "source": "cdn"
   },
   "stellar-engine": {
-    "file_name": "stellar_engine-0.2.2-cp313-none-any.whl",
+    "file_name": "stellar_engine-0.3.0-cp313-none-any.whl",
     "name": "stellar_engine",
     "source": "local"
   },
@@ -100,7 +110,7 @@
     "source": "local"
   },
   "thermohl": {
-    "file_name": "thermohl-1.9.0-cp313-none-any.whl",
+    "file_name": "thermohl-1.9.2-cp313-none-any.whl",
     "name": "thermohl",
     "source": "local"
   },
@@ -110,7 +120,7 @@
     "source": "local"
   },
   "typing-extensions": {
-    "file_name": "typing_extensions-4.14.1-py3-none-any.whl",
+    "file_name": "typing_extensions-4.15.0-py3-none-any.whl",
     "name": "typing_extensions",
     "source": "cdn"
   },
@@ -119,13 +129,18 @@
     "name": "typing_inspect",
     "source": "local"
   },
+  "typing-inspection": {
+    "file_name": "typing_inspection-0.4.2-py3-none-any.whl",
+    "name": "typing_inspection",
+    "source": "cdn"
+  },
   "tzdata": {
-    "file_name": "tzdata-2025.2-py2.py3-none-any.whl",
+    "file_name": "tzdata-2025.3-py2.py3-none-any.whl",
     "name": "tzdata",
     "source": "cdn"
   },
   "xxhash": {
-    "file_name": "xxhash-3.5.0-cp313-cp313-pyodide_2025_0_wasm32.whl",
+    "file_name": "xxhash-3.5.0-cp313-cp313-pyemscripten_2025_0_wasm32.whl",
     "name": "xxhash",
     "source": "cdn"
   }
