@@ -24,6 +24,7 @@ import { LoadFormsService } from '../../services/loadForms.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
+import { CABLE_LENGTH_CHANGE_FORM_BOUNDS, CABLE_LENGTH_CHANGE_FORM_DEFAULTS } from './cable-length-change.constantes';
 
 @Component({
   selector: 'app-cable-length-change',
@@ -65,11 +66,21 @@ export class CableLengthChangeComponent {
       { validators: [Validators.required] }
     ),
     modificationType: new FormControl<CableWidthType | null>('lengthening', { validators: [Validators.required] }),
-    modifiedLengthCable: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(0), Validators.max(1000), maxDecimalsValidator(2)]
+    modifiedLengthCable: new FormControl<number | null>(CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable, {
+      validators: [
+        Validators.required,
+        Validators.min(CABLE_LENGTH_CHANGE_FORM_BOUNDS.modifiedLengthCableMin),
+        Validators.max(CABLE_LENGTH_CHANGE_FORM_BOUNDS.modifiedLengthCableMax),
+        maxDecimalsValidator(CABLE_LENGTH_CHANGE_FORM_BOUNDS.maxDecimals)
+      ]
     }),
-    distanceSupportRef: new FormControl<number | null>(0, {
-      validators: [Validators.required, Validators.min(0), Validators.max(5000), maxDecimalsValidator(2)]
+    distanceSupportRef: new FormControl<number | null>(CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef, {
+      validators: [
+        Validators.required,
+        Validators.min(CABLE_LENGTH_CHANGE_FORM_BOUNDS.distanceSupportRefMin),
+        Validators.max(CABLE_LENGTH_CHANGE_FORM_BOUNDS.distanceSupportRefMax),
+        maxDecimalsValidator(CABLE_LENGTH_CHANGE_FORM_BOUNDS.maxDecimals)
+      ]
     })
   });
 
@@ -234,7 +245,11 @@ export class CableLengthChangeComponent {
       );
     } else {
       this.form.patchValue(
-        { modificationType: 'lengthening', modifiedLengthCable: 0, distanceSupportRef: 0 },
+        {
+          modificationType: 'lengthening',
+          modifiedLengthCable: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable,
+          distanceSupportRef: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef
+        },
         { emitEvent: false }
       );
       this.hasSavedModification.set(true);
@@ -338,8 +353,8 @@ export class CableLengthChangeComponent {
       {
         supportRef: 'LEFT',
         modificationType: 'lengthening',
-        modifiedLengthCable: 0,
-        distanceSupportRef: 0
+        modifiedLengthCable: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable,
+        distanceSupportRef: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef
       },
       { emitEvent: false }
     );
@@ -400,8 +415,10 @@ export class CableLengthChangeComponent {
           spanUuid,
           supportRef: this.form.controls.supportRef.value ?? 'LEFT',
           modificationType: this.form.controls.modificationType.value ?? 'lengthening',
-          modifiedLengthCable: this.form.controls.modifiedLengthCable.value ?? 0,
-          distanceSupportRef: this.form.controls.distanceSupportRef.value ?? 0
+          modifiedLengthCable:
+            this.form.controls.modifiedLengthCable.value ?? CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable,
+          distanceSupportRef:
+            this.form.controls.distanceSupportRef.value ?? CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef
         };
 
     temporaryLoadData.cableModifParams = [...(temporaryLoadData.cableModifParams ?? []), nextCableModification];
@@ -433,10 +450,12 @@ export class CableLengthChangeComponent {
         cableModification.modificationType = value === 'shortening' ? 'shortening' : 'lengthening';
         break;
       case 'modifiedLengthCable':
-        cableModification.modifiedLengthCable = typeof value === 'number' ? value : 0;
+        cableModification.modifiedLengthCable =
+          typeof value === 'number' ? value : CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable;
         break;
       case 'distanceSupportRef':
-        cableModification.distanceSupportRef = typeof value === 'number' ? value : 0;
+        cableModification.distanceSupportRef =
+          typeof value === 'number' ? value : CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef;
         break;
     }
   }
