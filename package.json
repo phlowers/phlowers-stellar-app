@@ -81,7 +81,7 @@
     "plotly.js-dist-min": "3.7.0",
     "primeicons": "7.0.0",
     "primeng": "21.1.9",
-    "pyodide": "0.28.3",
+    "pyodide": "0.29.4",
     "rxjs": "7.8.1",
     "tailwindcss-primeui": "0.5.1",
     "tslib": "2.3.0",

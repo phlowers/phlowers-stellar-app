@@ -81,10 +81,12 @@ describe('Worker', () => {
 
       // Verify loadPyodide was called with correct parameters
       const allPythonPackages = Object.values(pythonPackages).map((pkg) => self.name + 'pyodide/' + pkg.file_name);
-      expect(loadPyodide).toHaveBeenCalledWith({
-        indexURL: self.name + 'pyodide/',
-        packages: expect.arrayContaining(allPythonPackages)
-      });
+      expect(loadPyodide).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexURL: self.name + 'pyodide/',
+          packages: expect.arrayContaining(allPythonPackages)
+        })
+      );
 
       // Verify all packages are included
       const allPackages = Object.values(pythonPackages).map((pkg) => 'test/pyodide/' + pkg.file_name);
