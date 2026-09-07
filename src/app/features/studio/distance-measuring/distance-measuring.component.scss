@@ -20,28 +20,16 @@
     color: var(--star-dust-900);
   }
 
+  &__zoom-btn {
+    align-self: flex-start;
+  }
+
   &__span-cols {
-    @apply grid grid-cols-2;
-    grid-template-areas:
-      'spanLabel .'
-      'spanInput spanZoom';
-    column-gap: 0.625rem;
+    @apply flex flex-col items-start;
 
     @at-root {
-      .span-label {
-        grid-area: spanLabel;
-        @extend %_align-end;
-      }
-
       .span-input {
-        grid-area: spanInput;
-        @extend %_align-center;
-      }
-
-      .span-zoom {
-        grid-area: spanZoom;
-        @extend %_align-center;
-        justify-self: end;
+        min-width: 50%;
       }
     }
   }
