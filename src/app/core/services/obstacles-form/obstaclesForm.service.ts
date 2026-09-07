@@ -23,6 +23,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable, startWith } from 'rxjs';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotOptions } from '@shared/types/plot.types';
+import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -473,12 +474,7 @@ export class ObstacleFormService {
   }
 
   getErrorIds(controlName: string, errorTypes: string[]): string | null {
-    const control = this.form.get(controlName);
-    if (!control?.errors) {
-      return null;
-    }
-    const ids = errorTypes.filter((type) => control.errors?.[type]).map((type) => `${controlName}-error-${type}`);
-    return ids.length > 0 ? ids.join(' ') : null;
+    return getControlErrorIds(this.form, controlName, errorTypes);
   }
 
   returnToSpan(): void {

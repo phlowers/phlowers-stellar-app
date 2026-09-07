@@ -451,3 +451,44 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Already removed. `ObstacleOutput` interface kept for `refreshProjection` output. |
 | ✅ Validated | 🗑️ REMOVED — 2026-06-17 |
+
+---
+
+## 34. `integerValidator` — `src/app/shared/components/initial-condition-modal/initialConditionModal.helpers.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/components/initial-condition-modal/initialConditionModal.helpers.ts` lines 3-11 |
+| Code | `export function integerValidator(control): ValidationErrors \| null { ... }` — duplicates the now-shared `maxDecimalsValidator(0)` from `@shared/helpers/numberValidators.ts` |
+| 🔍 Evidence | Found while unifying number-input validators (branch `778-efforts-values-must-be-limited-to-one-decimal`). Only reference outside its own file is `initialConditionModal.helpers.spec.ts`, which tests the function itself — no production component imports or uses it. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the function + its dedicated spec `describe('integerValidator', ...)` block |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 35. `shared.initial-condition-modal.whole-number-required` i18n key
+
+| | |
+|---|---|
+| 📍 Source | `public/i18n/en.json` / `public/i18n/fr.json` (`shared.initial-condition-modal` namespace) |
+| Code | `"whole-number-required": "Whole number required"` (en) / French equivalent |
+| 🔍 Evidence | Was displayed for `base_temperature`/`min_temperature`/`max_wind_pressure` decimal errors in `initialConditionModal.component.html`; replaced by the unified `common.max-decimals-error` message during the number-input validators/messages unification. No remaining template reference found. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the key from both `en.json` and `fr.json` once confirmed unused elsewhere |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 36. `studio.pose-table.max-two-decimals-error` + `studio.pose-table.integer-error` i18n keys
+
+| | |
+|---|---|
+| 📍 Source | `public/i18n/en.json` / `public/i18n/fr.json` (`studio.pose-table` namespace) |
+| Code | `"max-two-decimals-error": "Maximum 2 decimal places"`, `"integer-error": "Value must be a whole number"` (en) + French equivalents |
+| 🔍 Evidence | Were displayed by `pose-table.component.ts`'s `getLowestTempError()`/`getComputingStepError()` methods; replaced by the unified `common.max-decimals-error` message during the number-input validators/messages unification. No remaining reference found in `src/app`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both keys from `en.json` and `fr.json` once confirmed unused elsewhere |
+| ✅ Validated | ⏳ Pending review |
+
+

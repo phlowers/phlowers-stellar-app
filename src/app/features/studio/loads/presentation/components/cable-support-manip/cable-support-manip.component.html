@@ -70,15 +70,14 @@
                 [attr.step]="BOUNDS.vertDisplacement.step"
                 [attr.min]="BOUNDS.vertDisplacement.min"
                 [attr.max]="BOUNDS.vertDisplacement.max"
-                (input)="truncateTwoDecimals($event)"
                 formControlName="vertDisplacement"
                 data-testid="cable-support-manip-vert-displacement"
                 [attr.aria-invalid]="form.controls.vertDisplacement.invalid || null"
-                [attr.aria-errormessage]="getErrorIds('vertDisplacement', ['min', 'max'])"
+                [attr.aria-errormessage]="getErrorIds('vertDisplacement', ['min', 'max', 'maxDecimals'])"
               />
               <p-inputgroup-addon>m</p-inputgroup-addon>
             </p-inputgroup>
-            @if (form.controls.vertDisplacement.errors?.['min']) {
+            @if (form.controls.vertDisplacement.errors?.['min']; as minError) {
               <p-message
                 id="vertDisplacement-error-min"
                 severity="error"
@@ -86,10 +85,9 @@
                 variant="simple"
                 class="crane-divide__error1"
               >
-                <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                {{ BOUNDS.vertDisplacement.min }}
+                {{ 'common.min-value-error' | transloco: { min: minError.min } }}
               </p-message>
-            } @else if (form.controls.vertDisplacement.errors?.['max']) {
+            } @else if (form.controls.vertDisplacement.errors?.['max']; as maxError) {
               <p-message
                 id="vertDisplacement-error-max"
                 severity="error"
@@ -97,8 +95,17 @@
                 variant="simple"
                 class="crane-divide__error1"
               >
-                <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                {{ BOUNDS.vertDisplacement.max }}
+                {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+              </p-message>
+            } @else if (form.controls.vertDisplacement.errors?.['maxDecimals']; as maxDecimals) {
+              <p-message
+                id="vertDisplacement-error-maxDecimals"
+                severity="error"
+                size="small"
+                variant="simple"
+                class="crane-divide__error1"
+              >
+                {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
               </p-message>
             }
 
@@ -128,23 +135,24 @@
               [attr.step]="BOUNDS.lateralDistance.step"
               [attr.min]="BOUNDS.lateralDistance.min"
               [attr.max]="BOUNDS.lateralDistance.max"
-              (input)="truncateTwoDecimals($event)"
               formControlName="lateralDistance"
               data-testid="cable-support-manip-lateral-distance"
               [attr.aria-invalid]="form.controls.lateralDistance.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max'])"
+              [attr.aria-errormessage]="getErrorIds('lateralDistance', ['min', 'max', 'maxDecimals'])"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (form.controls.lateralDistance.errors?.['min']) {
+          @if (form.controls.lateralDistance.errors?.['min']; as minError) {
             <p-message id="lateralDistance-error-min" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-              {{ BOUNDS.lateralDistance.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (form.controls.lateralDistance.errors?.['max']) {
+          } @else if (form.controls.lateralDistance.errors?.['max']; as maxError) {
             <p-message id="lateralDistance-error-max" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-              {{ BOUNDS.lateralDistance.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.lateralDistance.errors?.['maxDecimals']; as maxDecimals) {
+            <p-message id="lateralDistance-error-maxDecimals" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
             </p-message>
           }
         </div>
@@ -171,23 +179,24 @@
               [attr.step]="BOUNDS.ropeLength.step"
               [attr.min]="BOUNDS.ropeLength.min"
               [attr.max]="BOUNDS.ropeLength.max"
-              (input)="truncateTwoDecimals($event)"
               formControlName="ropeLength"
               data-testid="cable-support-manip-rope-length"
               [attr.aria-invalid]="form.controls.ropeLength.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('ropeLength', ['min', 'max'])"
+              [attr.aria-errormessage]="getErrorIds('ropeLength', ['min', 'max', 'maxDecimals'])"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (form.controls.ropeLength.errors?.['min']) {
+          @if (form.controls.ropeLength.errors?.['min']; as minError) {
             <p-message id="ropeLength-error-min" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-              {{ BOUNDS.ropeLength.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (form.controls.ropeLength.errors?.['max']) {
+          } @else if (form.controls.ropeLength.errors?.['max']; as maxError) {
             <p-message id="ropeLength-error-max" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-              {{ BOUNDS.ropeLength.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.ropeLength.errors?.['maxDecimals']; as maxDecimals) {
+            <p-message id="ropeLength-error-maxDecimals" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
             </p-message>
           }
         </div>
@@ -204,23 +213,24 @@
               [attr.step]="BOUNDS.shiftingClampLength.step"
               [attr.min]="BOUNDS.shiftingClampLength.min"
               [attr.max]="BOUNDS.shiftingClampLength.max"
-              (input)="truncateTwoDecimals($event)"
               formControlName="shiftingClampLength"
               data-testid="cable-support-manip-shifting-clamp-length"
               [attr.aria-invalid]="form.controls.shiftingClampLength.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('shiftingClampLength', ['min', 'max'])"
+              [attr.aria-errormessage]="getErrorIds('shiftingClampLength', ['min', 'max', 'maxDecimals'])"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (form.controls.shiftingClampLength.errors?.['min']) {
+          @if (form.controls.shiftingClampLength.errors?.['min']; as minError) {
             <p-message id="shiftingClampLength-error-min" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-              {{ BOUNDS.shiftingClampLength.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (form.controls.shiftingClampLength.errors?.['max']) {
+          } @else if (form.controls.shiftingClampLength.errors?.['max']; as maxError) {
             <p-message id="shiftingClampLength-error-max" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-              {{ BOUNDS.shiftingClampLength.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.shiftingClampLength.errors?.['maxDecimals']; as maxDecimals) {
+            <p-message id="shiftingClampLength-error-maxDecimals" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
             </p-message>
           }
         </div>
@@ -289,23 +299,29 @@
                   [attr.step]="BOUNDS.shiftingClampLength.step"
                   [attr.min]="BOUNDS.shiftingClampLength.min"
                   [attr.max]="BOUNDS.shiftingClampLength.max"
-                  (input)="truncateTwoDecimals($event)"
                   formControlName="manip2ShiftingClampLength"
                   data-testid="cable-support-manip-manip2-shifting-clamp-length"
                   [attr.aria-invalid]="form.controls.manip2ShiftingClampLength.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max'])"
+                  [attr.aria-errormessage]="getErrorIds('manip2ShiftingClampLength', ['min', 'max', 'maxDecimals'])"
                 />
                 <p-inputgroup-addon>m</p-inputgroup-addon>
               </p-inputgroup>
-              @if (form.controls.manip2ShiftingClampLength.errors?.['min']) {
+              @if (form.controls.manip2ShiftingClampLength.errors?.['min']; as minError) {
                 <p-message id="manip2ShiftingClampLength-error-min" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                  {{ BOUNDS.shiftingClampLength.min }}
+                  {{ 'common.min-value-error' | transloco: { min: minError.min } }}
                 </p-message>
-              } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']) {
+              } @else if (form.controls.manip2ShiftingClampLength.errors?.['max']; as maxError) {
                 <p-message id="manip2ShiftingClampLength-error-max" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                  {{ BOUNDS.shiftingClampLength.max }}
+                  {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+                </p-message>
+              } @else if (form.controls.manip2ShiftingClampLength.errors?.['maxDecimals']; as maxDecimals) {
+                <p-message
+                  id="manip2ShiftingClampLength-error-maxDecimals"
+                  severity="error"
+                  size="small"
+                  variant="simple"
+                >
+                  {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
                 </p-message>
               }
             </div>

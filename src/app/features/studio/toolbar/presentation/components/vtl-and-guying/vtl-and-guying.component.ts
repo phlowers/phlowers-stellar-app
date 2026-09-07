@@ -36,6 +36,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { VtlGuyingReportService } from '../../services/vtl-guying-report/vtl-guying-report.service';
 import { VtlGuyingReportData } from '../../services/vtl-guying-report/vtl-guying-report.interfaces';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 
 /** Option for selecting a reference support direction. */
 interface SupportOption {
@@ -125,8 +126,12 @@ export class VhlAndGuyingComponent {
         },
         [Validators.required]
       ),
-      altitude: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
-      horizontalDistance: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
+      altitude: this.fb.control<number | null>(null, [Validators.required, Validators.min(0), maxDecimalsValidator(2)]),
+      horizontalDistance: this.fb.control<number | null>(null, [
+        Validators.required,
+        Validators.min(0),
+        maxDecimalsValidator(2)
+      ]),
       hasPulley: this.fb.control<boolean>(false, { nonNullable: true }),
       comment: this.fb.control<string>('', { nonNullable: true })
     });

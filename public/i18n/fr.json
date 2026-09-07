@@ -32,8 +32,10 @@
     "error": "Erreur",
     "success": "Succès",
     "results": "Résultats :",
-    "min-value": "Valeur minimale :",
-    "max-value": "Valeur maximale :",
+    "min-value-error": "Valeur min : {{ min }}",
+    "max-value-error": "Valeur max : {{ max }}",
+    "max-decimals-error": "Décimales max : {{ maxDecimals }}",
+    "out-of-bound-error": "La valeur doit être comprise entre {{ min }} et {{ max }}",
     "meter": "m",
     "required": "Requis",
     "section-type": {

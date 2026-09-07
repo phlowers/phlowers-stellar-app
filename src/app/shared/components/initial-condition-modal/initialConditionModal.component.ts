@@ -16,13 +16,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Study } from '@shared/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { initialConditionConstraints } from '@shared/components/initial-condition-modal/initialConditionModal.constantes';
-import {
-  getErrorIds,
-  integerValidator
-} from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
+import { getErrorIds } from '@shared/components/initial-condition-modal/initialConditionModal.helpers';
 
 /** Form validation rules for initial condition fields. */
 const validators = {
@@ -32,7 +30,8 @@ const validators = {
     [
       Validators.required,
       Validators.min(initialConditionConstraints.base_parameters.min),
-      Validators.max(initialConditionConstraints.base_parameters.max)
+      Validators.max(initialConditionConstraints.base_parameters.max),
+      maxDecimalsValidator(2)
     ]
   ],
   base_temperature: [
@@ -41,14 +40,15 @@ const validators = {
       Validators.required,
       Validators.min(initialConditionConstraints.base_temperature.min),
       Validators.max(initialConditionConstraints.base_temperature.max),
-      integerValidator
+      maxDecimalsValidator(0)
     ]
   ],
   cable_pretension: [
     0,
     [
       Validators.min(initialConditionConstraints.cable_pretension.min),
-      Validators.max(initialConditionConstraints.cable_pretension.max)
+      Validators.max(initialConditionConstraints.cable_pretension.max),
+      maxDecimalsValidator(1)
     ]
   ],
   min_temperature: [
@@ -56,7 +56,7 @@ const validators = {
     [
       Validators.min(initialConditionConstraints.min_temperature.min),
       Validators.max(initialConditionConstraints.min_temperature.max),
-      integerValidator
+      maxDecimalsValidator(0)
     ]
   ],
   max_wind_pressure: [
@@ -64,14 +64,15 @@ const validators = {
     [
       Validators.min(initialConditionConstraints.max_wind_pressure.min),
       Validators.max(initialConditionConstraints.max_wind_pressure.max),
-      integerValidator
+      maxDecimalsValidator(0)
     ]
   ],
   max_frost_width: [
     0,
     [
       Validators.min(initialConditionConstraints.max_frost_width.min),
-      Validators.max(initialConditionConstraints.max_frost_width.max)
+      Validators.max(initialConditionConstraints.max_frost_width.max),
+      maxDecimalsValidator(1)
     ]
   ]
 };

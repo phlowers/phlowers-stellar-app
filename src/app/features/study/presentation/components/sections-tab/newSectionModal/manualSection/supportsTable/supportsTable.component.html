@@ -128,23 +128,29 @@
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
               [id]="'spanLength' + rowIndex"
               data-testid="span-length-input"
-              [attr.aria-invalid]="spanLengthInput.dirty && spanLengthInput.invalid"
+              [attr.aria-invalid]="
+                spanLengthInput.dirty && (spanLengthInput.invalid || !!maxTwoDecimalsValidator(spanLengthInput.control))
+              "
               [attr.aria-errormessage]="
-                spanLengthInput.dirty && spanLengthInput.invalid ? 'spanLengthError' + rowIndex : null
+                spanLengthInput.dirty && (spanLengthInput.invalid || !!maxTwoDecimalsValidator(spanLengthInput.control))
+                  ? 'spanLengthError' + rowIndex
+                  : null
               "
               #spanLengthInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (spanLengthInput.dirty && spanLengthInput.errors?.['min']) {
+          @if (spanLengthInput.dirty && spanLengthInput.errors?.['min']; as minError) {
             <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.spanLength.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (spanLengthInput.dirty && spanLengthInput.errors?.['max']) {
+          } @else if (spanLengthInput.dirty && spanLengthInput.errors?.['max']; as maxError) {
             <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.spanLength.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (spanLengthInput.dirty && maxTwoDecimalsValidator(spanLengthInput.control); as decimalsError) {
+            <p-message [id]="'spanLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -167,27 +173,37 @@
               [max]="limits.attachmentHeight.max"
               [attr.aria-label]="'supports-table.aria-attachment-height' | transloco"
               [ngModel]="support.attachmentHeight"
-              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentHeight', $event)"
               [id]="'attachmentHeight' + rowIndex"
               data-testid="attachment-height-input"
-              [attr.aria-invalid]="attachmentHeightInput.dirty && attachmentHeightInput.invalid"
+              [attr.aria-invalid]="
+                attachmentHeightInput.dirty &&
+                (attachmentHeightInput.invalid || !!maxTwoDecimalsValidator(attachmentHeightInput.control))
+              "
               [attr.aria-errormessage]="
-                attachmentHeightInput.dirty && attachmentHeightInput.invalid ? 'attachmentHeightError' + rowIndex : null
+                attachmentHeightInput.dirty &&
+                (attachmentHeightInput.invalid || !!maxTwoDecimalsValidator(attachmentHeightInput.control))
+                  ? 'attachmentHeightError' + rowIndex
+                  : null
               "
               #attachmentHeightInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['min']) {
+          @if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['min']; as minError) {
             <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.attachmentHeight.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['max']) {
+          } @else if (attachmentHeightInput.dirty && attachmentHeightInput.errors?.['max']; as maxError) {
             <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.attachmentHeight.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (
+            attachmentHeightInput.dirty && maxTwoDecimalsValidator(attachmentHeightInput.control);
+            as decimalsError
+          ) {
+            <p-message [id]="'attachmentHeightError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -210,27 +226,32 @@
               [max]="limits.spanAngle.max"
               [attr.aria-label]="'supports-table.aria-span-angle' | transloco"
               [ngModel]="support.spanAngle"
-              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanAngle', $event)"
               [id]="'spanAngle' + rowIndex"
               data-testid="span-angle-input"
-              [attr.aria-invalid]="spanAngleInput.dirty && spanAngleInput.invalid"
+              [attr.aria-invalid]="
+                spanAngleInput.dirty && (spanAngleInput.invalid || !!maxTwoDecimalsValidator(spanAngleInput.control))
+              "
               [attr.aria-errormessage]="
-                spanAngleInput.dirty && spanAngleInput.invalid ? 'spanAngleError' + rowIndex : null
+                spanAngleInput.dirty && (spanAngleInput.invalid || !!maxTwoDecimalsValidator(spanAngleInput.control))
+                  ? 'spanAngleError' + rowIndex
+                  : null
               "
               #spanAngleInput="ngModel"
             />
             <p-inputgroup-addon>Gr</p-inputgroup-addon>
           </p-inputgroup>
-          @if (spanAngleInput.dirty && spanAngleInput.errors?.['min']) {
+          @if (spanAngleInput.dirty && spanAngleInput.errors?.['min']; as minError) {
             <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.spanAngle.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (spanAngleInput.dirty && spanAngleInput.errors?.['max']) {
+          } @else if (spanAngleInput.dirty && spanAngleInput.errors?.['max']; as maxError) {
             <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.spanAngle.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (spanAngleInput.dirty && maxTwoDecimalsValidator(spanAngleInput.control); as decimalsError) {
+            <p-message [id]="'spanAngleError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -284,23 +305,31 @@
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
               [id]="'chainLength' + rowIndex"
               data-testid="chain-length-input"
-              [attr.aria-invalid]="chainLengthInput.dirty && chainLengthInput.invalid"
+              [attr.aria-invalid]="
+                chainLengthInput.dirty &&
+                (chainLengthInput.invalid || !!maxTwoDecimalsValidator(chainLengthInput.control))
+              "
               [attr.aria-errormessage]="
-                chainLengthInput.dirty && chainLengthInput.invalid ? 'chainLengthError' + rowIndex : null
+                chainLengthInput.dirty &&
+                (chainLengthInput.invalid || !!maxTwoDecimalsValidator(chainLengthInput.control))
+                  ? 'chainLengthError' + rowIndex
+                  : null
               "
               #chainLengthInput="ngModel"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
-          @if (chainLengthInput.dirty && chainLengthInput.errors?.['min']) {
+          @if (chainLengthInput.dirty && chainLengthInput.errors?.['min']; as minError) {
             <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.chainLength.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (chainLengthInput.dirty && chainLengthInput.errors?.['max']) {
+          } @else if (chainLengthInput.dirty && chainLengthInput.errors?.['max']; as maxError) {
             <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.chainLength.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (chainLengthInput.dirty && maxTwoDecimalsValidator(chainLengthInput.control); as decimalsError) {
+            <p-message [id]="'chainLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -326,23 +355,31 @@
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
               [id]="'chainWeight' + rowIndex"
               data-testid="chain-weight-input"
-              [attr.aria-invalid]="chainWeightInput.dirty && chainWeightInput.invalid"
+              [attr.aria-invalid]="
+                chainWeightInput.dirty &&
+                (chainWeightInput.invalid || !!maxTwoDecimalsValidator(chainWeightInput.control))
+              "
               [attr.aria-errormessage]="
-                chainWeightInput.dirty && chainWeightInput.invalid ? 'chainWeightError' + rowIndex : null
+                chainWeightInput.dirty &&
+                (chainWeightInput.invalid || !!maxTwoDecimalsValidator(chainWeightInput.control))
+                  ? 'chainWeightError' + rowIndex
+                  : null
               "
               #chainWeightInput="ngModel"
             />
             <p-inputgroup-addon>kg</p-inputgroup-addon>
           </p-inputgroup>
-          @if (chainWeightInput.dirty && chainWeightInput.errors?.['min']) {
+          @if (chainWeightInput.dirty && chainWeightInput.errors?.['min']; as minError) {
             <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.chainWeight.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (chainWeightInput.dirty && chainWeightInput.errors?.['max']) {
+          } @else if (chainWeightInput.dirty && chainWeightInput.errors?.['max']; as maxError) {
             <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.chainWeight.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (chainWeightInput.dirty && maxTwoDecimalsValidator(chainWeightInput.control); as decimalsError) {
+            <p-message [id]="'chainWeightError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -410,15 +447,13 @@
               </button>
             </p-inputicon>
           </p-iconfield>
-          @if (attachmentSetInput.dirty && attachmentSetInput.errors?.['min']) {
+          @if (attachmentSetInput.dirty && attachmentSetInput.errors?.['min']; as minError) {
             <p-message [id]="'attachmentSetError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.attachmentSet.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (attachmentSetInput.dirty && attachmentSetInput.errors?.['max']) {
+          } @else if (attachmentSetInput.dirty && attachmentSetInput.errors?.['max']; as maxError) {
             <p-message [id]="'attachmentSetError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.attachmentSet.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
             </p-message>
           }
         } @else {
@@ -436,27 +471,32 @@
               [max]="limits.armLength.max"
               [attr.aria-label]="'supports-table.aria-arm-length' | transloco"
               [ngModel]="support.armLength"
-              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
               [id]="'armLength' + rowIndex"
               data-testid="arm-length-input"
-              [attr.aria-invalid]="armLengthInput.dirty && armLengthInput.invalid"
+              [attr.aria-invalid]="
+                armLengthInput.dirty && (armLengthInput.invalid || !!maxTwoDecimalsValidator(armLengthInput.control))
+              "
               [attr.aria-errormessage]="
-                armLengthInput.dirty && armLengthInput.invalid ? 'armLengthError' + rowIndex : null
+                armLengthInput.dirty && (armLengthInput.invalid || !!maxTwoDecimalsValidator(armLengthInput.control))
+                  ? 'armLengthError' + rowIndex
+                  : null
               "
               #armLengthInput="ngModel"
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (armLengthInput.dirty && armLengthInput.errors?.['min']) {
+          @if (armLengthInput.dirty && armLengthInput.errors?.['min']; as minError) {
             <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.armLength.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (armLengthInput.dirty && armLengthInput.errors?.['max']) {
+          } @else if (armLengthInput.dirty && armLengthInput.errors?.['max']; as maxError) {
             <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.armLength.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (armLengthInput.dirty && maxTwoDecimalsValidator(armLengthInput.control); as decimalsError) {
+            <p-message [id]="'armLengthError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -514,23 +554,34 @@
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
               [id]="'counterWeight' + rowIndex"
               data-testid="counter-weight-input"
-              [attr.aria-invalid]="counterWeightInput.dirty && counterWeightInput.invalid"
+              [attr.aria-invalid]="
+                counterWeightInput.dirty &&
+                (counterWeightInput.invalid || !!maxTwoDecimalsValidator(counterWeightInput.control))
+              "
               [attr.aria-errormessage]="
-                counterWeightInput.dirty && counterWeightInput.invalid ? 'counterWeightError' + rowIndex : null
+                counterWeightInput.dirty &&
+                (counterWeightInput.invalid || !!maxTwoDecimalsValidator(counterWeightInput.control))
+                  ? 'counterWeightError' + rowIndex
+                  : null
               "
               #counterWeightInput="ngModel"
             />
             <p-inputgroup-addon>kg</p-inputgroup-addon>
           </p-inputgroup>
-          @if (counterWeightInput.dirty && counterWeightInput.errors?.['min']) {
+          @if (counterWeightInput.dirty && counterWeightInput.errors?.['min']; as minError) {
             <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.counterWeight.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (counterWeightInput.dirty && counterWeightInput.errors?.['max']) {
+          } @else if (counterWeightInput.dirty && counterWeightInput.errors?.['max']; as maxError) {
             <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.counterWeight.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (
+            counterWeightInput.dirty && maxTwoDecimalsValidator(counterWeightInput.control);
+            as decimalsError
+          ) {
+            <p-message [id]="'counterWeightError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -553,13 +604,16 @@
               [max]="limits.supportFootAltitude.max"
               [attr.aria-label]="'supports-table.aria-supp-foot-alt' | transloco"
               [ngModel]="support.supportFootAltitude"
-              (input)="truncateTwoDecimals($event)"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
               [id]="'supportFootAltitude' + rowIndex"
               data-testid="support-foot-altitude-input"
-              [attr.aria-invalid]="supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid"
+              [attr.aria-invalid]="
+                supportFootAltitudeInput.dirty &&
+                (supportFootAltitudeInput.invalid || !!maxTwoDecimalsValidator(supportFootAltitudeInput.control))
+              "
               [attr.aria-errormessage]="
-                supportFootAltitudeInput.dirty && supportFootAltitudeInput.invalid
+                supportFootAltitudeInput.dirty &&
+                (supportFootAltitudeInput.invalid || !!maxTwoDecimalsValidator(supportFootAltitudeInput.control))
                   ? 'supportFootAltitudeError' + rowIndex
                   : null
               "
@@ -567,15 +621,20 @@
             />
             <p-inputgroup-addon>m</p-inputgroup-addon>
           </p-inputgroup>
-          @if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['min']) {
+          @if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['min']; as minError) {
             <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.supportFootAltitude.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['max']) {
+          } @else if (supportFootAltitudeInput.dirty && supportFootAltitudeInput.errors?.['max']; as maxError) {
             <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.supportFootAltitude.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (
+            supportFootAltitudeInput.dirty && maxTwoDecimalsValidator(supportFootAltitudeInput.control);
+            as decimalsError
+          ) {
+            <p-message [id]="'supportFootAltitudeError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
@@ -618,23 +677,31 @@
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
               [id]="'chainSurface' + rowIndex"
               data-testid="chain-surface-input"
-              [attr.aria-invalid]="chainSurfaceInput.dirty && chainSurfaceInput.invalid"
+              [attr.aria-invalid]="
+                chainSurfaceInput.dirty &&
+                (chainSurfaceInput.invalid || !!maxTwoDecimalsValidator(chainSurfaceInput.control))
+              "
               [attr.aria-errormessage]="
-                chainSurfaceInput.dirty && chainSurfaceInput.invalid ? 'chainSurfaceError' + rowIndex : null
+                chainSurfaceInput.dirty &&
+                (chainSurfaceInput.invalid || !!maxTwoDecimalsValidator(chainSurfaceInput.control))
+                  ? 'chainSurfaceError' + rowIndex
+                  : null
               "
               #chainSurfaceInput="ngModel"
             />
             <p-inputgroup-addon>m²</p-inputgroup-addon>
           </p-inputgroup>
-          @if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['min']) {
+          @if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['min']; as minError) {
             <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.min-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.chainSurface.min }}
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
             </p-message>
-          } @else if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['max']) {
+          } @else if (chainSurfaceInput.dirty && chainSurfaceInput.errors?.['max']; as maxError) {
             <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
-              <ng-container>{{ 'common.max-value' | transloco }}</ng-container
-              >&nbsp;{{ limits.chainSurface.max }}
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (chainSurfaceInput.dirty && maxTwoDecimalsValidator(chainSurfaceInput.control); as decimalsError) {
+            <p-message [id]="'chainSurfaceError' + rowIndex" severity="error" size="small" variant="simple">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError['maxDecimals'].maxDecimals } }}
             </p-message>
           }
         } @else {
