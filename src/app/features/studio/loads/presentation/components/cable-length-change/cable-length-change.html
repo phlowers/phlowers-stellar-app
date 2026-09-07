@@ -86,9 +86,24 @@
         step="0.01"
         formControlName="modifiedLengthCable"
         data-testid="cable-length-change-size-cable"
+        [attr.aria-invalid]="form.controls.modifiedLengthCable.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('modifiedLengthCable', ['min', 'max', 'maxDecimals'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.modifiedLengthCable.errors?.['min']; as minError) {
+    <p-message id="modifiedLengthCable-error-min" severity="error" size="small" variant="simple">
+      {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+    </p-message>
+    } @else if (form.controls.modifiedLengthCable.errors?.['max']; as maxError) {
+    <p-message id="modifiedLengthCable-error-max" severity="error" size="small" variant="simple">
+      {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+    </p-message>
+    } @else if (form.controls.modifiedLengthCable.errors?.['maxDecimals']; as maxDecimals) {
+    <p-message id="modifiedLengthCable-error-maxDecimals" severity="error" size="small" variant="simple">
+      {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
+    </p-message>
+    }
   </div>
 
   <div>
@@ -104,9 +119,24 @@
         step="0.01"
         formControlName="distanceSupportRef"
         data-testid="cable-length-change-distance-support-ref"
+        [attr.aria-invalid]="form.controls.distanceSupportRef.invalid || null"
+        [attr.aria-errormessage]="getErrorIds('distanceSupportRef', ['min', 'max', 'maxDecimals'])"
       />
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
+    @if (form.controls.distanceSupportRef.errors?.['min']; as minError) {
+    <p-message id="distanceSupportRef-error-min" severity="error" size="small" variant="simple">
+      {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+    </p-message>
+    } @else if (form.controls.distanceSupportRef.errors?.['max']; as maxError) {
+    <p-message id="distanceSupportRef-error-max" severity="error" size="small" variant="simple">
+      {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+    </p-message>
+    } @else if (form.controls.distanceSupportRef.errors?.['maxDecimals']; as maxDecimals) {
+    <p-message id="distanceSupportRef-error-maxDecimals" severity="error" size="small" variant="simple">
+      {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
+    </p-message>
+    }
   </div>
 
   <div class="cable-length-change__btns">

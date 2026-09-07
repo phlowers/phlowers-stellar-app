@@ -19,28 +19,16 @@
   />
   <p-inputgroup-addon>°</p-inputgroup-addon>
 </p-inputgroup>
-@if (isLatitudeOverMax()) {
+@if (isLatitudeOverMax() || isLatitudeUnderMin()) {
   <p-message
-    [id]="errorIds.latitude.max"
-    data-testid="latitude-max-error"
+    [id]="latitudeErrorId()"
+    [attr.data-testid]="isLatitudeOverMax() ? 'latitude-max-error' : 'latitude-min-error'"
     severity="error"
     size="small"
     variant="simple"
     class="error-lat"
   >
-    <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ config.latitude.max }}
-  </p-message>
-}
-@if (isLatitudeUnderMin()) {
-  <p-message
-    [id]="errorIds.latitude.min"
-    data-testid="latitude-min-error"
-    severity="error"
-    size="small"
-    variant="simple"
-    class="error-lat"
-  >
-    <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ config.latitude.min }}
+    {{ 'common.out-of-bound-error' | transloco: { min: config.latitude.min, max: config.latitude.max } }}
   </p-message>
 }
 
@@ -63,28 +51,16 @@
   />
   <p-inputgroup-addon>°</p-inputgroup-addon>
 </p-inputgroup>
-@if (isLongitudeOverMax()) {
+@if (isLongitudeOverMax() || isLongitudeUnderMin()) {
   <p-message
-    [id]="errorIds.longitude.max"
-    data-testid="longitude-max-error"
+    [id]="longitudeErrorId()"
+    [attr.data-testid]="isLongitudeOverMax() ? 'longitude-max-error' : 'longitude-min-error'"
     severity="error"
     size="small"
     variant="simple"
     class="error-long"
   >
-    <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ config.longitude.max }}
-  </p-message>
-}
-@if (isLongitudeUnderMin()) {
-  <p-message
-    [id]="errorIds.longitude.min"
-    data-testid="longitude-min-error"
-    severity="error"
-    size="small"
-    variant="simple"
-    class="error-long"
-  >
-    <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ config.longitude.min }}
+    {{ 'common.out-of-bound-error' | transloco: { min: config.longitude.min, max: config.longitude.max } }}
   </p-message>
 }
 
@@ -107,27 +83,15 @@
   />
   <p-inputgroup-addon>°</p-inputgroup-addon>
 </p-inputgroup>
-@if (isAzimuthOverMax()) {
+@if (isAzimuthOverMax() || isAzimuthUnderMin()) {
   <p-message
-    [id]="errorIds.azimuth.max"
-    data-testid="azimuth-max-error"
+    [id]="azimuthErrorId()"
+    [attr.data-testid]="isAzimuthOverMax() ? 'azimuth-max-error' : 'azimuth-min-error'"
     severity="error"
     size="small"
     variant="simple"
     class="error-az"
   >
-    <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ config.azimuth.max }}
-  </p-message>
-}
-@if (isAzimuthUnderMin()) {
-  <p-message
-    [id]="errorIds.azimuth.min"
-    data-testid="azimuth-min-error"
-    severity="error"
-    size="small"
-    variant="simple"
-    class="error-az"
-  >
-    <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ config.azimuth.min }}
+    {{ 'common.out-of-bound-error' | transloco: { min: config.azimuth.min, max: config.azimuth.max } }}
   </p-message>
 }

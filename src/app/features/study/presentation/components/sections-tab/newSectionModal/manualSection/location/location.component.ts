@@ -64,8 +64,6 @@ export class LocationComponent {
     return v !== null && v < this.config.azimuth.min;
   });
 
-  protected readonly errorIds = LOCATION_ERROR_IDS;
-
   protected readonly isValid = computed(
     () =>
       !this.isLatitudeOverMax() &&

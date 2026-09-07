@@ -20,7 +20,6 @@ import { NotificationService } from '@services/notification/notification.service
 import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, SelectOption } from '../../constants';
 import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
-import { truncateNoDecimals } from '@shared/helpers/truncateDecimals';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 @Component({
   selector: 'app-temperature-calculation',
@@ -68,8 +67,6 @@ export class TemperatureCalculationComponent {
   readonly transitBounds = TRANSIT_BOUNDS;
 
   readonly measuredSolarFluxBounds = MEASURED_SOLAR_FLUX_BOUNDS;
-
-  readonly truncateNoDecimals = truncateNoDecimals;
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 

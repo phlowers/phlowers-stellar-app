@@ -85,15 +85,19 @@
               formControlName="base_parameters"
               data-testid="base-parameter-input"
               [attr.aria-invalid]="form.controls.base_parameters.invalid || null"
-              [attr.aria-errormessage]="getErrorIds('base_parameters', ['min', 'max'])"
+              [attr.aria-errormessage]="getErrorIds('base_parameters', ['min', 'max', 'maxDecimals'])"
             />
-            @if (form.controls.base_parameters.errors?.['min']) {
+            @if (form.controls.base_parameters.errors?.['min']; as minError) {
               <p-message id="base_parameters-error-min" severity="error" size="small" variant="simple">
-                <ng-container>{{ 'common.min-value' | transloco }}</ng-container> {{ constraints.base_parameters.min }}.
+                {{ 'common.min-value-error' | transloco: { min: minError.min } }}
               </p-message>
-            } @else if (form.controls.base_parameters.errors?.['max']) {
+            } @else if (form.controls.base_parameters.errors?.['max']; as maxError) {
               <p-message id="base_parameters-error-max" severity="error" size="small" variant="simple">
-                <ng-container>{{ 'common.max-value' | transloco }}</ng-container> {{ constraints.base_parameters.max }}.
+                {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+              </p-message>
+            } @else if (form.controls.base_parameters.errors?.['maxDecimals']; as maxDecimals) {
+              <p-message id="base_parameters-error-maxDecimals" severity="error" size="small" variant="simple">
+                {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
               </p-message>
             }
           </div>
@@ -112,23 +116,21 @@
                 formControlName="base_temperature"
                 data-testid="base-temperature-input"
                 [attr.aria-invalid]="form.controls.base_temperature.invalid || null"
-                [attr.aria-errormessage]="getErrorIds('base_temperature', ['min', 'max', 'integer'])"
+                [attr.aria-errormessage]="getErrorIds('base_temperature', ['min', 'max', 'maxDecimals'])"
               />
               <p-inputgroup-addon>°C</p-inputgroup-addon>
             </p-inputgroup>
-            @if (form.controls.base_temperature.errors?.['min']) {
+            @if (form.controls.base_temperature.errors?.['min']; as minError) {
               <p-message id="base_temperature-error-min" severity="error" size="small" variant="simple">
-                <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                {{ constraints.base_temperature.min }}.
+                {{ 'common.min-value-error' | transloco: { min: minError.min } }}
               </p-message>
-            } @else if (form.controls.base_temperature.errors?.['max']) {
+            } @else if (form.controls.base_temperature.errors?.['max']; as maxError) {
               <p-message id="base_temperature-error-max" severity="error" size="small" variant="simple">
-                <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                {{ constraints.base_temperature.max }}.
+                {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
               </p-message>
-            } @else if (form.controls.base_temperature.errors?.['integer']) {
-              <p-message id="base_temperature-error-integer" severity="error" size="small" variant="simple">
-                {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
+            } @else if (form.controls.base_temperature.errors?.['maxDecimals']; as maxDecimals) {
+              <p-message id="base_temperature-error-maxDecimals" severity="error" size="small" variant="simple">
+                {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
               </p-message>
             }
           </div>
@@ -146,19 +148,21 @@
                   formControlName="cable_pretension"
                   data-testid="cable-pretension-input"
                   [attr.aria-invalid]="form.controls.cable_pretension.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('cable_pretension', ['min', 'max'])"
+                  [attr.aria-errormessage]="getErrorIds('cable_pretension', ['min', 'max', 'maxDecimals'])"
                 />
                 <p-inputgroup-addon>%CRA</p-inputgroup-addon>
               </p-inputgroup>
-              @if (form.controls.cable_pretension.errors?.['min']) {
+              @if (form.controls.cable_pretension.errors?.['min']; as minError) {
                 <p-message id="cable_pretension-error-min" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                  {{ constraints.cable_pretension.min }}.
+                  {{ 'common.min-value-error' | transloco: { min: minError.min } }}
                 </p-message>
-              } @else if (form.controls.cable_pretension.errors?.['max']) {
+              } @else if (form.controls.cable_pretension.errors?.['max']; as maxError) {
                 <p-message id="cable_pretension-error-max" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                  {{ constraints.cable_pretension.max }}.
+                  {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+                </p-message>
+              } @else if (form.controls.cable_pretension.errors?.['maxDecimals']; as maxDecimals) {
+                <p-message id="cable_pretension-error-maxDecimals" severity="error" size="small" variant="simple">
+                  {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
                 </p-message>
               }
             </div>
@@ -177,23 +181,21 @@
                   pInputText
                   formControlName="min_temperature"
                   [attr.aria-invalid]="form.controls.min_temperature.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('min_temperature', ['min', 'max', 'integer'])"
+                  [attr.aria-errormessage]="getErrorIds('min_temperature', ['min', 'max', 'maxDecimals'])"
                 />
                 <p-inputgroup-addon>°C</p-inputgroup-addon>
               </p-inputgroup>
-              @if (form.controls.min_temperature.errors?.['min']) {
+              @if (form.controls.min_temperature.errors?.['min']; as minError) {
                 <p-message id="min_temperature-error-min" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                  {{ constraints.min_temperature.min }}.
+                  {{ 'common.min-value-error' | transloco: { min: minError.min } }}
                 </p-message>
-              } @else if (form.controls.min_temperature.errors?.['max']) {
+              } @else if (form.controls.min_temperature.errors?.['max']; as maxError) {
                 <p-message id="min_temperature-error-max" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                  {{ constraints.min_temperature.max }}.
+                  {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
                 </p-message>
-              } @else if (form.controls.min_temperature.errors?.['integer']) {
-                <p-message id="min_temperature-error-integer" severity="error" size="small" variant="simple">
-                  {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
+              } @else if (form.controls.min_temperature.errors?.['maxDecimals']; as maxDecimals) {
+                <p-message id="min_temperature-error-maxDecimals" severity="error" size="small" variant="simple">
+                  {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
                 </p-message>
               }
             </div>
@@ -209,23 +211,21 @@
                   pInputText
                   formControlName="max_wind_pressure"
                   [attr.aria-invalid]="form.controls.max_wind_pressure.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('max_wind_pressure', ['min', 'max', 'integer'])"
+                  [attr.aria-errormessage]="getErrorIds('max_wind_pressure', ['min', 'max', 'maxDecimals'])"
                 />
                 <p-inputgroup-addon>Pa</p-inputgroup-addon>
               </p-inputgroup>
-              @if (form.controls.max_wind_pressure.errors?.['min']) {
+              @if (form.controls.max_wind_pressure.errors?.['min']; as minError) {
                 <p-message id="max_wind_pressure-error-min" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                  {{ constraints.max_wind_pressure.min }}.
+                  {{ 'common.min-value-error' | transloco: { min: minError.min } }}
                 </p-message>
-              } @else if (form.controls.max_wind_pressure.errors?.['max']) {
+              } @else if (form.controls.max_wind_pressure.errors?.['max']; as maxError) {
                 <p-message id="max_wind_pressure-error-max" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                  {{ constraints.max_wind_pressure.max }}.
+                  {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
                 </p-message>
-              } @else if (form.controls.max_wind_pressure.errors?.['integer']) {
-                <p-message id="max_wind_pressure-error-integer" severity="error" size="small" variant="simple">
-                  {{ 'shared.initial-condition-modal.whole-number-required' | transloco }}
+              } @else if (form.controls.max_wind_pressure.errors?.['maxDecimals']; as maxDecimals) {
+                <p-message id="max_wind_pressure-error-maxDecimals" severity="error" size="small" variant="simple">
+                  {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
                 </p-message>
               }
             </div>
@@ -241,19 +241,21 @@
                   pInputText
                   formControlName="max_frost_width"
                   [attr.aria-invalid]="form.controls.max_frost_width.invalid || null"
-                  [attr.aria-errormessage]="getErrorIds('max_frost_width', ['min', 'max'])"
+                  [attr.aria-errormessage]="getErrorIds('max_frost_width', ['min', 'max', 'maxDecimals'])"
                 />
                 <p-inputgroup-addon>cm</p-inputgroup-addon>
               </p-inputgroup>
-              @if (form.controls.max_frost_width.errors?.['min']) {
+              @if (form.controls.max_frost_width.errors?.['min']; as minError) {
                 <p-message id="max_frost_width-error-min" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-                  {{ constraints.max_frost_width.min }}.
+                  {{ 'common.min-value-error' | transloco: { min: minError.min } }}
                 </p-message>
-              } @else if (form.controls.max_frost_width.errors?.['max']) {
+              } @else if (form.controls.max_frost_width.errors?.['max']; as maxError) {
                 <p-message id="max_frost_width-error-max" severity="error" size="small" variant="simple">
-                  <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-                  {{ constraints.max_frost_width.max }}.
+                  {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+                </p-message>
+              } @else if (form.controls.max_frost_width.errors?.['maxDecimals']; as maxDecimals) {
+                <p-message id="max_frost_width-error-maxDecimals" severity="error" size="small" variant="simple">
+                  {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
                 </p-message>
               }
             </div>

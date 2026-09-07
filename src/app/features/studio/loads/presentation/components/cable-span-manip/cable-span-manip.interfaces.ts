@@ -1,5 +1,6 @@
 import { FormControl } from '@angular/forms';
 import { AnchoringType, CableManipMethod, CableManipType } from '@shared/domain';
+import { SLING_LENGTH_DEFAULT } from './cable-span-manip.constantes';
 
 export const CABLE_SPAN_MANIP_DEFAULTS = {
   referenceSupport: 'LEFT' as 'LEFT' | 'RIGHT',
@@ -15,7 +16,7 @@ export const CABLE_SPAN_MANIP_DEFAULTS = {
   chainWeight: null as number | null,
   chainSurface: null as number | null,
   counterWeight: null as number | null,
-  slingLength: 5
+  slingLength: SLING_LENGTH_DEFAULT
 };
 
 /** Typed form controls for the cable span manipulation form. */

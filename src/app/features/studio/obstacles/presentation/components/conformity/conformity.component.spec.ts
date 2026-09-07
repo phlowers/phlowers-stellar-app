@@ -232,8 +232,8 @@ describe('ConformityComponent', () => {
               'studio.conformity.form-legend': 'Form',
               'studio.conformity.lateral-column-suffix': 'lateral',
               'studio.conformity.lateral-distance-temperature-label': 'Lateral distance temperature',
-              'common.max-value': 'Maximum value:',
-              'common.min-value': 'Minimum value:',
+              'common.max-value-error': 'Max. value: {{ max }}',
+              'common.min-value-error': 'Min. value: {{ min }}',
               'studio.conformity.minimum-distance-case-label': 'Minimum distance case',
               'studio.conformity.name-label': 'Name',
               'studio.conformity.no-conformity-config-error':
@@ -576,6 +576,20 @@ describe('ConformityComponent', () => {
       component.form.controls.lateralDistanceTemperature.setValue(-1);
       fixture.detectChanges();
       expect(component.lateralDistanceTemperatureErrorId()).toBe('lateral-distance-temperature-min-error');
+    });
+
+    it('should expose a maxDecimals error id for repartition temperature with more than two decimals', async () => {
+      await createComponent();
+      component.form.controls.repartitionTemperature.setValue(1.234);
+      fixture.detectChanges();
+      expect(component.repartitionTemperatureErrorId()).toBe('repartition-temperature-maxDecimals-error');
+    });
+
+    it('should expose a maxDecimals error id for lateral distance temperature with more than two decimals', async () => {
+      await createComponent();
+      component.form.controls.lateralDistanceTemperature.setValue(1.234);
+      fixture.detectChanges();
+      expect(component.lateralDistanceTemperatureErrorId()).toBe('lateral-distance-temperature-maxDecimals-error');
     });
 
     it('should return null error id when the value is valid', async () => {
