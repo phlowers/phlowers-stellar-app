@@ -22,7 +22,7 @@ import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Localization, Task } from '@core/services/worker_python/tasks/types';
-import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
+import { AttachmentSetModalComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { KeyFilterModule } from 'primeng/keyfilter';
