@@ -152,7 +152,7 @@ def import_lambert_and_validate(inputs: dict) -> dict:
     }
 
 
-def compute_localization(inputs: SectionGeoData) -> dict:
+def compute_localization(inputs: dict) -> dict:
     """Compute section localization from flat geometry using pyproj.
 
     The section geometry is described by flat span lengths and flat line
@@ -165,7 +165,7 @@ def compute_localization(inputs: SectionGeoData) -> dict:
     convergence before each geodesic step, mirroring
     :func:`import_lambert` which removes it.
 
-    Expects an already-built :class:`SectionGeoData`::
+    Expects a dict which can be converted to :class:`SectionGeoData`::
 
         SectionGeoData(
             startLatitude=float,  # decimal degrees
@@ -186,11 +186,8 @@ def compute_localization(inputs: SectionGeoData) -> dict:
         }
     """
 
-    geo_inputs = (
-        SectionGeoData.from_dict(inputs)
-        if isinstance(inputs, dict)
-        else inputs
-    )
+    geo_inputs = SectionGeoData.from_dict(inputs)
+
 
     span_length = np.array(geo_inputs.spanLength, dtype=np.float64)
     line_angle = np.array(geo_inputs.lineAngle, dtype=np.float64)

@@ -1474,7 +1474,7 @@ describe('SectionImportService', () => {
     });
 
     it('should call importLambert and importLambertAndValidate in order', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       await service.processFile(file, neverAccept);
 
       const calledTasks = workerPythonServiceMock.runTask.mock.calls.map((call) => call[0]);
@@ -1482,7 +1482,7 @@ describe('SectionImportService', () => {
     });
 
     it('should store mean_reprojection_diff_meters from the validation task meanGpsDiffMeter', async () => {
-      const file = makeJsonFile(buildValidGeoLiaisonPayload());
+      const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
       expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
