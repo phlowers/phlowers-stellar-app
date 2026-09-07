@@ -60,3 +60,22 @@ The generated PDF is written to `docs-sphinx/build/simplepdf/` folder.
 > ```shell
 > uv pip install 'weasyprint==52.5'
 > ```
+
+#### Generate PowerPoint documentation
+
+A PowerPoint export is available by converting the PDF produced by `make simplepdf`. This approach keeps the exact page layout while producing editable text boxes in PowerPoint. Run:
+
+```shell
+cd docs-sphinx
+make pptx
+```
+
+Or, from the repository root:
+
+```shell
+npm run docs:pptx
+```
+
+The generated `.pptx` is written to `docs-sphinx/build/pptx/stellar_documentation.pptx`.
+
+> **Note:** This requires `pymupdf` and `python-pptx`, already listed in `docs-sphinx/requirements.txt`.

@@ -12,11 +12,17 @@ BUILDDIR      = build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile simplepdf
+.PHONY: help Makefile simplepdf pptx
 
 # Build a PDF from the Sphinx sources using sphinx-simplepdf.
 simplepdf:
 	@$(SPHINXBUILD) -M simplepdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Convert the SimplePDF output into an editable PowerPoint deck.
+pptx: simplepdf
+	uv run python scripts/build_pptx_from_pdf.py \
+		--pdf "build/simplepdf/stellar_documentation.pdf" \
+		--output "build/pptx/stellar_documentation.pptx"
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

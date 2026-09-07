@@ -31,7 +31,8 @@
     "cyclonedx": "npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-file bom.xml --output-format XML",
     "docs": "cd docs-sphinx && uv run sphinx-build -M clean source build && uv run sphinx-build -M html source build",
     "autodocs": "cd docs-sphinx && uv run sphinx-autobuild --host localhost --port 8000 source build",
-    "docs:open": "npm run docs && xdg-open docs-sphinx/build/html/index.html"
+    "docs:open": "npm run docs && xdg-open docs-sphinx/build/html/index.html",
+    "docs:pptx": "cd docs-sphinx && make pptx"
   },
   "browser": {
     "child_process": false,
