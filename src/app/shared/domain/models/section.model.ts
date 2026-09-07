@@ -11,6 +11,7 @@ import { InitialCondition } from './initial-condition.model';
 import { Support } from './support.model';
 import { VtlAndGuying } from './vtl-and-guying.model';
 import { Obstacle } from './obstacle.model';
+import { Floor } from './floor.model';
 import { CableModification } from './cable-modification.model';
 import { CableSpanManipulation } from './cable-span-manipulation.model';
 import { CableSupportManipulation } from './cable-support-manipulation.model';
@@ -123,6 +124,8 @@ export interface Section {
   supports: Support[];
   /** Array of obstacles near the section */
   obstacles: Obstacle[];
+  /** Array of floor (ground) profiles defined per span */
+  floors?: Floor[];
   /** Array of initial conditions for calculations */
   initial_conditions: InitialCondition[];
   /** UUID of the currently selected initial condition */

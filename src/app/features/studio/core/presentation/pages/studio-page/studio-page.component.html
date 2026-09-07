@@ -12,7 +12,11 @@
 <div class="graph-tools">
   <div class="graph-tools__left">
     @if (plotOptionsService.isFreePositioningMode()) {
-      <app-free-positioning class="plot-view" />
+      @if (plotOptionsService.freePositioningSource() === 'floor') {
+        <app-floor-free-positioning class="plot-view" />
+      } @else {
+        <app-free-positioning class="plot-view" />
+      }
     } @else {
       <app-studio class="plot-view" [isPreview]="false" />
     }
@@ -86,94 +90,7 @@
         </dl>
       </div>
 
-      <div class="graph-tools-cards__item quick-measures">
-        <p-select
-          [ariaLabel]="'studio.studio-page.select-obstacle-aria-label' | transloco"
-          styleClass="quick-measures__select"
-          [options]="filteredObstaclesOptions()"
-          [ngModel]="obstaclesService.selectedObstacleUuid()"
-          (ngModelChange)="onObstacleSelect($event)"
-          [disabled]="!filteredObstaclesOptions().length"
-          data-testid="quick-measures-select-obstacle"
-        />
-
-        @if (obstaclePointOptions().length > 1) {
-          <p-select
-            @pointSelect
-            [ariaLabel]="'studio.studio-page.select-obstacle-point-aria-label' | transloco"
-            styleClass="quick-measures__select"
-            [options]="obstaclePointOptions()"
-            [ngModel]="obstaclesService.activePointIndex()"
-            (ngModelChange)="obstaclesService.activePointIndex.set($event)"
-            data-testid="quick-measures-select-obstacle-point"
-          />
-        }
-
-        <dl class="quick-measures__list">
-          <div>
-            <dt class="quick-measures__list__title">
-              <label for="oblique-distance">{{ 'studio.shared.oblique' | transloco }}</label>
-              <p-radiobutton
-                name="distanceType"
-                value="oblique"
-                inputId="oblique-distance"
-                [(ngModel)]="obstacleStateService.distanceType"
-                [disabled]="!obstaclesService.selectedObstacleUuid()"
-                data-testid="oblique-distance-radio"
-              />
-            </dt>
-            <dd class="quick-measures__list__value" data-testid="distance-oblique-value">
-              @if (obstacleFormService.results().oblique !== null) {
-                {{ obstacleFormService.results().oblique | number: '1.0-2' }} m
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-
-          <div>
-            <dt class="quick-measures__list__title">
-              <label for="vertical-distance">{{ 'studio.shared.vertical' | transloco }}</label>
-              <p-radiobutton
-                name="distanceType"
-                value="vertical"
-                inputId="vertical-distance"
-                [(ngModel)]="obstacleStateService.distanceType"
-                [disabled]="!obstaclesService.selectedObstacleUuid()"
-                data-testid="vertical-distance-radio"
-              />
-            </dt>
-            <dd class="quick-measures__list__value" data-testid="distance-vertical-value">
-              @if (obstacleFormService.results().vertical !== null) {
-                {{ obstacleFormService.results().vertical | number: '1.0-2' }} m
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-
-          <div>
-            <dt class="quick-measures__list__title">
-              <label for="horizontal-distance">{{ 'studio.shared.horizontal' | transloco }}</label>
-              <p-radiobutton
-                name="distanceType"
-                value="horizontal"
-                inputId="horizontal-distance"
-                [(ngModel)]="obstacleStateService.distanceType"
-                [disabled]="!obstaclesService.selectedObstacleUuid()"
-                data-testid="horizontal-distance-radio"
-              />
-            </dt>
-            <dd class="quick-measures__list__value" data-testid="distance-horizontal-value">
-              @if (obstacleFormService.results().horizontal !== null) {
-                {{ obstacleFormService.results().horizontal | number: '1.0-2' }} m
-              } @else {
-                -
-              }
-            </dd>
-          </div>
-        </dl>
-      </div>
+      <app-quick-measures class="graph-tools-cards__item" />
     </section>
 
     <hr />
@@ -343,6 +260,10 @@
 
     <app-side-tab label="Obstacles">
       <ng-template><app-obstacles-form /></ng-template>
+    </app-side-tab>
+
+    <app-side-tab [label]="'studio.studio-page.floor-sidetab-label' | transloco">
+      <ng-template><app-floor /></ng-template>
     </app-side-tab>
 
     <app-side-tab [label]="'studio.studio-page.distances-label' | transloco">

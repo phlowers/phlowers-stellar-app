@@ -6,7 +6,7 @@ import { Support } from '@shared/domain/models/support.model';
 
 // Mock the createDataObject function
 vi.mock('./createPlotDataObject');
-const mockCreateDataObject = createDataObject as vi.MockedFunction<typeof createDataObject>;
+const mockCreateDataObject = vi.mocked(createDataObject);
 
 const mockSupports: Support[] = [
   {

@@ -54,7 +54,7 @@ describe('ObstaclesService', () => {
 
   describe('selection signals', () => {
     it('initializes signals to null', () => {
-      expect(service.selectedObstacleUuid()).toBeNull();
+      expect(service.selectedMeasureUuid()).toBeNull();
       expect(service.activePointIndex()).toBeNull();
     });
     it('setCurrentPointIndex updates activePointIndex', () => {
@@ -66,14 +66,14 @@ describe('ObstaclesService', () => {
       service.resetCurrentPointIndex();
       expect(service.activePointIndex()).toBeNull();
     });
-    it('setSelectedObstacle sets both uuid and point index', () => {
-      service.setSelectedObstacle('uuid-1', 2);
-      expect(service.selectedObstacleUuid()).toBe('uuid-1');
+    it('setSelectedMeasure sets both uuid and point index', () => {
+      service.setSelectedMeasure('uuid-1', 2);
+      expect(service.selectedMeasureUuid()).toBe('uuid-1');
       expect(service.activePointIndex()).toBe(2);
     });
-    it('setSelectedObstacle accepts nulls', () => {
-      service.setSelectedObstacle(null, null);
-      expect(service.selectedObstacleUuid()).toBeNull();
+    it('setSelectedMeasure accepts nulls', () => {
+      service.setSelectedMeasure(null, null);
+      expect(service.selectedMeasureUuid()).toBeNull();
       expect(service.activePointIndex()).toBeNull();
     });
   });

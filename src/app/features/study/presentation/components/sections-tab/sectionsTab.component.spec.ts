@@ -348,7 +348,7 @@ describe('SectionsTabComponent', () => {
       fixture.detectChanges();
 
       const cards = getAllByTestId('section-card');
-      expect(cards.length).toBe(1);
+      expect(cards).toHaveLength(1);
     });
 
     it('UC-ST2: should display section name', () => {
