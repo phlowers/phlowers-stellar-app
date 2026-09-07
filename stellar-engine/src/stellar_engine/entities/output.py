@@ -159,6 +159,10 @@ def format_distances_for_plot(distances):
                         "distanceDiagonal": dist_result.distance_3d,
                         "distanceHorizontal": dist_result.distance_projection_u,
                         "distanceVertical": dist_result.distance_projection_v,
+                        # Signed variant, read by floors only: v_plane always points up, so this
+                        # is cable_z - point_z, negative when the cable passes below the floor.
+                        # Obstacles keep the non-negative "distanceVertical" above.
+                        "signedDistanceVertical": dist_result.signed_distance_projection_v,
                     }
                 )
             except (ValueError, AttributeError) as e:

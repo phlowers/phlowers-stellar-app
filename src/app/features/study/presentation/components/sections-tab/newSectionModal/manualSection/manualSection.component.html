@@ -1,6 +1,6 @@
 <p-tabs
   [value]="tabValue()"
-  (valueChange)="tabValueChange($event)"
+  (valueChange)="$event !== undefined && tabValueChange($event)"
   class="{{ mode() === 'view' ? 'mt-0' : 'mt-4' }} h-full"
 >
   <p-tablist>

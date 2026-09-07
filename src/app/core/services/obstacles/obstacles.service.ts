@@ -28,10 +28,15 @@ export class ObstaclesService {
   /** BehaviorSubject indicating whether the service is ready to use. */
   public readonly ready = new BehaviorSubject<boolean>(false);
 
-  /** UUID of the obstacle currently selected in the quick-measures p-select. */
-  selectedObstacleUuid = signal<string | null>(null);
+  /**
+   * UUID of the obstacle **or floor** currently selected for measurement — set from the quick-measures
+   * p-select, a plot click, or an obstacle save; read by the quick-measures card, the distance results
+   * and the plot's highlighting/distance layer. Floors are registered as obstacles in the worker
+   * (see `mapFloorToObstacle`), so a floor uuid matches `Distance.obstacleUuid` just the same.
+   */
+  selectedMeasureUuid = signal<string | null>(null);
 
-  /** Index of the currently active obstacle point — shared by form editor and plot highlighting. */
+  /** Index of the active point within the selected measure — shared by form editor and plot highlighting. */
   activePointIndex = signal<number | null>(null);
 
   private readonly storageService = inject(StorageService);
@@ -43,19 +48,19 @@ export class ObstaclesService {
     });
   }
 
-  /** Sets the active obstacle point index. */
+  /** Sets the active point index within the selected measure. */
   setCurrentPointIndex(index: number): void {
     this.activePointIndex.set(index);
   }
 
-  /** Resets the active obstacle point index to null (no point selected). */
+  /** Resets the active point index to null (no point selected). */
   resetCurrentPointIndex(): void {
     this.activePointIndex.set(null);
   }
 
-  /** Sets the selected obstacle and point for quick-measures display and plot highlighting. */
-  setSelectedObstacle(uuid: string | null, pointIndex: number | null): void {
-    this.selectedObstacleUuid.set(uuid);
+  /** Selects the obstacle or floor (and its point) to measure, for quick-measures display and plot highlighting. */
+  setSelectedMeasure(uuid: string | null, pointIndex: number | null): void {
+    this.selectedMeasureUuid.set(uuid);
     this.activePointIndex.set(pointIndex);
   }
 

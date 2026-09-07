@@ -20,7 +20,6 @@ class TestHostComponent {}
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let plotOptionsServiceMock: { refreshCamera: ReturnType<typeof vi.fn> };
-  let sideTabsService: SideTabsService;
   const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   beforeEach(async () => {
@@ -44,7 +43,6 @@ describe('SideTabsComponent', () => {
       providers: [{ provide: PlotOptionsService, useValue: plotOptionsServiceMock }, SideTabsService]
     }).compileComponents();
 
-    sideTabsService = TestBed.inject(SideTabsService);
     fixture = TestBed.createComponent(TestHostComponent);
     fixture.detectChanges();
   });
@@ -59,7 +57,7 @@ describe('SideTabsComponent', () => {
 
   it('should render tab buttons', () => {
     const buttons = getButtons();
-    expect(buttons.length).toBe(2);
+    expect(buttons).toHaveLength(2);
     expect(buttons[0].textContent).toContain('One');
     expect(buttons[1].textContent).toContain('Two');
   });
@@ -134,33 +132,6 @@ describe('SideTabsComponent', () => {
     expect(document.activeElement).toBe(buttons[0]);
   });
 
-  it('updateWidth sets panelWidth to 0 if no tab is open', () => {
-    const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
-    sideTabsService.sideTabs.set(null);
-    component['updateWidth']();
-    expect(component.panelWidth()).toBe('0px');
-  });
-
-  it('updateWidth sets panelWidth based on element offsetWidth when tab is open', async () => {
-    const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
-
-    // Set a tab to be open
-    sideTabsService.sideTabs.set(0);
-
-    // Mock the panel element with offsetWidth
-    const mockPanel = {
-      nativeElement: {
-        offsetWidth: 300
-      }
-    };
-    component['panels'] = (() => [mockPanel]) as unknown as ReturnType<(typeof component)['panels']>;
-
-    component['updateWidth']();
-
-    await wait(10);
-    expect(component.panelWidth()).toBe('300px');
-  });
-
   it('focusPanel does nothing if panel element is missing', () => {
     const component = fixture.debugElement.query(By.directive(SideTabsComponent)).componentInstance;
     component['panels'] = (() => []) as unknown as ReturnType<(typeof component)['panels']>;
@@ -201,6 +172,8 @@ describe('SideTabsComponent', () => {
     panelEl.appendChild(insideEl);
 
     component.handlePanelFocusOut({ relatedTarget: insideEl } as unknown as FocusEvent, 0);
+
+    expect(panelEl.contains(insideEl)).toBe(true);
   });
 
   it('toggleTab calls plotService.refreshCamera after delay', async () => {

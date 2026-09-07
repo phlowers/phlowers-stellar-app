@@ -8,6 +8,7 @@ import { sanitizeSectionGeometry } from './section-geometry.helpers';
 import { Section } from '@shared/domain';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { Charge, SpanLoad, LoadType, SymmetryType } from '@shared/domain/models/charge.model';
+import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
 
 const makeSupport = (uuid: string): Support => ({ uuid }) as Support;
@@ -22,6 +23,17 @@ const makeObstacle = (overrides: Partial<Obstacle> = {}): Obstacle => ({
   referenceSupport: ReferenceSupport.LEFT,
   lateralDistanceType: LateralDistanceType.SPAN_AXIS,
   positions: [{ x: 1, y: 2, z: 3 }],
+  ...overrides
+});
+
+const makeFloor = (overrides: Partial<Floor> = {}): Floor => ({
+  uuid: 'floor-1',
+  supportUuid: 'sup-1',
+  referenceSupport: 'LEFT',
+  points: [
+    { distanceToRefSupport: 0, altitude: 10 },
+    { distanceToRefSupport: 100, altitude: 12 }
+  ],
   ...overrides
 });
 
@@ -92,13 +104,39 @@ describe('sanitizeSectionGeometry', () => {
 
   it('should treat the last support as not starting a span, dropping objects referencing it', () => {
     const section = makeSection({
-      obstacles: [makeObstacle({ uuid: 'obs-on-last-support', supportUuid: 'sup-3' })]
+      obstacles: [makeObstacle({ uuid: 'obs-on-last-support', supportUuid: 'sup-3' })],
+      floors: [makeFloor({ uuid: 'floor-on-last-support', supportUuid: 'sup-3' })]
     });
 
     const result = sanitizeSectionGeometry(section);
 
     expect(result.removedGeometryBoundObjects).toBe(true);
     expect(result.section.obstacles).toEqual([]);
+    expect(result.section.floors).toEqual([]);
+  });
+
+  it('should remove floors referencing a support that no longer exists', () => {
+    const section = makeSection({
+      floors: [
+        makeFloor({ uuid: 'floor-keep', supportUuid: 'sup-1' }),
+        makeFloor({ uuid: 'floor-drop', supportUuid: 'deleted-support' })
+      ]
+    });
+
+    const result = sanitizeSectionGeometry(section);
+
+    // A floor left on a deleted span is skipped by the worker: it can no longer be drawn or edited.
+    expect(result.removedGeometryBoundObjects).toBe(true);
+    expect(result.section.floors?.map((floor) => floor.uuid)).toEqual(['floor-keep']);
+  });
+
+  it('should keep a section that has no floors at all untouched', () => {
+    const section = makeSection({ obstacles: [makeObstacle({ supportUuid: 'sup-1' })] });
+
+    const result = sanitizeSectionGeometry(section);
+
+    expect(result.removedGeometryBoundObjects).toBe(false);
+    expect(result.section).toBe(section);
   });
 
   it('should remove only the span loads referencing a deleted support, keeping the charge', () => {

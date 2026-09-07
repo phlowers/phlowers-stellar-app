@@ -27,13 +27,13 @@ export class SectionService {
   private readonly translocoService = inject(TranslocoService);
 
   /**
-   * Create or update a section in a study. Obstacles and loads referencing a support/span
+   * Create or update a section in a study. Obstacles, floors and loads referencing a support/span
    * that no longer exists in the section geometry are pruned before persisting.
    * @param study The study containing the section
    * @param section The section to create or update
    * @returns Promise resolving with `removedGeometryBoundObjects`, which is only `true` when an
-   * obstacle or a non-zero (user-defined) span load was pruned; stale zero-weight span loads are
-   * removed silently and do not set the flag.
+   * obstacle, a floor or a non-zero (user-defined) span load was pruned; stale zero-weight span
+   * loads are removed silently and do not set the flag.
    */
   async createOrUpdateSection(study: StudyEntity, section: Section): Promise<SectionUpdateResult> {
     const existingSection = study.sections.find((s) => s?.uuid === section?.uuid);

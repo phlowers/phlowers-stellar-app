@@ -1,8 +1,12 @@
 @use 'sass:map';
 @use 'abstract.extracts' as app;
 
+:host {
+  @apply shrink-0;
+}
+
 .side-tab {
-  @apply flex h-full;
+  @apply flex min-h-full;
 
   $_btn-overlap-size: 0.875rem;
   $_btn-px: 2.25rem;
@@ -154,24 +158,27 @@
   }
 
   &__main {
-    @apply relative h-full overflow-hidden;
+    @apply relative grid;
+    grid-template-columns: 0fr;
     z-index: 3;
     background-color: $_active-btn-bgc;
-    transition: width $_panel-transition-timing ease-in;
+    transition: grid-template-columns $_panel-transition-timing ease-in;
 
     &:has(.side-tab__main__section.active) {
+      grid-template-columns: 1fr;
       box-shadow: map.get(app.$elevation, neutral-4);
     }
 
     &__section {
-      @apply absolute top-0 left-0 opacity-0;
+      @apply opacity-0 overflow-hidden;
+      min-width: 0;
       transition:
         opacity $_panel-transition-timing $_panel-transition-effect,
         display $_panel-transition-timing $_panel-transition-effect;
       transition-behavior: allow-discrete;
 
       &.active {
-        @apply opacity-100 h-full;
+        @apply opacity-100 min-h-full;
         background: $_active-btn-bgc;
         transition: opacity $_panel-transition-timing $_panel-transition-timing $_panel-transition-effect;
 

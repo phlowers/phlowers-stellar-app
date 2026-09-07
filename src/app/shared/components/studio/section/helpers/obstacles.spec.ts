@@ -195,6 +195,35 @@ describe('createObstaclesAnnotations', () => {
     expect(createObstaclesAnnotations(params)).toEqual([]);
   });
 
+  it('should not render a floor as obstacle dots and labels', () => {
+    // Floors are registered as obstacles for their distance calculation, but drawn by createFloorTraces.
+    const params = basePlotParams({
+      currentObstacleUuid: null,
+      obstacles: [],
+      floors: [{ uuid: 'floor-1', supportUuid: 'sup-1', referenceSupport: 'LEFT', points: [] }],
+      litData: makeLitData([{ uuid: 'floor-1', points: [[1, 2, 3]] }])
+    });
+
+    expect(createObstaclesAnnotations(params)).toEqual([]);
+  });
+
+  it('should still render a real obstacle sharing the plot with a floor', () => {
+    const params = basePlotParams({
+      currentObstacleUuid: null,
+      obstacles: [makeObstacle({ supportUuid: 'sup-1' })],
+      floors: [{ uuid: 'floor-1', supportUuid: 'sup-1', referenceSupport: 'LEFT', points: [] }],
+      litData: makeLitData([
+        { uuid: 'floor-1', points: [[1, 2, 3]] },
+        { uuid: 'obs-1', points: [[4, 5, 6]] }
+      ])
+    });
+
+    const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
+
+    expect(annotations).toHaveLength(2);
+    expect(annotations.every((a) => a.x === 4)).toBe(true);
+  });
+
   it('should render all obstacles in black when no obstacle is selected', () => {
     const obstacle = makeObstacle({ supportUuid: 'sup-1' });
     const params = basePlotParams({

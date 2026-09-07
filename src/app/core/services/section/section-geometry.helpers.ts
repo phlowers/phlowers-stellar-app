@@ -5,14 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Charge, Section } from '@shared/domain';
-import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { SanitizedCharges, SectionGeometrySanitizeResult } from './section-geometry.interfaces';
 
 const isUserDefinedSpanLoad = (loadWeight: number): boolean => loadWeight !== 0;
 
-/** Keeps only obstacles whose span (identified by its starting support) still exists. */
-const sanitizeObstacles = (obstacles: Obstacle[], spanStartSupportUuids: Set<string>): Obstacle[] =>
-  obstacles.filter((obstacle) => spanStartSupportUuids.has(obstacle.supportUuid));
+/** Keeps only span-bound objects — obstacles, floors — whose span (identified by its starting support) still exists. */
+const sanitizeSpanBound = <T extends { supportUuid: string }>(items: T[], spanStartSupportUuids: Set<string>): T[] =>
+  items.filter((item) => spanStartSupportUuids.has(item.supportUuid));
 
 /** Prunes stale span loads from every charge, tracking whether a user-defined one was removed. */
 const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): SanitizedCharges => {
@@ -35,13 +34,13 @@ const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): Sanit
 };
 
 /**
- * Removes obstacles and span loads that reference a support/span no longer present in the
+ * Removes obstacles, floors and span loads that reference a support/span no longer present in the
  * section geometry (e.g. a support was deleted outside the Studio).
  *
  * @remarks
- * Obstacles are span-bound: a span is identified by the UUID of the support it starts from, and
- * with N supports there are N-1 spans, so the last support never starts a span and cannot host an
- * obstacle. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
+ * Obstacles and floors are span-bound: a span is identified by the UUID of the support it starts
+ * from, and with N supports there are N-1 spans, so the last support never starts a span and cannot
+ * host either. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
  * support (including the last), so a load is only stale when its `supportUuid` no longer exists at
  * all. Charges are kept even when all their span loads are removed, since a charge also carries its
  * own climate configuration.
@@ -50,21 +49,24 @@ export const sanitizeSectionGeometry = (section: Section): SectionGeometrySaniti
   const spanStartSupportUuids = new Set(section.supports.slice(0, -1).map((support) => support.uuid));
   const allSupportUuids = new Set(section.supports.map((support) => support.uuid));
 
-  const sanitizedObstacles = sanitizeObstacles(section.obstacles, spanStartSupportUuids);
+  const sanitizedObstacles = sanitizeSpanBound(section.obstacles, spanStartSupportUuids);
+  const sanitizedFloors = sanitizeSpanBound(section.floors ?? [], spanStartSupportUuids);
   const { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad } = sanitizeCharges(
     section.charges,
     allSupportUuids
   );
 
-  const removedGeometryBoundObjects =
-    sanitizedObstacles.length !== section.obstacles.length || removedUserDefinedSpanLoad;
-  const geometryChanged = sanitizedObstacles.length !== section.obstacles.length || chargesChanged;
+  const obstaclesChanged = sanitizedObstacles.length !== section.obstacles.length;
+  const floorsChanged = sanitizedFloors.length !== (section.floors?.length ?? 0);
+
+  const removedGeometryBoundObjects = obstaclesChanged || floorsChanged || removedUserDefinedSpanLoad;
+  const geometryChanged = obstaclesChanged || floorsChanged || chargesChanged;
   if (!geometryChanged) {
     return { section, removedGeometryBoundObjects };
   }
 
   return {
-    section: { ...section, obstacles: sanitizedObstacles, charges: sanitizedCharges },
+    section: { ...section, obstacles: sanitizedObstacles, floors: sanitizedFloors, charges: sanitizedCharges },
     removedGeometryBoundObjects
   };
 };

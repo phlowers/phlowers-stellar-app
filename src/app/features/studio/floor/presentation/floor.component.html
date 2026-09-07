@@ -1,0 +1,238 @@
+<form [formGroup]="floorFormService.form" class="floor-form" data-testid="floor-form">
+  <button
+    app-btn
+    type="button"
+    btnStyle="outlined"
+    btnSize="s"
+    class="floor-form__zoom-btn"
+    [disabled]="!floorFormService.spanValue()"
+    (click)="floorFormService.returnToSpan()"
+    data-testid="return-to-span"
+  >
+    <app-icon icon="filter_center_focus" aria-hidden="true" />
+    <ng-container>{{ 'shared.studio.zoom' | transloco }}</ng-container>
+  </button>
+
+  <div class="floor-form__span-selection">
+    <label class="span-label" for="floorSpan">{{ 'studio.shared.span-label' | transloco }}</label>
+    <p-select
+      inputId="floorSpan"
+      [options]="floorFormService.spanOptions()"
+      formControlName="span"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="span-select"
+      class="span-select"
+    />
+
+    <label class="reference-support-label" for="floorReferenceSupport">{{
+      'studio.shared.reference-support-label' | transloco
+    }}</label>
+    <p-select
+      inputId="floorReferenceSupport"
+      [options]="floorFormService.supportsOptions()"
+      formControlName="referenceSupport"
+      optionLabel="label"
+      optionValue="value"
+      data-testid="reference-support-select"
+      class="reference-support-select"
+    />
+  </div>
+
+  @if (floorFormService.referenceSupportValue()) {
+    <div class="floor-form__field">
+      <div class="floor-form__field__toggle">
+        <p-toggleswitch
+          inputId="floorFreePositioning"
+          name="floorFreePositioning"
+          [disabled]="!floorFormService.hasEditablePoints()"
+          [ngModel]="plotOptionsService.isFreePositioningMode()"
+          [ngModelOptions]="{ standalone: true }"
+          (onChange)="setFreePositioningMode($event.checked)"
+          data-testid="free-positioning"
+        />
+        <label for="floorFreePositioning">{{ 'studio.floor.free-positioning-label' | transloco }}</label>
+      </div>
+
+      <button app-btn type="button" btnStyle="outlined" (click)="floorFormService.addPoint()" data-testid="add-point">
+        <app-icon icon="add_circle" aria-hidden="true" />
+        <ng-container>{{ 'studio.floor.add-point-btn' | transloco }}</ng-container>
+      </button>
+    </div>
+
+    <ul class="floor-form__points" data-testid="points-list">
+      @for (point of floorFormService.pointsView(); track $index) {
+        <li
+          [class.floor-item--active]="floorFormService.activePointIndex() === $index"
+          [attr.aria-selected]="floorFormService.activePointIndex() === $index ? 'true' : 'false'"
+          class="floor-item"
+          data-testid="point-item"
+        >
+          <button
+            type="button"
+            class="floor-item__select"
+            (click)="floorFormService.setActivePoint($index)"
+            data-testid="select-point"
+          >
+            <span class="sr-only">{{
+              point.meta.titleKey
+                | transloco
+                  : { distance: floorFormService.formatDistance(point.group.controls.distanceToRefSupport.value) }
+            }}</span>
+          </button>
+
+          <div class="floor-item__header">
+            <p class="floor-item__title">
+              {{
+                point.meta.titleKey
+                  | transloco
+                    : { distance: floorFormService.formatDistance(point.group.controls.distanceToRefSupport.value) }
+              }}
+            </p>
+            @if (point.meta.removable) {
+              <button
+                app-btn
+                btnStyle="danger"
+                btnSize="s"
+                type="button"
+                class="floor-item__erase-btn"
+                (click)="floorFormService.deletePoint($index); $event.stopPropagation()"
+                [attr.aria-label]="'studio.floor.delete-point-aria-label' | transloco"
+                data-testid="delete-point"
+              >
+                <app-icon icon="delete" aria-hidden="true" />
+              </button>
+            }
+          </div>
+
+          <div class="floor-item__form">
+            <label [for]="'floorAltitude' + $index" class="floor-item__label alt-point-label">{{
+              'studio.floor.point-alt-label' | transloco
+            }}</label>
+            <p-inputgroup class="floor-item__input">
+              <input
+                pInputText
+                type="number"
+                [id]="'floorAltitude' + $index"
+                [formControl]="point.group.controls.altitude"
+                [readonly]="point.meta.altitudeReadonly"
+                (focus)="floorFormService.setActivePoint($index)"
+                class="alt-point-input"
+                step="0.01"
+                data-testid="point-altitude"
+              />
+              <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+            </p-inputgroup>
+
+            <label [for]="'floorDistanceToRefSupport' + $index" class="floor-item__label dist-ref-label">{{
+              'studio.floor.ref-support-dist-label' | transloco
+            }}</label>
+            <p-inputgroup class="floor-item__input">
+              <input
+                pInputText
+                type="number"
+                [id]="'floorDistanceToRefSupport' + $index"
+                [formControl]="point.group.controls.distanceToRefSupport"
+                [readonly]="point.meta.distanceToRefSupportReadonly"
+                (focus)="floorFormService.setActivePoint($index)"
+                (blur)="floorFormService.onDistanceBlur()"
+                class="dist-ref-input"
+                step="0.01"
+                data-testid="point-distance-to-ref-support"
+              />
+              <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+            </p-inputgroup>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="floor-form__sticky">
+    <div class="floor-form__sticky__btns">
+      <button
+        app-btn
+        btnStyle="danger"
+        type="button"
+        [disabled]="!floorFormService.isFloorSaved() || floorFormService.isCalculating()"
+        (click)="floorFormService.eraseFloor()"
+        [attr.aria-label]="'studio.floor.delete-floor-aria-label' | transloco"
+        data-testid="delete-floor"
+      >
+        <app-icon icon="delete" aria-hidden="true" />
+      </button>
+
+      <button
+        app-btn
+        type="button"
+        (click)="floorFormService.calculateAndSave()"
+        [disabled]="!floorFormService.canCalculateAndSave()"
+        [btnLoading]="floorFormService.isCalculating()"
+        data-testid="calculate-save"
+      >
+        <app-icon icon="rocket_launch" aria-hidden="true" />
+        <ng-container>{{ 'studio.floor.calculate-and-save-btn' | transloco }}</ng-container>
+      </button>
+    </div>
+
+    <hr class="floor-form__sticky__divider" />
+
+    <output class="floor-form__results" data-testid="results">
+      <h2 class="floor-form__results__title">{{ 'common.results' | transloco }}</h2>
+
+      <dl class="floor-form__results__grid">
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--minVertDist">
+          <dt>
+            {{ 'studio.floor.min-vertical-distance-label' | transloco }}
+          </dt>
+          <dd data-testid="result-min-vertical-distance">
+            {{
+              floorFormService.results().minVerticalDistance !== null
+                ? (floorFormService.results().minVerticalDistance | number: '1.0-2') + ' m'
+                : '-'
+            }}
+          </dd>
+        </div>
+
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--altPoint">
+          <dt>
+            {{ 'studio.floor.floor-altitude-label' | transloco }}
+          </dt>
+          <dd data-testid="result-floor-altitude">
+            {{
+              floorFormService.results().floorAltitude !== null
+                ? (floorFormService.results().floorAltitude | number: '1.0-2') + ' m'
+                : '-'
+            }}
+          </dd>
+        </div>
+
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--altCable">
+          <dt>
+            {{ 'studio.floor.cable-altitude-label' | transloco }}
+          </dt>
+          <dd data-testid="result-cable-altitude">
+            {{
+              floorFormService.results().cableAltitude !== null
+                ? (floorFormService.results().cableAltitude | number: '1.0-2') + ' m'
+                : '-'
+            }}
+          </dd>
+        </div>
+
+        <div class="floor-form__results__grid__item floor-form__results__grid__item--distRefSupp">
+          <dt>
+            {{ 'studio.floor.min-vertical-position-label' | transloco }}
+          </dt>
+          <dd data-testid="result-min-vertical-position">
+            {{
+              floorFormService.results().minVerticalPosition !== null
+                ? (floorFormService.results().minVerticalPosition | number: '1.0-2') + ' m'
+                : '-'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </output>
+  </div>
+</form>
