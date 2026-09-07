@@ -13,6 +13,9 @@
   --p-select-disabled-color: var(--grey-300);
   --p-select-placeholder-color: var(--grey-500);
 
+  --p-select-dropdown-color: var(--star-dust-950);
+  --p-select-clear-icon-color: var(--p-select-dropdown-color);
+
   --p-select-shadow: #{map.get(app.$elevation, neutral-inner)};
 
   --p-select-padding-y: 0.375rem;

@@ -11,6 +11,8 @@ import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetM
 import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
+import { createEmptyChain } from './helpers';
+import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { vi } from 'vitest';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 
@@ -1183,20 +1185,142 @@ describe('SupportsTableComponent', () => {
     });
   });
 
-  describe('HTML rendering - support name select loading state', () => {
-    it('should pass [loading] prop to p-select when catalog not loaded', () => {
+  // Both filterable columns are the same native <select>; the only differences are the
+  // catalog they read and the support field they write.
+  describe.each([
+    {
+      column: 'chain name',
+      testId: 'chain-name',
+      field: 'chainName',
+      seedCatalog: (component: SupportsTableComponent) =>
+        component.chainsOptions.set([
+          createEmptyChain('ALU 1'),
+          createEmptyChain('BETA chain'),
+          createEmptyChain('GAMMA alu')
+        ])
+    },
+    {
+      column: 'support name',
+      testId: 'support-name',
+      field: 'name',
+      seedCatalog: () => distinctSupportNamesSubject.next(['ALU 1', 'BETA chain', 'GAMMA alu'])
+    }
+  ])('native $column select', ({ testId, field, seedCatalog }) => {
+    const firstSelect = (): HTMLSelectElement =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}-select"]`);
+    const filterInput = (): HTMLInputElement => firstSelect().querySelector('input') as HTMLInputElement;
+    const type = (query: string) => {
+      const filter = filterInput();
+      filter.value = query;
+      filter.dispatchEvent(new Event('input'));
+    };
+
+    const optionLabels = () =>
+      [...firstSelect().querySelectorAll('option:not([data-placeholder])')].map((option) => option.textContent);
+
+    beforeEach(() => {
+      seedCatalog(component);
       fixture.detectChanges();
-      const selectDebugElement = fixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
-      expect(selectDebugElement).toBeTruthy();
-      // Access componentInstance to check loading property
-      expect(selectDebugElement.componentInstance.loading).toBe(true);
     });
 
-    it('should enable virtualScroll on support name select', () => {
+    // Options are built lazily: a closed select only carries the value it displays, so a
+    // 100-row page does not pay for every catalog entry of every row.
+    it('should render only the current value until the select is focused', () => {
+      expect(optionLabels()).toEqual([mockSupports[0][field as 'chainName' | 'name']]);
+
+      // `focusin`, not `focus`: Chromium fires no `focus` on a select opened with the mouse.
+      firstSelect().dispatchEvent(new Event('focusin'));
       fixture.detectChanges();
-      const selectDebugElement = fixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
-      expect(selectDebugElement.componentInstance.virtualScroll).toBe(true);
-      expect(selectDebugElement.componentInstance.virtualScrollItemSize).toBe(34);
+
+      expect(optionLabels()).toEqual(expect.arrayContaining(['ALU 1', 'BETA chain', 'GAMMA alu']));
+    });
+
+    describe('once focused', () => {
+      beforeEach(() => {
+        firstSelect().dispatchEvent(new Event('focusin'));
+        fixture.detectChanges();
+      });
+
+      // The filter input only works from inside the picker, and the HTML parser refuses to
+      // keep an <input> in a <select> — this passes only because Angular builds the DOM
+      // with createElement/appendChild instead.
+      it('should nest the filter input inside the select element', () => {
+        const filter = fixture.nativeElement.querySelector(`[data-testid="${testId}-filter"]`);
+        expect(filter).toBeTruthy();
+        expect(filter.closest('select')).toBe(firstSelect());
+      });
+
+      it('should hide options that do not contain the query anywhere in the label', () => {
+        type('alu');
+
+        const shown = [...firstSelect().querySelectorAll('option')]
+          .filter((option) => option.value && !option.hidden)
+          .map((option) => option.text);
+        // 'GAMMA alu' matches on a substring, not a prefix
+        expect(shown).toEqual(['ALU 1', 'GAMMA alu']);
+      });
+
+      // [ngValue] rewrites option.value to an internal id, so the blank option can only be
+      // told apart by its marker — without it, resetting the filter reveals an empty row.
+      it('should keep the blank placeholder option hidden across a filter and a reset', () => {
+        const placeholder = firstSelect().querySelector('option[data-placeholder]') as HTMLOptionElement;
+        expect(placeholder?.text).toBe('');
+        expect(placeholder.hidden).toBe(true);
+
+        type('alu');
+        expect(placeholder.hidden).toBe(true);
+
+        filterInput().dispatchEvent(new Event('focus'));
+        expect(placeholder.hidden).toBe(true);
+      });
+
+      // Chromium focuses the filter each time the picker opens, so that focus is the reset hook.
+      it('should restore every option when the picker is reopened after a filter', () => {
+        type('alu');
+
+        filterInput().dispatchEvent(new Event('focus'));
+
+        expect(filterInput().value).toBe('');
+        const stillHidden = [...firstSelect().querySelectorAll('option:not([data-placeholder])')].filter(
+          (option) => (option as HTMLOptionElement).hidden
+        );
+        expect(stillHidden).toEqual([]);
+      });
+
+      it('should move focus onto the first matching option on ArrowDown', () => {
+        type('alu');
+
+        const focused: string[] = [];
+        firstSelect()
+          .querySelectorAll('option')
+          .forEach((option) => {
+            option.focus = () => focused.push(option.text);
+          });
+        filterInput().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+
+        expect(focused).toEqual(['ALU 1']);
+      });
+
+      it('should clear the value from the erase button', () => {
+        const clear = fixture.nativeElement.querySelector(`[data-testid="${testId}-clear-btn"]`);
+        expect(clear).toBeTruthy();
+        clear.click();
+
+        expect(component.supportChange.emit).toHaveBeenCalledWith({
+          uuid: mockSupports[0].uuid,
+          support: { [field]: null }
+        });
+      });
+    });
+  });
+
+  describe('native chain V select', () => {
+    it('should offer only Yes and No, with No as the default of a new support', () => {
+      fixture.detectChanges();
+      const select = fixture.nativeElement.querySelector('[data-testid="chain-v-select"]') as HTMLSelectElement;
+
+      expect([...select.querySelectorAll('option')].map((option) => option.text)).toEqual(['Yes', 'No']);
+      expect(createEmptySupport().chainV).toBe(false);
     });
   });
 });

@@ -22,7 +22,6 @@ import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Localization, Task } from '@core/services/worker_python/tasks/types';
-import { SelectModule } from 'primeng/select';
 import { AttachmentSetModalComponent } from './attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -61,7 +60,6 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     PopoverModule,
     ButtonComponent,
     IconComponent,
-    SelectModule,
     AttachmentSetModalComponent,
     IconFieldModule,
     InputIconModule,
@@ -116,11 +114,6 @@ export class SupportsTableComponent implements OnInit {
   private readonly transloco = inject(TranslocoService);
   localization = signal<Localization | null>(null);
   localizationLoading = signal<boolean>(false);
-  private readonly _localizationEffect = effect(() => {
-    if (this.workerReady()) {
-      untracked(() => void this.computeLocalization());
-    }
-  });
   optionsAttachmentPosition = new Array(20).fill(0).map((_, index) => ({
     label: String(index + 1),
     value: String(index + 1)
@@ -137,6 +130,11 @@ export class SupportsTableComponent implements OnInit {
   ];
 
   constructor() {
+    effect(() => {
+      if (this.workerReady()) {
+        untracked(() => void this.computeLocalization());
+      }
+    });
     effect(() => {
       this.updateSupportFilterTables(this.allCatalogSupportNames() ?? []);
     });
@@ -221,6 +219,82 @@ export class SupportsTableComponent implements OnInit {
     }
   }
 
+  /** Native selects whose option list has been built, keyed by field and support UUID. */
+  private readonly expandedSelects = signal(new Set<string>());
+
+  /**
+   * A closed native select only needs an option for the value it currently shows: building
+   * every catalog option for every row up front was the single most expensive cell of a
+   * 100-row page render. The list is built on `focusin`, which fires before the picker paints
+   * on both paths — unlike `focus`, which Chromium never fires when the picker is opened with
+   * the mouse.
+   */
+  optionsExpanded(field: 'chainName' | 'name' | 'attachmentPosition', uuid: string): boolean {
+    return this.expandedSelects().has(field + uuid);
+  }
+
+  expandOptions(field: 'chainName' | 'name' | 'attachmentPosition', uuid: string): void {
+    if (this.optionsExpanded(field, uuid)) return;
+    this.expandedSelects.update((keys) => new Set(keys).add(field + uuid));
+  }
+
+  /**
+   * Selectable options of a native select, excluding the blank placeholder.
+   * The placeholder is matched on its marker attribute because `[ngValue]` replaces an
+   * option's `value` with an internal id, so an empty value cannot identify it.
+   */
+  private selectableOptions(element: HTMLElement): HTMLOptionElement[] {
+    const select = element.closest('select');
+    return select ? [...select.querySelectorAll<HTMLOptionElement>('option:not([data-placeholder])')] : [];
+  }
+
+  /**
+   * Filters the native select's options as the user types, matching anywhere in the label.
+   * Hiding options directly on the DOM (rather than through a signal) keeps a keystroke
+   * from re-rendering every row of the table.
+   */
+  onOptionFilterInput(event: Event, field: 'chainName' | 'name') {
+    const input = event.target as HTMLInputElement;
+    const query = input.value.trim().toLowerCase();
+    this.selectableOptions(input).forEach((option) => {
+      option.hidden = !option.text.toLowerCase().includes(query);
+    });
+    // Keeps a typed value that is absent from the catalog selectable, as the PrimeNG filter did.
+    if (field === 'chainName') {
+      this.onChainNameFilter({ filter: input.value });
+    } else {
+      this.onSupportNameFilter({ filter: input.value });
+    }
+  }
+
+  /**
+   * Bridges the filter input to the option list: while focus sits in the input, Chromium
+   * routes arrow keys to it instead of the picker, so a keyboard user could never reach an
+   * option. Moving focus onto an option hands navigation back to the native select.
+   */
+  onOptionFilterKeydown(event: KeyboardEvent) {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    const input = event.target as HTMLInputElement;
+    const visible = this.selectableOptions(input).filter((option) => !option.hidden);
+    const target = event.key === 'ArrowDown' ? visible.at(0) : visible.at(-1);
+    if (!target) return;
+    event.preventDefault();
+    target.focus();
+  }
+
+  /**
+   * Clears a stale query so a reopened picker shows the full list.
+   * A `<select>` fires no toggle event, but Chromium focuses the filter every time the
+   * picker opens, which makes this the reliable "opened" hook. Resetting on the select's
+   * `change` instead would misfire: moving onto an option with ArrowDown also raises
+   * `change`, expanding the list back under the user mid-navigation.
+   */
+  resetOptionFilter(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = '';
+    this.selectableOptions(input).forEach((option) => (option.hidden = false));
+  }
+
   onChainNameFilter(event: { filter: string }) {
     const supplementaryChains = buildSupplementaryChains(
       [...getSupportFieldValues(this.supports(), 'chainName'), event.filter],
@@ -250,6 +324,14 @@ export class SupportsTableComponent implements OnInit {
     return this.attachmentSetRestrictionsBySupportUuid()[uuid] ?? [];
   }
 
+  private clearAttachmentSetRestriction(uuid: string): void {
+    this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
+      const rest = { ...prev };
+      delete rest[uuid];
+      return rest;
+    });
+  }
+
   private async refreshAttachmentSetRestriction(
     uuid: string,
     supportName: string | null,
@@ -259,11 +341,7 @@ export class SupportsTableComponent implements OnInit {
     const requestId = this.restrictionRequests.begin(uuid);
 
     if (!supportName || attachmentSet == null) {
-      this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
-        const rest = { ...prev };
-        delete rest[uuid];
-        return rest;
-      });
+      this.clearAttachmentSetRestriction(uuid);
       return;
     }
 
@@ -274,14 +352,7 @@ export class SupportsTableComponent implements OnInit {
       return;
     }
     if (!matchedEntry) {
-      if (!this.restrictionRequests.isCurrent(uuid, requestId)) {
-        return;
-      }
-      this.attachmentSetRestrictionsBySupportUuid.update((prev) => {
-        const rest = { ...prev };
-        delete rest[uuid];
-        return rest;
-      });
+      this.clearAttachmentSetRestriction(uuid);
       return;
     }
 
