@@ -14,3 +14,13 @@
     }
   }
 }
+
+// Free-positioning plots (obstacles and floor): clicking places a point, so a crosshair reads better than the pan cursor.
+// Plotly puts the `.js-plotly-plot` class on the same element as this id (not a descendant), so the id alone scopes it.
+#plotly-output-single-span-profile-2,
+#plotly-output-single-span-face-2,
+#plotly-output-floor-free-positioning {
+  .plotly .cursor-move {
+    cursor: crosshair;
+  }
+}

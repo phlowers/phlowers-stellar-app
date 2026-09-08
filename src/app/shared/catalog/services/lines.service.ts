@@ -51,11 +51,6 @@ export class LinesService {
 
   /**
    * Import line catalog data from `lines.csv` via the generic Web Worker.
-   *
-   * @param expectedHash - SHA-256 hex digest the downloaded file must match
-   * (see `CatalogUpdateService`). Verified by the worker before any Dexie
-   * mutation; errors are propagated (never swallowed) so a caller can decide
-   * whether to continue with other catalogs.
    */
   async importFromFile(expectedHash?: string): Promise<void> {
     await this.csvImportClient.importCsv('lines', { expectedHash });

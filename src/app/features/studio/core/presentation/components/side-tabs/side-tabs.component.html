@@ -23,7 +23,7 @@
     }
   </header>
 
-  <main class="side-tab__main" [style.width]="panelWidth()">
+  <main class="side-tab__main">
     @for (tab of tabs(); track $index) {
       <section
         #panelRef

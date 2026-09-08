@@ -9,7 +9,9 @@ node_modules
 .vscode
 .angular
 *.md
-*.yml
-/tsconfig.json
-*.json
 .venv
+# Only ignore specific JSON/YAML files:
+/tsconfig.json
+/package.json
+/package-lock.json
+/.prettierrc.json

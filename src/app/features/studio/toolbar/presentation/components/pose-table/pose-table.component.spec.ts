@@ -95,10 +95,9 @@ describe('PoseTableComponent', () => {
               'studio.pose-table.pose-table-saved': 'Pose table saved',
               'studio.pose-table.failed-to-save-pose-table': 'Failed to save pose table',
               'common.required': 'Required',
-              'studio.pose-table.max-two-decimals-error': 'Maximum 2 decimal places',
-              'common.min-value': 'Minimum value:',
-              'common.max-value': 'Maximum value:',
-              'studio.pose-table.integer-error': 'Value must be a whole number'
+              'common.min-value-error': 'Min. value: {{ min }}',
+              'common.max-value-error': 'Max. value: {{ max }}',
+              'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
@@ -191,7 +190,7 @@ describe('PoseTableComponent', () => {
 
     it('is invalid when value has more than 2 decimal places', () => {
       component.form.controls.lowestTemp.setValue(-10.123);
-      expect(component.form.controls.lowestTemp.hasError('maxTwoDecimals')).toBe(true);
+      expect(component.form.controls.lowestTemp.hasError('maxDecimals')).toBe(true);
     });
 
     it('is valid when value has exactly 2 decimal places', () => {
@@ -230,7 +229,7 @@ describe('PoseTableComponent', () => {
 
     it('is invalid when value is decimal', () => {
       component.form.controls.computingStep.setValue(3.5);
-      expect(component.form.controls.computingStep.hasError('integer')).toBe(true);
+      expect(component.form.controls.computingStep.hasError('maxDecimals')).toBe(true);
     });
 
     it('is valid when value is a whole number', () => {
@@ -249,17 +248,17 @@ describe('PoseTableComponent', () => {
 
     it('returns decimal error message when value has more than 2 decimal places', () => {
       component.form.controls.lowestTemp.setValue(-10.123);
-      expect(component.getLowestTempError()).toBe('Maximum 2 decimal places');
+      expect(component.getLowestTempError()).toBe('Max decimals: 2');
     });
 
     it('returns min error message when value is too low', () => {
       component.form.controls.lowestTemp.setValue(component.LOWEST_TEMP_MIN - 1);
-      expect(component.getLowestTempError()).toBe(`Minimum value: ${component.LOWEST_TEMP_MIN}°C`);
+      expect(component.getLowestTempError()).toBe(`Min. value: ${component.LOWEST_TEMP_MIN}`);
     });
 
     it('returns max error message when value is too high', () => {
       component.form.controls.lowestTemp.setValue(component.LOWEST_TEMP_MAX + 1);
-      expect(component.getLowestTempError()).toBe(`Maximum value: ${component.LOWEST_TEMP_MAX}°C`);
+      expect(component.getLowestTempError()).toBe(`Max. value: ${component.LOWEST_TEMP_MAX}`);
     });
 
     it('returns empty string when control is valid', () => {
@@ -278,17 +277,17 @@ describe('PoseTableComponent', () => {
 
     it('returns integer error message when value is decimal', () => {
       component.form.controls.computingStep.setValue(3.5);
-      expect(component.getComputingStepError()).toBe('Value must be a whole number');
+      expect(component.getComputingStepError()).toBe('Max decimals: 0');
     });
 
     it('returns min error message when value is too low', () => {
       component.form.controls.computingStep.setValue(component.COMPUTING_STEP_MIN - 1);
-      expect(component.getComputingStepError()).toBe(`Minimum value: ${component.COMPUTING_STEP_MIN}`);
+      expect(component.getComputingStepError()).toBe(`Min. value: ${component.COMPUTING_STEP_MIN}`);
     });
 
     it('returns max error message when value is too high', () => {
       component.form.controls.computingStep.setValue(component.COMPUTING_STEP_MAX + 1);
-      expect(component.getComputingStepError()).toBe(`Maximum value: ${component.COMPUTING_STEP_MAX}`);
+      expect(component.getComputingStepError()).toBe(`Max. value: ${component.COMPUTING_STEP_MAX}`);
     });
 
     it('returns empty string when control is valid', () => {

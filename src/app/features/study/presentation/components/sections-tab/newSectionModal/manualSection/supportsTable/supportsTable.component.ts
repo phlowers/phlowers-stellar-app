@@ -44,8 +44,8 @@ import {
   getSupportFieldValues,
   SUPPORT_FIELD_LIMITS
 } from './helpers';
-import { truncateTwoDecimals } from '@shared/helpers/truncateDecimals';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -130,10 +130,10 @@ export class SupportsTableComponent implements OnInit {
     value: String(index + 1)
   }));
   readonly limits = SUPPORT_FIELD_LIMITS;
+  /** Exposed for template use, mirrors the shared reactive-forms validator (see cable-span-manip). */
+  readonly maxTwoDecimalsValidator = maxDecimalsValidator(2);
 
   public onlyPositiveNumbers = /^\d*$/;
-
-  readonly truncateTwoDecimals = truncateTwoDecimals;
 
   optionsChainV = [
     { label: this.transloco.translate('common.yes'), value: true },

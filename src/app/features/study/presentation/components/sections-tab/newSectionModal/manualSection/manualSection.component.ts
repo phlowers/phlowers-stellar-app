@@ -26,6 +26,8 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@shared/types';
 import { StudioComponent } from '@shared/components/studio/studio.component';
 import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { createSectionTypes } from './section-mock';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { debounce, sortBy, orderBy, uniqBy } from 'lodash';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -49,8 +51,6 @@ import {
 import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
 import { LineTableProperties } from './manualSection.interfaces';
 import { LocationData } from './location/location.interfaces';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { createSectionTypes } from './section-mock';
 
 /**
  * Manual section editor component.
@@ -79,14 +79,13 @@ import { createSectionTypes } from './section-mock';
     PaginatorModule,
     NgxSliderModule,
     LocationComponent,
-    TranslocoModule
+    TranslocoPipe
   ],
   templateUrl: './manualSection.component.html',
   styleUrl: './manualSection.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManualSectionComponent implements OnInit {
-  private readonly transloco = inject(TranslocoService);
   tabValue = signal<string>('general');
   mode = input.required<CreateEditView>();
   section = input.required<Section>();
@@ -94,10 +93,11 @@ export class ManualSectionComponent implements OnInit {
   locationChange = output<LocationData>();
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<CatalogCable[]>([]);
-  protected readonly sectionTypes = createSectionTypes(this.transloco);
   isNameUnique = input<boolean>();
-  currentPageReportTemplate = this.transloco.translate('manual-section.current-page-report');
+  private readonly transloco = inject(TranslocoService);
+  readonly sectionTypes = createSectionTypes(this.transloco);
   readonly noVoltageLabel = this.transloco.translate('manual-section.no-voltage');
+  readonly currentPageReportTemplate = this.transloco.translate('manual-section.current-page-report');
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
@@ -209,8 +209,8 @@ export class ManualSectionComponent implements OnInit {
     });
   }
 
-  tabValueChange = (event: string | number | undefined) => {
-    this.tabValue.set(String(event ?? 'general'));
+  tabValueChange = (event: string | number) => {
+    this.tabValue.set(String(event));
     if (event === 'graphical') {
       this.spanService.section.set(this.section());
       this.plotService.plotOptionsChange({
@@ -243,7 +243,7 @@ export class ManualSectionComponent implements OnInit {
       ] as Support[];
     } else {
       const supports = currentSupports.slice(0, amount);
-      const lastSupport = supports[supports.length - 1];
+      const lastSupport = supports.at(-1)!;
       lastSupport.spanLength = null;
       this.section().supports = supports;
     }
@@ -276,7 +276,7 @@ export class ManualSectionComponent implements OnInit {
       return;
     }
     const supports = this.section().supports?.filter((support) => support.uuid !== uuid) || [];
-    const lastSupport = supports[supports.length - 1];
+    const lastSupport = supports.at(-1)!;
     lastSupport.spanLength = null;
     this.section().supports = supports;
     this.onSectionChange();

@@ -114,6 +114,7 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   const {
     litData,
     obstacles,
+    floors,
     view,
     side,
     currentObstacleUuid,
@@ -128,6 +129,10 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
     return [];
   }
 
+  // Floors are registered as obstacles for their distance calculation but rendered as their
+  // own trace (see createFloorTraces) — never as obstacle dots/labels.
+  const floorUuids = new Set((floors ?? []).map((f) => f.uuid));
+
   // Only render obstacles whose support is within the visible span window.
   // An obstacle attached to a support starts a span to the right, so the
   // endSupport itself belongs to the *next* span and must be excluded.
@@ -140,7 +145,7 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
   );
 
   return litData.obstacles.flatMap((litObstacle) => {
-    if (!visibleObstacleUuids.has(litObstacle.uuid)) {
+    if (floorUuids.has(litObstacle.uuid) || !visibleObstacleUuids.has(litObstacle.uuid)) {
       return [];
     }
 

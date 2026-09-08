@@ -12,6 +12,8 @@ import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 import { type Mock } from 'vitest';
 import { TranslocoService } from '@jsverse/transloco';
+import { Floor } from '@shared/domain/models/floor.model';
+import { Support } from '@shared/domain/models/support.model';
 
 // Mock Plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -592,6 +594,33 @@ describe('createPlot', () => {
         (btn) => btn.name === 'customOrbitRotation'
       );
       expect(orbitButton?.title).toBe('Rotation orbitale');
+    });
+
+    it('should label floor points with the active language', () => {
+      const frTransloco = {
+        translate: (key: string, params?: { distance: string }) =>
+          key === 'studio.floor.point-title' ? `Point ${params?.distance} m` : key
+      } as unknown as TranslocoService;
+
+      createPlot({
+        ...createDefaultParams(),
+        litData: { ...mockLitData, obstacles: [{ uuid: 'floor-1', points: [[0, 0, 5]] }] } as GetSectionOutput,
+        floors: [
+          {
+            uuid: 'floor-1',
+            supportUuid: 's0',
+            referenceSupport: 'LEFT',
+            points: [{ altitude: 5, distanceToRefSupport: 12 }]
+          }
+        ] as Floor[],
+        supports: [{ uuid: 's0' }] as Support[],
+        startSupport: 0,
+        endSupport: 1,
+        translocoService: frTransloco
+      });
+
+      const dataArg = (Plotly.react as Mock).mock.calls[0][1] as { name?: string; hovertext?: string[] }[];
+      expect(dataArg.find((trace) => trace.name === 'floor')?.hovertext).toEqual(['Point 12.00 m']);
     });
   });
 

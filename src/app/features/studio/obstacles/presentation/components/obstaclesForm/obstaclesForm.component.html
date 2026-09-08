@@ -115,7 +115,7 @@
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
         [ngModel]="plotOptionsService.isFreePositioningMode()"
         [ngModelOptions]="{ standalone: true }"
-        (onChange)="plotOptionsService.isFreePositioningMode.set($event.checked)"
+        (onChange)="plotOptionsService.setFreePositioningMode($event.checked, 'obstacle')"
       />
       <label for="freePositioning">{{ 'studio.obstacles-form.free-positioning-label' | transloco }}</label>
     </div>

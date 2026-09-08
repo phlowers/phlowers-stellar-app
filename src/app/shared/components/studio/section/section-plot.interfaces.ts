@@ -6,3 +6,8 @@ import type { ObstacleAnnotationData } from './helpers/obstacles';
 export interface ClickAnnotationEvent {
   annotation?: { data?: ObstacleAnnotationData | SpanLoadAnnotationData | CableModificationAnnotationData };
 }
+
+/** Payload emitted by Plotly's `plotly_click` event on a floor marker, carrying its `[floorUuid, pointIndex]` customdata. */
+export interface FloorClickEvent {
+  points?: { data?: { name?: string }; customdata?: [string, number] }[];
+}

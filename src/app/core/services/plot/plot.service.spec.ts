@@ -1279,7 +1279,8 @@ describe('PlotService', () => {
             virtualPointVertical: [0, 0, 0],
             distanceDiagonal: 1,
             distanceHorizontal: 2,
-            distanceVertical: 3
+            distanceVertical: 3,
+            signedDistanceVertical: 3
           }
         ]
       };

@@ -30,7 +30,7 @@ vi.mock('plotly.js-dist-min', () => ({
   update: vi.fn().mockResolvedValue(undefined)
 }));
 
-const mockCreatePlotData = createPlotData as vi.MockedFunction<typeof createPlotData>;
+const mockCreatePlotData = vi.mocked(createPlotData);
 
 describe('FreePositioningComponent', () => {
   let component: FreePositioningComponent;
@@ -73,7 +73,12 @@ describe('FreePositioningComponent', () => {
   const mockPlotOptionsService = {
     plotOptions: plotOptionsSignal,
     camera: signal(null),
-    isFreePositioningMode: signal(false)
+    isFreePositioningMode: signal(false),
+    freePositioningSource: signal<'obstacle' | 'floor' | null>(null),
+    setFreePositioningMode: vi.fn((enabled: boolean, source: 'obstacle' | 'floor') => {
+      mockPlotOptionsService.isFreePositioningMode.set(enabled);
+      mockPlotOptionsService.freePositioningSource.set(enabled ? source : null);
+    })
   };
 
   const mockWorkerPythonService = {

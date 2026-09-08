@@ -442,8 +442,6 @@ export interface TaskInputs {
   [Task.importLambertAndValidate]: {
     lambert_x: number[];
     lambert_y: number[];
-    startLatitude: number;
-    startLongitude: number;
     startAzimuth: number;
     spanLength: number[];
     lineAngle: number[];
@@ -512,7 +510,10 @@ export interface DistancePoint {
   virtualPointVertical: [number, number, number];
   distanceDiagonal: number;
   distanceHorizontal: number;
+  // Non-negative, as obstacles have always exposed it.
   distanceVertical: number;
+  // Same distance, signed: negative when the cable passes below the point. Read by floors only.
+  signedDistanceVertical: number;
 }
 
 export interface Distance {
@@ -755,7 +756,7 @@ export interface TaskOutputs {
   [Task.importLambert]: Localization;
   [Task.importLambertAndValidate]: {
     localization: Localization;
-    meanGpsDiff: number;
+    meanGpsDiffMeter: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;

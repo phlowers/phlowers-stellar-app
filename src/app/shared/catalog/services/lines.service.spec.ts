@@ -70,22 +70,22 @@ describe('LinesService', () => {
       await service.importFromFile();
       expect(csvImportClient.importCsv).toHaveBeenCalledWith('lines', { expectedHash: undefined });
     });
-    it('propagates errors from the client instead of swallowing them', async () => {
+    it('propagates errors from the client so CatalogUpdateService can flag the catalog', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
       await expect(service.importFromFile()).rejects.toThrow('worker boom');
     });
     it('emits on imported$ after a successful import', async () => {
-      const emissions: void[] = [];
-      service.imported$.subscribe(() => emissions.push(undefined));
+      let count = 0;
+      service.imported$.subscribe(() => count++);
       await service.importFromFile();
-      expect(emissions.length).toBe(1);
+      expect(count).toBe(1);
     });
     it('does not emit on imported$ when the import fails', async () => {
       csvImportClient.importCsv.mockRejectedValue(new Error('worker boom'));
-      const emissions: void[] = [];
-      service.imported$.subscribe(() => emissions.push(undefined));
+      let count = 0;
+      service.imported$.subscribe(() => count++);
       await expect(service.importFromFile()).rejects.toThrow('worker boom');
-      expect(emissions.length).toBe(0);
+      expect(count).toBe(0);
     });
   });
 });

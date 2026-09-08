@@ -136,8 +136,8 @@ describe('ClimateComponent effect edge cases', () => {
               'loads.climate.wind-pressure-label': 'Wind Pressure',
               'common.calculate': 'Calculate',
               'loads.shared.erase-load-case-aria-label': 'erase load case',
-              'common.max-value': 'Maximum value:',
-              'common.min-value': 'Minimum value:',
+              'common.max-value-error': 'Max. value: {{ max }}',
+              'common.min-value-error': 'Min. value: {{ min }}',
               'common.reset': 'Reset',
               'common.save': 'Save'
             }
@@ -203,8 +203,8 @@ describe('ClimateComponent effect edge cases', () => {
               'loads.climate.wind-pressure-label': 'Wind Pressure',
               'common.calculate': 'Calculate',
               'loads.shared.erase-load-case-aria-label': 'erase load case',
-              'common.max-value': 'Maximum value:',
-              'common.min-value': 'Minimum value:',
+              'common.max-value-error': 'Max. value: {{ max }}',
+              'common.min-value-error': 'Min. value: {{ min }}',
               'common.reset': 'Reset',
               'common.save': 'Save'
             }
@@ -325,8 +325,8 @@ describe('ClimateComponent', () => {
               'loads.climate.wind-pressure-label': 'Wind Pressure',
               'common.calculate': 'Calculate',
               'loads.shared.erase-load-case-aria-label': 'erase load case',
-              'common.max-value': 'Maximum value:',
-              'common.min-value': 'Minimum value:',
+              'common.max-value-error': 'Max. value: {{ max }}',
+              'common.min-value-error': 'Min. value: {{ min }}',
               'common.reset': 'Reset',
               'common.save': 'Save'
             }
@@ -480,21 +480,21 @@ describe('ClimateComponent', () => {
     });
   });
 
-  describe('integerValidator', () => {
+  describe('maxDecimalsValidator', () => {
     it('should return null for null values', () => {
       component.form.controls.windPressure.setValue(null);
       // The validator allows null (line 25 coverage)
       const errors = component.form.controls.windPressure.errors;
-      // required error will be present, but not integer error
-      expect(errors?.['integer']).toBeUndefined();
+      // required error will be present, but not maxDecimals error
+      expect(errors?.['maxDecimals']).toBeUndefined();
     });
 
-    it('should return integer error for non-integer values', () => {
+    it('should return maxDecimals error for non-integer values', () => {
       component.form.controls.windPressure.setValue(10.5);
       component.form.controls.windPressure.updateValueAndValidity();
 
       const errors = component.form.controls.windPressure.errors;
-      expect(errors?.['integer']).toBe(true);
+      expect(errors?.['maxDecimals']).toEqual({ maxDecimals: 0 });
     });
 
     it('should return null for valid integer values', () => {
@@ -502,7 +502,7 @@ describe('ClimateComponent', () => {
       component.form.controls.windPressure.updateValueAndValidity();
 
       const errors = component.form.controls.windPressure.errors;
-      expect(errors?.['integer']).toBeUndefined();
+      expect(errors?.['maxDecimals']).toBeUndefined();
     });
   });
 

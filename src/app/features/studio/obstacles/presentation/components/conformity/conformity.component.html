@@ -122,12 +122,11 @@
           formControlName="repartitionTemperature"
           [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="repartitionTemperatureErrorId()"
-          (input)="truncateTwoDecimals($event)"
           data-testid="conformity-repartition-temperature-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
-      @if (form.controls.repartitionTemperature.errors?.['min']) {
+      @if (form.controls.repartitionTemperature.errors?.['min']; as minError) {
         <p-message
           id="repartition-temperature-min-error"
           class="form__distrib-temp-error"
@@ -135,10 +134,9 @@
           size="small"
           variant="simple"
         >
-          <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-          {{ BOUNDS.repartitionTemperature.min }}
+          {{ 'common.min-value-error' | transloco: { min: minError.min } }}
         </p-message>
-      } @else if (form.controls.repartitionTemperature.errors?.['max']) {
+      } @else if (form.controls.repartitionTemperature.errors?.['max']; as maxError) {
         <p-message
           id="repartition-temperature-max-error"
           class="form__distrib-temp-error"
@@ -146,8 +144,17 @@
           size="small"
           variant="simple"
         >
-          <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-          {{ BOUNDS.repartitionTemperature.max }}
+          {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+        </p-message>
+      } @else if (form.controls.repartitionTemperature.errors?.['maxDecimals']; as maxDecimals) {
+        <p-message
+          id="repartition-temperature-maxDecimals-error"
+          class="form__distrib-temp-error"
+          severity="error"
+          size="small"
+          variant="simple"
+        >
+          {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
         </p-message>
       }
 
@@ -169,22 +176,23 @@
           [attr.aria-describedby]="lateralTemperatureHint() ? 'lateral-distance-hint' : null"
           [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
           [attr.aria-errormessage]="lateralDistanceTemperatureErrorId()"
-          (input)="truncateTwoDecimals($event)"
           data-testid="conformity-lateral-temperature-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>
 
       <div class="form__lat-temp-compl">
-        @if (form.controls.lateralDistanceTemperature.errors?.['min']) {
+        @if (form.controls.lateralDistanceTemperature.errors?.['min']; as minError) {
           <p-message id="lateral-distance-temperature-min-error" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'common.min-value' | transloco }}</ng-container>
-            {{ BOUNDS.lateralDistanceTemperature.min }}
+            {{ 'common.min-value-error' | transloco: { min: minError.min } }}
           </p-message>
-        } @else if (form.controls.lateralDistanceTemperature.errors?.['max']) {
+        } @else if (form.controls.lateralDistanceTemperature.errors?.['max']; as maxError) {
           <p-message id="lateral-distance-temperature-max-error" severity="error" size="small" variant="simple">
-            <ng-container>{{ 'common.max-value' | transloco }}</ng-container>
-            {{ BOUNDS.lateralDistanceTemperature.max }}
+            {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+          </p-message>
+        } @else if (form.controls.lateralDistanceTemperature.errors?.['maxDecimals']; as maxDecimals) {
+          <p-message id="lateral-distance-temperature-maxDecimals-error" severity="error" size="small" variant="simple">
+            {{ 'common.max-decimals-error' | transloco: { maxDecimals: maxDecimals.maxDecimals } }}
           </p-message>
         }
         @if (lateralTemperatureHint()) {

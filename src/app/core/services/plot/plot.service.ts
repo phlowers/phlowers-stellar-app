@@ -19,6 +19,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { alignSectionSpanLoadsToSupports } from './plot-section-loads.helpers';
+import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
 import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
@@ -86,7 +87,7 @@ export class PlotService {
     this.study.set(null);
     this.currentSectionUuid = null;
     this.obstacleStateService.reset();
-    this.obstaclesService.setSelectedObstacle(null, null);
+    this.obstaclesService.setSelectedMeasure(null, null);
     this.sideTabsService.sideTabs.set(null);
   };
 
@@ -164,7 +165,15 @@ export class PlotService {
     await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: true });
     // }
 
-    const obstacles = section.obstacles ?? [];
+    // Floors are registered as a specific obstacle type to reuse the obstacle worker's
+    // distance-to-cable calculation — see `mapFloorToObstacle`.
+    const floorObstacles = (section.floors ?? []).map((floor) =>
+      mapFloorToObstacle(
+        floor,
+        section.supports.findIndex((support) => support.uuid === floor.supportUuid)
+      )
+    );
+    const obstacles = [...(section.obstacles ?? []), ...floorObstacles];
     if (obstacles.length > 0) {
       await this.obstacleStateService.syncObstacles(
         obstacles,
