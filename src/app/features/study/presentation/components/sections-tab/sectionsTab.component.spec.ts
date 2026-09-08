@@ -5,6 +5,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { InitialCondition, Section } from '@shared/domain';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
+import { SectionDataReportService } from '@features/studio/toolbar/presentation/services/section-data-report/section-data-report.service';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { provideHttpClient } from '@angular/common/http';
@@ -39,6 +41,8 @@ describe('SectionsTabComponent', () => {
     deleteCharge: vi.Mock;
     duplicateCharge: vi.Mock;
   };
+  let mockCablesService: { getCables: vi.Mock };
+  let mockReportService: { generateReport: vi.Mock };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -160,6 +164,14 @@ describe('SectionsTabComponent', () => {
       duplicateCharge: vi.fn()
     };
 
+    mockCablesService = {
+      getCables: vi.fn().mockResolvedValue([])
+    };
+
+    mockReportService = {
+      generateReport: vi.fn().mockResolvedValue(undefined)
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
@@ -169,8 +181,11 @@ describe('SectionsTabComponent', () => {
               'common.duplicate': 'Duplicate',
               'common.edit': 'Edit',
               'common.view': 'View',
+              'common.yes': 'Yes',
+              'common.no': 'No',
               'sections-tab.actions': 'Actions',
               'sections-tab.add-initial-condition': 'Add initial condition',
+              'sections-tab.report-action': 'Report',
               'sections-tab.aria-actions-for-section': 'Actions for section {{ name }}',
               'sections-tab.aria-select-charge': 'Select charge case',
               'sections-tab.aria-select-ic': 'Select initial conditions',
@@ -201,6 +216,8 @@ describe('SectionsTabComponent', () => {
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
         { provide: ChargesService, useValue: mockChargesService },
+        { provide: CablesService, useValue: mockCablesService },
+        { provide: SectionDataReportService, useValue: mockReportService },
         { provide: MessageService, useValue: mockMessageService },
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
         provideHttpClient(),
@@ -340,6 +357,59 @@ describe('SectionsTabComponent', () => {
     fixture.detectChanges();
 
     expect(component.duplicateSection.emit).toHaveBeenCalledWith(mockSection);
+  });
+
+  it('should render the report button and generate the canton report when clicked', async () => {
+    const linesService = TestBed.inject(LinesService);
+    (linesService.getLines as unknown as vi.Mock).mockResolvedValue([
+      { lit_idr: 'LIT123', lit_adr: 'LIT-ADR-123' }
+    ]);
+    fixture.componentRef.setInput('study', { author_email: 'a@b.com', title: 'Study', sections: [mockSection] });
+    fixture.detectChanges();
+
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+    triggerBtn.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const reportBtn = document.body.querySelector('[data-testid="section-report-btn"]') as HTMLButtonElement;
+    expect(reportBtn).toBeTruthy();
+
+    reportBtn.click();
+    await fixture.whenStable();
+
+    expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
+    const data = mockReportService.generateReport.mock.calls[0][0];
+    expect(data.cantonName).toBe(mockSection.name);
+    expect(data.author).toBe('a@b.com');
+    expect(data.icName).toBe('Initial Cond 1');
+    expect(data.isPhase).toBe(true);
+    expect(data.initialCondition).not.toBeNull();
+    // Canton type is the translated label, not the raw select code.
+    expect(data.type).toBe('Phase');
+    // LIT resolves to the catalog lit_adr matched by lit_code, branch uses branch_idr.
+    expect(data.litName).toBe('LIT-ADR-123');
+    expect(data.branchName).toBe('BranchY');
+  });
+
+  it('onGenerateCantonReport should build report data with null initial condition when none is selected', async () => {
+    const sectionNoIc: Section = { ...mockSection, selected_initial_condition_uuid: undefined };
+    await component.onGenerateCantonReport(sectionNoIc);
+
+    expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
+    const data = mockReportService.generateReport.mock.calls[0][0];
+    expect(data.initialCondition).toBeNull();
+    expect(data.icName).toBe('');
+  });
+
+  it('onGenerateCantonReport should map the imported French type "garde" to the translated guard label', async () => {
+    const guardSection: Section = { ...mockSection, type: 'garde' };
+    await component.onGenerateCantonReport(guardSection);
+
+    const data = mockReportService.generateReport.mock.calls[0][0];
+    expect(data.type).toBe('Guard');
+    expect(data.isPhase).toBe(false);
   });
 
   describe('UC: display section list with actions', () => {
