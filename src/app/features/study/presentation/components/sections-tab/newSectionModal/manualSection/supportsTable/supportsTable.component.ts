@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   effect,
@@ -221,13 +222,14 @@ export class SupportsTableComponent implements OnInit {
 
   /** Native selects whose option list has been built, keyed by field and support UUID. */
   private readonly expandedSelects = signal(new Set<string>());
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /**
    * A closed native select only needs an option for the value it currently shows: building
    * every catalog option for every row up front was the single most expensive cell of a
-   * 100-row page render. The list is built on `focusin`, which fires before the picker paints
-   * on both paths — unlike `focus`, which Chromium never fires when the picker is opened with
-   * the mouse.
+   * 100-row page render. The list is built on `mousedown` (fires before the browser's
+   * default action opens the picker) and `focusin` (for keyboard-driven opening), each
+   * forcing a synchronous change-detection pass so the options exist before the picker paints.
    */
   optionsExpanded(field: 'chainName' | 'name' | 'attachmentPosition', uuid: string): boolean {
     return this.expandedSelects().has(field + uuid);
@@ -236,6 +238,9 @@ export class SupportsTableComponent implements OnInit {
   expandOptions(field: 'chainName' | 'name' | 'attachmentPosition', uuid: string): void {
     if (this.optionsExpanded(field, uuid)) return;
     this.expandedSelects.update((keys) => new Set(keys).add(field + uuid));
+    // The native picker reads the option list synchronously right after this handler
+    // returns, before Angular's normal (microtask-scheduled) CD would run — so force it now.
+    this.cdr.detectChanges();
   }
 
   /**
