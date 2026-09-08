@@ -90,8 +90,8 @@
     "source": "cdn"
   },
   "pyyaml": {
-    "file_name": "PyYAML-6.0.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-    "name": "PyYAML",
+    "file_name": "pyyaml-6.0.2-cp313-cp313-pyemscripten_2025_0_wasm32.whl",
+    "name": "pyyaml",
     "source": "cdn"
   },
   "six": {

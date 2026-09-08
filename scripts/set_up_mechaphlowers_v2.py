@@ -265,6 +265,7 @@ def replace_with_cdn(
                     missing.append((name, fname))
                     print(f"  ✗ {name}: {fname} not found")
             else:
+                print(f"  ↓ Downloading {cdn_url}/{fname})...")
                 data = requests.get(f"{cdn_url}/{fname}", timeout=60).content
                 (PYODIDE_DIR / fname).write_bytes(data)
                 cdn_names.add(fname)
@@ -286,7 +287,7 @@ def replace_with_cdn(
 
 
 def deduplicate(cdn_names: set[str]) -> None:
-    """Keep one wheel per package (wasm32 for CDN, cp313 otherwise)."""
+    """Keep one wheel per package, always favoring a wasm-compatible build."""
     by_name: dict[str, list[str]] = {}
     for w in wheels_in(PYODIDE_DIR):
         by_name.setdefault(parse_wheel(w)[0], []).append(w)
@@ -294,14 +295,16 @@ def deduplicate(cdn_names: set[str]) -> None:
     for name, ws in by_name.items():
         if len(ws) <= 1:
             continue
-        prefs = ("pyodide", "-cp313-") if name in cdn_names else ("-cp313-", "pyodide")
-        keep = (
-            next((w for w in ws if prefs[0] in w.lower()), None)
-            or next((w for w in ws if prefs[1] in w.lower()), None)
-            or ws[0]
+        # A CDN build is either compiled for wasm (pyemscripten) or pure Python (none-any);
+        # cp313 is never used as a criterion since it can change with the Python version.
+        tags = ("pyemscripten", "none-any") if name in cdn_names else ("none-any",)
+        keep = next(
+            (w for tag in tags for w in ws if tag in w.lower()),
+            ws[0],
         )
         for w in ws:
             if w != keep:
+                print(f"  Removing duplicate wheel: {w} (keeping {keep})")
                 (PYODIDE_DIR / w).unlink()
 
 
