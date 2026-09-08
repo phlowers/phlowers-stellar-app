@@ -9,7 +9,6 @@ custom_components
 engine_worker
 how_to_add_error_codes
 i18n
-geographic_system
 obstacles_and_obstacle_distances
 offline_database
 plot_refresh_pipeline

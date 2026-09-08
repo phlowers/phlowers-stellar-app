@@ -9,7 +9,6 @@ Composants personnalisés <custom_components>
 Worker moteur <engine_worker>
 Codes d'erreur <how_to_add_error_codes>
 i18n
-Système géographique <geographic_system>
 Obstacles et distances <obstacles_and_obstacle_distances>
 Base de données hors ligne <offline_database>
 Pipeline de rafraîchissement des graphiques <plot_refresh_pipeline>
