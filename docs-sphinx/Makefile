@@ -7,12 +7,13 @@ SPHINXOPTS    ?= -W
 SPHINXBUILD   ?= uv run sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+SPHINX_LANGUAGE ?= en
 
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile html html-en html-fr simplepdf pptx
+.PHONY: help Makefile html html-en html-fr html-rtd simplepdf pptx
 
 # Build the English HTML site.
 html-en:
@@ -24,6 +25,12 @@ html-fr:
 
 # Build both language sites.
 html: html-en html-fr
+
+# Build a single language straight into build/html, selected by $(SPHINX_LANGUAGE).
+# Used by ReadTheDocs, where each native translation project builds only its
+# own language (READTHEDOCS_LANGUAGE is exported into SPHINX_LANGUAGE).
+html-rtd:
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)/$(SPHINX_LANGUAGE)" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
 # Build a PDF from the Sphinx sources using sphinx-simplepdf (English).
 simplepdf:

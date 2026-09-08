@@ -70,14 +70,27 @@ environment variables set by the npm scripts — nothing is hard-coded in the te
 
 ## ReadTheDocs
 
-A **single** ReadTheDocs project builds both languages. The `.readthedocs.yaml`
-build job runs `make html-en` and `make html-fr`, copies the results into
-`$READTHEDOCS_OUTPUT/html/en` and `$READTHEDOCS_OUTPUT/html/fr`, and writes a root
-`index.html` that redirects to `/en/`.
+This uses ReadTheDocs' native **translations** feature: two separate RTD
+projects share this repository, one per language.
 
-- No second (translation) project is required.
-- The site is served with `/en/…` and `/fr/…` path prefixes, matching the
-  switcher's production defaults (`DOCS_EN_PREFIX=/en`, `DOCS_FR_PREFIX=/fr`).
+1. Create (or reuse) the main project pointing at this repo, with **Language**
+   set to `English` in its admin settings — this is the `en` project.
+2. Create a second RTD project for the same repo with **Language** set to
+   `French` — this is the `fr` project.
+3. In the main project's admin, go to **Translations** and add the `fr`
+   project.
+
+ReadTheDocs then serves both under the main project's domain (`/en/<version>/…`
+and `/fr/<version>/…`) and injects `READTHEDOCS_LANGUAGE` (`en` or `fr`) into
+each project's build. The `.readthedocs.yaml` build job forwards that value
+into `SPHINX_LANGUAGE` and runs `make html-rtd`, which builds only that
+project's language straight into `$READTHEDOCS_OUTPUT/html`.
+
+- No manual root-redirect page or `/en` + `/fr` merge step is needed — RTD
+  owns the path prefixing and the version/language switcher (flyout menu).
+- The switcher's production defaults (`DOCS_EN_PREFIX=/en`, `DOCS_FR_PREFIX=/fr`,
+  same origin) still match this URL shape, so the in-page navbar switcher
+  keeps working alongside RTD's own flyout.
 
 ## Language switcher
 
