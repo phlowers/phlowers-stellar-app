@@ -18,6 +18,7 @@ build:
         # READTHEDOCS_LANGUAGE per project so a single build job can build
         # whichever language that project owns.
         - cd docs-sphinx && SPHINX_LANGUAGE=${READTHEDOCS_LANGUAGE:-en} make html-rtd
+        - mkdir -p $READTHEDOCS_OUTPUT/html
         - cp -r docs-sphinx/build/html/* $READTHEDOCS_OUTPUT/html/
 
 sphinx:
