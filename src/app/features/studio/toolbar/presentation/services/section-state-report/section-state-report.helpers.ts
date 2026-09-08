@@ -11,45 +11,19 @@
 //    drawCartoucheSection()     → study & section metadata bullets
 //    drawSectionStateSection()   → max parameter + max stress rate
 //  Following pages — A4 landscape (297 × 210 mm):
-//    drawResultTablesSection()  → transposed result tables (≤ 5 columns each, 2 tables / page)
+//    drawResultTablesSection()  → transposed result tables (@shared/pdf/pdf-table.helpers)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import jsPDF from 'jspdf';
+import type jsPDF from 'jspdf';
 
-import {
-  CONTENT_WIDTH,
-  FONT_SIZES,
-  LINE_HEIGHT,
-  LINE_WIDTH_THIN,
-  PAGE_MARGIN,
-  PARAGRAPH_INDENT
-} from '@shared/pdf/pdf-layout.constantes';
-import { drawBulletItem, drawHeader, drawWrappingBulletItem, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import { CONTENT_WIDTH, LINE_HEIGHT, PAGE_MARGIN, PARAGRAPH_INDENT, PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
+import { drawBulletItem, drawBulletList, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 import { Support } from '@shared/domain';
 
-import {
-  LANDSCAPE_PAGE,
-  MAX_COLS_PER_TABLE,
-  MAX_TABLES_PER_PAGE,
-  MetricDescriptor,
-  TABLE_CELL_PADDING_X,
-  TABLE_ROW_HEIGHT,
-  TABLE_TEXT_BASELINE_OFFSET,
-  TABLE_VERTICAL_GAP,
-  UNITS
-} from './section-state-report.constantes';
-import {
-  PdfTableModel,
-  SectionReportLabels,
-  SectionStateReportData,
-  SpanReportRow,
-  SupportReportRow
-} from './section-state-report.interfaces';
-
-/** Maximum number of wrapped lines rendered inside a single table cell. */
-const MAX_CELL_LINES = 2;
+import { SectionReportLabels, SectionStateReportData, SpanReportRow, SupportReportRow } from './section-state-report.interfaces';
 
 /** Reads a numeric array value at the given index, returning null when absent. */
 function at(values: number[] | undefined, index: number): number | null {
@@ -134,52 +108,6 @@ export function buildSupportRows(
   return rows;
 }
 
-/** Formats a single metric cell: raw string for the identifier row, otherwise value + unit. */
-export function formatCell<T>(row: T, metric: MetricDescriptor<T>): string {
-  const raw = row[metric.field];
-  if (metric.unit === null) {
-    return typeof raw === 'string' && raw !== '' ? raw : '-';
-  }
-  return formatValue(raw as number | null, metric.unit, metric.decimals);
-}
-
-/** Splits an array into chunks of at most `size` items. */
-export function chunk<T>(items: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    result.push(items.slice(i, i + size));
-  }
-  return result;
-}
-
-/**
- * Builds the transposed table models for a set of result rows.
- * Columns are chunked into groups of MAX_COLS_PER_TABLE; each metric becomes a table row.
- */
-export function buildTables<T>(
-  rows: T[],
-  metrics: MetricDescriptor<T>[],
-  resolveLabel: (key: string) => string
-): PdfTableModel[] {
-  return chunk(rows, MAX_COLS_PER_TABLE).map((columns) => ({
-    rows: metrics.map((metric) => ({
-      label: resolveLabel(metric.labelKey),
-      values: columns.map((column) => formatCell(column, metric))
-    }))
-  }));
-}
-
-/** Draws an underlined section title at the page margin. Returns the next Y position. */
-function drawSectionTitle(doc: jsPDF, title: string, startY: number): number {
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.sectionTitle);
-  doc.text(title, PAGE_MARGIN.left, startY);
-  const titleWidth = doc.getTextWidth(title);
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, startY + 1, PAGE_MARGIN.left + titleWidth, startY + 1);
-  return startY + LINE_HEIGHT + 2;
-}
-
 /** Draws the study & section metadata section (page 1, portrait). Returns the next Y position. */
 export function drawCartoucheSection(
   doc: jsPDF,
@@ -191,22 +119,19 @@ export function drawCartoucheSection(
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
 
-  drawBulletItem(doc, labels.author, data.author || '-', leftX, y);
-  y += LINE_HEIGHT;
-  y += drawWrappingBulletItem(doc, labels.study, data.studyTitle || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.studyDescription, data.studyDescription || '-', leftX, y, wrapWidth);
-  drawBulletItem(doc, labels.section, data.sectionName || '-', leftX, y);
-  y += LINE_HEIGHT;
-  y += drawWrappingBulletItem(doc, labels.sectionComment, data.sectionComment || '-', leftX, y, wrapWidth);
-  drawBulletItem(doc, labels.initialCondition, data.icName || '-', leftX, y);
-  y += LINE_HEIGHT;
-  drawBulletItem(doc, labels.chargeName, data.chargeName || '-', leftX, y);
-  y += LINE_HEIGHT;
-  y += drawWrappingBulletItem(doc, labels.chargeDescription, data.chargeDescription || '-', leftX, y, wrapWidth);
+  const items: PdfBulletItem[] = [
+    { label: labels.author, value: data.author || '-' },
+    { label: labels.study, value: data.studyTitle || '-', wrap: true },
+    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
+    { label: labels.section, value: data.sectionName || '-' },
+    { label: labels.sectionComment, value: data.sectionComment || '-', wrap: true },
+    { label: labels.initialCondition, value: data.icName || '-' },
+    { label: labels.chargeName, value: data.chargeName || '-' },
+    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
+  ];
+  y = drawBulletList(doc, items, y, leftX, wrapWidth);
 
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_MARGIN.left + CONTENT_WIDTH, y);
-  return y + LINE_HEIGHT;
+  return drawSeparator(doc, y);
 }
 
 /** Draws the section state section (page 1, portrait): max parameter + max stress rate. */
@@ -220,103 +145,9 @@ export function drawSectionStateSection(
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
 
-  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, UNITS.meters, 0), leftX, y, false);
-  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, UNITS.percent, 1), rightX, y, false);
+  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, PDF_UNITS.meters, 0), leftX, y, false);
+  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, PDF_UNITS.percent, 1), rightX, y, false);
   y += LINE_HEIGHT;
 
   return y;
-}
-
-/** Draws a single table cell (border + wrapped text). */
-function drawCell(
-  doc: jsPDF,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  lines: string[],
-  bold: boolean
-): void {
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.rect(x, y, width, height);
-  doc.setFont('Nunito', bold ? 'bold' : 'normal');
-  doc.setFontSize(bold ? FONT_SIZES.label : FONT_SIZES.value);
-  lines.forEach((line, index) => {
-    doc.text(line, x + TABLE_CELL_PADDING_X, y + TABLE_TEXT_BASELINE_OFFSET + index * TABLE_ROW_HEIGHT);
-  });
-}
-
-/** Splits a cell string into at most MAX_CELL_LINES wrapped lines for the given width. */
-function wrapCell(doc: jsPDF, text: string, width: number): string[] {
-  const lines = doc.splitTextToSize(text, width - 2 * TABLE_CELL_PADDING_X) as string[];
-  return lines.slice(0, MAX_CELL_LINES);
-}
-
-/**
- * Computes a label column width tight enough to fit the widest row label across the given
- * tables (e.g. spans + supports combined), so both result sections share the same width.
- */
-export function computeLabelColWidth(doc: jsPDF, tables: PdfTableModel[]): number {
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.label);
-  const maxLabelWidth = tables.reduce(
-    (max, table) => table.rows.reduce((rowMax, row) => Math.max(rowMax, doc.getTextWidth(row.label)), max),
-    0
-  );
-  return maxLabelWidth + 2 * TABLE_CELL_PADDING_X;
-}
-
-/** Draws one transposed result table (metric rows × up to 5 value columns). Returns the next Y. */
-export function drawTable(
-  doc: jsPDF,
-  table: PdfTableModel,
-  startY: number,
-  pageWidth: number,
-  labelColWidth: number
-): number {
-  const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
-  const valueColWidth = (contentWidth - labelColWidth) / MAX_COLS_PER_TABLE;
-  const numCols = table.rows[0]?.values.length ?? 0;
-  let y = startY;
-
-  for (const row of table.rows) {
-    const labelLines = wrapCell(doc, row.label, labelColWidth);
-    const valueLines = row.values.map((value) => wrapCell(doc, value, valueColWidth));
-    const maxLines = Math.max(labelLines.length, ...valueLines.map((lines) => lines.length), 1);
-    const rowHeight = maxLines * TABLE_ROW_HEIGHT;
-
-    drawCell(doc, PAGE_MARGIN.left, y, labelColWidth, rowHeight, labelLines, true);
-    for (let col = 0; col < numCols; col += 1) {
-      const x = PAGE_MARGIN.left + labelColWidth + col * valueColWidth;
-      drawCell(doc, x, y, valueColWidth, rowHeight, valueLines[col], false);
-    }
-    y += rowHeight;
-  }
-
-  return y;
-}
-
-/**
- * Renders a set of result tables across one or more landscape pages
- * (MAX_TABLES_PER_PAGE tables per page), each page carrying its own header and section title.
- */
-export function drawResultTablesSection(
-  doc: jsPDF,
-  date: string,
-  reportTitle: string,
-  sectionTitle: string,
-  tables: PdfTableModel[],
-  labelColWidth: number
-): void {
-  let y = 0;
-  tables.forEach((table, index) => {
-    if (index % MAX_TABLES_PER_PAGE === 0) {
-      doc.addPage('a4', 'landscape');
-      y = drawHeader(doc, date, reportTitle, LANDSCAPE_PAGE.width);
-      y = drawSectionTitle(doc, sectionTitle, y);
-    } else {
-      y += TABLE_VERTICAL_GAP;
-    }
-    y = drawTable(doc, table, y, LANDSCAPE_PAGE.width, labelColWidth);
-  });
 }

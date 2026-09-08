@@ -216,6 +216,17 @@ describe('vtl-guying-report helpers', () => {
       });
       expect(authorLabelCall).toBeDefined();
     });
+
+    it('should draw every metadata label (author, study, description, section, comment, load case)', () => {
+      const doc = createMockDoc();
+      drawStudySection(doc, createMockReportData(), MOCK_LABELS, 40);
+
+      const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      const texts = calls.flatMap((c) => (Array.isArray(c[0]) ? (c[0] as string[]) : [String(c[0])]));
+      for (const label of ['Author', 'Study', 'Description', 'Section', 'Comment', 'Load case']) {
+        expect(texts.some((t) => t.includes(label))).toBe(true);
+      }
+    });
   });
 
   describe('drawVtlWithoutGuyingSection', () => {

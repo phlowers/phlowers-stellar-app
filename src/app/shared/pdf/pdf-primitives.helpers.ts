@@ -7,16 +7,22 @@
 
 import jsPDF from 'jspdf';
 
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@core/services/notification/notification.service';
+
 import {
   APP_NAME,
   BULLET,
+  CONTENT_WIDTH,
   DECIMAL_PLACES,
   FONT_SIZES,
+  LANDSCAPE_PAGE,
   LINE_HEIGHT,
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE
 } from '@shared/pdf/pdf-layout.constantes';
+import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
 /**
  * Chunk size used when converting binary data to a latin1 string before base64 encoding.
@@ -118,6 +124,40 @@ export function drawWrappingBulletItem(
   return Math.max(lines.length, 1) * LINE_HEIGHT;
 }
 
+/** Draws an underlined section title at the page margin. Returns the next Y position. */
+export function drawSectionTitle(doc: jsPDF, title: string, startY: number): number {
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.sectionTitle);
+  doc.text(title, PAGE_MARGIN.left, startY);
+  const titleWidth = doc.getTextWidth(title);
+  doc.setLineWidth(LINE_WIDTH_THIN);
+  doc.line(PAGE_MARGIN.left, startY + 1, PAGE_MARGIN.left + titleWidth, startY + 1);
+  return startY + LINE_HEIGHT + 2;
+}
+
+/**
+ * Draws a single-column list of metadata bullets from `startY`. Wrapping items advance by their
+ * wrapped height; non-wrapping items advance by one LINE_HEIGHT. Returns the Y below the last item.
+ */
+export function drawBulletList(
+  doc: jsPDF,
+  items: PdfBulletItem[],
+  startY: number,
+  leftX: number,
+  wrapWidth: number
+): number {
+  let y = startY;
+  for (const item of items) {
+    if (item.wrap) {
+      y += drawWrappingBulletItem(doc, item.label, item.value, leftX, y, wrapWidth);
+    } else {
+      drawBulletItem(doc, item.label, item.value, leftX, y);
+      y += LINE_HEIGHT;
+    }
+  }
+  return y;
+}
+
 /**
  * Draws the PDF header: title + app name + date + separator line. Returns the next Y position.
  * `pageWidth` defaults to the portrait A4 width; pass the landscape width (297) for landscape pages.
@@ -162,4 +202,67 @@ export function drawFooter(
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.footer);
   doc.text(pageFooter, pageWidth - PAGE_MARGIN.right, pageHeight - 8, { align: 'right' });
+}
+
+/** Draws a horizontal separator line spanning the content width. Returns the next Y position. */
+export function drawSeparator(doc: jsPDF, y: number): number {
+  doc.setLineWidth(LINE_WIDTH_THIN);
+  doc.line(PAGE_MARGIN.left, y, PAGE_MARGIN.left + CONTENT_WIDTH, y);
+  return y + LINE_HEIGHT;
+}
+
+/** Sanitizes a filename fragment by replacing characters that are illegal on common filesystems. */
+export function sanitizeFilenamePart(value: string): string {
+  return value.replace(/[/\\:*?"<>|]/g, '-');
+}
+
+/**
+ * Draws a footer with the page number on every page of the document.
+ * Pass `landscapeFromPage2: true` when pages after the first flip to landscape (result tables).
+ */
+export function drawPageFooters(doc: jsPDF, pageLabel: string, landscapeFromPage2 = false): void {
+  const totalPages = doc.getNumberOfPages();
+  for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+    doc.setPage(pageNumber);
+    const isLandscape = landscapeFromPage2 && pageNumber > 1;
+    const width = isLandscape ? LANDSCAPE_PAGE.width : PAGE_SIZE.width;
+    const height = isLandscape ? LANDSCAPE_PAGE.height : PAGE_SIZE.height;
+    drawFooter(doc, `${pageLabel} ${pageNumber} / ${totalPages}`, width, height);
+  }
+}
+
+/** Resolves a report's fixed labels via Transloco, preserving the label struct's type. */
+export function buildReportLabels<T extends Record<string, string>>(
+  translate: (key: string) => string,
+  keys: Record<keyof T, string>
+): T {
+  const entries = Object.entries(keys) as [keyof T, string][];
+  return entries.reduce((labels, [field, key]) => {
+    labels[field] = translate(key) as T[keyof T];
+    return labels;
+  }, {} as T);
+}
+
+/**
+ * Runs a PDF report `build` callback, saves the resulting document and notifies success;
+ * on failure, logs the error and notifies the user instead. Shared by all PDF report services
+ * to avoid duplicating the try/catch/notify boilerplate around report generation.
+ */
+export async function generatePdfReport(options: {
+  logger: LoggerService;
+  notificationService: NotificationService;
+  translate: (key: string) => string;
+  errorLogMessage: string;
+  successKey: string;
+  errorKey: string;
+  build: () => Promise<{ doc: jsPDF; filename: string }>;
+}): Promise<void> {
+  try {
+    const { doc, filename } = await options.build();
+    doc.save(filename);
+    options.notificationService.success(options.translate(options.successKey));
+  } catch (error) {
+    options.logger.error(options.errorLogMessage, error);
+    options.notificationService.error(options.translate(options.errorKey));
+  }
 }

@@ -190,13 +190,55 @@ describe('section-data-report.helpers', () => {
   });
 
   describe('drawStudyAndCantonSection', () => {
-    it('draws the title and every section A label', () => {
+    it('draws the title, every label with its value, and a separator', () => {
+      const doc = createMockDoc();
+      const y = drawStudyAndCantonSection(doc as unknown as jsPDF, createData(), LABELS, 20);
+      const texts = textCalls(doc);
+
+      expect(texts).toContain('Study and canton');
+      for (const label of [
+        'Author',
+        'Study',
+        'Study description',
+        'Canton label',
+        'Comment',
+        'IC',
+        'Charge',
+        'Charge description'
+      ]) {
+        expect(texts.some((t) => t.includes(label))).toBe(true);
+      }
+      for (const value of ['a@b.com', 'My study', 'Desc', 'Canton X', 'A comment', 'IC 1', 'CC 1', 'Charge desc']) {
+        expect(texts).toContain(value);
+      }
+      expect(doc.line).toHaveBeenCalled();
+      expect(y).toBeGreaterThan(20);
+    });
+
+    it('wraps all 8 metadata rows', () => {
       const doc = createMockDoc();
       drawStudyAndCantonSection(doc as unknown as jsPDF, createData(), LABELS, 20);
-      const texts = textCalls(doc);
-      expect(texts).toContain('Study and canton');
-      expect(texts.some((t) => t.includes('Author'))).toBe(true);
-      expect(texts.some((t) => t.includes('Charge description'))).toBe(true);
+      expect(doc.splitTextToSize).toHaveBeenCalledTimes(8);
+    });
+
+    it('falls back to "-" for empty metadata values', () => {
+      const doc = createMockDoc();
+      drawStudyAndCantonSection(
+        doc as unknown as jsPDF,
+        createData({
+          author: '',
+          studyTitle: '',
+          studyDescription: '',
+          cantonName: '',
+          comment: '',
+          icName: '',
+          chargeName: '',
+          chargeDescription: ''
+        }),
+        LABELS,
+        20
+      );
+      expect(textCalls(doc)).toContain('-');
     });
   });
 

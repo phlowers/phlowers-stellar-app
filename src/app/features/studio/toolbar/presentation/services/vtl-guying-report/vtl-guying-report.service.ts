@@ -6,13 +6,19 @@
  */
 
 import { inject, Injectable } from '@angular/core';
-import type jsPDF from 'jspdf';
 
 import { NotificationService } from '@core/services/notification/notification.service';
 import { TranslocoService } from '@jsverse/transloco';
 
 import { PdfBaseService } from '@shared/pdf/pdf-base.service';
-import { drawFooter, drawHeader, loadImageAsBase64 } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  buildReportLabels,
+  drawHeader,
+  drawPageFooters,
+  generatePdfReport,
+  loadImageAsBase64,
+  sanitizeFilenamePart
+} from '@shared/pdf/pdf-primitives.helpers';
 
 import { PDF_LABEL_KEYS } from './vtl-guying-report.constantes';
 import {
@@ -30,24 +36,6 @@ export class VtlGuyingReportService extends PdfBaseService {
   private readonly translocoService = inject(TranslocoService);
 
   private diagramImageCache: string | null = null;
-
-  /** Resolves all PDF report labels via TranslocoService at report-generation time. */
-  private buildLabels(): PdfLabels {
-    const entries = Object.entries(PDF_LABEL_KEYS) as [keyof PdfLabels, string][];
-    return entries.reduce((labels, [field, key]) => {
-      labels[field] = this.translocoService.translate(key);
-      return labels;
-    }, {} as PdfLabels);
-  }
-
-  private addPageFooters(doc: jsPDF, labels: PdfLabels): void {
-    const totalPages = doc.getNumberOfPages();
-
-    for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
-      doc.setPage(pageNumber);
-      drawFooter(doc, `${labels.pageLabel} ${pageNumber} / ${totalPages}`);
-    }
-  }
 
   /** Pre-loads the diagram image and caches it for future report generation. */
   async preloadDiagramImage(): Promise<void> {
@@ -74,29 +62,30 @@ export class VtlGuyingReportService extends PdfBaseService {
 
   /** Generates and downloads the VHL & Guying PDF report. */
   async generateReport(data: VtlGuyingReportData): Promise<void> {
-    try {
-      const doc = await this.createDoc();
-      const labels = this.buildLabels();
+    const translate = (key: string): string => this.translocoService.translate(key);
 
-      let y = drawHeader(doc, data.date ?? '-', labels.reportTitle);
-      y = drawStudySection(doc, data, labels, y);
-      y = drawVtlWithoutGuyingSection(doc, data, labels, y);
-      y = drawGuyingSection(doc, data, labels, y);
-      drawVtlWithGuyingSection(doc, data, labels, y);
-      this.addPageFooters(doc, labels);
+    await generatePdfReport({
+      logger: this.logger,
+      notificationService: this.notificationService,
+      translate,
+      errorLogMessage: 'Failed to generate VHL & Guying report',
+      successKey: 'studio.vtl-guying-report.report-generated-success',
+      errorKey: 'studio.vtl-guying-report.report-generation-failed',
+      build: async () => {
+        const doc = await this.createDoc();
+        const labels = buildReportLabels<PdfLabels>(translate, PDF_LABEL_KEYS);
 
-      const safeDate = data.date.replace(/[/\\:*?"<>|]/g, '-');
-      const filename = `rapport-vhl-haubanage-${safeDate}.pdf`;
-      doc.save(filename);
+        let y = drawHeader(doc, data.date ?? '-', labels.reportTitle);
+        y = drawStudySection(doc, data, labels, y);
+        y = drawVtlWithoutGuyingSection(doc, data, labels, y);
+        y = drawGuyingSection(doc, data, labels, y);
+        drawVtlWithGuyingSection(doc, data, labels, y);
+        drawPageFooters(doc, labels.pageLabel);
 
-      this.notificationService.success(
-        this.translocoService.translate('studio.vtl-guying-report.report-generated-success')
-      );
-    } catch (error) {
-      this.logger.error('Failed to generate VHL & Guying report', error);
-      this.notificationService.error(
-        this.translocoService.translate('studio.vtl-guying-report.report-generation-failed')
-      );
-    }
+        const filename = `rapport-vhl-haubanage-${sanitizeFilenamePart(data.date)}.pdf`;
+
+        return { doc, filename };
+      }
+    });
   }
 }

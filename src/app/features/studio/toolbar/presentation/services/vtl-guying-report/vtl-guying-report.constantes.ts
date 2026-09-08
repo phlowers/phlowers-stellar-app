@@ -47,10 +47,3 @@ export const PDF_LABEL_KEYS: PdfLabels = {
   vtlWithGuyingExplanation2: 'studio.vtl-guying-report.explanation-2',
   pageLabel: 'studio.vtl-guying-report.page-label'
 };
-
-/** Unit labels. */
-export const UNITS = {
-  daN: 'daN',
-  meters: 'm',
-  degrees: '°'
-} as const;

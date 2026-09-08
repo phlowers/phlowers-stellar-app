@@ -5,19 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { MetricDescriptor } from '../section-state-report/section-state-report.constantes';
-import { CantonReportLabels, CantonSupportRow } from './section-data-report.interfaces';
+import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
+import { MetricDescriptor } from '@shared/pdf/pdf-table.interfaces';
 
-/** Unit labels used across the canton data report metrics. */
-export const CANTON_UNITS = {
-  meters: 'm',
-  grad: 'gr',
-  kilograms: 'kg',
-  pascal: 'Pa',
-  celsius: '°C',
-  cra: '%CRA',
-  centimeters: 'cm'
-} as const;
+import { CantonReportLabels, CantonSupportRow } from './section-data-report.interfaces';
 
 /**
  * Per-support metric rows for the supports list tables (transposed: one row per metric,
@@ -25,19 +16,19 @@ export const CANTON_UNITS = {
  */
 export const SUPPORT_METRICS: MetricDescriptor<CantonSupportRow>[] = [
   { labelKey: 'studio.canton-report.support-number', unit: null, decimals: 0, field: 'supportNumber' },
-  { labelKey: 'studio.canton-report.attachment-height', unit: CANTON_UNITS.meters, decimals: 2, field: 'attachmentHeight' },
-  { labelKey: 'studio.canton-report.span-angle', unit: CANTON_UNITS.grad, decimals: 0, field: 'spanAngle' },
+  { labelKey: 'studio.canton-report.attachment-height', unit: PDF_UNITS.meters, decimals: 2, field: 'attachmentHeight' },
+  { labelKey: 'studio.canton-report.span-angle', unit: PDF_UNITS.grad, decimals: 0, field: 'spanAngle' },
   { labelKey: 'studio.canton-report.chain-name', unit: null, decimals: 0, field: 'chainName' },
-  { labelKey: 'studio.canton-report.chain-length', unit: CANTON_UNITS.meters, decimals: 2, field: 'chainLength' },
-  { labelKey: 'studio.canton-report.chain-weight', unit: CANTON_UNITS.kilograms, decimals: 0, field: 'chainWeight' },
+  { labelKey: 'studio.canton-report.chain-length', unit: PDF_UNITS.meters, decimals: 2, field: 'chainLength' },
+  { labelKey: 'studio.canton-report.chain-weight', unit: PDF_UNITS.kilograms, decimals: 0, field: 'chainWeight' },
   { labelKey: 'studio.canton-report.support-name', unit: null, decimals: 0, field: 'supportName' },
   { labelKey: 'studio.canton-report.attachment-set', unit: null, decimals: 0, field: 'attachmentSet' },
-  { labelKey: 'studio.canton-report.arm-length', unit: CANTON_UNITS.meters, decimals: 2, field: 'armLength' },
+  { labelKey: 'studio.canton-report.arm-length', unit: PDF_UNITS.meters, decimals: 2, field: 'armLength' },
   { labelKey: 'studio.canton-report.chain-v', unit: null, decimals: 0, field: 'chainV' },
-  { labelKey: 'studio.canton-report.counter-weight', unit: CANTON_UNITS.kilograms, decimals: 0, field: 'counterWeight' },
+  { labelKey: 'studio.canton-report.counter-weight', unit: PDF_UNITS.kilograms, decimals: 0, field: 'counterWeight' },
   {
     labelKey: 'studio.canton-report.support-foot-altitude',
-    unit: CANTON_UNITS.meters,
+    unit: PDF_UNITS.meters,
     decimals: 2,
     field: 'supportFootAltitude'
   },

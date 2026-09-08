@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { BaseReportLabels } from '@shared/pdf/pdf-report.interfaces';
+
 /** One row of per-support input data for the canton data report tables (page 2+). */
 export interface CantonSupportRow {
   /** Support number identifier (raw string). */
@@ -94,23 +96,16 @@ export interface CantonReportData {
 }
 
 /** Translated canton data report labels, resolved at report-generation time via TranslocoService. */
-export interface CantonReportLabels {
-  reportTitle: string;
+export interface CantonReportLabels extends BaseReportLabels {
   studyCantonTitle: string;
   cantonTitle: string;
   initialConditionTitle: string;
   supportsTitle: string;
-  pageLabel: string;
 
   // Section A
-  author: string;
-  study: string;
-  studyDescription: string;
   canton: string;
   comment: string;
   initialCondition: string;
-  chargeName: string;
-  chargeDescription: string;
 
   // Section B
   type: string;

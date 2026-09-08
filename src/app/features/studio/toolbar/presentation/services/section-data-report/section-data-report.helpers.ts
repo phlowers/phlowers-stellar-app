@@ -18,17 +18,17 @@
 import jsPDF from 'jspdf';
 
 import { Support } from '@shared/domain';
+import { CONTENT_WIDTH, LINE_HEIGHT, PAGE_MARGIN, PARAGRAPH_INDENT, PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
+import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import {
-  CONTENT_WIDTH,
-  FONT_SIZES,
-  LINE_HEIGHT,
-  LINE_WIDTH_THIN,
-  PAGE_MARGIN,
-  PARAGRAPH_INDENT
-} from '@shared/pdf/pdf-layout.constantes';
-import { drawBulletItem, drawHeader, drawWrappingBulletItem, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+  drawBulletItem,
+  drawBulletList,
+  drawHeader,
+  drawSectionTitle,
+  drawSeparator,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
 
-import { CANTON_UNITS } from './section-data-report.constantes';
 import { CantonBullet, CantonReportData, CantonReportLabels, CantonSupportRow } from './section-data-report.interfaces';
 
 /** Builds the per-support input rows for the supports list tables. */
@@ -53,24 +53,6 @@ export function buildSupportRows(supports: Support[], chainVYes: string, chainVN
     attachmentPosition: support.attachmentPosition ?? '-',
     towerModel: support.towerModel ?? '-'
   }));
-}
-
-/** Draws an underlined section title at the page margin. Returns the next Y position. */
-function drawSectionTitle(doc: jsPDF, title: string, startY: number): number {
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.sectionTitle);
-  doc.text(title, PAGE_MARGIN.left, startY);
-  const titleWidth = doc.getTextWidth(title);
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, startY + 1, PAGE_MARGIN.left + titleWidth, startY + 1);
-  return startY + LINE_HEIGHT + 2;
-}
-
-/** Draws a horizontal separator line at the given Y and returns the next Y position. */
-function drawSeparator(doc: jsPDF, y: number): number {
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_MARGIN.left + CONTENT_WIDTH, y);
-  return y + LINE_HEIGHT;
 }
 
 /**
@@ -111,14 +93,17 @@ export function drawStudyAndCantonSection(
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
 
-  y += drawWrappingBulletItem(doc, labels.author, data.author || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.study, data.studyTitle || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.studyDescription, data.studyDescription || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.canton, data.cantonName || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.comment, data.comment || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.initialCondition, data.icName || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.chargeName, data.chargeName || '-', leftX, y, wrapWidth);
-  y += drawWrappingBulletItem(doc, labels.chargeDescription, data.chargeDescription || '-', leftX, y, wrapWidth);
+  const items: PdfBulletItem[] = [
+    { label: labels.author, value: data.author || '-', wrap: true },
+    { label: labels.study, value: data.studyTitle || '-', wrap: true },
+    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
+    { label: labels.canton, value: data.cantonName || '-', wrap: true },
+    { label: labels.comment, value: data.comment || '-', wrap: true },
+    { label: labels.initialCondition, value: data.icName || '-', wrap: true },
+    { label: labels.chargeName, value: data.chargeName || '-', wrap: true },
+    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
+  ];
+  y = drawBulletList(doc, items, y, leftX, wrapWidth);
 
   return drawSeparator(doc, y);
 }
@@ -166,21 +151,21 @@ export function drawInitialConditionSection(
   const y = drawSectionTitle(doc, labels.initialConditionTitle, startY);
 
   const left: CantonBullet[] = [
-    { label: labels.baseParameter, value: formatValue(ic.baseParameter, CANTON_UNITS.meters, 0) },
+    { label: labels.baseParameter, value: formatValue(ic.baseParameter, PDF_UNITS.meters, 0) },
     ...(data.isNonLinear
       ? [
-          { label: labels.cablePretension, value: formatValue(ic.cablePretension, CANTON_UNITS.cra, 0) },
-          { label: labels.maxWindPressure, value: formatValue(ic.maxWindPressure, CANTON_UNITS.pascal, 0) }
+          { label: labels.cablePretension, value: formatValue(ic.cablePretension, PDF_UNITS.cra, 0) },
+          { label: labels.maxWindPressure, value: formatValue(ic.maxWindPressure, PDF_UNITS.pascal, 0) }
         ]
       : [])
   ];
 
   const right: CantonBullet[] = [
-    { label: labels.baseTemperature, value: formatValue(ic.baseTemperature, CANTON_UNITS.celsius, 0) },
+    { label: labels.baseTemperature, value: formatValue(ic.baseTemperature, PDF_UNITS.celsius, 0) },
     ...(data.isNonLinear
       ? [
-          { label: labels.minTemperature, value: formatValue(ic.minTemperature, CANTON_UNITS.celsius, 0) },
-          { label: labels.maxFrostWidth, value: formatValue(ic.maxFrostWidth, CANTON_UNITS.centimeters, 0) }
+          { label: labels.minTemperature, value: formatValue(ic.minTemperature, PDF_UNITS.celsius, 0) },
+          { label: labels.maxFrostWidth, value: formatValue(ic.maxFrostWidth, PDF_UNITS.centimeters, 0) }
         ]
       : [])
   ];
