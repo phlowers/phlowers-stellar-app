@@ -14,6 +14,31 @@ class _Errors:
     def unsupported_symmetry_type(symmetry_type: str) -> str:
         return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
 
+    @staticmethod
+    def cut_strands_layer_count_mismatch(
+        input_count: int, layer_count: int
+    ) -> str:
+        return (
+            f"Cut strands input has {input_count} layers, "
+            f"but cable has {layer_count} layers"
+        )
+
+    @staticmethod
+    def cut_strands_negative(layer_index: int) -> str:
+        return (
+            f"Cut strands count cannot be negative "
+            f"at layer {layer_index + 1}"
+        )
+
+    @staticmethod
+    def cut_strands_exceeds_layer(
+        layer_index: int, cut_count: int, layer_total: int
+    ) -> str:
+        return (
+            f"Cut strands count ({cut_count}) exceeds "
+            f"number of strands ({layer_total}) in layer {layer_index + 1}"
+        )
+
 
 class GeneratedPointsNoneError(ValueError):
     """Raised when generated points (spans, supports, insulators, others) are None."""

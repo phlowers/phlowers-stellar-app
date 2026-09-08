@@ -6,6 +6,7 @@
 
 import logging
 
+from stellar_engine.core import cut_strands as cut_strands_module
 from stellar_engine.core import geometry, manipulations, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
@@ -296,6 +297,45 @@ def import_lambert(js_inputs):
 @debug_log
 def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
+
+
+# ---------------------------cut strands----------------
+
+
+@debug_log
+def set_cut_strands(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    return cut_strands_module.set_cut_strands(
+        study, python_inputs["cutStrands"]
+    )
+
+
+@debug_log
+def get_cut_strands():
+    global study
+    return cut_strands_module.get_cut_strands(study)
+
+
+@debug_log
+def get_rrts():
+    global study
+    return cut_strands_module.get_rrts(study)
+
+
+@debug_log
+def get_utilization_rate():
+    global study
+    return cut_strands_module.get_utilization_rate(study)
+
+
+@debug_log
+def set_high_safety(js_inputs):
+    global study
+    python_inputs = js_to_python(js_inputs)
+    return cut_strands_module.set_high_safety(
+        study, python_inputs["highSafety"]
+    )
 
 
 # ---------------------------conformity----------------
