@@ -1,0 +1,136 @@
+# Installation
+
+## Prerequisites
+1. You need to install node/npm. We propose to use nvm to be precise on its version.  
+    - [For nvm](https://github.com/nvm-sh/nvm)
+    - Set node version to 23 using `nvm install v23` and `nvm use 23`
+
+2. You will need `uv` to run the script for mechaphlowers setup.
+*mechaphlowers is python scripts for complex physics calculations*
+[uv installation doc](https://docs.astral.sh/uv/getting-started/installation/)
+   - to install uv for windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+   - to install uv for macOS and linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+3. We advise installation of global angular CLI.
+You should match global and local project CLI by watching current version in `package.json`.  
+`npm i -g @angular/cli@project_cli_version`
+    - local CLI could be use but is not recommanded
+
+## Install dependencies and Run locally 
+1. install global packages with npm `npm i` / `npm install`
+
+2. Set up mechaphlowers using local script `npm run set-up-mechaphlowers`
+
+3. Launch local server with `ng serve` or `npm run start`
+
+## TypeScript Path Aliases
+
+The project uses TypeScript path aliases to simplify imports and improve code readability. These aliases are configured in `tsconfig.json` and `tsconfig.spec.json`.
+
+| Alias | Path | Description |
+|-------|------|-------------|
+| `@src/*` | `./src/*` | Root source folder |
+| `@app/*` | `./src/app/*` | Application folder |
+| `@core/*` | `./src/app/core/*` | Core module (domain, infrastructure) |
+| `@services/*` | `./src/app/core/services/*` | Application services |
+| `@features/*` | `./src/app/features/*` | Feature modules (DDD bounded contexts) |
+| `@shared/*` | `./src/app/shared/*` | Shared reusable components, pipes, directives |
+| `@infrastructure/*` | `./src/app/infrastructure/*` | Infrastructure (Dexie DB, DTOs) |
+
+### Usage examples
+
+```typescript
+// Instead of relative imports like:
+import { StorageService } from '../../../core/services/storage/storage.service';
+
+// Use alias imports:
+import { StorageService } from '@services/storage/storage.service';
+import { Study } from '@core/domain';
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+```
+
+## Import lines and maintenance data
+
+1. lines data should be put inside a `public/data/lines.csv` file with the following columns:
+    - LIAISON_IDR
+    - LIT_IDR
+    - LIT_ADR
+    - BRANCHE_IDR
+    - BRANCHE_ADR
+    - TENSION_ELECTRIQUE_IDR
+    - TENSION_ELECTRIQUE_ADR
+
+2. maintenance data should be put inside a `public/data/maintenance-teams.csv` file with the following columns:
+    - CM_CUR
+    - CM_DESIGNATION
+    - GMR_CUR
+    - GMR_DESIGNATION
+    - EEL_CUR
+    - EEL_DESIGNATION
+
+3. cables data should be put inside a `public/data/cables.csv` file with the following columns:
+    - cable_id
+    - name
+    - data_source
+    - section
+    - diameter
+    - young_modulus
+    - linear_mass
+    - dilatation_coefficient
+    - temperature_reference
+    - section_conductor
+    - section_heart
+    - stress_strain_a0
+    - stress_strain_a1
+    - stress_strain_a2
+    - stress_strain_a3
+    - stress_strain_a4
+    - stress_strain_b0
+    - stress_strain_b1
+    - stress_strain_b2
+    - stress_strain_b3
+    - stress_strain_b4
+    - is_polynomial
+    - is_bimetallic
+    - diameter_heart
+    - has_magnetic_heart
+    - electric_resistance_20
+    - linear_resistance_temperature_coef
+    - emissivity
+    - solar_absorption
+    - radial_thermal_conductivity
+    - rts_cable
+    - rts_layer_1
+    - nb_strand_layer_1
+    - rts_layer_2
+    - nb_strand_layer_2
+    - rts_layer_3
+    - nb_strand_layer_3
+    - rts_layer_4
+    - nb_strand_layer_4
+    - rts_layer_5
+    - nb_strand_layer_5
+    - rts_layer_6
+    - nb_strand_layer_6
+    - rts_layer_7
+    - nb_strand_layer_7
+    - rts_layer_8
+    - nb_strand_layer_8
+    - safety_coefficient
+
+4. chains data should be put inside a `public/data/chains.csv` file with the following columns:
+    - name
+    - length
+    - weight
+    - surface
+    - v
+
+5. attachments data should be put inside a `public/data/attachments.csv` file with the following columns:
+    - support_family
+    - support_name
+    - set_number
+    - arm_length
+    - altitude
+
+
+At startup, the application will import the data from the csv files and store it in the database.

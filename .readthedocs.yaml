@@ -10,6 +10,22 @@ build:
       - npm ci
       - pip install uv
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv pip install -r docs-sphinx/requirements.txt --link-mode=copy
+    build:
+      html:
+        # Single project: build both languages into /en and /fr sub-trees so the
+        # in-page language switcher (pure path-prefix swap) works in production.
+        - cd docs-sphinx && make html-en
+        - cd docs-sphinx && make html-fr
+        - mkdir -p $READTHEDOCS_OUTPUT/html/en $READTHEDOCS_OUTPUT/html/fr
+        - cp -r docs-sphinx/build/en/html/* $READTHEDOCS_OUTPUT/html/en/
+        - cp -r docs-sphinx/build/fr/html/* $READTHEDOCS_OUTPUT/html/fr/
+        # Root redirect to the default (English) site.
+        - printf '<!DOCTYPE html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./en/">\n<link rel="canonical" href="./en/">\n' > $READTHEDOCS_OUTPUT/html/index.html
 
 sphinx:
   configuration: docs-sphinx/source/conf.py
+  fail_on_warning: true
+
+# Single ReadTheDocs project builds both languages. The build job above produces
+# /en and /fr sub-trees; the language switcher swaps between them client-side.
+# No separate translation project is required.

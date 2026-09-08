@@ -1,0 +1,52 @@
+{% if docs_current_language == "fr" %}
+{% set other_label = "EN" %}
+{% else %}
+{% set other_label = "FR" %}
+{% endif %}
+
+<div class="pst-navbar-language-switcher">
+  <a
+    id="language-switcher-link"
+    class="nav-link"
+    href="#"
+    data-current-language="{{ docs_current_language }}"
+    data-en-origin="{{ docs_en_origin }}"
+    data-fr-origin="{{ docs_fr_origin }}"
+    data-en-prefix="{{ docs_en_prefix }}"
+    data-fr-prefix="{{ docs_fr_prefix }}"
+    aria-label="Switch to {{ other_label }}"
+  >
+    <span id="language-switcher-label">{{ other_label }}</span>
+  </a>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var link = document.getElementById('language-switcher-link');
+    var label = document.getElementById('language-switcher-label');
+    if (!link || !label) {
+      return;
+    }
+
+    var current = link.dataset.currentLanguage === 'fr' ? 'fr' : 'en';
+    var other = current === 'en' ? 'fr' : 'en';
+
+    var origins = { en: link.dataset.enOrigin || '', fr: link.dataset.frOrigin || '' };
+    var prefixes = { en: link.dataset.enPrefix || '', fr: link.dataset.frPrefix || '' };
+
+    // Strip the current language prefix from the path to get the shared sub-path.
+    var subPath = window.location.pathname;
+    var currentPrefix = prefixes[current];
+    if (currentPrefix && (subPath === currentPrefix || subPath.indexOf(currentPrefix + '/') === 0)) {
+      subPath = subPath.slice(currentPrefix.length);
+    }
+    if (subPath.charAt(0) !== '/') {
+      subPath = '/' + subPath;
+    }
+
+    var otherLabel = other.toUpperCase();
+    link.href = origins[other] + prefixes[other] + subPath + window.location.hash;
+    link.setAttribute('aria-label', 'Switch to ' + otherLabel);
+    label.textContent = otherLabel;
+  });
+</script>

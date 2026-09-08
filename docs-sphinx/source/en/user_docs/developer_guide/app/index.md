@@ -7,6 +7,7 @@ This section covers general application features and configuration.
 application_update
 custom_components
 engine_worker
+how_to_add_error_codes
 obstacles_and_obstacle_distances
 offline_database
 plot_refresh_pipeline

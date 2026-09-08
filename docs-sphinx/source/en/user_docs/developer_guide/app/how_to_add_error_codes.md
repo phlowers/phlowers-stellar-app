@@ -76,7 +76,7 @@ known `PythonErrorCode` enum values as a substring. This means:
    > Translated messages belong in `python-error-messages.ts` instead, which
    > must only ever be imported from main-thread code (components/services),
    > never from `handle-task.ts` or anything else bundled into
-   > `worker-python.ts`. See [Part 2, section 2.7](#27--the-worker-bundle-and-transloco)
+   > `worker-python.ts`. See [Part 2, section 2.7](#worker-bundle-transloco)
    > for details.
 
    - `'error'` — shown as a blocking error notification
@@ -155,11 +155,11 @@ StudioComponent effect() → NotificationService.error()/.warning() (one toast p
 
 **Exceptions** are not touched on the Python side at all — they propagate
 normally and are caught by the `try/catch` in
-[handle-task.ts](../../../../../src/app/core/services/worker_python/tasks/handle-task.ts).
+`handle-task.ts` (`src/app/core/services/worker_python/tasks/handle-task.ts`).
 
 **Warnings** would otherwise be printed to stderr and lost, since
 `warnings.warn()` does not raise. To capture them,
-[functions.py](../../../../../src/app/core/services/worker_python/tasks/python-scripts/functions.py)
+`functions.py` (`src/app/core/services/worker_python/tasks/python-scripts/functions.py`)
 installs a global hook at worker startup:
 
 ```python
@@ -222,17 +222,17 @@ return { result: null, runTime, error: errorType, diagnostics };
 
 ### 2.3 — Threading through the worker boundary
 
-- [worker-python.ts](../../../../../src/app/core/services/worker_python/worker-python.ts)
+- `worker-python.ts` (`src/app/core/services/worker_python/worker-python.ts`)
   posts `{ result, error, diagnostics }` back to the main thread (falls back
   to `diagnostics: []` if a task throws before `handleTask()` even runs).
-- [worker-python.service.ts](../../../../../src/app/core/services/worker_python/worker-python.service.ts)
+- `worker-python.service.ts` (`src/app/core/services/worker_python/worker-python.service.ts`)
   receives the message, extracts `diagnostics` (`data.diagnostics ?? []`), and
   resolves the caller's `runTask()`/`runTaskWithTimeout()` promise with
   `{ result, error, diagnostics }`.
 
 ### 2.4 — Storage: `PlotService.diagnostics`
 
-[plot.service.ts](../../../../../src/app/core/services/plot/plot.service.ts)
+`plot.service.ts` (`src/app/core/services/plot/plot.service.ts`)
 exposes a single signal:
 
 ```typescript
@@ -246,7 +246,7 @@ diagnostics never survive between sections or plot resets.
 
 ### 2.5 — Rendering: `StudioComponent` effect → toasts
 
-[studio.component.ts](../../../../../src/app/shared/components/studio/studio.component.ts)
+`studio.component.ts` (`src/app/shared/components/studio/studio.component.ts`)
 has a single `effect()` that reacts to both `plotService.error()` and
 `plotService.diagnostics()`:
 
@@ -300,6 +300,7 @@ without double-toasting: the exception branch only looks at
 `origin === 'warning'`, so the same diagnostic is never processed by both
 paths.
 
+(worker-bundle-transloco)=
 ### 2.7 — The worker bundle and Transloco
 
 `worker-python.ts` is bundled by Angular as a **separate Web Worker chunk**

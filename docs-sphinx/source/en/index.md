@@ -6,7 +6,7 @@ myst:
 html_theme.sidebar_secondary.remove: true
 ---
 
-# Stellar Documentation
+# Stellar English Documentation
 
 Welcome to the **Stellar** application documentation!
 Stellar is a web application built with Angular for power line mechanical analysis.
