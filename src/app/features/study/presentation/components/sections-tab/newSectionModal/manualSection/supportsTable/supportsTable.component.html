@@ -277,6 +277,7 @@
               [id]="'chainName' + rowIndex"
               (focusin)="expandOptions('chainName', support.uuid)"
               (mousedown)="expandOptions('chainName', support.uuid)"
+              (focusout)="collapseOptions($event, 'chainName', support.uuid)"
               data-testid="chain-name-select"
             >
               <option [ngValue]="null" hidden data-placeholder></option>
@@ -428,6 +429,7 @@
               [id]="'supportName' + rowIndex"
               (focusin)="expandOptions('name', support.uuid)"
               (mousedown)="expandOptions('name', support.uuid)"
+              (focusout)="collapseOptions($event, 'name', support.uuid)"
               data-testid="support-name-select"
             >
               <option [ngValue]="null" hidden data-placeholder></option>
@@ -708,6 +710,7 @@
             [id]="'attachmentPosition' + rowIndex"
             (focusin)="expandOptions('attachmentPosition', support.uuid)"
             (mousedown)="expandOptions('attachmentPosition', support.uuid)"
+            (focusout)="collapseOptions($event, 'attachmentPosition', support.uuid)"
             data-testid="attachment-position-select"
           >
             <option [ngValue]="null" hidden></option>

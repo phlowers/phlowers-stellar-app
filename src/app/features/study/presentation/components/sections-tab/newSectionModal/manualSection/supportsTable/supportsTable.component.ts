@@ -45,6 +45,7 @@ import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker'
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { LOCATION_CONFIG } from '../location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { ExpandableSelectField } from './supportsTable.types';
 
 /**
  * Editable table of supports within a section.
@@ -145,6 +146,11 @@ export class SupportsTableComponent implements OnInit {
       const activeUuids = this.supports().map((support) => support.uuid);
       this.derivedFieldsRequests.retain(activeUuids);
       this.restrictionRequests.retain(activeUuids);
+
+      const activeUuidSet = new Set(activeUuids);
+      this.expandedSelects.update(
+        (keys) => new Set([...keys].filter((key) => activeUuidSet.has(this.expandedSelectUuid(key))))
+      );
     });
   }
 
@@ -231,16 +237,40 @@ export class SupportsTableComponent implements OnInit {
    * default action opens the picker) and `focusin` (for keyboard-driven opening), each
    * forcing a synchronous change-detection pass so the options exist before the picker paints.
    */
-  optionsExpanded(field: 'chainName' | 'name' | 'attachmentPosition', uuid: string): boolean {
+  private readonly expandOptionFields = ['chainName', 'name', 'attachmentPosition'] as const;
+
+  private expandedSelectUuid(key: string): string {
+    const field = this.expandOptionFields.find((f) => key.startsWith(f));
+    return field ? key.slice(field.length) : key;
+  }
+
+  optionsExpanded(field: ExpandableSelectField, uuid: string): boolean {
     return this.expandedSelects().has(field + uuid);
   }
 
-  expandOptions(field: 'chainName' | 'name' | 'attachmentPosition', uuid: string): void {
+  expandOptions(field: ExpandableSelectField, uuid: string): void {
     if (this.optionsExpanded(field, uuid)) return;
     this.expandedSelects.update((keys) => new Set(keys).add(field + uuid));
     // The native picker reads the option list synchronously right after this handler
     // returns, before Angular's normal (microtask-scheduled) CD would run — so force it now.
     this.cdr.detectChanges();
+  }
+
+  /**
+   * Drops the built option list once focus actually leaves the select, so a closed picker
+   * goes back to costing one option instead of the whole catalog. `focusout` also fires when
+   * focus merely moves between the select's own children (the filter input, an option) —
+   * `relatedTarget` still sits inside the select in that case, so those moves are ignored.
+   */
+  collapseOptions(event: FocusEvent, field: ExpandableSelectField, uuid: string): void {
+    const select = event.currentTarget as HTMLElement;
+    const nextFocus = event.relatedTarget as Node | null;
+    if (nextFocus && select.contains(nextFocus)) return;
+    this.expandedSelects.update((keys) => {
+      const next = new Set(keys);
+      next.delete(field + uuid);
+      return next;
+    });
   }
 
   /**
