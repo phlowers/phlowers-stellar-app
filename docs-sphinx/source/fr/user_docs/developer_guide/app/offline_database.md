@@ -2,7 +2,7 @@
 
 The application needs to store data locally in order to be able to work offline.
 
-The application uses a local indexedDB database to store the data. The database logics and tables are located at `src/app/core/store`.
+The application uses a local indexedDB database to store the data. The database logics and tables are located at `src/app/infrastructure/database` (Dexie AppDatabase) and is created/managed by `StorageService`.
 
 The database is used to store the data for the application.
 

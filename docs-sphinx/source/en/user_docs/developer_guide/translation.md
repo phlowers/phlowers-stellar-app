@@ -1,6 +1,6 @@
 # Documentation translation workflow
 
-This project maintains the Stellar documentation in two languages: **English** (source of truth) and **French**. The French tree is a peer of the English tree, not a set of `.po` files.
+This project maintains the {{app_name}} documentation in two languages: **English** (source of truth) and **French**. The French tree is a peer of the English tree, not a set of `.po` files.
 
 ## Structure
 
@@ -30,7 +30,7 @@ Rules:
 1. Create the page under `source/en/` first.
 2. Copy it to the matching path under `source/fr/`.
 3. Translate the French copy.
-4. Add the page to the French `toctree` labels in the relevant `index.md` files.
+4. Add the page to the relevant `toctree` labels in both language indexes.
 
 ## Building locally
 
@@ -64,7 +64,7 @@ npm run autodocs:fr
 
 `autodocs:en` serves the English site on `http://localhost:8080/` and `autodocs:fr`
 serves the French site on `http://localhost:8081/`, both with live reload. Run both
-commands (in two terminals) to preview both languages side by side, opening each
+commands in two terminals to preview both languages side by side, opening each
 port in its own browser tab.
 
 ## ReadTheDocs
@@ -83,10 +83,10 @@ ReadTheDocs then serves both under the main project's domain (`/en/<version>/…
 and `/fr/<version>/…`) and injects `READTHEDOCS_LANGUAGE` (`en` or `fr`) into
 each project's build. The `.readthedocs.yaml` build job forwards that value
 into `SPHINX_LANGUAGE` and runs `make html-rtd`, which builds only that
-project's language straight into `$READTHEDOCS_OUTPUT/html`.
+project's language into `$READTHEDOCS_OUTPUT/html`.
 
 - No manual root-redirect page or `/en` + `/fr` merge step is needed — RTD
-  owns the path prefixing and the version/language switcher (flyout menu).
+  owns the path prefixing and the version/language switcher.
 - RTD's own flyout is the only language switch; no custom in-page switcher
   needs to be built or maintained.
 

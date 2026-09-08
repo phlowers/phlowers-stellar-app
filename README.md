@@ -39,7 +39,13 @@ source .venv/bin/activate # to activate it.
 uv pip install -r requirements.txt # to install the dependencies. 
 ```
 
-You can now run `npm run docs` to build or directly `npm run autodocs` to build and serve the documentation on `http://localhost:8000/` with live reload on changes.
+You can now run `npm run docs` to build both languages, `npm run docs:en` / `npm run docs:fr` to build a single language, or `npm run autodocs:en` / `npm run autodocs:fr` to build and serve the documentation with live reload on changes (see `docs-sphinx/TRANSLATION.md` for details on the bilingual build).
+
+By default the docs are titled "Stellar". Set the `SPHINX_APP_NAME` environment variable before building to customize the application name used throughout the generated documentation, e.g.:
+
+```shell
+SPHINX_APP_NAME="My App" npm run docs:en
+```
 
 #### Generate PDF documentation
 

@@ -1,6 +1,6 @@
 # Engine Worker
 
-The application uses a worker to run [mechaphlowers](https://github.com/phlowers/mechaphlowers) that is the calculation engine of the application. The worker is located at "src/app/core/engine/worker/worker.ts" and is responsible for:
+The application uses a worker to run [mechaphlowers](https://github.com/phlowers/mechaphlowers) that is the calculation engine of the application. The worker is located at "src/app/core/services/worker_python" and is responsible for:
 
 - installing mechaphlowers
 - running the engine
