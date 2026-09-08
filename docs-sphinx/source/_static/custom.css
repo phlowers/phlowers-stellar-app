@@ -71,18 +71,3 @@ html[data-theme='dark'] .bd-header {
   background-color: #3730a3 !important;
   border-bottom: 2px solid #1e1b4b;
 }
-
-/* Language switcher in header navbar */
-.pst-navbar-language-switcher .nav-link {
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  color: #fff !important;
-}
-
-.pst-navbar-language-switcher .nav-link:hover,
-.pst-navbar-language-switcher .nav-link:focus {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #c7d2fe !important;
-}

@@ -8,7 +8,7 @@ This project maintains the Stellar documentation in two languages: **English** (
 docs-sphinx/source/
 ├── conf.py              # Shared Sphinx configuration
 ├── _static/             # Shared static assets (CSS, logos, favicon)
-├── _templates/          # Shared templates (language switcher)
+├── _templates/          # Shared templates
 ├── en/                  # English documentation (source of truth)
 │   ├── index.md
 │   ├── api/
@@ -23,7 +23,7 @@ Rules:
 
 - `conf.py`, `_static/`, and `_templates/` are shared across languages.
 - The `SPHINX_LANGUAGE` environment variable selects the active language (`en` or `fr`).
-- Every page that exists in `source/en/` must also exist in `source/fr/` so the language switcher never 404s.
+- Every page that exists in `source/en/` must also exist in `source/fr/` so ReadTheDocs' language flyout never 404s.
 
 ## Adding a new page
 
@@ -64,9 +64,8 @@ npm run autodocs:fr
 
 `autodocs:en` serves the English site on `http://localhost:8080/` and `autodocs:fr`
 serves the French site on `http://localhost:8081/`, both with live reload. Run both
-commands (in two terminals) to make the language switcher jump between them. The
-ports are injected into the switcher via the `DOCS_EN_ORIGIN` / `DOCS_FR_ORIGIN`
-environment variables set by the npm scripts — nothing is hard-coded in the template.
+commands (in two terminals) to preview both languages side by side, opening each
+port in its own browser tab.
 
 ## ReadTheDocs
 
@@ -88,23 +87,8 @@ project's language straight into `$READTHEDOCS_OUTPUT/html`.
 
 - No manual root-redirect page or `/en` + `/fr` merge step is needed — RTD
   owns the path prefixing and the version/language switcher (flyout menu).
-- The switcher's production defaults (`DOCS_EN_PREFIX=/en`, `DOCS_FR_PREFIX=/fr`,
-  same origin) still match this URL shape, so the in-page navbar switcher
-  keeps working alongside RTD's own flyout.
-
-## Language switcher
-
-A persistent language switcher is rendered in the header of every page. It computes
-the target URL from four values injected by `conf.py` (origin + path prefix per
-language), so the same template works in dev and in production with no hard-coded
-ports:
-
-- **Production** (prefixes `/en`, `/fr`, same origin):
-  `/en/latest/user_docs/user_guide/index.html` → `/fr/latest/user_docs/user_guide/index.html`
-- **Dev** (origins `http://localhost:8080` / `:8081`, empty prefixes):
-  `http://localhost:8080/user_docs/user_guide/index.html` → `http://localhost:8081/user_docs/user_guide/index.html`
-
-The switcher template lives in `source/_templates/language-switcher.html` and is styled via `source/_static/custom.css`.
+- RTD's own flyout is the only language switch; no custom in-page switcher
+  needs to be built or maintained.
 
 ## Translation scope
 
