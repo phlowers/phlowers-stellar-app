@@ -705,6 +705,24 @@ describe('ManualSectionComponent', () => {
       expect(component.rowsSupport()).toBe(50);
       expect(component.firstSupport()).toBe(100);
     });
+
+    // A large-page request defers its render; if a small page is selected before that render
+    // fires, the deferred callback must not overwrite the newer synchronous selection.
+    it('ignores a stale deferred large-page render superseded by a later small page', async () => {
+      component.onSupportsPageChange({ rows: 50, page: 2 });
+      component.onSupportsPageChange({ rows: 10, page: 3 });
+
+      expect(component.supportsPageLoading()).toBe(false);
+      expect(component.rowsSupport()).toBe(10);
+      expect(component.firstSupport()).toBe(30);
+
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(component.supportsPageLoading()).toBe(false);
+      expect(component.rowsSupport()).toBe(10);
+      expect(component.firstSupport()).toBe(30);
+    });
   });
 
   describe('sliderOptions', () => {

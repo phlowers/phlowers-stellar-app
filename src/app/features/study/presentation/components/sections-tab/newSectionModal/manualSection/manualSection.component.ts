@@ -385,9 +385,12 @@ export class ManualSectionComponent implements OnInit {
     this.sectionChange.emit(this.section());
   }
 
+  private supportsPageRequestId = 0;
+
   onSupportsPageChange(event: { rows?: number; page?: number }) {
     const rows = event.rows ?? DEFAULT_TABLE_ROWS_PER_PAGE;
     const first = (event.page ?? 0) * rows;
+    const requestId = ++this.supportsPageRequestId;
 
     // Building a page of edit-mode rows is synchronous and blocks the main thread, so nothing
     // repaints between the click and the new rows. For large pages, show the table's loading mask
@@ -397,12 +400,15 @@ export class ManualSectionComponent implements OnInit {
     // frame would cost. Time the previous render instead if the rows-per-page options change.
     if (rows <= DEFAULT_TABLE_ROWS_PER_PAGE) {
       this.applySupportsPage(first, rows);
+      this.supportsPageLoading.set(false);
       return;
     }
 
     this.supportsPageLoading.set(true);
     requestAnimationFrame(() =>
       setTimeout(() => {
+        // A later request may have applied its own (possibly synchronous) page in the meantime.
+        if (requestId !== this.supportsPageRequestId) return;
         this.applySupportsPage(first, rows);
         this.supportsPageLoading.set(false);
       })
