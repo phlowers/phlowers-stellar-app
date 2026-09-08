@@ -34,18 +34,35 @@
     var origins = { en: link.dataset.enOrigin || '', fr: link.dataset.frOrigin || '' };
     var prefixes = { en: link.dataset.enPrefix || '', fr: link.dataset.frPrefix || '' };
 
-    // Strip the current language prefix from the path to get the shared sub-path.
-    var subPath = window.location.pathname;
-    var currentPrefix = prefixes[current];
-    if (currentPrefix && (subPath === currentPrefix || subPath.indexOf(currentPrefix + '/') === 0)) {
-      subPath = subPath.slice(currentPrefix.length);
+    var href;
+    var segments = window.location.pathname.split('/');
+
+    // Find the LAST exact "en"/"fr" path segment: in production this is our
+    // language sub-tree, even when ReadTheDocs prepends its own "/en/<version>/"
+    // base (which would be an earlier segment we must leave untouched).
+    var langIndex = -1;
+    for (var i = 0; i < segments.length; i++) {
+      if (segments[i] === 'en' || segments[i] === 'fr') {
+        langIndex = i;
+      }
     }
-    if (subPath.charAt(0) !== '/') {
-      subPath = '/' + subPath;
+
+    if (langIndex !== -1) {
+      // Same origin, swap only the sub-tree language segment.
+      segments[langIndex] = other;
+      href = segments.join('/') + window.location.hash;
+    } else {
+      // Dev multi-port: no language segment in the path, jump to the other
+      // language's origin/prefix at the same sub-path.
+      var subPath = window.location.pathname;
+      if (subPath.charAt(0) !== '/') {
+        subPath = '/' + subPath;
+      }
+      href = origins[other] + prefixes[other] + subPath + window.location.hash;
     }
 
     var otherLabel = other.toUpperCase();
-    link.href = origins[other] + prefixes[other] + subPath + window.location.hash;
+    link.href = href;
     link.setAttribute('aria-label', 'Switch to ' + otherLabel);
     label.textContent = otherLabel;
   });

@@ -4,7 +4,7 @@ html_theme.sidebar_secondary.remove: true
 
 # API Reference
 
-This section contains the TypeScript API documentation for the Stellar application,
+This section contains the TypeScript API documentation for the {{app_name}} application,
 auto-generated from the source code using [sphinx-js](https://sphinx-js.readthedocs.io/).
 
 ::::{grid} 1 2 2 2

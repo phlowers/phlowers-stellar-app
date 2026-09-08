@@ -1,7 +1,7 @@
 
 # Developer Guide
 
-Technical documentation for developers contributing to Stellar.
+Technical documentation for developers contributing to {{app_name}}.
 
 
 ```{toctree}

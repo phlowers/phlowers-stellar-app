@@ -8,7 +8,9 @@ import os
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Stellar"
+app_name = os.environ.get("SPHINX_APP_NAME", "Stellar")
+
+project = app_name
 copyright = "2026, RTE (http://www.rte-france.com)"
 
 
@@ -44,6 +46,11 @@ myst_enable_extensions = [
     "dollarmath",
     "substitution",
 ]
+
+myst_substitutions = {
+    "app_name": app_name,
+}
+
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
@@ -107,7 +114,7 @@ html_theme_options = {
 }
 
 html_title = (
-    "Documentation Stellar" if language == "fr" else "Stellar Documentation"
+    f"Documentation {app_name}" if language == "fr" else f"{app_name} Documentation"
 )
 
 # Remove secondary sidebar on landing page

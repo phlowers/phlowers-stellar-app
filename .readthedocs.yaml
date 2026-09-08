@@ -20,7 +20,7 @@ build:
         - cp -r docs-sphinx/build/en/html/* $READTHEDOCS_OUTPUT/html/en/
         - cp -r docs-sphinx/build/fr/html/* $READTHEDOCS_OUTPUT/html/fr/
         # Root redirect to the default (English) site.
-        - printf '<!DOCTYPE html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=./en/">\n<link rel="canonical" href="./en/">\n' > $READTHEDOCS_OUTPUT/html/index.html
+        - cp docs-sphinx/_rtd/index.html $READTHEDOCS_OUTPUT/html/index.html
 
 sphinx:
   configuration: docs-sphinx/source/conf.py

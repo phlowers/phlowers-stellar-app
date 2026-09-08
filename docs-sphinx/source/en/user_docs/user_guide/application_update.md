@@ -4,7 +4,7 @@ html_theme.sidebar_secondary.remove: true
 
 # Application Update
 
-This page explains how Stellar updates itself and how your user data is preserved.
+This page explains how {{app_name}} updates itself and how your user data is preserved.
 
 ## What Gets Updated
 
@@ -42,7 +42,7 @@ You may see an update notification when a new version is available. In that case
 
 ## User Best Practices
 
-- Keep a single main Stellar tab open during an update.
+- Keep a single main {{app_name}} tab open during an update.
 - Avoid forcing multiple consecutive page reloads.
 - If you are offline, reconnect and then reload the page.
 
@@ -50,7 +50,7 @@ You may see an update notification when a new version is available. In that case
 
 If you still see an old interface after deployment:
 
-1. Close all open Stellar tabs.
+1. Close all open {{app_name}} tabs.
 2. Reopen the application.
 3. Perform a full browser reload.
 
