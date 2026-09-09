@@ -468,7 +468,6 @@
               <app-icon icon="edit_arrow_down" />
               <ng-container>{{ 'manual-section.double-click-hint' | transloco }}</ng-container>
             </p>
-            <!-- TODO: STOP #2 — paginator interpolation -->
             <p-paginator
               (onPageChange)="onSupportsPageChange($event)"
               [totalRecords]="section().supports.length"
@@ -477,7 +476,7 @@
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
-              [currentPageReportTemplate]="currentPageReportTemplate"
+              [currentPageReportTemplate]="'manual-section.current-page-report' | transloco"
             />
           </div>
         } @else if (mode() === 'view') {
@@ -486,7 +485,6 @@
               <dt>{{ 'manual-section.label-supports-amount' | transloco }}</dt>
               <dd class="read-only-info">{{ section().supports.length }}</dd>
             </dl>
-            <!-- TODO: STOP #2 — paginator interpolation -->
             <p-paginator
               (onPageChange)="onSupportsPageChange($event)"
               [totalRecords]="section().supports.length"
@@ -495,7 +493,7 @@
               [showCurrentPageReport]="true"
               [showPageLinks]="true"
               [showJumpToPageDropdown]="false"
-              currentPageReportTemplate="Support {first} to {last} of {totalRecords}"
+              [currentPageReportTemplate]="'manual-section.current-page-report' | transloco"
             />
           </div>
         }
@@ -505,6 +503,7 @@
             [first]="firstSupport()"
             [supports]="section().supports || []"
             [section]="section()"
+            [pageLoading]="supportsPageLoading()"
             (addSupport)="addSupport($event.index, $event.position)"
             (deleteSupport)="deleteSupport($event)"
             (duplicateSupport)="duplicateSupport($event)"

@@ -10,6 +10,7 @@
     "studio": "Studio"
   },
   "common": {
+    "search": "Search",
     "yes": "Yes",
     "no": "No",
     "cancel": "Cancel",
@@ -482,9 +483,14 @@
     "delete": "Delete support",
     "aria-supports-amount": "supports amount",
     "aria-support-number": "support number",
+    "aria-support-name": "support name",
+    "aria-support-name-filter": "filter support names",
+    "aria-clear-support-name": "clear support name",
     "aria-span-length": "span length",
     "aria-span-angle": "span angle",
     "aria-chain-name": "chain name",
+    "aria-chain-name-filter": "filter chain names",
+    "aria-clear-chain-name": "clear chain name",
     "aria-chain-length": "chain length",
     "aria-chain-weight": "chain weight",
     "aria-open-attachment-modal": "open attachment set modal",

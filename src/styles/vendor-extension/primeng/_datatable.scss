@@ -9,6 +9,7 @@
   --p-datatable-header-cell-background: var(--primary-100);
   --p-datatable-header-cell-hover-background: var(--primary-50);
   --p-datatable-row-color: var(--p-datatable-header-cell-color);
+  --p-datatable-loading-icon-size: 5rem;
 
   .p-datatable-table {
     border-collapse: unset;
@@ -54,5 +55,9 @@
       padding-right: 0rem;
       padding-left: 0rem;
     }
+  }
+
+  .p-datatable-loading-icon {
+    color: var(--primary-500);
   }
 }
