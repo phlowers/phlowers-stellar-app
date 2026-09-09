@@ -18,7 +18,13 @@
 import jsPDF from 'jspdf';
 
 import { Support } from '@shared/domain';
-import { CONTENT_WIDTH, LINE_HEIGHT, PAGE_MARGIN, PARAGRAPH_INDENT, PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
+import {
+  CONTENT_WIDTH,
+  LINE_HEIGHT,
+  PAGE_MARGIN,
+  PARAGRAPH_INDENT,
+  PDF_UNITS
+} from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import {
   drawBulletItem,

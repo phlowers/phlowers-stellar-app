@@ -232,10 +232,7 @@ export function drawPageFooters(doc: jsPDF, pageLabel: string, landscapeFromPage
 }
 
 /** Resolves a report's fixed labels via Transloco, preserving the label struct's type. */
-export function buildReportLabels<T extends Record<string, string>>(
-  translate: (key: string) => string,
-  keys: Record<keyof T, string>
-): T {
+export function buildReportLabels<T>(translate: (key: string) => string, keys: { [K in keyof T]: string }): T {
   const entries = Object.entries(keys) as [keyof T, string][];
   return entries.reduce((labels, [field, key]) => {
     labels[field] = translate(key) as T[keyof T];
