@@ -2,6 +2,9 @@
 
 The application has to function offline. Therefore, all assets should be downloaded and cached on the user's device. It also has to be able to update itself when a new version is available.
 
+Catalog reference data (CSV/JSON files) is refreshed by a separate, independent
+mechanism — see [Catalog Update Process](catalog_update.md).
+
 ## Service Worker Overview
 
 Our application uses a service worker to enable offline capabilities and manage updates. The service worker:
@@ -10,6 +13,11 @@ Our application uses a service worker to enable offline capabilities and manage 
 2. Checks for new versions when the application loads
 3. Manages the update process when a new version is available
 4. Serves cached assets when the user is offline
+
+Catalog files (`/data/*.csv`, `/data/obstacle_configuration.json`) are **excluded**
+from the application asset manifest (`files`) — the service worker never
+downloads or caches them. Only their SHA-256 hashes are listed, under
+`data_hashes`, for the catalog update mechanism to consume.
 
 ## Update Mechanism
 
@@ -29,6 +37,40 @@ Our application uses a service worker to enable offline capabilities and manage 
    - Downloads new assets
    - Removes outdated assets
    - Updates the cached version information
+
+### Authorization and entry points
+
+`WorkerUpdateService` (`stellar/src/app/core/services/worker_update/worker_update.service.ts`)
+is the only class allowed to send `install`/`update` commands to the service
+worker, through three explicit, authenticated-only intents:
+
+- `confirmUpdate()` — the user accepts the update popup (`pendingAction` must be
+  `'first-install'` or `'update-available'`).
+- `forceUpdateFromAdmin()` — an explicit click on the `/admin` page (requires
+  `pendingAction === 'update-available'`).
+- `installFirstLaunch()` — the only action allowed to run automatically, and only
+  when the service worker cache is confirmed empty (`pendingAction === 'first-install'`)
+  **and** the user is authenticated.
+
+All three read `AuthService.currentUser()` (read-only) and return `false` without
+posting any message if the user is not authenticated or the pending action does
+not match.
+
+### Versioned, atomic activation
+
+Application versions are activated atomically to avoid any offline window with a
+partially-populated cache:
+
+- Each version is cached under its own `app-assets-v-*` name; a small control
+  cache (`app-assets-control`) stores the pointer to the currently `active`
+  cache and keeps the `previous` one for rollback.
+- A candidate version is only fully prepared (including a check that
+  `/index.html` and every manifest asset are present) **before** the control
+  pointer is switched — a single write, done only on full success.
+- On failure before activation, only the incomplete candidate is discarded; the
+  active version keeps serving the app unaffected.
+- Fetch handling resolves a single, consistent version per request (active, or
+  previous as fallback) — it never mixes assets from two versions.
 
 ### Asset List Generation
 

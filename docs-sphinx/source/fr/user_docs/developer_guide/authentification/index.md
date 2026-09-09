@@ -6,5 +6,4 @@ Cette section couvre les fonctionnalités et la configuration de l'authentificat
 :titlesonly:
 
 Authentification <authentification>
-Authentification (FR) <authentification-fr>
 ```
