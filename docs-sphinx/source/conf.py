@@ -24,6 +24,7 @@ extensions = [
     "sphinx_design",  # Grid, cards, tabs, badges, etc.
     "sphinx_copybutton",  # Copy button on code blocks
     "sphinx_simplepdf",  # PDF generation via WeasyPrint
+    "sphinxcontrib.mermaid",  # Render ```mermaid fenced code blocks as diagrams
 ]
 
 # Sphinx-SimplePDF configuration
@@ -35,7 +36,16 @@ simplepdf_vars = {
 
 # sphinx-js configuration for TypeScript
 js_language = "typescript"
-js_source_path = "../../src"
+js_source_path = [
+    "../../src/app/core/services",
+    "../../src/app/shared/catalog/services",
+    "../../src/app/shared/domain",
+    "../../src/app/infrastructure",
+    "../../src/app/features/changelog",
+    "../../src/app/features/news",
+]
+# Common ancestor of js_source_path entries, needed to disambiguate relative JS paths
+root_for_relative_js_paths = "../../src"
 jsdoc_tsconfig_path = "../tsconfig.typedoc.json"
 primary_domain = "js"
 
@@ -46,6 +56,9 @@ myst_enable_extensions = [
     "dollarmath",
     "substitution",
 ]
+
+# Render ```mermaid fences via the mermaid directive instead of Pygments highlighting
+myst_fence_as_directive = ["mermaid"]
 
 myst_substitutions = {
     "app_name": app_name,
