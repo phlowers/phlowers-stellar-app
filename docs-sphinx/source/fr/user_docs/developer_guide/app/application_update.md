@@ -1,65 +1,107 @@
-# Application Update Process
+# Processus de mise à jour de l'application
 
-The application has to function offline. Therefore, all assets should be downloaded and cached on the user's device. It also has to be able to update itself when a new version is available.
+L'application doit fonctionner hors ligne. Par conséquent, toutes les ressources doivent être téléchargées et mises en cache sur l'appareil de l'utilisateur. Elle doit également être capable de se mettre à jour elle-même lorsqu'une nouvelle version est disponible.
 
-## Service Worker Overview
+Les données de référence du catalogue (fichiers CSV/JSON) sont actualisées par un mécanisme
+séparé et indépendant — voir [Processus de mise à jour du catalogue](catalog_update.md).
 
-Our application uses a service worker to enable offline capabilities and manage updates. The service worker:
+## Aperçu du Service Worker
 
-1. Caches application assets during installation
-2. Checks for new versions when the application loads
-3. Manages the update process when a new version is available
-4. Serves cached assets when the user is offline
+Notre application utilise un service worker pour permettre les fonctionnalités hors ligne et gérer les mises à jour. Le service worker :
 
-## Update Mechanism
+1. Met en cache les ressources de l'application lors de l'installation
+2. Vérifie l'existence de nouvelles versions au chargement de l'application
+3. Gère le processus de mise à jour lorsqu'une nouvelle version est disponible
+4. Sert les ressources mises en cache lorsque l'utilisateur est hors ligne
 
-### How Updates Work
+Les fichiers de catalogue (`/data/*.csv`, `/data/obstacle_configuration.json`) sont **exclus**
+du manifeste des ressources de l'application (`files`) — le service worker ne les
+télécharge ni ne les met en cache. Seuls leurs hachages SHA-256 sont listés, sous
+`data_hashes`, à l'usage du mécanisme de mise à jour du catalogue.
 
-1. When a user navigates to the application, the service worker checks for a new version by comparing:
-   - The Git hash of the current version (stored in cache) and the Git hash of the latest version (from the server manifest)
-   - The build timestamp of the current version (stored in cache) and the build timestamp of the latest version (from the server manifest)
+## Mécanisme de mise à jour
 
-2. If a new version is detected, the service worker notifies the application via a message event.
+### Comment fonctionnent les mises à jour
 
-3. The application can then show a message to the user in the UI in order to let them know that an update is available.
+1. Lorsqu'un utilisateur navigue vers l'application, le service worker vérifie l'existence d'une nouvelle version en comparant :
+   - Le hash Git de la version actuelle (stocké en cache) et le hash Git de la dernière version (issu du manifeste serveur)
+   - L'horodatage de build de la version actuelle (stocké en cache) et l'horodatage de build de la dernière version (issu du manifeste serveur)
 
-4. The user can then go the the /admin page and click on the "Update" button to download the new version.
+2. Si une nouvelle version est détectée, le service worker en informe l'application via un événement message.
 
-5. During the update process, the service worker:
-   - Downloads new assets
-   - Removes outdated assets
-   - Updates the cached version information
+3. L'application peut alors afficher un message à l'utilisateur dans l'interface pour l'informer qu'une mise à jour est disponible.
 
-### Asset List Generation
+4. L'utilisateur peut ensuite se rendre sur la page /admin et cliquer sur le bouton « Mettre à jour » pour télécharger la nouvelle version.
 
-The service worker relies on a pre-generated list of assets to cache in order to download the correct assets when an update is available. This list is created during the build process using the `create_assets_list_for_service_worker.py` script.
+5. Pendant le processus de mise à jour, le service worker :
+   - Télécharge les nouvelles ressources
+   - Supprime les ressources obsolètes
+   - Met à jour les informations de version en cache
 
-#### Python Package Management
+### Autorisation et points d'entrée
 
-Python packages (mechaphlowers and dependencies) are managed by the `set_up_mechaphlowers.py` script, which:
-- Automatically detects all dependencies (26 packages)
-- Prefers CDN versions when available (14/26 from Pyodide CDN)
-- Downloads remaining packages via pip (12/26)
-- Optimizes wheels with Brotli/Gzip compression
-- Stores packages locally in `public/pyodide/`
+`WorkerUpdateService` (`stellar/src/app/core/services/worker_update/worker_update.service.ts`)
+est la seule classe autorisée à envoyer des commandes `install`/`update` au service
+worker, via trois intentions explicites, réservées aux utilisateurs authentifiés :
 
-Run the setup script before building:
+- `confirmUpdate()` — l'utilisateur accepte la popup de mise à jour (`pendingAction` doit être
+  `'first-install'` ou `'update-available'`).
+- `forceUpdateFromAdmin()` — un clic explicite sur la page `/admin` (nécessite
+  `pendingAction === 'update-available'`).
+- `installFirstLaunch()` — la seule action autorisée à s'exécuter automatiquement, et uniquement
+  lorsque le cache du service worker est confirmé vide (`pendingAction === 'first-install'`)
+  **et** que l'utilisateur est authentifié.
+
+Les trois méthodes lisent `AuthService.currentUser()` (lecture seule) et renvoient `false` sans
+envoyer aucun message si l'utilisateur n'est pas authentifié ou si l'action en attente ne
+correspond pas.
+
+### Activation versionnée et atomique
+
+Les versions de l'application sont activées de manière atomique afin d'éviter toute fenêtre hors ligne avec un
+cache partiellement rempli :
+
+- Chaque version est mise en cache sous son propre nom `app-assets-v-*` ; un petit cache
+  de contrôle (`app-assets-control`) stocke le pointeur vers le cache actuellement `active`
+  et conserve le `previous` pour un éventuel rollback.
+- Une version candidate n'est entièrement préparée (y compris une vérification que
+  `/index.html` et toutes les ressources du manifeste sont présentes) **qu'avant** le basculement
+  du pointeur de contrôle — une seule écriture, effectuée uniquement en cas de succès complet.
+- En cas d'échec avant l'activation, seule la version candidate incomplète est écartée ; la
+  version active continue de servir l'application sans être affectée.
+- La gestion des requêtes fetch résout une unique version cohérente par requête (active, ou
+  previous en repli) — elle ne mélange jamais les ressources de deux versions.
+
+### Génération de la liste des ressources
+
+Le service worker s'appuie sur une liste pré-générée de ressources à mettre en cache afin de télécharger les bonnes ressources lorsqu'une mise à jour est disponible. Cette liste est créée pendant le processus de build à l'aide du script `create_assets_list_for_service_worker.py`.
+
+#### Gestion des paquets Python
+
+Les paquets Python (mechaphlowers et ses dépendances) sont gérés par le script `set_up_mechaphlowers.py`, qui :
+- Détecte automatiquement toutes les dépendances (26 paquets)
+- Privilégie les versions CDN lorsqu'elles sont disponibles (14/26 depuis le CDN Pyodide)
+- Télécharge les paquets restants via pip (12/26)
+- Optimise les wheels avec une compression Brotli/Gzip
+- Stocke les paquets localement dans `public/pyodide/`
+
+Exécutez le script de configuration avant de builder :
 ```bash
 npm run set-up-mechaphlowers
 ```
 
-#### Asset List Commands
+#### Commandes de la liste des ressources
 
-`npm run build` runs it automatically after `ng build`. It can also be run manually:
+`npm run build` l'exécute automatiquement après `ng build`. Elle peut également être exécutée manuellement :
 
-- `npm run create-assets-list-for-service-worker` - Generates the asset list for the single Transloco build output in `dist/`
+- `npm run create-assets-list-for-service-worker` - Génère la liste des ressources pour l'unique sortie de build Transloco dans `dist/`
 
-This command runs the Python script that:
-1. Recursively scans the `dist/` build directory
-2. Creates a list of all files (excluding blacklisted items like the service worker itself)
-3. Includes Python packages from `public/pyodide/` (managed by `set_up_mechaphlowers.py`)
-4. Generates version information including:
-   - Git commit hash
-   - Build timestamp
-   - Application version from package.json
-5. Writes the complete asset list to `assets_list.json`
+Cette commande exécute le script Python qui :
+1. Parcourt récursivement le répertoire de build `dist/`
+2. Crée une liste de tous les fichiers (à l'exclusion des éléments sur liste noire comme le service worker lui-même)
+3. Inclut les paquets Python présents dans `public/pyodide/` (gérés par `set_up_mechaphlowers.py`)
+4. Génère les informations de version, notamment :
+   - Le hash du commit Git
+   - L'horodatage du build
+   - La version de l'application depuis package.json
+5. Écrit la liste complète des ressources dans `assets_list.json`

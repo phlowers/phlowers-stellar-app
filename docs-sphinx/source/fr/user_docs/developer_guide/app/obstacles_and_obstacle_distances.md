@@ -1,12 +1,12 @@
-# Obstacles and Obstacle Distances
+# Obstacles et distances aux obstacles
 
-This document describes the obstacle management system and the distance calculation pipeline for developers.
+Ce document décrit le système de gestion des obstacles et le pipeline de calcul des distances à destination des développeurs.
 
-Obstacles represent physical objects near power lines (buildings, trees, etc.) whose clearance distances must be computed and visualized. The system covers the full pipeline: from user input, through Python computation, to interactive Plotly rendering.
+Les obstacles représentent des objets physiques situés à proximité des lignes électriques (bâtiments, arbres, etc.) dont les distances de dégagement doivent être calculées et visualisées. Le système couvre l'intégralité du pipeline : de la saisie utilisateur, en passant par le calcul Python, jusqu'au rendu interactif Plotly.
 
 ---
 
-## Architecture overview
+## Vue d'ensemble de l'architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -46,32 +46,32 @@ Obstacles represent physical objects near power lines (buildings, trees, etc.) w
 
 ---
 
-## Key files at a glance
+## Aperçu des fichiers clés
 
-| File | Purpose |
+| Fichier | Objectif |
 |---|---|
-| `shared/domain/obstacles/obstacle-form.interfaces.ts` | Reactive form and domain types |
-| `shared/domain/helpers/span-loads.helpers.ts` | `recheckSpanLoads()` utility shared between loads and plot service |
-| `core/services/obstacles-form/obstaclesForm.service.ts` | Form state, save & compute orchestration |
-| `core/services/obstacles/obstacles.service.ts` | Obstacle type catalog, selection signals |
-| `core/services/plot/plot.service.ts` | Geometry state, distance storage, `reapplyObstacles()` coordination |
-| `core/services/worker_python/worker-python.service.ts` | Pyodide task runner |
-| `core/services/worker_python/tasks/types.ts` | `Distance`, `DistancePoint`, task I/O types |
+| `shared/domain/obstacles/obstacle-form.interfaces.ts` | Types de formulaire réactif et de domaine |
+| `shared/domain/helpers/span-loads.helpers.ts` | Utilitaire `recheckSpanLoads()` partagé entre le service de charges et le service de graphique |
+| `core/services/obstacles-form/obstaclesForm.service.ts` | État du formulaire, orchestration de l'enregistrement et du calcul |
+| `core/services/obstacles/obstacles.service.ts` | Catalogue des types d'obstacles, signaux de sélection |
+| `core/services/plot/plot.service.ts` | État de la géométrie, stockage des distances, coordination de `reapplyObstacles()` |
+| `core/services/worker_python/worker-python.service.ts` | Exécuteur de tâches Pyodide |
+| `core/services/worker_python/tasks/types.ts` | Types d'entrée/sortie des tâches `Distance`, `DistancePoint` |
 | `core/services/worker_python/tasks/python-scripts/functions.py` | `change_state()`, `add_obstacles()`, `calculate_obstacles_distances()` |
-| `features/studio/loads/presentation/services/loadForms.service.ts` | Load form state; delegates to `reapplyObstacles()` after load changes |
-| `features/studio/obstacles/presentation/components/obstaclesForm/` | Obstacle creation/edit UI |
-| `shared/components/studio/section/section-plot.component.ts` | Plot orchestration |
-| `shared/components/studio/section/helpers/createPlot.ts` | Plotly assembly entry point |
-| `shared/components/studio/section/helpers/createDistanceTraces.ts` | Distance line/annotation traces |
-| `shared/components/studio/section/helpers/obstacles.ts` | Obstacle marker annotations & click handling |
+| `features/studio/loads/presentation/services/loadForms.service.ts` | État du formulaire de charge ; délègue à `reapplyObstacles()` après les changements de charge |
+| `features/studio/obstacles/presentation/components/obstaclesForm/` | Interface de création/édition d'obstacle |
+| `shared/components/studio/section/section-plot.component.ts` | Orchestration du graphique |
+| `shared/components/studio/section/helpers/createPlot.ts` | Point d'entrée de l'assemblage Plotly |
+| `shared/components/studio/section/helpers/createDistanceTraces.ts` | Traces de lignes/annotations de distance |
+| `shared/components/studio/section/helpers/obstacles.ts` | Annotations des marqueurs d'obstacles et gestion des clics |
 
 ---
 
-## Data model
+## Modèle de données
 
 ### `Obstacle`
 
-Defined in `shared/domain/obstacles/obstacle-form.interfaces.ts`.
+Défini dans `shared/domain/obstacles/obstacle-form.interfaces.ts`.
 
 ```typescript
 interface Obstacle {
@@ -92,19 +92,19 @@ interface Position3D {
 }
 ```
 
-`altitudeType` controls how Python interprets the `z` field:
+`altitudeType` contrôle la façon dont Python interprète le champ `z` :
 
-| Value | Meaning |
+| Valeur | Signification |
 |---|---|
-| `'absolute'` | `z` is an NGF absolute altitude |
-| `'relative'` | `z` is relative to the reference support foot altitude |
-| `'relative_cable'` | `z` is relative to the cable attachment altitude of the reference support |
+| `'absolute'` | `z` est une altitude absolue NGF |
+| `'relative'` | `z` est relatif à l'altitude du pied du support de référence |
+| `'relative_cable'` | `z` est relatif à l'altitude d'attache du câble du support de référence |
 
-Python converts all altitude types to absolute NGF coordinates before returning geometry in `litData.obstacles`.
+Python convertit tous les types d'altitude en coordonnées NGF absolues avant de renvoyer la géométrie dans `litData.obstacles`.
 
-### `Distance` (result from Python)
+### `Distance` (résultat renvoyé par Python)
 
-Defined in `core/services/worker_python/tasks/types.ts`.
+Défini dans `core/services/worker_python/tasks/types.ts`.
 
 ```typescript
 interface Distance {
@@ -125,87 +125,87 @@ interface DistancePoint {
 
 ---
 
-## End-to-end data flow
+## Flux de données de bout en bout
 
-### 1. User input — `ObstaclesFormComponent`
+### 1. Saisie utilisateur — `ObstaclesFormComponent`
 
-The component renders a reactive form (positions, obstacle type, support, altitude/lateral type).
-Position field changes are debounced (300 ms) before being written back to `ObstaclesFormService`.
+Le composant affiche un formulaire réactif (positions, type d'obstacle, support, type d'altitude/latéral).
+Les changements des champs de position sont différés (debounce, 300 ms) avant d'être renvoyés à `ObstaclesFormService`.
 
-### 2. Form state — `ObstaclesFormService`
+### 2. État du formulaire — `ObstaclesFormService`
 
-Maintains the reactive form group, validates it, and exposes:
+Maintient le groupe de formulaire réactif, le valide, et expose :
 
-- `canCalculateAndSave` — computed signal; `true` when the form is valid and every position is complete.
-- `results` — computed signal; distance results for the currently selected obstacle point, derived from `PlotService.distances`.
+- `canCalculateAndSave` — signal calculé ; `true` lorsque le formulaire est valide et que chaque position est complète.
+- `results` — signal calculé ; résultats de distance pour le point d'obstacle actuellement sélectionné, dérivés de `PlotService.distances`.
 
-When the user triggers **Calculate & Save**:
+Lorsque l'utilisateur déclenche **Calculer et enregistrer** :
 
-1. The obstacle is built from the form (`buildObstacleFromForm()`).
-2. The obstacle is upserted into the section in memory (`upsertObstacleInSection()`).
-3. The section is persisted to the backend (`saveSection()`).
-4. **`PlotService.reapplyObstacles()` is called** — the service no longer runs Python tasks directly. All plot update coordination is deferred to `PlotService` (see below).
+1. L'obstacle est construit à partir du formulaire (`buildObstacleFromForm()`).
+2. L'obstacle est inséré/mis à jour dans la section en mémoire (`upsertObstacleInSection()`).
+3. La section est persistée sur le backend (`saveSection()`).
+4. **`PlotService.reapplyObstacles()` est appelé** — le service n'exécute plus directement de tâches Python. Toute la coordination de mise à jour du graphique est déléguée à `PlotService` (voir ci-dessous).
 
-### 3. Python computation — coordinated by `PlotService.reapplyObstacles()`
+### 3. Calcul Python — coordonné par `PlotService.reapplyObstacles()`
 
-`reapplyObstacles()` is the single entry point for any operation that must keep loads and obstacles in sync on the Plotly plot. It is called by both `ObstaclesFormService.calculateAndSave()` and `LoadFormsService.calculateLoad()`.
+`reapplyObstacles()` est le point d'entrée unique pour toute opération devant maintenir la synchronisation entre les charges et les obstacles sur le graphique Plotly. Il est appelé à la fois par `ObstaclesFormService.calculateAndSave()` et par `LoadFormsService.calculateLoad()`.
 
-It runs the following sequence:
+Il exécute la séquence suivante :
 
-| Step | Task constant | Python function | Condition |
+| Étape | Constante de tâche | Fonction Python | Condition |
 |---|---|---|---|
-| 1 | `Task.changeState` | `change_state()` | Only if `temporaryLoadData` is set (a load case is active) |
-| 2 | `Task.addObstacle` × N | `add_obstacles()` | Once per saved obstacle in the section |
-| 3 | `Task.calculateObstaclesDistances` | `calculate_obstacles_distances()` | Only if the section has at least one obstacle |
+| 1 | `Task.changeState` | `change_state()` | Uniquement si `temporaryLoadData` est défini (un cas de charge est actif) |
+| 2 | `Task.addObstacle` × N | `add_obstacles()` | Une fois par obstacle enregistré dans la section |
+| 3 | `Task.calculateObstaclesDistances` | `calculate_obstacles_distances()` | Uniquement si la section comporte au moins un obstacle |
 
-**Why this order matters:** The Python worker is stateful. `Task.changeState` resets the internal geometry to the base + load state, which clears any previously added obstacles. Running loads first and then re-adding all obstacles ensures that both loads and obstacles are always layered correctly, regardless of which form triggered the update.
+**Pourquoi cet ordre est important :** le worker Python conserve un état. `Task.changeState` réinitialise la géométrie interne à l'état de base + charge, ce qui efface tous les obstacles précédemment ajoutés. Appliquer d'abord les charges puis réajouter tous les obstacles garantit que charges et obstacles sont toujours superposés correctement, quel que soit le formulaire ayant déclenché la mise à jour.
 
-After the sequence:
-- `PlotService.litData` is updated with the final geometry (including obstacle 3-D points and load coordinates).
-- `PlotService.distances` is updated with the new clearance results.
+Après la séquence :
+- `PlotService.litData` est mis à jour avec la géométrie finale (incluant les points 3D des obstacles et les coordonnées de charge).
+- `PlotService.distances` est mis à jour avec les nouveaux résultats de dégagement.
 
-The worker uses Pyodide (Python in WebAssembly) — see [Engine Worker](engine_worker.md) for the worker infrastructure.
+Le worker utilise Pyodide (Python en WebAssembly) — voir [Worker moteur](engine_worker.md) pour l'infrastructure du worker.
 
-### 4. Load / obstacle interplay — `LoadFormsService`
+### 4. Interaction charges / obstacles — `LoadFormsService`
 
-`LoadFormsService.calculateLoad()` follows the same delegation pattern:
+`LoadFormsService.calculateLoad()` suit le même schéma de délégation :
 
-1. Validates and rechecks span loads against current supports (`recheckSpanLoads()` from `shared/domain/helpers/span-loads.helpers.ts`).
-2. Stores the updated load data in `PlotService.temporaryLoadData`.
-3. Calls **`PlotService.reapplyObstacles()`** — which applies the new load state first, then re-adds all obstacles on top.
+1. Valide et revérifie les charges de portée par rapport aux supports actuels (`recheckSpanLoads()` de `shared/domain/helpers/span-loads.helpers.ts`).
+2. Stocke les données de charge mises à jour dans `PlotService.temporaryLoadData`.
+3. Appelle **`PlotService.reapplyObstacles()`** — qui applique d'abord le nouvel état de charge, puis réajoute tous les obstacles par-dessus.
 
-This means calculating a load will never erase obstacle geometry, and calculating an obstacle will never erase load geometry.
+Cela signifie que le calcul d'une charge n'effacera jamais la géométrie des obstacles, et que le calcul d'un obstacle n'effacera jamais la géométrie de charge.
 
-### 5. State storage — `PlotService`
+### 5. Stockage d'état — `PlotService`
 
-`PlotService` acts as the central state hub for all visualization data:
+`PlotService` sert de point central d'état pour toutes les données de visualisation :
 
-- `litData` — geometry signal updated by `reapplyObstacles()` and `refreshSection()`.
-- `distances` — clearance distance results signal.
-- `distanceType` — which distance variant is rendered (`'oblique'`, `'vertical'`, `'horizontal'`, or `null`).
-- `temporaryLoadData` — the active load case data (`ChargeData | null`); read by `reapplyObstacles()` to decide whether to run `Task.changeState` first.
+- `litData` — signal de géométrie mis à jour par `reapplyObstacles()` et `refreshSection()`.
+- `distances` — signal des résultats de distances de dégagement.
+- `distanceType` — quelle variante de distance est affichée (`'oblique'`, `'vertical'`, `'horizontal'`, ou `null`).
+- `temporaryLoadData` — les données du cas de charge actif (`ChargeData | null`) ; lues par `reapplyObstacles()` pour décider s'il faut d'abord exécuter `Task.changeState`.
 
-### 6. Plot rendering — `SectionPlotComponent` + helpers
+### 6. Rendu du graphique — `SectionPlotComponent` + fonctions utilitaires
 
-`SectionPlotComponent` computes a `plotState` signal that merges all relevant signals. Any change triggers a debounced (100 ms) call to `refreshPlot()`, which calls `createPlot()`.
+`SectionPlotComponent` calcule un signal `plotState` qui fusionne tous les signaux pertinents. Tout changement déclenche un appel différé (debounce, 100 ms) à `refreshPlot()`, qui appelle `createPlot()`.
 
-`createPlot()` assembles:
+`createPlot()` assemble :
 
-- Base geometry traces (spans, supports, insulators…).
-- **Obstacle annotations** — `createObstaclesAnnotations()` in `obstacles.ts` — reads absolute 3-D coordinates from `litData.obstacles` (Python-computed) to place one dot marker (`●`) and one label per obstacle point; red when selected, black otherwise.
-- **Distance traces** — `createDistanceTraces()` — lines and annotations rendered differently per distance type (see below).
+- Les traces de géométrie de base (portées, supports, isolateurs…).
+- **Annotations d'obstacles** — `createObstaclesAnnotations()` dans `obstacles.ts` — lit les coordonnées 3D absolues depuis `litData.obstacles` (calculées par Python) pour placer un marqueur point (`●`) et une étiquette par point d'obstacle ; en rouge si sélectionné, en noir sinon.
+- **Traces de distance** — `createDistanceTraces()` — lignes et annotations rendues différemment selon le type de distance (voir ci-dessous).
 
-`Plotly.react()` is used for all updates to preserve camera/zoom state.
+`Plotly.react()` est utilisé pour toutes les mises à jour afin de préserver l'état de la caméra/du zoom.
 
 ---
 
-## Distance visualization
+## Visualisation des distances
 
-Three visual patterns are used depending on `distanceType`:
+Trois motifs visuels sont utilisés selon `distanceType` :
 
 ### Oblique
 
-A single solid line from the wire point to the obstacle point.
+Une seule ligne pleine du point de câble au point d'obstacle.
 
 ```
   wirePoint
@@ -217,7 +217,7 @@ A single solid line from the wire point to the obstacle point.
 
 ### Vertical
 
-A dotted horizontal segment (wire → virtual point) followed by a solid vertical segment (virtual point → obstacle).
+Un segment horizontal en pointillés (câble → point virtuel) suivi d'un segment vertical plein (point virtuel → obstacle).
 
 ```
   wirePoint ·····> virtualPointVertical
@@ -229,7 +229,7 @@ A dotted horizontal segment (wire → virtual point) followed by a solid vertica
 
 ### Horizontal
 
-A dotted vertical segment (wire → virtual point) followed by a solid horizontal segment (virtual point → obstacle).
+Un segment vertical en pointillés (câble → point virtuel) suivi d'un segment horizontal plein (point virtuel → obstacle).
 
 ```
   wirePoint
@@ -239,45 +239,45 @@ A dotted vertical segment (wire → virtual point) followed by a solid horizonta
                   distanceHorizontal
 ```
 
-Coordinates are projected to the active view:
+Les coordonnées sont projetées selon la vue active :
 
-| View | X axis | Y axis |
+| Vue | Axe X | Axe Y |
 |---|---|---|
-| 3-D | x | y, z |
-| 2-D profile | x (along span) | z (altitude) |
-| 2-D face | y (lateral) | z (altitude) |
+| 3D | x | y, z |
+| Profil 2D | x (le long de la portée) | z (altitude) |
+| Face 2D | y (latéral) | z (altitude) |
 
 ---
 
-## Obstacle selection and interactivity
+## Sélection des obstacles et interactivité
 
-`ObstaclesService` holds two selection signals:
+`ObstaclesService` détient deux signaux de sélection :
 
-- `selectedObstacleUuid` — which obstacle is active.
-- `activePointIndex` — which point within that obstacle is focused.
+- `selectedObstacleUuid` — quel obstacle est actif.
+- `activePointIndex` — quel point de cet obstacle est actuellement ciblé.
 
-Clicking an obstacle annotation in the plot fires a `plotly_clickannotation` event. The handler in `SectionPlotComponent`:
+Cliquer sur une annotation d'obstacle dans le graphique déclenche un événement `plotly_clickannotation`. Le gestionnaire dans `SectionPlotComponent` :
 
-1. Extracts the `ObstacleAnnotationData` payload (`obstacleUuid`, `obstaclePositionIndex`).
-2. Resolves the support index from the section data.
-3. Calls `ObstaclesFormService.setExistingObstacle()` to load the obstacle into the form.
-4. Updates the selection signals so the clicked point turns red.
-
----
-
-## Section refresh cycle
-
-When the active section changes (e.g. span selection, view toggle), `PlotService.refreshSection()` replays the full computation:
-
-1. Fetch base geometry (`Task.getLit`).
-2. For each saved obstacle, call `Task.addObstacle` to add it back.
-3. Call `Task.calculateObstaclesDistances` once to get all distances.
-4. Update `litData` and `distances` signals.
-
-Note: `refreshSection()` does **not** re-apply loads (it does not call `Task.changeState`). Load application is done on demand via `reapplyObstacles()` when the user triggers a calculation.
+1. Extrait la charge utile `ObstacleAnnotationData` (`obstacleUuid`, `obstaclePositionIndex`).
+2. Résout l'index du support à partir des données de la section.
+3. Appelle `ObstaclesFormService.setExistingObstacle()` pour charger l'obstacle dans le formulaire.
+4. Met à jour les signaux de sélection afin que le point cliqué devienne rouge.
 
 ---
 
-## Known limitations and TODOs
+## Cycle de rafraîchissement de la section
 
-- Distance results are keyed by **obstacle name** in the Python output. The TypeScript code works around this (see `obstaclesForm.service.ts` `results` computed). The key should be changed to UUID once the Python side is updated.
+Lorsque la section active change (par exemple sélection de portée, bascule de vue), `PlotService.refreshSection()` rejoue le calcul complet :
+
+1. Récupère la géométrie de base (`Task.getLit`).
+2. Pour chaque obstacle enregistré, appelle `Task.addObstacle` pour le réajouter.
+3. Appelle `Task.calculateObstaclesDistances` une fois pour obtenir toutes les distances.
+4. Met à jour les signaux `litData` et `distances`.
+
+Remarque : `refreshSection()` ne réapplique **pas** les charges (elle n'appelle pas `Task.changeState`). L'application des charges se fait à la demande via `reapplyObstacles()` lorsque l'utilisateur déclenche un calcul.
+
+---
+
+## Limitations connues et TODO
+
+- Les résultats de distance sont indexés par **nom d'obstacle** dans la sortie Python. Le code TypeScript contourne cela (voir le `computed` `results` de `obstaclesForm.service.ts`). La clé devrait être remplacée par l'UUID une fois le côté Python mis à jour.

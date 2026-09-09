@@ -1,148 +1,148 @@
 Services
 ========
 
-This section documents the Angular services located in ``src/app/core/services``.
+Cette section documente les services Angular situés dans ``src/app/core/services``.
 
-Storage & Data Services
------------------------
+Services de stockage et de données
+----------------------------------
 
 storage.service
 ^^^^^^^^^^^^^^^
 
-IndexedDB storage management service for persistent data storage.
+Service de gestion du stockage IndexedDB pour la persistance des données.
 
 .. js:automodule:: storage.service
 
 studies.service
 ^^^^^^^^^^^^^^^
 
-Service for managing studies (CRUD operations).
+Service de gestion des études (opérations CRUD).
 
 .. js:automodule:: studies.service
 
 user.service
 ^^^^^^^^^^^^
 
-Service for managing user information and preferences.
+Service de gestion des informations et préférences utilisateur.
 
 .. js:automodule:: user.service
 
-Catalog Services
-----------------
+Services de catalogue
+---------------------
 
 attachment.service
 ^^^^^^^^^^^^^^^^^^
 
-Service for managing attachment catalog data.
+Service de gestion des données du catalogue des attaches.
 
 .. js:automodule:: attachment.service
 
 cables.service
 ^^^^^^^^^^^^^^
 
-Service for managing cable catalog data.
+Service de gestion des données du catalogue des câbles.
 
 .. js:automodule:: cables.service
 
 chains.service
 ^^^^^^^^^^^^^^
 
-Service for managing chain catalog data.
+Service de gestion des données du catalogue des chaînes.
 
 .. js:automodule:: chains.service
 
 lines.service
 ^^^^^^^^^^^^^
 
-Service for managing line catalog data.
+Service de gestion des données du catalogue des lignes.
 
 .. js:automodule:: lines.service
 
 maintenance.service
 ^^^^^^^^^^^^^^^^^^^
 
-Service for managing maintenance team catalog data.
+Service de gestion des données du catalogue des équipes de maintenance.
 
 .. js:automodule:: maintenance.service
 
-Domain Services
----------------
+Services de domaine
+-------------------
 
 section.service
 ^^^^^^^^^^^^^^^
 
-Service for managing section data and calculations.
+Service de gestion des données de section et des calculs.
 
 .. js:automodule:: section.service
 
 charges.service
 ^^^^^^^^^^^^^^^
 
-Service for managing charge data (load conditions).
+Service de gestion des données de charge (conditions de charge).
 
 .. js:automodule:: charges.service
 
 initial-condition.service
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Service for managing initial conditions for calculations.
+Service de gestion des conditions initiales pour les calculs.
 
 .. js:automodule:: initial-condition.service
 
-Application Services
---------------------
+Services de l'application
+-------------------------
 
 changelog.service
 ^^^^^^^^^^^^^^^^^
 
-Service for managing application changelog and version history.
+Service de gestion du journal des modifications et de l'historique des versions de l'application.
 
 .. js:automodule:: changelog.service
 
 news.service
 ^^^^^^^^^^^^
 
-Service for fetching and displaying application news.
+Service de récupération et d'affichage des actualités de l'application.
 
 .. js:automodule:: news.service
 
 online.service
 ^^^^^^^^^^^^^^
 
-Service for detecting online/offline status.
+Service de détection du statut en ligne/hors ligne.
 
 .. js:automodule:: online.service
 
-Worker Services
+Services Worker
 ---------------
 
 worker-python.service
 ^^^^^^^^^^^^^^^^^^^^^
 
-Service for managing the Python worker (Pyodide) for calculations.
+Service de gestion du worker Python (Pyodide) pour les calculs.
 
 .. js:automodule:: worker-python.service
 
 worker-python
 ^^^^^^^^^^^^^
 
-Python worker implementation.
+Implémentation du worker Python.
 
 .. js:automodule:: worker-python
 
 worker_update.service
 ^^^^^^^^^^^^^^^^^^^^^
 
-Service for managing service worker updates.
+Service de gestion des mises à jour du service worker.
 
 .. js:automodule:: worker_update.service
 
-UI Services
------------
+Services d'interface utilisateur
+--------------------------------
 
 plot.service
 ^^^^^^^^^^^^
 
-Service for managing plot display options.
+Service de gestion des options d'affichage des graphiques.
 
 .. js:automodule:: plot.service

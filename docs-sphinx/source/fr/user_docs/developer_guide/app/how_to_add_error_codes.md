@@ -1,33 +1,34 @@
-# How to Add Error/Warning Codes and How the Toast Pipeline Works
+# Comment ajouter des codes d'erreur/d'avertissement et comment fonctionne le pipeline de toasts
 
-This document explains how to add a new Python error or warning code so it
-shows up as a toast in the app, and then describes how the underlying
-catch/warning pipeline works end to end.
+Ce document explique comment ajouter un nouveau code d'erreur ou d'avertissement Python
+afin qu'il apparaisse sous forme de toast dans l'application, puis décrit comment
+fonctionne de bout en bout le pipeline sous-jacent de capture des erreurs/avertissements.
 
 ---
 
-## Part 1 — Adding a new error/warning code
+## Partie 1 — Ajouter un nouveau code d'erreur/d'avertissement
 
-There are two distinct triggers on the Python side, and both are funnelled
-into the same `PythonDiagnostic` shape on the TypeScript side:
+Il existe deux déclencheurs distincts côté Python, et tous deux sont acheminés
+vers la même forme `PythonDiagnostic` côté TypeScript :
 
-- **A raised exception** — e.g. `raise ValueError("SolverError: ...")` — is
-  caught by the `try/except` in `handleTask()`.
-- **A captured warning** — e.g. `warnings.warn("...")` — never raises, but is
-  intercepted by a `warnings.showwarning` hook and polled after every task.
+- **Une exception levée** — par ex. `raise ValueError("SolverError: ...")` — est
+  capturée par le `try/except` dans `handleTask()`.
+- **Un avertissement capturé** — par ex. `warnings.warn("...")` — ne lève jamais
+  d'exception, mais est intercepté par un hook `warnings.showwarning` et récupéré
+  après chaque tâche.
 
-In both cases, the JS/TS side identifies which code was raised by checking
-whether the exception message or the warning text **contains** one of the
-known `PythonErrorCode` enum values as a substring. This means:
+Dans les deux cas, le côté JS/TS identifie quel code a été levé en vérifiant
+si le message de l'exception ou le texte de l'avertissement **contient** l'une des
+valeurs connues de l'énumération `PythonErrorCode` en tant que sous-chaîne. Cela signifie que :
 
-- The Python side does **not** need to send a structured code — it just needs
-  the code name to appear somewhere in the exception message or warning text.
-- Adding a new code is purely a TypeScript-side change (enum + message +
-  severity), as long as the Python message text contains that code name.
+- Le côté Python n'a **pas** besoin d'envoyer un code structuré — il suffit que
+  le nom du code apparaisse quelque part dans le message de l'exception ou le texte de l'avertissement.
+- Ajouter un nouveau code est un changement purement côté TypeScript (enum + message +
+  sévérité), tant que le texte du message Python contient ce nom de code.
 
-### Steps to add a new code
+### Étapes pour ajouter un nouveau code
 
-1. **Add the enum value** in types.ts:
+1. **Ajouter la valeur d'énumération** dans types.ts :
 
    ```typescript
    export enum PythonErrorCode {
@@ -36,11 +37,11 @@ known `PythonErrorCode` enum values as a substring. This means:
    }
    ```
 
-   The string value **must** be the exact substring that appears in the
-   Python exception message or `warnings.warn(...)` text (e.g. `MyNewError`).
+   La valeur de la chaîne **doit** être exactement la sous-chaîne qui apparaît dans le
+   message d'exception Python ou le texte de `warnings.warn(...)` (par ex. `MyNewError`).
 
-2. **Add its translation key** in python-error-messages.ts, in `PYTHON_ERROR_KEYS`, then add the
-   corresponding entry to both `public/i18n/en.json` and `public/i18n/fr.json` under `shared.python-errors.*`:
+2. **Ajouter sa clé de traduction** dans python-error-messages.ts, dans `PYTHON_ERROR_KEYS`, puis ajouter
+   l'entrée correspondante à la fois dans `public/i18n/en.json` et `public/i18n/fr.json` sous `shared.python-errors.*` :
 
    ```typescript
    const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
@@ -60,7 +61,7 @@ known `PythonErrorCode` enum values as a substring. This means:
    }
    ```
 
-3. **Classify its severity** in python-error-severity.ts, in `PYTHON_ERROR_SEVERITY`:
+3. **Classer sa sévérité** dans python-error-severity.ts, dans `PYTHON_ERROR_SEVERITY` :
 
    ```typescript
    export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> = {
@@ -69,28 +70,28 @@ known `PythonErrorCode` enum values as a substring. This means:
    };
    ```
 
-   > **Important:** `python-error-severity.ts` must never import or use
-   > `TranslocoService`/i18n. It is imported by `handle-task.ts`, which runs
-   > inside the Pyodide Web Worker bundle — a bundle that has **no Angular
-   > injector**, so `TranslocoService` cannot be instantiated there.
-   > Translated messages belong in `python-error-messages.ts` instead, which
-   > must only ever be imported from main-thread code (components/services),
-   > never from `handle-task.ts` or anything else bundled into
-   > `worker-python.ts`. See [Part 2, section 2.7](#worker-bundle-transloco)
-   > for details.
+   > **Important :** `python-error-severity.ts` ne doit jamais importer ni utiliser
+   > `TranslocoService`/i18n. Il est importé par `handle-task.ts`, qui s'exécute
+   > à l'intérieur du bundle Web Worker Pyodide — un bundle qui n'a **aucun
+   > injecteur Angular**, donc `TranslocoService` ne peut pas y être instancié.
+   > Les messages traduits appartiennent à `python-error-messages.ts` à la place, qui
+   > ne doit être importé que depuis du code s'exécutant sur le thread principal (composants/services),
+   > jamais depuis `handle-task.ts` ou tout autre élément intégré dans
+   > `worker-python.ts`. Voir [Partie 2, section 2.7](#worker-bundle-transloco)
+   > pour plus de détails.
 
-   - `'error'` — shown as a blocking error notification
-     (`notificationService.error(...)`) and prevents the calculation result
-     from being used.
-   - `'warning'` — shown as a non-blocking warning toast
-     (`notificationService.warning(...)`); the calculation result is still
-     used.
+   - `'error'` — affiché comme une notification d'erreur bloquante
+     (`notificationService.error(...)`) et empêche le résultat du calcul
+     d'être utilisé.
+   - `'warning'` — affiché comme un toast d'avertissement non bloquant
+     (`notificationService.warning(...)`) ; le résultat du calcul est tout de même
+     utilisé.
 
-   TypeScript enforces that **every** `PythonErrorCode` has both a message and
-   a severity — forgetting one is a compile error.
+   TypeScript impose que **chaque** `PythonErrorCode` ait à la fois un message et
+   une sévérité — en oublier un est une erreur de compilation.
 
-4. **On the Python side**, make sure the error/warning text actually contains
-   the code name:
+4. **Côté Python**, assurez-vous que le texte de l'erreur/de l'avertissement contient bien
+   le nom du code :
 
    ```python
    # Exception — message must contain "MyNewError"
@@ -100,28 +101,28 @@ known `PythonErrorCode` enum values as a substring. This means:
    warnings.warn("MyNewError: something to flag")
    ```
 
-5. **Double-check the translation keys** you added in step 2 exist with matching values in both
-   `public/i18n/en.json` and `public/i18n/fr.json` — Transloco silently falls back to the raw key
-   string if a translation is missing in one of the languages.
+5. **Vérifiez à nouveau les clés de traduction** ajoutées à l'étape 2 : elles doivent exister avec des valeurs correspondantes dans
+   `public/i18n/en.json` et `public/i18n/fr.json` — Transloco se rabat silencieusement sur la chaîne
+   brute de la clé si une traduction est manquante dans l'une des langues.
 
-6. **Add/update tests**:
+6. **Ajouter/mettre à jour les tests** :
    - python-error-severity.spec.ts
-     asserts every `PythonErrorCode` has a severity mapping — this will fail
-     until you add step 3.
+     vérifie que chaque `PythonErrorCode` possède un mappage de sévérité — cela échouera
+     tant que vous n'aurez pas ajouté l'étape 3.
    - python-error-messages.spec.ts
-     asserts every known code formats to a non-null message.
-   - Add a case to handle-task.spec.ts
-     if the new code needs dedicated coverage for the matching logic.
+     vérifie que chaque code connu produit un message non nul.
+   - Ajoutez un cas à handle-task.spec.ts
+     si le nouveau code nécessite une couverture dédiée pour la logique de correspondance.
 
-No changes are needed in `WorkerPythonService`, `PlotService`, or
-`StudioComponent` — they are generic over `PythonDiagnostic[]` and
-automatically pick up any new code.
+Aucune modification n'est nécessaire dans `WorkerPythonService`, `PlotService` ou
+`StudioComponent` — ils sont génériques sur `PythonDiagnostic[]` et
+prennent automatiquement en compte tout nouveau code.
 
 ---
 
-## Part 2 — How the catch/warning pipeline works
+## Partie 2 — Comment fonctionne le pipeline de capture des erreurs/avertissements
 
-### Overview
+### Aperçu
 
 ```
 Python (Pyodide worker)
@@ -151,16 +152,16 @@ PlotService.diagnostics = signal<PythonDiagnostic[]>([...])
 StudioComponent effect() → NotificationService.error()/.warning() (one toast per diagnostic)
 ```
 
-### 2.1 — Python side: two independent capture mechanisms
+### 2.1 — Côté Python : deux mécanismes de capture indépendants
 
-**Exceptions** are not touched on the Python side at all — they propagate
-normally and are caught by the `try/catch` in
+**Les exceptions** ne sont pas du tout traitées côté Python — elles se propagent
+normalement et sont capturées par le `try/catch` dans
 `handle-task.ts` (`src/app/core/services/worker_python/tasks/handle-task.ts`).
 
-**Warnings** would otherwise be printed to stderr and lost, since
-`warnings.warn()` does not raise. To capture them,
+**Les avertissements** seraient sinon affichés sur stderr et perdus, puisque
+`warnings.warn()` ne lève pas d'exception. Pour les capturer,
 `functions.py` (`src/app/core/services/worker_python/tasks/python-scripts/functions.py`)
-installs a global hook at worker startup:
+installe un hook global au démarrage du worker :
 
 ```python
 _captured_warnings: list[str] = []
@@ -172,34 +173,34 @@ warnings.showwarning = _capture_warning
 warnings.simplefilter("always")  # capture every occurrence, not just the first
 ```
 
-`get_and_clear_warnings()` returns and empties the buffer — it is called by
-TypeScript after every task execution (success or failure), so warnings never
-leak between tasks.
+`get_and_clear_warnings()` renvoie et vide le tampon — elle est appelée par
+TypeScript après chaque exécution de tâche (succès ou échec), afin que les avertissements ne
+fuient jamais d'une tâche à l'autre.
 
-### 2.2 — TypeScript side: `handleTask()` builds the diagnostics array
+### 2.2 — Côté TypeScript : `handleTask()` construit le tableau de diagnostics
 
-`handleTask()` in `handle-task.ts` always returns:
+`handleTask()` dans `handle-task.ts` retourne toujours :
 
 ```typescript
 { result, runTime, error: TaskError | null, diagnostics: PythonDiagnostic[] }
 ```
 
-**On success:**
+**En cas de succès :**
 
 ```typescript
 const diagnostics = collectWarningDiagnostics(pyodide, task, log);
 return { result: resultJs, runTime, error: null, diagnostics };
 ```
 
-`collectWarningDiagnostics()`:
-1. Calls Python's `get_and_clear_warnings()` and gets the raw warning strings.
-2. For each warning text, finds the first `PythonErrorCode` enum value whose
-   string is a substring of the text (`warningText.includes(code)`).
-3. If a match is found, pushes a diagnostic with `origin: 'warning'`.
-4. If no code matches, the warning is **logged but dropped** — no toast is
-   shown for warnings that don't map to a known code.
+`collectWarningDiagnostics()` :
+1. Appelle la fonction Python `get_and_clear_warnings()` et récupère les chaînes brutes des avertissements.
+2. Pour chaque texte d'avertissement, trouve la première valeur d'énumération `PythonErrorCode` dont
+   la chaîne est une sous-chaîne du texte (`warningText.includes(code)`).
+3. Si une correspondance est trouvée, ajoute un diagnostic avec `origin: 'warning'`.
+4. Si aucun code ne correspond, l'avertissement est **journalisé mais abandonné** — aucun toast n'est
+   affiché pour les avertissements qui ne correspondent à aucun code connu.
 
-**On failure (exception thrown):**
+**En cas d'échec (exception levée) :**
 
 ```typescript
 const pythonErrorCode = Object.values(PythonErrorCode).find((code) => errorMessage.includes(code)) ?? null;
@@ -210,45 +211,45 @@ if (pythonErrorCode) {
 return { result: null, runTime, error: errorType, diagnostics };
 ```
 
-- The exception message is matched against `PythonErrorCode` the same way as
-  warnings (substring match).
-- If matched, the exception diagnostic is placed **first** (`unshift`) so
-  consumers can reliably find it via `diagnostics.find(d => d.origin === 'exception')`.
-- Any warnings captured *before* the exception was thrown are still collected
-  and kept in the array (with `origin: 'warning'`).
-- `error` is always set to a generic `TaskError` (`CALCULATION_ERROR` or
-  `SOLVER_DID_NOT_CONVERGE`) regardless of whether a Python code matched —
-  this is what gates whether the calculation result is considered failed.
+- Le message de l'exception est comparé aux `PythonErrorCode` de la même manière que
+  pour les avertissements (correspondance de sous-chaîne).
+- En cas de correspondance, le diagnostic de l'exception est placé **en premier** (`unshift`) afin que
+  les consommateurs puissent le retrouver de manière fiable via `diagnostics.find(d => d.origin === 'exception')`.
+- Les avertissements capturés *avant* que l'exception ne soit levée sont tout de même collectés
+  et conservés dans le tableau (avec `origin: 'warning'`).
+- `error` est toujours défini avec un `TaskError` générique (`CALCULATION_ERROR` ou
+  `SOLVER_DID_NOT_CONVERGE`), qu'un code Python ait correspondu ou non —
+  c'est ce qui détermine si le résultat du calcul est considéré comme en échec.
 
-### 2.3 — Threading through the worker boundary
+### 2.3 — Passage à travers la frontière du worker
 
 - `worker-python.ts` (`src/app/core/services/worker_python/worker-python.ts`)
-  posts `{ result, error, diagnostics }` back to the main thread (falls back
-  to `diagnostics: []` if a task throws before `handleTask()` even runs).
+  poste `{ result, error, diagnostics }` vers le thread principal (revient
+  à `diagnostics: []` si une tâche échoue avant même que `handleTask()` ne s'exécute).
 - `worker-python.service.ts` (`src/app/core/services/worker_python/worker-python.service.ts`)
-  receives the message, extracts `diagnostics` (`data.diagnostics ?? []`), and
-  resolves the caller's `runTask()`/`runTaskWithTimeout()` promise with
+  reçoit le message, extrait `diagnostics` (`data.diagnostics ?? []`), et
+  résout la promesse `runTask()`/`runTaskWithTimeout()` de l'appelant avec
   `{ result, error, diagnostics }`.
 
-### 2.4 — Storage: `PlotService.diagnostics`
+### 2.4 — Stockage : `PlotService.diagnostics`
 
 `plot.service.ts` (`src/app/core/services/plot/plot.service.ts`)
-exposes a single signal:
+expose un unique signal :
 
 ```typescript
 diagnostics = signal<PythonDiagnostic[]>([]);
 ```
 
-It is set after every `runTask()` call that can produce diagnostics
-(`initSectionStudio()`, `refreshProjection()`, load/cable-modification
-services, …), and reset to `[]` in `resetAll()` and `purgePlot()` so stale
-diagnostics never survive between sections or plot resets.
+Il est défini après chaque appel à `runTask()` susceptible de produire des diagnostics
+(`initSectionStudio()`, `refreshProjection()`, services de chargement/modification
+de câble, …), et réinitialisé à `[]` dans `resetAll()` et `purgePlot()` afin que les
+diagnostics obsolètes ne survivent jamais entre deux sections ou réinitialisations de plot.
 
-### 2.5 — Rendering: `StudioComponent` effect → toasts
+### 2.5 — Rendu : effect de `StudioComponent` → toasts
 
 `studio.component.ts` (`src/app/shared/components/studio/studio.component.ts`)
-has a single `effect()` that reacts to both `plotService.error()` and
-`plotService.diagnostics()`:
+possède un unique `effect()` qui réagit à la fois à `plotService.error()` et
+`plotService.diagnostics()` :
 
 ```typescript
 effect(() => {
@@ -276,54 +277,54 @@ effect(() => {
 });
 ```
 
-This produces at most:
-- **One blocking notification** for the `origin: 'exception'` diagnostic (if
-  any) — routed to `.error()` or `.warning()` depending on its severity. This
-  guards against a Python code classified as `'warning'` severity being
-  raised as an actual exception (e.g. some codes can appear in both an
-  exception message and a `warnings.warn()` call depending on context).
-- **One warning toast per `origin: 'warning'` diagnostic** — every captured
-  warning that resolved to a known code gets its own toast, using the plain
-  `formatPythonError()` message (no fallback to the generic `TaskError`
-  message, since there is no task-level error in that case).
+Cela produit au maximum :
+- **Une notification bloquante** pour le diagnostic `origin: 'exception'` (le cas échéant)
+  — routée vers `.error()` ou `.warning()` selon sa sévérité. Cela
+  protège contre le cas où un code Python classé en sévérité `'warning'` serait
+  levé comme une véritable exception (par ex. certains codes peuvent apparaître à la fois dans
+  un message d'exception et un appel `warnings.warn()` selon le contexte).
+- **Un toast d'avertissement par diagnostic `origin: 'warning'`** — chaque avertissement capturé
+  qui a été résolu vers un code connu obtient son propre toast, en utilisant le simple
+  message `formatPythonError()` (sans repli sur le message générique de `TaskError`,
+  puisqu'il n'y a pas d'erreur au niveau de la tâche dans ce cas).
 
-Diagnostics with `origin: 'warning'` are never routed through
-`notificationService.error()` — only exceptions can produce a blocking error.
+Les diagnostics avec `origin: 'warning'` ne sont jamais routés via
+`notificationService.error()` — seules les exceptions peuvent produire une erreur bloquante.
 
-### 2.6 — Why `origin` exists
+### 2.6 — Pourquoi `origin` existe
 
-`origin` (`'exception' | 'warning'`) is what lets `StudioComponent` merge what
-used to be two separate signals/effects (`pythonErrorCode` for exceptions,
-`pythonWarningCodes` for captured warnings) into a single `diagnostics` array
-without double-toasting: the exception branch only looks at
-`origin === 'exception'`, and the warning loop only looks at
-`origin === 'warning'`, so the same diagnostic is never processed by both
-paths.
+`origin` (`'exception' | 'warning'`) est ce qui permet à `StudioComponent` de fusionner ce qui
+était auparavant deux signaux/effects séparés (`pythonErrorCode` pour les exceptions,
+`pythonWarningCodes` pour les avertissements capturés) en un unique tableau `diagnostics`
+sans double affichage de toast : la branche exception ne regarde que
+`origin === 'exception'`, et la boucle d'avertissement ne regarde que
+`origin === 'warning'`, de sorte que le même diagnostic n'est jamais traité par les deux
+chemins.
 
 (worker-bundle-transloco)=
-### 2.7 — The worker bundle and Transloco
+### 2.7 — Le bundle du worker et Transloco
 
-`worker-python.ts` is bundled by Angular as a **separate Web Worker chunk**
-(triggered by the `new Worker(new URL('./worker-python', import.meta.url))`
-call in `worker-python.service.ts`). This chunk only gets the code it
-transitively imports — it does **not** run inside an Angular injection
-context, so services obtained via `inject()` (like `TranslocoService`)
-cannot be constructed there.
+`worker-python.ts` est packagé par Angular comme un **chunk Web Worker séparé**
+(déclenché par l'appel `new Worker(new URL('./worker-python', import.meta.url))`
+dans `worker-python.service.ts`). Ce chunk n'obtient que le code qu'il
+importe de manière transitive — il ne s'exécute **pas** dans un contexte d'injection
+Angular, donc les services obtenus via `inject()` (comme `TranslocoService`)
+ne peuvent pas y être construits.
 
-This means **any module imported (even transitively) by `handle-task.ts` or
-`worker-python.ts` must not depend on `TranslocoService`** (directly or via a
-helper that calls `translate()`), or the worker script throws at
-construction/call time — which looks like "Pyodide is not loading" from the
-outside.
+Cela signifie que **tout module importé (même de manière transitive) par `handle-task.ts` ou
+`worker-python.ts` ne doit pas dépendre de `TranslocoService`** (directement ou via un
+helper qui appelle `translate()`), sinon le script du worker lève une exception au
+moment de sa construction/de son appel — ce qui ressemble, vu de l'extérieur, à
+« Pyodide ne se charge pas ».
 
-This is why:
+C'est pourquoi :
 
-- `python-error-severity.ts` (severity map, plain string literals) is a
-  **separate file** from `python-error-messages.ts` (translation-key map,
-  `TranslocoService`-based) — `handle-task.ts` only imports the former.
-- `python-error-messages.ts` must only ever be imported from main-thread code
+- `python-error-severity.ts` (mappage de sévérité, littéraux de chaîne simples) est un
+  fichier **séparé** de `python-error-messages.ts` (mappage de clés de traduction,
+  basé sur `TranslocoService`) — `handle-task.ts` n'importe que le premier.
+- `python-error-messages.ts` ne doit être importé que depuis du code s'exécutant sur le thread principal
   (`studio.component.ts`, `errors.ts`, `free-positioning.component.ts`, …),
-  never from `handle-task.ts`, `worker-python.ts`, or any file they import.
+  jamais depuis `handle-task.ts`, `worker-python.ts`, ou tout fichier qu'ils importent.
 
-If you need to add worker-side logic that depends on a new file, check its
-import chain does not reach a `TranslocoService` usage before merging.
+Si vous devez ajouter une logique côté worker qui dépend d'un nouveau fichier, vérifiez que sa
+chaîne d'imports n'atteint pas une utilisation de `TranslocoService` avant de fusionner.

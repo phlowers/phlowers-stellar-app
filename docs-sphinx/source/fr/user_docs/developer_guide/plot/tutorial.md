@@ -1,24 +1,24 @@
-# How to Create a Plot
+# Comment créer un tracé (plot)
 
-A quick guide to using the plot system to visualize section data in 2D or 3D.
+Un guide rapide pour utiliser le système de tracé afin de visualiser les données de section en 2D ou en 3D.
 
 
-## The Basics
+## Les bases
 
-The plot system has three main pieces:
+Le système de tracé comporte trois éléments principaux :
 
-- **PlotService** - Manages all the plot data and settings
-- **StudioComponent** - The container that sets everything up
-- **SectionPlotComponent** - Actually draws the plot
+- **PlotService** - Gère toutes les données et paramètres du tracé
+- **StudioComponent** - Le conteneur qui met tout en place
+- **SectionPlotComponent** - Dessine réellement le tracé
 
-When you give `StudioComponent` a section, it automatically:
-1. Waits for the Python worker to be ready
-2. Fetches the section data
-3. Passes it to `SectionPlotComponent` to render
+Lorsque vous fournissez une section à `StudioComponent`, il :
+1. Attend que le worker Python soit prêt
+2. Récupère les données de la section
+3. Les transmet à `SectionPlotComponent` pour le rendu
 
-## Quick Start
+## Démarrage rapide
 
-Just use the `StudioComponent` in your template:
+Utilisez simplement `StudioComponent` dans votre template :
 
 ```text
 <app-studio
@@ -27,11 +27,11 @@ Just use the `StudioComponent` in your template:
 ></app-studio>
 ```
 
-The component handles loading states and errors automatically. That's it!
+Le composant gère automatiquement les états de chargement et les erreurs. C'est tout !
 
-## Changing Plot Options
+## Modifier les options du tracé
 
-Use `PlotService` to change how the plot looks:
+Utilisez `PlotService` pour changer l'apparence du tracé :
 
 ```typescript
 constructor(public plotService: PlotService) {}
@@ -49,7 +49,7 @@ plotService.plotOptionsChange({
 plotService.plotOptionsChange({ side: 'face' });
 ```
 
-### Available Options
+### Options disponibles
 
 ```typescript
 interface PlotOptions {
@@ -61,26 +61,26 @@ interface PlotOptions {
 }
 ```
 
-## How It Works
+## Fonctionnement
 
-### Data Flow
+### Flux de données
 
-1. You provide a `section` to `StudioComponent`
-2. `StudioComponent` calls `plotService.refreshSection(section)`
-3. The service fetches data from the Python worker
-4. Data flows into `SectionPlotComponent` via signals
-5. The plot automatically updates when data or options change
+1. Vous fournissez une `section` à `StudioComponent`
+2. `StudioComponent` appelle `plotService.refreshSection(section)`
+3. Le service récupère les données depuis le worker Python
+4. Les données circulent vers `SectionPlotComponent` via des signals
+5. Le tracé se met à jour automatiquement quand les données ou les options changent
 
-### Plot Rendering
+### Rendu du tracé
 
-`SectionPlotComponent` uses an Angular `effect()` to watch for changes. When data arrives, it:
-- Transforms the raw data into Plotly format
-- Creates the plot in a `<div id="plotly-output">` element
-- Preserves camera position in 3D mode
+`SectionPlotComponent` utilise un `effect()` Angular pour surveiller les changements. Quand les données arrivent, il :
+- Transforme les données brutes au format Plotly
+- Crée le tracé dans un élément `<div id="plotly-output">`
+- Préserve la position de la caméra en mode 3D
 
-## Common Tasks
+## Tâches courantes
 
-### Recalculate with Different Climate Parameters
+### Recalculer avec des paramètres climatiques différents
 
 ```typescript
 await plotService.calculateCharge(
@@ -90,32 +90,32 @@ await plotService.calculateCharge(
 );
 ```
 
-### Get Current Camera Position
+### Récupérer la position actuelle de la caméra
 
 ```typescript
 const camera = plotService.getCamera();
 // Camera is automatically preserved during updates
 ```
 
-### Reset Everything
+### Tout réinitialiser
 
 ```typescript
 plotService.resetAll(); // Clears plot and all state
 ```
 
-## Error Handling
+## Gestion des erreurs
 
-The system handles errors automatically. Common errors:
-- `NO_CABLE_FOUND` - Cable data missing
-- `CALCULATION_ERROR` - Calculation failed
-- `SOLVER_DID_NOT_CONVERGE` - Solver couldn't find solution
-- `PYODIDE_LOAD_ERROR` - Python worker didn't load
+Le système gère les erreurs automatiquement. Erreurs courantes :
+- `NO_CABLE_FOUND` - Données de câble manquantes
+- `CALCULATION_ERROR` - Le calcul a échoué
+- `SOLVER_DID_NOT_CONVERGE` - Le solveur n'a pas trouvé de solution
+- `PYODIDE_LOAD_ERROR` - Le worker Python n'a pas pu se charger
 
-Errors show up in the `StudioComponent` template automatically.
+Les erreurs s'affichent automatiquement dans le template de `StudioComponent`.
 
-## Cleanup
+## Nettoyage
 
-Don't forget to clean up when your component is destroyed:
+N'oubliez pas de nettoyer lorsque votre composant est détruit :
 
 ```typescript
 ngOnDestroy() {
@@ -126,7 +126,7 @@ ngOnDestroy() {
 }
 ```
 
-## Full Example
+## Exemple complet
 
 ```typescript
 @Component({
@@ -155,9 +155,9 @@ export class MyPlotComponent {
 }
 ```
 
-## Tips
+## Astuces
 
-- The plot updates automatically when data or options change - you usually don't need to manually refresh
-- Always use `plotOptionsChange()` instead of directly setting options
-- Camera position is preserved automatically in 3D mode
-- Make sure the Python worker is ready before calling `refreshSection()`
+- Le tracé se met à jour automatiquement quand les données ou les options changent - vous n'avez généralement pas besoin de rafraîchir manuellement
+- Utilisez toujours `plotOptionsChange()` plutôt que de définir les options directement
+- La position de la caméra est préservée automatiquement en mode 3D
+- Assurez-vous que le worker Python est prêt avant d'appeler `refreshSection()`

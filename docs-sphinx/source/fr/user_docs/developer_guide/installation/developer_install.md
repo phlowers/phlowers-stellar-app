@@ -1,43 +1,43 @@
 # Installation
 
-## Prerequisites
-1. You need to install node/npm. We propose to use nvm to be precise on its version.  
-    - [For nvm](https://github.com/nvm-sh/nvm)
-    - Set node version to 23 using `nvm install v23` and `nvm use 23`
+## Prérequis
+1. Vous devez installer node/npm. Nous proposons d'utiliser nvm pour maîtriser précisément sa version.  
+    - [Pour nvm](https://github.com/nvm-sh/nvm)
+    - Définissez la version de node sur 23 avec `nvm install v23` et `nvm use 23`
 
-2. You will need `uv` to run the script for mechaphlowers setup.
-*mechaphlowers is python scripts for complex physics calculations*
-[uv installation doc](https://docs.astral.sh/uv/getting-started/installation/)
-   - to install uv for windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
-   - to install uv for macOS and linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+2. Vous aurez besoin de `uv` pour exécuter le script de configuration de mechaphlowers.
+*mechaphlowers est un ensemble de scripts Python pour des calculs physiques complexes*
+[doc d'installation de uv](https://docs.astral.sh/uv/getting-started/installation/)
+   - pour installer uv sous windows : `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+   - pour installer uv sous macOS et linux : `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-3. We advise installation of global angular CLI.
-You should match global and local project CLI by watching current version in `package.json`.  
+3. Nous conseillons d'installer le CLI Angular en global.
+Vous devez faire correspondre le CLI global et le CLI local du projet en vérifiant la version actuelle dans `package.json`.  
 `npm i -g @angular/cli@project_cli_version`
-    - local CLI could be use but is not recommanded
+    - le CLI local peut être utilisé mais ce n'est pas recommandé
 
-## Install dependencies and Run locally 
-1. install global packages with npm `npm i` / `npm install`
+## Installer les dépendances et lancer en local
+1. installez les packages globaux avec npm `npm i` / `npm install`
 
-2. Set up mechaphlowers using local script `npm run set-up-mechaphlowers`
+2. configurez mechaphlowers avec le script local `npm run set-up-mechaphlowers`
 
-3. Launch local server with `ng serve` or `npm run start`
+3. lancez le serveur local avec `ng serve` ou `npm run start`
 
-## TypeScript Path Aliases
+## Alias de chemins TypeScript
 
-The project uses TypeScript path aliases to simplify imports and improve code readability. These aliases are configured in `tsconfig.json` and `tsconfig.spec.json`.
+Le projet utilise des alias de chemins TypeScript pour simplifier les imports et améliorer la lisibilité du code. Ces alias sont configurés dans `tsconfig.json` et `tsconfig.spec.json`.
 
-| Alias | Path | Description |
+| Alias | Chemin | Description |
 |-------|------|-------------|
-| `@src/*` | `./src/*` | Root source folder |
-| `@app/*` | `./src/app/*` | Application folder |
-| `@core/*` | `./src/app/core/*` | Core module (domain, infrastructure) |
-| `@services/*` | `./src/app/core/services/*` | Application services |
-| `@features/*` | `./src/app/features/*` | Feature modules (DDD bounded contexts) |
-| `@shared/*` | `./src/app/shared/*` | Shared reusable components, pipes, directives |
-| `@infrastructure/*` | `./src/app/infrastructure/*` | Infrastructure (Dexie DB, DTOs) |
+| `@src/*` | `./src/*` | Dossier source racine |
+| `@app/*` | `./src/app/*` | Dossier de l'application |
+| `@core/*` | `./src/app/core/*` | Module core (domaine, infrastructure) |
+| `@services/*` | `./src/app/core/services/*` | Services applicatifs |
+| `@features/*` | `./src/app/features/*` | Modules de feature (bounded contexts DDD) |
+| `@shared/*` | `./src/app/shared/*` | Composants, pipes, directives réutilisables partagés |
+| `@infrastructure/*` | `./src/app/infrastructure/*` | Infrastructure (base Dexie, DTOs) |
 
-### Usage examples
+### Exemples d'utilisation
 
 ```typescript
 // Instead of relative imports like:
@@ -49,9 +49,9 @@ import { Study } from '@core/domain';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 ```
 
-## Import lines and maintenance data
+## Importer les données de lignes et de maintenance
 
-1. lines data should be put inside a `public/data/lines.csv` file with the following columns:
+1. les données de lignes doivent être placées dans un fichier `public/data/lines.csv` avec les colonnes suivantes :
     - LIAISON_IDR
     - LIT_IDR
     - LIT_ADR
@@ -60,7 +60,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - TENSION_ELECTRIQUE_IDR
     - TENSION_ELECTRIQUE_ADR
 
-2. maintenance data should be put inside a `public/data/maintenance-teams.csv` file with the following columns:
+2. les données de maintenance doivent être placées dans un fichier `public/data/maintenance-teams.csv` avec les colonnes suivantes :
     - CM_CUR
     - CM_DESIGNATION
     - GMR_CUR
@@ -68,7 +68,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - EEL_CUR
     - EEL_DESIGNATION
 
-3. cables data should be put inside a `public/data/cables.csv` file with the following columns:
+3. les données de câbles doivent être placées dans un fichier `public/data/cables.csv` avec les colonnes suivantes :
     - cable_id
     - name
     - data_source
@@ -118,14 +118,14 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - nb_strand_layer_8
     - safety_coefficient
 
-4. chains data should be put inside a `public/data/chains.csv` file with the following columns:
+4. les données de chaînes doivent être placées dans un fichier `public/data/chains.csv` avec les colonnes suivantes :
     - name
     - length
     - weight
     - surface
     - v
 
-5. attachments data should be put inside a `public/data/attachments.csv` file with the following columns:
+5. les données d'attaches doivent être placées dans un fichier `public/data/attachments.csv` avec les colonnes suivantes :
     - support_family
     - support_name
     - set_number
@@ -133,4 +133,4 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
     - altitude
 
 
-At startup, the application will import the data from the csv files and store it in the database.
+Au démarrage, l'application importera les données depuis les fichiers csv et les stockera dans la base de données.

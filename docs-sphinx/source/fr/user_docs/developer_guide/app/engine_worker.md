@@ -1,26 +1,26 @@
-# Engine Worker
+# Worker du moteur
 
-The application uses a worker to run [mechaphlowers](https://github.com/phlowers/mechaphlowers) that is the calculation engine of the application. The worker is located at "src/app/core/services/worker_python" and is responsible for:
+L'application utilise un worker pour exécuter [mechaphlowers](https://github.com/phlowers/mechaphlowers), qui est le moteur de calcul de l'application. Le worker est situé à "src/app/core/engine/worker/worker.ts" et est responsable de :
 
-- installing mechaphlowers
-- running the engine
-- returning the result
+- l'installation de mechaphlowers
+- l'exécution du moteur
+- le retour du résultat
 
-## Mechaphlowers Installation
+## Installation de Mechaphlowers
 
-The mechaphlowers installation is done thanks to pyodide with the help of the `loadPyodide` function. It partially loads the needed python packages wheels through a CDN for the heaviest packages (numpy, pandas, etc.) and loads the rest of the packages from the local assets.
+L'installation de mechaphlowers se fait grâce à pyodide à l'aide de la fonction `loadPyodide`. Elle charge partiellement les wheels des paquets python nécessaires via un CDN pour les paquets les plus lourds (numpy, pandas, etc.) et charge le reste des paquets depuis les assets locaux.
 
-Just after installation, the `pyodide.runPython` function is used to run an initial import of all the packages in order to load them into memory.
+Juste après l'installation, la fonction `pyodide.runPython` est utilisée pour exécuter un import initial de tous les paquets afin de les charger en mémoire.
 
-## Running the engine
+## Exécution du moteur
 
-The engine is ran with the `runTask` function. It takes a task and a data object as arguments.
+Le moteur est exécuté avec la fonction `runTask`. Elle prend une tâche et un objet de données en arguments.
 
-The task is a string that corresponds to the function to call in the `worker.ts` file. The functions are python files located in the `src/app/core/engine/python-functions` directory.
+La tâche est une chaîne de caractères correspondant à la fonction à appeler dans le fichier `worker.ts`. Les fonctions sont des fichiers python situés dans le répertoire `src/app/core/engine/python-functions`.
 
-The data is an object that contains the data to pass to the function. The data is passed to the python function thanks to the `pyodide.globals.set` function.
+Les données sont un objet contenant les données à transmettre à la fonction. Les données sont transmises à la fonction python grâce à la fonction `pyodide.globals.set`.
 
-## Returned data
+## Données retournées
 
-After the python function is ran, the result of the computation is read by the javascript code thanks to the `pyodide.globals.get` function and then returned to the caller of the `runTask` function via the `postMessage` function. The result can be used to update the UI or to update the database.
+Une fois la fonction python exécutée, le résultat du calcul est lu par le code javascript grâce à la fonction `pyodide.globals.get`, puis renvoyé à l'appelant de la fonction `runTask` via la fonction `postMessage`. Le résultat peut être utilisé pour mettre à jour l'interface utilisateur ou pour mettre à jour la base de données.
 

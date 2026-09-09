@@ -1,163 +1,163 @@
 Infrastructure
 ==============
 
-This section documents the infrastructure layer located in ``src/app/core/infrastructure``.
-This includes database entities, schemas, and DTOs (Data Transfer Objects).
+Cette section documente la couche d'infrastructure située dans ``src/app/core/infrastructure``.
+Elle inclut les entités de base de données, les schémas et les DTOs (Data Transfer Objects).
 
-Database
---------
+Base de données
+---------------
 
 app-database
 ^^^^^^^^^^^^
 
-Main database configuration and initialization.
+Configuration et initialisation principales de la base de données.
 
 .. js:automodule:: app-database
 
-Entities
---------
+Entités
+-------
 
-Database entities represent the data structures stored in IndexedDB.
+Les entités de base de données représentent les structures de données stockées dans IndexedDB.
 
 study.entity
 ^^^^^^^^^^^^
 
-Entity for storing study data.
+Entité pour le stockage des données d'étude.
 
 .. js:automodule:: study.entity
 
 user.entity
 ^^^^^^^^^^^
 
-Entity for storing user data.
+Entité pour le stockage des données utilisateur.
 
 .. js:automodule:: user.entity
 
 catalog-attachment.entity
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Entity for storing attachment catalog data.
+Entité pour le stockage des données du catalogue des attaches.
 
 .. js:automodule:: catalog-attachment.entity
 
 catalog-cable.entity
 ^^^^^^^^^^^^^^^^^^^^
 
-Entity for storing cable catalog data.
+Entité pour le stockage des données du catalogue des câbles.
 
 .. js:automodule:: catalog-cable.entity
 
 catalog-chain.entity
 ^^^^^^^^^^^^^^^^^^^^
 
-Entity for storing chain catalog data.
+Entité pour le stockage des données du catalogue des chaînes.
 
 .. js:automodule:: catalog-chain.entity
 
 catalog-line.entity
 ^^^^^^^^^^^^^^^^^^^
 
-Entity for storing line catalog data.
+Entité pour le stockage des données du catalogue des lignes.
 
 .. js:automodule:: catalog-line.entity
 
 catalog-maintenance.entity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Entity for storing maintenance team catalog data.
+Entité pour le stockage des données du catalogue des équipes de maintenance.
 
 .. js:automodule:: catalog-maintenance.entity
 
-Schemas
+Schémas
 -------
 
-Database schemas define the structure for IndexedDB collections.
+Les schémas de base de données définissent la structure des collections IndexedDB.
 
 study.schema
 ^^^^^^^^^^^^
 
-Schema for study collection.
+Schéma pour la collection des études.
 
 .. js:automodule:: study.schema
 
 user.schema
 ^^^^^^^^^^^
 
-Schema for user collection.
+Schéma pour la collection des utilisateurs.
 
 .. js:automodule:: user.schema
 
 catalog-attachment.schema
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Schema for attachment catalog collection.
+Schéma pour la collection du catalogue des attaches.
 
 .. js:automodule:: catalog-attachment.schema
 
 catalog-cable.schema
 ^^^^^^^^^^^^^^^^^^^^
 
-Schema for cable catalog collection.
+Schéma pour la collection du catalogue des câbles.
 
 .. js:automodule:: catalog-cable.schema
 
 catalog-chain.schema
 ^^^^^^^^^^^^^^^^^^^^
 
-Schema for chain catalog collection.
+Schéma pour la collection du catalogue des chaînes.
 
 .. js:automodule:: catalog-chain.schema
 
 catalog-line.schema
 ^^^^^^^^^^^^^^^^^^^
 
-Schema for line catalog collection.
+Schéma pour la collection du catalogue des lignes.
 
 .. js:automodule:: catalog-line.schema
 
 catalog-maintenance.schema
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Schema for maintenance team catalog collection.
+Schéma pour la collection du catalogue des équipes de maintenance.
 
 .. js:automodule:: catalog-maintenance.schema
 
-DTOs (Data Transfer Objects)
------------------------------
+DTOs (objets de transfert de données)
+-------------------------------------
 
-DTOs are used to parse and transform data from external sources (CSV files).
+Les DTOs sont utilisés pour analyser et transformer les données provenant de sources externes (fichiers CSV).
 
 attachment-csv.dto
 ^^^^^^^^^^^^^^^^^^
 
-DTO for parsing attachment data from CSV.
+DTO pour l'analyse des données d'attache depuis un fichier CSV.
 
 .. js:automodule:: attachment-csv.dto
 
 cable-csv.dto
 ^^^^^^^^^^^^^
 
-DTO for parsing cable data from CSV.
+DTO pour l'analyse des données de câble depuis un fichier CSV.
 
 .. js:automodule:: cable-csv.dto
 
 chain-csv.dto
 ^^^^^^^^^^^^^
 
-DTO for parsing chain data from CSV.
+DTO pour l'analyse des données de chaîne depuis un fichier CSV.
 
 .. js:automodule:: chain-csv.dto
 
 line-csv.dto
 ^^^^^^^^^^^^
 
-DTO for parsing line data from CSV.
+DTO pour l'analyse des données de ligne depuis un fichier CSV.
 
 .. js:automodule:: line-csv.dto
 
 maintenance-csv.dto
 ^^^^^^^^^^^^^^^^^^^
 
-DTO for parsing maintenance team data from CSV.
+DTO pour l'analyse des données d'équipe de maintenance depuis un fichier CSV.
 
 .. js:automodule:: maintenance-csv.dto

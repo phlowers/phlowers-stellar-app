@@ -1,18 +1,18 @@
-# Plot Data Object Creation
+# Création des objets de données de tracé
 
-`createPlotData.ts` and `createPlotDataObject.ts` are the two files that turn 3D coordinate arrays into Plotly.js data objects for rendering. They handle three types of objects:
-- **Spans** (blue) - main structural elements
-- **Supports** (indigo) - support structures with numbered labels
-- **Insulators** (red) - insulator elements
+`createPlotData.ts` et `createPlotDataObject.ts` sont les deux fichiers qui transforment les tableaux de coordonnées 3D en objets de données Plotly.js pour le rendu. Ils gèrent trois types d'objets :
+- **Spans** (bleu) - éléments structurels principaux
+- **Supports** (indigo) - structures de support avec étiquettes numérotées
+- **Insulators** (rouge) - éléments isolateurs
 
-## How It Works
+## Fonctionnement
 
 ### `createPlotData.ts`
 
-This is the entry point. It takes section output data and plot options, then:
-1. Loops through spans, supports, and insulators
-2. Calls `createDataObject()` for each type
-3. Flattens everything into one array of Plotly data objects
+C'est le point d'entrée. Il prend les données de sortie de la section et les options de tracé, puis :
+1. Parcourt les spans, supports et insulators
+2. Appelle `createDataObject()` pour chaque type
+3. Aplatit le tout en un seul tableau d'objets de données Plotly
 
 ```typescript
 const plotData = createPlotData(sectionData, {
@@ -26,70 +26,70 @@ const plotData = createPlotData(sectionData, {
 
 ### `createPlotDataObject.ts`
 
-This does the actual work of transforming coordinates into Plotly objects.
+C'est ce fichier qui effectue le travail réel de transformation des coordonnées en objets Plotly.
 
-**`createDataObject()`** - The main function:
-- Slices the data based on support indices (spans exclude the end, supports/insulators include it)
-- Extracts x, y, z coordinates from each point
-- Transforms coordinates based on view:
-  - **3D**: Uses x, y, z directly with `scatter3d`
-  - **2D Profile**: Projects onto XZ plane (x→x, z→z, y→y)
-  - **2D Face**: Projects onto YZ plane (y→x, z→z, swaps axes)
-- Applies styling (colors, line width, markers, text labels)
+**`createDataObject()`** - La fonction principale :
+- Découpe les données selon les indices de support (les spans excluent la fin, les supports/insulators l'incluent)
+- Extrait les coordonnées x, y, z de chaque point
+- Transforme les coordonnées selon la vue :
+  - **3D** : Utilise x, y, z directement avec `scatter3d`
+  - **2D Profile** : Projette sur le plan XZ (x→x, z→z, y→y)
+  - **2D Face** : Projette sur le plan YZ (y→x, z→z, échange les axes)
+- Applique le style (couleurs, épaisseur de ligne, marqueurs, étiquettes de texte)
 
-**Helper functions:**
-- `getLine()` - Returns color (blue/indigo/red), dash style, and width (thicker in 3D)
-- `getMode()` - Returns `'text+lines+markers'` for supports, `'lines+markers'` for others
-- `getText()` - Labels supports with their `number` field from the `Support` model on the highest point
-- `getMarker()` - Sets marker sizes (varies by type and view)
+**Fonctions utilitaires :**
+- `getLine()` - Renvoie la couleur (bleu/indigo/rouge), le style de tirets et l'épaisseur (plus épaisse en 3D)
+- `getMode()` - Renvoie `'text+lines+markers'` pour les supports, `'lines+markers'` pour les autres
+- `getText()` - Étiquette les supports avec leur champ `number` du modèle `Support` sur le point le plus haut
+- `getMarker()` - Définit la taille des marqueurs (varie selon le type et la vue)
 
-## Quick Reference
+## Référence rapide
 
-**Coordinate transformations:**
-- 3D: `x, y, z` → `x, y, z` (scatter3d)
-- 2D Profile: `x, y, z` → `x, z, y` (scatter)
-- 2D Face: `x, y, z` → `y, z, y` (scatter, swaps x/y)
+**Transformations de coordonnées :**
+- 3D : `x, y, z` → `x, y, z` (scatter3d)
+- 2D Profile : `x, y, z` → `x, z, y` (scatter)
+- 2D Face : `x, y, z` → `y, z, y` (scatter, échange x/y)
 
-**Styling:**
-- Spans: dodgerblue, width 8 (3D) or 4 (2D)
-- Supports: indigo, width 8 (3D) or 4 (2D), shows numbered labels
-- Insulators: red, width 8 (3D) or 4 (2D)
+**Style :**
+- Spans : dodgerblue, épaisseur 8 (3D) ou 4 (2D)
+- Supports : indigo, épaisseur 8 (3D) ou 4 (2D), affiche des étiquettes numérotées
+- Insulators : rouge, épaisseur 8 (3D) ou 4 (2D)
 
-**Note:** Support labels display the `number` field from the `Support` model, not a derived index.
+**Remarque :** Les étiquettes des supports affichent le champ `number` du modèle `Support`, pas un index dérivé.
 
-## Style Configuration Summary
+## Résumé de la configuration de style
 
-### Lines
+### Lignes
 
-All line styles use `dash: 'solid'`. Line width varies by view mode (thicker in 3D):
+Tous les styles de ligne utilisent `dash: 'solid'`. L'épaisseur de ligne varie selon le mode de vue (plus épaisse en 3D) :
 
-| Type | Color | Width (3D) | Width (2D) |
+| Type | Couleur | Épaisseur (3D) | Épaisseur (2D) |
 |------|-------|------------|------------|
 | **Spans** | `dodgerblue` | 8 | 4 |
 | **Supports** | `indigo` | 8 | 4 |
 | **Insulators** | `red` | 8 | 4 |
-| **Default** | `black` | 8 | 4 |
+| **Par défaut** | `black` | 8 | 4 |
 
-### Markers
+### Marqueurs
 
-Marker sizes vary by object type and view mode:
+La taille des marqueurs varie selon le type d'objet et le mode de vue :
 
-| Type | Size (3D) | Size (2D) |
+| Type | Taille (3D) | Taille (2D) |
 |------|-----------|-----------|
 | **Spans** | 3 | 5 |
 | **Supports** | 3 | 4 |
 | **Insulators** | 4 | 6 |
-| **Default** | 3 | 3 |
+| **Par défaut** | 3 | 3 |
 
-### Text
+### Texte
 
-- **Mode**: 
-  - Supports: `'text+lines+markers'` (displays text labels)
-  - All others: `'lines+markers'` (no text labels)
+- **Mode** : 
+  - Supports : `'text+lines+markers'` (affiche les étiquettes de texte)
+  - Tous les autres : `'lines+markers'` (pas d'étiquettes de texte)
   
-- **Text Labels** (Supports only):
-  - Display: Support `number` field from the `Support` model on the highest point (maximum z-coordinate)
-  - Position: `'top center'` (applied to all data objects)
-  - Logic: Only the point with the highest z-value in each support gets labeled; all other points have empty strings. Falls back to an empty string if the support or its `number` is not available.
+- **Étiquettes de texte** (Supports uniquement) :
+  - Affichage : champ `number` du support depuis le modèle `Support`, sur le point le plus haut (coordonnée z maximale)
+  - Position : `'top center'` (appliquée à tous les objets de données)
+  - Logique : seul le point avec la valeur z la plus élevée dans chaque support est étiqueté ; tous les autres points ont des chaînes vides. Se replie sur une chaîne vide si le support ou son `number` n'est pas disponible.
 
-- **Text Position**: `'top center'` (applied globally to all data objects)
+- **Position du texte** : `'top center'` (appliquée globalement à tous les objets de données)
