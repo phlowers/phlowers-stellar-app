@@ -36,24 +36,24 @@ describe('AppConfigService', () => {
     await expect(promise).resolves.toBe('fr');
   });
 
-  it('should fall back to "fr" when the config file request fails', async () => {
+  it('should fall back to "en" when the config file request fails', async () => {
     const promise = service.loadDefaultLang();
 
     httpMock.expectOne('assets/config/app-config.json').flush('Not Found', { status: 404, statusText: 'Not Found' });
 
-    await expect(promise).resolves.toBe('fr');
+    await expect(promise).resolves.toBe('en');
     expect(mockLoggerService.warn).toHaveBeenCalled();
   });
 
-  it('should fall back to "fr" when defaultLang is missing from the response', async () => {
+  it('should fall back to "en" when defaultLang is missing from the response', async () => {
     const promise = service.loadDefaultLang();
 
     httpMock.expectOne('assets/config/app-config.json').flush({});
 
-    await expect(promise).resolves.toBe('fr');
+    await expect(promise).resolves.toBe('en');
   });
 
-  it('should fall back to "fr" when the request hangs beyond the timeout', async () => {
+  it('should fall back to "en" when the request hangs beyond the timeout', async () => {
     vi.useFakeTimers();
     try {
       const promise = service.loadDefaultLang();
@@ -62,7 +62,7 @@ describe('AppConfigService', () => {
       httpMock.expectOne('assets/config/app-config.json');
       await vi.advanceTimersByTimeAsync(3000);
 
-      await expect(promise).resolves.toBe('fr');
+      await expect(promise).resolves.toBe('en');
       expect(mockLoggerService.warn).toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
