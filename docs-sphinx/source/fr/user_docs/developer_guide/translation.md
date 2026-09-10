@@ -1,6 +1,6 @@
 # Workflow de traduction de la documentation
 
-Ce projet maintient la documentation de {{app_name}} en deux langues : **anglais** et **français**. L'arborescence française est un équivalent de l'arborescence anglaise, et non un ensemble de fichiers `.po`. Selon le dossier, l'une ou l'autre langue peut être la source de vérité pour la rédaction — voir [Portée de la traduction](#portee-de-la-traduction).
+Ce projet maintient la documentation de {{app_name}} en deux langues : **anglais** et **français**. L'arborescence française est un équivalent de l'arborescence anglaise, et non un ensemble de fichiers `.po`. Selon le dossier, l'une ou l'autre langue peut être la source de vérité pour la rédaction — voir la section « Portée de la traduction » ci-dessous.
 
 ## Structure
 
@@ -27,11 +27,11 @@ Règles :
 
 ## Ajouter une nouvelle page
 
-1. Créez la page dans la langue source de vérité du dossier concerné (voir
-   [Portée de la traduction](#portee-de-la-traduction) ci-dessous) : `source/fr/user_docs/user_guide/`
+1. Créez la page dans la langue source de vérité du dossier concerné (voir la section
+   « Portée de la traduction » ci-dessous) : `source/fr/user_docs/user_guide/`
    pour le guide utilisateur, `source/en/` pour le reste.
 2. Copiez-la dans le chemin correspondant sous l'autre arborescence linguistique.
-3. Traduisez la copie (voir [Traduction locale assistée par IA](#traduction-locale-assistee-par-ia)).
+3. Traduisez la copie (voir la section « Traduction locale assistée par IA » ci-dessous).
 4. Ajoutez la page aux `toctree` des index des deux langues.
 
 ## Construction locale
@@ -108,8 +108,7 @@ La traduction est réalisée localement par le contributeur, pas par la CI :
 1. Modifiez le fichier source de vérité du dossier concerné (voir le tableau ci-dessus).
 2. Ouvrez le fichier pair (permutez `en/` ↔ `fr/` au même chemin relatif) dans une session Copilot Chat.
 3. Demandez à Copilot d'appliquer la compétence `skill-translate-docs`, en pointant vers les deux fichiers.
-4. Relisez le diff généré — vérifiez la terminologie par rapport à
-   [`.github/skills/skill-translate-docs/glossary.md`](../../../../../.github/skills/skill-translate-docs/glossary.md),
-   corrigez si besoin, puis validez vous-même le commit.
+4. Relisez le diff généré — vérifiez la terminologie par rapport au glossaire dans
+   `.github/skills/skill-translate-docs/glossary.md`, corrigez si besoin, puis validez vous-même le commit.
 
 Ceci est volontairement peu automatisé : aucun script ni job CI n'effectue la traduction.

@@ -1,6 +1,6 @@
 # Documentation translation workflow
 
-This project maintains the {{app_name}} documentation in two languages: **English** and **French**. The French tree is a peer of the English tree, not a set of `.po` files. Depending on the folder, either language can be the authoring source of truth — see [Translation scope](#translation-scope).
+This project maintains the {{app_name}} documentation in two languages: **English** and **French**. The French tree is a peer of the English tree, not a set of `.po` files. Depending on the folder, either language can be the authoring source of truth — see the "Translation scope" section below.
 
 ## Structure
 
@@ -106,8 +106,7 @@ Translation is done locally by the contributor, not by CI:
 1. Edit the source-of-truth file for the relevant folder (see the table above).
 2. Open the peer file (swap `en/` ↔ `fr/` at the same relative path) in a Copilot Chat session.
 3. Ask Copilot to apply the `skill-translate-docs` skill, pointing at the two files.
-4. Review the generated diff — check terminology against
-   [`.github/skills/skill-translate-docs/glossary.md`](../../../../../.github/skills/skill-translate-docs/glossary.md),
-   fix anything off, then commit yourself.
+4. Review the generated diff — check terminology against the glossary in
+   `.github/skills/skill-translate-docs/glossary.md`, fix anything off, then commit yourself.
 
 This is intentionally low-automation: no script or CI job performs the translation.
