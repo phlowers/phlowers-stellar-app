@@ -3,9 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import json
 import os
-from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -14,12 +12,6 @@ app_name = os.environ.get("SPHINX_APP_NAME", "Stellar")
 
 project = app_name
 copyright = "2026, RTE (http://www.rte-france.com)"
-
-# Required by the EPUB builder; kept in sync with the app's package.json.
-package_json = json.loads(
-    (Path(__file__).resolve().parents[2] / "package.json").read_text()
-)
-version = release = package_json["version"]
 
 
 # -- General configuration ---------------------------------------------------
@@ -79,10 +71,6 @@ source_suffix = {
 
 templates_path = ["_templates"]
 exclude_patterns = []
-
-# Extension-less remote badge images (README.md shields.io badges) have no
-# guessable MIME type for EPUB packaging; this is expected and harmless.
-suppress_warnings = ["epub.unknown_project_files"]
 
 # Language configuration
 language = os.environ.get("SPHINX_LANGUAGE", "en")
