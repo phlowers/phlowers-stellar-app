@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Distance } from '@services/worker_python/tasks/types';
-import { firstMeasuredPoint } from './quick-measures.helpers';
+import { firstMeasuredPoint } from '@features/studio/core/presentation/components/quick-measures/quick-measures.helpers';
 
 const distance = (obstacleUuid: string, pointIndexes: number[]): Distance => ({
   obstacleUuid,

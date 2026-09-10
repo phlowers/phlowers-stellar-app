@@ -7,6 +7,7 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatStudioError } from './helpers/errors';
 import { formatPythonError } from '@core/services/worker_python/tasks/python-error-messages';
+import { PythonErrorCode } from '@core/services/worker_python/tasks/types';
 
 @Component({
   selector: 'app-studio',
@@ -54,8 +55,12 @@ export class StudioComponent implements OnDestroy {
         }
       }
 
+      // one toast per code: warnings are collected per entity (obstacle, floor…) but their
+      // message only carries the code, so several of them would repeat the same text
+      const shownCodes = new Set<PythonErrorCode>();
       for (const diagnostic of diagnostics) {
-        if (diagnostic.origin === 'warning') {
+        if (diagnostic.origin === 'warning' && !shownCodes.has(diagnostic.code)) {
+          shownCodes.add(diagnostic.code);
           const message = formatPythonError(diagnostic.code, this.translocoService);
           if (message !== null) {
             this.notificationService.warning(message);

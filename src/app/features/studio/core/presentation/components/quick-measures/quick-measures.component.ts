@@ -17,7 +17,7 @@ import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.se
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { firstMeasuredPoint } from './quick-measures.helpers';
+import { firstMeasuredPoint } from '@features/studio/core/presentation/components/quick-measures/quick-measures.helpers';
 
 /**
  * Quick-measures card: pick an obstacle or a floor visible in the current span window,

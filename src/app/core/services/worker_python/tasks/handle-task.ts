@@ -154,6 +154,8 @@ const tasks: Record<
  * Retrieves Python warnings captured since the last call (via `warnings.warn()`,
  * e.g. inside mechaphlowers) and maps each one to a known `PythonErrorCode`.
  * Warnings that don't match any known code are logged but dropped — no toast is shown for them.
+ * Every matching warning is kept, one diagnostic per entity: consumers filter by rawText
+ * (e.g. PlotService drops floor warnings) before the toast layer de-duplicates by code.
  */
 function collectWarningDiagnostics(
   pyodide: PyodideAPI,
@@ -179,23 +181,20 @@ function collectWarningDiagnostics(
   }
 
   const diagnostics: PythonDiagnostic[] = [];
-  const seenCodes = new Set<PythonErrorCode>();
   for (const warningText of capturedWarnings) {
     const matchedCode = Object.values(PythonErrorCode).find((code) => warningText.includes(code)) ?? null;
-    const isDuplicate = matchedCode !== null && seenCodes.has(matchedCode);
 
-    if (matchedCode && !isDuplicate) {
+    if (matchedCode) {
       diagnostics.push({
         code: matchedCode,
         severity: PYTHON_ERROR_SEVERITY[matchedCode],
         origin: 'warning',
         rawText: warningText
       });
-      seenCodes.add(matchedCode);
     }
     log?.(
       'debug',
-      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}${isDuplicate ? ' (duplicate, skipped)' : ''}`
+      `Task ${task}: captured Python warning "${warningText}" -> pythonWarningCode=${matchedCode ?? 'null (no PythonErrorCode matched, no toast)'}`
     );
   }
   return diagnostics;
