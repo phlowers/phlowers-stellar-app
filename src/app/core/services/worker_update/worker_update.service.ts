@@ -197,9 +197,7 @@ export class UpdateService {
    * Call `clearManifestCache` to force a fresh fetch.
    */
   async getLatestAssetList(): Promise<AssetManifest | null> {
-    if (!this.cachedManifestPromise) {
-      this.cachedManifestPromise = this.fetchManifest();
-    }
+    this.cachedManifestPromise ??= this.fetchManifest();
     return this.cachedManifestPromise;
   }
 

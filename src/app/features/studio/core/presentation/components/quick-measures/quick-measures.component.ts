@@ -17,6 +17,7 @@ import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.se
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { firstMeasuredPoint } from './quick-measures.helpers';
 
 /**
  * Quick-measures card: pick an obstacle or a floor visible in the current span window,
@@ -148,7 +149,7 @@ export class QuickMeasuresComponent {
     if (uuid && section?.floors?.some((floor) => floor.uuid === uuid)) {
       // Land on a point straight away, like picking an obstacle does: same entry point as a plot
       // click, so the floor form follows and the vertical distance shows without a second pick.
-      this.floorFormService.selectFloorPoint(uuid, this.firstMeasuredPoint(uuid));
+      this.floorFormService.selectFloorPoint(uuid, firstMeasuredPoint(this.obstacleStateService.distances(), uuid));
       return;
     }
     const obstacle = uuid ? section?.obstacles.find((o) => o.uuid === uuid) : null;
@@ -157,19 +158,6 @@ export class QuickMeasuresComponent {
     if (obstacle) {
       this.obstacleFormService.setExistingObstacle(obstacle, pointIndex ?? 0);
     }
-  }
-
-  /**
-   * First point of a floor the engine could measure. A point sitting exactly on a support has no
-   * distance — the distance plane finds no cable there, the cable hanging off the support axis — so
-   * selecting one would show empty rows.
-   */
-  private firstMeasuredPoint(floorUuid: string): number {
-    const measured = this.obstacleStateService
-      .distances()
-      .filter((distance) => distance.obstacleUuid === floorUuid)
-      .flatMap((distance) => distance.points.map((point) => point.pointIndex));
-    return measured.length ? Math.min(...measured) : 0;
   }
 
   onPointSelect(index: number) {
