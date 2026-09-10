@@ -255,16 +255,29 @@ describe('QuickMeasuresComponent', () => {
       expect(obstacleStateService.distanceType()).toBeNull();
     });
 
-    it('should select a floor without loading the obstacle form', () => {
+    it('should select a floor on its first point, without loading the obstacle form', () => {
       spanService.section.set(sectionWithFloor());
       obstacleStateService.distanceType.set('oblique');
 
       component.onObstacleSelect('floor-0');
 
-      expect(obstaclesService.selectedMeasureUuid()).toBe('floor-0');
-      expect(obstaclesService.activePointIndex()).toBeNull();
-      expect(obstacleStateService.distanceType()).toBeNull();
+      // Picking an obstacle lands on one of its points; a floor does the same, through the shared
+      // floor selection that owns the rest of the sync (selection + vertical distance).
+      expect(floorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-0', 0);
       expect(obstacleFormService.setExistingObstacle).not.toHaveBeenCalled();
+    });
+
+    it('should skip a floor point the engine could not measure when pre-selecting', () => {
+      // A point sitting on a support has no distance: the engine's plane finds no cable there, so
+      // landing on it would show empty rows.
+      spanService.section.set(sectionWithFloor());
+      obstacleStateService.distances.set([
+        { obstacleUuid: 'floor-0', points: [{ pointIndex: 1 } as Distance['points'][number]] }
+      ]);
+
+      component.onObstacleSelect('floor-0');
+
+      expect(floorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-0', 1);
     });
   });
 

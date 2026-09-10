@@ -177,7 +177,6 @@ describe('ObstacleFormService', () => {
   };
   let mockObstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
-    setCurrentPointIndex: vi.Mock;
     selectedMeasureUuid: ReturnType<typeof signal<string | null>>;
     setSelectedMeasure: vi.Mock;
   };
@@ -221,7 +220,6 @@ describe('ObstacleFormService', () => {
     };
     mockObstaclesService = {
       activePointIndex: signal<number | null>(null),
-      setCurrentPointIndex: vi.fn(),
       selectedMeasureUuid: signal<string | null>(null),
       setSelectedMeasure: vi.fn().mockImplementation((uuid: string | null, pointIndex: number | null) => {
         mockObstaclesService.selectedMeasureUuid.set(uuid);
@@ -354,7 +352,9 @@ describe('ObstacleFormService', () => {
       ]);
       expect(service.positions.length).toBe(1);
       expect(service.positions.at(0).get('x')?.value).toBe(1);
-      expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalledWith(0);
+      // The form obstacle claims the shared selection, uuid included: the plot's distance layer
+      // reads both, so a point index alone would point at whatever was selected before.
+      expect(mockObstaclesService.setSelectedMeasure).toHaveBeenCalledWith('obs-1', 0);
     });
   });
 
@@ -479,13 +479,15 @@ describe('ObstacleFormService', () => {
       service.addPosition();
       service.deletePoint(0);
       expect(service.positions.length).toBe(1);
-      expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalled();
+      // Untouched form: its empty uuid reads as "nothing selected" for the plot's distance layer.
+      expect(mockObstaclesService.setSelectedMeasure).toHaveBeenCalledWith(null, 0);
     });
     it('should use activePointIndex when index not provided', () => {
       mockObstaclesService.activePointIndex.set(0);
       service.addPosition();
       service.deletePoint();
-      expect(mockObstaclesService.setCurrentPointIndex).toHaveBeenCalled();
+      // Untouched form: its empty uuid reads as "nothing selected" for the plot's distance layer.
+      expect(mockObstaclesService.setSelectedMeasure).toHaveBeenCalledWith(null, 0);
     });
     it('should remove point from litData.obstacles for the matching obstacle', () => {
       const obstacleUuid = 'obs-lit-1';

@@ -37,6 +37,7 @@ class MockObstacleFormService {
   syncSpanSelectionWithoutZoom = vi.fn();
   resetFormForNewObstacle = vi.fn();
   addPosition = vi.fn();
+  setActivePoint = vi.fn();
   deletePoint = vi.fn();
   deleteObstacle = vi.fn();
   saveObstacle = vi.fn();
@@ -107,6 +108,9 @@ describe('ObstaclesFormComponent', () => {
       setCurrentPointIndex: vi.fn((i: number) => indexSignal.set(i)),
       resetCurrentPointIndex: vi.fn()
     };
+    // Picking a point in the form claims the shared selection through ObstacleFormService, which
+    // carries the form obstacle's uuid along with the index.
+    mockObstacleFormService.setActivePoint.mockImplementation((i: number) => indexSignal.set(i));
 
     distanceCount = 0;
     mockStorageService = {

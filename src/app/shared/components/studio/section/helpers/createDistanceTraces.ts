@@ -221,15 +221,38 @@ const buildDistanceVisuals = (
 export const createDistanceVisuals = (
   plotParams: CreatePlotParams
 ): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {
-  const { distances, distanceType, litData, view, side, currentObstacleUuid, currentObstaclePointIndex, floors } =
-    plotParams;
+  const {
+    distances,
+    distanceType,
+    litData,
+    view,
+    side,
+    currentObstacleUuid,
+    currentObstaclePointIndex,
+    floors,
+    obstacles,
+    supports,
+    startSupport,
+    endSupport
+  } = plotParams;
 
   if (!distances?.length || !litData?.obstacles?.length || !distanceType || !currentObstacleUuid) {
     return { traces: [], annotations: [] };
   }
 
   // Floors are registered as obstacles, so the selected uuid is what tells them apart here.
-  const isFloor = !!floors?.some((floor) => floor.uuid === currentObstacleUuid);
+  const floor = floors?.find((f) => f.uuid === currentObstacleUuid);
+  const isFloor = !!floor;
+
+  // The selection survives a change of span window, and the engine returns every registered
+  // obstacle's coordinates in the visible window's frame: drawing them anyway lands the lines on
+  // whichever span is on screen. Clip to the visible window like the obstacle annotations and floor
+  // traces do — a measure hangs off its span's left support, so endSupport belongs to the next span.
+  const supportUuid = floor?.supportUuid ?? obstacles.find((o) => o.uuid === currentObstacleUuid)?.supportUuid;
+  const visibleSupportUuids = new Set((supports ?? []).slice(startSupport, endSupport).map((s) => s.uuid));
+  if (supportUuid && !visibleSupportUuids.has(supportUuid)) {
+    return { traces: [], annotations: [] };
+  }
   const selectedDistances = distances.filter((d) => d.obstacleUuid === currentObstacleUuid);
   return buildDistanceVisuals(selectedDistances, currentObstaclePointIndex, distanceType, litData, view, side, isFloor);
 };

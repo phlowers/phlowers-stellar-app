@@ -3,7 +3,14 @@ import { DOCUMENT } from '@angular/common';
 
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
-import { DataError, GetSectionOutput, ObstacleOutput, Task, TaskError } from '@services/worker_python/tasks/types';
+import {
+  DataError,
+  GetSectionOutput,
+  ObstacleOutput,
+  PythonErrorCode,
+  Task,
+  TaskError
+} from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
@@ -203,13 +210,33 @@ export class PlotService {
     this.obstacleStateService.setDistances(result?.distances ?? []);
     this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
     this.error.set(error);
-    this.diagnostics.set(diagnostics);
+    this.diagnostics.set(this.withoutFloorIntersectionWarnings(diagnostics));
 
     const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
     await this.updateAspectRatio(scalingFactors, plotOptions);
 
     this.loading.set(false);
   };
+
+  /**
+   * Drops the engine's "distance plane does not intersect the cable" warning when it is about a
+   * floor. A floor's end points sit on the supports themselves, where the plane has no cable to
+   * intersect — the cable hangs off the support axis — so the engine skips those points and warns
+   * for every saved floor, whatever its clearance. The floor's own clearance is computed from the
+   * rendered polylines instead (`computeFloorClearance`), so the warning carries no information
+   * here; obstacles keep it, where it does mean their point could not be measured.
+   */
+  private withoutFloorIntersectionWarnings(diagnostics: PythonDiagnostic[]): PythonDiagnostic[] {
+    const floorUuids = this.spanService.section()?.floors?.map((floor) => floor.uuid) ?? [];
+    if (!floorUuids.length) {
+      return diagnostics;
+    }
+    return diagnostics.filter(
+      (diagnostic) =>
+        diagnostic.code !== PythonErrorCode.NoIntersectionPlaneWarning ||
+        !floorUuids.some((uuid) => diagnostic.rawText.includes(uuid))
+    );
+  }
 
   /**
    * Purge the Plotly instance attached to the plot DOM element.

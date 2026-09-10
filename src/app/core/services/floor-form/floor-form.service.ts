@@ -24,8 +24,9 @@ import {
   SpanSupports,
   SupportOption
 } from '@shared/domain/floor/floor-form.interfaces';
-import { computeFloorClearance, mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
+import { computeFloorClearance, FloorClearance, mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
 import { Floor, FloorPoint } from '@shared/domain/models/floor.model';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 /** Service owning the floor tab's reactive form, so both the form UI and the free-positioning plot can share it. */
 @Injectable({
@@ -150,9 +151,7 @@ export class FloorFormService {
     if (!floor || !litData) {
       return noResults;
     }
-    const floorPoints = litData.obstacles?.find((obstacle) => obstacle.uuid === floor.uuid)?.points;
-    const cablePoints = litData.coords?.spans?.[this.spanService.getSupportIndex(floor.supportUuid)];
-    const clearance = floorPoints && cablePoints ? computeFloorClearance(floorPoints, cablePoints) : null;
+    const clearance = this.clearanceOf(floor, litData);
     if (!clearance) {
       return noResults;
     }
@@ -167,6 +166,41 @@ export class FloorFormService {
       ...clearance,
       minVerticalPosition: isMirrored ? spanLength - clearance.minVerticalPosition : clearance.minVerticalPosition
     };
+  });
+
+  /** Vertical clearance of one floor against its span's cable, from the engine's rendered geometry. */
+  private clearanceOf(floor: Floor, litData: GetSectionOutput): FloorClearance | null {
+    const floorPoints = litData.obstacles?.find((obstacle) => obstacle.uuid === floor.uuid)?.points;
+    const cablePoints = litData.coords?.spans?.[this.spanService.getSupportIndex(floor.supportUuid)];
+    return floorPoints && cablePoints ? computeFloorClearance(floorPoints, cablePoints) : null;
+  }
+
+  /**
+   * Warns for every saved floor the cable passes under, on each projection refresh — a charge change
+   * or a recalculation can sink the cable into a floor saved long before. The engine raises nothing
+   * usable here: its own distance warning fires for every floor whatever the clearance, because a
+   * floor's end points sit on the supports where its distance plane finds no cable, so `PlotService`
+   * drops it and this is what tells the user their cable crosses a floor.
+   */
+  private readonly cableBelowFloorEffect = effect(() => {
+    const litData = this.plotService.litData();
+    const floors = this.spanService.section()?.floors ?? [];
+    if (!litData || !floors.length) {
+      return;
+    }
+    untracked(() => {
+      const spanOptions = this.spanService.getSpanOptions();
+      for (const floor of floors) {
+        const clearance = this.clearanceOf(floor, litData);
+        if (!clearance || clearance.minVerticalDistance >= 0) {
+          continue;
+        }
+        const span = spanOptions.find((option) => option.value === floor.supportUuid)?.label ?? '';
+        this.notificationService.warning(
+          this.translocoService.translate('shared.floor-form-service.cable-below-floor-detail', { span })
+        );
+      }
+    });
   });
 
   /** Whether the form holds enough data (span, reference support, and every point filled in) to calculate and save. */
@@ -341,19 +375,18 @@ export class FloorFormService {
   }
 
   /**
-   * Sets the point that the plot click should edit and highlight, and mirrors it in quick-measures
-   * and the plot's distance layer — both read the selection from `ObstaclesService`, so selecting a
-   * point from the form must sync it too, not only a plot/quick-measures click (`selectFloorPoint`).
+   * Sets the point that the form (or its free-positioning plot) edits and highlights, and follows it
+   * in quick-measures when this floor is the measure already selected there — as an obstacle's form
+   * does. It never claims the selection for a floor that is not the selected measure: that direction
+   * belongs to `selectFloorPoint`, for a point picked from the plot or quick-measures itself.
    */
   setActivePoint(index: number): void {
     this.activePointIndex.set(index);
     const floorUuid = this.savedFloorUuid();
     const savedIndex = this.activeSavedPointIndex();
-    if (!floorUuid || savedIndex === null) {
-      return;
+    if (floorUuid && savedIndex !== null && this.obstaclesService.selectedMeasureUuid() === floorUuid) {
+      this.obstaclesService.activePointIndex.set(savedIndex);
     }
-    this.obstaclesService.setSelectedMeasure(floorUuid, savedIndex);
-    this.obstacleStateService.distanceType.set('vertical');
   }
 
   /**

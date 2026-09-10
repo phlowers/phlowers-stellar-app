@@ -115,10 +115,11 @@ describe('createFloorTraces', () => {
     expect(ribbon).toBeDefined();
   });
 
-  it('should carry one hover payload per ribbon triangle, reaching the closing point', () => {
+  it('should resolve every triangle of a point cell to that point, reaching the closing point', () => {
     // The ribbon covers far more screen area than the markers, so it is what the mouse actually
-    // hits in gl3d — and Plotly indexes a mesh3d hit by face, not by vertex. With a payload per
-    // vertex, a two-point floor resolved both faces to point 0 and the last point was unclickable.
+    // hits in gl3d — and Plotly indexes a mesh3d hit by face, not by vertex. The strip is cut at
+    // the segment midpoints, so both triangles framing a point carry it: tagging whole segments
+    // made the far half of each point's surroundings resolve to its neighbour.
     const ribbon = build({
       litData,
       floors: [floor],
@@ -135,13 +136,48 @@ describe('createFloorTraces', () => {
     };
 
     expect(ribbon.hoverinfo).toBe('text');
-    expect(ribbon.hovertext).toEqual(['point 0.00', 'point 25.00']);
+    expect(ribbon.hovertext).toEqual(['point 0.00', 'point 0.00', 'point 25.00', 'point 25.00']);
     expect(ribbon.customdata).toEqual([
       ['floor-1', 0],
+      ['floor-1', 0],
+      ['floor-1', 1],
       ['floor-1', 1]
     ]);
     // One entry per face, so every triangle index has a payload.
     expect(ribbon.hovertext?.length).toBe(ribbon.i?.length);
+  });
+
+  it('should give a free point its own cell instead of sharing it with the next point', () => {
+    const threePoints = {
+      obstacles: [
+        {
+          uuid: 'floor-1',
+          points: [
+            [0, 0, 10],
+            [10, 0, 11],
+            [20, 0, 12]
+          ]
+        }
+      ]
+    } as unknown as GetSectionOutput;
+    const ribbon = build({
+      litData: threePoints,
+      floors: [{ ...floor, points: [...floor.points, { distanceToRefSupport: 50, altitude: 12 }] }],
+      supports,
+      startSupport: 0,
+      endSupport: 2,
+      view: '3d',
+      side: 'profile'
+    }).find((t) => t.type === 'mesh3d') as { customdata?: unknown };
+
+    expect(ribbon.customdata).toEqual([
+      ['floor-1', 0],
+      ['floor-1', 0],
+      ['floor-1', 1],
+      ['floor-1', 1],
+      ['floor-1', 2],
+      ['floor-1', 2]
+    ]);
   });
 
   it('should widen the ribbon perpendicular to the span, not along global Y', () => {
@@ -167,8 +203,9 @@ describe('createFloorTraces', () => {
       side: 'profile'
     }).find((t) => t.type === 'mesh3d') as { x?: number[]; y?: number[] };
 
-    expect(ribbon.x).toEqual([-10, 10, -10, 10]);
-    expect(ribbon.y).toEqual([0, 0, 25, 25]);
+    // Three rails: the first point, the segment midpoint cutting the two cells apart, the last point.
+    expect(ribbon.x).toEqual([-10, 10, -10, 10, -10, 10]);
+    expect(ribbon.y).toEqual([0, 0, 12.5, 12.5, 25, 25]);
   });
 
   it('should recess the ribbon below the markers so they stay hoverable', () => {
@@ -182,8 +219,9 @@ describe('createFloorTraces', () => {
       side: 'profile'
     }).find((t) => t.type === 'mesh3d') as { z?: number[] };
 
-    // mesh3d always writes to the 3D pick buffer, so every ribbon vertex sits under its point altitude.
-    expect(ribbon.z?.every((z, i) => z < [10, 10, 12, 12][i])).toBe(true);
+    // mesh3d always writes to the 3D pick buffer, so every ribbon vertex sits under the altitude of
+    // the point or midpoint it hangs from.
+    expect(ribbon.z?.every((z, i) => z < [10, 10, 11, 11, 12, 12][i])).toBe(true);
   });
 
   it('should tag each floor marker with its [floorUuid, pointIndex] customdata', () => {
@@ -203,8 +241,8 @@ describe('createFloorTraces', () => {
     ]);
   });
 
-  it('should highlight the selected point of the selected floor', () => {
-    const [line] = build({
+  it('should draw the selected point as the red diamond an obstacle active point uses', () => {
+    const traces = build({
       litData,
       floors: [floor],
       supports,
@@ -215,14 +253,24 @@ describe('createFloorTraces', () => {
       selectedFloorUuid: 'floor-1',
       selectedPointIndex: 1
     });
-    const marker = (line as { marker?: { color: string[]; size: number[] } }).marker!;
+    const [line] = traces;
+    // A whole trace carries one symbol, so the active point rides in its own, drawn last.
+    const selected = traces.at(-1) as { marker?: { color: string; size: number; symbol: string } } & {
+      x?: number[];
+      customdata?: unknown;
+    };
 
-    expect(marker.color).toEqual(['#f6ab4d', '#ed6e13']);
-    expect(marker.size[1]).toBeGreaterThan(marker.size[0]);
+    expect(selected.marker).toMatchObject({ color: 'red', symbol: 'diamond' });
+    expect(selected.x).toEqual([4]);
+    expect(selected.customdata).toEqual([['floor-1', 1]]);
+    // Hidden in the line trace, so the two markers never stack.
+    const [unselectedSize, selectedSize] = (line as { marker?: { size: number[] } }).marker!.size;
+    expect(selectedSize).toBe(0);
+    expect(unselectedSize).toBeGreaterThan(0);
   });
 
-  it('should not highlight when the selected floor uuid does not match', () => {
-    const [line] = build({
+  it('should not draw a selected point when the selected floor uuid does not match', () => {
+    const traces = build({
       litData,
       floors: [floor],
       supports,
@@ -233,9 +281,12 @@ describe('createFloorTraces', () => {
       selectedFloorUuid: 'other-floor',
       selectedPointIndex: 1
     });
-    const marker = (line as { marker?: { color: string[] } }).marker!;
+    const [line] = traces;
 
-    expect(marker.color).toEqual(['#f6ab4d', '#f6ab4d']);
+    expect(traces).toHaveLength(2);
+    const [first, second] = (line as { marker?: { size: number[] } }).marker!.size;
+    expect(second).toBe(first);
+    expect(first).toBeGreaterThan(0);
   });
 
   it('should expose point names only on hover as "point {distance}"', () => {

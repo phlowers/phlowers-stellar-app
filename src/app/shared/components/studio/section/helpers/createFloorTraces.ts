@@ -39,20 +39,25 @@ export interface CreateFloorTracesParams {
 export type FloorPointLabel = (distanceToRefSupport: number | null) => string;
 
 const FLOOR_COLOR = '#f6ab4d';
-/** Highlight color for the floor point currently active in the floor form. */
-const FLOOR_SELECTED_COLOR = '#ed6e13';
+/** Highlight of the floor point active in the floor form: the red diamond an obstacle's active point uses. */
+const FLOOR_SELECTED_COLOR = 'red';
+const FLOOR_SELECTED_SYMBOL = 'diamond';
 const FLOOR_LINE_WIDTH_3D = 0;
 const FLOOR_LINE_WIDTH_2D = 4;
-const FLOOR_MARKER_SIZE_3D = 6;
+const FLOOR_MARKER_SIZE_3D = 8;
 const FLOOR_MARKER_SIZE_2D = 5;
-const FLOOR_SELECTED_MARKER_SIZE_3D = 8;
-const FLOOR_SELECTED_MARKER_SIZE_2D = 12;
+const FLOOR_SELECTED_MARKER_SIZE_3D = 4;
+const FLOOR_SELECTED_MARKER_SIZE_2D = 4;
 /** Lateral half-width (meters) giving the 3D floor ribbon its forward/backward depth. */
 const FLOOR_RIBBON_HALF_WIDTH = 10;
 const FLOOR_RIBBON_OPACITY = 0.6;
 // mesh3d always writes to the 3D pick buffer (hoverinfo 'skip' only hides its own label), so it
 // occludes coplanar floor markers. Recess the ribbon just below the line to keep markers hoverable.
 const FLOOR_RIBBON_Z_OFFSET = -0.15;
+// Same reason, for what the eye sees: the ribbon surrounds a free point on both sides and, being
+// semi-transparent yet depth-writing, hides or tints a marker sitting on the line — the end points
+// escape it only because the strip stops at them. Lift the active marker over the strip in 3D.
+const FLOOR_SELECTED_Z_LIFT = 0.3;
 
 /** Maps an absolute [x, y, z] coord to plot axes, mirroring `createObstaclesAnnotations`. */
 const mapCoord = (coord: Coord3, view: View, side: Side): { x: number; y: number; z: number } => {
@@ -79,9 +84,9 @@ const createFloorLineTrace = (
   const mapped = points.map((point) => mapCoord(point, view, side));
   const hovertext = points.map((_, index) => floorPointName(floor, index, pointLabel));
   const baseSize = is3d ? FLOOR_MARKER_SIZE_3D : FLOOR_MARKER_SIZE_2D;
-  const selectedSize = is3d ? FLOOR_SELECTED_MARKER_SIZE_3D : FLOOR_SELECTED_MARKER_SIZE_2D;
-  const markerSize = points.map((_, index) => (index === selectedPointIndex ? selectedSize : baseSize));
-  const markerColor = points.map((_, index) => (index === selectedPointIndex ? FLOOR_SELECTED_COLOR : FLOOR_COLOR));
+  // The active point is drawn by `createSelectedPointTrace` instead, so hide this trace's marker
+  // under it: Plotly takes one symbol per trace, and only a trace of its own can be a diamond.
+  const markerSize = points.map((_, index) => (index === selectedPointIndex ? 0 : baseSize));
 
   return {
     x: mapped.map((m) => m.x),
@@ -90,10 +95,46 @@ const createFloorLineTrace = (
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'lines+markers',
     line: { color: FLOOR_COLOR, width: is3d ? FLOOR_LINE_WIDTH_3D : FLOOR_LINE_WIDTH_2D },
-    marker: { color: markerColor, size: markerSize },
+    marker: { color: FLOOR_COLOR, size: markerSize },
     // Per-point identity so a plot click can resolve the floor and point it belongs to.
     customdata: points.map((_, index) => [floor.uuid, index]),
     hovertext,
+    hoverinfo: 'text',
+    showlegend: false,
+    name: 'floor',
+    supportUuid: undefined
+  } as DataObject;
+};
+
+/**
+ * Draws the floor point active in the floor form as the red diamond an obstacle's active point uses.
+ * It rides in its own trace because `marker.symbol` applies to a whole trace, and it keeps the
+ * `floor` name and `[uuid, index]` customdata so a click on it resolves like any other floor point.
+ */
+const createSelectedPointTrace = (
+  points: Coord3[],
+  floor: Floor,
+  view: View,
+  side: Side,
+  selectedPointIndex: number,
+  pointLabel: FloorPointLabel
+): DataObject => {
+  const is3d = view === '3d';
+  const { x, y, z } = mapCoord(points[selectedPointIndex], view, side);
+
+  return {
+    x: [x],
+    y: [y],
+    z: is3d ? [z + FLOOR_SELECTED_Z_LIFT] : undefined,
+    type: is3d ? 'scatter3d' : 'scatter',
+    mode: 'markers',
+    marker: {
+      color: FLOOR_SELECTED_COLOR,
+      size: is3d ? FLOOR_SELECTED_MARKER_SIZE_3D : FLOOR_SELECTED_MARKER_SIZE_2D,
+      symbol: FLOOR_SELECTED_SYMBOL
+    },
+    customdata: [[floor.uuid, selectedPointIndex]],
+    hovertext: [floorPointName(floor, selectedPointIndex, pointLabel)],
     hoverinfo: 'text',
     showlegend: false,
     name: 'floor',
@@ -106,7 +147,8 @@ const createFloorLineTrace = (
  * The ribbon is what the mouse actually lands on in gl3d (it covers far more screen area
  * than the thin markers), so hovering or clicking it resolves to a floor point. Plotly
  * indexes a mesh3d hit by *face*, not by vertex, so hovertext/customdata carry one entry
- * per triangle: the two triangles of segment `p` resolve to points `p` and `p + 1`.
+ * per triangle, and the strip is cut at the segment midpoints so each point owns the two
+ * triangles of the cell around it — the nearest point wins, wherever the mouse lands.
  */
 const createFloorRibbonTrace = (
   points: Coord3[],
@@ -130,10 +172,22 @@ const createFloorRibbonTrace = (
       ? [0, FLOOR_RIBBON_HALF_WIDTH]
       : [(-dy / len) * FLOOR_RIBBON_HALF_WIDTH, (dx / len) * FLOOR_RIBBON_HALF_WIDTH];
 
+  // Cut the ribbon at its segment midpoints, giving every point the cell of ribbon closest to it.
+  // Plotly indexes a mesh3d hit by face, so a cell's triangles are the payload's real hit area:
+  // tagging whole segments instead split each point's surroundings in two, and the half beyond the
+  // point resolved to its neighbour.
+  const cuts: Coord3[] = [points[0]];
+  for (let p = 0; p < points.length - 1; p++) {
+    const [ax, ay, az] = points[p];
+    const [bx, by, bz] = points[p + 1];
+    cuts.push([(ax + bx) / 2, (ay + by) / 2, (az + bz) / 2]);
+  }
+  cuts.push(points.at(-1)!);
+
   const xs: number[] = [];
   const ys: number[] = [];
   const zs: number[] = [];
-  points.forEach(([cx, cy, cz]) => {
+  cuts.forEach(([cx, cy, cz]) => {
     xs.push(cx + offX, cx - offX);
     ys.push(cy + offY, cy - offY);
     zs.push(cz + FLOOR_RIBBON_Z_OFFSET, cz + FLOOR_RIBBON_Z_OFFSET);
@@ -144,7 +198,8 @@ const createFloorRibbonTrace = (
   const kIdx: number[] = [];
   const hovertext: string[] = [];
   const customdata: [string, number][] = [];
-  for (let p = 0; p < points.length - 1; p++) {
+  // One cell per point, between the two cuts framing it — the closing point included.
+  for (let p = 0; p < points.length; p++) {
     const front0 = 2 * p;
     const back0 = 2 * p + 1;
     const front1 = 2 * (p + 1);
@@ -152,10 +207,10 @@ const createFloorRibbonTrace = (
     iIdx.push(front0, back0);
     jIdx.push(back0, back1);
     kIdx.push(front1, front1);
-    // One payload per triangle, in the same order: first triangle resolves to p, second to p + 1,
-    // so the polyline's closing point stays reachable from the ribbon.
-    hovertext.push(floorPointName(floor, p, pointLabel), floorPointName(floor, p + 1, pointLabel));
-    customdata.push([floor.uuid, p], [floor.uuid, p + 1]);
+    // One payload per triangle, in the same order: both triangles of the cell resolve to its point.
+    const name = floorPointName(floor, p, pointLabel);
+    hovertext.push(name, name);
+    customdata.push([floor.uuid, p], [floor.uuid, p]);
   }
 
   return {
@@ -217,6 +272,10 @@ export const createFloorTraces = ({
     const ribbon = createFloorRibbonTrace(points, floor, view, pointLabel);
     if (ribbon) {
       traces.push(ribbon);
+    }
+    // Last, so it draws over the ribbon rather than under it.
+    if (activePointIndex !== null && points[activePointIndex]) {
+      traces.push(createSelectedPointTrace(points, floor, view, side, activePointIndex, pointLabel));
     }
   }
   return traces;
