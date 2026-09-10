@@ -1,6 +1,6 @@
 # Workflow de traduction de la documentation
 
-Ce projet maintient la documentation de {{app_name}} en deux langues : **anglais** (source de vérité) et **français**. L'arborescence française est un équivalent de l'arborescence anglaise, et non un ensemble de fichiers `.po`.
+Ce projet maintient la documentation de {{app_name}} en deux langues : **anglais** et **français**. L'arborescence française est un équivalent de l'arborescence anglaise, et non un ensemble de fichiers `.po`. Selon le dossier, l'une ou l'autre langue peut être la source de vérité pour la rédaction — voir [Portée de la traduction](#portee-de-la-traduction).
 
 ## Structure
 
@@ -9,11 +9,11 @@ docs-sphinx/source/
 ├── conf.py              # Configuration Sphinx partagée
 ├── _static/             # Ressources statiques partagées (CSS, logos, favicon)
 ├── _templates/          # Modèles partagés
-├── en/                  # Documentation anglaise (source de vérité)
+├── en/                  # Documentation anglaise (source de vérité, sauf user_guide)
 │   ├── index.md
 │   ├── api/
 │   └── user_docs/
-└── fr/                  # Traduction française
+└── fr/                  # Documentation française (source de vérité pour user_guide)
     ├── index.md
     ├── api/
     └── user_docs/
@@ -27,9 +27,11 @@ Règles :
 
 ## Ajouter une nouvelle page
 
-1. Créez la page dans `source/en/` en premier.
-2. Copiez-la dans le chemin correspondant sous `source/fr/`.
-3. Traduisez la version française.
+1. Créez la page dans la langue source de vérité du dossier concerné (voir
+   [Portée de la traduction](#portee-de-la-traduction) ci-dessous) : `source/fr/user_docs/user_guide/`
+   pour le guide utilisateur, `source/en/` pour le reste.
+2. Copiez-la dans le chemin correspondant sous l'autre arborescence linguistique.
+3. Traduisez la copie (voir [Traduction locale assistée par IA](#traduction-locale-assistee-par-ia)).
 4. Ajoutez la page aux `toctree` des index des deux langues.
 
 ## Construction locale
@@ -92,7 +94,22 @@ directement dans `$READTHEDOCS_OUTPUT/html`.
 
 ## Portée de la traduction
 
-- L'anglais est la source de vérité pour la rédaction.
-- Les pages du guide utilisateur sont entièrement traduites en français.
-- Les pages de référence API restent en anglais dans une première itération.
-- Les pages détaillées du guide développeur peuvent rester en anglais temporairement ; leurs libellés de navigation dans `index.md` sont traduits.
+La direction dépend du dossier — il n'y a pas une seule « langue source » pour toute l'arborescence :
+
+| Dossier | Source de vérité | Traduit vers |
+|---|---|---|
+| `user_docs/user_guide/` | **Français** | Anglais |
+| `index.md`, `api/`, `user_docs/developer_guide/`, `user_docs/getting_started.md`, `user_docs/scale_view.md` | **Anglais** | Français |
+
+## Traduction locale assistée par IA
+
+La traduction est réalisée localement par le contributeur, pas par la CI :
+
+1. Modifiez le fichier source de vérité du dossier concerné (voir le tableau ci-dessus).
+2. Ouvrez le fichier pair (permutez `en/` ↔ `fr/` au même chemin relatif) dans une session Copilot Chat.
+3. Demandez à Copilot d'appliquer la compétence `skill-translate-docs`, en pointant vers les deux fichiers.
+4. Relisez le diff généré — vérifiez la terminologie par rapport à
+   [`.github/skills/skill-translate-docs/glossary.md`](../../../../../.github/skills/skill-translate-docs/glossary.md),
+   corrigez si besoin, puis validez vous-même le commit.
+
+Ceci est volontairement peu automatisé : aucun script ni job CI n'effectue la traduction.
