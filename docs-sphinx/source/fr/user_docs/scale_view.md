@@ -8,103 +8,103 @@ orphan: true
 
 Ce document décrit le `ScaleViewComponent` situé dans la barre d'outils supérieure du Studio. Il contrôle la résolution du graphique via un curseur et un champ numérique, synchronise les deux contrôles, persiste et applique les changements de résolution via le `PlotService`, puis rafraîchit la projection du graphique. Ce fichier liste le comportement du composant, la surface d'API de `PlotService` impactée, des astuces de débogage et des tests suggérés pour les développeurs.
 
-## Component location
+## Emplacement du composant
 
 `src/app/features/studio/core/presentation/components/top-toolbar/scale-view/scale-view.component.ts`
 
-## Purpose
+## Objectif
 
-- Provide a popover UI with a slider and numeric input to change the plot resolution.
-- Keep slider and input synchronized using Angular `signal`/`effect` and reactive forms.
-- Persist resolution changes and apply them to the plotting engine, then refresh the projection.
+- Fournir une interface en popover avec un curseur et un champ numérique pour modifier la résolution du graphique.
+- Garder le curseur et le champ numérique synchronisés grâce aux `signal`/`effect` Angular et aux formulaires réactifs.
+- Persister les changements de résolution et les appliquer au moteur de tracé, puis rafraîchir la projection.
 
-## Key behaviors
+## Comportements clés
 
-- Controls
-  - `sliderControl` (FormControl<number>) — slider for resolution.
-  - `pointsControl` (FormControl<number>) — numeric input for points count.
-  - `formScaleView` — form group containing `scale`, `sliderPointsCount`, `pointsCount`.
+- Contrôles
+  - `sliderControl` (FormControl<number>) — curseur pour la résolution.
+  - `pointsControl` (FormControl<number>) — champ numérique pour le nombre de points.
+  - `formScaleView` — groupe de formulaire contenant `scale`, `sliderPointsCount`, `pointsCount`.
 
-- Signals / Effects
-  - `sliderValue` and `pointsCountValue` are created with `toSignal(...)` from `valueChanges`.
-  - Effects synchronize slider -> input and input -> slider; they call `PlotService.setResolution(...)` when changes originate from the UI.
-  - An effect keeps both controls in sync with `PlotService.resolution()` when the service changes the resolution externally.
+- Signaux / Effects
+  - `sliderValue` et `pointsCountValue` sont créés avec `toSignal(...)` à partir de `valueChanges`.
+  - Des effects synchronisent le curseur -> champ numérique et le champ numérique -> curseur ; ils appellent `PlotService.setResolution(...)` lorsque les changements proviennent de l'interface utilisateur.
+  - Un effect maintient les deux contrôles synchronisés avec `PlotService.resolution()` lorsque le service modifie la résolution de manière externe.
 
-- Validation flow (`onValidate()`)
-  1. Toggle the popover closed.
-  2. Read `resolution` from `pointsControl` and `scale` from the form.
-  3. Call `PlotService.setResolution(resolution)`.
-  4. Await `PlotService.applyResolution(resolution)`.
-  5. Determine axis norms from `scaleNormsMap` and call `PlotService.setAxesNorms(norms)`.
-  6. Await `PlotService.refreshProjection()`.
+- Flux de validation (`onValidate()`)
+  1. Fermer le popover.
+  2. Lire `resolution` depuis `pointsControl` et `scale` depuis le formulaire.
+  3. Appeler `PlotService.setResolution(resolution)`.
+  4. Attendre `PlotService.applyResolution(resolution)`.
+  5. Déterminer les normes d'axes à partir de `scaleNormsMap` et appeler `PlotService.setAxesNorms(norms)`.
+  6. Attendre `PlotService.refreshProjection()`.
 
-## Scale norms
+## Normes d'échelle
 
-The component defines `scaleNormsMap`:
+Le composant définit `scaleNormsMap` :
 
 - `plan` → `{ x: 0.2, y: 1, z: 1, aspectMode: 'manual' }`
 - `geo` → `{ x: 1, y: 1, z: 1, aspectMode: 'manual' }`
 - `celeste` → `{ x: 1, y: 1, z: 0.5, aspectMode: 'manual' }`
 - `auto` → `{ x: 1, y: 1, z: 1, aspectMode: 'data' }`
 
-## Impacted service: `PlotService`
+## Service impacté : `PlotService`
 
-Verify these methods exist and behave as expected when debugging or writing tests:
+Vérifiez que ces méthodes existent et se comportent comme attendu lors du débogage ou de l'écriture de tests :
 
 - `maxResolution(): number`
-  - Used by the component as `scaleMax` to bound the slider value. This value is initialized from the Python worker's `RESOLUTION` constant (100) via the `getConfig` task.
+  - Utilisé par le composant comme `scaleMax` pour borner la valeur du curseur. Cette valeur est initialisée à partir de la constante `RESOLUTION` du worker Python (100) via la tâche `getConfig`.
 - `resolution(): number`
-  - Returns the current resolution; the component reads this value to initialize and to remain synchronized.
-  - When restored from localStorage, the value is clamped to `MIN_RESOLUTION` (25). Once `maxResolution` is loaded from the worker, the resolution is re-clamped if it exceeds the maximum.
+  - Retourne la résolution actuelle ; le composant lit cette valeur pour s'initialiser et rester synchronisé.
+  - Lorsqu'elle est restaurée depuis le localStorage, la valeur est bornée à `MIN_RESOLUTION` (25). Une fois `maxResolution` chargée depuis le worker, la résolution est re-bornée si elle dépasse le maximum.
 - `setResolution(value: number): void`
-  - Persist the requested resolution (local state, storage or engine configuration).
-  - Internally normalizes the value using `normalizeResolution()` to clamp it between `MIN_RESOLUTION` (25) and `maxResolution()`.
+  - Persiste la résolution demandée (état local, stockage ou configuration du moteur).
+  - Normalise en interne la valeur à l'aide de `normalizeResolution()` pour la borner entre `MIN_RESOLUTION` (25) et `maxResolution()`.
 - `applyResolution(value: number): Promise<void>`
-  - Apply the resolution to the plotting engine. The component awaits this in `onValidate()`.
+  - Applique la résolution au moteur de tracé. Le composant attend cet appel dans `onValidate()`.
 - `setAxesNorms(norms: {x:number,y:number,z:number,aspectMode:string}): void`
-  - Apply axis normalization presets computed from `scaleNormsMap`.
+  - Applique les préréglages de normalisation d'axes calculés à partir de `scaleNormsMap`.
 - `refreshProjection(): Promise<void>`
-  - Recompute or redraw the plot projection; awaited by `onValidate()`.
+  - Recalcule ou redessine la projection du graphique ; attendu par `onValidate()`.
 
-## Resolution bounds
+## Bornes de résolution
 
-- **Minimum**: 25 (enforced in `PlotService.MIN_RESOLUTION` and `ScaleViewComponent.scaleMin`)
-- **Maximum**: Loaded dynamically from Python worker's `RESOLUTION` constant (default: 100)
-- **Default**: 100 (`DEFAULT_RESOLUTION` in `PlotService`)
-- Stored values from localStorage are clamped to these bounds on load and after worker initialization to prevent inconsistent control state.
+- **Minimum** : 25 (imposé dans `PlotService.MIN_RESOLUTION` et `ScaleViewComponent.scaleMin`)
+- **Maximum** : Chargé dynamiquement depuis la constante `RESOLUTION` du worker Python (par défaut : 100)
+- **Défaut** : 100 (`DEFAULT_RESOLUTION` dans `PlotService`)
+- Les valeurs stockées dans le localStorage sont bornées à ces limites au chargement et après l'initialisation du worker, afin d'éviter un état incohérent des contrôles.
 
-## Debugging guide
+## Guide de débogage
 
-When controls are out of sync or the plot does not update after changes, follow these steps:
+Lorsque les contrôles sont désynchronisés ou que le graphique ne se met pas à jour après un changement, suivez ces étapes :
 
-1. Check `PlotService.resolution()` — if it differs from controls, inspect the persistence layer or initialization sequence.
-2. Ensure `sliderValue` and `pointsCountValue` receive `valueChanges` events. If `valueChanges` are missing, check for `emitEvent: false` usages elsewhere.
-3. Confirm `setResolution(...)` is invoked exactly once per intended user change. The component uses `emitEvent: false` when programmatically updating the paired control to avoid cycles.
-4. Inspect `applyResolution(...)` and `refreshProjection()` for errors or long-running tasks. Add temporary logging to detect promise rejections or delays.
-5. If axis norms appear incorrect after validation, verify the `scale` value from the form and the `scaleNormsMap` mapping.
+1. Vérifiez `PlotService.resolution()` — si elle diffère des contrôles, inspectez la couche de persistance ou la séquence d'initialisation.
+2. Assurez-vous que `sliderValue` et `pointsCountValue` reçoivent bien les événements `valueChanges`. Si `valueChanges` sont absents, vérifiez les usages de `emitEvent: false` ailleurs.
+3. Confirmez que `setResolution(...)` est invoqué exactement une fois par changement utilisateur voulu. Le composant utilise `emitEvent: false` lors de la mise à jour programmatique du contrôle apparié pour éviter les cycles.
+4. Inspectez `applyResolution(...)` et `refreshProjection()` pour détecter des erreurs ou des tâches longues. Ajoutez des logs temporaires pour détecter des rejets de promesses ou des délais.
+5. Si les normes d'axes semblent incorrectes après validation, vérifiez la valeur `scale` du formulaire et le mapping `scaleNormsMap`.
 
-## Suggested unit tests
+## Tests unitaires suggérés
 
-- Mock `PlotService` and assert the following:
-  - Slider -> input synchronization triggers `setResolution` with the new value.
-  - Input -> slider synchronization triggers `setResolution` with the new value.
-  - `onValidate()` calls `applyResolution`, `setAxesNorms` with the right norms and then `refreshProjection`.
-  - The component updates controls when `PlotService.resolution()` changes (effect keeps them in sync).
+- Simulez (mock) `PlotService` et vérifiez les points suivants :
+  - La synchronisation curseur -> champ numérique déclenche `setResolution` avec la nouvelle valeur.
+  - La synchronisation champ numérique -> curseur déclenche `setResolution` avec la nouvelle valeur.
+  - `onValidate()` appelle `applyResolution`, `setAxesNorms` avec les bonnes normes, puis `refreshProjection`.
+  - Le composant met à jour les contrôles lorsque `PlotService.resolution()` change (l'effect les maintient synchronisés).
 
-## Integration / E2E suggestions
+## Suggestions d'intégration / E2E
 
-- Open the popover, change resolution via slider and input, click Apply, verify the visible plot updates accordingly.
+- Ouvrez le popover, changez la résolution via le curseur et le champ numérique, cliquez sur Valider, vérifiez que le graphique visible se met à jour en conséquence.
 
-## Where to look in code
+## Où chercher dans le code
 
-- Component: `src/app/features/studio/core/presentation/components/top-toolbar/scale-view/scale-view.component.ts`
-- Plot service: search for `class PlotService` under `src/app` to find its implementation and tests/mocks.
+- Composant : `src/app/features/studio/core/presentation/components/top-toolbar/scale-view/scale-view.component.ts`
+- Service de tracé : recherchez `class PlotService` sous `src/app` pour trouver son implémentation ainsi que ses tests/mocks.
 
-## Notes for reviewers
+## Notes pour les relecteurs
 
-- Component uses Angular standalone component imports and PrimeNG components.
-- Form controls are created with `nonNullable: true`; tests should initialize numeric values accordingly.
+- Le composant utilise des imports de composant standalone Angular et des composants PrimeNG.
+- Les contrôles de formulaire sont créés avec `nonNullable: true` ; les tests doivent initialiser les valeurs numériques en conséquence.
 
 ---
 
-End of document.
+Fin du document.

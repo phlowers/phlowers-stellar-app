@@ -1,24 +1,24 @@
-# Generic Import Pipeline
+# Pipeline d'import générique
 
-This document explains the architecture of the reusable import feature shared by **Study** and **Section** contexts.
+Ce document explique l'architecture de la fonctionnalité d'import réutilisable partagée par les contextes **Study** et **Section**.
 
 ---
 
-## Overview
+## Aperçu
 
-The import system is built around three layers:
+Le système d'import est construit autour de trois couches :
 
-| Layer | Role |
+| Couche | Rôle |
 |---|---|
-| **`ImportComponent`** | Generic UI: file picker, outcomes list, collision dialog |
-| **`GenericImportEngineService`** | Pipeline orchestration: validate → collision check → process |
-| **`ImportAdapter<T>`** | Context-specific business logic: parse, validate, persist |
+| **`ImportComponent`** | UI générique : sélecteur de fichier, liste des résultats, boîte de dialogue de collision |
+| **`GenericImportEngineService`** | Orchestration du pipeline : validation → vérification de collision → traitement |
+| **`ImportAdapter<T>`** | Logique métier spécifique au contexte : parsing, validation, persistance |
 
-The UI and the engine know nothing about Study or Section. They only depend on the `ImportAdapter` interface, resolved at runtime via Angular's DI system using `IMPORT_ADAPTER_TOKEN`.
+L'UI et le moteur ne savent rien de Study ou Section. Ils dépendent uniquement de l'interface `ImportAdapter`, résolue à l'exécution via le système d'injection de dépendances d'Angular à l'aide de `IMPORT_ADAPTER_TOKEN`.
 
 ---
 
-## Key files
+## Fichiers clés
 
 ```
 src/app/shared/import/
@@ -48,9 +48,9 @@ src/app/features/study/.../import-section/
 
 ---
 
-## The `ImportAdapter` interface
+## L'interface `ImportAdapter`
 
-Any context that wants to plug into the generic import system must implement this interface:
+Tout contexte souhaitant s'intégrer au système d'import générique doit implémenter cette interface :
 
 ```typescript
 interface ImportAdapter<TEntity = unknown> {
@@ -60,27 +60,27 @@ interface ImportAdapter<TEntity = unknown> {
 }
 ```
 
-| Method | Stage | Responsibility |
+| Méthode | Étape | Responsabilité |
 |---|---|---|
-| `accepts(file)` | `FILE_VALIDATION` | Return `true` if the file extension/type is supported |
-| `checkCollision(file)` | `COLLISION_CHECK` | Read the UUID from the file and check if an entity already exists |
-| `processFile(file, resolver)` | `DECODING → PERSISTENCE` | Parse, validate, map, and persist the entity |
+| `accepts(file)` | `FILE_VALIDATION` | Retourne `true` si l'extension/le type de fichier est pris en charge |
+| `checkCollision(file)` | `COLLISION_CHECK` | Lit l'UUID du fichier et vérifie si une entité existe déjà |
+| `processFile(file, resolver)` | `DECODING → PERSISTENCE` | Parse, valide, mappe et persiste l'entité |
 
 ---
 
-## The `IMPORT_ADAPTER_TOKEN`
+## Le `IMPORT_ADAPTER_TOKEN`
 
 ```typescript
 export const IMPORT_ADAPTER_TOKEN = new InjectionToken<ImportAdapter>('IMPORT_ADAPTER_TOKEN');
 ```
 
-This DI token is the bridge between the generic engine and a context-specific adapter. The host component is responsible for binding the right service to this token in its `providers` array.
+Ce token d'injection de dépendances est le pont entre le moteur générique et un adaptateur spécifique au contexte. Le composant hôte est responsable de lier le bon service à ce token dans son tableau `providers`.
 
 ---
 
-## The `ImportContextConfig` input
+## L'input `ImportContextConfig`
 
-`ImportComponent` accepts a single required input of type `ImportContextConfig`:
+`ImportComponent` accepte un unique input requis de type `ImportContextConfig` :
 
 ```typescript
 interface ImportContextConfig {
@@ -98,23 +98,23 @@ interface ImportContextConfig {
 }
 ```
 
-**Effect of each property on the rendered UI:**
+**Effet de chaque propriété sur l'UI rendue :**
 
-| Property | Effect |
+| Propriété | Effet |
 |---|---|
-| `acceptedFiles.extensions` + `mimeTypes` | Computes the `[accept]` attribute on the file `<input>` |
-| `acceptedFiles.hint` | Displayed as a sub-label inside the upload zone |
-| `texts.description` | Paragraph rendered above the upload zone (hidden if absent) |
-| `texts.uploadPrompt` | Upload zone main text and `aria-label` on the input |
-| `entityLabel` | Inserted into the collision dialog: *"Section X already exists…"* |
-| `navigationRoute` | Renders a `<a [routerLink]="...">` button on each successfully imported item |
-| `successAction` | Renders an action button on each success item; clicking calls `action(outcome)` and emits `successActionTriggered` |
+| `acceptedFiles.extensions` + `mimeTypes` | Calcule l'attribut `[accept]` sur l'`<input>` de fichier |
+| `acceptedFiles.hint` | Affiché comme sous-libellé à l'intérieur de la zone de dépôt |
+| `texts.description` | Paragraphe affiché au-dessus de la zone de dépôt (masqué si absent) |
+| `texts.uploadPrompt` | Texte principal de la zone de dépôt et `aria-label` sur l'input |
+| `entityLabel` | Inséré dans la boîte de dialogue de collision : *« Section X already exists… »* |
+| `navigationRoute` | Affiche un bouton `<a [routerLink]="...">` sur chaque élément importé avec succès |
+| `successAction` | Affiche un bouton d'action sur chaque élément réussi ; le clic appelle `action(outcome)` et émet `successActionTriggered` |
 
 ---
 
-## Pipeline stages
+## Étapes du pipeline
 
-For each file, the engine runs these stages in order:
+Pour chaque fichier, le moteur exécute ces étapes dans l'ordre :
 
 ```
 FILE_VALIDATION
@@ -134,13 +134,13 @@ DECODING → PARSING → VALIDATION → MAPPING → PERSISTENCE
            └─ throws ImportError → outcome: error
 ```
 
-Files are processed **sequentially** — one confirmation dialog at a time.
+Les fichiers sont traités **séquentiellement** — une seule boîte de dialogue de confirmation à la fois.
 
 ---
 
-## How to wire a new context
+## Comment câbler un nouveau contexte
 
-**1. Create a service implementing `ImportAdapter<YourEntity>`:**
+**1. Créer un service implémentant `ImportAdapter<YourEntity>` :**
 
 ```typescript
 @Injectable()
@@ -151,7 +151,7 @@ export class YourImportService implements ImportAdapter<YourEntity> {
 }
 ```
 
-**2. Create a host wrapper component that provides the adapter:**
+**2. Créer un composant wrapper hôte qui fournit l'adaptateur :**
 
 ```typescript
 @Component({
@@ -178,7 +178,7 @@ export class ImportYourContextComponent {
 }
 ```
 
-**3. Define your config constant in a `.constantes.ts` file:**
+**3. Définir votre constante de configuration dans un fichier `.constantes.ts` :**
 
 ```typescript
 export const YOUR_IMPORT_CONFIG: ImportContextConfig = {
@@ -188,7 +188,7 @@ export const YOUR_IMPORT_CONFIG: ImportContextConfig = {
 };
 ```
 
-**4. Use the wrapper in your parent template:**
+**4. Utiliser le wrapper dans votre template parent :**
 
 ```text
 <app-import-your-context
@@ -196,11 +196,11 @@ export const YOUR_IMPORT_CONFIG: ImportContextConfig = {
 />
 ```
 
-> **Note:** The `ConfirmationService` and `<p-confirmdialog key="positionDialog" />` **must** be provided by the wrapper itself. Do not rely on a parent component having registered them.
+> **Remarque :** Le `ConfirmationService` et le `<p-confirmdialog key="positionDialog" />` **doivent** être fournis par le wrapper lui-même. Ne comptez pas sur le fait qu'un composant parent les ait déjà enregistrés.
 
 ---
 
-## DI scoping diagram
+## Diagramme de portée (scoping) de l'injection de dépendances
 
 ```
 Host wrapper (ImportYourContextComponent)
@@ -219,29 +219,29 @@ Host wrapper (ImportYourContextComponent)
               inject(IMPORT_ADAPTER_TOKEN)  ← resolved to YourImportService
 ```
 
-Each `<app-import>` instance gets its own `GenericImportEngineService`. The adapter is shared from the parent injector.
+Chaque instance de `<app-import>` obtient son propre `GenericImportEngineService`. L'adaptateur est partagé depuis l'injecteur parent.
 
 ---
 
-## Error catalog
+## Catalogue d'erreurs
 
-Standard error codes thrown by adapters:
+Codes d'erreur standard levés par les adaptateurs :
 
-| Code | Stage | Meaning |
+| Code | Étape | Signification |
 |---|---|---|
-| `FILE_TYPE_NOT_ALLOWED` | `FILE_VALIDATION` | Extension not accepted by `adapter.accepts()` |
-| `FILE_READ_ERROR` | `DECODING` | `file.text()` or FileReader failed |
-| `FILE_PARSE_ERROR` | `PARSING` | JSON / CSV parse failure |
-| `VALIDATION_ERROR` | `VALIDATION` | Business rule violation (missing field, out-of-bounds value…) |
-| `PERSISTENCE_ERROR` | `PERSISTENCE` | Storage layer failure |
+| `FILE_TYPE_NOT_ALLOWED` | `FILE_VALIDATION` | Extension non acceptée par `adapter.accepts()` |
+| `FILE_READ_ERROR` | `DECODING` | Échec de `file.text()` ou du FileReader |
+| `FILE_PARSE_ERROR` | `PARSING` | Échec du parsing JSON / CSV |
+| `VALIDATION_ERROR` | `VALIDATION` | Violation d'une règle métier (champ manquant, valeur hors limites…) |
+| `PERSISTENCE_ERROR` | `PERSISTENCE` | Échec de la couche de stockage |
 
-Adapters may add context-specific codes by extending the `ImportErrorCode` union type.
+Les adaptateurs peuvent ajouter des codes spécifiques au contexte en étendant le type union `ImportErrorCode`.
 
 ---
 
-## Output — `importCompleted`
+## Sortie — `importCompleted`
 
-After every file batch, `ImportComponent` emits `ImportOutcome[]` via its `importCompleted` output.
+Après chaque lot de fichiers, `ImportComponent` émet `ImportOutcome[]` via son output `importCompleted`.
 
 ```typescript
 interface ImportOutcome {
@@ -253,7 +253,7 @@ interface ImportOutcome {
 }
 ```
 
-The host wrapper forwards this event upward. The parent (e.g. a modal) can inspect it to close on success:
+Le wrapper hôte transmet cet événement vers le haut. Le parent (par exemple une modale) peut l'inspecter pour se fermer en cas de succès :
 
 ```typescript
 onImportCompleted(outcomes: ImportOutcome[]): void {

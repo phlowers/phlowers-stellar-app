@@ -1,20 +1,20 @@
-# Plot Refresh Pipeline
+# Pipeline de rafraîchissement du graphique
 
-This document describes the four refresh functions that keep the Plotly section
-chart in sync with data changes, when they are triggered, and what Python work
-each one performs.
+Ce document décrit les quatre fonctions de rafraîchissement qui maintiennent le graphique
+de section Plotly synchronisé avec les changements de données, le moment où elles sont
+déclenchées, et le travail Python que chacune effectue.
 
 ---
 
-## Overview
+## Vue d'ensemble
 
-The rendering pipeline has two distinct layers:
+Le pipeline de rendu comporte deux couches distinctes :
 
-- **Data layer** — `PlotService` and `ObstacleFormService` fetch or update geometry
-  from the Python worker and store results in Angular signals (`litData`,
-  `obstacleStateService.distances`, …).
-- **Render layer** — `SectionPlotComponent` reacts to those signals and performs a
-  client-side Plotly redraw. No Python calls happen here.
+- **Couche de données** — `PlotService` et `ObstacleFormService` récupèrent ou mettent à jour
+  la géométrie depuis le worker Python et stockent les résultats dans des signaux Angular
+  (`litData`, `obstacleStateService.distances`, …).
+- **Couche de rendu** — `SectionPlotComponent` réagit à ces signaux et effectue un redessin
+  Plotly côté client. Aucun appel Python n'a lieu ici.
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
@@ -38,26 +38,26 @@ The rendering pipeline has two distinct layers:
 
 ## 1. `refreshSection(section)` — `PlotService`
 
-### When it is called
+### Quand elle est appelée
 
-Triggered once by `StudioComponent` whenever the active section changes (new
-section loaded or section data replaced).
+Déclenchée une fois par `StudioComponent` chaque fois que la section active change (nouvelle
+section chargée ou données de section remplacées).
 
-### What it does
+### Ce qu'elle fait
 
-Full cold start. Builds the entire Python engine from scratch
-(`BalanceEngine` + `PlotEngine`), projects the geometry, registers all saved
-obstacles, and calculates their distances.
+Démarrage à froid complet. Construit entièrement le moteur Python depuis zéro
+(`BalanceEngine` + `PlotEngine`), projette la géométrie, enregistre tous les obstacles
+sauvegardés, et calcule leurs distances.
 
-### Python calls
+### Appels Python
 
-| Order | Task | Description |
+| Ordre | Tâche | Description |
 |-------|------|-------------|
-| 1 | `getLit` | Build engine; return full section geometry (`GetSectionWithBaseOutput`) |
-| 2 | `addObstacle` | Register all obstacles for the current span in `plt_line` |
-| 3 | `calculateObstaclesDistances` | Compute clearance distances |
+| 1 | `getLit` | Construit le moteur ; renvoie la géométrie complète de la section (`GetSectionWithBaseOutput`) |
+| 2 | `addObstacle` | Enregistre tous les obstacles de la portée courante dans `plt_line` |
+| 3 | `calculateObstaclesDistances` | Calcule les distances de dégagement |
 
-### Call graph
+### Graphe d'appels
 
 ```
 StudioComponent (effect on section input)
@@ -76,27 +76,27 @@ StudioComponent (effect on section input)
 
 ## 2. `refreshProjection()` — `PlotService`
 
-### When it is called
+### Quand elle est appelée
 
-Called automatically by `plotOptionsChange()` whenever `startSupport`,
-`endSupport`, or `view` changes — i.e. every time the span slider moves or the
-2D/3D toggle is used.
+Appelée automatiquement par `plotOptionsChange()` chaque fois que `startSupport`,
+`endSupport`, ou `view` change — c'est-à-dire chaque fois que le curseur de portée est
+déplacé ou que le bascule 2D/3D est utilisé.
 
-### What it does
+### Ce qu'elle fait
 
-Re-projects the **existing** Python engine with new view parameters. Because
-`plt_line` already holds the registered obstacles from the last `addObstacle`
-call, `refresh_projection` on the Python side calls `get_coordinates()` **and**
-`plt_line.obstacles_dict()`, returning obstacle coordinates embedded in
-`current.obstacles`. No extra Python calls are needed.
+Reprojette le moteur Python **existant** avec de nouveaux paramètres de vue. Comme
+`plt_line` contient déjà les obstacles enregistrés lors du dernier appel à `addObstacle`,
+`refresh_projection` côté Python appelle `get_coordinates()` **et**
+`plt_line.obstacles_dict()`, renvoyant les coordonnées des obstacles intégrées dans
+`current.obstacles`. Aucun appel Python supplémentaire n'est nécessaire.
 
-### Python calls
+### Appels Python
 
-| Order | Task | Description |
+| Ordre | Tâche | Description |
 |-------|------|-------------|
-| 1 | `refreshProjection` | Re-project geometry; obstacle coords included in return value |
+| 1 | `refreshProjection` | Reprojette la géométrie ; les coordonnées des obstacles sont incluses dans la valeur de retour |
 
-### Call graph
+### Graphe d'appels
 
 ```
 StudioPage span slider / view toggle
@@ -111,35 +111,36 @@ StudioPage span slider / view toggle
                           └─► SectionPlotComponent reacts → refreshPlot()
 ```
 
-### Key design note
+### Note de conception clé
 
-The filtering of obstacles by span range happens **before** this call, at the
-`addObstacle` step (in `refreshSection` or `calculateAndSave`). By the time
-`refreshProjection` runs, `plt_line` only contains the obstacles that belong to
-the currently selected span window.
+Le filtrage des obstacles par plage de portée se produit **avant** cet appel, à l'étape
+`addObstacle` (dans `refreshSection` ou `calculateAndSave`). Au moment où
+`refreshProjection` s'exécute, `plt_line` ne contient que les obstacles appartenant à
+la fenêtre de portée actuellement sélectionnée.
 
 ---
 
 ## 3. `calculateAndSave()` — `ObstacleFormService`
 
-### When it is called
+### Quand elle est appelée
 
-Triggered by the user clicking **Calculate and save** in the obstacle form panel.
+Déclenchée lorsque l'utilisateur clique sur **Calculer et enregistrer** dans le panneau
+du formulaire d'obstacle.
 
-### What it does
+### Ce qu'elle fait
 
-Registers the obstacle(s) for the current span into `plt_line`, obtains their
-rendered 3D positions, persists the domain object to IndexedDB, then recalculates
-clearance distances.
+Enregistre le ou les obstacles de la portée courante dans `plt_line`, obtient leurs
+positions 3D calculées, persiste l'objet de domaine dans IndexedDB, puis recalcule
+les distances de dégagement.
 
-### Python calls
+### Appels Python
 
-| Order | Task | Description |
+| Ordre | Tâche | Description |
 |-------|------|-------------|
-| 1 | `addObstacle` | Register filtered obstacle list; return rendered positions |
-| 2 | `calculateObstaclesDistances` | Recompute clearance distances |
+| 1 | `addObstacle` | Enregistre la liste d'obstacles filtrée ; renvoie les positions calculées |
+| 2 | `calculateObstaclesDistances` | Recalcule les distances de dégagement |
 
-### Call graph
+### Graphe d'appels
 
 ```
 Obstacle form — "Calculate and save" click
@@ -162,22 +163,22 @@ Obstacle form — "Calculate and save" click
 
 ## 4. `refreshPlot()` — `SectionPlotComponent`
 
-### When it is called
+### Quand elle est appelée
 
-Reactive — fires automatically whenever the `plotState` computed signal changes.
-A 50 ms debounce prevents redundant redraws when multiple signals change in the
-same tick.
+Réactive — se déclenche automatiquement chaque fois que le signal calculé `plotState`
+change. Un debounce de 50 ms évite les redessins redondants lorsque plusieurs signaux
+changent dans le même cycle.
 
-`plotState` aggregates: `litData`, `baseLitData`, `plotOptions`,
-`selectedDisplayOptions`, `axesNorms`, form positions, obstacle selection,
-distances, and distance type.
+`plotState` agrège : `litData`, `baseLitData`, `plotOptions`,
+`selectedDisplayOptions`, `axesNorms`, les positions du formulaire, la sélection
+d'obstacle, les distances, et le type de distance.
 
-### What it does
+### Ce qu'elle fait
 
-Pure client-side Plotly redraw. Reads all data from signals and calls
-`Plotly.react()` (diff update). **No Python calls.**
+Redessin Plotly purement côté client. Lit toutes les données depuis les signaux et
+appelle `Plotly.react()` (mise à jour différentielle). **Aucun appel Python.**
 
-### Call graph
+### Graphe d'appels
 
 ```
 Any signal change (litData, plotOptions, distances, form values, …)
@@ -192,11 +193,11 @@ Any signal change (litData, plotOptions, distances, form values, …)
 
 ---
 
-## Summary
+## Résumé
 
-| Function | Layer | Trigger | Python tasks | Rebuilds engine |
+| Fonction | Couche | Déclencheur | Tâches Python | Reconstruit le moteur |
 |----------|-------|---------|-------------|-----------------|
-| `refreshSection` | `PlotService` | Section change | `getLit` + `addObstacle` + `calcDistances` | Yes |
-| `refreshProjection` | `PlotService` | Span / view change | `refreshProjection` (×1) | No |
-| `calculateAndSave` | `ObstacleFormService` | Save button | `addObstacle` + `calcDistances` | No |
-| `refreshPlot` | `SectionPlotComponent` | Any signal change | None | No |
+| `refreshSection` | `PlotService` | Changement de section | `getLit` + `addObstacle` + `calcDistances` | Oui |
+| `refreshProjection` | `PlotService` | Changement de portée / vue | `refreshProjection` (×1) | Non |
+| `calculateAndSave` | `ObstacleFormService` | Bouton d'enregistrement | `addObstacle` + `calcDistances` | Non |
+| `refreshPlot` | `SectionPlotComponent` | Tout changement de signal | Aucune | Non |

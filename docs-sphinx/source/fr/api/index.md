@@ -40,10 +40,6 @@ Services métier utilisés dans toute l'application.
 
 ::::
 
-:::{note}
-Les pages de référence API ci-dessous restent en anglais dans cette première itération.
-:::
-
 ```{toctree}
 :maxdepth: 2
 :hidden:

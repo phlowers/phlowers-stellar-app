@@ -4,7 +4,7 @@ html_theme.sidebar_secondary.remove: true
 
 # Mise à jour de l'application
 
-Cette page explique comment Stellar se met à jour et comment vos données utilisateur sont préservées.
+Cette page explique comment {{app_name}} se met à jour et comment vos données utilisateur sont préservées.
 
 ## Éléments mis à jour
 
@@ -42,7 +42,7 @@ Un message de notification peut s'afficher lorsqu'une nouvelle version est dispo
 
 ## Bonnes pratiques
 
-- Gardez un seul onglet Stellar principal ouvert pendant la mise à jour.
+- Gardez un seul onglet {{app_name}} principal ouvert pendant la mise à jour.
 - Évitez d'effectuer plusieurs rechargements de page consécutifs.
 - Si vous êtes hors ligne, reconnectez-vous puis rechargez la page.
 
@@ -50,7 +50,7 @@ Un message de notification peut s'afficher lorsqu'une nouvelle version est dispo
 
 Si vous voyez toujours une ancienne interface après le déploiement :
 
-1. Fermez tous les onglets Stellar ouverts.
+1. Fermez tous les onglets {{app_name}} ouverts.
 2. Rouvrez l'application.
 3. Effectuez un rechargement complet du navigateur.
 

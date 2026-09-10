@@ -1,16 +1,16 @@
-# Set-up Mechaphlowers Guide
+# Guide de configuration de Mechaphlowers
 
-## Overview
+## Vue d'ensemble
 
-The `set_up_mechaphlowers_v2.py` script builds **stellar-engine** from source and prepares all Python packages for the **Pyodide** web worker.
+Le script `set_up_mechaphlowers_v2.py` construit **stellar-engine** depuis les sources et prépare tous les packages Python pour le web worker **Pyodide**.
 
-**What it does:**
+**Ce qu'il fait :**
 
-1. Builds the `stellar-engine` wheel (which depends on `mechaphlowers`)
-2. Downloads the Pyodide runtime from NPM
-3. Downloads all transitive dependencies via `pip download`
-4. Replaces packages with pre-compiled CDN wheels when available
-5. Compiles remaining wheels to bytecode and generates `python-packages.json`
+1. Construit le wheel `stellar-engine` (qui dépend de `mechaphlowers`)
+2. Télécharge le runtime Pyodide depuis NPM
+3. Télécharge toutes les dépendances transitives via `pip download`
+4. Remplace les packages par des wheels précompilés du CDN quand ils sont disponibles
+5. Compile les wheels restants en bytecode et génère `python-packages.json`
 
 ---
 
@@ -37,7 +37,7 @@ Step 5: COMPILE & CONFIG
 
 ## Configuration
 
-The Pyodide version is read from `package.json`:
+La version de Pyodide est lue depuis `package.json` :
 
 ```json
 {
@@ -50,7 +50,7 @@ The Pyodide version is read from `package.json`:
 }
 ```
 
-stellar-engine's `pyproject.toml` declares a single direct dependency:
+Le `pyproject.toml` de stellar-engine déclare une seule dépendance directe :
 
 ```toml
 dependencies = [
@@ -58,18 +58,18 @@ dependencies = [
 ]
 ```
 
-All transitive dependencies (thermohl, numpy, pandas, pandera, etc.) are resolved automatically by pip.
+Toutes les dépendances transitives (thermohl, numpy, pandas, pandera, etc.) sont résolues automatiquement par pip.
 
-### Key files
+### Fichiers clés
 
-| File | Purpose |
+| Fichier | Rôle |
 |------|---------|
-| `stellar-engine/pyproject.toml` | stellar-engine package definition |
-| `scripts/constraints.in` | Version constraints for Pyodide CDN compatibility |
+| `stellar-engine/pyproject.toml` | Définition du package stellar-engine |
+| `scripts/constraints.in` | Contraintes de version pour la compatibilité CDN Pyodide |
 
 ---
 
-## Usage
+## Utilisation
 
 ```bash
 # Standard execution
@@ -91,29 +91,29 @@ npm run set-up-mechaphlowers -- --npm-registry-url https://registry.npmmirror.co
 
 ### `--engine-only`
 
-Rebuild only `stellar-engine` and update its wheel in `public/pyodide/` without re-downloading Pyodide, resolving dependencies, or recompiling other packages. This is useful during development when only `stellar-engine` source code has changed.
+Reconstruit uniquement `stellar-engine` et met à jour son wheel dans `public/pyodide/` sans re-télécharger Pyodide, sans résoudre les dépendances, ni recompiler les autres packages. C'est utile en développement lorsque seul le code source de `stellar-engine` a changé.
 
-The script will:
+Le script va :
 
-1. Build a new `stellar-engine` wheel
-2. Remove the old `stellar_engine*.whl` from `public/pyodide/`
-3. Copy the new wheel in place
-4. Update only the `stellar-engine` entry in `python-packages.json`
+1. Construire un nouveau wheel `stellar-engine`
+2. Supprimer l'ancien `stellar_engine*.whl` de `public/pyodide/`
+3. Copier le nouveau wheel à sa place
+4. Mettre à jour uniquement l'entrée `stellar-engine` dans `python-packages.json`
 
-Can be combined with `--local-mechaphlowers` to patch the mechaphlowers version before building.
+Peut être combiné avec `--local-mechaphlowers` pour patcher la version de mechaphlowers avant la construction.
 
 ### `--local-mechaphlowers`
 
-Place a mechaphlowers `.whl` file in `stellar-engine/input/`.  The script will:
+Placez un fichier `.whl` de mechaphlowers dans `stellar-engine/input/`. Le script va :
 
-1. Patch `pyproject.toml` with the local version before building
-2. Use the local wheel's declared dependencies for resolution
-3. Replace the downloaded mechaphlowers with the local wheel
-4. Restore the original `pyproject.toml` after building
+1. Patcher `pyproject.toml` avec la version locale avant la construction
+2. Utiliser les dépendances déclarées du wheel local pour la résolution
+3. Remplacer le mechaphlowers téléchargé par le wheel local
+4. Restaurer le `pyproject.toml` d'origine après la construction
 
 ---
 
-## Output Structure
+## Structure de sortie
 
 ```
 public/pyodide/
@@ -131,23 +131,23 @@ src/app/core/services/worker_python/
 
 ---
 
-## Troubleshooting
+## Dépannage
 
-| Error | Solution |
+| Erreur | Solution |
 |-------|----------|
-| `pyproject.toml not found` | Ensure `stellar-engine/pyproject.toml` exists |
-| `Could not fetch pyodide-lock.json` | Check internet or use `--local-cdn-dir` |
-| `multiple mechaphlowers wheels found` | Keep only one `.whl` in `stellar-engine/input/` |
-| `no mechaphlowers wheel found` | Place a wheel in `stellar-engine/input/` |
+| `pyproject.toml not found` | Vérifiez que `stellar-engine/pyproject.toml` existe |
+| `Could not fetch pyodide-lock.json` | Vérifiez la connexion internet ou utilisez `--local-cdn-dir` |
+| `multiple mechaphlowers wheels found` | Ne conservez qu'un seul `.whl` dans `stellar-engine/input/` |
+| `no mechaphlowers wheel found` | Placez un wheel dans `stellar-engine/input/` |
 
-### Verify installation
+### Vérifier l'installation
 
 ```bash
 ls -lh public/pyodide/*.whl | wc -l
 cat src/app/core/services/worker_python/python-packages.json | jq 'keys | length'
 ```
 
-### Clean rebuild
+### Reconstruction propre
 
 ```bash
 rm -rf public/pyodide
@@ -157,12 +157,12 @@ npm run set-up-mechaphlowers
 
 ---
 
-## Resources
+## Ressources
 
-- [Pyodide Documentation](https://pyodide.org/)
-- [mechaphlowers GitHub](https://github.com/phlowers/mechaphlowers)
-- [uv Documentation](https://docs.astral.sh/uv/)
+- [Documentation Pyodide](https://pyodide.org/)
+- [mechaphlowers sur GitHub](https://github.com/phlowers/mechaphlowers)
+- [Documentation uv](https://docs.astral.sh/uv/)
 
 ---
 
-**Last update**: March 31, 2026
+**Dernière mise à jour** : 31 mars 2026

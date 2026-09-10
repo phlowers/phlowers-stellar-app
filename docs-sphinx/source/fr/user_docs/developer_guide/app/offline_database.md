@@ -1,20 +1,20 @@
-# Database
+# Base de données
 
-The application needs to store data locally in order to be able to work offline.
+L'application doit stocker des données localement afin de pouvoir fonctionner hors ligne.
 
-The application uses a local indexedDB database to store the data. The database logics and tables are located at `src/app/infrastructure/database` (Dexie AppDatabase) and is created/managed by `StorageService`.
+L'application utilise une base de données IndexedDB locale pour stocker les données. La logique et les tables de la base de données se trouvent dans `src/app/core/store`.
 
-The database is used to store the data for the application.
+La base de données est utilisée pour stocker les données de l'application.
 
 ## Dexie
 
-The application uses [Dexie](https://dexie.org/) as a wrapper for the indexedDB database.
+L'application utilise [Dexie](https://dexie.org/) comme surcouche pour la base de données IndexedDB.
 
-Dexie makes it easier to work with IndexedDB by providing a cleaner syntax and additional features like complex indexing, live queries, and observable data.
+Dexie facilite le travail avec IndexedDB en proposant une syntaxe plus claire et des fonctionnalités supplémentaires telles que l'indexation complexe, les requêtes en direct (live queries) et les données observables.
 
-## Database Tables
+## Tables de la base de données
 
-The database has the following tables:
+La base de données comporte les tables suivantes :
 
-- `config`: stores the application configuration
-- `data`: stores the application data
+- `config` : stocke la configuration de l'application
+- `data` : stocke les données de l'application
