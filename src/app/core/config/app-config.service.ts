@@ -5,7 +5,7 @@ import { LoggerService } from '@services/logger/logger.service';
 import { AppConfig } from './app-config.interfaces';
 
 const APP_CONFIG_URL = 'assets/config/app-config.json';
-const FALLBACK_LANG = 'fr';
+const FALLBACK_LANG = 'en';
 // Awaited by the APP_INITIALIZER (blocking initial navigation): must be
 // bounded or a hung request blanks the whole first render (incident
 // 2026-08-10). Short on purpose — the fallback language is harmless and the
@@ -19,7 +19,7 @@ const LOAD_TIMEOUT_MS = 3000;
  * arg (see `Dockerfile`), so changing the language for a deployment requires
  * rebuilding the image.
  *
- * Falls back with a log warning to `'fr'` if the file is absent or malformed.
+ * Falls back with a log warning to `'en'` if the file is absent or malformed.
  */
 @Injectable({ providedIn: 'root' })
 export class AppConfigService {

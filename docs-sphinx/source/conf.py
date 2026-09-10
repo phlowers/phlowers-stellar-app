@@ -3,10 +3,14 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Stellar"
+app_name = os.environ.get("SPHINX_APP_NAME", "Stellar")
+
+project = app_name
 copyright = "2026, RTE (http://www.rte-france.com)"
 
 
@@ -20,6 +24,7 @@ extensions = [
     "sphinx_design",  # Grid, cards, tabs, badges, etc.
     "sphinx_copybutton",  # Copy button on code blocks
     "sphinx_simplepdf",  # PDF generation via WeasyPrint
+    "sphinxcontrib.mermaid",  # Render ```mermaid fenced code blocks as diagrams
 ]
 
 # Sphinx-SimplePDF configuration
@@ -31,7 +36,16 @@ simplepdf_vars = {
 
 # sphinx-js configuration for TypeScript
 js_language = "typescript"
-js_source_path = "../../src"
+js_source_path = [
+    "../../src/app/core/services",
+    "../../src/app/shared/catalog/services",
+    "../../src/app/shared/domain",
+    "../../src/app/infrastructure",
+    "../../src/app/features/changelog",
+    "../../src/app/features/news",
+]
+# Common ancestor of js_source_path entries, needed to disambiguate relative JS paths
+root_for_relative_js_paths = "../../src"
 jsdoc_tsconfig_path = "../tsconfig.typedoc.json"
 primary_domain = "js"
 
@@ -42,6 +56,14 @@ myst_enable_extensions = [
     "dollarmath",
     "substitution",
 ]
+
+# Render ```mermaid fences via the mermaid directive instead of Pygments highlighting
+myst_fence_as_directive = ["mermaid"]
+
+myst_substitutions = {
+    "app_name": app_name,
+}
+
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
@@ -51,7 +73,7 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 # Language configuration
-language = "en"
+language = os.environ.get("SPHINX_LANGUAGE", "en")
 
 # Static files (images, style sheets, etc.)
 html_static_path = ["_static"]
@@ -78,18 +100,14 @@ html_theme_options = {
         "image_light": "_static/logo.svg",
         "image_dark": "_static/logo.svg",
     },
-    "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/phlowers/phlowers-stellar-app",
-            "icon": "fa-brands fa-github",
-        },
-    ],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright"],
     "footer_center": ["sphinx-version"],
 }
 
-html_title = "Stellar Documentation"
+html_title = (
+    f"Documentation {app_name}" if language == "fr" else f"{app_name} Documentation"
+)
 
 # Remove secondary sidebar on landing page
 html_sidebars = {

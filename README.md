@@ -40,13 +40,13 @@ source .venv/bin/activate          # activate it
 uv pip install -r requirements.txt # install Sphinx and dependencies
 ```
 
-Once the environment is ready, you can use the following npm scripts from the project root:
+You can now run `npm run docs` to build both languages, `npm run docs:en` / `npm run docs:fr` to build a single language, or `npm run autodocs:en` / `npm run autodocs:fr` to build and serve the documentation with live reload on changes (see `docs-sphinx/TRANSLATION.md` for details on the bilingual build).
 
-- `npm run docs` — cleans and builds the static HTML documentation in `docs-sphinx/build/html`.
-- `npm run autodocs` — builds and serves the documentation on `http://localhost:8000/` with live reload on changes.
-- `npm run docs:open` — builds the documentation and opens `docs-sphinx/build/html/index.html` in your default browser.
+By default the docs are titled "Stellar". Set the `SPHINX_APP_NAME` environment variable before building to customize the application name used throughout the generated documentation, e.g.:
 
-Use `npm run autodocs` during active writing so changes are rebuilt and reloaded automatically.
+```shell
+SPHINX_APP_NAME="My App" npm run docs:en
+```
 
 #### Generate PDF documentation
 
@@ -67,3 +67,22 @@ The generated PDF is written to `docs-sphinx/build/simplepdf/` folder.
 > ```shell
 > uv pip install 'weasyprint==52.5'
 > ```
+
+#### Generate PowerPoint documentation
+
+A PowerPoint export is available by converting the PDF produced by `make simplepdf`. This approach keeps the exact page layout while producing editable text boxes in PowerPoint. Run:
+
+```shell
+cd docs-sphinx
+make pptx
+```
+
+Or, from the repository root:
+
+```shell
+npm run docs:pptx
+```
+
+The generated `.pptx` is written to `docs-sphinx/build/pptx/stellar_documentation.pptx`.
+
+> **Note:** This requires `pymupdf` and `python-pptx`, already listed in `docs-sphinx/requirements.txt`.
