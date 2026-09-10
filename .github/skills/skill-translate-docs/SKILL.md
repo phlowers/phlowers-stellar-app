@@ -46,7 +46,7 @@ translating English back into itself.
 3. **Read the glossary** in [glossary.md](glossary.md) in this skill folder before translating —
    reuse existing term translations, don't invent new ones for terms already listed.
 4. **Translate**, preserving:
-   - MyST/Sphinx syntax as-is: `{doc}`, `{{ app_name }}`, front matter (`---` blocks), `toctree`
+   - MyST/Sphinx syntax as-is: `{doc}`, `{{app_name}}`, front matter (`---` blocks), `toctree`
      directives, admonitions (`` ```{note} ``, `` ```{warning} ``, etc.) — translate only the
      admonition body text, not the directive name.
    - Code blocks, inline code, file paths, CLI commands, class/function names, and URLs

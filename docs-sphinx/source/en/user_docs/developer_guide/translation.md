@@ -27,9 +27,11 @@ Rules:
 
 ## Adding a new page
 
-1. Create the page under `source/en/` first.
-2. Copy it to the matching path under `source/fr/`.
-3. Translate the French copy.
+1. Create the page in the source-of-truth language for that folder (see the
+   "Translation scope" table below): use `source/fr/user_docs/user_guide/` for
+   the user guide and `source/en/` for the rest of the documentation.
+2. Copy it to the matching path under the peer language tree.
+3. Translate the copy in the target language.
 4. Add the page to the relevant `toctree` labels in both language indexes.
 
 ## Building locally

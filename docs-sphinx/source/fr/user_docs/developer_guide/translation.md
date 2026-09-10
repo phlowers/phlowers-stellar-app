@@ -30,8 +30,8 @@ Règles :
 1. Créez la page dans la langue source de vérité du dossier concerné (voir la section
    « Portée de la traduction » ci-dessous) : `source/fr/user_docs/user_guide/`
    pour le guide utilisateur, `source/en/` pour le reste.
-2. Copiez-la dans le chemin correspondant sous l'autre arborescence linguistique.
-3. Traduisez la copie (voir la section « Traduction locale assistée par IA » ci-dessous).
+2. Copiez-la dans le chemin correspondant sous l'arborescence de la langue cible.
+3. Traduisez la copie dans la langue cible.
 4. Ajoutez la page aux `toctree` des index des deux langues.
 
 ## Construction locale
