@@ -16,14 +16,31 @@
 
 import type jsPDF from 'jspdf';
 
-import { CONTENT_WIDTH, LINE_HEIGHT, PAGE_MARGIN, PARAGRAPH_INDENT, PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
-import { drawBulletItem, drawBulletList, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  CONTENT_WIDTH,
+  LINE_HEIGHT,
+  PAGE_MARGIN,
+  PARAGRAPH_INDENT,
+  PDF_UNITS
+} from '@shared/pdf/pdf-layout.constantes';
+import {
+  drawBulletItem,
+  drawBulletList,
+  drawSectionTitle,
+  drawSeparator,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 import { Support } from '@shared/domain';
 
-import { SectionReportLabels, SectionStateReportData, SpanReportRow, SupportReportRow } from './section-state-report.interfaces';
+import {
+  SectionReportLabels,
+  SectionStateReportData,
+  SpanReportRow,
+  SupportReportRow
+} from './section-state-report.interfaces';
 
 /** Reads a numeric array value at the given index, returning null when absent. */
 function at(values: number[] | undefined, index: number): number | null {

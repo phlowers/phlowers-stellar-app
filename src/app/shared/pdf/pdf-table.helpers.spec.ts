@@ -8,7 +8,14 @@
 import { vi } from 'vitest';
 import type jsPDF from 'jspdf';
 
-import { buildTables, chunk, computeLabelColWidth, drawResultTablesSection, drawTable, formatCell } from './pdf-table.helpers';
+import {
+  buildTables,
+  chunk,
+  computeLabelColWidth,
+  drawResultTablesSection,
+  drawTable,
+  formatCell
+} from './pdf-table.helpers';
 import { MetricDescriptor, PdfTableModel } from './pdf-table.interfaces';
 
 function createMockDoc() {

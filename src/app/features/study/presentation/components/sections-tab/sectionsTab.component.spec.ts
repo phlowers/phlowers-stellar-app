@@ -361,9 +361,7 @@ describe('SectionsTabComponent', () => {
 
   it('should render the report button and generate the canton report when clicked', async () => {
     const linesService = TestBed.inject(LinesService);
-    (linesService.getLines as unknown as vi.Mock).mockResolvedValue([
-      { lit_idr: 'LIT123', lit_adr: 'LIT-ADR-123' }
-    ]);
+    (linesService.getLines as unknown as vi.Mock).mockResolvedValue([{ lit_idr: 'LIT123', lit_adr: 'LIT-ADR-123' }]);
     fixture.componentRef.setInput('study', { author_email: 'a@b.com', title: 'Study', sections: [mockSection] });
     fixture.detectChanges();
 

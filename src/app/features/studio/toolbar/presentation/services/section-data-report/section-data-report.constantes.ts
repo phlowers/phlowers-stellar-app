@@ -16,7 +16,12 @@ import { CantonReportLabels, CantonSupportRow } from './section-data-report.inte
  */
 export const SUPPORT_METRICS: MetricDescriptor<CantonSupportRow>[] = [
   { labelKey: 'studio.canton-report.support-number', unit: null, decimals: 0, field: 'supportNumber' },
-  { labelKey: 'studio.canton-report.attachment-height', unit: PDF_UNITS.meters, decimals: 2, field: 'attachmentHeight' },
+  {
+    labelKey: 'studio.canton-report.attachment-height',
+    unit: PDF_UNITS.meters,
+    decimals: 2,
+    field: 'attachmentHeight'
+  },
   { labelKey: 'studio.canton-report.span-angle', unit: PDF_UNITS.grad, decimals: 0, field: 'spanAngle' },
   { labelKey: 'studio.canton-report.chain-name', unit: null, decimals: 0, field: 'chainName' },
   { labelKey: 'studio.canton-report.chain-length', unit: PDF_UNITS.meters, decimals: 2, field: 'chainLength' },

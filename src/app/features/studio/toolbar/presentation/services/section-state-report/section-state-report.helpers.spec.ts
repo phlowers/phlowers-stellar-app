@@ -130,7 +130,16 @@ describe('section-state-report.helpers', () => {
       for (const label of ['Author', 'Study', 'Description', 'Section', 'Comment', 'Initial condition', 'Load case']) {
         expect(texts.some((t) => t.includes(label))).toBe(true);
       }
-      for (const value of ['a@b.com', 'My study', 'Study desc', 'Section A', 'A comment', 'IC 1', 'Charge 1', 'Charge desc']) {
+      for (const value of [
+        'a@b.com',
+        'My study',
+        'Study desc',
+        'Section A',
+        'A comment',
+        'IC 1',
+        'Charge 1',
+        'Charge desc'
+      ]) {
         expect(texts).toContain(value);
       }
       expect(doc.line).toHaveBeenCalled();

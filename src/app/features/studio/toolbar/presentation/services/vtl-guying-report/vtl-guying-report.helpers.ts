@@ -36,7 +36,13 @@ import {
   PARAGRAPH_INDENT,
   PDF_UNITS
 } from '@shared/pdf/pdf-layout.constantes';
-import { drawBulletItem, drawBulletList, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  drawBulletItem,
+  drawBulletList,
+  drawSectionTitle,
+  drawSeparator,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
 import { DIAGRAM_WIDTH } from './vtl-guying-report.constantes';

@@ -338,12 +338,9 @@ describe('pdf-primitives helpers', () => {
 
       drawPageFooters(doc, 'Page', true);
 
-      expect(doc.text).toHaveBeenCalledWith(
-        'Page 1 / 2',
-        PAGE_SIZE.width - PAGE_MARGIN.right,
-        expect.any(Number),
-        { align: 'right' }
-      );
+      expect(doc.text).toHaveBeenCalledWith('Page 1 / 2', PAGE_SIZE.width - PAGE_MARGIN.right, expect.any(Number), {
+        align: 'right'
+      });
       expect(doc.text).toHaveBeenCalledWith(
         'Page 2 / 2',
         LANDSCAPE_PAGE.width - PAGE_MARGIN.right,

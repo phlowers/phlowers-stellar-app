@@ -279,7 +279,12 @@ describe('section-data-report.helpers', () => {
   describe('drawInitialConditionSection', () => {
     it('returns startY unchanged and draws nothing when there is no initial condition', () => {
       const doc = createMockDoc();
-      const y = drawInitialConditionSection(doc as unknown as jsPDF, createData({ initialCondition: null }), LABELS, 42);
+      const y = drawInitialConditionSection(
+        doc as unknown as jsPDF,
+        createData({ initialCondition: null }),
+        LABELS,
+        42
+      );
       expect(y).toBe(42);
       expect(doc.text).not.toHaveBeenCalled();
     });

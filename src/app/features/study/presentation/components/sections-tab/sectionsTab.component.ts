@@ -153,7 +153,7 @@ export class SectionsTabComponent {
     const typeCode = rawType === 'garde' ? 'guard' : rawType;
 
     const data: CantonReportData = {
-      date: new Date().toLocaleDateString('fr-FR'),
+      date: new Date().toLocaleDateString(this.getLocaleForDate()),
       author: study?.author_email ?? '',
       studyTitle: study?.title ?? '',
       studyDescription: study?.description ?? '',
@@ -168,7 +168,7 @@ export class SectionsTabComponent {
       litName: litAdr,
       supportsCount: section.supports.length,
       supportsDescription: section.supports_comment ?? '',
-      isPhase: section.type === 'phase',
+      isPhase: typeCode === 'phase',
       phaseNumber: section.electric_phase_number ?? null,
       cablesAmount: section.cables_amount ?? null,
       maintenanceTeam,
@@ -192,6 +192,11 @@ export class SectionsTabComponent {
     };
 
     await this.sectionDataReportService.generateReport(data);
+  }
+
+  private getLocaleForDate(): string {
+    const activeLang = this.transloco.getActiveLang();
+    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   openNewSectionModalCreate() {
