@@ -193,10 +193,28 @@
               class="alt-point-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
+              [attr.aria-invalid]="obstacle.get('z')?.invalid && obstacle.get('z')?.touched"
+              [attr.aria-errormessage]="
+                obstacleFormService.getPositionError($index, 'z') ? 'altPointError' + $index : null
+              "
               data-testid="point-altitude"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
+
+          <div class="alt-point-error">
+            @if (obstacleFormService.getPositionError($index, 'z'); as altError) {
+              <p-message
+                [id]="'altPointError' + $index"
+                severity="error"
+                size="small"
+                variant="simple"
+                data-testid="point-altitude-error"
+              >
+                {{ altError.key | transloco: altError.params }}
+              </p-message>
+            }
+          </div>
 
           <label
             [for]="'distanceToRefSupport' + $index"
@@ -217,10 +235,28 @@
               class="dist-ref-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
+              [attr.aria-invalid]="obstacle.get('x')?.invalid && obstacle.get('x')?.touched"
+              [attr.aria-errormessage]="
+                obstacleFormService.getPositionError($index, 'x') ? 'distRefError' + $index : null
+              "
               data-testid="point-ref-distance"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
+
+          <div class="dist-ref-error">
+            @if (obstacleFormService.getPositionError($index, 'x'); as refError) {
+              <p-message
+                [id]="'distRefError' + $index"
+                severity="error"
+                size="small"
+                variant="simple"
+                data-testid="point-ref-distance-error"
+              >
+                {{ refError.key | transloco: refError.params }}
+              </p-message>
+            }
+          </div>
 
           <label
             [for]="'distanceToLineAxis' + $index"
@@ -241,10 +277,28 @@
               class="dist-axis-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
+              [attr.aria-invalid]="obstacle.get('y')?.invalid && obstacle.get('y')?.touched"
+              [attr.aria-errormessage]="
+                obstacleFormService.getPositionError($index, 'y') ? 'distAxisError' + $index : null
+              "
               data-testid="point-axis-distance"
             />
             <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
           </p-inputgroup>
+
+          <div class="dist-axis-error">
+            @if (obstacleFormService.getPositionError($index, 'y'); as axisError) {
+              <p-message
+                [id]="'distAxisError' + $index"
+                severity="error"
+                size="small"
+                variant="simple"
+                data-testid="point-axis-distance-error"
+              >
+                {{ axisError.key | transloco: axisError.params }}
+              </p-message>
+            }
+          </div>
         </div>
       </li>
     }
