@@ -77,9 +77,28 @@ def add_text_line(
     font.color.rgb = RGBColor(*color)
 
 
+class TextLine(tuple):
+    """Represents a single line of text with its layout and style information."""
+
+    def __new__(
+        cls,
+        text: str,
+        x: float,
+        y: float,
+        width: float,
+        height: float,
+        font_size: float,
+        color: tuple[int, int, int],
+        bold: bool,
+        italic: bool,
+    ):
+        return super().__new__(cls, (text, x, y, width, height, font_size, color, bold, italic))
+
+TextLines = list[TextLine]
+
 def add_text_block(
     slide,
-    lines: list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]],
+    lines: TextLines #list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]],
 ) -> None:
     """Add a grouped block of text lines as one wrapping text box."""
     if not lines:

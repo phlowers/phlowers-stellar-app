@@ -1,4 +1,4 @@
-ARG DEFAULT_LANGUAGE=fr
+ARG DEFAULT_LANGUAGE=en
 
 FROM node:22-alpine AS build
 
@@ -18,7 +18,7 @@ RUN npm run build
 
 FROM nginx:latest
 
-ARG DEFAULT_LANGUAGE=fr
+ARG DEFAULT_LANGUAGE=en
 
 COPY --from=build /usr/src/app/dist /usr/share/nginx/html
 

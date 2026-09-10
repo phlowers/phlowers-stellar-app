@@ -9,7 +9,7 @@ SASS colors variables are exposed through abstracts.extracts.scss file *src/app/
 ex:  
 ```text
 @use 'sass:map';
-@use '/*path to styles folder*/abstracts/abstracts.extracts.scss' as app;
+@use 'abstract.extracts.scss' as app;
 
 .random-class {
   background-color: map.get(app.$primary, 600);
@@ -117,7 +117,7 @@ ex:
 ```text
 // sass map use
 @use 'sass:map';
-@use '/*path to styles folder*/abstracts/abstracts.extracts.scss' as app;
+@use 'abstract.extracts.scss' as app;
 
 .random-class {
   map.get(app.$text-heading, 3xl);
@@ -126,7 +126,7 @@ ex:
 
 ```text
 @use 'sass:map';
-@use '/*path to styles folder*/abstracts/abstracts.extracts.scss' as app;
+@use 'abstract.extracts.scss' as app;
 
 .random-class {
   @extend %heading-3xl; // SASS placeholders do not work with SASS namespaces yet.

@@ -100,13 +100,6 @@ html_theme_options = {
         "image_light": "_static/logo.svg",
         "image_dark": "_static/logo.svg",
     },
-    "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/phlowers/phlowers-stellar-app",
-            "icon": "fa-brands fa-github",
-        },
-    ],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright"],
     "footer_center": ["sphinx-version"],
