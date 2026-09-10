@@ -1,6 +1,6 @@
 # Documentation translation workflow
 
-This project maintains the {{app_name}} documentation in two languages: **English** (source of truth) and **French**. The French tree is a peer of the English tree, not a set of `.po` files.
+This project maintains the {{app_name}} documentation in two languages: **English** and **French**. The French tree is a peer of the English tree, not a set of `.po` files. Depending on the folder, either language can be the authoring source of truth — see the "Translation scope" section below.
 
 ## Structure
 
@@ -9,11 +9,11 @@ docs-sphinx/source/
 ├── conf.py              # Shared Sphinx configuration
 ├── _static/             # Shared static assets (CSS, logos, favicon)
 ├── _templates/          # Shared templates
-├── en/                  # English documentation (source of truth)
+├── en/                  # English documentation (source of truth, except user_guide)
 │   ├── index.md
 │   ├── api/
 │   └── user_docs/
-└── fr/                  # French translation
+└── fr/                  # French documentation (source of truth for user_guide)
     ├── index.md
     ├── api/
     └── user_docs/
@@ -27,9 +27,11 @@ Rules:
 
 ## Adding a new page
 
-1. Create the page under `source/en/` first.
-2. Copy it to the matching path under `source/fr/`.
-3. Translate the French copy.
+1. Create the page in the source-of-truth language for that folder (see the
+   "Translation scope" table below): use `source/fr/user_docs/user_guide/` for
+   the user guide and `source/en/` for the rest of the documentation.
+2. Copy it to the matching path under the peer language tree.
+3. Translate the copy in the target language.
 4. Add the page to the relevant `toctree` labels in both language indexes.
 
 ## Building locally
@@ -92,7 +94,21 @@ project's language into `$READTHEDOCS_OUTPUT/html`.
 
 ## Translation scope
 
-- English is the authoring source of truth.
-- User guide pages are fully translated to French.
-- API reference pages remain in English in the first iteration.
-- Developer guide detail pages may remain in English temporarily; their `index.md` navigation labels are translated.
+Direction depends on the folder — there is no single "source language" for the whole tree:
+
+| Folder | Source of truth | Translated into |
+|---|---|---|
+| `user_docs/user_guide/` | **French** | English |
+| `index.md`, `api/`, `user_docs/developer_guide/`, `user_docs/getting_started.md`, `user_docs/scale_view.md` | **English** | French |
+
+## Local AI-assisted translation
+
+Translation is done locally by the contributor, not by CI:
+
+1. Edit the source-of-truth file for the relevant folder (see the table above).
+2. Open the peer file (swap `en/` ↔ `fr/` at the same relative path) in a Copilot Chat session.
+3. Ask Copilot to apply the `skill-translate-docs` skill, pointing at the two files.
+4. Review the generated diff — check terminology against the glossary in
+   `.github/skills/skill-translate-docs/glossary.md`, fix anything off, then commit yourself.
+
+This is intentionally low-automation: no script or CI job performs the translation.
