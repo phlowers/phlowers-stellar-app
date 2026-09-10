@@ -1,10 +1,20 @@
 version: 2
 
+# Offline formats (see docs-sphinx/Makefile for the "-rtd" targets used below).
+formats:
+  - pdf
+  - epub
+
 build:
   os: ubuntu-24.04
   tools:
     python: '3.13'
     nodejs: '22'
+  # Native libraries required by WeasyPrint (used by sphinx-simplepdf for the pdf format).
+  apt_packages:
+    - libpango-1.0-0
+    - libpangoft2-1.0-0
+    - libharfbuzz-subset0
   jobs:
     post_install:
       - npm ci
@@ -20,6 +30,14 @@ build:
         - cd docs-sphinx && SPHINX_LANGUAGE=${READTHEDOCS_LANGUAGE:-en} make html-rtd
         - mkdir -p $READTHEDOCS_OUTPUT/html
         - cp -r docs-sphinx/build/html/* $READTHEDOCS_OUTPUT/html/
+      pdf:
+        - cd docs-sphinx && SPHINX_LANGUAGE=${READTHEDOCS_LANGUAGE:-en} make simplepdf-rtd
+        - mkdir -p $READTHEDOCS_OUTPUT/pdf
+        - cp docs-sphinx/build/simplepdf/*.pdf $READTHEDOCS_OUTPUT/pdf/
+      epub:
+        - cd docs-sphinx && SPHINX_LANGUAGE=${READTHEDOCS_LANGUAGE:-en} make epub-rtd
+        - mkdir -p $READTHEDOCS_OUTPUT/epub
+        - cp docs-sphinx/build/epub/*.epub $READTHEDOCS_OUTPUT/epub/
 
 sphinx:
   configuration: docs-sphinx/source/conf.py

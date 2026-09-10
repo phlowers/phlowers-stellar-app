@@ -13,7 +13,7 @@ SPHINX_LANGUAGE ?= en
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile html html-en html-fr html-rtd simplepdf simplepdf-fr pptx pptx-fr
+.PHONY: help Makefile html html-en html-fr html-rtd simplepdf simplepdf-fr simplepdf-rtd epub-rtd pptx pptx-fr
 
 # Build the English HTML site.
 html-en:
@@ -39,6 +39,16 @@ simplepdf:
 # Build a PDF from the Sphinx sources using sphinx-simplepdf (French).
 simplepdf-fr:
 	@SPHINX_LANGUAGE=fr $(SPHINXBUILD) -M simplepdf "$(SOURCEDIR)/fr" "$(BUILDDIR)/fr" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
+
+# Build a PDF straight into build/simplepdf, selected by $(SPHINX_LANGUAGE).
+# Used by ReadTheDocs to build the "pdf" offline format for each language project.
+simplepdf-rtd:
+	@$(SPHINXBUILD) -M simplepdf "$(SOURCEDIR)/$(SPHINX_LANGUAGE)" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
+
+# Build an ePub straight into build/epub, selected by $(SPHINX_LANGUAGE).
+# Used by ReadTheDocs to build the "epub" offline format for each language project.
+epub-rtd:
+	@$(SPHINXBUILD) -M epub "$(SOURCEDIR)/$(SPHINX_LANGUAGE)" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
 # Convert the SimplePDF output into an editable PowerPoint deck (English).
 pptx: simplepdf
