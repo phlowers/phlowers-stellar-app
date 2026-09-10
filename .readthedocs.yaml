@@ -10,6 +10,20 @@ build:
       - npm ci
       - pip install uv
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv pip install -r docs-sphinx/requirements.txt --link-mode=copy
+    build:
+      html:
+        # Native ReadTheDocs translations: this repo is shared by a main
+        # project (English) and a linked translation project (French), each
+        # configured with its own "Language" in the RTD admin. RTD injects
+        # READTHEDOCS_LANGUAGE per project so a single build job can build
+        # whichever language that project owns.
+        - cd docs-sphinx && SPHINX_LANGUAGE=${READTHEDOCS_LANGUAGE:-en} make html-rtd
+        - mkdir -p $READTHEDOCS_OUTPUT/html
+        - cp -r docs-sphinx/build/html/* $READTHEDOCS_OUTPUT/html/
 
 sphinx:
   configuration: docs-sphinx/source/conf.py
+  fail_on_warning: true
+
+# See docs-sphinx/TRANSLATION.md for how to link the French translation
+# project to this one in the ReadTheDocs admin (Admin > Translations).
