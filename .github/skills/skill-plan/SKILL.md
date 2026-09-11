@@ -1,60 +1,70 @@
 ---
 name: skill-plan
-description: "Architect mode for planning tasks. Use when: planning a feature, breaking down work into steps, creating a plan, decomposing a task, architecture design, micro-steps, atomic steps."
-argument-hint: "Description of the feature or task to plan"
+description: "Create a compact, implementation-ready plan for a feature, fix, or refactor. Replaces the existing plan.md."
+argument-hint: "Task, feature, bug, or refactor to plan"
 ---
 
 # Plan — Architect Mode
 
-## When to Use
+Plan only. Never implement.
 
-- The user asks to plan, design, or decompose a feature or task
-- A complex change needs to be broken into atomic micro-steps before implementation
-- The user says "plan", "découpe", "étapes", "architect", "design"
-
-## Role
-
-Act as a **Software Architect** with full knowledge of the project conventions defined in `.github/copilot-instructions.md`.
+Follow the active project instructions.
 
 ## Procedure
 
-1. **Read** `.github/copilot-instructions.md` (and any relevant `.github/instructions/*.instructions.md`) to refresh project conventions
-2. **Analyze** the user's task description and identify all impacted features/services and files. This repo is organized as `src/app/{core, features/<feat>, infrastructure, shared}`. Most features (`study`, `studies`, `admin`, `auth`, `home`, `news`, `changelog`) use an internal `application/` + `presentation/` (+ `infrastructure/`) split — follow this pattern for new features. `studio` uses a different legacy `core/` + sub-feature-folder layout; do not migrate it as part of an unrelated task. Never invent a third internal layout without explicit user validation
-3. **Decompose** the task into atomic, ordered micro-steps. Each step must:
-   - Be independently implementable and testable
-   - Have a clear scope (one file or one concern per step)
-   - Specify the target file(s) and area (`core` / `features/<feat>` / `infrastructure` / `shared`)
-   - Include acceptance criteria
-4. **Output** the plan as a numbered markdown checklist in `plan.md` at the workspace root
-5. **Never assume** anything about Python code (Pyodide / mechaphlowers) — flag it as requiring investigation if relevant
-6. **Never implement** — this skill only plans. Implementation is done by `/skill-agent`
+1. Understand the requested outcome and constraints.
+2. Investigate only the code needed to produce a reliable plan.
+3. Identify impacted files, key symbols, relevant callers/dependencies, tests, and behaviors to preserve.
+4. Prefer the smallest correct solution using the existing architecture.
+5. Split the implementation into ordered, atomic steps.
+6. Before writing the new plan, replace the existing `plan.md`.
+7. Write only the current active plan. Never append a new plan to an old one.
 
-## Output Format
+## Design Principles
+
+- Prefer the smallest correct solution.
+- Reuse existing architecture and abstractions before creating new ones.
+- Mutualize duplicated logic when an existing shared abstraction fits the use case.
+- If several impacted files implement the same behavior, consider a shared helper or reusable abstraction.
+- Do not create an abstraction for a single use case or speculative future reuse.
+- Fix root causes rather than adding compensating complexity.
+- Avoid unrelated refactors and speculative architecture.
+
+## Planning Rules
+
+- Keep `plan.md` compact and implementation-oriented.
+- Do not include investigation history or discarded alternatives.
+- Each step must be precise enough for `/skill-agent` to execute without repository rediscovery.
+- For shared/public symbols, identify relevant callers when needed.
+- Do not duplicate information between steps and global context.
+
+## Step Format
 
 ```markdown
-# Plan: [Feature title]
-
-## Context
-
-Brief description of the goal and impacted areas.
-
-## Steps
-
-### Step 1 — [Title]
-
-- **Area**: core | features/<feat> | infrastructure | shared
-- **Files**: `path/to/file.ts`
-- **Action**: Create | Modify | Delete
-- **Details**: What exactly to do
-- **Acceptance**: How to verify it's done
-
-### Step 2 — [Title]
-
-...
+### Step N — Title
+- **Status**: [ ]
+- **Files**: `path/to/file`
+- **Symbols**: `symbolName` when known
+- **Change**: exact implementation change
+- **Preserve**: behavior/API/layout/etc. that must not regress
+- **Validate**: smallest relevant test or check
 ```
 
-## Constraints
+Add `Read if needed` only when an additional file may genuinely be required.
 
-- Each step must be small enough to be implemented in a single agent turn
-- Include test steps (`/skill-test`) for every new or modified service/component
-- Include a review step (`/skill-review`) at the end
+## Execution Context
+
+End `plan.md` with a compact global handoff:
+
+```markdown
+## Execution Context
+- **Goal**: final expected result
+- **Preserve**: task-wide invariants
+- **Constraints**: task-specific constraints
+- **Forbidden**: scope that must not change
+```
+
+Do not repeat step-specific files or validation here.
+
+After all implementation steps are complete, the workflow continues with `/skill-review`.
+Do not add `/skill-review` as an implementation step.

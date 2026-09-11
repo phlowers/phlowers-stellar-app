@@ -1,43 +1,106 @@
 ---
 name: skill-agent
-description: "Executor mode for implementing a single plan step. Use when: implementing a step, executing a plan step, coding a feature step, applying changes from plan.md. Keywords: implement, execute, step, agent, build, code."
-argument-hint: "Step number from plan.md to implement"
+description: "Execute one approved step from plan.md, or all remaining steps when explicitly requested, with minimal context, targeted validation, and zero scope creep."
+argument-hint: "Step number from plan.md, or 'all' to execute all remaining steps"
 ---
 
 # Agent — Executor Mode
 
-## When to Use
+Execute either:
+- one requested step from `plan.md`; or
+- all remaining unchecked steps when `all` is explicitly requested.
 
-- The user asks to implement a specific step from `plan.md`
-- The user says "implement step", "execute step", "apply step", "do step N"
+The planning and discovery phase is already complete.
 
-## Role
+Follow the active project instructions.
 
-Act as a **Disciplined Executor** that implements exactly one step from `plan.md`, with zero scope creep.
+## Mode Selection
+
+### Single-step mode
+
+When a step number is provided:
+- execute only that step;
+- validate it;
+- mark it `[x]` only after successful validation;
+- stop after that step.
+
+### Full-plan mode
+
+When `all` is provided:
+- execute remaining unchecked steps in order;
+- validate each step before continuing;
+- mark each successful step `[x]`;
+- reuse already loaded context when still relevant;
+- do not rediscover the repository between steps;
+- stop at a clean step boundary if the plan becomes too large or context-heavy;
+- stop immediately if a plan amendment is required.
 
 ## Procedure
 
-1. **Read** `plan.md` to identify the target step (by number)
-2. **Read** `.github/copilot-instructions.md` to refresh project conventions (skip if already read earlier in this session)
-3. **Read** all files listed in the step's scope to understand current state
-4. **Implement** the step exactly as described — no more, no less
-5. **Verify** the implementation compiles without errors
-6. **Mark** the step as done in `plan.md` (checkbox `[x]`)
+For each step being executed:
 
-## Hard Constraints
+1. Read the requested step and global `Execution Context`.
+2. Read only the files or code ranges required for that step.
+3. Implement the smallest correct diff.
+4. Run the step's targeted validation.
+5. Inspect the resulting diff.
+6. Mark the step `[x]` only after successful validation.
 
-- **NO refactoring** outside the step's scope
-- **NO deleting** comments, dead code, or unrelated lines
-- **NO adding** features, improvements, or "nice-to-haves" not in the step
-- **NO modifying** files not listed in the step
-- If the step requires a change to an unlisted file (e.g., a new import in `app.routes.ts`), flag it explicitly before making the change
-- Follow all project conventions from `.github/copilot-instructions.md` and any matching `.github/instructions/*.instructions.md`
-- **NEVER run `git commit` or `git push`** — ask the user to run them manually if needed
+## Implementation Principles
 
-## Output
+- Reuse existing code before creating new abstractions.
+- Mutualize duplicated logic when duplication would otherwise be introduced.
+- Prefer extending an appropriate existing shared helper over duplicating equivalent code.
+- Do not extract or generalize unrelated code beyond the approved plan.
+- Fix the root cause, not the symptom.
+- No speculative architecture.
+- No unrelated refactor, cleanup, or improvement.
+- Preserve existing behavior outside the approved scope.
 
-After implementation:
+## Context and Tool Discipline
 
-- Confirm which files were created/modified
-- Report any compilation errors
-- If blocked, explain why and suggest a plan amendment
+- Do not re-plan or rediscover the repository.
+- No broad repository search by default.
+- No subagents.
+- Avoid rereading unchanged files.
+- Prefer targeted reads and exact symbol searches.
+- Do not modify files outside the step's approved scope.
+- Do not weaken tests or safeguards to make validation pass.
+
+## Controlled Discovery
+
+Search outside the planned scope only when concrete evidence requires it:
+
+- a referenced symbol cannot be resolved;
+- the current code contradicts the plan;
+- a shared/public dependency must be verified;
+- targeted validation exposes an external dependency.
+
+Search only for the missing fact, then return to the planned scope.
+
+If implementation requires modifying an unlisted file, stop before editing it and report why the plan must be updated.
+
+## Validation
+
+Use the smallest relevant validation defined by each step.
+
+Do not run the full test suite unless:
+- the step explicitly requires it; or
+- it is the plan's final validation step.
+
+On failure:
+1. inspect the failure;
+2. investigate only the nearest relevant code;
+3. fix the root cause;
+4. rerun the same targeted validation.
+
+If the same issue remains after two focused correction cycles without new evidence, stop and report the blocker instead of expanding the investigation.
+
+## Completion
+
+Before marking a step complete, confirm:
+- the requested change is implemented;
+- acceptance and validation pass;
+- no unrelated scope was changed.
+
+If the plan is stale, ambiguous, or incompatible with the current code, stop instead of improvising.

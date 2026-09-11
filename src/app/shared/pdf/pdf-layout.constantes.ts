@@ -13,6 +13,9 @@ export const PAGE_MARGIN = { top: 10, right: 15, bottom: 15, left: 15 } as const
 /** A4 page dimensions in mm. */
 export const PAGE_SIZE = { width: 210, height: 297 } as const;
 
+/** Landscape A4 page dimensions in mm, used for pages/footers that flip to landscape. */
+export const LANDSCAPE_PAGE = { width: 297, height: 210 } as const;
+
 /** Content area width (page width minus left and right margins). */
 export const CONTENT_WIDTH = PAGE_SIZE.width - PAGE_MARGIN.left - PAGE_MARGIN.right;
 
@@ -43,3 +46,17 @@ export const BULLET = '\u2022';
 
 /** Number of decimal places for numeric values. */
 export const DECIMAL_PLACES = 3;
+
+/** Unit labels shared across PDF report metrics. */
+export const PDF_UNITS = {
+  meters: 'm',
+  daN: 'daN',
+  degrees: '°',
+  grad: 'gr',
+  percent: '%',
+  kilograms: 'kg',
+  pascal: 'Pa',
+  celsius: '°C',
+  cra: '%CRA',
+  centimeters: 'cm'
+} as const;

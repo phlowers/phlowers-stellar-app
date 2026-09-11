@@ -210,6 +210,17 @@
               app-btn
               btnSize="s"
               btnStyle="text"
+              (click)="popover.hide(); onGenerateCantonReport(section)"
+              data-testid="section-report-btn"
+            >
+              <app-icon icon="description" />
+              <span>{{ 'sections-tab.report-action' | transloco }}</span>
+            </button>
+
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
               class="erase-btn"
               (click)="deleteSection.emit(section)"
               data-testid="section-delete-btn"

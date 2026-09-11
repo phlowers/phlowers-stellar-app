@@ -1,111 +1,159 @@
 ---
-name: skill-review
-description: "Senior auditor mode for reviewing implementation steps. Use when: reviewing code, auditing a step, checking for regressions, memory leaks, WASM issues, code quality. Keywords: review, audit, check, regression, memory leak, WASM, quality."
-argument-hint: "Step number from plan.md to review"
+name: skill-agent
+description: "Execute one approved step from plan.md, or all remaining steps when explicitly requested, with minimal context, targeted validation, tagged stop reasons, and zero scope creep."
+argument-hint: "Step number from plan.md, or 'all' to execute all remaining steps"
 ---
 
-# Review — Senior Auditor Mode
+# Agent — Executor Mode
 
-## When to Use
+Execute either:
+- one requested step from `plan.md`; or
+- all remaining unchecked steps when `all` is explicitly requested.
 
-- A plan step has been implemented and needs validation before moving on
-- The user asks to review, audit, or check code quality
-- The user says "review", "audit", "check step N", "verify"
+The planning and discovery phase is already complete.
 
-## Role
+Follow the active project instructions.
 
-Act as a **Senior Auditor** with expertise in the current Angular version (see `package.json`), TypeScript strict, WASM/Pyodide memory management, and the project conventions in `.github/copilot-instructions.md`.
+## Mode Selection
+
+### Single-step mode
+
+When a step number is provided:
+- execute only that step;
+- validate it;
+- mark it `[x]` only after successful validation;
+- stop after that step.
+
+### Full-plan mode
+
+When `all` is provided:
+- execute remaining unchecked steps in order;
+- validate each step before continuing;
+- mark each successful step `[x]`;
+- reuse already loaded context when still relevant;
+- do not rediscover the repository between steps;
+- reassess context before starting each new step.
+
+Stop at the previous completed step when the next step:
+- enters a substantially different functional area (`FUNCTIONAL_AREA_CHANGE`);
+- requires loading a significant new set of files (`NEW_FILE_SET`);
+- requires broad discovery not already captured by the plan (`BROAD_DISCOVERY_REQUIRED`); or
+- would make the current execution context unnecessarily large (`CONTEXT_SIZE`).
+
+Do not stop merely because another small, closely related step remains.
+
+**Example — continue**: Step 4 adds a method to the same service touched in Step 3, plus its test file. Same functional area, no new file set → continue.
+
+**Example — stop**: Step 4 requires touching a shared routing module used by three other features not covered in the plan → stop (`NEW_FILE_SET` / `BROAD_DISCOVERY_REQUIRED`).
+
+## Stop Reason Tags
+
+Whenever execution stops before the plan (or the requested step) is fully complete, tag the reason with exactly one of:
+
+- `FUNCTIONAL_AREA_CHANGE`
+- `NEW_FILE_SET`
+- `BROAD_DISCOVERY_REQUIRED`
+- `CONTEXT_SIZE`
+- `BLOCKER_UNRESOLVED` — same issue persists after two focused correction cycles
+- `PLAN_DEVIATION` — plan is stale, ambiguous, or incompatible with current code
+
+Record this tag wherever the stop is reported (Execution State in `all` mode, or the completion report in single-step mode). Never invent a reason outside this list — if none fits, use `PLAN_DEVIATION` and describe why in prose.
 
 ## Procedure
 
-1. **Read** `.github/copilot-instructions.md` and any `.github/instructions/*.instructions.md` matching the reviewed files
-2. **Read** `plan.md` to identify the step under review
-3. **Read** all files modified in the step
-4. **Audit** against the full checklist below
-5. **Report** findings as a structured list: PASS / WARN / FAIL per category
-6. **Do NOT fix** issues — only report them. Fixes are done via `/skill-agent` or `/skill-fix-test`
+For each step being executed:
 
-## Audit Checklist
+1. Read the requested step and global `Execution Context`.
+2. Read only the files or code ranges required for that step.
+3. Implement the smallest correct diff.
+4. Run the step's targeted validation.
+5. Inspect the resulting diff.
+6. Mark the step `[x]` only after successful validation.
 
-### Architecture
+## Implementation Principles
 
-- [ ] Changes respect the repo layout: `src/app/{core, features/<feat>, infrastructure, shared}`. Most features use an internal `application/` + `presentation/` (+ `infrastructure/`) split — follow it for new/modified features (`studio` is a legacy exception with a `core/` + sub-feature-folder layout; don't migrate it opportunistically). No invented third layout without explicit user validation
-- [ ] No cross-feature direct dependencies
-- [ ] Reusable logic lives in `core/` or `shared/`, not duplicated per feature
+- Reuse existing code before creating new abstractions.
+- Mutualize duplicated logic when duplication would otherwise be introduced.
+- Prefer extending an appropriate existing shared helper over duplicating equivalent code.
+- Do not extract or generalize unrelated code beyond the approved plan.
+- Fix the root cause, not the symptom.
+- No speculative architecture.
+- No unrelated refactor, cleanup, or improvement.
+- Preserve existing behavior outside the approved scope.
 
-### Angular
+## Context and Tool Discipline
 
-- [ ] `ChangeDetectionStrategy.OnPush` on all components
-- [ ] `inject()` used (no constructor injection)
-- [ ] State managed with `signal()` / `computed()` / `effect()`
-- [ ] `standalone: true` on all components
-- [ ] `input()` / `output()` (not `@Input` / `@Output`)
-- [ ] No business logic in presentation components
+- Do not re-plan or rediscover the repository.
+- No broad repository search by default.
+- No subagents.
+- Avoid rereading unchanged files.
+- Prefer targeted reads and exact symbol searches.
+- Do not modify files outside the step's approved scope.
+- Do not weaken tests or safeguards to make validation pass.
 
-### TypeScript Strict
+## Controlled Discovery
 
-- [ ] `npm run lint-check` passes — do not manually re-verify rules already enforced as ESLint errors (no `any`, no `window`)
-- [ ] Path aliases used (no relative imports)
+Search outside the planned scope only when concrete evidence requires it:
 
-### Logging & Notifications
+- a referenced symbol cannot be resolved;
+- the current code contradicts the plan;
+- a shared/public dependency must be verified;
+- targeted validation exposes an external dependency.
 
-- [ ] No `console.log` / `console.warn` / `console.error` in DI-injectable code
-- [ ] `LoggerService` used for all technical logs
-- [ ] `NotificationService` used for user-facing error / warning / info / success messages
+Search only for the missing fact, then return to the planned scope.
 
-### SCSS / BEM
+If implementation requires modifying an unlisted file, stop before editing it and report why the plan must be updated (`PLAN_DEVIATION`).
 
-- [ ] BEM naming respected
-- [ ] No magic values (CSS variables used)
-- [ ] No unnecessary selector nesting depth
+## Validation
 
-### Accessibility
+Use the smallest relevant validation defined by each step.
 
-- [ ] `aria-*` attributes on interactive elements
-- [ ] `data-testid` on all interactive/meaningful elements
-- [ ] Keyboard navigation works
+Do not run the full test suite unless:
+- the step explicitly requires it; or
+- it is the plan's final validation step.
 
-### Performance & Memory
+On failure:
+1. inspect the failure;
+2. investigate only the nearest relevant code;
+3. fix the root cause;
+4. rerun the same targeted validation.
 
-- [ ] Plotly calls run outside Angular zone (`ngZone.runOutsideAngular`)
-- [ ] `Plotly.purge()` called in `ngOnDestroy()`
-- [ ] Pyodide runs in Web Worker only
-- [ ] No WASM memory leaks (`.destroy()` called on Pyodide proxies)
-- [ ] Dexie transactions used for multi-table operations
-- [ ] Subscriptions properly cleaned up
+If the same issue remains after two focused correction cycles without new evidence, stop and report the blocker (`BLOCKER_UNRESOLVED`) instead of expanding the investigation.
 
-### Testing
+## Execution State
 
-- [ ] New/modified code has corresponding tests
-- [ ] No Jest APIs (only Vitest)
-- [ ] `data-testid` rendering tests present
+In `all` mode, if execution stops before all remaining steps are complete, maintain a single `Execution State` section in `plan.md`.
 
-### i18n
+Record only:
+- the next or blocked step;
+- the stop reason tag (see Stop Reason Tags);
+- a concise stop reason in prose.
 
-- [ ] No hardcoded user-facing text in templates (use the `transloco` pipe)
-- [ ] No hardcoded user-facing text in TypeScript (use `TranslocoService.translate()`)
-- [ ] No `$localize` / `i18n` attribute usage (Angular native i18n was fully replaced by Transloco)
-- [ ] New/changed translation keys added to **both** `public/i18n/en.json` and `public/i18n/fr.json`
+Replace any previous execution state. Never accumulate execution logs.
 
-### Dead Code
+Remove stale Execution State information once it is no longer relevant.
 
-- [ ] Any suspected dead code logged in `deadcode.md` (not deleted)
+## Output Discipline
 
-## Output Format
+Keep execution reporting minimal.
 
-```
-## Review: Step N — [Title]
+During execution:
+- do not narrate routine reads, edits, or intermediate reasoning;
+- report intermediate status only when blocked or when user input is required.
 
-### PASS
-- ✅ OnPush on all components
-- ✅ No `any` types
+At completion, report only:
+- completed step(s);
+- files changed;
+- validation result;
+- blocker or plan deviation, with its tag, if any.
 
-### WARN
-- ⚠️ Missing `aria-label` on dialog trigger button
+In `all` mode, provide one consolidated summary instead of one report per step.
 
-### FAIL
-- ❌ Domain entity imports from `@angular/core`
-- ❌ Missing tests for error branch in `loadData()`
+## Completion
 
-### Verdict: PASS | NEEDS FIXES
-```
+Before marking a step complete, confirm:
+- the requested change is implemented;
+- acceptance and validation pass;
+- no unrelated scope was changed.
+
+If the plan is stale, ambiguous, or incompatible with the current code, stop instead of improvising (`PLAN_DEVIATION`).
