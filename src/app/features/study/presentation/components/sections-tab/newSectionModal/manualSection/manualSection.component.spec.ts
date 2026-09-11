@@ -163,12 +163,20 @@ describe('ManualSectionComponent', () => {
       regional_team_id: undefined,
       maintenance_team_id: undefined,
       maintenance_center_id: undefined,
+      link_code: '',
       link_name: '',
-      lit_code: '',
-      lit_name: '',
+      lit_idr: '',
+      lit_adr: '',
       branch_name: '',
-      branch_idr: '',
+      branch_code: '',
       voltage_idr: '',
+      voltage_adr: undefined,
+      cm_idr: undefined,
+      cm_adr: undefined,
+      gmr_idr: undefined,
+      gmr_adr: undefined,
+      eel_idr: undefined,
+      eel_adr: undefined,
       comment: '',
       supports_comment: '',
       supports: [],
@@ -366,7 +374,7 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should fallback-filter without voltage_idr and auto-correct it when voltage mismatch leaves empty result', async () => {
-      mockSection.link_name = 'link1';
+      mockSection.link_code = 'link1';
       mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
 
       await component.setupFilterTables();
@@ -376,9 +384,9 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.voltage_idr).toBe('tension1');
     });
 
-    it('should not apply fallback when neither link_name nor lit_code is set', async () => {
-      mockSection.link_name = undefined;
-      mockSection.lit_code = undefined;
+    it('should not apply fallback when neither link_code nor lit_idr is set', async () => {
+      mockSection.link_code = undefined;
+      mockSection.lit_idr = undefined;
       mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
 
       await component.setupFilterTables();
@@ -493,10 +501,10 @@ describe('ManualSectionComponent', () => {
       await component.onLinesSelect(event, 'link_idr');
 
       expect(component.linesFilterTable()).toHaveLength(1);
-      expect(mockSection.link_name).toBe('link1');
-      expect(mockSection.lit_code).toBe('lit1');
+      expect(mockSection.link_code).toBe('link1');
+      expect(mockSection.lit_idr).toBe('lit1');
       expect(mockSection.branch_name).toBe('BRANCH 1');
-      expect(mockSection.branch_idr).toBe('1.0');
+      expect(mockSection.branch_code).toBe('1.0');
       expect(mockSection.voltage_idr).toBe('tension1');
     });
 
@@ -506,7 +514,7 @@ describe('ManualSectionComponent', () => {
       await component.onLinesSelect(event, 'lit_idr');
 
       expect(component.linesFilterTable()).toHaveLength(1);
-      expect(mockSection.lit_code).toBe('lit1');
+      expect(mockSection.lit_idr).toBe('lit1');
     });
 
     it('should filter by voltage_idr and auto-populate related fields', async () => {
@@ -534,9 +542,9 @@ describe('ManualSectionComponent', () => {
     });
 
     it('auto-corrects the voltage via fallback when selecting a value leaves an empty filtered result', async () => {
-      // link_name is already set, but the chosen voltage matches no line, so the
-      // cascade empties and the fallback recovers line1 by link_name + patches voltage.
-      mockSection.link_name = 'link1';
+      // link_code is already set, but the chosen voltage matches no line, so the
+      // cascade empties and the fallback recovers line1 by link_code + patches voltage.
+      mockSection.link_code = 'link1';
       mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
 
       await component.onLinesSelect({ value: 'MISMATCH_VOLTAGE' }, 'voltage_idr');
@@ -579,8 +587,8 @@ describe('ManualSectionComponent', () => {
     });
 
     it('populates the link/lit read-only labels from the matching lines', async () => {
-      mockSection.link_name = 'link1';
-      mockSection.lit_code = 'lit1';
+      mockSection.link_code = 'link1';
+      mockSection.lit_idr = 'lit1';
       mockSection.voltage_idr = 'tension1';
 
       await component.setupFilterTables();
@@ -828,10 +836,10 @@ describe('ManualSectionComponent', () => {
       mockMaintenanceService.getMaintenance.mockResolvedValue(mockMaintenanceData);
       mockLinesService.getLines.mockResolvedValue(mockLinesData);
       (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
-      mockSection.lit_code = 'lit1';
-      mockSection.lit_name = 'LIT 1';
-      mockSection.link_name = 'link1';
-      mockSection.branch_idr = '1.0';
+      mockSection.lit_idr = 'lit1';
+      mockSection.lit_adr = 'LIT 1';
+      mockSection.link_code = 'link1';
+      mockSection.branch_code = 'STB01';
       mockSection.voltage_idr = 'tension1';
       component.linesFilterTable.set(mockLinesData);
       component.litAdrRead.set('LIT 1');
@@ -839,7 +847,7 @@ describe('ManualSectionComponent', () => {
       await fixture.whenStable();
     });
 
-    it('should render LIT - ID with lit_code value', () => {
+    it('should render LIT - ID with lit_idr value', () => {
       const el = getByTestId('lit-code-view');
       expect(el).toBeTruthy();
       expect(el?.textContent?.trim()).toBe('lit1');
@@ -851,10 +859,10 @@ describe('ManualSectionComponent', () => {
       expect(el?.textContent?.trim()).toBe('LIT 1');
     });
 
-    it('should render Branch with branch_idr value', () => {
+    it('should render Branch with the extracted branch number', () => {
       const el = getByTestId('branch-idr-view');
       expect(el).toBeTruthy();
-      expect(el?.textContent?.trim()).toBe('1.0');
+      expect(el?.textContent?.trim()).toBe('1');
     });
   });
 

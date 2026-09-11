@@ -491,4 +491,17 @@
 | Removal impact | Remove both keys from `en.json` and `fr.json` once confirmed unused elsewhere |
 | ✅ Validated | ⏳ Pending review |
 
+---
+
+## 37. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/study/domain/section.model.ts` — `maintenance_center_names: string[] \| undefined;` and `regional_maintenance_center_names: string[] \| undefined;` |
+| Code | Populated in `section-import.service.ts`'s `mapExternalSectionToSection()` from `CM_DESIGNATION`/`GMR_DESIGNATION` (as single-element arrays), alongside the new SIG.144 scalar fields `cm_adr` and `gmr_adr` which are populated from the exact same source designations. |
+| 🔍 Evidence | SIG.144 introduced `cm_adr`/`gmr_adr` (scalar `string \| undefined`) as the canonical IDR/ADR designation fields, reusing the same `cmDesignation`/`gmrDesignation` computed variables that already fed `maintenance_center_names`/`regional_maintenance_center_names`. The two array fields now look redundant with the new scalar fields (always 0-or-1 element, same source value) — but they are still read by `manualSection.component.ts`/`.html` (maintenance-team display) and other consumers, so they were NOT touched by SIG.144 to keep the change scoped to the plan. |
+| ⚠️ Confidence | **MEDIUM** — needs verification that no consumer actually depends on the array shape (vs. always taking `[0]`) before consolidating onto the scalar fields. |
+| Removal impact | Potential follow-up: replace `maintenance_center_names`/`regional_maintenance_center_names` usages with `cm_adr`/`gmr_adr` and drop the array fields — out of scope for SIG.144, logged here for future cleanup. |
+| ✅ Validated | ⏳ Pending review |
+
 

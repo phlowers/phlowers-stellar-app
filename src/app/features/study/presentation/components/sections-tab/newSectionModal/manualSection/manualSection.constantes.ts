@@ -7,10 +7,10 @@ export const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 /** Mapping from line table property keys to their corresponding `Section` property keys. */
 export const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof Section> = {
   voltage_idr: 'voltage_idr',
-  link_idr: 'link_name',
-  lit_idr: 'lit_code',
-  lit_adr: 'lit_name',
-  branch_idr: 'branch_idr',
+  link_idr: 'link_code',
+  lit_idr: 'lit_idr',
+  lit_adr: 'lit_adr',
+  branch_idr: 'branch_code',
   branch_adr: 'branch_name'
 };
 
