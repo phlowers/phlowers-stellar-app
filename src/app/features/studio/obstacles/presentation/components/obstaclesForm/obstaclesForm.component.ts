@@ -163,11 +163,16 @@ export class ObstaclesFormComponent {
    */
   onPositionBlur(event: Event, key: 'x' | 'y' | 'z') {
     const input = event.target as HTMLInputElement;
+    const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
+    const positionGroup = this.obstacleFormService.positions.at(currentIndex);
+    // Mark the control touched regardless of validity so the min/max/maxDecimals error
+    // message can be shown once the user leaves the field. The input is bound via [value]
+    // (not formControlName), so Angular never marks the control touched on its own.
+    positionGroup?.get(key)?.markAsTouched();
     if (!Number.isNaN(Number.parseFloat(input.value))) {
       return;
     }
-    const currentIndex = this.obstaclesService.activePointIndex() ?? 0;
-    const persistedValue = this.obstacleFormService.positions.at(currentIndex)?.get(key)?.value;
+    const persistedValue = positionGroup?.get(key)?.value;
     input.value = persistedValue === null || persistedValue === undefined ? '' : String(persistedValue);
   }
 

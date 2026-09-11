@@ -295,6 +295,38 @@ describe('ObstacleFormService', () => {
       expect(group.get('y')?.value).toBe(2);
       expect(group.get('z')?.value).toBe(3);
     });
+    it('should be invalid when x (dist. supp. réf.) is below -50', () => {
+      const group = service.createPositionGroup({ x: -50.01, y: 0, z: 0 });
+      expect(group.get('x')?.errors?.['min']).toBeTruthy();
+    });
+    it('should be invalid when x (dist. supp. réf.) is above 5000', () => {
+      const group = service.createPositionGroup({ x: 5000.01, y: 0, z: 0 });
+      expect(group.get('x')?.errors?.['max']).toBeTruthy();
+    });
+    it('should be invalid when y (dist. axe ligne) is below -100', () => {
+      const group = service.createPositionGroup({ x: 0, y: -100.01, z: 0 });
+      expect(group.get('y')?.errors?.['min']).toBeTruthy();
+    });
+    it('should be invalid when y (dist. axe ligne) is above 100', () => {
+      const group = service.createPositionGroup({ x: 0, y: 100.01, z: 0 });
+      expect(group.get('y')?.errors?.['max']).toBeTruthy();
+    });
+    it('should be invalid when z (alt. point) is below -100', () => {
+      const group = service.createPositionGroup({ x: 0, y: 0, z: -100.01 });
+      expect(group.get('z')?.errors?.['min']).toBeTruthy();
+    });
+    it('should be invalid when z (alt. point) is above 9000', () => {
+      const group = service.createPositionGroup({ x: 0, y: 0, z: 9000.01 });
+      expect(group.get('z')?.errors?.['max']).toBeTruthy();
+    });
+    it('should be invalid when a coordinate has more than 2 decimals', () => {
+      const group = service.createPositionGroup({ x: 1.234, y: 2, z: 3 });
+      expect(group.get('x')?.errors?.['maxDecimals']).toBeTruthy();
+    });
+    it('should be valid when all coordinates are within range with up to 2 decimals', () => {
+      const group = service.createPositionGroup({ x: -50, y: 100, z: 9000 });
+      expect(group.valid).toBe(true);
+    });
   });
 
   describe('buildPositionControls', () => {
@@ -1159,6 +1191,49 @@ describe('ObstacleFormService', () => {
         lateralDistanceType: LateralDistanceType.SPAN_AXIS
       });
       expect(service.canCalculateAndSave()).toBe(true);
+    });
+    it('should return false when a position coordinate is out of range', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: 2, z: 99999 });
+      service.form.patchValue({
+        name: 'Obstacle',
+        supportUuid: 'sup-1',
+        type: 'House',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      expect(service.canCalculateAndSave()).toBe(false);
+    });
+  });
+
+  describe('getPositionError', () => {
+    it('should return null when the coordinate is valid', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: 2, z: 3 });
+      expect(service.getPositionError(0, 'z')).toBeNull();
+    });
+    it('should return the min-value-error key when below the minimum', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: 2, z: -200 });
+      expect(service.getPositionError(0, 'z')).toEqual({ key: 'common.min-value-error', params: { min: -100 } });
+    });
+    it('should return the max-value-error key when above the maximum', () => {
+      service.positions.clear();
+      service.addPosition({ x: 6000, y: 2, z: 3 });
+      expect(service.getPositionError(0, 'x')).toEqual({ key: 'common.max-value-error', params: { max: 5000 } });
+    });
+    it('should return the max-decimals-error key when precision is exceeded', () => {
+      service.positions.clear();
+      service.addPosition({ x: 1, y: 12.345, z: 3 });
+      expect(service.getPositionError(0, 'y')).toEqual({
+        key: 'common.max-decimals-error',
+        params: { maxDecimals: 2 }
+      });
+    });
+    it('should return null when the position index does not exist', () => {
+      service.positions.clear();
+      expect(service.getPositionError(0, 'x')).toBeNull();
     });
   });
 

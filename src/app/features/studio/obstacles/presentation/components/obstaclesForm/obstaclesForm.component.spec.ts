@@ -12,6 +12,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { BehaviorSubject } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { NumberInputErrorParams } from '@shared/helpers/formErrors.interfaces';
 
 vi.mock('lodash', () => ({
   debounce: (fn: (...args: unknown[]) => void) => fn
@@ -43,6 +44,7 @@ class MockObstacleFormService {
   calculateAndSave = vi.fn();
   canCalculateAndSave = vi.fn(() => true);
   saveConformityData = vi.fn().mockResolvedValue(undefined);
+  getPositionError = vi.fn((_index: number, _key: 'x' | 'y' | 'z'): NumberInputErrorParams | null => null);
 
   constructor() {
     const fb = new FormBuilder();
@@ -690,6 +692,7 @@ describe('ObstaclesFormComponent', () => {
       component.onPositionBlur({ target: input } as unknown as Event, 'x');
 
       expect(input.value).toBe('5.5');
+      expect(positionGroup.get('x')?.touched).toBe(true);
     });
 
     it('should not alter a valid field value on blur', () => {
@@ -701,6 +704,16 @@ describe('ObstaclesFormComponent', () => {
       expect(input.value).toBe('7.2');
     });
 
+    it('should mark the position control as touched on blur regardless of validity', () => {
+      const input = getByTestId('point-ref-distance') as HTMLInputElement;
+      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+      input.value = '7.2';
+
+      component.onPositionBlur({ target: input } as unknown as Event, 'x');
+
+      expect(positionGroup.get('x')?.touched).toBe(true);
+    });
+
     it('should revert to an empty string on blur when the control has no persisted value', () => {
       const input = getByTestId('point-ref-distance') as HTMLInputElement;
       const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
@@ -710,6 +723,46 @@ describe('ObstaclesFormComponent', () => {
       component.onPositionBlur({ target: input } as unknown as Event, 'x');
 
       expect(input.value).toBe('');
+    });
+  });
+
+  describe('point coordinate error messages', () => {
+    it('should not display an error message when the field is valid', () => {
+      mockObstacleFormService.getPositionError = vi.fn(() => null);
+      fixture.detectChanges();
+
+      expect(getByTestId('point-altitude-error')).toBeNull();
+      expect(getByTestId('point-ref-distance-error')).toBeNull();
+      expect(getByTestId('point-axis-distance-error')).toBeNull();
+    });
+
+    it('should display a single altitude (z) error message when out of range', () => {
+      mockObstacleFormService.getPositionError = vi.fn((index: number, key: 'x' | 'y' | 'z') =>
+        key === 'z' ? { key: 'common.min-value-error', params: { min: -100 } } : null
+      );
+      fixture.detectChanges();
+
+      expect(getByTestId('point-altitude-error')).not.toBeNull();
+      expect(getByTestId('point-ref-distance-error')).toBeNull();
+      expect(getByTestId('point-axis-distance-error')).toBeNull();
+    });
+
+    it('should display a single ref. support distance (x) error message when out of range', () => {
+      mockObstacleFormService.getPositionError = vi.fn((index: number, key: 'x' | 'y' | 'z') =>
+        key === 'x' ? { key: 'common.max-value-error', params: { max: 5000 } } : null
+      );
+      fixture.detectChanges();
+
+      expect(getByTestId('point-ref-distance-error')).not.toBeNull();
+    });
+
+    it('should display a single line axis distance (y) error message when out of range', () => {
+      mockObstacleFormService.getPositionError = vi.fn((index: number, key: 'x' | 'y' | 'z') =>
+        key === 'y' ? { key: 'common.max-decimals-error', params: { maxDecimals: 2 } } : null
+      );
+      fixture.detectChanges();
+
+      expect(getByTestId('point-axis-distance-error')).not.toBeNull();
     });
   });
 

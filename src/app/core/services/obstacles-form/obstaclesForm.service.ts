@@ -16,14 +16,26 @@ import { MessageService } from 'primeng/api';
 import { v4 as uuidv4 } from 'uuid';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
-import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domain/obstacles/obstacle-form.constants';
+import {
+  ALTITUDE_MAX,
+  ALTITUDE_MIN,
+  AXIS_DISTANCE_MAX,
+  AXIS_DISTANCE_MIN,
+  DEBOUNCED_UPDATE_POINT_DELAY,
+  defaultObstacleForm,
+  POSITION_MAX_DECIMALS,
+  REF_SUPPORT_DISTANCE_MAX,
+  REF_SUPPORT_DISTANCE_MIN
+} from '@shared/domain/obstacles/obstacle-form.constants';
 import { ObstacleFormGroupData, PositionFormGroup } from '@shared/domain/obstacles/obstacle-form.interfaces';
 import { debounce } from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable, startWith } from 'rxjs';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotOptions } from '@shared/types/plot.types';
-import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
+import { getControlErrorIds, getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
+import { NumberInputErrorParams } from '@shared/helpers/formErrors.interfaces';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 
 /** Service managing the obstacle reactive form, including CRUD operations, position management, and calculations. */
 @Injectable({
@@ -70,9 +82,26 @@ export class ObstacleFormService {
 
   createPositionGroup(position: Position3D = this.defaultPosition): PositionFormGroup {
     return this.fb.group({
-      x: [position.x],
-      y: [position.y],
-      z: [position.z]
+      x: [
+        position.x,
+        [
+          Validators.min(REF_SUPPORT_DISTANCE_MIN),
+          Validators.max(REF_SUPPORT_DISTANCE_MAX),
+          maxDecimalsValidator(POSITION_MAX_DECIMALS)
+        ]
+      ],
+      y: [
+        position.y,
+        [
+          Validators.min(AXIS_DISTANCE_MIN),
+          Validators.max(AXIS_DISTANCE_MAX),
+          maxDecimalsValidator(POSITION_MAX_DECIMALS)
+        ]
+      ],
+      z: [
+        position.z,
+        [Validators.min(ALTITUDE_MIN), Validators.max(ALTITUDE_MAX), maxDecimalsValidator(POSITION_MAX_DECIMALS)]
+      ]
     });
   }
 
@@ -478,6 +507,14 @@ export class ObstacleFormService {
 
   getErrorIds(controlName: string, errorTypes: string[]): string | null {
     return getControlErrorIds(this.form, controlName, errorTypes);
+  }
+
+  /**
+   * Resolves the single min/max/maxDecimals error (in that priority order) to display for a
+   * position's x/y/z coordinate field at the given index, or null when the field is valid.
+   */
+  getPositionError(index: number, key: 'x' | 'y' | 'z'): NumberInputErrorParams | null {
+    return getNumberInputErrorParams(this.positions.at(index)?.get(key) ?? null);
   }
 
   returnToSpan(): void {
