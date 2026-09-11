@@ -3,14 +3,25 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import json
 import os
+from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+ROOT = Path(__file__).resolve().parents[2]
+PACKAGE_JSON = ROOT / "package.json"
+
+with PACKAGE_JSON.open("r", encoding="utf-8") as package_file:
+    package_data = json.load(package_file)
+
 app_name = os.environ.get("SPHINX_APP_NAME", "Stellar")
+app_version = package_data.get("version", "0.0.0")
 
 project = app_name
+version = app_version
+release = version
 copyright = "2026, RTE (http://www.rte-france.com)"
 
 
