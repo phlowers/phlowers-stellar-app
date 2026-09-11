@@ -18,3 +18,22 @@ export interface PdfFonts {
 export interface PdfSection {
   draw(doc: jsPDF, startY: number): number;
 }
+
+/** A single bullet line of a metadata section: bold label + value, optionally wrapping to several lines. */
+export interface PdfBulletItem {
+  label: string;
+  value: string;
+  /** When true, the value wraps across multiple lines (drawWrappingBulletItem); otherwise a single line. */
+  wrap?: boolean;
+}
+
+/** Fields common to every PDF report's label set, resolved via Transloco at generation time. */
+export interface BaseReportLabels {
+  reportTitle: string;
+  author: string;
+  study: string;
+  studyDescription: string;
+  chargeName: string;
+  chargeDescription: string;
+  pageLabel: string;
+}

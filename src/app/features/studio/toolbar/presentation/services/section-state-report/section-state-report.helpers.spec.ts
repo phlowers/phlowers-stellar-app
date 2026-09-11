@@ -11,19 +11,8 @@ import type jsPDF from 'jspdf';
 import { Support } from '@shared/domain';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 
-import { SPAN_METRICS, SUPPORT_METRICS } from './section-state-report.constantes';
-import {
-  buildSpanRows,
-  buildSupportRows,
-  buildTables,
-  chunk,
-  computeLabelColWidth,
-  drawResultTablesSection,
-  drawTable,
-  formatCell,
-  maxOf
-} from './section-state-report.helpers';
-import { PdfTableModel, SpanReportRow } from './section-state-report.interfaces';
+import { buildSpanRows, buildSupportRows, drawCartoucheSection, maxOf } from './section-state-report.helpers';
+import { SectionReportLabels, SectionStateReportData } from './section-state-report.interfaces';
 
 function createMockDoc() {
   return {
@@ -84,7 +73,106 @@ function createMockParams(): SectionOutputParameters {
   } as unknown as SectionOutputParameters;
 }
 
+/** Collects every string argument passed to doc.text across all calls. */
+function textCalls(doc: ReturnType<typeof createMockDoc>): string[] {
+  return doc.text.mock.calls.flatMap((call) => {
+    const first = call[0];
+    return Array.isArray(first) ? (first as string[]) : [String(first)];
+  });
+}
+
+const CARTOUCHE_LABELS: SectionReportLabels = {
+  reportTitle: 'Report',
+  cartoucheTitle: 'Study and section',
+  author: 'Author',
+  study: 'Study',
+  studyDescription: 'Description',
+  section: 'Section',
+  sectionComment: 'Comment',
+  initialCondition: 'Initial condition',
+  chargeName: 'Load case',
+  chargeDescription: 'Load case description',
+  sectionStateTitle: 'Section state',
+  maxParameter: 'Max parameter',
+  maxStressRate: 'Max stress rate',
+  spansTitle: 'Spans',
+  supportsTitle: 'Supports',
+  pageLabel: 'Page'
+};
+
+function createCartoucheData(overrides: Partial<SectionStateReportData> = {}): SectionStateReportData {
+  return {
+    author: 'a@b.com',
+    date: '2026-05-20',
+    studyTitle: 'My study',
+    studyDescription: 'Study desc',
+    sectionName: 'Section A',
+    sectionComment: 'A comment',
+    icName: 'IC 1',
+    chargeName: 'Charge 1',
+    chargeDescription: 'Charge desc',
+    maxParameter: 1500,
+    maxStressRate: 60,
+    spans: [],
+    supports: [],
+    ...overrides
+  };
+}
+
 describe('section-state-report.helpers', () => {
+  describe('drawCartoucheSection', () => {
+    it('draws the title, every metadata label with its value, and a separator', () => {
+      const doc = createMockDoc();
+      const y = drawCartoucheSection(doc as unknown as jsPDF, createCartoucheData(), CARTOUCHE_LABELS, 20);
+      const texts = textCalls(doc);
+
+      expect(texts).toContain('Study and section');
+      for (const label of ['Author', 'Study', 'Description', 'Section', 'Comment', 'Initial condition', 'Load case']) {
+        expect(texts.some((t) => t.includes(label))).toBe(true);
+      }
+      for (const value of [
+        'a@b.com',
+        'My study',
+        'Study desc',
+        'Section A',
+        'A comment',
+        'IC 1',
+        'Charge 1',
+        'Charge desc'
+      ]) {
+        expect(texts).toContain(value);
+      }
+      expect(doc.line).toHaveBeenCalled();
+      expect(y).toBeGreaterThan(20);
+    });
+
+    it('wraps exactly the 4 long rows (study, description, comment, charge description)', () => {
+      const doc = createMockDoc();
+      drawCartoucheSection(doc as unknown as jsPDF, createCartoucheData(), CARTOUCHE_LABELS, 20);
+      expect(doc.splitTextToSize).toHaveBeenCalledTimes(4);
+    });
+
+    it('falls back to "-" for empty metadata values', () => {
+      const doc = createMockDoc();
+      drawCartoucheSection(
+        doc as unknown as jsPDF,
+        createCartoucheData({
+          author: '',
+          studyTitle: '',
+          studyDescription: '',
+          sectionName: '',
+          sectionComment: '',
+          icName: '',
+          chargeName: '',
+          chargeDescription: ''
+        }),
+        CARTOUCHE_LABELS,
+        20
+      );
+      expect(textCalls(doc)).toContain('-');
+    });
+  });
+
   describe('maxOf', () => {
     it('should return the maximum value of the array', () => {
       expect(maxOf([1, 9, 3])).toBe(9);
@@ -93,47 +181,6 @@ describe('section-state-report.helpers', () => {
     it('should return null for an empty or missing array', () => {
       expect(maxOf([])).toBeNull();
       expect(maxOf(undefined)).toBeNull();
-    });
-  });
-
-  describe('chunk', () => {
-    it('should split an array into chunks of the given size', () => {
-      expect(chunk([1, 2, 3, 4, 5, 6, 7], 5)).toEqual([
-        [1, 2, 3, 4, 5],
-        [6, 7]
-      ]);
-    });
-  });
-
-  describe('formatCell', () => {
-    const row: SpanReportRow = {
-      spanNumber: '1 - 2',
-      spanLength: 100,
-      elevation: null,
-      parameter: 1500,
-      horizontalTension: null,
-      tensionSup: null,
-      tensionInf: null,
-      sagF1: null,
-      sagF2: null,
-      horizontalDistance: null,
-      naturalLength: null,
-      arcLength: null,
-      slopeLeft: null,
-      slopeRight: null,
-      utilizationRate: null
-    };
-
-    it('should return the raw string for the identifier row (unit null)', () => {
-      expect(formatCell(row, SPAN_METRICS[0])).toBe('1 - 2');
-    });
-
-    it('should format numeric values with their unit', () => {
-      expect(formatCell(row, SPAN_METRICS[1])).toBe('100.00 m');
-    });
-
-    it('should return a dash for null numeric values', () => {
-      expect(formatCell(row, SPAN_METRICS[2])).toBe('-');
     });
   });
 
@@ -201,89 +248,6 @@ describe('section-state-report.helpers', () => {
       expect(rows[3].displacementX).toBe(0.65);
       expect(rows[3].displacementY).toBe(-1.6);
       expect(rows[3].displacementZ).toBe(-1.21);
-    });
-  });
-
-  describe('buildTables', () => {
-    it('should build one table per chunk of 5 columns with a row per metric', () => {
-      const supports = Array.from({ length: 7 }, (_, i) => createMockSupport(String(i + 1)));
-      const spanRows = buildSpanRows(createMockParams(), supports, 0, 6);
-      const tables = buildTables(spanRows, SPAN_METRICS, (key) => key);
-
-      expect(tables).toHaveLength(2);
-      expect(tables[0].rows).toHaveLength(SPAN_METRICS.length);
-      expect(tables[0].rows[0].values).toHaveLength(5);
-      expect(tables[1].rows[0].values).toHaveLength(1);
-    });
-
-    it('should build support tables with one row per support metric', () => {
-      const supports = [createMockSupport('1'), createMockSupport('2'), createMockSupport('3')];
-      const supportRows = buildSupportRows(createMockParams(), supports, 0, 2);
-      const tables = buildTables(supportRows, SUPPORT_METRICS, (key) => key);
-
-      expect(tables).toHaveLength(1);
-      expect(tables[0].rows).toHaveLength(SUPPORT_METRICS.length);
-      expect(tables[0].rows[0].values).toHaveLength(3);
-    });
-  });
-
-  describe('computeLabelColWidth', () => {
-    it('should size the column to the widest label across all given tables', () => {
-      const doc = createMockDoc();
-      doc.getTextWidth = vi.fn().mockReturnValueOnce(10).mockReturnValueOnce(40).mockReturnValueOnce(15);
-      const tables: PdfTableModel[] = [
-        { rows: [{ label: 'Short', values: ['1'] }] },
-        {
-          rows: [
-            { label: 'Angle balancement', values: ['2'] },
-            { label: 'Also short', values: ['3'] }
-          ]
-        }
-      ];
-
-      const width = computeLabelColWidth(doc as unknown as jsPDF, tables);
-
-      expect(width).toBe(40 + 2 * 1.5);
-    });
-  });
-
-  describe('drawTable', () => {
-    it('should draw a cell per metric row and return an increased Y position', () => {
-      const doc = createMockDoc();
-      const table: PdfTableModel = {
-        rows: [
-          { label: 'A', values: ['1', '2'] },
-          { label: 'B', values: ['3', '4'] }
-        ]
-      };
-
-      const endY = drawTable(doc as unknown as jsPDF, table, 30, 297, 62);
-
-      expect(endY).toBeGreaterThan(30);
-      expect(doc.rect).toHaveBeenCalled();
-    });
-  });
-
-  describe('drawResultTablesSection', () => {
-    it('should add a landscape page for every group of two tables', () => {
-      const doc = createMockDoc();
-      const tables: PdfTableModel[] = [
-        { rows: [{ label: 'A', values: ['1'] }] },
-        { rows: [{ label: 'A', values: ['2'] }] },
-        { rows: [{ label: 'A', values: ['3'] }] }
-      ];
-
-      drawResultTablesSection(doc as unknown as jsPDF, '2026-05-20', 'Report', 'Section', tables, 62);
-
-      // 3 tables → 2 pages (indices 0 and 2 start a new page)
-      expect(doc.addPage).toHaveBeenCalledTimes(2);
-      expect(doc.addPage).toHaveBeenCalledWith('a4', 'landscape');
-    });
-
-    it('should do nothing when there are no tables', () => {
-      const doc = createMockDoc();
-      drawResultTablesSection(doc as unknown as jsPDF, '2026-05-20', 'Report', 'Section', [], 62);
-      expect(doc.addPage).not.toHaveBeenCalled();
     });
   });
 });

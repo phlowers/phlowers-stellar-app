@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { BaseReportLabels } from '@shared/pdf/pdf-report.interfaces';
+
 /** One row of per-span computed results for the section state report tables. */
 export interface SpanReportRow {
   /** Span label built from the two bounding support numbers (e.g. "42 - 43"). */
@@ -77,33 +79,15 @@ export interface SectionStateReportData {
   supports: SupportReportRow[];
 }
 
-/** A single table row: a metric label plus one formatted value per column (span/support). */
-export interface PdfTableRow {
-  label: string;
-  values: string[];
-}
-
-/** A rendered table model (a chunk of up to MAX_COLS_PER_TABLE columns). */
-export interface PdfTableModel {
-  rows: PdfTableRow[];
-}
-
 /** Translated PDF report labels, resolved at report-generation time via TranslocoService. */
-export interface SectionReportLabels {
-  reportTitle: string;
+export interface SectionReportLabels extends BaseReportLabels {
   cartoucheTitle: string;
-  author: string;
-  study: string;
-  studyDescription: string;
   section: string;
   sectionComment: string;
   initialCondition: string;
-  chargeName: string;
-  chargeDescription: string;
   sectionStateTitle: string;
   maxParameter: string;
   maxStressRate: string;
   spansTitle: string;
   supportsTitle: string;
-  pageLabel: string;
 }
