@@ -44,7 +44,8 @@ guide terms EN→FR), but they're kept in a single table for easier lookup and m
 | connexion | sign-in / login |
 | endpoint | endpoint (do not translate) |
 | Service Worker (keep capitalized) | service worker |
-| hors ligne / offline-first (keep compound term) | offline-first |
+| hors ligne | offline |
+| offline-first (keep compound term) | offline-first |
 | cache / mis en cache | cache / cached |
 | déploiement | deployment |
 | déprécier / déprécié | to deprecate / deprecated |

@@ -36,7 +36,8 @@
     "autodocs:en": "cd docs-sphinx && SPHINX_LANGUAGE=en uv run sphinx-autobuild -c source --host localhost --port 8080 source/en build/en",
     "autodocs:fr": "cd docs-sphinx && SPHINX_LANGUAGE=fr uv run sphinx-autobuild -c source --host localhost --port 8081 source/fr build/fr",
     "docs:open": "npm run docs:en && xdg-open docs-sphinx/build/en/html/index.html",
-    "docs:pptx": "cd docs-sphinx && make pptx"
+    "docs:pptx": "cd docs-sphinx && make pptx",
+    "docs:pptx:fr": "cd docs-sphinx && make pptx-fr"
   },
   "browser": {
     "child_process": false,
