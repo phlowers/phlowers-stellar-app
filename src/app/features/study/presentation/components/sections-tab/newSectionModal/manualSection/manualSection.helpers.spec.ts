@@ -18,10 +18,11 @@ const makeLine = (overrides: Partial<CatalogLine> = {}): CatalogLine => ({
 const makeSection = (overrides: Partial<Section> = {}): Section =>
   ({
     uuid: 'section-uuid',
+    link_code: undefined,
     link_name: undefined,
-    lit_code: undefined,
-    lit_name: undefined,
-    branch_idr: undefined,
+    lit_idr: undefined,
+    lit_adr: undefined,
+    branch_code: undefined,
     branch_name: undefined,
     voltage_idr: undefined,
     ...overrides
@@ -102,7 +103,7 @@ describe('applyLinesCascadeFilter', () => {
   });
 
   it('should filter by link_idr from section', () => {
-    const section = makeSection({ link_name: 'link1' } as unknown as Partial<Section>);
+    const section = makeSection({ link_code: 'link1' });
     const result = applyLinesCascadeFilter(lines, section);
     expect(result).toHaveLength(1);
     expect(result[0].link_idr).toBe('link1');
@@ -143,36 +144,36 @@ describe('applyLinesFallback', () => {
     expect(result.patchedVoltage).toBeUndefined();
   });
 
-  it('should apply fallback by link_name when filteredLines is empty', () => {
-    const section = makeSection({ link_name: 'link1' } as unknown as Partial<Section>);
+  it('should apply fallback by link_code when filteredLines is empty', () => {
+    const section = makeSection({ link_code: 'link1' });
     const result = applyLinesFallback(allLines, [], section);
     expect(result.lines).toHaveLength(1);
     expect(result.lines[0].link_idr).toBe('link1');
     expect(result.patchedVoltage).toBe('v1');
   });
 
-  it('should apply fallback by lit_code when link_name is absent', () => {
-    const section = makeSection({ lit_code: 'lit2' } as unknown as Partial<Section>);
+  it('should apply fallback by lit_idr when link_code is absent', () => {
+    const section = makeSection({ lit_idr: 'lit2' });
     const result = applyLinesFallback(allLines, [], section);
     expect(result.lines).toHaveLength(1);
     expect(result.lines[0].lit_idr).toBe('lit2');
     expect(result.patchedVoltage).toBe('v2');
   });
 
-  it('should prefer link_name over lit_code for fallback', () => {
-    const section = makeSection({ link_name: 'link1', lit_code: 'lit2' } as unknown as Partial<Section>);
+  it('should prefer link_code over lit_idr for fallback', () => {
+    const section = makeSection({ link_code: 'link1', lit_idr: 'lit2' });
     const result = applyLinesFallback(allLines, [], section);
     expect(result.lines[0].link_idr).toBe('link1');
   });
 
-  it('should return empty lines when neither link_name nor lit_code match', () => {
-    const section = makeSection({ link_name: 'unknown' } as unknown as Partial<Section>);
+  it('should return empty lines when neither link_code nor lit_idr match', () => {
+    const section = makeSection({ link_code: 'unknown' });
     const result = applyLinesFallback(allLines, [], section);
     expect(result.lines).toHaveLength(0);
     expect(result.patchedVoltage).toBeUndefined();
   });
 
-  it('should return empty lines when section has no link_name or lit_code', () => {
+  it('should return empty lines when section has no link_code or lit_idr', () => {
     const section = makeSection();
     const result = applyLinesFallback(allLines, [], section);
     expect(result.lines).toHaveLength(0);
