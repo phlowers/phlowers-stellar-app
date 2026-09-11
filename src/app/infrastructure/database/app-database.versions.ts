@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import type Dexie from 'dexie';
+import type { Study } from '@shared/domain';
 import {
   USER_SCHEMA,
   USER_SCHEMA_V3,
@@ -182,5 +183,38 @@ export function applyStellarDbVersions(db: Dexie): void {
     ...toStagingSchema(CATALOG_OBSTACLE_DISTANCE_SCHEMA),
     ...toStagingSchema(CATALOG_OBSTACLE_WIND_ZONE_SCHEMA),
     ...toStagingSchema(CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA)
+  });
+
+  // V9: renames Section IDR/ADR fields to match the SIG.144 GeoLiaison contract
+  // (link_name -> link_code, lit_code -> lit_idr, lit_name -> lit_adr,
+  // branch_idr -> branch_code) and adds the new voltage_adr/cm_idr/cm_adr/
+  // gmr_idr/gmr_adr/eel_idr/eel_adr fields. Data-only migration (sections are
+  // stored as a JSON blob on the studies table), no schema/index change, so no
+  // `.stores()` call is needed for this version.
+  db.version(9).upgrade(async (tx) => {
+    await tx
+      .table('studies')
+      .toCollection()
+      .modify((study: Study) => {
+        for (const section of study.sections ?? []) {
+          const rawSection = section as unknown as Record<string, unknown>;
+          rawSection['lit_idr'] = rawSection['lit_code'];
+          delete rawSection['lit_code'];
+          rawSection['lit_adr'] = rawSection['lit_name'];
+          delete rawSection['lit_name'];
+          rawSection['branch_code'] = rawSection['branch_idr'];
+          delete rawSection['branch_idr'];
+          // The old `link_name` field actually held LIAISON_IDR (a mapping bug fixed by SIG.144).
+          rawSection['link_code'] = rawSection['link_name'];
+          rawSection['link_name'] = undefined;
+          rawSection['voltage_adr'] = undefined;
+          rawSection['cm_idr'] = undefined;
+          rawSection['cm_adr'] = undefined;
+          rawSection['gmr_idr'] = undefined;
+          rawSection['gmr_adr'] = undefined;
+          rawSection['eel_idr'] = undefined;
+          rawSection['eel_adr'] = undefined;
+        }
+      });
   });
 }

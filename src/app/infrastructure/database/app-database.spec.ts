@@ -23,13 +23,17 @@ function toStagingSchema(schema: Record<string, string>): Record<string, string>
 }
 
 const dexieState = vi.hoisted(() => ({
-  instances: [] as { name: string; versionCalls: { version: number; schema?: Record<string, string> }[] }[]
+  instances: [] as {
+    name: string;
+    versionCalls: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> }[];
+  }[]
 }));
 
 vi.mock('dexie', () => {
   class DexieMock {
     name: string;
-    versionCalls: { version: number; schema?: Record<string, string> }[] = [];
+    versionCalls: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> }[] =
+      [];
 
     constructor(name: string) {
       this.name = name;
@@ -37,15 +41,21 @@ vi.mock('dexie', () => {
     }
 
     version(version: number) {
-      const versionCall: { version: number; schema?: Record<string, string> } = { version };
+      const versionCall: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> } =
+        { version };
       this.versionCalls.push(versionCall);
 
-      return {
+      const chain = {
         stores: (schema: Record<string, string>) => {
           versionCall.schema = schema;
-          return this;
+          return chain;
+        },
+        upgrade: (fn: (tx: unknown) => Promise<void>) => {
+          versionCall.upgrade = fn;
+          return chain;
         }
       };
+      return chain;
     }
   }
 
@@ -215,5 +225,68 @@ describe('AppDatabase', () => {
     expect(stagingTableNames).not.toContain(`${STAGING_TABLE_PREFIX}users`);
     expect(stagingTableNames).not.toContain(`${STAGING_TABLE_PREFIX}studies`);
     expect(stagingTableNames).toHaveLength(11);
+  });
+
+  it('should register version 9 as a data-only upgrade for section IDR/ADR field renames', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const versionCall = dexieState.instances[0].versionCalls[8];
+    expect(versionCall.version).toBe(9);
+    expect(versionCall.schema).toBeUndefined();
+    expect(versionCall.upgrade).toBeInstanceOf(Function);
+  });
+
+  it('should rename Section IDR/ADR fields and initialize the new ones during the version 9 upgrade', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const upgrade = dexieState.instances[0].versionCalls[8].upgrade!;
+    const study = {
+      sections: [
+        {
+          lit_code: 'LIT001',
+          lit_name: 'LitName',
+          branch_idr: 'FLOREL61SSVIN01',
+          link_name: 'LIA001'
+        }
+      ]
+    };
+    let modifyCallback: ((s: unknown) => void) | undefined;
+    const tx = {
+      table: (name: string) => {
+        expect(name).toBe('studies');
+        return {
+          toCollection: () => ({
+            modify: (cb: (s: unknown) => void) => {
+              modifyCallback = cb;
+              return Promise.resolve();
+            }
+          })
+        };
+      }
+    };
+
+    await upgrade(tx);
+    modifyCallback!(study);
+
+    const section = study.sections[0] as unknown as Record<string, unknown>;
+    expect(section['lit_idr']).toBe('LIT001');
+    expect(section['lit_code']).toBeUndefined();
+    expect(section['lit_adr']).toBe('LitName');
+    expect(section['lit_name']).toBeUndefined();
+    expect(section['branch_code']).toBe('FLOREL61SSVIN01');
+    expect(section['branch_idr']).toBeUndefined();
+    expect(section['link_code']).toBe('LIA001');
+    expect(section['link_name']).toBeUndefined();
+    expect(section['voltage_adr']).toBeUndefined();
+    expect(section['cm_idr']).toBeUndefined();
+    expect(section['cm_adr']).toBeUndefined();
+    expect(section['gmr_idr']).toBeUndefined();
+    expect(section['gmr_adr']).toBeUndefined();
+    expect(section['eel_idr']).toBeUndefined();
+    expect(section['eel_adr']).toBeUndefined();
   });
 });

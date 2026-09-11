@@ -104,18 +104,34 @@ export interface Section {
   maintenance_team_id: string | undefined;
   /** Maintenance center identifier */
   maintenance_center_id: string | undefined;
-  /** Link name reference */
+  /** Link IDR reference (LIAISON_IDR) */
+  link_code: string | undefined;
+  /** Link ADR (LIAISON_ADR) */
   link_name: string | undefined;
-  /** LIT code identifier */
-  lit_code: string | undefined;
-  /** LIT name */
-  lit_name: string | undefined;
-  /** Branch name */
+  /** LIT IDR identifier */
+  lit_idr: string | undefined;
+  /** LIT ADR name */
+  lit_adr: string | undefined;
+  /** Branch name (BRANCHE_ADR) */
   branch_name: string | undefined;
-  /** Branch IDR reference */
-  branch_idr: string | undefined;
+  /** Raw branch IDR reference (BRANCHE_IDR) */
+  branch_code: string | undefined;
   /** Voltage IDR reference */
   voltage_idr: string | undefined;
+  /** Voltage ADR reference */
+  voltage_adr: string | undefined;
+  /** Maintenance center IDR */
+  cm_idr: string | undefined;
+  /** Maintenance center ADR */
+  cm_adr: string | undefined;
+  /** Regional maintenance center IDR */
+  gmr_idr: string | undefined;
+  /** Regional maintenance center ADR */
+  gmr_adr: string | undefined;
+  /** Maintenance team IDR */
+  eel_idr: string | undefined;
+  /** Maintenance team ADR */
+  eel_adr: string | undefined;
   /** General comment */
   comment: string | undefined;
   /** Comment about supports */

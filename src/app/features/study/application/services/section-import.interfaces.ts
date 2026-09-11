@@ -51,6 +51,7 @@ export interface Appartenance {
   LIT_ADR: string | null;
   LIT_IDR: string | null;
   BRANCHE_IDR: string | null;
+  BRANCHE_ADR: string | null;
   TENSION_ELECTRIQUE_IDR: string | null;
   TENSION_ELECTRIQUE_ADR: string | null;
   LIAISON_IDR: string | null;

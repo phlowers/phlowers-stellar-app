@@ -690,15 +690,16 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.lit_name).toBe('LitName');
-      expect(result?.lit_code).toBe('LIT001');
-      expect(result?.link_name).toBe('LIA001');
-      // BRANCHE_IDR='TESTLINE73STB01' is passed through extractBranchIdr(): last 2 chars '01' -> '1'.
-      expect(result?.branch_idr).toBe('1');
+      expect(result?.lit_adr).toBe('LitName');
+      expect(result?.lit_idr).toBe('LIT001');
+      expect(result?.link_code).toBe('LIA001');
+      expect(result?.link_name).toBe('Liaison 225kV Site-Alpha-Site-Beta');
+      expect(result?.branch_code).toBe('TESTLINE73STB01');
       expect(result?.voltage_idr).toBeUndefined();
+      expect(result?.voltage_adr).toBe('225 KV');
     });
 
-    it('should map branch_idr to undefined when BRANCHE_IDR is absent', async () => {
+    it('should map branch_code to undefined when BRANCHE_IDR is absent', async () => {
       const payload = buildValidSectionImportPayload();
       const appartenance = ((payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>)[
         'appartenance'
@@ -708,7 +709,7 @@ describe('SectionImportService', () => {
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.branch_idr).toBeUndefined();
+      expect(result?.branch_code).toBeUndefined();
     });
 
     it('should resolve voltage_idr from the line catalog, matching TENSION_ELECTRIQUE_IDR/_ADR regardless of spacing/casing', async () => {
@@ -1257,11 +1258,20 @@ describe('SectionImportService', () => {
         type: 'phase',
         cables_amount: 2,
         electric_phase_number: 1,
-        lit_name: 'LitName',
-        lit_code: 'LIT001',
-        link_name: 'LIA001',
-        branch_idr: '1',
+        lit_adr: 'LitName',
+        lit_idr: 'LIT001',
+        link_code: 'LIA001',
+        link_name: 'Liaison 225kV Site-Alpha-Site-Beta',
+        branch_code: 'TESTLINE73STB01',
+        branch_name: undefined,
         voltage_idr: undefined,
+        voltage_adr: '225 KV',
+        cm_idr: 'MC_ID_01',
+        cm_adr: 'CM_01',
+        gmr_idr: 'GMR_ID_01',
+        gmr_adr: 'GMR_01',
+        eel_idr: 'EEL_ID_01',
+        eel_adr: 'EEL_01',
         maintenance_center_id: 'MC_ID_01',
         maintenance_center_names: ['CM_01'],
         maintenance_team_id: 'EEL_ID_01',
@@ -1370,11 +1380,14 @@ describe('SectionImportService', () => {
       expect(result?.type).toBe('phase');
       expect(result?.cables_amount).toBe(2);
       expect(result?.electric_phase_number).toBe(3);
-      expect(result?.lit_name).toBe('LIT 225kV NO FAKE-SITE-A-FAKE-SITE-B');
-      expect(result?.lit_code).toBe('FAKEBR00LINE');
-      expect(result?.link_name).toBe('FAKEBR00LINE');
-      expect(result?.branch_idr).toBe('4');
+      expect(result?.lit_adr).toBe('LIT 225kV NO FAKE-SITE-A-FAKE-SITE-B');
+      expect(result?.lit_idr).toBe('FAKEBR00LINE');
+      expect(result?.link_code).toBe('FAKEBR00LINE');
+      expect(result?.link_name).toBeUndefined();
+      expect(result?.branch_code).toBe('FAKEBR00LINE04');
+      expect(result?.branch_name).toBeUndefined();
       expect(result?.voltage_idr).toBeUndefined();
+      expect(result?.voltage_adr).toBe('225 KV');
       expect(result?.maintenance_center_names).toEqual(['FAKE-CM-01']);
       expect(result?.maintenance_center_id).toBeUndefined();
       expect(result?.maintenance_team_id).toBeUndefined();
