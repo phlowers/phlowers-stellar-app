@@ -53,6 +53,13 @@ translating English back into itself.
      unchanged.
    - Markdown link targets unchanged; translate only the visible link text.
    - Table structure and column count.
+   - **Do not invent language-specific variants of a command/path by pattern** (e.g. turning
+     `make simplepdf` into `make simplepdf:fr`). If a page needs a French-specific build command
+     or output path (e.g. Makefile targets, `npm run docs:*` scripts), look up the real target
+     name in `docs-sphinx/Makefile` / `package.json` first — French targets in this repo use a
+     `-fr` suffix (`simplepdf-fr`, `pptx-fr`, `html-fr`), never `:fr`, and their build output goes
+     under `docs-sphinx/build/fr/...`, not `docs-sphinx/build/...`. Verify every command and file
+     path referenced in the translated page actually exists before writing it.
 5. **French typography**: use `«`/`»` guillemets for quotes outside code, and a non-breaking
    space before `:`, `;`, `!`, `?` where the existing French docs already do so. Do not alter
    quotes/spacing inside code blocks or paths.
