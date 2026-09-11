@@ -20,7 +20,7 @@ Continue with the {doc}`User Guide <user_guide/index>` for a detailed, step-by-s
 
 ## Setting up a development environment
 
-### Angular/typescript side
+### Angular/TypeScript side
 
 If you want to run {{app_name}} locally or contribute code, see the {doc}`Developer Guide <developer_guide/index>` for the full details. As a quick start:
 
@@ -48,7 +48,7 @@ npm run lint-check    # run eslint
 npm run format        # run prettier (formats js/ts/html files in place)
 ```
 
-### Pyodide/python side
+### Pyodide/Python side
 
 {{app_name}} runs Python calculations (via `mechaphlowers`, packaged as `stellar-engine`) directly in the
 browser using Pyodide. The `npm run set-up-mechaphlowers` command builds `stellar-engine` and prepares all
