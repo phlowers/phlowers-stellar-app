@@ -8,7 +8,7 @@ Currently, only the Edge browser is supported.
 
 1. Open {{app_name}} in a recent browser (latest Edge).
 2. Wait for the initial load — the app downloads and caches the Python engine and catalog data (lines, cables, chains, maintenance teams, attachments) so it can run offline afterwards.
-3. Once loaded, {{app_name}} works fully offline: you can lose network connection and keep working. Catalogs and application files are re-synchronized automatically the next time you are online (see {doc}`Application Update <user_docs/user_guide/application_update>`).
+3. Once loaded, {{app_name}} works fully offline: you can lose network connection and keep working. Catalogs and application files are re-synchronized automatically the next time you are online (see {doc}`Application Update <user_guide/application_update>`).
 
 ## Your first study
 
@@ -16,13 +16,13 @@ Currently, only the Edge browser is supported.
 - Enter or import the physical data of your line (supports, cables, chains).
 - Open the **Studio** to visualize the line in 2D/3D, run mechanical calculations, and check obstacle clearance.
 
-Continue with the {doc}`User Guide <user_docs/user_guide/index>` for a detailed, step-by-step walkthrough of each feature.
+Continue with the {doc}`User Guide <user_guide/index>` for a detailed, step-by-step walkthrough of each feature.
 
 ## Setting up a development environment
 
 ### Angular/typescript side
 
-If you want to run {{app_name}} locally or contribute code, see the {doc}`Developer Guide <user_docs/developer_guide/index>` for the full details. As a quick start:
+If you want to run {{app_name}} locally or contribute code, see the {doc}`Developer Guide <developer_guide/index>` for the full details. As a quick start:
 
 ```shell
 # 1. Install and select Node.js (nvm is recommended)
@@ -52,7 +52,7 @@ npm run format        # run prettier (formats js/ts/html files in place)
 
 {{app_name}} runs Python calculations (via `mechaphlowers`, packaged as `stellar-engine`) directly in the
 browser using Pyodide. The `npm run set-up-mechaphlowers` command builds `stellar-engine` and prepares all
-Python packages for the Pyodide web worker — see the {doc}`Set-up Mechaphlowers Guide <user_docs/developer_guide/installation/setup-mechaphlowers-guide>` for the full details. It requires [uv](https://docs.astral.sh/uv/getting-started/installation/):
+Python packages for the Pyodide web worker — see the {doc}`Set-up Mechaphlowers Guide <developer_guide/installation/setup-mechaphlowers-guide>` for the full details. It requires [uv](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```shell
 # Install uv (macOS/Linux)

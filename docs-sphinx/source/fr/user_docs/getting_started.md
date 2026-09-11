@@ -4,19 +4,18 @@
 {{app_name}} est une application web pour l'analyse mécanique des lignes électriques, construite
 avec Angular et fonctionnant entièrement dans votre navigateur grâce à
 [Pyodide](https://pyodide.org/en/stable/index.html), qui exécute le moteur Python `mechaphlowers`
-en WebAssembly.  
-Actuellement, l'application est développée pour le navigateur Edge.
+en WebAssembly.
 
 ## Ouvrir l'application
 
-1. Ouvrez {{app_name}} dans un navigateur récent (dernière version de Edge).
+1. Ouvrez {{app_name}} dans un navigateur récent (dernière version de Chrome, Edge ou Firefox).
 2. Attendez le chargement initial — l'application télécharge et met en cache le moteur Python
    ainsi que les données de catalogue (lignes, câbles, chaînes, équipes de maintenance,
    accessoires) afin de pouvoir fonctionner hors ligne par la suite.
 3. Une fois chargée, {{app_name}} fonctionne entièrement hors ligne : vous pouvez perdre la
    connexion réseau et continuer à travailler. Les catalogues et les fichiers de l'application
    sont resynchronisés automatiquement dès que vous êtes de nouveau en ligne (voir
-   {doc}`Mise à jour de l'application <user_docs/user_guide/application_update>`).
+   {doc}`Mise à jour de l'application <user_guide/application_update>`).
 
 ## Votre première étude
 
@@ -25,7 +24,7 @@ Actuellement, l'application est développée pour le navigateur Edge.
 - Ouvrez le **Studio** pour visualiser la ligne en 2D/3D, exécuter les calculs mécaniques et
   vérifier le respect des distances aux obstacles.
 
-Poursuivez avec le {doc}`Guide utilisateur <user_docs/user_guide/index>` pour une présentation
+Poursuivez avec le {doc}`Guide utilisateur <user_guide/index>` pour une présentation
 détaillée, étape par étape, de chaque fonctionnalité.
 
 ## Mettre en place un environnement de développement
@@ -33,7 +32,7 @@ détaillée, étape par étape, de chaque fonctionnalité.
 ### Côté Angular/TypeScript
 
 Si vous souhaitez exécuter {{app_name}} en local ou contribuer au code, consultez le
-{doc}`Guide développeur <user_docs/developer_guide/index>` pour tous les détails. Pour démarrer
+{doc}`Guide développeur <developer_guide/index>` pour tous les détails. Pour démarrer
 rapidement :
 
 ```shell
@@ -66,7 +65,7 @@ npm run format        # exécute prettier (formate les fichiers js/ts/html sur p
 `stellar-engine`) directement dans le navigateur grâce à Pyodide. La commande
 `npm run set-up-mechaphlowers` construit `stellar-engine` et prépare tous les paquets Python pour
 le web worker Pyodide — voir le
-{doc}`Guide de mise en place de Mechaphlowers <user_docs/developer_guide/installation/setup-mechaphlowers-guide>`
+{doc}`Guide de mise en place de Mechaphlowers <developer_guide/installation/setup-mechaphlowers-guide>`
 pour tous les détails. Elle nécessite [uv](https://docs.astral.sh/uv/getting-started/installation/) :
 
 ```shell
