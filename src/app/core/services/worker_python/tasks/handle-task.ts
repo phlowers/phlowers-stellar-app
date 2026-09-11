@@ -147,6 +147,26 @@ const tasks: Record<
   [Task.getConformity]: {
     function: 'get_conformity',
     externalPackages: []
+  },
+  [Task.setCutStrands]: {
+    function: 'set_cut_strands',
+    externalPackages: []
+  },
+  [Task.getCutStrands]: {
+    function: 'get_cut_strands',
+    externalPackages: []
+  },
+  [Task.getRrts]: {
+    function: 'get_rrts',
+    externalPackages: []
+  },
+  [Task.getUtilizationRate]: {
+    function: 'get_utilization_rate',
+    externalPackages: []
+  },
+  [Task.setHighSafety]: {
+    function: 'set_high_safety',
+    externalPackages: []
   }
 };
 

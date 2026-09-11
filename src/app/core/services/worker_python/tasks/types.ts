@@ -83,7 +83,17 @@ export enum Task {
   // Clear all distance/angle measurement points from the study's position engine
   clearMeasureDistanceAnglePoints = 'clearMeasureDistanceAnglePoints',
   // Compute obstacle conformity zones and points
-  getConformity = 'getConformity'
+  getConformity = 'getConformity',
+  // Set the number of cut strands per cable layer
+  setCutStrands = 'setCutStrands',
+  // Get the current number of cut strands per cable layer
+  getCutStrands = 'getCutStrands',
+  // Get the residual rated tensile strength of the cable
+  getRrts = 'getRrts',
+  // Get the cable utilization rate per span
+  getUtilizationRate = 'getUtilizationRate',
+  // Set the high-safety flag on the cable
+  setHighSafety = 'setHighSafety'
 }
 
 /**
@@ -483,6 +493,20 @@ export interface TaskInputs {
   [Task.clearMeasureDistanceAnglePoints]: undefined;
   // Inputs for getConformity task
   [Task.getConformity]: ConformityTaskInput;
+  // Inputs for setCutStrands task: number of cut strands per layer
+  [Task.setCutStrands]: {
+    cutStrands: number[];
+  };
+  // Inputs for getCutStrands task: no inputs
+  [Task.getCutStrands]: undefined;
+  // Inputs for getRrts task: no inputs
+  [Task.getRrts]: undefined;
+  // Inputs for getUtilizationRate task: no inputs
+  [Task.getUtilizationRate]: undefined;
+  // Inputs for setHighSafety task: high-safety flag value
+  [Task.setHighSafety]: {
+    highSafety: boolean;
+  };
 }
 
 /**
@@ -774,4 +798,14 @@ export interface TaskOutputs {
   [Task.clearMeasureDistanceAnglePoints]: { success: boolean };
   // Output from getConformity task
   [Task.getConformity]: ConformityTaskOutput;
+  // Output from setCutStrands task
+  [Task.setCutStrands]: { success: boolean };
+  // Output from getCutStrands task
+  [Task.getCutStrands]: { cutStrands: number[] };
+  // Output from getRrts task
+  [Task.getRrts]: { rrts: number };
+  // Output from getUtilizationRate task
+  [Task.getUtilizationRate]: { utilizationRate: number[] };
+  // Output from setHighSafety task
+  [Task.setHighSafety]: { success: boolean };
 }
