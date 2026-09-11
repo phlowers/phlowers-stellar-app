@@ -4,9 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ANNOTATION_COLOR } from './studio-annotations.tokens';
-
-export { ANNOTATION_COLOR as LOAD_COLOR };
+export { ANNOTATION_COLOR as LOAD_COLOR } from './studio-annotations.tokens';
 
 /**
  * FontAwesome glyph for a punctual span load annotation.

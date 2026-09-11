@@ -154,14 +154,9 @@ export async function installApp() {
  * @returns The updated asset manifest.
  */
 export async function updateApp() {
-  const response = await fetchLatestManifest();
-  if (!response.ok) {
-    throw new Error(`Manifest fetch failed with status ${response.status}`);
-  }
-  const manifest: AssetManifest = await response.json();
-  const cacheName = await precacheVersion(manifest);
-  await activateVersion(cacheName);
-  return manifest;
+  // Same steps as a fresh install: the version caches are immutable and uniquely named, so
+  // precaching the new manifest never touches the active one until `activateVersion` switches it.
+  return installApp();
 }
 
 const NO_CACHE_INIT: RequestInit = {

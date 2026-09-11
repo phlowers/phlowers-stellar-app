@@ -56,7 +56,8 @@ export function computeMeanReprojectionDiffMeters(
 /** Converts a JSON string/null value to `number | null`. */
 export function parseFloatOrNull(value: unknown): number | null {
   if (value === null || value === undefined || value === '') return null;
-  const n = Number.parseFloat(typeof value !== 'object' ? String(value) : '');
+  // Only strings and numbers can carry a number: anything else (object, boolean, function) is null.
+  const n = typeof value === 'number' || typeof value === 'string' ? Number.parseFloat(String(value)) : Number.NaN;
   return Number.isNaN(n) ? null : n;
 }
 

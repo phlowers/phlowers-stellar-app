@@ -139,6 +139,42 @@ describe('createDistanceTraces', () => {
       expect(result).toEqual([]);
     });
 
+    it('should return empty array when the selected obstacle hangs off a span outside the visible window', () => {
+      const result = createDistanceTraces(
+        basePlotParams({
+          supports: [{ uuid: 'support-1' }, { uuid: 'support-2' }] as unknown as CreatePlotParams['supports'],
+          obstacles: [{ uuid: 'obstacle_mock', supportUuid: 'support-2' }] as unknown as CreatePlotParams['obstacles'],
+          startSupport: 0,
+          endSupport: 1
+        })
+      );
+      expect(result).toEqual([]);
+    });
+
+    it('should keep the distance traces of an obstacle on the visible span', () => {
+      const result = createDistanceTraces(
+        basePlotParams({
+          supports: [{ uuid: 'support-1' }, { uuid: 'support-2' }] as unknown as CreatePlotParams['supports'],
+          obstacles: [{ uuid: 'obstacle_mock', supportUuid: 'support-1' }] as unknown as CreatePlotParams['obstacles'],
+          startSupport: 0,
+          endSupport: 1
+        })
+      );
+      expect(result.filter((t: DataObject) => t.name === 'distance-line')).toHaveLength(1);
+    });
+
+    it('should return empty array when the selected floor is outside the visible window', () => {
+      const result = createDistanceTraces(
+        basePlotParams({
+          floors: [{ uuid: 'obstacle_mock', supportUuid: 'support-2' }] as unknown as CreatePlotParams['floors'],
+          supports: [{ uuid: 'support-1' }, { uuid: 'support-2' }] as unknown as CreatePlotParams['supports'],
+          startSupport: 0,
+          endSupport: 1
+        })
+      );
+      expect(result).toEqual([]);
+    });
+
     it('should return empty array when distance has no points', () => {
       const result = createDistanceTraces(
         basePlotParams({

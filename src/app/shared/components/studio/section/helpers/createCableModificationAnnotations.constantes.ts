@@ -4,10 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ANNOTATION_COLOR } from './studio-annotations.tokens';
 import { TranslocoService } from '@jsverse/transloco';
 
-export { ANNOTATION_COLOR as CABLE_MOD_COLOR };
+export { ANNOTATION_COLOR as CABLE_MOD_COLOR } from './studio-annotations.tokens';
 
 /**
  * FontAwesome glyph for the cable modification annotation.

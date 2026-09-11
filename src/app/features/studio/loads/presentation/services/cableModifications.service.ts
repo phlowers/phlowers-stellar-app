@@ -12,9 +12,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { CableModification } from '@shared/domain';
-import { CableModificationParams } from './cableModifications.service.interfaces';
-
-export type { CableModificationParams };
+export type { CableModificationParams } from './cableModifications.service.interfaces';
 
 @Injectable({
   providedIn: 'root'

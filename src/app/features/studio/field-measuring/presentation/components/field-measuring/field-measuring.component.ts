@@ -248,7 +248,7 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!section || !measureData) {
       return;
     }
-    const isExistingMeasure = section.field_measures.find((measure) => measure.uuid === measureData.uuid);
+    const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);
     if (isExistingMeasure) {
       await this.plotService.modifySection({
         field_measures: section.field_measures.map((measure) =>

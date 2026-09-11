@@ -105,9 +105,20 @@ export class ObstacleFormService {
     });
   }
 
+  /**
+   * Activates one of the form obstacle's points, claiming the shared measure selection along with
+   * it. The plot's distance layer and the quick-measures card read both the uuid and the index from
+   * `ObstaclesService`: moving only the index would keep drawing whatever was selected before — a
+   * floor, typically — at the obstacle's point index.
+   */
+  setActivePoint(index: number): void {
+    // The untouched form holds an empty uuid, which reads as "nothing selected" downstream.
+    this.obstaclesService.setSelectedMeasure(this.form.controls.uuid.value || null, index);
+  }
+
   addPosition(position?: Position3D): void {
     this.positions.push(this.createPositionGroup(position));
-    this.obstaclesService.setCurrentPointIndex(this.positions.length - 1);
+    this.setActivePoint(this.positions.length - 1);
   }
 
   removePosition(index: number): void {
@@ -146,7 +157,7 @@ export class ObstacleFormService {
     // patched above with emitEvent:false).
     this.form.controls.supportUuid.setValue(obstacle.supportUuid);
     this.setPositions(obstacle.positions);
-    this.obstaclesService.setCurrentPointIndex(index);
+    this.setActivePoint(index);
   }
 
   readonly supportsOptions = signal<{ label: string; value: 'LEFT' | 'RIGHT' }[]>([]);
@@ -286,7 +297,7 @@ export class ObstacleFormService {
     this.removePosition(pointIndex);
     this.removePointFromLitData(pointIndex);
     const newIndex = Math.max(0, this.positions.length - 1);
-    this.obstaclesService.setCurrentPointIndex(newIndex);
+    this.setActivePoint(newIndex);
   }
 
   /** Remove a point from litData.obstacles so Plotly stays in sync with the form. */

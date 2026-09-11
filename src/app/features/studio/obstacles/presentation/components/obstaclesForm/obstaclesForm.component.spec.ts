@@ -38,6 +38,7 @@ class MockObstacleFormService {
   syncSpanSelectionWithoutZoom = vi.fn();
   resetFormForNewObstacle = vi.fn();
   addPosition = vi.fn();
+  setActivePoint = vi.fn();
   deletePoint = vi.fn();
   deleteObstacle = vi.fn();
   saveObstacle = vi.fn();
@@ -67,6 +68,20 @@ class MockObstacleFormService {
     });
   }
 }
+
+// The three coordinate inputs of a point: the test id it is rendered with, the position control it
+// writes to, its label, and a sample value. Drives every per-field test below.
+const POINT_FIELDS = [
+  { testId: 'point-altitude', key: 'z', labelTestId: 'label-point-altitude', label: 'Point alt.', value: 12.5 },
+  {
+    testId: 'point-ref-distance',
+    key: 'x',
+    labelTestId: 'label-ref-distance',
+    label: 'Ref. support dist.',
+    value: 5.3
+  },
+  { testId: 'point-axis-distance', key: 'y', labelTestId: 'label-axis-distance', label: 'Line axis dist.', value: 7.8 }
+] as const;
 
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
@@ -106,9 +121,12 @@ describe('ObstaclesFormComponent', () => {
     const indexSignal = signal<number | null>(null);
     obstaclesService = {
       activePointIndex: indexSignal,
-      setCurrentPointIndex: vi.fn((i: number) => indexSignal.set(i)),
+      setCurrentPointIndex: vi.fn((i: unknown) => indexSignal.set(i as number)),
       resetCurrentPointIndex: vi.fn()
     };
+    // Picking a point in the form claims the shared selection through ObstacleFormService, which
+    // carries the form obstacle's uuid along with the index.
+    mockObstacleFormService.setActivePoint.mockImplementation((i: number) => indexSignal.set(i));
 
     distanceCount = 0;
     mockStorageService = {
@@ -252,15 +270,12 @@ describe('ObstaclesFormComponent', () => {
       expect(form?.tagName).toBe('FORM');
     });
 
-    it('should render the span select dropdown', () => {
-      const spanSelect = getByTestId('span-select');
-      expect(spanSelect).toBeTruthy();
-    });
-
-    it('should render the obstacle type dropdown', () => {
-      const obstacleType = getByTestId('obstacle-type');
-      expect(obstacleType).toBeTruthy();
-    });
+    it.each(['span-select', 'obstacle-type', 'reference-support', 'altitude-type', 'lateral-distance-type', 'results'])(
+      'should render the %s element',
+      (testId) => {
+        expect(getByTestId(testId)).toBeTruthy();
+      }
+    );
 
     it('should render the obstacle name input', () => {
       const nameInput = getByTestId('obstacle-name');
@@ -269,106 +284,40 @@ describe('ObstaclesFormComponent', () => {
       expect(nameInput?.getAttribute('type')).toBe('text');
     });
 
-    it('should render the reference support dropdown', () => {
-      const refSupport = getByTestId('reference-support');
-      expect(refSupport).toBeTruthy();
-    });
-
-    it('should render the altitude type dropdown', () => {
-      const altType = getByTestId('altitude-type');
-      expect(altType).toBeTruthy();
-    });
-
-    it('should render the lateral distance type dropdown', () => {
-      const latType = getByTestId('lateral-distance-type');
-      expect(latType).toBeTruthy();
-    });
-
     it('should render the points list container', () => {
       const pointsList = getByTestId('points-list');
       expect(pointsList).toBeTruthy();
       expect(pointsList?.tagName).toBe('UL');
     });
-
-    it('should render the results section', () => {
-      const results = getByTestId('results');
-      expect(results).toBeTruthy();
-    });
   });
 
   describe('HTML rendering - buttons', () => {
-    it('should render the return-to-span button', () => {
-      const button = getByTestId('return-to-span');
-      expect(button).toBeTruthy();
-      expect(button?.tagName).toBe('BUTTON');
-    });
-
-    it('should render the create-new-obstacle button', () => {
-      const button = getByTestId('create-new-obstacle');
-      expect(button).toBeTruthy();
-      expect(button?.tagName).toBe('BUTTON');
-    });
-
-    it('should render the add-point button', () => {
-      const button = getByTestId('add-point');
-      expect(button).toBeTruthy();
-      expect(button?.tagName).toBe('BUTTON');
-    });
-
-    it('should render the delete-obstacle button', () => {
-      const button = getByTestId('delete-obstacle');
-      expect(button).toBeTruthy();
-      expect(button?.tagName).toBe('BUTTON');
-    });
+    it.each(['return-to-span', 'create-new-obstacle', 'add-point', 'delete-obstacle', 'calculate-save'])(
+      'should render the %s button',
+      (testId) => {
+        const button = getByTestId(testId);
+        expect(button).toBeTruthy();
+        expect(button?.tagName).toBe('BUTTON');
+      }
+    );
 
     it('should render the open-conformity-modal (Conformity) button as enabled', () => {
       const button = getByTestId('open-conformity-modal') as HTMLButtonElement;
       expect(button).toBeTruthy();
       expect(button.disabled).toBe(false);
     });
-
-    it('should render the calculate-save button', () => {
-      const button = getByTestId('calculate-save');
-      expect(button).toBeTruthy();
-      expect(button?.tagName).toBe('BUTTON');
-    });
   });
 
   describe('HTML rendering - point items', () => {
-    it('should render point items for each position', () => {
-      const pointItems = fixture.nativeElement.querySelectorAll('[data-testid="point-item"]');
-      expect(pointItems.length).toBe(1);
+    it.each(['point-item', 'select-point', 'delete-point'])('should render one %s per position', (testId) => {
+      expect(getAllByTestId(testId)).toHaveLength(1);
     });
 
-    it('should render select-point button for each point', () => {
-      const selectButtons = fixture.nativeElement.querySelectorAll('[data-testid="select-point"]');
-      expect(selectButtons.length).toBe(1);
-    });
-
-    it('should render delete-point button for each point', () => {
-      const deleteButtons = fixture.nativeElement.querySelectorAll('[data-testid="delete-point"]');
-      expect(deleteButtons.length).toBe(1);
-    });
-
-    it('should render point-altitude input for each point', () => {
-      const altInputs = fixture.nativeElement.querySelectorAll('[data-testid="point-altitude"]');
-      expect(altInputs.length).toBe(1);
-      expect(altInputs[0].tagName).toBe('INPUT');
-      expect(altInputs[0].type).toBe('number');
-    });
-
-    it('should render point-ref-distance input for each point', () => {
-      const refInputs = fixture.nativeElement.querySelectorAll('[data-testid="point-ref-distance"]');
-      expect(refInputs.length).toBe(1);
-      expect(refInputs[0].tagName).toBe('INPUT');
-      expect(refInputs[0].type).toBe('number');
-    });
-
-    it('should render point-axis-distance input for each point', () => {
-      const axisInputs = fixture.nativeElement.querySelectorAll('[data-testid="point-axis-distance"]');
-      expect(axisInputs.length).toBe(1);
-      expect(axisInputs[0].tagName).toBe('INPUT');
-      expect(axisInputs[0].type).toBe('number');
+    it.each(POINT_FIELDS)('should render the $testId number input for each point', ({ testId }) => {
+      const inputs = getAllByTestId(testId) as HTMLInputElement[];
+      expect(inputs).toHaveLength(1);
+      expect(inputs[0].tagName).toBe('INPUT');
+      expect(inputs[0].type).toBe('number');
     });
 
     it('should render multiple point items when multiple positions exist', () => {
@@ -382,16 +331,16 @@ describe('ObstaclesFormComponent', () => {
       fixture.detectChanges();
 
       const pointItems = fixture.nativeElement.querySelectorAll('[data-testid="point-item"]');
-      expect(pointItems.length).toBe(2);
+      expect(pointItems).toHaveLength(2);
 
       const altInputs = fixture.nativeElement.querySelectorAll('[data-testid="point-altitude"]');
-      expect(altInputs.length).toBe(2);
+      expect(altInputs).toHaveLength(2);
 
       const refInputs = fixture.nativeElement.querySelectorAll('[data-testid="point-ref-distance"]');
-      expect(refInputs.length).toBe(2);
+      expect(refInputs).toHaveLength(2);
 
       const axisInputs = fixture.nativeElement.querySelectorAll('[data-testid="point-axis-distance"]');
-      expect(axisInputs.length).toBe(2);
+      expect(axisInputs).toHaveLength(2);
     });
 
     it('should mark the active point item with aria-selected', () => {
@@ -406,27 +355,15 @@ describe('ObstaclesFormComponent', () => {
       fixture.detectChanges();
 
       const pointItems = fixture.nativeElement.querySelectorAll('[data-testid="point-item"]');
-      expect(pointItems.length).toBe(0);
+      expect(pointItems).toHaveLength(0);
     });
   });
 
   describe('HTML rendering - point labels', () => {
-    it('should render "Point alt." as the altitude label', () => {
-      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]');
-      expect(labels.length).toBe(1);
-      expect(labels[0].textContent.trim()).toBe('Point alt.');
-    });
-
-    it('should render "Ref. support dist." as the reference support distance label', () => {
-      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]');
-      expect(labels.length).toBe(1);
-      expect(labels[0].textContent.trim()).toBe('Ref. support dist.');
-    });
-
-    it('should render "Line axis dist." as the line axis distance label', () => {
-      const labels = fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]');
-      expect(labels.length).toBe(1);
-      expect(labels[0].textContent.trim()).toBe('Line axis dist.');
+    it.each(POINT_FIELDS)('should render "$label" as the $testId label', ({ labelTestId, label }) => {
+      const labels = getAllByTestId(labelTestId);
+      expect(labels).toHaveLength(1);
+      expect(labels[0].textContent?.trim()).toBe(label);
     });
 
     it('should render one label per point for each label type when multiple positions exist', () => {
@@ -440,9 +377,9 @@ describe('ObstaclesFormComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]').length).toBe(2);
-      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]').length).toBe(2);
-      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]').length).toBe(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-point-altitude"]')).toHaveLength(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-ref-distance"]')).toHaveLength(2);
+      expect(fixture.nativeElement.querySelectorAll('[data-testid="label-axis-distance"]')).toHaveLength(2);
     });
   });
 
@@ -517,7 +454,7 @@ describe('ObstaclesFormComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(component.obstacleTypeOptions().length).toBe(2);
+      expect(component.obstacleTypeOptions()).toHaveLength(2);
       expect(component.obstacleTypeOptions()).toEqual([
         { label: 'Ordinary ground', value: 'ordinary_ground' },
         { label: 'Vegetation', value: 'vegetation' }
@@ -609,7 +546,7 @@ describe('ObstaclesFormComponent', () => {
       ready$.next(false);
       await localFixture.whenStable();
       expect(getObstacleTypes).not.toHaveBeenCalled();
-      expect(localComponent.obstacleTypeOptions().length).toBe(0);
+      expect(localComponent.obstacleTypeOptions()).toHaveLength(0);
     });
 
     it('should handle null response from getObstacleTypes gracefully', async () => {
@@ -626,7 +563,7 @@ describe('ObstaclesFormComponent', () => {
       await fixture.whenStable();
 
       // Should not crash, options stay empty
-      expect(component.obstacleTypeOptions().length).toBe(0);
+      expect(component.obstacleTypeOptions()).toHaveLength(0);
     });
   });
 
@@ -661,7 +598,7 @@ describe('ObstaclesFormComponent', () => {
         })
       );
       mockObstacleFormService.form.controls.name.setValue('Obstacle');
-      obstaclesService.setCurrentPointIndex(1);
+      obstaclesService.activePointIndex.set(1);
       fixture.detectChanges();
 
       const input = getByTestId('point-ref-distance') as HTMLInputElement;
@@ -669,7 +606,9 @@ describe('ObstaclesFormComponent', () => {
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(obstaclesService.activePointIndex()).toBe(0);
+      // Selection must go through ObstacleFormService so the obstacle uuid travels with the index.
+      expect(mockObstacleFormService.setActivePoint).toHaveBeenCalledWith(0);
+      expect(obstaclesService.setCurrentPointIndex).not.toHaveBeenCalled();
     });
 
     it('should leave the control untouched when input is cleared (NaN)', () => {
@@ -790,7 +729,7 @@ describe('ObstaclesFormComponent', () => {
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
       fixture.detectChanges();
 
-      expect(mockObstacleFormService.resetFormForNewObstacle.mock.calls.length).toBe(callCount);
+      expect(mockObstacleFormService.resetFormForNewObstacle.mock.calls).toHaveLength(callCount);
     });
   });
 
@@ -969,12 +908,13 @@ describe('ObstaclesFormComponent', () => {
           z: new FormControl<number | null>(3)
         })
       );
-      obstaclesService.setCurrentPointIndex(1);
+      obstaclesService.activePointIndex.set(1);
       fixture.detectChanges();
 
       (getByTestId('select-point') as HTMLButtonElement).click();
 
-      expect(obstaclesService.activePointIndex()).toBe(0);
+      expect(mockObstacleFormService.setActivePoint).toHaveBeenCalledWith(0);
+      expect(obstaclesService.setCurrentPointIndex).not.toHaveBeenCalled();
     });
 
     it('should set current obstacle point on input focus', () => {
@@ -987,7 +927,7 @@ describe('ObstaclesFormComponent', () => {
         })
       );
       mockObstacleFormService.form.controls.name.setValue('Obstacle');
-      obstaclesService.setCurrentPointIndex(1);
+      obstaclesService.activePointIndex.set(1);
       fixture.detectChanges();
 
       const input = getByTestId('point-altitude') as HTMLInputElement;
@@ -995,7 +935,8 @@ describe('ObstaclesFormComponent', () => {
       input.dispatchEvent(new Event('focus'));
       fixture.detectChanges();
 
-      expect(obstaclesService.activePointIndex()).toBe(0);
+      expect(mockObstacleFormService.setActivePoint).toHaveBeenCalledWith(0);
+      expect(obstaclesService.setCurrentPointIndex).not.toHaveBeenCalled();
     });
   });
 
@@ -1026,34 +967,14 @@ describe('ObstaclesFormComponent', () => {
       expect(axisInput.disabled).toBe(false);
     });
 
-    it('should update z position on altitude input', () => {
-      const input = getByTestId('point-altitude') as HTMLInputElement;
-      input.value = '12.5';
+    it.each(POINT_FIELDS)('should update the $key position on the $testId input', ({ testId, key, value }) => {
+      const input = getByTestId(testId) as HTMLInputElement;
+      input.value = String(value);
 
-      component.onPositionInput({ target: input } as unknown as Event, 'z');
-
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('z')?.value).toBe(12.5);
-    });
-
-    it('should update x position on ref distance input', () => {
-      const input = getByTestId('point-ref-distance') as HTMLInputElement;
-      input.value = '5.3';
-
-      component.onPositionInput({ target: input } as unknown as Event, 'x');
+      component.onPositionInput({ target: input } as unknown as Event, key);
 
       const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('x')?.value).toBe(5.3);
-    });
-
-    it('should update y position on axis distance input', () => {
-      const input = getByTestId('point-axis-distance') as HTMLInputElement;
-      input.value = '7.8';
-
-      component.onPositionInput({ target: input } as unknown as Event, 'y');
-
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('y')?.value).toBe(7.8);
+      expect(positionGroup.get(key)?.value).toBe(value);
     });
 
     it('should leave the position unchanged when input value is not numeric', () => {
@@ -1078,38 +999,19 @@ describe('ObstaclesFormComponent', () => {
       expect(positionGroup.get('z')?.value).toBe(12.5);
     });
 
-    it('should not reset the altitude position to 0 when a lone "-" is typed mid-edit', () => {
-      const input = getByTestId('point-altitude') as HTMLInputElement;
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      positionGroup.get('z')?.setValue(12.5);
+    it.each(POINT_FIELDS)(
+      'should not reset the $key position to 0 when a lone "-" is typed mid-edit',
+      ({ testId, key, value }) => {
+        const input = getByTestId(testId) as HTMLInputElement;
+        const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+        positionGroup.get(key)?.setValue(value);
 
-      input.value = '-';
-      component.onPositionInput({ target: input } as unknown as Event, 'z');
+        input.value = '-';
+        component.onPositionInput({ target: input } as unknown as Event, key);
 
-      expect(positionGroup.get('z')?.value).toBe(12.5);
-    });
-
-    it('should not reset the ref distance position to 0 when a lone "-" is typed mid-edit', () => {
-      const input = getByTestId('point-ref-distance') as HTMLInputElement;
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      positionGroup.get('x')?.setValue(5.3);
-
-      input.value = '-';
-      component.onPositionInput({ target: input } as unknown as Event, 'x');
-
-      expect(positionGroup.get('x')?.value).toBe(5.3);
-    });
-
-    it('should not reset the axis distance position to 0 when a lone "-" is typed mid-edit', () => {
-      const input = getByTestId('point-axis-distance') as HTMLInputElement;
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      positionGroup.get('y')?.setValue(7.8);
-
-      input.value = '-';
-      component.onPositionInput({ target: input } as unknown as Event, 'y');
-
-      expect(positionGroup.get('y')?.value).toBe(7.8);
-    });
+        expect(positionGroup.get(key)?.value).toBe(value);
+      }
+    );
 
     it('should accept a full negative value typed progressively after a lone "-"', () => {
       const input = getByTestId('point-altitude') as HTMLInputElement;
@@ -1126,35 +1028,18 @@ describe('ObstaclesFormComponent', () => {
       expect(positionGroup.get('z')?.value).toBe(-5);
     });
 
-    it('should accept a full negative value replacing a selected altitude value', () => {
-      const input = getByTestId('point-altitude') as HTMLInputElement;
-      input.value = '-5.5';
+    it.each(POINT_FIELDS)(
+      'should accept a full negative value replacing a selected $key value',
+      ({ testId, key, value }) => {
+        const input = getByTestId(testId) as HTMLInputElement;
+        input.value = String(-value);
 
-      component.onPositionInput({ target: input } as unknown as Event, 'z');
+        component.onPositionInput({ target: input } as unknown as Event, key);
 
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('z')?.value).toBe(-5.5);
-    });
-
-    it('should accept a full negative value replacing a selected ref distance value', () => {
-      const input = getByTestId('point-ref-distance') as HTMLInputElement;
-      input.value = '-5.3';
-
-      component.onPositionInput({ target: input } as unknown as Event, 'x');
-
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('x')?.value).toBe(-5.3);
-    });
-
-    it('should accept a full negative value replacing a selected axis distance value', () => {
-      const input = getByTestId('point-axis-distance') as HTMLInputElement;
-      input.value = '-7.8';
-
-      component.onPositionInput({ target: input } as unknown as Event, 'y');
-
-      const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
-      expect(positionGroup.get('y')?.value).toBe(-7.8);
-    });
+        const positionGroup = mockObstacleFormService.positions.at(0) as FormGroup;
+        expect(positionGroup.get(key)?.value).toBe(-value);
+      }
+    );
   });
 
   describe('delete point button', () => {

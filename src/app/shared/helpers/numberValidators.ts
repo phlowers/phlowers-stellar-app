@@ -18,7 +18,7 @@ export function maxDecimalsValidator(maxDecimals: number): ValidatorFn {
     if (control.value === null || control.value === undefined) {
       return null;
     }
-    const pattern = maxDecimals === 0 ? /^-?\d+$/ : new RegExp(`^-?\\d+(\\.\\d{1,${maxDecimals}})?$`);
+    const pattern = maxDecimals === 0 ? /^-?\d+$/ : new RegExp(String.raw`^-?\d+(\.\d{1,${maxDecimals}})?$`);
     return pattern.test(control.value.toString()) ? null : { maxDecimals: { maxDecimals } };
   };
 }

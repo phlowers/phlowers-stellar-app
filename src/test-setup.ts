@@ -13,7 +13,7 @@ import { MessageService } from 'primeng/api';
 
 // Polyfill $localize for tests. Angular's i18n uses this at compile time.
 // In tests, we just return the string as-is since we're not extracting i18n strings.
-if (typeof (globalThis as Record<string, unknown>).$localize === 'undefined') {
+if ((globalThis as Record<string, unknown>).$localize === undefined) {
   (globalThis as Record<string, unknown>).$localize = (strings: TemplateStringsArray, ...values: unknown[]): string => {
     let result = strings[0];
     for (let i = 0; i < values.length; i++) {

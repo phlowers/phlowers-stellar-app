@@ -42,7 +42,7 @@ export async function loadFileAsBase64(url: string): Promise<string> {
   const chunks: string[] = [];
   for (let offset = 0; offset < bytes.length; offset += BASE64_CHUNK_SIZE) {
     const chunk = bytes.subarray(offset, offset + BASE64_CHUNK_SIZE);
-    chunks.push(String.fromCharCode(...chunk));
+    chunks.push(String.fromCodePoint(...chunk));
   }
   return globalThis.btoa(chunks.join(''));
 }
