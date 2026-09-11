@@ -37,8 +37,8 @@ rapidement :
 
 ```shell
 # 1. Installer et sélectionner Node.js (nvm est recommandé)
-nvm install v23
-nvm use 23
+nvm install v22
+nvm use 22
 
 # 2. Installer les dépendances du projet
 npm install
@@ -131,7 +131,7 @@ uv pip install -r requirements.txt # installer Sphinx et ses dépendances
 Vous pouvez maintenant exécuter `npm run docs` pour construire les deux langues, `npm run docs:en`
 / `npm run docs:fr` pour construire une seule langue, ou `npm run autodocs:en` /
 `npm run autodocs:fr` pour construire et servir la documentation avec rechargement à chaud (voir
-`docs-sphinx/TRANSLATION.md` pour le détail du build bilingue).
+{doc}`Documentation Translation Workflow <user_docs/developer_guide/translation>` pour le détail du build bilingue).
 
 Par défaut, la documentation est intitulée « Stellar ». Définissez la variable d'environnement
 `SPHINX_APP_NAME` avant de lancer le build pour personnaliser le nom d'application utilisé dans
@@ -150,10 +150,10 @@ Après avoir installé les dépendances Python décrites ci-dessus, exécutez :
 ```shell
 cd docs-sphinx
 # créer, installer, activer le venv
-make simplepdf
+make simplepdf-fr
 ```
 
-Le PDF généré est écrit dans le dossier `docs-sphinx/build/simplepdf/`.
+Le PDF généré est écrit dans le dossier `docs-sphinx/build/fr/simplepdf/`.
 
 > **Remarque :** Sphinx-SimplePDF repose sur
 > [WeasyPrint](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html), qui nécessite
@@ -170,22 +170,22 @@ Le PDF généré est écrit dans le dossier `docs-sphinx/build/simplepdf/`.
 
 ### Générer la documentation PowerPoint
 
-Un export PowerPoint est disponible en convertissant le PDF produit par `make simplepdf`. Cette
+Un export PowerPoint est disponible en convertissant le PDF produit par `make simplepdf-fr`. Cette
 approche conserve la mise en page exacte tout en produisant des zones de texte modifiables dans
 PowerPoint. Exécutez :
 
 ```shell
 cd docs-sphinx
-make pptx
+make pptx-fr
 ```
 
 Ou, depuis la racine du dépôt :
 
 ```shell
-npm run docs:pptx
+npm run docs:pptx:fr
 ```
 
-Le fichier `.pptx` généré est écrit dans `docs-sphinx/build/pptx/stellar_documentation.pptx`.
+Le fichier `.pptx` généré est écrit dans `docs-sphinx/build/fr/pptx/stellar_documentation.pptx`.
 
 > **Remarque :** Cela nécessite `pymupdf` et `python-pptx`, déjà listés dans
 > `docs-sphinx/requirements.txt`.

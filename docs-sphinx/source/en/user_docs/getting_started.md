@@ -26,8 +26,8 @@ If you want to run {{app_name}} locally or contribute code, see the {doc}`Develo
 
 ```shell
 # 1. Install and select Node.js (nvm is recommended)
-nvm install v23
-nvm use 23
+nvm install v22
+nvm use 22
 
 # 2. Install project dependencies
 npm install
