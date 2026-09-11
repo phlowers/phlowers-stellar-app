@@ -112,7 +112,7 @@ source .venv/bin/activate          # activate it
 uv pip install -r requirements.txt # install Sphinx and dependencies
 ```
 
-You can now run `npm run docs` to build both languages, `npm run docs:en` / `npm run docs:fr` to build a single language, or `npm run autodocs:en` / `npm run autodocs:fr` to build and serve the documentation with live reload on changes (see `docs-sphinx/TRANSLATION.md` for details on the bilingual build).
+You can now run `npm run docs` to build both languages, `npm run docs:en` / `npm run docs:fr` to build a single language, or `npm run autodocs:en` / `npm run autodocs:fr` to build and serve the documentation with live reload on changes (see {doc}`Documentation Translation Workflow <developer_guide/translation>` for details on the bilingual build).
 
 By default the docs are titled "Stellar". Set the `SPHINX_APP_NAME` environment variable before building to customize the application name used throughout the generated documentation, e.g.:
 

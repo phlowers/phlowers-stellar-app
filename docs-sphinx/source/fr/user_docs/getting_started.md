@@ -131,7 +131,7 @@ uv pip install -r requirements.txt # installer Sphinx et ses dépendances
 Vous pouvez maintenant exécuter `npm run docs` pour construire les deux langues, `npm run docs:en`
 / `npm run docs:fr` pour construire une seule langue, ou `npm run autodocs:en` /
 `npm run autodocs:fr` pour construire et servir la documentation avec rechargement à chaud (voir
-{doc}`Documentation Translation Workflow <user_docs/developer_guide/translation>` pour le détail du build bilingue).
+{doc}`Workflow de traduction de la documentation <developer_guide/translation>` pour le détail du build bilingue).
 
 Par défaut, la documentation est intitulée « Stellar ». Définissez la variable d'environnement
 `SPHINX_APP_NAME` avant de lancer le build pour personnaliser le nom d'application utilisé dans
