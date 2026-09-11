@@ -85,6 +85,8 @@ import mechaphlowers as mph  # noqa: E402
 def init_config():
     mph.options.graphics.resolution = RESOLUTION
     mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
+    mph.options.data.safety_coefficient_default = 1
+    mph.options.data.safety_security_factor = 1.5
 
 
 init_config()
