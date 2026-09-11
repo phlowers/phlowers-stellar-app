@@ -16,7 +16,7 @@ from stellar_engine.entities.errors import _Errors
 logger = logging.getLogger("stellar_engine")
 
 
-def set_cut_strands(study: SectionStudy, cut_strands: list[int]) -> dict:
+def set_cut_strands(study: SectionStudy, cut_strands: list[float]) -> dict:
     """Set the number of cut strands per layer on the study cable.
 
     Args:
@@ -40,8 +40,16 @@ def set_cut_strands(study: SectionStudy, cut_strands: list[int]) -> dict:
             )
         )
 
+    for layer_index, cut_count in enumerate(cut_strands):
+        if not np.isfinite(cut_count):
+            raise ValueError(_Errors.cut_strands_not_finite(layer_index))
+        if cut_count != int(cut_count):
+            raise ValueError(_Errors.cut_strands_not_integer(layer_index))
+
+    int_cut_strands = [int(c) for c in cut_strands]
+
     for layer_index, (cut_count, layer_total) in enumerate(
-        zip(cut_strands, nb_strands_per_layer)
+        zip(int_cut_strands, nb_strands_per_layer)
     ):
         if cut_count < 0:
             raise ValueError(_Errors.cut_strands_negative(layer_index))
@@ -52,11 +60,13 @@ def set_cut_strands(study: SectionStudy, cut_strands: list[int]) -> dict:
                 )
             )
 
-    study.balance_engine.cable_array.cut_strands = np.array(cut_strands)
+    study.balance_engine.cable_array.cut_strands = np.array(
+        int_cut_strands, dtype=int
+    )
     return {"success": True}
 
 
-def get_cut_strands(study: SectionStudy) -> dict:
+def get_cut_strands(study: SectionStudy) -> dict[str, list[int]]:
     """Return the current number of cut strands per layer.
 
     Args:
@@ -65,7 +75,9 @@ def get_cut_strands(study: SectionStudy) -> dict:
     Returns:
         A dictionary with the cut strands list under the ``cutStrands`` key.
     """
-    return {"cutStrands": study.balance_engine.cable_array.cut_strands.tolist()}
+    return {
+        "cutStrands": study.balance_engine.cable_array.cut_strands.tolist()
+    }
 
 
 def get_rrts(study: SectionStudy) -> dict:

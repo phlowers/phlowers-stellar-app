@@ -24,6 +24,19 @@ class _Errors:
         )
 
     @staticmethod
+    def cut_strands_not_finite(layer_index: int) -> str:
+        return (
+            f"Cut strands count must be finite " f"at layer {layer_index + 1}"
+        )
+
+    @staticmethod
+    def cut_strands_not_integer(layer_index: int) -> str:
+        return (
+            f"Cut strands count must be an integer "
+            f"at layer {layer_index + 1}"
+        )
+
+    @staticmethod
     def cut_strands_negative(layer_index: int) -> str:
         return (
             f"Cut strands count cannot be negative "

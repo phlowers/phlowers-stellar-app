@@ -28,6 +28,63 @@ def test_set_cut_strands_updates_array(balance_engine_base: BalanceEngine):
         study.balance_engine.cable_array.cut_strands,
         np.array(cut_strands_input),
     )
+    assert np.issubdtype(
+        study.balance_engine.cable_array.cut_strands.dtype, np.integer
+    )
+
+
+def test_set_cut_strands_accepts_integer_floats(
+    balance_engine_base: BalanceEngine,
+):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+
+    result = cut_strands.set_cut_strands(
+        study, [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    )
+
+    assert result == {"success": True}
+    np.testing.assert_array_equal(
+        study.balance_engine.cable_array.cut_strands,
+        np.array([1, 0, 0, 0, 0, 0, 0, 0]),
+    )
+    assert np.issubdtype(
+        study.balance_engine.cable_array.cut_strands.dtype, np.integer
+    )
+
+
+def test_set_cut_strands_rejects_nan(balance_engine_base: BalanceEngine):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+
+    with pytest.raises(ValueError, match="must be finite"):
+        cut_strands.set_cut_strands(study, [float("nan"), 0, 0, 0, 0, 0, 0, 0])
+
+
+def test_set_cut_strands_rejects_infinity(balance_engine_base: BalanceEngine):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+
+    with pytest.raises(ValueError, match="must be finite"):
+        cut_strands.set_cut_strands(study, [float("inf"), 0, 0, 0, 0, 0, 0, 0])
+
+
+def test_set_cut_strands_rejects_non_integer(
+    balance_engine_base: BalanceEngine,
+):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+
+    with pytest.raises(ValueError, match="must be an integer"):
+        cut_strands.set_cut_strands(study, [1.5, 0, 0, 0, 0, 0, 0, 0])
 
 
 def test_set_cut_strands_layer_count_mismatch(

@@ -188,7 +188,6 @@ def compute_localization(inputs: dict) -> dict:
 
     geo_inputs = SectionGeoData.from_dict(inputs)
 
-
     span_length = np.array(geo_inputs.spanLength, dtype=np.float64)
     line_angle = np.array(geo_inputs.lineAngle, dtype=np.float64)
     supports_number = span_length.size
