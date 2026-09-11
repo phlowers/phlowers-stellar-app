@@ -32,14 +32,20 @@ import {
   CONTENT_WIDTH,
   FONT_SIZES,
   LINE_HEIGHT,
-  LINE_WIDTH_THIN,
   PAGE_MARGIN,
-  PAGE_SIZE,
-  PARAGRAPH_INDENT
+  PARAGRAPH_INDENT,
+  PDF_UNITS
 } from '@shared/pdf/pdf-layout.constantes';
-import { drawBulletItem, drawWrappingBulletItem, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  drawBulletItem,
+  drawBulletList,
+  drawSectionTitle,
+  drawSeparator,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
+import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
-import { DIAGRAM_WIDTH, UNITS } from './vtl-guying-report.constantes';
+import { DIAGRAM_WIDTH } from './vtl-guying-report.constantes';
 import { PdfLabels, VtlGuyingReportData } from './vtl-guying-report.interfaces';
 
 // ─── SECTION 1: STUDY AND SECTION ───────────────────────────────────────────────
@@ -55,50 +61,25 @@ import { PdfLabels, VtlGuyingReportData } from './vtl-guying-report.interfaces';
 //  Bottom: full-width separator line (lineWidth 0.2)
 /** Draws the study and section metadata section. Returns the next Y position. */
 export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, labels: PdfLabels, startY: number): number {
-  let y = startY;
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
 
   // Section title (underlined) — at page margin, no indent
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.sectionTitle);
-  doc.text(labels.studySectionTitle, PAGE_MARGIN.left, y);
-  const titleWidth = doc.getTextWidth(labels.studySectionTitle);
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
-  y += LINE_HEIGHT + 2;
+  let y = drawSectionTitle(doc, labels.studySectionTitle, startY);
 
-  // Row 1: Author (left)
-  drawBulletItem(doc, labels.author, data.author || '-', leftX, y);
-  y += LINE_HEIGHT;
-
-  // Row 2: Study (wraps full width)
-  y += drawWrappingBulletItem(doc, labels.study, data.studyTitle || '-', leftX, y, wrapWidth);
-
-  // Row 3: Description (wraps full width)
-  y += drawWrappingBulletItem(doc, labels.studyDescription, data.studyDescription || '-', leftX, y, wrapWidth);
-
-  // Row 4: Section
-  drawBulletItem(doc, labels.section, data.sectionName || '-', leftX, y);
-  y += LINE_HEIGHT;
-
-  // Row 5: Comment (wraps full width)
-  y += drawWrappingBulletItem(doc, labels.sectionComment, data.sectionComment || '-', leftX, y, wrapWidth);
-
-  // Row 6: Load case
-  drawBulletItem(doc, labels.chargeName, data.chargeName || '-', leftX, y);
-  y += LINE_HEIGHT;
-
-  // Row 7: Load case description (wraps full width)
-  y += drawWrappingBulletItem(doc, labels.chargeDescription, data.chargeDescription || '-', leftX, y, wrapWidth);
+  const items: PdfBulletItem[] = [
+    { label: labels.author, value: data.author || '-' },
+    { label: labels.study, value: data.studyTitle || '-', wrap: true },
+    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
+    { label: labels.section, value: data.sectionName || '-' },
+    { label: labels.sectionComment, value: data.sectionComment || '-', wrap: true },
+    { label: labels.chargeName, value: data.chargeName || '-' },
+    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
+  ];
+  y = drawBulletList(doc, items, y, leftX, wrapWidth);
   y -= 2; // tighten gap before separator
 
-  // Separator line
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
-  y += LINE_HEIGHT;
-
-  return y;
+  return drawSeparator(doc, y);
 }
 
 // ─── SECTION 2: VTL WITHOUT GUYING ────────────────────────────────────────────
@@ -118,35 +99,24 @@ export function drawVtlWithoutGuyingSection(
   const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT; // aligned with right column // aligned with diagram left edge
 
   // Section title (underlined) — at page margin, no indent
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.sectionTitle);
-  doc.text(labels.vtlWithoutGuyingTitle, PAGE_MARGIN.left, y);
-  const titleWidth = doc.getTextWidth(labels.vtlWithoutGuyingTitle);
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
-  y += LINE_HEIGHT + 2;
+  y = drawSectionTitle(doc, labels.vtlWithoutGuyingTitle, y);
 
   // Charge V
-  drawBulletItem(doc, labels.chargeV, formatValue(data.vtlChargeV, UNITS.daN), leftX, y);
+  drawBulletItem(doc, labels.chargeV, formatValue(data.vtlChargeV, PDF_UNITS.daN), leftX, y);
   // Resultant (right column)
-  drawBulletItem(doc, labels.resultant, formatValue(data.vtlResultant, UNITS.daN), rightX, y, true);
+  drawBulletItem(doc, labels.resultant, formatValue(data.vtlResultant, PDF_UNITS.daN), rightX, y, true);
   y += LINE_HEIGHT;
 
   // Charge H
-  drawBulletItem(doc, labels.chargeH, formatValue(data.vtlChargeH, UNITS.daN), leftX, y);
+  drawBulletItem(doc, labels.chargeH, formatValue(data.vtlChargeH, PDF_UNITS.daN), leftX, y);
   y += LINE_HEIGHT;
 
   // Charge L
-  drawBulletItem(doc, labels.chargeL, formatValue(data.vtlChargeL, UNITS.daN), leftX, y);
+  drawBulletItem(doc, labels.chargeL, formatValue(data.vtlChargeL, PDF_UNITS.daN), leftX, y);
   y += LINE_HEIGHT;
   y -= 2; // tighten gap before separator
 
-  // Separator
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
-  y += LINE_HEIGHT;
-
-  return y;
+  return drawSeparator(doc, y);
 }
 
 // ─── SECTION 3: GUYING ─────────────────────────────────────────────────────────
@@ -165,13 +135,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, labels:
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
 
   // Section title (underlined) — at page margin, no indent
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.sectionTitle);
-  doc.text(labels.guyingTitle, PAGE_MARGIN.left, y);
-  const titleWidth = doc.getTextWidth(labels.guyingTitle);
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
-  y += LINE_HEIGHT + 2;
+  y = drawSectionTitle(doc, labels.guyingTitle, y);
 
   const paramsStartY = y;
 
@@ -183,9 +147,9 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, labels:
   leftY += LINE_HEIGHT;
   drawBulletItem(doc, labels.supportType, data.supportType || '-', leftX, leftY);
   leftY += LINE_HEIGHT;
-  drawBulletItem(doc, labels.altitude, formatValue(data.altitude, UNITS.meters), leftX, leftY);
+  drawBulletItem(doc, labels.altitude, formatValue(data.altitude, PDF_UNITS.meters), leftX, leftY);
   leftY += LINE_HEIGHT;
-  drawBulletItem(doc, labels.horizontalDistance, formatValue(data.horizontalDistance, UNITS.meters), leftX, leftY);
+  drawBulletItem(doc, labels.horizontalDistance, formatValue(data.horizontalDistance, PDF_UNITS.meters), leftX, leftY);
   leftY += LINE_HEIGHT;
   const pulleyValue = data.hasPulley ? labels.yes : labels.no;
   drawBulletItem(doc, labels.hasPulley, pulleyValue, leftX, leftY);
@@ -212,12 +176,7 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, labels:
   y = Math.max(leftY, imgEndY) + LINE_HEIGHT;
   y -= 4; // tighten gap before separator
 
-  // Separator
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_SIZE.width - PAGE_MARGIN.right, y);
-  y += LINE_HEIGHT;
-
-  return y;
+  return drawSeparator(doc, y);
 }
 
 // ─── SECTION 4: VTL WITH GUYING ────────────────────────────────────────────────
@@ -240,13 +199,7 @@ export function drawVtlWithGuyingSection(
   const rightX = PAGE_MARGIN.left + CONTENT_WIDTH / 2 + PARAGRAPH_INDENT;
 
   // Section title (underlined) — at page margin, no indent
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.sectionTitle);
-  doc.text(labels.vtlWithGuyingTitle, PAGE_MARGIN.left, y);
-  const titleWidth = doc.getTextWidth(labels.vtlWithGuyingTitle);
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y + 1, PAGE_MARGIN.left + titleWidth, y + 1);
-  y += LINE_HEIGHT + 2;
+  y = drawSectionTitle(doc, labels.vtlWithGuyingTitle, y);
 
   // Explanatory text (italic, with bullet — wrapped text indented past bullet)
   doc.setFont('Nunito', 'italic');
@@ -266,16 +219,30 @@ export function drawVtlWithGuyingSection(
   y += explanation2Lines.length * LINE_HEIGHT;
 
   // Results - left column (all result values rendered in bold per spec)
-  drawBulletItem(doc, labels.tensionInGuy, formatValue(data.tensionInGuy, UNITS.daN), leftX, y, true);
-  drawBulletItem(doc, labels.chargeVUnderConsole, formatValue(data.chargeVUnderConsole, UNITS.daN), rightX, y, true);
+  drawBulletItem(doc, labels.tensionInGuy, formatValue(data.tensionInGuy, PDF_UNITS.daN), leftX, y, true);
+  drawBulletItem(
+    doc,
+    labels.chargeVUnderConsole,
+    formatValue(data.chargeVUnderConsole, PDF_UNITS.daN),
+    rightX,
+    y,
+    true
+  );
   y += LINE_HEIGHT;
 
-  drawBulletItem(doc, labels.guyAngle, formatValue(data.guyAngle, UNITS.degrees), leftX, y, true);
-  drawBulletItem(doc, labels.chargeHUnderConsole, formatValue(data.chargeHUnderConsole, UNITS.daN), rightX, y, true);
+  drawBulletItem(doc, labels.guyAngle, formatValue(data.guyAngle, PDF_UNITS.degrees), leftX, y, true);
+  drawBulletItem(
+    doc,
+    labels.chargeHUnderConsole,
+    formatValue(data.chargeHUnderConsole, PDF_UNITS.daN),
+    rightX,
+    y,
+    true
+  );
   y += LINE_HEIGHT;
 
   // Charge L (if pulley) - only on right, bold per spec
-  drawBulletItem(doc, labels.chargeLIfPulley, formatValue(data.chargeLIfPulley, UNITS.daN), rightX, y, true);
+  drawBulletItem(doc, labels.chargeLIfPulley, formatValue(data.chargeLIfPulley, PDF_UNITS.daN), rightX, y, true);
   y += LINE_HEIGHT + 2;
 
   // Comment: label on its own line, value below indented and justified

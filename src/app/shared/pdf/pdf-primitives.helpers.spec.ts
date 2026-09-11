@@ -8,17 +8,27 @@
 import { vi } from 'vitest';
 import jsPDF from 'jspdf';
 
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@core/services/notification/notification.service';
+
 import {
+  buildReportLabels,
   drawBulletItem,
+  drawBulletList,
   drawFooter,
   drawHeader,
+  drawPageFooters,
+  drawSectionTitle,
+  drawSeparator,
   drawWrappingBulletItem,
   formatValue,
+  generatePdfReport,
   loadFileAsBase64,
   loadImageAsBase64,
-  registerNunitoFont
+  registerNunitoFont,
+  sanitizeFilenamePart
 } from './pdf-primitives.helpers';
-import { APP_NAME, LINE_HEIGHT, PAGE_MARGIN, PAGE_SIZE } from './pdf-layout.constantes';
+import { APP_NAME, CONTENT_WIDTH, LANDSCAPE_PAGE, LINE_HEIGHT, PAGE_MARGIN, PAGE_SIZE } from './pdf-layout.constantes';
 
 vi.mock('jspdf');
 
@@ -32,7 +42,10 @@ function createMockDoc(): jsPDF {
     addFileToVFS: vi.fn(),
     addFont: vi.fn(),
     getTextWidth: vi.fn().mockReturnValue(20),
-    splitTextToSize: vi.fn().mockImplementation((text: string) => [text])
+    splitTextToSize: vi.fn().mockImplementation((text: string) => [text]),
+    getNumberOfPages: vi.fn().mockReturnValue(1),
+    setPage: vi.fn(),
+    save: vi.fn()
   } as unknown as jsPDF;
 }
 
@@ -174,6 +187,50 @@ describe('pdf-primitives helpers', () => {
     });
   });
 
+  describe('drawSectionTitle', () => {
+    it('should draw the title at the page margin and return an advanced Y', () => {
+      const doc = createMockDoc();
+      const nextY = drawSectionTitle(doc, 'My section', 40);
+
+      expect(doc.text).toHaveBeenCalledWith('My section', PAGE_MARGIN.left, 40);
+      expect(doc.line).toHaveBeenCalled();
+      expect(nextY).toBe(40 + LINE_HEIGHT + 2);
+    });
+  });
+
+  describe('drawBulletList', () => {
+    it('should advance non-wrapping items by one LINE_HEIGHT each', () => {
+      const doc = createMockDoc();
+      const endY = drawBulletList(
+        doc,
+        [
+          { label: 'A', value: '1' },
+          { label: 'B', value: '2' }
+        ],
+        30,
+        15,
+        100
+      );
+
+      expect(endY).toBe(30 + 2 * LINE_HEIGHT);
+      expect(doc.splitTextToSize).not.toHaveBeenCalled();
+    });
+
+    it('should advance wrapping items by their wrapped height', () => {
+      const doc = createMockDoc();
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValueOnce(['l1', 'l2']);
+      const endY = drawBulletList(doc, [{ label: 'A', value: 'long', wrap: true }], 30, 15, 100);
+
+      expect(endY).toBe(30 + 2 * LINE_HEIGHT);
+      expect(doc.splitTextToSize).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return startY unchanged for an empty list', () => {
+      const doc = createMockDoc();
+      expect(drawBulletList(doc, [], 42, 15, 100)).toBe(42);
+    });
+  });
+
   describe('drawHeader', () => {
     it('should draw the app name right-aligned at top', () => {
       const doc = createMockDoc();
@@ -235,6 +292,127 @@ describe('pdf-primitives helpers', () => {
       const footerY = footerCall![2] as number;
       expect(footerY).toBeGreaterThan(PAGE_SIZE.height - 20);
       expect(footerY).toBeLessThan(PAGE_SIZE.height);
+    });
+  });
+
+  describe('drawSeparator', () => {
+    it('should draw a line spanning the content width and return the advanced Y', () => {
+      const doc = createMockDoc();
+      const nextY = drawSeparator(doc, 40);
+
+      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, 40, PAGE_MARGIN.left + CONTENT_WIDTH, 40);
+      expect(nextY).toBe(40 + LINE_HEIGHT);
+    });
+  });
+
+  describe('sanitizeFilenamePart', () => {
+    it('should replace illegal filesystem characters with a dash', () => {
+      expect(sanitizeFilenamePart('a/b\\c:d*e?f"g<h>i|j')).toBe('a-b-c-d-e-f-g-h-i-j');
+    });
+
+    it('should leave a value without illegal characters unchanged', () => {
+      expect(sanitizeFilenamePart('canton-42_2026-05-20')).toBe('canton-42_2026-05-20');
+    });
+  });
+
+  describe('drawPageFooters', () => {
+    it('should draw one footer per page in portrait mode', () => {
+      const doc = createMockDoc();
+      (doc.getNumberOfPages as ReturnType<typeof vi.fn>).mockReturnValue(2);
+
+      drawPageFooters(doc, 'Page');
+
+      expect(doc.setPage).toHaveBeenCalledWith(1);
+      expect(doc.setPage).toHaveBeenCalledWith(2);
+      expect(doc.text).toHaveBeenCalledWith('Page 1 / 2', PAGE_SIZE.width - PAGE_MARGIN.right, expect.any(Number), {
+        align: 'right'
+      });
+      expect(doc.text).toHaveBeenCalledWith('Page 2 / 2', PAGE_SIZE.width - PAGE_MARGIN.right, expect.any(Number), {
+        align: 'right'
+      });
+    });
+
+    it('should use landscape dimensions from page 2 when landscapeFromPage2 is true', () => {
+      const doc = createMockDoc();
+      (doc.getNumberOfPages as ReturnType<typeof vi.fn>).mockReturnValue(2);
+
+      drawPageFooters(doc, 'Page', true);
+
+      expect(doc.text).toHaveBeenCalledWith('Page 1 / 2', PAGE_SIZE.width - PAGE_MARGIN.right, expect.any(Number), {
+        align: 'right'
+      });
+      expect(doc.text).toHaveBeenCalledWith(
+        'Page 2 / 2',
+        LANDSCAPE_PAGE.width - PAGE_MARGIN.right,
+        expect.any(Number),
+        { align: 'right' }
+      );
+    });
+  });
+
+  describe('buildReportLabels', () => {
+    it('should translate every key and preserve the field names', () => {
+      const translate = vi.fn((key: string) => `translated:${key}`);
+      const labels = buildReportLabels<{ title: string; author: string }>(translate, {
+        title: 'report.title',
+        author: 'report.author'
+      });
+
+      expect(translate).toHaveBeenCalledWith('report.title');
+      expect(translate).toHaveBeenCalledWith('report.author');
+      expect(labels).toEqual({ title: 'translated:report.title', author: 'translated:report.author' });
+    });
+  });
+
+  describe('generatePdfReport', () => {
+    function createMockLogger(): LoggerService {
+      return { error: vi.fn() } as unknown as LoggerService;
+    }
+
+    function createMockNotificationService(): NotificationService {
+      return { success: vi.fn(), error: vi.fn() } as unknown as NotificationService;
+    }
+
+    it('should save the built document and notify success', async () => {
+      const doc = createMockDoc();
+      const logger = createMockLogger();
+      const notificationService = createMockNotificationService();
+      const translate = vi.fn((key: string) => `translated:${key}`);
+
+      await generatePdfReport({
+        logger,
+        notificationService,
+        translate,
+        errorLogMessage: 'Failed to build report',
+        successKey: 'report.success',
+        errorKey: 'report.error',
+        build: () => Promise.resolve({ doc, filename: 'report.pdf' })
+      });
+
+      expect(doc.save).toHaveBeenCalledWith('report.pdf');
+      expect(notificationService.success).toHaveBeenCalledWith('translated:report.success');
+      expect(notificationService.error).not.toHaveBeenCalled();
+    });
+
+    it('should log and notify an error when build rejects', async () => {
+      const logger = createMockLogger();
+      const notificationService = createMockNotificationService();
+      const translate = vi.fn((key: string) => `translated:${key}`);
+      const buildError = new Error('boom');
+
+      await generatePdfReport({
+        logger,
+        notificationService,
+        translate,
+        errorLogMessage: 'Failed to build report',
+        successKey: 'report.success',
+        errorKey: 'report.error',
+        build: () => Promise.reject(buildError)
+      });
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to build report', buildError);
+      expect(notificationService.error).toHaveBeenCalledWith('translated:report.error');
+      expect(notificationService.success).not.toHaveBeenCalled();
     });
   });
 });

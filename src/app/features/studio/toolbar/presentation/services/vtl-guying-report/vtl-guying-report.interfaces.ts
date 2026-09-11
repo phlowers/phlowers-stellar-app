@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { BaseReportLabels } from '@shared/pdf/pdf-report.interfaces';
+
 /** Data required to generate the VHL & Guying PDF report. */
 export interface VtlGuyingReportData {
   /** Study author email or name. */
@@ -65,17 +67,11 @@ export interface VtlGuyingReportData {
 }
 
 /** Translated PDF report labels, resolved at report-generation time via TranslocoService. */
-export interface PdfLabels {
-  reportTitle: string;
+export interface PdfLabels extends BaseReportLabels {
   studySectionTitle: string;
-  author: string;
   date: string;
-  study: string;
   section: string;
-  studyDescription: string;
   sectionComment: string;
-  chargeName: string;
-  chargeDescription: string;
   vtlWithoutGuyingTitle: string;
   chargeV: string;
   chargeH: string;

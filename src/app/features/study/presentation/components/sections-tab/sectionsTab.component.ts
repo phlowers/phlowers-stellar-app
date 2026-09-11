@@ -22,6 +22,12 @@ import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
+import { LinesService } from '@shared/catalog/services/lines.service';
+import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { SectionDataReportService } from '@features/studio/toolbar/presentation/services/section-data-report/section-data-report.service';
+import { CantonReportData } from '@features/studio/toolbar/presentation/services/section-data-report/section-data-report.interfaces';
+import { buildSupportRows } from '@features/studio/toolbar/presentation/services/section-data-report/section-data-report.helpers';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
@@ -83,6 +89,10 @@ export class SectionsTabComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly chargesService = inject(ChargesService);
+  private readonly cablesService = inject(CablesService);
+  private readonly linesService = inject(LinesService);
+  private readonly maintenanceService = inject(MaintenanceService);
+  private readonly sectionDataReportService = inject(SectionDataReportService);
 
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
@@ -120,6 +130,73 @@ export class SectionsTabComponent {
     this.currentSection.set(cloneDeep(section));
     this.newSectionModalMode.set('view');
     this.isNewSectionModalOpen.set(true);
+  }
+
+  async onGenerateCantonReport(section: Section): Promise<void> {
+    const study = this.study();
+    const ic = section.initial_conditions.find((c) => c.uuid === section.selected_initial_condition_uuid) ?? null;
+    const charge = section.charges.find((c) => c.uuid === section.selected_charge_uuid) ?? null;
+
+    const [maintenance, cables, lines] = await Promise.all([
+      this.maintenanceService.getMaintenance(),
+      this.cablesService.getCables(),
+      this.linesService.getLines()
+    ]);
+    const maintenanceCenter =
+      maintenance?.find((m) => m.maintenance_center_id === section.maintenance_center_id)?.maintenance_center ?? '';
+    const maintenanceTeam =
+      maintenance?.find((m) => m.maintenance_team_id === section.maintenance_team_id)?.maintenance_team ?? '';
+    const isNonLinear = !!cables?.find((c) => c.name === section.cable_name)?.is_polynomial;
+    const litAdr = lines?.find((l) => l.lit_idr === section.lit_code)?.lit_adr ?? '';
+    // Imported cantons store the raw French CANTON_TYPE ('garde'); map it to the canonical 'guard' key.
+    const rawType = (section.type ?? '').toLowerCase();
+    const typeCode = rawType === 'garde' ? 'guard' : rawType;
+
+    const data: CantonReportData = {
+      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      author: study?.author_email ?? '',
+      studyTitle: study?.title ?? '',
+      studyDescription: study?.description ?? '',
+      cantonName: section.name ?? '',
+      comment: section.comment ?? '',
+      icName: ic?.name ?? '',
+      chargeName: charge?.name ?? '',
+      chargeDescription: charge?.description ?? '',
+      type: typeCode ? this.transloco.translate('common.section-type.' + typeCode) : '',
+      cableName: section.cable_name ?? '',
+      maintenanceCenter,
+      litName: litAdr,
+      supportsCount: section.supports.length,
+      supportsDescription: section.supports_comment ?? '',
+      isPhase: typeCode === 'phase',
+      phaseNumber: section.electric_phase_number ?? null,
+      cablesAmount: section.cables_amount ?? null,
+      maintenanceTeam,
+      branchName: section.branch_idr ?? '',
+      initialCondition: ic
+        ? {
+            baseParameter: ic.base_parameters,
+            baseTemperature: ic.base_temperature,
+            cablePretension: ic.cable_pretension,
+            minTemperature: ic.min_temperature,
+            maxWindPressure: ic.max_wind_pressure,
+            maxFrostWidth: ic.max_frost_width
+          }
+        : null,
+      isNonLinear,
+      supports: buildSupportRows(
+        section.supports,
+        this.transloco.translate('common.yes'),
+        this.transloco.translate('common.no')
+      )
+    };
+
+    await this.sectionDataReportService.generateReport(data);
+  }
+
+  private getLocaleForDate(): string {
+    const activeLang = this.transloco.getActiveLang();
+    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   openNewSectionModalCreate() {
