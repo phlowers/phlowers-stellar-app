@@ -351,7 +351,8 @@
       "col-description": "Description/commentaire",
       "col-actions": "Actions",
       "study-actions-menu": "Menu des actions d'étude",
-      "pagination-report": "Étude {first} à {last} sur {totalRecords}"
+      "pagination-report": "Étude {first} à {last} sur {totalRecords}",
+      "date-format": "d MMMM yyyy 'à' HH'h'mm"
     },
     "tabs": {
       "my-studies": "Mes dernières études",
@@ -645,7 +646,8 @@
       "parameter-15c": "Calcul du paramètre à 15°C sans vent"
     },
     "actions": {
-      "success-detail": "Données enregistrées avec succès"
+      "success-detail": "Données enregistrées avec succès",
+      "export-invalid-detail": "Veuillez corriger les champs invalides dans tous les onglets avant d'exporter"
     },
     "calculus-setting": {
       "papoto-radio-label": "PAPOTO",
@@ -677,7 +679,8 @@
       "parameter-1-3-label": "Paramètre 1-3",
       "criterion-label": "Critère 0.5%",
       "error-message": "Une erreur est survenue",
-      "help-title": "Aide (PAPOTO)"
+      "help-title": "Aide (PAPOTO)",
+      "calculate-button": "Calculer"
     },
     "field-datas": {
       "mandatory-msg": "Toutes les données sont obligatoires.",

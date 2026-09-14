@@ -504,4 +504,18 @@
 | Removal impact | Potential follow-up: replace `maintenance_center_names`/`regional_maintenance_center_names` usages with `cm_adr`/`gmr_adr` and drop the array fields — out of scope for SIG.144, logged here for future cleanup. |
 | ✅ Validated | ⏳ Pending review |
 
+---
+
+## 38. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/domain/models/field-measure.model.ts` — `diffuseSolarFlux: number` and `diffuseDirectSolarFlux: number` (hardcoded to `123`/`246` in `createInitialMeasureData`, `presentation/helpers.ts`) |
+| Code | Never read anywhere outside their own initialization; the "Mesure de terrain" JSON export (ticket 842, `field-measure-export.helpers.ts`) maps `temperatureCalculation.solarFlux.diffuse`/`.direct` from the similarly-named `diffusedSolarFlux`/`directSolarFlux` fields instead. |
+| 🔍 Evidence | Grep across `field-measuring/**` shows `diffuseSolarFlux`/`diffuseDirectSolarFlux` only ever assigned (constant values), never consumed in any computed/template/export mapping. `diffusedSolarFlux`/`directSolarFlux`/`diffusedPlusDirectSolarFlux` are the fields actually wired to the UI and the new export. |
+| ⚠️ Confidence | **MEDIUM** — naming is close enough to `diffusedSolarFlux`/`directSolarFlux` that this may be a leftover from an earlier refactor; needs confirmation before removal since it's part of the `FieldMeasure` persisted model (Dexie). |
+| Removal impact | Potential follow-up: drop the two fields from `FieldMeasure` and `createInitialMeasureData` — out of scope for ticket 842 (export-only work), logged here for future cleanup. |
+| ✅ Validated | ⏳ Pending review |
+
+
 
