@@ -263,7 +263,12 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
   readonly canExport = computed(
-    () => this.isFormValid() && (this.hasComputedOutputs() || !this.hasUnsavedChanges())
+    () =>
+      this.isFormValid() &&
+      this.isParameterCalculationValid() &&
+      this.isTemperatureCalculationValid() &&
+      this.isParameter15CValid() &&
+      (this.hasComputedOutputs() || !this.hasUnsavedChanges())
   );
 
   private async initializeMeasureData(): Promise<void> {
@@ -339,9 +344,9 @@ export class FieldMeasuringComponent implements OnDestroy {
   }
 
   private async saveExportFile(json: string, filename: string): Promise<void> {
-    if (window.showSaveFilePicker) {
+    if (globalThis.showSaveFilePicker) {
       try {
-        const handle = await window.showSaveFilePicker({
+        const handle = await globalThis.showSaveFilePicker({
           suggestedName: `${filename}.json`,
           types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
         });
@@ -365,7 +370,6 @@ export class FieldMeasuringComponent implements OnDestroy {
     a.click();
     URL.revokeObjectURL(url);
   }
-
 
   onReport() {
     // TODO: Implement report functionality

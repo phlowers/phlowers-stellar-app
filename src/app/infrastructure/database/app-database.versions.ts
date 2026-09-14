@@ -185,7 +185,6 @@ export function applyStellarDbVersions(db: Dexie): void {
     ...toStagingSchema(CATALOG_OBSTACLE_CONFORMITY_CONFIG_SCHEMA)
   });
 
-  // V9: renames Section IDR/ADR fields to match the SIG.144 GeoLiaison contract
   // (link_name -> link_code, lit_code -> lit_idr, lit_name -> lit_adr,
   // branch_idr -> branch_code) and adds the new voltage_adr/cm_idr/cm_adr/
   // gmr_idr/gmr_adr/eel_idr/eel_adr fields. Data-only migration (sections are

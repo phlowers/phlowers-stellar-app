@@ -14,7 +14,7 @@ Le front-end ne réimplémente jamais ces calculs.
 
 | Étape | Représentation | Raison |
 |---|---|---|
-| Import (fichier GeoLiaison) | Lambert93 (EPSG:2154) | Les fichiers de terrain (`PIED_X_LAMBERT93` / `PIED_Y_LAMBERT93`) sont produits dans ce repère national français. |
+| Import (fichier d'arpentage) | Lambert93 (EPSG:2154) | Les fichiers de terrain (`PIED_X_LAMBERT93` / `PIED_Y_LAMBERT93`) sont produits dans ce repère national français. |
 | Coeur / pivot | Degrés décimaux GPS (WGS84, EPSG:4326) | Le GPS est mondialement valide, contrairement à Lambert93 limité au territoire français. `Section.start_latitude` / `start_longitude` et `Support.footLatitude` / `footLongitude` sont stockés dans ce système. |
 | Stockage d'étude | Longueur de travée relative + angle de ligne (plan plat) | Chaque support ne stocke que sa longueur de travée et son angle par rapport au support précédent (`Support.spanLength`, `spanAngle`), avec un azimut plat pour le premier support ; cela reste compact et indépendant de toute projection absolue. |
 | Calcul d'une étude | GPS reconstruit géodésiquement depuis le modèle relatif | Le rendu d'une section sur une carte recalculera les positions GPS absolues à la demande à partir du modèle relatif. |

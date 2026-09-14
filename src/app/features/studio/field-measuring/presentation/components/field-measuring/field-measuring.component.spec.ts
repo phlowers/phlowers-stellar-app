@@ -421,7 +421,7 @@ describe('FieldMeasuringComponent', () => {
         createWritable: vi.fn().mockResolvedValue(writable)
       };
       const showSaveFilePickerSpy = vi.fn().mockResolvedValue(handle);
-      (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker = showSaveFilePickerSpy;
+      (globalThis as typeof globalThis & { showSaveFilePicker?: unknown }).showSaveFilePicker = showSaveFilePickerSpy;
       const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
 
       await component.onExport();
@@ -435,14 +435,14 @@ describe('FieldMeasuringComponent', () => {
       expect(createObjectUrlSpy).not.toHaveBeenCalled();
 
       createObjectUrlSpy.mockRestore();
-      delete (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker;
+      delete (globalThis as typeof globalThis & { showSaveFilePicker?: unknown }).showSaveFilePicker;
     });
 
     it('should not fall back to the Blob download when the user cancels the save picker', async () => {
       component.measureData.set(createFullyValidMeasureData());
 
       const showSaveFilePickerSpy = vi.fn().mockRejectedValue(new DOMException('cancelled', 'AbortError'));
-      (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker = showSaveFilePickerSpy;
+      (globalThis as typeof globalThis & { showSaveFilePicker?: unknown }).showSaveFilePicker = showSaveFilePickerSpy;
       const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
 
       await component.onExport();
@@ -451,7 +451,7 @@ describe('FieldMeasuringComponent', () => {
       expect(createObjectUrlSpy).not.toHaveBeenCalled();
 
       createObjectUrlSpy.mockRestore();
-      delete (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker;
+      delete (globalThis as typeof globalThis & { showSaveFilePicker?: unknown }).showSaveFilePicker;
     });
 
     it('should export successfully in auto mode even when the parameter at 15°C has not been computed yet', async () => {
@@ -497,6 +497,21 @@ describe('FieldMeasuringComponent', () => {
           ambientTemperature: 20,
           windDirection: 'N',
           skyCover: SkyCover.N0,
+          transit: (TRANSIT_BOUNDS.min + TRANSIT_BOUNDS.max) / 2,
+          measuredDiffusedPlusDirectSolarFlux: 100,
+          leftSupport: '0',
+          spanLength: 100,
+          measuredElevationDifference: 5,
+          HL: 1,
+          H1: 2,
+          H2: 3,
+          H3: 4,
+          HR: 5,
+          VL: 1,
+          V1: 2,
+          V2: 3,
+          V3: 4,
+          VR: 5,
           outputs: {
             papoto: {
               parameter: 500,

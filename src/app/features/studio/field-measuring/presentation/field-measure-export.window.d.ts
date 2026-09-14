@@ -13,6 +13,10 @@ interface SaveFilePickerOptions {
   types?: { description?: string; accept: Record<string, string[]> }[];
 }
 
-interface Window {
-  showSaveFilePicker?(options?: SaveFilePickerOptions): Promise<FileSystemFileHandle>;
-}
+/**
+ * Declared as a global `var` (not on `Window`) so it is reachable via `globalThis`, required by the
+ * `no-restricted-globals` lint rule. Must use `var` (not `let`/`const`) for TypeScript to expose it
+ * on the `typeof globalThis` type, matching real runtime script-scope semantics.
+ */
+// eslint-disable-next-line no-var
+declare var showSaveFilePicker: ((options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>) | undefined;

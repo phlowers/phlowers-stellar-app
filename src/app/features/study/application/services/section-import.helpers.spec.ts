@@ -98,6 +98,18 @@ describe('extractBranchIdr', () => {
   it('should return "10" for a two-digit branch number without leading zero', () => {
     expect(extractBranchIdr('TESTLINE73STB10')).toBe('10');
   });
+
+  it('should return "1" for a legacy short decimal value "1.0" instead of NaN', () => {
+    expect(extractBranchIdr('1.0')).toBe('1');
+  });
+
+  it('should return "10" for a legacy short decimal value "10.0"', () => {
+    expect(extractBranchIdr('10.0')).toBe('10');
+  });
+
+  it('should return the raw value unchanged when it cannot be parsed as a number', () => {
+    expect(extractBranchIdr('N/A')).toBe('N/A');
+  });
 });
 
 describe('parseBooleanOrNull', () => {
