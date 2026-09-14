@@ -31,7 +31,7 @@ interface UserinfoResponse extends Partial<OidcClaims> {
  * Two mutually-exclusive modes, decided server-side and discovered by the
  * SPA through `/auth/userinfo`:
  *   - OIDC mode (`oidcEnabled === true`): the only authentication path is
- *     the G@IA prompt. The local email fallback is forbidden.
+ *     the auth-serv prompt. The local email fallback is forbidden.
  *   - Fallback mode (`oidcEnabled === false`): no server-side OIDC, the SPA
  *     accepts an email-only local login (parity with `ng serve`).
  *
@@ -49,7 +49,7 @@ export class AuthService {
    *
    * MUST stay strictly greater than Apache's `OIDCHTTPTimeoutLong` (10s in
    * `httpd-oidc.conf.template`): a shorter client timeout races Apache's own
-   * outgoing call to G@IA and aborts the request right as Apache might have
+   * outgoing call to auth-serv and aborts the request right as Apache might have
    * been about to answer. 13s leaves a ~3s margin.
    */
   private static readonly USERINFO_PROBE_TIMEOUT_MS = 13000;
@@ -284,7 +284,7 @@ export class AuthService {
    * Create a local user from an email address (fallback login form).
    *
    * Forbidden when OIDC mode is active: the only authentication path in
-   * that mode is the G@IA prompt.
+   * that mode is the auth-serv prompt.
    *
    * @throws Error when called while `oidcEnabled() === true`.
    */
