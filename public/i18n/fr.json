@@ -206,6 +206,7 @@
       "save-detail": "Obstacle enregistré"
     },
     "floor-form-service": {
+      "cable-below-floor-detail": "Le câble passe sous le sol de la portée {{span}}",
       "delete-detail": "Sol supprimé",
       "delete-error-detail": "Échec de la suppression du sol",
       "save-detail": "Sol enregistré",

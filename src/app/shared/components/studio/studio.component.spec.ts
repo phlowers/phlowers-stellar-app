@@ -305,6 +305,25 @@ describe('StudioComponent', () => {
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledTimes(2);
     });
+
+    it('should call notificationService.warning once for several diagnostics sharing a code', () => {
+      mockPlotService.diagnostics.set([
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: obstacle obs-1'
+        },
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: obstacle obs-2'
+        }
+      ]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Effect – preview refresh', () => {

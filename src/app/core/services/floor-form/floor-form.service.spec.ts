@@ -113,7 +113,7 @@ describe('FloorFormService', () => {
         },
         { provide: PlotOptionsService, useValue: { camera: signal(null), plotOptions: signal({}) } },
         { provide: SectionService, useValue: { createOrUpdateSection: vi.fn() } },
-        { provide: NotificationService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: NotificationService, useValue: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } },
         { provide: LoggerService, useValue: { warn: vi.fn() } },
         {
           provide: ObstacleStateService,
@@ -131,6 +131,44 @@ describe('FloorFormService', () => {
 
     service = TestBed.inject(FloorFormService);
     TestBed.flushEffects();
+  });
+
+  describe('cable below a floor', () => {
+    const clearingCable = [
+      [0, 0, 40],
+      [65, 0, 30],
+      [100, 0, 40]
+    ];
+    const dippingCable = [
+      [0, 0, 40],
+      [65, 0, 14],
+      [100, 0, 40]
+    ];
+
+    it('should warn on every projection that leaves the cable under a saved floor', () => {
+      // The engine's own distance warning fires for every floor whatever the clearance (its end
+      // points sit on the supports), so PlotService drops it and this is what flags a real crossing.
+      litDataSignal.set(litDataFor(dippingCable));
+      TestBed.flushEffects();
+
+      expect(TestBed.inject(NotificationService).warning).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stay quiet while the cable clears every floor', () => {
+      litDataSignal.set(litDataFor(clearingCable));
+      TestBed.flushEffects();
+
+      expect(TestBed.inject(NotificationService).warning).not.toHaveBeenCalled();
+    });
+
+    it('should warn again once a recomputed projection sinks the cable into the floor', () => {
+      litDataSignal.set(litDataFor(clearingCable));
+      TestBed.flushEffects();
+      litDataSignal.set(litDataFor(dippingCable));
+      TestBed.flushEffects();
+
+      expect(TestBed.inject(NotificationService).warning).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('results', () => {
@@ -333,7 +371,6 @@ describe('FloorFormService', () => {
       service.setActivePoint(0);
 
       expect(service.activeSavedPointIndex()).toBe(2);
-      expect(obstaclesServiceMock.setSelectedMeasure).toHaveBeenCalledWith('floor-1', 2);
     });
 
     it('should replace the saved floor on save instead of adding a second one for the span', async () => {

@@ -18,7 +18,7 @@ export { runWorkerImport } from './internal/run-worker-import.helpers';
  */
 const isWorkerContext =
   typeof self !== 'undefined' &&
-  typeof (globalThis as { DedicatedWorkerGlobalScope?: unknown }).DedicatedWorkerGlobalScope !== 'undefined' &&
+  (globalThis as { DedicatedWorkerGlobalScope?: unknown }).DedicatedWorkerGlobalScope !== undefined &&
   self instanceof (globalThis as { DedicatedWorkerGlobalScope: new () => unknown }).DedicatedWorkerGlobalScope;
 
 if (isWorkerContext) {

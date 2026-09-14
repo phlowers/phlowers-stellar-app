@@ -20,7 +20,8 @@ import {
   DataError,
   GetSectionWithBaseOutput,
   GetSectionOutput,
-  Distance
+  Distance,
+  PythonErrorCode
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@shared/domain';
 import * as plotly from 'plotly.js-dist-min';
@@ -591,6 +592,31 @@ describe('PlotService', () => {
       await service.refreshProjection();
 
       expect(service.loading()).toBe(false);
+    });
+
+    it('should drop the intersection warning raised for a floor, but keep an obstacle one', async () => {
+      // A floor's end points sit on the supports, where the engine's distance plane finds no cable:
+      // it warns for every saved floor whatever its clearance, so the toast is pure noise there.
+      const floorWarning = {
+        code: PythonErrorCode.NoIntersectionPlaneWarning,
+        severity: 'warning' as const,
+        origin: 'warning' as const,
+        rawText: "NoIntersectionPlaneWarning: No intersection found between obstacle 'floor-uuid' (point index 0)"
+      };
+      const obstacleWarning = { ...floorWarning, rawText: 'NoIntersectionPlaneWarning: obstacle obs-uuid point 1' };
+      spanService.section.set({
+        ...mockSection,
+        floors: [{ uuid: 'floor-uuid', supportUuid: 'sup-0', referenceSupport: 'LEFT', points: [] }]
+      } as unknown as Section);
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+        error: null,
+        diagnostics: [floorWarning, obstacleWarning]
+      });
+
+      await service.refreshProjection();
+
+      expect(service.diagnostics()).toEqual([obstacleWarning]);
     });
 
     it('should update plotOptions with section supports range via initSectionStudio', async () => {

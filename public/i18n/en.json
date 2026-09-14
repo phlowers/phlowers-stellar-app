@@ -206,6 +206,7 @@
       "save-detail": "Obstacle saved"
     },
     "floor-form-service": {
+      "cable-below-floor-detail": "The cable passes below the floor of span {{span}}",
       "delete-detail": "Floor deleted",
       "delete-error-detail": "Failed to delete floor",
       "save-detail": "Floor saved",

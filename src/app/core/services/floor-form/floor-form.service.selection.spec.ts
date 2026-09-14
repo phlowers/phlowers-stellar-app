@@ -60,7 +60,12 @@ describe('FloorFormService — plot/form point selection', () => {
         { provide: PlotSpanService, useValue: spanServiceMock },
         {
           provide: PlotService,
-          useValue: { plotOptionsChange: vi.fn(), study: signal(null), refreshProjection: vi.fn() }
+          useValue: {
+            plotOptionsChange: vi.fn(),
+            study: signal(null),
+            refreshProjection: vi.fn(),
+            litData: signal(null)
+          }
         },
         { provide: PlotOptionsService, useValue: { camera: signal(null), plotOptions: signal({}) } },
         { provide: SectionService, useValue: { createOrUpdateSection: vi.fn() } },
@@ -112,7 +117,7 @@ describe('FloorFormService — plot/form point selection', () => {
     expect(service.activePointIndex()).toBe(2);
   });
 
-  it('should mirror a point selected from the form into quick-measures and the plot', () => {
+  it('should not select a point picked from the form in quick-measures', () => {
     service.form.controls.span.setValue('s0');
     service.form.controls.referenceSupport.enable();
     service.form.controls.referenceSupport.setValue('LEFT');
@@ -120,8 +125,53 @@ describe('FloorFormService — plot/form point selection', () => {
 
     service.setActivePoint(1);
 
+    expect(service.activePointIndex()).toBe(1);
+    expect(TestBed.inject(ObstaclesService).setSelectedMeasure).not.toHaveBeenCalled();
+    expect(TestBed.inject(ObstacleStateService).distanceType()).toBeNull();
+  });
+
+  it('should follow the quick-measures point when its floor is the selected measure', () => {
     const obstaclesService = TestBed.inject(ObstaclesService);
-    expect(obstaclesService.setSelectedMeasure).toHaveBeenCalledWith('floor-1', 1);
+    obstaclesService.selectedMeasureUuid.set('floor-1');
+    service.form.controls.span.setValue('s0');
+    service.form.controls.referenceSupport.enable();
+    service.form.controls.referenceSupport.setValue('LEFT');
+    TestBed.flushEffects();
+
+    service.setActivePoint(1);
+
+    expect(obstaclesService.activePointIndex()).toBe(1);
+    // Following the point is not selecting the floor: quick-measures already had it.
+    expect(obstaclesService.setSelectedMeasure).not.toHaveBeenCalled();
+  });
+
+  it('should follow it in the saved point order when the form reads the floor from the other end', () => {
+    const obstaclesService = TestBed.inject(ObstaclesService);
+    obstaclesService.selectedMeasureUuid.set('floor-1');
+    service.form.controls.span.setValue('s0');
+    service.form.controls.referenceSupport.enable();
+    TestBed.flushEffects();
+    // Flipping the side after the floor loaded, so the form re-reads it from the closing support.
+    service.form.controls.referenceSupport.setValue('RIGHT');
+    TestBed.flushEffects();
+
+    service.setActivePoint(0);
+
+    // The floor was saved from the LEFT support, so the form's first point is the stored last one —
+    // and quick-measures lists the points in the stored order.
+    expect(obstaclesService.activePointIndex()).toBe(2);
+  });
+
+  it('should select a point picked from the plot/quick-measures in both the form and quick-measures', () => {
+    service.form.controls.span.setValue('s0');
+    service.form.controls.referenceSupport.enable();
+    service.form.controls.referenceSupport.setValue('LEFT');
+    TestBed.flushEffects();
+
+    service.selectFloorPoint('floor-1', 1);
+
+    expect(service.activePointIndex()).toBe(1);
+    expect(TestBed.inject(ObstaclesService).setSelectedMeasure).toHaveBeenCalledWith('floor-1', 1);
     expect(TestBed.inject(ObstacleStateService).distanceType()).toBe('vertical');
   });
 

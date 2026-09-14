@@ -136,7 +136,7 @@ export class StudyComponent implements OnInit {
     // Initialize sections array if it's null
     const studyWithSections = study.sections ? study : { ...study, sections: [] };
 
-    const existingSection = studyWithSections.sections.find((s) => s?.uuid === section?.uuid);
+    const existingSection = studyWithSections.sections.some((s) => s?.uuid === section?.uuid);
 
     const { removedGeometryBoundObjects } = await this.sectionService.createOrUpdateSection(studyWithSections, section);
 
