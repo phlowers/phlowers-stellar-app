@@ -5,7 +5,7 @@ Colors for this project are to be used through **`sass (scss)` maps** *(array or
 Custom properties are dynamicly generated from SASS for each color collection (primary, secondary, greys, etc).  
 
 ### SASS use
-SASS colors variables are exposed through abstracts.extracts.scss file *src/styles/abstracts/_abstract.extracts.scss* and requires sass:map built in module.  
+SASS colors variables are exposed through abstract.extracts.scss file *src/styles/abstracts/_abstract.extracts.scss* and requires sass:map built in module.  
 ex:  
 ```text
 @use 'sass:map';
@@ -126,7 +126,7 @@ ex:
 It is the neutral used for UI chrome (separators, disabled texts) and it is the base of every elevation shadow.
 
 ## Icons
-In compliance with RTE design system, we use Google's [material icons](https://fonts.google.com/icons) are self hosted for icons and we're using its symbols variant.  
+In compliance with RTE design system, we use Google's [material icons](https://fonts.google.com/icons) which are self hosted for icons and we're using its symbols variant.  
 You can insert any available icon with any tag wrapper with `app-icon` class and the name of the icon as plain text inside the tag.  
 We recommanded using semanticly blank tags like `span` or `div` for accessibility reasons.  
 
@@ -240,7 +240,7 @@ ex:
 
 | placeholder          | what it does                                                                                     |
 | -------------------: | ------------------------------------------------------------------------------------------------ |
-| %label-spacing       | Sole margin of a form label. Extracted so a custom label can keep the alignment without the typo. |
+| %label-spacing       | Sole margin of a form label. Extracted so a custom text can keep the alignment with labels without inheriting the font styles. |
 | %label-style         | Full form label style: %label-spacing + inline block + 0.75rem text in `--star-dust-900`.         |
 | %focus-state         | Accessibility focus ring: 1px outline in `--primary-900` with an offset. **Always prefer it over a hand written outline** so the focus stays consistent across the app. |
 | %vertical-separator  | 1px full height vertical rule in `--star-dust-300`, to separate inline blocks.                     |

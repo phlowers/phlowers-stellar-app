@@ -240,7 +240,7 @@ ex :
 
 | placeholder          | rôle                                                                                              |
 | -------------------: | ------------------------------------------------------------------------------------------------- |
-| %label-spacing       | Marge seule d'un label de formulaire. Extraite pour qu'un label personnalisé garde l'alignement sans reprendre la typo. |
+| %label-spacing       | Marge seule d'un label de formulaire. Extraite pour qu'un texte personnalisé reste aligné avec les labels sans hériter de leurs styles de police. |
 | %label-style         | Style complet d'un label de formulaire : %label-spacing + bloc en ligne + texte 0.75rem en `--star-dust-900`. |
 | %focus-state         | Anneau de focus accessible : contour de 1px en `--primary-900` avec un décalage. **À préférer systématiquement à un `outline` écrit à la main** pour garder un focus cohérent dans toute l'application. |
 | %vertical-separator  | Filet vertical de 1px sur toute la hauteur, en `--star-dust-300`, pour séparer des blocs en ligne.  |
