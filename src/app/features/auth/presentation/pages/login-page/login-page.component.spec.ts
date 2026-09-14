@@ -137,7 +137,7 @@ describe('LoginPageComponent', () => {
         expect(getByTestId('login-resolving')).toBeNull();
       });
 
-      it('should not render the GAIA redirecting status', () => {
+      it('should not render the auth-serv redirecting status', () => {
         expect(getByTestId('login-redirecting')).toBeNull();
       });
     });
@@ -319,7 +319,7 @@ describe('LoginPageComponent', () => {
       expect(getByTestId('login-form')).toBeNull();
     });
 
-    it('should not render the GAIA redirecting status while mode is unknown', () => {
+    it('should not render the auth-serv redirecting status while mode is unknown', () => {
       expect(getByTestId('login-redirecting')).toBeNull();
     });
 
@@ -330,7 +330,7 @@ describe('LoginPageComponent', () => {
     });
   });
 
-  describe('OIDC mode — GAIA redirect', () => {
+  describe('OIDC mode — auth-serv redirect', () => {
     let redirectSpy: vi.SpyInstance;
 
     beforeEach(async () => {
@@ -346,7 +346,7 @@ describe('LoginPageComponent', () => {
       expect(getByTestId('login-offline-waiting')).toBeNull();
     });
 
-    it('should render the GAIA redirecting status', () => {
+    it('should render the auth-serv redirecting status', () => {
       expect(getByTestId('login-redirecting')).toBeTruthy();
     });
 
@@ -381,7 +381,7 @@ describe('LoginPageComponent', () => {
       expect(getByTestId('login-offline-waiting')).toBeTruthy();
     });
 
-    it('should not render GAIA redirecting status while offline', () => {
+    it('should not render auth-serv redirecting status while offline', () => {
       expect(getByTestId('login-redirecting')).toBeNull();
     });
 

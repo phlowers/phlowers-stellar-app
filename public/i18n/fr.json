@@ -85,8 +85,8 @@
       "logo-alt": "Stellar",
       "title": "Se connecter",
       "resolving-mode": "Vérification du mode de connexion…",
-      "redirecting-to-gaia": "Redirection vers G@IA pour la connexion…",
-      "offline-waiting-for-gaia": "Vous êtes hors ligne. Reconnectez-vous pour continuer la connexion G@IA.",
+      "redirecting-to-auth-serv": "Redirection vers auth-serv pour la connexion…",
+      "offline-waiting-for-auth-serv": "Vous êtes hors ligne. Reconnectez-vous pour continuer la connexion auth-serv.",
       "subtitle": "Entrez votre adresse e-mail pour continuer.",
       "email-label": "Courriel",
       "email-required": "L'adresse e-mail est requise.",
@@ -213,7 +213,7 @@
       "save-error-detail": "Échec de l'enregistrement du sol"
     },
     "auth-service": {
-      "email-login-disabled": "La connexion par e-mail est désactivée car l'authentification unique G@IA est requise."
+      "email-login-disabled": "La connexion par e-mail est désactivée car l'authentification unique auth-serv est requise."
     },
     "global-error-handler": {
       "unexpected-error": "Une erreur inattendue s'est produite. Veuillez recharger la page si le problème persiste."

@@ -33,7 +33,7 @@ import { firstValueFrom } from 'rxjs';
 /**
  * Application initializer factory.
  *
- * Enforces the V2 startup sequence (§5.1 of connexion-gaia.md):
+ * Enforces the V2 startup sequence:
  * 1. StorageService.setPersistentStorage()
  * 2. StorageService.createDatabase()
  * 3. AuthService.initialize() — cache-first: resolves instantly when a

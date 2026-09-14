@@ -85,8 +85,8 @@
       "logo-alt": "Stellar",
       "title": "Sign in",
       "resolving-mode": "Checking sign-in mode…",
-      "redirecting-to-gaia": "Redirecting to G@IA for sign in…",
-      "offline-waiting-for-gaia": "You are offline. Reconnect to continue with G@IA sign in.",
+      "redirecting-to-auth-serv": "Redirecting to auth-serv for sign in…",
+      "offline-waiting-for-auth-serv": "You are offline. Reconnect to continue with auth-serv sign in.",
       "subtitle": "Enter your email address to continue.",
       "email-label": "Email",
       "email-required": "Email is required.",
@@ -213,7 +213,7 @@
       "save-error-detail": "Failed to save floor"
     },
     "auth-service": {
-      "email-login-disabled": "Email login is disabled because G@IA single sign-on is required."
+      "email-login-disabled": "Email login is disabled because auth-serv single sign-on is required."
     },
     "global-error-handler": {
       "unexpected-error": "An unexpected error occurred. Please reload the page if the problem persists."

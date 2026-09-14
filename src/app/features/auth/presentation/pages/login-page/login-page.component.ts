@@ -20,7 +20,7 @@ import { LOGIN_URL } from '@services/auth/auth.constants';
  * Behaviour is driven by `AuthService.oidcEnabled` (discovered server-side
  * via `/auth/userinfo`):
  *   - OIDC mode → a top-level navigation to `/auth/login` is fired so
- *     Apache `mod_auth_openidc` redirects the browser to the G@IA prompt.
+ *     Apache `mod_auth_openidc` redirects the browser to the auth-serv prompt.
  *     The local email form is never rendered.
  *   - Fallback mode → the email form is rendered and the user can sign in
  *     with a local IndexedDB user (parity with `ng serve`).
@@ -79,7 +79,7 @@ export class LoginPageComponent {
   }
 
   /**
-   * Whenever the resolved mode is OIDC, fire the G@IA prompt redirect.
+   * Whenever the resolved mode is OIDC, fire the auth-serv prompt redirect.
    * Implemented as an effect so it triggers both on initial mount and if
    * the mode flips after a late probe response.
    */
@@ -95,7 +95,7 @@ export class LoginPageComponent {
 
   /**
    * Top-level navigation to the Apache `/auth/login` endpoint that triggers
-   * the G@IA OIDC sign-in prompt. Extracted so it can be spied on in tests
+   * the auth-serv OIDC sign-in prompt. Extracted so it can be spied on in tests
    * (jsdom's `location.assign` is not configurable).
    */
   protected redirectToOidcLogin(): void {
