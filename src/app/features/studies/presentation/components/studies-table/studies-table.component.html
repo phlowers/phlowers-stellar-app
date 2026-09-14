@@ -79,7 +79,7 @@
       </td>
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
-      <td>{{ study.updated_at_offline | date: 'medium' }}</td>
+      <td>{{ study.updated_at_offline | date: dateFormat() : undefined : dateLocale() }}</td>
       <td>{{ study.sections?.[0]?.lit_name }}</td>
       <td>
         <p class="line-clamp-3 text-ellipsis overflow-hidden">

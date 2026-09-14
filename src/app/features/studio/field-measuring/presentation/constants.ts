@@ -1,3 +1,5 @@
+import { FieldMeasure } from '../domain/types';
+
 /** Option entry for select dropdowns with a string label and value. */
 export interface SelectOption<T extends string = string> {
   /** Display label for the option. */
@@ -73,3 +75,28 @@ export const LEFT_SUPPORT_OPTION_KEYS: TranslatableSelectOption[] = [
   { labelKey: 'field-measuring.shared.left-support.support-2', value: 'support2' },
   { labelKey: 'field-measuring.shared.left-support.support-3', value: 'support3' }
 ];
+
+/** PAPOTO validity criterion threshold (0.5%), not exposed by `PapotoResult` — used for the JSON export. */
+export const PAPOTO_VALIDITY_CRITERION_PERCENT = 0.5;
+
+/** Maps the internal `windSpeedUnit` value to the JSON export label. */
+export const WIND_SPEED_UNIT_EXPORT_LABELS: Record<FieldMeasure['windSpeedUnit'], 'KM/H' | 'M/S'> = {
+  kmh: 'KM/H',
+  ms: 'M/S'
+};
+
+/** Maps the internal `calculationMethod` value to the JSON export label. */
+export const PARAMETER_CALCULATION_METHOD_EXPORT_LABELS: Record<
+  FieldMeasure['calculationMethod'],
+  'PAPOTO' | 'VISEES_TANGENTES' | 'PEP'
+> = {
+  papoto: 'PAPOTO',
+  'tangente-aiming': 'VISEES_TANGENTES',
+  pep: 'PEP'
+};
+
+/** Maps the internal `updateMode15C` value to the JSON export label. */
+export const UPDATE_MODE_15C_EXPORT_LABELS: Record<FieldMeasure['updateMode15C'], 'AUTO' | 'MANUELLE'> = {
+  auto: 'AUTO',
+  manual: 'MANUELLE'
+};

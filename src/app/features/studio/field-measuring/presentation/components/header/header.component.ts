@@ -19,7 +19,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { isEqual } from 'lodash';
-import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { formatSpanLabel } from '../../helpers';
 import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
@@ -48,19 +48,14 @@ export class HeaderComponent {
   }>();
 
   readonly spans = computed<{ label: string; value: number[]; supports: number[] }[]>(() => {
-    const supports = this.spanService.section()?.supports ?? [];
+    const section = this.spanService.section();
+    const supports = section?.supports ?? [];
     const spanAmount = Math.max(supports.length - 1, 0);
-    return Array.from({ length: spanAmount }, (_, index) => {
-      const leftNum = supports[index]?.number;
-      const rightNum = supports[index + 1]?.number;
-      const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);
-      const right = rightNum ? formatSupportNumber(rightNum) : String(index + 2);
-      return {
-        label: `${left} - ${right}`,
-        value: [index, index + 1],
-        supports: [index, index + 1]
-      };
-    });
+    return Array.from({ length: spanAmount }, (_, index) => ({
+      label: formatSpanLabel(section, [index, index + 1]),
+      value: [index, index + 1],
+      supports: [index, index + 1]
+    }));
   });
 
   selectedSpan = signal<number[] | null>(null);

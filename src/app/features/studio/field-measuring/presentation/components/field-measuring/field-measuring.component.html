@@ -54,11 +54,18 @@
       <app-icon icon="description" />
       <span>{{ 'common.report' | transloco }}</span>
     </button>
-    <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onExport()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="!canExport()"
+      btnStyle="outlined"
+      (click)="onExport()"
+      data-testid="export-btn"
+    >
       <app-icon icon="download" />
       <span>{{ 'common.export' | transloco }}</span>
     </button>
-    <button app-btn type="button" [disabled]="!isFormValid()" (click)="onSave()" data-testid="save-btn">
+    <button app-btn type="button" [disabled]="!isFormValid() || !hasUnsavedChanges()" (click)="onSave()" data-testid="save-btn">
       <app-icon icon="save" />
       <span>{{ 'common.save' | transloco }}</span>
     </button>

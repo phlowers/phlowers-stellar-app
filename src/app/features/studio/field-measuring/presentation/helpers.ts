@@ -2,9 +2,11 @@ import { Section } from '@shared/domain';
 import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { TranslocoService } from '@jsverse/transloco';
 import {
   SelectOption,
+  TranslatableSelectOption,
   WIND_DIRECTION_OPTION_KEYS,
   TIME_MODE_OPTION_KEYS,
   SKY_COVER_OPTION_SOURCES,
@@ -13,15 +15,27 @@ import {
 } from './constants';
 
 /**
+ * Builds select options from translatable option keys, resolving each label through Transloco.
+ * @param options - The translatable option keys to build from
+ * @param translocoService - Service used to resolve the translated labels
+ * @returns `SelectOption[]` with translated labels
+ */
+export const buildTranslatableSelectOptions = (
+  options: TranslatableSelectOption[],
+  translocoService: TranslocoService
+): SelectOption[] =>
+  options.map((option) => ({
+    value: option.value,
+    label: translocoService.translate(option.labelKey)
+  }));
+
+/**
  * Builds the wind direction select options with labels translated through Transloco.
  * @param translocoService - Service used to resolve the translated labels
  * @returns Wind direction `SelectOption[]` with translated labels
  */
 export const buildWindDirectionOptions = (translocoService: TranslocoService): SelectOption[] =>
-  WIND_DIRECTION_OPTION_KEYS.map((option) => ({
-    value: option.value,
-    label: translocoService.translate(option.labelKey)
-  }));
+  buildTranslatableSelectOptions(WIND_DIRECTION_OPTION_KEYS, translocoService);
 
 /**
  * Builds the time mode (summer / winter) select options with labels translated through Transloco.
@@ -29,10 +43,7 @@ export const buildWindDirectionOptions = (translocoService: TranslocoService): S
  * @returns Time mode `SelectOption[]` with translated labels
  */
 export const buildTimeModeOptions = (translocoService: TranslocoService): SelectOption[] =>
-  TIME_MODE_OPTION_KEYS.map((option) => ({
-    value: option.value,
-    label: translocoService.translate(option.labelKey)
-  }));
+  buildTranslatableSelectOptions(TIME_MODE_OPTION_KEYS, translocoService);
 
 /**
  * Builds the sky cover select options, translating only the entries that carry a translation key.
@@ -52,10 +63,71 @@ export const buildSkyCoverOptions = (translocoService: TranslocoService): Select
  * @returns Left support `SelectOption[]` with translated labels
  */
 export const buildLeftSupportOptions = (translocoService: TranslocoService): SelectOption[] =>
-  LEFT_SUPPORT_OPTION_KEYS.map((option) => ({
-    value: option.value,
-    label: translocoService.translate(option.labelKey)
-  }));
+  buildTranslatableSelectOptions(LEFT_SUPPORT_OPTION_KEYS, translocoService);
+
+/**
+ * Formats the display label for a span, given its support indices — e.g. "12 - 13".
+ * Falls back to a 1-based index when a support has no `number` (mirrors the header's span dropdown).
+ * @param section - The current section, used to resolve support numbers
+ * @param span - The `[leftIndex, rightIndex]` support indices of the span (or `null`)
+ * @returns The formatted span label, or an empty string when `span` is not a valid pair
+ */
+export const formatSpanLabel = (section: Section | null, span: number[] | null): string => {
+  if (span?.length !== 2) {
+    return '';
+  }
+  const supports = section?.supports ?? [];
+  const [leftIndex, rightIndex] = span;
+  const leftNum = supports[leftIndex]?.number;
+  const rightNum = supports[rightIndex]?.number;
+  const left = leftNum ? formatSupportNumber(leftNum) : String(leftIndex + 1);
+  const right = rightNum ? formatSupportNumber(rightNum) : String(rightIndex + 1);
+  return `${left} - ${right}`;
+};
+
+/**
+ * Sanitizes a field measure name for use as a downloaded file name, stripping characters unsafe for file systems.
+ * @param name - The raw measure name
+ * @returns A sanitized, filename-safe string (falls back to `field-measure` when empty after sanitizing)
+ */
+const sanitizeFilename = (name: string): string =>
+  name
+    .trim()
+    .replace(/[^a-zA-Z0-9-_ ]/g, '')
+    .replace(/\s+/g, '-') || 'field-measure';
+
+/**
+ * Formats a generation date as `YYYY-MM-DD` in local time.
+ * @param date - The generation date
+ * @returns The formatted date segment
+ */
+const formatGenerationDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * Builds the download filename (without extension) for a field measure JSON export.
+ * Format: "Export Mesure de terrain_<measure name>_<section name>_<generation date>".
+ * @param measureData - The field measure to export
+ * @param sectionName - The name of the section the measure belongs to (or `null`)
+ * @param generationDate - The date the export is generated (defaults to now)
+ * @returns A sanitized filename
+ */
+export const buildFieldMeasureExportFilename = (
+  measureData: FieldMeasure,
+  sectionName: string | null,
+  generationDate: Date = new Date()
+): string =>
+  [
+    'Export Mesure de terrain',
+    sanitizeFilename(measureData.name),
+    sanitizeFilename(sectionName || ''),
+    formatGenerationDate(generationDate)
+  ].join('_');
+
 
 /**
  * Determines if the current date is in Daylight Saving Time (DST)
