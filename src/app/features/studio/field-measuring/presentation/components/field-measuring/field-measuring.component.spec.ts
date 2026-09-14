@@ -15,10 +15,11 @@ import { StudiesService } from '@services/studies/studies.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { BehaviorSubject } from 'rxjs';
-import { Section, SkyCover } from '@shared/domain';
+import { Section, SkyCover, Study } from '@shared/domain';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
+import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
@@ -121,15 +122,19 @@ describe('FieldMeasuringComponent', () => {
     const mockSection: Section = {
       uuid: 'test-section-uuid',
       field_measures: [testMeasure],
-      selected_field_measure_uuid: testMeasure.uuid
-    } as Section;
+      selected_field_measure_uuid: testMeasure.uuid,
+      initial_conditions: [],
+      charges: []
+    } as unknown as Section;
 
     const mockSpanService = {
       section: signal<Section | null>(mockSection)
     };
 
     const mockPlotService = {
-      modifySection: vi.fn().mockResolvedValue(undefined)
+      modifySection: vi.fn().mockResolvedValue(undefined),
+      study: signal<Study | null>(null),
+      litData: signal<GetSectionOutput | null>(null)
     } as unknown as PlotService;
 
     const mockLinesService = {
@@ -150,7 +155,9 @@ describe('FieldMeasuringComponent', () => {
               'common.report': 'Report',
               'common.save': 'Save',
               'field-measuring.actions.success-detail': 'Data saved successfully',
+              'field-measuring.actions.export-invalid-detail': 'Please fix invalid fields in all tabs before exporting',
               'common.success': 'Success',
+              'common.error': 'Error',
               'field-measuring.tabs.parameter-15c': 'Parameter at 15\u00b0C without wind',
               'field-measuring.tabs.parameter-calculation': 'Parameter calculation',
               'field-measuring.tabs.temperature-calculation': 'Temperature calculation',
@@ -311,12 +318,217 @@ describe('FieldMeasuringComponent', () => {
   });
 
   describe('onExport', () => {
-    it('should log export data', () => {
-      const consoleSpy = vi.spyOn(console, 'log');
+    const createFullyValidMeasureData = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
+      createTestMeasureData({
+        name: 'MT 1',
+        span: [0, 1],
+        longitude: 1,
+        latitude: 1,
+        altitude: 100,
+        azimuth: 10,
+        windSpeed: 5,
+        ambientTemperature: 20,
+        windDirection: 'N',
+        skyCover: SkyCover.N0,
+        transit: (TRANSIT_BOUNDS.min + TRANSIT_BOUNDS.max) / 2,
+        measuredDiffusedPlusDirectSolarFlux: 100,
+        leftSupport: '0',
+        spanLength: 100,
+        measuredElevationDifference: 5,
+        HL: 1,
+        H1: 2,
+        H2: 3,
+        H3: 4,
+        HR: 5,
+        VL: 1,
+        V1: 2,
+        V2: 3,
+        V3: 4,
+        VR: 5,
+        updateMode15C: 'auto',
+        outputs: {
+          papoto: {
+            parameter: 500,
+            parameter_1_2: 1,
+            parameter_2_3: 2,
+            parameter_1_3: 3,
+            checkValidity: true,
+            uncertainty: 0.1
+          },
+          cableTemperature: {
+            cableSolarFlux: 100,
+            cableTemperature: 25,
+            cableTemperatureUncertainty: 1
+          },
+          parameter15C: {
+            parameter15C: 480,
+            parameter15CMinusUncertainty: 470,
+            parameter15CPlusUncertainty: 490
+          }
+        },
+        ...overrides
+      });
+
+    it('should show an error notification and not export when a tab is invalid', () => {
+      component.measureData.set(createTestMeasureData({ name: 'Invalid' }));
+      const messageService = TestBed.inject(MessageService);
+      const addSpy = vi.spyOn(messageService, 'add');
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
 
       component.onExport();
 
-      expect(consoleSpy).toHaveBeenCalledWith('Export', component.measureData());
+      expect(addSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
+      expect(createObjectUrlSpy).not.toHaveBeenCalled();
+
+      createObjectUrlSpy.mockRestore();
+    });
+
+    it('should download the measure data as a JSON file via the Blob fallback when showSaveFilePicker is unavailable', () => {
+      component.measureData.set(createFullyValidMeasureData());
+
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+      const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+      const createElementSpy = vi.spyOn(document, 'createElement');
+
+      component.onExport();
+
+      expect(createObjectUrlSpy).toHaveBeenCalledTimes(1);
+      const blobArg = createObjectUrlSpy.mock.calls[0][0] as Blob;
+      expect(blobArg.type).toBe('application/json');
+
+      const anchor = createElementSpy.mock.results.find((result) => result.value.tagName === 'A')
+        ?.value as HTMLAnchorElement;
+      expect(anchor.download).toMatch(/^Export Mesure de terrain_MT-1_.*\.json$/);
+      expect(anchor.href).toBe('blob:test');
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(revokeObjectUrlSpy).toHaveBeenCalledWith('blob:test');
+
+      createObjectUrlSpy.mockRestore();
+      revokeObjectUrlSpy.mockRestore();
+      clickSpy.mockRestore();
+      createElementSpy.mockRestore();
+    });
+
+    it('should save via showSaveFilePicker when the File System Access API is available', async () => {
+      component.measureData.set(createFullyValidMeasureData());
+
+      const writable = {
+        write: vi.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined)
+      };
+      const handle = {
+        createWritable: vi.fn().mockResolvedValue(writable)
+      };
+      const showSaveFilePickerSpy = vi.fn().mockResolvedValue(handle);
+      (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker = showSaveFilePickerSpy;
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
+
+      await component.onExport();
+
+      expect(showSaveFilePickerSpy).toHaveBeenCalledTimes(1);
+      expect(handle.createWritable).toHaveBeenCalledTimes(1);
+      expect(writable.write).toHaveBeenCalledTimes(1);
+      const jsonArg = writable.write.mock.calls[0][0] as string;
+      expect(JSON.parse(jsonArg).groundMeasurement).toBeDefined();
+      expect(writable.close).toHaveBeenCalledTimes(1);
+      expect(createObjectUrlSpy).not.toHaveBeenCalled();
+
+      createObjectUrlSpy.mockRestore();
+      delete (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker;
+    });
+
+    it('should not fall back to the Blob download when the user cancels the save picker', async () => {
+      component.measureData.set(createFullyValidMeasureData());
+
+      const showSaveFilePickerSpy = vi.fn().mockRejectedValue(new DOMException('cancelled', 'AbortError'));
+      (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker = showSaveFilePickerSpy;
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
+
+      await component.onExport();
+
+      expect(showSaveFilePickerSpy).toHaveBeenCalledTimes(1);
+      expect(createObjectUrlSpy).not.toHaveBeenCalled();
+
+      createObjectUrlSpy.mockRestore();
+      delete (window as Window & { showSaveFilePicker?: unknown }).showSaveFilePicker;
+    });
+
+    it('should export successfully in auto mode even when the parameter at 15°C has not been computed yet', async () => {
+      component.measureData.set(
+        createFullyValidMeasureData({
+          updateMode15C: 'auto',
+          outputs: { papoto: null, cableTemperature: null, parameter15C: null }
+        })
+      );
+      const messageService = TestBed.inject(MessageService);
+      const addSpy = vi.spyOn(messageService, 'add');
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+      const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+      await component.onExport();
+
+      expect(addSpy).not.toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
+      expect(createObjectUrlSpy).toHaveBeenCalledTimes(1);
+
+      createObjectUrlSpy.mockRestore();
+      revokeObjectUrlSpy.mockRestore();
+      clickSpy.mockRestore();
+    });
+  });
+
+  describe('canExport', () => {
+    it('should be false when the form is invalid', () => {
+      component.measureData.set(createTestMeasureData({ name: 'Invalid' }));
+      expect(component.canExport()).toBe(false);
+    });
+
+    it('should be true when the form is valid and the measure has computed outputs', () => {
+      component.measureData.set(
+        createTestMeasureData({
+          name: 'MT 1',
+          span: [0, 1],
+          longitude: 1,
+          latitude: 1,
+          altitude: 100,
+          azimuth: 10,
+          windSpeed: 5,
+          ambientTemperature: 20,
+          windDirection: 'N',
+          skyCover: SkyCover.N0,
+          outputs: {
+            papoto: {
+              parameter: 500,
+              parameter_1_2: 1,
+              parameter_2_3: 2,
+              parameter_1_3: 3,
+              checkValidity: true,
+              uncertainty: 0.1
+            },
+            cableTemperature: null,
+            parameter15C: null
+          }
+        })
+      );
+      expect(component.canExport()).toBe(true);
+    });
+
+    it('should be false when the form is valid but not yet computed nor saved', () => {
+      const measureData = createTestMeasureData({
+        name: 'MT 1',
+        span: [0, 1],
+        longitude: 1,
+        latitude: 1,
+        altitude: 100,
+        azimuth: 10,
+        windSpeed: 5,
+        ambientTemperature: 20,
+        windDirection: 'N',
+        skyCover: SkyCover.N0
+      });
+      component.measureData.set(measureData);
+      expect(component.canExport()).toBe(false);
     });
   });
 
@@ -379,6 +591,42 @@ describe('FieldMeasuringComponent', () => {
 
       // onSave no longer closes the tool - it shows a success message instead
       expect(closeToolSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('hasUnsavedChanges', () => {
+    it('should be false right after initialization and true after an edit', async () => {
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      fixture.detectChanges();
+
+      expect(component.hasUnsavedChanges()).toBe(false);
+
+      component.onFieldChange('windSpeed', 12);
+
+      expect(component.hasUnsavedChanges()).toBe(true);
+    });
+
+    it('should become false again after a successful save', async () => {
+      const plotService = TestBed.inject(PlotService);
+      vi.spyOn(plotService, 'modifySection').mockResolvedValue(undefined);
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      fixture.detectChanges();
+
+      component.onFieldChange('windSpeed', 12);
+      expect(component.hasUnsavedChanges()).toBe(true);
+
+      await component.onSave();
+
+      expect(component.hasUnsavedChanges()).toBe(false);
     });
   });
 

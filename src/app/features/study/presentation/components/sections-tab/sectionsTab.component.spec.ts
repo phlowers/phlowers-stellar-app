@@ -394,7 +394,7 @@ describe('SectionsTabComponent', () => {
     expect(data.initialCondition).not.toBeNull();
     // Canton type is the translated label, not the raw select code.
     expect(data.type).toBe('Phase');
-    // LIT resolves to the catalog lit_adr matched by lit_code, branch uses branch_idr.
+    // LIT resolves to the catalog lit_adr matched by lit_idr, branch uses branch_code.
     expect(data.litName).toBe('LIT-ADR-123');
     expect(data.branchName).toBe('BranchY');
   });

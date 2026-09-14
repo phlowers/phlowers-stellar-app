@@ -350,7 +350,8 @@
       "col-description": "Description/comment",
       "col-actions": "Actions",
       "study-actions-menu": "Study actions menu",
-      "pagination-report": "Study {first} to {last} of {totalRecords}"
+      "pagination-report": "Study {first} to {last} of {totalRecords}",
+      "date-format": "d MMMM yyyy 'at' HH'h'mm"
     },
     "tabs": {
       "my-studies": "My last studies",
@@ -644,7 +645,8 @@
       "parameter-15c": "Parameter at 15°C without wind"
     },
     "actions": {
-      "success-detail": "Data saved successfully"
+      "success-detail": "Data saved successfully",
+      "export-invalid-detail": "Please fix invalid fields in all tabs before exporting"
     },
     "calculus-setting": {
       "papoto-radio-label": "PAPOTO",
@@ -676,7 +678,8 @@
       "parameter-1-3-label": "Parameter 1-3",
       "criterion-label": "0.5% criterion",
       "error-message": "An error occurred",
-      "help-title": "Help (PAPOTO)"
+      "help-title": "Help (PAPOTO)",
+      "calculate-button": "Calculate"
     },
     "field-datas": {
       "mandatory-msg": "All fields are mandatory",
