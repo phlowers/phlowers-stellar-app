@@ -167,6 +167,18 @@ export class ManualSectionComponent implements OnInit {
     return rawBranchCode ? extractBranchIdr(rawBranchCode) : '';
   });
 
+  /**
+   * Short branch number derived from the raw `branch_code`, used to pre-select the matching
+   * option in the branch catalog dropdown (`uniqueBranchIdr()`, whose `branch_idr` values are
+   * short catalog references, not the raw BRANCHE_IDR). Kept as a one-way, UI-only selection
+   * value so the raw `branch_code` is never silently overwritten by the catalog's own value —
+   * see `onBranchSelect`.
+   */
+  readonly selectedBranchNumber = computed<string | undefined>(() => {
+    const rawBranchCode = this.section().branch_code;
+    return rawBranchCode ? extractBranchIdr(rawBranchCode) : undefined;
+  });
+
   async setupFilterTables() {
     await Promise.all([this.setupMaintenanceFilter(), this.setupLinesFilter(), this.setupCablesFilter()]);
   }
@@ -386,6 +398,20 @@ export class ManualSectionComponent implements OnInit {
           linesTable[0][id];
       });
     }
+  }
+
+  /**
+   * Handles branch selection from the catalog dropdown.
+   *
+   * The catalog only exposes the short branch number (e.g. "1", "1.0"), not the raw BRANCHE_IDR
+   * stored in `branch_code`. The dropdown's `ngModel` stays one-way (bound to
+   * `selectedBranchNumber`), so `branch_code` is only ever assigned here, as the direct result of
+   * an explicit user selection — never clobbered by an unrelated re-render or cascading filter.
+   */
+  async onBranchSelect(event: { value: string }) {
+    await this.onLinesSelect(event, 'branch_idr');
+    this.section().branch_code = event.value || undefined;
+    this.onSectionChange();
   }
 
   onSectionChange() {
