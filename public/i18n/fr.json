@@ -819,7 +819,8 @@
       "strand-rrts-tool": "RRTS de brin",
       "forest-trenches-tool": "Tranchées forestières",
       "height-and-lateral-distance-tool": "Hauteur & distance latérale",
-      "cable-adjustment-tool": "Réglage câble"
+      "cable-adjustment-tool": "Réglage câble",
+      "rrts-cut-strands": "CRR de brins coupées"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
@@ -1163,6 +1164,19 @@
       "failed-to-save-pose-table": "Échec de la sauvegarde du tableau de pose",
       "max-two-decimals-error": "Valeur à 2 décimales maximum",
       "integer-error": "La valeur doit être un nombre entier"
+    },
+    "rrts-cut-strands": {
+      "layers-detail": "Détail des couches",
+      "cable-name-label": "Nom du câble",
+      "current-work-load-label": "Taux de travail actuel",
+      "distance-support-ref-label": "Distance au support de référence",
+      "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
+      "result-cable-rrts-label": "CRR du câble",
+      "result-new-working-load-label": "Nouveau taux de travail max",
+      "saved": "Brins coupés CRR sauvegardés",
+      "failed-to-save": "Échec de la sauvegarde des brins coupés CRR",
+      "deleted": "Brins coupés CRR supprimés",
+      "failed-to-delete": "Échec de la suppression des brins coupés CRR"
     }
   }
 }

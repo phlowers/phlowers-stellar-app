@@ -28,6 +28,18 @@ export interface PoseTableData {
   computingStep: number;
 }
 
+export interface RrtsCutStrandsData {
+  span: { index: number; uuid: string };
+  supportRef: 'LEFT' | 'RIGHT';
+  distanceSupportRef: number;
+  // Cut strands per cable layer used for the saved results, index 0 = layer 1
+  cutStrands: number[];
+  // Residual rated tensile strength (daN)
+  rrts: number;
+  // Utilization rate per span (%) with the cut strands applied
+  utilizationRates: number[];
+}
+
 /**
  * Section domain model - represents a power line section.
  *
@@ -142,6 +154,8 @@ export interface Section {
   vtl_and_guying: VtlAndGuying | undefined;
   /** Pose table calculation data */
   pose_table?: PoseTableData;
+  /** RRTS cut strands calculation data */
+  rrts_cut_strands?: RrtsCutStrandsData;
   /** Array of cable length modifications on this section's spans */
   cable_modifications: CableModification[];
   /** UUID of the currently selected cable modification */

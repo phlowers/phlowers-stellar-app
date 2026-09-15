@@ -819,7 +819,8 @@
       "strand-rrts-tool": "Strand RRTS",
       "forest-trenches-tool": "Forest trenches",
       "height-and-lateral-distance-tool": "Height & lateral distance",
-      "cable-adjustment-tool": "Cable adjustment"
+      "cable-adjustment-tool": "Cable adjustment",
+      "rrts-cut-strands": "RRTS cut strands"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
@@ -1163,6 +1164,19 @@
       "failed-to-save-pose-table": "Failed to save pose table",
       "max-two-decimals-error": "Maximum 2 decimal places",
       "integer-error": "Value must be a whole number"
+    },
+    "rrts-cut-strands": {
+      "layers-detail": "Layers detail",
+      "cable-name-label": "Cable name",
+      "current-work-load-label": "Current work load",
+      "distance-support-ref-label": "Distance to reference support",
+      "cut-strands-layer-label": "Cut strands layer {{ layer }}",
+      "result-cable-rrts-label": "Cable's RRTS",
+      "result-new-working-load-label": "New max working load",
+      "saved": "RRTS cut strands saved",
+      "failed-to-save": "Failed to save RRTS cut strands",
+      "deleted": "RRTS cut strands deleted",
+      "failed-to-delete": "Failed to delete RRTS cut strands"
     }
   }
 }
