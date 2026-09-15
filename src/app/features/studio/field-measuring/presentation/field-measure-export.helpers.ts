@@ -162,10 +162,8 @@ export const buildTemperatureCalculationExport = (measureData: FieldMeasure): Te
 /** Builds the PAPOTO method export block, including computed length/elevation from `litData`. */
 const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionOutput | null): PapotoMethodExport => {
   const leftIndex = measureData.span?.[0] ?? null;
-  const calculatedLength =
-    leftIndex !== null ? (litData?.output_parameters.span_length[leftIndex] ?? null) : null;
-  const calculatedElevation =
-    leftIndex !== null ? (litData?.output_parameters.elevation[leftIndex] ?? null) : null;
+  const calculatedLength = leftIndex !== null ? (litData?.output_parameters.span_length[leftIndex] ?? null) : null;
+  const calculatedElevation = leftIndex !== null ? (litData?.output_parameters.elevation[leftIndex] ?? null) : null;
   const { papoto } = measureData.outputs;
   return {
     measuredLength: createValueUnit(measureData.spanLength, 'm'),

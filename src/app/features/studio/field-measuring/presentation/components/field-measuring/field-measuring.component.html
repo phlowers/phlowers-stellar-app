@@ -65,7 +65,13 @@
       <app-icon icon="download" />
       <span>{{ 'common.export' | transloco }}</span>
     </button>
-    <button app-btn type="button" [disabled]="!isFormValid() || !hasUnsavedChanges()" (click)="onSave()" data-testid="save-btn">
+    <button
+      app-btn
+      type="button"
+      [disabled]="!isFormValid() || !hasUnsavedChanges()"
+      (click)="onSave()"
+      data-testid="save-btn"
+    >
       <app-icon icon="save" />
       <span>{{ 'common.save' | transloco }}</span>
     </button>
