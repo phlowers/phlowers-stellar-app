@@ -504,7 +504,8 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.link_code).toBe('link1');
       expect(mockSection.lit_idr).toBe('lit1');
       expect(mockSection.branch_name).toBe('BRANCH 1');
-      expect(mockSection.branch_code).toBe('1.0');
+      // branch_code is intentionally NOT populated by cascade filter to preserve imported raw BRANCHE_IDR
+      expect(mockSection.branch_code).toBe('');
       expect(mockSection.voltage_idr).toBe('tension1');
     });
 

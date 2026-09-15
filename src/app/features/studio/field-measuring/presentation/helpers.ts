@@ -93,7 +93,7 @@ export const formatSpanLabel = (section: Section | null, span: number[] | null):
 const sanitizeFilename = (name: string): string =>
   name
     .trim()
-    .replace(/[^a-zA-Z0-9-_ ]/g, '')
+    .replace(/[^a-zA-Z0-9 _-]/g, '')
     .replace(/\s+/g, '-') || 'field-measure';
 
 /**

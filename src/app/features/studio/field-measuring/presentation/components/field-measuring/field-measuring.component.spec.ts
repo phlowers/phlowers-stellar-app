@@ -315,6 +315,116 @@ describe('FieldMeasuringComponent', () => {
       component.onFieldChange('ambientTemperature', null);
       expect(component.measureData().ambientTemperature).toBeNull();
     });
+
+    it('should clear stale PAPOTO output when any PAPOTO input field changes', () => {
+      // Set up measure data with computed PAPOTO output
+      const measureDataWithOutput = createTestMeasureData({
+        spanLength: 100,
+        HL: 1,
+        H1: 2,
+        H2: 3,
+        H3: 4,
+        HR: 5,
+        outputs: {
+          papoto: {
+            parameter: 500,
+            parameter_1_2: 1,
+            parameter_2_3: 2,
+            parameter_1_3: 3,
+            checkValidity: true,
+            uncertainty: 0.1
+          },
+          cableTemperature: null,
+          parameter15C: null
+        }
+      });
+      component.measureData.set(measureDataWithOutput);
+
+      expect(component.measureData().outputs.papoto).not.toBeNull();
+
+      // Change a PAPOTO input field
+      component.onFieldChange('spanLength', 150);
+
+      // Verify PAPOTO output is cleared
+      expect(component.measureData().spanLength).toBe(150);
+      expect(component.measureData().outputs.papoto).toBeNull();
+    });
+
+    it('should preserve PAPOTO output when non-PAPOTO input field changes', () => {
+      // Set up measure data with computed PAPOTO output
+      const measureDataWithOutput = createTestMeasureData({
+        spanLength: 100,
+        outputs: {
+          papoto: {
+            parameter: 500,
+            parameter_1_2: 1,
+            parameter_2_3: 2,
+            parameter_1_3: 3,
+            checkValidity: true,
+            uncertainty: 0.1
+          },
+          cableTemperature: null,
+          parameter15C: null
+        }
+      });
+      component.measureData.set(measureDataWithOutput);
+
+      const originalOutput = component.measureData().outputs.papoto;
+
+      // Change a non-PAPOTO field
+      component.onFieldChange('windSpeed', 12);
+
+      // Verify PAPOTO output is preserved
+      expect(component.measureData().windSpeed).toBe(12);
+      expect(component.measureData().outputs.papoto).toBe(originalOutput);
+    });
+
+    it('should clear PAPOTO output for all PAPOTO input fields', () => {
+      const papotoInputFields: (keyof FieldMeasure)[] = [
+        'leftSupport',
+        'spanLength',
+        'measuredElevationDifference',
+        'HL',
+        'H1',
+        'H2',
+        'H3',
+        'HR',
+        'VL',
+        'V1',
+        'V2',
+        'V3',
+        'VR'
+      ];
+
+      papotoInputFields.forEach((field) => {
+        const measureDataWithOutput = createTestMeasureData({
+          outputs: {
+            papoto: {
+              parameter: 500,
+              parameter_1_2: 1,
+              parameter_2_3: 2,
+              parameter_1_3: 3,
+              checkValidity: true,
+              uncertainty: 0.1
+            },
+            cableTemperature: null,
+            parameter15C: null
+          }
+        });
+        component.measureData.set(measureDataWithOutput);
+
+        expect(component.measureData().outputs.papoto).not.toBeNull();
+
+        // Change the PAPOTO input field with appropriate test value
+        const testValue = field === 'leftSupport' ? '1' : field === 'calculationType' ? 'parametre' : 100;
+        component.onFieldChange(field, testValue);
+
+        // Verify PAPOTO output is cleared
+        expect(component.measureData().outputs.papoto).toBeNull(
+          `PAPOTO output should be cleared when ${field} changes`
+        );
+      });
+    });
   });
 
   describe('onExport', () => {
