@@ -106,7 +106,11 @@ export const buildMeasureExport = (measureData: FieldMeasure, translocoService: 
   date: formatExportDate(measureData.date),
   time: formatExportTime(measureData.time),
   voltage: createValueUnit(measureData.voltage, 'KV'),
-  sectionType: measureData.spanType ? translocoService.translate('common.section-type.' + measureData.spanType) : null,
+  sectionType: measureData.spanType
+    ? translocoService.translate(
+        'common.section-type.' + (measureData.spanType.toLowerCase() === 'garde' ? 'guard' : measureData.spanType)
+      )
+    : null,
   cable: measureData.cableName,
   cablesNumber: measureData.numberOfConductors,
   phaseNumber: measureData.phaseNumber

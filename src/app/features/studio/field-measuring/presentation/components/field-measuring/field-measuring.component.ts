@@ -313,10 +313,35 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!measureData) {
       return;
     }
-    this.measureData.set({
+
+    // Papoto input fields — any change invalidates the stale calculation result
+    const papotoInputFields: (keyof FieldMeasure)[] = [
+      'leftSupport',
+      'spanLength',
+      'measuredElevationDifference',
+      'HL',
+      'H1',
+      'H2',
+      'H3',
+      'HR',
+      'VL',
+      'V1',
+      'V2',
+      'V3',
+      'VR'
+    ];
+
+    const updated = {
       ...measureData,
       [field]: value
-    });
+    };
+
+    // Clear stale PAPOTO result if any PAPOTO input changed
+    if (papotoInputFields.includes(field) && measureData.outputs.papoto !== null) {
+      updated.outputs = { ...updated.outputs, papoto: null };
+    }
+
+    this.measureData.set(updated);
   }
 
   async onExport() {

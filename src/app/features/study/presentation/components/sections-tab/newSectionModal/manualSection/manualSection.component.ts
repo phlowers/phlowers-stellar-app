@@ -394,6 +394,10 @@ export class ManualSectionComponent implements OnInit {
     this.linesFilterTable.set(sortCatalogLines(linesTable));
     if (linesTable.length === 1) {
       orderedLineTableProperties.forEach((id) => {
+        // Skip branch_idr: it maps to branch_code (raw BRANCHE_IDR), which must remain an imported
+        // value and never be overwritten by the short catalog reference. Branch selection is
+        // UI-only (selectedBranchNumber) and does not persist to branch_code.
+        if (id === 'branch_idr') return;
         (this.section() as unknown as Record<string, unknown>)[lineTablePropertiesToSectionProperties[id]] =
           linesTable[0][id];
       });
@@ -405,12 +409,12 @@ export class ManualSectionComponent implements OnInit {
    *
    * The catalog only exposes the short branch number (e.g. "1", "1.0"), not the raw BRANCHE_IDR
    * stored in `branch_code`. The dropdown's `ngModel` stays one-way (bound to
-   * `selectedBranchNumber`), so `branch_code` is only ever assigned here, as the direct result of
-   * an explicit user selection — never clobbered by an unrelated re-render or cascading filter.
+   * `selectedBranchNumber`), so `branch_code` remains a UI-only state — never mapped from
+   * the short catalog value. This preserves the raw identifier on imported sections and ensures
+   * the cascading filter only updates related properties (voltage, link, etc.).
    */
   async onBranchSelect(event: { value: string }) {
     await this.onLinesSelect(event, 'branch_idr');
-    this.section().branch_code = event.value || undefined;
     this.onSectionChange();
   }
 

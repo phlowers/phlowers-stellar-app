@@ -172,7 +172,7 @@ export class SectionsTabComponent {
       phaseNumber: section.electric_phase_number ?? null,
       cablesAmount: section.cables_amount ?? null,
       maintenanceTeam,
-      branchName: section.branch_code ?? '',
+      branchName: section.branch_name ?? '',
       initialCondition: ic
         ? {
             baseParameter: ic.base_parameters,
