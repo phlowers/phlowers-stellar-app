@@ -491,4 +491,31 @@
 | Removal impact | Remove both keys from `en.json` and `fr.json` once confirmed unused elsewhere |
 | ✅ Validated | ⏳ Pending review |
 
+---
+
+## 37. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/study/domain/section.model.ts` — `maintenance_center_names: string[] \| undefined;` and `regional_maintenance_center_names: string[] \| undefined;` |
+| Code | Populated in `section-import.service.ts`'s `mapExternalSectionToSection()` from `CM_DESIGNATION`/`GMR_DESIGNATION` (as single-element arrays), alongside the new SIG.144 scalar fields `cm_adr` and `gmr_adr` which are populated from the exact same source designations. |
+| 🔍 Evidence | SIG.144 introduced `cm_adr`/`gmr_adr` (scalar `string \| undefined`) as the canonical IDR/ADR designation fields, reusing the same `cmDesignation`/`gmrDesignation` computed variables that already fed `maintenance_center_names`/`regional_maintenance_center_names`. The two array fields now look redundant with the new scalar fields (always 0-or-1 element, same source value) — but they are still read by `manualSection.component.ts`/`.html` (maintenance-team display) and other consumers, so they were NOT touched by SIG.144 to keep the change scoped to the plan. |
+| ⚠️ Confidence | **MEDIUM** — needs verification that no consumer actually depends on the array shape (vs. always taking `[0]`) before consolidating onto the scalar fields. |
+| Removal impact | Potential follow-up: replace `maintenance_center_names`/`regional_maintenance_center_names` usages with `cm_adr`/`gmr_adr` and drop the array fields — out of scope for SIG.144, logged here for future cleanup. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 38. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/domain/models/field-measure.model.ts` — `diffuseSolarFlux: number` and `diffuseDirectSolarFlux: number` (hardcoded to `123`/`246` in `createInitialMeasureData`, `presentation/helpers.ts`) |
+| Code | Never read anywhere outside their own initialization; the "Mesure de terrain" JSON export (ticket 842, `field-measure-export.helpers.ts`) maps `temperatureCalculation.solarFlux.diffuse`/`.direct` from the similarly-named `diffusedSolarFlux`/`directSolarFlux` fields instead. |
+| 🔍 Evidence | Grep across `field-measuring/**` shows `diffuseSolarFlux`/`diffuseDirectSolarFlux` only ever assigned (constant values), never consumed in any computed/template/export mapping. `diffusedSolarFlux`/`directSolarFlux`/`diffusedPlusDirectSolarFlux` are the fields actually wired to the UI and the new export. |
+| ⚠️ Confidence | **MEDIUM** — naming is close enough to `diffusedSolarFlux`/`directSolarFlux` that this may be a leftover from an earlier refactor; needs confirmation before removal since it's part of the `FieldMeasure` persisted model (Dexie). |
+| Removal impact | Potential follow-up: drop the two fields from `FieldMeasure` and `createInitialMeasureData` — out of scope for ticket 842 (export-only work), logged here for future cleanup. |
+| ✅ Validated | ⏳ Pending review |
+
+
 

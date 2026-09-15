@@ -147,7 +147,7 @@ export class SectionsTabComponent {
     const maintenanceTeam =
       maintenance?.find((m) => m.maintenance_team_id === section.maintenance_team_id)?.maintenance_team ?? '';
     const isNonLinear = !!cables?.find((c) => c.name === section.cable_name)?.is_polynomial;
-    const litAdr = lines?.find((l) => l.lit_idr === section.lit_code)?.lit_adr ?? '';
+    const litAdr = lines?.find((l) => l.lit_idr === section.lit_idr)?.lit_adr ?? '';
     // Imported cantons store the raw French CANTON_TYPE ('garde'); map it to the canonical 'guard' key.
     const rawType = (section.type ?? '').toLowerCase();
     const typeCode = rawType === 'garde' ? 'guard' : rawType;
@@ -172,7 +172,7 @@ export class SectionsTabComponent {
       phaseNumber: section.electric_phase_number ?? null,
       cablesAmount: section.cables_amount ?? null,
       maintenanceTeam,
-      branchName: section.branch_idr ?? '',
+      branchName: section.branch_name ?? '',
       initialCondition: ic
         ? {
             baseParameter: ic.base_parameters,

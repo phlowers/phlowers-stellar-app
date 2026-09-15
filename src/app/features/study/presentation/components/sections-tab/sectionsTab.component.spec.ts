@@ -101,12 +101,20 @@ describe('SectionsTabComponent', () => {
     regional_team_id: '1.23',
     maintenance_team_id: '4.56',
     maintenance_center_id: '7.89',
+    link_code: 'LinkX',
     link_name: 'LinkX',
-    lit_code: 'LIT123',
-    lit_name: 'LIT123',
+    lit_idr: 'LIT123',
+    lit_adr: 'LIT123',
     branch_name: 'BranchY',
-    branch_idr: 'BranchY',
+    branch_code: 'BranchY',
     voltage_idr: '230V',
+    voltage_adr: undefined,
+    cm_idr: undefined,
+    cm_adr: undefined,
+    gmr_idr: undefined,
+    gmr_adr: undefined,
+    eel_idr: undefined,
+    eel_adr: undefined,
     comment: 'Test section comment',
     supports_comment: 'Test supports comment',
     supports: [],
@@ -386,7 +394,7 @@ describe('SectionsTabComponent', () => {
     expect(data.initialCondition).not.toBeNull();
     // Canton type is the translated label, not the raw select code.
     expect(data.type).toBe('Phase');
-    // LIT resolves to the catalog lit_adr matched by lit_code, branch uses branch_idr.
+    // LIT resolves to the catalog lit_adr matched by lit_idr, branch uses branch_code.
     expect(data.litName).toBe('LIT-ADR-123');
     expect(data.branchName).toBe('BranchY');
   });

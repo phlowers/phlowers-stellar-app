@@ -51,6 +51,7 @@ import {
 import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
 import { LineTableProperties } from './manualSection.interfaces';
 import { LocationData } from './location/location.interfaces';
+import { extractBranchIdr } from '@features/study/application/services/section-import.helpers';
 
 /**
  * Manual section editor component.
@@ -160,6 +161,24 @@ export class ManualSectionComponent implements OnInit {
     orderBy(uniqBy(this.linesFilterTable(), 'branch_idr'), ['branch_idr'], ['asc'])
   );
 
+  /** Branch number extracted from the raw `branch_code` (BRANCHE_IDR), for display purposes only. */
+  readonly branchNumberRead = computed(() => {
+    const rawBranchCode = this.section().branch_code;
+    return rawBranchCode ? extractBranchIdr(rawBranchCode) : '';
+  });
+
+  /**
+   * Short branch number derived from the raw `branch_code`, used to pre-select the matching
+   * option in the branch catalog dropdown (`uniqueBranchIdr()`, whose `branch_idr` values are
+   * short catalog references, not the raw BRANCHE_IDR). Kept as a one-way, UI-only selection
+   * value so the raw `branch_code` is never silently overwritten by the catalog's own value —
+   * see `onBranchSelect`.
+   */
+  readonly selectedBranchNumber = computed<string | undefined>(() => {
+    const rawBranchCode = this.section().branch_code;
+    return rawBranchCode ? extractBranchIdr(rawBranchCode) : undefined;
+  });
+
   async setupFilterTables() {
     await Promise.all([this.setupMaintenanceFilter(), this.setupLinesFilter(), this.setupCablesFilter()]);
   }
@@ -191,9 +210,9 @@ export class ManualSectionComponent implements OnInit {
     }
     this.linesFilterTable.set(sortCatalogLines(linesTable));
     if (this.mode() !== 'view') return;
-    const linkLine = linesTable.find((item) => item.link_idr === this.section().link_name);
+    const linkLine = linesTable.find((item) => item.link_idr === this.section().link_code);
     this.linkAdrRead.set(linkLine?.link_adr ?? '');
-    const litLine = linesTable.find((item) => item.lit_idr === this.section().lit_code);
+    const litLine = linesTable.find((item) => item.lit_idr === this.section().lit_idr);
     this.litAdrRead.set(litLine?.lit_adr ?? '');
   }
 
@@ -375,10 +394,28 @@ export class ManualSectionComponent implements OnInit {
     this.linesFilterTable.set(sortCatalogLines(linesTable));
     if (linesTable.length === 1) {
       orderedLineTableProperties.forEach((id) => {
+        // Skip branch_idr: it maps to branch_code (raw BRANCHE_IDR), which must remain an imported
+        // value and never be overwritten by the short catalog reference. Branch selection is
+        // UI-only (selectedBranchNumber) and does not persist to branch_code.
+        if (id === 'branch_idr') return;
         (this.section() as unknown as Record<string, unknown>)[lineTablePropertiesToSectionProperties[id]] =
           linesTable[0][id];
       });
     }
+  }
+
+  /**
+   * Handles branch selection from the catalog dropdown.
+   *
+   * The catalog only exposes the short branch number (e.g. "1", "1.0"), not the raw BRANCHE_IDR
+   * stored in `branch_code`. The dropdown's `ngModel` stays one-way (bound to
+   * `selectedBranchNumber`), so `branch_code` remains a UI-only state — never mapped from
+   * the short catalog value. This preserves the raw identifier on imported sections and ensures
+   * the cascading filter only updates related properties (voltage, link, etc.).
+   */
+  async onBranchSelect(event: { value: string }) {
+    await this.onLinesSelect(event, 'branch_idr');
+    this.onSectionChange();
   }
 
   onSectionChange() {

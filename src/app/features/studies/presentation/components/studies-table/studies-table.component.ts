@@ -4,7 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { SortEvent } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -19,7 +20,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
  * Sortable, paginated table displaying a list of studies.
@@ -61,6 +62,17 @@ export class StudiesTableComponent {
   duplicateStudy = output<string>();
 
   readonly studiesService = inject(StudiesService);
+  private readonly transloco = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang()
+  });
+  /** Recomputed whenever the active language changes so the date format stays in sync. */
+  public dateFormat = computed<string>(() => {
+    this.activeLang();
+    return this.transloco.translate('studies.table.date-format');
+  });
+  /** Locale used to render localized month names (e.g. "septembre" vs "September"). */
+  public dateLocale = computed<string>(() => (this.activeLang() === 'en' ? 'en-US' : 'fr-FR'));
 
   openExportDialog = (uuid: string) => {
     this.studiesService.exportDialogData.set({
