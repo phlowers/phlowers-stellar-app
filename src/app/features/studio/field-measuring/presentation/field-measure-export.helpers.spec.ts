@@ -333,7 +333,13 @@ describe('field-measure-export.helpers', () => {
   describe('buildGroundMeasurementExport / buildFieldMeasureExportJson', () => {
     it('should compose all export blocks into a single groundMeasurement entry', () => {
       const measureData = createTestMeasureData({ name: 'MT 1' });
-      const result = buildGroundMeasurementExport(measureData, mockSection, mockStudy, mockLitData, mockTranslocoService);
+      const result = buildGroundMeasurementExport(
+        measureData,
+        mockSection,
+        mockStudy,
+        mockLitData,
+        mockTranslocoService
+      );
       expect(result).toHaveProperty('general');
       expect(result).toHaveProperty('measure');
       expect(result).toHaveProperty('span');

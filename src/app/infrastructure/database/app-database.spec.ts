@@ -32,8 +32,7 @@ const dexieState = vi.hoisted(() => ({
 vi.mock('dexie', () => {
   class DexieMock {
     name: string;
-    versionCalls: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> }[] =
-      [];
+    versionCalls: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> }[] = [];
 
     constructor(name: string) {
       this.name = name;
@@ -41,8 +40,11 @@ vi.mock('dexie', () => {
     }
 
     version(version: number) {
-      const versionCall: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> } =
-        { version };
+      const versionCall: {
+        version: number;
+        schema?: Record<string, string>;
+        upgrade?: (tx: unknown) => Promise<void>;
+      } = { version };
       this.versionCalls.push(versionCall);
 
       const chain = {

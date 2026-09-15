@@ -128,7 +128,6 @@ export const buildFieldMeasureExportFilename = (
     formatGenerationDate(generationDate)
   ].join('_');
 
-
 /**
  * Determines if the current date is in Daylight Saving Time (DST)
  * Compares current timezone offset with standard time offset

@@ -116,8 +116,14 @@ export interface PapotoMethodExport {
   calculatedLength: ValueUnit;
   measuredElevation: ValueUnit;
   calculatedElevation: ValueUnit;
-  horizontalAngles: { value: { HG: number | null; H1: number | null; H2: number | null; H3: number | null; HD: number | null }; unit: '°' };
-  verticalAngles: { value: { VG: number | null; V1: number | null; V2: number | null; V3: number | null; VD: number | null }; unit: '°' };
+  horizontalAngles: {
+    value: { HG: number | null; H1: number | null; H2: number | null; H3: number | null; HD: number | null };
+    unit: '°';
+  };
+  verticalAngles: {
+    value: { VG: number | null; V1: number | null; V2: number | null; V3: number | null; VD: number | null };
+    unit: '°';
+  };
   intermediateParameters: { value: { p12: number | null; p23: number | null; p13: number | null }; unit: 'm' };
   calculatedParameter: PapotoCalculatedParameterExport;
 }
