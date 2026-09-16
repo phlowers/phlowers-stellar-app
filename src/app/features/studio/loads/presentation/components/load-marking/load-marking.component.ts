@@ -19,6 +19,7 @@ import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
@@ -55,6 +56,7 @@ export class LoadMarkingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  readonly plotOptionsService = inject(PlotOptionsService);
   readonly loadFormsService = inject(LoadFormsService);
   private readonly translocoService = inject(TranslocoService);
   readonly chargeUuid = input<string | null>(null);

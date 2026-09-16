@@ -4,7 +4,7 @@
       app-btn
       type="button"
       btnStyle="outlined"
-      [disabled]="!supportUuidValue()"
+      [disabled]="!supportUuidValue() || plotOptionsService.isFreePositioningMode()"
       (click)="obstacleFormService.returnToSpan()"
       btnSize="s"
       data-testid="return-to-span"
@@ -32,6 +32,7 @@
     <p-select
       inputId="span"
       [options]="spansOptions()"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
       formControlName="supportUuid"
       optionLabel="label"
       optionValue="value"

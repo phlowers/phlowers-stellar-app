@@ -19,25 +19,6 @@ export const getSupportAltitudeNgf = (litData: GetSectionOutput | null | undefin
 };
 
 /**
- * Resolves the frozen span index for a free-positioning wrapper from the tab's own
- * span-selecting field (support UUID), so the plot reloads as soon as that field
- * changes — even though the top plot's span selector stays frozen/disabled.
- * Falls back to the plot's current start support when the UUID has no value or does
- * not resolve to a known support.
- */
-export const resolveFrozenSpan = (
-  supportUuid: string | null | undefined,
-  getSupportIndex: (uuid: string) => number,
-  fallback: number
-): number => {
-  if (supportUuid) {
-    const idx = getSupportIndex(supportUuid);
-    if (idx >= 0) return idx;
-  }
-  return fallback;
-};
-
-/**
  * Builds obstacle points for the given frozen span.
  */
 export const buildObstaclePoints = (params: AggregatePointsParams): FreePositioningPoint[] => {

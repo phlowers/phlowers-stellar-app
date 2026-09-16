@@ -41,8 +41,8 @@ describe('ObstacleFreePositioningComponent', () => {
 
   const mockPlotOptionsService = {
     plotOptions: signal({ startSupport: 0, endSupport: 1, view: '2d', side: 'profile' }),
-    setFreePositioningMode: vi.fn(),
-    syncFrozenSpan: vi.fn()
+    frozenSpan: signal<number>(0),
+    setFreePositioningMode: vi.fn()
   };
 
   const mockPlotSpanService = {
@@ -81,6 +81,7 @@ describe('ObstacleFreePositioningComponent', () => {
     mockObstacleFormService.form = obstacleForm;
     mockObstacleFormService.positions = positionsArray;
     mockObstaclesService.activePointIndex.set(0);
+    mockPlotOptionsService.frozenSpan.set(0);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -111,11 +112,11 @@ describe('ObstacleFreePositioningComponent', () => {
   });
 
   describe('frozenSpan and points', () => {
-    it('should compute frozen span from obstacle form supportUuid', () => {
+    it('should read the frozen span captured by PlotOptionsService', () => {
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(0);
 
-      obstacleForm.controls['supportUuid'].setValue('sup-1');
+      mockPlotOptionsService.frozenSpan.set(1);
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(1);
     });
@@ -125,13 +126,13 @@ describe('ObstacleFreePositioningComponent', () => {
       expect(mockDataService.getPoints).toHaveBeenCalledWith(0, 'obstacle');
     });
 
-    it('should sync the span selector display when frozenSpan changes', () => {
+    it('should not follow the obstacle form supportUuid once frozen', () => {
       fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(0);
+      expect(component.frozenSpan()).toBe(0);
 
       obstacleForm.controls['supportUuid'].setValue('sup-1');
       fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(1);
+      expect(component.frozenSpan()).toBe(0);
     });
   });
 

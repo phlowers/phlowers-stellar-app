@@ -17,6 +17,7 @@ import { TranslocoModule } from '@jsverse/transloco';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { DistanceMeasuringService } from './distance-measuring.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { FreePositioningToggleComponent } from '@features/studio/core/presentation/components/free-positioning-toggle/free-positioning-toggle.component';
 
 /** Distance-measuring tab: place three points and read back the distances and angle between them. */
@@ -51,4 +52,5 @@ import { FreePositioningToggleComponent } from '@features/studio/core/presentati
 })
 export class DistanceMeasuringComponent {
   readonly service = inject(DistanceMeasuringService);
+  readonly plotOptionsService = inject(PlotOptionsService);
 }

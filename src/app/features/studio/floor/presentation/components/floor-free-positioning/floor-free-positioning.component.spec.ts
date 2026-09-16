@@ -39,8 +39,8 @@ describe('FloorFreePositioningComponent', () => {
 
   const mockPlotOptionsService = {
     plotOptions: signal({ startSupport: 0, endSupport: 1, view: '2d', side: 'profile' }),
-    setFreePositioningMode: vi.fn(),
-    syncFrozenSpan: vi.fn()
+    frozenSpan: signal<number>(0),
+    setFreePositioningMode: vi.fn()
   };
 
   const mockPlotSpanService = {
@@ -68,6 +68,7 @@ describe('FloorFreePositioningComponent', () => {
 
     mockFloorFormService.points = pointsArray;
     mockFloorFormService.spanValue.set('sup-0');
+    mockPlotOptionsService.frozenSpan.set(0);
     mockFloorFormService.activePointIndex.set(1);
     mockFloorFormService.pointsView.mockReturnValue([
       { group: pointsArray.at(0) as FormGroup, meta: { removable: false } },
@@ -103,11 +104,11 @@ describe('FloorFreePositioningComponent', () => {
   });
 
   describe('frozenSpan and points', () => {
-    it('should compute frozen span from floor form spanValue', () => {
+    it('should read the frozen span captured by PlotOptionsService', () => {
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(0);
 
-      mockFloorFormService.spanValue.set('sup-1');
+      mockPlotOptionsService.frozenSpan.set(1);
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(1);
     });
@@ -117,13 +118,13 @@ describe('FloorFreePositioningComponent', () => {
       expect(mockDataService.getPoints).toHaveBeenCalledWith(0, 'floor');
     });
 
-    it('should sync the span selector display when frozenSpan changes', () => {
+    it('should not follow the tab span field once frozen', () => {
       fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(0);
+      expect(component.frozenSpan()).toBe(0);
 
       mockFloorFormService.spanValue.set('sup-1');
       fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(1);
+      expect(component.frozenSpan()).toBe(0);
     });
   });
 

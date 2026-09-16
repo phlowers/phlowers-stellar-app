@@ -36,11 +36,11 @@ import { SectionPlotCardsComponent } from '@features/studio/core/presentation/co
 import { SideTabsComponent } from '@features/studio/core/presentation/components/side-tabs/side-tabs.component';
 import { QuickMeasuresComponent } from '@features/studio/core/presentation/components/quick-measures/quick-measures.component';
 import { SideTabComponent } from '@features/studio/core/presentation/components/side-tabs/side-tab/side-tab.component';
-import { ObstacleFreePositioningComponent } from '@features/studio/obstacles/presentation/components/obstacle-free-positioning/obstacle-free-positioning.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
-import { LoadsFreePositioningComponent } from '@features/studio/loads/presentation/components/loads-free-positioning/loads-free-positioning.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
+import { ObstacleFreePositioningComponent } from '@features/studio/obstacles/presentation/components/obstacle-free-positioning/obstacle-free-positioning.component';
+import { LoadsFreePositioningComponent } from '@features/studio/loads/presentation/components/loads-free-positioning/loads-free-positioning.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';

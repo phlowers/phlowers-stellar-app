@@ -13,7 +13,6 @@ import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { CableModification } from '@src/app/shared/domain';
 import { CableModificationsService } from './cableModifications.service';
-import { resolveFrozenSpan } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +25,7 @@ export class LoadFormsService {
   /** UUID of the span support to select in the span form, set when clicking a load annotation. Cleared after consumption. */
   readonly selectedSpanSupportUuid = signal<string | null>(null);
 
-  /** UUID of the span currently selected in the load-marking form's `spanSelect` control, kept in sync so the free-positioning plot can react to span changes while frozen. */
+  /** UUID of the span currently selected in the load-marking form's `spanSelect` control. Kept for the span form; free positioning now reads its frozen span from `PlotOptionsService.frozenSpan`. */
   readonly activeSpanSupportUuid = signal<string | null>(null);
 
   /** Position updated from free positioning plot click. */
@@ -42,13 +41,9 @@ export class LoadFormsService {
     this.activeLoadPosition.set(position);
   }
 
-  /** Resolves the span index currently frozen for free positioning, from the form's `spanSelect` field. */
+  /** Resolves the span index frozen for free positioning, snapshotted when the mode was switched on. */
   private getActiveSpanIndex(): number {
-    return resolveFrozenSpan(
-      this.activeSpanSupportUuid(),
-      (uuid) => this.spanService.getSupportIndex(uuid),
-      this.plotOptionsService.plotOptions().startSupport
-    );
+    return this.plotOptionsService.frozenSpan();
   }
 
   /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */

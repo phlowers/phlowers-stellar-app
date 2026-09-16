@@ -31,8 +31,8 @@ describe('LoadsFreePositioningComponent', () => {
 
   const mockPlotOptionsService = {
     plotOptions: signal({ startSupport: 1, endSupport: 2, view: '2d', side: 'profile' }),
-    setFreePositioningMode: vi.fn(),
-    syncFrozenSpan: vi.fn()
+    frozenSpan: signal<number>(1),
+    setFreePositioningMode: vi.fn()
   };
 
   const mockPlotSpanService = {
@@ -52,6 +52,7 @@ describe('LoadsFreePositioningComponent', () => {
     vi.clearAllMocks();
 
     mockPlotOptionsService.plotOptions.set({ startSupport: 1, endSupport: 2, view: '2d', side: 'profile' });
+    mockPlotOptionsService.frozenSpan.set(1);
     mockLoadFormsService.activeSpanSupportUuid.set(null);
 
     await TestBed.configureTestingModule({
@@ -82,7 +83,7 @@ describe('LoadsFreePositioningComponent', () => {
   });
 
   describe('frozenSpan and points', () => {
-    it('should compute frozen span from plotOptions startSupport', () => {
+    it('should read the frozen span captured by PlotOptionsService', () => {
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(1);
     });
@@ -92,26 +93,13 @@ describe('LoadsFreePositioningComponent', () => {
       expect(mockDataService.getPoints).toHaveBeenCalledWith(1, 'loads');
     });
 
-    it('should recompute frozen span from the load-marking form span selection', () => {
-      fixture.detectChanges();
-      expect(component.frozenSpan()).toBe(1);
-
-      mockLoadFormsService.activeSpanSupportUuid.set('sup-1');
+    it('should not follow the load-marking form span selection once frozen', () => {
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(1);
 
       mockLoadFormsService.activeSpanSupportUuid.set('sup-0');
       fixture.detectChanges();
-      expect(component.frozenSpan()).toBe(0);
-    });
-
-    it('should sync the span selector display when frozenSpan changes', () => {
-      fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(1);
-
-      mockLoadFormsService.activeSpanSupportUuid.set('sup-0');
-      fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(0);
+      expect(component.frozenSpan()).toBe(1);
     });
   });
 

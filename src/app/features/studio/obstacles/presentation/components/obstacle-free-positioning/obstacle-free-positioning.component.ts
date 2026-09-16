@@ -8,13 +8,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
-  OnDestroy,
-  Signal
+  OnDestroy
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map, of } from 'rxjs';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
 import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
@@ -25,10 +21,9 @@ import {
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
 import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
-import { getSupportAltitudeNgf, resolveFrozenSpan } from '@core/services/free-positioning-data/free-positioning-data.helpers';
+import { getSupportAltitudeNgf } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 
 import { OBSTACLE_FREE_POSITIONING_CONFIG } from './obstacle-free-positioning.component.constantes';
 import {
@@ -51,30 +46,14 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly plotOptionsService = inject(PlotOptionsService);
-  private readonly spanService = inject(PlotSpanService);
   private readonly plotService = inject(PlotService);
 
-  private readonly supportUuidSignal: Signal<string | undefined> = toSignal(
-    (this.obstacleFormService.form.get('supportUuid')?.valueChanges ?? of(this.obstacleFormService.form.get('supportUuid')?.value)).pipe(
-      map((value) => value ?? undefined)
-    ),
-    { initialValue: this.obstacleFormService.form.get('supportUuid')?.value ?? undefined }
-  );
-
-  readonly frozenSpan = computed(() =>
-    resolveFrozenSpan(
-      this.supportUuidSignal(),
-      (uuid) => this.spanService.getSupportIndex(uuid),
-      this.plotOptionsService.plotOptions()?.startSupport ?? 0
-    )
-  );
+  /** Span frozen when free positioning was switched on; constant for the whole session. */
+  readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
   readonly points = computed(() =>
     this.dataService.getPoints(this.frozenSpan(), 'obstacle')
   );
-
-  /** Keeps the disabled span selector display in sync with the frozen span. */
-  private readonly frozenSpanSyncEffect = effect(() => this.plotOptionsService.syncFrozenSpan(this.frozenSpan()));
 
   onPlacement(placement: FreePositioningPlacement): void {
     const activeIndex = this.obstaclesService.activePointIndex();

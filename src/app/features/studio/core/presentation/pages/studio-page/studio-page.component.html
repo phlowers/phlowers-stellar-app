@@ -17,13 +17,15 @@
           <app-floor-free-positioning class="plot-view" />
         }
         @case ('obstacle') {
-          <app-free-positioning class="plot-view" />
+          <app-obstacle-free-positioning class="plot-view" />
         }
         @case ('distance') {
           <app-distance-free-positioning class="plot-view" />
         }
+        @case ('loads') {
+          <app-loads-free-positioning class="plot-view" />
+        }
         @default {
-          <!-- TODO: dedicated loads free-positioning plot is a later phase -->
           <app-studio class="plot-view" [isPreview]="false" />
         }
       }

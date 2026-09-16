@@ -49,6 +49,12 @@ export class PlotOptionsService {
   readonly isFreePositioningMode = signal<boolean>(false);
   /** Which feature currently drives free positioning mode, so the studio page can render the matching plot. */
   readonly freePositioningSource = signal<FreePositioningSource | null>(null);
+  /**
+   * Span index captured when free positioning mode is switched on and held constant while it stays on.
+   * Free-positioning wrappers read this instead of any live form/plot value so nothing can change the
+   * displayed span during the session — the user must leave the mode to select another span.
+   */
+  readonly frozenSpan = signal<number>(0);
 
   private readonly document = inject(DOCUMENT);
 
@@ -123,6 +129,10 @@ export class PlotOptionsService {
     if (!enabled && untracked(() => this.freePositioningSource()) !== source) {
       return;
     }
+    if (enabled) {
+      // Snapshot the span once so the frozen view never follows later form/plot changes.
+      this.frozenSpan.set(untracked(() => this.plotOptions().startSupport));
+    }
     this.isFreePositioningMode.set(enabled);
     this.freePositioningSource.set(enabled ? source : null);
   }
@@ -134,18 +144,8 @@ export class PlotOptionsService {
     this.pendingCameraRestore.set(null);
     this.isFreePositioningMode.set(false);
     this.freePositioningSource.set(null);
+    this.frozenSpan.set(0);
     this.scalingFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     this.aspectRatio.set({ x: 1, y: 1, z: 1 });
-  }
-
-  /**
-   * Keeps the (disabled) span selector display in sync with the span frozen by a
-   * free-positioning wrapper, without going through `plotOptionsChange` — so no
-   * projection refresh is triggered while navigation is frozen.
-   */
-  syncFrozenSpan(span: number): void {
-    const current = untracked(() => this.plotOptions());
-    if (current.startSupport === span && current.endSupport === span + 1) return;
-    this.plotOptions.set({ ...current, startSupport: span, endSupport: span + 1 });
   }
 }

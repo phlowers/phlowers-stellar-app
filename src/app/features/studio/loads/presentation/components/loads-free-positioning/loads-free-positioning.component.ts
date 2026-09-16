@@ -8,12 +8,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   OnDestroy
 } from '@angular/core';
 
-import { resolveFrozenSpan } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
 import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
 import {
@@ -22,7 +20,6 @@ import {
 } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.interfaces';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { PlotSpanService } from '@services/plot/plot-span.service';
 
 import { LOADS_FREE_POSITIONING_CONFIG } from './loads-free-positioning.component.constantes';
 
@@ -44,22 +41,13 @@ export class LoadsFreePositioningComponent implements OnDestroy {
   private readonly dataService = inject(FreePositioningDataService);
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly plotOptionsService = inject(PlotOptionsService);
-  private readonly spanService = inject(PlotSpanService);
 
-  readonly frozenSpan = computed(() =>
-    resolveFrozenSpan(
-      this.loadFormsService.activeSpanSupportUuid(),
-      (uuid) => this.spanService.getSupportIndex(uuid),
-      this.plotOptionsService.plotOptions()?.startSupport ?? 0
-    )
-  );
+  /** Span frozen when free positioning was switched on; constant for the whole session. */
+  readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
   readonly points = computed(() =>
     this.dataService.getPoints(this.frozenSpan(), 'loads')
   );
-
-  /** Keeps the disabled span selector display in sync with the frozen span. */
-  private readonly frozenSpanSyncEffect = effect(() => this.plotOptionsService.syncFrozenSpan(this.frozenSpan()));
 
   onPlacement(placement: FreePositioningPlacement): void {
     this.loadFormsService.setLoadPosition(placement.alongSpan);

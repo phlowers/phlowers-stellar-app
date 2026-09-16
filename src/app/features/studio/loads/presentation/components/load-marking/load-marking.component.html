@@ -6,7 +6,7 @@
       type="button"
       btnStyle="outlined"
       btnSize="s"
-      [disabled]="!spanSelectValue()"
+      [disabled]="!spanSelectValue() || plotOptionsService.isFreePositioningMode()"
       (click)="zoomToSpan()"
       data-testid="span-zoom"
     >
@@ -25,6 +25,7 @@
     <p-select
       inputId="spanSelect"
       [options]="spansOptions()"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
       fluid
       formControlName="spanSelect"
       optionLabel="label"

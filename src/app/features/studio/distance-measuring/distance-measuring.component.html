@@ -9,7 +9,7 @@
   type="button"
   btnStyle="outlined"
   btnSize="s"
-  [disabled]="!service.selectedSupportUuid()"
+  [disabled]="!service.selectedSupportUuid() || plotOptionsService.isFreePositioningMode()"
   (click)="service.zoomToSpan()"
   data-testid="zoom-to-span"
   class="distance-measuring__zoom-btn"
@@ -23,6 +23,7 @@
   <p-select
     inputId="distanceSpan"
     [options]="service.spanOptions()"
+    [disabled]="plotOptionsService.isFreePositioningMode()"
     [ngModel]="service.selectedSupportUuid()"
     (ngModelChange)="service.selectedSupportUuid.set($event)"
     optionLabel="label"

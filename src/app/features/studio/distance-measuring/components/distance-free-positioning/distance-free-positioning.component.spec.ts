@@ -37,8 +37,8 @@ describe('DistanceFreePositioningComponent', () => {
 
   const mockPlotOptionsService = {
     plotOptions: signal({ startSupport: 0, endSupport: 1, view: '2d', side: 'profile' }),
-    setFreePositioningMode: vi.fn(),
-    syncFrozenSpan: vi.fn()
+    frozenSpan: signal<number>(0),
+    setFreePositioningMode: vi.fn()
   };
 
   const mockPlotSpanService = {
@@ -66,6 +66,7 @@ describe('DistanceFreePositioningComponent', () => {
     mockDistanceMeasuringService.form = formArray;
     mockDistanceMeasuringService.activePointIndex.set(0);
     mockDistanceMeasuringService.selectedSupportUuid.set('sup-0');
+    mockPlotOptionsService.frozenSpan.set(0);
     mockDistanceMeasuringService.positions = signal([
       { x: 10, y: null, z: 20 },
       { x: null, y: null, z: null }
@@ -99,11 +100,11 @@ describe('DistanceFreePositioningComponent', () => {
   });
 
   describe('frozenSpan and points', () => {
-    it('should compute frozen span from distance measuring selectedSupportUuid', () => {
+    it('should read the frozen span captured by PlotOptionsService', () => {
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(0);
 
-      mockDistanceMeasuringService.selectedSupportUuid.set('sup-1');
+      mockPlotOptionsService.frozenSpan.set(1);
       fixture.detectChanges();
       expect(component.frozenSpan()).toBe(1);
     });
@@ -113,13 +114,13 @@ describe('DistanceFreePositioningComponent', () => {
       expect(mockDataService.getPoints).toHaveBeenCalledWith(0, 'distance');
     });
 
-    it('should sync the span selector display when frozenSpan changes', () => {
+    it('should not follow the tab span field once frozen', () => {
       fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(0);
+      expect(component.frozenSpan()).toBe(0);
 
       mockDistanceMeasuringService.selectedSupportUuid.set('sup-1');
       fixture.detectChanges();
-      expect(mockPlotOptionsService.syncFrozenSpan).toHaveBeenCalledWith(1);
+      expect(component.frozenSpan()).toBe(0);
     });
   });
 

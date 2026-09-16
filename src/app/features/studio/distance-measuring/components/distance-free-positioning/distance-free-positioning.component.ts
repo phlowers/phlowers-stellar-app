@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
 import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
@@ -12,10 +12,8 @@ import {
   FreePositioningPlacement,
   FreePositioningSelection
 } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.interfaces';
-import { resolveFrozenSpan } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { PlotSpanService } from '@services/plot/plot-span.service';
 
 import { DISTANCE_FREE_POSITIONING_CONFIG } from './distance-free-positioning.component.constantes';
 import {
@@ -39,23 +37,14 @@ export class DistanceFreePositioningComponent implements OnDestroy {
 
   private readonly dataService = inject(FreePositioningDataService);
   readonly distanceMeasuringService = inject(DistanceMeasuringService);
-  private readonly spanService = inject(PlotSpanService);
   private readonly plotOptionsService = inject(PlotOptionsService);
 
-  readonly frozenSpan = computed(() =>
-    resolveFrozenSpan(
-      this.distanceMeasuringService.selectedSupportUuid(),
-      (uuid) => this.spanService.getSupportIndex(uuid),
-      this.plotOptionsService.plotOptions()?.startSupport ?? 0
-    )
-  );
+  /** Span frozen when free positioning was switched on; constant for the whole session. */
+  readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
   readonly points = computed(() =>
     this.dataService.getPoints(this.frozenSpan(), 'distance')
   );
-
-  /** Keeps the disabled span selector display in sync with the frozen span. */
-  private readonly frozenSpanSyncEffect = effect(() => this.plotOptionsService.syncFrozenSpan(this.frozenSpan()));
 
   onPlacement(placement: FreePositioningPlacement): void {
     const activeIndex = this.distanceMeasuringService.activePointIndex();

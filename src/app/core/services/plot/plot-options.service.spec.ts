@@ -204,25 +204,35 @@ describe('PlotOptionsService', () => {
     });
   });
 
-  describe('syncFrozenSpan', () => {
-    it('should update startSupport and endSupport to reflect the given span', () => {
-      service.plotOptions.set({ view: '3d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
-      service.syncFrozenSpan(3);
-      expect(service.plotOptions().startSupport).toBe(3);
-      expect(service.plotOptions().endSupport).toBe(4);
+  describe('frozenSpan', () => {
+    it('should snapshot the current startSupport when free positioning is switched on', () => {
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 4, endSupport: 5, invert: false });
+      service.setFreePositioningMode(true, 'floor');
+      expect(service.frozenSpan()).toBe(4);
     });
 
-    it('should not write to plotOptions when the span is already in sync', () => {
-      service.plotOptions.set({ view: '3d', side: 'profile', startSupport: 2, endSupport: 3, invert: false });
-      const spy = vi.spyOn(service.plotOptions, 'set');
-      service.syncFrozenSpan(2);
-      expect(spy).not.toHaveBeenCalled();
+    it('should not change the frozen span while free positioning stays on', () => {
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 4, endSupport: 5, invert: false });
+      service.setFreePositioningMode(true, 'floor');
+      // A later plot span change must not move the frozen span.
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 7, endSupport: 8, invert: false });
+      expect(service.frozenSpan()).toBe(4);
     });
 
-    it('should preserve other plot options (view, side, invert)', () => {
-      service.plotOptions.set({ view: '2d', side: 'face', startSupport: 0, endSupport: 1, invert: true });
-      service.syncFrozenSpan(5);
-      expect(service.plotOptions()).toEqual({ view: '2d', side: 'face', startSupport: 5, endSupport: 6, invert: true });
+    it('should re-capture the current span when re-entering free positioning', () => {
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 2, endSupport: 3, invert: false });
+      service.setFreePositioningMode(true, 'floor');
+      service.setFreePositioningMode(false, 'floor');
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 6, endSupport: 7, invert: false });
+      service.setFreePositioningMode(true, 'floor');
+      expect(service.frozenSpan()).toBe(6);
+    });
+
+    it('should reset the frozen span to 0 on reset', () => {
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 4, endSupport: 5, invert: false });
+      service.setFreePositioningMode(true, 'floor');
+      service.reset();
+      expect(service.frozenSpan()).toBe(0);
     });
   });
 

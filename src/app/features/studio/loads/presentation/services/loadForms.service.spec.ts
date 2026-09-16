@@ -161,7 +161,8 @@ describe('LoadFormsService', () => {
     } as unknown as vi.Mocked<PlotSpanService>;
     plotOptionsServiceMock = {
       refreshCamera: vi.fn(),
-      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1, view: '3d' })
+      plotOptions: createSignalMock({ startSupport: 0, endSupport: 1, view: '3d' }),
+      frozenSpan: createSignalMock(0)
     } as unknown as vi.Mocked<PlotOptionsService>;
 
     mockChargesService = {
