@@ -98,17 +98,39 @@ describe('FreePositioningToggleComponent', () => {
     expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
   });
 
-  it('should force a 2D reprojection when enabling free positioning from the 3D view', () => {
+  it('should force a 2D reprojection on the frozen span when enabling free positioning', () => {
     mockPlotOptionsService.plotOptions.set({ view: '3d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
+    fixture.componentRef.setInput('spanIndex', 2);
+    fixture.detectChanges();
 
     component.onChange(true);
 
-    expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ view: '2d' });
-    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor', null);
+    expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ view: '2d', startSupport: 2, endSupport: 3 });
+    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor', 2);
   });
 
-  it('should not trigger a reprojection when enabling free positioning already in 2D', () => {
+  it('should reproject on the tab span even when the studio shows a different span (reference support bug)', () => {
+    // Studio shows span 1-2 (startSupport 0) while the tab selects span 2-3 (index 1). The
+    // reprojection must re-zero litData on the tab span so its left support sits at x=0.
+    mockPlotOptionsService.plotOptions.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
+    fixture.componentRef.setInput('spanIndex', 1);
+    fixture.detectChanges();
+
     component.onChange(true);
+
+    expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ view: '2d', startSupport: 1, endSupport: 2 });
+  });
+
+  it('should fall back to the studio startSupport when no tab span is selected', () => {
+    mockPlotOptionsService.plotOptions.set({ view: '2d', side: 'profile', startSupport: 3, endSupport: 4, invert: false });
+
+    component.onChange(true);
+
+    expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ view: '2d', startSupport: 3, endSupport: 4 });
+  });
+
+  it('should not reproject when disabling free positioning', () => {
+    component.onChange(false);
 
     expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
   });

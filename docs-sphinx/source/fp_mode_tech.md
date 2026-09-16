@@ -44,6 +44,29 @@ The frozen span is a single source of truth held by `PlotOptionsService`:
   (only the zoom button writes `startSupport`), so freezing `startSupport` would
   otherwise capture a stale span. Using `untracked` guarantees the capture is a
   one-off snapshot with no reactive dependency on `plotOptions()`.
+
+  Capturing the frozen span is not enough on its own: the plot's x-coordinates
+  come from `litData`, which Python re-zeroes at the **left support of the
+  projected range** in `refreshProjection()`. If fp mode is entered while the
+  studio is projected on a different span, `litData` keeps the old x-origin and
+  the frozen span's left support (the *reference support*) is drawn at a non-zero
+  x. To avoid this, `FreePositioningToggleComponent.onChange` reprojects on the
+  frozen span **before** enabling the mode:
+
+  ```ts
+  if (enabled) {
+    const span = this.spanIndex() ?? this.plotOptionsService.plotOptions().startSupport;
+    this.plotService.plotOptionsChange({ view: '2d', startSupport: span, endSupport: span + 1 });
+  }
+  this.plotOptionsService.setFreePositioningMode(enabled, this.source(), this.spanIndex());
+  ```
+
+  `plotService.plotOptionsChange` forces a 2D single-span view **and** triggers
+  `refreshProjection()`, so `litData` is recomputed with the frozen span's left
+  support at `x = 0`. The reprojection lives in the toggle (not in
+  `PlotOptionsService`) because it needs `PlotService`, which would be a circular
+  dependency inside `PlotOptionsService`.
+
 - It is reset to `0` in `reset()`.
 - Every wrapper reads it directly, with **no reactivity** of its own:
 

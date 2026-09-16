@@ -35,10 +35,12 @@ export class FreePositioningToggleComponent {
   readonly inputId = input<string>('freePositioning');
 
   onChange(enabled: boolean): void {
-    // Free positioning needs span-projected (2D) coordinates for its face plot;
-    // force a 2D reprojection first so litData isn't left in the raw 3D frame.
-    if (enabled && this.plotOptionsService.plotOptions().view === '3d') {
-      this.plotService.plotOptionsChange({ view: '2d' });
+    if (enabled) {
+      // Reproject in 2D on the tab-selected (frozen) span so litData's x-origin is that span's
+      // left support. Free positioning needs span-projected 2D coordinates, and the reference
+      // support must follow the tab selection, not the studio's last-shown span.
+      const span = this.spanIndex() ?? this.plotOptionsService.plotOptions().startSupport;
+      this.plotService.plotOptionsChange({ view: '2d', startSupport: span, endSupport: span + 1 });
     }
     this.plotOptionsService.setFreePositioningMode(enabled, this.source(), this.spanIndex());
   }
