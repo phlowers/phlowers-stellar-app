@@ -79,24 +79,27 @@ export const LEFT_SUPPORT_OPTION_KEYS: TranslatableSelectOption[] = [
 /** PAPOTO validity criterion threshold (0.5%), not exposed by `PapotoResult` — used for the JSON export. */
 export const PAPOTO_VALIDITY_CRITERION_PERCENT = 0.5;
 
-/** Maps the internal `windSpeedUnit` value to the JSON export label. */
-export const WIND_SPEED_UNIT_EXPORT_LABELS: Record<FieldMeasure['windSpeedUnit'], 'KM/H' | 'M/S'> = {
-  kmh: 'KM/H',
-  ms: 'M/S'
+/** Maps the internal `windSpeedUnit` value to a Transloco key for JSON export label. */
+export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], string> = {
+  kmh: 'field-measuring.export-labels.wind-speed-unit.kmh',
+  ms: 'field-measuring.export-labels.wind-speed-unit.ms'
 };
 
-/** Maps the internal `calculationMethod` value to the JSON export label. */
-export const PARAMETER_CALCULATION_METHOD_EXPORT_LABELS: Record<
-  FieldMeasure['calculationMethod'],
-  'PAPOTO' | 'VISEES_TANGENTES' | 'PEP'
-> = {
-  papoto: 'PAPOTO',
-  'tangente-aiming': 'VISEES_TANGENTES',
-  pep: 'PEP'
+/** Maps the internal `calculationMethod` value to a Transloco key for JSON export label. */
+export const PARAMETER_CALCULATION_METHOD_EXPORT_KEYS: Record<FieldMeasure['calculationMethod'], string> = {
+  papoto: 'field-measuring.export-labels.calculation-method.papoto',
+  'tangente-aiming': 'field-measuring.export-labels.calculation-method.tangente-aiming',
+  pep: 'field-measuring.export-labels.calculation-method.pep'
 };
 
-/** Maps the internal `updateMode15C` value to the JSON export label. */
-export const UPDATE_MODE_15C_EXPORT_LABELS: Record<FieldMeasure['updateMode15C'], 'AUTO' | 'MANUELLE'> = {
-  auto: 'AUTO',
-  manual: 'MANUELLE'
+/** Maps the internal `updateMode15C` value to a Transloco key for JSON export label. */
+export const UPDATE_MODE_15C_EXPORT_KEYS: Record<FieldMeasure['updateMode15C'], string> = {
+  auto: 'field-measuring.export-labels.update-mode-15c.auto',
+  manual: 'field-measuring.export-labels.update-mode-15c.manual'
+};
+
+/** Maps the internal `calculationType` value to a Transloco key for JSON export label. */
+export const CALCULATION_TYPE_EXPORT_KEYS: Record<string, string> = {
+  tangente: 'field-measuring.export-labels.calculation-type.angle-tangent',
+  other: 'field-measuring.export-labels.calculation-type.parameter'
 };

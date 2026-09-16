@@ -12,9 +12,10 @@ import { FieldMeasure } from '../domain/types';
 import { formatSpanLabel } from './helpers';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
-  PARAMETER_CALCULATION_METHOD_EXPORT_LABELS,
-  UPDATE_MODE_15C_EXPORT_LABELS,
-  WIND_SPEED_UNIT_EXPORT_LABELS
+  PARAMETER_CALCULATION_METHOD_EXPORT_KEYS,
+  UPDATE_MODE_15C_EXPORT_KEYS,
+  WIND_SPEED_UNIT_EXPORT_KEYS,
+  CALCULATION_TYPE_EXPORT_KEYS
 } from './constants';
 import {
   GeneralExport,
@@ -132,14 +133,21 @@ export const buildSpanExport = (measureData: FieldMeasure, section: Section | nu
 /**
  * Builds the `temperatureCalculation` export block.
  * @param measureData - The field measure to export
+ * @param translocoService - The Transloco service used to translate export labels
  * @returns The `temperatureCalculation` export block
  */
-export const buildTemperatureCalculationExport = (measureData: FieldMeasure): TemperatureCalculationExport => {
+export const buildTemperatureCalculationExport = (
+  measureData: FieldMeasure,
+  translocoService: TranslocoService
+): TemperatureCalculationExport => {
   const { outputs } = measureData;
   return {
     ambientTemperature: createValueUnit(measureData.ambientTemperature, '°C'),
     wind: {
-      speed: createValueUnit(measureData.windSpeed, WIND_SPEED_UNIT_EXPORT_LABELS[measureData.windSpeedUnit]),
+      speed: createValueUnit(
+        measureData.windSpeed,
+        translocoService.translate(WIND_SPEED_UNIT_EXPORT_KEYS[measureData.windSpeedUnit])
+      ),
       direction: measureData.windDirection,
       incidence: createValueUnit(measureData.windIncidence, '°')
     },
@@ -200,23 +208,32 @@ const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionO
 };
 
 /** Builds the tangential sights (Visées tangentes) method export block from raw inputs (method not implemented). */
-const buildTangentialSightsMethodExport = (measureData: FieldMeasure): TangentialSightsMethodExport => ({
-  measuredLength: createValueUnit(null, 'm'),
-  calculatedLength: createValueUnit(null, 'm'),
-  leftSupportMeasures: {
-    verticalDistance: createValueUnit(null, 'm'),
-    verticalAngle: createValueUnit(measureData.cableVerticalAccAngle, '°'),
-    horizontalDistance: createValueUnit(measureData.cableHAccDistance, 'm')
-  },
-  rightSupportMeasures: {
-    verticalAngle: createValueUnit(measureData.cableTangentAngle, '°')
-  },
-  calculationType: {
-    type: measureData.calculationType === 'tangente' ? 'ANGLE_TANGENT' : 'PARAMETRE',
-    value: null
-  },
-  calculatedParameter: undefined
-});
+const buildTangentialSightsMethodExport = (
+  measureData: FieldMeasure,
+  translocoService: TranslocoService
+): TangentialSightsMethodExport => {
+  const calculationTypeKey =
+    measureData.calculationType === 'tangente'
+      ? CALCULATION_TYPE_EXPORT_KEYS.tangente
+      : CALCULATION_TYPE_EXPORT_KEYS.other;
+  return {
+    measuredLength: createValueUnit(null, 'm'),
+    calculatedLength: createValueUnit(null, 'm'),
+    leftSupportMeasures: {
+      verticalDistance: createValueUnit(null, 'm'),
+      verticalAngle: createValueUnit(measureData.cableVerticalAccAngle, '°'),
+      horizontalDistance: createValueUnit(measureData.cableHAccDistance, 'm')
+    },
+    rightSupportMeasures: {
+      verticalAngle: createValueUnit(measureData.cableTangentAngle, '°')
+    },
+    calculationType: {
+      type: translocoService.translate(calculationTypeKey),
+      value: null
+    },
+    calculatedParameter: undefined
+  };
+};
 
 /** Builds the PEP method export block from raw inputs (method not implemented). */
 const buildPepMethodExport = (measureData: FieldMeasure): PepMethodExport => ({
@@ -239,11 +256,13 @@ const buildPepMethodExport = (measureData: FieldMeasure): PepMethodExport => ({
  * is populated in `method`; the other methods are left undefined.
  * @param measureData - The field measure to export
  * @param litData - The current section geometry/output parameters (or `null`)
+ * @param translocoService - The Transloco service used to translate export labels
  * @returns The `parameterCalculation` export block
  */
 export const buildParameterCalculationExport = (
   measureData: FieldMeasure,
-  litData: GetSectionOutput | null
+  litData: GetSectionOutput | null,
+  translocoService: TranslocoService
 ): ParameterCalculationExport => {
   const method: ParameterCalculationExport['method'] = {};
   switch (measureData.calculationMethod) {
@@ -251,14 +270,14 @@ export const buildParameterCalculationExport = (
       method.papoto = buildPapotoMethodExport(measureData, litData);
       break;
     case 'tangente-aiming':
-      method.tangentialSights = buildTangentialSightsMethodExport(measureData);
+      method.tangentialSights = buildTangentialSightsMethodExport(measureData, translocoService);
       break;
     case 'pep':
       method.pep = buildPepMethodExport(measureData);
       break;
   }
   return {
-    methodName: PARAMETER_CALCULATION_METHOD_EXPORT_LABELS[measureData.calculationMethod],
+    methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_EXPORT_KEYS[measureData.calculationMethod]),
     subMethodName: null,
     leftSupport: measureData.leftSupport,
     method
@@ -268,9 +287,13 @@ export const buildParameterCalculationExport = (
 /**
  * Builds the `zeroWindCalculation` export block (parameter at 15°C without wind), in auto or manual mode.
  * @param measureData - The field measure to export
+ * @param translocoService - The Transloco service used to translate export labels
  * @returns The `zeroWindCalculation` export block
  */
-export const buildZeroWindCalculationExport = (measureData: FieldMeasure): ZeroWindCalculationExport => {
+export const buildZeroWindCalculationExport = (
+  measureData: FieldMeasure,
+  translocoService: TranslocoService
+): ZeroWindCalculationExport => {
   const isManual = measureData.updateMode15C === 'manual';
   const manualData = measureData.manualParameterCalculation15CWithoutWind;
   const { outputs } = measureData;
@@ -290,7 +313,7 @@ export const buildZeroWindCalculationExport = (measureData: FieldMeasure): ZeroW
       );
   const parameter15C = outputs.parameter15C;
   return {
-    mode: UPDATE_MODE_15C_EXPORT_LABELS[measureData.updateMode15C],
+    mode: translocoService.translate(UPDATE_MODE_15C_EXPORT_KEYS[measureData.updateMode15C]),
     inputParameter,
     inputTemperature,
     zeroWindParameters: {
@@ -321,9 +344,9 @@ export const buildGroundMeasurementExport = (
   general: buildGeneralExport(section, study),
   measure: buildMeasureExport(measureData, translocoService),
   span: buildSpanExport(measureData, section),
-  temperatureCalculation: buildTemperatureCalculationExport(measureData),
-  parameterCalculation: buildParameterCalculationExport(measureData, litData),
-  zeroWindCalculation: buildZeroWindCalculationExport(measureData)
+  temperatureCalculation: buildTemperatureCalculationExport(measureData, translocoService),
+  parameterCalculation: buildParameterCalculationExport(measureData, litData, translocoService),
+  zeroWindCalculation: buildZeroWindCalculationExport(measureData, translocoService)
 });
 
 /**

@@ -348,7 +348,7 @@
       "col-title": "Title",
       "col-author": "Author",
       "col-modification-date": "Modification date",
-      "col-lit": "LIT",
+      "col-lit": "LIT IDR",
       "col-description": "Description/comment",
       "col-actions": "Actions",
       "study-actions-menu": "Study actions menu",
@@ -399,7 +399,7 @@
     "aria-select-section": "select this study's section",
     "col-name": "Section Name",
     "col-type": "Section type",
-    "col-lit": "LIT",
+    "col-lit": "LIT ADR",
     "col-last-modified": "Last modified",
     "initial-condition": "Initial condition",
     "add-initial-condition": "Add initial condition",
@@ -752,6 +752,25 @@
       "error-message": "An error occurred while calculating the temperature",
       "perpendicular-option": "Perpendicular",
       "sky-cover-estimation-error": "Sky cover could not be estimated from the provided inputs. Please check the values and try again."
+    },
+    "export-labels": {
+      "calculation-method": {
+        "papoto": "PAPOTO",
+        "tangente-aiming": "VISEES_TANGENTES",
+        "pep": "PEP"
+      },
+      "wind-speed-unit": {
+        "kmh": "KM/H",
+        "ms": "M/S"
+      },
+      "update-mode-15c": {
+        "auto": "AUTO",
+        "manual": "MANUELLE"
+      },
+      "calculation-type": {
+        "angle-tangent": "ANGLE_TANGENT",
+        "parameter": "PARAMETRE"
+      }
     }
   },
   "studio": {

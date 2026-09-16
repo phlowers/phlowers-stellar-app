@@ -156,10 +156,10 @@ describe('field-measure-export.helpers', () => {
         diffusedSolarFlux: 30,
         transit: 200
       });
-      const result = buildTemperatureCalculationExport(measureData);
+      const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
       expect(result.ambientTemperature).toEqual({ value: 20, unit: '°C' });
       expect(result.wind).toEqual({
-        speed: { value: 5, unit: 'KM/H' },
+        speed: { value: 5, unit: 'field-measuring.export-labels.wind-speed-unit.kmh' },
         direction: 'N',
         incidence: { value: 10, unit: '°' }
       });
@@ -181,7 +181,7 @@ describe('field-measure-export.helpers', () => {
           parameter15C: null
         }
       });
-      const result = buildTemperatureCalculationExport(measureData);
+      const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
       expect(result.calculatedTemperature).toEqual({
         cableTemperature: { value: 35, unit: '°C', uncertainty: 2 },
         cableSolarFlux: { value: 40, unit: 'W/m²' }
@@ -220,8 +220,8 @@ describe('field-measure-export.helpers', () => {
           parameter15C: null
         }
       });
-      const result = buildParameterCalculationExport(measureData, mockLitData);
-      expect(result.methodName).toBe('PAPOTO');
+      const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
+      expect(result.methodName).toBe('field-measuring.export-labels.calculation-method.papoto');
       expect(result.subMethodName).toBeNull();
       expect(result.leftSupport).toBe('0');
       expect(result.method.papoto).toBeDefined();
@@ -237,8 +237,8 @@ describe('field-measure-export.helpers', () => {
 
     it('should populate only the tangentialSights method block for the tangente-aiming calculation method', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming' });
-      const result = buildParameterCalculationExport(measureData, null);
-      expect(result.methodName).toBe('VISEES_TANGENTES');
+      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+      expect(result.methodName).toBe('field-measuring.export-labels.calculation-method.tangente-aiming');
       expect(result.method.tangentialSights).toBeDefined();
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
@@ -247,8 +247,8 @@ describe('field-measure-export.helpers', () => {
 
     it('should populate only the pep method block for the pep calculation method', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'pep' });
-      const result = buildParameterCalculationExport(measureData, null);
-      expect(result.methodName).toBe('PEP');
+      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+      expect(result.methodName).toBe('field-measuring.export-labels.calculation-method.pep');
       expect(result.method.pep).toBeDefined();
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.tangentialSights).toBeUndefined();
@@ -267,8 +267,8 @@ describe('field-measure-export.helpers', () => {
           cableTemperatureCalibrationUncertainty: 1
         }
       });
-      const result = buildZeroWindCalculationExport(measureData);
-      expect(result.mode).toBe('MANUELLE');
+      const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);
+      expect(result.mode).toBe('field-measuring.export-labels.update-mode-15c.manual');
       expect(result.inputParameter).toEqual({ value: 480, unit: 'm', uncertainty: 5 });
       expect(result.inputTemperature).toEqual({ value: 25, unit: '°C', uncertainty: 1 });
       expect(result.zeroWindParameters).toEqual({
@@ -295,8 +295,8 @@ describe('field-measure-export.helpers', () => {
           parameter15C: { parameter15C: 480, parameter15CMinusUncertainty: 470, parameter15CPlusUncertainty: 490 }
         }
       });
-      const result = buildZeroWindCalculationExport(measureData);
-      expect(result.mode).toBe('AUTO');
+      const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);
+      expect(result.mode).toBe('field-measuring.export-labels.update-mode-15c.auto');
       expect(result.inputParameter).toEqual({ value: 500, unit: 'm', uncertainty: 0.5 });
       expect(result.inputTemperature).toEqual({ value: 30, unit: '°C', uncertainty: 1.5 });
       expect(result.zeroWindParameters).toEqual({
@@ -320,7 +320,7 @@ describe('field-measure-export.helpers', () => {
           }
         }
       });
-      const result = buildZeroWindCalculationExport(measureData);
+      const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);
       expect(result.zeroWindParameters).toEqual({
         parameter: -1.414,
         minusParameter: null,
