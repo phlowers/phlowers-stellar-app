@@ -287,7 +287,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
     // Fetch link_adr from lines service
     const linesTable = await this.linesService.getLines();
-    const linkLine = linesTable?.find((item) => item.link_idr === section.link_code);
+    const linkLine = linesTable?.find((item) => item.link_idr === section.link_idr);
     const linkAdrRead = linkLine?.link_adr || '';
 
     this.measureData.set({

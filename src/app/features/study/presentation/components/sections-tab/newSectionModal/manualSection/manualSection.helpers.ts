@@ -54,11 +54,11 @@ export const applyLinesCascadeFilter = (
 
 /**
  * Applies a fallback filter when the cascade filter returns no results.
- * Tries `link_code` first, then `lit_idr`.
+ * Tries `link_idr` first, then `lit_idr`.
  * Returns the filtered lines and an optional voltage patch to apply on the section.
  * @param allLines - Full catalog lines array
  * @param filteredLines - Result of the cascade filter (may be empty)
- * @param section - Current section providing link_code and lit_idr
+ * @param section - Current section providing link_idr and lit_idr
  * @returns Object with the resulting lines and an optional `patchedVoltage`
  */
 export const applyLinesFallback = (
@@ -69,7 +69,7 @@ export const applyLinesFallback = (
   if (filteredLines.length > 0) {
     return { lines: filteredLines };
   }
-  const linkCode = section.link_code;
+  const linkCode = section.link_idr;
   const litIdr = section.lit_idr;
   let result: CatalogLine[] = [];
   if (linkCode) {

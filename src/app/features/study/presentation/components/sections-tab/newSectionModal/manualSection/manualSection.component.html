@@ -270,7 +270,7 @@
               <p-select
                 inputId="linkIdr"
                 [options]="uniqueLinkIdr()"
-                [(ngModel)]="section().link_code"
+                [(ngModel)]="section().link_idr"
                 optionLabel="link_idr"
                 optionValue="link_idr"
                 appendTo="body"
@@ -289,7 +289,7 @@
               <p-select
                 inputId="linkAdr"
                 [options]="uniqueLinkAdr()"
-                [(ngModel)]="section().link_code"
+                [(ngModel)]="section().link_idr"
                 optionLabel="link_adr"
                 optionValue="link_idr"
                 [fluid]="true"
@@ -374,7 +374,7 @@
 
             <div class="section-form-part-grid__cell--b">
               <dt>{{ 'manual-section.label-link-id' | transloco }}</dt>
-              <dd class="read-only-info">{{ section().link_code }}</dd>
+              <dd class="read-only-info">{{ section().link_idr }}</dd>
             </div>
 
             <div class="section-form-part-grid__cell--c">

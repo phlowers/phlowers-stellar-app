@@ -493,16 +493,16 @@
 
 ---
 
-## 37. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144)
+## 37. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144) — ✅ RESOLVED
 
 | | |
 |---|---|
-| 📍 Source | `src/app/features/study/domain/section.model.ts` — `maintenance_center_names: string[] \| undefined;` and `regional_maintenance_center_names: string[] \| undefined;` |
-| Code | Populated in `section-import.service.ts`'s `mapExternalSectionToSection()` from `CM_DESIGNATION`/`GMR_DESIGNATION` (as single-element arrays), alongside the new SIG.144 scalar fields `cm_adr` and `gmr_adr` which are populated from the exact same source designations. |
-| 🔍 Evidence | SIG.144 introduced `cm_adr`/`gmr_adr` (scalar `string \| undefined`) as the canonical IDR/ADR designation fields, reusing the same `cmDesignation`/`gmrDesignation` computed variables that already fed `maintenance_center_names`/`regional_maintenance_center_names`. The two array fields now look redundant with the new scalar fields (always 0-or-1 element, same source value) — but they are still read by `manualSection.component.ts`/`.html` (maintenance-team display) and other consumers, so they were NOT touched by SIG.144 to keep the change scoped to the plan. |
-| ⚠️ Confidence | **MEDIUM** — needs verification that no consumer actually depends on the array shape (vs. always taking `[0]`) before consolidating onto the scalar fields. |
-| Removal impact | Potential follow-up: replace `maintenance_center_names`/`regional_maintenance_center_names` usages with `cm_adr`/`gmr_adr` and drop the array fields — out of scope for SIG.144, logged here for future cleanup. |
-| ✅ Validated | ⏳ Pending review |
+| 📍 Source | `src/app/shared/domain/models/section.model.ts` — `maintenance_center_names: string[] \| undefined;` and `regional_maintenance_center_names: string[] \| undefined;` |
+| Code | Was populated in `section-import.service.ts`'s `mapExternalSectionToSection()` from `CM_DESIGNATION`/`GMR_DESIGNATION` (as single-element arrays), alongside the scalar `cm_adr`/`gmr_adr` fields populated from the exact same source designations. |
+| 🔍 Evidence | The "Normalisation du modèle Section — CM/GMR/EEL + LIAISON/BRANCHE" plan removed these two redundant array fields entirely (along with the never-populated `cm_idr`/`gmr_idr`/`eel_idr` fields), renaming the scalar fields to `cm_designation`/`gmr_designation`/`eel_designation`. A Dexie V10 data-only migration (`app-database.versions.ts`) deletes these keys from persisted `Section` records on existing studies. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Done — all production code and specs updated to the new scalar `cm_designation`/`gmr_designation`/`eel_designation` fields. |
+| ✅ Validated | ✅ Done — `npx tsc --noEmit`, targeted `vitest` suites, and `app-database.spec.ts` V10 migration tests all pass. |
 
 ---
 

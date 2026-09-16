@@ -53,12 +53,12 @@
           />
         </div>
       </th>
-      <th id="lit_adr" pSortableColumn="lit_adr">
+      <th id="lit_idr" pSortableColumn="lit_idr">
         <div class="flex items-center gap-2">
           {{ 'studies.table.col-lit' | transloco }}
           <app-icon
             [icon]="
-              $any(sortField() === 'lit_adr' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert')
+              $any(sortField() === 'lit_idr' ? (sortOrder() === 1 ? 'arrow_upward' : 'arrow_downward') : 'swap_vert')
             "
           />
         </div>
@@ -80,7 +80,7 @@
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
       <td>{{ study.updated_at_offline | date: dateFormat() : undefined : dateLocale() }}</td>
-      <td>{{ study.sections?.[0]?.lit_adr }}</td>
+      <td>{{ study.sections?.[0]?.lit_idr }}</td>
       <td>
         <p class="line-clamp-3 text-ellipsis overflow-hidden">
           {{ study.description }}

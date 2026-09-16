@@ -158,25 +158,20 @@ describe('ManualSectionComponent', () => {
       last_support_number: 2,
       first_attachment_set: '',
       last_attachment_set: '',
-      regional_maintenance_center_names: [],
-      maintenance_center_names: [],
       regional_team_id: undefined,
       maintenance_team_id: undefined,
       maintenance_center_id: undefined,
-      link_code: '',
-      link_name: '',
+      link_idr: '',
+      link_adr: '',
       lit_idr: '',
       lit_adr: '',
-      branch_name: '',
-      branch_code: '',
+      branch_adr: '',
+      branch_idr: '',
       voltage_idr: '',
       voltage_adr: undefined,
-      cm_idr: undefined,
-      cm_adr: undefined,
-      gmr_idr: undefined,
-      gmr_adr: undefined,
-      eel_idr: undefined,
-      eel_adr: undefined,
+      cm_designation: undefined,
+      gmr_designation: undefined,
+      eel_designation: undefined,
       comment: '',
       supports_comment: '',
       supports: [],
@@ -374,7 +369,7 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should fallback-filter without voltage_idr and auto-correct it when voltage mismatch leaves empty result', async () => {
-      mockSection.link_code = 'link1';
+      mockSection.link_idr = 'link1';
       mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
 
       await component.setupFilterTables();
@@ -384,8 +379,8 @@ describe('ManualSectionComponent', () => {
       expect(mockSection.voltage_idr).toBe('tension1');
     });
 
-    it('should not apply fallback when neither link_code nor lit_idr is set', async () => {
-      mockSection.link_code = undefined;
+    it('should not apply fallback when neither link_idr nor lit_idr is set', async () => {
+      mockSection.link_idr = undefined;
       mockSection.lit_idr = undefined;
       mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
 
@@ -501,11 +496,11 @@ describe('ManualSectionComponent', () => {
       await component.onLinesSelect(event, 'link_idr');
 
       expect(component.linesFilterTable()).toHaveLength(1);
-      expect(mockSection.link_code).toBe('link1');
+      expect(mockSection.link_idr).toBe('link1');
       expect(mockSection.lit_idr).toBe('lit1');
-      expect(mockSection.branch_name).toBe('BRANCH 1');
-      // branch_code is intentionally NOT populated by cascade filter to preserve imported raw BRANCHE_IDR
-      expect(mockSection.branch_code).toBe('');
+      expect(mockSection.branch_adr).toBe('BRANCH 1');
+      // branch_idr is intentionally NOT populated by cascade filter to preserve imported raw BRANCHE_IDR
+      expect(mockSection.branch_idr).toBe('');
       expect(mockSection.voltage_idr).toBe('tension1');
     });
 
@@ -543,9 +538,9 @@ describe('ManualSectionComponent', () => {
     });
 
     it('auto-corrects the voltage via fallback when selecting a value leaves an empty filtered result', async () => {
-      // link_code is already set, but the chosen voltage matches no line, so the
-      // cascade empties and the fallback recovers line1 by link_code + patches voltage.
-      mockSection.link_code = 'link1';
+      // link_idr is already set, but the chosen voltage matches no line, so the
+      // cascade empties and the fallback recovers line1 by link_idr + patches voltage.
+      mockSection.link_idr = 'link1';
       mockSection.voltage_idr = 'MISMATCH_VOLTAGE';
 
       await component.onLinesSelect({ value: 'MISMATCH_VOLTAGE' }, 'voltage_idr');
@@ -588,7 +583,7 @@ describe('ManualSectionComponent', () => {
     });
 
     it('populates the link/lit read-only labels from the matching lines', async () => {
-      mockSection.link_code = 'link1';
+      mockSection.link_idr = 'link1';
       mockSection.lit_idr = 'lit1';
       mockSection.voltage_idr = 'tension1';
 
@@ -839,8 +834,8 @@ describe('ManualSectionComponent', () => {
       (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
       mockSection.lit_idr = 'lit1';
       mockSection.lit_adr = 'LIT 1';
-      mockSection.link_code = 'link1';
-      mockSection.branch_code = 'STB01';
+      mockSection.link_idr = 'link1';
+      mockSection.branch_idr = 'STB01';
       mockSection.voltage_idr = 'tension1';
       component.linesFilterTable.set(mockLinesData);
       component.litAdrRead.set('LIT 1');

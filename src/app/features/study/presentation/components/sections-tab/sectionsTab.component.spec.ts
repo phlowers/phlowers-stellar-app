@@ -96,25 +96,20 @@ describe('SectionsTabComponent', () => {
     last_support_number: 200,
     first_attachment_set: 'AttachSet1',
     last_attachment_set: 'AttachSet2',
-    regional_maintenance_center_names: ['Center1', 'Center2'],
-    maintenance_center_names: ['Maint1', 'Maint2'],
     regional_team_id: '1.23',
     maintenance_team_id: '4.56',
     maintenance_center_id: '7.89',
-    link_code: 'LinkX',
-    link_name: 'LinkX',
+    link_idr: 'LinkX',
+    link_adr: 'LinkX',
     lit_idr: 'LIT123',
     lit_adr: 'LIT123',
-    branch_name: 'BranchY',
-    branch_code: 'BranchY',
+    branch_adr: 'BranchY',
+    branch_idr: 'BranchY',
     voltage_idr: '230V',
     voltage_adr: undefined,
-    cm_idr: undefined,
-    cm_adr: undefined,
-    gmr_idr: undefined,
-    gmr_adr: undefined,
-    eel_idr: undefined,
-    eel_adr: undefined,
+    cm_designation: undefined,
+    gmr_designation: undefined,
+    eel_designation: undefined,
     comment: 'Test section comment',
     supports_comment: 'Test supports comment',
     supports: [],
@@ -394,7 +389,7 @@ describe('SectionsTabComponent', () => {
     expect(data.initialCondition).not.toBeNull();
     // Canton type is the translated label, not the raw select code.
     expect(data.type).toBe('Phase');
-    // LIT resolves to the catalog lit_adr matched by lit_idr, branch uses branch_code.
+    // LIT resolves to the catalog lit_adr matched by lit_idr, branch uses branch_idr.
     expect(data.litName).toBe('LIT-ADR-123');
     expect(data.branchName).toBe('BranchY');
   });

@@ -94,10 +94,6 @@ export interface Section {
   first_attachment_set: string;
   /** Last attachment set identifier */
   last_attachment_set: string;
-  /** Regional maintenance center names */
-  regional_maintenance_center_names: string[];
-  /** Maintenance center names */
-  maintenance_center_names: string[];
   /** Regional team identifier */
   regional_team_id: string | undefined;
   /** Maintenance team identifier */
@@ -105,33 +101,27 @@ export interface Section {
   /** Maintenance center identifier */
   maintenance_center_id: string | undefined;
   /** Link IDR reference (LIAISON_IDR) */
-  link_code: string | undefined;
+  link_idr: string | undefined;
   /** Link ADR (LIAISON_ADR) */
-  link_name: string | undefined;
+  link_adr: string | undefined;
   /** LIT IDR identifier */
   lit_idr: string | undefined;
   /** LIT ADR name */
   lit_adr: string | undefined;
-  /** Branch name (BRANCHE_ADR) */
-  branch_name: string | undefined;
+  /** Branch ADR (BRANCHE_ADR) */
+  branch_adr: string | undefined;
   /** Raw branch IDR reference (BRANCHE_IDR) */
-  branch_code: string | undefined;
+  branch_idr: string | undefined;
   /** Voltage IDR reference */
   voltage_idr: string | undefined;
   /** Voltage ADR reference */
   voltage_adr: string | undefined;
-  /** Maintenance center IDR */
-  cm_idr: string | undefined;
-  /** Maintenance center ADR */
-  cm_adr: string | undefined;
-  /** Regional maintenance center IDR */
-  gmr_idr: string | undefined;
-  /** Regional maintenance center ADR */
-  gmr_adr: string | undefined;
-  /** Maintenance team IDR */
-  eel_idr: string | undefined;
-  /** Maintenance team ADR */
-  eel_adr: string | undefined;
+  /** Maintenance center designation (CM_DESIGNATION) */
+  cm_designation: string | undefined;
+  /** Regional maintenance center designation (GMR_DESIGNATION) */
+  gmr_designation: string | undefined;
+  /** Maintenance team designation (EEL_DESIGNATION) */
+  eel_designation: string | undefined;
   /** General comment */
   comment: string | undefined;
   /** Comment about supports */

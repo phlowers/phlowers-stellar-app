@@ -219,7 +219,7 @@ export const createInitialMeasureData = (
     cableTemperatureCalibration: null,
     cableTemperatureCalibrationUncertainty: null,
     manualParameterCalculation15CWithoutWind: null,
-    link: section?.link_name || null,
+    link: section?.link_adr || null,
     voltage: section?.voltage_idr || null,
     spanType: section?.type || null,
     phaseNumber: section?.electric_phase_number || null,
@@ -236,7 +236,7 @@ export const createInitialMeasureData = (
  */
 export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldMeasure => {
   const mockSection: Partial<Section> = {
-    link_name: 'Line 225kV Rougemontier - Tourbe #1',
+    link_adr: 'Line 225kV Rougemontier - Tourbe #1',
     voltage_idr: '123 kV',
     type: 'phase',
     electric_phase_number: 3,
