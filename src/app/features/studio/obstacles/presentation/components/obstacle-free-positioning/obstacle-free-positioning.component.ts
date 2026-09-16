@@ -22,7 +22,7 @@ import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.serv
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { PlotService } from '@services/plot/plot.service';
-import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { LateralDistanceType, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { getSupportAltitudeNgf } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 
 import { OBSTACLE_FREE_POSITIONING_CONFIG } from './obstacle-free-positioning.component.constantes';
@@ -47,6 +47,13 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly plotService = inject(PlotService);
+
+  constructor() {
+    // Force obstacle reference frame while free positioning is active.
+    this.obstacleFormService.form.get('referenceSupport')?.setValue(ReferenceSupport.LEFT);
+    this.obstacleFormService.form.get('altitudeType')?.setValue('absolute');
+    this.obstacleFormService.form.get('lateralDistanceType')?.setValue(LateralDistanceType.SPAN_AXIS);
+  }
 
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
