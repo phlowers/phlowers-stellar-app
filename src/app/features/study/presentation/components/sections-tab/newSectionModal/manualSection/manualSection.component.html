@@ -117,13 +117,13 @@
             </div>
           </div>
         } @else if (mode() === 'view') {
-          <dl class="section-form-part-grid">
-            <div class="col-span-2">
+          <dl class="section-form-part-grid canton-form-grid">
+            <div class="[grid-area:a]">
               <dt>{{ 'manual-section.label-section-name' | transloco }}</dt>
               <dd class="read-only-info">{{ section().name }}</dd>
             </div>
 
-            <div>
+            <div class="[grid-area:b]">
               <dt>{{ 'manual-section.label-section-type' | transloco }}</dt>
               <dd class="read-only-info">
                 @if (section().type === 'phase') {
@@ -134,7 +134,7 @@
               </dd>
             </div>
 
-            <div>
+            <div class="[grid-area:c]">
               @if (section().type === 'phase') {
                 <dt>{{ 'manual-section.label-phase-number' | transloco }}</dt>
                 <dd class="read-only-info">
@@ -143,12 +143,12 @@
               }
             </div>
 
-            <div>
+            <div class="[grid-area:d]">
               <dt>{{ 'manual-section.label-cable-name' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cable_name }}</dd>
             </div>
 
-            <div>
+            <div class="[grid-area:e]">
               <dt>{{ 'manual-section.label-cable-amount' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cables_amount }}</dd>
             </div>

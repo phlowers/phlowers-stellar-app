@@ -19,6 +19,12 @@
       'b c c .'
       'd e e f';
   }
+
+  &.canton-form-grid {
+    grid-template-areas:
+      'a b c .'
+      'd e . .';
+  }
 }
 
 dt {
