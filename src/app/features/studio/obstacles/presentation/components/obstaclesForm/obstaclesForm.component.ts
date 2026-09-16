@@ -116,6 +116,16 @@ export class ObstaclesFormComponent {
     }
   );
 
+  /** Index of the span currently selected in the tab; frozen when free positioning is switched on. */
+  readonly selectedSpanIndex = computed(() => {
+    const uuid = this.supportUuidValue();
+    if (!uuid) {
+      return null;
+    }
+    const index = this.spanService.getSupportIndex(uuid);
+    return index >= 0 ? index : null;
+  });
+
   private firstSupportUuidEffectRun = true;
 
   private readonly supportUuidEffect = effect(() => {

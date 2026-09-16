@@ -29,16 +29,21 @@ The frozen span is a single source of truth held by `PlotOptionsService`:
 
 - `readonly frozenSpan = signal<number>(0);`
 - It is **captured once** when fp mode is enabled, inside
-  `setFreePositioningMode(enabled, source)`:
+  `setFreePositioningMode(enabled, source, spanIndex?)`:
 
   ```ts
   if (enabled) {
-    this.frozenSpan.set(untracked(() => this.plotOptions().startSupport));
+    const snapshot = spanIndex ?? untracked(() => this.plotOptions().startSupport);
+    this.frozenSpan.set(snapshot);
   }
   ```
 
-  Using `untracked` guarantees the capture is a one-off snapshot with no reactive
-  dependency on `plotOptions()`.
+  The owning tab passes the span index currently selected in its dropdown
+  (`spanIndex`); the plot's `startSupport` is only used as a fallback. This
+  matters because selecting a span in a tab dropdown does **not** move the plot
+  (only the zoom button writes `startSupport`), so freezing `startSupport` would
+  otherwise capture a stale span. Using `untracked` guarantees the capture is a
+  one-off snapshot with no reactive dependency on `plotOptions()`.
 - It is reset to `0` in `reset()`.
 - Every wrapper reads it directly, with **no reactivity** of its own:
 
@@ -90,7 +95,13 @@ turned on:
   `!supportUuid || !hasEditablePoints()` for obstacle). `ObstacleFormService`
   exposes `hasEditablePoints = computed(() => positionsSnapshot().length > 0)`,
   mirroring `FloorFormService`.
-
+The toggle also carries a `[spanIndex]` input: each tab binds a
+`selectedSpanIndex` computed that maps its selected span UUID to an index via
+`PlotSpanService.getSupportIndex` (`null` when nothing is selected). The toggle
+forwards it to `setFreePositioningMode`, so the frozen span is exactly the span
+selected in the tab, not the plot's last-zoomed span. Distance exposes the
+computed on `DistanceMeasuringService`; the other tabs expose it on their
+component.
 ## History / rebase note
 
 A broken rebase on `refactor/free-positioning/new_dev` previously left the branch

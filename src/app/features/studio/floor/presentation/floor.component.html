@@ -47,6 +47,7 @@
           source="floor"
           inputId="floorFreePositioning"
           [disabled]="!floorFormService.spanValue() || !floorFormService.hasEditablePoints()"
+          [spanIndex]="selectedSpanIndex()"
           labelKey="studio.floor.free-positioning-label"
         />
       </div>

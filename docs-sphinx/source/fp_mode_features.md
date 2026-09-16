@@ -23,9 +23,9 @@ current span and every control that could change it.
     (an obstacle point / a floor point). Selecting the span alone is not enough;
     the switch stays disabled until a point exists.
 - When the switch is turned **on**:
-  - The span currently selected in the studio (the start support of the active
-    span) is **captured once** and becomes the *frozen span* for the whole
-    fp session.
+  - The span currently **selected in the tab** (its span dropdown) is **captured
+    once** and becomes the *frozen span* for the whole fp session. It does not
+    matter which span the studio plot was last zoomed to — the tab selection wins.
   - The opened tab loads its data for that frozen span.
   - The plot displays that span and does not move.
 

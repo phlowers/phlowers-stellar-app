@@ -64,6 +64,16 @@ export class DistanceMeasuringService {
   readonly selectedSupportUuid = signal<string | null>(null);
   readonly spanOptions = computed(() => this.spanService.getSpanOptions());
 
+  /** Index of the span currently selected in the tab; frozen when free positioning is switched on. */
+  readonly selectedSpanIndex = computed(() => {
+    const uuid = this.selectedSupportUuid();
+    if (!uuid) {
+      return null;
+    }
+    const index = this.spanService.getSupportIndex(uuid);
+    return index >= 0 ? index : null;
+  });
+
   // --- Results / calculation ---
   readonly isCalculating = signal(false);
   readonly results = signal<DistanceMeasuringResults | null>(null);

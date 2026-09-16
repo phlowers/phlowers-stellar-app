@@ -91,6 +91,16 @@ export class LoadMarkingComponent {
   });
   readonly spanSelectValue = computed(() => this.spanSelectSignal());
 
+  /** Index of the span currently selected in the tab; frozen when free positioning is switched on. */
+  readonly selectedSpanIndex = computed(() => {
+    const uuid = this.spanSelectValue();
+    if (!uuid) {
+      return null;
+    }
+    const index = this.spanService.getSupportIndex(uuid);
+    return index >= 0 ? index : null;
+  });
+
   private readonly loadControlSignals: Record<LoadControlName, Signal<unknown>> = {
     loadPosition: toSignal(this.form.controls.loadPosition.valueChanges, {
       initialValue: this.form.controls.loadPosition.value,

@@ -125,13 +125,15 @@ export class PlotOptionsService {
    * the previous plot component, whose `ngOnDestroy` safety net would otherwise close the mode the
    * new one just opened.
    */
-  setFreePositioningMode(enabled: boolean, source: FreePositioningSource): void {
+  setFreePositioningMode(enabled: boolean, source: FreePositioningSource, spanIndex?: number | null): void {
     if (!enabled && untracked(() => this.freePositioningSource()) !== source) {
       return;
     }
     if (enabled) {
       // Snapshot the span once so the frozen view never follows later form/plot changes.
-      this.frozenSpan.set(untracked(() => this.plotOptions().startSupport));
+      // Prefer the span currently selected in the owning tab; fall back to the displayed span.
+      const snapshot = spanIndex ?? untracked(() => this.plotOptions().startSupport);
+      this.frozenSpan.set(snapshot);
     }
     this.isFreePositioningMode.set(enabled);
     this.freePositioningSource.set(enabled ? source : null);

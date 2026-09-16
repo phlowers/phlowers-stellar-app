@@ -28,6 +28,8 @@ export class FreePositioningToggleComponent {
   /** Feature owning this toggle instance; passed on every mode change. */
   readonly source = input.required<FreePositioningSource>();
   readonly disabled = input<boolean>(false);
+  /** Span index selected in the owning tab; frozen as the fp span when the mode is switched on. */
+  readonly spanIndex = input<number | null>(null);
   /** Full transloco key for the visible label (e.g. 'studio.floor.free-positioning-label'). */
   readonly labelKey = input.required<string>();
   readonly inputId = input<string>('freePositioning');
@@ -38,6 +40,6 @@ export class FreePositioningToggleComponent {
     if (enabled && this.plotOptionsService.plotOptions().view === '3d') {
       this.plotService.plotOptionsChange({ view: '2d' });
     }
-    this.plotOptionsService.setFreePositioningMode(enabled, this.source());
+    this.plotOptionsService.setFreePositioningMode(enabled, this.source(), this.spanIndex());
   }
 }

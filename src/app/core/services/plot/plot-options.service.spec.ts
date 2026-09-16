@@ -211,6 +211,18 @@ describe('PlotOptionsService', () => {
       expect(service.frozenSpan()).toBe(4);
     });
 
+    it('should snapshot the provided span index over the plot startSupport', () => {
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 4, endSupport: 5, invert: false });
+      service.setFreePositioningMode(true, 'floor', 9);
+      expect(service.frozenSpan()).toBe(9);
+    });
+
+    it('should fall back to startSupport when the provided span index is null', () => {
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 4, endSupport: 5, invert: false });
+      service.setFreePositioningMode(true, 'floor', null);
+      expect(service.frozenSpan()).toBe(4);
+    });
+
     it('should not change the frozen span while free positioning stays on', () => {
       service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 4, endSupport: 5, invert: false });
       service.setFreePositioningMode(true, 'floor');

@@ -113,6 +113,7 @@
       <app-free-positioning-toggle
         source="obstacle"
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value || !obstacleFormService.hasEditablePoints()"
+        [spanIndex]="selectedSpanIndex()"
         labelKey="studio.obstacles-form.free-positioning-label"
       />
     </div>

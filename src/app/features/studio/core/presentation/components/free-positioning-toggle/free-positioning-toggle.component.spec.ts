@@ -20,10 +20,12 @@ describe('FreePositioningToggleComponent', () => {
     isFreePositioningMode: signal(false),
     freePositioningSource: signal<'obstacle' | 'floor' | 'loads' | 'distance' | null>(null),
     plotOptions: signal({ view: '2d', side: 'profile', startSupport: 0, endSupport: 1, invert: false }),
-    setFreePositioningMode: vi.fn((enabled: boolean, source: 'obstacle' | 'floor' | 'loads' | 'distance') => {
-      mockPlotOptionsService.isFreePositioningMode.set(enabled);
-      mockPlotOptionsService.freePositioningSource.set(enabled ? source : null);
-    })
+    setFreePositioningMode: vi.fn(
+      (enabled: boolean, source: 'obstacle' | 'floor' | 'loads' | 'distance', _spanIndex?: number | null) => {
+        mockPlotOptionsService.isFreePositioningMode.set(enabled);
+        mockPlotOptionsService.freePositioningSource.set(enabled ? source : null);
+      }
+    )
   };
 
   const mockPlotService = {
@@ -74,8 +76,17 @@ describe('FreePositioningToggleComponent', () => {
   it('should turn on free positioning for its own source', () => {
     component.onChange(true);
 
-    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor');
+    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor', null);
     expect(mockPlotOptionsService.freePositioningSource()).toBe('floor');
+  });
+
+  it('should freeze the selected span index when enabling free positioning', () => {
+    fixture.componentRef.setInput('spanIndex', 3);
+    fixture.detectChanges();
+
+    component.onChange(true);
+
+    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor', 3);
   });
 
   it('should turn off free positioning for its own source', () => {
@@ -83,7 +94,7 @@ describe('FreePositioningToggleComponent', () => {
 
     component.onChange(false);
 
-    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(false, 'floor');
+    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(false, 'floor', null);
     expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
   });
 
@@ -93,7 +104,7 @@ describe('FreePositioningToggleComponent', () => {
     component.onChange(true);
 
     expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ view: '2d' });
-    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor');
+    expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(true, 'floor', null);
   });
 
   it('should not trigger a reprojection when enabling free positioning already in 2D', () => {
