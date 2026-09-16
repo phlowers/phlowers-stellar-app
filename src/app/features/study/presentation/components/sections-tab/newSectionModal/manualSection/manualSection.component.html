@@ -117,13 +117,13 @@
             </div>
           </div>
         } @else if (mode() === 'view') {
-          <dl class="section-form-part-grid canton-form-grid">
-            <div class="[grid-area:a]">
+          <dl class="section-form-part-grid section-form-part-grid--infos">
+            <div class="section-form-part-grid__cell--a" data-testid="section-name-view">
               <dt>{{ 'manual-section.label-section-name' | transloco }}</dt>
               <dd class="read-only-info">{{ section().name }}</dd>
             </div>
 
-            <div class="[grid-area:b]">
+            <div class="section-form-part-grid__cell--b" data-testid="section-type-view">
               <dt>{{ 'manual-section.label-section-type' | transloco }}</dt>
               <dd class="read-only-info">
                 @if (section().type === 'phase') {
@@ -134,7 +134,7 @@
               </dd>
             </div>
 
-            <div class="[grid-area:c]">
+            <div class="section-form-part-grid__cell--c" data-testid="phase-number-view">
               @if (section().type === 'phase') {
                 <dt>{{ 'manual-section.label-phase-number' | transloco }}</dt>
                 <dd class="read-only-info">
@@ -143,12 +143,12 @@
               }
             </div>
 
-            <div class="[grid-area:d]">
+            <div class="section-form-part-grid__cell--d" data-testid="cable-name-view">
               <dt>{{ 'manual-section.label-cable-name' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cable_name }}</dd>
             </div>
 
-            <div class="[grid-area:e]">
+            <div class="section-form-part-grid__cell--e" data-testid="cable-amount-view">
               <dt>{{ 'manual-section.label-cable-amount' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cables_amount }}</dd>
             </div>
@@ -239,7 +239,7 @@
 
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid lines-form-grid">
-            <div class="flex flex-col [grid-area:a]">
+            <div class="flex flex-col section-form-part-grid__cell--a">
               <label for="linkEtl">{{ 'manual-section.label-etl' | transloco }}</label>
               <p-select
                 inputId="linkEtl"
@@ -265,7 +265,7 @@
                 </ng-template>
               </p-select>
             </div>
-            <div class="flex flex-col [grid-area:b]">
+            <div class="flex flex-col section-form-part-grid__cell--b">
               <label for="linkIdr">{{ 'manual-section.label-link-id' | transloco }}</label>
               <p-select
                 inputId="linkIdr"
@@ -284,7 +284,7 @@
                 data-testid="link-idr-select"
               />
             </div>
-            <div class="flex flex-col [grid-area:c]">
+            <div class="flex flex-col section-form-part-grid__cell--c">
               <label for="linkAdr">{{ 'manual-section.label-link-name' | transloco }}</label>
               <p-select
                 inputId="linkAdr"
@@ -304,7 +304,7 @@
                 data-testid="link-adr-select"
               />
             </div>
-            <div class="flex flex-col [grid-area:d]">
+            <div class="flex flex-col section-form-part-grid__cell--d">
               <label for="litIdr">{{ 'manual-section.label-lit-id' | transloco }}</label>
               <p-select
                 inputId="litIdr"
@@ -324,7 +324,7 @@
               />
             </div>
 
-            <div class="flex flex-col [grid-area:e]">
+            <div class="flex flex-col section-form-part-grid__cell--e">
               <label for="litAdr">{{ 'manual-section.label-lit-name' | transloco }}</label>
               <p-select
                 inputId="litAdr"
@@ -344,7 +344,7 @@
               />
             </div>
 
-            <div class="flex flex-col [grid-area:f]">
+            <div class="flex flex-col section-form-part-grid__cell--f">
               <label for="linkBm">{{ 'manual-section.label-branch' | transloco }}</label>
               <p-select
                 inputId="linkBm"
@@ -366,34 +366,34 @@
           </div>
         } @else if (mode() === 'view') {
           <dl class="section-form-part-grid lines-form-grid">
-            <div class="[grid-area:a]">
+            <div class="section-form-part-grid__cell--a">
               <dt>{{ 'manual-section.label-etl' | transloco }}</dt>
               <dd class="read-only-info">
                 {{ section().voltage_idr === 'NO VOLTAGE' ? noVoltageLabel : section().voltage_idr }}
               </dd>
             </div>
 
-            <div class="[grid-area:b]">
+            <div class="section-form-part-grid__cell--b">
               <dt>{{ 'manual-section.label-link-id' | transloco }}</dt>
               <dd class="read-only-info">{{ section().link_name }}</dd>
             </div>
 
-            <div class="[grid-area:c]">
+            <div class="section-form-part-grid__cell--c">
               <dt>{{ 'manual-section.label-link-name' | transloco }}</dt>
               <dd class="read-only-info">{{ linkAdrRead() }}</dd>
             </div>
 
-            <div class="[grid-area:d]">
+            <div class="section-form-part-grid__cell--d">
               <dt>{{ 'manual-section.label-lit-id' | transloco }}</dt>
               <dd class="read-only-info" data-testid="lit-code-view">{{ section().lit_code }}</dd>
             </div>
 
-            <div class="[grid-area:e]">
+            <div class="section-form-part-grid__cell--e">
               <dt>{{ 'manual-section.label-lit-name' | transloco }}</dt>
               <dd class="read-only-info" data-testid="lit-name-view">{{ litAdrRead() }}</dd>
             </div>
 
-            <div class="[grid-area:f]">
+            <div class="section-form-part-grid__cell--f">
               <dt>{{ 'manual-section.label-branch' | transloco }}</dt>
               <dd class="read-only-info" data-testid="branch-idr-view">{{ section().branch_idr }}</dd>
             </div>

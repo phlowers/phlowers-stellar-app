@@ -20,10 +20,34 @@
       'd e e f';
   }
 
-  &.canton-form-grid {
+  &--infos {
     grid-template-areas:
       'a b c .'
       'd e . .';
+  }
+
+  &__cell--a {
+    grid-area: a;
+  }
+
+  &__cell--b {
+    grid-area: b;
+  }
+
+  &__cell--c {
+    grid-area: c;
+  }
+
+  &__cell--d {
+    grid-area: d;
+  }
+
+  &__cell--e {
+    grid-area: e;
+  }
+
+  &__cell--f {
+    grid-area: f;
   }
 }
 
