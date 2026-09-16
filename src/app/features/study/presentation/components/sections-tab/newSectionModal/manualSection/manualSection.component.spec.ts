@@ -858,6 +858,35 @@ describe('ManualSectionComponent', () => {
     });
   });
 
+  describe('HTML rendering - view mode General section grid layout', () => {
+    const getByTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    beforeEach(() => {
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      component.tabValue.set('general');
+    });
+
+    it('should place the phase-number cell in grid-area:c next to the section-type cell for phase sections', () => {
+      mockSection.type = 'phase';
+      fixture.detectChanges();
+
+      expect(getByTestId('section-type-view')?.classList.contains('section-form-part-grid__cell--b')).toBe(true);
+      const phaseNumberView = getByTestId('phase-number-view');
+      expect(phaseNumberView?.classList.contains('section-form-part-grid__cell--c')).toBe(true);
+      expect(phaseNumberView?.textContent).toContain(String(mockSection.electric_phase_number));
+    });
+
+    it('should keep the phase-number cell in grid-area:c empty for guard sections', () => {
+      mockSection.type = 'guard';
+      fixture.detectChanges();
+
+      const phaseNumberView = getByTestId('phase-number-view');
+      expect(phaseNumberView?.classList.contains('section-form-part-grid__cell--c')).toBe(true);
+      expect(phaseNumberView?.textContent?.trim()).toBe('');
+    });
+  });
+
   describe('HTML rendering - supports_comment in view mode', () => {
     const getByTestId = (testId: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
