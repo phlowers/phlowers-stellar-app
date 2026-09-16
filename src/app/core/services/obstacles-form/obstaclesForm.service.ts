@@ -80,6 +80,9 @@ export class ObstacleFormService {
     initialValue: this.positions.value as Position3D[]
   });
 
+  /** True once at least one point has been added; gates enabling free positioning. */
+  readonly hasEditablePoints = computed(() => this.positionsSnapshot().length > 0);
+
   createPositionGroup(position: Position3D = this.defaultPosition): PositionFormGroup {
     return this.fb.group({
       x: [

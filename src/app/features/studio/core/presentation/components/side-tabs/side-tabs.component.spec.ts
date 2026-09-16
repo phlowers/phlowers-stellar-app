@@ -35,7 +35,7 @@ describe('SideTabsComponent', () => {
       refreshCamera: vi.fn(),
       isFreePositioningMode: vi.fn().mockImplementation(() => isFreePositioningActive),
       freePositioningSource: vi.fn().mockImplementation(() => (isFreePositioningActive ? 'floor' : null)),
-      setFreePositioningMode: vi.fn((enabled: boolean, source: string) => {
+      setFreePositioningMode: vi.fn((enabled: boolean, _source: string) => {
         if (!enabled) {
           isFreePositioningActive = false;
         } else {

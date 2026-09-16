@@ -39,6 +39,7 @@
   <app-free-positioning-toggle
     source="distance"
     inputId="distanceFreePositioning"
+    [disabled]="!service.selectedSupportUuid()"
     labelKey="studio.distance-measuring.free-positioning-label"
   />
 </div>

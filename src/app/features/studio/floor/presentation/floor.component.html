@@ -46,7 +46,7 @@
         <app-free-positioning-toggle
           source="floor"
           inputId="floorFreePositioning"
-          [disabled]="!floorFormService.hasEditablePoints()"
+          [disabled]="!floorFormService.spanValue() || !floorFormService.hasEditablePoints()"
           labelKey="studio.floor.free-positioning-label"
         />
       </div>

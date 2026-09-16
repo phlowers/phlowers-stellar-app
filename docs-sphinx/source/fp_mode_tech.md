@@ -77,6 +77,20 @@ All span-changing controls are disabled while fp mode is on, driven by
 Components that gained the binding (`distance-measuring`, `load-marking`) now
 inject `PlotOptionsService` as a public readonly field for template access.
 
+## Enabling the toggle
+
+The `app-free-positioning-toggle` `[disabled]` input gates when fp mode can be
+turned on:
+
+- Loads / distance: disabled while no span is selected
+  (`!spanSelectValue()` / `!service.selectedSupportUuid()`).
+- Floor / obstacle: additionally require at least one point, via a
+  `hasEditablePoints` computed on the tab form service
+  (`!spanValue() || !hasEditablePoints()` for floor, and
+  `!supportUuid || !hasEditablePoints()` for obstacle). `ObstacleFormService`
+  exposes `hasEditablePoints = computed(() => positionsSnapshot().length > 0)`,
+  mirroring `FloorFormService`.
+
 ## History / rebase note
 
 A broken rebase on `refactor/free-positioning/new_dev` previously left the branch

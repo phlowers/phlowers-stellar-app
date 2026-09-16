@@ -16,6 +16,12 @@ current span and every control that could change it.
 
 - Each concerned tab (obstacle, floor, loads, distance) exposes a free-positioning
   toggle switch.
+- The toggle switch is **disabled until the tab has something to position**:
+  - Loads and distance require a **span to be selected** (load span / distance
+    support).
+  - Obstacle and floor additionally require **at least one point to be added**
+    (an obstacle point / a floor point). Selecting the span alone is not enough;
+    the switch stays disabled until a point exists.
 - When the switch is turned **on**:
   - The span currently selected in the studio (the start support of the active
     span) is **captured once** and becomes the *frozen span* for the whole

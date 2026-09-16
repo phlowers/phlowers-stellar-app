@@ -31,6 +31,7 @@ class MockObstacleFormService {
   });
   isCalculatingObstacle = signal(false);
   calculationError = signal<string | null>(null);
+  hasEditablePoints = signal(true);
   // Consumed by the ConformityComponent rendered inside the conformity dialog.
   formValue = signal<{ uuid: string | null; type: string | null }>({ uuid: null, type: 'House' });
 
@@ -849,6 +850,17 @@ describe('ObstaclesFormComponent', () => {
 
       const toggle = localFixture.nativeElement.querySelector('p-toggleswitch');
       expect(toggle.getAttribute('data-p-disabled')).toBe('false');
+    });
+
+    it('should be disabled when a support is selected but no point has been added', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      mockObstacleFormService.hasEditablePoints.set(false);
+
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+
+      const toggle = localFixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('data-p-disabled')).toBe('true');
     });
 
     it('should reflect isFreePositioningMode value', async () => {
