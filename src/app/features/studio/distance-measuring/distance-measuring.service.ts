@@ -29,8 +29,8 @@ import { DistanceMeasuringResults } from './distance-measuring.model';
  * `Point alt.` (`z`) and `Ref. support dist.` (`x`) are expressed relative to the
  * span's left support.
  *
- * Free positioning (driving the points from the plot) is temporarily disabled
- * while the free-positioning component is being reworked on another branch.
+ * Free positioning (driving the points from the plot) is wired to the shared toggle but the
+ * click-to-place calculus for this tab is not implemented yet — a later phase covers it.
  *
  * @category Services
  */

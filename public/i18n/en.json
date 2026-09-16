@@ -205,6 +205,12 @@
       "distance-calculation-error-detail": "Failed to calculate obstacle distances",
       "save-detail": "Obstacle saved"
     },
+    "free-positioning-data": {
+      "floor-point": "Floor #{{ index }}",
+      "distance-point": "Distance #{{ index }}",
+      "punctual-load": "Punctual load",
+      "marking-load": "Marking load"
+    },
     "floor-form-service": {
       "delete-detail": "Floor deleted",
       "delete-error-detail": "Failed to delete floor",
@@ -852,7 +858,13 @@
     "free-positioning": {
       "x-label": "x:",
       "z-label": "z:",
-      "y-label": "y:"
+      "y-label": "y:",
+      "categories": {
+        "obstacle": "Obstacles",
+        "floor": "Floor",
+        "distance": "Distance",
+        "loads": "Loads"
+      }
     },
     "studio-page": {
       "parameter-label": "Parameter",

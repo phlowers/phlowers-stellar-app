@@ -1,0 +1,14 @@
+@use 'abstract.extracts' as app;
+
+.free-positioning-error {
+  @extend %heading-l;
+  color: var(--main-error);
+}
+
+dl {
+  @apply flex gap-1 text-sm font-semibold;
+}
+
+dd {
+  @apply pr-2;
+}

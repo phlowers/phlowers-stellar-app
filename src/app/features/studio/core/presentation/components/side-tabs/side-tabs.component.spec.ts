@@ -19,12 +19,32 @@ class TestHostComponent {}
 
 describe('SideTabsComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
-  let plotOptionsServiceMock: { refreshCamera: ReturnType<typeof vi.fn> };
+  let plotOptionsServiceMock: {
+    refreshCamera: ReturnType<typeof vi.fn>;
+    isFreePositioningMode: ReturnType<typeof vi.fn>;
+    freePositioningSource: ReturnType<typeof vi.fn>;
+    setFreePositioningMode: ReturnType<typeof vi.fn>;
+    exitFreePositioningMode: ReturnType<typeof vi.fn>;
+  };
+  let isFreePositioningActive: boolean;
   const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   beforeEach(async () => {
+    isFreePositioningActive = false;
     plotOptionsServiceMock = {
-      refreshCamera: vi.fn()
+      refreshCamera: vi.fn(),
+      isFreePositioningMode: vi.fn().mockImplementation(() => isFreePositioningActive),
+      freePositioningSource: vi.fn().mockImplementation(() => (isFreePositioningActive ? 'floor' : null)),
+      setFreePositioningMode: vi.fn((enabled: boolean, source: string) => {
+        if (!enabled) {
+          isFreePositioningActive = false;
+        } else {
+          isFreePositioningActive = true;
+        }
+      }),
+      exitFreePositioningMode: vi.fn(() => {
+        isFreePositioningActive = false;
+      })
     };
 
     await TestBed.configureTestingModule({
@@ -113,6 +133,17 @@ describe('SideTabsComponent', () => {
 
     expect(panels[0].hidden).toBe(true);
     expect(document.activeElement).toBe(buttons[0]);
+  });
+
+  it('should quit free positioning when switching tabs', () => {
+    isFreePositioningActive = true;
+    fixture.detectChanges();
+
+    const buttons = getButtons();
+    buttons[1].click();
+    fixture.detectChanges();
+
+    expect(plotOptionsServiceMock.exitFreePositioningMode).toHaveBeenCalled();
   });
 
   it('should move focus with arrow keys', () => {

@@ -17,6 +17,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { FreePositioningToggleComponent } from '@features/studio/core/presentation/components/free-positioning-toggle/free-positioning-toggle.component';
 
 /** Floor tab: select a span and its reference support. */
 @Component({
@@ -33,7 +34,8 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
     ButtonComponent,
     IconComponent,
     DecimalPipe,
-    TranslocoModule
+    TranslocoModule,
+    FreePositioningToggleComponent
   ],
   templateUrl: './floor.component.html',
   styleUrl: './floor.component.scss',

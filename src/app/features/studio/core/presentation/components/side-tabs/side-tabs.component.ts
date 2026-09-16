@@ -62,6 +62,10 @@ export class SideTabsComponent {
   }
 
   toggleTab(i: number) {
+    if (this.plotOptionsService.isFreePositioningMode()) {
+      this.plotOptionsService.exitFreePositioningMode();
+    }
+
     const toggle = this.sideTabsService.sideTabs() === i ? null : i;
     this.sideTabsService.sideTabs.set(toggle);
   }

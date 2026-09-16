@@ -40,6 +40,9 @@ import { Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.mod
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { MousePosition, PlotAnnotation, PlotElement } from './free-positioning.interfaces';
+import { DEBOUNCED_REFRESH_STUDIO_DELAY, DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY } from './free-positioning.constantes';
+import { attachPlotEventListeners, getPixelOffset, isOutsidePlotBounds, toMousePosition } from './free-positioning.helpers';
 
 // Constants
 const PLOT_CONFIG = {
@@ -53,50 +56,10 @@ const PLOT_CONFIG = {
   MARKER_DELTA: 5
 } as const;
 
-export const DEBOUNCED_REFRESH_STUDIO_DELAY = 400;
-export const DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY = 100;
 const PLOT_IDS = {
   FACE: 'plotly-output-single-span-face-2',
   PROFILE: 'plotly-output-single-span-profile-2'
 } as const;
-
-interface MousePosition {
-  x: string;
-  z: string;
-}
-
-interface PlotLayout {
-  margin: {
-    l: number;
-    r: number;
-    t: number;
-    b: number;
-  };
-  xaxis: {
-    p2c: (value: number) => number;
-  };
-  yaxis: {
-    p2c: (value: number) => number;
-  };
-}
-
-interface PlotAnnotation {
-  x: number;
-  y: number;
-  text: string;
-  showarrow: boolean;
-  arrowhead?: number;
-  standoff?: number;
-  yshift?: number;
-  font?: {
-    color?: string;
-    size?: number;
-  };
-}
-
-interface PlotElement extends HTMLElement {
-  _fullLayout?: PlotLayout;
-}
 
 @Component({
   selector: 'app-free-positioning',
@@ -350,20 +313,8 @@ export class FreePositioningComponent implements OnDestroy {
     const layout = plotElement?._fullLayout;
     if (!layout) return;
 
-    const x = evt.layerX - layout.margin.l;
-    const y = evt.layerY - layout.margin.t;
-
-    this.updateMousePosition(type, layout, x, y);
-  }
-
-  /**
-   * Updates mouse position display
-   */
-  private updateMousePosition(type: Side, layout: PlotLayout, x: number, y: number): void {
-    const position: MousePosition = {
-      x: Number(layout.xaxis.p2c(x)).toFixed(2),
-      z: Number(layout.yaxis.p2c(y)).toFixed(2)
-    };
+    const { x, y } = getPixelOffset(evt, layout);
+    const position = toMousePosition(layout, x, y);
 
     if (type === 'profile') {
       this.profileMousePosition.set(position);
@@ -377,13 +328,10 @@ export class FreePositioningComponent implements OnDestroy {
    */
   private handleClick(evt: MouseEvent, type: Side, plotElement: PlotElement | null): void {
     const layout = plotElement?._fullLayout;
-    if (!layout) return;
+    if (!layout || !plotElement) return;
 
-    const x = evt.layerX - layout.margin.l;
-    const y = evt.layerY - layout.margin.t;
-    const plotWidth = plotElement.clientWidth - layout.margin.l - layout.margin.r;
-    const plotHeight = plotElement.clientHeight - layout.margin.t - layout.margin.b;
-    if (x < 0 || x > plotWidth || y < 0 || y > plotHeight) return;
+    const { x, y } = getPixelOffset(evt, layout);
+    if (isOutsidePlotBounds(x, y, layout, plotElement)) return;
 
     const previousSelected = this.obstaclesService.activePointIndex();
     if (!isNumber(previousSelected)) return;
@@ -519,25 +467,14 @@ export class FreePositioningComponent implements OnDestroy {
   /**
    * Attaches event listeners to the plot
    */
-  // The plot containers are static template elements that survive Plotly.purge(), so listeners
-  // must be removed on every recreation — otherwise each refresh adds another click handler.
   private attachEventListeners(type: Side, plotElement: PlotElement | null): void {
     if (!plotElement) return;
 
-    const onMouseMove = (evt: MouseEvent) => {
-      this.handleMouseMove(evt, type, plotElement);
-    };
-    const onClick = (evt: MouseEvent) => {
-      this.handleClick(evt, type, plotElement);
-    };
-
-    plotElement.addEventListener('mousemove', onMouseMove);
-    plotElement.addEventListener('click', onClick);
-
-    this.detachEventListeners.set(type, () => {
-      plotElement.removeEventListener('mousemove', onMouseMove);
-      plotElement.removeEventListener('click', onClick);
+    const detach = attachPlotEventListeners(plotElement, {
+      onMouseMove: (evt) => this.handleMouseMove(evt, type, plotElement),
+      onClick: (evt) => this.handleClick(evt, type, plotElement)
     });
+    this.detachEventListeners.set(type, detach);
   }
 
   /**

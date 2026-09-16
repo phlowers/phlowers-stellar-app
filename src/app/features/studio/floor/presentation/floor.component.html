@@ -42,16 +42,12 @@
   @if (floorFormService.referenceSupportValue()) {
     <div class="floor-form__field">
       <div class="floor-form__field__toggle">
-        <p-toggleswitch
+        <app-free-positioning-toggle
+          source="floor"
           inputId="floorFreePositioning"
-          name="floorFreePositioning"
           [disabled]="!floorFormService.hasEditablePoints()"
-          [ngModel]="plotOptionsService.isFreePositioningMode()"
-          [ngModelOptions]="{ standalone: true }"
-          (onChange)="setFreePositioningMode($event.checked)"
-          data-testid="free-positioning"
+          labelKey="studio.floor.free-positioning-label"
         />
-        <label for="floorFreePositioning">{{ 'studio.floor.free-positioning-label' | transloco }}</label>
       </div>
 
       <button app-btn type="button" btnStyle="outlined" (click)="floorFormService.addPoint()" data-testid="add-point">

@@ -72,7 +72,9 @@ describe('LoadMarkingComponent', () => {
       saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined),
       calculateLoad: vi.fn().mockResolvedValue(undefined),
       activeLoadTab: signal('0'),
-      selectedSpanSupportUuid: signal<string | null>(null)
+      selectedSpanSupportUuid: signal<string | null>(null),
+      activeSpanSupportUuid: signal<string | null>(null),
+      activeLoadPosition: signal<number | null>(null)
     };
 
     await TestBed.configureTestingModule({

@@ -270,6 +270,20 @@
 
 ---
 
+## 20. Free-positioning legacy implementations (superseded by unified free-positioning engine)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/core/presentation/components/free-positioning/free-positioning.component.ts` (+ `.html`/`.scss`/`.spec.ts`) only |
+| Code | Legacy `FreePositioningComponent`, `getAnnotations()` annotation-based marker generation in obstacle/floor/distance |
+| 🔍 Evidence | Replaced by `app-free-positioning-plot` unified engine with `FreePositioningDataService` and thin wrappers (`app-obstacle-free-positioning`, `app-floor-free-positioning`, `app-distance-free-positioning`, `app-loads-free-positioning`). |
+| ⚠️ Confidence | **HIGH** |
+| ⚠️ Do NOT delete | `free-positioning.interfaces.ts`, `free-positioning.constantes.ts`, `free-positioning.helpers.ts`, and `free-positioning-traces.helpers.ts` (+ their specs) in the same folder are **still live** — they are the canonical shared primitives re-exported by `free-positioning-plot.*` and consumed by `FreePositioningDataService`. Only the legacy `free-positioning.component.*` files may be removed. |
+| Removal impact | Delete legacy `FreePositioningComponent` files (component/template/style/spec) once unified engine is fully validated. |
+| Status | ⏳ PENDING REVIEW — 2026-09-11 |
+
+---
+
 ## 20. `lodash.isEqual` import — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
 
 | | |

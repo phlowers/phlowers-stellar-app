@@ -12,6 +12,7 @@ import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptio
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 import { checkIfProjectionNeedRefresh, getLiveCamera } from './plot-options.utils';
+import { FreePositioningSource } from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';
 
 /** Default plot options used when initializing or resetting the studio view. */
 const defaultPlotOptions: PlotOptions = {
@@ -47,7 +48,7 @@ export class PlotOptionsService {
   readonly pendingCameraRestore = signal<Camera | null>(null);
   readonly isFreePositioningMode = signal<boolean>(false);
   /** Which feature currently drives free positioning mode, so the studio page can render the matching plot. */
-  readonly freePositioningSource = signal<'obstacle' | 'floor' | null>(null);
+  readonly freePositioningSource = signal<FreePositioningSource | null>(null);
 
   private readonly document = inject(DOCUMENT);
 
@@ -104,13 +105,21 @@ export class PlotOptionsService {
     this.aspectRatio.set(ratio);
   }
 
+  /** Exits free-positioning mode for whichever feature currently owns it. */
+  exitFreePositioningMode(): void {
+    const source = untracked(() => this.freePositioningSource());
+    if (source !== null) {
+      this.setFreePositioningMode(false, source);
+    }
+  }
+
   /**
    * Turns free positioning mode on for the given feature, or off (source is cleared either way when
    * disabling). Only the feature currently owning the mode can turn it off: handing it over destroys
    * the previous plot component, whose `ngOnDestroy` safety net would otherwise close the mode the
    * new one just opened.
    */
-  setFreePositioningMode(enabled: boolean, source: 'obstacle' | 'floor'): void {
+  setFreePositioningMode(enabled: boolean, source: FreePositioningSource): void {
     if (!enabled && untracked(() => this.freePositioningSource()) !== source) {
       return;
     }
@@ -127,5 +136,16 @@ export class PlotOptionsService {
     this.freePositioningSource.set(null);
     this.scalingFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     this.aspectRatio.set({ x: 1, y: 1, z: 1 });
+  }
+
+  /**
+   * Keeps the (disabled) span selector display in sync with the span frozen by a
+   * free-positioning wrapper, without going through `plotOptionsChange` — so no
+   * projection refresh is triggered while navigation is frozen.
+   */
+  syncFrozenSpan(span: number): void {
+    const current = untracked(() => this.plotOptions());
+    if (current.startSupport === span && current.endSupport === span + 1) return;
+    this.plotOptions.set({ ...current, startSupport: span, endSupport: span + 1 });
   }
 }

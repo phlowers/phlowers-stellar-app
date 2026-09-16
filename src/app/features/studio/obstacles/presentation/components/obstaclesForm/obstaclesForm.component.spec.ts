@@ -72,7 +72,11 @@ describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
   let mockSpanService: { getSpanOptions: ReturnType<typeof vi.fn>; section: ReturnType<typeof vi.fn> };
-  let mockPlotOptionsService: { isFreePositioningMode: ReturnType<typeof signal> };
+  let mockPlotOptionsService: {
+    isFreePositioningMode: ReturnType<typeof signal<boolean>>;
+    freePositioningSource: ReturnType<typeof signal<'obstacle' | 'floor' | 'loads' | 'distance' | null>>;
+    setFreePositioningMode: ReturnType<typeof vi.fn>;
+  };
   let mockObstacleFormService: MockObstacleFormService;
   let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
@@ -97,7 +101,12 @@ describe('ObstaclesFormComponent', () => {
       section: vi.fn().mockReturnValue(null)
     };
     mockPlotOptionsService = {
-      isFreePositioningMode: signal(false)
+      isFreePositioningMode: signal(false),
+      freePositioningSource: signal(null),
+      setFreePositioningMode: vi.fn((enabled: boolean, source: 'obstacle' | 'floor' | 'loads' | 'distance') => {
+        mockPlotOptionsService.isFreePositioningMode.set(enabled);
+        mockPlotOptionsService.freePositioningSource.set(enabled ? source : null);
+      })
     };
     mockPlotService = {
       loading: signal(false)
@@ -847,7 +856,7 @@ describe('ObstaclesFormComponent', () => {
       expect(toggle.getAttribute('data-p-checked')).toBe('false');
 
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-      mockPlotOptionsService.isFreePositioningMode.set(true);
+      mockPlotOptionsService.setFreePositioningMode(true, 'obstacle');
 
       const localFixture = TestBed.createComponent(ObstaclesFormComponent);
       localFixture.detectChanges();

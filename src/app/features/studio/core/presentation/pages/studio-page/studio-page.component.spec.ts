@@ -86,6 +86,8 @@ describe('StudioPageComponent', () => {
   let plotOptionsServiceMock: {
     plotOptions: ReturnType<typeof vi.fn>;
     isFreePositioningMode: SignalFn<boolean>;
+    freePositioningSource: SignalFn<'obstacle' | 'floor' | 'loads' | 'distance' | null>;
+    setFreePositioningMode: ReturnType<typeof vi.fn>;
     camera: SignalFn<Camera | null>;
     pendingCameraRestore: SignalFn<Camera | null>;
     setScalingFactors: ReturnType<typeof vi.fn>;
@@ -116,6 +118,8 @@ describe('StudioPageComponent', () => {
     plotOptionsServiceMock = {
       plotOptions: vi.fn().mockReturnValue({ invert: false }),
       isFreePositioningMode: createSignalMock<boolean>(false),
+      freePositioningSource: createSignalMock<'obstacle' | 'floor' | 'loads' | 'distance' | null>('floor'),
+      setFreePositioningMode: vi.fn(),
       camera: createSignalMock<Camera | null>(null),
       pendingCameraRestore: createSignalMock<Camera | null>(null),
       setScalingFactors: vi.fn(),
@@ -249,6 +253,27 @@ describe('StudioPageComponent', () => {
     // Initial state: no section and invert=false per mock
     expect(component.sliderOptions().ceil).toBeUndefined();
     expect(component.sliderOptions().rightToLeft).toBe(false);
+  });
+
+  it('should quit free positioning when changing charge tabs', () => {
+    plotOptionsServiceMock.isFreePositioningMode.set(true);
+    plotOptionsServiceMock.freePositioningSource.set('loads');
+
+    component.onLoadTabChange('1');
+
+    expect(plotOptionsServiceMock.setFreePositioningMode).toHaveBeenCalledWith(false, 'loads');
+    expect(component.loadFormsService.activeLoadTab()).toBe('1');
+  });
+
+  it('should freeze span navigation while free positioning is active', () => {
+    plotOptionsServiceMock.isFreePositioningMode.set(true);
+    expect(component.isPreviousDisabled()).toBe(true);
+    expect(component.isNextDisabled()).toBe(true);
+
+    component.onSupportButtonClick('left');
+    component.onSelectSpanAmount('single');
+
+    expect(plotService.plotOptionsChange).not.toHaveBeenCalled();
   });
 
   it('ngOnInit should navigate when params are missing', () => {

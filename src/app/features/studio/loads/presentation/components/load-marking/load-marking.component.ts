@@ -28,6 +28,7 @@ import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { FreePositioningToggleComponent } from '@features/studio/core/presentation/components/free-positioning-toggle/free-positioning-toggle.component';
 
 @Component({
   selector: 'app-load-marking',
@@ -42,7 +43,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     IconComponent,
     ToggleSwitchModule,
     FormsModule,
-    TranslocoModule
+    TranslocoModule,
+    FreePositioningToggleComponent
   ],
   templateUrl: './load-marking.component.html',
   styleUrl: './load-marking.component.scss',
@@ -109,6 +111,7 @@ export class LoadMarkingComponent {
   private readonly spanSelectEffect = effect(() => {
     const value = this.spanSelectSignal();
     this.onSpanSelectChange(value ?? null);
+    this.loadFormsService.activeSpanSupportUuid.set(value ?? null);
   });
 
   private readonly chargeChangeEffect = effect(() => {
@@ -124,6 +127,14 @@ export class LoadMarkingComponent {
     if (uuid) {
       this.form.controls.spanSelect.setValue(uuid);
       this.loadFormsService.selectedSpanSupportUuid.set(null);
+    }
+  });
+
+  private readonly externalLoadPositionEffect = effect(() => {
+    const pos = this.loadFormsService.activeLoadPosition();
+    if (pos !== null && pos !== undefined) {
+      this.form.controls.loadPosition.setValue(pos);
+      this.loadFormsService.activeLoadPosition.set(null);
     }
   });
 

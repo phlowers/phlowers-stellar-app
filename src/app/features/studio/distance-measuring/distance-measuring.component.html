@@ -35,16 +35,11 @@
 </div>
 
 <div class="distance-measuring__free-positioning">
-  <p-toggleswitch
+  <app-free-positioning-toggle
+    source="distance"
     inputId="distanceFreePositioning"
-    name="distanceFreePositioning"
-    [disabled]="true"
-    [ngModel]="false"
-    [ngModelOptions]="{ standalone: true }"
-    aria-describedby="distance-measuring-hint"
-    data-testid="free-positioning-toggle"
+    labelKey="studio.distance-measuring.free-positioning-label"
   />
-  <label for="distanceFreePositioning">{{ 'studio.distance-measuring.free-positioning-label' | transloco }}</label>
 </div>
 
 <ul class="distance-measuring__points" data-testid="points-list">

@@ -204,6 +204,28 @@ describe('PlotOptionsService', () => {
     });
   });
 
+  describe('syncFrozenSpan', () => {
+    it('should update startSupport and endSupport to reflect the given span', () => {
+      service.plotOptions.set({ view: '3d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
+      service.syncFrozenSpan(3);
+      expect(service.plotOptions().startSupport).toBe(3);
+      expect(service.plotOptions().endSupport).toBe(4);
+    });
+
+    it('should not write to plotOptions when the span is already in sync', () => {
+      service.plotOptions.set({ view: '3d', side: 'profile', startSupport: 2, endSupport: 3, invert: false });
+      const spy = vi.spyOn(service.plotOptions, 'set');
+      service.syncFrozenSpan(2);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('should preserve other plot options (view, side, invert)', () => {
+      service.plotOptions.set({ view: '2d', side: 'face', startSupport: 0, endSupport: 1, invert: true });
+      service.syncFrozenSpan(5);
+      expect(service.plotOptions()).toEqual({ view: '2d', side: 'face', startSupport: 5, endSupport: 6, invert: true });
+    });
+  });
+
   describe('reset', () => {
     it('should reset plotOptions to defaults', () => {
       service.plotOptions.set({ view: '2d', side: 'face', startSupport: 5, endSupport: 10, invert: true });

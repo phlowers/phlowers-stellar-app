@@ -109,15 +109,11 @@
 
   <div class="obstacles-form__field">
     <div class="obstacles-form__field__toggle">
-      <p-toggleswitch
-        inputId="freePositioning"
-        name="freePositioning"
+      <app-free-positioning-toggle
+        source="obstacle"
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
-        [ngModel]="plotOptionsService.isFreePositioningMode()"
-        [ngModelOptions]="{ standalone: true }"
-        (onChange)="plotOptionsService.setFreePositioningMode($event.checked, 'obstacle')"
+        labelKey="studio.obstacles-form.free-positioning-label"
       />
-      <label for="freePositioning">{{ 'studio.obstacles-form.free-positioning-label' | transloco }}</label>
     </div>
 
     <button

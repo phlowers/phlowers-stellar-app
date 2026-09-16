@@ -31,6 +31,7 @@ import { ConformityComponent } from '../conformity/conformity.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { FreePositioningToggleComponent } from '@features/studio/core/presentation/components/free-positioning-toggle/free-positioning-toggle.component';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -50,7 +51,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     DecimalPipe,
     DialogModule,
     ConformityComponent,
-    TranslocoModule
+    TranslocoModule,
+    FreePositioningToggleComponent
   ],
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss',

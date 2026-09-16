@@ -205,6 +205,12 @@
       "distance-calculation-error-detail": "Échec du calcul des distances des obstacles",
       "save-detail": "Obstacle enregistré"
     },
+    "free-positioning-data": {
+      "floor-point": "Sol #{{ index }}",
+      "distance-point": "Distance #{{ index }}",
+      "punctual-load": "Charge ponctuelle",
+      "marking-load": "Charge de balisage"
+    },
     "floor-form-service": {
       "delete-detail": "Sol supprimé",
       "delete-error-detail": "Échec de la suppression du sol",
@@ -852,7 +858,13 @@
     "free-positioning": {
       "x-label": "x :",
       "z-label": "z :",
-      "y-label": "y :"
+      "y-label": "y :",
+      "categories": {
+        "obstacle": "Obstacles",
+        "floor": "Terrain",
+        "distance": "Distance",
+        "loads": "Charges"
+      }
     },
     "studio-page": {
       "parameter-label": "Paramètre",

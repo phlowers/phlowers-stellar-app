@@ -6,6 +6,14 @@
  */
 import Plotly, { ModeBarButtonAny } from 'plotly.js-dist-min';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
+import { FreePositioningConfig } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.interfaces';
+
+/** Config consumed by the shared FreePositioningPlotComponent: profile only, floor is the editable category. */
+export const FLOOR_FREE_POSITIONING_CONFIG: FreePositioningConfig = {
+  showFace: false,
+  editableCategory: 'floor',
+  defaultVisibleCategories: ['floor']
+};
 
 export const PLOT_CONFIG = {
   MARGIN_LEFT: 35,
@@ -14,8 +22,10 @@ export const PLOT_CONFIG = {
   MARGIN_BOTTOM: 35
 } as const;
 
-export const DEBOUNCED_REFRESH_STUDIO_DELAY = 400;
-export const DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY = 100;
+export {
+  DEBOUNCED_REFRESH_STUDIO_DELAY,
+  DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY
+} from '@features/studio/core/presentation/components/free-positioning/free-positioning.constantes';
 
 /** Click-to-select radius (pixels) for picking an existing floor point instead of placing the active one. */
 export const POINT_SELECTION_PIXEL_RADIUS = 12;
