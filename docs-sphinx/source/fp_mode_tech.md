@@ -23,6 +23,28 @@ per `freePositioningSource` (`obstacle`, `floor`, `loads`), with `@default`
 falling back to `<app-studio>`. The distance and floor cases are handled by their
 respective wrappers as well.
 
+### Point data reactivity
+
+Every wrapper exposes its plot points as a `computed`:
+
+```ts
+readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), '<category>'));
+```
+
+A `computed` only re-evaluates when a **signal it reads** changes, so every tab's
+points inside `FreePositioningDataService.buildAggregateParams` must be sourced
+from a signal — otherwise placing a point patches the form but never refreshes
+the markers. Concretely:
+
+- Distance reads `distanceMeasuringService.positions()` (a `toSignal` of the form).
+- Obstacle reads `obstacleFormService.positionsSnapshot()` (a `toSignal` of the
+  positions `FormArray`), **not** `form.get('positions').value`, which is not
+  reactive and would leave the obstacle markers stale after a click.
+
+This keeps all tabs behaving identically: clicking the left (x·z / profile) plot
+fills and shows a point's along-span and altitude, and clicking the right (y·z /
+face) plot fills its lateral coordinate.
+
 ## The frozen span
 
 The frozen span is a single source of truth held by `PlotOptionsService`:

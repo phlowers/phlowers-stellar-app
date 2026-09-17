@@ -76,7 +76,8 @@ export class ObstacleFormService {
     return this.form.get('positions') as FormArray;
   }
 
-  private readonly positionsSnapshot = toSignal(this.positions.valueChanges as Observable<Position3D[]>, {
+  /** Reactive snapshot of the positions form array; consumers (e.g. free positioning) must read this to stay in sync. */
+  readonly positionsSnapshot = toSignal(this.positions.valueChanges as Observable<Position3D[]>, {
     initialValue: this.positions.value as Position3D[]
   });
 

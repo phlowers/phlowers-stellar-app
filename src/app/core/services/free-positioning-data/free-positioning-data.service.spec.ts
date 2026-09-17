@@ -93,7 +93,8 @@ describe('FreePositioningDataService', () => {
 
   let mockObstacleForm: ReturnType<FormBuilder['group']>;
   const mockObstacleFormService = {
-    form: null as unknown as ReturnType<FormBuilder['group']>
+    form: null as unknown as ReturnType<FormBuilder['group']>,
+    positionsSnapshot: signal<{ x: number | null; y: number | null; z: number | null }[]>([])
   };
 
   const mockObstaclesService = {
@@ -126,6 +127,9 @@ describe('FreePositioningDataService', () => {
       referenceSupport: ['LEFT']
     });
     mockObstacleFormService.form = mockObstacleForm;
+    mockObstacleFormService.positionsSnapshot.set(
+      (mockObstacleForm.get('positions')?.value ?? []) as { x: number | null; y: number | null; z: number | null }[]
+    );
 
     mockFloorFormService.pointsView.mockReturnValue([
       {

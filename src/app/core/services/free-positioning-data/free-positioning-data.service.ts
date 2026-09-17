@@ -44,8 +44,9 @@ export class FreePositioningDataService {
     const supports = section?.supports ?? [];
     const litData = this.plotService.litData();
 
-    // Obstacle form state
-    const obstaclePositions = (this.obstacleFormService.form?.get('positions')?.value ?? []) as Position3D[];
+    // Obstacle form state — read the reactive snapshot so the points recompute on every form change,
+    // matching the distance tab (which reads its positions signal).
+    const obstaclePositions = (this.obstacleFormService.positionsSnapshot() ?? []) as Position3D[];
     const activeObstacleIndex = this.obstaclesService.activePointIndex();
     const activeObstacleSupportUuid = this.obstacleFormService.form?.get('supportUuid')?.value as string | undefined;
     const isAbsoluteAltitude = this.obstacleFormService.form?.get('altitudeType')?.value === 'absolute';
