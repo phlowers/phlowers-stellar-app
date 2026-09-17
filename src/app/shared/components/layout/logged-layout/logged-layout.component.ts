@@ -35,6 +35,13 @@ export class LoggedLayoutComponent {
           label: this.translocoService.translate('shared.logged-layout.studies'),
           route: '/studies',
           icon: 'folder'
+        },
+        {
+          id: 'sideB-documentation',
+          label: this.translocoService.translate('shared.logged-layout.documentation'),
+          externalUrl: '/docs/index.html',
+          target: '_blank',
+          icon: 'help'
         }
       ],
       footer: [

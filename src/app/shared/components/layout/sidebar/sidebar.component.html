@@ -17,24 +17,44 @@
     <ul>
       @for (item of mainLinks(); track item.id) {
         <li>
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            ariaCurrentWhenActive="page"
-            [id]="item.id"
-            class="stellar-sidebar__link"
-            data-testid="nav-link"
-          >
-            <app-icon [icon]="item.icon" />
-            <span>
-              @if (item.shortLabel && expandedStatus() === false) {
-                {{ item.shortLabel }}
-              } @else {
-                {{ item.label }}
-              }
-            </span>
-          </a>
+          @if (item.externalUrl) {
+            <a
+              [href]="item.externalUrl"
+              [target]="item.target ?? null"
+              rel="noopener noreferrer"
+              [id]="item.id"
+              class="stellar-sidebar__link"
+              data-testid="nav-link"
+            >
+              <app-icon [icon]="item.icon" />
+              <span>
+                @if (item.shortLabel && expandedStatus() === false) {
+                  {{ item.shortLabel }}
+                } @else {
+                  {{ item.label }}
+                }
+              </span>
+            </a>
+          } @else {
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              [id]="item.id"
+              class="stellar-sidebar__link"
+              data-testid="nav-link"
+            >
+              <app-icon [icon]="item.icon" />
+              <span>
+                @if (item.shortLabel && expandedStatus() === false) {
+                  {{ item.shortLabel }}
+                } @else {
+                  {{ item.label }}
+                }
+              </span>
+            </a>
+          }
         </li>
       }
     </ul>
@@ -46,24 +66,44 @@
     <ul>
       @for (item of footerLinks(); track item.id) {
         <li>
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            ariaCurrentWhenActive="page"
-            [id]="item.id"
-            class="stellar-sidebar__link"
-            data-testid="nav-link"
-          >
-            <app-icon [icon]="item.icon" />
-            <span>
-              @if (item.shortLabel && expandedStatus() === false) {
-                {{ item.shortLabel }}
-              } @else {
-                {{ item.label }}
-              }
-            </span>
-          </a>
+          @if (item.externalUrl) {
+            <a
+              [href]="item.externalUrl"
+              [target]="item.target ?? null"
+              rel="noopener noreferrer"
+              [id]="item.id"
+              class="stellar-sidebar__link"
+              data-testid="nav-link"
+            >
+              <app-icon [icon]="item.icon" />
+              <span>
+                @if (item.shortLabel && expandedStatus() === false) {
+                  {{ item.shortLabel }}
+                } @else {
+                  {{ item.label }}
+                }
+              </span>
+            </a>
+          } @else {
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              [id]="item.id"
+              class="stellar-sidebar__link"
+              data-testid="nav-link"
+            >
+              <app-icon [icon]="item.icon" />
+              <span>
+                @if (item.shortLabel && expandedStatus() === false) {
+                  {{ item.shortLabel }}
+                } @else {
+                  {{ item.label }}
+                }
+              </span>
+            </a>
+          }
         </li>
       }
     </ul>

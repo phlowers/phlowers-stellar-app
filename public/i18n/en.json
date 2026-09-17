@@ -171,6 +171,7 @@
     "logged-layout": {
       "home": "Home",
       "studies": "Studies",
+      "documentation": "Documentation",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
