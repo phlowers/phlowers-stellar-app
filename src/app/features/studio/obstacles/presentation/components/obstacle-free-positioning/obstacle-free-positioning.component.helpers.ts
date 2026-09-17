@@ -20,7 +20,7 @@ export const computeNewObstaclePosition = (
     return {
       x: placement.alongSpan,
       y: currentPosition.y ?? null,
-      z: isAbsolute ? placement.altitude : Number.parseFloat((placement.altitude - refAltitude).toFixed(2))
+      z: isAbsolute ? placement.altitude : Number.parseFloat((placement.altitude - refAltitude).toFixed(1))
     };
   }
   return {

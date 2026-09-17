@@ -342,12 +342,12 @@ export class FreePositioningComponent implements OnDestroy {
     let newObstacle: Position3D;
     if (type === 'profile') {
       // Profile plot: update x and z, keep y
-      const clickedAbsoluteAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const clickedAbsoluteAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(1));
       const zValue = this.isAbsoluteAltitudeMode()
         ? clickedAbsoluteAltitude
-        : Number.parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(2));
+        : Number.parseFloat((clickedAbsoluteAltitude - this.referenceSupportAltitudeNgf()).toFixed(1));
       newObstacle = {
-        x: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        x: Number.parseFloat(layout.xaxis.p2c(x).toFixed(1)),
         y: previousSelectedObstacle.y ?? null,
         z: zValue
       };
@@ -355,7 +355,7 @@ export class FreePositioningComponent implements OnDestroy {
       // Face plot: update y only, keep x and z
       newObstacle = {
         x: previousSelectedObstacle.x ?? null,
-        y: Number.parseFloat(layout.xaxis.p2c(x).toFixed(2)),
+        y: Number.parseFloat(layout.xaxis.p2c(x).toFixed(1)),
         z: previousSelectedObstacle.z ?? null
       };
     }

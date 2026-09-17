@@ -360,8 +360,8 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
     // Place a new point or move the active editable point
     if (side === 'profile') {
-      const clickedAlongSpan = Number.parseFloat(layout.xaxis.p2c(x).toFixed(2));
-      const clickedAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const clickedAlongSpan = Number.parseFloat(layout.xaxis.p2c(x).toFixed(1));
+      const clickedAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(1));
       this.placement.emit({
         alongSpan: clickedAlongSpan,
         lateral: null,
@@ -370,8 +370,8 @@ export class FreePositioningPlotComponent implements OnDestroy {
         side: 'profile'
       });
     } else {
-      const clickedLateral = Number.parseFloat(layout.xaxis.p2c(x).toFixed(2));
-      const clickedAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(2));
+      const clickedLateral = Number.parseFloat(layout.xaxis.p2c(x).toFixed(1));
+      const clickedAltitude = Number.parseFloat(layout.yaxis.p2c(y).toFixed(1));
       this.placement.emit({
         alongSpan: 0,
         lateral: clickedLateral,

@@ -25,6 +25,20 @@ describe('obstacle-free-positioning helpers', () => {
       expect(result).toEqual({ x: 50, y: 5, z: 60 });
     });
 
+    it('should round the relative altitude to one decimal for free positioning updates', () => {
+      const current = { x: 10, y: 5, z: 20 };
+      const placement = {
+        alongSpan: 50,
+        lateral: null,
+        altitude: 100.17,
+        category: 'obstacle' as const,
+        side: 'profile' as const
+      };
+      const result = computeNewObstaclePosition(current, placement, false, 40.12);
+
+      expect(result).toEqual({ x: 50, y: 5, z: 60.1 });
+    });
+
     it('should update y from face placement and keep x and z', () => {
       const current = { x: 50, y: 5, z: 60 };
       const placement = { alongSpan: 0, lateral: 15, altitude: 100, category: 'obstacle' as const, side: 'face' as const };
