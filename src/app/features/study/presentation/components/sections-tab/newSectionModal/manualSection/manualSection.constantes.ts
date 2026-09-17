@@ -8,6 +8,7 @@ export const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 export const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof Section> = {
   voltage_idr: 'voltage_idr',
   link_idr: 'link_idr',
+  link_adr: 'link_adr',
   lit_idr: 'lit_idr',
   lit_adr: 'lit_adr',
   branch_idr: 'branch_idr',
@@ -23,6 +24,7 @@ export const orderedMaintenanceTableProperties: (
 export const orderedLineTableProperties: LineTableProperties[] = [
   'voltage_idr',
   'link_idr',
+  'link_adr',
   'lit_idr',
   'lit_adr',
   'branch_idr',
