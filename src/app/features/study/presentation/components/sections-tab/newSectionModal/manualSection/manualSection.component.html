@@ -265,13 +265,8 @@
                 </ng-template>
               </p-select>
             </div>
-<<<<<<< HEAD
-            <div class="flex flex-col section-form-part-grid__cell--b">
-              <label for="linkIdr">{{ 'manual-section.label-link-id' | transloco }}</label>
-=======
             <div class="flex flex-col [grid-area:b]">
               <label for="linkIdr">{{ 'manual-section.label-link-idr' | transloco }}</label>
->>>>>>> 99a78ae9 (fix conflict with IDR and ADR)
               <p-select
                 inputId="linkIdr"
                 [options]="uniqueLinkIdr()"
@@ -289,13 +284,8 @@
                 data-testid="link-idr-select"
               />
             </div>
-<<<<<<< HEAD
-            <div class="flex flex-col section-form-part-grid__cell--c">
-              <label for="linkAdr">{{ 'manual-section.label-link-name' | transloco }}</label>
-=======
             <div class="flex flex-col [grid-area:c]">
               <label for="linkAdr">{{ 'manual-section.label-link-adr' | transloco }}</label>
->>>>>>> 99a78ae9 (fix conflict with IDR and ADR)
               <p-select
                 inputId="linkAdr"
                 [options]="uniqueLinkAdr()"
@@ -314,13 +304,8 @@
                 data-testid="link-adr-select"
               />
             </div>
-<<<<<<< HEAD
-            <div class="flex flex-col section-form-part-grid__cell--d">
-              <label for="litIdr">{{ 'manual-section.label-lit-id' | transloco }}</label>
-=======
             <div class="flex flex-col [grid-area:d]">
               <label for="litIdr">{{ 'manual-section.label-lit-idr' | transloco }}</label>
->>>>>>> 99a78ae9 (fix conflict with IDR and ADR)
               <p-select
                 inputId="litIdr"
                 [options]="uniqueLitIdr()"
@@ -339,13 +324,8 @@
               />
             </div>
 
-<<<<<<< HEAD
-            <div class="flex flex-col section-form-part-grid__cell--e">
-              <label for="litAdr">{{ 'manual-section.label-lit-name' | transloco }}</label>
-=======
             <div class="flex flex-col [grid-area:e]">
               <label for="litAdr">{{ 'manual-section.label-lit-adr' | transloco }}</label>
->>>>>>> 99a78ae9 (fix conflict with IDR and ADR)
               <p-select
                 inputId="litAdr"
                 [options]="uniqueLitAdr()"
@@ -392,25 +372,6 @@
               </dd>
             </div>
 
-<<<<<<< HEAD
-            <div class="section-form-part-grid__cell--b">
-              <dt>{{ 'manual-section.label-link-id' | transloco }}</dt>
-              <dd class="read-only-info">{{ section().link_idr }}</dd>
-            </div>
-
-            <div class="section-form-part-grid__cell--c">
-              <dt>{{ 'manual-section.label-link-name' | transloco }}</dt>
-              <dd class="read-only-info">{{ linkAdrRead() }}</dd>
-            </div>
-
-            <div class="section-form-part-grid__cell--d">
-              <dt>{{ 'manual-section.label-lit-id' | transloco }}</dt>
-              <dd class="read-only-info" data-testid="lit-code-view">{{ section().lit_idr }}</dd>
-            </div>
-
-            <div class="section-form-part-grid__cell--e">
-              <dt>{{ 'manual-section.label-lit-name' | transloco }}</dt>
-=======
             <div class="[grid-area:b]">
               <dt>{{ 'manual-section.label-link-idr' | transloco }}</dt>
               <dd class="read-only-info">{{ section().link_idr }}</dd>
@@ -428,7 +389,6 @@
 
             <div class="[grid-area:e]">
               <dt>{{ 'manual-section.label-lit-adr' | transloco }}</dt>
->>>>>>> 99a78ae9 (fix conflict with IDR and ADR)
               <dd class="read-only-info" data-testid="lit-name-view">{{ litAdrRead() }}</dd>
             </div>
 
