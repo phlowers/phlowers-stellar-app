@@ -49,10 +49,13 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   private readonly plotService = inject(PlotService);
 
   constructor() {
-    // Force obstacle reference frame while free positioning is active.
+    // Force and lock obstacle reference frame while free positioning is active.
     this.obstacleFormService.form.get('referenceSupport')?.setValue(ReferenceSupport.LEFT);
     this.obstacleFormService.form.get('altitudeType')?.setValue('absolute');
     this.obstacleFormService.form.get('lateralDistanceType')?.setValue(LateralDistanceType.SPAN_AXIS);
+    this.obstacleFormService.form.get('referenceSupport')?.disable();
+    this.obstacleFormService.form.get('altitudeType')?.disable();
+    this.obstacleFormService.form.get('lateralDistanceType')?.disable();
   }
 
   /** Span frozen when free positioning was switched on; constant for the whole session. */
@@ -100,6 +103,9 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.obstacleFormService.form.get('referenceSupport')?.enable();
+    this.obstacleFormService.form.get('altitudeType')?.enable();
+    this.obstacleFormService.form.get('lateralDistanceType')?.enable();
     this.plotOptionsService.setFreePositioningMode(false, 'obstacle');
   }
 }
