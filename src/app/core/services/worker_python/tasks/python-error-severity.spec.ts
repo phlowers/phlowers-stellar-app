@@ -40,7 +40,12 @@ describe('PYTHON_ERROR_SEVERITY', () => {
 
     Object.values(PythonErrorCode).forEach((code) => {
       const severity = PYTHON_ERROR_SEVERITY[code];
-      const message = formatPythonError(code, translocoService);
+      // rawText carries the dynamic values of the cut strands message
+      const message = formatPythonError(
+        code,
+        translocoService,
+        'Cut strands count (27) exceeds number of strands (19) in layer 1'
+      );
 
       expect(severity, `missing severity for ${code}`).toBeDefined();
       expect(['error', 'warning']).toContain(severity);

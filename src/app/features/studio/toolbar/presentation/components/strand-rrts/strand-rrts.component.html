@@ -18,6 +18,10 @@
     <dd class="stress-rate-value" data-testid="work-load-value">
       {{ workLoad() !== null ? (workLoad() | number: '1.0-1') : '-' }}&nbsp;%
     </dd>
+    <dt class="staff-presence-label">{{ 'studio.rrts-cut-strands.staff-presence-label' | transloco }}</dt>
+    <dd class="staff-presence-value" data-testid="staff-presence-value">
+      {{ (staffIsPresent() ? 'common.yes' : 'common.no') | transloco }}
+    </dd>
   </dl>
 
   <div class="grid-structure grid-structure--form">
@@ -31,6 +35,7 @@
         formControlName="span"
         appendTo="body"
         fluid
+        [showClear]="true"
         data-testid="rrts-span-select"
       />
     </div>
@@ -110,7 +115,13 @@
   </div>
 
   <div class="calculate-btn-wrapper">
-    <button type="submit" app-btn [disabled]="isCalculating()">
+    <button
+      type="submit"
+      app-btn
+      data-testid="calculate-btn"
+      [disabled]="form.invalid || isSaving()"
+      [btnLoading]="isCalculating()"
+    >
       <app-icon icon="rocket_launch" aria-hidden="true" />
       {{ 'common.calculate' | transloco }}
     </button>
@@ -118,7 +129,7 @@
 </form>
 
 @if (rrts() !== null) {
-  <section class="results" @expand>
+  <output class="results" @expand>
     <h2>{{ 'common.results' | transloco }}</h2>
 
     <dl class="grid-structure grid-structure--results">
@@ -126,27 +137,74 @@
       <dd class="results-rrts-value" data-testid="results-rrts-value">{{ rrts() | number: '1.0-1' }}&nbsp;daN</dd>
       <dt class="results-load-label">{{ 'studio.rrts-cut-strands.result-new-working-load-label' | transloco }}</dt>
       <dd class="results-load-value" data-testid="results-load-value">
-        {{ newWorkLoad() !== null ? (newWorkLoad() | number: '1.0-1') : '-' }}&nbsp;%
+        <span>{{ newWorkLoad() !== null ? (newWorkLoad() | number: '1.0-1') : '-' }}&nbsp;%</span>
+        @if (newWorkLoad() === null) {
+          <app-icon
+            icon="counter_0"
+            class="results-load-icon results-load-icon--null"
+            [ariaLabel]="'studio.rrts-cut-strands.result-new-working-load-null' | transloco"
+          />
+        } @else if (newWorkLoad()! > 0 && newWorkLoad()! <= 75) {
+          <app-icon
+            icon="check"
+            class="results-load-icon results-load-icon--ok"
+            [ariaLabel]="'studio.rrts-cut-strands.result-new-working-load-ok' | transloco"
+          />
+        } @else if (newWorkLoad()! > 75 && newWorkLoad()! <= 100) {
+          <app-icon
+            icon="exclamation"
+            class="results-load-icon results-load-icon--warning"
+            [ariaLabel]="'studio.rrts-cut-strands.result-new-working-load-warning' | transloco"
+          />
+        } @else if (newWorkLoad()! < 0 || newWorkLoad()! > 100) {
+          <app-icon
+            icon="close_small"
+            class="results-load-icon results-load-icon--error"
+            [ariaLabel]="'studio.rrts-cut-strands.result-new-working-load-error' | transloco"
+          />
+        } @else {
+          <app-icon
+            icon="question_mark"
+            class="results-load-icon results-load-icon--unknown"
+            [ariaLabel]="'studio.rrts-cut-strands.result-new-working-load-unknown' | transloco"
+          />
+        }
       </dd>
     </dl>
-  </section>
+  </output>
 }
 
 <ng-template #footer>
-  <button type="button" app-btn btnStyle="danger" data-testid="delete-btn" [disabled]="!isSaved()" (click)="delete()">
-    <app-icon icon="delete" aria-hidden="true" />
-    {{ 'common.delete' | transloco }}
-  </button>
+  <div class="footer">
+    <div class="footer-actions">
+      <button
+        type="button"
+        app-btn
+        btnStyle="danger"
+        data-testid="delete-btn"
+        [disabled]="!isSaved() || isSaving()"
+        (click)="delete()"
+      >
+        <app-icon icon="delete" aria-hidden="true" />
+        {{ 'common.delete' | transloco }}
+      </button>
 
-  <button
-    type="button"
-    app-btn
-    btnStyle="base"
-    data-testid="save-btn"
-    [disabled]="rrts() === null || form.invalid || isCalculating()"
-    (click)="save()"
-  >
-    <app-icon icon="save" aria-hidden="true" />
-    {{ 'common.save' | transloco }}
-  </button>
+      <button
+        type="button"
+        app-btn
+        btnStyle="base"
+        data-testid="save-btn"
+        aria-describedby="rrts-save-hint"
+        [disabled]="form.invalid || isCalculating()"
+        [btnLoading]="isSaving()"
+        (click)="save()"
+      >
+        <app-icon icon="save" aria-hidden="true" />
+        {{ 'common.calculate-and-save' | transloco }}
+      </button>
+    </div>
+    <p id="rrts-save-hint" class="text-s-400 mb-0" data-testid="save-hint">
+      {{ 'studio.rrts-cut-strands.single-change-hint' | transloco }}
+    </p>
+  </div>
 </ng-template>

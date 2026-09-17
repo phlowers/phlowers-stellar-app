@@ -28,17 +28,25 @@ export interface PoseTableData {
   computingStep: number;
 }
 
+// Keyed by span (null = whole section). A single entry per section for now, the list allows several later
 export interface RrtsCutStrandsData {
-  span: { index: number; uuid: string };
-  supportRef: 'LEFT' | 'RIGHT';
-  distanceSupportRef: number;
-  // Cut strands per cable layer used for the saved results, index 0 = layer 1
+  // Optional location of the damage, used for the studio marker; results always cover the whole cable
+  span: { index: number; uuid: string } | null;
+  supportRef: 'LEFT' | 'RIGHT' | null;
+  distanceSupportRef: number | null;
+  // Cut strands per cable layer, index 0 = layer 1. Results are recomputed from these on studio init.
   cutStrands: number[];
-  // Residual rated tensile strength (daN)
-  rrts: number;
-  // Utilization rate per span (%) with the cut strands applied
-  utilizationRates: number[];
 }
+
+// Engine cables always have 8 layers; layers without strands stay at 0
+export const CUT_STRANDS_LAYER_COUNT = 8;
+
+// The engine takes a single damage for the whole cable: cut strands of all entries add up per layer
+export const sumCutStrands = (entries: Pick<RrtsCutStrandsData, 'cutStrands'>[]): number[] =>
+  entries.reduce(
+    (total, { cutStrands }) => total.map((sum, i) => sum + (cutStrands[i] ?? 0)),
+    new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
+  );
 
 /**
  * Section domain model - represents a power line section.
@@ -155,7 +163,7 @@ export interface Section {
   /** Pose table calculation data */
   pose_table?: PoseTableData;
   /** RRTS cut strands calculation data */
-  rrts_cut_strands?: RrtsCutStrandsData;
+  rrts_cut_strands?: RrtsCutStrandsData[];
   /** Array of cable length modifications on this section's spans */
   cable_modifications: CableModification[];
   /** UUID of the currently selected cable modification */

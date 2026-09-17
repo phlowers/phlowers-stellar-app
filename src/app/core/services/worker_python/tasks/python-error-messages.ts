@@ -27,21 +27,41 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.InvalidManipulationRange]: 'shared.python-errors.invalid-manipulation-range',
   [PythonErrorCode.SupportOutOfRangeError]: 'shared.python-errors.support-out-of-range-error',
   [PythonErrorCode.GeneratedPointsNoneError]: 'shared.python-errors.generated-points-none-error',
-  [PythonErrorCode.NightTimeError]: 'shared.python-errors.night-time-error'
+  [PythonErrorCode.NightTimeError]: 'shared.python-errors.night-time-error',
+  [PythonErrorCode.CutStrandsExceedsLayerError]: 'shared.python-errors.cut-strands-exceeds-layer-error',
+  [PythonErrorCode.RtsCableNotAvailable]: 'shared.python-errors.rts-cable-not-available',
+  [PythonErrorCode.RtsLayerNotAvailable]: 'shared.python-errors.rts-layer-not-available'
+};
+
+// Translation params read from the raw Python message, for messages with dynamic values.
+// Each regex must follow the message built in stellar_engine/entities/errors.py.
+const PYTHON_ERROR_PARAMS: Partial<Record<PythonErrorCode, (rawText: string) => Record<string, string> | null>> = {
+  [PythonErrorCode.CutStrandsExceedsLayerError]: (rawText) => {
+    const match = /\((\d+)\) exceeds number of strands \((\d+)\) in layer (\d+)/.exec(rawText);
+    return match ? { cutCount: match[1], layerTotal: match[2], layer: match[3] } : null;
+  }
 };
 
 /**
  * Formats a `PythonErrorCode` into a localized human-readable string.
- * Returns `null` when the code is `null` or unrecognized, allowing the caller to apply its own fallback.
+ * Returns `null` when the code is `null` or unrecognized, or when the dynamic values of its message
+ * cannot be read from `rawText`, allowing the caller to apply its own fallback.
  *
  * @param code - The Python exception class name, or `null`
  * @param translocoService - The translation service (injected by caller)
+ * @param rawText - The raw Python message, needed by codes whose message has dynamic values
  * @returns The localized message, or `null` if no mapping exists
  */
-export const formatPythonError = (code: PythonErrorCode | null, translocoService: TranslocoService): string | null => {
+export const formatPythonError = (
+  code: PythonErrorCode | null,
+  translocoService: TranslocoService,
+  rawText = ''
+): string | null => {
   if (code === null) {
     return null;
   }
   const key = PYTHON_ERROR_KEYS[code];
-  return key ? translocoService.translate(key) : null;
+  const getParams = PYTHON_ERROR_PARAMS[code];
+  const params = getParams ? getParams(rawText) : {};
+  return key && params ? translocoService.translate(key, params) : null;
 };

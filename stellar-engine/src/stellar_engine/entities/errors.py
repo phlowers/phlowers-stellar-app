@@ -67,3 +67,15 @@ class ObstacleNotFoundError(ValueError):
 
 class NightTimeError(ValueError):
     """Raised when input time is night time but computation requires to be during day time."""
+
+
+class CutStrandsExceedsLayerError(ValueError):
+    """Raised when the cut strands of a layer exceed its number of strands."""
+
+
+class RtsCableNotAvailable(ValueError):
+    """Raised when the cable RTS is missing from the catalog, so the RRTS cannot be computed."""
+
+
+class RtsLayerNotAvailable(ValueError):
+    """Raised when a layer with cut strands has no strand RTS in the catalog, so the RRTS cannot be computed."""

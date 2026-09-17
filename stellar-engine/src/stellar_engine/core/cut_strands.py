@@ -10,8 +10,14 @@ import logging
 
 import numpy as np
 from mechaphlowers import SectionStudy
+from mechaphlowers.entities.errors import RtsDataNotAvailable
 
-from stellar_engine.entities.errors import _Errors
+from stellar_engine.entities.errors import (
+    CutStrandsExceedsLayerError,
+    RtsCableNotAvailable,
+    RtsLayerNotAvailable,
+    _Errors,
+)
 
 logger = logging.getLogger("stellar_engine")
 
@@ -54,7 +60,7 @@ def set_cut_strands(study: SectionStudy, cut_strands: list[float]) -> dict:
         if cut_count < 0:
             raise ValueError(_Errors.cut_strands_negative(layer_index))
         if cut_count > layer_total:
-            raise ValueError(
+            raise CutStrandsExceedsLayerError(
                 _Errors.cut_strands_exceeds_layer(
                     layer_index, cut_count, layer_total
                 )
@@ -88,8 +94,22 @@ def get_rrts(study: SectionStudy) -> dict:
 
     Returns:
         A dictionary with the residual RTS under the ``rrts`` key.
+
+    Raises:
+        RtsCableNotAvailable: If the cable RTS is missing from the catalog.
+        RtsLayerNotAvailable: If a layer with cut strands has no strand RTS.
     """
-    return {"rrts": study.balance_engine.cable_array.rrts}
+    try:
+        return {"rrts": study.balance_engine.cable_array.rrts}
+    except RtsDataNotAvailable as error:
+        # mechaphlowers raises one exception for both causes: only the missing cable RTS names 'rts_cable'.
+        # "from None" keeps the generic class name out of the traceback the app matches codes against.
+        cause = (
+            RtsCableNotAvailable
+            if "rts_cable" in str(error)
+            else RtsLayerNotAvailable
+        )
+        raise cause(str(error)) from None
 
 
 def get_utilization_rate(study: SectionStudy) -> dict:

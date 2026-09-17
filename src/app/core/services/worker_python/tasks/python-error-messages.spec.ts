@@ -38,7 +38,9 @@ describe('formatPythonError', () => {
               'shared.python-errors.invalid-manipulation-keys': 'The manipulation keys provided are invalid.',
               'shared.python-errors.invalid-manipulation-range': 'The manipulation range provided is invalid.',
               'shared.python-errors.support-out-of-range-error': 'The support is out of the valid range.',
-              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.'
+              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.',
+              'shared.python-errors.cut-strands-exceeds-layer-error':
+                'Cut strands count ({{cutCount}}), summed over all spans, exceeds number of strands ({{layerTotal}}) in layer {{layer}}.'
             }
           },
           translocoConfig: {
@@ -62,9 +64,23 @@ describe('formatPythonError', () => {
   });
 
   it.each(Object.values(PythonErrorCode))('should format code %s to a non-null, non-empty message', (code) => {
-    const message = formatPythonError(code, translocoService);
+    const message = formatPythonError(code, translocoService, CUT_STRANDS_RAW_TEXT);
     expect(message).not.toBeNull();
     expect(typeof message).toBe('string');
     expect(message?.length).toBeGreaterThan(0);
   });
+
+  it('should fill the cut strands message with the values of the raw Python message', () => {
+    expect(formatPythonError(PythonErrorCode.CutStrandsExceedsLayerError, translocoService, CUT_STRANDS_RAW_TEXT)).toBe(
+      'Cut strands count (27), summed over all spans, exceeds number of strands (19) in layer 1.'
+    );
+  });
+
+  it('should return null when the cut strands values cannot be read from the raw Python message', () => {
+    expect(formatPythonError(PythonErrorCode.CutStrandsExceedsLayerError, translocoService, 'Traceback')).toBeNull();
+  });
 });
+
+const CUT_STRANDS_RAW_TEXT = `Traceback (most recent call last):
+  File "stellar_engine/core/cut_strands.py", line 57, in set_cut_strands
+CutStrandsExceedsLayerError: Cut strands count (27) exceeds number of strands (19) in layer 1`;

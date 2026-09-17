@@ -332,6 +332,46 @@ describe('PlotService', () => {
     });
   });
 
+  describe('applyCutStrands', () => {
+    const ok = (result: unknown) => ({ result, error: null, diagnostics: [] });
+
+    it('should store the RRTS in daN, the damaged and the undamaged utilization rates', async () => {
+      mockWorkerPythonService.runTask
+        .mockResolvedValueOnce(ok({ success: true }))
+        .mockResolvedValueOnce(ok({ rrts: 12000 }))
+        .mockResolvedValueOnce(ok({ utilizationRate: [40, 55] }))
+        .mockResolvedValueOnce(ok({ success: true }))
+        .mockResolvedValueOnce(ok({ utilizationRate: [30, 35] }))
+        .mockResolvedValueOnce(ok({ success: true }));
+
+      expect(await service.applyCutStrands([1, 0, 0, 0, 0, 0, 0, 0])).toBeNull();
+      const setCalls = mockWorkerPythonService.runTask.mock.calls.filter(([task]) => task === Task.setCutStrands);
+      // Damage, undamaged cable for the base rates, then the damage again
+      expect(setCalls.map(([, inputs]) => (inputs as { cutStrands: number[] }).cutStrands)).toEqual([
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0]
+      ]);
+      expect(service.rrts()).toBe(1200);
+      expect(service.cutStrandsUtilizationRates()).toEqual([40, 55]);
+      expect(service.baseUtilizationRates()).toEqual([30, 35]);
+    });
+
+    it('should return the diagnostics and leave the engine and results untouched when the cut strands are rejected', async () => {
+      const diagnostics = [{ origin: 'exception', code: TaskError.UNKNOWN_ERROR }];
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics
+      });
+
+      expect(await service.applyCutStrands([99, 0, 0, 0, 0, 0, 0, 0])).toBe(diagnostics);
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledTimes(1);
+      expect(service.rrts()).toBeNull();
+      expect(service.baseUtilizationRates()).toBeNull();
+    });
+  });
+
   describe('plotOptionsChange', () => {
     it('should update a single plot option', () => {
       service.plotOptionsChange({ view: '2d' });
@@ -493,6 +533,43 @@ describe('PlotService', () => {
           view: expect.any(String)
         })
       );
+    });
+
+    it('should apply the sum of every saved cut strands entry before refreshing the projection', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null, diagnostics: [] });
+      const cutStrands = (span: { index: number; uuid: string } | null, values: number[]) => ({
+        span,
+        supportRef: null,
+        distanceSupportRef: null,
+        cutStrands: values
+      });
+
+      await service.initSectionStudio({
+        ...mockSection,
+        rrts_cut_strands: [
+          cutStrands(null, [1, 0, 0, 0, 0, 0, 0, 0]),
+          cutStrands({ index: 0, uuid: 'a' }, [2, 3, 0, 0, 0, 0, 0, 0]),
+          cutStrands({ index: 1, uuid: 'b' }, [0, 1, 0, 0, 0, 0, 0, 0])
+        ]
+      });
+
+      const tasks = mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setCutStrands, {
+        cutStrands: [3, 4, 0, 0, 0, 0, 0, 0]
+      });
+      expect(tasks.indexOf(Task.setCutStrands)).toBeLessThan(tasks.indexOf(Task.refreshProjection));
+    });
+
+    it('should not touch the cut strands without saved entries', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null, diagnostics: [] });
+
+      await service.initSectionStudio({ ...mockSection, rrts_cut_strands: [] });
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.setCutStrands, expect.anything());
     });
 
     it('should set error when initLit task fails', async () => {

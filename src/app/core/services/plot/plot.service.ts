@@ -20,6 +20,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { Subscription } from 'rxjs';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
+import { sumCutStrands } from '@shared/domain/models/section.model';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -49,6 +50,15 @@ export class PlotService {
 
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
+
+  // Cut-strand results are never persisted: they are recomputed from the section's saved
+  // cut strands on studio init, and by the RRTS dialog on each calculation.
+  // Residual rated tensile strength of the cable with the cut strands applied (daN)
+  rrts = signal<number | null>(null);
+  // Utilization rate per span (%) with the cut strands applied
+  cutStrandsUtilizationRates = signal<number[] | null>(null);
+  // Utilization rate per span (%) of the undamaged cable, in the same engine state as above
+  baseUtilizationRates = signal<number[] | null>(null);
 
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
@@ -93,6 +103,9 @@ export class PlotService {
     this.spanService.section.set(null);
     this.study.set(null);
     this.currentSectionUuid = null;
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    this.baseUtilizationRates.set(null);
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedMeasure(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -188,8 +201,47 @@ export class PlotService {
       );
     }
 
+    // Saved cut strands are inputs only: replay them on the freshly initialized engine
+    // so the plot and the RRTS results reflect the damaged cable again.
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    this.baseUtilizationRates.set(null);
+    const savedCutStrands = section.rrts_cut_strands;
+    if (savedCutStrands?.length) {
+      await this.applyCutStrands(sumCutStrands(savedCutStrands));
+    }
+
     // initLit initializes the study — refreshProjection gets the actual render data
     await this.refreshProjection();
+  };
+
+  // Apply cut strands to the engine and refresh the RRTS results.
+  // Returns the diagnostics of the failing task, or null on success.
+  applyCutStrands = async (cutStrands: number[]): Promise<PythonDiagnostic[] | null> => {
+    const worker = this.workerPythonService;
+    // Set first: the engine validates the cut strands before changing anything
+    const setRes = await worker.runTask(Task.setCutStrands, { cutStrands });
+    if (setRes.error) return setRes.diagnostics;
+    const rrtsRes = await worker.runTask(Task.getRrts, undefined);
+    if (rrtsRes.error || !rrtsRes.result) return rrtsRes.diagnostics;
+    const rateRes = await worker.runTask(Task.getUtilizationRate, undefined);
+    if (rateRes.error || !rateRes.result) return rateRes.diagnostics;
+
+    // Undamaged rates in the same engine state, then put the damage back
+    const resetRes = await worker.runTask(Task.setCutStrands, {
+      cutStrands: new Array<number>(cutStrands.length).fill(0)
+    });
+    if (resetRes.error) return resetRes.diagnostics;
+    const baseRateRes = await worker.runTask(Task.getUtilizationRate, undefined);
+    const restoreRes = await worker.runTask(Task.setCutStrands, { cutStrands });
+    if (restoreRes.error) return restoreRes.diagnostics;
+    if (baseRateRes.error || !baseRateRes.result) return baseRateRes.diagnostics;
+
+    // The engine returns the RRTS in N, displayed in daN like the other tensions
+    this.rrts.set(rrtsRes.result.rrts / 10);
+    this.cutStrandsUtilizationRates.set(rateRes.result.utilizationRate);
+    this.baseUtilizationRates.set(baseRateRes.result.utilizationRate);
+    return null;
   };
 
   refreshProjection = async () => {

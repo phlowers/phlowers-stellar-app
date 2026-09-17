@@ -20,8 +20,8 @@ h2 {
 
   &--infos {
     grid-template-areas:
-      'cableNameLabel stressRateLabel .'
-      'cableNameValue stressRateValue .';
+      'cableNameLabel stressRateLabel staffPresenceLabel'
+      'cableNameValue stressRateValue staffPresenceValue';
     margin: 0.75rem 0rem;
   }
 
@@ -47,6 +47,46 @@ h2 {
   padding-top: 0.75rem;
 }
 
+.results-load-icon {
+  color: var(--star-dust-0);
+  font-size: 1.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  line-height: 1.5rem;
+  border-radius: 1.5rem;
+  text-align: center;
+
+  &--null {
+    background-color: var(--star-dust-300);
+  }
+  &--ok {
+    background-color: var(--main-success);
+  }
+  &--warning {
+    background-color: var(--main-warning);
+  }
+  &--error {
+    background-color: var(--main-error);
+  }
+  &--unknown {
+    background-color: var(--star-dust-300);
+  }
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex: 1 0 100%;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
 // ******** grid areas *********
 .cable-name-label {
   grid-area: cableNameLabel;
@@ -64,6 +104,14 @@ h2 {
   grid-area: stressRateValue;
 }
 
+.staff-presence-label {
+  grid-area: staffPresenceLabel;
+}
+
+.staff-presence-value {
+  grid-area: staffPresenceValue;
+}
+
 .results-rrts-label {
   grid-area: resultsRrtsLabel;
 }
@@ -78,4 +126,7 @@ h2 {
 
 .results-load-value {
   grid-area: resultsLoadValue;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
