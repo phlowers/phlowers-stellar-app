@@ -680,8 +680,7 @@
       "parameter-1-3-label": "Paramètre 1-3",
       "criterion-label": "Critère 0.5%",
       "error-message": "Une erreur est survenue",
-      "help-title": "Aide (PAPOTO)",
-      "calculate-button": "Calculer"
+      "help-title": "Aide (PAPOTO)"
     },
     "field-datas": {
       "mandatory-msg": "Toutes les données sont obligatoires.",
