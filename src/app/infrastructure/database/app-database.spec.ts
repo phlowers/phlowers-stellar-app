@@ -23,13 +23,16 @@ function toStagingSchema(schema: Record<string, string>): Record<string, string>
 }
 
 const dexieState = vi.hoisted(() => ({
-  instances: [] as { name: string; versionCalls: { version: number; schema?: Record<string, string> }[] }[]
+  instances: [] as {
+    name: string;
+    versionCalls: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> }[];
+  }[]
 }));
 
 vi.mock('dexie', () => {
   class DexieMock {
     name: string;
-    versionCalls: { version: number; schema?: Record<string, string> }[] = [];
+    versionCalls: { version: number; schema?: Record<string, string>; upgrade?: (tx: unknown) => Promise<void> }[] = [];
 
     constructor(name: string) {
       this.name = name;
@@ -37,15 +40,24 @@ vi.mock('dexie', () => {
     }
 
     version(version: number) {
-      const versionCall: { version: number; schema?: Record<string, string> } = { version };
+      const versionCall: {
+        version: number;
+        schema?: Record<string, string>;
+        upgrade?: (tx: unknown) => Promise<void>;
+      } = { version };
       this.versionCalls.push(versionCall);
 
-      return {
+      const chain = {
         stores: (schema: Record<string, string>) => {
           versionCall.schema = schema;
-          return this;
+          return chain;
+        },
+        upgrade: (fn: (tx: unknown) => Promise<void>) => {
+          versionCall.upgrade = fn;
+          return chain;
         }
       };
+      return chain;
     }
   }
 
@@ -215,5 +227,143 @@ describe('AppDatabase', () => {
     expect(stagingTableNames).not.toContain(`${STAGING_TABLE_PREFIX}users`);
     expect(stagingTableNames).not.toContain(`${STAGING_TABLE_PREFIX}studies`);
     expect(stagingTableNames).toHaveLength(11);
+  });
+
+  it('should register version 9 as a data-only upgrade for section IDR/ADR field renames', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const versionCall = dexieState.instances[0].versionCalls[8];
+    expect(versionCall.version).toBe(9);
+    expect(versionCall.schema).toBeUndefined();
+    expect(versionCall.upgrade).toBeInstanceOf(Function);
+  });
+
+  it('should rename Section IDR/ADR fields and initialize the new ones during the version 9 upgrade', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const upgrade = dexieState.instances[0].versionCalls[8].upgrade!;
+    const study = {
+      sections: [
+        {
+          lit_code: 'LIT001',
+          lit_name: 'LitName',
+          branch_idr: 'FLOREL61SSVIN01',
+          link_name: 'LIA001'
+        }
+      ]
+    };
+    let modifyCallback: ((s: unknown) => void) | undefined;
+    const tx = {
+      table: (name: string) => {
+        expect(name).toBe('studies');
+        return {
+          toCollection: () => ({
+            modify: (cb: (s: unknown) => void) => {
+              modifyCallback = cb;
+              return Promise.resolve();
+            }
+          })
+        };
+      }
+    };
+
+    await upgrade(tx);
+    modifyCallback!(study);
+
+    const section = study.sections[0] as unknown as Record<string, unknown>;
+    expect(section['lit_idr']).toBe('LIT001');
+    expect(section['lit_code']).toBeUndefined();
+    expect(section['lit_adr']).toBe('LitName');
+    expect(section['lit_name']).toBeUndefined();
+    expect(section['branch_code']).toBe('FLOREL61SSVIN01');
+    expect(section['branch_idr']).toBeUndefined();
+    expect(section['link_code']).toBe('LIA001');
+    expect(section['link_name']).toBeUndefined();
+    expect(section['voltage_adr']).toBeUndefined();
+    expect(section['cm_idr']).toBeUndefined();
+    expect(section['cm_adr']).toBeUndefined();
+    expect(section['gmr_idr']).toBeUndefined();
+    expect(section['gmr_adr']).toBeUndefined();
+    expect(section['eel_idr']).toBeUndefined();
+    expect(section['eel_adr']).toBeUndefined();
+  });
+
+  it('should register version 10 as a data-only upgrade for section field renames', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const versionCall = dexieState.instances[0].versionCalls[9];
+    expect(versionCall.version).toBe(10);
+    expect(versionCall.schema).toBeUndefined();
+    expect(versionCall.upgrade).toBeInstanceOf(Function);
+  });
+
+  it('should rename Section fields to the final CM/GMR/EEL + LIAISON/BRANCHE nomenclature during the version 10 upgrade', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const upgrade = dexieState.instances[0].versionCalls[9].upgrade!;
+    const study = {
+      sections: [
+        {
+          link_code: 'LIA001',
+          link_name: 'Liaison 225kV Site-Alpha-Site-Beta',
+          branch_code: 'FLOREL61SSVIN01',
+          branch_name: 'Branch 1',
+          cm_adr: 'CM_DESIGNATION_1',
+          gmr_adr: 'GMR_DESIGNATION_1',
+          eel_adr: 'EEL_DESIGNATION_1',
+          cm_idr: 'CM_IDR_1',
+          gmr_idr: 'GMR_IDR_1',
+          eel_idr: 'EEL_IDR_1',
+          maintenance_center_names: ['CM_01'],
+          regional_maintenance_center_names: ['GMR_01']
+        }
+      ]
+    };
+    let modifyCallback: ((s: unknown) => void) | undefined;
+    const tx = {
+      table: (name: string) => {
+        expect(name).toBe('studies');
+        return {
+          toCollection: () => ({
+            modify: (cb: (s: unknown) => void) => {
+              modifyCallback = cb;
+              return Promise.resolve();
+            }
+          })
+        };
+      }
+    };
+
+    await upgrade(tx);
+    modifyCallback!(study);
+
+    const section = study.sections[0] as unknown as Record<string, unknown>;
+    expect(section['link_idr']).toBe('LIA001');
+    expect(section['link_code']).toBeUndefined();
+    expect(section['link_adr']).toBe('Liaison 225kV Site-Alpha-Site-Beta');
+    expect(section['link_name']).toBeUndefined();
+    expect(section['branch_idr']).toBe('FLOREL61SSVIN01');
+    expect(section['branch_code']).toBeUndefined();
+    expect(section['branch_adr']).toBe('Branch 1');
+    expect(section['branch_name']).toBeUndefined();
+    expect(section['cm_designation']).toBe('CM_DESIGNATION_1');
+    expect(section['cm_adr']).toBeUndefined();
+    expect(section['gmr_designation']).toBe('GMR_DESIGNATION_1');
+    expect(section['gmr_adr']).toBeUndefined();
+    expect(section['eel_designation']).toBe('EEL_DESIGNATION_1');
+    expect(section['eel_adr']).toBeUndefined();
+    expect(section['cm_idr']).toBeUndefined();
+    expect(section['gmr_idr']).toBeUndefined();
+    expect(section['eel_idr']).toBeUndefined();
+    expect(section['maintenance_center_names']).toBeUndefined();
+    expect(section['regional_maintenance_center_names']).toBeUndefined();
   });
 });

@@ -7,11 +7,12 @@ export const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 /** Mapping from line table property keys to their corresponding `Section` property keys. */
 export const lineTablePropertiesToSectionProperties: Record<LineTableProperties, keyof Section> = {
   voltage_idr: 'voltage_idr',
-  link_idr: 'link_name',
-  lit_idr: 'lit_code',
-  lit_adr: 'lit_name',
+  link_idr: 'link_idr',
+  link_adr: 'link_adr',
+  lit_idr: 'lit_idr',
+  lit_adr: 'lit_adr',
   branch_idr: 'branch_idr',
-  branch_adr: 'branch_name'
+  branch_adr: 'branch_adr'
 };
 
 /** Ordered maintenance hierarchy for cascading filter: center -> regional team -> maintenance team. */
@@ -23,6 +24,7 @@ export const orderedMaintenanceTableProperties: (
 export const orderedLineTableProperties: LineTableProperties[] = [
   'voltage_idr',
   'link_idr',
+  'link_adr',
   'lit_idr',
   'lit_adr',
   'branch_idr',

@@ -1,3 +1,5 @@
+import { FieldMeasure } from '../domain/types';
+
 /** Option entry for select dropdowns with a string label and value. */
 export interface SelectOption<T extends string = string> {
   /** Display label for the option. */
@@ -73,3 +75,31 @@ export const LEFT_SUPPORT_OPTION_KEYS: TranslatableSelectOption[] = [
   { labelKey: 'field-measuring.shared.left-support.support-2', value: 'support2' },
   { labelKey: 'field-measuring.shared.left-support.support-3', value: 'support3' }
 ];
+
+/** PAPOTO validity criterion threshold (0.5%), not exposed by `PapotoResult` — used for the JSON export. */
+export const PAPOTO_VALIDITY_CRITERION_PERCENT = 0.5;
+
+/** Maps the internal `windSpeedUnit` value to a Transloco key for JSON export label. */
+export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], string> = {
+  kmh: 'field-measuring.export-labels.wind-speed-unit.kmh',
+  ms: 'field-measuring.export-labels.wind-speed-unit.ms'
+};
+
+/** Maps the internal `calculationMethod` value to a Transloco key for JSON export label. */
+export const PARAMETER_CALCULATION_METHOD_EXPORT_KEYS: Record<FieldMeasure['calculationMethod'], string> = {
+  papoto: 'field-measuring.export-labels.calculation-method.papoto',
+  'tangente-aiming': 'field-measuring.export-labels.calculation-method.tangente-aiming',
+  pep: 'field-measuring.export-labels.calculation-method.pep'
+};
+
+/** Maps the internal `updateMode15C` value to a Transloco key for JSON export label. */
+export const UPDATE_MODE_15C_EXPORT_KEYS: Record<FieldMeasure['updateMode15C'], string> = {
+  auto: 'field-measuring.export-labels.update-mode-15c.auto',
+  manual: 'field-measuring.export-labels.update-mode-15c.manual'
+};
+
+/** Maps the internal `calculationType` value to a Transloco key for JSON export label. */
+export const CALCULATION_TYPE_EXPORT_KEYS: Record<string, string> = {
+  tangente: 'field-measuring.export-labels.calculation-type.angle-tangent',
+  other: 'field-measuring.export-labels.calculation-type.parameter'
+};

@@ -98,7 +98,11 @@ vi.mock('dexie', () => {
       Object.assign(this, dexieState.tables);
     }
     version() {
-      return { stores: () => this };
+      const chain = {
+        stores: () => chain,
+        upgrade: () => chain
+      };
+      return chain;
     }
   }
   return { __esModule: true, default: DexieMock, Table: class {} };

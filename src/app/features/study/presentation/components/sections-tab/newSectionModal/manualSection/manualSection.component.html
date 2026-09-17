@@ -265,12 +265,12 @@
                 </ng-template>
               </p-select>
             </div>
-            <div class="flex flex-col section-form-part-grid__cell--b">
-              <label for="linkIdr">{{ 'manual-section.label-link-id' | transloco }}</label>
+            <div class="flex flex-col [grid-area:b]">
+              <label for="linkIdr">{{ 'manual-section.label-link-idr' | transloco }}</label>
               <p-select
                 inputId="linkIdr"
                 [options]="uniqueLinkIdr()"
-                [(ngModel)]="section().link_name"
+                [(ngModel)]="section().link_idr"
                 optionLabel="link_idr"
                 optionValue="link_idr"
                 appendTo="body"
@@ -284,32 +284,32 @@
                 data-testid="link-idr-select"
               />
             </div>
-            <div class="flex flex-col section-form-part-grid__cell--c">
-              <label for="linkAdr">{{ 'manual-section.label-link-name' | transloco }}</label>
+            <div class="flex flex-col [grid-area:c]">
+              <label for="linkAdr">{{ 'manual-section.label-link-adr' | transloco }}</label>
               <p-select
                 inputId="linkAdr"
                 [options]="uniqueLinkAdr()"
-                [(ngModel)]="section().link_name"
+                [(ngModel)]="section().link_adr"
                 optionLabel="link_adr"
-                optionValue="link_idr"
+                optionValue="link_adr"
                 [fluid]="true"
                 appendTo="body"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
                 (ngModelChange)="onSectionChange()"
-                (onChange)="onLinesSelect($event, 'link_idr')"
+                (onChange)="onLinesSelect($event, 'link_adr')"
                 [showClear]="true"
                 [filter]="true"
                 filterBy="link_adr"
                 data-testid="link-adr-select"
               />
             </div>
-            <div class="flex flex-col section-form-part-grid__cell--d">
-              <label for="litIdr">{{ 'manual-section.label-lit-id' | transloco }}</label>
+            <div class="flex flex-col [grid-area:d]">
+              <label for="litIdr">{{ 'manual-section.label-lit-idr' | transloco }}</label>
               <p-select
                 inputId="litIdr"
                 [options]="uniqueLitIdr()"
-                [(ngModel)]="section().lit_code"
+                [(ngModel)]="section().lit_idr"
                 optionLabel="lit_idr"
                 optionValue="lit_idr"
                 (ngModelChange)="onSectionChange()"
@@ -324,12 +324,12 @@
               />
             </div>
 
-            <div class="flex flex-col section-form-part-grid__cell--e">
-              <label for="litAdr">{{ 'manual-section.label-lit-name' | transloco }}</label>
+            <div class="flex flex-col [grid-area:e]">
+              <label for="litAdr">{{ 'manual-section.label-lit-adr' | transloco }}</label>
               <p-select
                 inputId="litAdr"
                 [options]="uniqueLitAdr()"
-                [(ngModel)]="section().lit_name"
+                [(ngModel)]="section().lit_adr"
                 optionLabel="lit_adr"
                 optionValue="lit_adr"
                 (ngModelChange)="onSectionChange()"
@@ -349,14 +349,13 @@
               <p-select
                 inputId="linkBm"
                 [options]="uniqueBranchIdr()"
-                [(ngModel)]="section().branch_idr"
+                [ngModel]="selectedBranchNumber()"
                 optionLabel="branch_idr"
                 optionValue="branch_idr"
-                (onChange)="onLinesSelect($event, 'branch_idr')"
+                (onChange)="onBranchSelect($event)"
                 virtualScroll="true"
                 virtualScrollItemSize="10"
                 appendTo="body"
-                (ngModelChange)="onSectionChange()"
                 [showClear]="true"
                 [filter]="true"
                 filterBy="branch_idr"
@@ -373,29 +372,29 @@
               </dd>
             </div>
 
-            <div class="section-form-part-grid__cell--b">
-              <dt>{{ 'manual-section.label-link-id' | transloco }}</dt>
-              <dd class="read-only-info">{{ section().link_name }}</dd>
+            <div class="[grid-area:b]">
+              <dt>{{ 'manual-section.label-link-idr' | transloco }}</dt>
+              <dd class="read-only-info">{{ section().link_idr }}</dd>
             </div>
 
-            <div class="section-form-part-grid__cell--c">
-              <dt>{{ 'manual-section.label-link-name' | transloco }}</dt>
+            <div class="[grid-area:c]">
+              <dt>{{ 'manual-section.label-link-adr' | transloco }}</dt>
               <dd class="read-only-info">{{ linkAdrRead() }}</dd>
             </div>
 
-            <div class="section-form-part-grid__cell--d">
-              <dt>{{ 'manual-section.label-lit-id' | transloco }}</dt>
-              <dd class="read-only-info" data-testid="lit-code-view">{{ section().lit_code }}</dd>
+            <div class="[grid-area:d]">
+              <dt>{{ 'manual-section.label-lit-idr' | transloco }}</dt>
+              <dd class="read-only-info" data-testid="lit-code-view">{{ section().lit_idr }}</dd>
             </div>
 
-            <div class="section-form-part-grid__cell--e">
-              <dt>{{ 'manual-section.label-lit-name' | transloco }}</dt>
+            <div class="[grid-area:e]">
+              <dt>{{ 'manual-section.label-lit-adr' | transloco }}</dt>
               <dd class="read-only-info" data-testid="lit-name-view">{{ litAdrRead() }}</dd>
             </div>
 
             <div class="section-form-part-grid__cell--f">
               <dt>{{ 'manual-section.label-branch' | transloco }}</dt>
-              <dd class="read-only-info" data-testid="branch-idr-view">{{ section().branch_idr }}</dd>
+              <dd class="read-only-info" data-testid="branch-idr-view">{{ branchNumberRead() }}</dd>
             </div>
           </dl>
         }

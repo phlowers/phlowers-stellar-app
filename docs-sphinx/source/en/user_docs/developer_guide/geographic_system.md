@@ -14,7 +14,7 @@ never re-implements this math.
 
 | Stage | Representation | Reason |
 |---|---|---|
-| Import (GeoLiaison file) | Lambert93 (EPSG:2154) | Survey input files (`PIED_X_LAMBERT93` / `PIED_Y_LAMBERT93`) are produced in this French national grid. |
+| Import (survey file) | Lambert93 (EPSG:2154) | Survey input files (`PIED_X_LAMBERT93` / `PIED_Y_LAMBERT93`) are produced in this French national grid. |
 | Core / pivot | GPS decimal degrees (WGS84, EPSG:4326) | GPS is international and valid anywhere; Lambert93 is France-specific. `Section.start_latitude` / `start_longitude` and `Support.footLatitude` / `footLongitude` are stored in this system. |
 | Study storage | Relative span length + line angle (flat plane) | Each support stores only its span length and line angle relative to the previous support (`Support.spanLength`, `spanAngle`), along with a flat azimuth for the first support; this is compact and projection-independent. |
 | Study forward computation | GPS reconstructed geodesically from the relative model | Rendering a section on a map recomputes absolute GPS positions on demand from the relative model. |
