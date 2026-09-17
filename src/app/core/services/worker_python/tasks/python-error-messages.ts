@@ -7,6 +7,7 @@
 
 import { TranslocoService } from '@jsverse/transloco';
 import { PythonErrorCode } from './types';
+import { PythonDiagnostic } from './python-diagnostic.interfaces';
 
 /** Map of Python exception class names to their i18n translation keys. */
 const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
@@ -64,4 +65,13 @@ export const formatPythonError = (
   const getParams = PYTHON_ERROR_PARAMS[code];
   const params = getParams ? getParams(rawText) : {};
   return key && params ? translocoService.translate(key, params) : null;
+};
+
+// Message of the exception among the diagnostics, falling back to the generic calculation error
+export const formatDiagnosticsError = (diagnostics: PythonDiagnostic[], translocoService: TranslocoService): string => {
+  const exception = diagnostics.find((d) => d.origin === 'exception');
+  return (
+    formatPythonError(exception?.code ?? null, translocoService, exception?.rawText) ??
+    translocoService.translate('shared.studio.calculation-error')
+  );
 };

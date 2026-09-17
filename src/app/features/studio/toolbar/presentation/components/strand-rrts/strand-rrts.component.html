@@ -144,7 +144,7 @@
             class="results-load-icon results-load-icon--null"
             [ariaLabel]="'studio.rrts-cut-strands.result-new-working-load-null' | transloco"
           />
-        } @else if (newWorkLoad()! > 0 && newWorkLoad()! <= 75) {
+        } @else if (newWorkLoad()! >= 0 && newWorkLoad()! <= 75) {
           <app-icon
             icon="check"
             class="results-load-icon results-load-icon--ok"

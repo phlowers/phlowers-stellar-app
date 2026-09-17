@@ -38,16 +38,6 @@ export interface RrtsCutStrandsData {
   cutStrands: number[];
 }
 
-// Engine cables always have 8 layers; layers without strands stay at 0
-export const CUT_STRANDS_LAYER_COUNT = 8;
-
-// The engine takes a single damage for the whole cable: cut strands of all entries add up per layer
-export const sumCutStrands = (entries: Pick<RrtsCutStrandsData, 'cutStrands'>[]): number[] =>
-  entries.reduce(
-    (total, { cutStrands }) => total.map((sum, i) => sum + (cutStrands[i] ?? 0)),
-    new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
-  );
-
 /**
  * Section domain model - represents a power line section.
  *

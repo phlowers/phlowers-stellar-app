@@ -243,6 +243,42 @@ describe('StrandRrtsComponent', () => {
     expect(component.form.controls.cutStrands.getRawValue()).toEqual([1, 0]);
   });
 
+  it('should put the saved damage back when the dialog closes on an unsaved calculation', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+
+    fixture.destroy();
+
+    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([1, 0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  it('should put the saved damage back once a calculation running at close ends', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    let finish!: () => void;
+    plotService.applyCutStrands.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve(null))));
+    const calculation = component.calculate();
+
+    fixture.destroy();
+    expect(plotService.applyCutStrands).toHaveBeenCalledTimes(1);
+    finish();
+    await calculation;
+
+    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([1, 0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  it('should keep the saved damage when the dialog closes after saving', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.save();
+    const calls = plotService.applyCutStrands.mock.calls.length;
+
+    fixture.destroy();
+
+    expect(plotService.applyCutStrands).toHaveBeenCalledTimes(calls);
+  });
+
   it('should delete the selected entry and apply the remaining ones', async () => {
     await setup([GLOBAL, ON_SPAN_1]);
     await selectSpan(SPAN_1);

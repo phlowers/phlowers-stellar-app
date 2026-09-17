@@ -1,7 +1,9 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   resource,
@@ -28,15 +30,17 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { NotificationService } from '@core/services/notification/notification.service';
-import { CUT_STRANDS_LAYER_COUNT, RrtsCutStrandsData, sumCutStrands } from '@shared/domain/models/section.model';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
+import { CUT_STRANDS_LAYER_COUNT, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
 import { PythonDiagnostic } from '@core/services/worker_python/tasks/python-diagnostic.interfaces';
-import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
+import { formatDiagnosticsError } from '@services/worker_python/tasks/python-error-messages';
 import { SectionService } from '@services/section/section.service';
-import { DISTANCE_MAX, STRAND_LAYER_KEYS } from './strand-rrts.constants';
+import { DISTANCE_MAX, STRAND_LAYER_KEYS } from './strand-rrts.constantes';
 import { cutStrandsControl, maxFinite } from './strand-rrts.helpers';
 
 @Component({
   selector: 'app-strand-rrts',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     IconComponent,
     TranslocoModule,
@@ -129,6 +133,8 @@ export class StrandRrtsComponent {
   readonly rrts = this.plotService.rrts;
   // Span key of a calculation applied to the engine but not saved yet
   private readonly pending = signal<{ uuid: string | null } | null>(null);
+  // The dialog destroys this component on close: an unsaved calculation must not outlive it
+  private destroyed = false;
 
   // Cut strands damage the whole cable, so the new working load is always the max over all spans
   readonly newWorkLoad = computed(() => maxFinite(this.plotService.cutStrandsUtilizationRates()));
@@ -138,6 +144,11 @@ export class StrandRrtsComponent {
   readonly isSaved = computed(() => !!this.selectedEntry());
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
+      this.discardIfClosed();
+    });
+
     effect(() => {
       const header = this.headerTemplate();
       const footer = this.footerTemplate();
@@ -191,6 +202,7 @@ export class StrandRrtsComponent {
       await this.runCalculation();
     } finally {
       this.isCalculating.set(false);
+      this.discardIfClosed();
     }
   }
 
@@ -220,7 +232,15 @@ export class StrandRrtsComponent {
       erased.forEach((e) => this.notificationService.warning(this.erasedMessage(e)));
     } finally {
       this.isSaving.set(false);
+      this.discardIfClosed();
     }
+  }
+
+  // Once closed, put the engine back to the saved damage; waits for a running calculation or save to settle
+  private discardIfClosed(): void {
+    if (!this.destroyed || !this.pending() || this.isCalculating() || this.isSaving()) return;
+    this.pending.set(null);
+    void this.applySavedCutStrands();
   }
 
   // Apply the form's cut strands to the whole cable; returns the entry they were calculated from, or null on failure
@@ -308,10 +328,6 @@ export class StrandRrtsComponent {
   }
 
   private notifyError(diagnostics: PythonDiagnostic[] = []): void {
-    const exception = diagnostics.find((d) => d.origin === 'exception');
-    this.notificationService.error(
-      formatPythonError(exception?.code ?? null, this.translocoService, exception?.rawText) ??
-        this.translocoService.translate('shared.studio.calculation-error')
-    );
+    this.notificationService.error(formatDiagnosticsError(diagnostics, this.translocoService));
   }
 }

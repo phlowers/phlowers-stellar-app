@@ -6,6 +6,7 @@
  */
 
 import { InitialCondition, Section, Support } from '@shared/domain';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -155,3 +156,13 @@ export const createEmptySection = (): Section => {
     mean_reprojection_diff_meters: null
   };
 };
+
+// Engine cables always have 8 layers; layers without strands stay at 0
+export const CUT_STRANDS_LAYER_COUNT = 8;
+
+// The engine takes a single damage for the whole cable: cut strands of all entries add up per layer
+export const sumCutStrands = (entries: Pick<RrtsCutStrandsData, 'cutStrands'>[]): number[] =>
+  entries.reduce(
+    (total, { cutStrands }) => total.map((sum, i) => sum + (cutStrands[i] ?? 0)),
+    new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
+  );

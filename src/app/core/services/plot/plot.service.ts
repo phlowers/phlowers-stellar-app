@@ -12,6 +12,9 @@ import {
   TaskError
 } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
+import { formatDiagnosticsError } from '@services/worker_python/tasks/python-error-messages';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { TranslocoService } from '@jsverse/transloco';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
@@ -20,7 +23,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { Subscription } from 'rxjs';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
-import { sumCutStrands } from '@shared/domain/models/section.model';
+import { sumCutStrands } from '@shared/domain/helpers/sections.helpers';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -71,9 +74,13 @@ export class PlotService {
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly document = inject(DOCUMENT);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
   private currentSectionUuid: string | null = null;
+  // Cut strands the engine holds and the RRTS results match; null for a freshly initialized (undamaged) engine
+  private appliedCutStrands: number[] | null = null;
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -103,6 +110,7 @@ export class PlotService {
     this.spanService.section.set(null);
     this.study.set(null);
     this.currentSectionUuid = null;
+    this.appliedCutStrands = null;
     this.rrts.set(null);
     this.cutStrandsUtilizationRates.set(null);
     this.baseUtilizationRates.set(null);
@@ -206,9 +214,14 @@ export class PlotService {
     this.rrts.set(null);
     this.cutStrandsUtilizationRates.set(null);
     this.baseUtilizationRates.set(null);
+    this.appliedCutStrands = null;
     const savedCutStrands = section.rrts_cut_strands;
     if (savedCutStrands?.length) {
-      await this.applyCutStrands(sumCutStrands(savedCutStrands));
+      // On failure the engine stays undamaged: the plot still renders, the user is told why RRTS is missing
+      const replayDiagnostics = await this.applyCutStrands(sumCutStrands(savedCutStrands));
+      if (replayDiagnostics) {
+        this.notificationService.error(formatDiagnosticsError(replayDiagnostics, this.translocoService));
+      }
     }
 
     // initLit initializes the study — refreshProjection gets the actual render data
@@ -222,25 +235,33 @@ export class PlotService {
     // Set first: the engine validates the cut strands before changing anything
     const setRes = await worker.runTask(Task.setCutStrands, { cutStrands });
     if (setRes.error) return setRes.diagnostics;
+    // Past this point the engine holds the new damage: put back the one the displayed results match
+    const rollback = async (diagnostics: PythonDiagnostic[]) => {
+      await worker.runTask(Task.setCutStrands, {
+        cutStrands: this.appliedCutStrands ?? new Array<number>(cutStrands.length).fill(0)
+      });
+      return diagnostics;
+    };
     const rrtsRes = await worker.runTask(Task.getRrts, undefined);
-    if (rrtsRes.error || !rrtsRes.result) return rrtsRes.diagnostics;
+    if (rrtsRes.error || !rrtsRes.result) return rollback(rrtsRes.diagnostics);
     const rateRes = await worker.runTask(Task.getUtilizationRate, undefined);
-    if (rateRes.error || !rateRes.result) return rateRes.diagnostics;
+    if (rateRes.error || !rateRes.result) return rollback(rateRes.diagnostics);
 
     // Undamaged rates in the same engine state, then put the damage back
     const resetRes = await worker.runTask(Task.setCutStrands, {
       cutStrands: new Array<number>(cutStrands.length).fill(0)
     });
-    if (resetRes.error) return resetRes.diagnostics;
+    if (resetRes.error) return rollback(resetRes.diagnostics);
     const baseRateRes = await worker.runTask(Task.getUtilizationRate, undefined);
+    if (baseRateRes.error || !baseRateRes.result) return rollback(baseRateRes.diagnostics);
     const restoreRes = await worker.runTask(Task.setCutStrands, { cutStrands });
-    if (restoreRes.error) return restoreRes.diagnostics;
-    if (baseRateRes.error || !baseRateRes.result) return baseRateRes.diagnostics;
+    if (restoreRes.error) return rollback(restoreRes.diagnostics);
 
     // The engine returns the RRTS in N, displayed in daN like the other tensions
     this.rrts.set(rrtsRes.result.rrts / 10);
     this.cutStrandsUtilizationRates.set(rateRes.result.utilizationRate);
     this.baseUtilizationRates.set(baseRateRes.result.utilizationRate);
+    this.appliedCutStrands = cutStrands;
     return null;
   };
 
