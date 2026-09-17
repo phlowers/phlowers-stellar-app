@@ -305,7 +305,7 @@ describe('SidebarComponent', () => {
       {
         id: 'documentation',
         label: 'Documentation',
-        icon: 'open_in_new',
+        icon: 'help',
         externalUrl: '/docs/index.html',
         target: '_blank'
       }
