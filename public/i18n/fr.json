@@ -238,8 +238,8 @@
       "generated-points-none-error": "Aucun point généré n'a été trouvé après le calcul.",
       "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit.",
       "cut-strands-exceeds-layer-error": "Le nombre de brins coupés ({{cutCount}}), cumulé sur toutes les portées, dépasse le nombre de brins ({{layerTotal}}) de la couche {{layer}}.",
-      "rts-cable-not-available": "Impossible de calculer la RRTS : le catalogue ne contient pas la charge de rupture (rts_cable) de ce câble.",
-      "rts-layer-not-available": "Impossible de calculer la RRTS : le catalogue ne contient pas la charge de rupture des brins (rts_layer_*) d'une couche avec des brins coupés."
+      "rts-cable-not-available": "Impossible de calculer la CRR : le catalogue ne contient pas la charge de rupture (rts_cable) de ce câble.",
+      "rts-layer-not-available": "Impossible de calculer la CRR : le catalogue ne contient pas la charge de rupture des brins (rts_layer_*) d'une couche avec des brins coupés."
     },
     "initial-condition-modal": {
       "create-title": "Créer une condition initiale",
@@ -820,7 +820,7 @@
       "field-measurements-tool": "Mesures terrain",
       "vtl-and-guying-tool": "VHL & Haubanage",
       "cable-marking-tool": "Marquage câble",
-      "strand-rrts-tool": "RRTS de brin",
+      "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
       "height-and-lateral-distance-tool": "Hauteur & distance latérale",
       "cable-adjustment-tool": "Réglage câble",
