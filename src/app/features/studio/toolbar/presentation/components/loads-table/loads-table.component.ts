@@ -238,6 +238,11 @@ export class LoadsTableComponent {
 
     await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, updatedCharge);
     this.mode.set('view');
+    // Only the selected charge is applied to the engine
+    const isSelected = uuid === this.spanService.section()?.selected_charge_uuid;
+    if (isSelected && updatedCharge.personnelPresence !== existingCharge.personnelPresence) {
+      await this.plotService.setHighSafety(updatedCharge.personnelPresence);
+    }
   }
 
   getSymmetryLabel(type: SymmetryType): string {

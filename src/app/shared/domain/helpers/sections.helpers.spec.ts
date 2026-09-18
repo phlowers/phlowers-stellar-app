@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { createEmptyInitialCondition, createEmptySection } from './sections.helpers';
+import { createEmptyInitialCondition, createEmptySection, sumCutStrands } from './sections.helpers';
 
 describe('createEmptyInitialCondition', () => {
   it('should create an initial condition with a non-empty uuid', () => {
@@ -70,5 +70,17 @@ describe('createEmptySection', () => {
   it('should initialise selected_cable_support_manipulation_uuid as null', () => {
     const section = createEmptySection();
     expect(section.selected_cable_support_manipulation_uuid).toBeNull();
+  });
+});
+
+describe('sumCutStrands', () => {
+  it('should add up the cut strands of every entry per layer, over the 8 engine layers', () => {
+    expect(sumCutStrands([{ cutStrands: [1, 0] }, { cutStrands: [2, 3, 0, 0, 0, 0, 0, 1] }])).toEqual([
+      3, 3, 0, 0, 0, 0, 0, 1
+    ]);
+  });
+
+  it('should return an undamaged cable without entries', () => {
+    expect(sumCutStrands([])).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 });

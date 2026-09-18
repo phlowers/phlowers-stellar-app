@@ -433,7 +433,7 @@ export class ManualSectionComponent implements OnInit {
     // repaints between the click and the new rows. For large pages, show the table's loading mask
     // and let the browser paint it (rAF fires before the paint, the timeout after) before starting
     // the blocking render.
-    // ponytail: page-size threshold, not a measurement — small pages render faster than the extra
+    // Page-size threshold, not a measurement — small pages render faster than the extra
     // frame would cost. Time the previous render instead if the rows-per-page options change.
     if (rows <= DEFAULT_TABLE_ROWS_PER_PAGE) {
       this.applySupportsPage(first, rows);

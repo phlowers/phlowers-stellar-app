@@ -28,6 +28,16 @@ export interface PoseTableData {
   computingStep: number;
 }
 
+// Keyed by span (null = whole section). A single entry per section for now, the list allows several later
+export interface RrtsCutStrandsData {
+  // Optional location of the damage, used for the studio marker; results always cover the whole cable
+  span: { index: number; uuid: string } | null;
+  supportRef: 'LEFT' | 'RIGHT' | null;
+  distanceSupportRef: number | null;
+  // Cut strands per cable layer, index 0 = layer 1. Results are recomputed from these on studio init.
+  cutStrands: number[];
+}
+
 /**
  * Section domain model - represents a power line section.
  *
@@ -148,6 +158,8 @@ export interface Section {
   vtl_and_guying: VtlAndGuying | undefined;
   /** Pose table calculation data */
   pose_table?: PoseTableData;
+  /** RRTS cut strands calculation data */
+  rrts_cut_strands?: RrtsCutStrandsData[];
   /** Array of cable length modifications on this section's spans */
   cable_modifications: CableModification[];
   /** UUID of the currently selected cable modification */

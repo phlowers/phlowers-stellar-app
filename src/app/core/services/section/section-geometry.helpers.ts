@@ -34,13 +34,14 @@ const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): Sanit
 };
 
 /**
- * Removes obstacles, floors and span loads that reference a support/span no longer present in the
+ * Removes obstacles, floors, RRTS cut strands and span loads that reference a support/span no longer present in the
  * section geometry (e.g. a support was deleted outside the Studio).
  *
  * @remarks
  * Obstacles and floors are span-bound: a span is identified by the UUID of the support it starts
  * from, and with N supports there are N-1 spans, so the last support never starts a span and cannot
- * host either. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
+ * host either. RRTS cut strands entries are span-bound too when they have a span; whole-section ones
+ * (no span) are always kept. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
  * support (including the last), so a load is only stale when its `supportUuid` no longer exists at
  * all. Charges are kept even when all their span loads are removed, since a charge also carries its
  * own climate configuration.
@@ -51,6 +52,9 @@ export const sanitizeSectionGeometry = (section: Section): SectionGeometrySaniti
 
   const sanitizedObstacles = sanitizeSpanBound(section.obstacles, spanStartSupportUuids);
   const sanitizedFloors = sanitizeSpanBound(section.floors ?? [], spanStartSupportUuids);
+  const sanitizedCutStrands = section.rrts_cut_strands?.filter(
+    ({ span }) => !span || spanStartSupportUuids.has(span.uuid)
+  );
   const { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad } = sanitizeCharges(
     section.charges,
     allSupportUuids
@@ -58,15 +62,23 @@ export const sanitizeSectionGeometry = (section: Section): SectionGeometrySaniti
 
   const obstaclesChanged = sanitizedObstacles.length !== section.obstacles.length;
   const floorsChanged = sanitizedFloors.length !== (section.floors?.length ?? 0);
+  const cutStrandsChanged = sanitizedCutStrands?.length !== section.rrts_cut_strands?.length;
 
-  const removedGeometryBoundObjects = obstaclesChanged || floorsChanged || removedUserDefinedSpanLoad;
-  const geometryChanged = obstaclesChanged || floorsChanged || chargesChanged;
+  const removedGeometryBoundObjects =
+    obstaclesChanged || floorsChanged || cutStrandsChanged || removedUserDefinedSpanLoad;
+  const geometryChanged = obstaclesChanged || floorsChanged || cutStrandsChanged || chargesChanged;
   if (!geometryChanged) {
     return { section, removedGeometryBoundObjects };
   }
 
   return {
-    section: { ...section, obstacles: sanitizedObstacles, floors: sanitizedFloors, charges: sanitizedCharges },
+    section: {
+      ...section,
+      obstacles: sanitizedObstacles,
+      floors: sanitizedFloors,
+      rrts_cut_strands: sanitizedCutStrands,
+      charges: sanitizedCharges
+    },
     removedGeometryBoundObjects
   };
 };

@@ -17,6 +17,7 @@
     "close": "Close",
     "save": "Save",
     "calculate": "Calculate",
+    "calculate-and-save": "Calculate and save",
     "reset": "Reset",
     "delete": "Delete",
     "edit": "Edit",
@@ -236,7 +237,10 @@
       "invalid-manipulation-range": "The manipulation range provided is invalid.",
       "support-out-of-range-error": "The support is out of the valid range.",
       "generated-points-none-error": "No generated points were found after computation.",
-      "night-time-error": "Sky cover cannot be estimated because the provided time is during the night."
+      "night-time-error": "Sky cover cannot be estimated because the provided time is during the night.",
+      "cut-strands-exceeds-layer-error": "Cut strands count ({{cutCount}}), summed over all spans, exceeds number of strands ({{layerTotal}}) in layer {{layer}}.",
+      "rts-cable-not-available": "The RRTS cannot be calculated: the cable catalog has no rated tensile strength (rts_cable) for this cable.",
+      "rts-layer-not-available": "The RRTS cannot be calculated: the cable catalog has no strand tensile strength (rts_layer_*) for a layer with cut strands."
     },
     "initial-condition-modal": {
       "create-title": "Create an initial condition",
@@ -376,7 +380,7 @@
       "section-created": "Section Created",
       "section-deleted": "Section Deleted",
       "section-duplicated": "Section Duplicated",
-      "geometry-objects-updated": "Obstacles, floors and loads have been updated to match the section geometry",
+      "geometry-objects-updated": "Obstacles, floors, loads and RRTS cut strands have been updated to match the section geometry",
       "ic-updated": "Initial Condition Updated",
       "ic-added": "Initial Condition Added",
       "ic-deleted": "Initial Condition Deleted",
@@ -841,7 +845,8 @@
       "strand-rrts-tool": "Strand RRTS",
       "forest-trenches-tool": "Forest trenches",
       "height-and-lateral-distance-tool": "Height & lateral distance",
-      "cable-adjustment-tool": "Cable adjustment"
+      "cable-adjustment-tool": "Cable adjustment",
+      "rrts-cut-strands": "RRTS cut strands"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
@@ -924,7 +929,6 @@
       "ref-support-dist-label": "Ref. support dist.",
       "line-axis-dist-label": "Line axis dist.",
       "delete-obstacle-aria-label": "delete obstacle",
-      "calculate-and-save-btn": "Calculate and save",
       "conformity-dialog-title": "Conformity verifications",
       "obstacle-must-be-saved-warning": "obstacle must be saved",
       "obstacle-type-not-eligible-warning": "obstacle type '{{typeLabel}}' is not eligible for conformity control",
@@ -995,7 +999,6 @@
       "add-point-btn": "Add point",
       "delete-point-aria-label": "delete point",
       "delete-floor-aria-label": "delete floor",
-      "calculate-and-save-btn": "Calculate and save",
       "min-vertical-distance-label": "Minimum vertical distance",
       "floor-altitude-label": "Point alt.",
       "cable-altitude-label": "Cable alt.",
@@ -1185,6 +1188,26 @@
       "failed-to-save-pose-table": "Failed to save pose table",
       "max-two-decimals-error": "Maximum 2 decimal places",
       "integer-error": "Value must be a whole number"
+    },
+    "rrts-cut-strands": {
+      "layers-detail": "Layers detail",
+      "cable-name-label": "Cable name",
+      "current-work-load-label": "Current max working load",
+      "staff-presence-label": "Staff presence",
+      "distance-support-ref-label": "Distance to reference support",
+      "cut-strands-layer-label": "Cut strands layer {{ layer }}",
+      "result-cable-rrts-label": "Cable's RRTS",
+      "result-new-working-load-label": "New max working load",
+      "result-new-working-load-null": "No new max working load",
+      "result-new-working-load-ok": "The new max working load is satisfactory",
+      "result-new-working-load-warning": "The new max working load is concerning",
+      "result-new-working-load-error": "The new max working load is dangerous",
+      "result-new-working-load-unknown": "The new max working load is unknown",
+      "saved": "RRTS cut strands saved",
+      "failed-to-save": "Failed to save RRTS cut strands",
+      "deleted": "RRTS cut strands deleted",
+      "failed-to-delete": "Failed to delete RRTS cut strands",
+      "no-strand-layers": "No strand layer data available for this cable"
     }
   }
 }

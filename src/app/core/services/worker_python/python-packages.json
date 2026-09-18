@@ -100,7 +100,7 @@
     "source": "cdn"
   },
   "stellar-engine": {
-    "file_name": "stellar_engine-0.3.0-cp313-none-any.whl",
+    "file_name": "stellar_engine-0.3.0-py3-none-any.whl",
     "name": "stellar_engine",
     "source": "local"
   },

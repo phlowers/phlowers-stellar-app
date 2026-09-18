@@ -210,7 +210,7 @@ describe('StudyComponent', () => {
               'study.notifications.duplicated': 'Study Duplicated',
               'study.notifications.duplication-failed': 'Study Duplication Failed',
               'study.notifications.geometry-objects-updated':
-                'Obstacles and loads have been updated to match the section geometry',
+                'Obstacles, floors, loads and RRTS cut strands have been updated to match the section geometry',
               'study.notifications.ic-added': 'Initial Condition Added',
               'study.notifications.ic-deleted': 'Initial Condition Deleted',
               'study.notifications.ic-duplicated': 'Initial Condition Duplicated',
@@ -434,7 +434,7 @@ describe('StudyComponent', () => {
 
       expect(mockNotificationService.success).toHaveBeenCalledWith(expect.any(String));
       expect(mockNotificationService.warning).toHaveBeenCalledWith(
-        'Obstacles and loads have been updated to match the section geometry'
+        'Obstacles, floors, loads and RRTS cut strands have been updated to match the section geometry'
       );
     });
   });

@@ -17,6 +17,7 @@
     "close": "Fermer",
     "save": "Enregistrer",
     "calculate": "Calculer",
+    "calculate-and-save": "Calculer et enregistrer",
     "reset": "Réinitialiser",
     "delete": "Supprimer",
     "edit": "Modifier",
@@ -236,7 +237,10 @@
       "invalid-manipulation-range": "La plage de manipulation fournie est invalide.",
       "support-out-of-range-error": "Le support est hors de la plage valide.",
       "generated-points-none-error": "Aucun point généré n'a été trouvé après le calcul.",
-      "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit."
+      "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit.",
+      "cut-strands-exceeds-layer-error": "Le nombre de brins coupés ({{cutCount}}), cumulé sur toutes les portées, dépasse le nombre de brins ({{layerTotal}}) de la couche {{layer}}.",
+      "rts-cable-not-available": "Impossible de calculer la CRR : le catalogue ne contient pas la charge de rupture (rts_cable) de ce câble.",
+      "rts-layer-not-available": "Impossible de calculer la CRR : le catalogue ne contient pas la charge de rupture des brins (rts_layer_*) d'une couche avec des brins coupés."
     },
     "initial-condition-modal": {
       "create-title": "Créer une condition initiale",
@@ -376,7 +380,7 @@
       "section-created": "Canton créé",
       "section-deleted": "Canton supprimé",
       "section-duplicated": "Canton dupliqué",
-      "geometry-objects-updated": "Les obstacles, sols et charges ont été mis à jour pour correspondre à la géométrie du canton",
+      "geometry-objects-updated": "Les obstacles, sols, charges et brins coupés CRR ont été mis à jour pour correspondre à la géométrie du canton",
       "ic-updated": "Condition initiale mise à jour",
       "ic-added": "Condition initiale ajoutée",
       "ic-deleted": "Condition initiale supprimée",
@@ -838,10 +842,11 @@
       "field-measurements-tool": "Mesures terrain",
       "vtl-and-guying-tool": "VHL & Haubanage",
       "cable-marking-tool": "Marquage câble",
-      "strand-rrts-tool": "RRTS de brin",
+      "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
       "height-and-lateral-distance-tool": "Hauteur & distance latérale",
-      "cable-adjustment-tool": "Réglage câble"
+      "cable-adjustment-tool": "Réglage câble",
+      "rrts-cut-strands": "CRR de brins coupés"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
@@ -924,7 +929,6 @@
       "ref-support-dist-label": "Dist. supp. réf.",
       "line-axis-dist-label": "Dist. axe ligne.",
       "delete-obstacle-aria-label": "Supprimer l'obstacle",
-      "calculate-and-save-btn": "Calculer et enregistrer",
       "conformity-dialog-title": "Respect conformité",
       "obstacle-must-be-saved-warning": "L'obstacle doit être enregistré",
       "obstacle-type-not-eligible-warning": "Le type d'obstacle '{{typeLabel}}' n'est pas éligible au contrôle de conformité",
@@ -995,7 +999,6 @@
       "add-point-btn": "Ajouter un point",
       "delete-point-aria-label": "supprimer le point",
       "delete-floor-aria-label": "supprimer le sol",
-      "calculate-and-save-btn": "Calculer et enregistrer",
       "min-vertical-distance-label": "Distance verticale minimum",
       "floor-altitude-label": "Alt. point",
       "cable-altitude-label": "Alt. câble",
@@ -1185,6 +1188,26 @@
       "failed-to-save-pose-table": "Échec de la sauvegarde du tableau de pose",
       "max-two-decimals-error": "Valeur à 2 décimales maximum",
       "integer-error": "La valeur doit être un nombre entier"
+    },
+    "rrts-cut-strands": {
+      "layers-detail": "Détail des couches",
+      "cable-name-label": "Nom du câble",
+      "current-work-load-label": "Taux de travail max actuel",
+      "staff-presence-label": "Présence du personnel",
+      "distance-support-ref-label": "Distance au support de référence",
+      "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
+      "result-cable-rrts-label": "CRR du câble",
+      "result-new-working-load-label": "Nouveau taux de travail max",
+      "result-new-working-load-null": "aucun nouveau taux de travail max",
+      "result-new-working-load-ok": "le nouveau taux de travail max est satisfaisant",
+      "result-new-working-load-warning": "le nouveau taux de travail max est préoccupant",
+      "result-new-working-load-error": "le nouveau taux de travail max est dangereux",
+      "result-new-working-load-unknown": "le nouveau taux de travail max est inconnu",
+      "saved": "Brins coupés CRR sauvegardés",
+      "failed-to-save": "Échec de la sauvegarde des brins coupés CRR",
+      "deleted": "Brins coupés CRR supprimés",
+      "failed-to-delete": "Échec de la suppression des brins coupés CRR",
+      "no-strand-layers": "Aucune donnée de couche de brins disponible pour ce câble"
     }
   }
 }

@@ -35,6 +35,8 @@
   --p-select-option-selected-color: var(--p-select-option-color);
   --p-select-option-selected-focus-color: var(--p-select-option-color);
 
+  --p-select-padding-y: 0.2813rem;
+
   @extend %text-m-400;
 }
 

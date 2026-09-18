@@ -11,7 +11,12 @@ import pytest
 from mechaphlowers import BalanceEngine, SectionStudy
 
 from stellar_engine.core import cut_strands
-from stellar_engine.entities.errors import _Errors
+from stellar_engine.entities.errors import (
+    CutStrandsExceedsLayerError,
+    RtsCableNotAvailable,
+    RtsLayerNotAvailable,
+    _Errors,
+)
 
 
 def test_set_cut_strands_updates_array(balance_engine_base: BalanceEngine):
@@ -119,7 +124,7 @@ def test_set_cut_strands_exceeds_layer_total(
     nb_strands = study.balance_engine.cable_array.nb_strand_per_layer
 
     with pytest.raises(
-        ValueError,
+        CutStrandsExceedsLayerError,
         match=re.escape(
             _Errors.cut_strands_exceeds_layer(
                 0, nb_strands[0] + 1, nb_strands[0]
@@ -164,6 +169,28 @@ def test_get_rrts_returns_positive_value(balance_engine_base: BalanceEngine):
 
     assert "rrts" in result
     assert result["rrts"] > 0
+
+
+@pytest.mark.parametrize(
+    ("missing_column", "expected_error"),
+    [
+        ("rts_cable", RtsCableNotAvailable),
+        ("rts_layer_1", RtsLayerNotAvailable),
+    ],
+)
+def test_get_rrts_raises_explicit_error_on_missing_rts(
+    balance_engine_base: BalanceEngine, missing_column, expected_error
+):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+    cut_strands.set_cut_strands(study, [1, 0, 0, 0, 0, 0, 0, 0])
+    cable_data = study.balance_engine.cable_array._tensile_strength._cable_data
+    cable_data[missing_column] = np.nan
+
+    with pytest.raises(expected_error):
+        cut_strands.get_rrts(study)
 
 
 def test_get_utilization_rate_returns_array(

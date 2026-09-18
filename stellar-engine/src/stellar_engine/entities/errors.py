@@ -25,9 +25,7 @@ class _Errors:
 
     @staticmethod
     def cut_strands_not_finite(layer_index: int) -> str:
-        return (
-            f"Cut strands count must be finite " f"at layer {layer_index + 1}"
-        )
+        return f"Cut strands count must be finite at layer {layer_index + 1}"
 
     @staticmethod
     def cut_strands_not_integer(layer_index: int) -> str:
@@ -67,3 +65,15 @@ class ObstacleNotFoundError(ValueError):
 
 class NightTimeError(ValueError):
     """Raised when input time is night time but computation requires to be during day time."""
+
+
+class CutStrandsExceedsLayerError(ValueError):
+    """Raised when the cut strands of a layer exceed its number of strands."""
+
+
+class RtsCableNotAvailable(ValueError):
+    """Raised when the cable RTS is missing from the catalog, so the RRTS cannot be computed."""
+
+
+class RtsLayerNotAvailable(ValueError):
+    """Raised when a layer with cut strands has no strand RTS in the catalog, so the RRTS cannot be computed."""

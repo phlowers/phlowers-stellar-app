@@ -1,0 +1,388 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { TranslocoTestingModule } from '@jsverse/transloco';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+
+import { StrandRrtsComponent } from './strand-rrts.component';
+import { PlotService } from '@services/plot/plot.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
+import { SectionService } from '@services/section/section.service';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
+import { RrtsCutStrandsData, Section } from '@shared/domain/models/section.model';
+
+const SPAN_1 = { index: 0, uuid: 's1' };
+const SPAN_2 = { index: 1, uuid: 's2' };
+
+const entry = (span: RrtsCutStrandsData['span'], cutStrands: number[]): RrtsCutStrandsData => ({
+  span,
+  supportRef: span ? 'RIGHT' : null,
+  distanceSupportRef: span ? 12 : null,
+  cutStrands
+});
+
+const GLOBAL = entry(null, [1, 0, 0, 0, 0, 0, 0, 0]);
+const ON_SPAN_1 = entry(SPAN_1, [0, 2, 0, 0, 0, 0, 0, 0]);
+
+describe('StrandRrtsComponent', () => {
+  let component: StrandRrtsComponent;
+  let fixture: ComponentFixture<StrandRrtsComponent>;
+  let spanService: PlotSpanService;
+  let plotService: {
+    study: ReturnType<typeof signal>;
+    litData: ReturnType<typeof signal>;
+    rrts: ReturnType<typeof signal<number | null>>;
+    cutStrandsUtilizationRates: ReturnType<typeof signal<number[] | null>>;
+    baseUtilizationRates: ReturnType<typeof signal<number[] | null>>;
+    applyCutStrands: vi.Mock;
+    restoreSavedCutStrands: vi.Mock;
+  };
+  let sectionService: { createOrUpdateSection: vi.Mock };
+  let notificationService: { success: vi.Mock; error: vi.Mock; warning: vi.Mock };
+
+  const setup = async (entries?: RrtsCutStrandsData[]) => {
+    spanService.section.set({
+      uuid: 'section',
+      cable_name: 'CABLE',
+      supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }],
+      rrts_cut_strands: entries
+    } as unknown as Section);
+    fixture = TestBed.createComponent(StrandRrtsComponent);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  };
+
+  const selectSpan = async (span: RrtsCutStrandsData['span']) => {
+    component.form.controls.span.setValue(span);
+    await fixture.whenStable();
+  };
+
+  const savedEntries = () => (sectionService.createOrUpdateSection.mock.calls.at(-1)?.[1] as Section).rrts_cut_strands;
+
+  beforeEach(async () => {
+    plotService = {
+      study: signal({ uuid: 'study', sections: [] }),
+      litData: signal({ output_parameters: { utilization_rate: [30, 45, Number.NaN] } }),
+      rrts: signal(null),
+      cutStrandsUtilizationRates: signal(null),
+      baseUtilizationRates: signal(null),
+      applyCutStrands: vi.fn().mockImplementation(async () => {
+        plotService.rrts.set(1000);
+        return null;
+      }),
+      restoreSavedCutStrands: vi.fn().mockResolvedValue(null)
+    };
+    sectionService = { createOrUpdateSection: vi.fn().mockResolvedValue(undefined) };
+    notificationService = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        StrandRrtsComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          preloadLangs: true
+        })
+      ],
+      providers: [
+        provideNoopAnimations(),
+        { provide: PlotService, useValue: plotService },
+        { provide: SectionService, useValue: sectionService },
+        {
+          provide: CablesService,
+          useValue: { getCable: vi.fn().mockResolvedValue({ nb_strand_layer_1: 6, nb_strand_layer_2: 12 }) }
+        },
+        { provide: NotificationService, useValue: notificationService },
+        { provide: ToolbarDialogService, useValue: { setTemplates: vi.fn() } }
+      ]
+    }).compileComponents();
+
+    spanService = TestBed.inject(PlotSpanService);
+  });
+
+  it('should stay valid and ignore the reference support inputs when no span is selected', async () => {
+    await setup();
+    expect(component.form.valid).toBe(true);
+    expect(component.form.controls.supportRef.disabled).toBe(true);
+    expect(component.form.controls.distanceSupportRef.disabled).toBe(true);
+    // Disabled controls are left out of `value`, so they never reach the saved data
+    expect(component.form.value.supportRef).toBeUndefined();
+    expect(component.form.value.distanceSupportRef).toBeUndefined();
+  });
+
+  it('should show staff presence from the charge selected on the study', async () => {
+    await setup();
+    expect(component.staffIsPresent()).toBe(false);
+
+    spanService.section.update((s) => ({ ...s!, charges: [{ uuid: 'c1', personnelPresence: true }] }) as Section);
+    plotService.study.set({ uuid: 'study', sections: [{ uuid: 'section', selected_charge_uuid: 'c1' }] });
+    expect(component.staffIsPresent()).toBe(true);
+  });
+
+  it('should load the saved entry of the selected span, or the global one without span', async () => {
+    await setup([GLOBAL, ON_SPAN_1]);
+    expect(component.form.controls.cutStrands.getRawValue()).toEqual([1, 0]);
+
+    await selectSpan(SPAN_1);
+    expect(component.form.getRawValue()).toMatchObject({ supportRef: 'RIGHT', distanceSupportRef: 12 });
+    expect(component.form.controls.cutStrands.getRawValue()).toEqual([0, 2]);
+
+    await selectSpan(SPAN_2);
+    expect(component.form.getRawValue()).toMatchObject({ supportRef: 'LEFT', distanceSupportRef: 0 });
+    expect(component.form.controls.cutStrands.getRawValue()).toEqual([0, 0]);
+    expect(component.isSaved()).toBe(false);
+  });
+
+  it('should compare the undamaged max working load with the new max over all spans', async () => {
+    await setup();
+    // Nothing applied yet: the plot data is the undamaged cable
+    expect(component.workLoad()).toBe(45);
+
+    plotService.baseUtilizationRates.set([20, 25, Number.NaN]);
+    plotService.cutStrandsUtilizationRates.set([60, 40, Number.NaN]);
+    await selectSpan(SPAN_2);
+    expect(component.workLoad()).toBe(25);
+    expect(component.newWorkLoad()).toBe(60);
+  });
+
+  it('should calculate with the form cut strands only, other entries being erased on save', async () => {
+    await setup([GLOBAL, ON_SPAN_1]);
+    await selectSpan(SPAN_2);
+    component.form.controls.cutStrands.setValue([3, 1]);
+
+    await component.calculate();
+
+    expect(plotService.applyCutStrands).toHaveBeenCalledWith([3, 1, 0, 0, 0, 0, 0, 0]);
+  });
+
+  it('should disable calculate on an invalid form and show a loading state while calculating', async () => {
+    await setup();
+    const button = (): HTMLButtonElement => fixture.nativeElement.querySelector('[data-testid="calculate-btn"]');
+
+    component.form.controls.cutStrands.setValue([7, 0]);
+    fixture.detectChanges();
+    expect(button().disabled).toBe(true);
+
+    component.form.controls.cutStrands.setValue([1, 0]);
+    let finish!: () => void;
+    plotService.applyCutStrands.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve(null))));
+    const calculation = component.calculate();
+    fixture.detectChanges();
+    expect(button().disabled).toBe(false);
+    expect(button().classList).toContain('app-btn-loading');
+
+    finish();
+    await calculation;
+    fixture.detectChanges();
+    expect(button().classList).not.toContain('app-btn-loading');
+  });
+
+  it('should disable calculate and never apply cut strands when the cable has no strand layer', async () => {
+    TestBed.inject(CablesService).getCable = vi.fn().mockResolvedValue(undefined);
+    await setup();
+    fixture.detectChanges();
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('[data-testid="calculate-btn"]');
+
+    expect(component.form.valid).toBe(true);
+    expect(button.disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('[data-testid="rrts-no-layers"]')).toBeTruthy();
+    await component.calculate();
+    await component.save();
+    expect(plotService.applyCutStrands).not.toHaveBeenCalled();
+    expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+  });
+
+  it('should calculate then save the form as the single entry of the section', async () => {
+    await setup([ON_SPAN_1]);
+    await selectSpan(SPAN_1);
+    component.form.controls.cutStrands.setValue([0, 5]);
+
+    await component.save();
+
+    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([0, 5, 0, 0, 0, 0, 0, 0]);
+    expect(savedEntries()).toEqual([
+      { span: SPAN_1, supportRef: 'RIGHT', distanceSupportRef: 12, cutStrands: [0, 5, 0, 0, 0, 0, 0, 0] }
+    ]);
+    expect(notificationService.success).toHaveBeenCalled();
+  });
+
+  it('should erase the other entries on save', async () => {
+    await setup([GLOBAL, ON_SPAN_1]);
+    await selectSpan(SPAN_2);
+    component.form.controls.cutStrands.setValue([3, 0]);
+
+    await component.save();
+
+    expect(savedEntries()).toEqual([
+      { span: SPAN_2, supportRef: 'LEFT', distanceSupportRef: 0, cutStrands: [3, 0, 0, 0, 0, 0, 0, 0] }
+    ]);
+  });
+
+  it('should not save when the calculation fails', async () => {
+    await setup([GLOBAL]);
+    await selectSpan(SPAN_1);
+    plotService.applyCutStrands.mockResolvedValueOnce([{ origin: 'exception', code: null, rawText: 'boom' }]);
+
+    await component.save();
+
+    expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    expect(notificationService.error).toHaveBeenCalled();
+    expect(notificationService.warning).not.toHaveBeenCalled();
+  });
+
+  it('should be saving while calculating and saving', async () => {
+    await setup();
+    let finish!: () => void;
+    plotService.applyCutStrands.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve(null))));
+    const saving = component.save();
+    expect(component.isSaving()).toBe(true);
+
+    finish();
+    await saving;
+    expect(component.isSaving()).toBe(false);
+    expect(savedEntries()).toHaveLength(1);
+  });
+
+  it('should put the saved damage back when leaving an unsaved calculation', async () => {
+    await setup([GLOBAL]);
+    await selectSpan(SPAN_1);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+
+    await selectSpan(null);
+
+    expect(plotService.restoreSavedCutStrands).toHaveBeenCalledOnce();
+    expect(component.form.controls.cutStrands.getRawValue()).toEqual([1, 0]);
+  });
+
+  it('should notify and retry on the next span change when the saved damage cannot be put back', async () => {
+    await setup([GLOBAL]);
+    await selectSpan(SPAN_1);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+    plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);
+
+    await selectSpan(null);
+    await fixture.whenStable();
+    expect(notificationService.error).toHaveBeenCalledOnce();
+
+    await selectSpan(SPAN_2);
+    await fixture.whenStable();
+    expect(plotService.restoreSavedCutStrands).toHaveBeenCalledTimes(2);
+    expect(notificationService.error).toHaveBeenCalledOnce();
+  });
+
+  it('should notify when the saved damage cannot be put back on close', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+    plotService.restoreSavedCutStrands.mockRejectedValueOnce(new Error('worker down'));
+
+    fixture.destroy();
+    await vi.waitFor(() => expect(notificationService.error).toHaveBeenCalled());
+  });
+
+  it('should put the saved damage back when the dialog closes on an unsaved calculation', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+
+    fixture.destroy();
+
+    await vi.waitFor(() => expect(plotService.restoreSavedCutStrands).toHaveBeenCalledOnce());
+  });
+
+  it('should put the saved damage back once a calculation running at close ends', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    let finish!: () => void;
+    plotService.applyCutStrands.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve(null))));
+    const calculation = component.calculate();
+
+    fixture.destroy();
+    await fixture.whenStable();
+    expect(plotService.restoreSavedCutStrands).not.toHaveBeenCalled();
+    finish();
+    await calculation;
+
+    await vi.waitFor(() => expect(plotService.restoreSavedCutStrands).toHaveBeenCalledOnce());
+  });
+
+  it('should keep the saved damage when the dialog closes after saving', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.save();
+
+    fixture.destroy();
+    await fixture.whenStable();
+
+    expect(plotService.restoreSavedCutStrands).not.toHaveBeenCalled();
+  });
+
+  it('should delete the selected entry, then put the engine back to the remaining ones', async () => {
+    await setup([GLOBAL, ON_SPAN_1]);
+    await selectSpan(SPAN_1);
+    let entriesAtRestore: RrtsCutStrandsData[] | undefined;
+    plotService.restoreSavedCutStrands.mockImplementationOnce(async () => {
+      entriesAtRestore = spanService.section()?.rrts_cut_strands;
+      return null;
+    });
+
+    await component.delete();
+
+    expect(savedEntries()).toEqual([GLOBAL]);
+    expect(entriesAtRestore).toEqual([GLOBAL]);
+    expect(notificationService.success).toHaveBeenCalledOnce();
+  });
+
+  it('should be deleting and block calculating until the engine is put back', async () => {
+    await setup([GLOBAL]);
+    const button = (): HTMLButtonElement => fixture.nativeElement.querySelector('[data-testid="calculate-btn"]');
+    let finish!: () => void;
+    plotService.restoreSavedCutStrands.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve(null))));
+    const deleting = component.delete();
+    fixture.detectChanges();
+    expect(component.isDeleting()).toBe(true);
+    expect(button().disabled).toBe(true);
+
+    finish();
+    await deleting;
+    fixture.detectChanges();
+    expect(component.isDeleting()).toBe(false);
+    expect(button().disabled).toBe(false);
+    expect(sectionService.createOrUpdateSection).toHaveBeenCalledOnce();
+  });
+
+  it('should notify when the engine cannot be put back after a delete', async () => {
+    await setup([GLOBAL]);
+    plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);
+
+    await component.delete();
+
+    expect(savedEntries()).toEqual([]);
+    expect(notificationService.error).toHaveBeenCalledOnce();
+    expect(notificationService.success).not.toHaveBeenCalled();
+  });
+
+  it('should notify when the restore after a delete rejects', async () => {
+    await setup([GLOBAL]);
+    plotService.restoreSavedCutStrands.mockRejectedValueOnce(new Error('worker down'));
+
+    await component.delete();
+
+    expect(notificationService.error).toHaveBeenCalledOnce();
+    expect(notificationService.success).not.toHaveBeenCalled();
+  });
+
+  it('should retry putting the engine back on close when it failed after a delete', async () => {
+    await setup([GLOBAL]);
+    plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);
+    await component.delete();
+
+    fixture.destroy();
+    await fixture.whenStable();
+
+    await vi.waitFor(() => expect(plotService.restoreSavedCutStrands).toHaveBeenCalledTimes(2));
+  });
+});

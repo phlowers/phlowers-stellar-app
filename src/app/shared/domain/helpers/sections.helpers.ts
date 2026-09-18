@@ -5,7 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { InitialCondition, Section, Support } from '@shared/domain';
+import { InitialCondition, Section, Study, Support } from '@shared/domain';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -157,4 +158,21 @@ export const createEmptySection = (): Section => {
     start_azimuth: null,
     mean_reprojection_diff_meters: null
   };
+};
+
+// Engine cables always have 8 layers; layers without strands stay at 0
+export const CUT_STRANDS_LAYER_COUNT = 8;
+
+// The engine takes a single damage for the whole cable: cut strands of all entries add up per layer
+export const sumCutStrands = (entries: Pick<RrtsCutStrandsData, 'cutStrands'>[]): number[] =>
+  entries.reduce(
+    (total, { cutStrands }) => total.map((sum, i) => sum + (cutStrands[i] ?? 0)),
+    new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
+  );
+
+// Personnel presence of the selected charge, which the engine applies as its high-safety coefficient.
+// Same source as the menu bar: the selected charge is tracked on the study's copy of the section
+export const hasStaffPresence = (study: Study | null, section: Section | null): boolean => {
+  const chargeUuid = study?.sections.find((s) => s?.uuid === section?.uuid)?.selected_charge_uuid;
+  return !!section?.charges?.find((c) => c.uuid === chargeUuid)?.personnelPresence;
 };

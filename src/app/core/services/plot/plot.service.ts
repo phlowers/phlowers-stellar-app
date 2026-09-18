@@ -12,6 +12,9 @@ import {
   TaskError
 } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
+import { formatDiagnosticsError } from '@services/worker_python/tasks/python-error-messages';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { TranslocoService } from '@jsverse/transloco';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
@@ -20,6 +23,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { Subscription } from 'rxjs';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
+import { CUT_STRANDS_LAYER_COUNT, hasStaffPresence, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -50,6 +54,15 @@ export class PlotService {
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
 
+  // Cut-strand results are never persisted: they are recomputed from the section's saved
+  // cut strands on studio init, and by the RRTS dialog on each calculation.
+  // Residual rated tensile strength of the cable with the cut strands applied (daN)
+  rrts = signal<number | null>(null);
+  // Utilization rate per span (%) with the cut strands applied
+  cutStrandsUtilizationRates = signal<number[] | null>(null);
+  // Utilization rate per span (%) of the undamaged cable, in the same engine state as above
+  baseUtilizationRates = signal<number[] | null>(null);
+
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly spanService = inject(PlotSpanService);
@@ -61,9 +74,15 @@ export class PlotService {
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly document = inject(DOCUMENT);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
   private currentSectionUuid: string | null = null;
+  // Cut strands the engine holds and the RRTS results match; null for a freshly initialized (undamaged) engine
+  private appliedCutStrands: number[] | null = null;
+  // Tail of the queue of multi-task engine sequences (init, cut strands, projection): they share one engine state
+  private engineQueue: Promise<unknown> = Promise.resolve();
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -93,6 +112,10 @@ export class PlotService {
     this.spanService.section.set(null);
     this.study.set(null);
     this.currentSectionUuid = null;
+    this.appliedCutStrands = null;
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    this.baseUtilizationRates.set(null);
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedMeasure(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -126,7 +149,8 @@ export class PlotService {
     this.plotOptionsService.plotOptionsChange(
       values,
       () => this.loading(),
-      () => this.refreshProjection()
+      // View options leave the loads untouched: no need to recompute the cut-strand results
+      () => this.serialize(() => this.refreshProjectionNow())
     );
   }
 
@@ -144,9 +168,15 @@ export class PlotService {
       return;
     }
     this.loading.set(true);
-    const cable = await this.cableService.getCable(section.cable_name);
+    // The resets above stay synchronous: the studio relies on litData being nulled right away
+    const cableName = section.cable_name;
+    return this.serialize(() => this.initEngine(section, cableName));
+  };
+
+  private readonly initEngine = async (section: Section, cableName: string) => {
+    const cable = await this.cableService.getCable(cableName);
     if (!cable) {
-      this.logger.error('no cable found: ', section.cable_name);
+      this.logger.error('no cable found: ', cableName);
       this.loading.set(false);
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
@@ -159,6 +189,19 @@ export class PlotService {
     this.diagnostics.set(diagnostics);
 
     if (error || !result?.success) {
+      this.obstacleStateService.reset();
+      this.loading.set(false);
+      return;
+    }
+
+    // A fresh engine runs without the high-safety coefficient: apply the selected charge's personnel presence.
+    // Without it every utilization rate would use the wrong coefficient, so a failure stops the init.
+    const highSafetyRes = await this.workerPythonService.runTask(Task.setHighSafety, {
+      highSafety: hasStaffPresence(this.study(), section)
+    });
+    if (highSafetyRes.error) {
+      this.error.set(highSafetyRes.error);
+      this.diagnostics.set(highSafetyRes.diagnostics);
       this.obstacleStateService.reset();
       this.loading.set(false);
       return;
@@ -188,11 +231,126 @@ export class PlotService {
       );
     }
 
+    // Saved cut strands are inputs only: replay them on the freshly initialized engine
+    // so the plot and the RRTS results reflect the damaged cable again.
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    this.baseUtilizationRates.set(null);
+    this.appliedCutStrands = null;
+    const savedCutStrands = section.rrts_cut_strands;
+    if (savedCutStrands?.length) {
+      // On failure the engine stays undamaged: the plot still renders, the user is told why RRTS is missing
+      const replayDiagnostics = await this.applyCutStrandsNow(sumCutStrands(savedCutStrands));
+      if (replayDiagnostics) {
+        this.notificationService.error(formatDiagnosticsError(replayDiagnostics, this.translocoService));
+      }
+    }
+
     // initLit initializes the study — refreshProjection gets the actual render data
-    await this.refreshProjection();
+    await this.refreshProjectionNow();
   };
 
-  refreshProjection = async () => {
+  // Apply cut strands to the engine and refresh the RRTS results.
+  // Returns the diagnostics of the failing task, or null on success.
+  applyCutStrands = (cutStrands: number[]) => this.serialize(() => this.applyCutStrandsNow(cutStrands));
+
+  // Put the engine back to the section's saved cut strands, dropping any unsaved calculation.
+  // A failing non-empty restore rolls back to the previous damage; reinit from the section once several entries are kept.
+  restoreSavedCutStrands = () =>
+    this.serialize(() => {
+      const saved = this.spanService.section()?.rrts_cut_strands ?? [];
+      return saved.length ? this.applyCutStrandsNow(sumCutStrands(saved)) : this.clearCutStrandsNow();
+    });
+
+  // Put the engine back to the undamaged cable and drop the cut-strand results. Never rolls back:
+  // on failure the engine keeps its previous damage, so the results matching it are kept too.
+  private readonly clearCutStrandsNow = async (): Promise<PythonDiagnostic[] | null> => {
+    const res = await this.workerPythonService.runTask(Task.setCutStrands, {
+      cutStrands: new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
+    });
+    if (res.error) return res.diagnostics;
+    this.appliedCutStrands = null;
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    return null;
+  };
+
+  // Callers run this after changing the loads or the climate: the cut-strand results depend on them too
+  refreshProjection = () =>
+    this.serialize(async () => {
+      await this.refreshProjectionNow();
+      await this.refreshCutStrandResultsNow();
+    });
+
+  // Personnel presence switches the safety coefficient of every utilization rate: recompute them all
+  setHighSafety = (highSafety: boolean) =>
+    this.serialize(async () => {
+      const { error, diagnostics } = await this.workerPythonService.runTask(Task.setHighSafety, { highSafety });
+      if (error) {
+        this.notificationService.error(formatDiagnosticsError(diagnostics, this.translocoService));
+        return;
+      }
+      await this.refreshProjectionNow();
+      await this.refreshCutStrandResultsNow();
+    });
+
+  // Run fn once every queued engine sequence has settled, so their tasks never interleave on the engine.
+  // Queued sequences must call the *Now variants: going through the queue again would wait on themselves.
+  // Only PlotService sequences are queued; loads/obstacles/floors tasks still post directly, route them here if they race.
+  private serialize<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.engineQueue.then(fn, fn);
+    this.engineQueue = run.catch(() => undefined);
+    return run;
+  }
+
+  private readonly applyCutStrandsNow = async (cutStrands: number[]): Promise<PythonDiagnostic[] | null> => {
+    const worker = this.workerPythonService;
+    // Set first: the engine validates the cut strands before changing anything
+    const setRes = await worker.runTask(Task.setCutStrands, { cutStrands });
+    if (setRes.error) return setRes.diagnostics;
+    // Past this point the engine holds the new damage: put back the one the displayed results match
+    const rollback = async (diagnostics: PythonDiagnostic[]) => {
+      await worker.runTask(Task.setCutStrands, {
+        cutStrands: this.appliedCutStrands ?? new Array<number>(cutStrands.length).fill(0)
+      });
+      return diagnostics;
+    };
+    const rrtsRes = await worker.runTask(Task.getRrts, undefined);
+    if (rrtsRes.error || !rrtsRes.result) return rollback(rrtsRes.diagnostics);
+    const rateRes = await worker.runTask(Task.getUtilizationRate, undefined);
+    if (rateRes.error || !rateRes.result) return rollback(rateRes.diagnostics);
+
+    // Undamaged rates in the same engine state, then put the damage back
+    const resetRes = await worker.runTask(Task.setCutStrands, {
+      cutStrands: new Array<number>(cutStrands.length).fill(0)
+    });
+    if (resetRes.error) return rollback(resetRes.diagnostics);
+    const baseRateRes = await worker.runTask(Task.getUtilizationRate, undefined);
+    if (baseRateRes.error || !baseRateRes.result) return rollback(baseRateRes.diagnostics);
+    const restoreRes = await worker.runTask(Task.setCutStrands, { cutStrands });
+    if (restoreRes.error) return rollback(restoreRes.diagnostics);
+
+    // The engine returns the RRTS in N, displayed in daN like the other tensions
+    this.rrts.set(rrtsRes.result.rrts / 10);
+    this.cutStrandsUtilizationRates.set(rateRes.result.utilizationRate);
+    this.baseUtilizationRates.set(baseRateRes.result.utilizationRate);
+    this.appliedCutStrands = cutStrands;
+    return null;
+  };
+
+  // Recompute the cut-strand results under the current engine state, once damage is applied
+  private readonly refreshCutStrandResultsNow = async () => {
+    if (!this.appliedCutStrands) return;
+    const diagnostics = await this.applyCutStrandsNow(this.appliedCutStrands);
+    if (!diagnostics) return;
+    // The previous results match another load state: drop them, the damage stays applied for the next refresh
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    this.baseUtilizationRates.set(null);
+    this.notificationService.error(formatDiagnosticsError(diagnostics, this.translocoService));
+  };
+
+  private readonly refreshProjectionNow = async () => {
     this.loading.set(true);
     const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {

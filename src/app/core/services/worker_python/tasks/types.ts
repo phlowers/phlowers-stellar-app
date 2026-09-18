@@ -148,7 +148,13 @@ export enum PythonErrorCode {
   // Raised when generated points (spans, supports, insulators, others) are None after computation.
   GeneratedPointsNoneError = 'GeneratedPointsNoneError',
   // Raised when the provided time is during the night but the computation requires daytime.
-  NightTimeError = 'NightTimeError'
+  NightTimeError = 'NightTimeError',
+  // Raised when the cut strands of a layer, summed over all spans, exceed its number of strands
+  CutStrandsExceedsLayerError = 'CutStrandsExceedsLayerError',
+  // Raised when the cable RTS is missing from the catalog, so the RRTS cannot be computed
+  RtsCableNotAvailable = 'RtsCableNotAvailable',
+  // Raised when a layer with cut strands has no strand RTS in the catalog, so the RRTS cannot be computed
+  RtsLayerNotAvailable = 'RtsLayerNotAvailable'
 }
 
 /**
