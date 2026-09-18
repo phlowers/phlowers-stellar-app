@@ -152,6 +152,19 @@ All span-changing controls are disabled while fp mode is on, driven by
   3D/2D selector, profile/face side selector and invert toggle (top-toolbar) were
   already bound to `isFreePositioningMode()`.
 
+Additionally, `ObstacleFreePositioningComponent` disables and forces three
+obstacle form controls to standardized FP values in its constructor:
+
+- `referenceSupport` → `LEFT`
+- `altitudeType` → `absolute`
+- `lateralDistanceType` → `SPAN_AXIS`
+
+When saving, `ObstacleFormService.buildObstacleFromForm()` uses
+`form.getRawValue()` instead of `form.value` to include these disabled controls,
+so the obstacle is saved with the FP-forced values intact (not dropped by
+Angular's form.value, which excludes disabled controls). This ensures the saved
+obstacle has valid metadata for the Python worker's coordinate transformation.
+
 Components that gained the binding (`distance-measuring`, `load-marking`) now
 inject `PlotOptionsService` as a public readonly field for template access.
 

@@ -460,7 +460,9 @@ export class ObstacleFormService {
   }
 
   buildObstacleFromForm(): Obstacle {
-    const formValue = this.form.value;
+    // getRawValue() includes controls disabled by free positioning (altitudeType, referenceSupport,
+    // lateralDistanceType); form.value would drop them and corrupt the saved/worker-registered obstacle.
+    const formValue = this.form.getRawValue();
     // Use || so empty string also triggers UUID generation (defaultObstacleForm.uuid = '')
     const uuid = formValue.uuid || uuidv4();
     // Persist generated UUID back to the form so repeated calls use the same obstacle
