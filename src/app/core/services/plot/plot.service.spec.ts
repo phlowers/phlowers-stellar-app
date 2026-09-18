@@ -32,6 +32,7 @@ import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.se
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 // Mock plotly
 vi.mock('plotly.js-dist-min', () => ({
   purge: vi.fn()
@@ -739,6 +740,27 @@ describe('PlotService', () => {
         expect(tasks.indexOf(Task.setHighSafety)).toBeLessThan(tasks.indexOf(Task.refreshProjection));
       }
     );
+
+    it('should stop the init with the diagnostics when high safety cannot be set', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      const diagnostics = [{ code: 'E', message: 'failed' }] as unknown as PythonDiagnostic[];
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(
+          task === Task.setHighSafety
+            ? { result: null, error: TaskError.CALCULATION_ERROR, diagnostics }
+            : { result: { success: true }, error: null, diagnostics: [] }
+        )
+      );
+
+      await service.initSectionStudio(mockSection);
+
+      const tasks = mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+      expect(tasks).toEqual([Task.initLit, Task.setHighSafety]);
+      expect(service.error()).toBe(TaskError.CALCULATION_ERROR);
+      expect(service.diagnostics()).toBe(diagnostics);
+      expect(service.loading()).toBe(false);
+    });
 
     it('should apply the sum of every saved cut strands entry before refreshing the projection', async () => {
       mockWorkerPythonService.setReady?.(true);

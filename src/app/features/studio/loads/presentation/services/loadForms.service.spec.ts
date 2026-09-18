@@ -9,7 +9,7 @@ import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { Task, PythonErrorCode, TaskError } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { CableModificationsService } from './cableModifications.service';
 
@@ -397,6 +397,28 @@ describe('LoadFormsService', () => {
         expect(tasks.indexOf(Task.setHighSafety)).toBeLessThan(tasks.indexOf(Task.changeState));
       }
     );
+
+    it('should stop with the diagnostics when high safety cannot be set', async () => {
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(
+          task === Task.setHighSafety
+            ? { result: null, error: TaskError.CALCULATION_ERROR, diagnostics: ['d'] }
+            : { result: null, error: null }
+        )
+      );
+
+      await service.initTemporaryLoadData();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.changeState, expect.anything());
+      expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+      expect(mockPlotService.error.set).toHaveBeenCalledWith(TaskError.CALCULATION_ERROR);
+      expect(mockPlotService.diagnostics.set).toHaveBeenCalledWith(['d']);
+    });
   });
 
   describe('saveTemporaryLoadDataInSection', () => {
@@ -662,6 +684,26 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.temporaryLoadData).toBeNull();
       expect(mockPlotService.refreshProjection).toHaveBeenCalled();
+    });
+
+    it('should stop with the diagnostics when high safety cannot be reset', async () => {
+      mockSpanService.section.mockReturnValue(mockSection);
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(
+          task === Task.setHighSafety
+            ? { result: null, error: TaskError.CALCULATION_ERROR, diagnostics: ['d'] }
+            : { result: null, error: null }
+        )
+      );
+
+      await service.deleteLoad();
+
+      expect(mockPlotService.temporaryLoadData).toBeNull();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.changeState, expect.anything());
+      expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+      expect(mockPlotService.error.set).toHaveBeenCalledWith(TaskError.CALCULATION_ERROR);
+      expect(mockPlotService.diagnostics.set).toHaveBeenCalledWith(['d']);
     });
 
     it('should not call chargesService.deleteCharge', async () => {

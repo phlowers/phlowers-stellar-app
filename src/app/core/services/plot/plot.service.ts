@@ -194,8 +194,18 @@ export class PlotService {
       return;
     }
 
-    // A fresh engine runs without the high-safety coefficient: apply the selected charge's personnel presence
-    await this.workerPythonService.runTask(Task.setHighSafety, { highSafety: hasStaffPresence(this.study(), section) });
+    // A fresh engine runs without the high-safety coefficient: apply the selected charge's personnel presence.
+    // Without it every utilization rate would use the wrong coefficient, so a failure stops the init.
+    const highSafetyRes = await this.workerPythonService.runTask(Task.setHighSafety, {
+      highSafety: hasStaffPresence(this.study(), section)
+    });
+    if (highSafetyRes.error) {
+      this.error.set(highSafetyRes.error);
+      this.diagnostics.set(highSafetyRes.diagnostics);
+      this.obstacleStateService.reset();
+      this.loading.set(false);
+      return;
+    }
 
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
