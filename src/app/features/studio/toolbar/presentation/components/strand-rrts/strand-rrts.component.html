@@ -124,7 +124,7 @@
       type="submit"
       app-btn
       data-testid="calculate-btn"
-      [disabled]="form.invalid || !hasLayers() || isSaving()"
+      [disabled]="form.invalid || !hasLayers() || isSaving() || isDeleting()"
       [btnLoading]="isCalculating()"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
@@ -186,6 +186,7 @@
     btnStyle="danger"
     data-testid="delete-btn"
     [disabled]="!isSaved() || isSaving() || isCalculating()"
+    [btnLoading]="isDeleting()"
     (click)="delete()"
   >
     <app-icon icon="delete" aria-hidden="true" />
@@ -197,7 +198,7 @@
     app-btn
     btnStyle="base"
     data-testid="save-btn"
-    [disabled]="form.invalid || !hasLayers() || isCalculating()"
+    [disabled]="form.invalid || !hasLayers() || isCalculating() || isDeleting()"
     [btnLoading]="isSaving()"
     (click)="save()"
   >

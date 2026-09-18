@@ -336,6 +336,24 @@ describe('StrandRrtsComponent', () => {
     expect(notificationService.success).toHaveBeenCalledOnce();
   });
 
+  it('should be deleting and block calculating until the engine is put back', async () => {
+    await setup([GLOBAL]);
+    const button = (): HTMLButtonElement => fixture.nativeElement.querySelector('[data-testid="calculate-btn"]');
+    let finish!: () => void;
+    plotService.restoreSavedCutStrands.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve(null))));
+    const deleting = component.delete();
+    fixture.detectChanges();
+    expect(component.isDeleting()).toBe(true);
+    expect(button().disabled).toBe(true);
+
+    finish();
+    await deleting;
+    fixture.detectChanges();
+    expect(component.isDeleting()).toBe(false);
+    expect(button().disabled).toBe(false);
+    expect(sectionService.createOrUpdateSection).toHaveBeenCalledOnce();
+  });
+
   it('should notify when the engine cannot be put back after a delete', async () => {
     await setup([GLOBAL]);
     plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);

@@ -140,6 +140,7 @@ export class StrandRrtsComponent {
 
   readonly isCalculating = signal(false);
   readonly isSaving = signal(false);
+  readonly isDeleting = signal(false);
   readonly isSaved = computed(() => !!this.selectedEntry());
 
   constructor() {
@@ -228,22 +229,24 @@ export class StrandRrtsComponent {
     });
   }
 
-  async delete(): Promise<void> {
-    const study = this.plotService.study();
-    const section = this.spanService.section();
-    if (!study || !section || !this.selectedEntry()) return;
+  delete(): Promise<void> {
+    return this.run(this.isDeleting, async () => {
+      const study = this.plotService.study();
+      const section = this.spanService.section();
+      if (!study || !section || !this.selectedEntry()) return;
 
-    const updated = { ...section, rrts_cut_strands: this.otherEntries(this.selectedKey()) };
-    try {
-      await this.sectionService.createOrUpdateSection(study, updated);
-      this.spanService.section.set(updated);
-    } catch {
-      this.notify('error', 'failed-to-delete');
-      return;
-    }
-    // Until the engine drops the deleted damage it diverges from the section, like an unsaved calculation
-    this.pending.set({ uuid: this.selectedKey() });
-    if (await this.restoreSavedCutStrands()) this.notify('success', 'deleted');
+      const updated = { ...section, rrts_cut_strands: this.otherEntries(this.selectedKey()) };
+      try {
+        await this.sectionService.createOrUpdateSection(study, updated);
+        this.spanService.section.set(updated);
+      } catch {
+        this.notify('error', 'failed-to-delete');
+        return;
+      }
+      // Until the engine drops the deleted damage it diverges from the section, like an unsaved calculation
+      this.pending.set({ uuid: this.selectedKey() });
+      if (await this.restoreSavedCutStrands()) this.notify('success', 'deleted');
+    });
   }
 
   // Flag the action as running while it runs, and hold the close cleanup until it settles
