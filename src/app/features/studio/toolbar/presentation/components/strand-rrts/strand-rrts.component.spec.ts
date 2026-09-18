@@ -36,7 +36,7 @@ describe('StrandRrtsComponent', () => {
     cutStrandsUtilizationRates: ReturnType<typeof signal<number[] | null>>;
     baseUtilizationRates: ReturnType<typeof signal<number[] | null>>;
     applyCutStrands: vi.Mock;
-    clearCutStrands: vi.Mock;
+    restoreSavedCutStrands: vi.Mock;
   };
   let sectionService: { createOrUpdateSection: vi.Mock };
   let notificationService: { success: vi.Mock; error: vi.Mock; warning: vi.Mock };
@@ -71,11 +71,7 @@ describe('StrandRrtsComponent', () => {
         plotService.rrts.set(1000);
         return null;
       }),
-      clearCutStrands: vi.fn().mockImplementation(async () => {
-        plotService.rrts.set(null);
-        plotService.cutStrandsUtilizationRates.set(null);
-        return null;
-      })
+      restoreSavedCutStrands: vi.fn().mockResolvedValue(null)
     };
     sectionService = { createOrUpdateSection: vi.fn().mockResolvedValue(undefined) };
     notificationService = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
@@ -256,8 +252,35 @@ describe('StrandRrtsComponent', () => {
 
     await selectSpan(null);
 
-    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([1, 0, 0, 0, 0, 0, 0, 0]);
+    expect(plotService.restoreSavedCutStrands).toHaveBeenCalledOnce();
     expect(component.form.controls.cutStrands.getRawValue()).toEqual([1, 0]);
+  });
+
+  it('should notify and retry on the next span change when the saved damage cannot be put back', async () => {
+    await setup([GLOBAL]);
+    await selectSpan(SPAN_1);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+    plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);
+
+    await selectSpan(null);
+    await fixture.whenStable();
+    expect(notificationService.error).toHaveBeenCalledOnce();
+
+    await selectSpan(SPAN_2);
+    await fixture.whenStable();
+    expect(plotService.restoreSavedCutStrands).toHaveBeenCalledTimes(2);
+    expect(notificationService.error).toHaveBeenCalledOnce();
+  });
+
+  it('should notify when the saved damage cannot be put back on close', async () => {
+    await setup([GLOBAL]);
+    component.form.controls.cutStrands.setValue([2, 0]);
+    await component.calculate();
+    plotService.restoreSavedCutStrands.mockRejectedValueOnce(new Error('worker down'));
+
+    fixture.destroy();
+    await vi.waitFor(() => expect(notificationService.error).toHaveBeenCalled());
   });
 
   it('should put the saved damage back when the dialog closes on an unsaved calculation', async () => {
@@ -267,7 +290,7 @@ describe('StrandRrtsComponent', () => {
 
     fixture.destroy();
 
-    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([1, 0, 0, 0, 0, 0, 0, 0]);
+    await vi.waitFor(() => expect(plotService.restoreSavedCutStrands).toHaveBeenCalledOnce());
   });
 
   it('should put the saved damage back once a calculation running at close ends', async () => {
@@ -278,45 +301,49 @@ describe('StrandRrtsComponent', () => {
     const calculation = component.calculate();
 
     fixture.destroy();
-    expect(plotService.applyCutStrands).toHaveBeenCalledTimes(1);
+    await fixture.whenStable();
+    expect(plotService.restoreSavedCutStrands).not.toHaveBeenCalled();
     finish();
     await calculation;
 
-    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([1, 0, 0, 0, 0, 0, 0, 0]);
+    await vi.waitFor(() => expect(plotService.restoreSavedCutStrands).toHaveBeenCalledOnce());
   });
 
   it('should keep the saved damage when the dialog closes after saving', async () => {
     await setup([GLOBAL]);
     component.form.controls.cutStrands.setValue([2, 0]);
     await component.save();
-    const calls = plotService.applyCutStrands.mock.calls.length;
 
     fixture.destroy();
+    await fixture.whenStable();
 
-    expect(plotService.applyCutStrands).toHaveBeenCalledTimes(calls);
+    expect(plotService.restoreSavedCutStrands).not.toHaveBeenCalled();
   });
 
-  it('should delete the selected entry and apply the remaining ones', async () => {
+  it('should delete the selected entry, then put the engine back to the remaining ones', async () => {
     await setup([GLOBAL, ON_SPAN_1]);
     await selectSpan(SPAN_1);
+    let entriesAtRestore: RrtsCutStrandsData[] | undefined;
+    plotService.restoreSavedCutStrands.mockImplementationOnce(async () => {
+      entriesAtRestore = spanService.section()?.rrts_cut_strands;
+      return null;
+    });
 
     await component.delete();
 
     expect(savedEntries()).toEqual([GLOBAL]);
-    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([1, 0, 0, 0, 0, 0, 0, 0]);
-    expect(plotService.rrts()).toBe(1000);
+    expect(entriesAtRestore).toEqual([GLOBAL]);
+    expect(notificationService.success).toHaveBeenCalledOnce();
   });
 
-  it('should clear the cut strands and results when the last entry is deleted', async () => {
+  it('should notify when the engine cannot be put back after a delete', async () => {
     await setup([GLOBAL]);
-    plotService.cutStrandsUtilizationRates.set([60]);
+    plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);
 
     await component.delete();
 
     expect(savedEntries()).toEqual([]);
-    expect(plotService.applyCutStrands).not.toHaveBeenCalled();
-    expect(plotService.clearCutStrands).toHaveBeenCalledOnce();
-    expect(plotService.rrts()).toBeNull();
-    expect(plotService.cutStrandsUtilizationRates()).toBeNull();
+    expect(notificationService.error).toHaveBeenCalledOnce();
+    expect(notificationService.success).not.toHaveBeenCalled();
   });
 });

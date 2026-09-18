@@ -337,8 +337,27 @@ describe('PlotService', () => {
     });
   });
 
-  describe('clearCutStrands', () => {
-    it('should reset the engine to no cut strands and drop the results, without rolling back', async () => {
+  describe('restoreSavedCutStrands', () => {
+    it('should apply the sum of the saved entries', async () => {
+      spanService.section.set({
+        rrts_cut_strands: [{ cutStrands: [1, 0, 0, 0, 0, 0, 0, 0] }, { cutStrands: [1, 2, 0, 0, 0, 0, 0, 0] }]
+      } as unknown as Section);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve({
+          result:
+            task === Task.getRrts ? { rrts: 1 } : task === Task.getUtilizationRate ? { utilizationRate: [1] } : {},
+          error: null,
+          diagnostics: []
+        })
+      );
+
+      expect(await service.restoreSavedCutStrands()).toBeNull();
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setCutStrands, {
+        cutStrands: [2, 2, 0, 0, 0, 0, 0, 0]
+      });
+    });
+
+    it('should reset the engine to no cut strands and drop the results without saved entries, without rolling back', async () => {
       service.rrts.set(1200);
       service.cutStrandsUtilizationRates.set([40]);
       service.baseUtilizationRates.set([30]);
@@ -348,7 +367,7 @@ describe('PlotService', () => {
         diagnostics: []
       });
 
-      expect(await service.clearCutStrands()).toBeNull();
+      expect(await service.restoreSavedCutStrands()).toBeNull();
       expect(mockWorkerPythonService.runTask.mock.calls).toEqual([
         [Task.setCutStrands, { cutStrands: [0, 0, 0, 0, 0, 0, 0, 0] }]
       ]);
@@ -356,6 +375,17 @@ describe('PlotService', () => {
       expect(service.cutStrandsUtilizationRates()).toBeNull();
       // Undamaged rates stay valid for the undamaged cable
       expect(service.baseUtilizationRates()).toEqual([30]);
+    });
+
+    it('should keep the results when the engine refuses the reset', async () => {
+      service.rrts.set(1200);
+      service.cutStrandsUtilizationRates.set([40]);
+      const diagnostics = [{ code: 'x', message: 'failed' }];
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'failed', diagnostics });
+
+      expect(await service.restoreSavedCutStrands()).toEqual(diagnostics);
+      expect(service.rrts()).toBe(1200);
+      expect(service.cutStrandsUtilizationRates()).toEqual([40]);
     });
   });
 
@@ -436,6 +466,65 @@ describe('PlotService', () => {
         cutStrands: [1, 0, 0, 0, 0, 0, 0, 0]
       });
       expect(service.rrts()).toBe(1200);
+    });
+  });
+
+  describe('refreshProjection with cut strands applied', () => {
+    const ok = (result: unknown) => ({ result, error: null, diagnostics: [] });
+    let rates: { damaged: number[]; base: number[] };
+
+    beforeEach(async () => {
+      rates = { damaged: [40], base: [30] };
+      // Utilization rates alternate damaged / undamaged, as the engine is toggled between them
+      let rateCalls = 0;
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+        if (task === Task.getRrts) return Promise.resolve(ok({ rrts: 12000 }));
+        if (task === Task.getUtilizationRate) {
+          return Promise.resolve(ok({ utilizationRate: rateCalls++ % 2 === 0 ? rates.damaged : rates.base }));
+        }
+        return Promise.resolve(ok({ success: true }));
+      });
+      await service.applyCutStrands([1, 0, 0, 0, 0, 0, 0, 0]);
+      mockWorkerPythonService.runTask.mockClear();
+    });
+
+    it('should recompute the damaged and undamaged rates under the new load state', async () => {
+      rates = { damaged: [60], base: [45] };
+
+      await service.refreshProjection();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+      expect(service.cutStrandsUtilizationRates()).toEqual([60]);
+      expect(service.baseUtilizationRates()).toEqual([45]);
+      expect(mockWorkerPythonService.runTask).toHaveBeenLastCalledWith(Task.setCutStrands, {
+        cutStrands: [1, 0, 0, 0, 0, 0, 0, 0]
+      });
+    });
+
+    it('should drop the stale results when they cannot be recomputed', async () => {
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(
+          task === Task.getRrts
+            ? { result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] }
+            : ok(task === Task.getUtilizationRate ? { utilizationRate: [1] } : { success: true })
+        )
+      );
+
+      await service.refreshProjection();
+
+      expect(service.rrts()).toBeNull();
+      expect(service.cutStrandsUtilizationRates()).toBeNull();
+      expect(service.baseUtilizationRates()).toBeNull();
+    });
+
+    it('should not recompute the rates on a view change', async () => {
+      service.loading.set(false);
+      service.plotOptionsChange({ view: '2d' });
+      await vi.waitFor(() =>
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.anything())
+      );
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.getUtilizationRate, undefined);
     });
   });
 

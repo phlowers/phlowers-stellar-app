@@ -149,7 +149,8 @@ export class PlotService {
     this.plotOptionsService.plotOptionsChange(
       values,
       () => this.loading(),
-      () => this.refreshProjection()
+      // View options leave the loads untouched: no need to recompute the cut-strand results
+      () => this.serialize(() => this.refreshProjectionNow())
     );
   }
 
@@ -240,20 +241,33 @@ export class PlotService {
   // Returns the diagnostics of the failing task, or null on success.
   applyCutStrands = (cutStrands: number[]) => this.serialize(() => this.applyCutStrandsNow(cutStrands));
 
-  // Put the engine back to the undamaged cable and drop the cut-strand results. Never rolls back:
-  // it restores the persisted state (no saved entry), whatever was applied before.
-  clearCutStrands = () =>
-    this.serialize(async (): Promise<PythonDiagnostic[] | null> => {
-      this.appliedCutStrands = null;
-      this.rrts.set(null);
-      this.cutStrandsUtilizationRates.set(null);
-      const res = await this.workerPythonService.runTask(Task.setCutStrands, {
-        cutStrands: new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
-      });
-      return res.error ? res.diagnostics : null;
+  // Put the engine back to the section's saved cut strands, dropping any unsaved calculation.
+  // A failing non-empty restore rolls back to the previous damage; reinit from the section once several entries are kept.
+  restoreSavedCutStrands = () =>
+    this.serialize(() => {
+      const saved = this.spanService.section()?.rrts_cut_strands ?? [];
+      return saved.length ? this.applyCutStrandsNow(sumCutStrands(saved)) : this.clearCutStrandsNow();
     });
 
-  refreshProjection = () => this.serialize(() => this.refreshProjectionNow());
+  // Put the engine back to the undamaged cable and drop the cut-strand results. Never rolls back:
+  // on failure the engine keeps its previous damage, so the results matching it are kept too.
+  private clearCutStrandsNow = async (): Promise<PythonDiagnostic[] | null> => {
+    const res = await this.workerPythonService.runTask(Task.setCutStrands, {
+      cutStrands: new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
+    });
+    if (res.error) return res.diagnostics;
+    this.appliedCutStrands = null;
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    return null;
+  };
+
+  // Callers run this after changing the loads or the climate: the cut-strand results depend on them too
+  refreshProjection = () =>
+    this.serialize(async () => {
+      await this.refreshProjectionNow();
+      await this.refreshCutStrandResultsNow();
+    });
 
   // Run fn once every queued engine sequence has settled, so their tasks never interleave on the engine.
   // Queued sequences must call the *Now variants: going through the queue again would wait on themselves.
@@ -297,6 +311,18 @@ export class PlotService {
     this.baseUtilizationRates.set(baseRateRes.result.utilizationRate);
     this.appliedCutStrands = cutStrands;
     return null;
+  };
+
+  // Recompute the cut-strand results under the current engine state, once damage is applied
+  private refreshCutStrandResultsNow = async () => {
+    if (!this.appliedCutStrands) return;
+    const diagnostics = await this.applyCutStrandsNow(this.appliedCutStrands);
+    if (!diagnostics) return;
+    // The previous results match another load state: drop them, the damage stays applied for the next refresh
+    this.rrts.set(null);
+    this.cutStrandsUtilizationRates.set(null);
+    this.baseUtilizationRates.set(null);
+    this.notificationService.error(formatDiagnosticsError(diagnostics, this.translocoService));
   };
 
   private refreshProjectionNow = async () => {

@@ -10,7 +10,8 @@ import {
   signal,
   TemplateRef,
   untracked,
-  viewChild
+  viewChild,
+  WritableSignal
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -36,7 +37,8 @@ import { PythonDiagnostic } from '@core/services/worker_python/tasks/python-diag
 import { formatDiagnosticsError } from '@services/worker_python/tasks/python-error-messages';
 import { SectionService } from '@services/section/section.service';
 import { DISTANCE_MAX, STRAND_LAYER_KEYS } from './strand-rrts.constantes';
-import { cutStrandsControl, maxFinite } from './strand-rrts.helpers';
+import { cutStrandsControl, hasStaffPresence, maxFinite } from './strand-rrts.helpers';
+import { NotificationKey } from './strand-rrts.interfaces';
 
 @Component({
   selector: 'app-strand-rrts',
@@ -92,12 +94,7 @@ export class StrandRrtsComponent {
 
   readonly cableName = computed(() => this.spanService.section()?.cable_name ?? null);
 
-  // Same source as the menu bar: the selected charge is tracked on the study's copy of the section
-  readonly staffIsPresent = computed(() => {
-    const section = this.spanService.section();
-    const chargeUuid = this.plotService.study()?.sections.find((s) => s?.uuid === section?.uuid)?.selected_charge_uuid;
-    return !!section?.charges?.find((c) => c.uuid === chargeUuid)?.personnelPresence;
-  });
+  readonly staffIsPresent = computed(() => hasStaffPresence(this.plotService.study(), this.spanService.section()));
 
   readonly cable = resource({
     params: () => this.cableName() ?? undefined,
@@ -135,8 +132,8 @@ export class StrandRrtsComponent {
   readonly rrts = this.plotService.rrts;
   // Span key of a calculation applied to the engine but not saved yet
   private readonly pending = signal<{ uuid: string | null } | null>(null);
-  // The dialog destroys this component on close: an unsaved calculation must not outlive it
-  private destroyed = false;
+  // Settles once every running calculation or save has: an unsaved calculation is only known after it
+  private settled: Promise<unknown> = Promise.resolve();
 
   // Cut strands damage the whole cable, so the new working load is always the max over all spans
   readonly newWorkLoad = computed(() => maxFinite(this.plotService.cutStrandsUtilizationRates()));
@@ -146,9 +143,11 @@ export class StrandRrtsComponent {
   readonly isSaved = computed(() => !!this.selectedEntry());
 
   constructor() {
+    // The dialog destroys this component on close: an unsaved calculation must not outlive it
     inject(DestroyRef).onDestroy(() => {
-      this.destroyed = true;
-      this.discardIfClosed();
+      void this.settled.then(() => {
+        if (this.pending()) void this.restoreSavedCutStrands();
+      });
     });
 
     effect(() => {
@@ -164,30 +163,34 @@ export class StrandRrtsComponent {
       untracked(() => this.form.setControl('cutStrands', new FormArray(controls)));
     });
 
-    // Load the selected entry's inputs; without a span, the reference support and its distance are ignored
+    // Without a span, the reference support and its distance are ignored
     effect(() => {
       const hasSpan = !!this.selectedSpan();
-      const key = this.selectedKey();
+      untracked(() => {
+        const { supportRef, distanceSupportRef } = this.form.controls;
+        [supportRef, distanceSupportRef].forEach((control) => (hasSpan ? control.enable() : control.disable()));
+      });
+    });
+
+    // Load the selected entry's inputs
+    effect(() => {
+      const hasSpan = !!this.selectedSpan();
       const entry = this.selectedEntry();
       const layers = this.layers();
       untracked(() => {
         const { supportRef, distanceSupportRef } = this.form.controls;
-        if (hasSpan) {
-          supportRef.enable();
-          distanceSupportRef.enable();
-        } else {
-          supportRef.disable();
-          distanceSupportRef.disable();
-        }
         supportRef.setValue(entry?.supportRef ?? (hasSpan ? 'LEFT' : null));
         distanceSupportRef.setValue(entry?.distanceSupportRef ?? 0);
         layers.forEach(({ layer, control }) => control.setValue(entry?.cutStrands[layer - 1] ?? 0));
+      });
+    });
 
-        // Leaving an unsaved calculation: put the engine back to the saved damage
-        if (this.pending() && this.pending()?.uuid !== key) {
-          this.pending.set(null);
-          void this.applySavedCutStrands();
-        }
+    // Leaving an unsaved calculation: put the engine back to the saved damage
+    effect(() => {
+      const key = this.selectedKey();
+      untracked(() => {
+        const pending = this.pending();
+        if (pending && pending.uuid !== key) void this.restoreSavedCutStrands();
       });
     });
   }
@@ -198,23 +201,15 @@ export class StrandRrtsComponent {
     return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
   }
 
-  async calculate(): Promise<void> {
-    this.isCalculating.set(true);
-    try {
-      await this.runCalculation();
-    } finally {
-      this.isCalculating.set(false);
-      this.discardIfClosed();
-    }
+  calculate(): Promise<void> {
+    return this.run(this.isCalculating, () => this.runCalculation());
   }
 
   // Calculate, then save the form as it was calculated. The section holds a single entry: any other one is replaced.
-  async save(): Promise<void> {
-    const study = this.plotService.study();
-    if (!study || !this.spanService.section()) return;
-
-    this.isSaving.set(true);
-    try {
+  save(): Promise<void> {
+    return this.run(this.isSaving, async () => {
+      const study = this.plotService.study();
+      if (!study || !this.spanService.section()) return;
       const entry = await this.runCalculation();
       // Read after calculating: the section may have changed meanwhile
       const section = this.spanService.section();
@@ -224,23 +219,63 @@ export class StrandRrtsComponent {
       try {
         await this.sectionService.createOrUpdateSection(study, updated);
       } catch {
-        this.notificationService.error(this.translocoService.translate('studio.rrts-cut-strands.failed-to-save'));
+        this.notify('error', 'failed-to-save');
         return;
       }
       this.spanService.section.set(updated);
       this.pending.set(null);
-      this.notificationService.success(this.translocoService.translate('studio.rrts-cut-strands.saved'));
+      this.notify('success', 'saved');
+    });
+  }
+
+  async delete(): Promise<void> {
+    const study = this.plotService.study();
+    const section = this.spanService.section();
+    if (!study || !section || !this.selectedEntry()) return;
+
+    const updated = { ...section, rrts_cut_strands: this.otherEntries(this.selectedKey()) };
+    try {
+      await this.sectionService.createOrUpdateSection(study, updated);
+      this.spanService.section.set(updated);
+    } catch {
+      this.notify('error', 'failed-to-delete');
+      return;
+    }
+    this.pending.set(null);
+    const diagnostics = await this.plotService.restoreSavedCutStrands();
+    if (diagnostics) {
+      this.notifyError(diagnostics);
+      return;
+    }
+    this.notify('success', 'deleted');
+  }
+
+  // Flag the action as running while it runs, and hold the close cleanup until it settles
+  private async run(busy: WritableSignal<boolean>, action: () => Promise<unknown>): Promise<void> {
+    busy.set(true);
+    const running = action();
+    this.settled = Promise.allSettled([this.settled, running]);
+    try {
+      await running;
     } finally {
-      this.isSaving.set(false);
-      this.discardIfClosed();
+      busy.set(false);
     }
   }
 
-  // Once closed, put the engine back to the saved damage; waits for a running calculation or save to settle
-  private discardIfClosed(): void {
-    if (!this.destroyed || !this.pending() || this.isCalculating() || this.isSaving()) return;
+  // Drop the unsaved calculation from the engine. Cleared upfront so a calculation queued meanwhile keeps its own pending
+  private async restoreSavedCutStrands(): Promise<void> {
+    const pending = this.pending();
     this.pending.set(null);
-    void this.applySavedCutStrands();
+    let diagnostics: PythonDiagnostic[] | null;
+    try {
+      diagnostics = await this.plotService.restoreSavedCutStrands();
+    } catch {
+      diagnostics = [];
+    }
+    if (!diagnostics) return;
+    // The engine still holds the unsaved calculation: keep it pending so the next span change or close retries
+    if (!this.pending()) this.pending.set(pending);
+    this.notifyError(diagnostics);
   }
 
   // Apply the form's cut strands to the whole cable; returns the entry they were calculated from, or null on failure
@@ -277,28 +312,6 @@ export class StrandRrtsComponent {
     };
   }
 
-  async delete(): Promise<void> {
-    const study = this.plotService.study();
-    const section = this.spanService.section();
-    if (!study || !section || !this.selectedEntry()) return;
-
-    const updated = { ...section, rrts_cut_strands: this.otherEntries(this.selectedKey()) };
-    try {
-      await this.sectionService.createOrUpdateSection(study, updated);
-      this.spanService.section.set(updated);
-    } catch {
-      this.notificationService.error(this.translocoService.translate('studio.rrts-cut-strands.failed-to-delete'));
-      return;
-    }
-    this.pending.set(null);
-    const diagnostics = await this.applySavedCutStrands();
-    if (diagnostics) {
-      this.notifyError(diagnostics);
-      return;
-    }
-    this.notificationService.success(this.translocoService.translate('studio.rrts-cut-strands.deleted'));
-  }
-
   private otherEntries(uuid: string | null): RrtsCutStrandsData[] {
     return this.savedEntries().filter(({ span }) => (span?.uuid ?? null) !== uuid);
   }
@@ -309,13 +322,8 @@ export class StrandRrtsComponent {
     return [];
   }
 
-  // Apply the total of the saved entries; without any, the cable is undamaged and there are no results.
-  // A failing non-empty restore rolls back to the previous damage; reinit from the section once several entries are kept.
-  private applySavedCutStrands(): Promise<PythonDiagnostic[] | null> {
-    const entries = this.savedEntries();
-    return entries.length
-      ? this.plotService.applyCutStrands(sumCutStrands(entries))
-      : this.plotService.clearCutStrands();
+  private notify(kind: 'success' | 'error', key: NotificationKey): void {
+    this.notificationService[kind](this.translocoService.translate(`studio.rrts-cut-strands.${key}`));
   }
 
   private notifyError(diagnostics: PythonDiagnostic[] = []): void {

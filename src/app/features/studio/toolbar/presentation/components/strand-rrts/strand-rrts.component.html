@@ -197,7 +197,6 @@
     app-btn
     btnStyle="base"
     data-testid="save-btn"
-    aria-describedby="rrts-save-hint"
     [disabled]="form.invalid || !hasLayers() || isCalculating()"
     [btnLoading]="isSaving()"
     (click)="save()"

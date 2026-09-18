@@ -378,7 +378,7 @@
       "section-created": "Canton créé",
       "section-deleted": "Canton supprimé",
       "section-duplicated": "Canton dupliqué",
-      "geometry-objects-updated": "Les obstacles, sols et charges ont été mis à jour pour correspondre à la géométrie du canton",
+      "geometry-objects-updated": "Les obstacles, sols, charges et brins coupés CRR ont été mis à jour pour correspondre à la géométrie du canton",
       "ic-updated": "Condition initiale mise à jour",
       "ic-added": "Condition initiale ajoutée",
       "ic-deleted": "Condition initiale supprimée",
