@@ -1181,13 +1181,11 @@
       "result-new-working-load-warning": "The new max working load is concerning",
       "result-new-working-load-error": "The new max working load is dangerous",
       "result-new-working-load-unknown": "The new max working load is unknown",
-      "single-change-hint": "Only one modification can be done for the whole section: saving replaces any previous one.",
-      "span-change-erased": "The previous change on span {{ span }} has been erased",
-      "section-change-erased": "The previous change on the whole section has been erased",
       "saved": "RRTS cut strands saved",
       "failed-to-save": "Failed to save RRTS cut strands",
       "deleted": "RRTS cut strands deleted",
-      "failed-to-delete": "Failed to delete RRTS cut strands"
+      "failed-to-delete": "Failed to delete RRTS cut strands",
+      "no-strand-layers": "No strand layer data available for this cable"
     }
   }
 }

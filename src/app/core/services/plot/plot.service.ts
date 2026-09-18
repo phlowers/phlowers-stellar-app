@@ -23,7 +23,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { Subscription } from 'rxjs';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
-import { sumCutStrands } from '@shared/domain/helpers/sections.helpers';
+import { CUT_STRANDS_LAYER_COUNT, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -81,6 +81,8 @@ export class PlotService {
   private currentSectionUuid: string | null = null;
   // Cut strands the engine holds and the RRTS results match; null for a freshly initialized (undamaged) engine
   private appliedCutStrands: number[] | null = null;
+  // Tail of the queue of multi-task engine sequences (init, cut strands, projection): they share one engine state
+  private engineQueue: Promise<unknown> = Promise.resolve();
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -165,9 +167,15 @@ export class PlotService {
       return;
     }
     this.loading.set(true);
-    const cable = await this.cableService.getCable(section.cable_name);
+    // The resets above stay synchronous: the studio relies on litData being nulled right away
+    const cableName = section.cable_name;
+    return this.serialize(() => this.initEngine(section, cableName));
+  };
+
+  private initEngine = async (section: Section, cableName: string) => {
+    const cable = await this.cableService.getCable(cableName);
     if (!cable) {
-      this.logger.error('no cable found: ', section.cable_name);
+      this.logger.error('no cable found: ', cableName);
       this.loading.set(false);
       this.error.set(DataError.NO_CABLE_FOUND);
       return;
@@ -218,19 +226,45 @@ export class PlotService {
     const savedCutStrands = section.rrts_cut_strands;
     if (savedCutStrands?.length) {
       // On failure the engine stays undamaged: the plot still renders, the user is told why RRTS is missing
-      const replayDiagnostics = await this.applyCutStrands(sumCutStrands(savedCutStrands));
+      const replayDiagnostics = await this.applyCutStrandsNow(sumCutStrands(savedCutStrands));
       if (replayDiagnostics) {
         this.notificationService.error(formatDiagnosticsError(replayDiagnostics, this.translocoService));
       }
     }
 
     // initLit initializes the study — refreshProjection gets the actual render data
-    await this.refreshProjection();
+    await this.refreshProjectionNow();
   };
 
   // Apply cut strands to the engine and refresh the RRTS results.
   // Returns the diagnostics of the failing task, or null on success.
-  applyCutStrands = async (cutStrands: number[]): Promise<PythonDiagnostic[] | null> => {
+  applyCutStrands = (cutStrands: number[]) => this.serialize(() => this.applyCutStrandsNow(cutStrands));
+
+  // Put the engine back to the undamaged cable and drop the cut-strand results. Never rolls back:
+  // it restores the persisted state (no saved entry), whatever was applied before.
+  clearCutStrands = () =>
+    this.serialize(async (): Promise<PythonDiagnostic[] | null> => {
+      this.appliedCutStrands = null;
+      this.rrts.set(null);
+      this.cutStrandsUtilizationRates.set(null);
+      const res = await this.workerPythonService.runTask(Task.setCutStrands, {
+        cutStrands: new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
+      });
+      return res.error ? res.diagnostics : null;
+    });
+
+  refreshProjection = () => this.serialize(() => this.refreshProjectionNow());
+
+  // Run fn once every queued engine sequence has settled, so their tasks never interleave on the engine.
+  // Queued sequences must call the *Now variants: going through the queue again would wait on themselves.
+  // Only PlotService sequences are queued; loads/obstacles/floors tasks still post directly, route them here if they race.
+  private serialize<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.engineQueue.then(fn, fn);
+    this.engineQueue = run.catch(() => undefined);
+    return run;
+  }
+
+  private applyCutStrandsNow = async (cutStrands: number[]): Promise<PythonDiagnostic[] | null> => {
     const worker = this.workerPythonService;
     // Set first: the engine validates the cut strands before changing anything
     const setRes = await worker.runTask(Task.setCutStrands, { cutStrands });
@@ -265,7 +299,7 @@ export class PlotService {
     return null;
   };
 
-  refreshProjection = async () => {
+  private refreshProjectionNow = async () => {
     this.loading.set(true);
     const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {

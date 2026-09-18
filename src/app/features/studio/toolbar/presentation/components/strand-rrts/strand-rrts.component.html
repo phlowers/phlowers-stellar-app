@@ -80,6 +80,11 @@
       }
     </div>
 
+    @if (!hasLayers()) {
+      <p-message severity="secondary" size="small" variant="simple" data-testid="rrts-no-layers">
+        {{ (cable.isLoading() ? 'common.loading' : 'studio.rrts-cut-strands.no-strand-layers') | transloco }}
+      </p-message>
+    }
     @for (item of layers(); track item) {
       @let error = item.control.touched ? getError(item.control) : '';
       <div>
@@ -119,7 +124,7 @@
       type="submit"
       app-btn
       data-testid="calculate-btn"
-      [disabled]="form.invalid || isSaving()"
+      [disabled]="form.invalid || !hasLayers() || isSaving()"
       [btnLoading]="isCalculating()"
     >
       <app-icon icon="rocket_launch" aria-hidden="true" />
@@ -175,36 +180,29 @@
 }
 
 <ng-template #footer>
-  <div class="footer">
-    <div class="footer-actions">
-      <button
-        type="button"
-        app-btn
-        btnStyle="danger"
-        data-testid="delete-btn"
-        [disabled]="!isSaved() || isSaving()"
-        (click)="delete()"
-      >
-        <app-icon icon="delete" aria-hidden="true" />
-        {{ 'common.delete' | transloco }}
-      </button>
+  <button
+    type="button"
+    app-btn
+    btnStyle="danger"
+    data-testid="delete-btn"
+    [disabled]="!isSaved() || isSaving() || isCalculating()"
+    (click)="delete()"
+  >
+    <app-icon icon="delete" aria-hidden="true" />
+    {{ 'common.delete' | transloco }}
+  </button>
 
-      <button
-        type="button"
-        app-btn
-        btnStyle="base"
-        data-testid="save-btn"
-        aria-describedby="rrts-save-hint"
-        [disabled]="form.invalid || isCalculating()"
-        [btnLoading]="isSaving()"
-        (click)="save()"
-      >
-        <app-icon icon="save" aria-hidden="true" />
-        {{ 'common.calculate-and-save' | transloco }}
-      </button>
-    </div>
-    <p id="rrts-save-hint" class="text-s-400 mb-0" data-testid="save-hint">
-      {{ 'studio.rrts-cut-strands.single-change-hint' | transloco }}
-    </p>
-  </div>
+  <button
+    type="button"
+    app-btn
+    btnStyle="base"
+    data-testid="save-btn"
+    aria-describedby="rrts-save-hint"
+    [disabled]="form.invalid || !hasLayers() || isCalculating()"
+    [btnLoading]="isSaving()"
+    (click)="save()"
+  >
+    <app-icon icon="save" aria-hidden="true" />
+    {{ 'common.save' | transloco }}
+  </button>
 </ng-template>

@@ -13,7 +13,7 @@ import { SectionReportLabels, SpanReportRow, SupportReportRow } from './section-
 /**
  * Per-span metric rows (transposed table: one row per metric, one column per span).
  *
- * ponytail: field→output_parameters index mapping assumes each span array is indexed by span
+ * The field→output_parameters index mapping assumes each span array is indexed by span
  * position. The engine's `tension_sup`/`tension_inf`/`T_h` are documented "at each support" in
  * types.ts but the US places them in the span table — validate against real engine output.
  */

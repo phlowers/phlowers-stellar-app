@@ -99,7 +99,7 @@ export class StrandRrtsComponent {
     return !!section?.charges?.find((c) => c.uuid === chargeUuid)?.personnelPresence;
   });
 
-  private readonly cable = resource({
+  readonly cable = resource({
     params: () => this.cableName() ?? undefined,
     loader: ({ params }) => this.cablesService.getCable(params)
   });
@@ -112,6 +112,8 @@ export class StrandRrtsComponent {
       .filter(({ max }) => max > 0)
       .map((layer) => ({ ...layer, control: cutStrandsControl(layer.max) }));
   });
+  // Without strand layers (cable loading, unknown, failed or without strand data) the empty form would be valid
+  readonly hasLayers = computed(() => this.layers().length > 0);
 
   private readonly selectedSpan = toSignal(this.form.controls.span.valueChanges, { initialValue: null });
 
@@ -218,7 +220,6 @@ export class StrandRrtsComponent {
       const section = this.spanService.section();
       if (!entry || !section) return;
 
-      const erased = this.otherEntries(entry.span?.uuid ?? null).filter((e) => !this.keptEntries().includes(e));
       const updated = { ...section, rrts_cut_strands: [...this.keptEntries(), entry] };
       try {
         await this.sectionService.createOrUpdateSection(study, updated);
@@ -229,7 +230,6 @@ export class StrandRrtsComponent {
       this.spanService.section.set(updated);
       this.pending.set(null);
       this.notificationService.success(this.translocoService.translate('studio.rrts-cut-strands.saved'));
-      erased.forEach((e) => this.notificationService.warning(this.erasedMessage(e)));
     } finally {
       this.isSaving.set(false);
       this.discardIfClosed();
@@ -245,6 +245,7 @@ export class StrandRrtsComponent {
 
   // Apply the form's cut strands to the whole cable; returns the entry they were calculated from, or null on failure
   private async runCalculation(): Promise<RrtsCutStrandsData | null> {
+    if (!this.hasLayers()) return null;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return null;
@@ -274,14 +275,6 @@ export class StrandRrtsComponent {
       distanceSupportRef: distanceSupportRef ?? null,
       cutStrands
     };
-  }
-
-  private erasedMessage({ span }: RrtsCutStrandsData): string {
-    if (!span) return this.translocoService.translate('studio.rrts-cut-strands.section-change-erased');
-    const label =
-      this.spanService.getSpanOptionsWithIndex().find(({ value }) => value?.uuid === span.uuid)?.label ??
-      String(span.index + 1);
-    return this.translocoService.translate('studio.rrts-cut-strands.span-change-erased', { span: label });
   }
 
   async delete(): Promise<void> {
@@ -316,15 +309,13 @@ export class StrandRrtsComponent {
     return [];
   }
 
-  // Apply the total of the saved entries; without any, the cable is undamaged and there are no results
-  private async applySavedCutStrands(): Promise<PythonDiagnostic[] | null> {
+  // Apply the total of the saved entries; without any, the cable is undamaged and there are no results.
+  // A failing non-empty restore rolls back to the previous damage; reinit from the section once several entries are kept.
+  private applySavedCutStrands(): Promise<PythonDiagnostic[] | null> {
     const entries = this.savedEntries();
-    const diagnostics = await this.plotService.applyCutStrands(sumCutStrands(entries));
-    if (!entries.length) {
-      this.plotService.rrts.set(null);
-      this.plotService.cutStrandsUtilizationRates.set(null);
-    }
-    return diagnostics;
+    return entries.length
+      ? this.plotService.applyCutStrands(sumCutStrands(entries))
+      : this.plotService.clearCutStrands();
   }
 
   private notifyError(diagnostics: PythonDiagnostic[] = []): void {

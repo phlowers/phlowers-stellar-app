@@ -16,16 +16,16 @@ export interface SanitizedCharges {
   removedUserDefinedSpanLoad: boolean;
 }
 
-/** Result of sanitizing a section's obstacles, floors and span loads against its current geometry. */
+/** Result of sanitizing a section's obstacles, floors, RRTS cut strands and span loads against its current geometry. */
 export interface SectionGeometrySanitizeResult {
-  /** The section, with obstacles/floors/span loads pruned when they reference a deleted support/span. */
+  /** The section, with obstacles/floors/RRTS cut strands/span loads pruned when they reference a deleted support/span. */
   section: Section;
-  /** Whether any obstacle, any floor, or any non-zero (user-defined) span load was removed. */
+  /** Whether any obstacle, floor, span-bound RRTS cut strands entry, or non-zero (user-defined) span load was removed. */
   removedGeometryBoundObjects: boolean;
 }
 
 /** Result of `SectionService.createOrUpdateSection`. */
 export interface SectionUpdateResult {
-  /** Whether obstacles, floors or loads were removed to match the updated section geometry. */
+  /** Whether obstacles, floors, RRTS cut strands or loads were removed to match the updated section geometry. */
   removedGeometryBoundObjects: boolean;
 }

@@ -36,6 +36,7 @@ describe('StrandRrtsComponent', () => {
     cutStrandsUtilizationRates: ReturnType<typeof signal<number[] | null>>;
     baseUtilizationRates: ReturnType<typeof signal<number[] | null>>;
     applyCutStrands: vi.Mock;
+    clearCutStrands: vi.Mock;
   };
   let sectionService: { createOrUpdateSection: vi.Mock };
   let notificationService: { success: vi.Mock; error: vi.Mock; warning: vi.Mock };
@@ -68,6 +69,11 @@ describe('StrandRrtsComponent', () => {
       baseUtilizationRates: signal(null),
       applyCutStrands: vi.fn().mockImplementation(async () => {
         plotService.rrts.set(1000);
+        return null;
+      }),
+      clearCutStrands: vi.fn().mockImplementation(async () => {
+        plotService.rrts.set(null);
+        plotService.cutStrandsUtilizationRates.set(null);
         return null;
       })
     };
@@ -176,6 +182,21 @@ describe('StrandRrtsComponent', () => {
     expect(button().classList).not.toContain('app-btn-loading');
   });
 
+  it('should disable calculate and never apply cut strands when the cable has no strand layer', async () => {
+    TestBed.inject(CablesService).getCable = vi.fn().mockResolvedValue(undefined);
+    await setup();
+    fixture.detectChanges();
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('[data-testid="calculate-btn"]');
+
+    expect(component.form.valid).toBe(true);
+    expect(button.disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('[data-testid="rrts-no-layers"]')).toBeTruthy();
+    await component.calculate();
+    await component.save();
+    expect(plotService.applyCutStrands).not.toHaveBeenCalled();
+    expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+  });
+
   it('should calculate then save the form as the single entry of the section', async () => {
     await setup([ON_SPAN_1]);
     await selectSpan(SPAN_1);
@@ -188,11 +209,9 @@ describe('StrandRrtsComponent', () => {
       { span: SPAN_1, supportRef: 'RIGHT', distanceSupportRef: 12, cutStrands: [0, 5, 0, 0, 0, 0, 0, 0] }
     ]);
     expect(notificationService.success).toHaveBeenCalled();
-    // Same span: its entry is updated, nothing else is erased
-    expect(notificationService.warning).not.toHaveBeenCalled();
   });
 
-  it('should erase the other entries on save and warn about each of them', async () => {
+  it('should erase the other entries on save', async () => {
     await setup([GLOBAL, ON_SPAN_1]);
     await selectSpan(SPAN_2);
     component.form.controls.cutStrands.setValue([3, 0]);
@@ -202,8 +221,6 @@ describe('StrandRrtsComponent', () => {
     expect(savedEntries()).toEqual([
       { span: SPAN_2, supportRef: 'LEFT', distanceSupportRef: 0, cutStrands: [3, 0, 0, 0, 0, 0, 0, 0] }
     ]);
-    expect(notificationService.warning).toHaveBeenCalledWith('studio.rrts-cut-strands.section-change-erased');
-    expect(notificationService.warning).toHaveBeenCalledWith('studio.rrts-cut-strands.span-change-erased');
   });
 
   it('should not save when the calculation fails', async () => {
@@ -290,14 +307,15 @@ describe('StrandRrtsComponent', () => {
     expect(plotService.rrts()).toBe(1000);
   });
 
-  it('should clear the results when the last entry is deleted', async () => {
+  it('should clear the cut strands and results when the last entry is deleted', async () => {
     await setup([GLOBAL]);
     plotService.cutStrandsUtilizationRates.set([60]);
 
     await component.delete();
 
     expect(savedEntries()).toEqual([]);
-    expect(plotService.applyCutStrands).toHaveBeenLastCalledWith([0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(plotService.applyCutStrands).not.toHaveBeenCalled();
+    expect(plotService.clearCutStrands).toHaveBeenCalledOnce();
     expect(plotService.rrts()).toBeNull();
     expect(plotService.cutStrandsUtilizationRates()).toBeNull();
   });

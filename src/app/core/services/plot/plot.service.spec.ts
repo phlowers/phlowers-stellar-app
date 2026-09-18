@@ -337,6 +337,28 @@ describe('PlotService', () => {
     });
   });
 
+  describe('clearCutStrands', () => {
+    it('should reset the engine to no cut strands and drop the results, without rolling back', async () => {
+      service.rrts.set(1200);
+      service.cutStrandsUtilizationRates.set([40]);
+      service.baseUtilizationRates.set([30]);
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: { success: true },
+        error: null,
+        diagnostics: []
+      });
+
+      expect(await service.clearCutStrands()).toBeNull();
+      expect(mockWorkerPythonService.runTask.mock.calls).toEqual([
+        [Task.setCutStrands, { cutStrands: [0, 0, 0, 0, 0, 0, 0, 0] }]
+      ]);
+      expect(service.rrts()).toBeNull();
+      expect(service.cutStrandsUtilizationRates()).toBeNull();
+      // Undamaged rates stay valid for the undamaged cable
+      expect(service.baseUtilizationRates()).toEqual([30]);
+    });
+  });
+
   describe('applyCutStrands', () => {
     const ok = (result: unknown) => ({ result, error: null, diagnostics: [] });
 
@@ -360,6 +382,25 @@ describe('PlotService', () => {
       expect(service.rrts()).toBe(1200);
       expect(service.cutStrandsUtilizationRates()).toEqual([40, 55]);
       expect(service.baseUtilizationRates()).toEqual([30, 35]);
+    });
+
+    it('should not interleave the tasks of concurrent calls', async () => {
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(
+          ok(task === Task.getRrts ? { rrts: 1 } : task === Task.getUtilizationRate ? { utilizationRate: [1] } : {})
+        )
+      );
+
+      await Promise.all([service.applyCutStrands([1, 0]), service.applyCutStrands([2, 0])]);
+      const setCalls = mockWorkerPythonService.runTask.mock.calls.filter(([task]) => task === Task.setCutStrands);
+      expect(setCalls.map(([, inputs]) => (inputs as { cutStrands: number[] }).cutStrands)).toEqual([
+        [1, 0],
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [0, 0],
+        [2, 0]
+      ]);
     });
 
     it('should return the diagnostics and leave the engine and results untouched when the cut strands are rejected', async () => {

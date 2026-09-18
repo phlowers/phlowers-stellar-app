@@ -1171,7 +1171,7 @@
       "layers-detail": "Détail des couches",
       "cable-name-label": "Nom du câble",
       "current-work-load-label": "Taux de travail max actuel",
-      "staff-presence-label": "Présence de personnel",
+      "staff-presence-label": "Présence du personnel",
       "distance-support-ref-label": "Distance au support de référence",
       "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
       "result-cable-rrts-label": "CRR du câble",
@@ -1181,13 +1181,11 @@
       "result-new-working-load-warning": "le nouveau taux de travail max est préoccupant",
       "result-new-working-load-error": "le nouveau taux de travail max est dangereux",
       "result-new-working-load-unknown": "le nouveau taux de travail max est inconnu",
-      "single-change-hint": "Une seule modification est possible pour tout le canton : la sauvegarde remplace la précédente.",
-      "span-change-erased": "La modification précédente sur la portée {{ span }} a été effacée",
-      "section-change-erased": "La modification précédente sur tout le canton a été effacée",
       "saved": "Brins coupés CRR sauvegardés",
       "failed-to-save": "Échec de la sauvegarde des brins coupés CRR",
       "deleted": "Brins coupés CRR supprimés",
-      "failed-to-delete": "Échec de la suppression des brins coupés CRR"
+      "failed-to-delete": "Échec de la suppression des brins coupés CRR",
+      "no-strand-layers": "Aucune donnée de couche de brins disponible pour ce câble"
     }
   }
 }

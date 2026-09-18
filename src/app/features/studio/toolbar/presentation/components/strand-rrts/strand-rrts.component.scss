@@ -73,20 +73,6 @@ h2 {
   }
 }
 
-.footer {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-  flex: 1 0 100%;
-}
-
-.footer-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
 // ******** grid areas *********
 .cable-name-label {
   grid-area: cableNameLabel;

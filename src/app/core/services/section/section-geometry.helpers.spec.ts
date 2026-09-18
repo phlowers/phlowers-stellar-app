@@ -130,6 +130,24 @@ describe('sanitizeSectionGeometry', () => {
     expect(result.section.floors?.map((floor) => floor.uuid)).toEqual(['floor-keep']);
   });
 
+  it('should drop RRTS cut strands entries on a removed span, keeping whole-section ones', () => {
+    const onSpan = (uuid: string) => ({
+      span: { index: 0, uuid },
+      supportRef: 'LEFT' as const,
+      distanceSupportRef: 0,
+      cutStrands: [1]
+    });
+    const wholeSection = { span: null, supportRef: null, distanceSupportRef: null, cutStrands: [2] };
+    const section = makeSection({
+      rrts_cut_strands: [onSpan('sup-1'), onSpan('sup-3'), onSpan('deleted-support'), wholeSection]
+    });
+
+    const result = sanitizeSectionGeometry(section);
+
+    expect(result.removedGeometryBoundObjects).toBe(true);
+    expect(result.section.rrts_cut_strands).toEqual([onSpan('sup-1'), wholeSection]);
+  });
+
   it('should keep a section that has no floors at all untouched', () => {
     const section = makeSection({ obstacles: [makeObstacle({ supportUuid: 'sup-1' })] });
 
