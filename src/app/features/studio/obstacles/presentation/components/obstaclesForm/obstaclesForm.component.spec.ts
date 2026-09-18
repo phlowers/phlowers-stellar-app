@@ -23,6 +23,7 @@ class MockObstacleFormService {
   positions: FormArray<
     FormGroup<{ x: FormControl<number | null>; y: FormControl<number | null>; z: FormControl<number | null> }>
   >;
+  positionsSnapshot = signal<{ x: number | null; y: number | null; z: number | null }[]>([]);
   supportsOptions = signal([{ label: '1', value: 'LEFT' as const }]);
   results = signal({
     oblique: null as number | null,
@@ -66,6 +67,10 @@ class MockObstacleFormService {
       lateralDistanceType: new FormControl<string | null>('SPAN_AXIS'),
       positions: this.positions
     });
+    this.positionsSnapshot.set(this.positions.value as { x: number | null; y: number | null; z: number | null }[]);
+    this.positions.valueChanges.subscribe((value) =>
+      this.positionsSnapshot.set(value as { x: number | null; y: number | null; z: number | null }[])
+    );
   }
 }
 

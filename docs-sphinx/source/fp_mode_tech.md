@@ -45,6 +45,34 @@ This keeps all tabs behaving identically: clicking the left (x·z / profile) plo
 fills and shows a point's along-span and altitude, and clicking the right (y·z /
 face) plot fills its lateral coordinate.
 
+### Form field reactivity (`OnPush` templates)
+
+Reading a signal in `FreePositioningDataService` is enough to refresh the *plot
+markers*, but each tab's own form fields are a separate `OnPush` component tree
+with its own reactivity requirements. `ObstaclesFormComponent`'s point inputs are
+bound with `[value]="..."` (not `formControlName`) to handle intermediate typing
+states such as a lone `-` — see `onPositionInput` / `onPositionBlur`. A `[value]`
+binding only re-renders when Angular re-checks the component, and an `OnPush`
+component is only re-checked when it reads a **signal** that changed (or gets an
+event/`@Input`). A free-positioning click calls `positionGroup.patchValue(...)`,
+which changes no signal read by `ObstaclesFormComponent`'s template, so the field
+stayed stale until an unrelated re-render (e.g. selecting another point).
+
+The fix: bind the point inputs to the reactive
+`obstacleFormService.positionsSnapshot()` signal instead of the FormArray's
+plain `.value`:
+
+```html
+[value]="obstacleFormService.positionsSnapshot()[$index]?.z"
+```
+
+Reading that signal in the template makes `ObstaclesFormComponent` mark itself
+dirty whenever a position changes, refreshing the fields immediately after a
+free-positioning click — without touching the `[value]` + `onPositionInput` /
+`onPositionBlur` typing-state handling. The distance tab never had this problem
+because it binds `[formControl]`, whose `ControlValueAccessor` writes the DOM
+directly on `patchValue`, independent of change detection.
+
 ## The frozen span
 
 The frozen span is a single source of truth held by `PlotOptionsService`:
