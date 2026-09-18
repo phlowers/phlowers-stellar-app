@@ -7,6 +7,12 @@
   background-color: var(--primary-50);
   color: var(--star-dust-950);
 
+  &--disabled {
+    opacity: 0.65;
+    pointer-events: none;
+    user-select: none;
+  }
+
   &__separator {
     @extend %vertical-separator;
   }

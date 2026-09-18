@@ -133,6 +133,22 @@ describe('StudioTopToolbarComponent', () => {
       expect(component.toolsDropdown()).toBeNull();
     });
 
+    it('should disable the toolbar while free positioning is active', () => {
+      plotOptionsServiceMock.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+
+      expect(component.toolbarDisabled()).toBe(true);
+    });
+
+    it('should re-enable the toolbar when free positioning is exited', () => {
+      plotOptionsServiceMock.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+      plotOptionsServiceMock.isFreePositioningMode.set(false);
+      fixture.detectChanges();
+
+      expect(component.toolbarDisabled()).toBe(false);
+    });
+
     it('should initialize threeDOptions signal', () => {
       const options = component.threeDOptions();
       expect(options).toHaveLength(2);

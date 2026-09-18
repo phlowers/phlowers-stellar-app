@@ -1,7 +1,7 @@
-<div class="toolbar" role="menubar">
+<div class="toolbar" role="menubar" [class.toolbar--disabled]="toolbarDisabled()" [attr.aria-disabled]="toolbarDisabled() ? true : null">
   <p-selectbutton
     [options]="threeDOptions()"
-    [disabled]="plotService.loading() || plotOptionsService.isFreePositioningMode()"
+    [disabled]="plotService.loading() || toolbarDisabled()"
     [ngModel]="plotOptionsService.plotOptions().view"
     (onChange)="plotService.plotOptionsChange({ view: $event.value })"
     optionLabel="label"
@@ -15,7 +15,7 @@
   <div class="flex items-center gap-2">
     <p-selectbutton
       [options]="sideOptions()"
-      [disabled]="plotOptionsService.isFreePositioningMode() || plotOptionsService.plotOptions().view === '3d'"
+      [disabled]="toolbarDisabled() || plotOptionsService.plotOptions().view === '3d'"
       [ngModel]="plotOptionsService.plotOptions().side"
       (onChange)="plotService.plotOptionsChange({ side: $event.value })"
       optionLabel="label"
@@ -32,7 +32,7 @@
     <p-toggleswitch
       inputId="invert"
       data-testid="invert-toggle"
-      [disabled]="plotOptionsService.isFreePositioningMode()"
+      [disabled]="toolbarDisabled()"
       [(ngModel)]="plotOptionsService.plotOptions().invert"
       (onChange)="plotService.plotOptionsChange({ invert: $event.checked })"
     />
@@ -47,6 +47,7 @@
   <p-multiselect
     data-testid="display-multiselect"
     appendTo="body"
+    [disabled]="toolbarDisabled()"
     [placeholder]="'studio.top-toolbar.display-label' | transloco"
     [filter]="false"
     [showToggleAll]="false"
@@ -81,9 +82,9 @@
 
   <hr class="toolbar__separator" />
 
-  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="tablesDropdown()" data-testid="tables-dropdown">
+  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="tablesDropdown()" [disabled]="toolbarDisabled()" data-testid="tables-dropdown">
     <ng-template #button let-toggleCallback="toggleCallback">
-      <button (click)="toggleCallback($event)">
+      <button (click)="toggleCallback($event)" [disabled]="toolbarDisabled()">
         <app-icon icon="table_chart" />
         <ng-container>{{ 'studio.top-toolbar.tables-label' | transloco }}</ng-container>
       </button>
@@ -98,9 +99,9 @@
 
   <hr class="toolbar__separator" />
 
-  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="toolsDropdown()" data-testid="tools-dropdown">
+  <p-speedDial direction="down" class="toolbar-speed-dial" [model]="toolsDropdown()" [disabled]="toolbarDisabled()" data-testid="tools-dropdown">
     <ng-template #button let-toggleCallback="toggleCallback">
-      <button (click)="toggleCallback($event)">
+      <button (click)="toggleCallback($event)" [disabled]="toolbarDisabled()">
         <app-icon icon="build" />
         <ng-container>{{ 'studio.top-toolbar.tools-label' | transloco }}</ng-container>
       </button>
@@ -120,7 +121,7 @@
       @if (item.checked) {
         <button
           class="toolbar__specifbtn"
-          [disabled]="item.disabled"
+          [disabled]="toolbarDisabled() || item.disabled"
           (click)="item.action()"
           [attr.aria-label]="item.label"
         >
@@ -132,6 +133,7 @@
 
   <button
     class="toolbar__specifbtn toolbar__specifbtn--icon"
+    [disabled]="toolbarDisabled()"
     [attr.aria-label]="'studio.top-toolbar.edit-shortcuts-aria-label' | transloco"
     (click)="shortcutsModal.set(true)"
     data-testid="shortcuts-btn"
