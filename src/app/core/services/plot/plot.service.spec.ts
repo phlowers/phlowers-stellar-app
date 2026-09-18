@@ -23,7 +23,7 @@ import {
   Distance,
   PythonErrorCode
 } from '@services/worker_python/tasks/types';
-import { CatalogCable, Section, Study } from '@shared/domain';
+import { CatalogCable, Charge, Section, Study } from '@shared/domain';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
@@ -517,6 +517,33 @@ describe('PlotService', () => {
       expect(service.baseUtilizationRates()).toBeNull();
     });
 
+    it.each([true, false])('should recompute every rate when high safety is set to %s', async (highSafety) => {
+      rates = { damaged: [70], base: [55] };
+
+      await service.setHighSafety(highSafety);
+
+      const tasks = mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+      expect(tasks[0]).toBe(Task.setHighSafety);
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety });
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+      expect(service.cutStrandsUtilizationRates()).toEqual([70]);
+      expect(service.baseUtilizationRates()).toEqual([55]);
+    });
+
+    it('should keep the results and notify when high safety cannot be set', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValueOnce({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: []
+      });
+
+      await service.setHighSafety(true);
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledOnce();
+      expect(service.cutStrandsUtilizationRates()).toEqual([40]);
+      expect(mockNotificationService.error).toHaveBeenCalledOnce();
+    });
+
     it('should not recompute the rates on a view change', async () => {
       service.loading.set(false);
       service.plotOptionsChange({ view: '2d' });
@@ -690,6 +717,28 @@ describe('PlotService', () => {
         })
       );
     });
+
+    it.each([true, false])(
+      'should apply the selected charge personnel presence (%s) as high safety',
+      async (personnelPresence) => {
+        mockWorkerPythonService.setReady?.(true);
+        mockCablesService.getCable.mockResolvedValue(mockCable);
+        mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null, diagnostics: [] });
+        const section = {
+          ...mockSection,
+          charges: [{ uuid: 'charge-1', personnelPresence, data: { spanLoads: [] } } as unknown as Charge]
+        };
+        service.study.set({ sections: [{ ...section, selected_charge_uuid: 'charge-1' }] } as Study);
+
+        await service.initSectionStudio(section);
+
+        const tasks = mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, {
+          highSafety: personnelPresence
+        });
+        expect(tasks.indexOf(Task.setHighSafety)).toBeLessThan(tasks.indexOf(Task.refreshProjection));
+      }
+    );
 
     it('should apply the sum of every saved cut strands entry before refreshing the projection', async () => {
       mockWorkerPythonService.setReady?.(true);

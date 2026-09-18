@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { InitialCondition, Section, Support } from '@shared/domain';
+import { InitialCondition, Section, Study, Support } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -166,3 +166,10 @@ export const sumCutStrands = (entries: Pick<RrtsCutStrandsData, 'cutStrands'>[])
     (total, { cutStrands }) => total.map((sum, i) => sum + (cutStrands[i] ?? 0)),
     new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
   );
+
+// Personnel presence of the selected charge, which the engine applies as its high-safety coefficient.
+// Same source as the menu bar: the selected charge is tracked on the study's copy of the section
+export const hasStaffPresence = (study: Study | null, section: Section | null): boolean => {
+  const chargeUuid = study?.sections.find((s) => s?.uuid === section?.uuid)?.selected_charge_uuid;
+  return !!section?.charges?.find((c) => c.uuid === chargeUuid)?.personnelPresence;
+};

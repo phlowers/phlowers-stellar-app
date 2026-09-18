@@ -69,6 +69,7 @@ export class LoadFormsService {
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : []
       });
+      await this.workerPythonService.runTask(Task.setHighSafety, { highSafety: charge.personnelPresence });
       await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
       await this.plotService.refreshProjection();
     } catch (err) {
@@ -233,6 +234,8 @@ export class LoadFormsService {
    */
   async deleteLoad(): Promise<void> {
     await this.workerPythonService.runTask(Task.deleteAllLoads, undefined);
+    // Without a charge there is no personnel presence
+    await this.workerPythonService.runTask(Task.setHighSafety, { highSafety: false });
     const baseClimate = getBaseClimate(this.spanService.section());
     await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
     this.plotService.temporaryLoadData = null;

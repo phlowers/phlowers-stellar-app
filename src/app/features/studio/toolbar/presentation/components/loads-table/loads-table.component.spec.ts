@@ -210,7 +210,8 @@ describe('LoadsTableComponent', () => {
     };
 
     mockPlotService = {
-      study: signal<Study | null>(mockStudy)
+      study: signal<Study | null>(mockStudy),
+      setHighSafety: vi.fn().mockResolvedValue(undefined)
     };
 
     mockSpanService = {
@@ -339,6 +340,34 @@ describe('LoadsTableComponent', () => {
         })
       );
       expect(component.mode()).toBe('view');
+    });
+
+    it('should apply a personnel presence change of the selected charge to the engine', async () => {
+      component.chargeUuid.set('charge-uuid-1');
+      component.updatePersonnelPresence(false);
+
+      await component.saveChanges();
+
+      expect(mockPlotService.setHighSafety).toHaveBeenCalledExactlyOnceWith(false);
+    });
+
+    it('should not touch the engine when personnel presence is unchanged', async () => {
+      component.chargeUuid.set('charge-uuid-1');
+      component.updatePersonnelPresence(true);
+
+      await component.saveChanges();
+
+      expect(mockPlotService.setHighSafety).not.toHaveBeenCalled();
+    });
+
+    it('should not touch the engine when the edited charge is not the selected one', async () => {
+      mockSpanService.section.set({ ...mockSection, selected_charge_uuid: 'other-charge' });
+      component.chargeUuid.set('charge-uuid-1');
+      component.updatePersonnelPresence(false);
+
+      await component.saveChanges();
+
+      expect(mockPlotService.setHighSafety).not.toHaveBeenCalled();
     });
 
     it('should not save if study uuid is missing', async () => {

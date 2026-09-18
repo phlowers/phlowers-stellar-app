@@ -346,4 +346,25 @@ describe('StrandRrtsComponent', () => {
     expect(notificationService.error).toHaveBeenCalledOnce();
     expect(notificationService.success).not.toHaveBeenCalled();
   });
+
+  it('should notify when the restore after a delete rejects', async () => {
+    await setup([GLOBAL]);
+    plotService.restoreSavedCutStrands.mockRejectedValueOnce(new Error('worker down'));
+
+    await component.delete();
+
+    expect(notificationService.error).toHaveBeenCalledOnce();
+    expect(notificationService.success).not.toHaveBeenCalled();
+  });
+
+  it('should retry putting the engine back on close when it failed after a delete', async () => {
+    await setup([GLOBAL]);
+    plotService.restoreSavedCutStrands.mockResolvedValueOnce([]);
+    await component.delete();
+
+    fixture.destroy();
+    await fixture.whenStable();
+
+    await vi.waitFor(() => expect(plotService.restoreSavedCutStrands).toHaveBeenCalledTimes(2));
+  });
 });

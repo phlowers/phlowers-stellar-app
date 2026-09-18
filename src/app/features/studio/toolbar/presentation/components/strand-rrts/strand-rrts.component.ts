@@ -32,12 +32,12 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
-import { CUT_STRANDS_LAYER_COUNT, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
+import { CUT_STRANDS_LAYER_COUNT, hasStaffPresence, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
 import { PythonDiagnostic } from '@core/services/worker_python/tasks/python-diagnostic.interfaces';
 import { formatDiagnosticsError } from '@services/worker_python/tasks/python-error-messages';
 import { SectionService } from '@services/section/section.service';
 import { DISTANCE_MAX, STRAND_LAYER_KEYS } from './strand-rrts.constantes';
-import { cutStrandsControl, hasStaffPresence, maxFinite } from './strand-rrts.helpers';
+import { cutStrandsControl, maxFinite } from './strand-rrts.helpers';
 import { NotificationKey } from './strand-rrts.interfaces';
 
 @Component({
@@ -241,13 +241,9 @@ export class StrandRrtsComponent {
       this.notify('error', 'failed-to-delete');
       return;
     }
-    this.pending.set(null);
-    const diagnostics = await this.plotService.restoreSavedCutStrands();
-    if (diagnostics) {
-      this.notifyError(diagnostics);
-      return;
-    }
-    this.notify('success', 'deleted');
+    // Until the engine drops the deleted damage it diverges from the section, like an unsaved calculation
+    this.pending.set({ uuid: this.selectedKey() });
+    if (await this.restoreSavedCutStrands()) this.notify('success', 'deleted');
   }
 
   // Flag the action as running while it runs, and hold the close cleanup until it settles
@@ -263,7 +259,8 @@ export class StrandRrtsComponent {
   }
 
   // Drop the unsaved calculation from the engine. Cleared upfront so a calculation queued meanwhile keeps its own pending
-  private async restoreSavedCutStrands(): Promise<void> {
+  // Returns whether the engine is back to the saved damage.
+  private async restoreSavedCutStrands(): Promise<boolean> {
     const pending = this.pending();
     this.pending.set(null);
     let diagnostics: PythonDiagnostic[] | null;
@@ -272,10 +269,11 @@ export class StrandRrtsComponent {
     } catch {
       diagnostics = [];
     }
-    if (!diagnostics) return;
+    if (!diagnostics) return true;
     // The engine still holds the unsaved calculation: keep it pending so the next span change or close retries
     if (!this.pending()) this.pending.set(pending);
     this.notifyError(diagnostics);
+    return false;
   }
 
   // Apply the form's cut strands to the whole cable; returns the entry they were calculated from, or null on failure

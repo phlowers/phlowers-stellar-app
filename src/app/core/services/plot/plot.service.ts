@@ -23,7 +23,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { Subscription } from 'rxjs';
 import { SectionService } from '@services/section/section.service';
 import { ChargeData } from '@shared/domain/models/charge.model';
-import { CUT_STRANDS_LAYER_COUNT, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
+import { CUT_STRANDS_LAYER_COUNT, hasStaffPresence, sumCutStrands } from '@shared/domain/helpers/sections.helpers';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -173,7 +173,7 @@ export class PlotService {
     return this.serialize(() => this.initEngine(section, cableName));
   };
 
-  private initEngine = async (section: Section, cableName: string) => {
+  private readonly initEngine = async (section: Section, cableName: string) => {
     const cable = await this.cableService.getCable(cableName);
     if (!cable) {
       this.logger.error('no cable found: ', cableName);
@@ -193,6 +193,9 @@ export class PlotService {
       this.loading.set(false);
       return;
     }
+
+    // A fresh engine runs without the high-safety coefficient: apply the selected charge's personnel presence
+    await this.workerPythonService.runTask(Task.setHighSafety, { highSafety: hasStaffPresence(this.study(), section) });
 
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
@@ -251,7 +254,7 @@ export class PlotService {
 
   // Put the engine back to the undamaged cable and drop the cut-strand results. Never rolls back:
   // on failure the engine keeps its previous damage, so the results matching it are kept too.
-  private clearCutStrandsNow = async (): Promise<PythonDiagnostic[] | null> => {
+  private readonly clearCutStrandsNow = async (): Promise<PythonDiagnostic[] | null> => {
     const res = await this.workerPythonService.runTask(Task.setCutStrands, {
       cutStrands: new Array<number>(CUT_STRANDS_LAYER_COUNT).fill(0)
     });
@@ -269,6 +272,18 @@ export class PlotService {
       await this.refreshCutStrandResultsNow();
     });
 
+  // Personnel presence switches the safety coefficient of every utilization rate: recompute them all
+  setHighSafety = (highSafety: boolean) =>
+    this.serialize(async () => {
+      const { error, diagnostics } = await this.workerPythonService.runTask(Task.setHighSafety, { highSafety });
+      if (error) {
+        this.notificationService.error(formatDiagnosticsError(diagnostics, this.translocoService));
+        return;
+      }
+      await this.refreshProjectionNow();
+      await this.refreshCutStrandResultsNow();
+    });
+
   // Run fn once every queued engine sequence has settled, so their tasks never interleave on the engine.
   // Queued sequences must call the *Now variants: going through the queue again would wait on themselves.
   // Only PlotService sequences are queued; loads/obstacles/floors tasks still post directly, route them here if they race.
@@ -278,7 +293,7 @@ export class PlotService {
     return run;
   }
 
-  private applyCutStrandsNow = async (cutStrands: number[]): Promise<PythonDiagnostic[] | null> => {
+  private readonly applyCutStrandsNow = async (cutStrands: number[]): Promise<PythonDiagnostic[] | null> => {
     const worker = this.workerPythonService;
     // Set first: the engine validates the cut strands before changing anything
     const setRes = await worker.runTask(Task.setCutStrands, { cutStrands });
@@ -314,7 +329,7 @@ export class PlotService {
   };
 
   // Recompute the cut-strand results under the current engine state, once damage is applied
-  private refreshCutStrandResultsNow = async () => {
+  private readonly refreshCutStrandResultsNow = async () => {
     if (!this.appliedCutStrands) return;
     const diagnostics = await this.applyCutStrandsNow(this.appliedCutStrands);
     if (!diagnostics) return;
@@ -325,7 +340,7 @@ export class PlotService {
     this.notificationService.error(formatDiagnosticsError(diagnostics, this.translocoService));
   };
 
-  private refreshProjectionNow = async () => {
+  private readonly refreshProjectionNow = async () => {
     this.loading.set(true);
     const plotOptions = this.plotOptionsService.plotOptions();
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {

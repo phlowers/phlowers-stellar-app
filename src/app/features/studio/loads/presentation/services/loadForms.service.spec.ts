@@ -378,6 +378,25 @@ describe('LoadFormsService', () => {
       expect(setLoadsCall).toBeDefined();
       expect((setLoadsCall![1] as { spanLoads: unknown[] }).spanLoads.length).toBeGreaterThan(0);
     });
+
+    it.each([true, false])(
+      'should apply the charge personnel presence (%s) as high safety before changing state',
+      async (personnelPresence) => {
+        mockSpanService.section.mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1',
+          charges: [{ ...mockCharge, personnelPresence }]
+        } as Section);
+
+        await service.initTemporaryLoadData();
+
+        const tasks = mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, {
+          highSafety: personnelPresence
+        });
+        expect(tasks.indexOf(Task.setHighSafety)).toBeLessThan(tasks.indexOf(Task.changeState));
+      }
+    );
   });
 
   describe('saveTemporaryLoadDataInSection', () => {
@@ -629,6 +648,7 @@ describe('LoadFormsService', () => {
       await service.deleteLoad();
 
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.deleteAllLoads, undefined);
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: false });
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, {
         climate: expect.objectContaining({ windPressure: 0, iceThickness: 0, cableTemperature: 20 })
       });
