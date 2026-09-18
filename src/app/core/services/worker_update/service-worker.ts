@@ -301,8 +301,8 @@ async function resolveActiveCache(): Promise<Cache | null> {
  * renders its own "not found" page for a URL it doesn't know.
  *
  * `/data/` (catalog CSV/JSON) MUST be bypassed too: catalogs are excluded
- * from the asset manifest and verified independently by SHA-256 in
- * `CatalogUpdateService`, so routing them through the generic cache-first
+ * from the asset manifest and the import pipeline verifies each download
+ * independently with SHA-256 before promotion, so
  * branch below serves no purpose and its blanket `.catch(() => Response.error())`
  * silently hides the real failure (e.g. an OIDC-redirect network error, the
  * same class already documented above for navigation requests).
