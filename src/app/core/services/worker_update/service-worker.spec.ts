@@ -494,6 +494,16 @@ describe('Service Worker Functions', () => {
       expect(mockFetch).not.toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
+
+    it('should bypass /data/ catalog files completely (no respondWith, no cache access)', async () => {
+      mockEvent.request.url = 'https://example.com/data/cables.csv';
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
   });
 
   describe('handleFetch — 3xx response not cached', () => {
