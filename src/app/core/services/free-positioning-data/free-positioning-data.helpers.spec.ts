@@ -111,6 +111,71 @@ describe('free-positioning-data.helpers', () => {
         name: 'Tree'
       });
     });
+
+    it('should show existing obstacles on the span while editing a new obstacle on the same span', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'obstacle',
+        activeObstacleSupportUuid: 'sup-0',
+        activeObstacleUuid: 'obs-new',
+        activeObstaclePositions: [{ x: 80, y: 3, z: 210 }],
+        activeObstacleIndex: 0,
+        isAbsoluteAltitude: true,
+        section: {
+          obstacles: [{ uuid: 'obs-existing', supportUuid: 'sup-0', name: 'Tree' }]
+        } as unknown as Section,
+        litData: {
+          obstacles: [{ uuid: 'obs-existing', points: [[45, 12, 130]] }]
+        } as unknown as GetSectionOutput
+      };
+
+      const points = buildObstaclePoints(params);
+
+      // Both the form obstacle being edited and the existing obstacle must be shown.
+      expect(points).toHaveLength(2);
+      expect(points).toContainEqual({
+        id: 'obstacle-form-0',
+        category: 'obstacle',
+        alongSpan: 80,
+        lateral: 3,
+        altitude: 210,
+        editable: true,
+        name: '#1'
+      });
+      expect(points).toContainEqual({
+        id: 'obstacle-obs-existing-0',
+        category: 'obstacle',
+        alongSpan: 45,
+        lateral: 12,
+        altitude: 130,
+        editable: false,
+        name: 'Tree'
+      });
+    });
+
+    it('should not duplicate the obstacle currently being edited when it already exists in litData', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'obstacle',
+        activeObstacleSupportUuid: 'sup-0',
+        activeObstacleUuid: 'obs-edited',
+        activeObstaclePositions: [{ x: 50, y: 1, z: 200 }],
+        activeObstacleIndex: 0,
+        isAbsoluteAltitude: true,
+        section: {
+          obstacles: [{ uuid: 'obs-edited', supportUuid: 'sup-0', name: 'Tree' }]
+        } as unknown as Section,
+        litData: {
+          obstacles: [{ uuid: 'obs-edited', points: [[45, 12, 130]] }]
+        } as unknown as GetSectionOutput
+      };
+
+      const points = buildObstaclePoints(params);
+
+      // Only the live form points, not a duplicate rendered from litData.
+      expect(points).toHaveLength(1);
+      expect(points[0].id).toBe('obstacle-form-0');
+    });
   });
 
   describe('buildFloorPoints', () => {

@@ -22,6 +22,7 @@ export interface AggregatePointsParams {
   activeObstaclePositions?: Position3D[];
   activeObstacleIndex?: number | null;
   activeObstacleSupportUuid?: string | null;
+  activeObstacleUuid?: string | null;
   referenceSupportAltitudeNgf?: number;
   isAbsoluteAltitude?: boolean;
   // Floor state

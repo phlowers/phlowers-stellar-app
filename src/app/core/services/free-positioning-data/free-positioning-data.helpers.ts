@@ -27,12 +27,13 @@ export const buildObstaclePoints = (params: AggregatePointsParams): FreePosition
   const supportUuid = currentSupport?.uuid;
 
   // Active obstacle being edited in the form
-  if (
+  const isEditingObstacle =
     params.editableCategory === 'obstacle' &&
-    params.activeObstaclePositions &&
+    !!params.activeObstaclePositions &&
     params.activeObstaclePositions.length > 0 &&
-    (!params.activeObstacleSupportUuid || params.activeObstacleSupportUuid === supportUuid)
-  ) {
+    (!params.activeObstacleSupportUuid || params.activeObstacleSupportUuid === supportUuid);
+
+  if (isEditingObstacle && params.activeObstaclePositions) {
     const refAltitude = params.referenceSupportAltitudeNgf ?? 0;
     params.activeObstaclePositions.forEach((pos, idx) => {
       if (pos.x !== null && pos.z !== null && !Number.isNaN(pos.x) && !Number.isNaN(pos.z)) {
@@ -48,14 +49,16 @@ export const buildObstaclePoints = (params: AggregatePointsParams): FreePosition
         });
       }
     });
-    return points;
   }
 
-  // Obstacles from litData / section
+  // Other obstacles already saved on the span (from litData / section).
+  // Skip the obstacle currently being edited to avoid duplicating its form points.
   const sectionObstacles = params.section?.obstacles ?? [];
   const litObstacles = params.litData?.obstacles ?? [];
 
   for (const litObs of litObstacles) {
+    if (isEditingObstacle && litObs.uuid === params.activeObstacleUuid) continue;
+
     const domainObs = sectionObstacles.find((o) => o.uuid === litObs.uuid);
     if (!domainObs) continue;
 

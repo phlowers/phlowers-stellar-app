@@ -49,6 +49,7 @@ export class FreePositioningDataService {
     const obstaclePositions = (this.obstacleFormService.positionsSnapshot() ?? []) as Position3D[];
     const activeObstacleIndex = this.obstaclesService.activePointIndex();
     const activeObstacleSupportUuid = this.obstacleFormService.form?.get('supportUuid')?.value as string | undefined;
+    const activeObstacleUuid = this.obstacleFormService.form?.get('uuid')?.value as string | undefined;
     const isAbsoluteAltitude = this.obstacleFormService.form?.get('altitudeType')?.value === 'absolute';
     const referenceSupportValue = this.obstacleFormService.form?.get('referenceSupport')?.value as
       | ReferenceSupport
@@ -85,6 +86,7 @@ export class FreePositioningDataService {
       activeObstaclePositions: obstaclePositions,
       activeObstacleIndex,
       activeObstacleSupportUuid,
+      activeObstacleUuid,
       referenceSupportAltitudeNgf: refAltitude,
       isAbsoluteAltitude,
       activeFloorPoints: floorPoints,
