@@ -474,6 +474,26 @@ describe('Service Worker Functions', () => {
       expect(mockFetch).not.toHaveBeenCalled();
       expect(mockCaches.open).not.toHaveBeenCalled();
     });
+
+    it('should bypass /docs completely (no respondWith, no cache access)', async () => {
+      mockEvent.request.url = 'https://example.com/docs';
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should bypass /docs/ sub-pages completely (no respondWith, no cache access)', async () => {
+      mockEvent.request.url = 'https://example.com/docs/some-page.html';
+
+      await handleFetch(mockEvent as unknown as FetchEvent);
+
+      expect(mockEvent.respondWith).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
   });
 
   describe('handleFetch — 3xx response not cached', () => {

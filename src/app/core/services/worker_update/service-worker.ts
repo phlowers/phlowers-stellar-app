@@ -292,11 +292,24 @@ async function resolveActiveCache(): Promise<Cache | null> {
  * served stale from the SW cache-first branch until the user performs a
  * hard-reload (which bypasses the SW entirely), because it is only
  * refreshed when `updateApp()`/`installApp()` runs.
+ *
+ * `/docs` (and everything under it) MUST be bypassed too: it is a separate
+ * static Sphinx site served by Apache from the same origin, not an Angular
+ * route. Without this bypass, the generic `navigate` branch below always
+ * discards its real response and serves the cached SPA shell instead
+ * (`cachedShell` wins over the network body), so the Angular router then
+ * renders its own "not found" page for a URL it doesn't know.
  */
 function shouldBypassSW(url: string): boolean {
   try {
     const path = new URL(url).pathname;
-    return path.startsWith('/auth/') || path === '/assets_list.json' || path === '/version.json';
+    return (
+      path.startsWith('/auth/') ||
+      path === '/assets_list.json' ||
+      path === '/version.json' ||
+      path === '/docs' ||
+      path.startsWith('/docs/')
+    );
   } catch {
     return false;
   }
@@ -316,7 +329,8 @@ export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
 
-  // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
+  // Full bypass: /auth/* (OIDC), /assets_list.json, /version.json and /docs/*
+  // must never be intercepted.
   // Plain return WITHOUT respondWith: the browser handles the request natively.
   // `respondWith(fetch(request))` is NOT equivalent — OIDC endpoints answer
   // with cross-origin redirects to the AuthProvider, and a SW-relayed fetch of a
