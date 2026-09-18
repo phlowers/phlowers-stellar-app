@@ -299,6 +299,13 @@ async function resolveActiveCache(): Promise<Cache | null> {
  * discards its real response and serves the cached SPA shell instead
  * (`cachedShell` wins over the network body), so the Angular router then
  * renders its own "not found" page for a URL it doesn't know.
+ *
+ * `/data/` (catalog CSV/JSON) MUST be bypassed too: catalogs are excluded
+ * from the asset manifest and the import pipeline verifies each download
+ * independently with SHA-256 before promotion, so
+ * branch below serves no purpose and its blanket `.catch(() => Response.error())`
+ * silently hides the real failure (e.g. an OIDC-redirect network error, the
+ * same class already documented above for navigation requests).
  */
 function shouldBypassSW(url: string): boolean {
   try {
@@ -308,7 +315,8 @@ function shouldBypassSW(url: string): boolean {
       path === '/assets_list.json' ||
       path === '/version.json' ||
       path === '/docs' ||
-      path.startsWith('/docs/')
+      path.startsWith('/docs/') ||
+      path.startsWith('/data/')
     );
   } catch {
     return false;
