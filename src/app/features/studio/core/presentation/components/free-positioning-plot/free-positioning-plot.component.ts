@@ -109,6 +109,10 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
   private readonly detachEventListeners = new Map<Side, () => void>();
 
+  // Incremented on every destroy/recreation: any async plot creation started under a
+  // previous generation is discarded instead of publishing a stale plot.
+  private plotGeneration = 0;
+
   readonly getErrorString = computed(() => {
     const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
     return formatStudioError(this.plotService.error(), this.translocoService, exceptionDiagnostic?.code ?? null);
@@ -180,6 +184,9 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
   recreatePlots = debounce(async () => {
     this.destroyAllPlots();
+    // Capture the generation after destroyAllPlots bumped it: a destroy or a newer
+    // recreation during the async plot creation invalidates this run.
+    const generation = this.plotGeneration;
     const span = this.effectiveSpanIndex();
     this.isLoading.set(true);
 
@@ -192,9 +199,15 @@ export class FreePositioningPlotComponent implements OnDestroy {
     const supports = this.spanService.section()?.supports ?? [];
     this.sharedYRange.set(null);
 
-    await this.createPlot(currentLitData, span, 'profile', supports);
+    await this.createPlot(currentLitData, span, 'profile', supports, generation);
+    if (generation !== this.plotGeneration) {
+      return;
+    }
     if (this.config().showFace) {
-      await this.createPlot(currentLitData, span, 'face', supports);
+      await this.createPlot(currentLitData, span, 'face', supports, generation);
+      if (generation !== this.plotGeneration) {
+        return;
+      }
       this.synchronizeYAxisRanges();
     }
     this.isLoading.set(false);
@@ -270,7 +283,8 @@ export class FreePositioningPlotComponent implements OnDestroy {
     litData: Parameters<typeof createPlotData>[0],
     span: number,
     side: Side,
-    supports: Parameters<typeof createPlotData>[2]
+    supports: Parameters<typeof createPlotData>[2],
+    generation: number = this.plotGeneration
   ): Promise<void> {
     const plotId = side === 'face' ? this.plotIds.FACE : this.plotIds.PROFILE;
     const plotElement = document.getElementById(plotId) as PlotElement | null;
@@ -285,6 +299,12 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
     try {
       const plot = await Plotly.newPlot(plotId, traces, layout, config);
+      if (generation !== this.plotGeneration) {
+        // A destroy or a newer recreation happened while newPlot was in flight:
+        // discard the stale plot instead of attaching listeners to removed DOM.
+        Plotly.purge(plot);
+        return;
+      }
       this.attachEventListeners(side, plotElement);
       if (side === 'face') {
         this.plotFace.set(plot);
@@ -383,6 +403,11 @@ export class FreePositioningPlotComponent implements OnDestroy {
   }
 
   private destroyAllPlots(): void {
+    // Invalidate any in-flight async plot creation and cancel pending debounced work
+    this.plotGeneration += 1;
+    this.debounceUpdateTraces.cancel();
+    this.recreatePlots.cancel();
+
     this.detachEventListeners.forEach((detach) => detach());
     this.detachEventListeners.clear();
 

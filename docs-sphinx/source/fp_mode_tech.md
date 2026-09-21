@@ -19,9 +19,8 @@ wrappers**, one per concerned tab:
 
 The wrappers are rendered from
 `studio-page.component.html` inside the free-positioning `@switch`, one `@case`
-per `freePositioningSource` (`obstacle`, `floor`, `loads`), with `@default`
-falling back to `<app-studio>`. The distance and floor cases are handled by their
-respective wrappers as well.
+per `freePositioningSource` (`obstacle`, `floor`, `loads`, `distance`), with
+`@default` falling back to `<app-studio>`.
 
 ### Point data reactivity
 
