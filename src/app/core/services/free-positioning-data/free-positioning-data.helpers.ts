@@ -191,7 +191,25 @@ export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningP
   const loadsCoords = params.litData?.output_parameters?.loads_coords;
   const coord = loadsCoords?.[params.frozenSpan];
 
-  if (coord && Array.isArray(coord) && coord.length >= 3) {
+  const hasEditableLoadPosition =
+    params.editableCategory === 'loads' &&
+    params.loadPosition !== null &&
+    params.loadPosition !== undefined &&
+    !Number.isNaN(params.loadPosition);
+
+  if (hasEditableLoadPosition) {
+    const isPunctual = params.loadType === 'punctual';
+    points.push({
+      id: `load-active-${params.frozenSpan}`,
+      category: 'loads',
+      alongSpan: params.loadPosition,
+      lateral: coord && Array.isArray(coord) && coord.length >= 2 ? coord[1] : 0,
+      altitude: coord && Array.isArray(coord) && coord.length >= 3 ? coord[2] : getSupportAltitudeNgf(params.litData, params.frozenSpan),
+      editable: true,
+      icon: isPunctual ? LOAD_ICON : MARKING_ICON,
+      nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
+    });
+  } else if (coord && Array.isArray(coord) && coord.length >= 3) {
     const isPunctual = spanLoad?.type === 'punctual' || params.loadType === 'punctual';
     points.push({
       id: `load-${params.frozenSpan}`,
@@ -200,24 +218,6 @@ export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningP
       lateral: coord[1],
       altitude: coord[2],
       editable: params.editableCategory === 'loads',
-      icon: isPunctual ? LOAD_ICON : MARKING_ICON,
-      nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
-    });
-  } else if (
-    params.editableCategory === 'loads' &&
-    params.loadPosition !== null &&
-    params.loadPosition !== undefined &&
-    !Number.isNaN(params.loadPosition)
-  ) {
-    const isPunctual = params.loadType === 'punctual';
-    // No cable coordinate yet (load not placed): approximate altitude with the span's support level rather than 0.
-    points.push({
-      id: `load-active-${params.frozenSpan}`,
-      category: 'loads',
-      alongSpan: params.loadPosition,
-      lateral: 0,
-      altitude: getSupportAltitudeNgf(params.litData, params.frozenSpan),
-      editable: true,
       icon: isPunctual ? LOAD_ICON : MARKING_ICON,
       nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
     });

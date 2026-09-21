@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ModeBarButtonAny } from 'plotly.js-dist-min';
+import Plotly, { ModeBarButtonAny } from 'plotly.js-dist-min';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
 import { FreePositioningCategory } from './free-positioning-plot.interfaces';
 

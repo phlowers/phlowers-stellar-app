@@ -285,6 +285,29 @@ describe('free-positioning-data.helpers', () => {
       const points = buildLoadPoints(params);
       expect(points[0].icon).toBe(MARKING_ICON);
     });
+
+    it('should prefer active editable loadPosition over stale litData coordinate', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'loads',
+        litData: {
+          output_parameters: {
+            loads_coords: {
+              0: [120, 0, 75]
+            }
+          }
+        } as unknown as GetSectionOutput,
+        loadPosition: 42,
+        loadType: 'punctual'
+      };
+
+      const points = buildLoadPoints(params);
+      expect(points).toHaveLength(1);
+      expect(points[0].alongSpan).toBe(42);
+      expect(points[0].altitude).toBe(75);
+      expect(points[0].editable).toBe(true);
+      expect(points[0].icon).toBe(LOAD_ICON);
+    });
   });
 
   describe('aggregateFreePositioningPoints', () => {
