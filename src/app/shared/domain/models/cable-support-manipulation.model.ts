@@ -26,6 +26,16 @@ export interface CableSupportManipItem {
   ropeLength: number | null;
   /** Shifting clamp length in meters (shifting only). */
   shiftingClampLength: number | null;
+  /** Chain name (for 'with_chain' anchoring) */
+  chainName: string | null;
+  /** Chain length in meters (for 'with_chain' anchoring) */
+  chainLength: number | null;
+  /** Chain weight in kg (for 'with_chain' anchoring) */
+  chainWeight: number | null;
+  /** Chain surface in m² (for 'with_chain' anchoring) */
+  chainSurface: number | null;
+  /** Counter weight in kg (for 'with_chain' anchoring) */
+  counterWeight: number | null;
 }
 
 /**

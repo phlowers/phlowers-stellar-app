@@ -23,6 +23,14 @@ import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ClimateCharge, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
+import {
+  CableModification,
+  CableSpanManipulation,
+  CableSupportManipItem,
+  CableSupportManipulation,
+  SupportAnchoringType,
+  SupportManipType
+} from '@shared/domain';
 
 /** Row data representing climate parameters in the loads table. */
 interface ClimateRow {
@@ -42,6 +50,40 @@ interface SpanLoadRow {
   type: string;
   loadWeight: number;
   loadPosition: number;
+}
+
+/** Row data representing a cable length modification in the loads table. */
+interface CableModifRow {
+  spanLabel: string;
+  referenceSupport: string;
+  modificationType: 'lengthening' | 'shortening';
+  modifiedLengthCable: number;
+  distanceSupportRef: number;
+}
+
+/** Row data representing a support manipulation in the loads table. */
+interface SupportManipRow extends CableSupportManipItem {
+  displayIndex: number | null;
+  supportLabel: string;
+}
+
+/** Row data representing a span manipulation in the loads table. */
+interface SpanManipRow {
+  spanLabel: string;
+  referenceSupport: string;
+  distanceToRefSupport: number;
+  cableManipType: CableSpanManipulation['cableManipType'];
+  cableManipMethod: CableSpanManipulation['cableManipMethod'];
+  longitudinalDistance: number | null;
+  lateralDistance: number;
+  altitude: number;
+  anchoring: CableSpanManipulation['anchoring'];
+  slingLength: number | null;
+  chainName: string | null;
+  chainLength: number | null;
+  chainWeight: number | null;
+  chainSurface: number | null;
+  counterWeight: number | null;
 }
 
 @Component({
@@ -79,6 +121,9 @@ export class LoadsTableComponent {
   chargeUuid = signal<string | null>(null);
   climate = signal<ClimateCharge | null>(null);
   spanLoads = signal<SpanLoad[]>([]);
+  cableModifParams = signal<CableModification[]>([]);
+  supportManips = signal<CableSupportManipulation[]>([]);
+  spanManips = signal<CableSpanManipulation[]>([]);
 
   nameLength = computed(() => this.name().length ?? 0);
   descriptionLength = computed(() => this.description().length ?? 0);
@@ -104,7 +149,6 @@ export class LoadsTableComponent {
 
   spanLoadRows = computed<SpanLoadRow[]>(() => {
     const loads = this.spanLoads();
-    const supports = this.spanService.section()?.supports ?? [];
 
     return loads
       .filter((load) => {
@@ -114,35 +158,110 @@ export class LoadsTableComponent {
         return load.loadWeight !== 0 || load.loadPosition !== 0;
       })
       .map((load) => {
-        const supportIndex = supports.findIndex((s) => s.uuid === load.supportUuid);
-        const hasNextSupport = supportIndex >= 0 && supportIndex + 1 < supports.length;
-
-        if (!hasNextSupport) {
-          return {
-            spanLabel: '-',
-            referenceSupport: '-',
-            type: load.type,
-            loadWeight: load.loadWeight,
-            loadPosition: load.loadPosition
-          };
-        }
-
-        const leftNum = supports[supportIndex]?.number;
-        const rightNum = supports[supportIndex + 1]?.number;
-        const left = leftNum ? formatSupportNumber(leftNum) : String(supportIndex + 1);
-        const right = rightNum ? formatSupportNumber(rightNum) : String(supportIndex + 2);
-        const spanLabel = hasNextSupport ? `${left} - ${right}` : '-';
-        const referenceSupport = load.referenceSupport === 'LEFT' ? left : right;
+        const { spanLabel, referenceSupportLabel } = this.resolveSpanAndRefSupportLabels(
+          load.supportUuid,
+          load.referenceSupport
+        );
 
         return {
           spanLabel,
-          referenceSupport,
+          referenceSupport: referenceSupportLabel,
           type: load.type,
           loadWeight: load.loadWeight,
           loadPosition: load.loadPosition
         };
       });
   });
+
+  cableModifRows = computed<CableModifRow[]>(() =>
+    this.cableModifParams().map((modif) => {
+      const { spanLabel, referenceSupportLabel } = this.resolveSpanAndRefSupportLabels(
+        modif.spanUuid,
+        modif.supportRef
+      );
+      return {
+        spanLabel,
+        referenceSupport: referenceSupportLabel,
+        modificationType: modif.modificationType,
+        modifiedLengthCable: modif.modifiedLengthCable,
+        distanceSupportRef: modif.distanceSupportRef
+      };
+    })
+  );
+
+  supportManipRows = computed<SupportManipRow[]>(() => {
+    const supports = this.spanService.section()?.supports ?? [];
+    const rows: SupportManipRow[] = [];
+
+    this.supportManips().forEach((manip, index) => {
+      const support = supports.find((s) => s.uuid === manip.supportUuid);
+      const supportLabel = support ? formatSupportNumber(support.number) : '-';
+
+      rows.push({ displayIndex: index + 1, supportLabel, ...manip.manip1 });
+      if (manip.manip2) {
+        rows.push({ displayIndex: null, supportLabel, ...manip.manip2 });
+      }
+    });
+
+    return rows;
+  });
+
+  hasShiftingSupportManip = computed(() => this.supportManipRows().some((row) => row.type === 'shifting'));
+  hasCraneSupportManip = computed(() => this.supportManipRows().some((row) => row.type === 'crane'));
+  hasRopeSupportManip = computed(() => this.supportManipRows().some((row) => row.type === 'rope'));
+  hasChainSupportManip = computed(() => this.supportManipRows().some((row) => row.anchoring === 'with_chain'));
+
+  hasSlingSpanManip = computed(() => this.spanManipRows().some((row) => row.anchoring === 'with_sling'));
+  hasChainSpanManip = computed(() => this.spanManipRows().some((row) => row.anchoring === 'with_chain'));
+
+  spanManipRows = computed<SpanManipRow[]>(() =>
+    this.spanManips().map((manip) => {
+      const { spanLabel, referenceSupportLabel } = this.resolveSpanAndRefSupportLabels(
+        manip.spanUuid,
+        manip.referenceSupport
+      );
+      return {
+        spanLabel,
+        referenceSupport: referenceSupportLabel,
+        distanceToRefSupport: manip.distanceToRefSupport,
+        cableManipType: manip.cableManipType,
+        cableManipMethod: manip.cableManipMethod,
+        longitudinalDistance: manip.longitudinalDistance,
+        lateralDistance: manip.lateralDistance,
+        altitude: manip.altitude,
+        anchoring: manip.anchoring,
+        slingLength: manip.anchoring === 'with_sling' ? manip.slingLength : null,
+        chainName: manip.chainName,
+        chainLength: manip.chainLength,
+        chainWeight: manip.chainWeight,
+        chainSurface: manip.chainSurface,
+        counterWeight: manip.counterWeight
+      };
+    })
+  );
+
+  /** Resolves the span label (left - right supports) and the reference support label for a given support/reference pair. */
+  private resolveSpanAndRefSupportLabels(
+    supportUuid: string,
+    referenceSupport: 'LEFT' | 'RIGHT'
+  ): { spanLabel: string; referenceSupportLabel: string } {
+    const supports = this.spanService.section()?.supports ?? [];
+    const supportIndex = supports.findIndex((s) => s.uuid === supportUuid);
+    const hasNextSupport = supportIndex >= 0 && supportIndex + 1 < supports.length;
+
+    if (!hasNextSupport) {
+      return { spanLabel: '-', referenceSupportLabel: '-' };
+    }
+
+    const leftNum = supports[supportIndex]?.number;
+    const rightNum = supports[supportIndex + 1]?.number;
+    const left = leftNum ? formatSupportNumber(leftNum) : String(supportIndex + 1);
+    const right = rightNum ? formatSupportNumber(rightNum) : String(supportIndex + 2);
+    const spanLabel = `${left} - ${right}`;
+    const referenceSupportLabel = referenceSupport === 'LEFT' ? left : right;
+
+    return { spanLabel, referenceSupportLabel };
+  }
 
   constructor() {
     effect(() => {
@@ -188,6 +307,11 @@ export class LoadsTableComponent {
       this.description.set(charge.description);
       this.climate.set(charge.data?.climate ?? null);
       this.spanLoads.set(charge.data?.spanLoads ?? []);
+      this.cableModifParams.set(charge.data?.cableModifParams ?? []);
+      const supportManipulations = this.spanService.section()?.cable_support_manipulations ?? [];
+      this.supportManips.set(supportManipulations.filter((m) => m.chargeUuid === uuid));
+      const spanManipulations = this.spanService.section()?.cable_span_manipulations ?? [];
+      this.spanManips.set(spanManipulations.filter((m) => m.chargeUuid === uuid));
     }
   }
 
@@ -240,6 +364,34 @@ export class LoadsTableComponent {
     this.mode.set('view');
   }
 
+  async deleteChargeCase(): Promise<void> {
+    const studyUuid = this.plotService.study()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
+    const uuid = this.chargeUuid();
+
+    if (!studyUuid || !sectionUuid || !uuid) {
+      return;
+    }
+
+    await this.chargesService.deleteCharge(studyUuid, sectionUuid, uuid);
+    this.toolbarDialogService.closeTool();
+  }
+
+  async duplicateChargeCase(): Promise<void> {
+    const studyUuid = this.plotService.study()?.uuid;
+    const sectionUuid = this.spanService.section()?.uuid;
+    const uuid = this.chargeUuid();
+
+    if (!studyUuid || !sectionUuid || !uuid) {
+      return;
+    }
+
+    const newCharge = await this.chargesService.duplicateChargeWithoutSelecting(studyUuid, sectionUuid, uuid);
+    this.chargeUuid.set(newCharge.uuid);
+    this.mode.set('edit');
+    await this.loadChargeData(newCharge.uuid);
+  }
+
   getSymmetryLabel(type: SymmetryType): string {
     switch (type) {
       case SymmetryType.SYMMETRIC:
@@ -257,6 +409,64 @@ export class LoadsTableComponent {
         return this.translocoService.translate('studio.loads-table.marking-label');
       default:
         return type;
+    }
+  }
+
+  getModificationTypeLabel(type: 'lengthening' | 'shortening'): string {
+    switch (type) {
+      case 'lengthening':
+        return this.translocoService.translate('shared.studio.cable-mod-lengthening');
+      case 'shortening':
+        return this.translocoService.translate('shared.studio.cable-mod-shortening');
+    }
+  }
+
+  getSupportManipTypeLabel(type: SupportManipType): string {
+    switch (type) {
+      case 'crane':
+        return this.translocoService.translate('loads.cable-support-manip.crane-handling-option');
+      case 'rope':
+        return this.translocoService.translate('loads.cable-support-manip.rope-handling-option');
+      case 'shifting':
+        return this.translocoService.translate('loads.cable-support-manip.shifting-option');
+    }
+  }
+
+  getSupportAnchoringLabel(anchoring: SupportAnchoringType | null): string {
+    switch (anchoring) {
+      case 'without_chain':
+        return this.translocoService.translate('loads.cable-support-manip.without-chain-option');
+      case 'with_chain':
+        return this.translocoService.translate('loads.shared.with-chain-option');
+      default:
+        return '-';
+    }
+  }
+
+  getCableManipTypeLabel(type: CableSpanManipulation['cableManipType']): string {
+    switch (type) {
+      case 'with_a_crane':
+        return this.translocoService.translate('loads.cable-span-manip.with-a-crane-option');
+      case 'temporary_support':
+        return this.translocoService.translate('loads.cable-span-manip.temporary-support-option');
+    }
+  }
+
+  getCableManipMethodLabel(method: CableSpanManipulation['cableManipMethod']): string {
+    switch (method) {
+      case 'clamp':
+        return this.translocoService.translate('loads.cable-span-manip.clamp-option');
+      case 'pulley':
+        return this.translocoService.translate('loads.cable-span-manip.pulley-option');
+    }
+  }
+
+  getSpanAnchoringLabel(anchoring: CableSpanManipulation['anchoring']): string {
+    switch (anchoring) {
+      case 'with_sling':
+        return this.translocoService.translate('loads.cable-span-manip.with-sling-option');
+      case 'with_chain':
+        return this.translocoService.translate('loads.shared.with-chain-option');
     }
   }
 

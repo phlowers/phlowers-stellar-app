@@ -209,7 +209,9 @@ describe('LoadsTableComponent', () => {
 
     mockChargesService = {
       getCharge: vi.fn().mockResolvedValue(mockCharge),
-      createOrUpdateCharge: vi.fn().mockResolvedValue(undefined)
+      createOrUpdateCharge: vi.fn().mockResolvedValue(undefined),
+      deleteCharge: vi.fn().mockResolvedValue(undefined),
+      duplicateChargeWithoutSelecting: vi.fn().mockResolvedValue({ ...mockCharge, uuid: 'new-charge-uuid' })
     };
 
     mockPlotService = {
@@ -229,7 +231,19 @@ describe('LoadsTableComponent', () => {
               'studio.loads-table.symmetric-label': 'Symmetric',
               'studio.loads-table.dis-symmetric-label': 'Dis Symmetric',
               'studio.loads-table.punctual-load-label': 'Punctual load',
-              'studio.loads-table.marking-label': 'Marking'
+              'studio.loads-table.marking-label': 'Marking',
+              'shared.studio.cable-mod-lengthening': 'Lengthening',
+              'shared.studio.cable-mod-shortening': 'Shortening',
+              'loads.cable-support-manip.crane-handling-option': 'Crane handling',
+              'loads.cable-support-manip.rope-handling-option': 'Rope handling',
+              'loads.cable-support-manip.shifting-option': 'Shifting',
+              'loads.cable-support-manip.without-chain-option': 'Without chain',
+              'loads.shared.with-chain-option': 'With chain',
+              'loads.cable-span-manip.with-a-crane-option': 'With a crane',
+              'loads.cable-span-manip.temporary-support-option': 'Temporary support',
+              'loads.cable-span-manip.clamp-option': 'Clamp',
+              'loads.cable-span-manip.pulley-option': 'Pulley',
+              'loads.cable-span-manip.with-sling-option': 'With sling'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
@@ -409,6 +423,138 @@ describe('LoadsTableComponent', () => {
       expect(component.spanLoads()).toEqual(mockCharge.data.spanLoads);
     });
 
+    it('should populate cableModifParams signal after loading charge data', async () => {
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.cableModifParams()).toEqual(mockCharge.data.cableModifParams);
+    });
+
+    it('should populate supportManips signal filtered by the viewed charge uuid', async () => {
+      mockSpanService.section.set({
+        ...mockSection,
+        cable_support_manipulations: [
+          {
+            uuid: 'manip-uuid-1',
+            supportUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            manip1: {
+              type: 'shifting',
+              vertDisplacement: null,
+              anchoring: null,
+              lateralDistance: null,
+              ropeLength: null,
+              shiftingClampLength: 2,
+              chainName: null,
+              chainLength: null,
+              chainWeight: null,
+              chainSurface: null,
+              counterWeight: null
+            },
+            manip2: null
+          },
+          {
+            uuid: 'manip-uuid-2',
+            supportUuid: 'support-uuid-2',
+            chargeUuid: 'other-charge-uuid',
+            manip1: {
+              type: 'rope',
+              vertDisplacement: null,
+              anchoring: null,
+              lateralDistance: null,
+              ropeLength: 4,
+              shiftingClampLength: null,
+              chainName: null,
+              chainLength: null,
+              chainWeight: null,
+              chainSurface: null,
+              counterWeight: null
+            },
+            manip2: null
+          }
+        ]
+      });
+
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.supportManips()).toHaveLength(1);
+      expect(component.supportManips()[0].uuid).toBe('manip-uuid-1');
+    });
+
+    it('should populate spanManips signal filtered by the viewed charge uuid', async () => {
+      mockSpanService.section.set({
+        ...mockSection,
+        cable_span_manipulations: [
+          {
+            uuid: 'span-manip-uuid-1',
+            spanUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            referenceSupport: 'LEFT',
+            distanceToRefSupport: 10,
+            cableManipType: 'with_a_crane',
+            cableManipMethod: 'clamp',
+            longitudinalDistance: null,
+            lateralDistance: 1,
+            altitude: 2,
+            anchoring: 'with_sling',
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null,
+            slingLength: 5
+          },
+          {
+            uuid: 'span-manip-uuid-2',
+            spanUuid: 'support-uuid-2',
+            chargeUuid: 'other-charge-uuid',
+            referenceSupport: 'LEFT',
+            distanceToRefSupport: 10,
+            cableManipType: 'with_a_crane',
+            cableManipMethod: 'clamp',
+            longitudinalDistance: null,
+            lateralDistance: 1,
+            altitude: 2,
+            anchoring: 'with_sling',
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null,
+            slingLength: 5
+          }
+        ]
+      });
+
+      mockToolbarDialogService.isOpen!.set(true);
+      mockToolbarDialogService.currentTool!.set('load-table');
+      mockToolbarDialogService.loadTableContext!.set({
+        mode: 'view',
+        chargeUuid: 'charge-uuid-1'
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.spanManips()).toHaveLength(1);
+      expect(component.spanManips()[0].uuid).toBe('span-manip-uuid-1');
+    });
+
     it('should handle null charge data gracefully', async () => {
       (mockChargesService.getCharge as vi.Mock).mockResolvedValue({
         ...mockCharge,
@@ -576,6 +722,159 @@ describe('LoadsTableComponent', () => {
     });
   });
 
+  describe('cableModifRows', () => {
+    it('should return empty array when cableModifParams is empty', () => {
+      component.cableModifParams.set([]);
+      expect(component.cableModifRows()).toEqual([]);
+    });
+
+    it('should compute cableModifRows with resolved span/support labels', () => {
+      component.cableModifParams.set([
+        {
+          uuid: 'modif-uuid-1',
+          spanUuid: 'support-uuid-1',
+          supportRef: 'LEFT',
+          modificationType: 'lengthening',
+          modifiedLengthCable: 3.5,
+          distanceSupportRef: 12.2
+        }
+      ]);
+
+      const rows = component.cableModifRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].spanLabel).toBe('1 - 2');
+      expect(rows[0].referenceSupport).toBe('1');
+      expect(rows[0].modificationType).toBe('lengthening');
+      expect(rows[0].modifiedLengthCable).toBe(3.5);
+      expect(rows[0].distanceSupportRef).toBe(12.2);
+    });
+  });
+
+  describe('supportManipRows', () => {
+    it('should return empty array when supportManips is empty', () => {
+      component.supportManips.set([]);
+      expect(component.supportManipRows()).toEqual([]);
+    });
+
+    it('should produce a single row when manip2 is null', () => {
+      component.supportManips.set([
+        {
+          uuid: 'manip-uuid-1',
+          supportUuid: 'support-uuid-1',
+          chargeUuid: 'charge-uuid-1',
+          manip1: {
+            type: 'shifting',
+            vertDisplacement: null,
+            anchoring: null,
+            lateralDistance: null,
+            ropeLength: null,
+            shiftingClampLength: 2.5,
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null
+          },
+          manip2: null
+        }
+      ]);
+
+      const rows = component.supportManipRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].displayIndex).toBe(1);
+      expect(rows[0].supportLabel).toBe('1');
+      expect(rows[0].type).toBe('shifting');
+      expect(rows[0].shiftingClampLength).toBe(2.5);
+    });
+
+    it('should produce two rows when manip2 is present, with displayIndex null on the second', () => {
+      component.supportManips.set([
+        {
+          uuid: 'manip-uuid-1',
+          supportUuid: 'support-uuid-1',
+          chargeUuid: 'charge-uuid-1',
+          manip1: {
+            type: 'crane',
+            vertDisplacement: 1.2,
+            anchoring: 'with_chain',
+            lateralDistance: 0.5,
+            ropeLength: null,
+            shiftingClampLength: null,
+            chainName: 'Chain A',
+            chainLength: 3,
+            chainWeight: 10,
+            chainSurface: 0.2,
+            counterWeight: 15
+          },
+          manip2: {
+            type: 'shifting',
+            vertDisplacement: null,
+            anchoring: null,
+            lateralDistance: null,
+            ropeLength: null,
+            shiftingClampLength: 1.5,
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null
+          }
+        }
+      ]);
+
+      const rows = component.supportManipRows();
+      expect(rows).toHaveLength(2);
+      expect(rows[0].displayIndex).toBe(1);
+      expect(rows[0].type).toBe('crane');
+      expect(rows[0].anchoring).toBe('with_chain');
+      expect(rows[1].displayIndex).toBeNull();
+      expect(rows[1].supportLabel).toBe(rows[0].supportLabel);
+      expect(rows[1].type).toBe('shifting');
+    });
+  });
+
+  describe('spanManipRows', () => {
+    it('should return empty array when spanManips is empty', () => {
+      component.spanManips.set([]);
+      expect(component.spanManipRows()).toEqual([]);
+    });
+
+    it('should compute spanManipRows with resolved span/support labels', () => {
+      component.spanManips.set([
+        {
+          uuid: 'span-manip-uuid-1',
+          spanUuid: 'support-uuid-1',
+          chargeUuid: 'charge-uuid-1',
+          referenceSupport: 'LEFT',
+          distanceToRefSupport: 20,
+          cableManipType: 'with_a_crane',
+          cableManipMethod: 'clamp',
+          longitudinalDistance: 1,
+          lateralDistance: 2,
+          altitude: 3,
+          anchoring: 'with_sling',
+          chainName: null,
+          chainLength: null,
+          chainWeight: null,
+          chainSurface: null,
+          counterWeight: null,
+          slingLength: 5
+        }
+      ]);
+
+      const rows = component.spanManipRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].spanLabel).toBe('1 - 2');
+      expect(rows[0].referenceSupport).toBe('1');
+      expect(rows[0].distanceToRefSupport).toBe(20);
+      expect(rows[0].cableManipType).toBe('with_a_crane');
+      expect(rows[0].cableManipMethod).toBe('clamp');
+      expect(rows[0].anchoring).toBe('with_sling');
+      expect(rows[0].slingLength).toBe(5);
+      expect(rows[0].chainName).toBeNull();
+    });
+  });
+
   describe('getSymmetryLabel', () => {
     it('should return Symmetric for SYMMETRIC type', () => {
       expect(component.getSymmetryLabel(SymmetryType.SYMMETRIC)).toBe('Symmetric');
@@ -597,6 +896,117 @@ describe('LoadsTableComponent', () => {
 
     it('should return raw value for unknown type', () => {
       expect(component.getLoadTypeLabel('unknown')).toBe('unknown');
+    });
+  });
+
+  describe('getModificationTypeLabel', () => {
+    it('should return Lengthening for lengthening type', () => {
+      expect(component.getModificationTypeLabel('lengthening')).toBe('Lengthening');
+    });
+
+    it('should return Shortening for shortening type', () => {
+      expect(component.getModificationTypeLabel('shortening')).toBe('Shortening');
+    });
+  });
+
+  describe('getSupportManipTypeLabel', () => {
+    it('should return Crane handling for crane type', () => {
+      expect(component.getSupportManipTypeLabel('crane')).toBe('Crane handling');
+    });
+
+    it('should return Rope handling for rope type', () => {
+      expect(component.getSupportManipTypeLabel('rope')).toBe('Rope handling');
+    });
+
+    it('should return Shifting for shifting type', () => {
+      expect(component.getSupportManipTypeLabel('shifting')).toBe('Shifting');
+    });
+  });
+
+  describe('getSupportAnchoringLabel', () => {
+    it('should return Without chain for without_chain', () => {
+      expect(component.getSupportAnchoringLabel('without_chain')).toBe('Without chain');
+    });
+
+    it('should return With chain for with_chain', () => {
+      expect(component.getSupportAnchoringLabel('with_chain')).toBe('With chain');
+    });
+
+    it('should return dash for null anchoring', () => {
+      expect(component.getSupportAnchoringLabel(null)).toBe('-');
+    });
+  });
+
+  describe('getCableManipTypeLabel', () => {
+    it('should return With a crane for with_a_crane', () => {
+      expect(component.getCableManipTypeLabel('with_a_crane')).toBe('With a crane');
+    });
+
+    it('should return Temporary support for temporary_support', () => {
+      expect(component.getCableManipTypeLabel('temporary_support')).toBe('Temporary support');
+    });
+  });
+
+  describe('getCableManipMethodLabel', () => {
+    it('should return Clamp for clamp', () => {
+      expect(component.getCableManipMethodLabel('clamp')).toBe('Clamp');
+    });
+
+    it('should return Pulley for pulley', () => {
+      expect(component.getCableManipMethodLabel('pulley')).toBe('Pulley');
+    });
+  });
+
+  describe('getSpanAnchoringLabel', () => {
+    it('should return With sling for with_sling', () => {
+      expect(component.getSpanAnchoringLabel('with_sling')).toBe('With sling');
+    });
+
+    it('should return With chain for with_chain', () => {
+      expect(component.getSpanAnchoringLabel('with_chain')).toBe('With chain');
+    });
+  });
+
+  describe('deleteChargeCase', () => {
+    it('should call ChargesService.deleteCharge with the correct uuids and close the tool', async () => {
+      component.chargeUuid.set('charge-uuid-1');
+
+      await component.deleteChargeCase();
+
+      expect(mockChargesService.deleteCharge).toHaveBeenCalledWith('study-uuid', 'section-uuid', 'charge-uuid-1');
+      expect(mockToolbarDialogService.closeTool).toHaveBeenCalled();
+    });
+
+    it('should not call deleteCharge when chargeUuid is null', async () => {
+      component.chargeUuid.set(null);
+
+      await component.deleteChargeCase();
+
+      expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('duplicateChargeCase', () => {
+    it('should call ChargesService.duplicateChargeWithoutSelecting and switch to the new charge in edit mode', async () => {
+      component.chargeUuid.set('charge-uuid-1');
+
+      await component.duplicateChargeCase();
+
+      expect(mockChargesService.duplicateChargeWithoutSelecting).toHaveBeenCalledWith(
+        'study-uuid',
+        'section-uuid',
+        'charge-uuid-1'
+      );
+      expect(component.chargeUuid()).toBe('new-charge-uuid');
+      expect(component.mode()).toBe('edit');
+    });
+
+    it('should not call duplicateChargeWithoutSelecting when chargeUuid is null', async () => {
+      component.chargeUuid.set(null);
+
+      await component.duplicateChargeCase();
+
+      expect(mockChargesService.duplicateChargeWithoutSelecting).not.toHaveBeenCalled();
     });
   });
 

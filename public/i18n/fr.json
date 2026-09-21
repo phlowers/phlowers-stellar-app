@@ -1016,6 +1016,7 @@
       "ice-thickness-after-label": "Épaisseur du givre après le support frontière",
       "index-label": "N°",
       "ref-support-label": "Support réf.",
+      "modification-type-label": "Type de modification",
       "distance-to-ref-support-label": "Distance au support de réf.",
       "modify-btn": "Modifier",
       "symmetric-label": "Symétrique",
@@ -1122,6 +1123,22 @@
       "warning-no-data": "Aucun résultat de calcul disponible pour générer le rapport.",
       "report-generated-success": "Rapport généré avec succès",
       "report-generation-failed": "Échec de la génération du rapport"
+    },
+    "charges-report": {
+      "title": "Rapport des charges",
+      "charge-title": "Charge",
+      "climate-title": "Climat",
+      "loads-title": "Charges",
+      "cable-modif-title": "Modifications du câble",
+      "support-manip-title": "Manipulations des supports",
+      "span-manip-title": "Manipulations de portée",
+      "page-label": "Page",
+      "author-label": "Auteur",
+      "study-label": "Étude",
+      "study-description-label": "Description",
+      "charge-name-label": "Cas de charge",
+      "charge-description-label": "Description du cas de charge",
+      "personnel-presence-label": "Présence du personnel"
     },
     "canton-report": {
       "title": "Rapport Données du canton",

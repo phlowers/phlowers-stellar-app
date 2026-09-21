@@ -148,6 +148,36 @@ export class ChargesService {
   }
 
   /**
+   * Duplicate a charge in a section without changing the section's selected charge.
+   * @param studyUuid The uuid of the study containing the section
+   * @param sectionUuid The uuid of the section containing the charge
+   * @param chargeUuid The uuid of the charge to duplicate
+   * @returns Promise that resolves with the duplicated charge
+   */
+  async duplicateChargeWithoutSelecting(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<Charge> {
+    const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);
+
+    const charge = section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
+    if (!charge) {
+      throw new Error(`Charge with uuid ${chargeUuid} not found`);
+    }
+
+    const newCharge: Charge = {
+      ...charge,
+      uuid: uuidv4(),
+      name: findDuplicateTitle(
+        section.charges.map((c) => c.name),
+        charge.name,
+        this.translocoService.translate('shared.duplicate.copy-suffix')
+      )
+    };
+
+    section.charges = [newCharge, ...section.charges];
+    await this.studiesService.updateStudy(study);
+    return newCharge;
+  }
+
+  /**
    * Set the selected charge for a section.
    *
    * @param studyUuid - The UUID of the study containing the section

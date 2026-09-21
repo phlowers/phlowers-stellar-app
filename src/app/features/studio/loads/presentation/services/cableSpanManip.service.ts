@@ -30,23 +30,23 @@ export class CableSpanManipService {
 
   /**
    * Persist a cable span manipulation in the current section.
-   * Creates a new entry if no manipulation exists for the span, otherwise updates it.
+   * Matches by spanUuid + chargeUuid so each (span, charge case) pair is independent.
+   * Creates a new entry if none exists for that pair, otherwise updates it.
    * @param manip The cable span manipulation to save
    */
   save = async (manip: Omit<CableSpanManipulation, 'uuid'> & { uuid?: string }): Promise<void> => {
     await this.mutateCurrentSection((section) => {
-      const existingForSpan = section.cable_span_manipulations?.find((m) => m.spanUuid === manip.spanUuid);
+      const keyMatches = (m: CableSpanManipulation) =>
+        m.spanUuid === manip.spanUuid && m.chargeUuid === manip.chargeUuid;
+      const existing = section.cable_span_manipulations?.find(keyMatches);
       const toSave: CableSpanManipulation = {
         ...manip,
-        uuid: existingForSpan?.uuid ?? manip.uuid ?? uuidv4()
+        uuid: existing?.uuid ?? manip.uuid ?? uuidv4()
       };
-      if (existingForSpan) {
-        section.cable_span_manipulations = section.cable_span_manipulations.map((m) =>
-          m.spanUuid === toSave.spanUuid ? toSave : m
-        );
-      } else {
-        section.cable_span_manipulations = [toSave, ...(section.cable_span_manipulations ?? [])];
-      }
+      section.cable_span_manipulations = [
+        toSave,
+        ...(section.cable_span_manipulations ?? []).filter((m) => !keyMatches(m))
+      ];
       section.selected_cable_span_manipulation_uuid = toSave.uuid;
     });
   };

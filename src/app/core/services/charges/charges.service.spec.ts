@@ -462,6 +462,85 @@ describe('ChargesService', () => {
     });
   });
 
+  describe('duplicateChargeWithoutSelecting', () => {
+    it('should duplicate a charge with a new UUID without changing selected_charge_uuid', async () => {
+      const freshStudy: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSection,
+            charges: [mockCharge],
+            selected_charge_uuid: 'charge-uuid-1'
+          }
+        ]
+      };
+
+      mockStudiesService.getStudy.mockResolvedValue(freshStudy);
+
+      const result = await service.duplicateChargeWithoutSelecting('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
+
+      expect(result.uuid).toBe('mock-uuid-123');
+      expect(result.name).toBe('Charge 1 (Copy 1)');
+
+      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sections: expect.arrayContaining([
+            expect.objectContaining({
+              uuid: 'section-uuid-1',
+              charges: expect.arrayContaining([
+                expect.objectContaining({
+                  uuid: 'mock-uuid-123',
+                  name: 'Charge 1 (Copy 1)'
+                }),
+                mockCharge
+              ]),
+              selected_charge_uuid: 'charge-uuid-1'
+            })
+          ])
+        })
+      );
+    });
+
+    it('should throw an error when study is not found', async () => {
+      mockStudiesService.getStudy.mockResolvedValue(undefined);
+
+      await expect(
+        service.duplicateChargeWithoutSelecting('non-existent-study', 'section-uuid-1', 'charge-uuid-1')
+      ).rejects.toThrow('Study with uuid non-existent-study not found');
+    });
+
+    it('should throw an error when section is not found', async () => {
+      const studyWithoutSection: StudyEntity = {
+        ...mockStudy,
+        sections: []
+      };
+
+      mockStudiesService.getStudy.mockResolvedValue(studyWithoutSection);
+
+      await expect(
+        service.duplicateChargeWithoutSelecting('study-uuid-1', 'non-existent-section', 'charge-uuid-1')
+      ).rejects.toThrow('Section with uuid non-existent-section not found');
+    });
+
+    it('should throw an error when charge is not found', async () => {
+      const studyWithoutCharge: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSection,
+            charges: []
+          }
+        ]
+      };
+
+      mockStudiesService.getStudy.mockResolvedValue(studyWithoutCharge);
+
+      await expect(
+        service.duplicateChargeWithoutSelecting('study-uuid-1', 'section-uuid-1', 'non-existent-charge')
+      ).rejects.toThrow('Charge with uuid non-existent-charge not found');
+    });
+  });
+
   describe('setSelectedCharge', () => {
     it('should set the selected charge uuid', async () => {
       await service.setSelectedCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');

@@ -1016,6 +1016,7 @@
       "ice-thickness-after-label": "Ice thickness after support frontier",
       "index-label": "N°",
       "ref-support-label": "Ref. support",
+      "modification-type-label": "Modification type",
       "distance-to-ref-support-label": "Distance to ref. support",
       "modify-btn": "Modify",
       "symmetric-label": "Symmetric",
@@ -1122,6 +1123,22 @@
       "warning-no-data": "No calculation results available to generate the report.",
       "report-generated-success": "Report generated successfully",
       "report-generation-failed": "Failed to generate report"
+    },
+    "charges-report": {
+      "title": "Charges Report",
+      "charge-title": "Charge",
+      "climate-title": "Climate",
+      "loads-title": "Loads",
+      "cable-modif-title": "Cable modifications",
+      "support-manip-title": "Support manipulations",
+      "span-manip-title": "Span manipulations",
+      "page-label": "Page",
+      "author-label": "Author",
+      "study-label": "Study",
+      "study-description-label": "Description",
+      "charge-name-label": "Charge case",
+      "charge-description-label": "Charge case description",
+      "personnel-presence-label": "Personnel presence"
     },
     "canton-report": {
       "title": "Canton Data Report",

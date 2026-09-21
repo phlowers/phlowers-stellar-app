@@ -172,6 +172,17 @@ export class CableSpanManipComponent implements OnInit {
   readonly isWithChain = computed(() => this.anchoringSignal() === 'with_chain');
   readonly isWithSling = computed(() => this.anchoringSignal() === 'with_sling');
 
+  private _previousChargeUuid: string | null | undefined = undefined;
+
+  // Re-populate the form when the active load case changes so that each
+  // (span, charge) pair shows its own saved manipulation.
+  private readonly _reloadOnChargeChange = effect(() => {
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    if (chargeUuid === this._previousChargeUuid) return;
+    this._previousChargeUuid = chargeUuid;
+    untracked(() => this.onScopeChange(this.form.controls.scope.value));
+  });
+
   constructor() {
     // Track dirty state whenever any enabled form field changes.
     // scope changes are corrected immediately by onScopeChange().
@@ -267,7 +278,10 @@ export class CableSpanManipComponent implements OnInit {
     this.supportRefOptions.set(this.spanService.getSupportOptions(uuid));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
 
-    const savedManip = this.spanService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === uuid);
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    const savedManip = this.spanService
+      .section()
+      ?.cable_span_manipulations?.find((m) => m.spanUuid === uuid && m.chargeUuid === chargeUuid);
 
     if (savedManip) {
       this.hasSavedManipulation.set(true);
@@ -315,12 +329,15 @@ export class CableSpanManipComponent implements OnInit {
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
     const raw = this.form.getRawValue();
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    if (!chargeUuid) return;
     // form.invalid guard above ensures required fields are non-null;
     // disabled controls (cableManipType, cableManipMethod, anchoring) are always initialised.
     this.isLoading.set(true);
     try {
       await this.cableSpanManipService.save({
         spanUuid: raw.scope!,
+        chargeUuid,
         referenceSupport: raw.referenceSupport!,
         distanceToRefSupport: raw.distanceToRefSupport!,
         cableManipType: raw.cableManipType!,
@@ -346,9 +363,14 @@ export class CableSpanManipComponent implements OnInit {
 
   deleteForm(): void {
     const spanUuid = this.form.controls.scope.value;
-    const uuid = spanUuid
-      ? (this.spanService.section()?.cable_span_manipulations?.find((m) => m.spanUuid === spanUuid)?.uuid ?? null)
-      : null;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    const uuid =
+      spanUuid && chargeUuid
+        ? (this.spanService
+            .section()
+            ?.cable_span_manipulations?.find((m) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid)?.uuid ??
+          null)
+        : null;
 
     if (uuid) {
       this.cableSpanManipService.delete(uuid).then(async () => {
