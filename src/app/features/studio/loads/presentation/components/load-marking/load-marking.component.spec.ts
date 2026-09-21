@@ -90,7 +90,10 @@ describe('LoadMarkingComponent', () => {
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
-        { provide: PlotOptionsService, useValue: { isFreePositioningMode: signal(false) } },
+        {
+          provide: PlotOptionsService,
+          useValue: { isFreePositioningMode: signal(false), freePositioningSource: signal(null) }
+        },
         { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();

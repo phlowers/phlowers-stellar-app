@@ -126,6 +126,15 @@ export class ObstaclesFormComponent {
     return index >= 0 ? index : null;
   });
 
+  /** Leaves obstacle free positioning mode once its last point is removed, since there's nothing left to place. */
+  private readonly clearFreePositioningWhenNoPointsEffect = effect(() => {
+    const hasEditablePoints = this.obstacleFormService.hasEditablePoints();
+    const source = this.plotOptionsService.freePositioningSource();
+    if (!hasEditablePoints && source === 'obstacle') {
+      untracked(() => this.plotOptionsService.setFreePositioningMode(false, 'obstacle'));
+    }
+  });
+
   private firstSupportUuidEffectRun = true;
 
   private readonly supportUuidEffect = effect(() => {

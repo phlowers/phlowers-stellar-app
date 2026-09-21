@@ -885,6 +885,39 @@ describe('ObstaclesFormComponent', () => {
     });
   });
 
+  describe('leaving free positioning when the last point is removed', () => {
+    it('should stay in the mode while a point remains', () => {
+      mockPlotOptionsService.setFreePositioningMode(true, 'obstacle');
+      TestBed.flushEffects();
+
+      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(true);
+    });
+
+    it('should leave the mode once the last point is removed', () => {
+      mockPlotOptionsService.setFreePositioningMode(true, 'obstacle');
+      TestBed.flushEffects();
+
+      mockObstacleFormService.hasEditablePoints.set(false);
+      TestBed.flushEffects();
+
+      expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(false, 'obstacle');
+      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
+      expect(mockPlotOptionsService.freePositioningSource()).toBeNull();
+    });
+
+    it('should not disturb a floor-driven free positioning session', () => {
+      mockPlotOptionsService.setFreePositioningMode(true, 'floor');
+      TestBed.flushEffects();
+      vi.clearAllMocks();
+
+      mockObstacleFormService.hasEditablePoints.set(false);
+      TestBed.flushEffects();
+
+      expect(mockPlotOptionsService.setFreePositioningMode).not.toHaveBeenCalled();
+      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(true);
+    });
+  });
+
   describe('add point button', () => {
     it('should be disabled when support uuid is null', () => {
       const addButton = getByTestId('add-point') as HTMLButtonElement;
