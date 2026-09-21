@@ -12,17 +12,19 @@ import {
   buildTables,
   chunk,
   computeLabelColWidth,
+  drawResultTablesFlow,
   drawResultTablesSection,
   drawTable,
   formatCell
 } from './pdf-table.helpers';
-import { MetricDescriptor, PdfTableModel } from './pdf-table.interfaces';
+import { MetricDescriptor, PdfResultSection, PdfTableModel } from './pdf-table.interfaces';
 
 function createMockDoc() {
   return {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
     setLineWidth: vi.fn(),
+    setDrawColor: vi.fn(),
     setPage: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
@@ -139,6 +141,116 @@ describe('pdf-table.helpers', () => {
       const doc = createMockDoc();
       drawResultTablesSection(doc as unknown as jsPDF, '2026-05-20', 'Report', 'Section', [], 62);
       expect(doc.addPage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('drawResultTablesFlow', () => {
+    it('should stack several small sections on the same landscape page without extra addPage calls', () => {
+      const doc = createMockDoc();
+      const sections: PdfResultSection[] = [
+        {
+          title: 'Section A',
+          tables: [
+            {
+              rows: [
+                { label: 'A1', values: ['1'] },
+                { label: 'A2', values: ['2'] }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Section B',
+          tables: [
+            {
+              rows: [
+                { label: 'B1', values: ['3'] },
+                { label: 'B2', values: ['4'] }
+              ]
+            }
+          ]
+        }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      expect(doc.addPage).toHaveBeenCalledTimes(1);
+      expect(doc.addPage).toHaveBeenCalledWith('a4', 'landscape');
+      expect(doc.text).toHaveBeenCalledWith('Section A', expect.any(Number), expect.any(Number));
+      expect(doc.text).toHaveBeenCalledWith('Section B', expect.any(Number), expect.any(Number));
+    });
+
+    it('should start a new page once the cumulative height exceeds the remaining space', () => {
+      const doc = createMockDoc();
+      const manyRows = Array.from({ length: 40 }, (_, i) => ({ label: `R${i}`, values: [String(i)] }));
+      const sections: PdfResultSection[] = [
+        { title: 'Section A', tables: [{ rows: [{ label: 'A1', values: ['1'] }] }] },
+        { title: 'Section B', tables: [{ rows: manyRows }] }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      // Section A fits on the first page; Section B's oversized table forces a second page.
+      expect(doc.addPage).toHaveBeenCalledTimes(2);
+    });
+
+    it('should silently skip a section with no tables', () => {
+      const doc = createMockDoc();
+      const sections: PdfResultSection[] = [
+        { title: 'Empty section', tables: [] },
+        { title: 'Section A', tables: [{ rows: [{ label: 'A1', values: ['1'] }] }] }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      expect(doc.addPage).toHaveBeenCalledTimes(1);
+      expect(doc.text).not.toHaveBeenCalledWith('Empty section', expect.any(Number), expect.any(Number));
+      expect(doc.text).toHaveBeenCalledWith('Section A', expect.any(Number), expect.any(Number));
+    });
+
+    it('should stack a second chunk of the same section directly below the first when space allows', () => {
+      const doc = createMockDoc();
+      const sections: PdfResultSection[] = [
+        {
+          title: 'Section A',
+          tables: [{ rows: [{ label: 'A1', values: ['1', '2', '3', '4', '5'] }] }, { rows: [{ label: 'A1', values: ['6', '7'] }] }]
+        }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      expect(doc.addPage).toHaveBeenCalledTimes(1);
+      expect(doc.text).toHaveBeenCalledWith('Section A', expect.any(Number), expect.any(Number));
+    });
+
+    it('should draw a full-width separator line below every table', () => {
+      const doc = createMockDoc();
+      const sections: PdfResultSection[] = [
+        { title: 'Section A', tables: [{ rows: [{ label: 'A1', values: ['1'] }] }] }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      // contentWidth = LANDSCAPE_PAGE.width(297) - PAGE_MARGIN.left(15) - PAGE_MARGIN.right(15) = 267
+      expect(doc.line).toHaveBeenCalledWith(15, expect.any(Number), 15 + 267, expect.any(Number));
+    });
+
+    it('should never draw a section title without its first table following on the same page', () => {
+      const doc = createMockDoc();
+      const sectionARows = Array.from({ length: 26 }, (_, i) => ({ label: `A${i}`, values: [String(i)] }));
+      const sectionBRows = Array.from({ length: 3 }, (_, i) => ({ label: `B${i}`, values: [String(i)] }));
+      const sections: PdfResultSection[] = [
+        { title: 'Section A', tables: [{ rows: sectionARows }] },
+        { title: 'Section B', tables: [{ rows: sectionBRows }] }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      // Section B's title + first table don't fit what's left of page 1, so both must move
+      // together to page 2 — the title must be drawn exactly once, never orphaned on page 1.
+      const sectionBTitleCalls = doc.text.mock.calls.filter((call) => call[0] === 'Section B');
+      expect(sectionBTitleCalls).toHaveLength(1);
+      expect(doc.addPage).toHaveBeenCalledTimes(2);
     });
   });
 });

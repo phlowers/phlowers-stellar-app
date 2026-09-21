@@ -30,6 +30,8 @@ import {
   SupportAnchoringType,
   SupportManipType
 } from '@shared/domain';
+import { LoadsReportData } from '../../services/loads-data-report/loads-data-report.interfaces';
+import { LoadsReportService } from '../../services/loads-data-report/loads-data-report.service';
 import {
   ClimateRow,
   CableModifRow,
@@ -65,6 +67,7 @@ export class LoadsTableComponent {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly loadsReportService = inject(LoadsReportService);
 
   mode = signal<'view' | 'edit'>('view');
   name = signal<string>('');
@@ -342,6 +345,61 @@ export class LoadsTableComponent {
     this.chargeUuid.set(newCharge.uuid);
     this.mode.set('edit');
     await this.loadChargeData(newCharge.uuid);
+  }
+
+  /** Builds the loads report data from the current charge case and triggers PDF generation. */
+  async onGenerateReport(): Promise<void> {
+    const study = this.plotService.study();
+    const section = this.spanService.section();
+    const initialCondition = section?.initial_conditions.find(
+      (ic) => ic.uuid === section.selected_initial_condition_uuid
+    );
+
+    const data: LoadsReportData = {
+      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      author: study?.author_email ?? '-',
+      studyTitle: study?.title ?? '-',
+      studyDescription: study?.description ?? '',
+      cantonName: section?.name ?? '-',
+      cantonComment: section?.comment ?? '',
+      icName: initialCondition?.name ?? '-',
+      chargeName: this.name(),
+      chargeDescription: this.description(),
+      personnelPresence: this.personnelPresence(),
+      climate: this.climate() ?? {
+        windPressure: null,
+        cableTemperature: null,
+        symmetryType: SymmetryType.SYMMETRIC,
+        iceThickness: null,
+        frontierSupportNumber: null,
+        iceThicknessBefore: null,
+        iceThicknessAfter: null
+      },
+      spanLoads: this.spanLoadRows().map((row) => ({ ...row, type: this.getLoadTypeLabel(row.type) })),
+      cableModifications: this.cableModifRows().map((row) => ({
+        ...row,
+        modificationType: this.getModificationTypeLabel(row.modificationType)
+      })),
+      supportManipulations: this.supportManipRows().map((row) => ({
+        ...row,
+        displayIndex: row.displayIndex != null ? String(row.displayIndex) : '',
+        type: this.getSupportManipTypeLabel(row.type),
+        anchoring: row.anchoring ? this.getSupportAnchoringLabel(row.anchoring) : null
+      })),
+      spanManipulations: this.spanManipRows().map((row) => ({
+        ...row,
+        cableManipType: this.getCableManipTypeLabel(row.cableManipType),
+        cableManipMethod: this.getCableManipMethodLabel(row.cableManipMethod),
+        anchoring: this.getSpanAnchoringLabel(row.anchoring)
+      }))
+    };
+
+    await this.loadsReportService.generateReport(data);
+  }
+
+  private getLocaleForDate(): string {
+    const activeLang = this.translocoService.getActiveLang();
+    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   getSymmetryLabel(type: SymmetryType): string {

@@ -1124,9 +1124,9 @@
       "report-generated-success": "Report generated successfully",
       "report-generation-failed": "Failed to generate report"
     },
-    "charges-report": {
-      "title": "Charges Report",
-      "charge-title": "Charge",
+    "loads-report": {
+      "title": "Loads Table Report",
+      "cartouche-title": "Study and canton",
       "climate-title": "Climate",
       "loads-title": "Loads",
       "cable-modif-title": "Cable modifications",
@@ -1136,9 +1136,14 @@
       "author-label": "Author",
       "study-label": "Study",
       "study-description-label": "Description",
+      "canton-label": "Canton",
+      "canton-comment-label": "Comment",
+      "initial-condition-label": "Initial condition",
       "charge-name-label": "Charge case",
       "charge-description-label": "Charge case description",
       "personnel-presence-label": "Personnel presence",
+      "modified-length-label": "Modified length",
+      "support-label": "Support",
       "report-generated-success": "Report generated successfully",
       "report-generation-failed": "Failed to generate report"
     },

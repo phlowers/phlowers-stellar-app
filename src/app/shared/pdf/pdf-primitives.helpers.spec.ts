@@ -28,7 +28,16 @@ import {
   registerNunitoFont,
   sanitizeFilenamePart
 } from './pdf-primitives.helpers';
-import { APP_NAME, CONTENT_WIDTH, LANDSCAPE_PAGE, LINE_HEIGHT, PAGE_MARGIN, PAGE_SIZE } from './pdf-layout.constantes';
+import {
+  APP_NAME,
+  CONTENT_WIDTH,
+  LANDSCAPE_PAGE,
+  LINE_HEIGHT,
+  PAGE_MARGIN,
+  PAGE_SIZE,
+  SEPARATOR_COLOR,
+  SEPARATOR_MARGIN_Y
+} from './pdf-layout.constantes';
 
 vi.mock('jspdf');
 
@@ -37,6 +46,7 @@ function createMockDoc(): jsPDF {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
     setLineWidth: vi.fn(),
+    setDrawColor: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
     addFileToVFS: vi.fn(),
@@ -296,11 +306,23 @@ describe('pdf-primitives helpers', () => {
   });
 
   describe('drawSeparator', () => {
-    it('should draw a line spanning the content width and return the advanced Y', () => {
+    it('should draw an indented gray line spanning the content width and return the advanced Y', () => {
       const doc = createMockDoc();
       const nextY = drawSeparator(doc, 40);
+      const lineY = 40 + SEPARATOR_MARGIN_Y;
 
-      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, 40, PAGE_MARGIN.left + CONTENT_WIDTH, 40);
+      expect(doc.setDrawColor).toHaveBeenCalledWith(SEPARATOR_COLOR);
+      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + CONTENT_WIDTH, lineY);
+      expect(doc.setDrawColor).toHaveBeenLastCalledWith(0);
+      expect(nextY).toBe(40 + LINE_HEIGHT);
+    });
+
+    it('should draw a line spanning a custom width when provided', () => {
+      const doc = createMockDoc();
+      const nextY = drawSeparator(doc, 40, 267);
+      const lineY = 40 + SEPARATOR_MARGIN_Y;
+
+      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + 267, lineY);
       expect(nextY).toBe(40 + LINE_HEIGHT);
     });
   });

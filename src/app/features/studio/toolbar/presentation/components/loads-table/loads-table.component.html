@@ -311,7 +311,7 @@
 
 <ng-template #footer>
   @if (mode() === 'view') {
-    <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
+    <button app-btn type="button" btnStyle="text" (click)="onGenerateReport()" data-testid="report-btn">
       <app-icon icon="description" />
       <ng-container>{{ 'common.report' | transloco }}</ng-container>
     </button>

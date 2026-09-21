@@ -20,7 +20,9 @@ import {
   LINE_HEIGHT,
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
-  PAGE_SIZE
+  PAGE_SIZE,
+  SEPARATOR_COLOR,
+  SEPARATOR_MARGIN_Y
 } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
@@ -204,11 +206,18 @@ export function drawFooter(
   doc.text(pageFooter, pageWidth - PAGE_MARGIN.right, pageHeight - 8, { align: 'right' });
 }
 
-/** Draws a horizontal separator line spanning the content width. Returns the next Y position. */
-export function drawSeparator(doc: jsPDF, y: number): number {
+/**
+ * Draws a horizontal separator line spanning `width` (defaults to the portrait content width),
+ * indented by `SEPARATOR_MARGIN_Y` from the content drawn above and below it, in a light gray
+ * (`SEPARATOR_COLOR`) rather than the default black. Returns the next Y position.
+ */
+export function drawSeparator(doc: jsPDF, y: number, width: number = CONTENT_WIDTH): number {
+  const lineY = y + SEPARATOR_MARGIN_Y;
   doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_MARGIN.left + CONTENT_WIDTH, y);
-  return y + LINE_HEIGHT;
+  doc.setDrawColor(SEPARATOR_COLOR);
+  doc.line(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + width, lineY);
+  doc.setDrawColor(0);
+  return lineY + SEPARATOR_MARGIN_Y;
 }
 
 /** Sanitizes a filename fragment by replacing characters that are illegal on common filesystems. */

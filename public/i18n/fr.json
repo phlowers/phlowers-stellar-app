@@ -1124,9 +1124,9 @@
       "report-generated-success": "Rapport généré avec succès",
       "report-generation-failed": "Échec de la génération du rapport"
     },
-    "charges-report": {
-      "title": "Rapport des charges",
-      "charge-title": "Charge",
+    "loads-report": {
+      "title": "Rapport Tableau des charges",
+      "cartouche-title": "Étude et canton",
       "climate-title": "Climat",
       "loads-title": "Charges",
       "cable-modif-title": "Modifications du câble",
@@ -1136,9 +1136,14 @@
       "author-label": "Auteur",
       "study-label": "Étude",
       "study-description-label": "Description",
+      "canton-label": "Canton",
+      "canton-comment-label": "Commentaire",
+      "initial-condition-label": "Condition initiale",
       "charge-name-label": "Cas de charge",
       "charge-description-label": "Description du cas de charge",
       "personnel-presence-label": "Présence du personnel",
+      "modified-length-label": "Longueur modifiée",
+      "support-label": "Support",
       "report-generated-success": "Rapport généré avec succès",
       "report-generation-failed": "Échec de la génération du rapport"
     },

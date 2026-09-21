@@ -10,6 +10,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Charge, Section, Study } from '@shared/domain';
 import { LoadType, SymmetryType } from '@shared/domain/models/charge.model';
 import { Support } from '@shared/domain/models/support.model';
+import { LoadsReportService } from '../../services/loads-data-report/loads-data-report.service';
 
 describe('LoadsTableComponent', () => {
   let component: LoadsTableComponent;
@@ -18,6 +19,7 @@ describe('LoadsTableComponent', () => {
   let mockChargesService: Partial<ChargesService>;
   let mockPlotService: Partial<PlotService>;
   let mockSpanService: { section: ReturnType<typeof signal<Section | null>> };
+  let mockLoadsReportService: Partial<LoadsReportService>;
 
   const mockSupports: Support[] = [
     {
@@ -222,6 +224,10 @@ describe('LoadsTableComponent', () => {
       section: signal<Section | null>(mockSection)
     };
 
+    mockLoadsReportService = {
+      generateReport: vi.fn().mockResolvedValue(undefined)
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         LoadsTableComponent,
@@ -253,7 +259,8 @@ describe('LoadsTableComponent', () => {
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: ChargesService, useValue: mockChargesService },
         { provide: PlotService, useValue: mockPlotService },
-        { provide: PlotSpanService, useValue: mockSpanService }
+        { provide: PlotSpanService, useValue: mockSpanService },
+        { provide: LoadsReportService, useValue: mockLoadsReportService }
       ]
     }).compileComponents();
 
@@ -983,6 +990,39 @@ describe('LoadsTableComponent', () => {
       await component.deleteChargeCase();
 
       expect(mockChargesService.deleteCharge).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onGenerateReport', () => {
+    beforeEach(() => {
+      component.chargeUuid.set('charge-uuid-1');
+      component.name.set('Test Charge');
+      component.description.set('Test description');
+      component.personnelPresence.set(true);
+      component.climate.set(mockCharge.data.climate);
+      component.spanLoads.set(mockCharge.data.spanLoads);
+    });
+
+    it('should call LoadsReportService.generateReport with the assembled report data', async () => {
+      await component.onGenerateReport();
+
+      expect(mockLoadsReportService.generateReport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          author: 'test@example.com',
+          studyTitle: 'Test Study',
+          cantonName: 'Test section',
+          chargeName: 'Test Charge',
+          chargeDescription: 'Test description',
+          personnelPresence: true
+        })
+      );
+    });
+
+    it('should translate the span load type in the assembled rows', async () => {
+      await component.onGenerateReport();
+
+      const data = (mockLoadsReportService.generateReport as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(data.spanLoads[0].type).toBe('Punctual load');
     });
   });
 
