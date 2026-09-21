@@ -905,6 +905,7 @@
       "obstacle-name-label": "Obstacle name",
       "obstacle-altitude-type-label": "Obstacle altitude type",
       "free-positioning-label": "Free positioning",
+      "free-positioning-forced-frame-warning": "Free positioning mode is only available with a left reference support, an absolute altitude type and a span-axis lateral distance type. The current obstacle settings differ, so the results may be inaccurate.",
       "add-point-btn": "Add point",
       "select-point-label": "Select point",
       "point-label": "Point",

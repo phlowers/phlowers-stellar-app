@@ -18,6 +18,9 @@ import {
   FreePositioningPlacement,
   FreePositioningSelection
 } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.interfaces';
+import { TranslocoService } from '@jsverse/transloco';
+
+import { NotificationService } from '@services/notification/notification.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -25,7 +28,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { LateralDistanceType, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { getSupportAltitudeNgf } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 
-import { OBSTACLE_FREE_POSITIONING_CONFIG } from './obstacle-free-positioning.component.constantes';
+import { OBSTACLE_FP_FORCED_FRAME_WARNING_KEY, OBSTACLE_FREE_POSITIONING_CONFIG } from './obstacle-free-positioning.component.constantes';
 import {
   computeNewObstaclePosition,
   parseObstacleFormPointIndex
@@ -47,8 +50,20 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly plotService = inject(PlotService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
+    // Warn when the current obstacle frame differs from the forced fp frame: existing position
+    // values are not converted, so coordinates stored in another frame would be misinterpreted.
+    const form = this.obstacleFormService.form;
+    const frameMatchesForcedFrame =
+      form.get('referenceSupport')?.value === ReferenceSupport.LEFT &&
+      form.get('altitudeType')?.value === 'absolute' &&
+      form.get('lateralDistanceType')?.value === LateralDistanceType.SPAN_AXIS;
+    if (!frameMatchesForcedFrame) {
+      this.notificationService.warning(this.translocoService.translate(OBSTACLE_FP_FORCED_FRAME_WARNING_KEY));
+    }
     // Force and lock obstacle reference frame while free positioning is active.
     this.obstacleFormService.form.get('referenceSupport')?.setValue(ReferenceSupport.LEFT);
     this.obstacleFormService.form.get('altitudeType')?.setValue('absolute');

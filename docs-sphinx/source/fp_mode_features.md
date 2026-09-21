@@ -28,6 +28,18 @@ current span and every control that could change it.
     matter which span the studio plot was last zoomed to — the tab selection wins.
   - The opened tab loads its data for that frozen span.
   - The plot displays that span and does not move.
+- On the **obstacle** tab, free-positioning works in a single coordinate frame:
+  **left reference support**, **absolute altitude type** and **span-axis lateral
+  distance type**. When fp mode is turned on, these three obstacle form fields
+  are forced to those values and disabled for the whole fp session.
+  - If the obstacle form was using a different frame (right reference support,
+    relative altitude, or another lateral distance type), a **warning** is shown
+    on entry: *"Free positioning mode is only available with a left reference
+    support, an absolute altitude type and a span-axis lateral distance type.
+    The current obstacle settings differ, so the results may be inaccurate."*
+  - The existing point coordinates are **not converted** between frames: they
+    are reinterpreted in the forced frame. The user is expected to review the
+    displayed positions after the warning.
 
 ## What is frozen while fp mode is on
 
@@ -60,3 +72,9 @@ On re-entry, the newly selected span is captured as the new frozen span.
 
 When the switch is turned **off**, all frozen controls become interactive again
 and the studio returns to its normal reactive behaviour.
+
+On the **obstacle** and **floor** tabs, fp mode also turns **off by itself** when
+the last editable point is removed (the toggle switch flips back off). There is
+no longer anything to position, and the switch would otherwise be left disabled
+with no way to turn the mode off from that tab — the switch requires at least one
+point to be interactive.

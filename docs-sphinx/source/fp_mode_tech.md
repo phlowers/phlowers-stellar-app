@@ -158,6 +158,16 @@ obstacle form controls to standardized FP values in its constructor:
 - `altitudeType` → `absolute`
 - `lateralDistanceType` → `SPAN_AXIS`
 
+Because no coordinate transformation exists between these frames, the constructor
+**first compares the current form values against the forced frame**. On any
+mismatch it emits a warning through `NotificationService.warning(...)` with the
+transloco key `studio.obstacles-form.free-positioning-forced-frame-warning`
+(exported as `OBSTACLE_FP_FORCED_FRAME_WARNING_KEY` from
+`obstacle-free-positioning.component.constantes.ts`), telling the user that the
+existing coordinates may be misinterpreted. The warning is informational only:
+the values are still forced and locked, and existing point coordinates are
+reinterpreted — not converted — in the new frame.
+
 When saving, `ObstacleFormService.buildObstacleFromForm()` uses
 `form.getRawValue()` instead of `form.value` to include these disabled controls,
 so the obstacle is saved with the FP-forced values intact (not dropped by
@@ -187,6 +197,28 @@ forwards it to `setFreePositioningMode`, so the frozen span is exactly the span
 selected in the tab, not the plot's last-zoomed span. Distance exposes the
 computed on `DistanceMeasuringService`; the other tabs expose it on their
 component.
+
+Because the toggle is disabled while `!hasEditablePoints()`, deleting the last
+point while fp mode is on would lock the user in the mode: the switch is the
+only in-tab way out, and it is disabled. To avoid this, both
+`FloorComponent` and `ObstaclesFormComponent` carry an auto-exit effect that
+turns the mode off when the tab's `hasEditablePoints()` flips to `false` while
+that tab owns the session:
+
+```ts
+private readonly clearFreePositioningWhenNoPointsEffect = effect(() => {
+  const hasEditablePoints = this.<tab>FormService.hasEditablePoints();
+  const source = this.plotOptionsService.freePositioningSource();
+  if (!hasEditablePoints && source === '<tab>') {
+    untracked(() => this.plotOptionsService.setFreePositioningMode(false, '<tab>'));
+  }
+});
+```
+
+The `freePositioningSource()` check guarantees the effect never disturbs a
+session owned by another tab (e.g. the obstacle tab deleting its last point
+while floor fp mode is on leaves it untouched).
+
 ## History / rebase note
 
 A broken rebase on `refactor/free-positioning/new_dev` previously left the branch

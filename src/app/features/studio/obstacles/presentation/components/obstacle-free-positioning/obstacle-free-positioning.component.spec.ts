@@ -11,6 +11,7 @@ import { TranslocoTestingModule } from '@jsverse/transloco';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -62,6 +63,10 @@ describe('ObstacleFreePositioningComponent', () => {
     })
   };
 
+  const mockNotificationService = {
+    warning: vi.fn()
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
     fb = new FormBuilder();
@@ -75,7 +80,8 @@ describe('ObstacleFreePositioningComponent', () => {
       positions: positionsArray,
       supportUuid: ['sup-0'],
       altitudeType: ['absolute'],
-      referenceSupport: ['LEFT']
+      referenceSupport: ['LEFT'],
+      lateralDistanceType: ['SPAN_AXIS']
     });
 
     mockObstacleFormService.form = obstacleForm;
@@ -98,7 +104,8 @@ describe('ObstacleFreePositioningComponent', () => {
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: PlotSpanService, useValue: mockPlotSpanService },
-        { provide: PlotService, useValue: mockPlotService }
+        { provide: PlotService, useValue: mockPlotService },
+        { provide: NotificationService, useValue: mockNotificationService }
       ]
     }).compileComponents();
 
@@ -109,6 +116,33 @@ describe('ObstacleFreePositioningComponent', () => {
   it('should create', () => {
     fixture.detectChanges();
     expect(component).toBeTruthy();
+  });
+
+  describe('forced frame warning', () => {
+    it('should not warn when the obstacle frame already matches the forced fp frame', () => {
+      expect(mockNotificationService.warning).not.toHaveBeenCalled();
+    });
+
+    it('should warn when the obstacle reference support differs from the forced fp frame', () => {
+      obstacleForm.controls['referenceSupport'].setValue('RIGHT');
+      TestBed.createComponent(ObstacleFreePositioningComponent);
+
+      expect(mockNotificationService.warning).toHaveBeenCalled();
+    });
+
+    it('should warn when the obstacle altitude type differs from the forced fp frame', () => {
+      obstacleForm.controls['altitudeType'].setValue('relative');
+      TestBed.createComponent(ObstacleFreePositioningComponent);
+
+      expect(mockNotificationService.warning).toHaveBeenCalled();
+    });
+
+    it('should warn when the obstacle lateral distance type differs from the forced fp frame', () => {
+      obstacleForm.controls['lateralDistanceType'].setValue('LINE_AXIS');
+      TestBed.createComponent(ObstacleFreePositioningComponent);
+
+      expect(mockNotificationService.warning).toHaveBeenCalled();
+    });
   });
 
   describe('frozenSpan and points', () => {
