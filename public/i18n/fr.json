@@ -782,6 +782,7 @@
       "altitude-type-relative": "Relative au support",
       "altitude-type-relative-cable": "Relative accr. câble",
       "span-axis-option": "Axe de la portée",
+      "line-axis-option": "Axe de ligne",
       "oblique": "Oblique",
       "vertical": "Verticale",
       "horizontal": "Horizontale"
@@ -1022,6 +1023,21 @@
       "dis-symmetric-label": "Disymétrique",
       "punctual-load-label": "Charge ponctuelle",
       "marking-label": "Marquage"
+    },
+    "obstacles-table": {
+      "initial-condition-label": "Condition initiale",
+      "charge-case-label": "Cas de charge",
+      "all-spans-option": "Toutes les portées",
+      "number-column-label": "N°",
+      "obstacle-name-column-label": "Nom d'obstacle",
+      "obstacle-type-column-label": "Type d'obstacle",
+      "altitude-type-column-label": "Type d'altitude",
+      "point-column-label": "Point",
+      "altitude-column-label": "Altitude",
+      "ref-support-distance-column-label": "Dist. supp. réf.",
+      "line-axis-distance-column-label": "Dist. axe ligne",
+      "no-obstacles-message": "Aucun obstacle défini pour cette portée.",
+      "current-page-report": "{first} à {last} sur {totalRecords}"
     },
     "vtl-and-guying": {
       "guying-span-label": "Portée haubanée",

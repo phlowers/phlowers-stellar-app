@@ -1,0 +1,120 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="table_chart" aria-hidden="true" />
+    <span>{{ 'studio.top-toolbar.obstacles-table-label' | transloco }}</span>
+  </p>
+</ng-template>
+
+<section class="obstacles-table__filters" data-testid="obstacles-table-filters">
+  <div class="obstacles-table__field">
+    <label for="spanSelect">{{ 'studio.shared.span-label' | transloco }} *</label>
+    <p-select
+      inputId="spanSelect"
+      [options]="spanOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="selectedSpanUuid()"
+      (ngModelChange)="selectedSpanUuid.set($event)"
+      data-testid="span-select"
+    />
+  </div>
+
+  <dl class="obstacles-table__field">
+    <dt>{{ 'studio.obstacles-table.initial-condition-label' | transloco }}</dt>
+    <dd data-testid="initial-condition-value">{{ selectedInitialConditionName() ?? '-' }}</dd>
+  </dl>
+
+  <dl class="obstacles-table__field">
+    <dt>{{ 'studio.obstacles-table.charge-case-label' | transloco }}</dt>
+    <dd data-testid="charge-case-value">{{ selectedChargeName() ?? '-' }}</dd>
+  </dl>
+</section>
+
+<div class="obstacles-table__paginator">
+  <p-paginator
+    [totalRecords]="rows().length"
+    [rows]="rowsPerPage()"
+    [first]="first()"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+    [showCurrentPageReport]="true"
+    [currentPageReportTemplate]="'studio.obstacles-table.current-page-report' | transloco"
+    dropdownAppendTo="body"
+    (onPageChange)="onPageChange($event)"
+    data-testid="obstacles-table-paginator"
+  />
+</div>
+
+<p-table
+  [value]="rows()"
+  [paginator]="true"
+  [rows]="rowsPerPage()"
+  [first]="first()"
+  [rowsPerPageOptions]="rowsPerPageOptions"
+  class="obstacles-table__table"
+  [customSort]="true"
+  paginatorStyleClass="!hidden"
+  (sortFunction)="customSort($event)"
+  data-testid="obstacles-table"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th id="index-col" class="obstacles-table__sticky-col">
+        {{ 'studio.obstacles-table.number-column-label' | transloco }}
+      </th>
+      <th id="name-col" pSortableColumn="obstacleName">
+        <div class="flex items-center gap-2">
+          <span>{{ 'studio.obstacles-table.obstacle-name-column-label' | transloco }}</span>
+          <app-icon [icon]="getSortIcon('obstacleName')" />
+        </div>
+      </th>
+      <th id="type-col">{{ 'studio.obstacles-table.obstacle-type-column-label' | transloco }}</th>
+      <th id="span-col">{{ 'studio.shared.span-label' | transloco }}</th>
+      <th id="ref-support-col">{{ 'studio.shared.reference-support-label' | transloco }}</th>
+      <th id="altitude-type-col">{{ 'studio.obstacles-table.altitude-type-column-label' | transloco }}</th>
+      <th id="lateral-distance-type-col">{{ 'studio.shared.lateral-distance-type-label' | transloco }}</th>
+      <th id="point-col">{{ 'studio.obstacles-table.point-column-label' | transloco }}</th>
+      <th id="altitude-col">{{ 'studio.obstacles-table.altitude-column-label' | transloco }}</th>
+      <th id="ref-support-distance-col">
+        {{ 'studio.obstacles-table.ref-support-distance-column-label' | transloco }}
+      </th>
+      <th id="line-axis-distance-col">{{ 'studio.obstacles-table.line-axis-distance-column-label' | transloco }}</th>
+      <th id="oblique-col">{{ 'studio.shared.oblique' | transloco }}</th>
+      <th id="vertical-col">{{ 'studio.shared.vertical' | transloco }}</th>
+      <th id="horizontal-col">{{ 'studio.shared.horizontal' | transloco }}</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-row let-i="rowIndex">
+    <tr>
+      <td class="obstacles-table__sticky-col">{{ i + 1 }}</td>
+      <td>{{ row.obstacleName }}</td>
+      <td>{{ row.obstacleType }}</td>
+      <td>{{ row.spanLabel }}</td>
+      <td>{{ row.referenceSupportLabel }}</td>
+      <td>{{ row.altitudeTypeLabel }}</td>
+      <td>{{ row.lateralDistanceTypeLabel }}</td>
+      <td>{{ row.pointNumber }}</td>
+      <td>{{ row.altitude !== null ? (row.altitude | number: '1.0-2') + '\u00a0m' : '-' }}</td>
+      <td>{{ row.distanceToRefSupport !== null ? (row.distanceToRefSupport | number: '1.0-2') + '\u00a0m' : '-' }}</td>
+      <td>{{ row.distanceToLineAxis !== null ? (row.distanceToLineAxis | number: '1.0-2') + '\u00a0m' : '-' }}</td>
+      <td>{{ row.oblique !== null ? (row.oblique | number: '1.0-2') + '\u00a0m' : '-' }}</td>
+      <td>{{ row.vertical !== null ? (row.vertical | number: '1.0-2') + '\u00a0m' : '-' }}</td>
+      <td>{{ row.horizontal !== null ? (row.horizontal | number: '1.0-2') + '\u00a0m' : '-' }}</td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="14" data-testid="obstacles-table-empty">
+        {{ 'studio.obstacles-table.no-obstacles-message' | transloco }}
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<ng-template #footer>
+  <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
+    <app-icon icon="description" aria-hidden="true" />
+    <ng-container>{{ 'common.report' | transloco }}</ng-container>
+  </button>
+</ng-template>

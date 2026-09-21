@@ -782,6 +782,7 @@
       "altitude-type-relative": "Relative to support",
       "altitude-type-relative-cable": "Relative to cable attachment",
       "span-axis-option": "Span axis",
+      "line-axis-option": "Line axis",
       "oblique": "Oblique",
       "vertical": "Vertical",
       "horizontal": "Horizontal"
@@ -1022,6 +1023,21 @@
       "dis-symmetric-label": "Dis Symmetric",
       "punctual-load-label": "Punctual load",
       "marking-label": "Marking"
+    },
+    "obstacles-table": {
+      "initial-condition-label": "Initial condition",
+      "charge-case-label": "Charge case",
+      "all-spans-option": "All spans",
+      "number-column-label": "No.",
+      "obstacle-name-column-label": "Obstacle name",
+      "obstacle-type-column-label": "Obstacle type",
+      "altitude-type-column-label": "Altitude type",
+      "point-column-label": "Point",
+      "altitude-column-label": "Altitude",
+      "ref-support-distance-column-label": "Ref. support dist.",
+      "line-axis-distance-column-label": "Line axis dist.",
+      "no-obstacles-message": "No obstacles defined for this span.",
+      "current-page-report": "{first} to {last} of {totalRecords}"
     },
     "vtl-and-guying": {
       "guying-span-label": "Guying span",
