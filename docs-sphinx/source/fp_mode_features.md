@@ -57,7 +57,7 @@ nothing can change the reference span:
 There is **no reactive behaviour** that can silently change the selected span
 while fp mode is on. The frozen span stays constant for the whole session.
 
-ok ## Changing the span
+## Changing the span
 
 Because the span is frozen, the span cannot be changed while fp mode is on.
 To work on a different span the user must:
