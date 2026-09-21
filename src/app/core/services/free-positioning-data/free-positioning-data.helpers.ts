@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { DISTANCE_POINT_KEY, FLOOR_POINT_KEY, LOAD_ICON, MARKING_ICON, MARKING_LOAD_KEY, PUNCTUAL_LOAD_KEY } from './free-positioning-data.constantes';
+import { DISTANCE_POINT_KEY, FLOOR_POINT_KEY, MARKING_LOAD_KEY, PUNCTUAL_LOAD_KEY } from './free-positioning-data.constantes';
 import { AggregatePointsParams, FreePositioningPoint } from './free-positioning-data.interfaces';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 
@@ -190,26 +190,36 @@ export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningP
 
   const loadsCoords = params.litData?.output_parameters?.loads_coords;
   const coord = loadsCoords?.[params.frozenSpan];
+  const hasCoord = Array.isArray(coord) && coord.length >= 3;
 
+  const loadPosition = params.loadPosition;
   const hasEditableLoadPosition =
     params.editableCategory === 'loads' &&
-    params.loadPosition !== null &&
-    params.loadPosition !== undefined &&
-    !Number.isNaN(params.loadPosition);
+    loadPosition !== null &&
+    loadPosition !== undefined &&
+    !Number.isNaN(loadPosition);
 
   if (hasEditableLoadPosition) {
     const isPunctual = params.loadType === 'punctual';
+    // x/y/z come from the python task output (loads_coords): the form loadPosition is an
+    // input and does not match exactly what the calculus computes. Only when the task output
+    // is not available yet do we fall back to converting the form value (which is relative to
+    // the reference support) to an absolute abscissa measured from the left support.
+    const spanLength = params.litData?.output_parameters?.span_length?.[params.frozenSpan];
+    const fallbackAlongSpan =
+      params.loadReferenceSupport === 'RIGHT' && typeof spanLength === 'number' && !Number.isNaN(spanLength)
+        ? spanLength - loadPosition
+        : loadPosition;
     points.push({
       id: `load-active-${params.frozenSpan}`,
       category: 'loads',
-      alongSpan: params.loadPosition,
-      lateral: coord && Array.isArray(coord) && coord.length >= 2 ? coord[1] : 0,
-      altitude: coord && Array.isArray(coord) && coord.length >= 3 ? coord[2] : getSupportAltitudeNgf(params.litData, params.frozenSpan),
+      alongSpan: hasCoord ? coord[0] : fallbackAlongSpan,
+      lateral: hasCoord ? coord[1] : 0,
+      altitude: hasCoord ? coord[2] : getSupportAltitudeNgf(params.litData, params.frozenSpan),
       editable: true,
-      icon: isPunctual ? LOAD_ICON : MARKING_ICON,
       nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
     });
-  } else if (coord && Array.isArray(coord) && coord.length >= 3) {
+  } else if (hasCoord) {
     const isPunctual = spanLoad?.type === 'punctual' || params.loadType === 'punctual';
     points.push({
       id: `load-${params.frozenSpan}`,
@@ -218,7 +228,6 @@ export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningP
       lateral: coord[1],
       altitude: coord[2],
       editable: params.editableCategory === 'loads',
-      icon: isPunctual ? LOAD_ICON : MARKING_ICON,
       nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
     });
   }

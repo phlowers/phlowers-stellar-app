@@ -35,10 +35,19 @@ export class LoadFormsService {
   setLoadPosition(position: number): void {
     const spanIndex = this.getActiveSpanIndex();
     const temporaryLoadData = this.plotService.temporaryLoadData;
-    if (temporaryLoadData?.spanLoads?.[spanIndex]) {
-      temporaryLoadData.spanLoads[spanIndex].loadPosition = position;
+    const spanLoad = temporaryLoadData?.spanLoads?.[spanIndex];
+    // The plot click abscissa is measured from the left support, while loadPosition is stored
+    // relative to the load's reference support. Convert for a RIGHT reference so the stored
+    // position stays consistent with the icon location.
+    const spanLength = this.plotService.litData()?.output_parameters?.span_length?.[spanIndex];
+    const referenceRelativePosition =
+      spanLoad?.referenceSupport === 'RIGHT' && typeof spanLength === 'number' && !Number.isNaN(spanLength)
+        ? spanLength - position
+        : position;
+    if (spanLoad) {
+      spanLoad.loadPosition = referenceRelativePosition;
     }
-    this.activeLoadPosition.set(position);
+    this.activeLoadPosition.set(referenceRelativePosition);
   }
 
   /** Resolves the span index frozen for free positioning, snapshotted when the mode was switched on. */

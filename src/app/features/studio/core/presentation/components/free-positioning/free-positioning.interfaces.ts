@@ -23,7 +23,6 @@ export interface FreePositioningPoint {
   /** Transloco key used to translate `name` once a TranslocoService is available (pure helpers cannot translate). */
   nameKey?: string;
   nameParams?: Record<string, string | number>;
-  icon?: string;
   color?: string;
 }
 

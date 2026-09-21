@@ -29,19 +29,13 @@ export const CATEGORY_SYMBOLS: Record<FreePositioningCategory, string> = {
   obstacle: 'circle',
   floor: 'triangle-up',
   distance: 'diamond',
-  loads: 'circle'
+  loads: 'square'
 };
 
 export const EDITABLE_POINT_COLOR = '#dc2626';
 export const EDITABLE_POINT_SIZE = 14;
 export const DEFAULT_POINT_SIZE = 10;
 export const POINT_SELECTION_PIXEL_RADIUS = 15;
-
-/** FontAwesome glyph for a punctual load (`location-dot`). */
-export const LOAD_ICON = '&#xf5cd;';
-
-/** FontAwesome glyph for a marking load (`thumbtack`). */
-export const MARKING_ICON = '&#xf08d;';
 
 export const CORE_FREE_POSITIONING_PLOT_IDS = {
   PROFILE: 'plotly-output-free-positioning-profile',

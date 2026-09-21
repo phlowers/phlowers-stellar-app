@@ -98,6 +98,7 @@ export class FreePositioningDataService {
       loadPosition: spanLoad?.loadPosition,
       loadType: spanLoad?.type as 'punctual' | 'marking' | undefined,
       loadSpanSupportUuid: spanLoad?.supportUuid,
+      loadReferenceSupport: spanLoad?.referenceSupport,
       ...overrides
     };
   }

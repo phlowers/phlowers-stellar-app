@@ -13,7 +13,7 @@ import {
   buildObstaclePoints
 } from './free-positioning-data.helpers';
 import { AggregatePointsParams } from './free-positioning-data.interfaces';
-import { LOAD_ICON, MARKING_ICON } from './free-positioning-data.constantes';
+import { MARKING_LOAD_KEY, PUNCTUAL_LOAD_KEY } from './free-positioning-data.constantes';
 import { Section, Support } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 
@@ -265,10 +265,10 @@ describe('free-positioning-data.helpers', () => {
       expect(points[0].alongSpan).toBe(120);
       expect(points[0].altitude).toBe(75);
       expect(points[0].editable).toBe(true);
-      expect(points[0].icon).toBe(LOAD_ICON);
+      expect(points[0].nameKey).toBe(PUNCTUAL_LOAD_KEY);
     });
 
-    it('should use marking icon when loadType is marking', () => {
+    it('should use the marking name key when loadType is marking', () => {
       const params: AggregatePointsParams = {
         ...baseParams,
         editableCategory: 'loads',
@@ -283,10 +283,10 @@ describe('free-positioning-data.helpers', () => {
       };
 
       const points = buildLoadPoints(params);
-      expect(points[0].icon).toBe(MARKING_ICON);
+      expect(points[0].nameKey).toBe(MARKING_LOAD_KEY);
     });
 
-    it('should prefer active editable loadPosition over stale litData coordinate', () => {
+    it('should plot the editable load point from the task output loads_coords, not the form loadPosition', () => {
       const params: AggregatePointsParams = {
         ...baseParams,
         editableCategory: 'loads',
@@ -303,10 +303,49 @@ describe('free-positioning-data.helpers', () => {
 
       const points = buildLoadPoints(params);
       expect(points).toHaveLength(1);
-      expect(points[0].alongSpan).toBe(42);
+      expect(points[0].alongSpan).toBe(120);
       expect(points[0].altitude).toBe(75);
       expect(points[0].editable).toBe(true);
-      expect(points[0].icon).toBe(LOAD_ICON);
+      expect(points[0].nameKey).toBe(PUNCTUAL_LOAD_KEY);
+    });
+
+    it('should convert editable loadPosition to an absolute abscissa for a RIGHT reference support', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'loads',
+        litData: {
+          output_parameters: {
+            span_length: [100],
+            loads_coords: {}
+          }
+        } as unknown as GetSectionOutput,
+        loadPosition: 30,
+        loadType: 'punctual',
+        loadReferenceSupport: 'RIGHT'
+      };
+
+      const points = buildLoadPoints(params);
+      expect(points).toHaveLength(1);
+      expect(points[0].alongSpan).toBe(70);
+    });
+
+    it('should keep editable loadPosition as-is for a LEFT reference support', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'loads',
+        litData: {
+          output_parameters: {
+            span_length: [100],
+            loads_coords: {}
+          }
+        } as unknown as GetSectionOutput,
+        loadPosition: 30,
+        loadType: 'punctual',
+        loadReferenceSupport: 'LEFT'
+      };
+
+      const points = buildLoadPoints(params);
+      expect(points[0].alongSpan).toBe(30);
     });
   });
 

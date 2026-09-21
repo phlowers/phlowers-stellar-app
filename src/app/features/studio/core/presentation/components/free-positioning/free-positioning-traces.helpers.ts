@@ -42,7 +42,8 @@ export const filterPointsForSide = (
 
 /**
  * Builds Plotly scatter traces for free-positioning points on the given plot side.
- * Categorizes points into marker traces and icon traces without using Plotly annotations.
+ * All points are rendered as marker symbols so they are geometrically centered on their
+ * data point.
  */
 export const buildFreePositioningTraces = (
   points: readonly FreePositioningPoint[],
@@ -60,61 +61,29 @@ export const buildFreePositioningTraces = (
 
   for (const category of categoriesPresent) {
     const categoryPoints = validPoints.filter((p) => p.category === category);
-    const iconPoints = categoryPoints.filter((p) => p.icon != null);
-    const markerPoints = categoryPoints.filter((p) => p.icon == null);
-
-    if (markerPoints.length > 0) {
-      const hasLabels = markerPoints.some((p) => Boolean(p.name));
-      const trace: Data = {
-        type: 'scatter',
-        mode: hasLabels ? 'text+markers' : 'markers',
-        name: `${category}-markers`,
-        x: markerPoints.map((p) => (side === 'profile' ? p.alongSpan : (p.lateral as number))),
-        y: markerPoints.map((p) => p.altitude),
-        text: markerPoints.map((p) => p.name ?? ''),
-        textposition: 'top center',
-        hovertext: markerPoints.map((p) => p.name ?? category),
-        hoverinfo: 'x+y+text',
-        showlegend: false,
-        marker: {
-          size: markerPoints.map((p) => (p.editable ? EDITABLE_POINT_SIZE : DEFAULT_POINT_SIZE)),
-          color: markerPoints.map((p) =>
-            p.editable ? EDITABLE_POINT_COLOR : (p.color ?? CATEGORY_COLORS[category])
-          ),
-          symbol: CATEGORY_SYMBOLS[category],
-          line: {
-            width: markerPoints.map((p) => (p.editable ? 2 : 1)),
-            color: markerPoints.map((p) => (p.editable ? '#7f1d1d' : '#1f2937'))
-          }
+    const hasLabels = categoryPoints.some((p) => Boolean(p.name));
+    const trace: Data = {
+      type: 'scatter',
+      mode: hasLabels ? 'text+markers' : 'markers',
+      name: `${category}-markers`,
+      x: categoryPoints.map((p) => (side === 'profile' ? p.alongSpan : (p.lateral as number))),
+      y: categoryPoints.map((p) => p.altitude),
+      text: categoryPoints.map((p) => p.name ?? ''),
+      textposition: 'top center',
+      hovertext: categoryPoints.map((p) => p.name ?? category),
+      hoverinfo: 'x+y+text',
+      showlegend: false,
+      marker: {
+        size: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_SIZE : DEFAULT_POINT_SIZE)),
+        color: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_COLOR : (p.color ?? CATEGORY_COLORS[category]))),
+        symbol: CATEGORY_SYMBOLS[category],
+        line: {
+          width: categoryPoints.map((p) => (p.editable ? 2 : 1)),
+          color: categoryPoints.map((p) => (p.editable ? '#7f1d1d' : '#1f2937'))
         }
-      };
-      traces.push(trace);
-    }
-
-    if (iconPoints.length > 0) {
-      const textSize = Math.max(
-        ...iconPoints.map((p) => (p.editable ? EDITABLE_POINT_SIZE + 4 : DEFAULT_POINT_SIZE + 4))
-      );
-      const trace: Data = {
-        type: 'scatter',
-        mode: 'text',
-        name: `${category}-icons`,
-        x: iconPoints.map((p) => (side === 'profile' ? p.alongSpan : (p.lateral as number))),
-        y: iconPoints.map((p) => p.altitude),
-        text: iconPoints.map((p) => p.icon as string),
-        textposition: 'middle center',
-        textfont: {
-          size: textSize,
-          color: iconPoints.map((p) =>
-            p.editable ? EDITABLE_POINT_COLOR : (p.color ?? CATEGORY_COLORS[category])
-          )
-        },
-        hovertext: iconPoints.map((p) => p.name ?? category),
-        hoverinfo: 'x+y+text',
-        showlegend: false
-      };
-      traces.push(trace);
-    }
+      }
+    };
+    traces.push(trace);
   }
 
   return traces;

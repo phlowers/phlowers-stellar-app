@@ -17,8 +17,6 @@ export {
   EDITABLE_POINT_COLOR,
   EDITABLE_POINT_SIZE,
   FREE_POSITIONING_CATEGORIES,
-  LOAD_ICON,
-  MARKING_ICON,
   POINT_SELECTION_PIXEL_RADIUS
 } from '../free-positioning/free-positioning.constantes';
 

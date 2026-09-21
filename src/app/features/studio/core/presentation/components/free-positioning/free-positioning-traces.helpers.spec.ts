@@ -15,8 +15,7 @@ import {
   CATEGORY_SYMBOLS,
   DEFAULT_POINT_SIZE,
   EDITABLE_POINT_COLOR,
-  EDITABLE_POINT_SIZE,
-  LOAD_ICON
+  EDITABLE_POINT_SIZE
 } from './free-positioning.constantes';
 import { FreePositioningPoint, PlotLayout } from './free-positioning.interfaces';
 
@@ -54,7 +53,6 @@ describe('free-positioning-traces helpers', () => {
       lateral: 0,
       altitude: 135,
       editable: false,
-      icon: LOAD_ICON,
       color: '#9333ea'
     },
     {
@@ -127,7 +125,7 @@ describe('free-positioning-traces helpers', () => {
       expect(traces).toEqual([]);
     });
 
-    it('should generate marker traces for points without icons', () => {
+    it('should generate marker traces grouped by category', () => {
       const traces = buildFreePositioningTraces(samplePoints, 'profile', ['obstacle', 'floor']);
       expect(traces).toHaveLength(2); // obstacle-markers, floor-markers
 
@@ -141,29 +139,27 @@ describe('free-positioning-traces helpers', () => {
       expect(obstacleTrace).toBeDefined();
       expect(obstacleTrace.x).toEqual([50, 80]);
       expect(obstacleTrace.y).toEqual([120, 110]);
-      expect(obstacleTrace.mode).toBe('markers+text');
+      expect(obstacleTrace.mode).toBe('text+markers');
       expect(obstacleTrace.marker.size).toEqual([EDITABLE_POINT_SIZE, DEFAULT_POINT_SIZE]);
       expect(obstacleTrace.marker.color).toEqual([EDITABLE_POINT_COLOR, CATEGORY_COLORS.obstacle]);
       expect(obstacleTrace.marker.symbol).toBe(CATEGORY_SYMBOLS.obstacle);
     });
 
-    it('should generate text traces for points with icons', () => {
+    it('should render loads points as square markers on their category trace', () => {
       const traces = buildFreePositioningTraces(samplePoints, 'profile', ['loads']);
       expect(traces).toHaveLength(1);
 
       const loadTrace = traces[0] as {
-        mode: string;
-        text: string[];
-        textfont: { size: number[]; color: string[] };
+        name: string;
         x: number[];
         y: number[];
+        marker: { symbol: string };
       };
 
-      expect(loadTrace.mode).toBe('text');
-      expect(loadTrace.text).toEqual([LOAD_ICON]);
+      expect(loadTrace.name).toBe('loads-markers');
       expect(loadTrace.x).toEqual([40]);
       expect(loadTrace.y).toEqual([135]);
-      expect(loadTrace.textfont.color).toEqual(['#9333ea']);
+      expect(loadTrace.marker.symbol).toBe(CATEGORY_SYMBOLS.loads);
     });
 
     it('should use lateral coordinate when side is face', () => {
@@ -173,7 +169,7 @@ describe('free-positioning-traces helpers', () => {
       expect(obstacleTrace.y).toEqual([120, 110]);
     });
 
-    it('should handle points with editable icon correctly', () => {
+    it('should use the editable color and size for an editable load point', () => {
       const points: FreePositioningPoint[] = [
         {
           id: 'editable-load',
@@ -181,15 +177,15 @@ describe('free-positioning-traces helpers', () => {
           alongSpan: 25,
           lateral: 0,
           altitude: 100,
-          editable: true,
-          icon: LOAD_ICON
+          editable: true
         }
       ];
 
       const traces = buildFreePositioningTraces(points, 'profile', ['loads']);
-      const trace = traces[0] as { textfont: { color: string[]; size: number[] } };
-      expect(trace.textfont.color).toEqual([EDITABLE_POINT_COLOR]);
-      expect(trace.textfont.size).toEqual([EDITABLE_POINT_SIZE + 4]);
+      const trace = traces[0] as { marker: { color: string[]; size: number[]; symbol: string } };
+      expect(trace.marker.color).toEqual([EDITABLE_POINT_COLOR]);
+      expect(trace.marker.size).toEqual([EDITABLE_POINT_SIZE]);
+      expect(trace.marker.symbol).toBe(CATEGORY_SYMBOLS.loads);
     });
   });
 

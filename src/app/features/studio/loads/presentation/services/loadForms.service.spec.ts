@@ -208,6 +208,38 @@ describe('LoadFormsService', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('setLoadPosition', () => {
+    it('should store the placement abscissa as-is for a LEFT reference support', () => {
+      mockPlotService.temporaryLoadData = {
+        ...mockChargeData,
+        spanLoads: [{ ...mockChargeData.spanLoads[0], referenceSupport: 'LEFT' }]
+      };
+      mockPlotService.litData.mockReturnValue({
+        output_parameters: { span_length: [100] }
+      } as unknown as ReturnType<typeof mockPlotService.litData>);
+
+      service.setLoadPosition(30);
+
+      expect(mockPlotService.temporaryLoadData.spanLoads[0].loadPosition).toBe(30);
+      expect(service.activeLoadPosition()).toBe(30);
+    });
+
+    it('should convert the placement abscissa to a reference-relative position for a RIGHT reference support', () => {
+      mockPlotService.temporaryLoadData = {
+        ...mockChargeData,
+        spanLoads: [{ ...mockChargeData.spanLoads[0], referenceSupport: 'RIGHT' }]
+      };
+      mockPlotService.litData.mockReturnValue({
+        output_parameters: { span_length: [100] }
+      } as unknown as ReturnType<typeof mockPlotService.litData>);
+
+      service.setLoadPosition(30);
+
+      expect(mockPlotService.temporaryLoadData.spanLoads[0].loadPosition).toBe(70);
+      expect(service.activeLoadPosition()).toBe(70);
+    });
+  });
+
   describe('constructor effect gating', () => {
     it('should not call setLoads when worker is not ready even if a charge is selected', () => {
       mockPlotService.workerReady.mockReturnValue(false);

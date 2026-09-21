@@ -21,8 +21,8 @@ export const isOutsidePlotBounds = (x: number, y: number, layout: PlotLayout, pl
 
 /** Converts a pixel offset to the plot's data coordinates, formatted for display. */
 export const toMousePosition = (layout: PlotLayout, x: number, y: number): MousePosition => ({
-  x: Number(layout.xaxis.p2c(x)).toFixed(1),
-  z: Number(layout.yaxis.p2c(y)).toFixed(1)
+  x: Number(layout.xaxis.p2c(x)).toFixed(2),
+  z: Number(layout.yaxis.p2c(y)).toFixed(2)
 });
 
 /**

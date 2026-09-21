@@ -37,6 +37,7 @@ export interface AggregatePointsParams {
   loadPosition?: number | null;
   loadType?: 'punctual' | 'marking' | null;
   loadSpanSupportUuid?: string | null;
+  loadReferenceSupport?: 'LEFT' | 'RIGHT' | null;
 }
 
 export type { FreePositioningCategory, FreePositioningPoint };
