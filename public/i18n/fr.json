@@ -1138,7 +1138,9 @@
       "study-description-label": "Description",
       "charge-name-label": "Cas de charge",
       "charge-description-label": "Description du cas de charge",
-      "personnel-presence-label": "Présence du personnel"
+      "personnel-presence-label": "Présence du personnel",
+      "report-generated-success": "Rapport généré avec succès",
+      "report-generation-failed": "Échec de la génération du rapport"
     },
     "canton-report": {
       "title": "Rapport Données du canton",
