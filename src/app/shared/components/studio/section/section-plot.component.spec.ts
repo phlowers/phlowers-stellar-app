@@ -889,13 +889,11 @@ describe('SectionPlotComponent', () => {
       await component.refreshPlot();
 
       expect(mockCreatePlot).toHaveBeenCalledTimes(2);
-      expect(mockPlotElement.removeAllListeners).toHaveBeenCalledTimes(6);
+      expect(mockPlotElement.removeAllListeners).toHaveBeenCalledTimes(4);
       expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(1, 'plotly_clickannotation');
       expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(2, 'plotly_relayout');
-      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(3, 'plotly_click');
-      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(4, 'plotly_clickannotation');
-      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(5, 'plotly_relayout');
-      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(6, 'plotly_click');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(3, 'plotly_clickannotation');
+      expect(mockPlotElement.removeAllListeners).toHaveBeenNthCalledWith(4, 'plotly_relayout');
     });
 
     it('should preserve obstacle data across refreshes', async () => {
@@ -1174,16 +1172,15 @@ describe('SectionPlotComponent', () => {
   });
 
   describe('addEventListenersToPlot — floor point click', () => {
-    let capturedFloorHandler:
-      ((event: { points?: { data?: { name?: string }; customdata?: [string, number] }[] }) => void) | null = null;
+    let capturedHandler: ((event: { annotation?: { data?: unknown } }) => void) | null = null;
 
-    const makePlotCapturingClick = () => {
-      capturedFloorHandler = null;
+    const makePlotWithCapture = () => {
+      capturedHandler = null;
       return {
         removeAllListeners: vi.fn(),
-        on: (event: string, fn: (event: unknown) => void) => {
-          if (event === 'plotly_click') {
-            capturedFloorHandler = fn as typeof capturedFloorHandler;
+        on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
+          if (event === 'plotly_clickannotation') {
+            capturedHandler = fn;
           }
         }
       } as unknown as PlotlyHTMLElement;
@@ -1195,43 +1192,25 @@ describe('SectionPlotComponent', () => {
     });
 
     it('should select the clicked floor point in the floor form', () => {
-      component.addEventListenersToPlot(makePlotCapturingClick());
+      component.addEventListenersToPlot(makePlotWithCapture());
 
-      capturedFloorHandler!({ points: [{ data: { name: 'floor' }, customdata: ['floor-1', 2] }] });
+      capturedHandler!({ annotation: { data: { type: 'floor', floorUuid: 'floor-1', pointIndex: 2 } } });
 
       expect(mockFloorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-1', 2);
     });
 
     it('should open the floor side tab when a floor point is clicked', () => {
-      component.addEventListenersToPlot(makePlotCapturingClick());
+      component.addEventListenersToPlot(makePlotWithCapture());
 
-      capturedFloorHandler!({ points: [{ data: { name: 'floor' }, customdata: ['floor-1', 2] }] });
+      capturedHandler!({ annotation: { data: { type: 'floor', floorUuid: 'floor-1', pointIndex: 2 } } });
 
       expect(mockSideTabsService.sideTabs()).toBe(2);
     });
 
-    it('should select the point when the click lands on the floor ribbon', () => {
-      // The ribbon is the easy 3D hit target and carries the same customdata as the markers.
-      component.addEventListenersToPlot(makePlotCapturingClick());
+    it('should ignore other annotation types', () => {
+      component.addEventListenersToPlot(makePlotWithCapture());
 
-      capturedFloorHandler!({ points: [{ data: { name: 'floor-ribbon' }, customdata: ['floor-1', 1] }] });
-
-      expect(mockFloorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-1', 1);
-      expect(mockSideTabsService.sideTabs()).toBe(2);
-    });
-
-    it('should ignore clicks on non-floor traces', () => {
-      component.addEventListenersToPlot(makePlotCapturingClick());
-
-      capturedFloorHandler!({ points: [{ data: { name: 'span' }, customdata: ['floor-1', 2] }] });
-
-      expect(mockFloorFormService.selectFloorPoint).not.toHaveBeenCalled();
-    });
-
-    it('should ignore floor clicks without customdata', () => {
-      component.addEventListenersToPlot(makePlotCapturingClick());
-
-      capturedFloorHandler!({ points: [{ data: { name: 'floor' } }] });
+      capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
 
       expect(mockFloorFormService.selectFloorPoint).not.toHaveBeenCalled();
     });

@@ -1,13 +1,11 @@
 import type { SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
 import type { CableModificationAnnotationData } from './helpers/createCableModificationAnnotations.interfaces';
+import type { FloorAnnotationData } from './helpers/createFloorTraces';
 import type { ObstacleAnnotationData } from './helpers/obstacles';
 
 /** Payload emitted by Plotly's `plotly_clickannotation` event for our annotated plot. */
 export interface ClickAnnotationEvent {
-  annotation?: { data?: ObstacleAnnotationData | SpanLoadAnnotationData | CableModificationAnnotationData };
-}
-
-/** Payload emitted by Plotly's `plotly_click` event on a floor marker, carrying its `[floorUuid, pointIndex]` customdata. */
-export interface FloorClickEvent {
-  points?: { data?: { name?: string }; customdata?: [string, number] }[];
+  annotation?: {
+    data?: ObstacleAnnotationData | SpanLoadAnnotationData | CableModificationAnnotationData | FloorAnnotationData;
+  };
 }
