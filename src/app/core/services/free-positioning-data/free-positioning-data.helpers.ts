@@ -4,7 +4,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { DISTANCE_POINT_KEY, FLOOR_POINT_KEY, MARKING_LOAD_KEY, PUNCTUAL_LOAD_KEY } from './free-positioning-data.constantes';
+import {
+  DISTANCE_POINT_KEY,
+  FLOOR_POINT_KEY,
+  MARKING_LOAD_KEY,
+  PUNCTUAL_LOAD_KEY
+} from './free-positioning-data.constantes';
 import { AggregatePointsParams, FreePositioningPoint } from './free-positioning-data.interfaces';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 
@@ -62,9 +67,7 @@ export const buildObstaclePoints = (params: AggregatePointsParams): FreePosition
     const domainObs = sectionObstacles.find((o) => o.uuid === litObs.uuid);
     if (!domainObs) continue;
 
-    const matchesSpan =
-      domainObs.supportUuid === supportUuid ||
-      domainObs.supportIndex === params.frozenSpan;
+    const matchesSpan = domainObs.supportUuid === supportUuid || domainObs.supportIndex === params.frozenSpan;
 
     if (matchesSpan) {
       litObs.points.forEach(([cx, cy, cz], ptIdx) => {
@@ -93,11 +96,7 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
   const supportUuid = currentSupport?.uuid;
 
   // Active floor being edited in the form
-  if (
-    params.editableCategory === 'floor' &&
-    params.activeFloorPoints &&
-    params.activeFloorPoints.length > 0
-  ) {
+  if (params.editableCategory === 'floor' && params.activeFloorPoints && params.activeFloorPoints.length > 0) {
     params.activeFloorPoints.forEach((pt, idx) => {
       if (
         pt.distanceToRefSupport !== null &&
@@ -156,8 +155,7 @@ export const buildDistancePoints = (params: AggregatePointsParams): FreePosition
   const currentSupport = params.supports[params.frozenSpan];
   const supportUuid = currentSupport?.uuid;
 
-  const matchesSpan =
-    !params.distanceSupportUuid || params.distanceSupportUuid === supportUuid;
+  const matchesSpan = !params.distanceSupportUuid || params.distanceSupportUuid === supportUuid;
 
   if (matchesSpan && params.distancePositions) {
     params.distancePositions.forEach((pos, idx) => {

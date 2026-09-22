@@ -87,9 +87,7 @@ describe('free-positioning-data.helpers', () => {
         ...baseParams,
         editableCategory: 'floor', // editing floor, not obstacle
         section: {
-          obstacles: [
-            { uuid: 'obs-span0', supportUuid: 'sup-0', name: 'Tree' }
-          ]
+          obstacles: [{ uuid: 'obs-span0', supportUuid: 'sup-0', name: 'Tree' }]
         } as unknown as Section,
         litData: {
           obstacles: [

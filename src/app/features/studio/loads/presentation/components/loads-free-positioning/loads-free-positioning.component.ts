@@ -4,13 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  OnDestroy
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
 import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
@@ -45,9 +39,7 @@ export class LoadsFreePositioningComponent implements OnDestroy {
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
-  readonly points = computed(() =>
-    this.dataService.getPoints(this.frozenSpan(), 'loads')
-  );
+  readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), 'loads'));
 
   onPlacement(placement: FreePositioningPlacement): void {
     this.loadFormsService.setLoadPosition(placement.alongSpan);

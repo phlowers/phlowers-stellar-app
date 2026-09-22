@@ -40,9 +40,7 @@ export class FloorFreePositioningComponent implements OnDestroy {
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
-  readonly points = computed(() =>
-    this.dataService.getPoints(this.frozenSpan(), 'floor')
-  );
+  readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), 'floor'));
 
   onPlacement(placement: FreePositioningPlacement): void {
     const activeIndex = this.floorFormService.activePointIndex();
@@ -67,4 +65,3 @@ export class FloorFreePositioningComponent implements OnDestroy {
     this.plotOptionsService.setFreePositioningMode(false, 'floor');
   }
 }
-

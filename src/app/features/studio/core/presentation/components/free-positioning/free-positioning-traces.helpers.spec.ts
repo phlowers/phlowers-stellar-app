@@ -233,14 +233,7 @@ describe('free-positioning-traces helpers', () => {
 
     it('should consider lateral coordinates for face side', () => {
       // obs-1 has lateral: 10 -> c2p(10) = 5, altitude: 120 -> c2p(120) = 40
-      const nearest = findNearestPointAtPixel(
-        samplePoints,
-        'face',
-        mockLayout,
-        6,
-        40,
-        ['obstacle']
-      );
+      const nearest = findNearestPointAtPixel(samplePoints, 'face', mockLayout, 6, 40, ['obstacle']);
 
       expect(nearest?.id).toBe('obs-1');
     });

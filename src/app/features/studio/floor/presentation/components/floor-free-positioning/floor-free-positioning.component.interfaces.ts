@@ -12,4 +12,3 @@ export type {
   PlotAnnotation,
   PlotElement
 } from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';
-

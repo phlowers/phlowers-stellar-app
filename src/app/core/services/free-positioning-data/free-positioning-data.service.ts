@@ -52,8 +52,7 @@ export class FreePositioningDataService {
     const activeObstacleUuid = this.obstacleFormService.form?.get('uuid')?.value as string | undefined;
     const isAbsoluteAltitude = this.obstacleFormService.form?.get('altitudeType')?.value === 'absolute';
     const referenceSupportValue = this.obstacleFormService.form?.get('referenceSupport')?.value as
-      | ReferenceSupport
-      | undefined;
+      ReferenceSupport | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? frozenSpan + 1 : frozenSpan;
     const refAltitude = getSupportAltitudeNgf(litData, referenceSupportIndex);
 

@@ -4,13 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  OnDestroy
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
 import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
@@ -28,11 +22,11 @@ import { PlotService } from '@services/plot/plot.service';
 import { LateralDistanceType, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { getSupportAltitudeNgf } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 
-import { OBSTACLE_FP_FORCED_FRAME_WARNING_KEY, OBSTACLE_FREE_POSITIONING_CONFIG } from './obstacle-free-positioning.component.constantes';
 import {
-  computeNewObstaclePosition,
-  parseObstacleFormPointIndex
-} from './obstacle-free-positioning.component.helpers';
+  OBSTACLE_FP_FORCED_FRAME_WARNING_KEY,
+  OBSTACLE_FREE_POSITIONING_CONFIG
+} from './obstacle-free-positioning.component.constantes';
+import { computeNewObstaclePosition, parseObstacleFormPointIndex } from './obstacle-free-positioning.component.helpers';
 
 @Component({
   selector: 'app-obstacle-free-positioning',
@@ -76,9 +70,7 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
-  readonly points = computed(() =>
-    this.dataService.getPoints(this.frozenSpan(), 'obstacle')
-  );
+  readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), 'obstacle'));
 
   onPlacement(placement: FreePositioningPlacement): void {
     const activeIndex = this.obstaclesService.activePointIndex();
@@ -111,8 +103,7 @@ export class ObstacleFreePositioningComponent implements OnDestroy {
   private getReferenceSupportAltitude(): number {
     const startSupport = this.frozenSpan();
     const referenceSupportValue = this.obstacleFormService.form.get('referenceSupport')?.value as
-      | ReferenceSupport
-      | undefined;
+      ReferenceSupport | undefined;
     const referenceSupportIndex = referenceSupportValue === ReferenceSupport.RIGHT ? startSupport + 1 : startSupport;
     return getSupportAltitudeNgf(this.plotService.litData(), referenceSupportIndex);
   }

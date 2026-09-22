@@ -69,7 +69,12 @@ describe('FreePositioningPlotComponent', () => {
   };
 
   const mockSpanService = {
-    section: signal({ supports: [{ uuid: 'sup-1', number: '1' }, { uuid: 'sup-2', number: '2' }] })
+    section: signal({
+      supports: [
+        { uuid: 'sup-1', number: '1' },
+        { uuid: 'sup-2', number: '2' }
+      ]
+    })
   };
 
   const mockSideTabsService = {
@@ -81,8 +86,7 @@ describe('FreePositioningPlotComponent', () => {
     error: vi.fn()
   };
 
-  const getByTestId = (id: string): HTMLElement | null =>
-    fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
+  const getByTestId = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
 
   beforeEach(async () => {
     vi.clearAllMocks();

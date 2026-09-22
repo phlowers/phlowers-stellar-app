@@ -37,7 +37,13 @@ describe('FreePositioningToggleComponent', () => {
   beforeEach(async () => {
     mockPlotOptionsService.isFreePositioningMode.set(false);
     mockPlotOptionsService.freePositioningSource.set(null);
-    mockPlotOptionsService.plotOptions.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
+    mockPlotOptionsService.plotOptions.set({
+      view: '2d',
+      side: 'profile',
+      startSupport: 0,
+      endSupport: 1,
+      invert: false
+    });
     vi.clearAllMocks();
 
     await TestBed.configureTestingModule({
@@ -99,7 +105,13 @@ describe('FreePositioningToggleComponent', () => {
   });
 
   it('should force a 2D reprojection on the frozen span when enabling free positioning', () => {
-    mockPlotOptionsService.plotOptions.set({ view: '3d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
+    mockPlotOptionsService.plotOptions.set({
+      view: '3d',
+      side: 'profile',
+      startSupport: 0,
+      endSupport: 1,
+      invert: false
+    });
     fixture.componentRef.setInput('spanIndex', 2);
     fixture.detectChanges();
 
@@ -112,7 +124,13 @@ describe('FreePositioningToggleComponent', () => {
   it('should reproject on the tab span even when the studio shows a different span (reference support bug)', () => {
     // Studio shows span 1-2 (startSupport 0) while the tab selects span 2-3 (index 1). The
     // reprojection must re-zero litData on the tab span so its left support sits at x=0.
-    mockPlotOptionsService.plotOptions.set({ view: '2d', side: 'profile', startSupport: 0, endSupport: 1, invert: false });
+    mockPlotOptionsService.plotOptions.set({
+      view: '2d',
+      side: 'profile',
+      startSupport: 0,
+      endSupport: 1,
+      invert: false
+    });
     fixture.componentRef.setInput('spanIndex', 1);
     fixture.detectChanges();
 
@@ -122,7 +140,13 @@ describe('FreePositioningToggleComponent', () => {
   });
 
   it('should fall back to the studio startSupport when no tab span is selected', () => {
-    mockPlotOptionsService.plotOptions.set({ view: '2d', side: 'profile', startSupport: 3, endSupport: 4, invert: false });
+    mockPlotOptionsService.plotOptions.set({
+      view: '2d',
+      side: 'profile',
+      startSupport: 3,
+      endSupport: 4,
+      invert: false
+    });
 
     component.onChange(true);
 

@@ -60,7 +60,12 @@
     />
   </div>
   <div class="col-span-2 flex items-center">
-    <app-free-positioning-toggle source="loads" [disabled]="!spanSelectValue()" [spanIndex]="selectedSpanIndex()" labelKey="loads.load-marking.free-positioning-label" />
+    <app-free-positioning-toggle
+      source="loads"
+      [disabled]="!spanSelectValue()"
+      [spanIndex]="selectedSpanIndex()"
+      labelKey="loads.load-marking.free-positioning-label"
+    />
   </div>
 
   <div>

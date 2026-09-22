@@ -16,10 +16,7 @@ import { DistanceMeasuringService } from '@features/studio/distance-measuring/di
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 
 import { DISTANCE_FREE_POSITIONING_CONFIG } from './distance-free-positioning.component.constantes';
-import {
-  computeNewDistancePosition,
-  parseDistanceFormPointIndex
-} from './distance-free-positioning.component.helpers';
+import { computeNewDistancePosition, parseDistanceFormPointIndex } from './distance-free-positioning.component.helpers';
 
 /**
  * Distance-measuring free positioning wrapper: thin consumer of the shared FreePositioningPlotComponent.
@@ -42,9 +39,7 @@ export class DistanceFreePositioningComponent implements OnDestroy {
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
-  readonly points = computed(() =>
-    this.dataService.getPoints(this.frozenSpan(), 'distance')
-  );
+  readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), 'distance'));
 
   onPlacement(placement: FreePositioningPlacement): void {
     const activeIndex = this.distanceMeasuringService.activePointIndex();
@@ -73,4 +68,3 @@ export class DistanceFreePositioningComponent implements OnDestroy {
     this.plotOptionsService.setFreePositioningMode(false, 'distance');
   }
 }
-

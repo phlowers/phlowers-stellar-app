@@ -10,10 +10,7 @@ import { Position3D } from '@shared/domain/models/obstacle.model';
 /**
  * Computes updated 3D coordinates when placing a distance measuring point.
  */
-export const computeNewDistancePosition = (
-  current: Position3D,
-  placement: FreePositioningPlacement
-): Position3D => {
+export const computeNewDistancePosition = (current: Position3D, placement: FreePositioningPlacement): Position3D => {
   if (placement.side === 'profile') {
     return {
       x: placement.alongSpan,

@@ -41,8 +41,16 @@ import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot
 import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { MousePosition, PlotAnnotation, PlotElement } from './free-positioning.interfaces';
-import { DEBOUNCED_REFRESH_STUDIO_DELAY, DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY } from './free-positioning.constantes';
-import { attachPlotEventListeners, getPixelOffset, isOutsidePlotBounds, toMousePosition } from './free-positioning.helpers';
+import {
+  DEBOUNCED_REFRESH_STUDIO_DELAY,
+  DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY
+} from './free-positioning.constantes';
+import {
+  attachPlotEventListeners,
+  getPixelOffset,
+  isOutsidePlotBounds,
+  toMousePosition
+} from './free-positioning.helpers';
 
 // Constants
 const PLOT_CONFIG = {

@@ -54,20 +54,12 @@
 
     <div class="free-positioning-plot__body" [class.free-positioning-plot__body--with-face]="config().showFace">
       <div class="free-positioning-plot__chart-pane free-positioning-plot__chart-pane--profile">
-        <div
-          [id]="plotIds.PROFILE"
-          class="free-positioning-plot__chart"
-          data-testid="plot-container-profile"
-        ></div>
+        <div [id]="plotIds.PROFILE" class="free-positioning-plot__chart" data-testid="plot-container-profile"></div>
       </div>
 
       @if (config().showFace) {
         <div class="free-positioning-plot__chart-pane free-positioning-plot__chart-pane--face">
-          <div
-            [id]="plotIds.FACE"
-            class="free-positioning-plot__chart"
-            data-testid="plot-container-face"
-          ></div>
+          <div [id]="plotIds.FACE" class="free-positioning-plot__chart" data-testid="plot-container-face"></div>
         </div>
       }
     </div>

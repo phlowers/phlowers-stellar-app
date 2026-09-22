@@ -60,11 +60,7 @@ describe('FreePositioningDataService', () => {
   const mockLitData: GetSectionOutput = {
     coords: {
       spans: [],
-      supports: [
-        [[0, 0, 100]],
-        [[200, 0, 105]],
-        [[400, 0, 110]]
-      ],
+      supports: [[[0, 0, 100]], [[200, 0, 105]], [[400, 0, 110]]],
       insulators: []
     },
     obstacles: [
@@ -88,7 +84,9 @@ describe('FreePositioningDataService', () => {
 
   const mockPlotService = {
     litData: signal<GetSectionOutput | null>(mockLitData),
-    temporaryLoadData: null as unknown as { spanLoads: { loadPosition: number; type: string; supportUuid: string }[] } | null
+    temporaryLoadData: null as unknown as {
+      spanLoads: { loadPosition: number; type: string; supportUuid: string }[];
+    } | null
   };
 
   let mockObstacleForm: ReturnType<FormBuilder['group']>;
@@ -118,10 +116,7 @@ describe('FreePositioningDataService', () => {
     fb = new FormBuilder();
 
     mockObstacleForm = fb.group({
-      positions: fb.array([
-        fb.group({ x: [50], y: [10], z: [120] }),
-        fb.group({ x: [80], y: [15], z: [125] })
-      ]),
+      positions: fb.array([fb.group({ x: [50], y: [10], z: [120] }), fb.group({ x: [80], y: [15], z: [125] })]),
       supportUuid: ['sup-0'],
       altitudeType: ['absolute'],
       referenceSupport: ['LEFT']

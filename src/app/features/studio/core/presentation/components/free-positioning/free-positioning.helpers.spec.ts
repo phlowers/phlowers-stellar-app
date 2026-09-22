@@ -5,7 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { vi } from 'vitest';
-import { attachPlotEventListeners, getPixelOffset, isOutsidePlotBounds, toMousePosition } from './free-positioning.helpers';
+import {
+  attachPlotEventListeners,
+  getPixelOffset,
+  isOutsidePlotBounds,
+  toMousePosition
+} from './free-positioning.helpers';
 import { PlotElement, PlotLayout } from './free-positioning.interfaces';
 
 const layout: PlotLayout = {
@@ -54,7 +59,6 @@ describe('free-positioning.helpers', () => {
       expect(isOutsidePlotBounds(100, 50, layout, incompletePlotElement)).toBe(false);
     });
   });
-
 
   describe('toMousePosition', () => {
     it('should convert a pixel offset to formatted data coordinates', () => {

@@ -11,7 +11,13 @@ describe('obstacle-free-positioning helpers', () => {
   describe('computeNewObstaclePosition', () => {
     it('should update x and z from profile placement in absolute mode', () => {
       const current = { x: 10, y: 5, z: 20 };
-      const placement = { alongSpan: 50, lateral: null, altitude: 100, category: 'obstacle' as const, side: 'profile' as const };
+      const placement = {
+        alongSpan: 50,
+        lateral: null,
+        altitude: 100,
+        category: 'obstacle' as const,
+        side: 'profile' as const
+      };
       const result = computeNewObstaclePosition(current, placement, true, 40);
 
       expect(result).toEqual({ x: 50, y: 5, z: 100 });
@@ -19,7 +25,13 @@ describe('obstacle-free-positioning helpers', () => {
 
     it('should subtract reference altitude in relative mode', () => {
       const current = { x: 10, y: 5, z: 20 };
-      const placement = { alongSpan: 50, lateral: null, altitude: 100, category: 'obstacle' as const, side: 'profile' as const };
+      const placement = {
+        alongSpan: 50,
+        lateral: null,
+        altitude: 100,
+        category: 'obstacle' as const,
+        side: 'profile' as const
+      };
       const result = computeNewObstaclePosition(current, placement, false, 40);
 
       expect(result).toEqual({ x: 50, y: 5, z: 60 });
@@ -41,7 +53,13 @@ describe('obstacle-free-positioning helpers', () => {
 
     it('should update y from face placement and keep x and z', () => {
       const current = { x: 50, y: 5, z: 60 };
-      const placement = { alongSpan: 0, lateral: 15, altitude: 100, category: 'obstacle' as const, side: 'face' as const };
+      const placement = {
+        alongSpan: 0,
+        lateral: 15,
+        altitude: 100,
+        category: 'obstacle' as const,
+        side: 'face' as const
+      };
       const result = computeNewObstaclePosition(current, placement, false, 40);
 
       expect(result).toEqual({ x: 50, y: 15, z: 60 });

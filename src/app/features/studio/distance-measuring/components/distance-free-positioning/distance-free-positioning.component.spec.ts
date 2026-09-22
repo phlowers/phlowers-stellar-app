@@ -58,10 +58,7 @@ describe('DistanceFreePositioningComponent', () => {
     vi.clearAllMocks();
     fb = new FormBuilder();
 
-    formArray = fb.array([
-      fb.group({ x: [10], y: [null], z: [20] }),
-      fb.group({ x: [null], y: [null], z: [null] })
-    ]);
+    formArray = fb.array([fb.group({ x: [10], y: [null], z: [20] }), fb.group({ x: [null], y: [null], z: [null] })]);
 
     mockDistanceMeasuringService.form = formArray;
     mockDistanceMeasuringService.activePointIndex.set(0);
@@ -187,4 +184,3 @@ describe('DistanceFreePositioningComponent', () => {
     });
   });
 });
-

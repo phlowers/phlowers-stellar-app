@@ -71,10 +71,7 @@ describe('ObstacleFreePositioningComponent', () => {
     vi.clearAllMocks();
     fb = new FormBuilder();
 
-    positionsArray = fb.array([
-      fb.group({ x: [10], y: [5], z: [20] }),
-      fb.group({ x: [30], y: [15], z: [25] })
-    ]);
+    positionsArray = fb.array([fb.group({ x: [10], y: [5], z: [20] }), fb.group({ x: [30], y: [15], z: [25] })]);
 
     obstacleForm = fb.group({
       positions: positionsArray,

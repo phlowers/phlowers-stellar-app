@@ -12,11 +12,7 @@ describe('free-positioning-plot.helpers', () => {
   describe('extractYValues', () => {
     it('should extract finite numbers from scatter traces', () => {
       const mockPlot = {
-        data: [
-          { y: [10, 20, null, Number.NaN, 30] },
-          { y: [40, Infinity, 50] },
-          {}
-        ]
+        data: [{ y: [10, 20, null, Number.NaN, 30] }, { y: [40, Infinity, 50] }, {}]
       } as unknown as PlotlyHTMLElement;
 
       const result = extractYValues(mockPlot);
