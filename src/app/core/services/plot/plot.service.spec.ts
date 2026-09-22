@@ -21,6 +21,7 @@ import {
   GetSectionWithBaseOutput,
   GetSectionOutput,
   Distance,
+  DistancePoint,
   PythonErrorCode
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@shared/domain';
@@ -620,6 +621,58 @@ describe('PlotService', () => {
       await service.refreshProjection();
 
       expect(service.diagnostics()).toEqual([obstacleWarning]);
+    });
+
+    it("should complete a floor's distances with the end points the engine skipped", async () => {
+      spanService.section.set({
+        ...mockSection,
+        supports: [{ uuid: 'sup-0' }, { uuid: 'sup-1' }],
+        floors: [{ uuid: 'floor-uuid', supportUuid: 'sup-0', referenceSupport: 'LEFT', points: [] }]
+      } as unknown as Section);
+      const middlePoint = { pointIndex: 1, signedDistanceVertical: 5 } as DistancePoint;
+      const obstacleDistance = { obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] };
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: {
+          sectionOutput: {
+            ...mockGetSectionWithBaseOutput,
+            current: {
+              ...mockGetSectionOutput,
+              coords: {
+                ...mockGetSectionOutput.coords,
+                spans: [
+                  [
+                    [0, 0, 20],
+                    [50, 0, 5],
+                    [100, 0, 20]
+                  ]
+                ]
+              }
+            }
+          },
+          obstacles: [
+            {
+              uuid: 'floor-uuid',
+              points: [
+                [0, 0, 1],
+                [50, 0, 0],
+                [100, 0, 2]
+              ]
+            }
+          ],
+          distances: [obstacleDistance, { obstacleUuid: 'floor-uuid', points: [middlePoint] }]
+        },
+        error: null,
+        diagnostics: []
+      });
+
+      await service.refreshProjection();
+
+      const [obstacle, floor] = obstacleStateService.distances();
+      expect(obstacle).toEqual(obstacleDistance);
+      expect(floor.points.map((point) => point.pointIndex)).toEqual([0, 1, 2]);
+      expect(floor.points[1]).toBe(middlePoint);
+      expect(floor.points[0].signedDistanceVertical).toBe(19);
+      expect(floor.points[2].signedDistanceVertical).toBe(18);
     });
 
     it('should update plotOptions with section supports range via initSectionStudio', async () => {

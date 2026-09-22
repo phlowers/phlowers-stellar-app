@@ -5,6 +5,7 @@ import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Section, Study } from '@shared/domain';
 import {
   DataError,
+  Distance,
   GetSectionOutput,
   ObstacleOutput,
   PythonErrorCode,
@@ -26,7 +27,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { alignSectionSpanLoadsToSupports } from './plot-section-loads.helpers';
-import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
+import { computeMissingFloorDistances, mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
 import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
@@ -207,7 +208,9 @@ export class PlotService {
     if (currentLitData && obstacles.length > 0) {
       this.litData.set({ ...currentLitData, obstacles });
     }
-    this.obstacleStateService.setDistances(result?.distances ?? []);
+    this.obstacleStateService.setDistances(
+      this.withFloorFallbackDistances(result?.distances ?? [], obstacles, currentLitData)
+    );
     this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
     this.error.set(error);
     this.diagnostics.set(this.withoutFloorIntersectionWarnings(diagnostics));
@@ -219,11 +222,53 @@ export class PlotService {
   };
 
   /**
+   * Completes the engine's distances with the floor points it skipped — always a floor's first and
+   * last points, which sit on the supports — so selecting them still shows a vertical distance.
+   * See `computeMissingFloorDistances`.
+   */
+  private withFloorFallbackDistances(
+    distances: Distance[],
+    obstacles: ObstacleOutput['obstacles'],
+    litData: GetSectionOutput | null
+  ): Distance[] {
+    const floors = this.spanService.section()?.floors ?? [];
+    if (!floors.length || !litData) {
+      return distances;
+    }
+    const completed = [...distances];
+    for (const floor of floors) {
+      const floorPoints = obstacles.find((obstacle) => obstacle.uuid === floor.uuid)?.points;
+      const cablePoints = litData.coords?.spans?.[this.spanService.getSupportIndex(floor.supportUuid)];
+      if (!floorPoints || !cablePoints) {
+        continue;
+      }
+      const index = completed.findIndex((distance) => distance.obstacleUuid === floor.uuid);
+      const measuredPoints = index >= 0 ? completed[index].points : [];
+      const missing = computeMissingFloorDistances(
+        floorPoints,
+        cablePoints,
+        new Set(measuredPoints.map((point) => point.pointIndex))
+      );
+      if (!missing.length) {
+        continue;
+      }
+      const points = [...measuredPoints, ...missing].sort((a, b) => a.pointIndex - b.pointIndex);
+      if (index >= 0) {
+        completed[index] = { ...completed[index], points };
+      } else {
+        completed.push({ obstacleUuid: floor.uuid, points });
+      }
+    }
+    return completed;
+  }
+
+  /**
    * Drops the engine's "distance plane does not intersect the cable" warning when it is about a
    * floor. A floor's end points sit on the supports themselves, where the plane has no cable to
    * intersect — the cable hangs off the support axis — so the engine skips those points and warns
-   * for every saved floor, whatever its clearance. The floor's own clearance is computed from the
-   * rendered polylines instead (`computeFloorClearance`), so the warning carries no information
+   * for every saved floor, whatever its clearance. The floor's own clearance and those points'
+   * distances are computed from the rendered polylines instead (`computeFloorClearance`,
+   * `computeMissingFloorDistances`), so the warning carries no information
    * here; obstacles keep it, where it does mean their point could not be measured.
    */
   private withoutFloorIntersectionWarnings(diagnostics: PythonDiagnostic[]): PythonDiagnostic[] {

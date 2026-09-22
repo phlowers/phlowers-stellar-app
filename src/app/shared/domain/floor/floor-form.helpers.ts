@@ -1,5 +1,6 @@
 import { LateralDistanceType, Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { Floor } from '@shared/domain/models/floor.model';
+import type { DistancePoint } from '@services/worker_python/tasks/types';
 import { FLOOR_OBSTACLE_TYPE } from './floor-form.constantes';
 
 /** Vertical clearance between the cable and the floor profile at its narrowest point. */
@@ -84,6 +85,76 @@ export function computeFloorClearance(floorPoints: number[][], cablePoints: numb
     }
   }
   return narrowest;
+}
+
+// Point of a 3D polyline at abscissa `t` of its profile, linearly interpolated, clamped to its ends.
+const pointAt = (points: number[][], profile: Profile, t: number): number[] => {
+  const next = profile.findIndex((point) => point.t >= t);
+  if (next < 0) {
+    return points.at(-1)!;
+  }
+  if (next === 0 || profile[next].t === t) {
+    return points[next];
+  }
+  const ratio = (t - profile[next - 1].t) / (profile[next].t - profile[next - 1].t);
+  return points[next].map((value, axis) => points[next - 1][axis] + (value - points[next - 1][axis]) * ratio);
+};
+
+/**
+ * Distances for the floor points the engine could not measure, from the rendered cable instead.
+ *
+ * The engine measures a point in the plane crossing the span right there. A point sitting on a
+ * support — a floor's first and last points always do — gets nothing back: the cable starts at the
+ * insulator attachment, which does not reach past that plane (a tension chain even ends metres inside
+ * the span), so the engine skips it. Here the cable altitude is read on the rendered catenary at the
+ * point's abscissa, clamped to the attachment beyond its end, as `computeFloorClearance` does.
+ *
+ * `measured` lists the point indexes the engine already covered; the result only holds the others,
+ * in the engine's `DistancePoint` shape and frame so the plot and quick measures treat them alike.
+ */
+export function computeMissingFloorDistances(
+  floorPoints: number[][],
+  cablePoints: number[][],
+  measured: Set<number>
+): DistancePoint[] {
+  if (floorPoints.length < 2 || cablePoints.length < 2) {
+    return [];
+  }
+  const origin = floorPoints[0];
+  const end = floorPoints.at(-1)!;
+  const [dx, dy] = [end[0] - origin[0], end[1] - origin[1]];
+  const spanLength = Math.hypot(dx, dy);
+  if (spanLength === 0) {
+    return [];
+  }
+  const floorProfile = toProfile(floorPoints, origin, dx / spanLength, dy / spanLength);
+  const cableProfile = toProfile(cablePoints, origin, dx / spanLength, dy / spanLength);
+  const orderedCable = cableProfile[0].t > cableProfile.at(-1)!.t ? [...cablePoints].reverse() : cablePoints;
+  if (orderedCable !== cablePoints) {
+    cableProfile.reverse();
+  }
+
+  return floorPoints.flatMap((point, pointIndex) => {
+    if (measured.has(pointIndex)) {
+      return [];
+    }
+    const [x, y, z] = point;
+    const linePoint = pointAt(orderedCable, cableProfile, floorProfile[pointIndex].t);
+    const signedDistanceVertical = linePoint[2] - z;
+    const distanceHorizontal = Math.hypot(linePoint[0] - x, linePoint[1] - y);
+    return [
+      {
+        pointIndex,
+        linePoint: [linePoint[0], linePoint[1], linePoint[2]],
+        virtualPointHorizontal: [linePoint[0], linePoint[1], z],
+        virtualPointVertical: [x, y, linePoint[2]],
+        distanceDiagonal: Math.hypot(distanceHorizontal, signedDistanceVertical),
+        distanceHorizontal,
+        distanceVertical: Math.abs(signedDistanceVertical),
+        signedDistanceVertical
+      }
+    ];
+  });
 }
 
 /**
