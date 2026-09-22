@@ -29,6 +29,8 @@ export interface AggregatePointsParams {
   activeFloorPoints?: { distanceToRefSupport: number | null; altitude: number | null; removable?: boolean }[];
   activeFloorIndex?: number | null;
   activeFloorSpan?: string | null;
+  /** Reference support selected in the floor form; floor form points are stored relative to it. */
+  floorReferenceSupport?: 'LEFT' | 'RIGHT' | null;
   // Distance state
   distancePositions?: Position3D[];
   distanceActiveIndex?: number | null;

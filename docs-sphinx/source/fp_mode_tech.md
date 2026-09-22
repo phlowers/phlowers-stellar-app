@@ -43,7 +43,10 @@ Concretely:
 - Obstacle reads `obstacleFormService.positionsSnapshot()` (a `toSignal` of the
   positions `FormArray`), **not** `form.get('positions').value`.
 - Floor reads `floorFormService.pointsView()` (a `computed` backed by the
-  reactive point snapshot), **not** the raw `FormArray.value`.
+  reactive point snapshot), **not** the raw `FormArray.value`. It also reads
+  `floorFormService.referenceSupportValue()` (a `toSignal` of the reference
+  support control) so flipping the reference support re-renders the floor
+  markers mirrored — see *Reference support mirroring* below.
 
 This keeps all tabs behaving identically: clicking the left (x·z / profile) plot
 fills and shows a point's along-span and altitude, and clicking the right (y·z /
@@ -76,6 +79,45 @@ free-positioning click — without touching the `[value]` + `onPositionInput` /
 `onPositionBlur` typing-state handling. The distance tab never had this problem
 because it binds `[formControl]`, whose `ControlValueAccessor` writes the DOM
 directly on `patchValue`, independent of change detection.
+
+### Reference support mirroring
+
+The plot's x-axis is always measured from the **left support** of the frozen
+span (`litData` is re-zeroed there), while floor points and load positions are
+stored **relative to their reference support**, which can be LEFT or RIGHT. The
+two frames are bridged by a shared pure helper in
+`free-positioning-data.helpers.ts`, generalizing the conversion the loads tab
+already applied inline in `LoadFormsService.setLoadPosition`:
+
+```ts
+export const mirrorPositionForReferenceSupport = (
+  position: number,
+  spanLength: number | null | undefined,
+  referenceSupport: 'LEFT' | 'RIGHT' | null | undefined
+): number =>
+  referenceSupport === 'RIGHT' && typeof spanLength === 'number' && !Number.isNaN(spanLength)
+    ? spanLength - position
+    : position;
+```
+
+The conversion is **self-inverse**, so the same function serves both directions:
+
+- **Display (form → plot)** — `buildFloorPoints` mirrors
+  `distanceToRefSupport` to the plot abscissa: active form points use the form's
+  `floorReferenceSupport` (passed through `AggregatePointsParams` from the
+  signal-backed `floorFormService.referenceSupportValue()`), saved-floor points
+  use the floor's own stored `referenceSupport`. Flipping the reference support
+  select therefore re-renders the markers in place instead of making them jump.
+- **Placement (plot click → form)** — `FloorFreePositioningComponent.onPlacement`
+  mirrors the left-measured click abscissa back into the reference-relative
+  `distanceToRefSupport` (span length taken from
+  `floorFormService.spanSupports().spanLength`) before calling
+  `setFreePointPosition`, exactly like the loads tab does in
+  `LoadFormsService.setLoadPosition`.
+
+The span length comes from the left support's `spanLength` field
+(`supports[frozenSpan].spanLength`), not from `litData`, so the mirroring works
+even before any worker output is available.
 
 ## The frozen span
 

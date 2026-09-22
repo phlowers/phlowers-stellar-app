@@ -102,7 +102,8 @@ describe('FreePositioningDataService', () => {
   const mockFloorFormService = {
     pointsView: vi.fn(),
     activePointIndex: signal<number | null>(1),
-    spanValue: signal<string | null>('sup-0')
+    spanValue: signal<string | null>('sup-0'),
+    referenceSupportValue: signal<'LEFT' | 'RIGHT' | null>('LEFT')
   };
 
   const mockDistanceMeasuringService = {

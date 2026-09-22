@@ -41,6 +41,22 @@ current span and every control that could change it.
     are reinterpreted in the forced frame. The user is expected to review the
     displayed positions after the warning.
 
+## Reference support side (floor tab)
+
+On the **floor** tab, the reference support can be LEFT or RIGHT and stays
+**editable** while free-positioning is on:
+
+- Floor points are stored as a *distance to the reference support*. The plot
+  measures positions from the span's **left** support, so when the reference
+  support is RIGHT the points are **mirrored along the span** (a point at
+  distance `d` from the right support is drawn at `span length − d`).
+- Switching the reference support **keeps the already placed points in place**:
+  the same floor profile is simply read from the other end, both on the plot and
+  in the form (which already mirrors the saved distances and reverses the point
+  order).
+- Clicking the plot while the reference support is RIGHT fills the point's
+  distance **to the right support**, matching what the form displays.
+
 ## What is frozen while fp mode is on
 
 While free-positioning is active, the following controls are **disabled** so that

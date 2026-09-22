@@ -32,6 +32,12 @@ describe('FloorFreePositioningComponent', () => {
     points: null as unknown as FormArray,
     activePointIndex: signal<number | null>(1),
     spanValue: signal<string | null>('sup-0'),
+    referenceSupportValue: signal<'LEFT' | 'RIGHT' | null>('LEFT'),
+    spanSupports: signal<{ reference: null; closing: null; spanLength: number | null }>({
+      reference: null,
+      closing: null,
+      spanLength: 200
+    }),
     pointsView: vi.fn(),
     setActivePoint: vi.fn(),
     setFreePointPosition: vi.fn()
@@ -68,6 +74,7 @@ describe('FloorFreePositioningComponent', () => {
 
     mockFloorFormService.points = pointsArray;
     mockFloorFormService.spanValue.set('sup-0');
+    mockFloorFormService.referenceSupportValue.set('LEFT');
     mockPlotOptionsService.frozenSpan.set(0);
     mockFloorFormService.activePointIndex.set(1);
     mockFloorFormService.pointsView.mockReturnValue([
@@ -141,6 +148,23 @@ describe('FloorFreePositioningComponent', () => {
 
       expect(mockFloorFormService.setFreePointPosition).toHaveBeenCalledWith(1, {
         distanceToRefSupport: 55.4,
+        altitude: 97.2
+      });
+    });
+
+    it('should mirror the click abscissa when the reference support is RIGHT', () => {
+      mockFloorFormService.referenceSupportValue.set('RIGHT');
+      fixture.detectChanges();
+      component.onPlacement({
+        alongSpan: 55.4,
+        lateral: null,
+        altitude: 97.2,
+        category: 'floor',
+        side: 'profile'
+      });
+
+      expect(mockFloorFormService.setFreePointPosition).toHaveBeenCalledWith(1, {
+        distanceToRefSupport: 200 - 55.4,
         altitude: 97.2
       });
     });

@@ -64,6 +64,8 @@ export class FreePositioningDataService {
     }));
     const activeFloorIndex = this.floorFormService.activePointIndex();
     const activeFloorSpan = this.floorFormService.spanValue();
+    // Signal-backed, so flipping the reference support re-renders the floor points mirrored.
+    const floorReferenceSupport = this.floorFormService.referenceSupportValue();
 
     // Distance state
     const distancePositions = this.distanceMeasuringService.positions();
@@ -91,6 +93,7 @@ export class FreePositioningDataService {
       activeFloorPoints: floorPoints,
       activeFloorIndex,
       activeFloorSpan,
+      floorReferenceSupport,
       distancePositions,
       distanceActiveIndex,
       distanceSupportUuid,

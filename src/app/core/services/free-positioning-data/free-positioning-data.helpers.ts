@@ -24,6 +24,21 @@ export const getSupportAltitudeNgf = (litData: GetSectionOutput | null | undefin
 };
 
 /**
+ * Mirrors a position between the plot's left-support abscissa and a reference-support-relative
+ * distance — the same conversion the loads tab applies to its load position (`setLoadPosition`).
+ * Identity for a LEFT reference support, `spanLength - position` for a RIGHT one. The conversion
+ * is self-inverse, so it works in both directions (form → plot and plot click → form).
+ */
+export const mirrorPositionForReferenceSupport = (
+  position: number,
+  spanLength: number | null | undefined,
+  referenceSupport: 'LEFT' | 'RIGHT' | null | undefined
+): number =>
+  referenceSupport === 'RIGHT' && typeof spanLength === 'number' && !Number.isNaN(spanLength)
+    ? spanLength - position
+    : position;
+
+/**
  * Builds obstacle points for the given frozen span.
  */
 export const buildObstaclePoints = (params: AggregatePointsParams): FreePositioningPoint[] => {
@@ -94,8 +109,13 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
   const points: FreePositioningPoint[] = [];
   const currentSupport = params.supports[params.frozenSpan];
   const supportUuid = currentSupport?.uuid;
+  // The plot abscissa is measured from the left support, while floor distances are stored relative
+  // to the reference support — mirror them for a RIGHT reference so points stay in place when the
+  // user flips the reference support side.
+  const spanLength = currentSupport?.spanLength;
 
-  // Active floor being edited in the form
+  // Active floor being edited in the form (form points are always expressed in the form's
+  // reference support frame, already mirrored by `FloorFormService` when reading a saved floor).
   if (params.editableCategory === 'floor' && params.activeFloorPoints && params.activeFloorPoints.length > 0) {
     params.activeFloorPoints.forEach((pt, idx) => {
       if (
@@ -107,7 +127,7 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
         points.push({
           id: `floor-form-${idx}`,
           category: 'floor',
-          alongSpan: pt.distanceToRefSupport,
+          alongSpan: mirrorPositionForReferenceSupport(pt.distanceToRefSupport, spanLength, params.floorReferenceSupport),
           lateral: null,
           altitude: pt.altitude,
           editable: idx === params.activeFloorIndex && (pt.removable ?? true),
@@ -119,7 +139,7 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
     return points;
   }
 
-  // Saved floor from section
+  // Saved floor from section (stored in the floor's own reference support frame)
   const floors = params.section?.floors ?? [];
   const matchingFloor = floors.find((f) => f.supportUuid === supportUuid);
   if (matchingFloor) {
@@ -133,7 +153,7 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
         points.push({
           id: `floor-${matchingFloor.uuid}-${idx}`,
           category: 'floor',
-          alongSpan: pt.distanceToRefSupport,
+          alongSpan: mirrorPositionForReferenceSupport(pt.distanceToRefSupport, spanLength, matchingFloor.referenceSupport),
           lateral: null,
           altitude: pt.altitude,
           editable: false,

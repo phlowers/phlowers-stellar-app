@@ -7,6 +7,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
+import { mirrorPositionForReferenceSupport } from '@core/services/free-positioning-data/free-positioning-data.helpers';
 import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
 import {
   FreePositioningPlacement,
@@ -46,8 +47,14 @@ export class FloorFreePositioningComponent implements OnDestroy {
     const activeIndex = this.floorFormService.activePointIndex();
     if (activeIndex === null || !this.floorFormService.pointsView()[activeIndex]?.meta.removable) return;
 
+    // The plot click abscissa is measured from the left support, while the form stores the distance
+    // to the selected reference support — mirror it for a RIGHT reference, like the loads tab does.
     this.floorFormService.setFreePointPosition(activeIndex, {
-      distanceToRefSupport: placement.alongSpan,
+      distanceToRefSupport: mirrorPositionForReferenceSupport(
+        placement.alongSpan,
+        this.floorFormService.spanSupports().spanLength,
+        this.floorFormService.referenceSupportValue()
+      ),
       altitude: placement.altitude
     });
   }

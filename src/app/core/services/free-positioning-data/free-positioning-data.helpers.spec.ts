@@ -10,7 +10,8 @@ import {
   buildDistancePoints,
   buildFloorPoints,
   buildLoadPoints,
-  buildObstaclePoints
+  buildObstaclePoints,
+  mirrorPositionForReferenceSupport
 } from './free-positioning-data.helpers';
 import { AggregatePointsParams } from './free-positioning-data.interfaces';
 import { MARKING_LOAD_KEY, PUNCTUAL_LOAD_KEY } from './free-positioning-data.constantes';
@@ -31,6 +32,28 @@ describe('free-positioning-data.helpers', () => {
     litData: null,
     supports: mockSupports
   };
+
+  describe('mirrorPositionForReferenceSupport', () => {
+    it('should keep the position as-is for a LEFT reference support', () => {
+      expect(mirrorPositionForReferenceSupport(50, 200, 'LEFT')).toBe(50);
+    });
+
+    it('should mirror the position along the span for a RIGHT reference support', () => {
+      expect(mirrorPositionForReferenceSupport(50, 200, 'RIGHT')).toBe(150);
+    });
+
+    it('should be self-inverse for a RIGHT reference support', () => {
+      expect(mirrorPositionForReferenceSupport(mirrorPositionForReferenceSupport(50, 200, 'RIGHT'), 200, 'RIGHT')).toBe(50);
+    });
+
+    it('should keep the position as-is when reference support or span length is missing', () => {
+      expect(mirrorPositionForReferenceSupport(50, 200, null)).toBe(50);
+      expect(mirrorPositionForReferenceSupport(50, 200, undefined)).toBe(50);
+      expect(mirrorPositionForReferenceSupport(50, null, 'RIGHT')).toBe(50);
+      expect(mirrorPositionForReferenceSupport(50, undefined, 'RIGHT')).toBe(50);
+      expect(mirrorPositionForReferenceSupport(50, NaN, 'RIGHT')).toBe(50);
+    });
+  });
 
   describe('buildObstaclePoints', () => {
     it('should build points from active obstacle form when editableCategory is obstacle', () => {
@@ -217,6 +240,56 @@ describe('free-positioning-data.helpers', () => {
       expect(points[0].alongSpan).toBe(50);
       expect(points[0].altitude).toBe(40);
       expect(points[0].editable).toBe(false);
+    });
+
+    it('should mirror active floor points for a RIGHT reference support', () => {
+      const supports: Support[] = [
+        { uuid: 'sup-0', number: '1', spanLength: 200 } as Support,
+        { uuid: 'sup-1', number: '2' } as Support
+      ];
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        supports,
+        editableCategory: 'floor',
+        floorReferenceSupport: 'RIGHT',
+        activeFloorPoints: [
+          { distanceToRefSupport: 0, altitude: 50, removable: false },
+          { distanceToRefSupport: 40, altitude: 45, removable: true }
+        ],
+        activeFloorIndex: 1
+      };
+
+      const points = buildFloorPoints(params);
+      expect(points).toHaveLength(2);
+      // Reference (right) support sits at x = spanLength; a point 40 m from it sits at 200 - 40.
+      expect(points[0].alongSpan).toBe(200);
+      expect(points[1].alongSpan).toBe(160);
+    });
+
+    it('should mirror saved floor points stored with a RIGHT reference support', () => {
+      const supports: Support[] = [
+        { uuid: 'sup-0', number: '1', spanLength: 200 } as Support,
+        { uuid: 'sup-1', number: '2' } as Support
+      ];
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        supports,
+        editableCategory: 'obstacle',
+        section: {
+          floors: [
+            {
+              uuid: 'floor-0',
+              supportUuid: 'sup-0',
+              referenceSupport: 'RIGHT',
+              points: [{ distanceToRefSupport: 50, altitude: 40 }]
+            }
+          ]
+        } as unknown as Section
+      };
+
+      const points = buildFloorPoints(params);
+      expect(points).toHaveLength(1);
+      expect(points[0].alongSpan).toBe(150);
     });
   });
 
