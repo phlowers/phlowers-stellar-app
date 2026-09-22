@@ -36,12 +36,15 @@ export class FreePositioningToggleComponent {
 
   onChange(enabled: boolean): void {
     if (enabled) {
-      // Reproject in 2D on the tab-selected (frozen) span so litData's x-origin is that span's
-      // left support. Free positioning needs span-projected 2D coordinates, and the reference
-      // support must follow the tab selection, not the studio's last-shown span.
+      // Enable the mode first: setFreePositioningMode snapshots the current view, camera and
+      // frozen span. Only then reproject in 2D on the tab-selected (frozen) span so litData's
+      // x-origin is that span's left support — the snapshot must hold the pre-fp view, and the
+      // reference support must follow the tab selection, not the studio's last-shown span.
+      this.plotOptionsService.setFreePositioningMode(true, this.source(), this.spanIndex());
       const span = this.spanIndex() ?? this.plotOptionsService.plotOptions().startSupport;
       this.plotService.plotOptionsChange({ view: '2d', startSupport: span, endSupport: span + 1 });
+      return;
     }
-    this.plotOptionsService.setFreePositioningMode(enabled, this.source(), this.spanIndex());
+    this.plotOptionsService.setFreePositioningMode(false, this.source(), this.spanIndex());
   }
 }

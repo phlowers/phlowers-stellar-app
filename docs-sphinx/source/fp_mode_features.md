@@ -26,6 +26,11 @@ current span and every control that could change it.
   - The span currently **selected in the tab** (its span dropdown) is **captured
     once** and becomes the *frozen span* for the whole fp session. It does not
     matter which span the studio plot was last zoomed to — the tab selection wins.
+  - The view the studio was in (3D / 2D, profile / face side, support window,
+    invert, and the 3D camera position) is **recorded**, so it can be restored
+    when the mode is turned off.
+  - The plot is forced to a **2D single-span view** of the frozen span, whatever
+    the previous view was.
   - The opened tab loads its data for that frozen span.
   - The plot displays that span and does not move.
 - On the **obstacle** tab, free-positioning works in a single coordinate frame:
@@ -82,12 +87,17 @@ To work on a different span the user must:
 2. Change the span using the normal span navigation / selector.
 3. Turn the free-positioning switch **on** again.
 
-On re-entry, the newly selected span is captured as the new frozen span.
+On re-entry, the newly selected span is captured as the new frozen span (and the
+current view is recorded again as the one to restore on exit).
 
 ## Leaving free-positioning mode
 
 When the switch is turned **off**, all frozen controls become interactive again
-and the studio returns to its normal reactive behaviour.
+and the studio returns to its normal reactive behaviour. The view recorded when
+the mode was turned on — 3D / 2D, profile / face side, support window, invert,
+and the 3D camera position — is **restored**, so the user lands back exactly
+where they were before entering the mode. This happens whichever way the mode is
+turned off (toggle switch, tab change, or automatic exit).
 
 On the **obstacle** and **floor** tabs, fp mode also turns **off by itself** when
 the last editable point is removed (the toggle switch flips back off). There is

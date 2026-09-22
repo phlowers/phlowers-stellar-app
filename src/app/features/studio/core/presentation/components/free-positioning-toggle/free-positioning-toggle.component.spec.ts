@@ -153,6 +153,14 @@ describe('FreePositioningToggleComponent', () => {
     expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ view: '2d', startSupport: 3, endSupport: 4 });
   });
 
+  it('should enable the mode before forcing the 2D reprojection so the pre-fp view is snapshotted', () => {
+    component.onChange(true);
+
+    const snapshotOrder = mockPlotOptionsService.setFreePositioningMode.mock.invocationCallOrder[0];
+    const reprojectOrder = mockPlotService.plotOptionsChange.mock.invocationCallOrder[0];
+    expect(snapshotOrder).toBeLessThan(reprojectOrder);
+  });
+
   it('should not reproject when disabling free positioning', () => {
     component.onChange(false);
 

@@ -347,6 +347,63 @@ describe('PlotOptionsService', () => {
     });
   });
 
+  describe('freePositioningSavedView', () => {
+    const viewOptions: PlotOptions = { view: '3d', side: 'face', startSupport: 2, endSupport: 6, invert: true };
+
+    it('should initialize to null', () => {
+      expect(service.freePositioningSavedView()).toBeNull();
+    });
+
+    it('should snapshot the current plot options and live camera when the mode is switched on', () => {
+      const cam: Camera = { eye: { x: 1, y: 1, z: 1 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      document.getElementById = vi.fn().mockReturnValue({ _fullLayout: { scene: { camera: cam } } });
+      service.plotOptions.set(viewOptions);
+
+      service.setFreePositioningMode(true, 'floor');
+
+      expect(service.freePositioningSavedView()).toEqual({ plotOptions: viewOptions, camera: cam });
+    });
+
+    it('should keep the pre-fp snapshot when the forced 2D reprojection changes the options', () => {
+      service.plotOptions.set(viewOptions);
+      service.setFreePositioningMode(true, 'floor');
+
+      service.plotOptions.set({ view: '2d', side: 'profile', startSupport: 3, endSupport: 4, invert: false });
+
+      expect(service.freePositioningSavedView()?.plotOptions).toEqual(viewOptions);
+    });
+
+    it('should keep the snapshot when the mode is switched off so PlotService can restore it', () => {
+      service.plotOptions.set(viewOptions);
+      service.setFreePositioningMode(true, 'floor');
+
+      service.setFreePositioningMode(false, 'floor');
+
+      expect(service.freePositioningSavedView()?.plotOptions).toEqual(viewOptions);
+    });
+
+    it('should re-capture the view when re-entering free positioning', () => {
+      service.plotOptions.set(viewOptions);
+      service.setFreePositioningMode(true, 'floor');
+      service.setFreePositioningMode(false, 'floor');
+      const newOptions: PlotOptions = { view: '2d', side: 'profile', startSupport: 1, endSupport: 2, invert: false };
+      service.plotOptions.set(newOptions);
+
+      service.setFreePositioningMode(true, 'floor');
+
+      expect(service.freePositioningSavedView()?.plotOptions).toEqual(newOptions);
+    });
+
+    it('should clear the snapshot on reset', () => {
+      service.plotOptions.set(viewOptions);
+      service.setFreePositioningMode(true, 'floor');
+
+      service.reset();
+
+      expect(service.freePositioningSavedView()).toBeNull();
+    });
+  });
+
   describe('pendingCameraRestore', () => {
     it('should initialize to null', () => {
       expect(service.pendingCameraRestore()).toBeNull();

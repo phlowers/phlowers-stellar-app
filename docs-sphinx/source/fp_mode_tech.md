@@ -146,17 +146,21 @@ The frozen span is a single source of truth held by `PlotOptionsService`:
   projected range** in `refreshProjection()`. If fp mode is entered while the
   studio is projected on a different span, `litData` keeps the old x-origin and
   the frozen span's left support (the *reference support*) is drawn at a non-zero
-  x. To avoid this, `FreePositioningToggleComponent.onChange` reprojects on the
-  frozen span **before** enabling the mode:
+  x. To avoid this, `FreePositioningToggleComponent.onChange` enables the mode —
+  which snapshots the current view and camera (see *View and camera restore*
+  below) — and **then** reprojects on the frozen span:
 
   ```ts
   if (enabled) {
+    this.plotOptionsService.setFreePositioningMode(true, this.source(), this.spanIndex());
     const span = this.spanIndex() ?? this.plotOptionsService.plotOptions().startSupport;
     this.plotService.plotOptionsChange({ view: '2d', startSupport: span, endSupport: span + 1 });
+    return;
   }
-  this.plotOptionsService.setFreePositioningMode(enabled, this.source(), this.spanIndex());
   ```
 
+  The mode is enabled **first** so `setFreePositioningMode` captures the pre-fp
+  view and camera before the 2D reprojection overwrites them.
   `plotService.plotOptionsChange` forces a 2D single-span view **and** triggers
   `refreshProjection()`, so `litData` is recomputed with the frozen span's left
   support at `x = 0`. The reprojection lives in the toggle (not in
@@ -173,6 +177,31 @@ The frozen span is a single source of truth held by `PlotOptionsService`:
 `LoadFormsService.getActiveSpanIndex()` also returns
 `this.plotOptionsService.frozenSpan()` instead of resolving the span from tab
 form fields.
+
+### View and camera restore
+
+Entering fp mode forces a 2D single-span view, discarding the view the user had.
+To give it back on exit, `PlotOptionsService.setFreePositioningMode(true, ...)`
+snapshots the current state into the `freePositioningSavedView` signal
+**before** the toggle forces the reprojection:
+
+- `plotOptions` — a shallow copy of the full options object (view, side, support
+  window, invert);
+- `camera` — the live 3D camera read from the Plotly DOM via `getCamera()`
+  (`null` when the previous view had no 3D scene).
+
+The restore is applied by a single generic effect in `PlotService` — not per
+tab — so it fires no matter which control turned the mode off (toggle, tab
+change, wrapper `ngOnDestroy`, auto-exit effect): when `isFreePositioningMode()`
+is `false` while a snapshot exists, the effect clears the snapshot, stores the
+camera in `pendingCameraRestore` (consumed by `SectionPlotComponent` after the
+first 3D render, like the back-navigation restore), and calls
+`plotService.plotOptionsChange({ ...savedView.plotOptions })`, which also
+refreshes the projection so `litData` matches the restored support window. The
+effect lives in `PlotService` because restoring the support window needs
+`refreshProjection()`, which `PlotOptionsService` cannot reach (circular
+dependency). `PlotOptionsService.reset()` clears the snapshot so leaving the
+studio never restores a stale view.
 
 ### Removed reactive machinery
 

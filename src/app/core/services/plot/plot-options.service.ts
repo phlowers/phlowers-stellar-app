@@ -12,7 +12,10 @@ import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptio
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
 import { checkIfProjectionNeedRefresh, getLiveCamera } from './plot-options.utils';
-import { FreePositioningSource } from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';
+import {
+  FreePositioningSavedView,
+  FreePositioningSource
+} from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';
 
 /** Default plot options used when initializing or resetting the studio view. */
 const defaultPlotOptions: PlotOptions = {
@@ -55,6 +58,12 @@ export class PlotOptionsService {
    * displayed span during the session — the user must leave the mode to select another span.
    */
   readonly frozenSpan = signal<number>(0);
+  /**
+   * View and camera captured when free positioning mode is switched on, before the caller forces
+   * the 2D single-span reprojection. Consumed and cleared by PlotService when the mode is switched
+   * off, so the previous view is restored no matter which control exited the mode.
+   */
+  readonly freePositioningSavedView = signal<FreePositioningSavedView | null>(null);
 
   private readonly document = inject(DOCUMENT);
 
@@ -130,6 +139,12 @@ export class PlotOptionsService {
       return;
     }
     if (enabled) {
+      // Snapshot the current view (options + live camera) before the caller forces the 2D
+      // single-span reprojection, so it can be restored when the mode is switched off.
+      this.freePositioningSavedView.set({
+        plotOptions: { ...untracked(() => this.plotOptions()) },
+        camera: this.getCamera()
+      });
       // Snapshot the span once so the frozen view never follows later form/plot changes.
       // Prefer the span currently selected in the owning tab; fall back to the displayed span.
       const snapshot = spanIndex ?? untracked(() => this.plotOptions().startSupport);
@@ -147,6 +162,7 @@ export class PlotOptionsService {
     this.isFreePositioningMode.set(false);
     this.freePositioningSource.set(null);
     this.frozenSpan.set(0);
+    this.freePositioningSavedView.set(null);
     this.scalingFactors.set({ x: 1, y: 1, z: 1, aspectMode: 'data' });
     this.aspectRatio.set({ x: 1, y: 1, z: 1 });
   }

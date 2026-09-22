@@ -5,8 +5,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { Camera } from 'plotly.js-dist-min';
+
+import { PlotOptions } from '@shared/types/plot.types';
+
 /** Feature that can drive free positioning mode; only its owner may turn the mode off. */
 export type FreePositioningSource = 'obstacle' | 'floor' | 'loads' | 'distance';
+
+/**
+ * Plot view and camera captured when free positioning mode is switched on, before the forced
+ * 2D single-span reprojection. Restored by PlotService when the mode is switched off.
+ */
+export interface FreePositioningSavedView {
+  /** Full plot options (view, side, support window, invert) as they were before entering the mode. */
+  plotOptions: PlotOptions;
+  /** Live 3D camera at capture time; null when the previous view had no 3D scene. */
+  camera: Camera | null;
+}
 
 /** Category of object supported in unified free positioning. */
 export type FreePositioningCategory = 'obstacle' | 'floor' | 'distance' | 'loads';
