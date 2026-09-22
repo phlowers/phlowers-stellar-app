@@ -21,6 +21,7 @@ import {
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE,
+  SECTION_TITLE_HEIGHT,
   SEPARATOR_MARGIN_Y
 } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
@@ -133,7 +134,7 @@ export function drawSectionTitle(doc: jsPDF, title: string, startY: number): num
   const titleWidth = doc.getTextWidth(title);
   doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, startY + 1, PAGE_MARGIN.left + titleWidth, startY + 1);
-  return startY + LINE_HEIGHT + 2;
+  return startY + SECTION_TITLE_HEIGHT;
 }
 
 /**

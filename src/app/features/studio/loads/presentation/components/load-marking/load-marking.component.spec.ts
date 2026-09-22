@@ -37,7 +37,8 @@ const createTemporaryLoadData = (overrides: Partial<SpanLoad> = {}): ChargeData 
       loadPosition: 2,
       ...overrides
     }
-  ]
+  ],
+  cableModifParams: []
 });
 
 describe('LoadMarkingComponent', () => {
@@ -368,7 +369,8 @@ describe('LoadMarkingComponent', () => {
           loadWeight: 20,
           loadPosition: 5
         }
-      ]
+      ],
+      cableModifParams: []
     });
 
     beforeEach(() => {

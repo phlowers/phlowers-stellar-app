@@ -1,7 +1,4 @@
-import {
-  CableSpanManipulation,
-  CableSupportManipItem
-} from '@shared/domain';
+import { CableSpanManipulation, CableSupportManipItem } from '@shared/domain';
 import { SymmetryType } from '@shared/domain/models/charge.model';
 
 /** Row data representing climate parameters in the loads table. */

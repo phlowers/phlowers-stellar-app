@@ -7,51 +7,18 @@
 
 import type jsPDF from 'jspdf';
 
-import { CableSupportManipulation, SupportAnchoringType, SupportManipType } from '@shared/domain/models/cable-support-manipulation.model';
 import { SymmetryType } from '@shared/domain/models/charge.model';
 import { CONTENT_WIDTH, PAGE_MARGIN, PARAGRAPH_INDENT, PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
-import { drawBulletList, drawHeader, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  drawBulletList,
+  drawHeader,
+  drawSectionTitle,
+  drawSeparator,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
 
-import { LoadsReportData, LoadsReportLabels, SupportManipReportRow } from './loads-data-report.interfaces';
-
-/**
- * Flattens support manipulations (`manip1` + optional `manip2`) into one column per instance for
- * the transposed support manipulation table. The display index (N°) is only shown on the first
- * instance of a given support manipulation.
- */
-export function flattenSupportManipulations(
-  manipulations: CableSupportManipulation[],
-  resolveSupportLabel: (supportUuid: string) => string,
-  resolveTypeLabel: (type: SupportManipType) => string,
-  resolveAnchoringLabel: (anchoring: SupportAnchoringType | null) => string | null
-): SupportManipReportRow[] {
-  const rows: SupportManipReportRow[] = [];
-
-  manipulations.forEach((manip, index) => {
-    const supportLabel = resolveSupportLabel(manip.supportUuid);
-
-    rows.push({
-      displayIndex: String(index + 1),
-      supportLabel,
-      ...manip.manip1,
-      type: resolveTypeLabel(manip.manip1.type),
-      anchoring: resolveAnchoringLabel(manip.manip1.anchoring)
-    });
-
-    if (manip.manip2) {
-      rows.push({
-        displayIndex: '',
-        supportLabel,
-        ...manip.manip2,
-        type: resolveTypeLabel(manip.manip2.type),
-        anchoring: resolveAnchoringLabel(manip.manip2.anchoring)
-      });
-    }
-  });
-
-  return rows;
-}
+import { LoadsReportData, LoadsReportLabels } from './loads-data-report.interfaces';
 
 /** Draws the study & canton metadata section (page 1, portrait, 1 column). Returns the next Y. */
 export function drawStudyAndCantonSection(
@@ -94,21 +61,21 @@ export function drawClimateSection(
   const items: PdfBulletItem[] = [
     { label: labels.windPressure, value: formatValue(climate.windPressure, PDF_UNITS.pascal, 0) },
     { label: labels.cableTemperature, value: formatValue(climate.cableTemperature, PDF_UNITS.celsius, 0) },
+    { label: labels.personnelPresence, value: data.personnelPresence ? labels.yes : labels.no },
     {
       label: labels.iceIndicator,
       value: climate.symmetryType === SymmetryType.DIS_SYMMETRIC ? labels.disSymmetric : labels.symmetric
     },
     ...(isDisSymmetric
       ? [
-          { label: labels.frontierSupport, value: String(climate.frontierSupportNumber) },
+          { label: labels.frontierSupport, value: data.frontierSupportLabel ?? '-' },
           {
             label: labels.iceThicknessBefore,
             value: formatValue(climate.iceThicknessBefore, PDF_UNITS.centimeters, 0)
           },
           { label: labels.iceThicknessAfter, value: formatValue(climate.iceThicknessAfter, PDF_UNITS.centimeters, 0) }
         ]
-      : [{ label: labels.iceThickness, value: formatValue(climate.iceThickness, PDF_UNITS.centimeters, 0) }]),
-    { label: labels.personnelPresence, value: data.personnelPresence ? labels.yes : labels.no }
+      : [{ label: labels.iceThickness, value: formatValue(climate.iceThickness, PDF_UNITS.centimeters, 0) }])
   ];
   y = drawBulletList(doc, items, y, leftX, CONTENT_WIDTH - PARAGRAPH_INDENT);
 
@@ -134,4 +101,3 @@ export function drawLoadsReportPage1(doc: jsPDF, data: LoadsReportData, labels: 
   y = drawStudyAndCantonSection(doc, data, labels, y);
   drawClimateSection(doc, data, labels, y);
 }
-

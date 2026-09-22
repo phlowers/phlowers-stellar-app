@@ -32,6 +32,20 @@ export const LINE_WIDTH_THIN = 0.05;
  */
 export const SEPARATOR_MARGIN_Y = LINE_HEIGHT;
 
+/**
+ * Total vertical space (mm) consumed by a horizontal separator, margins included.
+ * Callers that need to reserve room for a separator before drawing it must use this constant
+ * rather than recomputing it, so `drawSeparator` stays the single source of truth.
+ */
+export const SEPARATOR_HEIGHT = 2 * SEPARATOR_MARGIN_Y;
+
+/**
+ * Total vertical space (mm) consumed by an underlined section title.
+ * Callers that need to reserve room for a section title before drawing it must use this constant
+ * rather than recomputing it, so `drawSectionTitle` stays the single source of truth.
+ */
+export const SECTION_TITLE_HEIGHT = LINE_HEIGHT + 2;
+
 /** Paragraph indent in mm (11 pt × 0.35 mm/pt). Applied as left-column offset from PAGE_MARGIN.left. */
 export const PARAGRAPH_INDENT = 3.85;
 
@@ -65,5 +79,6 @@ export const PDF_UNITS = {
   pascal: 'Pa',
   celsius: '°C',
   cra: '%CRA',
-  centimeters: 'cm'
+  centimeters: 'cm',
+  squareMeters: 'm\u00B2'
 } as const;

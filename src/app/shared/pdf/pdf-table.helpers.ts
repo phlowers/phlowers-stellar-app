@@ -7,7 +7,14 @@
 
 import jsPDF from 'jspdf';
 
-import { LANDSCAPE_PAGE, FONT_SIZES, LINE_HEIGHT, LINE_WIDTH_THIN, PAGE_MARGIN, SEPARATOR_MARGIN_Y } from '@shared/pdf/pdf-layout.constantes';
+import {
+  LANDSCAPE_PAGE,
+  FONT_SIZES,
+  LINE_WIDTH_THIN,
+  PAGE_MARGIN,
+  SECTION_TITLE_HEIGHT,
+  SEPARATOR_HEIGHT
+} from '@shared/pdf/pdf-layout.constantes';
 import { drawHeader, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 
 import {
@@ -84,15 +91,24 @@ function wrapCell(doc: jsPDF, text: string, width: number): string[] {
 }
 
 /** Computes the rendered height (mm) of a single table row, wrapping label + value cells. */
-function computeRowHeight(doc: jsPDF, row: { label: string; values: string[] }, labelColWidth: number, valueColWidth: number): number {
+function computeRowHeight(
+  doc: jsPDF,
+  row: { label: string; values: string[] },
+  labelColWidth: number,
+  valueColWidth: number
+): number {
   const labelLines = wrapCell(doc, row.label, labelColWidth);
   const valueLines = row.values.map((value) => wrapCell(doc, value, valueColWidth));
   const maxLines = Math.max(labelLines.length, ...valueLines.map((lines) => lines.length), 1);
   return maxLines * TABLE_ROW_HEIGHT;
 }
 
-/** Computes the total rendered height (mm) of a table without drawing it. */
-export function computeTableHeight(doc: jsPDF, table: PdfTableModel, contentWidth: number, labelColWidth: number): number {
+/**
+ * Computes the total rendered height (mm) of a table without drawing it.
+ * Takes the same `pageWidth` as `drawTable` so both derive the column widths identically.
+ */
+export function computeTableHeight(doc: jsPDF, table: PdfTableModel, pageWidth: number, labelColWidth: number): number {
+  const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
   const valueColWidth = (contentWidth - labelColWidth) / MAX_COLS_PER_TABLE;
   return table.rows.reduce((total, row) => total + computeRowHeight(doc, row, labelColWidth, valueColWidth), 0);
 }
@@ -180,7 +196,6 @@ export function drawResultTablesFlow(
 ): void {
   const contentWidth = LANDSCAPE_PAGE.width - PAGE_MARGIN.left - PAGE_MARGIN.right;
   const pageBottom = LANDSCAPE_PAGE.height - PAGE_MARGIN.bottom;
-  const sectionTitleHeight = LINE_HEIGHT + 2;
   let y = 0;
 
   const startNewPage = (): number => {
@@ -195,12 +210,10 @@ export function drawResultTablesFlow(
 
     // Reserve space for the title, its first table AND the separator closing the section, so the
     // title is never drawn alone at the bottom of a page with its first table pushed away.
-    const firstTableHeight = computeTableHeight(doc, section.tables[0], contentWidth, labelColWidth);
-    const requiredForSectionStart = sectionTitleHeight + firstTableHeight + 2 * SEPARATOR_MARGIN_Y;
+    const firstTableHeight = computeTableHeight(doc, section.tables[0], LANDSCAPE_PAGE.width, labelColWidth);
+    const requiredForSectionStart = SECTION_TITLE_HEIGHT + firstTableHeight + SEPARATOR_HEIGHT;
 
-    if (y === 0) {
-      y = startNewPage();
-    } else if (y + requiredForSectionStart > pageBottom) {
+    if (y === 0 || y + requiredForSectionStart > pageBottom) {
       y = startNewPage();
     } else {
       y += TABLE_VERTICAL_GAP;
@@ -209,7 +222,7 @@ export function drawResultTablesFlow(
 
     section.tables.forEach((table, index) => {
       if (index > 0) {
-        const tableHeight = computeTableHeight(doc, table, contentWidth, labelColWidth);
+        const tableHeight = computeTableHeight(doc, table, LANDSCAPE_PAGE.width, labelColWidth);
         y += TABLE_VERTICAL_GAP;
         if (y + tableHeight > pageBottom) {
           y = startNewPage();

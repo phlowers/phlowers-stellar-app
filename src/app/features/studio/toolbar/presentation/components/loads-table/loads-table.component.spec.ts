@@ -3,14 +3,14 @@ import { signal } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 
 import { LoadsTableComponent } from './loads-table.component';
-import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Charge, Section, Study } from '@shared/domain';
 import { LoadType, SymmetryType } from '@shared/domain/models/charge.model';
 import { Support } from '@shared/domain/models/support.model';
-import { LoadsReportService } from '../../services/loads-data-report/loads-data-report.service';
+import { LoadsReportService } from '@features/studio/toolbar/presentation/services/loads-data-report/loads-data-report.service';
 
 describe('LoadsTableComponent', () => {
   let component: LoadsTableComponent;
@@ -234,8 +234,8 @@ describe('LoadsTableComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.loads-table.symmetric-label': 'Symmetric',
-              'studio.loads-table.dis-symmetric-label': 'Dis Symmetric',
+              'common.symmetric': 'Symmetric',
+              'common.dis-symmetric': 'Dissymmetric',
               'studio.loads-table.punctual-load-label': 'Punctual load',
               'studio.loads-table.marking-label': 'Marking',
               'shared.studio.cable-mod-lengthening': 'Lengthening',
@@ -887,8 +887,8 @@ describe('LoadsTableComponent', () => {
       expect(component.getSymmetryLabel(SymmetryType.SYMMETRIC)).toBe('Symmetric');
     });
 
-    it('should return Dis Symmetric for DIS_SYMMETRIC type', () => {
-      expect(component.getSymmetryLabel(SymmetryType.DIS_SYMMETRIC)).toBe('Dis Symmetric');
+    it('should return Dissymmetric for DIS_SYMMETRIC type', () => {
+      expect(component.getSymmetryLabel(SymmetryType.DIS_SYMMETRIC)).toBe('Dissymmetric');
     });
   });
 

@@ -39,6 +39,8 @@
     "out-of-bound-error": "Value must be between {{ min }} and {{ max }}",
     "meter": "m",
     "required": "Required",
+    "symmetric": "Symmetric",
+    "dis-symmetric": "Dissymmetric",
     "section-type": {
       "phase": "Phase",
       "guard": "Guard"
@@ -537,9 +539,7 @@
       "ice-thickness-label": "Ice thickness",
       "frontier-support-label": "Frontier support",
       "ice-thickness-before-label": "Ice thickness before support frontier",
-      "ice-thickness-after-label": "Ice thickness after support frontier",
-      "symmetric-option": "Symmetric",
-      "dis-symmetric-option": "Dis Symmetric"
+      "ice-thickness-after-label": "Ice thickness after support frontier"
     },
     "cable-length-change": {
       "cable-modification-label": "Cable modification",
@@ -1019,8 +1019,6 @@
       "modification-type-label": "Modification type",
       "distance-to-ref-support-label": "Distance to ref. support",
       "modify-btn": "Modify",
-      "symmetric-label": "Symmetric",
-      "dis-symmetric-label": "Dis Symmetric",
       "punctual-load-label": "Punctual load",
       "marking-label": "Marking"
     },

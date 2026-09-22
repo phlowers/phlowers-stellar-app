@@ -38,7 +38,8 @@ const mockChargeData: Charge = {
       iceThicknessBefore: null,
       iceThicknessAfter: null
     },
-    spanLoads: []
+    spanLoads: [],
+    cableModifParams: []
   }
 };
 
@@ -180,7 +181,8 @@ describe('ChargesService', () => {
             iceThicknessBefore: null,
             iceThicknessAfter: null
           },
-          spanLoads: []
+          spanLoads: [],
+          cableModifParams: []
         }
       };
 
@@ -312,7 +314,8 @@ describe('ChargesService', () => {
             iceThicknessBefore: null,
             iceThicknessAfter: null
           },
-          spanLoads: []
+          spanLoads: [],
+          cableModifParams: []
         }
       };
 

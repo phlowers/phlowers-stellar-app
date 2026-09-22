@@ -39,6 +39,8 @@
     "out-of-bound-error": "La valeur doit être comprise entre {{ min }} et {{ max }}",
     "meter": "m",
     "required": "Requis",
+    "symmetric": "Symétrique",
+    "dis-symmetric": "Dissymétrique",
     "section-type": {
       "phase": "Phase",
       "guard": "Garde"
@@ -537,9 +539,7 @@
       "ice-thickness-label": "Épaisseur du givre",
       "frontier-support-label": "Support frontière",
       "ice-thickness-before-label": "Épaisseur du givre avant le support frontière",
-      "ice-thickness-after-label": "Épaisseur du givre après le support frontière",
-      "symmetric-option": "Symétrique",
-      "dis-symmetric-option": "Disymétrique"
+      "ice-thickness-after-label": "Épaisseur du givre après le support frontière"
     },
     "cable-length-change": {
       "cable-modification-label": "Modification du câble",
@@ -1019,8 +1019,6 @@
       "modification-type-label": "Type de modification",
       "distance-to-ref-support-label": "Distance au support de réf.",
       "modify-btn": "Modifier",
-      "symmetric-label": "Symétrique",
-      "dis-symmetric-label": "Disymétrique",
       "punctual-load-label": "Charge ponctuelle",
       "marking-label": "Marquage"
     },

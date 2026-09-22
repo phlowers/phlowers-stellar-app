@@ -14,6 +14,13 @@ import { NotificationService } from '@core/services/notification/notification.se
 
 import { LoadsReportService } from './loads-data-report.service';
 import {
+  CABLE_MODIF_METRICS,
+  LOADS_METRICS,
+  PDF_LOADS_LABEL_KEYS,
+  SPAN_MANIP_METRICS,
+  SUPPORT_MANIP_METRICS
+} from './loads-data-report.constantes';
+import {
   CableModifReportRow,
   LoadsReportData,
   SpanLoadReportRow,
@@ -27,8 +34,8 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
   'studio.loads-report.page-label': 'Page',
   'studio.loads-report.report-generated-success': 'Report generated successfully',
   'studio.loads-report.report-generation-failed': 'Failed to generate report',
-  'studio.loads-table.symmetric-label': 'Symmetric',
-  'studio.loads-table.dis-symmetric-label': 'Dis Symmetric',
+  'common.symmetric': 'Symmetric',
+  'common.dis-symmetric': 'Dissymmetric',
   'common.yes': 'Oui',
   'common.no': 'Non'
 };
@@ -140,6 +147,7 @@ function createMockReportData(overrides: Partial<LoadsReportData> = {}): LoadsRe
       iceThicknessBefore: null,
       iceThicknessAfter: null
     },
+    frontierSupportLabel: null,
     spanLoads: [createSpanLoad(1)],
     cableModifications: [createCableModif(1)],
     supportManipulations: [createSupportManip(1)],
@@ -223,11 +231,12 @@ describe('LoadsReportService', () => {
             frontierSupportNumber: 3,
             iceThicknessBefore: 1,
             iceThicknessAfter: 2
-          }
+          },
+          frontierSupportLabel: 'AC3'
         })
       );
 
-      expect(__mockDoc.text).toHaveBeenCalledWith('3', expect.any(Number), expect.any(Number));
+      expect(__mockDoc.text).toHaveBeenCalledWith('AC3', expect.any(Number), expect.any(Number));
     });
 
     it('should render the symmetric climate variant even when a stale frontierSupportNumber is present', async () => {
@@ -244,11 +253,12 @@ describe('LoadsReportService', () => {
             frontierSupportNumber: 2,
             iceThicknessBefore: null,
             iceThicknessAfter: null
-          }
+          },
+          frontierSupportLabel: 'AC2'
         })
       );
 
-      expect(__mockDoc.text).not.toHaveBeenCalledWith('2', expect.any(Number), expect.any(Number));
+      expect(__mockDoc.text).not.toHaveBeenCalledWith('AC2', expect.any(Number), expect.any(Number));
       expect(__mockDoc.text).toHaveBeenCalledWith('12 cm', expect.any(Number), expect.any(Number));
     });
 
@@ -294,6 +304,45 @@ describe('LoadsReportService', () => {
       // stacking must now fit them onto fewer pages.
       expect(__mockDoc.addPage.mock.calls.length).toBeLessThan(4);
       expect(__mockDoc.addPage).toHaveBeenCalledWith('a4', 'landscape');
+    });
+
+    it('should label result table rows with the metric label keys', async () => {
+      const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { text: ReturnType<typeof vi.fn> } };
+      __mockDoc.text.mockClear();
+
+      await service.generateReport(createMockReportData());
+
+      const drawnTexts = __mockDoc.text.mock.calls.map((call) => call[0]);
+      const expectedLabels = [
+        ...LOADS_METRICS.map((metric) => metric.labelKey),
+        ...CABLE_MODIF_METRICS.map((metric) => metric.labelKey),
+        ...SUPPORT_MANIP_METRICS.map((metric) => metric.labelKey),
+        ...SPAN_MANIP_METRICS.map((metric) => metric.labelKey)
+      ];
+      expectedLabels.forEach((labelKey) => expect(drawnTexts).toContain(labelKey));
+    });
+
+    it('should draw the four result section titles when data is present', async () => {
+      const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { text: ReturnType<typeof vi.fn> } };
+      __mockDoc.text.mockClear();
+
+      await service.generateReport(createMockReportData());
+
+      [
+        PDF_LOADS_LABEL_KEYS.loadsTitle,
+        PDF_LOADS_LABEL_KEYS.cableModifTitle,
+        PDF_LOADS_LABEL_KEYS.supportManipTitle,
+        PDF_LOADS_LABEL_KEYS.spanManipTitle
+      ].forEach((title) => expect(__mockDoc.text).toHaveBeenCalledWith(title, expect.any(Number), expect.any(Number)));
+    });
+
+    it('should render the chain surface metric with the square meter unit', async () => {
+      const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { text: ReturnType<typeof vi.fn> } };
+      __mockDoc.text.mockClear();
+
+      await service.generateReport(createMockReportData());
+
+      expect(__mockDoc.text).toHaveBeenCalledWith('0.50 m\u00B2', expect.any(Number), expect.any(Number));
     });
 
     it('should paginate a table into groups of 5 columns', async () => {

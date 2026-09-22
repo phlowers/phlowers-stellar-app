@@ -10,11 +10,41 @@ import { MetricDescriptor } from '@shared/pdf/pdf-table.interfaces';
 
 import {
   CableModifReportRow,
+  ChainReportFields,
   LoadsReportLabels,
   SpanLoadReportRow,
   SpanManipReportRow,
   SupportManipReportRow
 } from './loads-data-report.interfaces';
+
+/** Chain metric rows shared by the support and span manipulation tables. */
+const CHAIN_METRICS: MetricDescriptor<ChainReportFields>[] = [
+  { labelKey: 'loads.cable-span-manip.chain-name-label', unit: null, decimals: 0, field: 'chainName' },
+  {
+    labelKey: 'loads.cable-span-manip.chain-length-label',
+    unit: PDF_UNITS.meters,
+    decimals: 2,
+    field: 'chainLength'
+  },
+  {
+    labelKey: 'loads.cable-span-manip.chain-weight-label',
+    unit: PDF_UNITS.kilograms,
+    decimals: 0,
+    field: 'chainWeight'
+  },
+  {
+    labelKey: 'loads.cable-span-manip.chain-surface-label',
+    unit: PDF_UNITS.squareMeters,
+    decimals: 2,
+    field: 'chainSurface'
+  },
+  {
+    labelKey: 'loads.cable-span-manip.counter-weight-label',
+    unit: PDF_UNITS.kilograms,
+    decimals: 0,
+    field: 'counterWeight'
+  }
+];
 
 /** Loads and markings metric rows (transposed table: one row per metric, one column per load). */
 export const LOADS_METRICS: MetricDescriptor<SpanLoadReportRow>[] = [
@@ -79,31 +109,7 @@ export const SUPPORT_MANIP_METRICS: MetricDescriptor<SupportManipReportRow>[] = 
     decimals: 2,
     field: 'shiftingClampLength'
   },
-  { labelKey: 'loads.cable-span-manip.chain-name-label', unit: null, decimals: 0, field: 'chainName' },
-  {
-    labelKey: 'loads.cable-span-manip.chain-length-label',
-    unit: PDF_UNITS.meters,
-    decimals: 2,
-    field: 'chainLength'
-  },
-  {
-    labelKey: 'loads.cable-span-manip.chain-weight-label',
-    unit: PDF_UNITS.kilograms,
-    decimals: 0,
-    field: 'chainWeight'
-  },
-  {
-    labelKey: 'loads.cable-span-manip.chain-surface-label',
-    unit: 'm\u00B2',
-    decimals: 2,
-    field: 'chainSurface'
-  },
-  {
-    labelKey: 'loads.cable-span-manip.counter-weight-label',
-    unit: PDF_UNITS.kilograms,
-    decimals: 0,
-    field: 'counterWeight'
-  }
+  ...CHAIN_METRICS
 ];
 
 /** Span manipulation metric rows (transposed table: one row per metric, one column per manipulation). */
@@ -143,31 +149,7 @@ export const SPAN_MANIP_METRICS: MetricDescriptor<SpanManipReportRow>[] = [
     decimals: 2,
     field: 'slingLength'
   },
-  { labelKey: 'loads.cable-span-manip.chain-name-label', unit: null, decimals: 0, field: 'chainName' },
-  {
-    labelKey: 'loads.cable-span-manip.chain-length-label',
-    unit: PDF_UNITS.meters,
-    decimals: 2,
-    field: 'chainLength'
-  },
-  {
-    labelKey: 'loads.cable-span-manip.chain-weight-label',
-    unit: PDF_UNITS.kilograms,
-    decimals: 0,
-    field: 'chainWeight'
-  },
-  {
-    labelKey: 'loads.cable-span-manip.chain-surface-label',
-    unit: 'm\u00B2',
-    decimals: 2,
-    field: 'chainSurface'
-  },
-  {
-    labelKey: 'loads.cable-span-manip.counter-weight-label',
-    unit: PDF_UNITS.kilograms,
-    decimals: 0,
-    field: 'counterWeight'
-  }
+  ...CHAIN_METRICS
 ];
 
 /** Transloco translation keys for the loads report's fixed labels. */
@@ -197,46 +179,10 @@ export const PDF_LOADS_LABEL_KEYS: LoadsReportLabels = {
   windPressure: 'loads.climate.wind-pressure-label',
   cableTemperature: 'loads.climate.cable-temperature-label',
   iceIndicator: 'loads.climate.ice-indicator-label',
-  symmetric: 'studio.loads-table.symmetric-label',
-  disSymmetric: 'studio.loads-table.dis-symmetric-label',
+  symmetric: 'common.symmetric',
+  disSymmetric: 'common.dis-symmetric',
   iceThickness: 'loads.climate.ice-thickness-label',
   frontierSupport: 'loads.climate.frontier-support-label',
   iceThicknessBefore: 'loads.climate.ice-thickness-before-label',
-  iceThicknessAfter: 'loads.climate.ice-thickness-after-label',
-
-  // Shared column headers — reuse existing loads.* labels
-  span: 'loads.shared.span-label',
-  referenceSupport: 'loads.shared.reference-support-label',
-  distanceToRefSupport: 'studio.loads-table.distance-to-ref-support-label',
-  lateralDistance: 'loads.cable-span-manip.lateral-distance-label',
-  anchoring: 'loads.cable-span-manip.anchoring-label',
-  chainName: 'loads.cable-span-manip.chain-name-label',
-  chainLength: 'loads.cable-span-manip.chain-length-label',
-  chainWeight: 'loads.cable-span-manip.chain-weight-label',
-  chainSurface: 'loads.cable-span-manip.chain-surface-label',
-  counterWeight: 'loads.cable-span-manip.counter-weight-label',
-
-  // Loads and markings table
-  loadType: 'loads.load-marking.load-type-label',
-  loadValue: 'loads.load-marking.load-label',
-
-  // Cable length modifications table
-  modificationType: 'studio.loads-table.modification-type-label',
-  modifiedLength: 'studio.loads-report.modified-length-label',
-
-  // Support manipulations table
-  index: 'studio.loads-table.index-label',
-  support: 'studio.loads-report.support-label',
-  manipType: 'loads.cable-support-manip.manipulation-type-label',
-  shiftingClampLength: 'loads.cable-support-manip.shifting-clamp-length-label',
-  vertDisplacement: 'loads.cable-support-manip.vert-displacement-cable-label',
-  ropeLength: 'loads.cable-support-manip.rope-length-label',
-
-  // Span manipulations table
-  cableManipType: 'loads.cable-span-manip.cable-manip-type-label',
-  cableManipMethod: 'loads.cable-span-manip.cable-manip-method-label',
-  longitudinalDistance: 'loads.cable-span-manip.longitudinal-distance-label',
-  altitude: 'loads.cable-span-manip.altitude-label',
-  slingLength: 'loads.cable-span-manip.sling-length-label'
+  iceThicknessAfter: 'loads.climate.ice-thickness-after-label'
 };
-

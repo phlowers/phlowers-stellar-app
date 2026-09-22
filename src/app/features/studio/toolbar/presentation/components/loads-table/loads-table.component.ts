@@ -12,7 +12,17 @@ import { DecimalPipe } from '@angular/common';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { FormsModule } from '@angular/forms';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
-import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
+import {
+  CABLE_MANIP_METHOD_LABEL_KEYS,
+  CABLE_MANIP_TYPE_LABEL_KEYS,
+  CABLE_MODIF_TYPE_LABEL_KEYS,
+  LOAD_TYPE_LABEL_KEYS,
+  SPAN_ANCHORING_LABEL_KEYS,
+  SUPPORT_ANCHORING_LABEL_KEYS,
+  SUPPORT_MANIP_TYPE_LABEL_KEYS,
+  SYMMETRY_TYPE_LABEL_KEYS
+} from '@shared/constants/loads-label-keys.constantes';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -30,15 +40,9 @@ import {
   SupportAnchoringType,
   SupportManipType
 } from '@shared/domain';
-import { LoadsReportData } from '../../services/loads-data-report/loads-data-report.interfaces';
-import { LoadsReportService } from '../../services/loads-data-report/loads-data-report.service';
-import {
-  ClimateRow,
-  CableModifRow,
-  SpanLoadRow,
-  SupportManipRow,
-  SpanManipRow
-} from './loads-table.interfaces';
+import { LoadsReportData } from '@features/studio/toolbar/presentation/services/loads-data-report/loads-data-report.interfaces';
+import { LoadsReportService } from '@features/studio/toolbar/presentation/services/loads-data-report/loads-data-report.service';
+import { ClimateRow, CableModifRow, SpanLoadRow, SupportManipRow, SpanManipRow } from './loads-table.interfaces';
 
 @Component({
   selector: 'app-loads-table',
@@ -375,6 +379,7 @@ export class LoadsTableComponent {
         iceThicknessBefore: null,
         iceThicknessAfter: null
       },
+      frontierSupportLabel: this.getFrontierSupportLabel(this.climate()?.frontierSupportNumber ?? null),
       spanLoads: this.spanLoadRows().map((row) => ({ ...row, type: this.getLoadTypeLabel(row.type) })),
       cableModifications: this.cableModifRows().map((row) => ({
         ...row,
@@ -403,81 +408,47 @@ export class LoadsTableComponent {
   }
 
   getSymmetryLabel(type: SymmetryType): string {
-    switch (type) {
-      case SymmetryType.SYMMETRIC:
-        return this.translocoService.translate('studio.loads-table.symmetric-label');
-      case SymmetryType.DIS_SYMMETRIC:
-        return this.translocoService.translate('studio.loads-table.dis-symmetric-label');
-    }
+    return this.translocoService.translate(SYMMETRY_TYPE_LABEL_KEYS[type]);
   }
 
   getLoadTypeLabel(type: string): string {
-    switch (type) {
-      case LoadType.PUNCTUAL:
-        return this.translocoService.translate('studio.loads-table.punctual-load-label');
-      case LoadType.MARKING:
-        return this.translocoService.translate('studio.loads-table.marking-label');
-      default:
-        return type;
-    }
+    const key = LOAD_TYPE_LABEL_KEYS[type as LoadType];
+    return key ? this.translocoService.translate(key) : type;
   }
 
   getModificationTypeLabel(type: 'lengthening' | 'shortening'): string {
-    switch (type) {
-      case 'lengthening':
-        return this.translocoService.translate('shared.studio.cable-mod-lengthening');
-      case 'shortening':
-        return this.translocoService.translate('shared.studio.cable-mod-shortening');
-    }
+    return this.translocoService.translate(CABLE_MODIF_TYPE_LABEL_KEYS[type]);
   }
 
   getSupportManipTypeLabel(type: SupportManipType): string {
-    switch (type) {
-      case 'crane':
-        return this.translocoService.translate('loads.cable-support-manip.crane-handling-option');
-      case 'rope':
-        return this.translocoService.translate('loads.cable-support-manip.rope-handling-option');
-      case 'shifting':
-        return this.translocoService.translate('loads.cable-support-manip.shifting-option');
-    }
+    return this.translocoService.translate(SUPPORT_MANIP_TYPE_LABEL_KEYS[type]);
   }
 
   getSupportAnchoringLabel(anchoring: SupportAnchoringType | null): string {
-    switch (anchoring) {
-      case 'without_chain':
-        return this.translocoService.translate('loads.cable-support-manip.without-chain-option');
-      case 'with_chain':
-        return this.translocoService.translate('loads.shared.with-chain-option');
-      default:
-        return '-';
-    }
+    const key = anchoring ? SUPPORT_ANCHORING_LABEL_KEYS[anchoring] : null;
+    return key ? this.translocoService.translate(key) : '-';
   }
 
   getCableManipTypeLabel(type: CableSpanManipulation['cableManipType']): string {
-    switch (type) {
-      case 'with_a_crane':
-        return this.translocoService.translate('loads.cable-span-manip.with-a-crane-option');
-      case 'temporary_support':
-        return this.translocoService.translate('loads.cable-span-manip.temporary-support-option');
-    }
+    return this.translocoService.translate(CABLE_MANIP_TYPE_LABEL_KEYS[type]);
   }
 
   getCableManipMethodLabel(method: CableSpanManipulation['cableManipMethod']): string {
-    switch (method) {
-      case 'clamp':
-        return this.translocoService.translate('loads.cable-span-manip.clamp-option');
-      case 'pulley':
-        return this.translocoService.translate('loads.cable-span-manip.pulley-option');
-    }
+    return this.translocoService.translate(CABLE_MANIP_METHOD_LABEL_KEYS[method]);
   }
 
   getSpanAnchoringLabel(anchoring: CableSpanManipulation['anchoring']): string {
-    switch (anchoring) {
-      case 'with_sling':
-        return this.translocoService.translate('loads.cable-span-manip.with-sling-option');
-      case 'with_chain':
-        return this.translocoService.translate('loads.shared.with-chain-option');
-    }
+    return this.translocoService.translate(SPAN_ANCHORING_LABEL_KEYS[anchoring]);
+  }
+
+  /** Converts a frontier support index to its formatted support number label (e.g., 2 → 'AC2'). */
+  private getFrontierSupportLabel(frontierSupportNumber: number | null): string | null {
+    if (frontierSupportNumber === null) return null;
+    const supports = this.spanService.section()?.supports ?? [];
+    const index = frontierSupportNumber - 1; // Value is 1-based, supports array is 0-based
+    const support = supports[index];
+    if (!support) return String(frontierSupportNumber);
+    return support.number ? formatSupportNumber(support.number) : String(frontierSupportNumber);
   }
 
   isFormValid(): boolean {

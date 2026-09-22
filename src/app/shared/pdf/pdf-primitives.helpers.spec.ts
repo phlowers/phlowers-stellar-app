@@ -35,6 +35,8 @@ import {
   LINE_HEIGHT,
   PAGE_MARGIN,
   PAGE_SIZE,
+  SECTION_TITLE_HEIGHT,
+  SEPARATOR_HEIGHT,
   SEPARATOR_MARGIN_Y
 } from './pdf-layout.constantes';
 
@@ -202,7 +204,7 @@ describe('pdf-primitives helpers', () => {
 
       expect(doc.text).toHaveBeenCalledWith('My section', PAGE_MARGIN.left, 40);
       expect(doc.line).toHaveBeenCalled();
-      expect(nextY).toBe(40 + LINE_HEIGHT + 2);
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT);
     });
   });
 
@@ -310,7 +312,7 @@ describe('pdf-primitives helpers', () => {
       const lineY = 40 + SEPARATOR_MARGIN_Y;
 
       expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + CONTENT_WIDTH, lineY);
-      expect(nextY).toBe(40 + 2 * SEPARATOR_MARGIN_Y);
+      expect(nextY).toBe(40 + SEPARATOR_HEIGHT);
     });
 
     it('should draw a line spanning a custom width when provided', () => {
@@ -319,7 +321,7 @@ describe('pdf-primitives helpers', () => {
       const lineY = 40 + SEPARATOR_MARGIN_Y;
 
       expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + 267, lineY);
-      expect(nextY).toBe(40 + 2 * SEPARATOR_MARGIN_Y);
+      expect(nextY).toBe(40 + SEPARATOR_HEIGHT);
     });
   });
 

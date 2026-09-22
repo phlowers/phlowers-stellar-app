@@ -8,10 +8,14 @@
 import { vi } from 'vitest';
 import type jsPDF from 'jspdf';
 
+import { LANDSCAPE_PAGE } from '@shared/pdf/pdf-layout.constantes';
+
+import { TABLE_ROW_HEIGHT } from './pdf-table.constantes';
 import {
   buildTables,
   chunk,
   computeLabelColWidth,
+  computeTableHeight,
   drawResultTablesFlow,
   drawResultTablesSection,
   drawTable,
@@ -100,6 +104,69 @@ describe('pdf-table.helpers', () => {
       const width = computeLabelColWidth(doc as unknown as jsPDF, tables);
 
       expect(width).toBe(40 + 2 * 1.5);
+    });
+  });
+
+  describe('computeTableHeight', () => {
+    const LABEL_COL_WIDTH = 62;
+    /** Returns two wrapped lines for the `wrapped` marker text, one line for anything else. */
+    const wrapOnMarker = (text: string): string[] => (text === 'wrapped' ? ['wrap', 'ped'] : [text]);
+
+    it('should sum one row height per single-line row', () => {
+      const doc = createMockDoc();
+      const table: PdfTableModel = {
+        rows: [
+          { label: 'A', values: ['1', '2'] },
+          { label: 'B', values: ['3', '4'] },
+          { label: 'C', values: ['5', '6'] }
+        ]
+      };
+
+      const height = computeTableHeight(doc as unknown as jsPDF, table, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+
+      expect(height).toBe(3 * TABLE_ROW_HEIGHT);
+    });
+
+    it('should double the height of a row whose value wraps onto two lines', () => {
+      const doc = createMockDoc();
+      doc.splitTextToSize = vi.fn().mockImplementation(wrapOnMarker);
+      const table: PdfTableModel = {
+        rows: [
+          { label: 'A', values: ['1'] },
+          { label: 'B', values: ['wrapped'] }
+        ]
+      };
+
+      const height = computeTableHeight(doc as unknown as jsPDF, table, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+
+      expect(height).toBe(3 * TABLE_ROW_HEIGHT);
+    });
+
+    it('should take the tallest cell into account when the label wraps instead of the value', () => {
+      const doc = createMockDoc();
+      doc.splitTextToSize = vi.fn().mockImplementation(wrapOnMarker);
+      const table: PdfTableModel = { rows: [{ label: 'wrapped', values: ['1', '2'] }] };
+
+      const height = computeTableHeight(doc as unknown as jsPDF, table, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+
+      expect(height).toBe(2 * TABLE_ROW_HEIGHT);
+    });
+
+    it('should match the vertical space actually consumed by drawTable', () => {
+      const doc = createMockDoc();
+      doc.splitTextToSize = vi.fn().mockImplementation(wrapOnMarker);
+      const table: PdfTableModel = {
+        rows: [
+          { label: 'A', values: ['1', '2'] },
+          { label: 'wrapped', values: ['3', '4'] },
+          { label: 'C', values: ['wrapped', '6'] }
+        ]
+      };
+
+      const measured = computeTableHeight(doc as unknown as jsPDF, table, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+      const drawnEndY = drawTable(doc as unknown as jsPDF, table, 0, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+
+      expect(measured).toBe(drawnEndY);
     });
   });
 
@@ -212,7 +279,10 @@ describe('pdf-table.helpers', () => {
       const sections: PdfResultSection[] = [
         {
           title: 'Section A',
-          tables: [{ rows: [{ label: 'A1', values: ['1', '2', '3', '4', '5'] }] }, { rows: [{ label: 'A1', values: ['6', '7'] }] }]
+          tables: [
+            { rows: [{ label: 'A1', values: ['1', '2', '3', '4', '5'] }] },
+            { rows: [{ label: 'A1', values: ['6', '7'] }] }
+          ]
         }
       ];
 

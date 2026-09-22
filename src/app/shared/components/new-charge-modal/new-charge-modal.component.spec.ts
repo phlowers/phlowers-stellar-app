@@ -48,7 +48,8 @@ describe('NewChargeModalComponent (Jest)', () => {
         iceThicknessBefore: null,
         iceThicknessAfter: null
       },
-      spanLoads: []
+      spanLoads: [],
+      cableModifParams: []
     }
   };
 

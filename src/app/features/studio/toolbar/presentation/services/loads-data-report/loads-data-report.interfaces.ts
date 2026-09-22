@@ -30,8 +30,10 @@ export interface SpanLoadReportRow extends Omit<SpanLoad, 'supportUuid' | 'refer
  * resolved labels added. `modificationType` holds the already-translated label (not the raw
  * domain code) since the transposed-table renderer displays it as-is.
  */
-export interface CableModifReportRow
-  extends Omit<CableModification, 'uuid' | 'spanUuid' | 'supportRef' | 'modificationType'> {
+export interface CableModifReportRow extends Omit<
+  CableModification,
+  'uuid' | 'spanUuid' | 'supportRef' | 'modificationType'
+> {
   /** Span label (e.g. 'S1 - S2') */
   spanLabel: string;
   /** Reference support label */
@@ -57,15 +59,30 @@ export interface SupportManipReportRow extends Omit<CableSupportManipItem, 'type
 }
 
 /**
+ * Chain-related fields shared by the support and span manipulation report rows.
+ * Used to type the chain metric descriptors declared once and reused by both tables.
+ */
+export type ChainReportFields = Pick<
+  SupportManipReportRow,
+  'chainName' | 'chainLength' | 'chainWeight' | 'chainSurface' | 'counterWeight'
+>;
+
+/**
  * Span manipulation row for the charges report — derived from the domain
  * `CableSpanManipulation`. `cableManipType`/`cableManipMethod`/`anchoring` hold already-translated
  * labels (not the raw domain codes) since the transposed-table renderer displays them as-is.
  */
-export interface SpanManipReportRow
-  extends Omit<
-    CableSpanManipulation,
-    'uuid' | 'spanUuid' | 'chargeUuid' | 'referenceSupport' | 'slingLength' | 'cableManipType' | 'cableManipMethod' | 'anchoring'
-  > {
+export interface SpanManipReportRow extends Omit<
+  CableSpanManipulation,
+  | 'uuid'
+  | 'spanUuid'
+  | 'chargeUuid'
+  | 'referenceSupport'
+  | 'slingLength'
+  | 'cableManipType'
+  | 'cableManipMethod'
+  | 'anchoring'
+> {
   /** Span label (e.g. 'S1 - S2') */
   spanLabel: string;
   /** Reference support label */
@@ -100,6 +117,8 @@ export interface LoadsReportData {
 
   // Climate (always 1 row)
   climate: ClimateCharge;
+  /** Label of the frontier support (e.g. 'AC2') for display in the PDF; corresponds to climate.frontierSupportNumber */
+  frontierSupportLabel: string | null;
 
   // Loads and markings (0+ rows)
   spanLoads: SpanLoadReportRow[];
@@ -114,19 +133,21 @@ export interface LoadsReportData {
   spanManipulations: SpanManipReportRow[];
 }
 
-/** Translation labels for the loads report. */
+/**
+ * Translation labels for the loads report.
+ *
+ * Only covers the fixed text of page 1 (cartouche + climate) and the result section titles.
+ * Result table row labels are not listed here: they come from the `labelKey` of each
+ * `MetricDescriptor` in `loads-data-report.constantes.ts` and are resolved by `buildTables`.
+ */
 export interface LoadsReportLabels extends BaseReportLabels {
-  reportTitle: string;
   cartoucheTitle: string;
   climateTitle: string;
   loadsTitle: string;
   cableModifTitle: string;
   supportManipTitle: string;
   spanManipTitle: string;
-  pageLabel: string;
 
-  chargeName: string;
-  chargeDescription: string;
   canton: string;
   cantonComment: string;
   initialCondition: string;
@@ -144,39 +165,4 @@ export interface LoadsReportLabels extends BaseReportLabels {
   frontierSupport: string;
   iceThicknessBefore: string;
   iceThicknessAfter: string;
-
-  // Shared column headers
-  span: string;
-  referenceSupport: string;
-  distanceToRefSupport: string;
-  lateralDistance: string;
-  anchoring: string;
-  chainName: string;
-  chainLength: string;
-  chainWeight: string;
-  chainSurface: string;
-  counterWeight: string;
-
-  // Loads and markings table
-  loadType: string;
-  loadValue: string;
-
-  // Cable length modifications table
-  modificationType: string;
-  modifiedLength: string;
-
-  // Support manipulations table
-  index: string;
-  support: string;
-  manipType: string;
-  shiftingClampLength: string;
-  vertDisplacement: string;
-  ropeLength: string;
-
-  // Span manipulations table
-  cableManipType: string;
-  cableManipMethod: string;
-  longitudinalDistance: string;
-  altitude: string;
-  slingLength: string;
 }

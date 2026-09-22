@@ -19,7 +19,13 @@ import {
 import { buildTables, computeLabelColWidth, drawResultTablesFlow } from '@shared/pdf/pdf-table.helpers';
 import { PdfResultSection, PdfTableModel } from '@shared/pdf/pdf-table.interfaces';
 
-import { CABLE_MODIF_METRICS, LOADS_METRICS, PDF_LOADS_LABEL_KEYS, SPAN_MANIP_METRICS, SUPPORT_MANIP_METRICS } from './loads-data-report.constantes';
+import {
+  CABLE_MODIF_METRICS,
+  LOADS_METRICS,
+  PDF_LOADS_LABEL_KEYS,
+  SPAN_MANIP_METRICS,
+  SUPPORT_MANIP_METRICS
+} from './loads-data-report.constantes';
 import { drawLoadsReportPage1 } from './loads-data-report.helpers';
 import { LoadsReportData, LoadsReportLabels } from './loads-data-report.interfaces';
 
@@ -111,4 +117,3 @@ export class LoadsReportService extends PdfBaseService {
     });
   }
 }
-

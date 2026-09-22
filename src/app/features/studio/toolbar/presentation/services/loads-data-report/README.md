@@ -2,107 +2,72 @@
 
 ## Overview
 
-The `LoadsReportService` generates PDF reports of charge cases ("Tableau de charges"). It extends `PdfBaseService` and converts charge data (climate, loads, modifications, manipulations) into a downloadable PDF document.
+`LoadsReportService` generates the "Loads tab" PDF report for a charge case. It extends
+`PdfBaseService` (font preloading + document creation) and is triggered from
+`LoadsTableComponent.onGenerateReport()`.
 
-## Current State
+## Page 1 — portrait
 
-- ✅ Service structure (`LoadsReportService`)
-- ✅ Data interfaces (`LoadsReportData`, `LoadsReportLabels`, etc.)
-- ✅ Translation key definitions (`PDF_LOADS_LABEL_KEYS`)
-- ✅ Page 1 layout implementation (`drawLoadsReportPage1()`) — charge case, climate, loads/markings, cable modifications, support manipulations and span manipulations, with automatic page breaks
-- ✅ i18n keys in `public/i18n/en.json` and `public/i18n/fr.json`
-- ✅ Unit tests (`loads-data-report.service.spec.ts`)
-- ❌ Not yet wired to a UI trigger (see "Activate in LoadsTableComponent" below)
+Drawn by `drawLoadsReportPage1()` (`loads-data-report.helpers.ts`):
 
-## Page 1 Layout
+1. `drawHeader()` — report title, app name, generation date
+2. `drawStudyAndCantonSection()` — cartouche bullets: author, study, study description, canton,
+   canton comment, initial condition, charge name, charge description (`-` when empty)
+3. `drawClimateSection()` — wind pressure, cable temperature, ice indicator, then either the
+   symmetric ice thickness or the dis-symmetric frontier support + ice thickness before/after
+   (driven by `climate.symmetryType`), and personnel presence
 
-`drawLoadsReportPage1()` (in `loads-data-report.helpers.ts`) draws, in order:
+Each section ends with a horizontal separator and returns the Y used by the next one.
 
-1. Header (report title, app name, date)
-2. Charge case bullets (name, description, personnel presence)
-3. Climate bullets — wind pressure, cable temperature, ice indicator, and either the symmetric
-   ice thickness or the dis-symmetric frontier support / ice thickness before/after, depending on
-   `data.climate.frontierSupportNumber`
-4. Loads and markings table (only if `data.spanLoads.length > 0`)
-5. Cable length modifications table (only if `data.cableModifications.length > 0`)
-6. Support manipulations table (only if `data.supportManipulations.length > 0`)
-7. Span manipulations table (only if `data.spanManipulations.length > 0`)
+## Following pages — landscape
 
-Each table is drawn by a local generic grid table renderer (equal-width bordered columns, up to
-two wrapped lines per cell) that automatically starts a new portrait page — redrawing the header
-and column headers — whenever a row would overflow the bottom margin.
+Result tables are **transposed** (one row per metric, one column per entity, at most 5 columns per
+table) and rendered by `drawResultTablesFlow()` (`@shared/pdf/pdf-table.helpers`). Sections are
+stacked continuously: a new landscape page is only started when the remaining vertical space is
+insufficient.
 
-## How to Complete This Feature
+Four sections, each skipped when its data set is empty:
 
-### 1. Activate in LoadsTableComponent
+| Section | Data | Metrics |
+|---|---|---|
+| Loads and markings | `spanLoads` | `LOADS_METRICS` |
+| Cable length modifications | `cableModifications` | `CABLE_MODIF_METRICS` |
+| Support manipulations | `supportManipulations` | `SUPPORT_MANIP_METRICS` |
+| Span manipulations | `spanManipulations` | `SPAN_MANIP_METRICS` |
 
-In `loads-table.component.ts`, inject the service and enable the report button:
+All four sections share a single label column width (`computeLabelColWidth()` computed over every
+table) so the columns line up from one section to the next.
 
-```typescript
-export class LoadsTableComponent {
-  private readonly loadsReportService = inject(LoadsReportService);
+Footers are added last by `drawPageFooters(doc, labels.pageLabel, true)` — the `true` flag places
+page numbers on the landscape footer from page 2 onward.
 
-  async reportChargeCase(): Promise<void> {
-    const studyUuid = this.plotService.study()?.uuid;
-    const sectionUuid = this.spanService.section()?.uuid;
-    const uuid = this.chargeUuid();
+## Labels
 
-    if (!studyUuid || !sectionUuid || !uuid) return;
+- **Fixed page 1 text and section titles** → `LoadsReportLabels` / `PDF_LOADS_LABEL_KEYS`,
+  resolved through `buildReportLabels()`.
+- **Result table row labels** → the `labelKey` of each `MetricDescriptor` in
+  `loads-data-report.constantes.ts`, resolved by `buildTables()`. They are deliberately *not*
+  duplicated in `LoadsReportLabels`.
 
-    const reportData: LoadsReportData = {
-      date: new Date().toLocaleString(),
-      chargeName: this.name(),
-      chargeDescription: this.description(),
-      personnelPresence: this.personnelPresence(),
-      climate: {
-        windPressure: this.climate()?.windPressure ?? null,
-        cableTemperature: this.climate()?.cableTemperature ?? null,
-        symmetryType: this.climate()?.symmetryType ?? '',
-        iceThickness: this.climate()?.iceThickness ?? null,
-        frontierSupportNumber: this.climate()?.frontierSupportNumber ?? null,
-        iceThicknessBefore: this.climate()?.iceThicknessBefore ?? null,
-        iceThicknessAfter: this.climate()?.iceThicknessAfter ?? null
-      },
-      spanLoads: this.spanLoadRows(),
-      cableModifications: this.cableModifRows(),
-      supportManipulations: this.supportManipRows(),
-      spanManipulations: this.spanManipRows()
-    };
+Cell values coming from an enum (load type, manipulation type, anchoring…) are already translated
+by `LoadsTableComponent` before reaching the service: the table renderer prints them as-is.
 
-    await this.loadsReportService.generateReport(reportData);
-  }
-}
-```
+## File name
 
-In the template, change the Report button from `disabled` to active:
-
-```html
-<button
-  app-btn
-  type="button"
-  btnStyle="text"
-  (click)="reportChargeCase()"
-  data-testid="report-btn"
->
-  <app-icon icon="description" />
-  <ng-container>{{ 'common.report' | transloco }}</ng-container>
-</button>
-```
+`<reportTitle>_<cantonName>_<chargeName>_<date>.pdf`, each part passed through
+`sanitizeFilenamePart()`.
 
 ## Data Flow
 
 ```
-LoadsTableComponent
-    ↓ (build LoadsReportData)
+LoadsTableComponent.onGenerateReport()
+    ↓ builds LoadsReportData (rows already carry translated labels)
 LoadsReportService.generateReport()
-    ↓ (preload fonts, create doc)
-drawLoadsReportPage1()
-    ↓ (draw sections)
+    ↓ generatePdfReport() wrapper — success / error notifications
+drawLoadsReportPage1()                                           → portrait page 1
+buildTables() + computeLabelColWidth() + drawResultTablesFlow()   → landscape pages
 drawPageFooters()
-    ↓ (add page numbers)
 doc.save(filename)
-    ↓
-Download PDF to user
 ```
 
 ## Key Design Patterns
@@ -123,5 +88,4 @@ Download PDF to user
 ## Related User Stories
 
 - **US.CHG.TAB** — "Consulter le tableau de charges d'un cas de charges" (View charges table)
-  - RG.CHG.RAP-BTN.1: Report button is currently inactive ("Inactif") in the current phase
-  - Future phase: Implement report generation via this service
+- **US.CHG.RAP** — charge case report generation
