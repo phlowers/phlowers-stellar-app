@@ -26,7 +26,6 @@ import { computeNewDistancePosition, parseDistanceFormPointIndex } from './dista
   standalone: true,
   imports: [FreePositioningPlotComponent],
   templateUrl: './distance-free-positioning.component.html',
-  styleUrl: './distance-free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DistanceFreePositioningComponent implements OnDestroy {
