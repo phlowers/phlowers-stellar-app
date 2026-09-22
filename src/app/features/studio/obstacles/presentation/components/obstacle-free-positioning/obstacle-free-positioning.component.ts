@@ -33,7 +33,6 @@ import { computeNewObstaclePosition, parseObstacleFormPointIndex } from './obsta
   standalone: true,
   imports: [FreePositioningPlotComponent],
   templateUrl: './obstacle-free-positioning.component.html',
-  styleUrl: './obstacle-free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ObstacleFreePositioningComponent implements OnDestroy {

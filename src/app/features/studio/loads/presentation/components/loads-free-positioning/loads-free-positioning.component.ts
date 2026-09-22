@@ -26,7 +26,6 @@ import { LOADS_FREE_POSITIONING_CONFIG } from './loads-free-positioning.componen
   standalone: true,
   imports: [FreePositioningPlotComponent],
   templateUrl: './loads-free-positioning.component.html',
-  styleUrl: './loads-free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoadsFreePositioningComponent implements OnDestroy {
