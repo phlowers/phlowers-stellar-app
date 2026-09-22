@@ -19,7 +19,8 @@
 // Plotly puts the `.js-plotly-plot` class on the same element as this id (not a descendant), so the id alone scopes it.
 #plotly-output-single-span-profile-2,
 #plotly-output-single-span-face-2,
-#plotly-output-floor-free-positioning {
+#plotly-output-free-positioning-profile,
+#plotly-output-free-positioning-face {
   .plotly .cursor-move {
     cursor: crosshair;
   }

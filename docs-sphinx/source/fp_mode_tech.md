@@ -30,15 +30,20 @@ Every wrapper exposes its plot points as a `computed`:
 readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), '<category>'));
 ```
 
-A `computed` only re-evaluates when a **signal it reads** changes, so every tab's
-points inside `FreePositioningDataService.buildAggregateParams` must be sourced
-from a signal — otherwise placing a point patches the form but never refreshes
-the markers. Concretely:
+A `computed` only re-evaluates when a **signal it reads** changes. In
+`FreePositioningDataService.buildAggregateParams`, the inputs must therefore come
+from signal-backed state — not from raw Angular form values such as
+`form.get('positions').value`, `group.value`, or `form.value`. Those are plain
+objects/arrays, so updating the form does not notify the `computed` that its
+input changed and the markers stay stale after a free-positioning click.
+Concretely:
 
-- Distance reads `distanceMeasuringService.positions()` (a `toSignal` of the form).
+- Distance reads `distanceMeasuringService.positions()` (a `toSignal` of the
+  form value changes).
 - Obstacle reads `obstacleFormService.positionsSnapshot()` (a `toSignal` of the
-  positions `FormArray`), **not** `form.get('positions').value`, which is not
-  reactive and would leave the obstacle markers stale after a click.
+  positions `FormArray`), **not** `form.get('positions').value`.
+- Floor reads `floorFormService.pointsView()` (a `computed` backed by the
+  reactive point snapshot), **not** the raw `FormArray.value`.
 
 This keeps all tabs behaving identically: clicking the left (x·z / profile) plot
 fills and shows a point's along-span and altitude, and clicking the right (y·z /
