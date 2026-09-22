@@ -8,6 +8,20 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
 import { Side, View } from '@shared/types/plot.types';
+import {
+  FLOOR_COLOR,
+  FLOOR_LABEL_FONT_SIZE,
+  FLOOR_LABEL_Y_SHIFT,
+  FLOOR_LINE_WIDTH_2D,
+  FLOOR_LINE_WIDTH_3D,
+  FLOOR_POINT_FONT_SIZE,
+  FLOOR_POINT_SYMBOL,
+  FLOOR_RIBBON_HALF_WIDTH,
+  FLOOR_RIBBON_OPACITY,
+  FLOOR_SELECTED_COLOR,
+  FLOOR_SELECTED_SYMBOL
+} from './createFloorTraces.constantes';
+import type { FloorAnnotationData } from './createFloorTraces.interfaces';
 import { DataObject } from './createPlotDataObject';
 import { Coord3 } from './distance.types';
 
@@ -37,33 +51,6 @@ export interface CreateFloorTracesParams {
 
 /** Formats a floor point's hover label — localized by the caller, so this helper holds no UI text. */
 export type FloorPointLabel = (distanceToRefSupport: number | null) => string;
-
-/**
- * Data payload attached to a floor point annotation for click event handling.
- * @category Studio
- */
-export interface FloorAnnotationData {
-  /** Discriminator indicating this annotation represents a floor point. */
-  type: 'floor';
-  /** UUID of the floor the point belongs to. */
-  floorUuid: string;
-  /** Index of the point within the floor. */
-  pointIndex: number;
-}
-
-const FLOOR_COLOR = '#f6ab4d';
-/** Highlight of the floor point active in the floor form: the red diamond an obstacle's active point uses. */
-const FLOOR_SELECTED_COLOR = 'red';
-const FLOOR_POINT_SYMBOL = '●'; // ● filled circle
-const FLOOR_SELECTED_SYMBOL = '◆'; // ◆ diamond
-const FLOOR_POINT_FONT_SIZE = 14;
-const FLOOR_LABEL_FONT_SIZE = 10;
-const FLOOR_LABEL_Y_SHIFT = 12;
-const FLOOR_LINE_WIDTH_3D = 1;
-const FLOOR_LINE_WIDTH_2D = 4;
-/** Lateral half-width (meters) giving the 3D floor ribbon its forward/backward depth. */
-const FLOOR_RIBBON_HALF_WIDTH = 10;
-const FLOOR_RIBBON_OPACITY = 0.5;
 
 /** Maps an absolute [x, y, z] coord to plot axes, mirroring `createObstaclesAnnotations`. */
 const mapCoord = (coord: Coord3, view: View, side: Side): { x: number; y: number; z: number } => {

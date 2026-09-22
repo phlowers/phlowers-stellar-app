@@ -5,6 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { createFloorAnnotations, createFloorTraces } from './createFloorTraces';
+import {
+  FLOOR_COLOR,
+  FLOOR_POINT_SYMBOL,
+  FLOOR_SELECTED_COLOR,
+  FLOOR_SELECTED_SYMBOL
+} from './createFloorTraces.constantes';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
@@ -117,7 +123,7 @@ describe('createFloorTraces', () => {
     expect(line?.x).toEqual([1, 4]);
     expect(line?.y).toEqual([2, 5]);
     expect(line?.z).toEqual([10, 12]);
-    expect(line?.line).toMatchObject({ color: '#f6ab4d' });
+    expect(line?.line).toMatchObject({ color: FLOOR_COLOR });
     expect(ribbon).toBeDefined();
   });
 
@@ -193,8 +199,8 @@ describe('createFloorTraces', () => {
     ]);
     annotations.forEach((a) => {
       expect(a.captureevents).toBe(true);
-      expect(a.text).toBe('\u25cf');
-      expect(a.font?.color).toBe('#f6ab4d');
+      expect(a.text).toBe(FLOOR_POINT_SYMBOL);
+      expect(a.font?.color).toBe(FLOOR_COLOR);
     });
     expect(annotations.map((a) => a.data)).toEqual([
       { type: 'floor', floorUuid: 'floor-1', pointIndex: 0 },
@@ -219,8 +225,12 @@ describe('createFloorTraces', () => {
     const [first, selected, label] = annotations;
 
     expect(annotations).toHaveLength(3);
-    expect(first.text).toBe('\u25cf');
-    expect(selected).toMatchObject({ text: '\u25c6', captureevents: true, font: { color: 'red' } });
+    expect(first.text).toBe(FLOOR_POINT_SYMBOL);
+    expect(selected).toMatchObject({
+      text: FLOOR_SELECTED_SYMBOL,
+      captureevents: true,
+      font: { color: FLOOR_SELECTED_COLOR }
+    });
     expect(label).toMatchObject({ x: 4, text: 'point 25.00', captureevents: false });
     expect(label.yshift).toBeGreaterThan(0);
   });
@@ -235,7 +245,7 @@ describe('createFloorTraces', () => {
     });
 
     expect(annotations).toHaveLength(2);
-    expect(annotations.every((a) => a.text === '\u25cf')).toBe(true);
+    expect(annotations.every((a) => a.text === FLOOR_POINT_SYMBOL)).toBe(true);
   });
 
   it('should skip annotations of a floor outside the visible support window', () => {
