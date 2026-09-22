@@ -64,8 +64,6 @@ const FLOOR_LINE_WIDTH_2D = 4;
 /** Lateral half-width (meters) giving the 3D floor ribbon its forward/backward depth. */
 const FLOOR_RIBBON_HALF_WIDTH = 10;
 const FLOOR_RIBBON_OPACITY = 0.5;
-// Recess the ribbon just below the line so the two do not z-fight along the ribbon's middle.
-const FLOOR_RIBBON_Z_OFFSET = -0.15;
 
 /** Maps an absolute [x, y, z] coord to plot axes, mirroring `createObstaclesAnnotations`. */
 const mapCoord = (coord: Coord3, view: View, side: Side): { x: number; y: number; z: number } => {
@@ -150,7 +148,7 @@ const createFloorRibbonTrace = (points: Coord3[], view: View): DataObject | null
   points.forEach(([cx, cy, cz]) => {
     xs.push(cx + offX, cx - offX);
     ys.push(cy + offY, cy - offY);
-    zs.push(cz + FLOOR_RIBBON_Z_OFFSET, cz + FLOOR_RIBBON_Z_OFFSET);
+    zs.push(cz, cz);
   });
 
   const iIdx: number[] = [];

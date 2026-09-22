@@ -152,7 +152,7 @@ describe('createFloorTraces', () => {
 
     // One rail per point, each hanging from the line, and one quad (two triangles) per segment.
     expect(ribbon.x).toEqual([0, 0, 10, 10, 20, 20]);
-    expect(ribbon.z?.map((z) => z + 0.15)).toEqual([10, 10, 4, 4, 10, 10].map((z) => expect.closeTo(z, 9)));
+    expect(ribbon.z).toEqual([10, 10, 4, 4, 10, 10]);
     expect(ribbon.i).toHaveLength(4);
   });
 
@@ -181,14 +181,6 @@ describe('createFloorTraces', () => {
 
     expect(ribbon.x).toEqual([-10, 10, -10, 10]);
     expect(ribbon.y).toEqual([0, 0, 25, 25]);
-  });
-
-  it('should recess the ribbon just below the line', () => {
-    const ribbon = build({ litData, floors: [floor], ...window3d }).find((t) => t.type === 'mesh3d') as {
-      z?: number[];
-    };
-
-    expect(ribbon.z?.every((z, i) => z < [10, 10, 12, 12][i])).toBe(true);
   });
 
   it('should draw every floor point as a clickable annotation tagged with its floor and index', () => {
