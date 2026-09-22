@@ -37,20 +37,18 @@
         }
       </div>
 
-      <div class="free-positioning-plot__readouts" data-testid="free-positioning-readouts">
-        <dl class="free-positioning-plot__coords">
-          <dt>{{ 'studio.free-positioning.x-label' | transloco }}</dt>
-          <dd data-testid="mouse-x">{{ profileMousePosition()?.x || 'N/A' }}</dd>
+      <dl class="free-positioning-plot__coords" data-testid="free-positioning-readouts">
+        <dt>{{ 'studio.free-positioning.x-label' | transloco }}</dt>
+        <dd data-testid="mouse-x">{{ profileMousePosition()?.x || 'N/A' }}</dd>
 
-          <dt>{{ 'studio.free-positioning.z-label' | transloco }}</dt>
-          <dd data-testid="mouse-z">{{ profileMousePosition()?.z || 'N/A' }}</dd>
+        <dt>{{ 'studio.free-positioning.z-label' | transloco }}</dt>
+        <dd data-testid="mouse-z">{{ profileMousePosition()?.z || 'N/A' }}</dd>
 
-          @if (config().showFace) {
-            <dt>{{ 'studio.free-positioning.y-label' | transloco }}</dt>
-            <dd data-testid="mouse-y">{{ faceMousePosition()?.x || 'N/A' }}</dd>
-          }
-        </dl>
-      </div>
+        @if (config().showFace) {
+          <dt>{{ 'studio.free-positioning.y-label' | transloco }}</dt>
+          <dd data-testid="mouse-y">{{ faceMousePosition()?.x || 'N/A' }}</dd>
+        }
+      </dl>
     </div>
 
     <div class="free-positioning-plot__body" [class.free-positioning-plot__body--with-face]="config().showFace">
