@@ -27,6 +27,7 @@
             app-btn
             btnSize="s"
             [btnStyle]="visibleCategories().has(cat) ? 'base' : 'outlined'"
+            [attr.aria-pressed]="visibleCategories().has(cat) ? true : false"
             (click)="toggleCategory(cat)"
             [attr.data-testid]="'category-toggle-' + cat"
           >

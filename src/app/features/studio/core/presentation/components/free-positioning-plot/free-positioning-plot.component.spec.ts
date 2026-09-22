@@ -157,6 +157,18 @@ describe('FreePositioningPlotComponent', () => {
       expect(getByTestId('category-toggle-loads')).not.toBeNull();
     });
 
+    it('should expose aria-pressed state for each category toggle', () => {
+      fixture.componentRef.setInput('config', {
+        showFace: false,
+        editableCategory: 'obstacle',
+        defaultVisibleCategories: ['obstacle', 'floor']
+      });
+      fixture.detectChanges();
+
+      expect((getByTestId('category-toggle-floor') as HTMLButtonElement).getAttribute('aria-pressed')).toBe('true');
+      expect((getByTestId('category-toggle-distance') as HTMLButtonElement).getAttribute('aria-pressed')).toBe('false');
+    });
+
     it('should render profile plot container and omit face plot container when showFace is false', () => {
       fixture.detectChanges();
       expect(getByTestId('plot-container-profile')).not.toBeNull();
