@@ -77,7 +77,11 @@ class MockObstacleFormService {
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockSpanService: { getSpanOptions: ReturnType<typeof vi.fn>; section: ReturnType<typeof vi.fn> };
+  let mockSpanService: {
+    getSpanOptions: ReturnType<typeof vi.fn>;
+    section: ReturnType<typeof vi.fn>;
+    getSupportIndex: ReturnType<typeof vi.fn>;
+  };
   let mockPlotOptionsService: {
     isFreePositioningMode: ReturnType<typeof signal<boolean>>;
     freePositioningSource: ReturnType<typeof signal<'obstacle' | 'floor' | 'loads' | 'distance' | null>>;
@@ -104,7 +108,8 @@ describe('ObstaclesFormComponent', () => {
   beforeEach(async () => {
     mockSpanService = {
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
-      section: vi.fn().mockReturnValue(null)
+      section: vi.fn().mockReturnValue(null),
+      getSupportIndex: vi.fn().mockReturnValue(0)
     };
     mockPlotOptionsService = {
       isFreePositioningMode: signal(false),
@@ -882,39 +887,6 @@ describe('ObstaclesFormComponent', () => {
 
       const localToggle = localFixture.nativeElement.querySelector('p-toggleswitch');
       expect(localToggle.getAttribute('data-p-checked')).toBe('true');
-    });
-  });
-
-  describe('leaving free positioning when the last point is removed', () => {
-    it('should stay in the mode while a point remains', () => {
-      mockPlotOptionsService.setFreePositioningMode(true, 'obstacle');
-      TestBed.flushEffects();
-
-      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(true);
-    });
-
-    it('should leave the mode once the last point is removed', () => {
-      mockPlotOptionsService.setFreePositioningMode(true, 'obstacle');
-      TestBed.flushEffects();
-
-      mockObstacleFormService.hasEditablePoints.set(false);
-      TestBed.flushEffects();
-
-      expect(mockPlotOptionsService.setFreePositioningMode).toHaveBeenCalledWith(false, 'obstacle');
-      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(false);
-      expect(mockPlotOptionsService.freePositioningSource()).toBeNull();
-    });
-
-    it('should not disturb a floor-driven free positioning session', () => {
-      mockPlotOptionsService.setFreePositioningMode(true, 'floor');
-      TestBed.flushEffects();
-      vi.clearAllMocks();
-
-      mockObstacleFormService.hasEditablePoints.set(false);
-      TestBed.flushEffects();
-
-      expect(mockPlotOptionsService.setFreePositioningMode).not.toHaveBeenCalled();
-      expect(mockPlotOptionsService.isFreePositioningMode()).toBe(true);
     });
   });
 

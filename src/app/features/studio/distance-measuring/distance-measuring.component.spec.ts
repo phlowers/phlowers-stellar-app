@@ -144,7 +144,17 @@ describe('DistanceMeasuringComponent', () => {
     expect(points[0].getAttribute('aria-selected')).toBe('false');
   });
 
-  it('should keep the free-positioning toggle enabled and unchecked by default', () => {
+  it('should keep the free-positioning toggle disabled and unchecked when no span is selected', () => {
+    const toggle = getByTestId('free-positioning');
+    expect(toggle?.getAttribute('data-p-disabled')).toBe('true');
+    expect(toggle?.getAttribute('data-p-checked')).toBe('false');
+  });
+
+  it('should enable the free-positioning toggle once a span is selected, still unchecked', async () => {
+    selectSpan();
+    // PrimeNG's toggleswitch only refreshes its data-p-* host attributes after a stable tick.
+    await fixture.whenStable();
+    fixture.detectChanges();
     const toggle = getByTestId('free-positioning');
     expect(toggle?.getAttribute('data-p-disabled')).toBe('false');
     expect(toggle?.getAttribute('data-p-checked')).toBe('false');
