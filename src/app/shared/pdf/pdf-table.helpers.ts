@@ -7,7 +7,7 @@
 
 import jsPDF from 'jspdf';
 
-import { LANDSCAPE_PAGE, FONT_SIZES, LINE_HEIGHT, LINE_WIDTH_THIN, PAGE_MARGIN } from '@shared/pdf/pdf-layout.constantes';
+import { LANDSCAPE_PAGE, FONT_SIZES, LINE_HEIGHT, LINE_WIDTH_THIN, PAGE_MARGIN, SEPARATOR_MARGIN_Y } from '@shared/pdf/pdf-layout.constantes';
 import { drawHeader, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 
 import {
@@ -193,10 +193,10 @@ export function drawResultTablesFlow(
       continue;
     }
 
-    // Reserve space for the title, its first table AND the separator drawn below it, so the
+    // Reserve space for the title, its first table AND the separator closing the section, so the
     // title is never drawn alone at the bottom of a page with its first table pushed away.
     const firstTableHeight = computeTableHeight(doc, section.tables[0], contentWidth, labelColWidth);
-    const requiredForSectionStart = sectionTitleHeight + firstTableHeight + LINE_HEIGHT;
+    const requiredForSectionStart = sectionTitleHeight + firstTableHeight + 2 * SEPARATOR_MARGIN_Y;
 
     if (y === 0) {
       y = startNewPage();
@@ -208,20 +208,19 @@ export function drawResultTablesFlow(
     y = drawSectionTitle(doc, section.title, y);
 
     section.tables.forEach((table, index) => {
-      if (index === 0) {
-        y = drawTable(doc, table, y, LANDSCAPE_PAGE.width, labelColWidth);
-        y = drawSeparator(doc, y, contentWidth);
-        return;
-      }
-
-      const tableHeight = computeTableHeight(doc, table, contentWidth, labelColWidth);
-      y += TABLE_VERTICAL_GAP;
-      if (y + tableHeight > pageBottom) {
-        y = startNewPage();
-        y = drawSectionTitle(doc, section.title, y);
+      if (index > 0) {
+        const tableHeight = computeTableHeight(doc, table, contentWidth, labelColWidth);
+        y += TABLE_VERTICAL_GAP;
+        if (y + tableHeight > pageBottom) {
+          y = startNewPage();
+          y = drawSectionTitle(doc, section.title, y);
+        }
       }
       y = drawTable(doc, table, y, LANDSCAPE_PAGE.width, labelColWidth);
-      y = drawSeparator(doc, y, contentWidth);
     });
+
+    // A separator marks the end of a category, not the end of each table: a category split into
+    // several chunks (more than MAX_COLS_PER_TABLE columns) stays visually grouped.
+    y = drawSeparator(doc, y, contentWidth);
   }
 }

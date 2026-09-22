@@ -21,7 +21,6 @@ import {
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE,
-  SEPARATOR_COLOR,
   SEPARATOR_MARGIN_Y
 } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
@@ -208,15 +207,13 @@ export function drawFooter(
 
 /**
  * Draws a horizontal separator line spanning `width` (defaults to the portrait content width),
- * indented by `SEPARATOR_MARGIN_Y` from the content drawn above and below it, in a light gray
- * (`SEPARATOR_COLOR`) rather than the default black. Returns the next Y position.
+ * inset by `SEPARATOR_MARGIN_Y` from the content drawn above and below it so sections are clearly
+ * separated. Returns the next Y position.
  */
 export function drawSeparator(doc: jsPDF, y: number, width: number = CONTENT_WIDTH): number {
   const lineY = y + SEPARATOR_MARGIN_Y;
   doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.setDrawColor(SEPARATOR_COLOR);
   doc.line(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + width, lineY);
-  doc.setDrawColor(0);
   return lineY + SEPARATOR_MARGIN_Y;
 }
 

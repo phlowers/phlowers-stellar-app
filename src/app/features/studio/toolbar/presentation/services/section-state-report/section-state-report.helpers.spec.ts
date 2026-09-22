@@ -19,7 +19,6 @@ function createMockDoc() {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
     setLineWidth: vi.fn(),
-    setDrawColor: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
     rect: vi.fn(),

@@ -24,7 +24,6 @@ function createMockDoc() {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
     setLineWidth: vi.fn(),
-    setDrawColor: vi.fn(),
     setPage: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
@@ -223,7 +222,7 @@ describe('pdf-table.helpers', () => {
       expect(doc.text).toHaveBeenCalledWith('Section A', expect.any(Number), expect.any(Number));
     });
 
-    it('should draw a full-width separator line below every table', () => {
+    it('should draw a full-width separator line at the end of a section', () => {
       const doc = createMockDoc();
       const sections: PdfResultSection[] = [
         { title: 'Section A', tables: [{ rows: [{ label: 'A1', values: ['1'] }] }] }
@@ -233,6 +232,26 @@ describe('pdf-table.helpers', () => {
 
       // contentWidth = LANDSCAPE_PAGE.width(297) - PAGE_MARGIN.left(15) - PAGE_MARGIN.right(15) = 267
       expect(doc.line).toHaveBeenCalledWith(15, expect.any(Number), 15 + 267, expect.any(Number));
+    });
+
+    it('should draw one separator per category, not one per table chunk', () => {
+      const doc = createMockDoc();
+      const sections: PdfResultSection[] = [
+        {
+          title: 'Section A',
+          tables: [{ rows: [{ label: 'A1', values: ['1'] }] }, { rows: [{ label: 'A1', values: ['2'] }] }]
+        },
+        { title: 'Section B', tables: [{ rows: [{ label: 'B1', values: ['3'] }] }] }
+      ];
+
+      drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62);
+
+      // Section A is split into 2 chunks but stays visually grouped: one separator per category,
+      // never between two chunks of the same category. drawHeader also draws a full-width line on
+      // each page, so that one is discounted from the total.
+      const fullWidthLines = doc.line.mock.calls.filter((call) => call[0] === 15 && call[2] === 15 + 267);
+      const headerLines = doc.addPage.mock.calls.length;
+      expect(fullWidthLines).toHaveLength(headerLines + 2);
     });
 
     it('should never draw a section title without its first table following on the same page', () => {

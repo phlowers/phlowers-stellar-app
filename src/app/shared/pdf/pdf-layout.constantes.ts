@@ -26,14 +26,11 @@ export const LINE_HEIGHT = 5;
 export const LINE_WIDTH_THIN = 0.05;
 
 /**
- * Vertical margin (mm) applied above and below a horizontal separator line, so it does not sit
- * flush against the content drawn before/after it. Split evenly within LINE_HEIGHT, so the total
- * vertical space reserved for a separator is unchanged.
+ * Vertical margin (mm) applied above and below a horizontal separator line, so it never sits
+ * flush against the content drawn before/after it. The total vertical space a separator consumes
+ * is therefore `2 * SEPARATOR_MARGIN_Y`.
  */
-export const SEPARATOR_MARGIN_Y = LINE_HEIGHT / 2;
-
-/** Grayscale value (0 = black, 255 = white) used to draw horizontal separator lines. */
-export const SEPARATOR_COLOR = 180;
+export const SEPARATOR_MARGIN_Y = LINE_HEIGHT;
 
 /** Paragraph indent in mm (11 pt × 0.35 mm/pt). Applied as left-column offset from PAGE_MARGIN.left. */
 export const PARAGRAPH_INDENT = 3.85;
