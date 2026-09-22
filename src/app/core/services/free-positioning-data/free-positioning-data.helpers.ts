@@ -127,7 +127,11 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
         points.push({
           id: `floor-form-${idx}`,
           category: 'floor',
-          alongSpan: mirrorPositionForReferenceSupport(pt.distanceToRefSupport, spanLength, params.floorReferenceSupport),
+          alongSpan: mirrorPositionForReferenceSupport(
+            pt.distanceToRefSupport,
+            spanLength,
+            params.floorReferenceSupport
+          ),
           lateral: null,
           altitude: pt.altitude,
           editable: idx === params.activeFloorIndex && (pt.removable ?? true),
@@ -153,7 +157,11 @@ export const buildFloorPoints = (params: AggregatePointsParams): FreePositioning
         points.push({
           id: `floor-${matchingFloor.uuid}-${idx}`,
           category: 'floor',
-          alongSpan: mirrorPositionForReferenceSupport(pt.distanceToRefSupport, spanLength, matchingFloor.referenceSupport),
+          alongSpan: mirrorPositionForReferenceSupport(
+            pt.distanceToRefSupport,
+            spanLength,
+            matchingFloor.referenceSupport
+          ),
           lateral: null,
           altitude: pt.altitude,
           editable: false,

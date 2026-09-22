@@ -43,7 +43,9 @@ describe('free-positioning-data.helpers', () => {
     });
 
     it('should be self-inverse for a RIGHT reference support', () => {
-      expect(mirrorPositionForReferenceSupport(mirrorPositionForReferenceSupport(50, 200, 'RIGHT'), 200, 'RIGHT')).toBe(50);
+      expect(mirrorPositionForReferenceSupport(mirrorPositionForReferenceSupport(50, 200, 'RIGHT'), 200, 'RIGHT')).toBe(
+        50
+      );
     });
 
     it('should keep the position as-is when reference support or span length is missing', () => {
