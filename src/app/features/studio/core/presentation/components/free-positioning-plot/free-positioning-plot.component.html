@@ -32,7 +32,7 @@
             [attr.data-testid]="'category-toggle-' + cat"
           >
             <span class="free-positioning-plot__category-dot" [style.backgroundColor]="categoryColors[cat]"></span>
-            {{ 'studio.free-positioning.categories.' + cat | transloco }}
+            {{ ('studio.free-positioning.' + cat) | transloco }}
           </button>
         }
       </div>

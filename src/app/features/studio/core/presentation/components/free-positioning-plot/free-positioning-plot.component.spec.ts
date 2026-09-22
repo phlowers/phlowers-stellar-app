@@ -103,10 +103,10 @@ describe('FreePositioningPlotComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.free-positioning.categories.obstacle': 'Obstacles',
-              'studio.free-positioning.categories.floor': 'Floor',
-              'studio.free-positioning.categories.distance': 'Distance',
-              'studio.free-positioning.categories.loads': 'Loads',
+              'studio.free-positioning.obstacle': 'Obstacles',
+              'studio.free-positioning.floor': 'Floor',
+              'studio.free-positioning.distance': 'Distance',
+              'studio.free-positioning.loads': 'Loads',
               'studio.free-positioning.x-label': 'x:',
               'studio.free-positioning.y-label': 'y:',
               'studio.free-positioning.z-label': 'z:',

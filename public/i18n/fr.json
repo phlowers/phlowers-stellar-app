@@ -859,12 +859,10 @@
       "x-label": "x :",
       "z-label": "z :",
       "y-label": "y :",
-      "categories": {
-        "obstacle": "Obstacles",
-        "floor": "Terrain",
-        "distance": "Distance",
-        "loads": "Charges"
-      }
+      "obstacle": "Obstacles",
+      "floor": "Terrain",
+      "distance": "Distance",
+      "loads": "Charges"
     },
     "studio-page": {
       "parameter-label": "Paramètre",
