@@ -532,5 +532,29 @@
 | Removal impact | Remove the signal + its `.set()` call in `load-marking.component.ts` and related spec mocks. |
 | ✅ Validated | ⏳ Pending review |
 | Detected on | 2026-09-16 |
+## 39. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144) — ✅ RESOLVED
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/domain/models/section.model.ts` — `maintenance_center_names: string[] \| undefined;` and `regional_maintenance_center_names: string[] \| undefined;` |
+| Code | Was populated in `section-import.service.ts`'s `mapExternalSectionToSection()` from `CM_DESIGNATION`/`GMR_DESIGNATION` (as single-element arrays), alongside the scalar `cm_adr`/`gmr_adr` fields populated from the exact same source designations. |
+| 🔍 Evidence | The "Normalisation du modèle Section — CM/GMR/EEL + LIAISON/BRANCHE" plan removed these two redundant array fields entirely (along with the never-populated `cm_idr`/`gmr_idr`/`eel_idr` fields), renaming the scalar fields to `cm_designation`/`gmr_designation`/`eel_designation`. A Dexie V10 data-only migration (`app-database.versions.ts`) deletes these keys from persisted `Section` records on existing studies. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Done — all production code and specs updated to the new scalar `cm_designation`/`gmr_designation`/`eel_designation` fields. |
+| ✅ Validated | ✅ Done — `npx tsc --noEmit`, targeted `vitest` suites, and `app-database.spec.ts` V10 migration tests all pass. |
+
+---
+
+## 40. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/domain/models/field-measure.model.ts` — `diffuseSolarFlux: number` and `diffuseDirectSolarFlux: number` (hardcoded to `123`/`246` in `createInitialMeasureData`, `presentation/helpers.ts`) |
+| Code | Never read anywhere outside their own initialization; the "Mesure de terrain" JSON export (ticket 842, `field-measure-export.helpers.ts`) maps `temperatureCalculation.solarFlux.diffuse`/`.direct` from the similarly-named `diffusedSolarFlux`/`directSolarFlux` fields instead. |
+| 🔍 Evidence | Grep across `field-measuring/**` shows `diffuseSolarFlux`/`diffuseDirectSolarFlux` only ever assigned (constant values), never consumed in any computed/template/export mapping. `diffusedSolarFlux`/`directSolarFlux`/`diffusedPlusDirectSolarFlux` are the fields actually wired to the UI and the new export. |
+| ⚠️ Confidence | **MEDIUM** — naming is close enough to `diffusedSolarFlux`/`directSolarFlux` that this may be a leftover from an earlier refactor; needs confirmation before removal since it's part of the `FieldMeasure` persisted model (Dexie). |
+| Removal impact | Potential follow-up: drop the two fields from `FieldMeasure` and `createInitialMeasureData` — out of scope for ticket 842 (export-only work), logged here for future cleanup. |
+| ✅ Validated | ⏳ Pending review |
+
 
 

@@ -20,7 +20,7 @@ export const authGuard: CanActivateFn = async () => {
 
   // Offline-first: never block navigation on a network round-trip. The
   // authoritative resync runs in the background (AuthService.initialize) and
-  // any 401/403 is handled by the auth-session interceptor (G@IA redirect),
+  // any 401/403 is handled by the auth-session interceptor (auth-serv redirect),
   // so the guard only needs the already-resolved user or the IndexedDB cache.
   if (authService.currentUser()) {
     return true;

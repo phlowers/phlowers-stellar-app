@@ -43,17 +43,20 @@ const mockSection: Section = {
   last_support_number: 2,
   first_attachment_set: '',
   last_attachment_set: '',
-  regional_maintenance_center_names: [],
-  maintenance_center_names: [],
   regional_team_id: undefined,
   maintenance_team_id: undefined,
   maintenance_center_id: undefined,
-  link_name: undefined,
-  lit_code: undefined,
-  lit_name: undefined,
-  branch_name: undefined,
+  link_idr: undefined,
+  link_adr: undefined,
+  lit_idr: undefined,
+  lit_adr: undefined,
+  branch_adr: undefined,
   branch_idr: undefined,
   voltage_idr: undefined,
+  voltage_adr: undefined,
+  cm_designation: undefined,
+  gmr_designation: undefined,
+  eel_designation: undefined,
   comment: undefined,
   supports_comment: undefined,
   supports: [],
@@ -304,6 +307,25 @@ describe('StudioComponent', () => {
       ]);
       fixture.detectChanges();
       expect(mockNotificationService.warning).toHaveBeenCalledTimes(2);
+    });
+
+    it('should call notificationService.warning once for several diagnostics sharing a code', () => {
+      mockPlotService.diagnostics.set([
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: obstacle obs-1'
+        },
+        {
+          code: PythonErrorCode.NoIntersectionPlaneWarning,
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: obstacle obs-2'
+        }
+      ]);
+      fixture.detectChanges();
+      expect(mockNotificationService.warning).toHaveBeenCalledTimes(1);
     });
   });
 

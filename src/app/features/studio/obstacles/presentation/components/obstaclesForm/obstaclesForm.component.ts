@@ -198,7 +198,7 @@ export class ObstaclesFormComponent {
   }
 
   setCurrentObstaclePoint(index: number) {
-    this.obstaclesService.setCurrentPointIndex(index);
+    this.obstacleFormService.setActivePoint(index);
   }
 
   async openConformityModal(): Promise<void> {

@@ -85,8 +85,8 @@
       "logo-alt": "Stellar",
       "title": "Sign in",
       "resolving-mode": "Checking sign-in mode…",
-      "redirecting-to-gaia": "Redirecting to G@IA for sign in…",
-      "offline-waiting-for-gaia": "You are offline. Reconnect to continue with G@IA sign in.",
+      "redirecting-to-auth-serv": "Redirecting to auth-serv for sign in…",
+      "offline-waiting-for-auth-serv": "You are offline. Reconnect to continue with auth-serv sign in.",
       "subtitle": "Enter your email address to continue.",
       "email-label": "Email",
       "email-required": "Email is required.",
@@ -171,6 +171,7 @@
     "logged-layout": {
       "home": "Home",
       "studies": "Studies",
+      "documentation": "Documentation",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
@@ -212,13 +213,14 @@
       "marking-load": "Marking load"
     },
     "floor-form-service": {
+      "cable-below-floor-detail": "The cable passes below the floor of span {{span}}",
       "delete-detail": "Floor deleted",
       "delete-error-detail": "Failed to delete floor",
       "save-detail": "Floor saved",
       "save-error-detail": "Failed to save floor"
     },
     "auth-service": {
-      "email-login-disabled": "Email login is disabled because G@IA single sign-on is required."
+      "email-login-disabled": "Email login is disabled because auth-serv single sign-on is required."
     },
     "global-error-handler": {
       "unexpected-error": "An unexpected error occurred. Please reload the page if the problem persists."
@@ -352,11 +354,12 @@
       "col-title": "Title",
       "col-author": "Author",
       "col-modification-date": "Modification date",
-      "col-lit": "LIT",
+      "col-lit": "LIT IDR",
       "col-description": "Description/comment",
       "col-actions": "Actions",
       "study-actions-menu": "Study actions menu",
-      "pagination-report": "Study {first} to {last} of {totalRecords}"
+      "pagination-report": "Study {first} to {last} of {totalRecords}",
+      "date-format": "d MMMM yyyy 'at' HH'h'mm"
     },
     "tabs": {
       "my-studies": "My last studies",
@@ -402,7 +405,7 @@
     "aria-select-section": "select this study's section",
     "col-name": "Section Name",
     "col-type": "Section type",
-    "col-lit": "LIT",
+    "col-lit": "LIT ADR",
     "col-last-modified": "Last modified",
     "initial-condition": "Initial condition",
     "add-initial-condition": "Add initial condition",
@@ -446,10 +449,10 @@
     "label-maintenance-team": "EEL",
     "link-group": "Link",
     "label-etl": "Electric tension level",
-    "label-link-id": "Link - IDR",
-    "label-link-name": "Link - ADR",
-    "label-lit-id": "LIT - IDR",
-    "label-lit-name": "LIT - ADR",
+    "label-link-idr": "Link - IDR",
+    "label-link-adr": "Link - ADR",
+    "label-lit-idr": "LIT - IDR",
+    "label-lit-adr": "LIT - ADR",
     "current-page-report": "Support {first} to {last} of {totalRecords}",
     "name-unique": "Section name must be unique.",
     "label-branch": "Branch",
@@ -650,7 +653,8 @@
       "parameter-15c": "Parameter at 15°C without wind"
     },
     "actions": {
-      "success-detail": "Data saved successfully"
+      "success-detail": "Data saved successfully",
+      "export-invalid-detail": "Please fix invalid fields in all tabs before exporting"
     },
     "calculus-setting": {
       "papoto-radio-label": "PAPOTO",
@@ -753,6 +757,25 @@
       "error-message": "An error occurred while calculating the temperature",
       "perpendicular-option": "Perpendicular",
       "sky-cover-estimation-error": "Sky cover could not be estimated from the provided inputs. Please check the values and try again."
+    },
+    "export-labels": {
+      "calculation-method": {
+        "papoto": "PAPOTO",
+        "tangente-aiming": "VISEES_TANGENTES",
+        "pep": "PEP"
+      },
+      "wind-speed-unit": {
+        "kmh": "KM/H",
+        "ms": "M/S"
+      },
+      "update-mode-15c": {
+        "auto": "AUTO",
+        "manual": "MANUELLE"
+      },
+      "calculation-type": {
+        "angle-tangent": "ANGLE_TANGENT",
+        "parameter": "PARAMETRE"
+      }
     }
   },
   "studio": {

@@ -85,8 +85,8 @@
       "logo-alt": "Stellar",
       "title": "Se connecter",
       "resolving-mode": "Vérification du mode de connexion…",
-      "redirecting-to-gaia": "Redirection vers G@IA pour la connexion…",
-      "offline-waiting-for-gaia": "Vous êtes hors ligne. Reconnectez-vous pour continuer la connexion G@IA.",
+      "redirecting-to-auth-serv": "Redirection vers auth-serv pour la connexion…",
+      "offline-waiting-for-auth-serv": "Vous êtes hors ligne. Reconnectez-vous pour continuer la connexion auth-serv.",
       "subtitle": "Entrez votre adresse e-mail pour continuer.",
       "email-label": "Courriel",
       "email-required": "L'adresse e-mail est requise.",
@@ -171,6 +171,7 @@
     "logged-layout": {
       "home": "Accueil",
       "studies": "Études",
+      "documentation": "Documentation",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
@@ -212,13 +213,14 @@
       "marking-load": "Charge de balisage"
     },
     "floor-form-service": {
+      "cable-below-floor-detail": "Le câble passe sous le sol de la portée {{span}}",
       "delete-detail": "Sol supprimé",
       "delete-error-detail": "Échec de la suppression du sol",
       "save-detail": "Sol enregistré",
       "save-error-detail": "Échec de l'enregistrement du sol"
     },
     "auth-service": {
-      "email-login-disabled": "La connexion par e-mail est désactivée car l'authentification unique G@IA est requise."
+      "email-login-disabled": "La connexion par e-mail est désactivée car l'authentification unique auth-serv est requise."
     },
     "global-error-handler": {
       "unexpected-error": "Une erreur inattendue s'est produite. Veuillez recharger la page si le problème persiste."
@@ -352,11 +354,12 @@
       "col-title": "Titre",
       "col-author": "Auteur",
       "col-modification-date": "Date de modification",
-      "col-lit": "LIT",
+      "col-lit": "LIT IDR",
       "col-description": "Description/commentaire",
       "col-actions": "Actions",
       "study-actions-menu": "Menu des actions d'étude",
-      "pagination-report": "Étude {first} à {last} sur {totalRecords}"
+      "pagination-report": "Étude {first} à {last} sur {totalRecords}",
+      "date-format": "d MMMM yyyy 'à' HH'h'mm"
     },
     "tabs": {
       "my-studies": "Mes dernières études",
@@ -402,7 +405,7 @@
     "aria-select-section": "sélectionner ce canton de l'étude",
     "col-name": "Nom du canton",
     "col-type": "Type de canton",
-    "col-lit": "LIT",
+    "col-lit": "LIT ADR",
     "col-last-modified": "Dernière modification",
     "initial-condition": "Condition initiale",
     "add-initial-condition": "Ajouter une condition initiale",
@@ -446,10 +449,10 @@
     "label-maintenance-team": "EEL",
     "link-group": "Liaison",
     "label-etl": "Niveau de tension électrique",
-    "label-link-id": "Liaison - IDR",
-    "label-link-name": "Liaison - ADR",
-    "label-lit-id": "LIT - IDR",
-    "label-lit-name": "LIT - ADR",
+    "label-link-idr": "Liaison - IDR",
+    "label-link-adr": "Liaison - ADR",
+    "label-lit-idr": "LIT - IDR",
+    "label-lit-adr": "LIT - ADR",
     "current-page-report": "Support {first} à {last} sur {totalRecords}",
     "name-unique": "Le nom du canton doit être unique.",
     "label-branch": "Branche",
@@ -650,7 +653,8 @@
       "parameter-15c": "Calcul du paramètre à 15°C sans vent"
     },
     "actions": {
-      "success-detail": "Données enregistrées avec succès"
+      "success-detail": "Données enregistrées avec succès",
+      "export-invalid-detail": "Veuillez corriger les champs invalides dans tous les onglets avant d'exporter"
     },
     "calculus-setting": {
       "papoto-radio-label": "PAPOTO",
@@ -753,6 +757,25 @@
       "error-message": "Une erreur est survenue lors du calcul de la température",
       "perpendicular-option": "Perpendiculaire",
       "sky-cover-estimation-error": "La nébulosité n'a pas pu être estimée à partir des données fournies. Veuillez vérifier les valeurs et réessayer."
+    },
+    "export-labels": {
+      "calculation-method": {
+        "papoto": "PAPOTO",
+        "tangente-aiming": "VISEES_TANGENTES",
+        "pep": "PEP"
+      },
+      "wind-speed-unit": {
+        "kmh": "KM/H",
+        "ms": "M/S"
+      },
+      "update-mode-15c": {
+        "auto": "AUTO",
+        "manual": "MANUELLE"
+      },
+      "calculation-type": {
+        "angle-tangent": "ANGLE_TANGENT",
+        "parameter": "PARAMETRE"
+      }
     }
   },
   "studio": {

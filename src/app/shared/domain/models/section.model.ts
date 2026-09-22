@@ -94,28 +94,34 @@ export interface Section {
   first_attachment_set: string;
   /** Last attachment set identifier */
   last_attachment_set: string;
-  /** Regional maintenance center names */
-  regional_maintenance_center_names: string[];
-  /** Maintenance center names */
-  maintenance_center_names: string[];
   /** Regional team identifier */
   regional_team_id: string | undefined;
   /** Maintenance team identifier */
   maintenance_team_id: string | undefined;
   /** Maintenance center identifier */
   maintenance_center_id: string | undefined;
-  /** Link name reference */
-  link_name: string | undefined;
-  /** LIT code identifier */
-  lit_code: string | undefined;
-  /** LIT name */
-  lit_name: string | undefined;
-  /** Branch name */
-  branch_name: string | undefined;
-  /** Branch IDR reference */
+  /** Link IDR reference (LIAISON_IDR) */
+  link_idr: string | undefined;
+  /** Link ADR (LIAISON_ADR) */
+  link_adr: string | undefined;
+  /** LIT IDR identifier */
+  lit_idr: string | undefined;
+  /** LIT ADR name */
+  lit_adr: string | undefined;
+  /** Branch ADR (BRANCHE_ADR) */
+  branch_adr: string | undefined;
+  /** Raw branch IDR reference (BRANCHE_IDR) */
   branch_idr: string | undefined;
   /** Voltage IDR reference */
   voltage_idr: string | undefined;
+  /** Voltage ADR reference */
+  voltage_adr: string | undefined;
+  /** Maintenance center designation (CM_DESIGNATION) */
+  cm_designation: string | undefined;
+  /** Regional maintenance center designation (GMR_DESIGNATION) */
+  gmr_designation: string | undefined;
+  /** Maintenance team designation (EEL_DESIGNATION) */
+  eel_designation: string | undefined;
   /** General comment */
   comment: string | undefined;
   /** Comment about supports */

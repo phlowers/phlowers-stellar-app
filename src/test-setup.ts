@@ -8,12 +8,20 @@ import '@angular/compiler';
 import '@analogjs/vitest-angular/setup-zone';
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeFrExtra from '@angular/common/locales/extra/fr';
+import localeEn from '@angular/common/locales/en';
+import localeEnExtra from '@angular/common/locales/extra/en';
 import { Subject } from 'rxjs';
 import { MessageService } from 'primeng/api';
 
+registerLocaleData(localeFr, 'fr-FR', localeFrExtra);
+registerLocaleData(localeEn, 'en-US', localeEnExtra);
+
 // Polyfill $localize for tests. Angular's i18n uses this at compile time.
 // In tests, we just return the string as-is since we're not extracting i18n strings.
-if (typeof (globalThis as Record<string, unknown>).$localize === 'undefined') {
+if ((globalThis as Record<string, unknown>).$localize === undefined) {
   (globalThis as Record<string, unknown>).$localize = (strings: TemplateStringsArray, ...values: unknown[]): string => {
     let result = strings[0];
     for (let i = 0; i < values.length; i++) {

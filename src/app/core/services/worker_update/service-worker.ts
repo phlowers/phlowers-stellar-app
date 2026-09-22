@@ -154,14 +154,9 @@ export async function installApp() {
  * @returns The updated asset manifest.
  */
 export async function updateApp() {
-  const response = await fetchLatestManifest();
-  if (!response.ok) {
-    throw new Error(`Manifest fetch failed with status ${response.status}`);
-  }
-  const manifest: AssetManifest = await response.json();
-  const cacheName = await precacheVersion(manifest);
-  await activateVersion(cacheName);
-  return manifest;
+  // Same steps as a fresh install: the version caches are immutable and uniquely named, so
+  // precaching the new manifest never touches the active one until `activateVersion` switches it.
+  return installApp();
 }
 
 const NO_CACHE_INIT: RequestInit = {
@@ -297,11 +292,32 @@ async function resolveActiveCache(): Promise<Cache | null> {
  * served stale from the SW cache-first branch until the user performs a
  * hard-reload (which bypasses the SW entirely), because it is only
  * refreshed when `updateApp()`/`installApp()` runs.
+ *
+ * `/docs` (and everything under it) MUST be bypassed too: it is a separate
+ * static Sphinx site served by Apache from the same origin, not an Angular
+ * route. Without this bypass, the generic `navigate` branch below always
+ * discards its real response and serves the cached SPA shell instead
+ * (`cachedShell` wins over the network body), so the Angular router then
+ * renders its own "not found" page for a URL it doesn't know.
+ *
+ * `/data/` (catalog CSV/JSON) MUST be bypassed too: catalogs are excluded
+ * from the asset manifest and the import pipeline verifies each download
+ * independently with SHA-256 before promotion, so
+ * branch below serves no purpose and its blanket `.catch(() => Response.error())`
+ * silently hides the real failure (e.g. an OIDC-redirect network error, the
+ * same class already documented above for navigation requests).
  */
 function shouldBypassSW(url: string): boolean {
   try {
     const path = new URL(url).pathname;
-    return path.startsWith('/auth/') || path === '/assets_list.json' || path === '/version.json';
+    return (
+      path.startsWith('/auth/') ||
+      path === '/assets_list.json' ||
+      path === '/version.json' ||
+      path === '/docs' ||
+      path.startsWith('/docs/') ||
+      path.startsWith('/data/')
+    );
   } catch {
     return false;
   }
@@ -321,7 +337,8 @@ export async function handleFetch(event: FetchEvent) {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
 
-  // Full bypass: /auth/* (OIDC), /assets_list.json and /version.json must never be intercepted.
+  // Full bypass: /auth/* (OIDC), /assets_list.json, /version.json and /docs/*
+  // must never be intercepted.
   // Plain return WITHOUT respondWith: the browser handles the request natively.
   // `respondWith(fetch(request))` is NOT equivalent — OIDC endpoints answer
   // with cross-origin redirects to the AuthProvider, and a SW-relayed fetch of a

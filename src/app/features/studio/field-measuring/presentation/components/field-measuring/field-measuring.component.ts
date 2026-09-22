@@ -18,7 +18,7 @@ import { TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import { SelectOption, TRANSIT_BOUNDS } from '../../constants';
+import { SelectOption, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS } from '../../constants';
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
 import { PlotService } from '@services/plot/plot.service';
@@ -32,11 +32,13 @@ import {
   createInitialMeasureData,
   buildWindDirectionOptions,
   buildSkyCoverOptions,
-  buildLeftSupportOptions
+  buildLeftSupportOptions,
+  buildFieldMeasureExportFilename
 } from '../../helpers';
+import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
-import { isNumber } from 'lodash';
+import { isNumber, isEqual } from 'lodash';
 import { MessageService } from 'primeng/api';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -82,6 +84,9 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   measureData = signal<FieldMeasure>(createInitialMeasureData(null, '', null, null));
 
+  /** Snapshot of the measure data as of the last successful save (or initial load), used to detect unsaved changes. */
+  private readonly lastSavedMeasureData = signal<FieldMeasure | null>(null);
+
   selectedSpan = signal<number[]>([]);
 
   activeTab = signal<'terrainData' | 'parameterCalculation' | 'temperatureCalculation' | 'parameterAt15CWithoutWind'>(
@@ -115,6 +120,9 @@ export class FieldMeasuringComponent implements OnDestroy {
     this.activeLang();
     return buildLeftSupportOptions(this.translocoService);
   });
+
+  /** Whether `measureData` differs from the last saved snapshot. */
+  readonly hasUnsavedChanges = computed(() => !isEqual(this.measureData(), this.lastSavedMeasureData()));
 
   constructor() {
     effect(() => {
@@ -185,6 +193,84 @@ export class FieldMeasuringComponent implements OnDestroy {
     return isValid && !this.isNameAlreadyTaken();
   });
 
+  /**
+   * Validity of the "Parameter calculation" tab (RG.MES.EXP-BTN.2). Only the PAPOTO method has an
+   * implemented form to validate; the other methods (placeholders) are always considered valid.
+   */
+  readonly isParameterCalculationValid = computed(() => {
+    const measureData = this.measureData();
+    if (measureData.calculationMethod !== 'papoto') {
+      return true;
+    }
+    return !!(
+      measureData.leftSupport &&
+      measureData.spanLength != null &&
+      measureData.measuredElevationDifference != null &&
+      measureData.HL != null &&
+      measureData.H1 != null &&
+      measureData.H2 != null &&
+      measureData.H3 != null &&
+      measureData.HR != null &&
+      measureData.VL != null &&
+      measureData.V1 != null &&
+      measureData.V2 != null &&
+      measureData.V3 != null &&
+      measureData.VR != null
+    );
+  });
+
+  /** Validity of the "Temperature calculation" tab (RG.MES.EXP-BTN.2), mirroring `TemperatureCalculationComponent.isFormValid`. */
+  readonly isTemperatureCalculationValid = computed(() => {
+    const measureData = this.measureData();
+    const isTransitOutOfBounds =
+      isNumber(measureData.transit) &&
+      (measureData.transit < TRANSIT_BOUNDS.min || measureData.transit > TRANSIT_BOUNDS.max);
+    const isMeasuredSolarFluxOutOfBounds =
+      isNumber(measureData.measuredDiffusedPlusDirectSolarFlux) &&
+      (measureData.measuredDiffusedPlusDirectSolarFlux < MEASURED_SOLAR_FLUX_BOUNDS.min ||
+        measureData.measuredDiffusedPlusDirectSolarFlux > MEASURED_SOLAR_FLUX_BOUNDS.max);
+    return (
+      measureData.cableName !== null &&
+      measureData.transit !== null &&
+      measureData.skyCover !== null &&
+      !isTransitOutOfBounds &&
+      !isMeasuredSolarFluxOutOfBounds
+    );
+  });
+
+  /**
+   * Validity of the "Parameter at 15°C without wind" tab (RG.MES.EXP-BTN.2). In manual mode the user-entered
+   * fields must be filled. In auto mode the tab has no editable input (it only displays computed values), so
+   * it is always valid for export purposes — the export contract already supports an uncomputed
+   * `zeroWindCalculation` (see `buildZeroWindCalculationExport`), matching RG.MES.EXP-BTN.1 allowing export
+   * once the measure is calculated *or* saved (not necessarily both calculated).
+   */
+  readonly isParameter15CValid = computed(() => {
+    const measureData = this.measureData();
+    if (measureData.updateMode15C !== 'manual') {
+      return true;
+    }
+    const manualData = measureData.manualParameterCalculation15CWithoutWind;
+    return (
+      isNumber(manualData?.cableTemperatureCalibration) &&
+      isNumber(manualData?.parameterPapoto) &&
+      isNumber(manualData?.cableTemperatureCalibrationUncertainty)
+    );
+  });
+
+  /** Whether the measure has been computed at least once (PAPOTO is currently the only implemented method). */
+  readonly hasComputedOutputs = computed(() => this.measureData().outputs.papoto !== null);
+
+  /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
+  readonly canExport = computed(
+    () =>
+      this.isFormValid() &&
+      this.isParameterCalculationValid() &&
+      this.isTemperatureCalculationValid() &&
+      this.isParameter15CValid() &&
+      (this.hasComputedOutputs() || !this.hasUnsavedChanges())
+  );
+
   private async initializeMeasureData(): Promise<void> {
     const section = this.spanService.section();
     const selectedFieldMeasure = section?.field_measures.find(
@@ -201,7 +287,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
     // Fetch link_adr from lines service
     const linesTable = await this.linesService.getLines();
-    const linkLine = linesTable?.find((item) => item.link_idr === section.link_name);
+    const linkLine = linesTable?.find((item) => item.link_idr === section.link_idr);
     const linkAdrRead = linkLine?.link_adr || '';
 
     this.measureData.set({
@@ -213,6 +299,7 @@ export class FieldMeasuringComponent implements OnDestroy {
       numberOfConductors: section.cables_amount || 0,
       cableName: section.cable_name || ''
     });
+    this.lastSavedMeasureData.set(this.measureData());
   }
 
   onVisibleChange(visible: boolean) {
@@ -226,15 +313,87 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!measureData) {
       return;
     }
-    this.measureData.set({
+
+    // Papoto input fields — any change invalidates the stale calculation result
+    const papotoInputFields: (keyof FieldMeasure)[] = [
+      'leftSupport',
+      'spanLength',
+      'measuredElevationDifference',
+      'HL',
+      'H1',
+      'H2',
+      'H3',
+      'HR',
+      'VL',
+      'V1',
+      'V2',
+      'V3',
+      'VR'
+    ];
+
+    const updated = {
       ...measureData,
       [field]: value
-    });
+    };
+
+    // Clear stale PAPOTO result if any PAPOTO input changed
+    if (papotoInputFields.includes(field) && measureData.outputs.papoto !== null) {
+      updated.outputs = { ...updated.outputs, papoto: null };
+    }
+
+    this.measureData.set(updated);
   }
 
-  onExport() {
-    // TODO: Implement export functionality
-    this.logger.log('Export', this.measureData());
+  async onExport() {
+    if (
+      !this.isFormValid() ||
+      !this.isParameterCalculationValid() ||
+      !this.isTemperatureCalculationValid() ||
+      !this.isParameter15CValid()
+    ) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translocoService.translate('common.error'),
+        detail: this.translocoService.translate('field-measuring.actions.export-invalid-detail')
+      });
+      return;
+    }
+
+    const measureData = this.measureData();
+    const section = this.spanService.section();
+    const study = this.plotService.study();
+    const litData = this.plotService.litData();
+    const json = buildFieldMeasureExportJson(measureData, section, study, litData, this.translocoService);
+    const filename = buildFieldMeasureExportFilename(measureData, section?.name ?? null);
+    await this.saveExportFile(json, filename);
+  }
+
+  private async saveExportFile(json: string, filename: string): Promise<void> {
+    if (globalThis.showSaveFilePicker) {
+      try {
+        const handle = await globalThis.showSaveFilePicker({
+          suggestedName: `${filename}.json`,
+          types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(json);
+        await writable.close();
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+        this.logger.error('Failed to save export file via showSaveFilePicker', error);
+      }
+    }
+
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   onReport() {
@@ -248,7 +407,7 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!section || !measureData) {
       return;
     }
-    const isExistingMeasure = section.field_measures.find((measure) => measure.uuid === measureData.uuid);
+    const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);
     if (isExistingMeasure) {
       await this.plotService.modifySection({
         field_measures: section.field_measures.map((measure) =>
@@ -265,6 +424,7 @@ export class FieldMeasuringComponent implements OnDestroy {
       summary: this.translocoService.translate('common.success'),
       detail: this.translocoService.translate('field-measuring.actions.success-detail')
     });
+    this.lastSavedMeasureData.set(measureData);
   }
 
   onImportStationData() {

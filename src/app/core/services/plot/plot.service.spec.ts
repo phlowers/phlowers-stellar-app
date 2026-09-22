@@ -20,7 +20,8 @@ import {
   DataError,
   GetSectionWithBaseOutput,
   GetSectionOutput,
-  Distance
+  Distance,
+  PythonErrorCode
 } from '@services/worker_python/tasks/types';
 import { CatalogCable, Section, Study } from '@shared/domain';
 import * as plotly from 'plotly.js-dist-min';
@@ -163,17 +164,20 @@ describe('PlotService', () => {
     last_support_number: 6,
     first_attachment_set: 'Set 1',
     last_attachment_set: 'Set 2',
-    regional_maintenance_center_names: ['Center 1'],
-    maintenance_center_names: ['Maintenance 1'],
     regional_team_id: 'GMR-001',
     maintenance_team_id: 'EEL-001',
     maintenance_center_id: 'CM-001',
-    link_name: 'Link 1',
-    lit_code: 'LIT-001',
-    lit_name: 'LIT-001',
-    branch_name: 'Branch 1',
+    link_idr: 'Link 1',
+    link_adr: 'Link 1',
+    lit_idr: 'LIT-001',
+    lit_adr: 'LIT-001',
+    branch_adr: 'Branch 1',
     branch_idr: 'Branch 1',
     voltage_idr: '400kV',
+    voltage_adr: undefined,
+    cm_designation: undefined,
+    gmr_designation: undefined,
+    eel_designation: undefined,
     comment: 'Test comment',
     supports_comment: 'Supports comment',
     supports: [
@@ -591,6 +595,31 @@ describe('PlotService', () => {
       await service.refreshProjection();
 
       expect(service.loading()).toBe(false);
+    });
+
+    it('should drop the intersection warning raised for a floor, but keep an obstacle one', async () => {
+      // A floor's end points sit on the supports, where the engine's distance plane finds no cable:
+      // it warns for every saved floor whatever its clearance, so the toast is pure noise there.
+      const floorWarning = {
+        code: PythonErrorCode.NoIntersectionPlaneWarning,
+        severity: 'warning' as const,
+        origin: 'warning' as const,
+        rawText: "NoIntersectionPlaneWarning: No intersection found between obstacle 'floor-uuid' (point index 0)"
+      };
+      const obstacleWarning = { ...floorWarning, rawText: 'NoIntersectionPlaneWarning: obstacle obs-uuid point 1' };
+      spanService.section.set({
+        ...mockSection,
+        floors: [{ uuid: 'floor-uuid', supportUuid: 'sup-0', referenceSupport: 'LEFT', points: [] }]
+      } as unknown as Section);
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+        error: null,
+        diagnostics: [floorWarning, obstacleWarning]
+      });
+
+      await service.refreshProjection();
+
+      expect(service.diagnostics()).toEqual([obstacleWarning]);
     });
 
     it('should update plotOptions with section supports range via initSectionStudio', async () => {

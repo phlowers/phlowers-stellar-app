@@ -10,6 +10,10 @@ export interface SidebarItem {
   label: string;
   /** Abbreviated label used when the sidebar is collapsed. */
   shortLabel?: string;
-  /** Router path the item navigates to. */
-  route: string;
+  /** Router path the item navigates to. Omit for an external link (use `externalUrl` instead). */
+  route?: string;
+  /** Absolute URL opened outside the Angular router (e.g. static Sphinx docs). */
+  externalUrl?: string;
+  /** Anchor `target` used when `externalUrl` is set. */
+  target?: '_blank';
 }

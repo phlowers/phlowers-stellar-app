@@ -315,7 +315,7 @@ describe('AuthService', () => {
 
       // Cache-first: the previously-authenticated user renders immediately.
       // Apache remains the authoritative enforcement layer for any real
-      // protected request from this point on (see connexion-gaia.md §2).
+      // protected request from this point on.
       expect(service.currentUser()).toEqual(testOidcUser);
 
       // Flush the background resync microtasks.

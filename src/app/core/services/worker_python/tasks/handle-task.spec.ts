@@ -189,7 +189,7 @@ describe('Task handlers', () => {
       expect(result.diagnostics).toEqual([]);
     });
 
-    it('should de-duplicate warnings with the same PythonErrorCode', async () => {
+    it('should keep every warning sharing a PythonErrorCode (de-duplication happens at toast level)', async () => {
       const mockToJs = vi.fn().mockReturnValue({ success: true });
       (mockPyodide.globals.get as vi.Mock).mockImplementation((name: unknown) =>
         name === 'get_and_clear_warnings'
@@ -215,6 +215,12 @@ describe('Task handlers', () => {
           severity: 'warning',
           origin: 'warning',
           rawText: 'NoIntersectionPlaneWarning: no intersection found for point 1'
+        },
+        {
+          code: 'NoIntersectionPlaneWarning',
+          severity: 'warning',
+          origin: 'warning',
+          rawText: 'NoIntersectionPlaneWarning: no intersection found for point 2'
         },
         {
           code: 'DataWarning',

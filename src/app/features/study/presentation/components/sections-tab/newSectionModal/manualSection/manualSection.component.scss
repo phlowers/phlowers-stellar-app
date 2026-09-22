@@ -19,6 +19,36 @@
       'b c c .'
       'd e e f';
   }
+
+  &--infos {
+    grid-template-areas:
+      'a b c .'
+      'd e . .';
+  }
+
+  &__cell--a {
+    grid-area: a;
+  }
+
+  &__cell--b {
+    grid-area: b;
+  }
+
+  &__cell--c {
+    grid-area: c;
+  }
+
+  &__cell--d {
+    grid-area: d;
+  }
+
+  &__cell--e {
+    grid-area: e;
+  }
+
+  &__cell--f {
+    grid-area: f;
+  }
 }
 
 dt {

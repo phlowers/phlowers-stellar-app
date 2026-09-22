@@ -117,10 +117,12 @@ export async function runWorkerImport(
 
     // The engine's own 'done' is never forwarded as-is: it only reflects
     // staging having been fully written, not yet promoted to live.
-    let stagedDone: CsvImportWorkerResponse | null = null;
+    // Held in an object, not a `let`: TypeScript keeps the initial `null` type for a local assigned
+    // only from inside a closure, so the staged message would read as `never` when checked below.
+    const staged: { done: CsvImportWorkerResponse | null } = { done: null };
     const stagingPost = (msg: CsvImportWorkerResponse) => {
       if (msg.type === 'done') {
-        stagedDone = msg;
+        staged.done = msg;
         return;
       }
       post(msg);
@@ -157,10 +159,10 @@ export async function runWorkerImport(
       hash
     );
 
-    if (!stagedDone || stagedDone.type !== 'done') {
+    if (staged.done?.type !== 'done') {
       throw new Error(`Catalog import for ${config.filename} completed without a done message`);
     }
-    post({ ...stagedDone, verifiedHash: hash });
+    post({ ...staged.done, verifiedHash: hash });
   } finally {
     db.close();
   }

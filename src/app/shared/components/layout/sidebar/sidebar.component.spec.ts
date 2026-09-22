@@ -297,6 +297,48 @@ describe('SidebarComponent', () => {
     expect(mainLinks[2].attributes['id']).toBe('new-link');
   });
 
+  it('should render an external link with target and rel when item has externalUrl', () => {
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
+    hostComponent.mainLinks = [
+      ...hostComponent.mainLinks,
+      {
+        id: 'documentation',
+        label: 'Documentation',
+        icon: 'help',
+        externalUrl: '/docs/index.html',
+        target: '_blank'
+      }
+    ];
+    hostFixture.detectChanges();
+
+    const externalLink = hostFixture.debugElement.query(By.css('#documentation'));
+    expect(externalLink.attributes['href']).toBe('/docs/index.html');
+    expect(externalLink.attributes['target']).toBe('_blank');
+    expect(externalLink.attributes['rel']).toBe('noopener noreferrer');
+  });
+
+  it('should render an external link with target and rel in the footer when item has externalUrl', () => {
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
+    hostComponent.footerLinks = [
+      ...hostComponent.footerLinks,
+      {
+        id: 'footer-documentation',
+        label: 'Documentation',
+        icon: 'help',
+        externalUrl: '/docs/index.html',
+        target: '_blank'
+      }
+    ];
+    hostFixture.detectChanges();
+
+    const externalLink = hostFixture.debugElement.query(By.css('#footer-documentation'));
+    expect(externalLink.attributes['href']).toBe('/docs/index.html');
+    expect(externalLink.attributes['target']).toBe('_blank');
+    expect(externalLink.attributes['rel']).toBe('noopener noreferrer');
+  });
+
   describe('UC: should render nav links and toggle expanded/collapsed', () => {
     const getAllByTestId = (testId: string): HTMLElement[] =>
       Array.from(hostFixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`));

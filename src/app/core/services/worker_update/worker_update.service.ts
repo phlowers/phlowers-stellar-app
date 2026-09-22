@@ -46,7 +46,7 @@ export class UpdateService {
    * `/version.json`) so a slow or unreachable server never hangs the update
    * layer. Kept strictly greater than Apache's `OIDCHTTPTimeoutLong` (10s in
    * `httpd-oidc.conf.template`) for the same reason as the auth probe: a
-   * shorter client timeout races Apache's own outgoing call to G@IA.
+   * shorter client timeout races Apache's own outgoing call to auth-serv.
    */
   private static readonly FETCH_TIMEOUT_MS = 13000;
 
@@ -197,9 +197,7 @@ export class UpdateService {
    * Call `clearManifestCache` to force a fresh fetch.
    */
   async getLatestAssetList(): Promise<AssetManifest | null> {
-    if (!this.cachedManifestPromise) {
-      this.cachedManifestPromise = this.fetchManifest();
-    }
+    this.cachedManifestPromise ??= this.fetchManifest();
     return this.cachedManifestPromise;
   }
 

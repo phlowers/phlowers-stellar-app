@@ -17,6 +17,7 @@ import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.se
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { firstMeasuredPoint } from '@features/studio/core/presentation/components/quick-measures/quick-measures.helpers';
 
 /**
  * Quick-measures card: pick an obstacle or a floor visible in the current span window,
@@ -146,7 +147,9 @@ export class QuickMeasuresComponent {
     this.obstacleStateService.distanceType.set(null);
     const section = this.spanService.section();
     if (uuid && section?.floors?.some((floor) => floor.uuid === uuid)) {
-      this.obstaclesService.setSelectedMeasure(uuid, null);
+      // Land on a point straight away, like picking an obstacle does: same entry point as a plot
+      // click, so the floor form follows and the vertical distance shows without a second pick.
+      this.floorFormService.selectFloorPoint(uuid, firstMeasuredPoint(this.obstacleStateService.distances(), uuid));
       return;
     }
     const obstacle = uuid ? section?.obstacles.find((o) => o.uuid === uuid) : null;

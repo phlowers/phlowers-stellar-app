@@ -37,6 +37,7 @@ describe('LoggedLayoutComponent', () => {
             en: {
               'shared.logged-layout.home': 'Home',
               'shared.logged-layout.studies': 'Studies',
+              'shared.logged-layout.documentation': 'Documentation',
               'shared.logged-layout.ver-maj': 'Ver.MAJ',
               'shared.logged-layout.version-maj': 'Version / MAJ'
             }
@@ -97,8 +98,8 @@ describe('LoggedLayoutComponent', () => {
     sidebarNav.main.forEach((item) => {
       expect(item).toHaveProperty('id');
       expect(item).toHaveProperty('label');
-      expect(item).toHaveProperty('route');
       expect(item).toHaveProperty('icon');
+      expect(item.route ?? item.externalUrl).toBeTruthy();
     });
 
     sidebarNav.footer.forEach((item) => {
@@ -107,5 +108,14 @@ describe('LoggedLayoutComponent', () => {
       expect(item).toHaveProperty('route');
       expect(item).toHaveProperty('icon');
     });
+  });
+
+  it('should include a documentation entry opening the static Sphinx docs in a new tab', () => {
+    const documentationItem = component.sideBarNav().main.find((item) => item.id === 'sideB-documentation');
+
+    expect(documentationItem).toBeTruthy();
+    expect(documentationItem?.externalUrl).toBe('/docs/index.html');
+    expect(documentationItem?.target).toBe('_blank');
+    expect(documentationItem?.route).toBeUndefined();
   });
 });

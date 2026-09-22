@@ -5,7 +5,7 @@ The application **does not embed any client-side OIDC library** (no `angular-aut
 1. **Probes the server** to discover which authentication mode is active.
 2. **Reads pre-authenticated claims** from a CGI endpoint.
 3. **Caches the user in IndexedDB** to keep working offline.
-4. **Forces a top-level redirect** to G@IA when an OIDC sign-in prompt is needed.
+4. **Forces a top-level redirect** to auth-serv when an OIDC sign-in prompt is needed.
 
 ---
 
@@ -14,7 +14,7 @@ The application **does not embed any client-side OIDC library** (no `angular-aut
 ```
 ┌──────────┐   1. GET /auth/userinfo  ┌────────┐  (no session)   ┌─────┐
 │ Browser  │ ───────────────────────► │ Apache │ ──────────────► │ IdP │
-│ (Angular)│                          │ mod_   │                 │G@IA │
+│ (Angular)│                          │ mod_   │                 │auth-serv │
 │          │ ◄─────────────────────── │ auth_  │ ◄────────────── │     │
 │          │  { authenticated, oidcEnabled,   │   Auth Code      └─────┘
 │          │     email?, sub?, given_name?,   │   + PKCE (S256)
@@ -23,7 +23,7 @@ The application **does not embed any client-side OIDC library** (no `angular-aut
 │          │                          │ openidc│
 │          │   2. GET /auth/login     │        │
 │          │   (top-level navigation) │        │
-│          │ ───────────────────────► │        │ → G@IA prompt
+│          │ ───────────────────────► │        │ → auth-serv prompt
 │          │ ◄─────────────────────── │        │ → callback → 302 "/"
 │          │   Set-Cookie HTTP-only   │        │
 │          │                          └────────┘
@@ -34,7 +34,7 @@ The application **does not embed any client-side OIDC library** (no `angular-aut
 - Apache enforces OIDC sign-in (Authorization Code + PKCE S256) and stores tokens in **HTTP-only cookies** invisible to JS.
 - Apache exposes three relevant endpoints:
   - `/auth/userinfo` — returns the current session state and OIDC claims as JSON. Always responds with `200 OK` (even when unauthenticated) to avoid noisy console errors and to advertise the server-side mode.
-  - `/auth/login` — dedicated entry point that triggers the G@IA prompt and 302-redirects to `/` once authenticated.
+  - `/auth/login` — dedicated entry point that triggers the auth-serv prompt and 302-redirects to `/` once authenticated.
   - `/auth/relogin` — last-resort recovery endpoint: clears the local `mod_auth_openidc` session cookie, then chains to `/auth/login`. Invoked only by the Service Worker (401/403 navigation with no cached shell) and by `reconnecting.html`.
 - Angular reads `/auth/userinfo`, persists the user in IndexedDB (Dexie) and exposes a `signal<User | null>`.
 - A same-origin HTTP interceptor (`authSessionInterceptor`) and the Service Worker both detect proven `401`/`403` session mismatches on live requests/navigations and trigger an automatic redirect to `/auth/login` (via `AuthResyncService`, rate-limited) — see §4.6.
@@ -67,7 +67,7 @@ The mode is decided **server-side** and discovered by the SPA through `/auth/use
 
 | Mode | `oidcEnabled` | Server | Email fallback form | Sign-in path |
 |---|---|---|---|---|
-| **OIDC mode** | `true` | Apache + `mod_auth_openidc` | Forbidden | Top-level navigation to `/auth/login` → G@IA prompt |
+| **OIDC mode** | `true` | Apache + `mod_auth_openidc` | Forbidden | Top-level navigation to `/auth/login` → auth-serv prompt |
 | **Fallback mode** | `false` | Plain dev server / Apache without OIDC | Allowed | Local `loginWithEmail()` (no password) |
 
 Defence in depth: a user document cached in fallback mode (no `sub` claim) is **rejected** if the server later reports OIDC mode.
@@ -137,7 +137,7 @@ Two independent detectors feed the same recovery path, because a stale session c
 
 - Both call `AuthService.markServerMismatchFromStatus(status)`, which sets `serverSessionInvalid = true` only for `401`/`403` (other statuses, e.g. transient `5xx`, are a no-op).
 - `shouldForceServerResync()` is `true` when `serverSessionInvalid()` is set **and** the browser is online — it forces `initialize()`/`tryRestoreFromCache()` to distrust the IndexedDB cache and re-resolve from the network.
-- `AuthResyncService.triggerImmediateRedirect()` performs the actual recovery: a top-level navigation to `/auth/login` (forcing the G@IA prompt again). Guarded by:
+- `AuthResyncService.triggerImmediateRedirect()` performs the actual recovery: a top-level navigation to `/auth/login` (forcing the auth-serv prompt again). Guarded by:
   - a **15 s cooldown** (`AUTH_RESYNC_REDIRECT_COOLDOWN_MS`), persisted in `sessionStorage` (`auth_resync:last_redirect_at`) so concurrent failing requests only trigger one redirect;
   - **suppressed paths** — no redirect is fired while already on `/auth/*` or `/login` (`isRedirectSuppressedPath`), to avoid loops;
   - **offline guard** — no redirect while `navigator.onLine === false`.
@@ -174,10 +174,10 @@ Dexie schema: `users: '&email, sub'` (primary key = `email`, secondary index = `
 | Aspect | Where it is handled |
 |---|---|
 | Access / refresh tokens | **Apache only**, in HTTP-only cookies — JS has no access |
-| Access-token refresh | **Deliberately none.** `OIDCRefreshAccessTokenBeforeExpiry` is intentionally NOT set (see §7.1) — the app never consumes the access_token upstream, and proactive refresh caused session-killing incidents with G@IA's rotating refresh tokens. Session validity is the Apache cookie alone. |
+| Access-token refresh | **Deliberately none.** `OIDCRefreshAccessTokenBeforeExpiry` is intentionally NOT set (see §7.1) — the app never consumes the access_token upstream, and proactive refresh caused session-killing incidents with auth-serv's rotating refresh tokens. Session validity is the Apache cookie alone. |
 | Expiration detection | `/auth/userinfo` → `{ authenticated: false }` (or HTTP `401` for legacy servers); a live request/navigation returning `401`/`403` is also caught by `authSessionInterceptor` / the Service Worker (§4.6) |
 | `Authorization` header | **No HTTP interceptor injects a Bearer token** — everything flows through cookies. `authSessionInterceptor` exists, but only to *detect* `401`/`403` session mismatches and trigger a resync (§4.6) |
-| Logout | **No Angular method, no UI button** — by design (`connexion-gaia.md` §2). Session lifetime is enforced by Apache (`OIDCSessionInactivityTimeout 604800` = 7 days, `OIDCSessionMaxDuration 2592000` = 30 days). |
+| Logout | **No Angular method, no UI button** — by design. Session lifetime is enforced by Apache (`OIDCSessionInactivityTimeout 604800` = 7 days, `OIDCSessionMaxDuration 2592000` = 30 days). |
 
 ---
 
@@ -189,23 +189,23 @@ The OIDC directives live in `httpd-oidc.conf.template` (repo root, resolved by `
 - `OIDCSessionType client-cookie` (tokens AES-encrypted client-side via `OIDCCryptoPassphrase`), `OIDCSessionInactivityTimeout 604800` (7 days), `OIDCSessionMaxDuration 2592000` (30 days).
 - `OIDCPassClaimsAs both`, `OIDCPassAccessToken On`, `OIDCPassIDTokenAs claims`, `OIDCPassRefreshToken Off`, `OIDCRemoteUserClaim sub` — claims surfaced as `OIDC_CLAIM_*` (and, for the `roles` claim carried in the access token, `OIDC_ACCESS_TOKEN_CLAIM_*`) env vars to CGIs.
 - `OIDCCookieSameSite Lax`, `OIDCCookieHTTPOnly On`, cookie name `mod_auth_openidc_session`, forced `Secure` via `SetEnv OIDC_SET_COOKIE_APPEND Secure`.
-- `OIDCSSLValidateServer On`; `OIDCHTTPTimeoutLong 10` / `OIDCHTTPTimeoutShort 5` for Apache's outgoing calls to G@IA (the client-side `USERINFO_PROBE_TIMEOUT_MS = 13000` in `auth.service.ts` must stay strictly greater than `OIDCHTTPTimeoutLong` so it never races Apache's own call).
+- `OIDCSSLValidateServer On`; `OIDCHTTPTimeoutLong 10` / `OIDCHTTPTimeoutShort 5` for Apache's outgoing calls to auth-serv (the client-side `USERINFO_PROBE_TIMEOUT_MS = 13000` in `auth.service.ts` must stay strictly greater than `OIDCHTTPTimeoutLong` so it never races Apache's own call).
 - `OIDCRedirectURLsAllowed` restricted to the app's own public host — open-redirect protection for the user-supplied `target_link_uri`/logout params (does not govern the normal post-login redirect, which comes from encrypted OIDC state).
 - `<Location />` → `Require valid-user` (whole app protected).
 - `<Location /auth/userinfo>` → `OIDCUnAuthAction pass` so the CGI can answer `{ authenticated: false }` instead of returning `401`.
-- `<Location /auth/login>` → `OIDCUnAuthAction auth`, so an unauthenticated request triggers the G@IA redirect.
-- `<Location /auth/relogin>` → `OIDCUnAuthAction pass`; clears the local `mod_auth_openidc_session` cookie via a `Set-Cookie ... Max-Age=0` response header, then `Redirect 302` to `/auth/login`. Deliberately does **not** use mod_auth_openidc's `?logout=` query (that performs an RP-initiated logout at G@IA, stranding the user on G@IA's own "Sign off successful" page, whose redirect target is not whitelisted).
+- `<Location /auth/login>` → `OIDCUnAuthAction auth`, so an unauthenticated request triggers the auth-serv redirect.
+- `<Location /auth/relogin>` → `OIDCUnAuthAction pass`; clears the local `mod_auth_openidc_session` cookie via a `Set-Cookie ... Max-Age=0` response header, then `Redirect 302` to `/auth/login`. Deliberately does **not** use mod_auth_openidc's `?logout=` query (that performs an RP-initiated logout at auth-serv, stranding the user on auth-serv's own "Sign off successful" page, whose redirect target is not whitelisted).
 
 ### 7.1 Deliberate absences (incident-driven — do not re-add without reading the source comment)
 
-- **No `OIDCRefreshAccessTokenBeforeExpiry`.** Proactive access-token refresh was removed after two 2026-08-10 incidents: this app never consumes the access_token upstream, and G@IA's single-use rotating refresh tokens combined with `client-cookie` sessions caused concurrent browser requests to race the same refresh token, killing the whole token family (`invalid_grant`, cascading 502s). Combined with `logout_on_error` it caused an instant login lockout on the first failed refresh.
+- **No `OIDCRefreshAccessTokenBeforeExpiry`.** Proactive access-token refresh was removed after two 2026-08-10 incidents: this app never consumes the access_token upstream, and auth-serv's single-use rotating refresh tokens combined with `client-cookie` sessions caused concurrent browser requests to race the same refresh token, killing the whole token family (`invalid_grant`, cascading 502s). Combined with `logout_on_error` it caused an instant login lockout on the first failed refresh.
 - **No `ErrorDocument 401`.** A 401 `ErrorDocument` pointing at a relogin endpoint means any stray `401` (e.g. a `favicon.ico` request racing a session refresh) tears down a live session. 401 navigations are instead recovered client-side by the Service Worker and `reconnecting.js` (§4.6, §8) — non-navigation `401`s stay plain `401`s.
 - **`ErrorDocument 400` → `/__access-denied.html`** and **`ErrorDocument 502/503/504` → `/__reconnecting.html`** are the only server-side error redirects, both served from public, OIDC-bypassed `<Location>` blocks (`httpd.conf.patch`) so the internal error subrequest is not itself caught by the OIDC catch-all.
 
 ### 7.2 CGI scripts
 
 - [docker/cgi-bin/userinfo.sh](https://github.com/phlowers/phlowers-stellar-app/blob/main/docker/cgi-bin/userinfo.sh) — always returns `200 OK` with `{ authenticated, oidcEnabled, … }`. The `oidcEnabled` flag comes from the `OIDC_ENABLED` env var injected by the entrypoint. Claims are JSON-encoded with `jq` (no string interpolation, no injection risk). The `roles` claim is read from `OIDC_ACCESS_TOKEN_CLAIM_roles` (CSV or indexed `_0`, `_1`, … env vars), falling back to `OIDC_CLAIM_roles` for IdPs that mirror it into the id_token/userinfo.
-- [docker/cgi-bin/login.sh](https://github.com/phlowers/phlowers-stellar-app/blob/main/docker/cgi-bin/login.sh) — runs only after a successful G@IA callback; emits `302 Location: /`. Returning here (instead of directly to `/`) guarantees a known landing URL that the Service Worker bypasses.
+- [docker/cgi-bin/login.sh](https://github.com/phlowers/phlowers-stellar-app/blob/main/docker/cgi-bin/login.sh) — runs only after a successful auth-serv callback; emits `302 Location: /`. Returning here (instead of directly to `/`) guarantees a known landing URL that the Service Worker bypasses.
 
 ---
 
@@ -228,7 +228,7 @@ npm start
 - ❌ No `HttpInterceptor` injecting a Bearer token (the one interceptor that exists, `authSessionInterceptor`, only detects `401`/`403` session mismatches and triggers a resync redirect — see §4.6).
 - ❌ No OIDC environment variables in Angular (`clientId`, `redirectUri`, scopes…). All OIDC config lives in Apache.
 - ❌ No `/.well-known/openid-configuration` consumed on the front.
-- ❌ No logout button or route in the UI (deliberate — see `connexion-gaia.md`).
+- ❌ No logout button or route in the UI (deliberate).
 - ❌ No client-side token storage (`localStorage`, `sessionStorage`, in-memory tokens).
 - ❌ No automatic deletion of cached users (the table preserves attached studies).
 

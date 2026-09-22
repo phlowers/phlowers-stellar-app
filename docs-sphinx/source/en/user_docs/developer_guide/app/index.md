@@ -10,7 +10,7 @@ custom_components
 engine_worker
 how_to_add_error_codes
 i18n
-obstacles_and_obstacle_distances
+obstacles_floors_and_distances
 offline_database
 plot_refresh_pipeline
 theme_styles

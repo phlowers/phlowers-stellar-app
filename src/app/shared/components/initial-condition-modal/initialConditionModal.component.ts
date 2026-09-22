@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, 
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
-import { Section, InitialCondition } from '@shared/domain';
+import { Section, InitialCondition, Study } from '@shared/domain';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,7 +13,6 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { isNumber } from 'lodash';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { v4 as uuidv4 } from 'uuid';
-import { Study } from '@shared/domain';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
@@ -150,7 +149,7 @@ export class InitialConditionModalComponent {
   }
 
   checkNameUniqueness(name: string) {
-    return !this.initialConditions().find((ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid);
+    return !this.initialConditions().some((ic) => ic.name === name && ic.uuid !== this.initialCondition().uuid);
   }
 
   getErrorIds(controlName: string, errorTypes: string[]): string | null {
