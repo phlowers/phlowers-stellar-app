@@ -28,7 +28,6 @@ import { parseFloorFormPointIndex } from './floor-free-positioning.component.hel
   standalone: true,
   imports: [FreePositioningPlotComponent],
   templateUrl: './floor-free-positioning.component.html',
-  styleUrl: './floor-free-positioning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FloorFreePositioningComponent implements OnDestroy {
