@@ -31,6 +31,9 @@ Le mode **Positionnement libre** permet de placer un point en cliquant sur le gr
 
 - Pour quitter le mode, désactivez l'interrupteur **Positionnement libre**.
 
+Voir {doc}`Positionnement libre <plot/free-positioning>` pour le comportement
+complet du mode (portée figée, contrôles figés, restauration de la vue).
+
 ### Interaction avec l'altitude
 
 - En mode **Absolue (NGF)** : un clic définit directement `z` à l'altitude NGF cliquée.

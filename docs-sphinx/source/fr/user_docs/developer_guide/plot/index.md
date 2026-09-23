@@ -7,4 +7,5 @@ Cette section couvre les fonctionnalités de traçage et de visualisation.
 
 Tutoriel <tutorial>
 Objets <objects>
+Positionnement libre <free-positioning>
 ```

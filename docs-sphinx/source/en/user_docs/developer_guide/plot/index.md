@@ -7,4 +7,5 @@ This section covers general application features and configuration.
 
 tutorial
 objects
+free-positioning
 ```

@@ -8,6 +8,7 @@ Guides pas à pas pour utiliser l'application {{app_name}}.
 
  - {doc}`Bienvenue <welcome>` — Présentation de l'application {{app_name}} et de ses principales fonctionnalités.
  - {doc}`Mise à jour de l'application <application_update>` — Comprenez comment les fichiers de l'application et les données du catalogue sont mis à jour en toute sécurité.
+ - {doc}`Positionnement libre <plot/free-positioning>` — Placez obstacles, sol, charges et repères de distance sur une portée figée.
 
 ```{toctree}
 :maxdepth: 2
@@ -17,4 +18,5 @@ Bienvenue <welcome>
 Obstacles <obstacles>
 Mise à jour de l'application <application_update>
 Modification de câble <charge-cable-manip-at-span>
+Positionnement libre <plot/free-positioning>
 ```
