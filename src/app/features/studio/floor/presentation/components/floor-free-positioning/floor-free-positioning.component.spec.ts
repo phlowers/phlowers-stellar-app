@@ -136,12 +136,12 @@ describe('FloorFreePositioningComponent', () => {
   });
 
   describe('onPlacement', () => {
-    it('should update free point position when active point is removable', () => {
+    it('should truncate free-positioning values to one decimal before updating the form', () => {
       fixture.detectChanges();
       component.onPlacement({
-        alongSpan: 55.4,
+        alongSpan: 55.49,
         lateral: null,
-        altitude: 97.2,
+        altitude: 97.29,
         category: 'floor',
         side: 'profile'
       });
@@ -152,19 +152,19 @@ describe('FloorFreePositioningComponent', () => {
       });
     });
 
-    it('should mirror the click abscissa when the reference support is RIGHT', () => {
+    it('should mirror and cap the click abscissa to two decimals when the reference support is RIGHT', () => {
       mockFloorFormService.referenceSupportValue.set('RIGHT');
       fixture.detectChanges();
       component.onPlacement({
-        alongSpan: 55.4,
+        alongSpan: 55.49,
         lateral: null,
-        altitude: 97.2,
+        altitude: 97.29,
         category: 'floor',
         side: 'profile'
       });
 
       expect(mockFloorFormService.setFreePointPosition).toHaveBeenCalledWith(1, {
-        distanceToRefSupport: 200 - 55.4,
+        distanceToRefSupport: 144.51,
         altitude: 97.2
       });
     });

@@ -15,6 +15,7 @@ import {
 } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.interfaces';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 
 import { FLOOR_FREE_POSITIONING_CONFIG } from './floor-free-positioning.component.constantes';
 import { parseFloorFormPointIndex } from './floor-free-positioning.component.helpers';
@@ -47,14 +48,22 @@ export class FloorFreePositioningComponent implements OnDestroy {
     if (activeIndex === null || !this.floorFormService.pointsView()[activeIndex]?.meta.removable) return;
 
     // The plot click abscissa is measured from the left support, while the form stores the distance
-    // to the selected reference support — mirror it for a RIGHT reference, like the loads tab does.
+    // to the selected reference support. Mirror it for a RIGHT reference, then keep the value within
+    // the display precision expected by that frame: normal left-side edits stay at one decimal, while
+    // the mirrored RIGHT conversion can keep a second decimal to avoid drift after the side flip.
+    const mirroredDistance = mirrorPositionForReferenceSupport(
+      placement.alongSpan,
+      this.floorFormService.spanSupports().spanLength,
+      this.floorFormService.referenceSupportValue()
+    );
+    const distanceToRefSupport =
+      this.floorFormService.referenceSupportValue() === 'RIGHT'
+        ? Number.parseFloat(mirroredDistance.toFixed(2))
+        : truncateNumberToOneDecimal(mirroredDistance);
+
     this.floorFormService.setFreePointPosition(activeIndex, {
-      distanceToRefSupport: mirrorPositionForReferenceSupport(
-        placement.alongSpan,
-        this.floorFormService.spanSupports().spanLength,
-        this.floorFormService.referenceSupportValue()
-      ),
-      altitude: placement.altitude
+      distanceToRefSupport,
+      altitude: truncateNumberToOneDecimal(placement.altitude)
     });
   }
 
