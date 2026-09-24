@@ -9,7 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { ChargesService } from './charges.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { MessageService } from 'primeng/api';
-import { Charge, Section, SymmetryType } from '@shared/domain';
+import { Charge, CableSpanManipulation, CableSupportManipulation, Section, SymmetryType } from '@shared/domain';
 import { StudyEntity } from '@infrastructure/database';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -97,6 +97,41 @@ const mockSectionData: Section = {
   start_longitude: null,
   start_azimuth: null,
   mean_reprojection_diff_meters: null
+};
+
+const mockSupportManip: CableSupportManipulation = {
+  uuid: 'support-manip-uuid-1',
+  supportUuid: 'support-uuid-1',
+  chargeUuid: 'charge-uuid-1',
+  manip1: {
+    type: 'shifting',
+    vertDisplacement: null,
+    anchoring: null,
+    lateralDistance: null,
+    ropeLength: null,
+    shiftingClampLength: 2
+  },
+  manip2: null
+};
+
+const mockSpanManip: CableSpanManipulation = {
+  uuid: 'span-manip-uuid-1',
+  spanUuid: 'span-uuid-1',
+  chargeUuid: 'charge-uuid-1',
+  referenceSupport: 'LEFT',
+  distanceToRefSupport: 10,
+  cableManipType: 'with_a_crane',
+  cableManipMethod: 'clamp',
+  longitudinalDistance: null,
+  lateralDistance: 0,
+  altitude: 0,
+  anchoring: 'with_sling',
+  chainName: null,
+  chainLength: null,
+  chainWeight: null,
+  chainSurface: null,
+  counterWeight: null,
+  slingLength: 5
 };
 
 describe('ChargesService', () => {
@@ -383,6 +418,41 @@ describe('ChargesService', () => {
         'Section with uuid non-existent-section not found'
       );
     });
+
+    it('should remove cable support and span manipulations belonging to the deleted charge', async () => {
+      const studyWithManipulations: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSection,
+            cable_support_manipulations: [
+              mockSupportManip,
+              { ...mockSupportManip, uuid: 'support-manip-uuid-2', chargeUuid: 'charge-uuid-2' }
+            ],
+            cable_span_manipulations: [
+              mockSpanManip,
+              { ...mockSpanManip, uuid: 'span-manip-uuid-2', chargeUuid: 'charge-uuid-2' }
+            ]
+          }
+        ]
+      };
+
+      mockStudiesService.getStudy.mockResolvedValue(studyWithManipulations);
+
+      await service.deleteCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
+
+      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sections: expect.arrayContaining([
+            expect.objectContaining({
+              uuid: 'section-uuid-1',
+              cable_support_manipulations: [expect.objectContaining({ uuid: 'support-manip-uuid-2' })],
+              cable_span_manipulations: [expect.objectContaining({ uuid: 'span-manip-uuid-2' })]
+            })
+          ])
+        })
+      );
+    });
   });
 
   describe('duplicateCharge', () => {
@@ -541,6 +611,37 @@ describe('ChargesService', () => {
       await expect(
         service.duplicateChargeWithoutSelecting('study-uuid-1', 'section-uuid-1', 'non-existent-charge')
       ).rejects.toThrow('Charge with uuid non-existent-charge not found');
+    });
+
+    it('should duplicate cable support and span manipulations belonging to the source charge with new uuids', async () => {
+      const studyWithManipulations: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSection,
+            charges: [mockCharge],
+            selected_charge_uuid: 'charge-uuid-1',
+            cable_support_manipulations: [mockSupportManip],
+            cable_span_manipulations: [mockSpanManip]
+          }
+        ]
+      };
+
+      mockStudiesService.getStudy.mockResolvedValue(studyWithManipulations);
+
+      const result = await service.duplicateChargeWithoutSelecting('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
+
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const updatedSection = updatedStudy.sections[0] as Section;
+
+      expect(updatedSection.cable_support_manipulations).toEqual([
+        mockSupportManip,
+        expect.objectContaining({ supportUuid: 'support-uuid-1', chargeUuid: result.uuid })
+      ]);
+      expect(updatedSection.cable_span_manipulations).toEqual([
+        mockSpanManip,
+        expect.objectContaining({ spanUuid: 'span-uuid-1', chargeUuid: result.uuid })
+      ]);
     });
   });
 

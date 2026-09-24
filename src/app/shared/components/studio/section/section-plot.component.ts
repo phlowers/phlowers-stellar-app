@@ -81,6 +81,8 @@ export class SectionPlotComponent implements OnDestroy {
 
   // Signals
   protected readonly isPlotRefreshing = signal(false);
+  private refreshInFlight: Promise<void> | null = null;
+  private refreshQueued = false;
 
   // Form values as signals
   private readonly currentObstaclePositions = toSignal(this.obstacleFormService.form.get('positions')!.valueChanges, {
@@ -119,11 +121,10 @@ export class SectionPlotComponent implements OnDestroy {
     distanceType: this.obstacleStateService.distanceType(),
     distanceMeasuringPoints: this.plotService.distanceMeasuringPoints(),
     measureSupportUuid: this.distanceMeasuringService.selectedSupportUuid(),
-    cableModifications: this.spanService.section()?.cable_modifications ?? [],
+    cableModifications: this.plotService.temporaryLoadData?.cableModifParams ?? [],
     floors: this.spanService.section()?.floors ?? [],
     selectedFloorUuid: this.floorFormService.savedFloorUuid(),
-    selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex(),
-    previewCableModification: this.cableModificationsService.previewCableModification()
+    selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex()
   }));
 
   // Debounced plot refresh with signal
@@ -183,8 +184,33 @@ export class SectionPlotComponent implements OnDestroy {
     return !!measureSupportUuid && visibleMeasureSupportUuids.has(measureSupportUuid);
   }
 
-  /** Rebuilds and redraws the section plot with the latest data, options, and obstacles. */
+  /**
+   * Rebuilds and redraws the section plot with the latest data, options, and obstacles.
+   *
+   * @remarks
+   * Guarded against overlapping calls: `createPlot()` awaits `Plotly.react`, whose
+   * resolution order is not guaranteed to match call order. Without this guard, a call
+   * started earlier with stale data (e.g. mid-calculation, before `litData`/obstacles/loads
+   * finish updating) could resolve AFTER a later call with fresh data, silently overwriting
+   * the plot and making annotations flash then vanish. Only one `Plotly.react` runs at a
+   * time; any refresh requested while one is in flight is coalesced into a single trailing
+   * re-run that reads the freshest state once the current one completes.
+   */
   async refreshPlot(): Promise<void> {
+    if (this.refreshInFlight) {
+      this.refreshQueued = true;
+      return;
+    }
+    this.refreshInFlight = this.runRefreshPlot();
+    await this.refreshInFlight;
+    this.refreshInFlight = null;
+    if (this.refreshQueued) {
+      this.refreshQueued = false;
+      await this.refreshPlot();
+    }
+  }
+
+  private async runRefreshPlot(): Promise<void> {
     const litData = this.plotService.litData();
     if (!litData) return;
 
@@ -223,14 +249,7 @@ export class SectionPlotComponent implements OnDestroy {
       const distanceMeasuringPoints = this.isMeasureSupportVisible(visibleMeasureSupportUuids)
         ? this.plotService.distanceMeasuringPoints()
         : [];
-      const savedCableModifications = section?.cable_modifications ?? [];
-      const preview = this.cableModificationsService.previewCableModification();
-      // The preview (current Calculate input) takes precedence over the saved
-      // modification on the same span so the icon reflects what the user is
-      // currently looking at, even before pressing Save.
-      const cableModifications = preview
-        ? [preview, ...savedCableModifications.filter((m) => m.spanUuid !== preview.spanUuid)]
-        : savedCableModifications;
+      const cableModifications = this.plotService.temporaryLoadData?.cableModifParams ?? [];
       const spanUuidToIndex = new Map<string, number>(
         (section?.supports ?? []).map((support, index) => [support.uuid, index])
       );

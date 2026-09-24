@@ -36,8 +36,10 @@ export class CableSpanManipService {
    */
   save = async (manip: Omit<CableSpanManipulation, 'uuid'> & { uuid?: string }): Promise<void> => {
     await this.mutateCurrentSection((section) => {
+      // Legacy records persisted before per-charge tracking have no chargeUuid; treat them as a
+      // match for the current charge so saving migrates them in place instead of duplicating.
       const keyMatches = (m: CableSpanManipulation) =>
-        m.spanUuid === manip.spanUuid && m.chargeUuid === manip.chargeUuid;
+        m.spanUuid === manip.spanUuid && (m.chargeUuid == null || m.chargeUuid === manip.chargeUuid);
       const existing = section.cable_span_manipulations?.find(keyMatches);
       const toSave: CableSpanManipulation = {
         ...manip,

@@ -216,10 +216,10 @@
           @if (hasChainSupportManip()) {
             @if (row.anchoring === 'with_chain') {
               <td>{{ row.chainName ?? '-' }}</td>
-              <td>{{ row.chainLength !== null ? row.chainLength + '\u00a0m' : '-' }}</td>
-              <td>{{ row.chainWeight !== null ? row.chainWeight + '\u00a0kg' : '-' }}</td>
-              <td>{{ row.chainSurface !== null ? row.chainSurface + '\u00a0m\u00b2' : '-' }}</td>
-              <td>{{ row.counterWeight !== null ? row.counterWeight + '\u00a0kg' : '-' }}</td>
+              <td>{{ row.chainLength != null ? row.chainLength + '\u00a0m' : '-' }}</td>
+              <td>{{ row.chainWeight != null ? row.chainWeight + '\u00a0kg' : '-' }}</td>
+              <td>{{ row.chainSurface != null ? row.chainSurface + '\u00a0m\u00b2' : '-' }}</td>
+              <td>{{ row.counterWeight != null ? row.counterWeight + '\u00a0kg' : '-' }}</td>
             } @else {
               <td>-</td>
               <td>-</td>

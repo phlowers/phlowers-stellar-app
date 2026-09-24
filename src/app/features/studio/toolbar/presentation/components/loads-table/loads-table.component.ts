@@ -270,7 +270,10 @@ export class LoadsTableComponent {
       const supportManipulations = this.spanService.section()?.cable_support_manipulations ?? [];
       this.supportManips.set(supportManipulations.filter((m) => m.chargeUuid === uuid));
       const spanManipulations = this.spanService.section()?.cable_span_manipulations ?? [];
-      this.spanManips.set(spanManipulations.filter((m) => m.chargeUuid === uuid));
+      // Legacy span manipulations (persisted before per-charge tracking) have no chargeUuid;
+      // include them regardless of the active charge, matching the cable-span-manip form's
+      // own legacy-compatible lookup (CableSpanManipComponent.normalizeLegacyManipulations).
+      this.spanManips.set(spanManipulations.filter((m) => m.chargeUuid === uuid || m.chargeUuid == null));
     }
   }
 
