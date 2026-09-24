@@ -57,9 +57,14 @@ h2 {
   margin: 0.75rem 0rem;
 }
 
+// Empty until calculated: the separator comes with the results
 .results {
-  border-top: 1px solid var(--star-dust-300);
-  padding-top: 0.75rem;
+  display: block;
+
+  &__content {
+    border-top: 1px solid var(--star-dust-300);
+    padding-top: 0.75rem;
+  }
 }
 
 .results-load-icon {

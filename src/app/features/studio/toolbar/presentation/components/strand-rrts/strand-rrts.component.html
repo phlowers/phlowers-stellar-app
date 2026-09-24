@@ -130,35 +130,44 @@
   </div>
 
   <div class="calculate-btn-wrapper">
-    <button type="submit" app-btn data-testid="calculate-btn" [disabled]="form.invalid || !hasLayers()">
+    <button
+      type="submit"
+      app-btn
+      data-testid="calculate-btn"
+      [disabled]="form.invalid || !hasLayers() || isBusy()"
+      [btnLoading]="isCalculating()"
+    >
       <app-icon icon="rocket_launch" aria-hidden="true" />
       {{ 'common.calculate' | transloco }}
     </button>
   </div>
 </form>
 
-@if (results(); as res) {
-  <output class="results" @expand>
-    <h2>{{ 'common.results' | transloco }}</h2>
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="results" data-testid="results">
+  @if (results(); as res) {
+    <div class="results__content" @expand>
+      <h2>{{ 'common.results' | transloco }}</h2>
 
-    <dl class="grid-structure grid-structure--results">
-      <dt class="results-rrts-label">{{ 'studio.rrts-cut-strands.result-cable-rrts-label' | transloco }}</dt>
-      <dd class="results-rrts-value" data-testid="results-rrts-value">{{ res.rrts | number: '1.0-1' }}&nbsp;daN</dd>
-      <dt class="results-load-label">{{ 'studio.rrts-cut-strands.result-new-working-load-label' | transloco }}</dt>
-      <dd class="results-load-value" data-testid="results-load-value">
-        @let loadIcon = newWorkLoadIcon();
-        <span>{{ res.newWorkLoad !== null ? (res.newWorkLoad | number: '1.0-1') : '-' }}&nbsp;%</span>
-        <app-icon
-          [icon]="loadIcon.name"
-          class="results-load-icon"
-          [class]="'results-load-icon--' + loadIcon.status"
-          [ariaLabel]="loadIcon.label | transloco"
-          data-testid="results-load-icon"
-        />
-      </dd>
-    </dl>
-  </output>
-}
+      <dl class="grid-structure grid-structure--results">
+        <dt class="results-rrts-label">{{ 'studio.rrts-cut-strands.result-cable-rrts-label' | transloco }}</dt>
+        <dd class="results-rrts-value" data-testid="results-rrts-value">{{ res.rrts | number: '1.0-1' }}&nbsp;daN</dd>
+        <dt class="results-load-label">{{ 'studio.rrts-cut-strands.result-new-working-load-label' | transloco }}</dt>
+        <dd class="results-load-value" data-testid="results-load-value">
+          @let loadIcon = newWorkLoadIcon();
+          <span>{{ res.newWorkLoad !== null ? (res.newWorkLoad | number: '1.0-1') : '-' }}&nbsp;%</span>
+          <app-icon
+            [icon]="loadIcon.name"
+            class="results-load-icon"
+            [class]="'results-load-icon--' + loadIcon.status"
+            [ariaLabel]="loadIcon.label | transloco"
+            data-testid="results-load-icon"
+          />
+        </dd>
+      </dl>
+    </div>
+  }
+</output>
 
 <ng-template #footer>
   <button
@@ -166,7 +175,7 @@
     app-btn
     btnStyle="danger"
     data-testid="delete-btn"
-    [disabled]="!isSaved() || isSaving() || isDeleting()"
+    [disabled]="!isSaved() || isBusy()"
     [btnLoading]="isDeleting()"
     (click)="delete()"
   >
@@ -179,7 +188,7 @@
     app-btn
     btnStyle="base"
     data-testid="save-btn"
-    [disabled]="!canSave() || isSaving() || isDeleting()"
+    [disabled]="!canSave() || isBusy()"
     [btnLoading]="isSaving()"
     (click)="save()"
   >

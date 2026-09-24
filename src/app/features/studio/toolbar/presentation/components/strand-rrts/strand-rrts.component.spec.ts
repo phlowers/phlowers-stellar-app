@@ -8,9 +8,23 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { Section } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
+
+const ENGINE_RESULTS: Partial<Record<Task, unknown>> = {
+  [Task.getRrts]: { rrts: 23114 },
+  // One rate per support: the last support starts no span
+  [Task.getUtilizationRate]: { utilizationRate: [30, 49.21, 12, Number.NaN] }
+};
+
+const engineAnswer = (task: Task, error: TaskError | null = null) => ({
+  result: error ? null : (ENGINE_RESULTS[task] ?? { success: true }),
+  error,
+  diagnostics: []
+});
 
 function makeCutStrandsData(overrides: Partial<RrtsCutStrandsData> = {}): RrtsCutStrandsData {
   return {
@@ -43,6 +57,7 @@ describe('StrandRrtsComponent', () => {
   let mockToolbarDialogService: { setTemplates: ReturnType<typeof vi.fn> };
   let mockSectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -82,10 +97,21 @@ describe('StrandRrtsComponent', () => {
   const footerButton = (testId: string): HTMLButtonElement =>
     renderTemplate(component.footerTemplate()).querySelector<HTMLButtonElement>(`[data-testid="${testId}"]`)!;
 
-  const calculate = () => {
-    component.calculate();
+  const calculate = async () => {
+    await component.calculate();
     fixture.detectChanges();
   };
+
+  const failTask = (failing: Task) =>
+    mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+      Promise.resolve(engineAnswer(task, task === failing ? TaskError.CALCULATION_ERROR : null))
+    );
+
+  // Cut strands given to the engine, in call order
+  const engineCutStrands = (): number[][] =>
+    mockWorkerPythonService.runTask.mock.calls
+      .filter(([task]) => task === Task.setCutStrands)
+      .map(([, inputs]) => inputs.cutStrands);
 
   const savedSection = (): Section => mockSectionService.createOrUpdateSection.mock.calls.at(-1)?.[1];
 
@@ -100,6 +126,7 @@ describe('StrandRrtsComponent', () => {
     mockToolbarDialogService = { setTemplates: vi.fn() };
     mockSectionService = { createOrUpdateSection: vi.fn().mockResolvedValue({ removedGeometryBoundObjects: false }) };
     mockNotificationService = { success: vi.fn(), error: vi.fn() };
+    mockWorkerPythonService = { runTask: vi.fn((task: Task) => Promise.resolve(engineAnswer(task))) };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -116,6 +143,7 @@ describe('StrandRrtsComponent', () => {
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
               'studio.rrts-cut-strands.no-strand-layers': 'No strand layer data available for this cable',
+              'studio.rrts-cut-strands.failed-to-calculate': 'Failed to calculate the RRTS',
               'studio.rrts-cut-strands.add-marking-label': 'Add a marking',
               'studio.rrts-cut-strands.saved': 'RRTS cut strands saved',
               'studio.rrts-cut-strands.failed-to-save': 'Failed to save RRTS cut strands',
@@ -136,7 +164,8 @@ describe('StrandRrtsComponent', () => {
         { provide: CablesService, useValue: mockCablesService },
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: SectionService, useValue: mockSectionService },
-        { provide: NotificationService, useValue: mockNotificationService }
+        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
       ]
     }).compileComponents();
 
@@ -373,10 +402,83 @@ describe('StrandRrtsComponent', () => {
       expect((getByTestId('calculate-btn') as HTMLButtonElement).disabled).toBe(true);
     });
 
-    it('shows the results', async () => {
+    it('runs the engine with the cut strands of every catalog layer, then gives it the default ones back', async () => {
       await setup();
-      calculate();
+      typeIn('rrts-cut-strands-layer2-input', '4');
+      await calculate();
+
+      expect(mockWorkerPythonService.runTask.mock.calls).toEqual([
+        [Task.setCutStrands, { cutStrands: [0, 4, 0, 0, 0, 0, 0, 0] }],
+        [Task.getRrts, undefined],
+        [Task.getUtilizationRate, undefined],
+        [Task.setCutStrands, { cutStrands: [0, 0, 0, 0, 0, 0, 0, 0] }]
+      ]);
+    });
+
+    it('gives the engine the saved cut strands back', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      typeIn('rrts-cut-strands-layer1-input', '5');
+      await calculate();
+
+      expect(engineCutStrands()).toEqual([
+        [5, 3, 0, 0, 0, 0, 0, 0],
+        [1, 3, 0, 0, 0, 0, 0, 0]
+      ]);
+    });
+
+    it('shows the RRTS and the max working load over the spans', async () => {
+      await setup();
+      await calculate();
+
+      expect(component.results()).toEqual({ rrts: 23114, newWorkLoad: 49.21 });
       expect(getByTestId('results-rrts-value')).not.toBeNull();
+    });
+
+    it.each([Task.setCutStrands, Task.getRrts, Task.getUtilizationRate])(
+      'tells when %s fails, and drops the previous results',
+      async (failingTask) => {
+        await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+        await calculate();
+        failTask(failingTask);
+        await calculate();
+
+        expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to calculate the RRTS');
+        expect(getByTestId('results-rrts-value')).toBeNull();
+        expect(footerButton('save-btn').disabled).toBe(true);
+        expect(engineCutStrands().at(-1)).toEqual([1, 3, 0, 0, 0, 0, 0, 0]);
+      }
+    );
+
+    it('tells when the engine does not answer', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task setCutStrands timed out'));
+      await setup();
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to calculate the RRTS');
+      expect(component.results()).toBeNull();
+    });
+
+    it('locks every action while calculating', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      let answer!: () => void;
+      mockWorkerPythonService.runTask.mockImplementationOnce(
+        (task: Task) => new Promise((resolve) => (answer = () => resolve(engineAnswer(task))))
+      );
+
+      const calculation = component.calculate();
+      fixture.detectChanges();
+      const calculateButton = getByTestId('calculate-btn') as HTMLButtonElement;
+      expect(calculateButton.disabled).toBe(true);
+      expect(calculateButton.classList).toContain('app-btn-loading');
+      expect(footerButton('delete-btn').disabled).toBe(true);
+      await component.delete();
+      expect(mockSectionService.createOrUpdateSection).not.toHaveBeenCalled();
+
+      answer();
+      await calculation;
+      fixture.detectChanges();
+      expect(calculateButton.disabled).toBe(false);
+      expect(footerButton('delete-btn').disabled).toBe(false);
     });
   });
 
@@ -385,13 +487,13 @@ describe('StrandRrtsComponent', () => {
       await setup();
       expect(footerButton('save-btn').disabled).toBe(true);
 
-      calculate();
+      await calculate();
       expect(footerButton('save-btn').disabled).toBe(false);
     });
 
     it('is unavailable while the inputs differ from the calculated ones', async () => {
       await setup();
-      calculate();
+      await calculate();
 
       typeIn('rrts-cut-strands-layer1-input', '2');
       expect(footerButton('save-btn').disabled).toBe(true);
@@ -400,7 +502,7 @@ describe('StrandRrtsComponent', () => {
       expect(footerButton('save-btn').disabled).toBe(false);
 
       typeIn('rrts-cut-strands-layer1-input', '2');
-      calculate();
+      await calculate();
       expect(footerButton('save-btn').disabled).toBe(false);
     });
 
@@ -413,7 +515,7 @@ describe('StrandRrtsComponent', () => {
     it('links the entry to the whole section when no span is selected', async () => {
       await setup();
       typeIn('rrts-cut-strands-layer2-input', '4');
-      calculate();
+      await calculate();
       await component.save();
 
       expect(savedSection().rrts_cut_strands).toEqual(
@@ -433,7 +535,7 @@ describe('StrandRrtsComponent', () => {
       component.form.controls.supportRef.setValue('RIGHT');
       component.form.controls.addMarking.setValue(true);
       component.form.controls.span.setValue(null);
-      calculate();
+      await calculate();
       await component.save();
 
       expect(savedSection().rrts_cut_strands).toMatchObject({ spanUuid: null, supportRef: null, addMarking: false });
@@ -443,7 +545,7 @@ describe('StrandRrtsComponent', () => {
       await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
       component.form.controls.span.setValue({ index: 0, uuid: 's1' });
       typeIn('rrts-cut-strands-layer1-input', '5');
-      calculate();
+      await calculate();
       await component.save();
 
       const saved = makeCutStrandsData({ spanUuid: 's1', cutStrands: [5, 3, 0, 0, 0, 0, 0, 0] });
@@ -451,14 +553,28 @@ describe('StrandRrtsComponent', () => {
       expect(spanService.section()?.rrts_cut_strands).toEqual(saved);
     });
 
-    it('keeps the section and tells when saving fails', async () => {
+    it('gives the engine the newly saved cut strands', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      typeIn('rrts-cut-strands-layer1-input', '5');
+      await calculate();
+      await component.save();
+
+      expect(engineCutStrands().at(-1)).toEqual([5, 3, 0, 0, 0, 0, 0, 0]);
+    });
+
+    it('keeps the section, and the engine on the saved cut strands, when saving fails', async () => {
       mockSectionService.createOrUpdateSection.mockRejectedValue(new Error('db'));
       await setup();
-      calculate();
+      typeIn('rrts-cut-strands-layer1-input', '5');
+      await calculate();
       await component.save();
 
       expect(spanService.section()?.rrts_cut_strands).toBeUndefined();
       expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to save RRTS cut strands');
+      expect(engineCutStrands()).toEqual([
+        [5, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+      ]);
     });
   });
 
@@ -481,15 +597,17 @@ describe('StrandRrtsComponent', () => {
       expect(spanService.section()?.rrts_cut_strands).toBeNull();
       expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands deleted');
       expect(footerButton('delete-btn').disabled).toBe(true);
+      expect(engineCutStrands()).toEqual([[0, 0, 0, 0, 0, 0, 0, 0]]);
     });
 
-    it('keeps the entry and tells when deleting fails', async () => {
+    it('keeps the entry, and the engine untouched, when deleting fails', async () => {
       mockSectionService.createOrUpdateSection.mockRejectedValue(new Error('db'));
       await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
       await component.delete();
 
       expect(spanService.section()?.rrts_cut_strands).toEqual(makeCutStrandsData());
       expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to delete RRTS cut strands');
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
   });
 
@@ -540,6 +658,22 @@ describe('StrandRrtsComponent', () => {
       showResults(49.21);
       expect(textOf('results-rrts-value')).toBe('23,114\u00a0daN');
       expect(newWorkLoadText()).toBe('49.2\u00a0%');
+    });
+
+    it('announces them in a live region kept on the page, empty without results', async () => {
+      await setup();
+      const liveRegion = getByTestId('results');
+      expect(liveRegion?.tagName).toBe('OUTPUT');
+      expect(liveRegion?.textContent?.trim()).toBe('');
+
+      showResults(49.21);
+      expect(getByTestId('results')).toBe(liveRegion);
+      expect(liveRegion?.contains(getByTestId('results-rrts-value'))).toBe(true);
+
+      component.results.set(null);
+      fixture.detectChanges();
+      expect(getByTestId('results')).toBe(liveRegion);
+      expect(liveRegion?.textContent?.trim()).toBe('');
     });
 
     it('shows "-" without new max working load', async () => {
