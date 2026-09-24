@@ -19,15 +19,15 @@ import {
 
 /** Chain metric rows shared by the support and span manipulation tables. */
 const CHAIN_METRICS: MetricDescriptor<ChainReportFields>[] = [
-  { labelKey: 'loads.cable-span-manip.chain-name-label', unit: null, decimals: 0, field: 'chainName' },
+  { labelKey: 'common.chain-name-label', unit: null, decimals: 0, field: 'chainName' },
   {
-    labelKey: 'loads.cable-span-manip.chain-length-label',
+    labelKey: 'common.chain-length-label',
     unit: PDF_UNITS.meters,
     decimals: 2,
     field: 'chainLength'
   },
   {
-    labelKey: 'loads.cable-span-manip.chain-weight-label',
+    labelKey: 'common.chain-weight-label',
     unit: PDF_UNITS.kilograms,
     decimals: 0,
     field: 'chainWeight'
@@ -39,7 +39,7 @@ const CHAIN_METRICS: MetricDescriptor<ChainReportFields>[] = [
     field: 'chainSurface'
   },
   {
-    labelKey: 'loads.cable-span-manip.counter-weight-label',
+    labelKey: 'common.counter-weight-label',
     unit: PDF_UNITS.kilograms,
     decimals: 0,
     field: 'counterWeight'
@@ -48,8 +48,8 @@ const CHAIN_METRICS: MetricDescriptor<ChainReportFields>[] = [
 
 /** Loads and markings metric rows (transposed table: one row per metric, one column per load). */
 export const LOADS_METRICS: MetricDescriptor<SpanLoadReportRow>[] = [
-  { labelKey: 'loads.shared.span-label', unit: null, decimals: 0, field: 'spanLabel' },
-  { labelKey: 'loads.shared.reference-support-label', unit: null, decimals: 0, field: 'referenceSupport' },
+  { labelKey: 'common.span-label', unit: null, decimals: 0, field: 'spanLabel' },
+  { labelKey: 'common.reference-support-label', unit: null, decimals: 0, field: 'referenceSupport' },
   { labelKey: 'loads.load-marking.load-type-label', unit: null, decimals: 0, field: 'type' },
   {
     labelKey: 'studio.loads-table.distance-to-ref-support-label',
@@ -62,8 +62,8 @@ export const LOADS_METRICS: MetricDescriptor<SpanLoadReportRow>[] = [
 
 /** Cable modification metric rows (transposed table: one row per metric, one column per modification). */
 export const CABLE_MODIF_METRICS: MetricDescriptor<CableModifReportRow>[] = [
-  { labelKey: 'loads.shared.span-label', unit: null, decimals: 0, field: 'spanLabel' },
-  { labelKey: 'loads.shared.reference-support-label', unit: null, decimals: 0, field: 'referenceSupport' },
+  { labelKey: 'common.span-label', unit: null, decimals: 0, field: 'spanLabel' },
+  { labelKey: 'common.reference-support-label', unit: null, decimals: 0, field: 'referenceSupport' },
   { labelKey: 'loads.cable-length-change.cable-length-mod-label', unit: null, decimals: 0, field: 'modificationType' },
   {
     labelKey: 'studio.loads-table.distance-to-ref-support-label',
@@ -114,8 +114,8 @@ export const SUPPORT_MANIP_METRICS: MetricDescriptor<SupportManipReportRow>[] = 
 
 /** Span manipulation metric rows (transposed table: one row per metric, one column per manipulation). */
 export const SPAN_MANIP_METRICS: MetricDescriptor<SpanManipReportRow>[] = [
-  { labelKey: 'loads.shared.span-label', unit: null, decimals: 0, field: 'spanLabel' },
-  { labelKey: 'loads.shared.reference-support-label', unit: null, decimals: 0, field: 'referenceSupport' },
+  { labelKey: 'common.span-label', unit: null, decimals: 0, field: 'spanLabel' },
+  { labelKey: 'common.reference-support-label', unit: null, decimals: 0, field: 'referenceSupport' },
   {
     labelKey: 'studio.loads-table.distance-to-ref-support-label',
     unit: PDF_UNITS.meters,
@@ -141,7 +141,7 @@ export const SPAN_MANIP_METRICS: MetricDescriptor<SpanManipReportRow>[] = [
     decimals: 2,
     field: 'lateralDistance'
   },
-  { labelKey: 'loads.cable-span-manip.altitude-label', unit: PDF_UNITS.meters, decimals: 2, field: 'altitude' },
+  { labelKey: 'common.altitude-label', unit: PDF_UNITS.meters, decimals: 2, field: 'altitude' },
   { labelKey: 'loads.cable-span-manip.anchoring-label', unit: null, decimals: 0, field: 'anchoring' },
   {
     labelKey: 'loads.cable-span-manip.sling-length-label',
@@ -155,34 +155,34 @@ export const SPAN_MANIP_METRICS: MetricDescriptor<SpanManipReportRow>[] = [
 /** Transloco translation keys for the loads report's fixed labels. */
 export const PDF_LOADS_LABEL_KEYS: LoadsReportLabels = {
   reportTitle: 'studio.loads-report.title',
-  cartoucheTitle: 'studio.loads-report.cartouche-title',
+  cartoucheTitle: 'common.study-and-section-label',
   climateTitle: 'studio.studio-page.climate-condition-label',
   loadsTitle: 'studio.studio-page.load-marking-label',
   cableModifTitle: 'studio.studio-page.cable-length-change-label',
   supportManipTitle: 'studio.studio-page.cable-manip-support-label',
   spanManipTitle: 'studio.studio-page.cable-manip-span-label',
-  pageLabel: 'studio.loads-report.page-label',
+  pageLabel: 'common.page-label',
 
-  author: 'studio.loads-report.author-label',
-  study: 'studio.loads-report.study-label',
-  studyDescription: 'studio.loads-report.study-description-label',
-  chargeName: 'studio.loads-report.charge-name-label',
-  chargeDescription: 'studio.loads-report.charge-description-label',
-  canton: 'studio.loads-report.canton-label',
-  cantonComment: 'studio.loads-report.canton-comment-label',
-  initialCondition: 'studio.loads-report.initial-condition-label',
-  personnelPresence: 'studio.loads-report.personnel-presence-label',
+  author: 'common.author-label',
+  study: 'common.study-label',
+  studyDescription: 'common.description-label',
+  chargeName: 'common.load-name-label',
+  chargeDescription: 'common.load-description-label',
+  canton: 'common.section-label',
+  cantonComment: 'common.comment-label',
+  initialCondition: 'common.initial-condition-label',
+  personnelPresence: 'common.personnel-presence-label',
   yes: 'common.yes',
   no: 'common.no',
 
   // Climate bullets — reuse the existing loads.climate.* form labels
   windPressure: 'loads.climate.wind-pressure-label',
   cableTemperature: 'loads.climate.cable-temperature-label',
-  iceIndicator: 'loads.climate.ice-indicator-label',
+  iceIndicator: 'common.ice-indicator-label',
   symmetric: 'common.symmetric',
   disSymmetric: 'common.dis-symmetric',
   iceThickness: 'loads.climate.ice-thickness-label',
   frontierSupport: 'loads.climate.frontier-support-label',
-  iceThicknessBefore: 'loads.climate.ice-thickness-before-label',
-  iceThicknessAfter: 'loads.climate.ice-thickness-after-label'
+  iceThicknessBefore: 'common.ice-thickness-before-support-frontier',
+  iceThicknessAfter: 'common.ice-thickness-after-support-frontier'
 };

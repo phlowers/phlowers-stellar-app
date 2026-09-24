@@ -74,7 +74,7 @@ describe('QuickMeasuresComponent', () => {
           langs: {
             en: {
               'studio.quick-measures.not-selected-option': 'Not selected',
-              'studio.quick-measures.point-option': 'Point {{ index }}',
+              'common.point-index-label': 'Point {{ index }}',
               'studio.quick-measures.floor-option': 'floor {{ span }}',
               'studio.floor.point-title': 'Point {{ distance }} m'
             }

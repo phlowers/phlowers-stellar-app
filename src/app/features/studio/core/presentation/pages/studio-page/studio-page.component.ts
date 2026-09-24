@@ -151,7 +151,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   // graph global param.
   globalStateOptions = [
-    { label: this.translocoService.translate('studio.studio-page.span-option'), value: 'span' },
+    { label: this.translocoService.translate('common.span-label'), value: 'span' },
     { label: this.translocoService.translate('studio.studio-page.max-section-option'), value: 'max_section' }
   ];
 

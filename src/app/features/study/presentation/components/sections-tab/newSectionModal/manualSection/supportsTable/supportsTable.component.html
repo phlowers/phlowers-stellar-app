@@ -54,11 +54,11 @@
         {{ 'supports-table.col-chain-weight' | transloco }}
       </th>
       <th id="support_name" (dblclick)="onSupportNumberDoubleClick('name')" class="text-column">
-        {{ 'supports-table.col-support-name' | transloco }}
+        {{ 'common.support-name-label' | transloco }}
       </th>
 
       <th id="attachment_set" (dblclick)="onSupportNumberDoubleClick('attachmentSet')" class="integer-column">
-        {{ 'supports-table.col-attachment-set' | transloco }}
+        {{ 'common.attachment-set-label' | transloco }}
       </th>
       <th id="arm_length" (dblclick)="onSupportNumberDoubleClick('armLength')" class="decimal-column">
         {{ 'supports-table.col-arm-length' | transloco }}
@@ -68,7 +68,7 @@
         {{ 'supports-table.col-chain-v' | transloco }}
       </th>
       <th id="counter_weight" (dblclick)="onSupportNumberDoubleClick('counterWeight')" class="decimal-column">
-        {{ 'supports-table.col-counter-weight' | transloco }}
+        {{ 'common.counter-weight-label' | transloco }}
       </th>
       <th
         id="support_foot_altitude"
@@ -86,15 +86,15 @@
       </th>
       @if (mode() === 'view') {
         <th id="tower_model">{{ 'supports-table.col-tower' | transloco }}</th>
-        <th id="latitude">{{ 'supports-table.col-latitude' | transloco }}</th>
-        <th id="longitude">{{ 'supports-table.col-longitude' | transloco }}</th>
-        <th id="azimuth">{{ 'supports-table.col-azimuth' | transloco }}</th>
+        <th id="latitude">{{ 'common.latitude-label' | transloco }}</th>
+        <th id="longitude">{{ 'common.longitude-label' | transloco }}</th>
+        <th id="azimuth">{{ 'common.azimuth-label' | transloco }}</th>
         <th id="xLambert93" class="one-line-text">{{ 'supports-table.col-x-lambert' | transloco }}</th>
         <th id="yLambert93" class="one-line-text">{{ 'supports-table.col-y-lambert' | transloco }}</th>
       }
 
       @if (mode() === 'create' || mode() === 'edit') {
-        <th class="sticky-right" id="actions">{{ 'supports-table.col-actions' | transloco }}</th>
+        <th class="sticky-right" id="actions">{{ 'common.actions-label' | transloco }}</th>
       }
     </tr>
   </ng-template>
@@ -124,7 +124,7 @@
               step="0.01"
               [min]="limits.spanLength.min"
               [max]="limits.spanLength.max"
-              [attr.aria-label]="'supports-table.aria-span-length' | transloco"
+              [attr.aria-label]="'common.span-length-label' | transloco"
               [ngModel]="support.spanLength"
               [disabled]="rowIndex === supports().length - 1"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'spanLength', $event)"
@@ -271,7 +271,7 @@
           <div class="native-select-removable-value">
             <select
               class="native-select"
-              [attr.aria-label]="'supports-table.aria-chain-name' | transloco"
+              [attr.aria-label]="'common.chain-name-label' | transloco"
               [ngModel]="support.chainName"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainName', $event)"
               [id]="'chainName' + rowIndex"
@@ -327,7 +327,7 @@
               [min]="limits.chainLength.min"
               [max]="limits.chainLength.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.aria-chain-length' | transloco"
+              [attr.aria-label]="'common.chain-length-label' | transloco"
               [ngModel]="support.chainLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainLength', $event)"
               [id]="'chainLength' + rowIndex"
@@ -377,7 +377,7 @@
               [min]="limits.chainWeight.min"
               [max]="limits.chainWeight.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.aria-chain-weight' | transloco"
+              [attr.aria-label]="'common.chain-weight-label' | transloco"
               [ngModel]="support.chainWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainWeight', $event)"
               [id]="'chainWeight' + rowIndex"
@@ -423,7 +423,7 @@
           <div class="native-select-removable-value">
             <select
               class="native-select"
-              [attr.aria-label]="'supports-table.aria-support-name' | transloco"
+              [attr.aria-label]="'common.support-name-full-label' | transloco"
               [ngModel]="support.name"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
               [id]="'supportName' + rowIndex"
@@ -477,7 +477,7 @@
               [min]="limits.attachmentSet.min"
               [max]="limits.attachmentSet.max"
               [pKeyFilter]="onlyPositiveNumbers"
-              [attr.aria-label]="'supports-table.aria-attachment-set' | transloco"
+              [attr.aria-label]="'common.attachment-set-label' | transloco"
               [ngModel]="support.attachmentSet"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'attachmentSet', $event)"
               [id]="'attachmentSet' + rowIndex"
@@ -524,7 +524,7 @@
               step="0.01"
               [min]="limits.armLength.min"
               [max]="limits.armLength.max"
-              [attr.aria-label]="'supports-table.aria-arm-length' | transloco"
+              [attr.aria-label]="'common.arm-length-label' | transloco"
               [ngModel]="support.armLength"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'armLength', $event)"
               [id]="'armLength' + rowIndex"
@@ -568,7 +568,7 @@
         @if (mode() !== 'view') {
           <select
             class="native-select native-select--chainV"
-            [attr.aria-label]="'supports-table.aria-chain-v' | transloco"
+            [attr.aria-label]="'supports-table.col-chain-v' | transloco"
             [ngModel]="support.chainV"
             (ngModelChange)="onSupportFieldChange(support.uuid, 'chainV', $event)"
             [id]="'chainV' + rowIndex"
@@ -603,7 +603,7 @@
               [min]="limits.counterWeight.min"
               [max]="limits.counterWeight.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.aria-counter-weight' | transloco"
+              [attr.aria-label]="'common.counter-weight-label' | transloco"
               [ngModel]="support.counterWeight"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'counterWeight', $event)"
               [id]="'counterWeight' + rowIndex"
@@ -656,7 +656,7 @@
               step="0.01"
               [min]="limits.supportFootAltitude.min"
               [max]="limits.supportFootAltitude.max"
-              [attr.aria-label]="'supports-table.aria-supp-foot-alt' | transloco"
+              [attr.aria-label]="'common.support-foot-altitude-label' | transloco"
               [ngModel]="support.supportFootAltitude"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'supportFootAltitude', $event)"
               [id]="'supportFootAltitude' + rowIndex"
@@ -735,7 +735,7 @@
               [min]="limits.chainSurface.min"
               [max]="limits.chainSurface.max"
               step="0.01"
-              [attr.aria-label]="'supports-table.aria-chain-surface' | transloco"
+              [attr.aria-label]="'supports-table.col-chain-surface' | transloco"
               [ngModel]="support.chainSurface"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'chainSurface', $event)"
               [id]="'chainSurface' + rowIndex"

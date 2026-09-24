@@ -69,13 +69,13 @@ describe('HomeComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'home.create-study': 'Create a new study',
+              'common.create-a-new-study': 'Create a new study',
               'home.go-to-studies': 'Go to my studies',
-              'home.my-last-studies': 'My last studies',
+              'common.my-last-studies-label': 'My last studies',
               'home.news-link-text': 'View all news',
               'home.news-text':
                 'Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!',
-              'home.news-title': 'News',
+              'common.news-label': 'News',
               'home.no-recent-studies': 'No recent studies',
               'home.server-error': 'An error occured while trying to reach servers.',
               'home.server-offline': 'Application in offline mode.',

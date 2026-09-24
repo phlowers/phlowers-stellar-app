@@ -106,7 +106,7 @@ export interface LoadsReportData {
   author: string;
   studyTitle: string;
   studyDescription: string;
-  cantonName: string;
+  sectionName: string;
   cantonComment: string;
   icName: string;
 

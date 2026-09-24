@@ -87,9 +87,9 @@ export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], 
 
 /** Maps the internal `calculationMethod` value to a Transloco key for JSON export label. */
 export const PARAMETER_CALCULATION_METHOD_EXPORT_KEYS: Record<FieldMeasure['calculationMethod'], string> = {
-  papoto: 'field-measuring.export-labels.calculation-method.papoto',
+  papoto: 'common.papoto-label',
   'tangente-aiming': 'field-measuring.export-labels.calculation-method.tangente-aiming',
-  pep: 'field-measuring.export-labels.calculation-method.pep'
+  pep: 'common.pep-label'
 };
 
 /** Maps the internal `updateMode15C` value to a Transloco key for JSON export label. */

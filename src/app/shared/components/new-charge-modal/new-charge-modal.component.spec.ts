@@ -134,15 +134,15 @@ describe('NewChargeModalComponent (Jest)', () => {
           langs: {
             en: {
               'common.validate': 'Validate',
-              'shared.new-charge-modal.charge-name-error': 'The charge case name must be unique.',
-              'shared.new-charge-modal.charge-name-label': 'Charge case name',
+              'shared.new-load-modal.load-name-error': 'The load case name must be unique.',
+              'common.load-case-name-label': 'Load case name',
               'common.close': 'Close',
-              'shared.new-charge-modal.create-title': 'Create a charge case',
-              'shared.new-charge-modal.default-name': 'CC',
-              'shared.new-charge-modal.description-label': 'Description',
-              'shared.new-charge-modal.description-placeholder': 'Add a description to the charge case',
-              'shared.new-charge-modal.generalities': 'Generalities',
-              'shared.new-charge-modal.personnel-presence': 'Personnel presence'
+              'shared.new-load-modal.create-title': 'Create a load case',
+              'shared.new-load-modal.default-name': 'CC',
+              'common.description-label': 'Description',
+              'shared.new-load-modal.description-placeholder': 'Add a description to the load case',
+              'shared.new-load-modal.generalities': 'Generalities',
+              'common.personnel-presence-label': 'Personnel presence'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -179,7 +179,7 @@ describe('NewChargeModalComponent (Jest)', () => {
     fixture.detectChanges();
 
     const header = fixture.debugElement.nativeElement.querySelector('p span');
-    expect(header.textContent).toContain('Create a charge case');
+    expect(header.textContent).toContain('Create a load case');
   });
 
   it('should emit isOpenChange(false) when onClose() is called', () => {
@@ -341,7 +341,7 @@ describe('NewChargeModalComponent (Jest)', () => {
 
     const errorMessage = fixture.debugElement.query(By.css('#charge-name-error-message'));
     expect(errorMessage).toBeTruthy();
-    expect(errorMessage.nativeElement.textContent).toContain(' The charge case name must be unique. ');
+    expect(errorMessage.nativeElement.textContent).toContain(' The load case name must be unique. ');
   });
 
   it('should not show error message when name is unique', () => {

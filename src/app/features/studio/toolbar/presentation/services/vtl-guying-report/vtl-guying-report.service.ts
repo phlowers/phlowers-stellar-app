@@ -69,8 +69,8 @@ export class VtlGuyingReportService extends PdfBaseService {
       notificationService: this.notificationService,
       translate,
       errorLogMessage: 'Failed to generate VHL & Guying report',
-      successKey: 'studio.vtl-guying-report.report-generated-success',
-      errorKey: 'studio.vtl-guying-report.report-generation-failed',
+      successKey: 'common.report-generated-successfully-label',
+      errorKey: 'common.failed-to-generate-report',
       build: async () => {
         const doc = await this.createDoc();
         const labels = buildReportLabels<PdfLabels>(translate, PDF_LABEL_KEYS);

@@ -108,9 +108,9 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
               'studio.section-plot-card.v-label': 'V:',
               'studio.section-plot-card.vtl-under-chain-title': 'VTL (under chain)',
               'studio.section-plot-card.vtl-under-console-title': 'VTL (under console)',
-              'studio.section-plot-card.x-label': 'X:',
-              'studio.section-plot-card.y-label': 'Y:',
-              'studio.section-plot-card.z-label': 'Z:'
+              'common.x-label': 'X:',
+              'common.y-label': 'Y:',
+              'common.z-label': 'Z:'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

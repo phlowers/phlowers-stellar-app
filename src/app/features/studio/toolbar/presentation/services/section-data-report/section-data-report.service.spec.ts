@@ -16,10 +16,10 @@ import { SectionDataReportService } from './section-data-report.service';
 import { CantonReportData, CantonSupportRow } from './section-data-report.interfaces';
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
-  'studio.canton-report.title': 'Rapport Données du canton',
-  'studio.canton-report.page-label': 'Page',
-  'studio.canton-report.report-generated-success': 'Report generated successfully',
-  'studio.canton-report.report-generation-failed': 'Failed to generate report'
+  'studio.section-report.title': 'Rapport Données du canton',
+  'common.page-label': 'Page',
+  'common.report-generated-successfully-label': 'Report generated successfully',
+  'common.failed-to-generate-report': 'Failed to generate report'
 };
 
 vi.mock('jspdf', () => {
@@ -75,7 +75,7 @@ function createMockReportData(): CantonReportData {
     author: 'test@example.com',
     studyTitle: 'Test Study',
     studyDescription: 'Description',
-    cantonName: 'Canton A',
+    sectionName: 'Canton A',
     comment: 'Comment',
     icName: 'IC 1',
     chargeName: 'Charge 1',

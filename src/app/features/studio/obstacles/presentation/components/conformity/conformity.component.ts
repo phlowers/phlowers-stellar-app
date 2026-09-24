@@ -220,7 +220,7 @@ export class ConformityComponent implements OnDestroy {
 
   readonly pointOptions = computed(() =>
     this.positions().map((_, i) => ({
-      label: this.translocoService.translate('studio.conformity.point-option-label', { index: i + 1 }),
+      label: this.translocoService.translate('common.point-index-label', { index: i + 1 }),
       value: i
     }))
   );

@@ -186,22 +186,22 @@ describe('SectionsTabComponent', () => {
               'common.view': 'View',
               'common.yes': 'Yes',
               'common.no': 'No',
-              'sections-tab.actions': 'Actions',
+              'common.actions-label': 'Actions',
               'sections-tab.add-initial-condition': 'Add initial condition',
-              'sections-tab.report-action': 'Report',
+              'common.report': 'Report',
               'sections-tab.aria-actions-for-section': 'Actions for section {{ name }}',
-              'sections-tab.aria-select-charge': 'Select charge case',
+              'common.select-load-case-label': 'Select load case',
               'sections-tab.aria-select-ic': 'Select initial conditions',
               'sections-tab.aria-select-section': "select this study's section",
-              'sections-tab.charge-cases': 'Charge cases',
+              'sections-tab.load-cases': 'Load cases',
               'sections-tab.col-last-modified': 'Last modified',
               'sections-tab.col-lit': 'LIT ADR',
-              'sections-tab.col-name': 'Section Name',
-              'sections-tab.col-type': 'Section type',
-              'sections-tab.create-section': 'Create a section',
+              'common.section-name-label': 'Section name',
+              'common.section-type-label': 'Section type',
+              'common.create-a-section-label': 'Create a section',
               'sections-tab.generate-state': 'Generate a state',
               'sections-tab.ic-prefix': 'IC',
-              'sections-tab.initial-condition': 'Initial condition',
+              'common.initial-condition-label': 'Initial condition',
               'sections-tab.no-section': 'No existing section',
               'sections-tab.placeholder-view-ic': 'Select IC',
               'sections-tab.placeholder-view-cc': 'Select CC',
@@ -382,7 +382,7 @@ describe('SectionsTabComponent', () => {
 
     expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
     const data = mockReportService.generateReport.mock.calls[0][0];
-    expect(data.cantonName).toBe(mockSection.name);
+    expect(data.sectionName).toBe(mockSection.name);
     expect(data.author).toBe('a@b.com');
     expect(data.icName).toBe('Initial Cond 1');
     expect(data.isPhase).toBe(true);

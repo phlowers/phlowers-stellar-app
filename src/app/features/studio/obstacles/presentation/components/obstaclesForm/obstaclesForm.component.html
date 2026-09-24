@@ -27,7 +27,7 @@
   </div>
 
   <div class="obstacles-form__grid-2-cols">
-    <label for="span" class="span-label">{{ 'studio.shared.span-label' | transloco }}</label>
+    <label for="span" class="span-label">{{ 'common.span-label' | transloco }}</label>
 
     <p-select
       inputId="span"
@@ -66,7 +66,7 @@
       data-testid="obstacle-name"
     />
 
-    <label for="referenceSupport" class="ref-label">{{ 'studio.shared.reference-support-label' | transloco }}</label>
+    <label for="referenceSupport" class="ref-label">{{ 'common.reference-support-label' | transloco }}</label>
     <p-select
       inputId="referenceSupport"
       [options]="obstacleFormService.supportsOptions()"
@@ -129,7 +129,7 @@
       data-testid="add-point"
     >
       <app-icon icon="add_circle" aria-hidden="true" />
-      <ng-container>{{ 'studio.obstacles-form.add-point-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.add-point-label' | transloco }}</ng-container>
     </button>
   </div>
 
@@ -148,14 +148,14 @@
           data-testid="select-point"
         >
           <span class="sr-only"
-            ><ng-container>{{ 'studio.obstacles-form.select-point-label' | transloco }}</ng-container
+            ><ng-container>{{ 'common.select-point-label' | transloco }}</ng-container
             >&nbsp;{{ $index + 1 }}</span
           >
         </button>
 
         <div class="obstacles-item__header">
           <p class="obstacles-item__title">
-            <ng-container>{{ 'studio.obstacles-form.point-label' | transloco }}</ng-container> {{ $index + 1 }}
+            <ng-container>{{ 'common.point-label' | transloco }}</ng-container> {{ $index + 1 }}
           </p>
           <button
             app-btn
@@ -164,7 +164,7 @@
             type="button"
             class="obstacles-item__erase-btn"
             (click)="obstacleFormService.deletePoint($index); $event.stopPropagation()"
-            [attr.aria-label]="'studio.obstacles-form.delete-point-aria-label' | transloco"
+            [attr.aria-label]="'common.delete-point-aria-label' | transloco"
             data-testid="delete-point"
           >
             <app-icon icon="delete" aria-hidden="true" />
@@ -176,7 +176,7 @@
             [for]="'altitudePoint' + $index"
             class="obstacles-item__label alt-point-label"
             data-testid="label-point-altitude"
-            >{{ 'studio.obstacles-form.point-alt-label' | transloco }}</label
+            >{{ 'common.point-alt-label' | transloco }}</label
           >
 
           <p-inputgroup class="obstacles-item__input">
@@ -218,7 +218,7 @@
             [for]="'distanceToRefSupport' + $index"
             class="obstacles-item__label dist-ref-label"
             data-testid="label-ref-distance"
-            >{{ 'studio.obstacles-form.ref-support-dist-label' | transloco }}</label
+            >{{ 'common.ref-support-dist-label' | transloco }}</label
           >
 
           <p-inputgroup class="obstacles-item__input">
@@ -260,7 +260,7 @@
             [for]="'distanceToLineAxis' + $index"
             class="obstacles-item__label dist-axis-label"
             data-testid="label-axis-distance"
-            >{{ 'studio.obstacles-form.line-axis-dist-label' | transloco }}</label
+            >{{ 'common.line-axis-dist-label' | transloco }}</label
           >
 
           <p-inputgroup class="obstacles-item__input">
@@ -336,7 +336,7 @@
         data-testid="calculate-save"
       >
         <app-icon icon="rocket_launch" aria-hidden="true" />
-        <ng-container>{{ 'studio.obstacles-form.calculate-and-save-btn' | transloco }}</ng-container>
+        <ng-container>{{ 'common.calculate-and-save-label' | transloco }}</ng-container>
       </button>
     </div>
 

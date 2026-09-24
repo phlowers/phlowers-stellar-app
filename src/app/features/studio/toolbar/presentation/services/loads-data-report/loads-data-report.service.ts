@@ -72,8 +72,8 @@ export class LoadsReportService extends PdfBaseService {
       notificationService: this.notificationService,
       translate,
       errorLogMessage: 'Failed to generate loads table report',
-      successKey: 'studio.loads-report.report-generated-success',
-      errorKey: 'studio.loads-report.report-generation-failed',
+      successKey: 'common.report-generated-successfully-label',
+      errorKey: 'common.failed-to-generate-report',
       build: async () => {
         const doc = await this.createDoc();
         const labels = buildReportLabels<LoadsReportLabels>(translate, PDF_LOADS_LABEL_KEYS);
@@ -109,7 +109,7 @@ export class LoadsReportService extends PdfBaseService {
         drawPageFooters(doc, labels.pageLabel, true);
 
         const filename = `${sanitizeFilenamePart(labels.reportTitle)}_${sanitizeFilenamePart(
-          data.cantonName
+          data.sectionName
         )}_${sanitizeFilenamePart(data.chargeName)}_${sanitizeFilenamePart(data.date)}.pdf`;
 
         return { doc, filename };
