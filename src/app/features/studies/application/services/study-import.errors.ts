@@ -12,8 +12,8 @@ export const studyImportErrors = {
   studyImportError: 'studies.import.error-import',
   studyDeleteError: 'studies.import.error-delete',
   fileDecodeError: 'studies.import.error-decode',
-  fileParseError: 'studies.import.error-parse',
-  fileReadError: 'studies.import.error-read'
+  fileParseError: 'common.error-parsing-file-label',
+  fileReadError: 'common.error-reading-file-label'
 };
 
 /** Transloco key for the successful study import notification. */

@@ -221,7 +221,7 @@ describe('field-measure-export.helpers', () => {
         }
       });
       const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
-      expect(result.methodName).toBe('field-measuring.export-labels.calculation-method.papoto');
+      expect(result.methodName).toBe('common.papoto-label');
       expect(result.subMethodName).toBeNull();
       expect(result.leftSupport).toBe('0');
       expect(result.method.papoto).toBeDefined();
@@ -248,7 +248,7 @@ describe('field-measure-export.helpers', () => {
     it('should populate only the pep method block for the pep calculation method', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'pep' });
       const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
-      expect(result.methodName).toBe('field-measuring.export-labels.calculation-method.pep');
+      expect(result.methodName).toBe('common.pep-label');
       expect(result.method.pep).toBeDefined();
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.tangentialSights).toBeUndefined();

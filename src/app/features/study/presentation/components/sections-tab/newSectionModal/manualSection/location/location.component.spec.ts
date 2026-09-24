@@ -27,9 +27,9 @@ describe('LocationComponent', () => {
           langs: {
             en: {
               'location.title': 'Support 1 coordinates:',
-              'location.label-latitude': 'Latitude',
-              'location.label-longitude': 'Longitude',
-              'location.label-azimuth': 'Azimuth',
+              'common.latitude-label': 'Latitude',
+              'common.longitude-label': 'Longitude',
+              'common.azimuth-label': 'Azimuth',
               'common.max-value': 'Maximum value:',
               'common.min-value': 'Minimum value:'
             }

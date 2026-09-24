@@ -22,7 +22,7 @@
           />
         </div>
         <div class="vtl-guying__form-field">
-          <label for="support-select">{{ 'studio.shared.reference-support-label' | transloco }}</label>
+          <label for="support-select">{{ 'common.reference-support-label' | transloco }}</label>
           <p-select
             id="support-select"
             [options]="supportOptions()"
@@ -66,15 +66,15 @@
         </header>
         <dl class="vtl-guying__vtl-fields">
           <div class="vtl-guying__vtl-field">
-            <dt>{{ 'studio.vtl-and-guying.charge-v-label' | transloco }}</dt>
+            <dt>{{ 'studio.vtl-and-guying.load-v-label' | transloco }}</dt>
             <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeV | number: '1.0-1') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
-            <dt>{{ 'studio.vtl-and-guying.charge-t-label' | transloco }}</dt>
+            <dt>{{ 'studio.vtl-and-guying.load-t-label' | transloco }}</dt>
             <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeH | number: '1.0-1') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
-            <dt>{{ 'studio.vtl-and-guying.charge-l-label' | transloco }}</dt>
+            <dt>{{ 'studio.vtl-and-guying.load-l-label' | transloco }}</dt>
             <dd class="vtl-guying__vtl-value">{{ (vtlWithoutGuying()?.chargeL | number: '1.0-1') ?? '-' }}&nbsp;daN</dd>
           </div>
           <div class="vtl-guying__vtl-field">
@@ -96,7 +96,7 @@
         </div>
         <div class="vtl-guying__fields-grid">
           <div class="vtl-guying__form-field">
-            <label for="altitude-input">{{ 'field-measuring.header.altitude-label' | transloco }}</label>
+            <label for="altitude-input">{{ 'common.altitude-label' | transloco }}</label>
             <p-inputgroup>
               <input
                 id="altitude-input"
@@ -170,25 +170,25 @@
               <dd class="vtl-guying__result-value">{{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°</dd>
             </div>
             <div class="vtl-guying__result-field chargeVUnderConsole">
-              <dt>{{ 'studio.vtl-and-guying.charge-v-under-console-label' | transloco }}</dt>
+              <dt>{{ 'studio.vtl-and-guying.load-v-under-console-label' | transloco }}</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.chargeVUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field chargeHUnderConsole">
-              <dt>{{ 'studio.vtl-and-guying.charge-t-under-console-label' | transloco }}</dt>
+              <dt>{{ 'studio.vtl-and-guying.load-t-under-console-label' | transloco }}</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.chargeHUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field chargeLIfPulley">
-              <dt>{{ 'studio.vtl-and-guying.charge-l-if-pulley-label' | transloco }}</dt>
+              <dt>{{ 'studio.vtl-and-guying.load-l-if-pulley-label' | transloco }}</dt>
               <dd class="vtl-guying__result-value">
                 {{ (results()?.chargeLIfPulley | number: '1.0-1') ?? '-' }}&nbsp;daN
               </dd>
             </div>
             <div class="vtl-guying__result-field comment">
-              <label for="comment-textarea">{{ 'studio.vtl-and-guying.comment-label' | transloco }}</label>
+              <label for="comment-textarea">{{ 'common.comment-label' | transloco }}</label>
               <textarea
                 pTextarea
                 id="comment-textarea"

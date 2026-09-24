@@ -39,8 +39,8 @@ export class SectionStateReportService extends PdfBaseService {
       notificationService: this.notificationService,
       translate,
       errorLogMessage: 'Failed to generate section state report',
-      successKey: 'studio.section-state-report.report-generated-success',
-      errorKey: 'studio.section-state-report.report-generation-failed',
+      successKey: 'common.report-generated-successfully-label',
+      errorKey: 'common.failed-to-generate-report',
       build: async () => {
         const doc = await this.createDoc();
         const labels = buildReportLabels<SectionReportLabels>(translate, PDF_LABEL_KEYS);

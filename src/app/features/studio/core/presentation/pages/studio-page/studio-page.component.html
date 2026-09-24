@@ -47,7 +47,7 @@
 
         <dl class="global-params__list">
           <div class="global-params__list__item">
-            <dt class="global-params__list__title">{{ 'studio.studio-page.parameter-label' | transloco }}</dt>
+            <dt class="global-params__list__title">{{ 'common.parameter-label' | transloco }}</dt>
             <dd class="global-params__list__value">{{ globalParameter() !== null ? globalParameter() : '-' }} m</dd>
           </div>
 
@@ -251,7 +251,7 @@
           } @else {
             <div class="flex items-center justify-center gap-1 my-4">
               <app-icon icon="info" />
-              <p>{{ 'studio.studio-page.no-charge-case-message' | transloco }}</p>
+              <p>{{ 'studio.studio-page.no-load-case-message' | transloco }}</p>
             </div>
             <div class="flex justify-center">
               <button
@@ -262,7 +262,7 @@
                 data-testid="add-charge-case-btn"
               >
                 <app-icon icon="add_circle" />
-                <ng-container>{{ 'studio.studio-page.add-charge-case-label' | transloco }}</ng-container>
+                <ng-container>{{ 'common.add-load-case-label' | transloco }}</ng-container>
               </button>
             </div>
           }

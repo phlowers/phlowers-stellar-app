@@ -54,7 +54,7 @@ by `LoadsTableComponent` before reaching the service: the table renderer prints 
 
 ## File name
 
-`<reportTitle>_<cantonName>_<chargeName>_<date>.pdf`, each part passed through
+`<reportTitle>_<sectionName>_<chargeName>_<date>.pdf`, each part passed through
 `sanitizeFilenamePart()`.
 
 ## Data Flow

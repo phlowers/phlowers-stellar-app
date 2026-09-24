@@ -38,8 +38,8 @@ export class SectionDataReportService extends PdfBaseService {
       notificationService: this.notificationService,
       translate,
       errorLogMessage: 'Failed to generate canton data report',
-      successKey: 'studio.canton-report.report-generated-success',
-      errorKey: 'studio.canton-report.report-generation-failed',
+      successKey: 'common.report-generated-successfully-label',
+      errorKey: 'common.failed-to-generate-report',
       build: async () => {
         const doc = await this.createDoc();
         const labels = buildReportLabels<CantonReportLabels>(translate, PDF_LABEL_KEYS);
@@ -62,7 +62,7 @@ export class SectionDataReportService extends PdfBaseService {
         drawPageFooters(doc, labels.pageLabel, true);
 
         const filename = `${sanitizeFilenamePart(labels.reportTitle)}_${sanitizeFilenamePart(
-          data.cantonName
+          data.sectionName
         )}_${sanitizeFilenamePart(data.icName)}_${sanitizeFilenamePart(data.date)}.pdf`;
 
         return { doc, filename };
