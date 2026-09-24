@@ -70,8 +70,8 @@ export const buildFreePositioningTraces = (
       y: categoryPoints.map((p) => p.altitude),
       text: categoryPoints.map((p) => p.name ?? ''),
       textposition: 'top center',
-      hovertext: categoryPoints.map((p) => p.name ?? category),
-      hoverinfo: 'x+y+text',
+      // Hover is disabled globally for free-positioning points
+      hoverinfo: 'skip',
       showlegend: false,
       marker: {
         size: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_SIZE : DEFAULT_POINT_SIZE)),

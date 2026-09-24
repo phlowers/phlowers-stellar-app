@@ -53,6 +53,16 @@ This keeps all tabs behaving identically: clicking the left (x·z / profile) plo
 fills and shows a point's along-span and altitude, and clicking the right (y·z /
 face) plot fills its lateral coordinate.
 
+Clicking is placement-first. The selection search in
+`FreePositioningPlotComponent.handleClick` is scoped to `[config().editableCategory]`,
+so only existing points of the **edited** category can be selected by a click
+(selecting one makes it the active point). A click on or near a **context marker
+from another category** is therefore treated exactly like an empty-space click:
+it never intercepts the click and instead injects the clicked coordinates into the
+active point's fields. Passing the full visible-category set here would let foreign
+markers swallow the click, which is why the search is narrowed to the edited
+category alone.
+
 ### Form field reactivity (`OnPush` templates)
 
 Reading a signal in `FreePositioningDataService` is enough to refresh the *plot

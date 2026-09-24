@@ -60,6 +60,19 @@ On the **floor** tab, the reference support can be LEFT or RIGHT and stays
 - Clicking the plot while the reference support is RIGHT fills the point's
   distance **to the right support**, matching what the form displays.
 
+## Placing points by clicking
+
+Click anywhere on the plot to fill the active point's coordinates: the left
+(profile) plot fills the along-span and altitude, and the right (face) plot fills
+the lateral coordinate. This works even where other markers are shown for
+context — clicking **on or near a marker from another tab** (for example floor or
+distance markers displayed while you edit an obstacle) behaves exactly like
+clicking an empty area and still injects the clicked coordinates.
+
+Only points belonging to the **current tab's** category can be selected by
+clicking (clicking one makes it the active point). Markers from other categories
+are context only and never block a click.
+
 ## Frozen controls
 
 While free positioning is active, the following controls are **disabled** so that

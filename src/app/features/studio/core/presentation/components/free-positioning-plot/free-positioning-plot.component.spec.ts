@@ -335,6 +335,31 @@ describe('FreePositioningPlotComponent', () => {
       });
     });
 
+    it('should emit placement (not selection) when clicking near a point from another category', () => {
+      const placementSpy = vi.fn();
+      const selectionSpy = vi.fn();
+      component.placement.subscribe(placementSpy);
+      component.selection.subscribe(selectionSpy);
+
+      // Point from a different category than the editable one ('obstacle') is context only.
+      fixture.componentRef.setInput('points', [{ ...samplePoint, category: 'floor', editable: false }]);
+      fixture.detectChanges();
+
+      const mockElem = makePlotElement();
+
+      // Click at (52, 101) -> within 15px of the floor point, but it must not be selectable
+      component['handleClick']({ layerX: 52, layerY: 101 } as unknown as MouseEvent, 'profile', mockElem);
+
+      expect(selectionSpy).not.toHaveBeenCalled();
+      expect(placementSpy).toHaveBeenCalledWith({
+        alongSpan: 52,
+        lateral: null,
+        altitude: 101,
+        category: 'obstacle',
+        side: 'profile'
+      });
+    });
+
     it('should prioritize placement over selection for the active editable point', () => {
       const placementSpy = vi.fn();
       const selectionSpy = vi.fn();

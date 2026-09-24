@@ -187,6 +187,15 @@ describe('free-positioning-traces helpers', () => {
       expect(trace.marker.size).toEqual([EDITABLE_POINT_SIZE]);
       expect(trace.marker.symbol).toBe(CATEGORY_SYMBOLS.loads);
     });
+
+    it('should disable hover on all point traces', () => {
+      const traces = buildFreePositioningTraces(samplePoints, 'profile', ['obstacle', 'floor', 'loads', 'distance']);
+      expect(traces.length).toBeGreaterThan(0);
+      for (const trace of traces) {
+        expect((trace as Record<string, unknown>).hoverinfo).toBe('skip');
+        expect((trace as Record<string, unknown>).hovertext).toBeUndefined();
+      }
+    });
   });
 
   describe('findNearestPointAtPixel', () => {

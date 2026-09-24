@@ -360,16 +360,16 @@ export class FreePositioningPlotComponent implements OnDestroy {
     const { x, y } = getPixelOffset(evt, layout);
     if (isOutsidePlotBounds(x, y, layout, plotElement)) return;
 
-    // If the active editable point is hit, its movement takes precedence over selection.
-    // This matches the desired workflow: click the currently edited point, then click the
-    // target location to move it; unrelated points can still be selected as context.
+    // Only existing points of the edited category are selectable. Clicking on or near a point
+    // from another category (context "other points") falls through to placement, so it injects
+    // coordinates into the selected point's fields exactly like clicking empty space.
     const nearestPoint = findNearestPointAtPixel(
       this.points(),
       side,
       layout,
       x,
       y,
-      this.visibleCategories(),
+      [this.config().editableCategory],
       POINT_SELECTION_PIXEL_RADIUS
     );
 
