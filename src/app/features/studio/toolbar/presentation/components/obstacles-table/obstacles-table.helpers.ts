@@ -23,7 +23,8 @@ export function buildObstacleTableRows(
   const rows: ObstacleTableRow[] = [];
 
   obstacles.forEach((obstacle) => {
-    const distance = distances.find((d) => d.obstacleUuid === obstacle.uuid);
+    // Distances can hold several entries per obstacle uuid; flatten all their points before matching.
+    const distancePoints = distances.filter((d) => d.obstacleUuid === obstacle.uuid).flatMap((d) => d.points);
     const spanLabel = spanLabelByUuid.get(obstacle.supportUuid) ?? '-';
     const referenceSupportOptions = referenceSupportOptionsByUuid.get(obstacle.supportUuid) ?? [];
     const referenceSupportLabel =
@@ -33,7 +34,7 @@ export function buildObstacleTableRows(
     const lateralDistanceType = findLabel(lateralDistanceTypeOptions, obstacle.lateralDistanceType);
 
     obstacle.positions.forEach((position, pointIndex) => {
-      const distancePoint = distance?.points.find((point) => point.pointIndex === pointIndex);
+      const distancePoint = distancePoints.find((point) => point.pointIndex === pointIndex);
 
       rows.push({
         obstacleName: obstacle.name,

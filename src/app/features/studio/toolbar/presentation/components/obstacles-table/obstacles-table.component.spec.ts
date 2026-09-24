@@ -324,6 +324,60 @@ describe('ObstaclesTableComponent', () => {
       expect(row.vertical).toBe(5);
     });
 
+    it('flattens points from every distance entry sharing the same obstacle uuid', () => {
+      distancesSignal.set([
+        {
+          obstacleUuid: 'obs-1',
+          points: [
+            {
+              pointIndex: 0,
+              linePoint: [0, 0, 0],
+              virtualPointHorizontal: [0, 0, 0],
+              virtualPointVertical: [0, 0, 0],
+              distanceDiagonal: 1,
+              distanceHorizontal: 1,
+              distanceVertical: 1,
+              signedDistanceVertical: 1
+            }
+          ]
+        },
+        {
+          obstacleUuid: 'obs-1',
+          points: [
+            {
+              pointIndex: 1,
+              linePoint: [0, 0, 0],
+              virtualPointHorizontal: [0, 0, 0],
+              virtualPointVertical: [0, 0, 0],
+              distanceDiagonal: 42,
+              distanceHorizontal: 8,
+              distanceVertical: 5,
+              signedDistanceVertical: 5
+            }
+          ]
+        }
+      ]);
+      sectionSignal.set(
+        makeSection({
+          obstacles: [
+            makeObstacle({
+              uuid: 'obs-1',
+              positions: [
+                { x: 1, y: 1, z: 1 },
+                { x: 2, y: 2, z: 2 }
+              ]
+            })
+          ]
+        })
+      );
+      fixture.detectChanges();
+
+      const rows = component.rows();
+      expect(rows[1].oblique).toBe(42);
+      expect(rows[1].horizontal).toBe(8);
+      expect(rows[1].vertical).toBe(5);
+    });
+
     it('resolves the obstacle type label once the catalog is ready', async () => {
       sectionSignal.set(makeSection({ obstacles: [makeObstacle({ type: 'vegetation' })] }));
       obstaclesReady$.next(true);
