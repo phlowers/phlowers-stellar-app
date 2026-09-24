@@ -40,7 +40,8 @@ const mockChargeData: Charge = {
       iceThicknessBefore: null,
       iceThicknessAfter: null
     },
-    spanLoads: []
+    spanLoads: [],
+    cableModifParams: []
   }
 };
 

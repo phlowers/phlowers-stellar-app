@@ -26,6 +26,31 @@ export interface CableSupportManipItem {
   ropeLength: number | null;
   /** Shifting clamp length in meters (shifting only). */
   shiftingClampLength: number | null;
+  /**
+   * Chain name (for 'with_chain' anchoring).
+   * Optional: legacy records persisted before chain support was added lack this field.
+   */
+  chainName?: string | null;
+  /**
+   * Chain length in meters (for 'with_chain' anchoring).
+   * Optional: legacy records persisted before chain support was added lack this field.
+   */
+  chainLength?: number | null;
+  /**
+   * Chain weight in kg (for 'with_chain' anchoring).
+   * Optional: legacy records persisted before chain support was added lack this field.
+   */
+  chainWeight?: number | null;
+  /**
+   * Chain surface in m² (for 'with_chain' anchoring).
+   * Optional: legacy records persisted before chain support was added lack this field.
+   */
+  chainSurface?: number | null;
+  /**
+   * Counter weight in kg (for 'with_chain' anchoring).
+   * Optional: legacy records persisted before chain support was added lack this field.
+   */
+  counterWeight?: number | null;
 }
 
 /**

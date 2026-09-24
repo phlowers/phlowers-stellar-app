@@ -40,7 +40,8 @@ describe('StudioMenuBarComponent', () => {
         iceThicknessBefore: null,
         iceThicknessAfter: null
       },
-      spanLoads: []
+      spanLoads: [],
+      cableModifParams: []
     }
   };
 
@@ -51,6 +52,7 @@ describe('StudioMenuBarComponent', () => {
     description: 'Test charge 2',
     data: {
       spanLoads: [],
+      cableModifParams: [],
       climate: {
         windPressure: 0,
         cableTemperature: 15,

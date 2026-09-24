@@ -272,7 +272,7 @@ describe('LoadFormsService', () => {
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
 
-    it('should call setLoads once worker is ready and litData is set (section studio initialized)', () => {
+    it('should call setLoads once worker is ready and litData is set (section studio initialized)', async () => {
       mockPlotService.workerReady.mockReturnValue(true);
       mockPlotService.litData.mockReturnValue({} as ReturnType<typeof mockPlotService.litData>);
       mockSpanService.section.mockReturnValue({
@@ -283,9 +283,11 @@ describe('LoadFormsService', () => {
 
       TestBed.flushEffects();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        Task.setLoads,
-        expect.objectContaining({ spanLoads: expect.any(Array) })
+      await vi.waitFor(() =>
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.setLoads,
+          expect.objectContaining({ spanLoads: expect.any(Array) })
+        )
       );
     });
   });

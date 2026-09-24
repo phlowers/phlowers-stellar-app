@@ -1037,7 +1037,8 @@ describe('ObstacleFormService', () => {
           iceThicknessBefore: null,
           iceThicknessAfter: null
         },
-        spanLoads: []
+        spanLoads: [],
+        cableModifParams: []
       };
       mockPlotService.temporaryLoadData = mockChargeData;
       service.form.patchValue({ ...validFormBase, uuid: 'obs-loads' });

@@ -107,6 +107,12 @@ export class ChargesService {
     if (section.selected_charge_uuid === chargeUuid) {
       section.selected_charge_uuid = null;
     }
+    // Manipulations are keyed by chargeUuid; without this cleanup they stay orphaned in the
+    // section forever (unreachable, but still persisted and exported).
+    section.cable_support_manipulations = (section.cable_support_manipulations ?? []).filter(
+      (m) => m.chargeUuid !== chargeUuid
+    );
+    section.cable_span_manipulations = section.cable_span_manipulations.filter((m) => m.chargeUuid !== chargeUuid);
     await this.studiesService.updateStudy(study);
     this.messageService.add({
       severity: 'success',
@@ -143,8 +149,63 @@ export class ChargesService {
 
     section.charges = [newCharge, ...section.charges];
     section.selected_charge_uuid = newCharge.uuid;
+    this.duplicateChargeManipulations(section, chargeUuid, newCharge.uuid);
     await this.studiesService.updateStudy(study);
     return newCharge;
+  }
+
+  /**
+   * Duplicate a charge in a section without changing the section's selected charge.
+   * @param studyUuid The uuid of the study containing the section
+   * @param sectionUuid The uuid of the section containing the charge
+   * @param chargeUuid The uuid of the charge to duplicate
+   * @returns Promise that resolves with the duplicated charge
+   */
+  async duplicateChargeWithoutSelecting(studyUuid: string, sectionUuid: string, chargeUuid: string): Promise<Charge> {
+    const { study, section } = await this.getStudyAndSection(studyUuid, sectionUuid);
+
+    const charge = section.charges?.find((c) => c?.uuid === chargeUuid) ?? null;
+    if (!charge) {
+      throw new Error(`Charge with uuid ${chargeUuid} not found`);
+    }
+
+    const newCharge: Charge = {
+      ...charge,
+      uuid: uuidv4(),
+      name: findDuplicateTitle(
+        section.charges.map((c) => c.name),
+        charge.name,
+        this.translocoService.translate('shared.duplicate.copy-suffix')
+      )
+    };
+
+    section.charges = [newCharge, ...section.charges];
+    this.duplicateChargeManipulations(section, chargeUuid, newCharge.uuid);
+    await this.studiesService.updateStudy(study);
+    return newCharge;
+  }
+
+  /**
+   * Copy the support and span manipulations belonging to a charge to a newly duplicated charge,
+   * assigning fresh UUIDs so both charges keep independent, editable records.
+   * @param section The section holding the manipulations
+   * @param sourceChargeUuid The uuid of the charge being duplicated
+   * @param newChargeUuid The uuid of the newly created charge
+   */
+  private duplicateChargeManipulations(section: Section, sourceChargeUuid: string, newChargeUuid: string): void {
+    const duplicateFor = <T extends { uuid: string; chargeUuid: string }>(items: T[] | undefined): T[] =>
+      (items ?? [])
+        .filter((m) => m.chargeUuid === sourceChargeUuid)
+        .map((m) => ({ ...m, uuid: uuidv4(), chargeUuid: newChargeUuid }));
+
+    section.cable_support_manipulations = [
+      ...(section.cable_support_manipulations ?? []),
+      ...duplicateFor(section.cable_support_manipulations)
+    ];
+    section.cable_span_manipulations = [
+      ...section.cable_span_manipulations,
+      ...duplicateFor(section.cable_span_manipulations)
+    ];
   }
 
   /**

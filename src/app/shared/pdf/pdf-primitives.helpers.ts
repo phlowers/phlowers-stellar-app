@@ -20,7 +20,9 @@ import {
   LINE_HEIGHT,
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
-  PAGE_SIZE
+  PAGE_SIZE,
+  SECTION_TITLE_HEIGHT,
+  SEPARATOR_MARGIN_Y
 } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
@@ -132,7 +134,7 @@ export function drawSectionTitle(doc: jsPDF, title: string, startY: number): num
   const titleWidth = doc.getTextWidth(title);
   doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, startY + 1, PAGE_MARGIN.left + titleWidth, startY + 1);
-  return startY + LINE_HEIGHT + 2;
+  return startY + SECTION_TITLE_HEIGHT;
 }
 
 /**
@@ -204,11 +206,16 @@ export function drawFooter(
   doc.text(pageFooter, pageWidth - PAGE_MARGIN.right, pageHeight - 8, { align: 'right' });
 }
 
-/** Draws a horizontal separator line spanning the content width. Returns the next Y position. */
-export function drawSeparator(doc: jsPDF, y: number): number {
+/**
+ * Draws a horizontal separator line spanning `width` (defaults to the portrait content width),
+ * inset by `SEPARATOR_MARGIN_Y` from the content drawn above and below it so sections are clearly
+ * separated. Returns the next Y position.
+ */
+export function drawSeparator(doc: jsPDF, y: number, width: number = CONTENT_WIDTH): number {
+  const lineY = y + SEPARATOR_MARGIN_Y;
   doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, PAGE_MARGIN.left + CONTENT_WIDTH, y);
-  return y + LINE_HEIGHT;
+  doc.line(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + width, lineY);
+  return lineY + SEPARATOR_MARGIN_Y;
 }
 
 /** Sanitizes a filename fragment by replacing characters that are illegal on common filesystems. */

@@ -99,7 +99,8 @@ const mockCharge: Charge = {
       iceThicknessBefore: null,
       iceThicknessAfter: null
     },
-    spanLoads: []
+    spanLoads: [],
+    cableModifParams: []
   }
 };
 
@@ -125,13 +126,13 @@ describe('ClimateComponent effect edge cases', () => {
           langs: {
             en: {
               'loads.climate.cable-temperature-label': 'Cable Temperature',
-              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'common.dis-symmetric': 'Dissymmetric',
               'loads.climate.frontier-support-label': 'Frontier support',
               'loads.climate.ice-indicator-label': 'Ice indicator',
               'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
               'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
               'loads.climate.ice-thickness-label': 'Ice thickness',
-              'loads.climate.symmetric-option': 'Symmetric',
+              'common.symmetric': 'Symmetric',
               'loads.climate.whole-number-required': 'Whole number required',
               'loads.climate.wind-pressure-label': 'Wind Pressure',
               'common.calculate': 'Calculate',
@@ -192,13 +193,13 @@ describe('ClimateComponent effect edge cases', () => {
           langs: {
             en: {
               'loads.climate.cable-temperature-label': 'Cable Temperature',
-              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'common.dis-symmetric': 'Dissymmetric',
               'loads.climate.frontier-support-label': 'Frontier support',
               'loads.climate.ice-indicator-label': 'Ice indicator',
               'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
               'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
               'loads.climate.ice-thickness-label': 'Ice thickness',
-              'loads.climate.symmetric-option': 'Symmetric',
+              'common.symmetric': 'Symmetric',
               'loads.climate.whole-number-required': 'Whole number required',
               'loads.climate.wind-pressure-label': 'Wind Pressure',
               'common.calculate': 'Calculate',
@@ -263,7 +264,8 @@ describe('ClimateComponent', () => {
         iceThicknessBefore: null,
         iceThicknessAfter: null
       },
-      spanLoads: []
+      spanLoads: [],
+      cableModifParams: []
     }
   };
 
@@ -314,13 +316,13 @@ describe('ClimateComponent', () => {
           langs: {
             en: {
               'loads.climate.cable-temperature-label': 'Cable Temperature',
-              'loads.climate.dis-symmetric-option': 'Dis Symmetric',
+              'common.dis-symmetric': 'Dissymmetric',
               'loads.climate.frontier-support-label': 'Frontier support',
               'loads.climate.ice-indicator-label': 'Ice indicator',
               'loads.climate.ice-thickness-after-label': 'Ice thickness after support frontier',
               'loads.climate.ice-thickness-before-label': 'Ice thickness before support frontier',
               'loads.climate.ice-thickness-label': 'Ice thickness',
-              'loads.climate.symmetric-option': 'Symmetric',
+              'common.symmetric': 'Symmetric',
               'loads.climate.whole-number-required': 'Whole number required',
               'loads.climate.wind-pressure-label': 'Wind Pressure',
               'common.calculate': 'Calculate',

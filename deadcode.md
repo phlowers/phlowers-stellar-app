@@ -556,5 +556,15 @@
 | Removal impact | Potential follow-up: drop the two fields from `FieldMeasure` and `createInitialMeasureData` — out of scope for ticket 842 (export-only work), logged here for future cleanup. |
 | ✅ Validated | ⏳ Pending review |
 
+---
 
+## 39. `flattenSupportManipulations` — `loads-data-report.helpers.ts` (ticket 863)
 
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/toolbar/presentation/services/loads-data-report/loads-data-report.helpers.ts` lines 18-54 |
+| Code | `export function flattenSupportManipulations(manipulations, resolveSupportLabel, resolveTypeLabel, resolveAnchoringLabel): SupportManipReportRow[]` |
+| 🔍 Evidence | Exported but never imported: a repository-wide search for `flattenSupportManipulations` returns only its own declaration. The same flattening logic (`manip1` + optional `manip2`, display index only on the first line) is reimplemented inline in `LoadsTableComponent.supportManipRows`, which is the code path actually feeding the PDF report. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the function and the imports it alone required (`CableSupportManipulation`, `SupportAnchoringType`, `SupportManipType`, `SupportManipReportRow`). No behavioral change: the report keeps using the component's inline flattening. |
+| ✅ Validated | 🗑️ REMOVED — dead on arrival, never wired |
