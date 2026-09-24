@@ -218,6 +218,8 @@ export class ObstaclesTableComponent {
   customSort(event: SortEvent): void {
     this.sortField.set((event.field as string) ?? '');
     this.sortOrder.set(event.order ?? 0);
+    // Keep the visible paginator in sync with the table, which resets its own page on sort.
+    this.first.set(0);
 
     const field = event.field as keyof ObstacleTableRow;
     const order = event.order ?? 1;

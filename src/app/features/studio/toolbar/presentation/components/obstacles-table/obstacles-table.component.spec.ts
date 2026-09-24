@@ -426,6 +426,12 @@ describe('ObstaclesTableComponent', () => {
       component.customSort({ field: 'obstacleName', order: -1, data });
       expect((data as { obstacleName: string }[]).map((row) => row.obstacleName)).toEqual(['B', 'A']);
     });
+
+    it('resets the first-record index to 0 so the paginator stays in sync', () => {
+      component.first.set(50);
+      component.customSort({ field: 'obstacleName', order: 1, data: [] as never[] });
+      expect(component.first()).toBe(0);
+    });
   });
 
   describe('onPageChange', () => {
