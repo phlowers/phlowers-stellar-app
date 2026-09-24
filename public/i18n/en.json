@@ -726,9 +726,6 @@
       "sky-cover-estimation-error": "Sky cover could not be estimated from the provided inputs. Please check the values and try again."
     },
     "export-labels": {
-      "calculation-method": {
-        "tangente-aiming": "VISEES_TANGENTES"
-      },
       "wind-speed-unit": {
         "kmh": "KM/H",
         "ms": "M/S"

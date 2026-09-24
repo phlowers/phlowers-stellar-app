@@ -726,9 +726,6 @@
       "sky-cover-estimation-error": "La nébulosité n'a pas pu être estimée à partir des données fournies. Veuillez vérifier les valeurs et réessayer."
     },
     "export-labels": {
-      "calculation-method": {
-        "tangente-aiming": "VISEES_TANGENTES"
-      },
       "wind-speed-unit": {
         "kmh": "KM/H",
         "ms": "M/S"

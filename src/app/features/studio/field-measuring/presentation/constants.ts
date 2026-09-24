@@ -85,12 +85,20 @@ export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], 
   ms: 'field-measuring.export-labels.wind-speed-unit.ms'
 };
 
-/** Maps the internal `calculationMethod` value to a Transloco key for JSON export label. */
-export const PARAMETER_CALCULATION_METHOD_EXPORT_KEYS: Record<FieldMeasure['calculationMethod'], string> = {
+/** Maps the translatable `calculationMethod` values (papoto/pep) to a Transloco key for JSON export label. */
+export const PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS: Record<
+  Exclude<FieldMeasure['calculationMethod'], 'tangente-aiming'>,
+  string
+> = {
   papoto: 'common.papoto-label',
-  'tangente-aiming': 'field-measuring.export-labels.calculation-method.tangente-aiming',
   pep: 'common.pep-label'
 };
+
+/**
+ * Fixed (non-translatable) `methodName` export value for the tangential sights method — a technical
+ * export contract code, identical across locales, not a user-facing label.
+ */
+export const TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE = 'VISEES_TANGENTES' as const;
 
 /** Maps the internal `updateMode15C` value to a Transloco key for JSON export label. */
 export const UPDATE_MODE_15C_EXPORT_KEYS: Record<FieldMeasure['updateMode15C'], string> = {
