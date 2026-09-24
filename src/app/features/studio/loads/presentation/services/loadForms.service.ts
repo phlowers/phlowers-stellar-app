@@ -164,10 +164,7 @@ export class LoadFormsService {
    */
   private async resyncObstacles(section: Section | null | undefined): Promise<void> {
     const floorObstacles = (section?.floors ?? []).map((floor) =>
-      mapFloorToObstacle(
-        floor,
-        section?.supports.findIndex((support) => support.uuid === floor.supportUuid) ?? -1
-      )
+      mapFloorToObstacle(floor, section?.supports.findIndex((support) => support.uuid === floor.supportUuid) ?? -1)
     );
     const obstacles = [...(section?.obstacles ?? []), ...floorObstacles];
     if (obstacles.length > 0) {

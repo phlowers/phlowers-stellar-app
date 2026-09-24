@@ -1125,11 +1125,6 @@
     "loads-report": {
       "title": "Rapport Tableau des charges",
       "cartouche-title": "Étude et canton",
-      "climate-title": "Climat",
-      "loads-title": "Charges",
-      "cable-modif-title": "Modifications du câble",
-      "support-manip-title": "Manipulations des supports",
-      "span-manip-title": "Manipulations de portée",
       "page-label": "Page",
       "author-label": "Auteur",
       "study-label": "Étude",

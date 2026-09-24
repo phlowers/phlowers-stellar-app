@@ -156,11 +156,11 @@ export const SPAN_MANIP_METRICS: MetricDescriptor<SpanManipReportRow>[] = [
 export const PDF_LOADS_LABEL_KEYS: LoadsReportLabels = {
   reportTitle: 'studio.loads-report.title',
   cartoucheTitle: 'studio.loads-report.cartouche-title',
-  climateTitle: 'studio.loads-report.climate-title',
-  loadsTitle: 'studio.loads-report.loads-title',
-  cableModifTitle: 'studio.loads-report.cable-modif-title',
-  supportManipTitle: 'studio.loads-report.support-manip-title',
-  spanManipTitle: 'studio.loads-report.span-manip-title',
+  climateTitle: 'studio.studio-page.climate-condition-label',
+  loadsTitle: 'studio.studio-page.load-marking-label',
+  cableModifTitle: 'studio.studio-page.cable-length-change-label',
+  supportManipTitle: 'studio.studio-page.cable-manip-support-label',
+  spanManipTitle: 'studio.studio-page.cable-manip-span-label',
   pageLabel: 'studio.loads-report.page-label',
 
   author: 'studio.loads-report.author-label',
