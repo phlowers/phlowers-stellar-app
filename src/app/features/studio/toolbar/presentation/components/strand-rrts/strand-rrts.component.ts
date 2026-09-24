@@ -30,12 +30,14 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { maxOf } from '../../services/section-state-report/section-state-report.helpers';
-import { DISTANCE_MAX, STRAND_LAYER_KEYS, WORK_LOAD_ICONS } from './strand-rrts.constantes';
-import { getWorkLoadStatus, toCutStrandsData } from './strand-rrts.helpers';
+import { DEFAULT_CUT_STRANDS, DISTANCE_MAX, STRAND_LAYER_KEYS, WORK_LOAD_ICONS } from './strand-rrts.constantes';
+import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
 import { NotificationKey, RrtsFormValue, RrtsResults } from './strand-rrts.interfaces';
 
 @Component({
@@ -75,6 +77,7 @@ export class StrandRrtsComponent {
   private readonly translocoService = inject(TranslocoService);
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
+  private readonly workerPythonService = inject(WorkerPythonService);
   readonly spanService = inject(PlotSpanService);
 
   readonly DISTANCE_MAX = DISTANCE_MAX;
@@ -116,7 +119,7 @@ export class StrandRrtsComponent {
       .filter(({ strands }) => strands > 0)
       .map((layer) => ({
         ...layer,
-        control: new FormControl<number>(0, {
+        control: new FormControl<number>(DEFAULT_CUT_STRANDS, {
           nonNullable: true,
           validators: [Validators.required, Validators.min(0), Validators.max(layer.strands), maxDecimalsValidator(0)]
         })
@@ -147,8 +150,11 @@ export class StrandRrtsComponent {
     equal: isEqual
   });
   readonly isSaved = computed(() => this.savedEntry() !== null);
+  readonly isCalculating = signal(false);
   readonly isSaving = signal(false);
   readonly isDeleting = signal(false);
+  // Each of them sets the engine cut strands: one at a time
+  readonly isBusy = computed(() => this.isCalculating() || this.isSaving() || this.isDeleting());
 
   readonly newWorkLoadIcon = computed(() => {
     const status = getWorkLoadStatus(this.results()?.newWorkLoad ?? null);
@@ -197,16 +203,26 @@ export class StrandRrtsComponent {
         });
         // Set last so the span rules (reference support default, disabled fields) apply to the saved values
         this.form.controls.span.setValue(span);
-        layers.forEach(({ layer, control }) => control.setValue(entry.cutStrands[layer - 1] ?? 0));
+        layers.forEach(({ layer, control }) => control.setValue(entry.cutStrands[layer - 1] ?? DEFAULT_CUT_STRANDS));
       });
     });
   }
 
-  calculate(): void {
-    if (this.form.invalid || !this.hasLayers()) return;
-    // Mocked until the calculation engine is wired
-    this.results.set({ rrts: 23114, newWorkLoad: 49.2 });
-    this.calculatedValue.set(this.form.getRawValue());
+  async calculate(): Promise<void> {
+    if (this.form.invalid || !this.hasLayers() || this.isBusy()) return;
+    const value = this.form.getRawValue();
+    const layers = this.layers().map(({ layer }) => layer);
+    this.isCalculating.set(true);
+    try {
+      this.results.set(await this.calculateResults(toCatalogCutStrands(value.cutStrands, layers)));
+      this.calculatedValue.set(value);
+    } catch {
+      this.results.set(null);
+      this.calculatedValue.set(null);
+      this.notify('error', 'failed-to-calculate');
+    } finally {
+      this.isCalculating.set(false);
+    }
   }
 
   // A single entry is kept per section: saving replaces the saved one
@@ -214,7 +230,7 @@ export class StrandRrtsComponent {
     const study = this.plotService.study();
     const section = this.spanService.section();
     const calculatedValue = this.calculatedValue();
-    if (!study || !section || !calculatedValue || !this.canSave() || this.isSaving()) return;
+    if (!study || !section || !calculatedValue || !this.canSave() || this.isBusy()) return;
 
     const layers = this.layers().map(({ layer }) => layer);
     const updated = { ...section, rrts_cut_strands: toCutStrandsData(calculatedValue, layers) };
@@ -222,6 +238,7 @@ export class StrandRrtsComponent {
     try {
       await this.sectionService.createOrUpdateSection(study, updated);
       this.spanService.section.set(updated);
+      await this.applySavedCutStrands();
       this.notify('success', 'saved');
     } catch {
       this.notify('error', 'failed-to-save');
@@ -233,13 +250,14 @@ export class StrandRrtsComponent {
   async delete(): Promise<void> {
     const study = this.plotService.study();
     const section = this.spanService.section();
-    if (!study || !section || !this.isSaved() || this.isDeleting()) return;
+    if (!study || !section || !this.isSaved() || this.isBusy()) return;
 
     const updated = { ...section, rrts_cut_strands: null };
     this.isDeleting.set(true);
     try {
       await this.sectionService.createOrUpdateSection(study, updated);
       this.spanService.section.set(updated);
+      await this.applySavedCutStrands();
       this.notify('success', 'deleted');
     } catch {
       this.notify('error', 'failed-to-delete');
@@ -252,6 +270,38 @@ export class StrandRrtsComponent {
     if (control.errors?.['required']) return this.translocoService.translate('common.required');
     const numberError = getNumberInputErrorParams(control);
     return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
+  }
+
+  // The engine keeps the cut strands it is given: the saved ones go back once the results are read
+  private async calculateResults(cutStrands: number[]): Promise<RrtsResults> {
+    try {
+      await this.runTask(Task.setCutStrands, { cutStrands });
+      const { rrts } = await this.runTask(Task.getRrts, undefined);
+      const { utilizationRate } = await this.runTask(Task.getUtilizationRate, undefined);
+      // One rate per support: the last support starts no span, its rate is NaN
+      return { rrts, newWorkLoad: maxOf(utilizationRate.filter(Number.isFinite)) };
+    } finally {
+      await this.applySavedCutStrands();
+    }
+  }
+
+  // The engine holds the saved cut strands, the default ones without saved entry, so the studio shows the saved state
+  private async applySavedCutStrands(): Promise<void> {
+    const layers = this.layers().map(({ layer }) => layer);
+    const cutStrands =
+      this.savedEntry()?.cutStrands ??
+      toCatalogCutStrands(
+        layers.map(() => DEFAULT_CUT_STRANDS),
+        layers
+      );
+    await this.workerPythonService.runTask(Task.setCutStrands, { cutStrands });
+  }
+
+  // Engine errors come back with the task result: throw them to stop at the failing step
+  private async runTask<T extends Task>(task: T, inputs: TaskInputs[T]): Promise<TaskOutputs[T]> {
+    const { result, error } = await this.workerPythonService.runTask(task, inputs);
+    if (error) throw new Error(error);
+    return result;
   }
 
   private notify(kind: 'success' | 'error', key: NotificationKey): void {

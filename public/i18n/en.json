@@ -1231,6 +1231,7 @@
       "result-new-working-load-error": "The new max working load is dangerous",
       "result-new-working-load-unknown": "The new max working load is unknown",
       "no-strand-layers": "No strand layer data available for this cable",
+      "failed-to-calculate": "Failed to calculate the RRTS",
       "saved": "RRTS cut strands saved",
       "failed-to-save": "Failed to save RRTS cut strands",
       "deleted": "RRTS cut strands deleted",

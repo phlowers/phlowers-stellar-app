@@ -23,7 +23,8 @@ import {
   Distance,
   PythonErrorCode
 } from '@services/worker_python/tasks/types';
-import { CatalogCable, Section, Study } from '@shared/domain';
+import { CatalogCable, Charge, Section, Study } from '@shared/domain';
+import { defaultClimaticCharge } from '@shared/domain/helpers/climate.helpers';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
@@ -614,6 +615,72 @@ describe('PlotService', () => {
       await service.initSectionStudio(mockSection);
 
       expect(service.loading()).toBe(false);
+    });
+
+    describe('high safety', () => {
+      // A load case as created in the app: only its staff presence matters here
+      const loadCase = (personnelPresence: boolean): Charge => ({
+        uuid: 'charge-uuid',
+        name: 'Load case 1',
+        personnelPresence,
+        description: '',
+        data: { climate: { ...defaultClimaticCharge }, spanLoads: [], cableModifParams: [] }
+      });
+
+      const sectionWithStaff = (personnelPresence: boolean): Section => ({
+        ...mockSection,
+        charges: [loadCase(personnelPresence)],
+        selected_charge_uuid: 'charge-uuid'
+      });
+
+      beforeEach(() => {
+        mockWorkerPythonService.setReady?.(true);
+        mockCablesService.getCable.mockResolvedValue(mockCable);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.initLit) {
+            return Promise.resolve({ result: { success: true }, error: null });
+          }
+          if (task === Task.refreshProjection) {
+            return Promise.resolve({
+              result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+              error: null
+            });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+      });
+
+      it.each([true, false])(
+        'should follow the staff presence on the selected charge: %s',
+        async (personnelPresence) => {
+          await service.initSectionStudio(sectionWithStaff(personnelPresence));
+
+          expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, {
+            highSafety: personnelPresence
+          });
+        }
+      );
+
+      it('should be off without selected charge', async () => {
+        await service.initSectionStudio({ ...sectionWithStaff(true), selected_charge_uuid: null });
+
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: false });
+      });
+
+      it('should be set right after the engine study is created, before any output is calculated', async () => {
+        await service.initSectionStudio(sectionWithStaff(true));
+
+        const tasks = mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+        expect(tasks.indexOf(Task.setHighSafety)).toBe(tasks.indexOf(Task.initLit) + 1);
+      });
+
+      it('should not be set when the engine study cannot be created', async () => {
+        mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: TaskError.CALCULATION_ERROR });
+
+        await service.initSectionStudio(sectionWithStaff(true));
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.setHighSafety, expect.anything());
+      });
     });
   });
 

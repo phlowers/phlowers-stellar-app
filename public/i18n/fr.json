@@ -1231,6 +1231,7 @@
       "result-new-working-load-error": "le nouveau taux de travail max est dangereux",
       "result-new-working-load-unknown": "le nouveau taux de travail max est inconnu",
       "no-strand-layers": "Aucune donnée de couche de brins disponible pour ce câble",
+      "failed-to-calculate": "Échec du calcul de la CRR",
       "saved": "Brins coupés CRR enregistrés",
       "failed-to-save": "Échec de l'enregistrement des brins coupés CRR",
       "deleted": "Brins coupés CRR supprimés",

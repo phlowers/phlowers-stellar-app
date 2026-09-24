@@ -183,6 +183,10 @@ export class PlotService {
       return;
     }
 
+    // A new engine study has no high safety: staff presence on the selected charge requires it
+    const selectedCharge = section.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
+    await this.workerPythonService.runTask(Task.setHighSafety, { highSafety: !!selectedCharge?.personnelPresence });
+
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
     // initial conditions left by initLit.

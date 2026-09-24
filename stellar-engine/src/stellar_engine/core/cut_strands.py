@@ -87,9 +87,10 @@ def get_rrts(study: SectionStudy) -> dict:
         study: The current section study.
 
     Returns:
-        A dictionary with the residual RTS under the ``rrts`` key.
+        A dictionary with the residual RTS in daN under the ``rrts`` key.
     """
-    return {"rrts": study.balance_engine.cable_array.rrts}
+    rrts = study.balance_engine.cable_array.rrts
+    return {"rrts": units(rrts, "N").to("daN").magnitude}
 
 
 def get_utilization_rate(study: SectionStudy) -> dict:
@@ -108,8 +109,7 @@ def get_utilization_rate(study: SectionStudy) -> dict:
     utilization_rate = study.balance_engine.cable_array.utilization_rate(
         tension_max
     )
-    utilization_rate_daN = units(utilization_rate, "N").to("daN").magnitude
-    return {"utilizationRate": utilization_rate_daN.tolist()}
+    return {"utilizationRate": utilization_rate.tolist()}
 
 
 def set_high_safety(study: SectionStudy, high_safety: bool) -> dict:
