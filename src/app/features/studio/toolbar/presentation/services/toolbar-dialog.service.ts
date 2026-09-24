@@ -6,10 +6,18 @@ import { VhlAndGuyingComponent } from '../components/vtl-and-guying/vtl-and-guyi
 import { LoadsTableComponent } from '../components/loads-table/loads-table.component';
 import { PoseTableComponent } from '../components/pose-table/pose-table.component';
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
+import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 
 /** Identifier for a toolbar tool. */
 export type Tool =
-  'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'pose-table' | 'obstacles-table' | 'other-tool';
+  | 'field-measuring'
+  | 'l0-sum'
+  | 'vtl-and-guying'
+  | 'load-table'
+  | 'pose-table'
+  | 'obstacles-table'
+  | 'strand-rrts'
+  | 'other-tool';
 
 /** Phase of the toolbar dialog lifecycle. */
 export type DialogPhase = 'init' | 'main';
@@ -79,6 +87,10 @@ export class ToolbarDialogService {
     'obstacles-table': {
       component: ObstaclesTableComponent,
       dialogStyle: { width: '85vw', 'max-width': '85vw' }
+    },
+    'strand-rrts': {
+      component: StrandRrtsComponent,
+      dialogStyle: { width: '43.5rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!
