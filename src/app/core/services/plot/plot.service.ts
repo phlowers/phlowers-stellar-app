@@ -64,6 +64,8 @@ export class PlotService {
 
   /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
   private currentSectionUuid: string | null = null;
+  // High safety of the engine study, to skip redundant setHighSafety calls
+  private highSafety: boolean | null = null;
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -112,6 +114,7 @@ export class PlotService {
     this.spanService.section.set(null);
     this.study.set(null);
     this.currentSectionUuid = null;
+    this.highSafety = null;
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedMeasure(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -185,7 +188,7 @@ export class PlotService {
 
     // A new engine study has no high safety: staff presence on the selected charge requires it
     const selectedCharge = section.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
-    await this.workerPythonService.runTask(Task.setHighSafety, { highSafety: !!selectedCharge?.personnelPresence });
+    await this.applyHighSafety(!!selectedCharge?.personnelPresence);
 
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
@@ -212,6 +215,14 @@ export class PlotService {
     }
 
     // initLit initializes the study — refreshProjection gets the actual render data
+    await this.refreshProjection();
+  };
+
+  // Staff presence on the selected charge changed in the studio: the engine study and the outputs depending on it follow
+  setHighSafety = async (highSafety: boolean) => {
+    // Outside the studio, no engine study belongs to the edited section
+    if (!this.isStudioActive() || highSafety === this.highSafety) return;
+    await this.applyHighSafety(highSafety);
     await this.refreshProjection();
   };
 
@@ -277,6 +288,13 @@ export class PlotService {
     }
     plotly.purge(PLOT_ID);
   };
+
+  private async applyHighSafety(highSafety: boolean): Promise<void> {
+    const { error } = await this.workerPythonService.runTask(Task.setHighSafety, { highSafety });
+    if (!error) {
+      this.highSafety = highSafety;
+    }
+  }
 
   private async updateAspectRatio(
     scalingFactors: { x: number; y: number; z: number },
