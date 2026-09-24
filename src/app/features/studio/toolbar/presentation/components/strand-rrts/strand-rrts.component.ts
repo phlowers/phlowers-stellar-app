@@ -85,7 +85,7 @@ export class StrandRrtsComponent {
   readonly form = new FormGroup({
     span: new FormControl<{ index: number; uuid: string } | null>(null),
     supportRef: new FormControl<'LEFT' | 'RIGHT' | null>({ value: null, disabled: true }),
-    distanceSupportRef: new FormControl<number | null>(null, [
+    distanceSupportRef: new FormControl<number | null>({ value: null, disabled: true }, [
       Validators.min(0),
       Validators.max(DISTANCE_MAX),
       maxDecimalsValidator(2)
@@ -175,16 +175,18 @@ export class StrandRrtsComponent {
       untracked(() => this.form.setControl('cutStrands', new FormArray(controls)));
     });
 
-    // Without a span there is no reference support, nor anywhere to draw the marking
+    // Without a span there is no reference support to measure a distance from, nor anywhere to draw the marking
     this.form.controls.span.valueChanges.pipe(takeUntilDestroyed()).subscribe((span) => {
-      const { supportRef, addMarking } = this.form.controls;
+      const { supportRef, distanceSupportRef, addMarking } = this.form.controls;
       if (!span) {
         supportRef.reset({ value: null, disabled: true });
+        distanceSupportRef.reset({ value: null, disabled: true });
         addMarking.reset({ value: false, disabled: true });
         return;
       }
       if (supportRef.disabled) supportRef.enable();
       if (!supportRef.value) supportRef.setValue('LEFT');
+      if (distanceSupportRef.disabled) distanceSupportRef.enable();
       if (addMarking.disabled) addMarking.enable();
     });
 
@@ -238,8 +240,8 @@ export class StrandRrtsComponent {
     try {
       await this.sectionService.createOrUpdateSection(study, updated);
       this.spanService.section.set(updated);
-      await this.applySavedCutStrands();
       this.notify('success', 'saved');
+      await this.syncSavedCutStrands();
     } catch {
       this.notify('error', 'failed-to-save');
     } finally {
@@ -257,8 +259,8 @@ export class StrandRrtsComponent {
     try {
       await this.sectionService.createOrUpdateSection(study, updated);
       this.spanService.section.set(updated);
-      await this.applySavedCutStrands();
       this.notify('success', 'deleted');
+      await this.syncSavedCutStrands();
     } catch {
       this.notify('error', 'failed-to-delete');
     } finally {
@@ -294,7 +296,16 @@ export class StrandRrtsComponent {
         layers.map(() => DEFAULT_CUT_STRANDS),
         layers
       );
-    await this.workerPythonService.runTask(Task.setCutStrands, { cutStrands });
+    await this.runTask(Task.setCutStrands, { cutStrands });
+  }
+
+  // Runs once the entry is stored: an engine failure is reported apart from the save or delete
+  private async syncSavedCutStrands(): Promise<void> {
+    try {
+      await this.applySavedCutStrands();
+    } catch {
+      this.notify('error', 'failed-to-sync');
+    }
   }
 
   // Engine errors come back with the task result: throw them to stop at the failing step

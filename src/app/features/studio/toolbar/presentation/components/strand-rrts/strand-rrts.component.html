@@ -58,21 +58,23 @@
     @let distanceError = distanceControl.dirty ? getError(distanceControl) : '';
     <div>
       <label for="rrts-distance-support-ref">
-        {{ ('studio.rrts-cut-strands.distance-support-ref-label' | transloco) + ' (m)' }}
+        {{ 'studio.rrts-cut-strands.distance-support-ref-label' | transloco }}
       </label>
-      <input
-        id="rrts-distance-support-ref"
-        type="number"
-        pInputText
-        fluid
-        formControlName="distanceSupportRef"
-        min="0"
-        [attr.max]="DISTANCE_MAX"
-        step="0.01"
-        data-testid="rrts-distance-support-ref-input"
-        [attr.aria-invalid]="distanceError ? 'true' : null"
-        [attr.aria-errormessage]="distanceError ? 'distanceSupportRef-error' : null"
-      />
+      <p-inputgroup>
+        <input
+          id="rrts-distance-support-ref"
+          type="number"
+          pInputText
+          formControlName="distanceSupportRef"
+          min="0"
+          [attr.max]="DISTANCE_MAX"
+          step="0.01"
+          data-testid="rrts-distance-support-ref-input"
+          [attr.aria-invalid]="distanceError ? 'true' : null"
+          [attr.aria-errormessage]="distanceError ? 'distanceSupportRef-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
       @if (distanceError) {
         <p-message id="distanceSupportRef-error" severity="error" size="small" variant="simple">
           {{ distanceError }}
