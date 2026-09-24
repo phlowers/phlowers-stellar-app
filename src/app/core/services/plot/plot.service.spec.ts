@@ -704,6 +704,28 @@ describe('PlotService', () => {
         );
         expect(highSafetyCalls).toEqual([[Task.setHighSafety, { highSafety: true }]]);
       });
+
+      it('should follow a charge selected while its high safety was being applied', async () => {
+        service.isStudioActive.set(true);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.initLit) {
+            return Promise.resolve({ result: { success: true }, error: null });
+          }
+          if (task === Task.setHighSafety && runTasks().filter((t) => t === Task.setHighSafety).length === 1) {
+            spanService.section.set(sectionWithStaff(true));
+            TestBed.flushEffects();
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+
+        await service.initSectionStudio(sectionWithStaff(false));
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const highSafetyCalls = mockWorkerPythonService.runTask.mock.calls.filter(
+          ([task]) => task === Task.setHighSafety
+        );
+        expect(highSafetyCalls.at(-1)).toEqual([Task.setHighSafety, { highSafety: true }]);
+      });
     });
 
     describe('when the selected charge changes in the studio', () => {
@@ -760,6 +782,30 @@ describe('PlotService', () => {
         await reloadSection(sectionWithStaff(false));
 
         expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.setHighSafety, expect.anything());
+      });
+
+      it('should end on the last selected charge when it changes back while the previous one is being applied', async () => {
+        let finishFirstRequest!: () => void;
+        mockWorkerPythonService.runTask.mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finishFirstRequest = () => resolve({ result: null, error: null });
+            })
+        );
+
+        spanService.section.set(sectionWithStaff(true));
+        TestBed.flushEffects();
+        await reloadSection(sectionWithStaff(false));
+        finishFirstRequest();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const highSafetyCalls = mockWorkerPythonService.runTask.mock.calls.filter(
+          ([task]) => task === Task.setHighSafety
+        );
+        expect(highSafetyCalls).toEqual([
+          [Task.setHighSafety, { highSafety: true }],
+          [Task.setHighSafety, { highSafety: false }]
+        ]);
       });
     });
   });

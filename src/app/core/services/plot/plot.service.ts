@@ -303,9 +303,13 @@ export class PlotService {
   }
 
   private async applyHighSafety(highSafety: boolean): Promise<void> {
+    const previous = this.highSafety;
+    // Cached before the call: the worker runs tasks in order, so the last request sent wins
+    this.highSafety = highSafety;
     const { error } = await this.workerPythonService.runTask(Task.setHighSafety, { highSafety });
-    if (!error) {
-      this.highSafety = highSafety;
+    // Only roll back if no newer request replaced this one in the meantime
+    if (error && this.highSafety === highSafety) {
+      this.highSafety = previous;
     }
   }
 
