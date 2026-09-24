@@ -323,8 +323,6 @@ export class LoadsTableComponent {
     };
 
     await this.chargesService.createOrUpdateCharge(studyUuid, sectionUuid, updatedCharge);
-    // Saving selects the load case: the engine follows its staff presence
-    await this.plotService.setHighSafety(updatedCharge.personnelPresence);
     this.mode.set('view');
   }
 

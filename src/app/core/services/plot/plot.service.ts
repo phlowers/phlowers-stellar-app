@@ -1,4 +1,4 @@
-import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
@@ -64,8 +64,14 @@ export class PlotService {
 
   /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
   private currentSectionUuid: string | null = null;
-  // High safety of the engine study, to skip redundant setHighSafety calls
+  // High safety of the engine study, to skip redundant setHighSafety calls. Null while no engine study is ready
   private highSafety: boolean | null = null;
+  // Staff presence on the selected charge requires high safety in the engine study
+  private readonly selectedChargeHighSafety = computed(() => {
+    const section = this.spanService.section();
+    const selectedCharge = section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
+    return !!selectedCharge?.personnelPresence;
+  });
 
   constructor() {
     this.subscription = this.workerPythonService.ready$.subscribe((value) => {
@@ -78,6 +84,12 @@ export class PlotService {
           this.initSectionStudio(section);
         }
       }
+    });
+    // The studio section is reloaded from the database after every charge change (selection, creation,
+    // duplication, deletion, edition), so the engine study follows the selected charge from here
+    effect(() => {
+      const highSafety = this.selectedChargeHighSafety();
+      untracked(() => this.syncHighSafety(highSafety));
     });
     // Restore the view and camera captured when free positioning mode was switched on. Lives here
     // (not in PlotOptionsService) because restoring the support window requires refreshProjection,
@@ -154,6 +166,8 @@ export class PlotService {
 
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
+    // The engine study is being replaced: high safety is applied once the new one exists
+    this.highSafety = null;
     this.error.set(null);
     this.diagnostics.set([]);
     this.litData.set(null);
@@ -186,9 +200,8 @@ export class PlotService {
       return;
     }
 
-    // A new engine study has no high safety: staff presence on the selected charge requires it
-    const selectedCharge = section.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
-    await this.applyHighSafety(!!selectedCharge?.personnelPresence);
+    // A new engine study has no high safety. Read the latest section, the selected charge may have changed during initLit
+    await this.applyHighSafety(untracked(() => this.selectedChargeHighSafety()));
 
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
@@ -215,14 +228,6 @@ export class PlotService {
     }
 
     // initLit initializes the study — refreshProjection gets the actual render data
-    await this.refreshProjection();
-  };
-
-  // Staff presence on the selected charge changed in the studio: the engine study and the outputs depending on it follow
-  setHighSafety = async (highSafety: boolean) => {
-    // Outside the studio, no engine study belongs to the edited section
-    if (!this.isStudioActive() || highSafety === this.highSafety) return;
-    await this.applyHighSafety(highSafety);
     await this.refreshProjection();
   };
 
@@ -288,6 +293,14 @@ export class PlotService {
     }
     plotly.purge(PLOT_ID);
   };
+
+  // Staff presence on the selected charge changed in the studio: the engine study and the outputs depending on it follow
+  private async syncHighSafety(highSafety: boolean): Promise<void> {
+    // Outside the studio, or before initSectionStudio created the engine study, there is nothing to update
+    if (!this.isStudioActive() || this.highSafety === null || highSafety === this.highSafety) return;
+    await this.applyHighSafety(highSafety);
+    await this.refreshProjection();
+  }
 
   private async applyHighSafety(highSafety: boolean): Promise<void> {
     const { error } = await this.workerPythonService.runTask(Task.setHighSafety, { highSafety });

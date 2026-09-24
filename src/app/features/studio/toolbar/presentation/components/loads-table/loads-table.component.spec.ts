@@ -217,8 +217,7 @@ describe('LoadsTableComponent', () => {
     };
 
     mockPlotService = {
-      study: signal<Study | null>(mockStudy),
-      setHighSafety: vi.fn().mockResolvedValue(undefined)
+      study: signal<Study | null>(mockStudy)
     };
 
     mockSpanService = {
@@ -366,26 +365,6 @@ describe('LoadsTableComponent', () => {
       expect(component.mode()).toBe('view');
     });
 
-    it.each([true, false])('should apply the saved staff presence to the engine: %s', async (personnelPresence) => {
-      component.chargeUuid.set('charge-uuid-1');
-      component.updatePersonnelPresence(personnelPresence);
-
-      await component.saveChanges();
-
-      expect(mockPlotService.setHighSafety).toHaveBeenCalledWith(personnelPresence);
-      expect((mockChargesService.createOrUpdateCharge as vi.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-        (mockPlotService.setHighSafety as vi.Mock).mock.invocationCallOrder[0]
-      );
-    });
-
-    it('should leave the engine untouched while the staff presence is only toggled', () => {
-      component.switchToEditMode();
-      component.updatePersonnelPresence(true);
-      component.cancelEdit();
-
-      expect(mockPlotService.setHighSafety).not.toHaveBeenCalled();
-    });
-
     it('should not save if study uuid is missing', async () => {
       mockPlotService.study!.set(null);
       component.chargeUuid.set('charge-uuid-1');
@@ -419,7 +398,6 @@ describe('LoadsTableComponent', () => {
       await component.saveChanges();
 
       expect(mockChargesService.createOrUpdateCharge).not.toHaveBeenCalled();
-      expect(mockPlotService.setHighSafety).not.toHaveBeenCalled();
     });
   });
 
