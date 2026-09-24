@@ -1235,7 +1235,8 @@
       "saved": "Brins coupés CRR enregistrés",
       "failed-to-save": "Échec de l'enregistrement des brins coupés CRR",
       "deleted": "Brins coupés CRR supprimés",
-      "failed-to-delete": "Échec de la suppression des brins coupés CRR"
+      "failed-to-delete": "Échec de la suppression des brins coupés CRR",
+      "failed-to-sync": "Échec de la mise à jour du studio avec les brins coupés CRR"
     }
   }
 }

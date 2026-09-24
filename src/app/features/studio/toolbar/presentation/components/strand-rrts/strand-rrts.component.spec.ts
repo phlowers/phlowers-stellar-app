@@ -139,6 +139,7 @@ describe('StrandRrtsComponent', () => {
               'common.no': 'No',
               'common.loading': 'Loading',
               'common.required': 'Required',
+              'common.meter': 'm',
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
@@ -149,6 +150,7 @@ describe('StrandRrtsComponent', () => {
               'studio.rrts-cut-strands.failed-to-save': 'Failed to save RRTS cut strands',
               'studio.rrts-cut-strands.deleted': 'RRTS cut strands deleted',
               'studio.rrts-cut-strands.failed-to-delete': 'Failed to delete RRTS cut strands',
+              'studio.rrts-cut-strands.failed-to-sync': 'Failed to update the studio with the RRTS cut strands',
               'studio.rrts-cut-strands.result-new-working-load-null': 'No new max working load',
               'studio.rrts-cut-strands.result-new-working-load-ok': 'The new max working load is satisfactory',
               'studio.rrts-cut-strands.result-new-working-load-warning': 'The new max working load is concerning',
@@ -294,12 +296,20 @@ describe('StrandRrtsComponent', () => {
   });
 
   describe('distance surface control', () => {
+    // The distance is measured from the reference support of a span
+    const setupWithSpan = async () => {
+      await setup();
+      component.form.controls.span.setValue({ index: 0, uuid: 's1' });
+      fixture.detectChanges();
+    };
+
     it('bounds the distance from 0 to 5000 m, to the centimeter', async () => {
       await setup();
       const input = getByTestId('rrts-distance-support-ref-input');
       expect(input?.getAttribute('min')).toBe('0');
       expect(input?.getAttribute('max')).toBe('5000');
       expect(input?.getAttribute('step')).toBe('0.01');
+      expect(input?.closest('p-inputgroup')?.querySelector('p-inputgroup-addon')?.textContent?.trim()).toBe('m');
     });
 
     it.each([
@@ -307,7 +317,7 @@ describe('StrandRrtsComponent', () => {
       ['5000.01', 'max', 'Max. value: 5000'],
       ['12.345', 'maxDecimals', 'Max decimals: 2']
     ])('rejects a %j distance with a %s error as soon as it is typed', async (value, errorKey, message) => {
-      await setup();
+      await setupWithSpan();
       const input = typeIn('rrts-distance-support-ref-input', value);
       expect(component.form.controls.distanceSupportRef.hasError(errorKey)).toBe(true);
       expect(component.form.invalid).toBe(true);
@@ -317,7 +327,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it.each(['', '0', '12.34', '5000'])('accepts a %j distance', async (value) => {
-      await setup();
+      await setupWithSpan();
       const input = typeIn('rrts-distance-support-ref-input', value);
       expect(component.form.controls.distanceSupportRef.valid).toBe(true);
       expect(getErrorMessage('distanceSupportRef-error')).toBeNull();
@@ -333,11 +343,16 @@ describe('StrandRrtsComponent', () => {
       fixture.detectChanges();
     };
 
-    it('disables the reference support and the marking without span', async () => {
+    const getDistanceInput = () => getByTestId('rrts-distance-support-ref-input') as HTMLInputElement;
+
+    it('disables the reference support, the distance and the marking without span', async () => {
       await setup();
-      const { supportRef, addMarking } = component.form.controls;
+      const { supportRef, distanceSupportRef, addMarking } = component.form.controls;
       expect(supportRef.disabled).toBe(true);
       expect(supportRef.value).toBeNull();
+      expect(distanceSupportRef.disabled).toBe(true);
+      expect(distanceSupportRef.value).toBeNull();
+      expect(getDistanceInput().disabled).toBe(true);
       expect(addMarking.disabled).toBe(true);
       expect(getCheckbox().disabled).toBe(true);
       expect(getCheckbox().checked).toBe(false);
@@ -350,9 +365,11 @@ describe('StrandRrtsComponent', () => {
       await setup();
       selectSpan({ index: 0, uuid: 's1' });
 
-      const { supportRef, addMarking } = component.form.controls;
+      const { supportRef, distanceSupportRef, addMarking } = component.form.controls;
       expect(supportRef.enabled).toBe(true);
       expect(supportRef.value).toBe('LEFT');
+      expect(distanceSupportRef.enabled).toBe(true);
+      expect(getDistanceInput().disabled).toBe(false);
       expect(addMarking.enabled).toBe(true);
       expect(addMarking.value).toBe(false);
       expect(getCheckbox().disabled).toBe(false);
@@ -378,12 +395,16 @@ describe('StrandRrtsComponent', () => {
       await setup();
       selectSpan({ index: 0, uuid: 's1' });
       component.form.controls.supportRef.setValue('RIGHT');
+      component.form.controls.distanceSupportRef.setValue(12.5);
       component.form.controls.addMarking.setValue(true);
 
       selectSpan(null);
-      const { supportRef, addMarking } = component.form.controls;
+      const { supportRef, distanceSupportRef, addMarking } = component.form.controls;
       expect(supportRef.disabled).toBe(true);
       expect(supportRef.value).toBeNull();
+      expect(distanceSupportRef.disabled).toBe(true);
+      expect(distanceSupportRef.value).toBeNull();
+      expect(getDistanceInput().disabled).toBe(true);
       expect(addMarking.disabled).toBe(true);
       expect(addMarking.value).toBe(false);
       expect(getCheckbox().disabled).toBe(true);
@@ -448,6 +469,23 @@ describe('StrandRrtsComponent', () => {
         expect(engineCutStrands().at(-1)).toEqual([1, 3, 0, 0, 0, 0, 0, 0]);
       }
     );
+
+    it('tells when the engine cannot get the saved cut strands back, and drops the results', async () => {
+      await setup();
+      mockWorkerPythonService.runTask.mockImplementation((task: Task, inputs?: { cutStrands: number[] }) =>
+        Promise.resolve(
+          engineAnswer(
+            task,
+            task === Task.setCutStrands && inputs?.cutStrands[0] === 0 ? TaskError.CALCULATION_ERROR : null
+          )
+        )
+      );
+      typeIn('rrts-cut-strands-layer1-input', '5');
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to calculate the RRTS');
+      expect(component.results()).toBeNull();
+    });
 
     it('tells when the engine does not answer', async () => {
       mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task setCutStrands timed out'));
@@ -529,16 +567,22 @@ describe('StrandRrtsComponent', () => {
       expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands saved');
     });
 
-    it('saves neither reference support nor marking once the span is removed', async () => {
+    it('saves neither reference support, distance nor marking once the span is removed', async () => {
       await setup();
       component.form.controls.span.setValue({ index: 0, uuid: 's1' });
       component.form.controls.supportRef.setValue('RIGHT');
+      component.form.controls.distanceSupportRef.setValue(12.5);
       component.form.controls.addMarking.setValue(true);
       component.form.controls.span.setValue(null);
       await calculate();
       await component.save();
 
-      expect(savedSection().rrts_cut_strands).toMatchObject({ spanUuid: null, supportRef: null, addMarking: false });
+      expect(savedSection().rrts_cut_strands).toMatchObject({
+        spanUuid: null,
+        supportRef: null,
+        distanceSupportRef: null,
+        addMarking: false
+      });
     });
 
     it('replaces the saved entry with one linked to the selected span', async () => {
@@ -560,6 +604,21 @@ describe('StrandRrtsComponent', () => {
       await component.save();
 
       expect(engineCutStrands().at(-1)).toEqual([5, 3, 0, 0, 0, 0, 0, 0]);
+    });
+
+    it('keeps the saved entry, and tells the studio is not updated, when the engine rejects it', async () => {
+      await setup();
+      typeIn('rrts-cut-strands-layer1-input', '5');
+      await calculate();
+      failTask(Task.setCutStrands);
+      await component.save();
+
+      expect(spanService.section()?.rrts_cut_strands).toMatchObject({ cutStrands: [5, 0, 0, 0, 0, 0, 0, 0] });
+      expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands saved');
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        'Failed to update the studio with the RRTS cut strands'
+      );
+      expect(mockNotificationService.error).not.toHaveBeenCalledWith('Failed to save RRTS cut strands');
     });
 
     it('keeps the section, and the engine on the saved cut strands, when saving fails', async () => {
@@ -598,6 +657,19 @@ describe('StrandRrtsComponent', () => {
       expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands deleted');
       expect(footerButton('delete-btn').disabled).toBe(true);
       expect(engineCutStrands()).toEqual([[0, 0, 0, 0, 0, 0, 0, 0]]);
+    });
+
+    it('keeps the entry deleted, and tells the studio is not updated, when the engine rejects the default cut strands', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      failTask(Task.setCutStrands);
+      await component.delete();
+
+      expect(spanService.section()?.rrts_cut_strands).toBeNull();
+      expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands deleted');
+      expect(mockNotificationService.error).toHaveBeenCalledWith(
+        'Failed to update the studio with the RRTS cut strands'
+      );
+      expect(mockNotificationService.error).not.toHaveBeenCalledWith('Failed to delete RRTS cut strands');
     });
 
     it('keeps the entry, and the engine untouched, when deleting fails', async () => {
@@ -640,6 +712,7 @@ describe('StrandRrtsComponent', () => {
     );
     expect(component.form.controls.span.value).toBeNull();
     expect(component.form.controls.supportRef.disabled).toBe(true);
+    expect(component.form.controls.distanceSupportRef.disabled).toBe(true);
     expect(component.form.controls.addMarking.disabled).toBe(true);
   });
 

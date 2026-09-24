@@ -1235,7 +1235,8 @@
       "saved": "RRTS cut strands saved",
       "failed-to-save": "Failed to save RRTS cut strands",
       "deleted": "RRTS cut strands deleted",
-      "failed-to-delete": "Failed to delete RRTS cut strands"
+      "failed-to-delete": "Failed to delete RRTS cut strands",
+      "failed-to-sync": "Failed to update the studio with the RRTS cut strands"
     }
   }
 }
