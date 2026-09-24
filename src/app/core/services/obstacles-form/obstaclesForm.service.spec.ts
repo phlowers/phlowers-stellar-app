@@ -1292,6 +1292,28 @@ describe('ObstacleFormService', () => {
       expect(obstacle.lateralDistanceType).toBe(LateralDistanceType.SPAN_AXIS);
       expect(obstacle.referenceSupport).toBe(ReferenceSupport.LEFT);
     });
+
+    it('should include free-positioning-forced values even when their controls are disabled', () => {
+      service.form.patchValue({
+        uuid: 'obs-fp',
+        name: 'Tree',
+        type: 'accessible_building',
+        supportUuid: 'sup-1',
+        referenceSupport: ReferenceSupport.LEFT,
+        altitudeType: 'absolute',
+        lateralDistanceType: LateralDistanceType.SPAN_AXIS
+      });
+      // Free positioning disables these three controls; form.value would drop them.
+      service.form.get('referenceSupport')?.disable();
+      service.form.get('altitudeType')?.disable();
+      service.form.get('lateralDistanceType')?.disable();
+
+      const obstacle = (service as unknown as { buildObstacleFromForm: () => Obstacle }).buildObstacleFromForm();
+
+      expect(obstacle.altitudeType).toBe('absolute');
+      expect(obstacle.referenceSupport).toBe(ReferenceSupport.LEFT);
+      expect(obstacle.lateralDistanceType).toBe(LateralDistanceType.SPAN_AXIS);
+    });
   });
 
   describe('upsertObstacleInSection', () => {

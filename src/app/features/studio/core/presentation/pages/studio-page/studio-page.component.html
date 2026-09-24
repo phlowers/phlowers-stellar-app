@@ -12,10 +12,22 @@
 <div class="graph-tools">
   <div class="graph-tools__left">
     @if (plotOptionsService.isFreePositioningMode()) {
-      @if (plotOptionsService.freePositioningSource() === 'floor') {
-        <app-floor-free-positioning class="plot-view" />
-      } @else {
-        <app-free-positioning class="plot-view" />
+      @switch (plotOptionsService.freePositioningSource()) {
+        @case ('floor') {
+          <app-floor-free-positioning class="plot-view" />
+        }
+        @case ('obstacle') {
+          <app-obstacle-free-positioning class="plot-view" />
+        }
+        @case ('distance') {
+          <app-distance-free-positioning class="plot-view" />
+        }
+        @case ('loads') {
+          <app-loads-free-positioning class="plot-view" />
+        }
+        @default {
+          <app-studio class="plot-view" [isPreview]="false" />
+        }
       }
     } @else {
       <app-studio class="plot-view" [isPreview]="false" />
@@ -152,7 +164,7 @@
       <ng-template>
         <p-tabs
           [value]="loadFormsService.activeLoadTab()"
-          (valueChange)="loadFormsService.activeLoadTab.set($event?.toString() ?? '0')"
+          (valueChange)="onLoadTabChange($event)"
           class="load-tabs"
           data-testid="load-tabs"
         >

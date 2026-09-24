@@ -6,7 +6,7 @@
       type="button"
       btnStyle="outlined"
       btnSize="s"
-      [disabled]="!spanSelectValue()"
+      [disabled]="!spanSelectValue() || plotOptionsService.isFreePositioningMode()"
       (click)="zoomToSpan()"
       data-testid="span-zoom"
     >
@@ -25,6 +25,7 @@
     <p-select
       inputId="spanSelect"
       [options]="spansOptions()"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
       fluid
       formControlName="spanSelect"
       optionLabel="label"
@@ -59,8 +60,12 @@
     />
   </div>
   <div class="col-span-2 flex items-center">
-    <p-toggleswitch disabled inputId="freePositioning" name="freePositioning" data-testid="free-positioning" />
-    <label for="freePositioning">{{ 'loads.load-marking.free-positioning-label' | transloco }}</label>
+    <app-free-positioning-toggle
+      source="loads"
+      [disabled]="!spanSelectValue()"
+      [spanIndex]="selectedSpanIndex()"
+      labelKey="loads.load-marking.free-positioning-label"
+    />
   </div>
 
   <div>

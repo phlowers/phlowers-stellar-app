@@ -19,6 +19,7 @@ import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { emptySpanLoad } from '../../helpers';
@@ -28,6 +29,7 @@ import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LoadControlName, SpanFormControls, SupportOption } from './load-marking.interfaces';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { FreePositioningToggleComponent } from '@features/studio/core/presentation/components/free-positioning-toggle/free-positioning-toggle.component';
 
 @Component({
   selector: 'app-load-marking',
@@ -42,7 +44,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     IconComponent,
     ToggleSwitchModule,
     FormsModule,
-    TranslocoModule
+    TranslocoModule,
+    FreePositioningToggleComponent
   ],
   templateUrl: './load-marking.component.html',
   styleUrl: './load-marking.component.scss',
@@ -53,6 +56,7 @@ export class LoadMarkingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  readonly plotOptionsService = inject(PlotOptionsService);
   readonly loadFormsService = inject(LoadFormsService);
   private readonly translocoService = inject(TranslocoService);
   readonly chargeUuid = input<string | null>(null);
@@ -87,6 +91,16 @@ export class LoadMarkingComponent {
   });
   readonly spanSelectValue = computed(() => this.spanSelectSignal());
 
+  /** Index of the span currently selected in the tab; frozen when free positioning is switched on. */
+  readonly selectedSpanIndex = computed(() => {
+    const uuid = this.spanSelectValue();
+    if (!uuid) {
+      return null;
+    }
+    const index = this.spanService.getSupportIndex(uuid);
+    return index >= 0 ? index : null;
+  });
+
   private readonly loadControlSignals: Record<LoadControlName, Signal<unknown>> = {
     loadPosition: toSignal(this.form.controls.loadPosition.valueChanges, {
       initialValue: this.form.controls.loadPosition.value,
@@ -109,6 +123,7 @@ export class LoadMarkingComponent {
   private readonly spanSelectEffect = effect(() => {
     const value = this.spanSelectSignal();
     this.onSpanSelectChange(value ?? null);
+    this.loadFormsService.activeSpanSupportUuid.set(value ?? null);
   });
 
   private readonly chargeChangeEffect = effect(() => {
@@ -124,6 +139,14 @@ export class LoadMarkingComponent {
     if (uuid) {
       this.form.controls.spanSelect.setValue(uuid);
       this.loadFormsService.selectedSpanSupportUuid.set(null);
+    }
+  });
+
+  private readonly externalLoadPositionEffect = effect(() => {
+    const pos = this.loadFormsService.activeLoadPosition();
+    if (pos !== null && pos !== undefined) {
+      this.form.controls.loadPosition.setValue(pos);
+      this.loadFormsService.activeLoadPosition.set(null);
     }
   });
 

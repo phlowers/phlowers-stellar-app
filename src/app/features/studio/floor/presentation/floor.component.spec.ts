@@ -10,6 +10,8 @@ import { FormArray, FormBuilder } from '@angular/forms';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { FloorComponent } from './floor.component';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotService } from '@services/plot/plot.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 import { FloorPointFormGroup, FloorResults } from '@shared/domain/floor/floor-form.interfaces';
 
@@ -22,10 +24,21 @@ describe('FloorComponent', () => {
   const mockPlotOptionsService = {
     isFreePositioningMode: signal(false),
     freePositioningSource: signal<'obstacle' | 'floor' | null>(null),
+    plotOptions: signal({ view: '3d', side: 'profile', startSupport: 0, endSupport: 1, invert: false }),
     setFreePositioningMode: vi.fn((enabled: boolean, source: 'obstacle' | 'floor') => {
       mockPlotOptionsService.isFreePositioningMode.set(enabled);
       mockPlotOptionsService.freePositioningSource.set(enabled ? source : null);
     })
+  };
+
+  /** `getSupportIndex` maps the selected span UUID to its 0-based support index. */
+  const mockPlotSpanService = {
+    getSupportIndex: vi.fn(() => 0)
+  };
+
+  /** Required by the free-positioning toggle rendered in the real template. */
+  const mockPlotService = {
+    plotOptionsChange: vi.fn()
   };
 
   const noResults: FloorResults = {
@@ -72,6 +85,8 @@ describe('FloorComponent', () => {
       ],
       providers: [
         { provide: PlotOptionsService, useValue: mockPlotOptionsService },
+        { provide: PlotSpanService, useValue: mockPlotSpanService },
+        { provide: PlotService, useValue: mockPlotService },
         { provide: FloorFormService, useValue: mockFloorFormService }
       ]
     });

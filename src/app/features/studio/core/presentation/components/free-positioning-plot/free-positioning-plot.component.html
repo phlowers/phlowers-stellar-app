@@ -1,0 +1,66 @@
+<div class="free-positioning-plot" data-testid="free-positioning-plot">
+  @if (plotService.loading()) {
+    <div class="free-positioning-plot__spinner" data-testid="free-positioning-loading">
+      <p-progress-spinner [ariaLabel]="'common.loading' | transloco" />
+    </div>
+  } @else if (plotService.error()) {
+    <div class="free-positioning-plot__error-container">
+      <p class="free-positioning-plot__error" role="alert" aria-live="assertive" data-testid="free-positioning-error">
+        {{ getErrorString() }}
+      </p>
+    </div>
+  } @else {
+    @if (isLoading()) {
+      <div
+        class="free-positioning-plot__spinner free-positioning-plot__spinner--overlay"
+        data-testid="free-positioning-overlay-loading"
+      >
+        <p-progress-spinner [ariaLabel]="'common.loading' | transloco" />
+      </div>
+    }
+
+    <div class="free-positioning-plot__header">
+      <div class="free-positioning-plot__categories" data-testid="free-positioning-categories">
+        @for (cat of categories; track cat) {
+          <button
+            type="button"
+            app-btn
+            btnSize="s"
+            [btnStyle]="visibleCategories().has(cat) ? 'base' : 'outlined'"
+            [attr.aria-pressed]="visibleCategories().has(cat) ? true : false"
+            (click)="toggleCategory(cat)"
+            [attr.data-testid]="'category-toggle-' + cat"
+          >
+            <span class="free-positioning-plot__category-dot" [style.backgroundColor]="categoryColors[cat]"></span>
+            {{ 'studio.free-positioning.' + cat | transloco }}
+          </button>
+        }
+      </div>
+
+      <dl class="free-positioning-plot__coords" data-testid="free-positioning-readouts">
+        <dt>{{ 'studio.free-positioning.x-label' | transloco }}</dt>
+        <dd data-testid="mouse-x">{{ profileMousePosition()?.x || 'N/A' }}</dd>
+
+        <dt>{{ 'studio.free-positioning.z-label' | transloco }}</dt>
+        <dd data-testid="mouse-z">{{ profileMousePosition()?.z || 'N/A' }}</dd>
+
+        @if (config().showFace) {
+          <dt>{{ 'studio.free-positioning.y-label' | transloco }}</dt>
+          <dd data-testid="mouse-y">{{ faceMousePosition()?.x || 'N/A' }}</dd>
+        }
+      </dl>
+    </div>
+
+    <div class="free-positioning-plot__body" [class.free-positioning-plot__body--with-face]="config().showFace">
+      <div class="free-positioning-plot__chart-pane free-positioning-plot__chart-pane--profile">
+        <div [id]="plotIds.PROFILE" class="free-positioning-plot__chart" data-testid="plot-container-profile"></div>
+      </div>
+
+      @if (config().showFace) {
+        <div class="free-positioning-plot__chart-pane free-positioning-plot__chart-pane--face">
+          <div [id]="plotIds.FACE" class="free-positioning-plot__chart" data-testid="plot-container-face"></div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -49,6 +49,7 @@ export class StudioTopToolbarComponent implements OnInit {
 
   private readonly spanService = inject(PlotSpanService);
   readonly plotOptionsService = inject(PlotOptionsService);
+  readonly toolbarDisabled = computed(() => this.plotOptionsService.isFreePositioningMode());
 
   private readonly hasCharges = computed(() => !!this.spanService.section()?.charges?.length);
 

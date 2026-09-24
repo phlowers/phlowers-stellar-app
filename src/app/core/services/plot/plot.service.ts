@@ -77,6 +77,25 @@ export class PlotService {
         }
       }
     });
+    // Restore the view and camera captured when free positioning mode was switched on. Lives here
+    // (not in PlotOptionsService) because restoring the support window requires refreshProjection,
+    // and PlotOptionsService cannot inject PlotService (circular dependency). Single generic exit
+    // point: it fires no matter which control turned the mode off (toggle, tab change, plot
+    // destroy, auto-exit effect).
+    effect(() => {
+      const savedView = this.plotOptionsService.freePositioningSavedView();
+      if (this.plotOptionsService.isFreePositioningMode() || !savedView) {
+        return;
+      }
+      untracked(() => {
+        this.plotOptionsService.freePositioningSavedView.set(null);
+        if (savedView.camera) {
+          // Consumed by SectionPlotComponent after the first 3D render following the restore.
+          this.plotOptionsService.pendingCameraRestore.set(savedView.camera);
+        }
+        this.plotOptionsChange({ ...savedView.plotOptions });
+      });
+    });
   }
 
   resetAll = () => {

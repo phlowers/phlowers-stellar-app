@@ -100,7 +100,10 @@ describe('DistanceMeasuringComponent', () => {
           provide: PlotOptionsService,
           useValue: {
             camera: signal<unknown>(null),
-            plotOptions: signal({ view: '3d', startSupport: 0, endSupport: 1 })
+            plotOptions: signal({ view: '3d', startSupport: 0, endSupport: 1 }),
+            isFreePositioningMode: signal(false),
+            freePositioningSource: signal<'obstacle' | 'floor' | 'loads' | 'distance' | null>(null),
+            setFreePositioningMode: vi.fn()
           }
         }
       ]
@@ -141,9 +144,20 @@ describe('DistanceMeasuringComponent', () => {
     expect(points[0].getAttribute('aria-selected')).toBe('false');
   });
 
-  it('should keep the free-positioning toggle disabled', () => {
-    const toggle = getByTestId('free-positioning-toggle');
+  it('should keep the free-positioning toggle disabled and unchecked when no span is selected', () => {
+    const toggle = getByTestId('free-positioning');
     expect(toggle?.getAttribute('data-p-disabled')).toBe('true');
+    expect(toggle?.getAttribute('data-p-checked')).toBe('false');
+  });
+
+  it('should enable the free-positioning toggle once a span is selected, still unchecked', async () => {
+    selectSpan();
+    // PrimeNG's toggleswitch only refreshes its data-p-* host attributes after a stable tick.
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const toggle = getByTestId('free-positioning');
+    expect(toggle?.getAttribute('data-p-disabled')).toBe('false');
+    expect(toggle?.getAttribute('data-p-checked')).toBe('false');
   });
 
   it('should disable Calculate until all points are filled', () => {

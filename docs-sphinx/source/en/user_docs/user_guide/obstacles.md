@@ -31,6 +31,9 @@ The **Free positioning** mode allows placing a point by clicking on the chart.
 
 - Exiting the mode by disabling the **Free positioning** toggle
 
+See {doc}`Free positioning <plot/free-positioning>` for the full behaviour of the
+mode (frozen span, frozen controls, view restore).
+
 ### Interaction with altitude
 
 - In **Absolute (NGF)** mode: a click directly sets `z` to the clicked NGF altitude.

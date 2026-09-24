@@ -25,6 +25,36 @@ export class LoadFormsService {
   /** UUID of the span support to select in the span form, set when clicking a load annotation. Cleared after consumption. */
   readonly selectedSpanSupportUuid = signal<string | null>(null);
 
+  /** UUID of the span currently selected in the load-marking form's `spanSelect` control. Kept for the span form; free positioning now reads its frozen span from `PlotOptionsService.frozenSpan`. */
+  readonly activeSpanSupportUuid = signal<string | null>(null);
+
+  /** Position updated from free positioning plot click. */
+  readonly activeLoadPosition = signal<number | null>(null);
+
+  /** Sets load position from free positioning, updating temporary load data and notifying subscribers. */
+  setLoadPosition(position: number): void {
+    const spanIndex = this.getActiveSpanIndex();
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    const spanLoad = temporaryLoadData?.spanLoads?.[spanIndex];
+    // The plot click abscissa is measured from the left support, while loadPosition is stored
+    // relative to the load's reference support. Convert for a RIGHT reference so the stored
+    // position stays consistent with the icon location.
+    const spanLength = this.plotService.litData()?.output_parameters?.span_length?.[spanIndex];
+    const referenceRelativePosition =
+      spanLoad?.referenceSupport === 'RIGHT' && typeof spanLength === 'number' && !Number.isNaN(spanLength)
+        ? spanLength - position
+        : position;
+    if (spanLoad) {
+      spanLoad.loadPosition = referenceRelativePosition;
+    }
+    this.activeLoadPosition.set(referenceRelativePosition);
+  }
+
+  /** Resolves the span index frozen for free positioning, snapshotted when the mode was switched on. */
+  private getActiveSpanIndex(): number {
+    return this.plotOptionsService.frozenSpan();
+  }
+
   /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */
   private lastLoadedChargeUuid: string | null = null;
   /**

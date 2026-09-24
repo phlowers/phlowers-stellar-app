@@ -270,6 +270,20 @@
 
 ---
 
+## 20. Free-positioning legacy implementations (superseded by unified free-positioning engine)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/core/presentation/components/free-positioning/free-positioning.component.ts` (+ `.html`/`.scss`/`.spec.ts`) only |
+| Code | Legacy `FreePositioningComponent`, `getAnnotations()` annotation-based marker generation in obstacle/floor/distance |
+| 🔍 Evidence | Replaced by `app-free-positioning-plot` unified engine with `FreePositioningDataService` and thin wrappers (`app-obstacle-free-positioning`, `app-floor-free-positioning`, `app-distance-free-positioning`, `app-loads-free-positioning`). |
+| ⚠️ Confidence | **HIGH** |
+| ⚠️ Do NOT delete | `free-positioning.interfaces.ts`, `free-positioning.constantes.ts`, `free-positioning.helpers.ts`, and `free-positioning-traces.helpers.ts` (+ their specs) in the same folder are **still live** — they are the canonical shared primitives re-exported by `free-positioning-plot.*` and consumed by `FreePositioningDataService`. Only the legacy `free-positioning.component.*` files may be removed. |
+| Removal impact | Delete legacy `FreePositioningComponent` files (component/template/style/spec) once unified engine is fully validated. |
+| Status | ⏳ PENDING REVIEW — 2026-09-11 |
+
+---
+
 ## 20. `lodash.isEqual` import — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
 
 | | |
@@ -493,7 +507,32 @@
 
 ---
 
-## 37. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144) — ✅ RESOLVED
+## 37. `FreePositioningComponent` (legacy monolith) — `core/presentation/components/free-positioning/free-positioning.component.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/core/presentation/components/free-positioning/free-positioning.component.ts` |
+| Code | `export class FreePositioningComponent` (selector `app-free-positioning`) |
+| 🔍 Evidence | Replaced by the centralized `FreePositioningPlotComponent` + 4 per-tab wrappers (obstacle/floor/loads/distance) when the free-positioning refactor merge was completed. No longer imported by `studio-page.component.ts` nor referenced in any template; only its own spec still references it. Note: the co-located `free-positioning.interfaces.ts` (`FreePositioningSource`) is still used by `PlotOptionsService` and `FreePositioningToggleComponent`, so keep the interfaces file. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete `free-positioning.component.ts` + `.html` + `.scss` + `.spec.ts` (and possibly `free-positioning-traces.helpers.ts` / `free-positioning.constantes.ts` if unused by the new plot). Keep `free-positioning.interfaces.ts`. |
+| ✅ Validated | ⏳ Pending review |
+| Detected on | 2026-09-16 |
+
+---
+
+## 38. `LoadFormsService.activeSpanSupportUuid` (write-only) — `loads/presentation/services/loadForms.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/loads/presentation/services/loadForms.service.ts` line 29 |
+| Code | `readonly activeSpanSupportUuid = signal<string | null>(null);` |
+| 🔍 Evidence | Its only reader was `getActiveSpanIndex()`, which now reads the frozen span snapshot from `PlotOptionsService.frozenSpan()` (free-positioning no longer reacts to the tab's span field). The signal is now only written by `load-marking.component.ts` and never read in production code. |
+| ⚠️ Confidence | **MEDIUM** |
+| Removal impact | Remove the signal + its `.set()` call in `load-marking.component.ts` and related spec mocks. |
+| ✅ Validated | ⏳ Pending review |
+| Detected on | 2026-09-16 |
+## 39. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144) — ✅ RESOLVED
 
 | | |
 |---|---|
@@ -506,7 +545,7 @@
 
 ---
 
-## 38. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
+## 40. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
 
 | | |
 |---|---|

@@ -208,6 +208,12 @@
       "distance-calculation-error-detail": "Échec du calcul des distances des obstacles",
       "save-detail": "Obstacle enregistré"
     },
+    "free-positioning-data": {
+      "floor-point": "Sol #{{ index }}",
+      "distance-point": "Distance #{{ index }}",
+      "punctual-load": "Charge ponctuelle",
+      "marking-load": "Charge de balisage"
+    },
     "floor-form-service": {
       "cable-below-floor-detail": "Le câble passe sous le sol de la portée {{span}}",
       "delete-detail": "Sol supprimé",
@@ -875,7 +881,11 @@
     "free-positioning": {
       "x-label": "x :",
       "z-label": "z :",
-      "y-label": "y :"
+      "y-label": "y :",
+      "obstacle": "Obstacles",
+      "floor": "Terrain",
+      "distance": "Distance",
+      "loads": "Charges"
     },
     "studio-page": {
       "parameter-label": "Paramètre",
@@ -916,6 +926,7 @@
       "obstacle-name-label": "Nom de l'obstacle",
       "obstacle-altitude-type-label": "Type d'altitude d'obstacle",
       "free-positioning-label": "Positionnement libre",
+      "free-positioning-forced-frame-warning": "Le mode de positionnement libre n'est disponible qu'avec un support de référence gauche, un type d'altitude absolue et une distance latérale selon l'axe de la portée. Les réglages actuels de l'obstacle diffèrent, les résultats peuvent donc être incorrects.",
       "add-point-btn": "Ajouter un point",
       "select-point-label": "Sélectionner le point",
       "point-label": "Point",

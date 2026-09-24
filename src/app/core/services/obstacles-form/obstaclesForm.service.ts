@@ -76,9 +76,13 @@ export class ObstacleFormService {
     return this.form.get('positions') as FormArray;
   }
 
-  private readonly positionsSnapshot = toSignal(this.positions.valueChanges as Observable<Position3D[]>, {
+  /** Reactive snapshot of the positions form array; consumers (e.g. free positioning) must read this to stay in sync. */
+  readonly positionsSnapshot = toSignal(this.positions.valueChanges as Observable<Position3D[]>, {
     initialValue: this.positions.value as Position3D[]
   });
+
+  /** True once at least one point has been added; gates enabling free positioning. */
+  readonly hasEditablePoints = computed(() => this.positionsSnapshot().length > 0);
 
   createPositionGroup(position: Position3D = this.defaultPosition): PositionFormGroup {
     return this.fb.group({
@@ -467,7 +471,9 @@ export class ObstacleFormService {
   }
 
   buildObstacleFromForm(): Obstacle {
-    const formValue = this.form.value;
+    // getRawValue() includes controls disabled by free positioning (altitudeType, referenceSupport,
+    // lateralDistanceType); form.value would drop them and corrupt the saved/worker-registered obstacle.
+    const formValue = this.form.getRawValue();
     // Use || so empty string also triggers UUID generation (defaultObstacleForm.uuid = '')
     const uuid = formValue.uuid || uuidv4();
     // Persist generated UUID back to the form so repeated calls use the same obstacle

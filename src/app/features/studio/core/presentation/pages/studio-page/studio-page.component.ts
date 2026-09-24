@@ -36,10 +36,11 @@ import { SectionPlotCardsComponent } from '@features/studio/core/presentation/co
 import { SideTabsComponent } from '@features/studio/core/presentation/components/side-tabs/side-tabs.component';
 import { QuickMeasuresComponent } from '@features/studio/core/presentation/components/quick-measures/quick-measures.component';
 import { SideTabComponent } from '@features/studio/core/presentation/components/side-tabs/side-tab/side-tab.component';
-import { FreePositioningComponent } from '@features/studio/core/presentation/components/free-positioning/free-positioning.component';
 import { ClimateComponent } from '@features/studio/loads/presentation/components/climate/climate.component';
 import { LoadMarkingComponent } from '@features/studio/loads/presentation/components/load-marking/load-marking.component';
 import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new-charge-modal.component';
+import { ObstacleFreePositioningComponent } from '@features/studio/obstacles/presentation/components/obstacle-free-positioning/obstacle-free-positioning.component';
+import { LoadsFreePositioningComponent } from '@features/studio/loads/presentation/components/loads-free-positioning/loads-free-positioning.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -55,6 +56,7 @@ import { CableSpanManipComponent } from '@features/studio/loads/presentation/com
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
+import { DistanceFreePositioningComponent } from '@features/studio/distance-measuring/components/distance-free-positioning/distance-free-positioning.component';
 import { FloorComponent } from '@src/app/features/studio/floor/presentation/floor.component';
 import { FloorFreePositioningComponent } from '@src/app/features/studio/floor/presentation/components/floor-free-positioning/floor-free-positioning.component';
 import { Camera } from 'plotly.js-dist-min';
@@ -107,10 +109,12 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     NewChargeModalComponent,
     ToolbarDialogComponent,
     ObstaclesFormComponent,
-    FreePositioningComponent,
+    ObstacleFreePositioningComponent,
+    LoadsFreePositioningComponent,
     CableSpanManipComponent,
     CableSupportManipComponent,
     DistanceMeasuringComponent,
+    DistanceFreePositioningComponent,
     FloorComponent,
     FloorFreePositioningComponent
   ],
@@ -165,12 +169,20 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   isPreviousDisabled = computed(() => {
     const { invert, startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    return this.plotService.loading() || (invert ? endSupport === this.maxSupportIndex() : startSupport === 0);
+    return (
+      this.plotService.loading() ||
+      this.plotOptionsService.isFreePositioningMode() ||
+      (invert ? endSupport === this.maxSupportIndex() : startSupport === 0)
+    );
   });
 
   isNextDisabled = computed(() => {
     const { invert, startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    return this.plotService.loading() || (invert ? startSupport === 0 : endSupport === this.maxSupportIndex());
+    return (
+      this.plotService.loading() ||
+      this.plotOptionsService.isFreePositioningMode() ||
+      (invert ? startSupport === 0 : endSupport === this.maxSupportIndex())
+    );
   });
 
   sliderOptions = computed<Options>(() => {
@@ -438,6 +450,22 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private exitFreePositioningMode(): void {
+    if (!this.plotOptionsService.isFreePositioningMode()) {
+      return;
+    }
+
+    const source = this.plotOptionsService.freePositioningSource();
+    if (source !== null) {
+      this.plotOptionsService.setFreePositioningMode(false, source);
+    }
+  }
+
+  onLoadTabChange(value: string | number | null | undefined): void {
+    this.loadFormsService.activeLoadTab.set(value?.toString() ?? '0');
+    this.exitFreePositioningMode();
+  }
+
   openNewChargeModal() {
     this.isNewChargeModalOpen.set(true);
   }
@@ -487,6 +515,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSelectSpanAmount(value: string) {
+    if (this.plotOptionsService.isFreePositioningMode()) {
+      return;
+    }
+
     this.spanService.spanAmountChoice.set(value as 'single' | 'double' | 'all');
     const startSupport = this.plotOptionsService.plotOptions().startSupport;
     const maxSupport = (this.spanService.section()?.supports.length ?? 0) - 1;
@@ -507,6 +539,10 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   }
 
   onSupportButtonClick(direction: 'left' | 'right') {
+    if (this.plotOptionsService.isFreePositioningMode()) {
+      return;
+    }
+
     let increment = direction === 'left' ? -1 : 1;
     increment = this.plotOptionsService.plotOptions().invert ? -increment : increment;
     const options = this.plotOptionsService.plotOptions();

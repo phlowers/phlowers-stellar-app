@@ -4,7 +4,7 @@
       app-btn
       type="button"
       btnStyle="outlined"
-      [disabled]="!supportUuidValue()"
+      [disabled]="!supportUuidValue() || plotOptionsService.isFreePositioningMode()"
       (click)="obstacleFormService.returnToSpan()"
       btnSize="s"
       data-testid="return-to-span"
@@ -32,6 +32,7 @@
     <p-select
       inputId="span"
       [options]="spansOptions()"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
       formControlName="supportUuid"
       optionLabel="label"
       optionValue="value"
@@ -109,15 +110,12 @@
 
   <div class="obstacles-form__field">
     <div class="obstacles-form__field__toggle">
-      <p-toggleswitch
-        inputId="freePositioning"
-        name="freePositioning"
-        [disabled]="!obstacleFormService.form.get('supportUuid')?.value"
-        [ngModel]="plotOptionsService.isFreePositioningMode()"
-        [ngModelOptions]="{ standalone: true }"
-        (onChange)="plotOptionsService.setFreePositioningMode($event.checked, 'obstacle')"
+      <app-free-positioning-toggle
+        source="obstacle"
+        [disabled]="!obstacleFormService.form.get('supportUuid')?.value || !obstacleFormService.hasEditablePoints()"
+        [spanIndex]="selectedSpanIndex()"
+        labelKey="studio.obstacles-form.free-positioning-label"
       />
-      <label for="freePositioning">{{ 'studio.obstacles-form.free-positioning-label' | transloco }}</label>
     </div>
 
     <button
@@ -189,7 +187,7 @@
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
               [id]="'altitudePoint' + $index"
-              [value]="obstacle.value.z"
+              [value]="obstacleFormService.positionsSnapshot()[$index]?.z"
               class="alt-point-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
@@ -231,7 +229,7 @@
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
               [id]="'distanceToRefSupport' + $index"
-              [value]="obstacle.value.x"
+              [value]="obstacleFormService.positionsSnapshot()[$index]?.x"
               class="dist-ref-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"
@@ -273,7 +271,7 @@
               [disabled]="!obstacleFormService.form.get('name')?.value"
               type="number"
               [id]="'distanceToLineAxis' + $index"
-              [value]="obstacle.value.y"
+              [value]="obstacleFormService.positionsSnapshot()[$index]?.y"
               class="dist-axis-input"
               step="0.01"
               (focus)="setCurrentObstaclePoint($index)"

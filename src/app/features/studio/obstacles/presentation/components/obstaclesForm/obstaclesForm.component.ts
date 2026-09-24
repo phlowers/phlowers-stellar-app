@@ -31,6 +31,7 @@ import { ConformityComponent } from '../conformity/conformity.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { StorageService } from '@services/storage/storage.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { FreePositioningToggleComponent } from '@features/studio/core/presentation/components/free-positioning-toggle/free-positioning-toggle.component';
 
 /** Component providing the obstacle creation and editing form in the studio sidebar. */
 @Component({
@@ -50,7 +51,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     DecimalPipe,
     DialogModule,
     ConformityComponent,
-    TranslocoModule
+    TranslocoModule,
+    FreePositioningToggleComponent
   ],
   templateUrl: './obstaclesForm.component.html',
   styleUrl: './obstaclesForm.component.scss',
@@ -113,6 +115,25 @@ export class ObstaclesFormComponent {
       initialValue: this.obstacleFormService.form.get('supportUuid')?.value ?? null
     }
   );
+
+  /** Index of the span currently selected in the tab; frozen when free positioning is switched on. */
+  readonly selectedSpanIndex = computed(() => {
+    const uuid = this.supportUuidValue();
+    if (!uuid) {
+      return null;
+    }
+    const index = this.spanService.getSupportIndex(uuid);
+    return index >= 0 ? index : null;
+  });
+
+  /** Leaves obstacle free positioning mode once its last point is removed, since there's nothing left to place. */
+  private readonly clearFreePositioningWhenNoPointsEffect = effect(() => {
+    const hasEditablePoints = this.obstacleFormService.hasEditablePoints();
+    const source = this.plotOptionsService.freePositioningSource();
+    if (!hasEditablePoints && source === 'obstacle') {
+      untracked(() => this.plotOptionsService.setFreePositioningMode(false, 'obstacle'));
+    }
+  });
 
   private firstSupportUuidEffectRun = true;
 

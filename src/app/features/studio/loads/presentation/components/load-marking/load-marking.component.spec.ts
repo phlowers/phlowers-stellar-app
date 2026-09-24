@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { LoadMarkingComponent } from './load-marking.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { ChargeData, LoadType, SpanLoad, SymmetryType } from '@shared/domain/models/charge.model';
 import { SpanOption } from '@src/app/shared/types/plot.types';
@@ -73,7 +74,9 @@ describe('LoadMarkingComponent', () => {
       saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined),
       calculateLoad: vi.fn().mockResolvedValue(undefined),
       activeLoadTab: signal('0'),
-      selectedSpanSupportUuid: signal<string | null>(null)
+      selectedSpanSupportUuid: signal<string | null>(null),
+      activeSpanSupportUuid: signal<string | null>(null),
+      activeLoadPosition: signal<number | null>(null)
     };
 
     await TestBed.configureTestingModule({
@@ -88,6 +91,10 @@ describe('LoadMarkingComponent', () => {
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
+        {
+          provide: PlotOptionsService,
+          useValue: { isFreePositioningMode: signal(false), freePositioningSource: signal(null) }
+        },
         { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();

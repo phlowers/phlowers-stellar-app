@@ -1,0 +1,10 @@
+<p-toggleswitch
+  [inputId]="inputId()"
+  [name]="inputId()"
+  [disabled]="disabled()"
+  [ngModel]="plotOptionsService.isFreePositioningMode() && plotOptionsService.freePositioningSource() === source()"
+  [ngModelOptions]="{ standalone: true }"
+  (onChange)="onChange($event.checked)"
+  data-testid="free-positioning"
+/>
+<label [for]="inputId()">{{ labelKey() | transloco }}</label>

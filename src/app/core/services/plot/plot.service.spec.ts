@@ -390,6 +390,64 @@ describe('PlotService', () => {
     });
   });
 
+  describe('free positioning view restore', () => {
+    const savedOptions: PlotOptions = { view: '3d', side: 'face', startSupport: 2, endSupport: 6, invert: true };
+    const fpOptions: PlotOptions = { view: '2d', side: 'profile', startSupport: 3, endSupport: 4, invert: false };
+
+    it('should restore the saved plot options when free positioning is switched off', () => {
+      plotOptionsService.plotOptions.set(savedOptions);
+      plotOptionsService.setFreePositioningMode(true, 'floor');
+      // Simulate the forced 2D single-span reprojection applied while the mode is on.
+      plotOptionsService.plotOptions.set(fpOptions);
+
+      plotOptionsService.setFreePositioningMode(false, 'floor');
+      TestBed.flushEffects();
+
+      expect(plotOptionsService.plotOptions()).toEqual(savedOptions);
+      expect(plotOptionsService.freePositioningSavedView()).toBeNull();
+    });
+
+    it('should restore the saved camera through pendingCameraRestore', () => {
+      const cam: Camera = { eye: { x: 1, y: 1, z: 1 }, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } };
+      const originalGetElementById = document.getElementById.bind(document);
+      document.getElementById = vi.fn().mockReturnValue({ _fullLayout: { scene: { camera: cam } } });
+      try {
+        plotOptionsService.plotOptions.set(savedOptions);
+        plotOptionsService.setFreePositioningMode(true, 'floor');
+        plotOptionsService.plotOptions.set(fpOptions);
+
+        plotOptionsService.setFreePositioningMode(false, 'floor');
+        TestBed.flushEffects();
+
+        expect(plotOptionsService.pendingCameraRestore()).toEqual(cam);
+      } finally {
+        document.getElementById = originalGetElementById;
+      }
+    });
+
+    it('should not set pendingCameraRestore when the previous view had no camera', () => {
+      document.getElementById = vi.fn().mockReturnValue(null);
+      plotOptionsService.plotOptions.set(savedOptions);
+      plotOptionsService.setFreePositioningMode(true, 'floor');
+
+      plotOptionsService.setFreePositioningMode(false, 'floor');
+      TestBed.flushEffects();
+
+      expect(plotOptionsService.pendingCameraRestore()).toBeNull();
+    });
+
+    it('should not restore the saved view while free positioning is still on', () => {
+      plotOptionsService.plotOptions.set(savedOptions);
+      plotOptionsService.setFreePositioningMode(true, 'floor');
+      plotOptionsService.plotOptions.set(fpOptions);
+
+      TestBed.flushEffects();
+
+      expect(plotOptionsService.plotOptions()).toEqual(fpOptions);
+      expect(plotOptionsService.freePositioningSavedView()?.plotOptions).toEqual(savedOptions);
+    });
+  });
+
   describe('initSectionStudio', () => {
     it('should clear error and litData at start', async () => {
       service.error.set(TaskError.CALCULATION_ERROR);

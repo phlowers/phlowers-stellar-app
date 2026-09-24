@@ -23,6 +23,7 @@ class MockObstacleFormService {
   positions: FormArray<
     FormGroup<{ x: FormControl<number | null>; y: FormControl<number | null>; z: FormControl<number | null> }>
   >;
+  positionsSnapshot = signal<{ x: number | null; y: number | null; z: number | null }[]>([]);
   supportsOptions = signal([{ label: '1', value: 'LEFT' as const }]);
   results = signal({
     oblique: null as number | null,
@@ -31,6 +32,7 @@ class MockObstacleFormService {
   });
   isCalculatingObstacle = signal(false);
   calculationError = signal<string | null>(null);
+  hasEditablePoints = signal(true);
   // Consumed by the ConformityComponent rendered inside the conformity dialog.
   formValue = signal<{ uuid: string | null; type: string | null }>({ uuid: null, type: 'House' });
 
@@ -66,6 +68,10 @@ class MockObstacleFormService {
       lateralDistanceType: new FormControl<string | null>('SPAN_AXIS'),
       positions: this.positions
     });
+    this.positionsSnapshot.set(this.positions.value as { x: number | null; y: number | null; z: number | null }[]);
+    this.positions.valueChanges.subscribe((value) =>
+      this.positionsSnapshot.set(value as { x: number | null; y: number | null; z: number | null }[])
+    );
   }
 }
 
@@ -86,8 +92,16 @@ const POINT_FIELDS = [
 describe('ObstaclesFormComponent', () => {
   let component: ObstaclesFormComponent;
   let fixture: ComponentFixture<ObstaclesFormComponent>;
-  let mockSpanService: { getSpanOptions: ReturnType<typeof vi.fn>; section: ReturnType<typeof vi.fn> };
-  let mockPlotOptionsService: { isFreePositioningMode: ReturnType<typeof signal> };
+  let mockSpanService: {
+    getSpanOptions: ReturnType<typeof vi.fn>;
+    section: ReturnType<typeof vi.fn>;
+    getSupportIndex: ReturnType<typeof vi.fn>;
+  };
+  let mockPlotOptionsService: {
+    isFreePositioningMode: ReturnType<typeof signal<boolean>>;
+    freePositioningSource: ReturnType<typeof signal<'obstacle' | 'floor' | 'loads' | 'distance' | null>>;
+    setFreePositioningMode: ReturnType<typeof vi.fn>;
+  };
   let mockObstacleFormService: MockObstacleFormService;
   let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
@@ -109,10 +123,16 @@ describe('ObstaclesFormComponent', () => {
   beforeEach(async () => {
     mockSpanService = {
       getSpanOptions: vi.fn().mockReturnValue([{ label: '1 - 2', value: 'support-1' }]),
-      section: vi.fn().mockReturnValue(null)
+      section: vi.fn().mockReturnValue(null),
+      getSupportIndex: vi.fn().mockReturnValue(0)
     };
     mockPlotOptionsService = {
-      isFreePositioningMode: signal(false)
+      isFreePositioningMode: signal(false),
+      freePositioningSource: signal(null),
+      setFreePositioningMode: vi.fn((enabled: boolean, source: 'obstacle' | 'floor' | 'loads' | 'distance') => {
+        mockPlotOptionsService.isFreePositioningMode.set(enabled);
+        mockPlotOptionsService.freePositioningSource.set(enabled ? source : null);
+      })
     };
     mockPlotService = {
       loading: signal(false)
@@ -781,12 +801,23 @@ describe('ObstaclesFormComponent', () => {
       expect(toggle.getAttribute('data-p-disabled')).toBe('false');
     });
 
+    it('should be disabled when a support is selected but no point has been added', () => {
+      mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
+      mockObstacleFormService.hasEditablePoints.set(false);
+
+      const localFixture = TestBed.createComponent(ObstaclesFormComponent);
+      localFixture.detectChanges();
+
+      const toggle = localFixture.nativeElement.querySelector('p-toggleswitch');
+      expect(toggle.getAttribute('data-p-disabled')).toBe('true');
+    });
+
     it('should reflect isFreePositioningMode value', async () => {
       const toggle = fixture.nativeElement.querySelector('p-toggleswitch');
       expect(toggle.getAttribute('data-p-checked')).toBe('false');
 
       mockObstacleFormService.form.controls.supportUuid.setValue('support-1');
-      mockPlotOptionsService.isFreePositioningMode.set(true);
+      mockPlotOptionsService.setFreePositioningMode(true, 'obstacle');
 
       const localFixture = TestBed.createComponent(ObstaclesFormComponent);
       localFixture.detectChanges();

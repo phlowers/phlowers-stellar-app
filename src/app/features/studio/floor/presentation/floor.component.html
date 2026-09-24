@@ -5,7 +5,7 @@
     btnStyle="outlined"
     btnSize="s"
     class="floor-form__zoom-btn"
-    [disabled]="!floorFormService.spanValue()"
+    [disabled]="!floorFormService.spanValue() || plotOptionsService.isFreePositioningMode()"
     (click)="floorFormService.returnToSpan()"
     data-testid="return-to-span"
   >
@@ -18,6 +18,7 @@
     <p-select
       inputId="floorSpan"
       [options]="floorFormService.spanOptions()"
+      [disabled]="plotOptionsService.isFreePositioningMode()"
       formControlName="span"
       optionLabel="label"
       optionValue="value"
@@ -42,16 +43,13 @@
   @if (floorFormService.referenceSupportValue()) {
     <div class="floor-form__field">
       <div class="floor-form__field__toggle">
-        <p-toggleswitch
+        <app-free-positioning-toggle
+          source="floor"
           inputId="floorFreePositioning"
-          name="floorFreePositioning"
-          [disabled]="!floorFormService.hasEditablePoints()"
-          [ngModel]="plotOptionsService.isFreePositioningMode()"
-          [ngModelOptions]="{ standalone: true }"
-          (onChange)="setFreePositioningMode($event.checked)"
-          data-testid="free-positioning"
+          [disabled]="!floorFormService.spanValue() || !floorFormService.hasEditablePoints()"
+          [spanIndex]="selectedSpanIndex()"
+          labelKey="studio.floor.free-positioning-label"
         />
-        <label for="floorFreePositioning">{{ 'studio.floor.free-positioning-label' | transloco }}</label>
       </div>
 
       <button app-btn type="button" btnStyle="outlined" (click)="floorFormService.addPoint()" data-testid="add-point">
