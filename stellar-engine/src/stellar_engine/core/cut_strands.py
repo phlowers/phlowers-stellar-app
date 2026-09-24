@@ -9,7 +9,7 @@
 import logging
 
 import numpy as np
-from mechaphlowers import SectionStudy
+from mechaphlowers import SectionStudy, units
 
 from stellar_engine.entities.errors import _Errors
 
@@ -108,7 +108,8 @@ def get_utilization_rate(study: SectionStudy) -> dict:
     utilization_rate = study.balance_engine.cable_array.utilization_rate(
         tension_max
     )
-    return {"utilizationRate": utilization_rate.tolist()}
+    utilization_rate_daN = units(utilization_rate, "N").to("daN").magnitude
+    return {"utilizationRate": utilization_rate_daN.tolist()}
 
 
 def set_high_safety(study: SectionStudy, high_safety: bool) -> dict:
