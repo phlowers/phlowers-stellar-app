@@ -296,20 +296,71 @@ describe('StrandRrtsComponent', () => {
     });
   });
 
-  describe('add marking', () => {
-    it('shows a disabled and unchecked checkbox with its label', async () => {
+  describe('span dependent fields', () => {
+    const getCheckbox = () => fixture.nativeElement.querySelector('#rrts-add-marking') as HTMLInputElement;
+
+    const selectSpan = (span: { index: number; uuid: string } | null) => {
+      component.form.controls.span.setValue(span);
+      fixture.detectChanges();
+    };
+
+    it('disables the reference support and the marking without span', async () => {
       await setup();
-      const checkbox = fixture.nativeElement.querySelector('#rrts-add-marking') as HTMLInputElement;
-      expect(checkbox.disabled).toBe(true);
-      expect(checkbox.checked).toBe(false);
+      const { supportRef, addMarking } = component.form.controls;
+      expect(supportRef.disabled).toBe(true);
+      expect(supportRef.value).toBeNull();
+      expect(addMarking.disabled).toBe(true);
+      expect(getCheckbox().disabled).toBe(true);
+      expect(getCheckbox().checked).toBe(false);
       expect(fixture.nativeElement.querySelector('label[for="rrts-add-marking"]')?.textContent?.trim()).toBe(
         'Add a marking'
       );
     });
 
-    it('holds a false flag in the form', async () => {
+    it('enables them once a span is selected, with the left support as reference by default', async () => {
       await setup();
-      expect(component.form.getRawValue().addMarking).toBe(false);
+      selectSpan({ index: 0, uuid: 's1' });
+
+      const { supportRef, addMarking } = component.form.controls;
+      expect(supportRef.enabled).toBe(true);
+      expect(supportRef.value).toBe('LEFT');
+      expect(addMarking.enabled).toBe(true);
+      expect(addMarking.value).toBe(false);
+      expect(getCheckbox().disabled).toBe(false);
+    });
+
+    it('shows the left support in the reference support select once a span is selected', async () => {
+      await setup();
+      selectSpan({ index: 1, uuid: 's2' });
+      const label = getByTestId('rrts-support-ref-select')?.querySelector('.p-select-label');
+      expect(label?.textContent?.trim()).toBe('2');
+    });
+
+    it('keeps the chosen reference support when switching spans', async () => {
+      await setup();
+      selectSpan({ index: 0, uuid: 's1' });
+      component.form.controls.supportRef.setValue('RIGHT');
+
+      selectSpan({ index: 1, uuid: 's2' });
+      expect(component.form.controls.supportRef.value).toBe('RIGHT');
+    });
+
+    it('clears and disables them again when the span is removed', async () => {
+      await setup();
+      selectSpan({ index: 0, uuid: 's1' });
+      component.form.controls.supportRef.setValue('RIGHT');
+      component.form.controls.addMarking.setValue(true);
+
+      selectSpan(null);
+      const { supportRef, addMarking } = component.form.controls;
+      expect(supportRef.disabled).toBe(true);
+      expect(supportRef.value).toBeNull();
+      expect(addMarking.disabled).toBe(true);
+      expect(addMarking.value).toBe(false);
+      expect(getCheckbox().disabled).toBe(true);
+
+      selectSpan({ index: 0, uuid: 's1' });
+      expect(supportRef.value).toBe('LEFT');
     });
   });
 
@@ -376,6 +427,18 @@ describe('StrandRrtsComponent', () => {
       expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands saved');
     });
 
+    it('saves neither reference support nor marking once the span is removed', async () => {
+      await setup();
+      component.form.controls.span.setValue({ index: 0, uuid: 's1' });
+      component.form.controls.supportRef.setValue('RIGHT');
+      component.form.controls.addMarking.setValue(true);
+      component.form.controls.span.setValue(null);
+      calculate();
+      await component.save();
+
+      expect(savedSection().rrts_cut_strands).toMatchObject({ spanUuid: null, supportRef: null, addMarking: false });
+    });
+
     it('replaces the saved entry with one linked to the selected span', async () => {
       await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
       component.form.controls.span.setValue({ index: 0, uuid: 's1' });
@@ -431,16 +494,35 @@ describe('StrandRrtsComponent', () => {
   });
 
   it('loads the saved entry into the form', async () => {
-    await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+    await setup(makeSection({ rrts_cut_strands: makeCutStrandsData({ addMarking: true }) }));
     expect(component.form.getRawValue()).toEqual({
       span: { index: 1, uuid: 's2' },
       supportRef: 'RIGHT',
       distanceSupportRef: 12.5,
       cutStrands: [1, 3],
-      addMarking: false
+      addMarking: true
     });
+    expect(component.form.controls.supportRef.enabled).toBe(true);
+    expect(component.form.controls.addMarking.enabled).toBe(true);
     expect(component.supportOptions()).toHaveLength(2);
     expect(footerButton('save-btn').disabled).toBe(true);
+  });
+
+  it('loads a saved span entry without reference support with the left support by default', async () => {
+    await setup(makeSection({ rrts_cut_strands: makeCutStrandsData({ supportRef: null }) }));
+    expect(component.form.controls.supportRef.enabled).toBe(true);
+    expect(component.form.controls.supportRef.value).toBe('LEFT');
+  });
+
+  it('loads a saved entry of the whole section with the span dependent fields disabled', async () => {
+    await setup(
+      makeSection({
+        rrts_cut_strands: makeCutStrandsData({ spanUuid: null, supportRef: null, distanceSupportRef: null })
+      })
+    );
+    expect(component.form.controls.span.value).toBeNull();
+    expect(component.form.controls.supportRef.disabled).toBe(true);
+    expect(component.form.controls.addMarking.disabled).toBe(true);
   });
 
   describe('results', () => {

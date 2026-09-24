@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { isEqual } from 'lodash';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -81,14 +81,14 @@ export class StrandRrtsComponent {
 
   readonly form = new FormGroup({
     span: new FormControl<{ index: number; uuid: string } | null>(null),
-    supportRef: new FormControl<'LEFT' | 'RIGHT' | null>(null),
+    supportRef: new FormControl<'LEFT' | 'RIGHT' | null>({ value: null, disabled: true }),
     distanceSupportRef: new FormControl<number | null>(null, [
       Validators.min(0),
       Validators.max(DISTANCE_MAX),
       maxDecimalsValidator(2)
     ]),
     cutStrands: new FormArray<FormControl<number>>([]),
-    addMarking: new FormControl({ value: false, disabled: false }, { nonNullable: true })
+    addMarking: new FormControl({ value: false, disabled: true }, { nonNullable: true })
   });
 
   readonly cableName = computed(() => this.spanService.section()?.cable_name ?? null);
@@ -169,6 +169,19 @@ export class StrandRrtsComponent {
       untracked(() => this.form.setControl('cutStrands', new FormArray(controls)));
     });
 
+    // Without a span there is no reference support, nor anywhere to draw the marking
+    this.form.controls.span.valueChanges.pipe(takeUntilDestroyed()).subscribe((span) => {
+      const { supportRef, addMarking } = this.form.controls;
+      if (!span) {
+        supportRef.reset({ value: null, disabled: true });
+        addMarking.reset({ value: false, disabled: true });
+        return;
+      }
+      if (supportRef.disabled) supportRef.enable();
+      if (!supportRef.value) supportRef.setValue('LEFT');
+      if (addMarking.disabled) addMarking.enable();
+    });
+
     // Load the saved entry into the form
     effect(() => {
       const entry = this.savedEntry();
@@ -178,11 +191,12 @@ export class StrandRrtsComponent {
         const span =
           this.spanService.getSpanOptionsWithIndex().find(({ value }) => value?.uuid === entry.spanUuid)?.value ?? null;
         this.form.patchValue({
-          span,
           supportRef: entry.supportRef,
           distanceSupportRef: entry.distanceSupportRef,
           addMarking: entry.addMarking
         });
+        // Set last so the span rules (reference support default, disabled fields) apply to the saved values
+        this.form.controls.span.setValue(span);
         layers.forEach(({ layer, control }) => control.setValue(entry.cutStrands[layer - 1] ?? 0));
       });
     });
