@@ -466,13 +466,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 4 - Strand RRTS', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[3].action();
-      expect(alertSpy).toHaveBeenCalledWith('click Strand RRTS');
-
-      alertSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('strand-rrts');
     });
 
     it('should execute action for tool item 5 - Forest trenches', () => {
@@ -514,9 +511,9 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      // First two tools call service, remaining 5 call alert
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(2);
-      expect(alertSpy).toHaveBeenCalledTimes(5);
+      // Field measurements, VTL & Guying and Strand RRTS open a dialog, the other 4 call alert
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(3);
+      expect(alertSpy).toHaveBeenCalledTimes(4);
       alertSpy.mockRestore();
     });
   });

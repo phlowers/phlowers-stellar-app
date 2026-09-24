@@ -5,9 +5,11 @@ import { L0SumComponent } from '../components/l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from '../components/vtl-and-guying/vtl-and-guying.component';
 import { LoadsTableComponent } from '../components/loads-table/loads-table.component';
 import { PoseTableComponent } from '../components/pose-table/pose-table.component';
+import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 
 /** Identifier for a toolbar tool. */
-export type Tool = 'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'pose-table' | 'other-tool';
+export type Tool =
+  'field-measuring' | 'l0-sum' | 'vtl-and-guying' | 'load-table' | 'pose-table' | 'strand-rrts' | 'other-tool';
 
 /** Phase of the toolbar dialog lifecycle. */
 export type DialogPhase = 'init' | 'main';
@@ -73,6 +75,10 @@ export class ToolbarDialogService {
     'pose-table': {
       component: PoseTableComponent,
       dialogStyle: { width: '64.375rem', 'max-width': '90%' }
+    },
+    'strand-rrts': {
+      component: StrandRrtsComponent,
+      dialogStyle: { width: '43.5rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!

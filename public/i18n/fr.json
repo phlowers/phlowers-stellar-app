@@ -384,7 +384,7 @@
       "section-created": "Canton créé",
       "section-deleted": "Canton supprimé",
       "section-duplicated": "Canton dupliqué",
-      "geometry-objects-updated": "Les obstacles, sols et charges ont été mis à jour pour correspondre à la géométrie du canton",
+      "geometry-objects-updated": "Les obstacles, sols, charges et brins coupés CRR ont été mis à jour pour correspondre à la géométrie du canton",
       "ic-updated": "Condition initiale mise à jour",
       "ic-added": "Condition initiale ajoutée",
       "ic-deleted": "Condition initiale supprimée",
@@ -844,10 +844,11 @@
       "field-measurements-tool": "Mesures terrain",
       "vtl-and-guying-tool": "VHL & Haubanage",
       "cable-marking-tool": "Marquage câble",
-      "strand-rrts-tool": "RRTS de brin",
+      "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
       "height-and-lateral-distance-tool": "Hauteur & distance latérale",
-      "cable-adjustment-tool": "Réglage câble"
+      "cable-adjustment-tool": "Réglage câble",
+      "rrts-cut-strands": "CRR de brins coupés"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
@@ -1213,6 +1214,27 @@
       "failed-to-save-pose-table": "Échec de la sauvegarde du tableau de pose",
       "max-two-decimals-error": "Valeur à 2 décimales maximum",
       "integer-error": "La valeur doit être un nombre entier"
+    },
+    "rrts-cut-strands": {
+      "layers-detail": "Détail des couches",
+      "cable-name-label": "Nom du câble",
+      "current-work-load-label": "Taux de travail max actuel",
+      "staff-presence-label": "Présence du personnel",
+      "distance-support-ref-label": "Distance au support de référence",
+      "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
+      "add-marking-label": "Ajouter un marquage",
+      "result-cable-rrts-label": "CRR du câble",
+      "result-new-working-load-label": "Nouveau taux de travail max",
+      "result-new-working-load-null": "aucun nouveau taux de travail max",
+      "result-new-working-load-ok": "le nouveau taux de travail max est satisfaisant",
+      "result-new-working-load-warning": "le nouveau taux de travail max est préoccupant",
+      "result-new-working-load-error": "le nouveau taux de travail max est dangereux",
+      "result-new-working-load-unknown": "le nouveau taux de travail max est inconnu",
+      "no-strand-layers": "Aucune donnée de couche de brins disponible pour ce câble",
+      "saved": "Brins coupés CRR enregistrés",
+      "failed-to-save": "Échec de l'enregistrement des brins coupés CRR",
+      "deleted": "Brins coupés CRR supprimés",
+      "failed-to-delete": "Échec de la suppression des brins coupés CRR"
     }
   }
 }
