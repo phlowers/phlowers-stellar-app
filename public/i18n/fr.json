@@ -39,6 +39,8 @@
     "out-of-bound-error": "La valeur doit être comprise entre {{ min }} et {{ max }}",
     "meter": "m",
     "required": "Requis",
+    "symmetric": "Symétrique",
+    "dis-symmetric": "Dissymétrique",
     "section-type": {
       "phase": "Phase",
       "guard": "Garde"
@@ -537,9 +539,7 @@
       "ice-thickness-label": "Épaisseur du givre",
       "frontier-support-label": "Support frontière",
       "ice-thickness-before-label": "Épaisseur du givre avant le support frontière",
-      "ice-thickness-after-label": "Épaisseur du givre après le support frontière",
-      "symmetric-option": "Symétrique",
-      "dis-symmetric-option": "Disymétrique"
+      "ice-thickness-after-label": "Épaisseur du givre après le support frontière"
     },
     "cable-length-change": {
       "cable-modification-label": "Modification du câble",
@@ -1016,10 +1016,9 @@
       "ice-thickness-after-label": "Épaisseur du givre après le support frontière",
       "index-label": "N°",
       "ref-support-label": "Support réf.",
+      "modification-type-label": "Type de modification",
       "distance-to-ref-support-label": "Distance au support de réf.",
       "modify-btn": "Modifier",
-      "symmetric-label": "Symétrique",
-      "dis-symmetric-label": "Disymétrique",
       "punctual-load-label": "Charge ponctuelle",
       "marking-label": "Marquage"
     },
@@ -1120,6 +1119,24 @@
       "load-angle": "Angle balancement",
       "page-label": "Page",
       "warning-no-data": "Aucun résultat de calcul disponible pour générer le rapport.",
+      "report-generated-success": "Rapport généré avec succès",
+      "report-generation-failed": "Échec de la génération du rapport"
+    },
+    "loads-report": {
+      "title": "Rapport Tableau des charges",
+      "cartouche-title": "Étude et canton",
+      "page-label": "Page",
+      "author-label": "Auteur",
+      "study-label": "Étude",
+      "study-description-label": "Description",
+      "canton-label": "Canton",
+      "canton-comment-label": "Commentaire",
+      "initial-condition-label": "Condition initiale",
+      "charge-name-label": "Cas de charge",
+      "charge-description-label": "Description du cas de charge",
+      "personnel-presence-label": "Présence du personnel",
+      "modified-length-label": "Longueur modifiée",
+      "support-label": "Support",
       "report-generated-success": "Rapport généré avec succès",
       "report-generation-failed": "Échec de la génération du rapport"
     },

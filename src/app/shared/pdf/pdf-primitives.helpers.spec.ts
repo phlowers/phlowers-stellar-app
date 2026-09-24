@@ -28,7 +28,17 @@ import {
   registerNunitoFont,
   sanitizeFilenamePart
 } from './pdf-primitives.helpers';
-import { APP_NAME, CONTENT_WIDTH, LANDSCAPE_PAGE, LINE_HEIGHT, PAGE_MARGIN, PAGE_SIZE } from './pdf-layout.constantes';
+import {
+  APP_NAME,
+  CONTENT_WIDTH,
+  LANDSCAPE_PAGE,
+  LINE_HEIGHT,
+  PAGE_MARGIN,
+  PAGE_SIZE,
+  SECTION_TITLE_HEIGHT,
+  SEPARATOR_HEIGHT,
+  SEPARATOR_MARGIN_Y
+} from './pdf-layout.constantes';
 
 vi.mock('jspdf');
 
@@ -194,7 +204,7 @@ describe('pdf-primitives helpers', () => {
 
       expect(doc.text).toHaveBeenCalledWith('My section', PAGE_MARGIN.left, 40);
       expect(doc.line).toHaveBeenCalled();
-      expect(nextY).toBe(40 + LINE_HEIGHT + 2);
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT);
     });
   });
 
@@ -296,12 +306,22 @@ describe('pdf-primitives helpers', () => {
   });
 
   describe('drawSeparator', () => {
-    it('should draw a line spanning the content width and return the advanced Y', () => {
+    it('should draw an inset line spanning the content width and return the advanced Y', () => {
       const doc = createMockDoc();
       const nextY = drawSeparator(doc, 40);
+      const lineY = 40 + SEPARATOR_MARGIN_Y;
 
-      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, 40, PAGE_MARGIN.left + CONTENT_WIDTH, 40);
-      expect(nextY).toBe(40 + LINE_HEIGHT);
+      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + CONTENT_WIDTH, lineY);
+      expect(nextY).toBe(40 + SEPARATOR_HEIGHT);
+    });
+
+    it('should draw a line spanning a custom width when provided', () => {
+      const doc = createMockDoc();
+      const nextY = drawSeparator(doc, 40, 267);
+      const lineY = 40 + SEPARATOR_MARGIN_Y;
+
+      expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + 267, lineY);
+      expect(nextY).toBe(40 + SEPARATOR_HEIGHT);
     });
   });
 

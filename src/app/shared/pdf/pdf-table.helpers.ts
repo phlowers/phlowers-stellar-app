@@ -7,8 +7,15 @@
 
 import jsPDF from 'jspdf';
 
-import { LANDSCAPE_PAGE, FONT_SIZES, LINE_WIDTH_THIN, PAGE_MARGIN } from '@shared/pdf/pdf-layout.constantes';
-import { drawHeader, drawSectionTitle, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  LANDSCAPE_PAGE,
+  FONT_SIZES,
+  LINE_WIDTH_THIN,
+  PAGE_MARGIN,
+  SECTION_TITLE_HEIGHT,
+  SEPARATOR_HEIGHT
+} from '@shared/pdf/pdf-layout.constantes';
+import { drawHeader, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 
 import {
   MAX_COLS_PER_TABLE,
@@ -18,7 +25,7 @@ import {
   TABLE_TEXT_BASELINE_OFFSET,
   TABLE_VERTICAL_GAP
 } from './pdf-table.constantes';
-import { MetricDescriptor, PdfTableModel } from './pdf-table.interfaces';
+import { MetricDescriptor, PdfResultSection, PdfTableModel } from './pdf-table.interfaces';
 
 /** Maximum number of wrapped lines rendered inside a single table cell. */
 const MAX_CELL_LINES = 2;
@@ -83,6 +90,29 @@ function wrapCell(doc: jsPDF, text: string, width: number): string[] {
   return lines.slice(0, MAX_CELL_LINES);
 }
 
+/** Computes the rendered height (mm) of a single table row, wrapping label + value cells. */
+function computeRowHeight(
+  doc: jsPDF,
+  row: { label: string; values: string[] },
+  labelColWidth: number,
+  valueColWidth: number
+): number {
+  const labelLines = wrapCell(doc, row.label, labelColWidth);
+  const valueLines = row.values.map((value) => wrapCell(doc, value, valueColWidth));
+  const maxLines = Math.max(labelLines.length, ...valueLines.map((lines) => lines.length), 1);
+  return maxLines * TABLE_ROW_HEIGHT;
+}
+
+/**
+ * Computes the total rendered height (mm) of a table without drawing it.
+ * Takes the same `pageWidth` as `drawTable` so both derive the column widths identically.
+ */
+export function computeTableHeight(doc: jsPDF, table: PdfTableModel, pageWidth: number, labelColWidth: number): number {
+  const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
+  const valueColWidth = (contentWidth - labelColWidth) / MAX_COLS_PER_TABLE;
+  return table.rows.reduce((total, row) => total + computeRowHeight(doc, row, labelColWidth, valueColWidth), 0);
+}
+
 /**
  * Computes a label column width tight enough to fit the widest row label across the given
  * tables (e.g. spans + supports combined), so both result sections share the same width.
@@ -111,10 +141,9 @@ export function drawTable(
   let y = startY;
 
   for (const row of table.rows) {
+    const rowHeight = computeRowHeight(doc, row, labelColWidth, valueColWidth);
     const labelLines = wrapCell(doc, row.label, labelColWidth);
     const valueLines = row.values.map((value) => wrapCell(doc, value, valueColWidth));
-    const maxLines = Math.max(labelLines.length, ...valueLines.map((lines) => lines.length), 1);
-    const rowHeight = maxLines * TABLE_ROW_HEIGHT;
 
     drawCell(doc, PAGE_MARGIN.left, y, labelColWidth, rowHeight, labelLines, true);
     for (let col = 0; col < numCols; col += 1) {
@@ -150,4 +179,61 @@ export function drawResultTablesSection(
     }
     y = drawTable(doc, table, y, LANDSCAPE_PAGE.width, labelColWidth);
   });
+}
+
+/**
+ * Renders a list of titled result sections as one continuous flow on landscape pages: sections
+ * and their table chunks stack directly below each other, only starting a new page when the
+ * remaining vertical space genuinely runs out (unlike `drawResultTablesSection`, which always
+ * starts a fresh page per call).
+ */
+export function drawResultTablesFlow(
+  doc: jsPDF,
+  date: string,
+  reportTitle: string,
+  sections: PdfResultSection[],
+  labelColWidth: number
+): void {
+  const contentWidth = LANDSCAPE_PAGE.width - PAGE_MARGIN.left - PAGE_MARGIN.right;
+  const pageBottom = LANDSCAPE_PAGE.height - PAGE_MARGIN.bottom;
+  let y = 0;
+
+  const startNewPage = (): number => {
+    doc.addPage('a4', 'landscape');
+    return drawHeader(doc, date, reportTitle, LANDSCAPE_PAGE.width);
+  };
+
+  for (const section of sections) {
+    if (section.tables.length === 0) {
+      continue;
+    }
+
+    // Reserve space for the title, its first table AND the separator closing the section, so the
+    // title is never drawn alone at the bottom of a page with its first table pushed away.
+    const firstTableHeight = computeTableHeight(doc, section.tables[0], LANDSCAPE_PAGE.width, labelColWidth);
+    const requiredForSectionStart = SECTION_TITLE_HEIGHT + firstTableHeight + SEPARATOR_HEIGHT;
+
+    if (y === 0 || y + requiredForSectionStart > pageBottom) {
+      y = startNewPage();
+    } else {
+      y += TABLE_VERTICAL_GAP;
+    }
+    y = drawSectionTitle(doc, section.title, y);
+
+    section.tables.forEach((table, index) => {
+      if (index > 0) {
+        const tableHeight = computeTableHeight(doc, table, LANDSCAPE_PAGE.width, labelColWidth);
+        y += TABLE_VERTICAL_GAP;
+        if (y + tableHeight > pageBottom) {
+          y = startNewPage();
+          y = drawSectionTitle(doc, section.title, y);
+        }
+      }
+      y = drawTable(doc, table, y, LANDSCAPE_PAGE.width, labelColWidth);
+    });
+
+    // A separator marks the end of a category, not the end of each table: a category split into
+    // several chunks (more than MAX_COLS_PER_TABLE columns) stays visually grouped.
+    y = drawSeparator(doc, y, contentWidth);
+  }
 }

@@ -330,7 +330,12 @@ export class CableSupportManipComponent {
               anchoring: null,
               lateralDistance: null,
               ropeLength: null,
-              shiftingClampLength: raw.manip2ShiftingClampLength
+              shiftingClampLength: raw.manip2ShiftingClampLength,
+              chainName: null,
+              chainLength: null,
+              chainWeight: null,
+              chainSurface: null,
+              counterWeight: null
             }
           : null
       });
@@ -400,7 +405,12 @@ export class CableSupportManipComponent {
         anchoring: raw.anchoring,
         lateralDistance: raw.lateralDistance,
         ropeLength: null,
-        shiftingClampLength: null
+        shiftingClampLength: null,
+        chainName: null,
+        chainLength: null,
+        chainWeight: null,
+        chainSurface: null,
+        counterWeight: null
       };
     }
     if (raw.manip1Type === 'rope') {
@@ -410,7 +420,12 @@ export class CableSupportManipComponent {
         anchoring: null,
         lateralDistance: null,
         ropeLength: raw.ropeLength,
-        shiftingClampLength: null
+        shiftingClampLength: null,
+        chainName: null,
+        chainLength: null,
+        chainWeight: null,
+        chainSurface: null,
+        counterWeight: null
       };
     }
     return {
@@ -419,7 +434,12 @@ export class CableSupportManipComponent {
       anchoring: null,
       lateralDistance: null,
       ropeLength: null,
-      shiftingClampLength: raw.shiftingClampLength
+      shiftingClampLength: raw.shiftingClampLength,
+      chainName: null,
+      chainLength: null,
+      chainWeight: null,
+      chainSurface: null,
+      counterWeight: null
     };
   }
 

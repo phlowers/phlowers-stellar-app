@@ -27,3 +27,9 @@ export interface PdfTableRow {
 export interface PdfTableModel {
   rows: PdfTableRow[];
 }
+
+/** A titled group of result tables, drawn together as one continuous section. */
+export interface PdfResultSection {
+  title: string;
+  tables: PdfTableModel[];
+}

@@ -57,45 +57,43 @@
   />
 </section>
 
-@if (climateRows().length > 0) {
-  <section>
-    <h2 class="title underline-text">{{ 'studio.studio-page.climate-condition-label' | transloco }}</h2>
+<section>
+  <h2 class="title underline-text">{{ 'studio.studio-page.climate-condition-label' | transloco }}</h2>
 
-    <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }" data-testid="climate-table">
-      <ng-template pTemplate="header">
-        <tr>
-          <th id="wind-pressure-col">{{ 'studio.conformity.wind-pressure-label' | transloco }}</th>
-          <th id="cable-temp-col">{{ 'studio.loads-table.cable-temp-label' | transloco }}</th>
-          <th id="ice-indicator-col">{{ 'studio.loads-table.ice-indicator-label' | transloco }}</th>
-          @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
-            <th id="ice-thickness-col">{{ 'loads.climate.ice-thickness-label' | transloco }}</th>
-          }
-          @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
-            <th id="frontier-support-col">{{ 'loads.climate.frontier-support-label' | transloco }}</th>
-            <th id="ice-before-col">{{ 'studio.loads-table.ice-thickness-before-label' | transloco }}</th>
-            <th id="ice-after-col">{{ 'studio.loads-table.ice-thickness-after-label' | transloco }}</th>
-          }
-        </tr>
-      </ng-template>
+  <p-table [value]="climateRows()" [tableStyle]="{ width: 'auto' }" data-testid="climate-table">
+    <ng-template pTemplate="header">
+      <tr>
+        <th id="wind-pressure-col">{{ 'studio.conformity.wind-pressure-label' | transloco }}</th>
+        <th id="cable-temp-col">{{ 'studio.loads-table.cable-temp-label' | transloco }}</th>
+        <th id="ice-indicator-col">{{ 'studio.loads-table.ice-indicator-label' | transloco }}</th>
+        @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
+          <th id="ice-thickness-col">{{ 'loads.climate.ice-thickness-label' | transloco }}</th>
+        }
+        @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
+          <th id="frontier-support-col">{{ 'loads.climate.frontier-support-label' | transloco }}</th>
+          <th id="ice-before-col">{{ 'studio.loads-table.ice-thickness-before-label' | transloco }}</th>
+          <th id="ice-after-col">{{ 'studio.loads-table.ice-thickness-after-label' | transloco }}</th>
+        }
+      </tr>
+    </ng-template>
 
-      <ng-template pTemplate="body" let-row>
-        <tr>
-          <td>{{ row.windPressure }}&nbsp;Pa</td>
-          <td>{{ row.cableTemperature }}&nbsp;°C</td>
-          <td>{{ getSymmetryLabel(row.symmetryType) }}</td>
-          @if (row.symmetryType === SymmetryType.SYMMETRIC) {
-            <td>{{ row.iceThickness }}&nbsp;cm</td>
-          }
-          @if (row.symmetryType === SymmetryType.DIS_SYMMETRIC) {
-            <td>{{ row.frontierSupportNumber }}</td>
-            <td>{{ row.iceThicknessBefore }}&nbsp;cm</td>
-            <td>{{ row.iceThicknessAfter }}&nbsp;cm</td>
-          }
-        </tr>
-      </ng-template>
-    </p-table>
-  </section>
-}
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.windPressure }}&nbsp;Pa</td>
+        <td>{{ row.cableTemperature }}&nbsp;°C</td>
+        <td>{{ getSymmetryLabel(row.symmetryType) }}</td>
+        @if (row.symmetryType === SymmetryType.SYMMETRIC) {
+          <td>{{ row.iceThickness }}&nbsp;cm</td>
+        }
+        @if (row.symmetryType === SymmetryType.DIS_SYMMETRIC) {
+          <td>{{ row.frontierSupportNumber }}</td>
+          <td>{{ row.iceThicknessBefore }}&nbsp;cm</td>
+          <td>{{ row.iceThicknessAfter }}&nbsp;cm</td>
+        }
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
 
 @if (spanLoadRows().length > 0) {
   <section>
@@ -131,11 +129,207 @@
   </section>
 }
 
+@if (cableModifRows().length > 0) {
+  <section>
+    <h2 class="title underline-text">{{ 'studio.studio-page.cable-length-change-label' | transloco }}</h2>
+
+    <p-table [value]="cableModifRows()" [tableStyle]="{ width: 'auto' }" data-testid="cable-modif-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="cable-modif-index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
+          <th id="cable-modif-span-col">{{ 'studio.shared.span-label' | transloco }}</th>
+          <th id="cable-modif-ref-support-col">{{ 'studio.loads-table.ref-support-label' | transloco }}</th>
+          <th id="cable-modif-type-col">{{ 'studio.loads-table.modification-type-label' | transloco }}</th>
+          <th id="cable-modif-length-col">{{ 'loads.cable-length-change.cable-length-mod-label' | transloco }}</th>
+          <th id="cable-modif-dist-col">{{ 'loads.cable-length-change.dist-to-ref-support-label' | transloco }}</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ row.spanLabel }}</td>
+          <td>{{ row.referenceSupport }}</td>
+          <td>{{ getModificationTypeLabel(row.modificationType) }}</td>
+          <td>{{ row.modifiedLengthCable }}&nbsp;m</td>
+          <td>{{ row.distanceSupportRef }}&nbsp;m</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+}
+
+@if (supportManipRows().length > 0) {
+  <section>
+    <h2 class="title underline-text">{{ 'studio.studio-page.cable-manip-support-label' | transloco }}</h2>
+
+    <p-table [value]="supportManipRows()" [tableStyle]="{ width: 'auto' }" data-testid="support-manip-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="support-manip-index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
+          <th id="support-manip-ref-support-col">{{ 'loads.shared.reference-support-label' | transloco }}</th>
+          <th id="support-manip-type-col">{{ 'loads.cable-support-manip.manipulation-type-label' | transloco }}</th>
+          @if (hasShiftingSupportManip()) {
+            <th id="support-manip-shifting-clamp-length-col">
+              {{ 'loads.cable-support-manip.shifting-clamp-length-label' | transloco }}
+            </th>
+          }
+          @if (hasCraneSupportManip()) {
+            <th id="support-manip-vert-displacement-col">
+              {{ 'loads.cable-support-manip.vert-displacement-cable-label' | transloco }}
+            </th>
+            <th id="support-manip-displac-type-col">
+              {{ 'loads.cable-support-manip.displac-manip-type-label' | transloco }}
+            </th>
+            <th id="support-manip-lateral-distance-col">
+              {{ 'loads.cable-support-manip.lateral-distance-label' | transloco }}
+            </th>
+          }
+          @if (hasChainSupportManip()) {
+            <th id="support-manip-chain-name-col">{{ 'loads.cable-span-manip.chain-name-label' | transloco }}</th>
+            <th id="support-manip-chain-length-col">{{ 'loads.cable-span-manip.chain-length-label' | transloco }}</th>
+            <th id="support-manip-chain-weight-col">{{ 'loads.cable-span-manip.chain-weight-label' | transloco }}</th>
+            <th id="support-manip-chain-surface-col">{{ 'loads.cable-span-manip.chain-surface-label' | transloco }}</th>
+            <th id="support-manip-counter-weight-col">
+              {{ 'loads.cable-span-manip.counter-weight-label' | transloco }}
+            </th>
+          }
+          @if (hasRopeSupportManip()) {
+            <th id="support-manip-rope-length-col">{{ 'loads.cable-support-manip.rope-length-label' | transloco }}</th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.displayIndex ?? '' }}</td>
+          <td>{{ row.supportLabel }}</td>
+          <td>{{ getSupportManipTypeLabel(row.type) }}</td>
+          @if (hasShiftingSupportManip()) {
+            <td>{{ row.shiftingClampLength !== null ? row.shiftingClampLength + '\u00a0m' : '-' }}</td>
+          }
+          @if (hasCraneSupportManip()) {
+            <td>{{ row.vertDisplacement !== null ? row.vertDisplacement + '\u00a0m' : '-' }}</td>
+            <td>{{ row.anchoring ? getSupportAnchoringLabel(row.anchoring) : '-' }}</td>
+            <td>{{ row.lateralDistance !== null ? row.lateralDistance + '\u00a0m' : '-' }}</td>
+          }
+          @if (hasChainSupportManip()) {
+            @if (row.anchoring === 'with_chain') {
+              <td>{{ row.chainName ?? '-' }}</td>
+              <td>{{ row.chainLength != null ? row.chainLength + '\u00a0m' : '-' }}</td>
+              <td>{{ row.chainWeight != null ? row.chainWeight + '\u00a0kg' : '-' }}</td>
+              <td>{{ row.chainSurface != null ? row.chainSurface + '\u00a0m\u00b2' : '-' }}</td>
+              <td>{{ row.counterWeight != null ? row.counterWeight + '\u00a0kg' : '-' }}</td>
+            } @else {
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+            }
+          }
+          @if (hasRopeSupportManip()) {
+            <td>{{ row.ropeLength !== null ? row.ropeLength + '\u00a0m' : '-' }}</td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+}
+
+@if (spanManipRows().length > 0) {
+  <section>
+    <h2 class="title underline-text">{{ 'studio.studio-page.cable-manip-span-label' | transloco }}</h2>
+
+    <p-table [value]="spanManipRows()" [tableStyle]="{ width: 'auto' }" data-testid="span-manip-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="span-manip-index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
+          <th id="span-manip-span-col">{{ 'loads.cable-span-manip.manipulated-span-label' | transloco }}</th>
+          <th id="span-manip-ref-support-col">{{ 'studio.loads-table.ref-support-label' | transloco }}</th>
+          <th id="span-manip-dist-ref-support-col">
+            {{ 'loads.cable-span-manip.manipulated-point-dist-ref-support-label' | transloco }}
+          </th>
+          <th id="span-manip-type-col">{{ 'loads.cable-span-manip.cable-manip-type-label' | transloco }}</th>
+          <th id="span-manip-method-col">{{ 'loads.cable-span-manip.cable-manip-method-label' | transloco }}</th>
+          <th id="span-manip-longitudinal-distance-col">
+            {{ 'loads.cable-span-manip.longitudinal-distance-label' | transloco }}
+          </th>
+          <th id="span-manip-lateral-distance-col">
+            {{ 'loads.cable-span-manip.lateral-distance-label' | transloco }}
+          </th>
+          <th id="span-manip-altitude-col">{{ 'loads.cable-span-manip.altitude-label' | transloco }}</th>
+          <th id="span-manip-anchoring-col">{{ 'loads.cable-span-manip.anchoring-label' | transloco }}</th>
+          @if (hasSlingSpanManip()) {
+            <th id="span-manip-sling-length-col">{{ 'loads.cable-span-manip.sling-length-label' | transloco }}</th>
+          }
+          @if (hasChainSpanManip()) {
+            <th id="span-manip-chain-name-col">{{ 'loads.cable-span-manip.chain-name-label' | transloco }}</th>
+            <th id="span-manip-chain-length-col">{{ 'loads.cable-span-manip.chain-length-label' | transloco }}</th>
+            <th id="span-manip-chain-weight-col">{{ 'loads.cable-span-manip.chain-weight-label' | transloco }}</th>
+            <th id="span-manip-chain-surface-col">{{ 'loads.cable-span-manip.chain-surface-label' | transloco }}</th>
+            <th id="span-manip-counter-weight-col">{{ 'loads.cable-span-manip.counter-weight-label' | transloco }}</th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ row.spanLabel }}</td>
+          <td>{{ row.referenceSupport }}</td>
+          <td>{{ row.distanceToRefSupport }}&nbsp;m</td>
+          <td>{{ getCableManipTypeLabel(row.cableManipType) }}</td>
+          <td>{{ getCableManipMethodLabel(row.cableManipMethod) }}</td>
+          <td>{{ row.longitudinalDistance !== null ? row.longitudinalDistance + '\u00a0m' : '-' }}</td>
+          <td>{{ row.lateralDistance }}&nbsp;m</td>
+          <td>{{ row.altitude }}&nbsp;m</td>
+          <td>{{ getSpanAnchoringLabel(row.anchoring) }}</td>
+          @if (hasSlingSpanManip()) {
+            <td>{{ row.anchoring === 'with_sling' ? row.slingLength + '\u00a0m' : '-' }}</td>
+          }
+          @if (hasChainSpanManip()) {
+            @if (row.anchoring === 'with_chain') {
+              <td>{{ row.chainName ?? '-' }}</td>
+              <td>{{ row.chainLength !== null ? row.chainLength + '\u00a0m' : '-' }}</td>
+              <td>{{ row.chainWeight !== null ? row.chainWeight + '\u00a0kg' : '-' }}</td>
+              <td>{{ row.chainSurface !== null ? row.chainSurface + '\u00a0m\u00b2' : '-' }}</td>
+              <td>{{ row.counterWeight !== null ? row.counterWeight + '\u00a0kg' : '-' }}</td>
+            } @else {
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+            }
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+}
+
 <ng-template #footer>
   @if (mode() === 'view') {
-    <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
+    <button app-btn type="button" btnStyle="text" (click)="onGenerateReport()" data-testid="report-btn">
       <app-icon icon="description" />
       <ng-container>{{ 'common.report' | transloco }}</ng-container>
+    </button>
+
+    <button app-btn type="button" btnStyle="outlined" (click)="deleteChargeCase()" data-testid="delete-charge-btn">
+      <app-icon icon="delete" />
+      <ng-container>{{ 'common.delete' | transloco }}</ng-container>
+    </button>
+
+    <button
+      app-btn
+      type="button"
+      btnStyle="outlined"
+      (click)="duplicateChargeCase()"
+      data-testid="duplicate-charge-btn"
+    >
+      <app-icon icon="content_copy" />
+      <ng-container>{{ 'common.duplicate' | transloco }}</ng-container>
     </button>
 
     <button app-btn type="button" (click)="switchToEditMode()" data-testid="modify-btn">

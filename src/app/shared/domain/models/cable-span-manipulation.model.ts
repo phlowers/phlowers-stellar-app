@@ -41,6 +41,8 @@ export interface CableSpanManipulation {
   uuid: string;
   /** UUID of the span this manipulation applies to */
   spanUuid: string;
+  /** UUID of the charge case this manipulation belongs to */
+  chargeUuid: string;
   /** Reference support used as origin for position measurements */
   referenceSupport: 'LEFT' | 'RIGHT';
   /** Distance from the reference support to the manipulated point on the cable (meters) */

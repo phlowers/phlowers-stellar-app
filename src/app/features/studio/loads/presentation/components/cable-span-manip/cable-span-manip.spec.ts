@@ -27,6 +27,7 @@ const mockSection: Partial<Section> = {
   ],
   cable_span_manipulations: [],
   selected_cable_span_manipulation_uuid: null,
+  selected_charge_uuid: 'charge-uuid-1',
   start_latitude: null,
   start_longitude: null,
   start_azimuth: null
@@ -583,6 +584,7 @@ describe('CableSpanManipComponent', () => {
           {
             uuid: 'manip-uuid-1',
             spanUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
             referenceSupport: 'LEFT',
             distanceToRefSupport: 0,
             cableManipType: 'with_a_crane',
@@ -612,6 +614,7 @@ describe('CableSpanManipComponent', () => {
           {
             uuid: 'manip-uuid-1',
             spanUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
             referenceSupport: 'RIGHT',
             distanceToRefSupport: 10,
             cableManipType: 'with_a_crane',
@@ -766,6 +769,7 @@ describe('CableSpanManipComponent', () => {
           {
             uuid: 'manip-uuid-1',
             spanUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
             referenceSupport: 'LEFT',
             distanceToRefSupport: 0,
             cableManipType: 'with_a_crane',

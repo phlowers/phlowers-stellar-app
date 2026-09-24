@@ -105,8 +105,8 @@ export class ClimateComponent {
   chargeUuid = input.required<string>();
 
   symmetryOptions = [
-    { label: this.translocoService.translate('loads.climate.symmetric-option'), value: SymmetryType.SYMMETRIC },
-    { label: this.translocoService.translate('loads.climate.dis-symmetric-option'), value: SymmetryType.DIS_SYMMETRIC }
+    { label: this.translocoService.translate('common.symmetric'), value: SymmetryType.SYMMETRIC },
+    { label: this.translocoService.translate('common.dis-symmetric'), value: SymmetryType.DIS_SYMMETRIC }
   ];
 
   readonly frontierSupportOptions = signal<{ label: string; value: number }[]>([]);

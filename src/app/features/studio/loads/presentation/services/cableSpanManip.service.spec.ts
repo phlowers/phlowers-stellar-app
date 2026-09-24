@@ -26,6 +26,7 @@ function createSignalMock<T>(initialValue: T) {
 const mockManip: CableSpanManipulation = {
   uuid: 'manip-uuid-1',
   spanUuid: 'support-uuid-1',
+  chargeUuid: 'charge-uuid-1',
   referenceSupport: 'LEFT',
   distanceToRefSupport: 5,
   cableManipType: 'with_a_crane',
@@ -223,7 +224,7 @@ describe('CableSpanManipService', () => {
       expect(section?.selected_cable_span_manipulation_uuid).toBeTruthy();
     });
 
-    it('should update an existing manipulation when one with the same spanUuid already exists', async () => {
+    it('should update an existing manipulation when (spanUuid, chargeUuid) pair already exists', async () => {
       const existingUuid = 'existing-manip-uuid';
       const studyWithManip: StudyEntity = {
         ...mockStudy,
@@ -243,6 +244,27 @@ describe('CableSpanManipService', () => {
       expect(section?.cable_span_manipulations).toHaveLength(1);
       expect(section?.cable_span_manipulations[0].uuid).toBe(existingUuid);
       expect(section?.cable_span_manipulations[0].slingLength).toBe(42);
+    });
+
+    it('should keep each (spanUuid, chargeUuid) pair independent', async () => {
+      const existingUuid = 'existing-manip-uuid';
+      const studyWithManip: StudyEntity = {
+        ...mockStudy,
+        sections: [
+          {
+            ...mockSectionBase,
+            cable_span_manipulations: [{ ...mockManip, uuid: existingUuid }]
+          }
+        ]
+      };
+      mockStudiesService.getStudy.mockResolvedValue(studyWithManip);
+
+      // Save for a different charge case — must not overwrite the existing one.
+      await service.save({ ...mockManip, chargeUuid: 'charge-uuid-2' });
+
+      const updatedStudy = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      const section = updatedStudy.sections.find((s) => s?.uuid === 'section-uuid-1');
+      expect(section?.cable_span_manipulations).toHaveLength(2);
     });
 
     it('should preserve the uuid when provided and no existing manipulation exists for the span', async () => {

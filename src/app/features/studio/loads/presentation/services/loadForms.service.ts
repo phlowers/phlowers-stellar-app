@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -11,8 +10,9 @@ import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { CableModification } from '@src/app/shared/domain';
-import { CableModificationsService } from './cableModifications.service';
+import { CableModification, Section } from '@shared/domain';
+import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +56,11 @@ export class LoadFormsService {
 
     // ideally, we want to call recheckCableModif and create an initial state,
     // but this cause inconsistencies with python task that only calls manipulations one by one
-    newData.cableModifParams = rawCableModif;
+    // ponytail: merge persisted section.cable_modifications into charge params on import
+    newData.cableModifParams = [
+      ...rawCableModif,
+      ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
+    ];
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
@@ -66,10 +70,12 @@ export class LoadFormsService {
       // When there are no saved span loads, pass an empty array so the Python engine
       // takes its "no loads" code path instead of receiving zero-weight placeholder
       // entries created by recheckSpanLoads (which would have the wrong array size).
+      await this.applyCableModifications(newData.cableModifParams ?? []);
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : []
       });
       await this.workerPythonService.runTask(Task.changeState, { climate: newData.climate });
+      await this.resyncObstacles(section);
       await this.plotService.refreshProjection();
     } catch (err) {
       this.lastLoadedChargeUuid = null; // Allow retry on next signal change
@@ -83,9 +89,8 @@ export class LoadFormsService {
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly chargesService = inject(ChargesService);
   private readonly workerPythonService = inject(WorkerPythonService);
-  private readonly cableModificationsService = inject(CableModificationsService);
   private readonly logger = inject(LoggerService);
-  // private readonly obstacleStateService = inject(ObstacleStateService);
+  private readonly obstacleStateService = inject(ObstacleStateService);
 
   constructor() {
     effect(() => {
@@ -119,6 +124,55 @@ export class LoadFormsService {
   };
 
   /**
+   * Sequentially apply cable length modifications in the Python engine.
+   *
+   * @remarks
+   * Must run **awaited and in order**: `manipulations.modify_cable` accumulates into
+   * `study.manipulation.shortening_span` one call at a time, and `Task.changeState`
+   * (called right after) re-solves assuming all prior manipulations already landed.
+   * An unawaited `forEach` here would let `changeState` race ahead of the
+   * `shortenLengthenCable` calls, corrupting the engine state (previously
+   * collapsing/losing other plot annotations after Calculate).
+   *
+   * Must also run **before** `Task.setLoads`: the manipulation solve rebuilds
+   * `study.position_engine`, discarding load coordinates registered beforehand.
+   */
+  private async applyCableModifications(modifications: CableModification[]): Promise<void> {
+    for (const modification of modifications) {
+      const spanIndex = this.spanService.getSupportIndex(modification.spanUuid);
+      if (spanIndex < 0) continue;
+      await this.workerPythonService.runTask(Task.shortenLengthenCable, {
+        spanIndex,
+        modificationType: modification.modificationType,
+        modifiedLengthCable: modification.modifiedLengthCable,
+        distanceSupportRef: modification.distanceSupportRef,
+        supportRef: modification.supportRef
+      });
+    }
+  }
+
+  /**
+   * Re-register all saved obstacles (and floors, treated as obstacles) in the Python engine.
+   *
+   * @remarks
+   * `Task.shortenLengthenCable` ends in `SectionStudy.solve_adjustment()`, which — when
+   * manipulations are registered — replaces `study.position_engine` with a fresh instance,
+   * dropping every obstacle previously registered in it. The next `refreshProjection` then
+   * returns an empty `obstacles` list, wiping obstacle/floor annotations from the plot even
+   * though the underlying section data is untouched. Must run after the cable modifications
+   * and before `refreshProjection`. Re-registering an already-known uuid is a no-op.
+   */
+  private async resyncObstacles(section: Section | null | undefined): Promise<void> {
+    const floorObstacles = (section?.floors ?? []).map((floor) =>
+      mapFloorToObstacle(floor, section?.supports.findIndex((support) => support.uuid === floor.supportUuid) ?? -1)
+    );
+    const obstacles = [...(section?.obstacles ?? []), ...floorObstacles];
+    if (obstacles.length > 0) {
+      await this.obstacleStateService.syncObstacles(obstacles, this.plotOptionsService.plotOptions());
+    }
+  }
+
+  /**
    * Calculate the load by running the changeState task, then re-sync all saved obstacles on top.
    */
   calculateLoad = async () => {
@@ -137,29 +191,12 @@ export class LoadFormsService {
         spanLoads: checkedSpanLoads
       };
 
+      // Must run before setLoads: the manipulation solve rebuilds the engine's position engine,
+      // discarding any load coordinates and obstacles registered beforehand.
+      await this.applyCableModifications(this.plotService.temporaryLoadData?.cableModifParams ?? []);
+
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: checkedSpanLoads
-      });
-
-      this.plotService.temporaryLoadData?.cableModifParams.forEach(async (cableModif: CableModification) => {
-        const spanIndex = this.spanService.getSupportIndex(cableModif.spanUuid);
-        if (spanIndex >= 0) {
-          this.cableModificationsService.previewCableModification.set({
-            uuid: this.cableModificationsService.previewCableModification()?.uuid ?? uuidv4(),
-            spanUuid: cableModif.spanUuid,
-            supportRef: cableModif.supportRef,
-            modificationType: cableModif.modificationType,
-            modifiedLengthCable: cableModif.modifiedLengthCable,
-            distanceSupportRef: cableModif.distanceSupportRef
-          });
-          await this.workerPythonService.runTask(Task.shortenLengthenCable, {
-            spanIndex,
-            modificationType: cableModif.modificationType,
-            modifiedLengthCable: cableModif.modifiedLengthCable,
-            distanceSupportRef: cableModif.distanceSupportRef,
-            supportRef: cableModif.supportRef
-          });
-        }
       });
 
       const {
@@ -179,23 +216,11 @@ export class LoadFormsService {
       if (!changeResult?.success) {
         return;
       }
-      // For me no need to re-sync obstacles here because the obstacles have already been updated before.
-      // const obstacles = currentSection?.obstacles ?? [];
-      // if (obstacles.length > 0) {
-      //   await this.obstacleStateService.syncObstacles(
-      //     obstacles,
-      //     this.plotOptionsService.plotOptions()
-      //   );
-      // }
+
+      await this.resyncObstacles(currentSection);
 
       // refreshProjection gets all data (litData, baseLitData, obstacles, distances)
       await this.plotService.refreshProjection();
-
-      // Re-apply any saved cable length modifications on top of the change-state
-      // result. `Task.changeState` resets the engine to the climate state without
-      // knowing about cable_modifications, which would otherwise be silently
-      // dropped from the recomputed geometry.
-      // await this.reapplyCableModifications(currentSection);
     } finally {
       this.plotService.loading.set(false);
     }
