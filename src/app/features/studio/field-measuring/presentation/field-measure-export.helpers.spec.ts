@@ -238,7 +238,7 @@ describe('field-measure-export.helpers', () => {
     it('should populate only the tangentialSights method block for the tangente-aiming calculation method', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming' });
       const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
-      expect(result.methodName).toBe('field-measuring.export-labels.calculation-method.tangente-aiming');
+      expect(result.methodName).toBe('VISEES_TANGENTES');
       expect(result.method.tangentialSights).toBeDefined();
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
