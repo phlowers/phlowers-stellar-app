@@ -4,7 +4,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { computeFloorClearance, mapFloorToObstacle, projectOnSpanAxis } from './floor-form.helpers';
+import {
+  computeFloorClearance,
+  computeMissingFloorDistances,
+  mapFloorToObstacle,
+  projectOnSpanAxis
+} from './floor-form.helpers';
 import { FLOOR_OBSTACLE_TYPE } from './floor-form.constantes';
 import { LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { Floor } from '@shared/domain/models/floor.model';
@@ -235,5 +240,86 @@ describe('computeFloorClearance', () => {
         saggingCable
       )
     ).toBeNull();
+  });
+});
+
+describe('computeMissingFloorDistances', () => {
+  // Suspension-like cable: attached 20 m up right above both supports, sagging to 5 m mid-span,
+  // 2 m to the side of the span axis (the crossarm).
+  const cable = [
+    [0, 2, 20],
+    [50, 2, 5],
+    [100, 2, 20]
+  ];
+  const floor = [
+    [0, 0, 1],
+    [50, 0, 0],
+    [100, 0, 2]
+  ];
+
+  it('should measure the skipped end points against the cable right above them', () => {
+    const distances = computeMissingFloorDistances(floor, cable, new Set([1]));
+
+    expect(distances.map((point) => point.pointIndex)).toEqual([0, 2]);
+    expect(distances[0]).toEqual({
+      pointIndex: 0,
+      linePoint: [0, 2, 20],
+      virtualPointHorizontal: [0, 2, 1],
+      virtualPointVertical: [0, 0, 20],
+      distanceDiagonal: Math.hypot(2, 19),
+      distanceHorizontal: 2,
+      distanceVertical: 19,
+      signedDistanceVertical: 19
+    });
+    expect(distances[1].signedDistanceVertical).toBe(18);
+  });
+
+  it('should clamp to the attachment when the cable starts inside the span', () => {
+    // Tension chains are horizontal: the cable only starts 3 m after the support.
+    const tensionCable = [
+      [3, 0, 20],
+      [50, 0, 5],
+      [97, 0, 22]
+    ];
+
+    const [first, last] = computeMissingFloorDistances(floor, tensionCable, new Set([1]));
+
+    expect(first.linePoint).toEqual([3, 0, 20]);
+    expect(first.signedDistanceVertical).toBe(19);
+    expect(last.linePoint).toEqual([97, 0, 22]);
+    expect(last.signedDistanceVertical).toBe(20);
+  });
+
+  it('should interpolate the cable between its samples and keep the sign below the floor', () => {
+    const distances = computeMissingFloorDistances(
+      [
+        [0, 0, 0],
+        [25, 0, 20],
+        [100, 0, 0]
+      ],
+      cable,
+      new Set([0, 2])
+    );
+
+    // Halfway down to the sag the cable sits at 12.5 m, under the 20 m floor point.
+    expect(distances).toHaveLength(1);
+    expect(distances[0].linePoint).toEqual([25, 2, 12.5]);
+    expect(distances[0].signedDistanceVertical).toBe(-7.5);
+    expect(distances[0].distanceVertical).toBe(7.5);
+  });
+
+  it('should read a cable sampled from the far support the same way', () => {
+    const distances = computeMissingFloorDistances(floor, [...cable].reverse(), new Set([1]));
+
+    expect(distances.map((point) => point.linePoint)).toEqual([
+      [0, 2, 20],
+      [100, 2, 20]
+    ]);
+  });
+
+  it('should return nothing when every point is measured or the geometry is degenerate', () => {
+    expect(computeMissingFloorDistances(floor, cable, new Set([0, 1, 2]))).toEqual([]);
+    expect(computeMissingFloorDistances([[0, 0, 0]], cable, new Set())).toEqual([]);
+    expect(computeMissingFloorDistances(floor, [[0, 0, 20]], new Set())).toEqual([]);
   });
 });

@@ -18,7 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { PlotOptions, PLOT_ID, SelectedDisplayOptions, View } from '@shared/types/plot.types';
+import { PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
 import { createPlotData } from './helpers/createPlotData';
 import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { PlotService } from '@services/plot/plot.service';
@@ -45,7 +45,7 @@ import { DistanceMeasuringService } from '@features/studio/distance-measuring/di
 import { FloorFormService } from '@services/floor-form/floor-form.service';
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
-import { ClickAnnotationEvent, FloorClickEvent } from './section-plot.interfaces';
+import { ClickAnnotationEvent } from './section-plot.interfaces';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
@@ -286,7 +286,6 @@ export class SectionPlotComponent implements OnDestroy {
       });
       if (plot) {
         this.addEventListenersToPlot(plot);
-        this.openActiveFloorTooltip(plot, plotOptions.view);
         // If there is a saved camera pending restore (first render after back-navigation),
         // apply it directly to bypass any layout/uirevision timing issues.
         if (pendingCamera) {
@@ -307,25 +306,12 @@ export class SectionPlotComponent implements OnDestroy {
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
       on(e: 'plotly_relayout', fn: (eventData: Record<string, unknown>) => void): void;
-      on(e: 'plotly_click', fn: (event: FloorClickEvent) => void): void;
       removeAllListeners(e: string): void;
     };
     // Remove stale listeners before re-adding — the plot element is reused across refreshes,
     // and each refresh call would otherwise accumulate a new listener, causing a memory leak.
     plotEl.removeAllListeners('plotly_clickannotation');
     plotEl.removeAllListeners('plotly_relayout');
-    plotEl.removeAllListeners('plotly_click');
-    plotEl.on('plotly_click', (event: FloorClickEvent) => {
-      const point = event?.points?.[0];
-      const isFloorPoint = point?.data?.name === 'floor' || point?.data?.name === 'floor-ribbon';
-      if (!isFloorPoint || !Array.isArray(point.customdata)) {
-        return;
-      }
-      const [floorUuid, pointIndex] = point.customdata;
-      // Floor is the third side tab (Charges=0, Obstacles=1, Floor=2).
-      this.sideTabsService.sideTabs.set(2);
-      this.floorFormService.selectFloorPoint(floorUuid, pointIndex);
-    });
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.spanService.section();
@@ -338,6 +324,11 @@ export class SectionPlotComponent implements OnDestroy {
         this.sideTabsService.sideTabs.set(1);
         this.obstaclesService.setSelectedMeasure(payload.obstacle.uuid, payload.obstaclePositionIndex);
         this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
+      } else if (event?.annotation?.data?.type === 'floor') {
+        const { floorUuid, pointIndex } = event.annotation.data;
+        // Floor is the third side tab (Charges=0, Obstacles=1, Floor=2).
+        this.sideTabsService.sideTabs.set(2);
+        this.floorFormService.selectFloorPoint(floorUuid, pointIndex);
       } else if (event?.annotation?.data?.type === 'spanLoad') {
         const data = event.annotation.data;
         this.sideTabsService.sideTabs.set(0);
@@ -370,44 +361,5 @@ export class SectionPlotComponent implements OnDestroy {
     // saveViewState() reads camera() as a fallback when getCamera() returns null.
     this.plotOptionsService.refreshCamera();
     this.plotService.purgePlot();
-  }
-
-  /**
-   * Opens the hover tooltip on the floor point currently active in the floor form, so selecting a
-   * point in the form visibly highlights it on the plot. Only supported in 2D — Plotly's gl3d
-   * hover cannot be triggered programmatically, so 3D relies on the enlarged marker highlight alone.
-   */
-  private openActiveFloorTooltip(plot: Plotly.PlotlyHTMLElement, view: View): void {
-    if (view === '3d') {
-      return;
-    }
-    const floorUuid = this.floorFormService.savedFloorUuid();
-    const pointIndex = this.floorFormService.activeSavedPointIndex();
-    if (!floorUuid || pointIndex === null) {
-      return;
-    }
-    const data = (plot as unknown as { data?: { name?: string; customdata?: [string, number][] }[] }).data;
-    if (!Array.isArray(data)) {
-      return;
-    }
-    const curveNumber = data.findIndex((trace) => trace.name === 'floor' && trace.customdata?.[0]?.[0] === floorUuid);
-    if (curveNumber < 0) {
-      return;
-    }
-    try {
-      (
-        Plotly as unknown as {
-          Fx: {
-            hover: (
-              gd: Plotly.PlotlyHTMLElement,
-              evt: { curveNumber: number; pointNumber: number }[],
-              sub: string
-            ) => void;
-          };
-        }
-      ).Fx.hover(plot, [{ curveNumber, pointNumber: pointIndex }], 'xy');
-    } catch {
-      // Hover is best-effort: ignore Plotly failures (e.g. the point is outside the current view window).
-    }
   }
 }

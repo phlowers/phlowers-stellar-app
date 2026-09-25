@@ -266,19 +266,6 @@ describe('QuickMeasuresComponent', () => {
       expect(floorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-0', 0);
       expect(obstacleFormService.setExistingObstacle).not.toHaveBeenCalled();
     });
-
-    it('should skip a floor point the engine could not measure when pre-selecting', () => {
-      // A point sitting on a support has no distance: the engine's plane finds no cable there, so
-      // landing on it would show empty rows.
-      spanService.section.set(sectionWithFloor());
-      obstacleStateService.distances.set([
-        { obstacleUuid: 'floor-0', points: [{ pointIndex: 1 } as Distance['points'][number]] }
-      ]);
-
-      component.onObstacleSelect('floor-0');
-
-      expect(floorFormService.selectFloorPoint).toHaveBeenCalledWith('floor-0', 1);
-    });
   });
 
   describe('onPointSelect', () => {

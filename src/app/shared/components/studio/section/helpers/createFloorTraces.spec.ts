@@ -4,7 +4,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { createFloorTraces } from './createFloorTraces';
+import { createFloorAnnotations, createFloorTraces } from './createFloorTraces';
+import {
+  FLOOR_COLOR,
+  FLOOR_POINT_SYMBOL,
+  FLOOR_SELECTED_COLOR,
+  FLOOR_SELECTED_SYMBOL
+} from './createFloorTraces.constantes';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
@@ -42,6 +48,20 @@ describe('createFloorTraces', () => {
       pointLabel: (distance) => (distance == null ? 'point' : `point ${distance.toFixed(2)}`),
       ...params
     }) as unknown as Partial<PlotData>[];
+
+  type FloorAnnotation = Partial<Plotly.Annotations> & {
+    z?: number;
+    data?: { type: string; floorUuid: string; pointIndex: number };
+  };
+  const buildAnnotations = (
+    params: Omit<Parameters<typeof createFloorAnnotations>[0], 'pointLabel'>
+  ): FloorAnnotation[] =>
+    createFloorAnnotations({
+      pointLabel: (distance) => (distance == null ? 'point' : `point ${distance.toFixed(2)}`),
+      ...params
+    }) as FloorAnnotation[];
+
+  const window3d = { supports, startSupport: 0, endSupport: 2, view: '3d', side: 'profile' } as const;
 
   it('should return [] when there are no floors', () => {
     expect(
@@ -93,91 +113,53 @@ describe('createFloorTraces', () => {
     ).toEqual([]);
   });
 
-  it('should build a line+markers trace and a ribbon in 3D', () => {
-    const traces = build({
-      litData,
-      floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
-    });
-    const line = traces.find((t) => t.mode === 'lines+markers');
+  it('should build a line trace and a ribbon in 3D', () => {
+    const traces = build({ litData, floors: [floor], ...window3d });
+    const line = traces.find((t) => t.type === 'scatter3d');
     const ribbon = traces.find((t) => t.type === 'mesh3d');
 
     expect(traces).toHaveLength(2);
-    expect(line?.type).toBe('scatter3d');
+    expect(line?.mode).toBe('lines');
     expect(line?.x).toEqual([1, 4]);
     expect(line?.y).toEqual([2, 5]);
     expect(line?.z).toEqual([10, 12]);
-    expect(line?.line).toMatchObject({ color: '#f6ab4d' });
+    expect(line?.line).toMatchObject({ color: FLOOR_COLOR });
     expect(ribbon).toBeDefined();
   });
 
-  it('should resolve every triangle of a point cell to that point, reaching the closing point', () => {
-    // The ribbon covers far more screen area than the markers, so it is what the mouse actually
-    // hits in gl3d — and Plotly indexes a mesh3d hit by face, not by vertex. The strip is cut at
-    // the segment midpoints, so both triangles framing a point carry it: tagging whole segments
-    // made the far half of each point's surroundings resolve to its neighbour.
-    const ribbon = build({
-      litData,
-      floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
-    }).find((t) => t.type === 'mesh3d') as {
-      hovertext?: string[];
-      customdata?: unknown;
-      hoverinfo?: string;
-      i?: number[];
-    };
+  it('should keep the line and the ribbon out of mouse interaction', () => {
+    // Floor points are picked through their annotations; the traces only draw the floor.
+    const traces = build({ litData, floors: [floor], ...window3d }) as { hoverinfo?: string; customdata?: unknown }[];
 
-    expect(ribbon.hoverinfo).toBe('text');
-    expect(ribbon.hovertext).toEqual(['point 0.00', 'point 0.00', 'point 25.00', 'point 25.00']);
-    expect(ribbon.customdata).toEqual([
-      ['floor-1', 0],
-      ['floor-1', 0],
-      ['floor-1', 1],
-      ['floor-1', 1]
-    ]);
-    // One entry per face, so every triangle index has a payload.
-    expect(ribbon.hovertext?.length).toBe(ribbon.i?.length);
+    traces.forEach((trace) => {
+      expect(trace.hoverinfo).toBe('skip');
+      expect(trace.customdata).toBeUndefined();
+    });
   });
 
-  it('should give a free point its own cell instead of sharing it with the next point', () => {
-    const threePoints = {
+  it('should bend the ribbon at every point so it follows an angled floor line', () => {
+    const vShape = {
       obstacles: [
         {
           uuid: 'floor-1',
           points: [
             [0, 0, 10],
-            [10, 0, 11],
-            [20, 0, 12]
+            [10, 0, 4],
+            [20, 0, 10]
           ]
         }
       ]
     } as unknown as GetSectionOutput;
     const ribbon = build({
-      litData: threePoints,
-      floors: [{ ...floor, points: [...floor.points, { distanceToRefSupport: 50, altitude: 12 }] }],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
-    }).find((t) => t.type === 'mesh3d') as { customdata?: unknown };
+      litData: vShape,
+      floors: [{ ...floor, points: [...floor.points, { distanceToRefSupport: 50, altitude: 10 }] }],
+      ...window3d
+    }).find((t) => t.type === 'mesh3d') as { x?: number[]; z?: number[]; i?: number[] };
 
-    expect(ribbon.customdata).toEqual([
-      ['floor-1', 0],
-      ['floor-1', 0],
-      ['floor-1', 1],
-      ['floor-1', 1],
-      ['floor-1', 2],
-      ['floor-1', 2]
-    ]);
+    // One rail per point, each hanging from the line, and one quad (two triangles) per segment.
+    expect(ribbon.x).toEqual([0, 0, 10, 10, 20, 20]);
+    expect(ribbon.z).toEqual([10, 10, 4, 4, 10, 10]);
+    expect(ribbon.i).toHaveLength(4);
   });
 
   it('should widen the ribbon perpendicular to the span, not along global Y', () => {
@@ -203,106 +185,80 @@ describe('createFloorTraces', () => {
       side: 'profile'
     }).find((t) => t.type === 'mesh3d') as { x?: number[]; y?: number[] };
 
-    // Three rails: the first point, the segment midpoint cutting the two cells apart, the last point.
-    expect(ribbon.x).toEqual([-10, 10, -10, 10, -10, 10]);
-    expect(ribbon.y).toEqual([0, 0, 12.5, 12.5, 25, 25]);
+    expect(ribbon.x).toEqual([-10, 10, -10, 10]);
+    expect(ribbon.y).toEqual([0, 0, 25, 25]);
   });
 
-  it('should recess the ribbon below the markers so they stay hoverable', () => {
-    const ribbon = build({
-      litData,
-      floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
-    }).find((t) => t.type === 'mesh3d') as { z?: number[] };
+  it('should draw every floor point as a clickable annotation tagged with its floor and index', () => {
+    const annotations = buildAnnotations({ litData, floors: [floor], ...window3d });
 
-    // mesh3d always writes to the 3D pick buffer, so every ribbon vertex sits under the altitude of
-    // the point or midpoint it hangs from.
-    expect(ribbon.z?.every((z, i) => z < [10, 10, 11, 11, 12, 12][i])).toBe(true);
-  });
-
-  it('should tag each floor marker with its [floorUuid, pointIndex] customdata', () => {
-    const [line] = build({
-      litData,
-      floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
+    expect(annotations).toHaveLength(2);
+    expect(annotations.map((a) => [a.x, a.y, a.z])).toEqual([
+      [1, 2, 10],
+      [4, 5, 12]
+    ]);
+    annotations.forEach((a) => {
+      expect(a.captureevents).toBe(true);
+      expect(a.text).toBe(FLOOR_POINT_SYMBOL);
+      expect(a.font?.color).toBe(FLOOR_COLOR);
     });
-
-    expect((line as { customdata?: unknown }).customdata).toEqual([
-      ['floor-1', 0],
-      ['floor-1', 1]
+    expect(annotations.map((a) => a.data)).toEqual([
+      { type: 'floor', floorUuid: 'floor-1', pointIndex: 0 },
+      { type: 'floor', floorUuid: 'floor-1', pointIndex: 1 }
     ]);
   });
 
-  it('should draw the selected point as the red diamond an obstacle active point uses', () => {
-    const traces = build({
+  it('should show point names on hover as "point {distance}"', () => {
+    const annotations = buildAnnotations({ litData, floors: [floor], ...window3d });
+
+    expect(annotations.map((a) => a.hovertext)).toEqual(['point 0.00', 'point 25.00']);
+  });
+
+  it('should draw the selected point as a red diamond labelled with its name', () => {
+    const annotations = buildAnnotations({
       litData,
       floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile',
+      ...window3d,
       selectedFloorUuid: 'floor-1',
       selectedPointIndex: 1
     });
-    const [line] = traces;
-    // A whole trace carries one symbol, so the active point rides in its own, drawn last.
-    const selected = traces.at(-1) as { marker?: { color: string; size: number; symbol: string } } & {
-      x?: number[];
-      customdata?: unknown;
-    };
+    const [first, selected, label] = annotations;
 
-    expect(selected.marker).toMatchObject({ color: 'red', symbol: 'diamond' });
-    expect(selected.x).toEqual([4]);
-    expect(selected.customdata).toEqual([['floor-1', 1]]);
-    // Hidden in the line trace, so the two markers never stack.
-    const [unselectedSize, selectedSize] = (line as { marker?: { size: number[] } }).marker!.size;
-    expect(selectedSize).toBe(0);
-    expect(unselectedSize).toBeGreaterThan(0);
+    expect(annotations).toHaveLength(3);
+    expect(first.text).toBe(FLOOR_POINT_SYMBOL);
+    expect(selected).toMatchObject({
+      text: FLOOR_SELECTED_SYMBOL,
+      captureevents: true,
+      font: { color: FLOOR_SELECTED_COLOR }
+    });
+    expect(label).toMatchObject({ x: 4, text: 'point 25.00', captureevents: false });
+    expect(label.yshift).toBeGreaterThan(0);
   });
 
-  it('should not draw a selected point when the selected floor uuid does not match', () => {
-    const traces = build({
+  it('should not highlight any point when the selected floor uuid does not match', () => {
+    const annotations = buildAnnotations({
       litData,
       floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile',
+      ...window3d,
       selectedFloorUuid: 'other-floor',
       selectedPointIndex: 1
     });
-    const [line] = traces;
 
-    expect(traces).toHaveLength(2);
-    const [first, second] = (line as { marker?: { size: number[] } }).marker!.size;
-    expect(second).toBe(first);
-    expect(first).toBeGreaterThan(0);
+    expect(annotations).toHaveLength(2);
+    expect(annotations.every((a) => a.text === FLOOR_POINT_SYMBOL)).toBe(true);
   });
 
-  it('should expose point names only on hover as "point {distance}"', () => {
-    const [line] = build({
-      litData,
-      floors: [floor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
-    });
+  it('should skip annotations of a floor outside the visible support window', () => {
+    expect(buildAnnotations({ litData, floors: [floor], ...window3d, startSupport: 1 })).toEqual([]);
+  });
 
-    expect(line.hoverinfo).toBe('text');
-    expect(line.text).toBeUndefined();
-    expect(line.hovertext).toEqual(['point 0.00', 'point 25.00']);
+  it('should map annotations to plot x/y in 2D face view', () => {
+    const annotations = buildAnnotations({ litData, floors: [floor], ...window3d, view: '2d', side: 'face' });
+
+    expect(annotations.map((a) => [a.x, a.y])).toEqual([
+      [2, 10],
+      [5, 12]
+    ]);
   });
 
   it('should map x/z to plot x/y and omit ribbon in 2D profile', () => {
@@ -315,7 +271,7 @@ describe('createFloorTraces', () => {
       view: '2d',
       side: 'profile'
     });
-    const line = traces.find((t) => t.mode === 'lines+markers');
+    const line = traces.find((t) => t.mode === 'lines');
 
     expect(traces).toHaveLength(1);
     expect(line?.type).toBe('scatter');
@@ -347,16 +303,8 @@ describe('createFloorTraces', () => {
         { distanceToRefSupport: null, altitude: 12 }
       ]
     };
-    const [line] = build({
-      litData,
-      floors: [nullFloor],
-      supports,
-      startSupport: 0,
-      endSupport: 2,
-      view: '3d',
-      side: 'profile'
-    });
+    const annotations = buildAnnotations({ litData, floors: [nullFloor], ...window3d });
 
-    expect(line.hovertext).toEqual(['point', 'point']);
+    expect(annotations.map((a) => a.hovertext)).toEqual(['point', 'point']);
   });
 });

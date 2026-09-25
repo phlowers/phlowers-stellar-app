@@ -619,8 +619,11 @@ describe('createPlot', () => {
         translocoService: frTransloco
       });
 
-      const dataArg = (Plotly.react as Mock).mock.calls[0][1] as { name?: string; hovertext?: string[] }[];
-      expect(dataArg.find((trace) => trace.name === 'floor')?.hovertext).toEqual(['Point 12.00 m']);
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        scene: { annotations: { hovertext?: string; data?: { type?: string } }[] };
+      };
+      const floorPoints = layoutArg.scene.annotations.filter((a) => a.data?.type === 'floor');
+      expect(floorPoints.map((a) => a.hovertext)).toEqual(['Point 12.00 m']);
     });
   });
 

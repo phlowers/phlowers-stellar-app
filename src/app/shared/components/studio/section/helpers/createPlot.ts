@@ -8,7 +8,12 @@ import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
 import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPointsTraces';
 import { createObstaclesAnnotations } from './obstacles';
-import { createFloorTraces, FloorPointLabel } from './createFloorTraces';
+import {
+  createFloorAnnotations,
+  createFloorTraces,
+  CreateFloorTracesParams,
+  FloorPointLabel
+} from './createFloorTraces';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
 import { PLOT_AXIS_CONFIG } from './plot.constants';
@@ -84,6 +89,27 @@ export interface CreatePlotParams {
   translocoService?: TranslocoService;
 }
 
+// Same label as the quick-measures point select, so both name a floor point identically.
+const floorPointLabel =
+  (translocoService?: TranslocoService): FloorPointLabel =>
+  (distance) => {
+    const value = (distance ?? 0).toFixed(2);
+    return translocoService?.translate('studio.floor.point-title', { distance: value }) ?? `point ${value}`;
+  };
+
+const toFloorParams = (plotParams: CreatePlotParams): CreateFloorTracesParams => ({
+  litData: plotParams.litData,
+  floors: plotParams.floors,
+  supports: plotParams.supports,
+  startSupport: plotParams.startSupport,
+  endSupport: plotParams.endSupport,
+  view: plotParams.view,
+  side: plotParams.side,
+  selectedFloorUuid: plotParams.selectedFloorUuid ?? null,
+  selectedPointIndex: plotParams.selectedFloorPointIndex ?? null,
+  pointLabel: floorPointLabel(plotParams.translocoService)
+});
+
 const normalCamera = () => ({
   center: {
     x: 0,
@@ -154,6 +180,7 @@ const createScene = (
         plotParams.spanUuidToIndex ?? new Map()
       ),
       ...createObstaclesAnnotations(plotParams),
+      ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
     ],
     camera: sceneCamera
@@ -385,6 +412,7 @@ const layout2d = (
         plotParams.spanUuidToIndex ?? new Map()
       ),
       ...createObstaclesAnnotations(plotParams),
+      ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
     ]
   };
@@ -398,14 +426,6 @@ const layout2d = (
  * @param plotParams - The full set of parameters describing the plot data, layout, and options.
  * @returns The Plotly promise returned by `Plotly.react`, or `undefined` if the target element is not found.
  */
-// Same label as the quick-measures point select, so both name a floor point identically.
-const floorPointLabel =
-  (translocoService?: TranslocoService): FloorPointLabel =>
-  (distance) => {
-    const value = (distance ?? 0).toFixed(2);
-    return translocoService?.translate('studio.floor.point-title', { distance: value }) ?? `point ${value}`;
-  };
-
 export const createPlot = (plotParams: CreatePlotParams) => {
   // check if div with id plotly-output exists
   if (!plotParams.documentRef.getElementById(plotParams.plotId)) {
@@ -433,18 +453,7 @@ export const createPlot = (plotParams: CreatePlotParams) => {
     resolvedParams.view === '3d'
       ? layout3d(resolvedParams, distanceAnnotations)
       : layout2d(resolvedParams, distanceAnnotations);
-  const floorTraces = createFloorTraces({
-    litData: resolvedParams.litData,
-    floors: resolvedParams.floors,
-    supports: resolvedParams.supports,
-    startSupport: resolvedParams.startSupport,
-    endSupport: resolvedParams.endSupport,
-    view: resolvedParams.view,
-    side: resolvedParams.side,
-    selectedFloorUuid: resolvedParams.selectedFloorUuid ?? null,
-    selectedPointIndex: resolvedParams.selectedFloorPointIndex ?? null,
-    pointLabel: floorPointLabel(resolvedParams.translocoService)
-  });
+  const floorTraces = createFloorTraces(toFloorParams(resolvedParams));
   const allData = [...resolvedParams.data, ...distanceTraces, ...distanceMeasuringPointsTraces, ...floorTraces];
 
   // Use Plotly.react to update data without resetting camera/zoom
