@@ -55,14 +55,10 @@ export class StudioMenuBarComponent {
   initialCondition = computed(() =>
     this.section()?.initial_conditions.find((ic) => ic.uuid === this.section()?.selected_initial_condition_uuid)
   );
+  // Without selected charge, staff is assumed present: the safest case
   staffIsPresent = computed(() => {
-    const section = this.section();
     const selectedChargeUuid = this.selectedChargeCaseUuid();
-    if (!section || !selectedChargeUuid) {
-      return false;
-    }
-    const charge = section.charges?.find((c) => c.uuid === selectedChargeUuid);
-    return charge?.personnelPresence;
+    return this.section()?.charges?.find((c) => c.uuid === selectedChargeUuid)?.personnelPresence ?? true;
   });
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly chargesService = inject(ChargesService);

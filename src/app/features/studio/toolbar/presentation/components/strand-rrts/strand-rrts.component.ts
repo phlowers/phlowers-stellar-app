@@ -101,11 +101,12 @@ export class StrandRrtsComponent {
   // Max over the whole section, like the global stress rate under the studio plot
   readonly workLoad = computed(() => maxOf(this.plotService.litData()?.output_parameters.utilization_rate));
 
-  // Same source as the menu bar: the selected charge is tracked on the study's copy of the section
+  // Same source as the menu bar: the selected charge is tracked on the study's copy of the section.
+  // Without selected charge, staff is assumed present: the safest case
   readonly staffIsPresent = computed(() => {
     const section = this.spanService.section();
     const chargeUuid = this.plotService.study()?.sections.find((s) => s?.uuid === section?.uuid)?.selected_charge_uuid;
-    return !!section?.charges?.find((c) => c.uuid === chargeUuid)?.personnelPresence;
+    return section?.charges?.find((c) => c.uuid === chargeUuid)?.personnelPresence ?? true;
   });
 
   readonly cable = resource({
