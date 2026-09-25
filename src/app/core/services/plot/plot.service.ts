@@ -66,11 +66,12 @@ export class PlotService {
   private currentSectionUuid: string | null = null;
   // High safety of the engine study, to skip redundant setHighSafety calls. Null while no engine study is ready
   private highSafety: boolean | null = null;
-  // Staff presence on the selected charge requires high safety in the engine study
+  // Staff presence on the selected charge requires high safety in the engine study.
+  // Without selected charge, staff is assumed present: the safest case
   private readonly selectedChargeHighSafety = computed(() => {
     const section = this.spanService.section();
     const selectedCharge = section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
-    return !!selectedCharge?.personnelPresence;
+    return selectedCharge?.personnelPresence ?? true;
   });
 
   constructor() {

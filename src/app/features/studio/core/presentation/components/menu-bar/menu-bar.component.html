@@ -64,16 +64,14 @@
     </button>
   }
 
-  @if (staffIsPresent() !== undefined) {
-    <p class="text-s-600 flex items-center gap-2 mb-0">
-      <app-icon [class]="staffIsPresent() ? 'icon-present' : 'icon-absent'" icon="engineering" [fill]="true" />
-      @if (staffIsPresent() === true) {
-        <ng-container>{{ 'studio.menu-bar.staff-present' | transloco }}</ng-container>
-      } @else if (staffIsPresent() === false) {
-        <ng-container>{{ 'studio.menu-bar.staff-absent' | transloco }}</ng-container>
-      }
-    </p>
-  }
+  <p class="text-s-600 flex items-center gap-2 mb-0">
+    <app-icon [class]="staffIsPresent() ? 'icon-present' : 'icon-absent'" icon="engineering" [fill]="true" />
+    @if (staffIsPresent()) {
+      <ng-container>{{ 'studio.menu-bar.staff-present' | transloco }}</ng-container>
+    } @else {
+      <ng-container>{{ 'studio.menu-bar.staff-absent' | transloco }}</ng-container>
+    }
+  </p>
 
   <hr class="menubar__separator" />
 

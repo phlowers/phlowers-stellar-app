@@ -212,16 +212,16 @@ describe('StrandRrtsComponent', () => {
       expect(textOf('work-load-value')).toBe('-\u00a0%');
     });
 
-    it('shows the staff presence of the charge selected on the study', async () => {
-      await setup(makeSection({ charges: [{ uuid: 'charge-uuid', personnelPresence: true }] as Section['charges'] }));
-      expect(textOf('staff-presence-value')).toBe('No');
+    it('shows the staff presence of the charge selected on the study, assumed present without selected charge', async () => {
+      await setup(makeSection({ charges: [{ uuid: 'charge-uuid', personnelPresence: false }] as Section['charges'] }));
+      expect(textOf('staff-presence-value')).toBe('Yes');
 
       studySignal.set({
         uuid: 'study-uuid',
         sections: [{ uuid: 'section-uuid', selected_charge_uuid: 'charge-uuid' }]
       });
       fixture.detectChanges();
-      expect(textOf('staff-presence-value')).toBe('Yes');
+      expect(textOf('staff-presence-value')).toBe('No');
     });
   });
 

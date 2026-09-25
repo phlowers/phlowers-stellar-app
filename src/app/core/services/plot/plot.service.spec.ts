@@ -665,10 +665,10 @@ describe('PlotService', () => {
         }
       );
 
-      it('should be off without selected charge', async () => {
-        await service.initSectionStudio({ ...sectionWithStaff(true), selected_charge_uuid: null });
+      it('should be on without selected charge, staff being assumed present', async () => {
+        await service.initSectionStudio({ ...sectionWithStaff(false), selected_charge_uuid: null });
 
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: false });
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: true });
       });
 
       it('should be set right after the engine study is created, before any output is calculated', async () => {
@@ -750,13 +750,10 @@ describe('PlotService', () => {
         expect(runTasks().slice(0, 2)).toEqual([Task.setHighSafety, Task.refreshProjection]);
       });
 
-      it('should turn it off when the selected charge is deleted', async () => {
-        await reloadSection(sectionWithStaff(true));
-        mockWorkerPythonService.runTask.mockClear();
+      it('should turn it on when the selected charge is deleted, staff being assumed present', async () => {
+        await reloadSection({ ...sectionWithStaff(false), selected_charge_uuid: null });
 
-        await reloadSection({ ...sectionWithStaff(true), selected_charge_uuid: null });
-
-        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: false });
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: true });
       });
 
       it('should do nothing when the engine study already has it', async () => {
