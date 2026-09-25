@@ -217,4 +217,35 @@ describe('sanitizeSectionGeometry', () => {
     expect(result.removedGeometryBoundObjects).toBe(false);
     expect(result.section.charges[0].data.spanLoads).toEqual([makeSpanLoad({ supportUuid: 'sup-3' })]);
   });
+  describe('RRTS cut strands', () => {
+    const makeCutStrands = (spanUuid: string | null) => ({
+      spanUuid,
+      supportRef: null,
+      distanceSupportRef: null,
+      cutStrands: [1, 0],
+      addMarking: false
+    });
+
+    it('should drop the RRTS cut strands of a span that no longer exists', () => {
+      const result = sanitizeSectionGeometry(makeSection({ rrts_cut_strands: makeCutStrands('deleted-support') }));
+
+      expect(result.section.rrts_cut_strands).toBeNull();
+      expect(result.removedGeometryBoundObjects).toBe(true);
+    });
+
+    it('should drop the RRTS cut strands linked to the last support, which starts no span', () => {
+      const result = sanitizeSectionGeometry(makeSection({ rrts_cut_strands: makeCutStrands('sup-3') }));
+
+      expect(result.section.rrts_cut_strands).toBeNull();
+    });
+
+    it.each([['sup-1'], [null]])('should keep the RRTS cut strands linked to %s', (spanUuid) => {
+      const section = makeSection({ rrts_cut_strands: makeCutStrands(spanUuid) });
+
+      const result = sanitizeSectionGeometry(section);
+
+      expect(result.section).toBe(section);
+      expect(result.removedGeometryBoundObjects).toBe(false);
+    });
+  });
 });

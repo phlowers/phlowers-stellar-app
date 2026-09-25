@@ -1,0 +1,200 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="table_chart" aria-hidden="true" />
+    <span>{{ 'studio.top-toolbar.rrts-cut-strands' | transloco }}</span>
+  </p>
+</ng-template>
+
+<form [formGroup]="form" (ngSubmit)="calculate()">
+  <button type="button" app-btn btnStyle="outlined" disabled>
+    <app-icon icon="help" aria-hidden="true" />
+    {{ 'studio.rrts-cut-strands.layers-detail' | transloco }}
+  </button>
+
+  <dl class="grid-structure grid-structure--infos">
+    <dt class="cable-name-label">{{ 'studio.rrts-cut-strands.cable-name-label' | transloco }}</dt>
+    <dd class="cable-name-value" data-testid="cable-name-value">{{ cableName() ?? '-' }}</dd>
+    <dt class="stress-rate-label">{{ 'studio.rrts-cut-strands.current-work-load-label' | transloco }}</dt>
+    <dd class="stress-rate-value" data-testid="work-load-value">
+      {{ workLoad() !== null ? (workLoad() | number: '1.0-1') : '-' }}&nbsp;%
+    </dd>
+    <dt class="staff-presence-label">{{ 'studio.rrts-cut-strands.staff-presence-label' | transloco }}</dt>
+    <dd class="staff-presence-value" data-testid="staff-presence-value">
+      {{ (staffIsPresent() ? 'common.yes' : 'common.no') | transloco }}
+    </dd>
+  </dl>
+
+  <div class="grid-structure grid-structure--form">
+    <div>
+      <label for="rrts-span">{{ 'studio.shared.span-label' | transloco }}</label>
+      <p-select
+        inputId="rrts-span"
+        [options]="spanService.getSpanOptionsWithIndex()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="span"
+        appendTo="body"
+        fluid
+        [showClear]="true"
+        data-testid="rrts-span-select"
+      />
+    </div>
+
+    <div>
+      <label for="rrts-support-ref">{{ 'studio.shared.reference-support-label' | transloco }}</label>
+      <p-select
+        inputId="rrts-support-ref"
+        [options]="supportOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="supportRef"
+        appendTo="body"
+        fluid
+        data-testid="rrts-support-ref-select"
+      />
+    </div>
+
+    @let distanceControl = form.controls.distanceSupportRef;
+    @let distanceError = distanceControl.dirty ? getError(distanceControl) : '';
+    <div>
+      <label for="rrts-distance-support-ref">
+        {{ 'studio.rrts-cut-strands.distance-support-ref-label' | transloco }}
+      </label>
+      <p-inputgroup>
+        <input
+          id="rrts-distance-support-ref"
+          type="number"
+          pInputText
+          formControlName="distanceSupportRef"
+          min="0"
+          [attr.max]="DISTANCE_MAX"
+          step="0.01"
+          data-testid="rrts-distance-support-ref-input"
+          [attr.aria-invalid]="distanceError ? 'true' : null"
+          [attr.aria-errormessage]="distanceError ? 'distanceSupportRef-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (distanceError) {
+        <p-message id="distanceSupportRef-error" severity="error" size="small" variant="simple">
+          {{ distanceError }}
+        </p-message>
+      }
+    </div>
+
+    @if (!hasLayers()) {
+      <p-message severity="secondary" size="small" variant="simple" data-testid="rrts-no-layers">
+        {{ (cable.isLoading() ? 'common.loading' : 'studio.rrts-cut-strands.no-strand-layers') | transloco }}
+      </p-message>
+    }
+    @for (item of layers(); track item.layer) {
+      @let error = item.control.dirty ? getError(item.control) : '';
+      <div>
+        <label [for]="'rrts-cut-strands-layer' + item.layer">
+          {{ 'studio.rrts-cut-strands.cut-strands-layer-label' | transloco: { layer: item.layer } }}
+          <sup class="mandatory" aria-hidden="true">*</sup>
+        </label>
+        <p-inputgroup>
+          <input
+            [id]="'rrts-cut-strands-layer' + item.layer"
+            type="number"
+            pInputText
+            [formControl]="item.control"
+            min="0"
+            [attr.max]="item.strands"
+            step="1"
+            required
+            [attr.data-testid]="'rrts-cut-strands-layer' + item.layer + '-input'"
+            [attr.aria-invalid]="error ? 'true' : null"
+            [attr.aria-errormessage]="error ? 'cutStrandsLayer' + item.layer + '-error' : null"
+          />
+          <p-inputgroup-addon [attr.data-testid]="'rrts-cut-strands-layer' + item.layer + '-max'">
+            / {{ item.strands }}
+          </p-inputgroup-addon>
+        </p-inputgroup>
+        @if (error) {
+          <p-message [id]="'cutStrandsLayer' + item.layer + '-error'" severity="error" size="small" variant="simple">
+            {{ error }}
+          </p-message>
+        }
+      </div>
+    }
+
+    <div class="add-marking">
+      <p-checkbox
+        formControlName="addMarking"
+        inputId="rrts-add-marking"
+        [binary]="true"
+        data-testid="rrts-add-marking-checkbox"
+      />
+      <label for="rrts-add-marking">{{ 'studio.rrts-cut-strands.add-marking-label' | transloco }}</label>
+    </div>
+  </div>
+
+  <div class="calculate-btn-wrapper">
+    <button
+      type="submit"
+      app-btn
+      data-testid="calculate-btn"
+      [disabled]="form.invalid || !hasLayers() || isBusy()"
+      [btnLoading]="isCalculating()"
+    >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      {{ 'common.calculate' | transloco }}
+    </button>
+  </div>
+</form>
+
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="results" data-testid="results">
+  @if (results(); as res) {
+    <div class="results__content" @expand>
+      <h2>{{ 'common.results' | transloco }}</h2>
+
+      <dl class="grid-structure grid-structure--results">
+        <dt class="results-rrts-label">{{ 'studio.rrts-cut-strands.result-cable-rrts-label' | transloco }}</dt>
+        <dd class="results-rrts-value" data-testid="results-rrts-value">{{ res.rrts | number: '1.0-1' }}&nbsp;daN</dd>
+        <dt class="results-load-label">{{ 'studio.rrts-cut-strands.result-new-working-load-label' | transloco }}</dt>
+        <dd class="results-load-value" data-testid="results-load-value">
+          @let loadIcon = newWorkLoadIcon();
+          <span>{{ res.newWorkLoad !== null ? (res.newWorkLoad | number: '1.0-1') : '-' }}&nbsp;%</span>
+          <app-icon
+            [icon]="loadIcon.name"
+            class="results-load-icon"
+            [class]="'results-load-icon--' + loadIcon.status"
+            [ariaLabel]="loadIcon.label | transloco"
+            data-testid="results-load-icon"
+          />
+        </dd>
+      </dl>
+    </div>
+  }
+</output>
+
+<ng-template #footer>
+  <button
+    type="button"
+    app-btn
+    btnStyle="danger"
+    data-testid="delete-btn"
+    [disabled]="!isSaved() || isBusy()"
+    [btnLoading]="isDeleting()"
+    (click)="delete()"
+  >
+    <app-icon icon="delete" aria-hidden="true" />
+    {{ 'common.delete' | transloco }}
+  </button>
+
+  <button
+    type="button"
+    app-btn
+    btnStyle="base"
+    data-testid="save-btn"
+    [disabled]="!canSave() || isBusy()"
+    [btnLoading]="isSaving()"
+    (click)="save()"
+  >
+    <app-icon icon="save" aria-hidden="true" />
+    {{ 'common.save' | transloco }}
+  </button>
+</ng-template>

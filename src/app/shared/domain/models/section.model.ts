@@ -28,6 +28,16 @@ export interface PoseTableData {
   computingStep: number;
 }
 
+// Linked to the span starting at spanUuid, or to the whole section when spanUuid is null
+export interface RrtsCutStrandsData {
+  spanUuid: string | null;
+  supportRef: 'LEFT' | 'RIGHT' | null;
+  distanceSupportRef: number | null;
+  // Cut strands per cable layer, index 0 = layer 1
+  cutStrands: number[];
+  addMarking: boolean;
+}
+
 /**
  * Section domain model - represents a power line section.
  *
@@ -148,6 +158,8 @@ export interface Section {
   vtl_and_guying: VtlAndGuying | undefined;
   /** Pose table calculation data */
   pose_table?: PoseTableData;
+  /** Saved RRTS cut strands, a single one per section */
+  rrts_cut_strands?: RrtsCutStrandsData | null;
   /** Array of cable length modifications on this section's spans */
   cable_modifications: CableModification[];
   /** UUID of the currently selected cable modification */

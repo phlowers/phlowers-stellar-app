@@ -23,7 +23,8 @@ import {
   Distance,
   PythonErrorCode
 } from '@services/worker_python/tasks/types';
-import { CatalogCable, Section, Study } from '@shared/domain';
+import { CatalogCable, Charge, Section, Study } from '@shared/domain';
+import { defaultClimaticCharge } from '@shared/domain/helpers/climate.helpers';
 import * as plotly from 'plotly.js-dist-min';
 import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
@@ -614,6 +615,195 @@ describe('PlotService', () => {
       await service.initSectionStudio(mockSection);
 
       expect(service.loading()).toBe(false);
+    });
+  });
+
+  describe('high safety', () => {
+    // A load case as created in the app: only its staff presence matters here
+    const loadCase = (personnelPresence: boolean): Charge => ({
+      uuid: 'charge-uuid',
+      name: 'Load case 1',
+      personnelPresence,
+      description: '',
+      data: { climate: { ...defaultClimaticCharge }, spanLoads: [], cableModifParams: [] }
+    });
+
+    const sectionWithStaff = (personnelPresence: boolean): Section => ({
+      ...mockSection,
+      charges: [loadCase(personnelPresence)],
+      selected_charge_uuid: 'charge-uuid'
+    });
+
+    const runTasks = () => mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+
+    beforeEach(() => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+        if (task === Task.initLit) {
+          return Promise.resolve({ result: { success: true }, error: null });
+        }
+        if (task === Task.refreshProjection) {
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null
+          });
+        }
+        return Promise.resolve({ result: null, error: null });
+      });
+    });
+
+    describe('at studio load', () => {
+      it.each([true, false])(
+        'should follow the staff presence on the selected charge: %s',
+        async (personnelPresence) => {
+          await service.initSectionStudio(sectionWithStaff(personnelPresence));
+
+          expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, {
+            highSafety: personnelPresence
+          });
+        }
+      );
+
+      it('should be on without selected charge, staff being assumed present', async () => {
+        await service.initSectionStudio({ ...sectionWithStaff(false), selected_charge_uuid: null });
+
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: true });
+      });
+
+      it('should be set right after the engine study is created, before any output is calculated', async () => {
+        await service.initSectionStudio(sectionWithStaff(true));
+
+        const tasks = runTasks();
+        expect(tasks.indexOf(Task.setHighSafety)).toBe(tasks.indexOf(Task.initLit) + 1);
+      });
+
+      it('should not be set when the engine study cannot be created', async () => {
+        mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: TaskError.CALCULATION_ERROR });
+
+        await service.initSectionStudio(sectionWithStaff(true));
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.setHighSafety, expect.anything());
+      });
+
+      it('should use the charge selected while the engine study was being created', async () => {
+        service.isStudioActive.set(true);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.initLit) {
+            spanService.section.set(sectionWithStaff(true));
+            TestBed.flushEffects();
+            return Promise.resolve({ result: { success: true }, error: null });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+
+        await service.initSectionStudio(sectionWithStaff(false));
+
+        const highSafetyCalls = mockWorkerPythonService.runTask.mock.calls.filter(
+          ([task]) => task === Task.setHighSafety
+        );
+        expect(highSafetyCalls).toEqual([[Task.setHighSafety, { highSafety: true }]]);
+      });
+
+      it('should follow a charge selected while its high safety was being applied', async () => {
+        service.isStudioActive.set(true);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.initLit) {
+            return Promise.resolve({ result: { success: true }, error: null });
+          }
+          if (task === Task.setHighSafety && runTasks().filter((t) => t === Task.setHighSafety).length === 1) {
+            spanService.section.set(sectionWithStaff(true));
+            TestBed.flushEffects();
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+
+        await service.initSectionStudio(sectionWithStaff(false));
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const highSafetyCalls = mockWorkerPythonService.runTask.mock.calls.filter(
+          ([task]) => task === Task.setHighSafety
+        );
+        expect(highSafetyCalls.at(-1)).toEqual([Task.setHighSafety, { highSafety: true }]);
+      });
+    });
+
+    describe('when the selected charge changes in the studio', () => {
+      // Selection, creation, duplication, deletion and edition of charges all reach the studio as a reloaded section
+      const reloadSection = async (section: Section) => {
+        spanService.section.set(section);
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve));
+      };
+
+      beforeEach(async () => {
+        await service.initSectionStudio(sectionWithStaff(false));
+        service.isStudioActive.set(true);
+        TestBed.flushEffects();
+        mockWorkerPythonService.runTask.mockClear();
+      });
+
+      it('should apply its staff presence, then refresh the outputs depending on it', async () => {
+        await reloadSection(sectionWithStaff(true));
+
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: true });
+        expect(runTasks().slice(0, 2)).toEqual([Task.setHighSafety, Task.refreshProjection]);
+      });
+
+      it('should turn it on when the selected charge is deleted, staff being assumed present', async () => {
+        await reloadSection({ ...sectionWithStaff(false), selected_charge_uuid: null });
+
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.setHighSafety, { highSafety: true });
+      });
+
+      it('should do nothing when the engine study already has it', async () => {
+        await reloadSection({ ...sectionWithStaff(false), name: 'renamed' });
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+
+      it('should do nothing outside the studio, where no engine study belongs to the edited section', async () => {
+        service.isStudioActive.set(false);
+
+        await reloadSection(sectionWithStaff(true));
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+
+      it('should keep the previous engine value when applying it failed', async () => {
+        mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: TaskError.CALCULATION_ERROR });
+        await reloadSection(sectionWithStaff(true));
+        mockWorkerPythonService.runTask.mockClear();
+
+        // The engine study kept its high safety off: no task is needed to go back to it
+        await reloadSection(sectionWithStaff(false));
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.setHighSafety, expect.anything());
+      });
+
+      it('should end on the last selected charge when it changes back while the previous one is being applied', async () => {
+        let finishFirstRequest!: () => void;
+        mockWorkerPythonService.runTask.mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finishFirstRequest = () => resolve({ result: null, error: null });
+            })
+        );
+
+        spanService.section.set(sectionWithStaff(true));
+        TestBed.flushEffects();
+        await reloadSection(sectionWithStaff(false));
+        finishFirstRequest();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        const highSafetyCalls = mockWorkerPythonService.runTask.mock.calls.filter(
+          ([task]) => task === Task.setHighSafety
+        );
+        expect(highSafetyCalls).toEqual([
+          [Task.setHighSafety, { highSafety: true }],
+          [Task.setHighSafety, { highSafety: false }]
+        ]);
+      });
     });
   });
 
