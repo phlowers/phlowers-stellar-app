@@ -27,9 +27,9 @@ const sectionSupportCatalogMissingWarning =
   'The attachment support from the section file is not present in the application support catalog';
 
 const sectionImportTranslations: Record<string, string> = {
-  'section-import.file-type-not-allowed': 'File type not allowed',
-  'section-import.file-read-error': 'Error reading file',
-  'section-import.file-parse-error': 'Error parsing file',
+  'common.import.error.file-type-not-allowed': 'File type not allowed',
+  'common.error-reading-file-label': 'Error reading file',
+  'common.error-parsing-file-label': 'Error parsing file',
   'section-import.validation-required-fields': 'Section is missing required fields',
   'section-import.validation-supports-bounds': 'Section has supports with values out of bounds',
   'section-import.import-error': 'Error importing section',

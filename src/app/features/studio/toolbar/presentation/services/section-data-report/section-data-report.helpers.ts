@@ -103,7 +103,7 @@ export function drawStudyAndCantonSection(
     { label: labels.author, value: data.author || '-', wrap: true },
     { label: labels.study, value: data.studyTitle || '-', wrap: true },
     { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
-    { label: labels.canton, value: data.cantonName || '-', wrap: true },
+    { label: labels.canton, value: data.sectionName || '-', wrap: true },
     { label: labels.comment, value: data.comment || '-', wrap: true },
     { label: labels.initialCondition, value: data.icName || '-', wrap: true },
     { label: labels.chargeName, value: data.chargeName || '-', wrap: true },

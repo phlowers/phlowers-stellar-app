@@ -19,9 +19,9 @@ import { SectionReportLabels, SpanReportRow, SupportReportRow } from './section-
  */
 export const SPAN_METRICS: MetricDescriptor<SpanReportRow>[] = [
   { labelKey: 'studio.section-state-report.span-number', unit: null, decimals: 0, field: 'spanNumber' },
-  { labelKey: 'studio.section-state-report.span-length', unit: PDF_UNITS.meters, decimals: 2, field: 'spanLength' },
+  { labelKey: 'common.span-length-label', unit: PDF_UNITS.meters, decimals: 2, field: 'spanLength' },
   { labelKey: 'studio.section-state-report.elevation', unit: PDF_UNITS.meters, decimals: 2, field: 'elevation' },
-  { labelKey: 'studio.section-state-report.parameter', unit: PDF_UNITS.meters, decimals: 0, field: 'parameter' },
+  { labelKey: 'common.parameter-label', unit: PDF_UNITS.meters, decimals: 0, field: 'parameter' },
   {
     labelKey: 'studio.section-state-report.horizontal-tension',
     unit: PDF_UNITS.daN,
@@ -57,18 +57,18 @@ export const SPAN_METRICS: MetricDescriptor<SpanReportRow>[] = [
 
 /** Per-support metric rows (transposed table: one row per metric, one column per support). */
 export const SUPPORT_METRICS: MetricDescriptor<SupportReportRow>[] = [
-  { labelKey: 'studio.section-state-report.support-number', unit: null, decimals: 0, field: 'supportNumber' },
+  { labelKey: 'common.support-no-label', unit: null, decimals: 0, field: 'supportNumber' },
   { labelKey: 'studio.section-state-report.v-chain', unit: PDF_UNITS.daN, decimals: 1, field: 'vChain' },
   { labelKey: 'studio.section-state-report.h-chain', unit: PDF_UNITS.daN, decimals: 1, field: 'hChain' },
   { labelKey: 'studio.section-state-report.l-chain', unit: PDF_UNITS.daN, decimals: 1, field: 'lChain' },
   { labelKey: 'studio.section-state-report.r-chain', unit: PDF_UNITS.daN, decimals: 1, field: 'rChain' },
-  { labelKey: 'studio.section-state-report.line-angle', unit: PDF_UNITS.grad, decimals: 1, field: 'lineAngle' },
+  { labelKey: 'common.line-angle-label', unit: PDF_UNITS.grad, decimals: 1, field: 'lineAngle' },
   { labelKey: 'studio.section-state-report.v-console', unit: PDF_UNITS.daN, decimals: 1, field: 'vConsole' },
   { labelKey: 'studio.section-state-report.h-console', unit: PDF_UNITS.daN, decimals: 1, field: 'hConsole' },
   { labelKey: 'studio.section-state-report.l-console', unit: PDF_UNITS.daN, decimals: 1, field: 'lConsole' },
   { labelKey: 'studio.section-state-report.r-console', unit: PDF_UNITS.daN, decimals: 1, field: 'rConsole' },
   {
-    labelKey: 'studio.section-state-report.foot-altitude',
+    labelKey: 'common.support-foot-altitude-label',
     unit: PDF_UNITS.meters,
     decimals: 2,
     field: 'footAltitude'
@@ -97,19 +97,19 @@ export const SUPPORT_METRICS: MetricDescriptor<SupportReportRow>[] = [
 /** Transloco translation keys for the report's fixed labels. */
 export const PDF_LABEL_KEYS: SectionReportLabels = {
   reportTitle: 'studio.section-state-report.title',
-  cartoucheTitle: 'studio.section-state-report.cartouche-title',
-  author: 'studio.section-state-report.author-label',
-  study: 'studio.section-state-report.study-label',
-  studyDescription: 'studio.section-state-report.description-label',
-  section: 'studio.section-state-report.section-label',
-  sectionComment: 'studio.section-state-report.comment-label',
-  initialCondition: 'studio.section-state-report.initial-condition-label',
-  chargeName: 'studio.section-state-report.charge-name-label',
-  chargeDescription: 'studio.section-state-report.charge-description-label',
+  cartoucheTitle: 'common.study-and-section-label',
+  author: 'common.author-label',
+  study: 'common.study-label',
+  studyDescription: 'common.description-label',
+  section: 'common.section-label',
+  sectionComment: 'common.comment-label',
+  initialCondition: 'common.initial-condition-label',
+  chargeName: 'common.load-name-label',
+  chargeDescription: 'common.load-description-label',
   sectionStateTitle: 'studio.section-state-report.section-state-title',
   maxParameter: 'studio.section-state-report.max-parameter-label',
   maxStressRate: 'studio.section-state-report.max-stress-rate-label',
   spansTitle: 'studio.section-state-report.spans-title',
   supportsTitle: 'studio.section-state-report.supports-title',
-  pageLabel: 'studio.section-state-report.page-label'
+  pageLabel: 'common.page-label'
 };

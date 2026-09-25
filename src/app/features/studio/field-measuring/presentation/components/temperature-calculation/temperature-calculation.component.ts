@@ -78,7 +78,7 @@ export class TemperatureCalculationComponent {
   readonly windIncidenceModeOptions = computed(() => {
     this.activeLang();
     return [
-      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      { label: this.translocoService.translate('common.auto-label'), value: 'auto' },
       {
         label: this.translocoService.translate('field-measuring.temperature-calculation.perpendicular-option'),
         value: 'perpendicular'

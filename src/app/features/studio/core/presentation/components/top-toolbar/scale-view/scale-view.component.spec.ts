@@ -56,14 +56,13 @@ describe('ScaleViewComponent', () => {
               'common.validate': 'Validate',
               'studio.scale-view.button-label': 'View',
               'studio.scale-view.form-aria-label': 'View configuration',
-              'studio.scale-view.input-aria-label': 'Number of points per range',
+              'common.number-of-points-per-range': 'Number of points per range',
               'studio.scale-view.points-legend': 'Choose the number of points to display per range.',
-              'studio.scale-view.scale-auto': 'Auto',
+              'common.auto-label': 'Auto',
               'studio.scale-view.scale-celeste': 'Reduced in z (x, y, z/2)',
               'studio.scale-view.scale-geo': 'Uniform (x, y, z)',
               'studio.scale-view.scale-legend': 'Select the display scale.',
-              'studio.scale-view.scale-plan': 'Reduced in x (x/5, y, z)',
-              'studio.scale-view.slider-aria-label': 'Number of points per range'
+              'studio.scale-view.scale-plan': 'Reduced in x (x/5, y, z)'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },

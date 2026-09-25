@@ -1,7 +1,7 @@
 <div class="header-grid">
   <dl class="contents">
     <div class="header-info">
-      <dt>{{ 'field-measuring.header.link-label' | transloco }}</dt>
+      <dt>{{ 'common.link-label' | transloco }}</dt>
       <dd>{{ measureData().link }}</dd>
     </div>
     <div class="header-info">
@@ -12,9 +12,9 @@
       <dt>{{ 'field-measuring.header.span-type-label' | transloco }}</dt>
       <dd class="capitalize">
         @if (measureData().spanType === 'phase') {
-          <ng-container>{{ 'field-measuring.header.phase-label' | transloco }}</ng-container>
+          <ng-container>{{ 'common.section-type.phase' | transloco }}</ng-container>
         } @else {
-          <ng-container>{{ 'field-measuring.header.guard-label' | transloco }}</ng-container>
+          <ng-container>{{ 'common.section-type.guard' | transloco }}</ng-container>
         }
       </dd>
     </div>
@@ -25,7 +25,7 @@
       }
     </div>
     <div class="header-info">
-      <dt>{{ 'field-measuring.header.cable-amount-label' | transloco }}</dt>
+      <dt>{{ 'common.cable-amount-label' | transloco }}</dt>
       <dd>{{ measureData().numberOfConductors }}</dd>
     </div>
   </dl>
@@ -33,7 +33,7 @@
   <!-- Location Fields Section -->
   <div class="form-field">
     <label for="portee">
-      <ng-container>{{ 'field-measuring.header.span-label' | transloco }}</ng-container>
+      <ng-container>{{ 'common.span-label' | transloco }}</ng-container>
       <sup class="mandatory">*</sup>
     </label>
     <p-select
@@ -52,7 +52,7 @@
   <div class="form-field">
     <label for="longitude">
       <span>
-        <ng-container>{{ 'field-measuring.header.longitude-label' | transloco }}</ng-container>
+        <ng-container>{{ 'common.longitude-label' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </span>
       <app-icon icon="help" class="help-icon" />
@@ -76,7 +76,7 @@
   <div class="form-field">
     <label for="latitude">
       <span>
-        <ng-container>{{ 'field-measuring.header.latitude-label' | transloco }}</ng-container>
+        <ng-container>{{ 'common.latitude-label' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </span>
       <app-icon icon="help" class="help-icon" />
@@ -99,7 +99,7 @@
 
   <div class="form-field">
     <label for="altitude">
-      <ng-container>{{ 'field-measuring.header.altitude-label' | transloco }}</ng-container>
+      <ng-container>{{ 'common.altitude-label' | transloco }}</ng-container>
       <sup class="mandatory">*</sup>
     </label>
     <p-inputgroup>
@@ -114,7 +114,7 @@
         (ngModelChange)="onFieldChange('altitude', $event)"
         required
       />
-      <p-inputgroup-addon>{{ 'field-measuring.header.meter-addon' | transloco }}</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
     </p-inputgroup>
   </div>
 

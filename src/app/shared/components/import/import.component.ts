@@ -131,8 +131,8 @@ export class ImportComponent {
     return (uuid, label) => {
       const messageTemplate = this.translocoService.translate('common.import.collision.message');
       const message = `${entityLabel} ${label} ${messageTemplate}`;
-      const acceptLabel = this.translocoService.translate('common.import.collision.yes');
-      const rejectLabel = this.translocoService.translate('common.import.collision.no');
+      const acceptLabel = this.translocoService.translate('common.yes');
+      const rejectLabel = this.translocoService.translate('common.no');
 
       return new Promise<boolean>((resolve) =>
         this.confirmationService.confirm({

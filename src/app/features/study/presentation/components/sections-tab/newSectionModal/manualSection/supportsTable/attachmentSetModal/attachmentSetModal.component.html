@@ -14,14 +14,14 @@
   data-testid="attachment-set-dialog"
 >
   <ng-template #header>
-    <p class="mb-0">{{ 'attachment-modal.title' | transloco }}</p>
+    <p class="mb-0">{{ 'common.attachment-set-label' | transloco }}</p>
   </ng-template>
   <ng-template #content>
     <div class="flex flex-row gap-4 h-full">
       <div class="flex flex-col gap-2">
         <p class="mb-0">{{ 'attachment-modal.choose-hint' | transloco }}</p>
         <div class="flex flex-col gap-1">
-          <label for="supportName">{{ 'attachment-modal.label-support-name' | transloco }}</label>
+          <label for="supportName">{{ 'common.support-name-label' | transloco }}</label>
           <p-select
             inputId="supportName"
             [options]="supportsFilterTable()"

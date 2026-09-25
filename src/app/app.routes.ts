@@ -26,12 +26,12 @@ export const appRoutes: Routes = [
     children: [
       {
         path: '',
-        title: 'routes.home',
+        title: 'common.home-label',
         loadChildren: () => import('@features/home/presentation/home.routes').then((m) => m.homeRoutes)
       },
       {
         path: 'studies',
-        title: 'routes.studies',
+        title: 'common.studies-label',
         loadChildren: () => import('@features/studies/presentation/studies.routes').then((m) => m.studiesRoutes)
       },
       {
@@ -41,17 +41,17 @@ export const appRoutes: Routes = [
       },
       {
         path: 'study/:uuid',
-        title: 'routes.study',
+        title: 'common.study-label',
         loadChildren: () => import('@features/study/presentation/study.routes').then((m) => m.studyRoutes)
       },
       {
         path: 'news',
-        title: 'routes.news',
+        title: 'common.news-label',
         loadChildren: () => import('@features/news/presentation/news.routes').then((m) => m.newsRoutes)
       },
       {
         path: 'changelog',
-        title: 'routes.changelog',
+        title: 'common.changelog-label',
         loadChildren: () => import('@features/changelog/presentation/changelog.routes').then((m) => m.changelogRoutes)
       },
       {

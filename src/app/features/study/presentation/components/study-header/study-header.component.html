@@ -7,7 +7,7 @@
     app-btn
     btnSize="s"
     btnStyle="text"
-    [attr.aria-label]="'study.header.aria-modify' | transloco"
+    [attr.aria-label]="'common.modify-label' | transloco"
     data-testid="modify-btn"
   >
     <app-icon icon="edit" />
@@ -49,7 +49,7 @@
 
   <button app-btn btnSize="s" btnStyle="text" (click)="duplicateStudy.emit(study()?.uuid!)" data-testid="duplicate-btn">
     <app-icon icon="content_copy" />
-    <ng-container>{{ 'study.header.duplicate' | transloco }}</ng-container>
+    <ng-container>{{ 'common.duplicate' | transloco }}</ng-container>
   </button>
 
   <button app-btn btnSize="s" disabled btnStyle="text">

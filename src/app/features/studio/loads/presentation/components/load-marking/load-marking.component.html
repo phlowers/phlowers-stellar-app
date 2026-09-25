@@ -21,7 +21,7 @@
   </div>
 
   <div>
-    <label for="spanSelect" class="mb-0">{{ 'loads.shared.span-label' | transloco }}</label>
+    <label for="spanSelect" class="mb-0">{{ 'common.span-label' | transloco }}</label>
     <p-select
       inputId="spanSelect"
       [options]="spansOptions()"
@@ -35,7 +35,7 @@
   </div>
 
   <div>
-    <label for="referenceSupport">{{ 'loads.shared.reference-support-label' | transloco }}</label>
+    <label for="referenceSupport">{{ 'common.reference-support-label' | transloco }}</label>
     <p-select
       inputId="referenceSupport"
       [options]="supportsOptions()"
@@ -64,7 +64,7 @@
       source="loads"
       [disabled]="!spanSelectValue()"
       [spanIndex]="selectedSpanIndex()"
-      labelKey="loads.load-marking.free-positioning-label"
+      labelKey="common.free-positioning-label"
     />
   </div>
 

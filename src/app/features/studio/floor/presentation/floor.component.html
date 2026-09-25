@@ -14,7 +14,7 @@
   </button>
 
   <div class="floor-form__span-selection">
-    <label class="span-label" for="floorSpan">{{ 'studio.shared.span-label' | transloco }}</label>
+    <label class="span-label" for="floorSpan">{{ 'common.span-label' | transloco }}</label>
     <p-select
       inputId="floorSpan"
       [options]="floorFormService.spanOptions()"
@@ -27,7 +27,7 @@
     />
 
     <label class="reference-support-label" for="floorReferenceSupport">{{
-      'studio.shared.reference-support-label' | transloco
+      'common.reference-support-label' | transloco
     }}</label>
     <p-select
       inputId="floorReferenceSupport"
@@ -54,7 +54,7 @@
 
       <button app-btn type="button" btnStyle="outlined" (click)="floorFormService.addPoint()" data-testid="add-point">
         <app-icon icon="add_circle" aria-hidden="true" />
-        <ng-container>{{ 'studio.floor.add-point-btn' | transloco }}</ng-container>
+        <ng-container>{{ 'common.add-point-label' | transloco }}</ng-container>
       </button>
     </div>
 
@@ -95,7 +95,7 @@
                 type="button"
                 class="floor-item__erase-btn"
                 (click)="floorFormService.deletePoint($index); $event.stopPropagation()"
-                [attr.aria-label]="'studio.floor.delete-point-aria-label' | transloco"
+                [attr.aria-label]="'common.delete-point-aria-label' | transloco"
                 data-testid="delete-point"
               >
                 <app-icon icon="delete" aria-hidden="true" />
@@ -123,7 +123,7 @@
             </p-inputgroup>
 
             <label [for]="'floorDistanceToRefSupport' + $index" class="floor-item__label dist-ref-label">{{
-              'studio.floor.ref-support-dist-label' | transloco
+              'common.ref-supp-dist-label' | transloco
             }}</label>
             <p-inputgroup class="floor-item__input">
               <input
@@ -169,7 +169,7 @@
         data-testid="calculate-save"
       >
         <app-icon icon="rocket_launch" aria-hidden="true" />
-        <ng-container>{{ 'studio.floor.calculate-and-save-btn' | transloco }}</ng-container>
+        <ng-container>{{ 'common.calculate-and-save-label' | transloco }}</ng-container>
       </button>
     </div>
 

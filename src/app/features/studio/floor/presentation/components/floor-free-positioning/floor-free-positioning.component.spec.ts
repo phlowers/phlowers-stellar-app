@@ -122,6 +122,7 @@ describe('FloorFreePositioningComponent', () => {
 
     it('should query dataService with frozenSpan and floor category', () => {
       fixture.detectChanges();
+      component.points();
       expect(mockDataService.getPoints).toHaveBeenCalledWith(0, 'floor');
     });
 

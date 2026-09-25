@@ -109,7 +109,7 @@ export class QuickMeasuresComponent {
     const obstacle = section?.obstacles.find((o) => o.uuid === uuid);
     if (!obstacle) return [];
     return obstacle.positions.map((_, index) => ({
-      label: this.translocoService.translate('studio.quick-measures.point-option', { index: index + 1 }),
+      label: this.translocoService.translate('common.point-index-label', { index: index + 1 }),
       value: index
     }));
   });

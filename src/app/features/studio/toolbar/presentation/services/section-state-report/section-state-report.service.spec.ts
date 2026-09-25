@@ -17,9 +17,9 @@ import { SectionStateReportData, SpanReportRow, SupportReportRow } from './secti
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
   'studio.section-state-report.title': 'Rapport État de canton',
-  'studio.section-state-report.page-label': 'Page',
-  'studio.section-state-report.report-generated-success': 'Report generated successfully',
-  'studio.section-state-report.report-generation-failed': 'Failed to generate report'
+  'common.page-label': 'Page',
+  'common.report-generated-successfully-label': 'Report generated successfully',
+  'common.failed-to-generate-report': 'Failed to generate report'
 };
 
 vi.mock('jspdf', () => {

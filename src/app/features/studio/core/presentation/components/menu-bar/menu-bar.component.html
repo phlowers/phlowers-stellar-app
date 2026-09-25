@@ -39,8 +39,8 @@
         (editOption)="viewOrEditChargeCase($event, 'edit')"
         optionLabel="label"
         optionValue="value"
-        [placeholder]="'studio.menu-bar.charge-case-select-label' | transloco"
-        [ariaLabel]="'studio.menu-bar.charge-case-select-label' | transloco"
+        [placeholder]="'common.select-load-case-label' | transloco"
+        [ariaLabel]="'common.select-load-case-label' | transloco"
         class="menubar__select"
         [showClear]="false"
         data-testid="charge-case-select"
@@ -48,7 +48,7 @@
     </div>
 
     <button
-      [attr.aria-label]="'studio.menu-bar.add-charge-aria-label' | transloco"
+      [attr.aria-label]="'common.add-load-case-label' | transloco"
       app-btn
       btnStyle="outlined"
       btnSize="s"
@@ -60,7 +60,7 @@
   } @else {
     <button (click)="openNewChargeModal.emit()" app-btn btnSize="s" btnStyle="outlined" class="section__content-init">
       <app-icon icon="add" />
-      <span>{{ 'studio.menu-bar.add-load-case' | transloco }}</span>
+      <span>{{ 'common.add-load-case-label' | transloco }}</span>
     </button>
   }
 
@@ -91,6 +91,6 @@
     data-testid="generate-report-btn"
   >
     <app-icon icon="description" aria-hidden="true" />
-    <ng-container>{{ 'studio.menu-bar.generate-report' | transloco }}</ng-container>
+    <ng-container>{{ 'common.report' | transloco }}</ng-container>
   </button>
 </div>

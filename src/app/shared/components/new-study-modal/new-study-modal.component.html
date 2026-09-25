@@ -10,7 +10,7 @@
     <p class="text-l-600 mb-0 flex gap-2">
       <app-icon icon="edit" />
       @if (mode() === 'new') {
-        <span>{{ 'shared.new-study-modal.create-title' | transloco }}</span>
+        <span>{{ 'common.create-a-new-study' | transloco }}</span>
       } @else {
         <span>{{ 'shared.new-study-modal.edit-title' | transloco }}</span>
       }
@@ -47,7 +47,7 @@
       </div>
       <div>
         <div class="label-container">
-          <label for="description" class="label">{{ 'shared.new-study-modal.description-label' | transloco }}</label>
+          <label for="description" class="label">{{ 'common.description-label' | transloco }}</label>
           <span class="input-length">{{ descriptionLength() }}/240</span>
         </div>
         <textarea

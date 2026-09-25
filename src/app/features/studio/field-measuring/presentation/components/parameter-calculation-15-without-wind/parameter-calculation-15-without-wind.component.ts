@@ -82,7 +82,7 @@ export class ParameterCalculation15WithoutWindComponent {
   readonly updateModeOptions = computed(() => {
     this.activeLang();
     return [
-      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      { label: this.translocoService.translate('common.auto-label'), value: 'auto' },
       {
         label: this.translocoService.translate('field-measuring.parameter-calculation-15.manual-option'),
         value: 'manual'
@@ -266,7 +266,7 @@ export class ParameterCalculation15WithoutWindComponent {
       this.messageService.add({
         severity: 'success',
         summary: this.translocoService.translate('common.success'),
-        detail: this.translocoService.translate('field-measuring.parameter-calculation-15.success-detail'),
+        detail: this.translocoService.translate('study.notifications.ic-added'),
         life: 3000
       });
     }

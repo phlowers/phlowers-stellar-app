@@ -12,7 +12,8 @@ import { FieldMeasure } from '../domain/types';
 import { formatSpanLabel } from './helpers';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
-  PARAMETER_CALCULATION_METHOD_EXPORT_KEYS,
+  PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS,
+  TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE,
   UPDATE_MODE_15C_EXPORT_KEYS,
   WIND_SPEED_UNIT_EXPORT_KEYS,
   CALCULATION_TYPE_EXPORT_KEYS
@@ -276,8 +277,12 @@ export const buildParameterCalculationExport = (
       method.pep = buildPepMethodExport(measureData);
       break;
   }
+  const methodName: ParameterCalculationExport['methodName'] =
+    measureData.calculationMethod === 'tangente-aiming'
+      ? TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE
+      : translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS[measureData.calculationMethod]);
   return {
-    methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_EXPORT_KEYS[measureData.calculationMethod]),
+    methodName,
     subMethodName: null,
     leftSupport: measureData.leftSupport,
     method

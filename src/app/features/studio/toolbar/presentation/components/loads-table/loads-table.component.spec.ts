@@ -236,8 +236,8 @@ describe('LoadsTableComponent', () => {
             en: {
               'common.symmetric': 'Symmetric',
               'common.dis-symmetric': 'Dissymmetric',
-              'studio.loads-table.punctual-load-label': 'Punctual load',
-              'studio.loads-table.marking-label': 'Marking',
+              'common.punctual-load-label': 'Punctual load',
+              'common.marking-label': 'Marking',
               'shared.studio.cable-mod-lengthening': 'Lengthening',
               'shared.studio.cable-mod-shortening': 'Shortening',
               'loads.cable-support-manip.crane-handling-option': 'Crane handling',
@@ -1010,7 +1010,7 @@ describe('LoadsTableComponent', () => {
         expect.objectContaining({
           author: 'test@example.com',
           studyTitle: 'Test Study',
-          cantonName: 'Test section',
+          sectionName: 'Test section',
           chargeName: 'Test Charge',
           chargeDescription: 'Test description',
           personnelPresence: true

@@ -116,7 +116,7 @@ export class HomeComponent {
 
   private buildDefaultTexts(): HomeTexts {
     return {
-      newsTitle: this.translocoService.translate('home.news-title'),
+      newsTitle: this.translocoService.translate('common.news-label'),
       newsText: this.translocoService.translate('home.news-text'),
       newsLinkText: this.translocoService.translate('home.news-link-text'),
       updateTitle: this.translocoService.translate('home.update-title'),

@@ -88,8 +88,8 @@ export class ChargesService {
       severity: 'success',
       summary: this.translocoService.translate('common.notification.successful'),
       detail: existingCharge
-        ? this.translocoService.translate('shared.charges-service.update-detail')
-        : this.translocoService.translate('shared.charges-service.create-detail')
+        ? this.translocoService.translate('shared.loads-service.update-detail')
+        : this.translocoService.translate('shared.loads-service.create-detail')
     });
   }
 
@@ -117,7 +117,7 @@ export class ChargesService {
     this.messageService.add({
       severity: 'success',
       summary: this.translocoService.translate('common.notification.successful'),
-      detail: this.translocoService.translate('shared.charges-service.delete-detail'),
+      detail: this.translocoService.translate('shared.loads-service.delete-detail'),
       life: 500
     });
   }

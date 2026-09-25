@@ -35,7 +35,7 @@
       data-testid="create-section-empty-btn"
     >
       <app-icon icon="add" />
-      {{ 'sections-tab.create-section' | transloco }}
+      {{ 'common.create-a-section-label' | transloco }}
     </button>
   </section>
 }
@@ -61,10 +61,10 @@
         />
 
         <dl>
-          <dt class="section__title-name">{{ 'sections-tab.col-name' | transloco }}</dt>
+          <dt class="section__title-name">{{ 'common.section-name-label' | transloco }}</dt>
           <dd class="section__text-name" data-testid="section-name">{{ section.name }}</dd>
 
-          <dt class="section__title-type">{{ 'sections-tab.col-type' | transloco }}</dt>
+          <dt class="section__title-type">{{ 'common.section-type-label' | transloco }}</dt>
           <dd class="section__text-type">
             @if (section.type === 'guard') {
               <ng-container>{{ 'common.section-type.guard' | transloco }}</ng-container>
@@ -82,7 +82,7 @@
           </dd>
         </dl>
 
-        <p class="mb-0 section__title-init">{{ 'sections-tab.initial-condition' | transloco }}</p>
+        <p class="mb-0 section__title-init">{{ 'common.initial-condition-label' | transloco }}</p>
 
         @if (!section.initial_conditions || section.initial_conditions.length === 0) {
           <button
@@ -140,7 +140,7 @@
         }
 
         @if (section.charges && section.charges.length > 0) {
-          <p class="mb-0 section__title-charges">{{ 'sections-tab.charge-cases' | transloco }}</p>
+          <p class="mb-0 section__title-charges">{{ 'sections-tab.load-cases' | transloco }}</p>
           <div class="section__content-charges w-[12.5rem]">
             <app-select-with-buttons
               [placeholder]="'sections-tab.placeholder-view-cc' | transloco"
@@ -153,13 +153,13 @@
               (editOption)="viewOrEditChargeCase($event, 'edit', section)"
               optionLabel="label"
               optionValue="value"
-              [ariaLabel]="'sections-tab.aria-select-charge' | transloco"
+              [ariaLabel]="'common.select-load-case-label' | transloco"
               [showClear]="false"
             />
           </div>
         }
 
-        <p class="mb-0 section__title-action">{{ 'sections-tab.actions' | transloco }}</p>
+        <p class="mb-0 section__title-action">{{ 'common.actions-label' | transloco }}</p>
 
         <button
           (click)="popover.toggle($event)"
@@ -214,7 +214,7 @@
               data-testid="section-report-btn"
             >
               <app-icon icon="description" />
-              <span>{{ 'sections-tab.report-action' | transloco }}</span>
+              <span>{{ 'common.report' | transloco }}</span>
             </button>
 
             <button
@@ -243,7 +243,7 @@
       data-testid="create-section-btn"
     >
       <app-icon icon="add" />
-      {{ 'sections-tab.create-section' | transloco }}
+      {{ 'common.create-a-section-label' | transloco }}
     </button>
     <a
       app-btn

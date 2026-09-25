@@ -128,13 +128,13 @@ describe('ImportStudyComponent', () => {
               'studies.import.error-import': 'Error importing study',
               'studies.import.error-delete': 'Error deleting study',
               'studies.import.error-decode': 'Error decoding file',
-              'studies.import.error-parse': 'Error parsing file',
-              'studies.import.error-read': 'Error reading file',
+              'common.error-parsing-file-label': 'Error parsing file',
+              'common.error-reading-file-label': 'Error reading file',
               'studies.import.success-detail': 'Study imported successfully',
               'studies.import.collision-message': 'Study {{ label }} already exists. Do you want to replace it?',
               'common.import.error.file-type-not-allowed': 'File type not allowed',
-              'common.import.collision.yes': 'Yes',
-              'common.import.collision.no': 'No'
+              'common.yes': 'Yes',
+              'common.no': 'No'
             },
             fr: {}
           },

@@ -157,7 +157,7 @@ export class SectionsTabComponent {
       author: study?.author_email ?? '',
       studyTitle: study?.title ?? '',
       studyDescription: study?.description ?? '',
-      cantonName: section.name ?? '',
+      sectionName: section.name ?? '',
       comment: section.comment ?? '',
       icName: ic?.name ?? '',
       chargeName: charge?.name ?? '',

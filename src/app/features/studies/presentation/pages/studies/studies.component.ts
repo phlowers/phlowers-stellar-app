@@ -96,8 +96,8 @@ export class StudiesComponent {
       accept: () => {
         this.studiesService.deleteStudy(uuid);
       },
-      acceptLabel: this.translocoService.translate('common.import.collision.yes'),
-      rejectLabel: this.translocoService.translate('common.import.collision.no')
+      acceptLabel: this.translocoService.translate('common.yes'),
+      rejectLabel: this.translocoService.translate('common.no')
     });
   }
 }

@@ -188,17 +188,17 @@ export class SectionPlotCardComponent {
         title: this.translocoService.translate('studio.section-plot-card.chain-displacement-acc-title'),
         fields: [
           {
-            label: this.translocoService.translate('studio.section-plot-card.x-label'),
+            label: this.translocoService.translate('common.x-label'),
             value: this.getFormatedNumberIndex(displacement?.[0], 2),
             unit: 'm'
           },
           {
-            label: this.translocoService.translate('studio.section-plot-card.y-label'),
+            label: this.translocoService.translate('common.y-label'),
             value: this.getFormatedNumberIndex(displacement?.[1], 2),
             unit: 'm'
           },
           {
-            label: this.translocoService.translate('studio.section-plot-card.z-label'),
+            label: this.translocoService.translate('common.z-label'),
             value: this.getFormatedNumberIndex(displacement?.[2], 2),
             unit: 'm'
           }

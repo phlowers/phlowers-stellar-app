@@ -53,9 +53,7 @@
     </div>
 
     <div class="parameterUncertaintyPapoto">
-      <label for="parameterUncertaintyPapoto-input">{{
-        'field-measuring.parameter-calculation-15.uncertainty-parameter-label' | transloco
-      }}</label>
+      <label for="parameterUncertaintyPapoto-input">{{ 'common.uncertainty-parameter-label' | transloco }}</label>
       <p-inputgroup>
         <input
           id="parameterUncertaintyPapoto-input"
@@ -88,7 +86,7 @@
 
     <div class="cableTemperatureUncertainty">
       <label for="cableTemperatureUncertainty-input">{{
-        'field-measuring.shared.uncertainty-cable-temperature' | transloco
+        'common.uncertainty-cable-temperature-label' | transloco
       }}</label>
       <p-inputgroup>
         <input
@@ -121,7 +119,7 @@
 
       <div class="parameterUncertaintyPapoto">
         <dt id="parameterUncertaintyPapoto-display">
-          <del>{{ 'field-measuring.parameter-calculation-15.uncertainty-parameter-label' | transloco }}</del>
+          <del>{{ 'common.uncertainty-parameter-label' | transloco }}</del>
         </dt>
         <dd>
           <del>{{ '-' }}</del>
@@ -138,7 +136,7 @@
 
       <div class="cableTemperatureUncertainty">
         <dt>
-          <del>{{ 'field-measuring.parameter-calculation-15.uncertainty-cable-temperature' | transloco }}</del>
+          <del>{{ 'common.uncertainty-cable-temperature-label' | transloco }}</del>
         </dt>
         <dd>
           <del>{{ measureData().outputs.cableTemperature?.cableTemperatureUncertainty ?? '-' }} °C</del>

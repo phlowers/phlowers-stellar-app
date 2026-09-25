@@ -19,7 +19,7 @@
 </button>
 
 <div class="distance-measuring__span-cols">
-  <label for="distanceSpan" class="span-label">{{ 'studio.studio-page.span-option' | transloco }}</label>
+  <label for="distanceSpan" class="span-label">{{ 'common.span-label' | transloco }}</label>
   <p-select
     inputId="distanceSpan"
     [options]="service.spanOptions()"
@@ -59,18 +59,16 @@
         (click)="service.setActivePoint($index)"
         data-testid="select-point"
       >
-        <span class="sr-only"
-          >{{ 'studio.distance-measuring.select-point-label' | transloco }}&nbsp;{{ $index + 1 }}</span
-        >
+        <span class="sr-only">{{ 'common.select-point-label' | transloco }}&nbsp;{{ $index + 1 }}</span>
       </button>
 
       <div class="distance-item__header">
-        <p class="distance-item__title">{{ 'studio.distance-measuring.point-label' | transloco }} {{ $index + 1 }}</p>
+        <p class="distance-item__title">{{ 'common.point-label' | transloco }} {{ $index + 1 }}</p>
       </div>
 
       <div class="distance-item__form">
         <label [for]="'altitudePoint' + $index" class="distance-item__label alt-point-label">{{
-          'studio.distance-measuring.point-alt-label' | transloco
+          'common.point-alt-label' | transloco
         }}</label>
         <p-inputgroup class="distance-item__input">
           <input
@@ -89,7 +87,7 @@
         </p-inputgroup>
 
         <label [for]="'distanceToRefSupport' + $index" class="distance-item__label dist-ref-label">{{
-          'studio.distance-measuring.ref-support-dist-label' | transloco
+          'common.ref-support-dist-label' | transloco
         }}</label>
         <p-inputgroup class="distance-item__input">
           <input
@@ -108,7 +106,7 @@
         </p-inputgroup>
 
         <label [for]="'distanceToLineAxis' + $index" class="distance-item__label dist-axis-label">{{
-          'studio.distance-measuring.line-axis-dist-label' | transloco
+          'common.line-axis-dist-label' | transloco
         }}</label>
         <p-inputgroup class="distance-item__input">
           <input
