@@ -80,10 +80,22 @@ describe('StrandRrtsComponent', () => {
     fixture.detectChanges();
   };
 
+  // The engine mock answers at once: every answer is in once the pending promises have settled
+  const waitForEngine = () => new Promise((resolve) => setTimeout(resolve));
+
   const setup = async (section: Section | null = makeSection()) => {
     createComponent(section);
     await fixture.whenStable();
     fixture.detectChanges();
+    // A saved entry is calculated on opening
+    await waitForEngine();
+    fixture.detectChanges();
+  };
+
+  // Opened on a saved entry, without the engine calls of its opening calculation
+  const setupSaved = async () => {
+    await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+    mockWorkerPythonService.runTask.mockClear();
   };
 
   const typeIn = (testId: string, value: string): HTMLInputElement => {
@@ -437,7 +449,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it('gives the engine the saved cut strands back', async () => {
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       typeIn('rrts-cut-strands-layer1-input', '5');
       await calculate();
 
@@ -455,10 +467,40 @@ describe('StrandRrtsComponent', () => {
       expect(getByTestId('results-rrts-value')).not.toBeNull();
     });
 
+    it('runs on opening on a saved entry, whose results are not saved', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+
+      expect(mockWorkerPythonService.runTask.mock.calls).toEqual([
+        [Task.setCutStrands, { cutStrands: [1, 3, 0, 0, 0, 0, 0, 0] }],
+        [Task.getRrts, undefined],
+        [Task.getUtilizationRate, undefined],
+        [Task.setCutStrands, { cutStrands: [1, 3, 0, 0, 0, 0, 0, 0] }]
+      ]);
+      expect(getByTestId('results-rrts-value')).not.toBeNull();
+      expect(footerButton('save-btn').disabled).toBe(false);
+    });
+
+    it('does not run on opening without saved entry', async () => {
+      await setup();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('does not run again when a save loads its entry back', async () => {
+      await setupSaved();
+      typeIn('rrts-cut-strands-layer1-input', '5');
+      await calculate();
+      await component.save();
+      // Loads the saved entry back into the form
+      fixture.detectChanges();
+      await waitForEngine();
+
+      expect(mockWorkerPythonService.runTask.mock.calls.filter(([task]) => task === Task.getRrts)).toHaveLength(1);
+    });
+
     it.each([Task.setCutStrands, Task.getRrts, Task.getUtilizationRate])(
       'tells when %s fails, and drops the previous results',
       async (failingTask) => {
-        await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+        await setupSaved();
         await calculate();
         failTask(failingTask);
         await calculate();
@@ -497,7 +539,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it('locks every action while calculating', async () => {
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       let answer!: () => void;
       mockWorkerPythonService.runTask.mockImplementationOnce(
         (task: Task) => new Promise((resolve) => (answer = () => resolve(engineAnswer(task))))
@@ -586,7 +628,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it('replaces the saved entry with one linked to the selected span', async () => {
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       component.form.controls.span.setValue({ index: 0, uuid: 's1' });
       typeIn('rrts-cut-strands-layer1-input', '5');
       await calculate();
@@ -598,7 +640,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it('gives the engine the newly saved cut strands', async () => {
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       typeIn('rrts-cut-strands-layer1-input', '5');
       await calculate();
       await component.save();
@@ -646,7 +688,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it('drops the saved entry', async () => {
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       expect(footerButton('delete-btn').disabled).toBe(false);
 
       await component.delete();
@@ -660,7 +702,7 @@ describe('StrandRrtsComponent', () => {
     });
 
     it('keeps the entry deleted, and tells the studio is not updated, when the engine rejects the default cut strands', async () => {
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       failTask(Task.setCutStrands);
       await component.delete();
 
@@ -674,7 +716,7 @@ describe('StrandRrtsComponent', () => {
 
     it('keeps the entry, and the engine untouched, when deleting fails', async () => {
       mockSectionService.createOrUpdateSection.mockRejectedValue(new Error('db'));
-      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData() }));
+      await setupSaved();
       await component.delete();
 
       expect(spanService.section()?.rrts_cut_strands).toEqual(makeCutStrandsData());
@@ -695,7 +737,6 @@ describe('StrandRrtsComponent', () => {
     expect(component.form.controls.supportRef.enabled).toBe(true);
     expect(component.form.controls.addMarking.enabled).toBe(true);
     expect(component.supportOptions()).toHaveLength(2);
-    expect(footerButton('save-btn').disabled).toBe(true);
   });
 
   it('loads a saved span entry without reference support with the left support by default', async () => {

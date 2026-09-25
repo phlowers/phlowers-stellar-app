@@ -190,7 +190,7 @@ export class StrandRrtsComponent {
       if (addMarking.disabled) addMarking.enable();
     });
 
-    // Load the saved entry into the form
+    // Load the saved entry into the form. Effects run in creation order: the cut strands controls are in the form
     effect(() => {
       const entry = this.savedEntry();
       const layers = this.layers();
@@ -206,6 +206,9 @@ export class StrandRrtsComponent {
         // Set last so the span rules (reference support default, disabled fields) apply to the saved values
         this.form.controls.span.setValue(span);
         layers.forEach(({ layer, control }) => control.setValue(entry.cutStrands[layer - 1] ?? DEFAULT_CUT_STRANDS));
+        // Results are not saved: calculate them on opening, once the cut strands are loaded. Not after a save, which
+        // reloads the entry it has just calculated
+        if (layers.length && !this.calculatedValue()) void this.calculate();
       });
     });
   }
