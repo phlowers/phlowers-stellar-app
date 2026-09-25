@@ -30,6 +30,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
@@ -78,6 +79,7 @@ export class StrandRrtsComponent {
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly logger = inject(LoggerService);
   readonly spanService = inject(PlotSpanService);
 
   readonly DISTANCE_MAX = DISTANCE_MAX;
@@ -221,7 +223,8 @@ export class StrandRrtsComponent {
     try {
       this.results.set(await this.calculateResults(toCatalogCutStrands(value.cutStrands, layers)));
       this.calculatedValue.set(value);
-    } catch {
+    } catch (error) {
+      this.logger.error('Failed to calculate the RRTS', error);
       this.results.set(null);
       this.calculatedValue.set(null);
       this.notify('error', 'failed-to-calculate');
@@ -245,7 +248,8 @@ export class StrandRrtsComponent {
       this.spanService.section.set(updated);
       this.notify('success', 'saved');
       await this.syncSavedCutStrands();
-    } catch {
+    } catch (error) {
+      this.logger.error('Failed to save RRTS cut strands', error);
       this.notify('error', 'failed-to-save');
     } finally {
       this.isSaving.set(false);
@@ -264,7 +268,8 @@ export class StrandRrtsComponent {
       this.spanService.section.set(updated);
       this.notify('success', 'deleted');
       await this.syncSavedCutStrands();
-    } catch {
+    } catch (error) {
+      this.logger.error('Failed to delete RRTS cut strands', error);
       this.notify('error', 'failed-to-delete');
     } finally {
       this.isDeleting.set(false);
@@ -306,7 +311,8 @@ export class StrandRrtsComponent {
   private async syncSavedCutStrands(): Promise<void> {
     try {
       await this.applySavedCutStrands();
-    } catch {
+    } catch (error) {
+      this.logger.error('Failed to update the studio with the RRTS cut strands', error);
       this.notify('error', 'failed-to-sync');
     }
   }

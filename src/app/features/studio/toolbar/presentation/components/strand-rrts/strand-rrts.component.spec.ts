@@ -8,6 +8,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
@@ -58,6 +59,7 @@ describe('StrandRrtsComponent', () => {
   let mockSectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
+  let mockLogger: { error: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -138,6 +140,7 @@ describe('StrandRrtsComponent', () => {
     mockToolbarDialogService = { setTemplates: vi.fn() };
     mockSectionService = { createOrUpdateSection: vi.fn().mockResolvedValue({ removedGeometryBoundObjects: false }) };
     mockNotificationService = { success: vi.fn(), error: vi.fn() };
+    mockLogger = { error: vi.fn() };
     mockWorkerPythonService = { runTask: vi.fn((task: Task) => Promise.resolve(engineAnswer(task))) };
 
     await TestBed.configureTestingModule({
@@ -179,7 +182,8 @@ describe('StrandRrtsComponent', () => {
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: SectionService, useValue: mockSectionService },
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: LoggerService, useValue: mockLogger }
       ]
     }).compileComponents();
 
@@ -506,6 +510,7 @@ describe('StrandRrtsComponent', () => {
         await calculate();
 
         expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to calculate the RRTS');
+        expect(mockLogger.error).toHaveBeenCalledWith('Failed to calculate the RRTS', expect.any(Error));
         expect(getByTestId('results-rrts-value')).toBeNull();
         expect(footerButton('save-btn').disabled).toBe(true);
         expect(engineCutStrands().at(-1)).toEqual([1, 3, 0, 0, 0, 0, 0, 0]);
@@ -526,6 +531,7 @@ describe('StrandRrtsComponent', () => {
       await calculate();
 
       expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to calculate the RRTS');
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to calculate the RRTS', expect.any(Error));
       expect(component.results()).toBeNull();
     });
 
@@ -535,6 +541,7 @@ describe('StrandRrtsComponent', () => {
       await calculate();
 
       expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to calculate the RRTS');
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to calculate the RRTS', expect.any(Error));
       expect(component.results()).toBeNull();
     });
 
@@ -660,6 +667,10 @@ describe('StrandRrtsComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith(
         'Failed to update the studio with the RRTS cut strands'
       );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to update the studio with the RRTS cut strands',
+        expect.any(Error)
+      );
       expect(mockNotificationService.error).not.toHaveBeenCalledWith('Failed to save RRTS cut strands');
     });
 
@@ -672,6 +683,7 @@ describe('StrandRrtsComponent', () => {
 
       expect(spanService.section()?.rrts_cut_strands).toBeUndefined();
       expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to save RRTS cut strands');
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to save RRTS cut strands', new Error('db'));
       expect(engineCutStrands()).toEqual([
         [5, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
@@ -711,6 +723,10 @@ describe('StrandRrtsComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith(
         'Failed to update the studio with the RRTS cut strands'
       );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to update the studio with the RRTS cut strands',
+        expect.any(Error)
+      );
       expect(mockNotificationService.error).not.toHaveBeenCalledWith('Failed to delete RRTS cut strands');
     });
 
@@ -721,6 +737,7 @@ describe('StrandRrtsComponent', () => {
 
       expect(spanService.section()?.rrts_cut_strands).toEqual(makeCutStrandsData());
       expect(mockNotificationService.error).toHaveBeenCalledWith('Failed to delete RRTS cut strands');
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to delete RRTS cut strands', new Error('db'));
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
   });
