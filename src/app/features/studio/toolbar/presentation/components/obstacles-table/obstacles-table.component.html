@@ -1,5 +1,5 @@
 <ng-template #header>
-  <p class="text-l-600 mb-0 flex gap-2 items-center">
+  <p class="obstacles-table__header">
     <app-icon icon="table_chart" aria-hidden="true" />
     <span>{{ 'studio.top-toolbar.obstacles-table-label' | transloco }}</span>
   </p>
@@ -19,14 +19,15 @@
     />
   </div>
 
-  <dl class="obstacles-table__field">
-    <dt>{{ 'studio.obstacles-table.initial-condition-label' | transloco }}</dt>
-    <dd data-testid="initial-condition-value">{{ selectedInitialConditionName() ?? '-' }}</dd>
-  </dl>
-
-  <dl class="obstacles-table__field">
-    <dt>{{ 'studio.obstacles-table.charge-case-label' | transloco }}</dt>
-    <dd data-testid="charge-case-value">{{ selectedChargeName() ?? '-' }}</dd>
+  <dl class="obstacles-table__field--groups">
+    <div class="obstacles-table__field">
+      <dt>{{ 'studio.obstacles-table.initial-condition-label' | transloco }}</dt>
+      <dd data-testid="initial-condition-value">{{ selectedInitialConditionName() ?? '-' }}</dd>
+    </div>
+    <div class="obstacles-table__field">
+      <dt>{{ 'studio.obstacles-table.charge-case-label' | transloco }}</dt>
+      <dd data-testid="charge-case-value">{{ selectedChargeName() ?? '-' }}</dd>
+    </div>
   </dl>
 </section>
 
@@ -62,7 +63,7 @@
         {{ 'studio.obstacles-table.number-column-label' | transloco }}
       </th>
       <th id="name-col" pSortableColumn="obstacleName">
-        <div class="flex items-center gap-2">
+        <div class="obstacles-table__column-header">
           <span>{{ 'studio.obstacles-table.obstacle-name-column-label' | transloco }}</span>
           <app-icon [icon]="getSortIcon('obstacleName')" aria-hidden="true" />
         </div>
@@ -115,6 +116,6 @@
 <ng-template #footer>
   <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
     <app-icon icon="description" aria-hidden="true" />
-    <ng-container>{{ 'common.report' | transloco }}</ng-container>
+    {{ 'common.report' | transloco }}
   </button>
 </ng-template>

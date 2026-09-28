@@ -52,8 +52,8 @@ import { ALL_SPANS_OPTION_VALUE } from './obstacles-table.constantes';
 })
 /** Dialog component displaying a read-only, paginated table of obstacle points for a selected span. */
 export class ObstaclesTableComponent {
-  readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
-  readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
+  readonly headerTemplate = viewChild<TemplateRef<void>>('header');
+  readonly footerTemplate = viewChild<TemplateRef<void>>('footer');
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly spanService = inject(PlotSpanService);

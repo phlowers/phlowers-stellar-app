@@ -1,9 +1,7 @@
 import { Distance } from '@services/worker_python/tasks/types';
 import { Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { ObstacleTableLabelOption, ObstacleTableRow } from './obstacles-table.interfaces';
-
-const findLabel = (options: ObstacleTableLabelOption[], value: string): string =>
-  options.find((option) => option.value === value)?.label ?? value;
+import { findLabel } from './obstacles-table.constantes';
 
 /**
  * Builds one table row per obstacle point (position) for the given obstacles, resolving
