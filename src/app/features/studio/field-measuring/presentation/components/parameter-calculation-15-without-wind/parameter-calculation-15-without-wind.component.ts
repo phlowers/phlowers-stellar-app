@@ -22,7 +22,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
-import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
+import {
+  truncateNumberToNoDecimal,
+  truncateNumberToOneDecimal,
+  truncateNumberToTwoDecimals
+} from '@shared/helpers/truncateDecimals';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -105,12 +109,13 @@ export class ParameterCalculation15WithoutWindComponent {
       return (
         isNumber(manualData?.cableTemperatureCalibration) &&
         isNumber(manualData?.parameterPapoto) &&
+        isNumber(manualData?.parameterUncertaintyPapoto) &&
         isNumber(manualData?.cableTemperatureCalibrationUncertainty)
       );
     }
     return (
       isNumber(this.measureData().outputs.papoto?.parameter) &&
-      // data.parameterUncertaintyPapoto !== null && // TODO: Uncomment when parameterUncertaintyPapoto is available
+      isNumber(this.measureData().outputs.papoto?.uncertainty) &&
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperature) &&
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty)
     );
@@ -131,19 +136,23 @@ export class ParameterCalculation15WithoutWindComponent {
           value === 'manual'
             ? {
                 parameterPapoto:
-                  d.manualParameterCalculation15CWithoutWind?.parameterPapoto ?? d.outputs.papoto?.parameter ?? null,
+                  d.manualParameterCalculation15CWithoutWind?.parameterPapoto ??
+                  (d.outputs.papoto?.parameter != null ? truncateNumberToNoDecimal(d.outputs.papoto.parameter) : null),
                 parameterUncertaintyPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ??
-                  d.outputs.papoto?.uncertainty ??
-                  null,
+                  (d.outputs.papoto?.uncertainty != null
+                    ? truncateNumberToTwoDecimals(d.outputs.papoto.uncertainty)
+                    : null),
                 cableTemperatureCalibration:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ??
-                  d.outputs.cableTemperature?.cableTemperature ??
-                  null,
+                  (d.outputs.cableTemperature?.cableTemperature != null
+                    ? truncateNumberToOneDecimal(d.outputs.cableTemperature.cableTemperature)
+                    : null),
                 cableTemperatureCalibrationUncertainty:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibrationUncertainty ??
-                  d.outputs.cableTemperature?.cableTemperatureUncertainty ??
-                  null
+                  (d.outputs.cableTemperature?.cableTemperatureUncertainty != null
+                    ? truncateNumberToOneDecimal(d.outputs.cableTemperature.cableTemperatureUncertainty)
+                    : null)
               }
             : d.manualParameterCalculation15CWithoutWind
       }));
@@ -187,8 +196,7 @@ export class ParameterCalculation15WithoutWindComponent {
     };
     const autoDataToSend = {
       parameterPapoto: data.outputs.papoto?.parameter || null,
-      // Uncertainties currently unused
-      parameterUncertaintyPapoto: data.parameterUncertaintyPapoto || null,
+      parameterUncertaintyPapoto: data.outputs.papoto?.uncertainty || null,
       cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature || null,
       cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty || null
     };

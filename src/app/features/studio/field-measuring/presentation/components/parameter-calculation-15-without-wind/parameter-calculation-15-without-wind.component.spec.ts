@@ -285,12 +285,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     // Set all required fields for manual mode
     component.updateMeasureData('updateMode15C', 'manual');
     component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
     component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
     component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
-
-    // Set top-level fields for the calculation to read
-    component.updateMeasureData('parameterPapoto', 1700);
-    component.updateMeasureData('parameterUncertaintyPapoto', 12);
 
     fixture.detectChanges();
 
@@ -298,12 +295,36 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
     expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(expect.any(String), {
       parameterPapoto: 1700,
-      parameterUncertaintyPapoto: null,
+      parameterUncertaintyPapoto: 12,
       cableTemperatureCalibration: 45,
       cableTemperatureCalibrationUncertainty: 3,
       span_index: 11
     });
     expect(component.parameter15CError()).toBe(false);
+  });
+
+  it('should send zero uncertainties as 0 instead of null', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: { parameter15CMinusUncertainty: 1700, parameter15C: 1700, parameter15CPlusUncertainty: 1700 },
+      error: null,
+      diagnostics: []
+    });
+
+    component.updateMeasureData('updateMode15C', 'manual');
+    component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 0);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 0);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 0);
+
+    await component.calculateParameter15C();
+
+    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(expect.any(String), {
+      parameterPapoto: 1700,
+      parameterUncertaintyPapoto: 0,
+      cableTemperatureCalibration: 0,
+      cableTemperatureCalibrationUncertainty: 0,
+      span_index: 11
+    });
   });
 
   it('should validate form correctly for manual mode', () => {

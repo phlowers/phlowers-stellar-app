@@ -206,13 +206,11 @@
       </div>
       <div class="uncertaintyCableTemperature">
         <dt>
-          <del>{{ 'field-measuring.shared.uncertainty-cable-temperature' | transloco }}</del>
+          {{ 'field-measuring.shared.uncertainty-cable-temperature' | transloco }}
         </dt>
         <dd>
-          <del>
-            {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-3') ?? '-' }}
-            °C
-          </del>
+          {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-1') ?? '-' }}
+          °C
         </dd>
       </div>
       <div class="solarFlux">

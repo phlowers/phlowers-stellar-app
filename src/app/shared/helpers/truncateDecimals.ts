@@ -81,3 +81,25 @@ export function truncateOneDecimalValue(value: string): string {
 export function truncateNumberToOneDecimal(value: number): number {
   return Math.trunc(value * 10) / 10;
 }
+
+/**
+ * Truncates a numeric value to an integer without rounding.
+ * Example: 2200.7 → 2200, 2200.2 → 2200
+ *
+ * @param value - The numeric value to truncate
+ * @returns The truncated integer value
+ */
+export function truncateNumberToNoDecimal(value: number): number {
+  return Math.trunc(value);
+}
+
+/**
+ * Truncates a numeric value to 2 decimal places without rounding.
+ * Example: 2200.177 → 2200.17, 2200.999 → 2200.99
+ *
+ * @param value - The numeric value to truncate
+ * @returns The truncated numeric value
+ */
+export function truncateNumberToTwoDecimals(value: number): number {
+  return Math.trunc(value * 100) / 100;
+}

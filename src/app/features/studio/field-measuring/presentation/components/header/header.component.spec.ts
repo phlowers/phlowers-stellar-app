@@ -8,6 +8,10 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '../../helpers';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { NotificationService } from '@services/notification/notification.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 @Component({
@@ -22,8 +26,17 @@ describe('HeaderComponent', () => {
   let fixture: ComponentFixture<HeaderComponent>;
 
   const mockMeasureData: FieldMeasure = createTestMeasureData();
+  let notificationServiceMock: vi.Mocked<NotificationService>;
+  let workerPythonServiceMock: vi.Mocked<WorkerPythonService>;
+  let loggerServiceMock: vi.Mocked<LoggerService>;
 
   beforeEach(async () => {
+    notificationServiceMock = { info: vi.fn() } as unknown as vi.Mocked<NotificationService>;
+    workerPythonServiceMock = {
+      runTask: vi.fn().mockResolvedValue({ result: null, error: null, diagnostics: [] })
+    } as unknown as vi.Mocked<WorkerPythonService>;
+    loggerServiceMock = { error: vi.fn() } as unknown as vi.Mocked<LoggerService>;
+
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
@@ -35,6 +48,7 @@ describe('HeaderComponent', () => {
               'field-measuring.header.degree-addon': '\u00b0',
               'field-measuring.header.guard-label': 'Guard',
               'field-measuring.header.latitude-label': 'Latitude',
+              'field-measuring.header.localization-not-available': 'Localization not available in study',
               'field-measuring.header.link-label': 'Link',
               'field-measuring.header.longitude-label': 'Longitude',
               'field-measuring.header.meter-addon': 'm',
@@ -50,7 +64,13 @@ describe('HeaderComponent', () => {
         }),
         HeaderComponent
       ],
-      providers: [provideHttpClient(), provideHttpClientTesting()]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: NotificationService, useValue: notificationServiceMock },
+        { provide: WorkerPythonService, useValue: workerPythonServiceMock },
+        { provide: LoggerService, useValue: loggerServiceMock }
+      ]
     })
       .overrideComponent(HeaderComponent, {
         remove: { imports: [IconComponent] },
@@ -603,6 +623,129 @@ describe('HeaderComponent', () => {
         field: 'altitude',
         value: 17.5
       });
+    });
+  });
+
+  describe('Localization from study', () => {
+    const localizedSection = {
+      start_latitude: 10,
+      start_longitude: 1,
+      start_azimuth: 0,
+      supports: [
+        { number: '1', spanLength: 100, spanAngle: 0 },
+        { number: '2', spanLength: 200, spanAngle: 10 },
+        { number: '3', spanLength: null, spanAngle: null }
+      ]
+    } as unknown as Section;
+    const computedLocalization = {
+      longitude: [1.1, 2.2, 3.3],
+      latitude: [10.1, 20.2, 30.3],
+      azimuth: [200, 30, Number.NaN],
+      lambert_x: [0, 0, 0],
+      lambert_y: [0, 0, 0]
+    };
+    let fieldChangeSpy: ReturnType<typeof vi.fn>;
+
+    const flush = () => new Promise((resolve) => setTimeout(resolve));
+
+    const setup = async (section: Section | null, data: Partial<FieldMeasure>) => {
+      vi.spyOn(TestBed.inject(PlotSpanService), 'section').mockReturnValue(section);
+      fieldChangeSpy = vi.fn();
+      component.fieldChange.subscribe(fieldChangeSpy);
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, ...data });
+      fixture.detectChanges();
+      await flush();
+    };
+
+    const localizationCalls = () =>
+      fieldChangeSpy.mock.calls
+        .map(([event]) => event)
+        .filter((event) => ['longitude', 'latitude', 'azimuth'].includes(event.field));
+
+    beforeEach(() => {
+      workerPythonServiceMock.runTask.mockResolvedValue({
+        result: computedLocalization,
+        error: null,
+        diagnostics: []
+      } as never);
+    });
+
+    afterEach(() => vi.restoreAllMocks());
+
+    it('should compute the section localization with the section start point and span geometry', async () => {
+      await setup(localizedSection, { span: [0, 1], leftSupport: null });
+
+      expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(Task.computeLocalization, {
+        startLatitude: 10,
+        startLongitude: 1,
+        startAzimuth: 0,
+        spanLength: [100, 200, Number.NaN],
+        lineAngle: [0, 10, 0]
+      });
+    });
+
+    it('should fill localization from the span left support when no reference support is selected', async () => {
+      await setup(localizedSection, { span: [0, 1], leftSupport: null });
+
+      expect(localizationCalls()).toEqual([
+        { field: 'longitude', value: 1.1 },
+        { field: 'latitude', value: 10.1 },
+        { field: 'azimuth', value: -160 }
+      ]);
+      expect(notificationServiceMock.info).not.toHaveBeenCalled();
+    });
+
+    it('should fill localization from the selected reference support', async () => {
+      await setup(localizedSection, { span: [0, 1], leftSupport: '2' });
+
+      expect(localizationCalls()).toEqual([
+        { field: 'longitude', value: 2.2 },
+        { field: 'latitude', value: 20.2 },
+        { field: 'azimuth', value: 30 }
+      ]);
+    });
+
+    it('should refill localization when the reference support changes', async () => {
+      await setup(localizedSection, { span: [0, 1], leftSupport: null });
+      fieldChangeSpy.mockClear();
+
+      fixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1], leftSupport: '2' });
+      fixture.detectChanges();
+      await flush();
+
+      expect(localizationCalls()).toContainEqual({ field: 'longitude', value: 2.2 });
+    });
+
+    it('should not overwrite the localization of a loaded measure', async () => {
+      await setup(localizedSection, { span: [0, 1], longitude: 5, latitude: 6, azimuth: 7 });
+
+      expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
+      expect(localizationCalls()).toEqual([]);
+      expect(notificationServiceMock.info).not.toHaveBeenCalled();
+    });
+
+    it('should notify when the section has no start localization', async () => {
+      await setup({ ...localizedSection, start_latitude: null }, { span: [0, 1], leftSupport: null });
+
+      expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
+      expect(notificationServiceMock.info).toHaveBeenCalledWith('Localization not available in study');
+    });
+
+    it('should notify when the computed localization of the reference support is not finite', async () => {
+      await setup(localizedSection, { span: [1, 2], leftSupport: '3' });
+
+      expect(localizationCalls()).toEqual([]);
+      expect(notificationServiceMock.info).toHaveBeenCalledTimes(1);
+      expect(notificationServiceMock.info).toHaveBeenCalledWith('Localization not available in study');
+    });
+
+    it('should notify and log when the localization task fails', async () => {
+      workerPythonServiceMock.runTask.mockRejectedValue(new Error('worker failure'));
+
+      await setup(localizedSection, { span: [0, 1], leftSupport: null });
+
+      expect(loggerServiceMock.error).toHaveBeenCalled();
+      expect(notificationServiceMock.info).toHaveBeenCalledWith('Localization not available in study');
     });
   });
 

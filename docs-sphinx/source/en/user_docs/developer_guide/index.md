@@ -10,6 +10,7 @@ Technical documentation for developers contributing to {{app_name}}.
 installation/index
 app/index
 plot/index
+field_measure/index
 authentification/index
 translation
 geographic_system

@@ -709,7 +709,8 @@
       "latitude-label": "Latitude",
       "altitude-label": "Altitude",
       "meter-addon": "m",
-      "azimuth-label": "Azimuth (clockwise — 0° North/South)"
+      "azimuth-label": "Azimuth (clockwise — 0° North/South)",
+      "localization-not-available": "Localization not available in study"
     },
     "init": {
       "create-or-select-intro": "Create a new measurment or select an existing one",

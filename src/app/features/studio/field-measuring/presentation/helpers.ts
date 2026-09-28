@@ -1,4 +1,5 @@
-import { Section } from '@shared/domain';
+import { Section, Support } from '@shared/domain';
+import { Localization, Task, TaskInputs } from '@services/worker_python/tasks/types';
 import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
@@ -66,6 +67,17 @@ export const buildLeftSupportOptions = (translocoService: TranslocoService): Sel
   buildTranslatableSelectOptions(LEFT_SUPPORT_OPTION_KEYS, translocoService);
 
 /**
+ * Formats the display label of a support — its formatted `number`, or its 1-based index when it has none.
+ * @param supports - The section supports
+ * @param index - The support index
+ * @returns The support label
+ */
+const formatSupportLabel = (supports: Support[], index: number): string => {
+  const supportNumber = supports[index]?.number;
+  return supportNumber ? formatSupportNumber(supportNumber) : String(index + 1);
+};
+
+/**
  * Formats the display label for a span, given its support indices — e.g. "12 - 13".
  * Falls back to a 1-based index when a support has no `number` (mirrors the header's span dropdown).
  * @param section - The current section, used to resolve support numbers
@@ -78,11 +90,76 @@ export const formatSpanLabel = (section: Section | null, span: number[] | null):
   }
   const supports = section?.supports ?? [];
   const [leftIndex, rightIndex] = span;
-  const leftNum = supports[leftIndex]?.number;
-  const rightNum = supports[rightIndex]?.number;
-  const left = leftNum ? formatSupportNumber(leftNum) : String(leftIndex + 1);
-  const right = rightNum ? formatSupportNumber(rightNum) : String(rightIndex + 1);
-  return `${left} - ${right}`;
+  return `${formatSupportLabel(supports, leftIndex)} - ${formatSupportLabel(supports, rightIndex)}`;
+};
+
+/**
+ * Normalizes an azimuth (degrees) into the `]-180, 180]` range accepted by the field measure form.
+ * @param azimuth - The azimuth in degrees
+ * @returns The normalized azimuth
+ */
+const normalizeAzimuth = (azimuth: number): number => {
+  const positive = ((azimuth % 360) + 360) % 360;
+  return positive > 180 ? positive - 360 : positive;
+};
+
+/**
+ * Builds the `computeLocalization` task inputs from the section start point and span geometry
+ * (same computation as the "view section data" supports table).
+ * @param section - The current section
+ * @returns The task inputs, or `null` when the section has no start localization or incomplete span geometry
+ */
+export const buildSectionLocalizationPayload = (
+  section: Section | null
+): TaskInputs[Task.computeLocalization] | null => {
+  const supports = section?.supports ?? [];
+  const lastIndex = supports.length - 1;
+  if (
+    !section ||
+    supports.length === 0 ||
+    section.start_latitude == null ||
+    section.start_longitude == null ||
+    section.start_azimuth == null ||
+    supports.slice(0, -1).some((support) => support.spanLength == null || support.spanAngle == null)
+  ) {
+    return null;
+  }
+  return {
+    startLatitude: section.start_latitude,
+    startLongitude: section.start_longitude,
+    startAzimuth: section.start_azimuth,
+    spanLength: supports.map((support, i) => (i === lastIndex ? Number.NaN : support.spanLength!)),
+    lineAngle: supports.map((support, i) => (i === lastIndex ? 0 : support.spanAngle!))
+  };
+};
+
+/**
+ * Picks the localization of the reference support of a span from the computed section localization.
+ * Uses the span's left support when no support of the span matches `referenceSupport`.
+ * @param localization - The computed section localization (one entry per support)
+ * @param section - The current section, used to resolve support labels
+ * @param span - The `[leftIndex, rightIndex]` support indices of the span (or `null`)
+ * @param referenceSupport - The reference support label, as selected in the PAPOTO form (or `null`)
+ * @returns The support localization, or `null` when it is not available
+ */
+export const getSpanLocalization = (
+  localization: Localization,
+  section: Section | null,
+  span: number[] | null,
+  referenceSupport: string | null
+): { longitude: number; latitude: number; azimuth: number } | null => {
+  if (span?.length !== 2) {
+    return null;
+  }
+  const supports = section?.supports ?? [];
+  const referenceIndex = span.find((index) => formatSupportLabel(supports, index) === referenceSupport) ?? span[0];
+  const longitude = localization.longitude[referenceIndex];
+  const latitude = localization.latitude[referenceIndex];
+  const azimuth = localization.azimuth[referenceIndex];
+  if (![longitude, latitude, azimuth].every(Number.isFinite)) {
+    return null;
+  }
+  return { longitude, latitude, azimuth: normalizeAzimuth(azimuth) };
 };
 
 /**

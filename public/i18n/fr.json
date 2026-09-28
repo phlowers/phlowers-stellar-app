@@ -709,7 +709,8 @@
       "latitude-label": "Latitude",
       "altitude-label": "Altitude",
       "meter-addon": "m",
-      "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)"
+      "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)",
+      "localization-not-available": "Localisation non disponible dans l'étude"
     },
     "init": {
       "create-or-select-intro": "Créer une nouvelle mesure ou sélectionner une mesure existante",
