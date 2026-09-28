@@ -1,0 +1,31 @@
+<section class="tools" [attr.aria-label]="'routes.tools' | transloco" data-testid="tools-page">
+  <ul class="tools__grid" data-testid="tools-list">
+    @for (tool of tools; track tool.id) {
+      <li class="tools__item">
+        <app-card-info
+          class="tools__card"
+          data-testid="tool-card"
+          [style.--tool-accent]="tool.accentColor"
+          [title]="tool.titleKey | transloco"
+          [text]="tool.descriptionKey | transloco"
+          [linkText]="'common.import.action.open' | transloco"
+          [linkAriaLabel]="'tools.aria-open-tool' | transloco: { tool: (tool.titleKey | transloco) }"
+          (linkClick)="openTool(tool)"
+        />
+      </li>
+    }
+  </ul>
+</section>
+
+@let tool = selectedTool();
+<p-dialog
+  data-testid="tool-dialog"
+  [visible]="tool !== null"
+  (visibleChange)="onVisibleChange($event)"
+  [header]="tool ? (tool.titleKey | transloco) : ''"
+  [modal]="true"
+  dismissableMask="true"
+  [style]="{ width: '60rem', maxWidth: '95vw' }"
+>
+  <p data-testid="tool-dialog-content">{{ 'tools.coming-soon' | transloco }}</p>
+</p-dialog>
