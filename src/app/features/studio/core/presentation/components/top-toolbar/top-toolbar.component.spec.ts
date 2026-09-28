@@ -232,13 +232,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute tablesDropdown command for Obstacles table', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockReturnValue(undefined);
       const tables = component.tablesDropdown();
 
       tables[3].command?.({});
-      expect(consoleSpy).toHaveBeenCalledWith('Add action triggered');
-
-      consoleSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('obstacles-table');
     });
 
     it('should execute tablesDropdown command for Grounds table', () => {

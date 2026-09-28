@@ -77,9 +77,9 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     {
       label: this.translocoService.translate('studio.top-toolbar.obstacles-table-label'),
-      disabled: true,
+      disabled: false,
       command: () => {
-        this.logger.log('Add action triggered');
+        this.toolbarDialogService.openTool('obstacles-table');
       }
     },
     {
