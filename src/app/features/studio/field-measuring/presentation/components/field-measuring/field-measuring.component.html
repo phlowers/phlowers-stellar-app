@@ -50,14 +50,14 @@
 
 <ng-template #footer>
   <div class="dialog-footer">
-    <button app-btn type="button" [disabled]="true" btnStyle="outlined" (click)="onReport()">
+    <button app-btn type="button" [disabled]="hasUnsavedChanges()" btnStyle="outlined" (click)="onReport()">
       <app-icon icon="description" />
       <span>{{ 'common.report' | transloco }}</span>
     </button>
     <button
       app-btn
       type="button"
-      [disabled]="!canExport()"
+      [disabled]="hasUnsavedChanges()"
       btnStyle="outlined"
       (click)="onExport()"
       data-testid="export-btn"
