@@ -76,6 +76,14 @@ describe('initializeApp', () => {
     expect(mockAuthService.initialize).toHaveBeenCalled();
   });
 
+  it('should set the <html> lang attribute to the runtime language', async () => {
+    mockAppConfigService.loadDefaultLang.mockResolvedValue('fr');
+
+    await TestBed.runInInjectionContext(() => initializeApp());
+
+    expect(document.documentElement.lang).toBe('fr');
+  });
+
   it('should log a warning if the background translation load fails, without rejecting', async () => {
     const promise = TestBed.runInInjectionContext(() => initializeApp());
     await promise;
