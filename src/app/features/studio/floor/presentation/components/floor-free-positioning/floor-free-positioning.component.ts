@@ -4,24 +4,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, signal } from '@angular/core';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 
 import { FreePositioningDataService } from '@core/services/free-positioning-data/free-positioning-data.service';
 import { mirrorPositionForReferenceSupport } from '@core/services/free-positioning-data/free-positioning-data.helpers';
-import { PlotService } from '@services/plot/plot.service';
-import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { LoggerService } from '@core/services/logger/logger.service';
-import { FloorFormService } from '@services/floor-form/floor-form.service';
-import { formatStudioError } from '@shared/components/studio/helpers/errors';
-import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
-
+import { FreePositioningPlotComponent } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.component';
 import {
   FreePositioningPlacement,
   FreePositioningSelection
 } from '@features/studio/core/presentation/components/free-positioning-plot/free-positioning-plot.interfaces';
-import { MousePosition } from './floor-free-positioning.component.interfaces';
+import { FloorFormService } from '@services/floor-form/floor-form.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 
 import { FLOOR_FREE_POSITIONING_CONFIG } from './floor-free-positioning.component.constantes';
 import { parseFloorFormPointIndex } from './floor-free-positioning.component.helpers';
@@ -33,7 +27,7 @@ import { parseFloorFormPointIndex } from './floor-free-positioning.component.hel
 @Component({
   selector: 'app-floor-free-positioning',
   standalone: true,
-  imports: [ProgressSpinnerModule, TranslocoModule],
+  imports: [FreePositioningPlotComponent],
   templateUrl: './floor-free-positioning.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -43,17 +37,6 @@ export class FloorFreePositioningComponent implements OnDestroy {
   private readonly dataService = inject(FreePositioningDataService);
   readonly floorFormService = inject(FloorFormService);
   private readonly plotOptionsService = inject(PlotOptionsService);
-  readonly plotService = inject(PlotService);
-  private readonly translocoService = inject(TranslocoService);
-  private readonly logger = inject(LoggerService);
-
-  readonly isLoading = signal<boolean>(true);
-  readonly mousePosition = signal<MousePosition | null>(null);
-
-  readonly getErrorString = computed(() => {
-    const exceptionDiagnostic = this.plotService.diagnostics().find((diagnostic) => diagnostic.origin === 'exception');
-    return formatStudioError(this.plotService.error(), this.translocoService, exceptionDiagnostic?.code ?? null);
-  });
 
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
