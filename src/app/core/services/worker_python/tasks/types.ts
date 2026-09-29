@@ -802,9 +802,9 @@ export interface TaskOutputs {
   [Task.setCutStrands]: { success: boolean };
   // Output from getCutStrands task
   [Task.getCutStrands]: { cutStrands: number[] };
-  // Output from getRrts task
+  // Output from getRrts task: residual rated tensile strength (daN)
   [Task.getRrts]: { rrts: number };
-  // Output from getUtilizationRate task
+  // Output from getUtilizationRate task: rate per support (%), NaN for the last one which starts no span
   [Task.getUtilizationRate]: { utilizationRate: number[] };
   // Output from setHighSafety task
   [Task.setHighSafety]: { success: boolean };

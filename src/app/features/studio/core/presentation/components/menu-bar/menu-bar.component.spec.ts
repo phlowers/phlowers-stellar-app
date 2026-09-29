@@ -400,7 +400,7 @@ describe('StudioMenuBarComponent', () => {
       expect(staffIsPresent).toBe(false);
     });
 
-    it('should return false when no charge is selected', () => {
+    it('should return true when no charge is selected, staff being assumed present', () => {
       const studyWithoutSelectedCharge: Study = {
         ...mockStudy,
         sections: [
@@ -414,10 +414,10 @@ describe('StudioMenuBarComponent', () => {
       fixture.detectChanges();
 
       const staffIsPresent = component.staffIsPresent();
-      expect(staffIsPresent).toBe(false);
+      expect(staffIsPresent).toBe(true);
     });
 
-    it('should return false when selected charge is not found', () => {
+    it('should return true when selected charge is not found', () => {
       const studyWithNonExistentCharge: Study = {
         ...mockStudy,
         sections: [
@@ -431,15 +431,15 @@ describe('StudioMenuBarComponent', () => {
       fixture.detectChanges();
 
       const staffIsPresent = component.staffIsPresent();
-      expect(staffIsPresent).toBeUndefined();
+      expect(staffIsPresent).toBe(true);
     });
 
-    it('should return false when section is null', () => {
+    it('should return true when section is null', () => {
       fixture.componentRef.setInput('section', null);
       fixture.detectChanges();
 
       const staffIsPresent = component.staffIsPresent();
-      expect(staffIsPresent).toBe(false);
+      expect(staffIsPresent).toBe(true);
     });
   });
 

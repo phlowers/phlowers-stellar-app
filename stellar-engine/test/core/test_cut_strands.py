@@ -166,6 +166,38 @@ def test_get_rrts_returns_positive_value(balance_engine_base: BalanceEngine):
     assert result["rrts"] > 0
 
 
+def test_get_rrts_returns_decanewtons(balance_engine_base: BalanceEngine):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+
+    result = cut_strands.get_rrts(study)
+
+    assert result["rrts"] == pytest.approx(
+        study.balance_engine.cable_array.rrts / 10
+    )
+
+
+def test_get_utilization_rate_returns_percentages(
+    balance_engine_base: BalanceEngine,
+):
+    study = SectionStudy(
+        cable_array=balance_engine_base.cable_array,
+        section_array=balance_engine_base.section_array,
+    )
+    study.solve_adjustment()
+    study.solve_change_state()
+    tension_max, _ = study.balance_engine.span_model.tensions_sup_inf()
+
+    result = cut_strands.get_utilization_rate(study)
+
+    np.testing.assert_allclose(
+        result["utilizationRate"],
+        study.balance_engine.cable_array.utilization_rate(tension_max),
+    )
+
+
 def test_get_utilization_rate_returns_array(
     balance_engine_base: BalanceEngine,
 ):

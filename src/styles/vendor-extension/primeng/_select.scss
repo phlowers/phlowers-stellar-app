@@ -18,7 +18,8 @@
 
   --p-select-shadow: #{map.get(app.$elevation, neutral-inner)};
 
-  --p-select-padding-y: 0.375rem;
+  // Keeps selects at the same height as text inputs so they line up in forms
+  --p-select-padding-y: 0.2813rem;
   --p-select-padding-x: 1rem;
 
   --p-select-border-radius: 0.25rem;

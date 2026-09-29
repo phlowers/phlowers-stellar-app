@@ -213,9 +213,9 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 5,
       label: this.translocoService.translate('studio.top-toolbar.strand-rrts-tool'),
       checked: false,
-      disabled: true,
+      disabled: false,
       action: () => {
-        alert('click Strand RRTS');
+        this.toolbarDialogService.openTool('strand-rrts');
       }
     },
     {
