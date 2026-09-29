@@ -11,6 +11,7 @@
   },
   "common": {
     "search": "Rechercher",
+    "clear-selection": "Effacer la sélection",
     "yes": "Oui",
     "no": "Non",
     "cancel": "Annuler",
@@ -653,8 +654,7 @@
       "parameter-15c": "Calcul du paramètre à 15°C sans vent"
     },
     "actions": {
-      "success-detail": "Données enregistrées avec succès",
-      "export-invalid-detail": "Veuillez corriger les champs invalides dans tous les onglets avant d'exporter"
+      "success-detail": "Données enregistrées avec succès"
     },
     "calculus-setting": {
       "papoto-radio-label": "PAPOTO",
@@ -663,6 +663,7 @@
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",
+      "close-aria-label": "fermer l'aide de PAPOTO",
       "import-station-data": "Importer les données de la station",
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
       "left-support-label": "Support de gauche",

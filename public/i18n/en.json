@@ -14,6 +14,7 @@
     "yes": "Yes",
     "no": "No",
     "cancel": "Cancel",
+    "clear-selection": "Clear selection",
     "close": "Close",
     "save": "Save",
     "calculate": "Calculate",
@@ -653,8 +654,7 @@
       "parameter-15c": "Parameter at 15°C without wind"
     },
     "actions": {
-      "success-detail": "Data saved successfully",
-      "export-invalid-detail": "Please fix invalid fields in all tabs before exporting"
+      "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
       "papoto-radio-label": "PAPOTO",
@@ -663,6 +663,7 @@
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
+      "close-aria-label": "close PAPOTO help",
       "import-station-data": "Import station's datas",
       "mandatory-msg": "All fields are mandatory for calculus setting",
       "left-support-label": "Left support",
