@@ -23,7 +23,7 @@
   &__card {
     width: 100%;
     min-height: 9rem;
-    border-left: 0.375rem solid var(--tool-accent);
+    border-left: 0.375rem solid var(--tool-accent, #674883);
     border-radius: 0.5rem;
     overflow: hidden;
   }
