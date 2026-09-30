@@ -163,7 +163,6 @@ describe('StrandRrtsComponent', () => {
               'studio.rrts-cut-strands.failed-to-save': 'Failed to save RRTS cut strands',
               'studio.rrts-cut-strands.deleted': 'RRTS cut strands deleted',
               'studio.rrts-cut-strands.failed-to-delete': 'Failed to delete RRTS cut strands',
-              'studio.rrts-cut-strands.failed-to-sync': 'Failed to update the studio with the RRTS cut strands',
               'studio.rrts-cut-strands.result-new-working-load-null': 'No new max working load',
               'studio.rrts-cut-strands.result-new-working-load-ok': 'The new max working load is satisfactory',
               'studio.rrts-cut-strands.result-new-working-load-warning': 'The new max working load is concerning',
@@ -644,32 +643,15 @@ describe('StrandRrtsComponent', () => {
       expect(spanService.section()?.rrts_cut_strands).toEqual(saved);
     });
 
-    it('gives the engine the newly saved cut strands', async () => {
+    it('leaves the engine to the studio, which applies the newly saved entry', async () => {
       await setupSaved();
       typeIn('rrts-cut-strands-layer1-input', '5');
       await calculate();
+      mockWorkerPythonService.runTask.mockClear();
       await component.save();
 
-      expect(engineCutStrands().at(-1)).toEqual([5, 3, 0, 0, 0, 0, 0, 0]);
-    });
-
-    it('keeps the saved entry, and tells the studio is not updated, when the engine rejects it', async () => {
-      await setup();
-      typeIn('rrts-cut-strands-layer1-input', '5');
-      await calculate();
-      failTask(Task.setCutStrands);
-      await component.save();
-
-      expect(spanService.section()?.rrts_cut_strands).toMatchObject({ cutStrands: [5, 0, 0, 0, 0, 0, 0, 0] });
-      expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands saved');
-      expect(mockNotificationService.error).toHaveBeenCalledWith(
-        'Failed to update the studio with the RRTS cut strands'
-      );
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to update the studio with the RRTS cut strands',
-        expect.any(Error)
-      );
-      expect(mockNotificationService.error).not.toHaveBeenCalledWith('Failed to save RRTS cut strands');
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      expect(spanService.section()?.rrts_cut_strands).toMatchObject({ cutStrands: [5, 3, 0, 0, 0, 0, 0, 0] });
     });
 
     it('keeps the section, and the engine on the saved cut strands, when saving fails', async () => {
@@ -708,24 +690,14 @@ describe('StrandRrtsComponent', () => {
       expect(spanService.section()?.rrts_cut_strands).toBeNull();
       expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands deleted');
       expect(footerButton('delete-btn').disabled).toBe(true);
-      expect(engineCutStrands()).toEqual([[0, 0, 0, 0, 0, 0, 0, 0]]);
     });
 
-    it('keeps the entry deleted, and tells the studio is not updated, when the engine rejects the default cut strands', async () => {
+    it('leaves the engine to the studio, which clears the cut strands', async () => {
       await setupSaved();
-      failTask(Task.setCutStrands);
+      mockWorkerPythonService.runTask.mockClear();
       await component.delete();
 
-      expect(spanService.section()?.rrts_cut_strands).toBeNull();
-      expect(mockNotificationService.success).toHaveBeenCalledWith('RRTS cut strands deleted');
-      expect(mockNotificationService.error).toHaveBeenCalledWith(
-        'Failed to update the studio with the RRTS cut strands'
-      );
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to update the studio with the RRTS cut strands',
-        expect.any(Error)
-      );
-      expect(mockNotificationService.error).not.toHaveBeenCalledWith('Failed to delete RRTS cut strands');
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
 
     it('keeps the entry, and the engine untouched, when deleting fails', async () => {
