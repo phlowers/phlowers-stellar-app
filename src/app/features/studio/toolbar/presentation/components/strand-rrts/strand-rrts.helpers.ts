@@ -19,6 +19,10 @@ export const toCatalogCutStrands = (cutStrands: number[], layers: number[]): num
   return catalogCutStrands;
 };
 
+// A saved entry can hold 0 on every layer: nothing is cut then
+export const hasCutStrand = (entry: RrtsCutStrandsData | null): boolean =>
+  entry?.cutStrands.some((cutStrands) => cutStrands > 0) ?? false;
+
 export const toCutStrandsData = (value: RrtsFormValue, layers: number[]): RrtsCutStrandsData => ({
   spanUuid: value.span?.uuid ?? null,
   supportRef: value.supportRef,

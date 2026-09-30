@@ -18,6 +18,9 @@ export const STRAND_LAYER_KEYS = [
   'nb_strand_layer_8'
 ] as const;
 
+// Engine input without cut strand on any catalog layer
+export const NO_CUT_STRANDS = STRAND_LAYER_KEYS.map(() => DEFAULT_CUT_STRANDS);
+
 export const WORK_LOAD_ICONS: Record<WorkLoadStatus, WorkLoadIcon> = {
   null: { name: 'counter_0', label: 'studio.rrts-cut-strands.result-new-working-load-null' },
   ok: { name: 'check', label: 'studio.rrts-cut-strands.result-new-working-load-ok' },

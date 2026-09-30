@@ -24,5 +24,4 @@ export interface RrtsFormValue {
   addMarking: boolean;
 }
 
-export type NotificationKey =
-  'failed-to-calculate' | 'saved' | 'failed-to-save' | 'deleted' | 'failed-to-delete' | 'failed-to-sync';
+export type NotificationKey = 'failed-to-calculate' | 'saved' | 'failed-to-save' | 'deleted' | 'failed-to-delete';
