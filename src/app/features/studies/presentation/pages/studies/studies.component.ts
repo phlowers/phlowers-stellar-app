@@ -25,6 +25,8 @@ import { ImportStudyComponent } from '@features/studies/presentation/components/
 import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 
 /**
  * Main studies listing page.
@@ -60,6 +62,8 @@ export class StudiesComponent {
   private readonly studiesService = inject(StudiesService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
   private readonly rawStudies = toSignal(this.studiesService.studies, { initialValue: [] as Study[] });
   private readonly studiesReady = toSignal(this.studiesService.ready, { initialValue: false });
 
@@ -72,7 +76,7 @@ export class StudiesComponent {
 
     effect(() => {
       if (this.studiesReady()) {
-        this.studiesService.getStudies().then((studies) => {
+        void this.studiesService.getStudies().then((studies) => {
           this.studies.set(this.sortStudies(studies));
         });
       }
@@ -86,7 +90,10 @@ export class StudiesComponent {
   }
 
   duplicateStudy(uuid: string) {
-    this.studiesService.duplicateStudy(uuid);
+    this.studiesService.duplicateStudy(uuid).catch((error: unknown) => {
+      this.logger.error('Failed to duplicate study', error);
+      this.notificationService.error(this.translocoService.translate('study.notifications.duplication-failed'));
+    });
   }
 
   deleteStudy(uuid: string) {
@@ -94,7 +101,10 @@ export class StudiesComponent {
       key: 'positionDialog',
       message: this.translocoService.translate('studies.delete-confirm-message'),
       accept: () => {
-        this.studiesService.deleteStudy(uuid);
+        this.studiesService.deleteStudy(uuid).catch((error: unknown) => {
+          this.logger.error('Failed to delete study', error);
+          this.notificationService.error(this.translocoService.translate('studies.import.error-delete'));
+        });
       },
       acceptLabel: this.translocoService.translate('common.import.collision.yes'),
       rejectLabel: this.translocoService.translate('common.import.collision.no')

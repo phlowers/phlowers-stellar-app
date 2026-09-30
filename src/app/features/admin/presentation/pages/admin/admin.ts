@@ -23,6 +23,8 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { WINDOW } from '@core/tokens/window.token';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 
 /** Pre-migration legacy cache name (kept for cleanup). */
 const LEGACY_CACHE_NAME = 'app-assets';
@@ -66,6 +68,8 @@ export class AdminComponent {
   private readonly window = inject(WINDOW);
   private readonly translocoService = inject(TranslocoService);
   private readonly datePipe = inject(DatePipe);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
 
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
@@ -102,7 +106,12 @@ export class AdminComponent {
     this.confirmationService.confirm({
       message: this.translocoService.translate('admin.delete-studies-confirm'),
       accept: () => {
-        this.studyService.deleteAllStudies();
+        this.studyService.deleteAllStudies().catch((error: unknown) => {
+          this.logger.error('Failed to delete all studies', error);
+          this.notificationService.error(
+            this.translocoService.translate('shared.global-error-handler.unexpected-error')
+          );
+        });
         this.messageService.add({
           severity: 'success',
           summary: this.translocoService.translate('admin.delete-studies-summary'),
@@ -116,7 +125,12 @@ export class AdminComponent {
     this.confirmationService.confirm({
       message: this.translocoService.translate('admin.reset-database-confirm'),
       accept: () => {
-        this.storageService.resetDatabase();
+        this.storageService.resetDatabase().catch((error: unknown) => {
+          this.logger.error('Failed to reset database', error);
+          this.notificationService.error(
+            this.translocoService.translate('shared.global-error-handler.unexpected-error')
+          );
+        });
         this.messageService.add({
           severity: 'success',
           summary: this.translocoService.translate('admin.reset-database-summary'),

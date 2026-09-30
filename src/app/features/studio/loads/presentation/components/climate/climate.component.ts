@@ -171,7 +171,7 @@ export class ClimateComponent {
       });
 
       // Wrap the async call
-      (async () => {
+      void (async () => {
         await this.initForm();
 
         // Before patching, verify we haven't been superseded

@@ -162,9 +162,9 @@ describe('SectionsTabComponent', () => {
     } as unknown as MessageService;
 
     mockChargesService = {
-      setSelectedCharge: vi.fn(),
-      deleteCharge: vi.fn(),
-      duplicateCharge: vi.fn()
+      setSelectedCharge: vi.fn().mockResolvedValue(undefined),
+      deleteCharge: vi.fn().mockResolvedValue(undefined),
+      duplicateCharge: vi.fn().mockResolvedValue(undefined)
     };
 
     mockCablesService = {

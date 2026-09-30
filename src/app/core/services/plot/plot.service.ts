@@ -74,7 +74,7 @@ export class PlotService {
       const section = this.spanService.section();
       if (this.isStudioActive() && this.workerReady() && section) {
         if (section.uuid !== this.currentSectionUuid) {
-          this.initSectionStudio(section);
+          void this.initSectionStudio(section);
         }
       }
     });

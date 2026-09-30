@@ -428,7 +428,7 @@ export async function handleFetch(event: FetchEvent) {
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('fetch', handleFetch);
 
 (self as unknown as ServiceWorkerGlobalScope).addEventListener('install', () => {
-  (self as unknown as ServiceWorkerGlobalScope).skipWaiting();
+  void (self as unknown as ServiceWorkerGlobalScope).skipWaiting();
 });
 
 /**

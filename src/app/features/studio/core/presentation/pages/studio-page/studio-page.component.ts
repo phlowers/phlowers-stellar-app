@@ -277,7 +277,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const studyUuid = this.route.snapshot.paramMap.get('uuid');
     const sectionUuid = this.route.snapshot.queryParamMap.get('sectionUuid');
     if (!studyUuid || !sectionUuid) {
-      this.router.navigate(['/studies']);
+      void this.router.navigate(['/studies']);
       return;
     }
     this.plotService.isStudioActive.set(true);
@@ -293,7 +293,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
   private handleLoadedStudy(study: Study | null | undefined, sectionUuid: string): void {
     if (!study) {
-      this.router.navigate(['/studies']);
+      void this.router.navigate(['/studies']);
       return;
     }
     this.plotService.study.set(study);
@@ -303,7 +303,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private tryInitializeSection(study: Study, sectionUuid: string): void {
     const section = study.sections.find((s: Section) => s.uuid === sectionUuid);
     if (!section) {
-      this.router.navigate(['/studies']);
+      void this.router.navigate(['/studies']);
       return;
     }
     this.spanService.section.set(section);

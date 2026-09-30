@@ -75,7 +75,7 @@ export class StudioComponent implements OnDestroy {
       const isPreview = this.isPreview();
 
       if (workerReady && section && isPreview) {
-        this.plotService.initSectionStudio(section);
+        void this.plotService.initSectionStudio(section);
       }
     });
   }

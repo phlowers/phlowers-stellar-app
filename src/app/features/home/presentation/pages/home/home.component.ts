@@ -102,7 +102,7 @@ export class HomeComponent {
 
     effect(() => {
       if (this.studiesReady()) {
-        this.studiesService.getLatestStudies().then((studies) => {
+        void this.studiesService.getLatestStudies().then((studies) => {
           this.latestStudies.set(
             studies?.map((study) => ({
               ...study,

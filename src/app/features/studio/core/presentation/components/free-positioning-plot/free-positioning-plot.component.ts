@@ -135,7 +135,7 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
       if (workerReady && litData && span !== null) {
         untracked(() => {
-          this.recreatePlots();
+          void this.recreatePlots();
         });
       }
     });

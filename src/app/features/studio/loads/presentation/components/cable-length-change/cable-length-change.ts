@@ -22,6 +22,8 @@ import {
 import { CableModificationsService } from '../../services/cableModifications.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { CABLE_LENGTH_CHANGE_FORM_BOUNDS, CABLE_LENGTH_CHANGE_FORM_DEFAULTS } from './cable-length-change.constantes';
@@ -52,6 +54,8 @@ export class CableLengthChangeComponent {
   private readonly cableModificationsService = inject(CableModificationsService);
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly isLoading = signal(false);
   readonly isCalculatingOnly = signal(false);
@@ -340,12 +344,20 @@ export class CableLengthChangeComponent {
     const spanUuid = this.form.controls.scope.value;
     const uuid = spanUuid ? (this.findCableModification(spanUuid)?.uuid ?? null) : null;
     if (uuid) {
-      this.cableModificationsService.delete(uuid).then(async () => {
-        await this.reloadSectionFromDb();
-        if (spanUuid) {
-          this.cableModificationsService.clearPersistedFormData(spanUuid);
-        }
-      });
+      this.cableModificationsService
+        .delete(uuid)
+        .then(async () => {
+          await this.reloadSectionFromDb();
+          if (spanUuid) {
+            this.cableModificationsService.clearPersistedFormData(spanUuid);
+          }
+        })
+        .catch((error: unknown) => {
+          this.logger.error('Failed to delete cable modification', error);
+          this.notificationService.error(
+            this.translocoService.translate('shared.global-error-handler.unexpected-error')
+          );
+        });
     } else if (spanUuid) {
       this.cableModificationsService.clearPersistedFormData(spanUuid);
     }

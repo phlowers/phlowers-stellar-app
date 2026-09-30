@@ -27,6 +27,8 @@ import {
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 
 @Component({
   selector: 'app-cable-span-manip',
@@ -76,6 +78,8 @@ export class CableSpanManipComponent implements OnInit {
   private readonly cableSpanManipService = inject(CableSpanManipService);
   private readonly chainsService = inject(ChainsService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly isLoading = signal(false);
   readonly isCalculating = computed(() => this.plotService.loading());
@@ -276,7 +280,7 @@ export class CableSpanManipComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadChains();
+    void this.loadChains();
   }
 
   private async loadChains(): Promise<void> {
@@ -400,12 +404,20 @@ export class CableSpanManipComponent implements OnInit {
         : null;
 
     if (uuid) {
-      this.cableSpanManipService.delete(uuid).then(async () => {
-        await this.cableSpanManipService.reloadSection();
-        if (spanUuid) {
-          this.cableSpanManipService.clearPersistedFormData(spanUuid);
-        }
-      });
+      this.cableSpanManipService
+        .delete(uuid)
+        .then(async () => {
+          await this.cableSpanManipService.reloadSection();
+          if (spanUuid) {
+            this.cableSpanManipService.clearPersistedFormData(spanUuid);
+          }
+        })
+        .catch((error: unknown) => {
+          this.logger.error('Failed to delete cable span manipulation', error);
+          this.notificationService.error(
+            this.translocoService.translate('shared.global-error-handler.unexpected-error')
+          );
+        });
     } else if (spanUuid) {
       this.cableSpanManipService.clearPersistedFormData(spanUuid);
     }

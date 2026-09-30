@@ -121,7 +121,7 @@ export class AttachmentSetModalComponent {
     });
     effect(() => {
       if (this.supportName()) {
-        this.findCoordinates(this.supportName()!);
+        void this.findCoordinates(this.supportName()!);
       }
     });
   }
