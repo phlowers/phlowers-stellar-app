@@ -37,5 +37,4 @@ export class CardInfoComponent {
       .join(' ');
   });
 
-  hasLinkClick = computed(() => !!this.linkClick && !this.linkRoute());
 }
