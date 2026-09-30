@@ -89,7 +89,7 @@ export class NewStudyModalComponent {
         title: this.title(),
         description: this.description()
       });
-      await this.router.navigate(['/study', uuid]);
+      void this.router.navigate(['/study', uuid]);
       this.messageService.add({
         severity: 'success',
         summary: this.translocoService.translate('shared.new-study-modal.study-created-summary'),

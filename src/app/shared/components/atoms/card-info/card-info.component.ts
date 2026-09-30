@@ -36,5 +36,4 @@ export class CardInfoComponent {
       .filter(Boolean)
       .join(' ');
   });
-
 }
