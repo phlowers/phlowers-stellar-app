@@ -45,6 +45,11 @@ export const appRoutes: Routes = [
         loadChildren: () => import('@features/study/presentation/study.routes').then((m) => m.studyRoutes)
       },
       {
+        path: 'tools',
+        title: 'routes.tools',
+        loadChildren: () => import('@features/tools/presentation/tools.routes').then((m) => m.toolsRoutes)
+      },
+      {
         path: 'news',
         title: 'routes.news',
         loadChildren: () => import('@features/news/presentation/news.routes').then((m) => m.newsRoutes)

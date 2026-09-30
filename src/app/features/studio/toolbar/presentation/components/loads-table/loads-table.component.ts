@@ -296,7 +296,7 @@ export class LoadsTableComponent {
   cancelEdit(): void {
     const uuid = this.chargeUuid();
     if (uuid) {
-      this.loadChargeData(uuid);
+      void this.loadChargeData(uuid);
     }
     this.mode.set('view');
   }

@@ -71,7 +71,7 @@ try {
 
 addEventListener('message', ({ data }: { data: { task: Task; inputs: TaskInputs[Task]; id: string } }) => {
   if (pyodide) {
-    handleTask(pyodide, data.task, data.inputs, log).then((result) => {
+    void handleTask(pyodide, data.task, data.inputs, log).then((result) => {
       postMessage({
         ...result,
         id: data.id

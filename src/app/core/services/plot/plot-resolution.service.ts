@@ -39,7 +39,7 @@ export class PlotResolutionService implements OnDestroy {
 
     effect(() => {
       if (this.workerReady()) {
-        this.workerPythonService.runTask(Task.getConfig, undefined).then(({ result }) => {
+        void this.workerPythonService.runTask(Task.getConfig, undefined).then(({ result }) => {
           if (result?.resolution) {
             this.defaultResolution.set(result.resolution);
             const currentResolution = this.resolution();

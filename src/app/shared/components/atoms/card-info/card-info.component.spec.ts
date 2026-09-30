@@ -146,6 +146,42 @@ describe('CardInfoComponent', () => {
       fixture.detectChanges();
 
       expect(getByTestId('card-info-link')).toBeNull();
+      expect(getByTestId('card-info-button')).toBeNull();
+    });
+
+    it('should not render card-info-button when linkRoute is set', () => {
+      fixture.componentRef.setInput('title', 'Test');
+      fixture.componentRef.setInput('text', 'Test text');
+      fixture.componentRef.setInput('linkText', 'Learn More');
+      fixture.componentRef.setInput('linkRoute', '/details');
+      fixture.detectChanges();
+
+      expect(getByTestId('card-info-button')).toBeNull();
+    });
+
+    it('should render card-info-button when linkText is set without linkRoute', () => {
+      fixture.componentRef.setInput('title', 'Test');
+      fixture.componentRef.setInput('text', 'Test text');
+      fixture.componentRef.setInput('linkText', 'Open');
+      fixture.componentRef.setInput('linkAriaLabel', 'Open the tool');
+      fixture.detectChanges();
+
+      const el = getByTestId('card-info-button');
+      expect(el?.tagName).toBe('BUTTON');
+      expect(el?.getAttribute('aria-label')).toBe('Open the tool');
+      expect(getByTestId('card-info-link')).toBeNull();
+    });
+
+    it('should emit linkClick when card-info-button is clicked', () => {
+      const emitSpy = vi.spyOn(component.linkClick, 'emit');
+      fixture.componentRef.setInput('title', 'Test');
+      fixture.componentRef.setInput('text', 'Test text');
+      fixture.componentRef.setInput('linkText', 'Open');
+      fixture.detectChanges();
+
+      getByTestId('card-info-button')?.click();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -63,7 +63,7 @@ export class StudyComponent implements OnInit {
   ngOnInit(): void {
     const uuid = this.route.snapshot.paramMap.get('uuid');
     if (!uuid) {
-      this.router.navigate(['/studies']);
+      void this.router.navigate(['/studies']);
       return;
     }
 
@@ -80,7 +80,7 @@ export class StudyComponent implements OnInit {
             sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
           });
         } else {
-          this.router.navigate(['/studies']);
+          void this.router.navigate(['/studies']);
         }
       });
 
@@ -103,7 +103,7 @@ export class StudyComponent implements OnInit {
               sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
             });
           } else {
-            this.router.navigate(['/studies']);
+            void this.router.navigate(['/studies']);
           }
         });
     }
@@ -118,7 +118,7 @@ export class StudyComponent implements OnInit {
       .duplicateStudy(uuid)
       .then((study) => {
         if (study) {
-          this.router.navigate(['/study', study.uuid]);
+          void this.router.navigate(['/study', study.uuid]);
           this.notificationService.success(this.transloco.translate('study.notifications.duplicated'));
         }
       })

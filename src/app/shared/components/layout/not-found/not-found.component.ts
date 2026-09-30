@@ -14,6 +14,6 @@ export class NotFoundComponent {
   private readonly router = inject(Router);
 
   goToHome() {
-    this.router.navigate(['/']);
+    void this.router.navigate(['/']);
   }
 }

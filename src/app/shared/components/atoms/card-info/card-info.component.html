@@ -21,6 +21,21 @@
         <app-icon icon="keyboard_arrow_right" iconRight />
       </a>
     </footer>
+  } @else if (linkText()) {
+    <footer class="info-card__footer">
+      <button
+        type="button"
+        [attr.aria-label]="linkAriaLabel()"
+        app-btn
+        btnSize="s"
+        btnStyle="text"
+        (click)="linkClick.emit()"
+        data-testid="card-info-button"
+      >
+        {{ linkText() }}
+        <app-icon icon="keyboard_arrow_right" iconRight aria-hidden="true" />
+      </button>
+    </footer>
   }
 
   <ng-content select="svg.server-status" />

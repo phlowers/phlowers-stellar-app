@@ -178,7 +178,7 @@ export class LoadMarkingComponent {
   resetForm() {
     this.form.reset();
     this.form.controls.referenceSupport.disable();
-    this.loadFormsService.initTemporaryLoadData();
+    void this.loadFormsService.initTemporaryLoadData();
   }
 
   async deleteCharge(): Promise<void> {

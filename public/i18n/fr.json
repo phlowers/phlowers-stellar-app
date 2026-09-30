@@ -7,7 +7,8 @@
     "study": "Étude",
     "news": "Actualités",
     "changelog": "Changelog",
-    "studio": "Studio"
+    "studio": "Studio",
+    "tools": "Outils"
   },
   "common": {
     "search": "Rechercher",
@@ -125,6 +126,24 @@
     "no-recent-studies": "Aucune étude récente",
     "go-to-studies": "Aller à mes études"
   },
+  "tools": {
+    "aria-open-tool": "Ouvrir l'outil {{ tool }}",
+    "coming-soon": "Cet outil sera bientôt disponible.",
+    "items": {
+      "ist-reduction": {
+        "title": "Réduction de l'IST",
+        "description": "Les points chauds (visite TIR) sont plus ou moins urgents à traiter (classes A et B). Pour gagner du temps, il est possible de réduire l'IST d'une ligne pour passer de la classe A à la classe B. Ce module donne directement la valeur à fournir côté exploitation pour cette réduction d'IST."
+      },
+      "wind-pressure": {
+        "title": "Conversion vitesse / pression",
+        "description": "Cet outil permet de convertir une vitesse de vent exprimée en km/h en pression de vent en Pa sur les câbles (type Arrêté Technique)."
+      },
+      "support-explorer": {
+        "title": "Explorateur de support",
+        "description": "Ceci est la description de l'outil."
+      }
+    }
+  },
   "news": {
     "offline": "Vous êtes hors ligne",
     "empty": "Aucune actualité"
@@ -174,6 +193,7 @@
     "logged-layout": {
       "home": "Accueil",
       "studies": "Études",
+      "tools": "Outils",
       "documentation": "Documentation",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"

@@ -47,7 +47,7 @@ class MockAttachmentService {
 
 class MockSectionService {
   duplicateSection = vi.fn().mockResolvedValue(undefined);
-  deleteSection = vi.fn();
+  deleteSection = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockNotificationService {

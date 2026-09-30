@@ -37,6 +37,7 @@ describe('LoggedLayoutComponent', () => {
             en: {
               'shared.logged-layout.home': 'Home',
               'shared.logged-layout.studies': 'Studies',
+              'shared.logged-layout.tools': 'Tools',
               'shared.logged-layout.documentation': 'Documentation',
               'shared.logged-layout.ver-maj': 'Ver.MAJ',
               'shared.logged-layout.version-maj': 'Version / MAJ'
@@ -108,6 +109,14 @@ describe('LoggedLayoutComponent', () => {
       expect(item).toHaveProperty('route');
       expect(item).toHaveProperty('icon');
     });
+  });
+
+  it('should include a tools entry with the wrench icon routing to /tools', () => {
+    const toolsItem = component.sideBarNav().main.find((item) => item.id === 'sideB-tools');
+
+    expect(toolsItem?.label).toBe('Tools');
+    expect(toolsItem?.route).toBe('/tools');
+    expect(toolsItem?.icon).toBe('build');
   });
 
   it('should include a documentation entry opening the static Sphinx docs in a new tab', () => {

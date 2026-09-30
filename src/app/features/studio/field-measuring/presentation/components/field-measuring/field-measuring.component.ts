@@ -136,8 +136,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     effect(() => {
       if (this.toolbarDialogService.isOpen() && this.toolbarDialogService.phase() === 'main') {
         // Initialize data from PlotService when dialog opens
-        this.initializeMeasureData();
-        this.cableService.getCables().then((cables) => {
+        void this.initializeMeasureData();
+        void this.cableService.getCables().then((cables) => {
           this.cableOptions.set(
             cables.map((cable) => ({
               label: cable.name,
