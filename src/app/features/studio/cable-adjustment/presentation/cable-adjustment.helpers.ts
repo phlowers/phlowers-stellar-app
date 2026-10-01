@@ -76,7 +76,7 @@ export function toCableAdjustmentInputs(
   };
 }
 
-/** Rounds the engine sighting angles to the grade (RG.REG.AHF.1 / RG.REG.AVF.1). */
+/** Rounds the engine sighting angles to the grade. */
 export function toDisplayedResults(result: CableAdjustmentResult): CableAdjustmentDisplayedResults {
   return {
     horizontalSightAngle: Math.round(result.horizontalSightAngle),

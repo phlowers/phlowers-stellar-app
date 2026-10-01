@@ -10,23 +10,19 @@ import {
   CableAdjustmentSupportOption
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 
-// RG.REG.AHG/AHD/AVG/AVD
 export const ANGLE_MIN = -200;
 export const ANGLE_MAX = 200;
 export const ANGLE_DECIMALS = 2;
 export const ANGLE_DEFAULT = 0;
 
-// RG.REG.DIS
 export const DISTANCE_MIN = 0;
 export const DISTANCE_MAX = 5000;
 export const DISTANCE_DECIMALS = 2;
 
-// RG.REG.PAR
 export const PARAMETER_MIN = 20;
 export const PARAMETER_MAX = 5000;
 export const PARAMETER_DECIMALS = 0;
 
-// RG.REG.SUP.2
 export const SUPPORT_OPTIONS: readonly CableAdjustmentSupportOption[] = [
   { labelKey: 'common.left', value: 'LEFT' },
   { labelKey: 'common.right', value: 'RIGHT' }

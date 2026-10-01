@@ -127,7 +127,7 @@ export class CableAdjustmentComponent {
     initialValue: this.form.valid
   });
 
-  // RG.REG.SUP.1-2: no side to pick without span
+  // no side to pick without span
   readonly supportOptions = computed(() =>
     this.selectedSpan()
       ? SUPPORT_OPTIONS.map(({ labelKey, value }) => ({ label: this.translocoService.translate(labelKey), value }))
@@ -153,15 +153,15 @@ export class CableAdjustmentComponent {
       }
     });
 
-    // RG.REG.SUP.1-2: the support list follows the selected span
+    // the support list follows the selected span
     this.form.controls.span.valueChanges.pipe(takeUntilDestroyed()).subscribe((span) => {
       this.form.controls.support.reset({ value: null, disabled: span === null });
     });
 
-    // RG.REG.RES-CAD.1: results only match the inputs they were calculated from
+    // results only match the inputs they were calculated from
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.results.set(null));
 
-    // RG.REG.POR.3: the current span is the first span of the section
+    // the current span is the first span of the section
     this.form.controls.span.setValue(this.spanService.getSpanOptionsWithIndex()[0]?.value ?? null);
   }
 

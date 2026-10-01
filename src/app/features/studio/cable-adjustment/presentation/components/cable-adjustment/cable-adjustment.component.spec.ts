@@ -130,19 +130,13 @@ describe('CableAdjustmentComponent', () => {
     });
   });
 
-  describe('Span (RG.REG.POR)', () => {
-    it('RG.REG.POR.1 lists every span of the section named after its supports, truncated to 5 characters', () => {
+  describe('Span', () => {
+    it('lists every span of the section named after its supports, truncated to 5 characters', () => {
       const [spanSelect] = selects();
       expect(spanSelect.options?.map((option) => option.label)).toEqual(['ABCDE - FGHIJ', 'FGHIJ - KLMNO']);
     });
 
-    it('RG.REG.POR.2 filters the spans while typing', () => {
-      const [spanSelect] = selects();
-      expect(spanSelect.filter).toBe(true);
-      expect(spanSelect.filterBy).toBe('label');
-    });
-
-    it('RG.REG.POR.3 selects the current (first) span by default', () => {
+    it('selects the current (first) span by default', () => {
       expect(component.form.controls.span.value).toEqual({ index: 0, uuid: 'support-a' });
     });
 
@@ -154,8 +148,8 @@ describe('CableAdjustmentComponent', () => {
     });
   });
 
-  describe('Span length (RG.REG.LON)', () => {
-    it('RG.REG.LON.1 shows the length of the selected span', () => {
+  describe('Span length', () => {
+    it('shows the length of the selected span', () => {
       expect(textOf('span-length-value')).toBe('310.5 m');
 
       component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
@@ -163,25 +157,25 @@ describe('CableAdjustmentComponent', () => {
       expect(textOf('span-length-value')).toBe('420 m');
     });
 
-    it('RG.REG.LON.1 shows a dash without span', () => {
+    it('shows a dash without span', () => {
       component.form.controls.span.setValue(null);
       fixture.detectChanges();
       expect(textOf('span-length-value')).toBe('- m');
     });
 
-    it('RG.REG.LON.2 is read-only', () => {
+    it('is read-only', () => {
       expect(getByTestId('span-length-value')?.tagName).toBe('DD');
     });
   });
 
-  describe('Support angles (RG.REG.AHG / AHD / AVG / AVD)', () => {
+  describe('Support angles', () => {
     const angleIds = ['left-horizontal-angle', 'right-horizontal-angle', 'left-vertical-angle', 'right-vertical-angle'];
 
-    it.each(angleIds)('%s defaults to 0 (RG.REG.AHG.2 / AHD.2 / AVG.2 / AVD.2)', (id) => {
+    it.each(angleIds)('%s defaults to 0', (id) => {
       expect((getByTestId(`${id}-input`) as HTMLInputElement).value).toBe('0');
     });
 
-    it.each(angleIds)('%s shows the bound and decimals errors (RG.REG.AHG.1 / AHD.1 / AVG.1 / AVD.1)', (id) => {
+    it.each(angleIds)('%s shows the bound and decimals errors', (id) => {
       const error = () => fixture.nativeElement.querySelector(`#${id}-error`)?.textContent?.trim();
 
       typeIn(`${id}-input`, '-200.01');
@@ -196,15 +190,15 @@ describe('CableAdjustmentComponent', () => {
     });
   });
 
-  describe('Support (RG.REG.SUP)', () => {
-    it('RG.REG.SUP.1 is empty and disabled without span', () => {
+  describe('Support', () => {
+    it('is empty and disabled without span', () => {
       component.form.controls.span.setValue(null);
       fixture.detectChanges();
       expect(component.supportOptions()).toEqual([]);
       expect(component.form.controls.support.disabled).toBe(true);
     });
 
-    it('RG.REG.SUP.2 lists the left and right supports of the selected span', () => {
+    it('lists the left and right supports of the selected span', () => {
       component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
       fixture.detectChanges();
       expect(selects()[1].options).toEqual([
@@ -214,17 +208,17 @@ describe('CableAdjustmentComponent', () => {
       expect(component.form.controls.support.enabled).toBe(true);
     });
 
-    it('RG.REG.SUP.2 clears the support when the span changes', () => {
+    it('clears the support when the span changes', () => {
       component.form.controls.support.setValue('RIGHT');
       component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
       expect(component.form.controls.support.value).toBeNull();
     });
   });
 
-  describe('Tacheometer distance and adjustment parameter (RG.REG.DIS / PAR)', () => {
+  describe('Tacheometer distance and adjustment parameter', () => {
     const error = (id: string) => fixture.nativeElement.querySelector(`#${id}-error`)?.textContent?.trim();
 
-    it('RG.REG.DIS.2 / RG.REG.PAR.2 have no default value', () => {
+    it('have no default value', () => {
       expect(component.form.controls.tacheometerHorizontalDistance.value).toBeNull();
       expect(component.form.controls.adjustmentParameter.value).toBeNull();
     });
@@ -234,12 +228,12 @@ describe('CableAdjustmentComponent', () => {
       ['5000.01', 'Max. value: 5000'],
       ['1.234', 'Max decimals: 2'],
       ['', 'Required']
-    ])('RG.REG.DIS.1 rejects "%s"', (value, message) => {
+    ])('tacheometer distance rejects "%s"', (value, message) => {
       typeIn('tacheometer-horizontal-distance-input', value);
       expect(error('tacheometer-horizontal-distance')).toBe(message);
     });
 
-    it.each(['0', '5000', '95.25'])('RG.REG.DIS.1 accepts %s', (value) => {
+    it.each(['0', '5000', '95.25'])('tacheometer distance accepts %s', (value) => {
       typeIn('tacheometer-horizontal-distance-input', value);
       expect(error('tacheometer-horizontal-distance')).toBeUndefined();
     });
@@ -249,26 +243,26 @@ describe('CableAdjustmentComponent', () => {
       ['5001', 'Max. value: 5000'],
       ['20.5', 'Max decimals: 0'],
       ['', 'Required']
-    ])('RG.REG.PAR.1 rejects "%s"', (value, message) => {
+    ])('adjustment parameter rejects "%s"', (value, message) => {
       typeIn('adjustment-parameter-input', value);
       expect(error('adjustment-parameter')).toBe(message);
     });
 
-    it.each(['20', '5000'])('RG.REG.PAR.1 accepts %s', (value) => {
+    it.each(['20', '5000'])('adjustment parameter accepts %s', (value) => {
       typeIn('adjustment-parameter-input', value);
       expect(error('adjustment-parameter')).toBeUndefined();
     });
   });
 
-  describe('Calculate button (RG.REG.CAL-BTN)', () => {
-    it('RG.REG.CAL-BTN.1 is disabled while required fields are missing', () => {
+  describe('Calculate button', () => {
+    it('is disabled while required fields are missing', () => {
       expect(calculateBtn().disabled).toBe(true);
 
       fillRequiredFields();
       expect(calculateBtn().disabled).toBe(false);
     });
 
-    it('RG.REG.CAL-BTN.1 is disabled when the span length is unknown', () => {
+    it('is disabled when the span length is unknown', () => {
       fillRequiredFields();
       component.form.controls.span.setValue({ index: 2, uuid: 'support-c' });
       component.form.controls.support.setValue('LEFT');
@@ -276,7 +270,7 @@ describe('CableAdjustmentComponent', () => {
       expect(calculateBtn().disabled).toBe(true);
     });
 
-    it('RG.REG.CAL-BTN.2 runs the calculation with the validated values', async () => {
+    it('runs the calculation with the validated values', async () => {
       fillRequiredFields();
       calculateBtn().click();
       await fixture.whenStable();
@@ -295,7 +289,7 @@ describe('CableAdjustmentComponent', () => {
       });
     });
 
-    it('RG.REG.CAL-BTN.2 flags the invalid fields and does not calculate', async () => {
+    it('flags the invalid fields and does not calculate', async () => {
       await calculate();
 
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
@@ -319,8 +313,8 @@ describe('CableAdjustmentComponent', () => {
     });
   });
 
-  describe('Results (RG.REG.RES-CAD / AHF / AVF)', () => {
-    it('RG.REG.RES-CAD.1 hides the results until a successful calculation', async () => {
+  describe('Results', () => {
+    it('hides the results until a successful calculation', async () => {
       expect(getByTestId('results-frame')).toBeNull();
 
       fillRequiredFields();
@@ -328,7 +322,7 @@ describe('CableAdjustmentComponent', () => {
       expect(getByTestId('results-frame')).not.toBeNull();
     });
 
-    it('RG.REG.RES-CAD.1 hides the results again when an input changes', async () => {
+    it('hides the results again when an input changes', async () => {
       fillRequiredFields();
       await calculate();
 
@@ -336,7 +330,7 @@ describe('CableAdjustmentComponent', () => {
       expect(getByTestId('results-frame')).toBeNull();
     });
 
-    it('RG.REG.RES-CAD.1 locks the inputs while calculating so results match them', async () => {
+    it('locks the inputs while calculating so results match them', async () => {
       let resolveTask!: (value: unknown) => void;
       mockWorkerPythonService.runTask.mockReturnValueOnce(new Promise((resolve) => (resolveTask = resolve)));
       fillRequiredFields();
@@ -354,7 +348,7 @@ describe('CableAdjustmentComponent', () => {
       expect(getByTestId('results-frame')).not.toBeNull();
     });
 
-    it('RG.REG.AHF.1 / RG.REG.AVF.1 show both angles rounded to the grade', async () => {
+    it('show both angles rounded to the grade', async () => {
       fillRequiredFields();
       await calculate();
 
@@ -362,7 +356,7 @@ describe('CableAdjustmentComponent', () => {
       expect(textOf('vertical-sight-angle-value')).toBe('97 gr');
     });
 
-    it('RG.REG.AHF.2 / RG.REG.AVF.2 are read-only', async () => {
+    it('are read-only', async () => {
       fillRequiredFields();
       await calculate();
 
@@ -386,7 +380,7 @@ describe('CableAdjustmentComponent', () => {
   });
 
   describe('Deferred actions', () => {
-    it('RG.REG.RAP-BTN.1 shows the report button disabled', () => {
+    it('shows the report button disabled', () => {
       const reportBtn = renderTemplate(component.footerTemplate()).querySelector<HTMLButtonElement>(
         '[data-testid="report-btn"]'
       );

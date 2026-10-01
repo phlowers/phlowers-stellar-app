@@ -28,11 +28,11 @@ const makeFormValue = (overrides: Partial<CableAdjustmentFormValue> = {}): Cable
 
 describe('cable-adjustment helpers', () => {
   describe('createAngleControl', () => {
-    it('defaults to 0 (RG.REG.AHG.2)', () => {
+    it('defaults to 0', () => {
       expect(createAngleControl().value).toBe(0);
     });
 
-    it.each([-200, 200, 12.34, -0.01])('accepts %s (RG.REG.AHG.1)', (value) => {
+    it.each([-200, 200, 12.34, -0.01])('accepts %s', (value) => {
       const control = createAngleControl();
       control.setValue(value);
       expect(control.valid).toBe(true);
@@ -43,7 +43,7 @@ describe('cable-adjustment helpers', () => {
       [200.01, 'max'],
       [1.234, 'maxDecimals'],
       [null, 'required']
-    ])('rejects %s with a %s error (RG.REG.AHG.1)', (value, errorKey) => {
+    ])('rejects %s with a %s error', (value, errorKey) => {
       const control = createAngleControl();
       control.setValue(value);
       expect(control.hasError(errorKey)).toBe(true);
@@ -55,7 +55,7 @@ describe('cable-adjustment helpers', () => {
       supports: [{ spanLength: 310.5 }, { spanLength: 420 }, { spanLength: null }]
     } as unknown as Section;
 
-    it('returns the length of the span starting at the given support (RG.REG.LON.1)', () => {
+    it('returns the length of the span starting at the given support', () => {
       expect(getSpanLength(section, 1)).toBe(420);
     });
 
@@ -101,7 +101,7 @@ describe('cable-adjustment helpers', () => {
   });
 
   describe('toDisplayedResults', () => {
-    it('rounds both sighting angles to the grade (RG.REG.AHF.1 / RG.REG.AVF.1)', () => {
+    it('rounds both sighting angles to the grade', () => {
       expect(toDisplayedResults({ horizontalSightAngle: 73.802, verticalSightAngle: 96.418 })).toEqual({
         horizontalSightAngle: 74,
         verticalSightAngle: 96
