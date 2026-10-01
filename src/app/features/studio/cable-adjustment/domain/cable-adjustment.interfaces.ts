@@ -13,10 +13,7 @@ export interface CableAdjustmentSpan {
 
 /** Form controls holding a support angle (grades). */
 export type CableAdjustmentAngleControl =
-  | 'leftHorizontalAngle'
-  | 'rightHorizontalAngle'
-  | 'leftVerticalAngle'
-  | 'rightVerticalAngle';
+  'leftHorizontalAngle' | 'rightHorizontalAngle' | 'leftVerticalAngle' | 'rightVerticalAngle';
 
 /** Display metadata of an angle input. */
 export interface CableAdjustmentAngleField {
@@ -26,6 +23,15 @@ export interface CableAdjustmentAngleField {
   labelKey: string;
 }
 
+/** Side of the selected span the tacheometer measures from. */
+export type CableAdjustmentSupportSide = 'LEFT' | 'RIGHT';
+
+/** Option of the support list. */
+export interface CableAdjustmentSupportOption {
+  labelKey: string;
+  value: CableAdjustmentSupportSide;
+}
+
 /** Raw value of the cable adjustment form (disabled controls included). */
 export interface CableAdjustmentFormValue {
   span: CableAdjustmentSpan | null;
@@ -33,7 +39,7 @@ export interface CableAdjustmentFormValue {
   rightHorizontalAngle: number | null;
   leftVerticalAngle: number | null;
   rightVerticalAngle: number | null;
-  support: 'LEFT' | 'RIGHT' | null;
+  support: CableAdjustmentSupportSide | null;
   tacheometerHorizontalDistance: number | null;
   adjustmentParameter: number | null;
 }

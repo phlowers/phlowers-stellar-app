@@ -5,7 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CableAdjustmentAngleField } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
+import {
+  CableAdjustmentAngleField,
+  CableAdjustmentSupportOption
+} from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 
 // RG.REG.AHG/AHD/AVG/AVD
 export const ANGLE_MIN = -200;
@@ -22,6 +25,12 @@ export const DISTANCE_DECIMALS = 2;
 export const PARAMETER_MIN = 20;
 export const PARAMETER_MAX = 5000;
 export const PARAMETER_DECIMALS = 0;
+
+// RG.REG.SUP.2
+export const SUPPORT_OPTIONS: readonly CableAdjustmentSupportOption[] = [
+  { labelKey: 'common.left', value: 'LEFT' },
+  { labelKey: 'common.right', value: 'RIGHT' }
+];
 
 export const ANGLE_FIELDS: readonly CableAdjustmentAngleField[] = [
   {
