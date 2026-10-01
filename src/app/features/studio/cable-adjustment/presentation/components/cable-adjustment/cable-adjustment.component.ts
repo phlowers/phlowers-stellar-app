@@ -33,17 +33,14 @@ import { Task } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { CableAdjustmentResult } from '@shared/domain';
-import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import {
-  ANGLE_DECIMALS,
   ANGLE_FIELDS,
-  ANGLE_MAX,
-  ANGLE_MIN,
   DISTANCE_DECIMALS,
   DISTANCE_MAX,
   DISTANCE_MIN,
+  INPUT_LIMITS,
   PARAMETER_DECIMALS,
   PARAMETER_MAX,
   PARAMETER_MIN,
@@ -55,6 +52,7 @@ import {
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 import {
   createAngleControl,
+  createNumberControl,
   getSpanLength,
   toCableAdjustmentInputs,
   toDisplayedResults
@@ -92,14 +90,7 @@ export class CableAdjustmentComponent {
   readonly spanService = inject(PlotSpanService);
 
   readonly ANGLE_FIELDS = ANGLE_FIELDS;
-  readonly ANGLE_MIN = ANGLE_MIN;
-  readonly ANGLE_MAX = ANGLE_MAX;
-  readonly ANGLE_STEP = 10 ** -ANGLE_DECIMALS;
-  readonly DISTANCE_MIN = DISTANCE_MIN;
-  readonly DISTANCE_MAX = DISTANCE_MAX;
-  readonly DISTANCE_STEP = 10 ** -DISTANCE_DECIMALS;
-  readonly PARAMETER_MIN = PARAMETER_MIN;
-  readonly PARAMETER_MAX = PARAMETER_MAX;
+  readonly limits = INPUT_LIMITS;
 
   readonly form = new FormGroup({
     span: new FormControl<CableAdjustmentSpan | null>(null, Validators.required),
@@ -108,18 +99,8 @@ export class CableAdjustmentComponent {
     leftVerticalAngle: createAngleControl(),
     rightVerticalAngle: createAngleControl(),
     support: new FormControl<CableAdjustmentSupportSide | null>({ value: null, disabled: true }, Validators.required),
-    tacheometerHorizontalDistance: new FormControl<number | null>(null, [
-      Validators.required,
-      Validators.min(DISTANCE_MIN),
-      Validators.max(DISTANCE_MAX),
-      maxDecimalsValidator(DISTANCE_DECIMALS)
-    ]),
-    adjustmentParameter: new FormControl<number | null>(null, [
-      Validators.required,
-      Validators.min(PARAMETER_MIN),
-      Validators.max(PARAMETER_MAX),
-      maxDecimalsValidator(PARAMETER_DECIMALS)
-    ])
+    tacheometerHorizontalDistance: createNumberControl(DISTANCE_MIN, DISTANCE_MAX, DISTANCE_DECIMALS),
+    adjustmentParameter: createNumberControl(PARAMETER_MIN, PARAMETER_MAX, PARAMETER_DECIMALS)
   });
 
   private readonly selectedSpan = toSignal(this.form.controls.span.valueChanges, { initialValue: null });

@@ -63,9 +63,9 @@
             type="number"
             pInputText
             [formControlName]="field.controlName"
-            [attr.min]="ANGLE_MIN"
-            [attr.max]="ANGLE_MAX"
-            [attr.step]="ANGLE_STEP"
+            [attr.min]="limits.angle.min"
+            [attr.max]="limits.angle.max"
+            [attr.step]="limits.angle.step"
             required
             [attr.data-testid]="field.id + '-input'"
             [attr.aria-invalid]="error ? 'true' : null"
@@ -109,9 +109,9 @@
           type="number"
           pInputText
           formControlName="tacheometerHorizontalDistance"
-          [attr.min]="DISTANCE_MIN"
-          [attr.max]="DISTANCE_MAX"
-          [attr.step]="DISTANCE_STEP"
+          [attr.min]="limits.distance.min"
+          [attr.max]="limits.distance.max"
+          [attr.step]="limits.distance.step"
           required
           data-testid="tacheometer-horizontal-distance-input"
           [attr.aria-invalid]="distanceError ? 'true' : null"
@@ -142,8 +142,8 @@
           type="number"
           pInputText
           formControlName="adjustmentParameter"
-          [attr.min]="PARAMETER_MIN"
-          [attr.max]="PARAMETER_MAX"
+          [attr.min]="limits.parameter.min"
+          [attr.max]="limits.parameter.max"
           step="1"
           required
           data-testid="adjustment-parameter-input"

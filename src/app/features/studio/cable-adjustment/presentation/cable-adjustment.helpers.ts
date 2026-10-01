@@ -19,14 +19,24 @@ import {
   CableAdjustmentFormValue
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 
+/** Creates a required number control bounded to [min; max] with at most `decimals` decimals. */
+export function createNumberControl(
+  min: number,
+  max: number,
+  decimals: number,
+  value: number | null = null
+): FormControl<number | null> {
+  return new FormControl<number | null>(value, [
+    Validators.required,
+    Validators.min(min),
+    Validators.max(max),
+    maxDecimalsValidator(decimals)
+  ]);
+}
+
 /** Creates a support angle control: required, in [-200; 200] grades, 2 decimals, 0 by default. */
 export function createAngleControl(): FormControl<number | null> {
-  return new FormControl<number | null>(ANGLE_DEFAULT, [
-    Validators.required,
-    Validators.min(ANGLE_MIN),
-    Validators.max(ANGLE_MAX),
-    maxDecimalsValidator(ANGLE_DECIMALS)
-  ]);
+  return createNumberControl(ANGLE_MIN, ANGLE_MAX, ANGLE_DECIMALS, ANGLE_DEFAULT);
 }
 
 /** Length of the span starting at `spanIndex`, or null when unknown. */

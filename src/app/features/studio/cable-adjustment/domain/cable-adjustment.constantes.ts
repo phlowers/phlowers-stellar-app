@@ -23,6 +23,12 @@ export const PARAMETER_MIN = 20;
 export const PARAMETER_MAX = 5000;
 export const PARAMETER_DECIMALS = 0;
 
+export const INPUT_LIMITS = {
+  angle: { min: ANGLE_MIN, max: ANGLE_MAX, step: 10 ** -ANGLE_DECIMALS },
+  distance: { min: DISTANCE_MIN, max: DISTANCE_MAX, step: 10 ** -DISTANCE_DECIMALS },
+  parameter: { min: PARAMETER_MIN, max: PARAMETER_MAX }
+} as const;
+
 export const SUPPORT_OPTIONS: readonly CableAdjustmentSupportOption[] = [
   { labelKey: 'common.left', value: 'LEFT' },
   { labelKey: 'common.right', value: 'RIGHT' }
