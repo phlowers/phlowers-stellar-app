@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
 import { HeaderComponent } from './header.component';
 import { Section, Support } from '@shared/domain';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -33,6 +34,7 @@ describe('HeaderComponent', () => {
   beforeEach(async () => {
     notificationServiceMock = { info: vi.fn() } as unknown as vi.Mocked<NotificationService>;
     workerPythonServiceMock = {
+      ready$: new BehaviorSubject(true),
       runTask: vi.fn().mockResolvedValue({ result: null, error: null, diagnostics: [] })
     } as unknown as vi.Mocked<WorkerPythonService>;
     loggerServiceMock = { error: vi.fn() } as unknown as vi.Mocked<LoggerService>;
@@ -294,6 +296,56 @@ describe('HeaderComponent', () => {
       component.onFieldChange('altitude', 30);
 
       expect(fieldChangeSpy).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('Localization retry during startup', () => {
+    it('should wait until the Python worker is ready before fetching localization', async () => {
+      fixture.destroy();
+      const ready$ = new BehaviorSubject(false);
+      workerPythonServiceMock.ready$ = ready$;
+      workerPythonServiceMock.runTask.mockClear();
+      const spanService = TestBed.inject(PlotSpanService);
+      vi.spyOn(spanService, 'section').mockReturnValue({
+        start_latitude: 48.8566,
+        start_longitude: 2.3522,
+        start_azimuth: 30,
+        supports: [
+          { spanLength: 10, spanAngle: 20 },
+          { spanLength: 12, spanAngle: 18 }
+        ]
+      } as any);
+
+      const startupFixture = TestBed.createComponent(HeaderComponent);
+      const startupComponent = startupFixture.componentInstance;
+      const measureData = createTestMeasureData({
+        uuid: 'startup-measure',
+        span: [0, 1],
+        leftSupport: '0',
+        longitude: null,
+        latitude: null,
+        azimuth: null
+      });
+
+      startupComponent.fieldChange.subscribe(() => undefined);
+      startupFixture.componentRef.setInput('measureData', measureData);
+      startupFixture.detectChanges();
+      await startupFixture.whenStable();
+
+      expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
+
+      ready$.next(true);
+      startupFixture.detectChanges();
+      await startupFixture.whenStable();
+
+      expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
+        Task.computeLocalization,
+        expect.objectContaining({
+          startLatitude: 48.8566,
+          startLongitude: 2.3522,
+          startAzimuth: 30
+        })
+      );
     });
   });
 

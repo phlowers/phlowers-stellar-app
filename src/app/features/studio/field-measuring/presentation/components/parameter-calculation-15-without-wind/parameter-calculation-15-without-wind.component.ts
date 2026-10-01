@@ -189,16 +189,16 @@ export class ParameterCalculation15WithoutWindComponent {
     const isManual = data.updateMode15C === 'manual';
     const manualData = data.manualParameterCalculation15CWithoutWind;
     const manualDataToSend = {
-      parameterPapoto: manualData?.parameterPapoto || null,
-      parameterUncertaintyPapoto: manualData?.parameterUncertaintyPapoto || null,
-      cableTemperatureCalibration: manualData?.cableTemperatureCalibration || null,
-      cableTemperatureCalibrationUncertainty: manualData?.cableTemperatureCalibrationUncertainty || null
+      parameterPapoto: manualData?.parameterPapoto ?? null,
+      parameterUncertaintyPapoto: manualData?.parameterUncertaintyPapoto ?? null,
+      cableTemperatureCalibration: manualData?.cableTemperatureCalibration ?? null,
+      cableTemperatureCalibrationUncertainty: manualData?.cableTemperatureCalibrationUncertainty ?? null
     };
     const autoDataToSend = {
-      parameterPapoto: data.outputs.papoto?.parameter || null,
-      parameterUncertaintyPapoto: data.outputs.papoto?.uncertainty || null,
-      cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature || null,
-      cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty || null
+      parameterPapoto: data.outputs.papoto?.parameter ?? null,
+      parameterUncertaintyPapoto: data.outputs.papoto?.uncertainty ?? null,
+      cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature ?? null,
+      cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty ?? null
     };
     const dataToSend = isManual ? manualDataToSend : autoDataToSend;
     this.isCalculating.set(true);

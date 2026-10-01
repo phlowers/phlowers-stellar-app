@@ -9,6 +9,7 @@ import {
   signal,
   untracked
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -74,6 +75,7 @@ export class HeaderComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   private readonly logger = inject(LoggerService);
 
   constructor() {
@@ -118,7 +120,7 @@ export class HeaderComponent {
     // Fill longitude/latitude/azimuth from the study when the span or reference support changes
     effect(() => {
       const { uuid, span, leftSupport, longitude, latitude, azimuth } = this.measureData();
-      if (span?.length !== 2) {
+      if (span?.length !== 2 || !this.workerReady()) {
         return;
       }
       const key = JSON.stringify([span, leftSupport]);
