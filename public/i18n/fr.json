@@ -383,7 +383,8 @@
       "zoom": "Zoom",
       "pan": "Pan",
       "cable-mod-lengthening": "Allongement",
-      "cable-mod-shortening": "Raccourcissement"
+      "cable-mod-shortening": "Raccourcissement",
+      "cut-strands-marking": "Brins coupés"
     },
     "loads-service": {
       "update-detail": "Charge mise à jour",
