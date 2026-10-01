@@ -3,6 +3,7 @@ import { TemplateRef } from '@angular/core';
 import { ToolbarDialogService } from './toolbar-dialog.service';
 import { FieldMeasuringComponent } from '@features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component';
 import { InitComponent } from '@features/studio/field-measuring/presentation/components/init/init.component';
+import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
 
 describe('ToolbarDialogService', () => {
   let service: ToolbarDialogService;
@@ -150,6 +151,15 @@ describe('ToolbarDialogService', () => {
   describe('getDialogStyle', () => {
     it('should return empty object when no tool is selected', () => {
       expect(service.getDialogStyle()).toEqual({});
+    });
+
+    it('should open cable-adjustment directly in main phase with its dialog style', () => {
+      service.openTool('cable-adjustment');
+      expect(service.currentTool()).toBe('cable-adjustment');
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('main');
+      expect(service.getComponent()).toBe(CableAdjustmentComponent);
+      expect(service.getDialogStyle()).toEqual({ width: '43.5rem', 'max-width': '90%' });
     });
 
     it('should return init style when field-measuring tool is opened', () => {

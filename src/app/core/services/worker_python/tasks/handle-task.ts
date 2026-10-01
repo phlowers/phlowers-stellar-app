@@ -44,6 +44,10 @@ const tasks: Record<
     function: 'calculate_guying',
     externalPackages: []
   },
+  [Task.calculateCableAdjustment]: {
+    function: 'calculate_cable_adjustment',
+    externalPackages: []
+  },
   [Task.setLogLevel]: {
     function: 'set_log_level',
     externalPackages: []

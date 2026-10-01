@@ -490,13 +490,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 7 - Cable adjustment', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[6].action();
-      expect(alertSpy).toHaveBeenCalledWith('click Cable adjustment');
-
-      alertSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('cable-adjustment');
     });
 
     it('should execute all actions through toolsDropdown commands', () => {
@@ -508,9 +505,9 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      // Field measurements, VTL & Guying and Strand RRTS open a dialog, the other 4 call alert
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(3);
-      expect(alertSpy).toHaveBeenCalledTimes(4);
+      // Field measurements, VTL & Guying, Strand RRTS and Cable adjustment open a dialog, the other 3 call alert
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(4);
+      expect(alertSpy).toHaveBeenCalledTimes(3);
       alertSpy.mockRestore();
     });
   });

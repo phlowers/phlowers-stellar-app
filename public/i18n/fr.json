@@ -836,7 +836,7 @@
       "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
       "height-and-lateral-distance-tool": "Hauteur & distance latérale",
-      "cable-adjustment-tool": "Réglage câble",
+      "cable-adjustment-tool": "Réglage d'un câble",
       "rrts-cut-strands": "CRR de brins coupés"
     },
     "section-plot-card": {
@@ -1117,6 +1117,22 @@
       "failed-to-save-pose-table": "Échec de la sauvegarde du tableau de pose",
       "max-two-decimals-error": "Valeur à 2 décimales maximum",
       "integer-error": "La valeur doit être un nombre entier"
+    },
+    "cable-adjustment": {
+      "span-length-label": "Longueur de portée",
+      "left-horizontal-angle-label": "Angle HG horizontal au support G",
+      "right-horizontal-angle-label": "Angle HD horizontal au support D",
+      "left-vertical-angle-label": "Angle VG vertical au support G",
+      "right-vertical-angle-label": "Angle VD vertical au support D",
+      "support-label": "Support",
+      "tacheometer-horizontal-distance-label": "Distance horizontale du tachéomètre",
+      "adjustment-parameter-label": "Paramètre de réglage",
+      "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
+      "horizontal-sight-angle-label": "Angle H horizontal de visée à la flèche médiane",
+      "vertical-sight-angle-label": "Angle V vertical de visée à la flèche médiane",
+      "grade-unit": "gr",
+      "aria-help": "Aide sur le réglage d'un câble",
+      "calculation-failed": "Échec du calcul de réglage du câble"
     },
     "rrts-cut-strands": {
       "layers-detail": "Détail des couches",

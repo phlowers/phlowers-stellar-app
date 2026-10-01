@@ -1,0 +1,207 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="build" aria-hidden="true" />
+    <span>{{ 'studio.top-toolbar.cable-adjustment-tool' | transloco }}</span>
+  </p>
+</ng-template>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="calculate()"
+  class="cable-adjustment"
+  [attr.aria-busy]="isCalculating()"
+  data-testid="cable-adjustment-form"
+>
+  <div class="cable-adjustment__grid">
+    <div class="cable-adjustment__field">
+      <label for="cable-adjustment-span">{{ 'studio.shared.span-label' | transloco }}</label>
+      <p-select
+        inputId="cable-adjustment-span"
+        [options]="spanService.getSpanOptionsWithIndex()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="span"
+        [filter]="true"
+        filterBy="label"
+        [showClear]="true"
+        appendTo="body"
+        fluid
+        data-testid="span-select"
+      />
+    </div>
+
+    <dl class="cable-adjustment__field">
+      <dt>{{ 'studio.cable-adjustment.span-length-label' | transloco }}</dt>
+      <dd data-testid="span-length-value">
+        {{ spanLength() !== null ? (spanLength() | number: '1.0-2') : '-' }}&nbsp;{{ 'common.meter' | transloco }}
+      </dd>
+    </dl>
+  </div>
+
+  <hr class="cable-adjustment__separator" />
+
+  <button
+    type="button"
+    app-btn
+    btnStyle="outlined"
+    btnSize="s"
+    disabled
+    class="cable-adjustment__help-btn"
+    [attr.aria-label]="'studio.cable-adjustment.aria-help' | transloco"
+    data-testid="help-btn"
+  >
+    <app-icon icon="help" aria-hidden="true" />
+  </button>
+
+  <div class="cable-adjustment__grid">
+    @for (field of ANGLE_FIELDS; track field.controlName) {
+      @let control = form.controls[field.controlName];
+      @let error = control.dirty || control.touched ? getError(control) : '';
+      <div class="cable-adjustment__field">
+        <label [for]="field.id">{{ field.labelKey | transloco }}</label>
+        <p-inputgroup>
+          <input
+            [id]="field.id"
+            type="number"
+            pInputText
+            [formControlName]="field.controlName"
+            [attr.min]="ANGLE_MIN"
+            [attr.max]="ANGLE_MAX"
+            [attr.step]="ANGLE_STEP"
+            required
+            [attr.data-testid]="field.id + '-input'"
+            [attr.aria-invalid]="error ? 'true' : null"
+            [attr.aria-errormessage]="error ? field.id + '-error' : null"
+          />
+          <p-inputgroup-addon>{{ 'studio.cable-adjustment.grade-unit' | transloco }}</p-inputgroup-addon>
+        </p-inputgroup>
+        @if (error) {
+          <p-message [id]="field.id + '-error'" severity="error" size="small" variant="simple" role="alert">
+            {{ error }}
+          </p-message>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="cable-adjustment__grid cable-adjustment__grid--measure">
+    <div class="cable-adjustment__field">
+      <label for="cable-adjustment-support">{{ 'studio.cable-adjustment.support-label' | transloco }}</label>
+      <p-select
+        inputId="cable-adjustment-support"
+        [options]="supportOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="support"
+        appendTo="body"
+        fluid
+        data-testid="support-select"
+      />
+    </div>
+
+    @let distanceControl = form.controls.tacheometerHorizontalDistance;
+    @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
+    <div class="cable-adjustment__field">
+      <label for="tacheometer-horizontal-distance">
+        {{ 'studio.cable-adjustment.tacheometer-horizontal-distance-label' | transloco }}
+      </label>
+      <p-inputgroup>
+        <input
+          id="tacheometer-horizontal-distance"
+          type="number"
+          pInputText
+          formControlName="tacheometerHorizontalDistance"
+          [attr.min]="DISTANCE_MIN"
+          [attr.max]="DISTANCE_MAX"
+          [attr.step]="DISTANCE_STEP"
+          required
+          data-testid="tacheometer-horizontal-distance-input"
+          [attr.aria-invalid]="distanceError ? 'true' : null"
+          [attr.aria-errormessage]="distanceError ? 'tacheometer-horizontal-distance-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (distanceError) {
+        <p-message
+          id="tacheometer-horizontal-distance-error"
+          severity="error"
+          size="small"
+          variant="simple"
+          role="alert"
+        >
+          {{ distanceError }}
+        </p-message>
+      }
+    </div>
+
+    @let parameterControl = form.controls.adjustmentParameter;
+    @let parameterError = parameterControl.dirty || parameterControl.touched ? getError(parameterControl) : '';
+    <div class="cable-adjustment__field">
+      <label for="adjustment-parameter">{{ 'studio.cable-adjustment.adjustment-parameter-label' | transloco }}</label>
+      <p-inputgroup>
+        <input
+          id="adjustment-parameter"
+          type="number"
+          pInputText
+          formControlName="adjustmentParameter"
+          [attr.min]="PARAMETER_MIN"
+          [attr.max]="PARAMETER_MAX"
+          step="1"
+          required
+          data-testid="adjustment-parameter-input"
+          [attr.aria-invalid]="parameterError ? 'true' : null"
+          [attr.aria-errormessage]="parameterError ? 'adjustment-parameter-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (parameterError) {
+        <p-message id="adjustment-parameter-error" severity="error" size="small" variant="simple" role="alert">
+          {{ parameterError }}
+        </p-message>
+      }
+    </div>
+  </div>
+
+  <div class="cable-adjustment__calculate">
+    <button
+      type="submit"
+      app-btn
+      [disabled]="!canCalculate()"
+      [btnLoading]="isCalculating()"
+      data-testid="calculate-btn"
+    >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      {{ 'studio.cable-adjustment.calculate-sight-angles' | transloco }}
+    </button>
+  </div>
+</form>
+
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="cable-adjustment__results" data-testid="results">
+  @if (displayedResults(); as res) {
+    <div class="cable-adjustment__results-content" data-testid="results-frame">
+      <h2>{{ 'common.results' | transloco }}</h2>
+      <dl class="cable-adjustment__grid">
+        <div class="cable-adjustment__field">
+          <dt>{{ 'studio.cable-adjustment.horizontal-sight-angle-label' | transloco }}</dt>
+          <dd data-testid="horizontal-sight-angle-value">
+            {{ res.horizontalSightAngle }}&nbsp;{{ 'studio.cable-adjustment.grade-unit' | transloco }}
+          </dd>
+        </div>
+        <div class="cable-adjustment__field">
+          <dt>{{ 'studio.cable-adjustment.vertical-sight-angle-label' | transloco }}</dt>
+          <dd data-testid="vertical-sight-angle-value">
+            {{ res.verticalSightAngle }}&nbsp;{{ 'studio.cable-adjustment.grade-unit' | transloco }}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
+</output>
+
+<ng-template #footer>
+  <button type="button" app-btn btnSize="m" disabled data-testid="report-btn">
+    <app-icon icon="picture_as_pdf" aria-hidden="true" />
+    {{ 'common.report' | transloco }}
+  </button>
+</ng-template>
