@@ -35,7 +35,13 @@ import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { maxOf } from '../../services/section-state-report/section-state-report.helpers';
-import { DEFAULT_CUT_STRANDS, DISTANCE_MAX, STRAND_LAYER_KEYS, WORK_LOAD_ICONS } from './strand-rrts.constantes';
+import {
+  DEFAULT_CUT_STRANDS,
+  DISTANCE_MAX,
+  MAX_SHOWN_LAYER,
+  STRAND_LAYER_KEYS,
+  WORK_LOAD_ICONS
+} from './strand-rrts.constantes';
 import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
 import { NotificationKey, RrtsFormValue, RrtsResults } from './strand-rrts.interfaces';
 
@@ -104,12 +110,13 @@ export class StrandRrtsComponent {
     loader: ({ params }) => this.cablesService.getCable(params)
   });
 
-  // One entry per cable layer with strands; its strand count bounds the cut strands input
+  // One entry per cable layer with strands, up to MAX_SHOWN_LAYER; its strand count bounds the cut strands input.
+  // The other layers are not in the form: they are given to the engine at 0
   readonly layers = computed(() => {
     if (!this.cable.hasValue()) return [];
     const cable = this.cable.value();
     return STRAND_LAYER_KEYS.map((key, i) => ({ layer: i + 1, strands: cable[key] ?? 0 }))
-      .filter(({ strands }) => strands > 0)
+      .filter(({ layer, strands }) => layer <= MAX_SHOWN_LAYER && strands > 0)
       .map((layer) => ({
         ...layer,
         control: new FormControl<number>(DEFAULT_CUT_STRANDS, {

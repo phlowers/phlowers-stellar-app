@@ -427,6 +427,51 @@ describe('StrandRrtsComponent', () => {
     });
   });
 
+  describe('shown layers', () => {
+    const input = (layer: number) => getByTestId(`rrts-cut-strands-layer${layer}-input`) as HTMLInputElement | null;
+
+    beforeEach(() => {
+      mockCablesService.getCable.mockResolvedValue({
+        nb_strand_layer_1: 6,
+        nb_strand_layer_2: 12,
+        nb_strand_layer_3: 8,
+        nb_strand_layer_4: 6,
+        nb_strand_layer_5: 1
+      });
+    });
+
+    it('only shows the first three layers', async () => {
+      await setup();
+
+      expect([1, 2, 3, 4, 5].map((layer) => input(layer) !== null)).toEqual([true, true, true, false, false]);
+      expect(getByTestId('rrts-cut-strands-layer4-max')).toBeNull();
+    });
+
+    it('gives the engine 0 for the layers that are not shown', async () => {
+      await setup();
+      typeIn('rrts-cut-strands-layer1-input', '1');
+      typeIn('rrts-cut-strands-layer2-input', '2');
+      typeIn('rrts-cut-strands-layer3-input', '3');
+      await calculate();
+
+      expect(engineCutStrands()[0]).toEqual([1, 2, 3, 0, 0, 0, 0, 0]);
+    });
+
+    it('ignores the layers that are not shown in a saved entry', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData({ cutStrands: [1, 2, 3, 4, 1, 0, 0, 0] }) }));
+
+      expect([1, 2, 3].map((layer) => input(layer)!.value)).toEqual(['1', '2', '3']);
+      expect(engineCutStrands()[0]).toEqual([1, 2, 3, 0, 0, 0, 0, 0]);
+    });
+
+    it('saves 0 for the layers that are not shown', async () => {
+      await setup(makeSection({ rrts_cut_strands: makeCutStrandsData({ cutStrands: [1, 2, 3, 4, 1, 0, 0, 0] }) }));
+      await component.save();
+
+      expect(savedSection().rrts_cut_strands?.cutStrands).toEqual([1, 2, 3, 0, 0, 0, 0, 0]);
+    });
+  });
+
   describe('calculation', () => {
     it('is only available on a valid form', async () => {
       await setup();

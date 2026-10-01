@@ -2,8 +2,8 @@
 
 L'outil **CRR de brins coupés** calcule la charge de rupture résiduelle (CRR, *RRTS* en anglais
 et dans le code) du câble de la section une fois certains de ses brins coupés, et le taux de
-travail max qui en découle. L'utilisateur saisit les brins coupés de chaque couche du câble, la
-boîte de dialogue lance le calcul dans le moteur Python, et une seule entrée peut être enregistrée
+travail max qui en découle. L'utilisateur saisit les brins coupés des trois premières couches du câble,
+la boîte de dialogue lance le calcul dans le moteur Python, et une seule entrée peut être enregistrée
 par section. En parallèle, la présence du personnel du cas de charge sélectionné règle la
 **haute sécurité** du moteur, qui pèse sur chaque taux de travail renvoyé par le moteur, y compris
 celui du studio.
@@ -22,8 +22,15 @@ Les chemins sont relatifs à `src/app/`, sauf `stellar-engine/`, relatif à la r
 | `features/studio/toolbar/presentation/components/strand-rrts/strand-rrts.helpers.ts` | Statut du nouveau taux de travail max, et conversion des brins coupés du formulaire vers l'entrée du moteur et vers l'entrée enregistrée |
 | `features/studio/toolbar/presentation/components/strand-rrts/strand-rrts.constantes.ts` | Bornes et valeurs par défaut du formulaire, clés catalogue des nombres de brins, icônes de statut |
 | `features/studio/toolbar/presentation/components/strand-rrts/strand-rrts.interfaces.ts` | Types de la valeur du formulaire, des résultats et du statut |
+| `features/studio/toolbar/application/services/strand-rrts.service.ts` | Exécute les tâches CRR du moteur : régler les brins coupés, calculer, appliquer ceux enregistrés |
+| `features/studio/core/presentation/pages/studio-page/studio-page.component.ts` | Applique les brins coupés enregistrés au moteur au chargement du studio et à chaque changement, et pilote l'indicateur de brin coupé |
 | `shared/domain/models/section.model.ts` | Entrée enregistrée, stockée sur la section |
 | `core/services/section/section-geometry.helpers.ts` | `sanitizeSectionGeometry()` supprime une entrée dont la portée n'existe plus |
+| `shared/components/studio/section/helpers/createCutStrandsAnnotations.ts` | Marquage dessiné sur le graphique du studio |
+| `shared/components/studio/section/helpers/createCutStrandsAnnotations.constantes.ts` | Couleur, icône, décalages en pixels et motif des pointillés du marquage, libellé au survol |
+| `shared/components/studio/section/helpers/createCutStrandsAnnotations.interfaces.ts` | Charge utile du clic sur le marquage |
+| `shared/components/studio/section/helpers/spanAnchor.ts` | Point d'une portée à une distance d'un support, partagé avec les annotations de modification de câble |
+| `shared/components/studio/section/section-plot.component.ts` | Transmet l'entrée enregistrée au graphique, ouvre l'outil au clic sur le marquage |
 | `core/services/plot/plot.service.ts` | Haute sécurité de l'étude moteur |
 | `core/services/worker_python/tasks/types.ts` | Entrées et sorties des tâches |
 | `core/services/worker_python/tasks/python-scripts/api.py` | Points d'entrée des tâches |
@@ -56,7 +63,8 @@ jusqu'à être réglés de nouveau, et chaque taux d'utilisation calculé ensuit
 compris celui de `refreshProjection()`. L'étude moteur créée par `Task.initLit` démarre avec les
 valeurs par défaut de mechaphlowers, sans brins coupés et sans haute sécurité, mais l'application
 applique juste après la haute sécurité du cas de charge sélectionné : elle est active pour une
-nouvelle étude, qui n'a pas de cas de charge sélectionné (voir *Haute sécurité*).
+nouvelle étude, qui n'a pas de cas de charge sélectionné (voir *Haute sécurité*). La page du studio
+applique de la même façon les brins coupés enregistrés (voir *Page du studio*).
 
 ### Tâches
 
@@ -113,8 +121,9 @@ interface Section {
   `distanceSupportRef: null` et `addMarking: false`.
 - `cutStrands` contient une valeur pour **chaque** couche du catalogue, `0` pour les couches sans
   brins, comme l'exige le tableau d'entrée de `setCutStrands` : une entrée enregistrée part telle
-  quelle vers le moteur. Le formulaire ne contient que les couches avec des brins :
-  `toCatalogCutStrands()` répartit ses valeurs sur les 8 couches du catalogue.
+  quelle vers le moteur. Le formulaire ne contient que les couches avec des brins parmi les
+  `MAX_SHOWN_LAYER` (3) premières : `toCatalogCutStrands()` répartit ses valeurs sur les 8 couches
+  du catalogue, avec `0` pour toutes les autres.
 - Les résultats (CRR, nouveau taux de travail max) ne sont pas persistés. Ils sont recalculés à
   l'ouverture de la boîte de dialogue sur une entrée enregistrée.
 
@@ -158,15 +167,15 @@ saisies et les résultats non enregistrés ne survivent pas à une fermeture.
 | `span` | Facultatif, effaçable. Options issues de `PlotSpanService.getSpanOptionsWithIndex()`, valeur `{ index, uuid }` |
 | `supportRef` | `LEFT` ou `RIGHT`, options issues de `PlotSpanService.getSupportOptions()`. Mis à `LEFT` quand une portée est sélectionnée alors qu'il est vide, conservé lors d'un changement de portée |
 | `distanceSupportRef` | Facultatif. De 0 à `DISTANCE_MAX` (5 000 m, fixe, pas la longueur de la portée), 2 décimales |
-| `cutStrands` | `FormArray`, un contrôle par couche avec des brins. Obligatoire, de 0 au nombre de brins de la couche, entier (`maxDecimalsValidator(0)`), `DEFAULT_CUT_STRANDS` (0) par défaut |
+| `cutStrands` | `FormArray`, un contrôle par couche avec des brins parmi les `MAX_SHOWN_LAYER` (3) premières. Obligatoire, de 0 au nombre de brins de la couche, entier (`maxDecimalsValidator(0)`), `DEFAULT_CUT_STRANDS` (0) par défaut |
 | `addMarking` | Booléen |
 
 - `supportRef`, `distanceSupportRef` et `addMarking` sont désactivés sans portée. Un abonnement à
   `span.valueChanges` les active quand une portée est sélectionnée, et les réinitialise et les
   désactive quand elle est effacée.
 - `layers()` est un `computed` sur une `resource` qui charge le câble du catalogue
-  (`CablesService.getCable()`). Il contient une entrée par `nb_strand_layer_n` supérieur à 0,
-  chacune avec son propre `FormControl`, et un effect les place dans le formulaire avec
+  (`CablesService.getCable()`). Il contient une entrée par `nb_strand_layer_n` supérieur à 0 parmi
+  les `MAX_SHOWN_LAYER` premières, chacune avec son propre `FormControl`, et un effect les place dans le formulaire avec
   `form.setControl('cutStrands', …)`. Sans aucune couche (câble en cours de chargement, pas de
   données de brins, échec de lecture du catalogue), un message remplace les champs et
   **Calculer** est désactivé.
@@ -191,7 +200,7 @@ compte. Un effect sur `savedEntry()` et `layers()` la charge dans le formulaire 
 
 Après un enregistrement, l'effect charge de nouveau l'entrée, mais ne calcule pas :
 `calculatedValue` est renseigné, les résultats affichés ont été calculés à partir de cette même
-entrée, et `save()` l'a déjà envoyée au moteur (voir *Enregistrement et suppression*).
+entrée, et la page du studio l'applique d'elle-même au moteur (voir *Page du studio*).
 
 Les effects s'exécutent dans l'ordre de leur création : l'effect qui place les contrôles des brins
 coupés dans le formulaire est déclaré en premier, pour que les contrôles existent au chargement de
@@ -214,6 +223,8 @@ sequenceDiagram
 
 - `calculate()` s'arrête immédiatement si le formulaire est invalide, sans couches, ou pendant un
   traitement en cours.
+- Les tâches passent par `StrandRrtsService.calculate()`, et l'état enregistré est restauré avec
+  `StrandRrtsService.applySaved()`.
 - `newWorkLoad` vaut `maxOf(utilizationRate.filter(Number.isFinite))` : le `NaN` du dernier
   support est écarté, et la valeur est `null` quand il ne reste aucun taux.
 - En cas de succès, `results` est renseigné et `calculatedValue` garde un instantané de
@@ -224,8 +235,9 @@ sequenceDiagram
 
 **Invariant :** en dehors d'un calcul, le moteur contient les brins coupés **enregistrés** (`0`
 par couche sans entrée enregistrée), jamais ceux en cours de saisie, de sorte que le studio
-n'affiche jamais de brins coupés non enregistrés. `applySavedCutStrands()` les restaure dans le
-`finally`, et l'enregistrement et la suppression envoient le nouvel état enregistré.
+n'affiche jamais de brins coupés non enregistrés. `calculateResults()` les restaure dans le
+`finally`. L'enregistrement et la suppression ne touchent pas au moteur : la page du studio applique
+le nouvel état enregistré (voir *Page du studio*).
 
 ### Statut du nouveau taux de travail max
 
@@ -253,15 +265,90 @@ les lecteurs d'écran n'annoncent que le contenu ajouté à une région live qui
 - `save()` persiste la section avec
   `rrts_cut_strands: toCutStrandsData(calculatedValue, layers)` via
   `SectionService.createOrUpdateSection()`, la règle sur `PlotSpanService.section`, affiche un
-  toast `saved`, puis envoie au moteur les nouveaux brins coupés enregistrés.
-- `delete()` fait de même avec `rrts_cut_strands: null` : le moteur revient à `0` par couche.
-- Si le moteur rejette le nouvel état enregistré, l'entrée reste enregistrée (ou supprimée), et un
-  toast `failed-to-sync` distinct signale que le studio n'a pas été mis à jour.
-- Si la persistance échoue, ni la section ni le moteur ne changent, et un toast `failed-to-save`
-  ou `failed-to-delete` s'affiche.
+  toast `saved`.
+- `delete()` fait de même avec `rrts_cut_strands: null`.
+- La boîte de dialogue ne met pas le moteur à jour : la page du studio le fait, à partir de la
+  section. Si le moteur rejette le nouvel état enregistré, l'entrée reste enregistrée (ou
+  supprimée), et la page du studio affiche un toast `failed-to-sync`.
+- Si la persistance échoue, la section ne change pas, et un toast `failed-to-save` ou
+  `failed-to-delete` s'affiche.
 - `isBusy` (calcul, enregistrement ou suppression en cours) désactive **Calculer**,
-  **Enregistrer** et **Supprimer** : chacun d'eux règle les brins coupés du moteur, ils s'exécutent
-  donc un par un.
+  **Enregistrer** et **Supprimer**, ils s'exécutent donc un par un.
+
+---
+
+## Page du studio
+
+`StudioPageComponent` applique les brins coupés enregistrés au moteur, pour que le studio les
+affiche sans que la boîte de dialogue soit ouverte.
+
+- `StrandRrtsService` possède les tâches CRR du moteur : `setCutStrands()`, `applySaved(entry)` (les
+  brins coupés enregistrés, ou `0` par couche du catalogue sans entrée) et `calculate()`, utilisée
+  par la boîte de dialogue.
+- `savedCutStrands` est un `computed` sur `section.rrts_cut_strands`, comparé avec `isEqual`. Un
+  effect attend que `litData()` soit renseigné et que `loading()` soit terminé, c'est-à-dire que
+  `initSectionStudio()` ait créé l'étude moteur, puis appelle `applyCutStrands()`.
+- `applyCutStrands()` ne fait rien quand l'entrée est égale à celle déjà appliquée
+  (`appliedCutStrands`, `null` au départ : une nouvelle étude moteur n'a pas de brins coupés).
+  Sinon, elle :
+  1. envoie les brins coupés enregistrés avec `applySaved()` ;
+  2. rafraîchit la projection, car le taux de travail est une sortie du moteur ;
+  3. règle `isGlobalCutStrand` avec `hasCutStrand()` : `true` quand au moins une couche a un brin
+     coupé.
+- Elle s'exécute à l'ouverture du studio et après chaque changement : l'enregistrement et la
+  suppression de la boîte de dialogue ne font que mettre à jour `PlotSpanService.section`.
+- En cas d'échec, l'erreur est journalisée, un toast `failed-to-sync` s'affiche, et
+  `isGlobalCutStrand` reste tel quel. L'échec n'est pas retenté avant que l'entrée change : il
+  notifierait de nouveau à chaque rafraîchissement du graphique.
+- `isGlobalCutStrand` pilote l'icône de ciseaux à côté du **Taux de travail** du studio : rouge
+  quand un brin est coupé (`--main-error`), grise sinon (`--grey-400`). Le **Taux de travail**
+  lui-même n'a besoin d'aucun branchement : il lit `utilization_rate`, qui porte les brins coupés
+  une fois la projection rafraîchie, en mode **Portée** comme en mode **Max canton**.
+
+---
+
+## Marquage sur le graphique du studio
+
+Une entrée enregistrée dont `addMarking` vaut `true` dessine un marquage sur le graphique du
+studio, en 2D comme en 3D. `addMarking` ne peut être coché qu'une fois une portée sélectionnée : un
+marquage a donc toujours une portée, mais `createCutStrandsAnnotations()` ne dessine rien pour une
+entrée qui n'en a pas.
+
+`SectionPlotComponent` transmet le `rrts_cut_strands` de la section à `createPlot()`, qui ajoute
+les annotations à la mise en page 2D et à la scène 3D. Elles suivent l'entrée enregistrée, pas le
+formulaire : le marquage apparaît à l'enregistrement de la boîte de dialogue, et disparaît quand
+l'entrée est supprimée ou enregistrée sans la case cochée. Rien n'est dessiné quand la portée est
+hors des supports affichés (`startSupport` ≤ indice de portée < `endSupport`).
+
+### Où il s'accroche
+
+| Distance au support de référence | Point d'ancrage |
+|---|---|
+| Vide | Le point le plus haut du support de référence (`supportRef`, gauche par défaut) : le marquage se tient au-dessus du support lui-même |
+| Renseignée | Le point du câble situé à cette distance du support de référence |
+
+Le point du câble vient de `resolveAnchorCoord()` (`spanAnchor.ts`), la recherche qu'utilisent les
+annotations de modification de câble. Elle interpole la polyligne de la portée à l'abscisse x de la
+distance, mesurée depuis le premier point de la polyligne (`LEFT`) ou le dernier (`RIGHT`). C'est
+une solution provisoire, voir *Limitations connues*. Aucune tâche du moteur n'intervient pour
+l'instant.
+
+### Son apparence
+
+- Une icône de ciseaux, à `CUT_STRANDS_OFFSET_Y` pixels au-dessus de son point d'ancrage, en
+  `#7D5A9F` (primary 600), avec un libellé **Brins coupés** au survol
+  (`shared.studio.cut-strands-marking`).
+- Un trait en pointillés de la même couleur reliant le point d'ancrage à l'icône.
+- Un clic sur l'icône ouvre l'outil CRR (`ToolbarDialogService.openTool('strand-rrts')`), via le
+  gestionnaire de `plotly_clickannotation` de `SectionPlotComponent` et la charge utile
+  `{ type: 'cutStrands' }` de l'icône. Les tirets ne capturent aucun événement.
+
+Les deux décalages sont en pixels, pas en unités de données : l'écart reste le même à n'importe
+quel niveau de zoom ou angle de caméra. Cela exclut les outils habituels pour le trait en
+pointillés. La flèche d'une annotation Plotly ne peut pas être en pointillés, et les formes
+(*shapes*), qui le peuvent, n'existent pas dans une scène 3D. Le trait est donc une série
+d'annotations réduites à une flèche, une par tiret : la queue de chacune est à `end` pixels
+au-dessus de l'ancrage, et son `standoff` éloigne sa pointe de `start` pixels de celui-ci.
 
 ---
 
@@ -300,6 +387,10 @@ sélectionné, il affiche **Personnel présent**.
 |---|---|
 | `strand-rrts.component.spec.ts` | Informations, contrôles affichés, champs dépendants de la portée, calcul (séquence de tâches, restauration de l'état enregistré, erreurs, verrou d'occupation, calcul à l'ouverture), enregistrement, suppression, résultats |
 | `strand-rrts.helpers.spec.ts` | Seuils de statut, répartition des brins coupés sur les couches du catalogue, forme enregistrée |
+| `strand-rrts.service.spec.ts` | Tâches du moteur : régler, appliquer l'entrée enregistrée ou aucune, calculer (CRR, taux le plus élevé, dernier support ignoré) |
+| `studio-page.component.spec.ts` | `saved RRTS cut strands` : application à l'ouverture et après les changements, indicateur, attente du moteur, échecs non retentés |
+| `createCutStrandsAnnotations.spec.ts` | Marquage : rien à dessiner, ancrage avec et sans distance depuis chaque support, correspondance des axes, icône, charge utile du clic, trait en pointillés |
+| `createPlot.spec.ts`, `section-plot.component.spec.ts` | Le marquage atteint la mise en page 2D et la scène 3D, l'entrée enregistrée atteint `createPlot()`, un clic ouvre l'outil |
 | `core/services/plot/plot.service.spec.ts` | `high safety` : après `initLit`, valeur par défaut sans cas de charge, modifications de cas de charge, demandes concurrentes |
 | `core/services/section/section-geometry.helpers.spec.ts` | `RRTS cut strands` : entrées supprimées avec leur portée, entrées liées à la section entière conservées |
 | `stellar-engine/test/core/test_cut_strands.py` | Validation des entrées, CRR en daN, taux d'utilisation |
@@ -311,15 +402,24 @@ dans `stellar-engine/`.
 
 ## Limitations connues
 
-- Les brins coupés enregistrés ne sont pas envoyés au moteur quand le studio charge une section :
-  tant que la boîte de dialogue n'a pas calculé, enregistré ou supprimé, le moteur contient `0`
-  par couche. Les rejouer au chargement est laissé à une suite.
-- Régler les brins coupés du moteur ne rafraîchit pas la projection : le **Taux de travail** du
-  studio, et le taux de travail max actuel de la boîte de dialogue, ne les prennent en compte
-  qu'au prochain `refreshProjection()`.
-- La portée, le support de référence, la distance et le marquage sont seulement stockés : aucun
-  repère n'est dessiné sur le graphique du studio, et l'indicateur de brin coupé du studio
-  (`isGlobalCutStrand`) est toujours codé en dur à `false`. Les deux sont laissés à un ticket
-  ultérieur.
+- Le marquage d'une distance est placé en TypeScript, par `resolveAnchorCoord()`, et diffère de
+  l'endroit où le moteur place une charge à la même distance. Le moteur convertit la distance en un
+  rapport de la longueur de portée entre supports, appliqué entre les points d'attache ; la
+  recherche la lit comme un décalage en x dans le repère du graphique. Sur une section synthétique,
+  l'écart avec le nœud de charge du moteur était d'environ 1 m en ligne droite, et allait jusqu'à
+  environ 14 m sur les portées qui ne sont pas parallèles à l'axe x du graphique (angle de ligne).
+  Sans distance, le placement n'est pas concerné. Les annotations de modification de câble
+  partagent la fonction et le défaut. Déplacer le placement dans le moteur, avec mechaphlowers, fait
+  l'objet d'un ticket distinct.
+- Seules les trois premières couches sont affichées, mais le studio applique une entrée enregistrée
+  telle quelle : une entrée enregistrée avant cette limite, avec des brins coupés sur une couche
+  suivante, reste en vigueur jusqu'à un nouvel enregistrement, et la boîte de dialogue n'affiche
+  pas ces valeurs.
+- Le marquage est dessiné à partir de l'entrée enregistrée seule, quels que soient ses brins
+  coupés : une entrée qui coche **Ajouter un marquage** avec `0` brin coupé sur chaque couche est
+  tout de même marquée.
+- Le marquage est maintenu à une distance fixe en pixels de son ancrage : quand l'ancrage est près
+  du haut du graphique, l'icône peut en sortir.
+- Le trait en pointillés traverse le numéro du support quand le marquage s'accroche à un support.
 - Le bouton **Détail des couches** est un emplacement réservé désactivé.
 - `DISTANCE_MAX` est fixé à 5 000 m, pas à la longueur de la portée sélectionnée.
