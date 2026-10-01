@@ -1,7 +1,7 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="table_chart" aria-hidden="true" />
-    <span>{{ 'studio.top-toolbar.pose-table-label' | transloco }}</span>
+    <span>{{ 'studio.top-toolbar.hanging-table-label' | transloco }}</span>
   </p>
 </ng-template>
 
@@ -13,13 +13,13 @@
     <dt>{{ 'common.base-temperature-label' | transloco }}</dt>
     <dd data-testid="base-temp-value">{{ baseTemp() !== null ? (baseTemp() | number: '1.0-1') + ' °C' : '-' }}</dd>
 
-    <dt>{{ 'studio.pose-table.equivalent-span-label' | transloco }}</dt>
+    <dt>{{ 'studio.hanging-table.equivalent-span-label' | transloco }}</dt>
     <dd>
       @if (!isPlotReady() || isCalculatingEquivalentSpan()) {
         <app-icon
           class="spinner"
           icon="progress_activity"
-          [ariaLabel]="'studio.pose-table.calculation-engine-waiting-label' | transloco"
+          [ariaLabel]="'studio.hanging-table.calculation-engine-waiting-label' | transloco"
         />
       } @else {
         {{ equivalentSpan() !== null ? (equivalentSpan() | number: '1.0-1') + ' m' : '-' }}
@@ -29,7 +29,7 @@
 
   <app-input-number
     formControlName="lowestTemp"
-    [label]="'studio.pose-table.lowest-temperature-label' | transloco"
+    [label]="'studio.hanging-table.lowest-temperature-label' | transloco"
     [min]="LOWEST_TEMP_MIN"
     [max]="LOWEST_TEMP_MAX"
     [step]="LOWEST_TEMP_STEP"
@@ -40,7 +40,7 @@
 
   <app-input-number
     formControlName="computingStep"
-    [label]="'studio.pose-table.computing-step-label' | transloco"
+    [label]="'studio.hanging-table.computing-step-label' | transloco"
     [min]="COMPUTING_STEP_MIN"
     [max]="COMPUTING_STEP_MAX"
     [isReadonly]="false"
@@ -76,14 +76,14 @@
         </tr>
 
         <tr>
-          <th scope="row">{{ 'studio.pose-table.pose-parameter-label' | transloco }}</th>
+          <th scope="row">{{ 'studio.hanging-table.hanging-parameter-label' | transloco }}</th>
           @for (param of res.poseParams; track $index) {
             <td>{{ param | number: '1.1-1' }} m</td>
           }
         </tr>
 
         <tr>
-          <th scope="row">{{ 'studio.pose-table.horizontal-tension-t0-label' | transloco }}</th>
+          <th scope="row">{{ 'studio.hanging-table.horizontal-tension-t0-label' | transloco }}</th>
           @for (tension of res.horizontalTensions; track $index) {
             <td>{{ tension | number: '1.1-1' }} daN</td>
           }
@@ -91,12 +91,12 @@
       </tbody>
     </table>
   </div>
-} @else if (poseTableError()) {
+} @else if (hangingTableError()) {
   <p-message
     severity="error"
     class="calculation-error"
-    data-testid="pose-table-error"
-    [text]="'studio.pose-table.calculation-error-text' | transloco"
+    data-testid="hanging-table-error"
+    [text]="'studio.hanging-table.calculation-error-text' | transloco"
   />
 }
 

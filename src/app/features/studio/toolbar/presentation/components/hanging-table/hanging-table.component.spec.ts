@@ -3,7 +3,7 @@ import { Component, signal, TemplateRef, WritableSignal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { PoseTableComponent } from './pose-table.component';
+import { HangingTableComponent } from './hanging-table.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
 import { SectionService } from '@services/section/section.service';
@@ -15,8 +15,8 @@ import { PoseTableData } from '@shared/domain/models/section.model';
 import { InitialCondition } from '@shared/domain/models/initial-condition.model';
 import { Charge } from '@shared/domain/models/charge.model';
 import { Task } from '@services/worker_python/tasks/types';
-import { PoseTableReportService } from '@features/studio/toolbar/presentation/services/pose-table-report/pose-table-report.service';
-import { PoseTableReportData } from '@features/studio/toolbar/presentation/services/pose-table-report/pose-table-report.interfaces';
+import { HangingTableReportService } from '@features/studio/toolbar/presentation/services/hanging-table-report/hanging-table-report.service';
+import { HangingTableReportData } from '@features/studio/toolbar/presentation/services/hanging-table-report/hanging-table-report.interfaces';
 
 /** Renders the footer template the way the toolbar dialog does. */
 @Component({
@@ -66,9 +66,9 @@ function makePoseResults() {
   };
 }
 
-describe('PoseTableComponent', () => {
-  let component: PoseTableComponent;
-  let fixture: ComponentFixture<PoseTableComponent>;
+describe('HangingTableComponent', () => {
+  let component: HangingTableComponent;
+  let fixture: ComponentFixture<HangingTableComponent>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -80,7 +80,7 @@ describe('PoseTableComponent', () => {
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
   let mockToolbarDialogService: { setTemplates: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
-  let mockPoseTableReportService: { generateReport: ReturnType<typeof vi.fn> };
+  let mockHangingTableReportService: { generateReport: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     sectionSignal = signal<Section | null>(null);
@@ -97,21 +97,21 @@ describe('PoseTableComponent', () => {
     };
     mockToolbarDialogService = { setTemplates: vi.fn() };
     mockNotificationService = { success: vi.fn(), error: vi.fn() };
-    mockPoseTableReportService = {
-      generateReport: vi.fn((_data: PoseTableReportData): Promise<void> => Promise.resolve())
+    mockHangingTableReportService = {
+      generateReport: vi.fn((_data: HangingTableReportData): Promise<void> => Promise.resolve())
     };
 
     await TestBed.configureTestingModule({
       imports: [
-        PoseTableComponent,
+        HangingTableComponent,
         NoopAnimationsModule,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.pose-table.failed-to-compute-equivalent-span': 'Failed to compute equivalent span',
-              'studio.pose-table.failed-to-compute-pose-table': 'Failed to compute pose table',
-              'studio.pose-table.pose-table-saved': 'Pose table saved',
-              'studio.pose-table.failed-to-save-pose-table': 'Failed to save pose table',
+              'studio.hanging-table.failed-to-compute-equivalent-span': 'Failed to compute equivalent span',
+              'studio.hanging-table.failed-to-compute-hanging-table': 'Failed to compute hanging table',
+              'studio.hanging-table.hanging-table-saved': 'Hanging table saved',
+              'studio.hanging-table.failed-to-save-hanging-table': 'Failed to save hanging table',
               'common.required': 'Required',
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
@@ -128,11 +128,11 @@ describe('PoseTableComponent', () => {
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: PoseTableReportService, useValue: mockPoseTableReportService }
+        { provide: HangingTableReportService, useValue: mockHangingTableReportService }
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PoseTableComponent);
+    fixture = TestBed.createComponent(HangingTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -166,8 +166,8 @@ describe('PoseTableComponent', () => {
       expect(component.results()).toBeNull();
     });
 
-    it('starts with poseTableError false', () => {
-      expect(component.poseTableError()).toBe(false);
+    it('starts with hangingTableError false', () => {
+      expect(component.hangingTableError()).toBe(false);
     });
 
     it('starts with equivalentSpan null', () => {
@@ -354,27 +354,27 @@ describe('PoseTableComponent', () => {
       expect(component.results()!.temperatures).toHaveLength(8);
     });
 
-    it('sets poseTableError to true when worker returns an error', async () => {
+    it('sets hangingTableError to true when worker returns an error', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'python error' });
       await component.calculate();
-      expect(component.poseTableError()).toBe(true);
+      expect(component.hangingTableError()).toBe(true);
     });
 
-    it('resets poseTableError to false at the start of each call', async () => {
+    it('resets hangingTableError to false at the start of each call', async () => {
       mockWorkerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'python error' });
       await component.calculate();
-      expect(component.poseTableError()).toBe(true);
+      expect(component.hangingTableError()).toBe(true);
 
       await component.calculate();
-      expect(component.poseTableError()).toBe(false);
+      expect(component.hangingTableError()).toBe(false);
     });
 
-    it('sets poseTableError, clears results and shows error notification when runTask rejects', async () => {
+    it('sets hangingTableError, clears results and shows error notification when runTask rejects', async () => {
       component.results.set(makePoseResults());
       mockWorkerPythonService.runTask.mockRejectedValueOnce(new Error('worker not initialized'));
       await component.calculate();
 
-      expect(component.poseTableError()).toBe(true);
+      expect(component.hangingTableError()).toBe(true);
       expect(component.results()).toBeNull();
       expect(mockNotificationService.error).toHaveBeenCalled();
     });
@@ -467,7 +467,7 @@ describe('PoseTableComponent', () => {
   describe('onGenerateReport()', () => {
     it('does not generate a report when there are no results', async () => {
       await component.onGenerateReport();
-      expect(mockPoseTableReportService.generateReport).not.toHaveBeenCalled();
+      expect(mockHangingTableReportService.generateReport).not.toHaveBeenCalled();
     });
 
     it('passes the current study, section, initial condition, form and results to the report service', async () => {
@@ -501,7 +501,7 @@ describe('PoseTableComponent', () => {
 
       await component.onGenerateReport();
 
-      expect(mockPoseTableReportService.generateReport).toHaveBeenCalledWith({
+      expect(mockHangingTableReportService.generateReport).toHaveBeenCalledWith({
         date: expect.any(String),
         author: 'author@example.test',
         studyTitle: 'Fake study',
@@ -724,9 +724,9 @@ describe('PoseTableComponent', () => {
       expect(component.results()).toBeNull();
     });
 
-    it('clears stale results and poseTableError when switching to a section with saved params but plot not ready', async () => {
+    it('clears stale results and hangingTableError when switching to a section with saved params but plot not ready', async () => {
       component.results.set(makePoseResults());
-      component.poseTableError.set(true);
+      component.hangingTableError.set(true);
 
       const savedData: PoseTableData = { lowestTemp: -30, computingStep: 2 };
       sectionSignal.set(makeSection({ pose_table: savedData }));
@@ -734,7 +734,7 @@ describe('PoseTableComponent', () => {
       await fixture.whenStable();
 
       expect(component.results()).toBeNull();
-      expect(component.poseTableError()).toBe(false);
+      expect(component.hangingTableError()).toBe(false);
     });
 
     it('does not change form or results when section has no pose_table', () => {

@@ -20,36 +20,36 @@ import {
 } from '@shared/pdf/pdf-primitives.helpers';
 import { buildTables, computeLabelColWidth, drawTable } from '@shared/pdf/pdf-table.helpers';
 
-import { PDF_POSE_TABLE_LABEL_KEYS, POSE_TABLE_METRICS } from './pose-table-report.constantes';
-import { buildPoseTableRows, drawPoseTableReportPage1 } from './pose-table-report.helpers';
-import { PoseTableReportData, PoseTableReportLabels } from './pose-table-report.interfaces';
+import { PDF_HANGING_TABLE_LABEL_KEYS, HANGING_TABLE_METRICS } from './hanging-table-report.constantes';
+import { buildHangingTableRows, drawHangingTableReportPage1 } from './hanging-table-report.helpers';
+import { HangingTableReportData, HangingTableReportLabels } from './hanging-table-report.interfaces';
 
-/** Service responsible for generating the pose table PDF report. */
+/** Service responsible for generating the hanging table PDF report. */
 @Injectable({ providedIn: 'root' })
-export class PoseTableReportService extends PdfBaseService {
+export class HangingTableReportService extends PdfBaseService {
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
 
-  /** Generates and downloads the pose table PDF report. */
-  async generateReport(data: PoseTableReportData): Promise<void> {
+  /** Generates and downloads the hanging table PDF report. */
+  async generateReport(data: HangingTableReportData): Promise<void> {
     const translate = (key: string): string => this.translocoService.translate(key);
 
     await generatePdfReport({
       logger: this.logger,
       notificationService: this.notificationService,
       translate,
-      errorLogMessage: 'Failed to generate pose table report',
-      successKey: 'studio.pose-table-report.report-generated-success',
-      errorKey: 'studio.pose-table-report.report-generation-failed',
+      errorLogMessage: 'Failed to generate hanging table report',
+      successKey: 'studio.hanging-table-report.report-generated-success',
+      errorKey: 'studio.hanging-table-report.report-generation-failed',
       build: async () => {
         const doc = await this.createDoc();
-        const labels = buildReportLabels<PoseTableReportLabels>(translate, PDF_POSE_TABLE_LABEL_KEYS);
+        const labels = buildReportLabels<HangingTableReportLabels>(translate, PDF_HANGING_TABLE_LABEL_KEYS);
 
-        const y = drawPoseTableReportPage1(doc, data, labels);
+        const y = drawHangingTableReportPage1(doc, data, labels);
 
         // Single portrait page: every temperature on one row, below the context sections
-        const rows = buildPoseTableRows(data.results);
-        const [table] = buildTables(rows, POSE_TABLE_METRICS, translate, Math.max(rows.length, 1));
+        const rows = buildHangingTableRows(data.results);
+        const [table] = buildTables(rows, HANGING_TABLE_METRICS, translate, Math.max(rows.length, 1));
         if (table) {
           const labelColWidth = computeLabelColWidth(doc, [table]);
           drawTable(doc, table, drawSectionTitle(doc, labels.resultsTitle, y), PAGE_SIZE.width, labelColWidth);
