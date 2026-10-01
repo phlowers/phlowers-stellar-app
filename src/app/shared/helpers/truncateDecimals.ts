@@ -5,14 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function truncateToDecimals(event: Event, decimals: number): void {
-  const input = event.target as HTMLInputElement;
-  const sepIndex = input.value.indexOf('.');
-  if (sepIndex !== -1 && input.value.substring(sepIndex + 1).length > decimals) {
-    input.value = input.value.substring(0, sepIndex + 1 + decimals);
-  }
-}
-
 /**
  * Returns the string value truncated to at most `decimals` decimal places.
  * Pure function — does not touch the DOM.
@@ -23,41 +15,6 @@ function truncateStringToDecimals(value: string, decimals: number): string {
     return value.substring(0, sepIndex + 1 + decimals);
   }
   return value;
-}
-
-/**
- * Truncates the value of a number input to at most 2 decimal places.
- * Intended as an `(input)` event handler on `<input type="number" step="0.01">` elements.
- *
- * @param event - The DOM input event fired by the number input element
- */
-export function truncateTwoDecimals(event: Event): void {
-  truncateToDecimals(event, 2);
-}
-
-/**
- * Truncates the value of a number input to at most 1 decimal place.
- * Intended as an `(input)` event handler on `<input type="number" step="0.1">` elements.
- *
- * @param event - The DOM input event fired by the number input element
- */
-export function truncateOneDecimal(event: Event): void {
-  truncateToDecimals(event, 1);
-}
-
-/**
- * Strips any decimal part (including the separator) from the value of a number input,
- * hard-blocking decimals so only integers can be entered.
- * Intended as an `(input)` event handler on integer-only `<input type="number" step="1">` elements.
- *
- * @param event - The DOM input event fired by the number input element
- */
-export function truncateNoDecimals(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  const sepIndex = input.value.indexOf('.');
-  if (sepIndex !== -1) {
-    input.value = input.value.substring(0, sepIndex);
-  }
 }
 
 /**
@@ -80,26 +37,4 @@ export function truncateOneDecimalValue(value: string): string {
  */
 export function truncateNumberToOneDecimal(value: number): number {
   return Math.trunc(value * 10) / 10;
-}
-
-/**
- * Truncates a numeric value to an integer without rounding.
- * Example: 2200.7 → 2200, 2200.2 → 2200
- *
- * @param value - The numeric value to truncate
- * @returns The truncated integer value
- */
-export function truncateNumberToNoDecimal(value: number): number {
-  return Math.trunc(value);
-}
-
-/**
- * Truncates a numeric value to 2 decimal places without rounding.
- * Example: 2200.177 → 2200.17, 2200.999 → 2200.99
- *
- * @param value - The numeric value to truncate
- * @returns The truncated numeric value
- */
-export function truncateNumberToTwoDecimals(value: number): number {
-  return Math.trunc(value * 100) / 100;
 }
