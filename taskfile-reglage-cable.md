@@ -442,6 +442,7 @@ files: { create: [], modify: [], reference: ["US.REG"] }
 - D-05 Arrondi Math.round, unité affichée "gr".
 - D-06 Libellé portée : format existant PlotSpanService "12 - 13" (pas de format spécifique).
 - D-07 Boutons "?" (aide) et "Rapport" PRÉSENTS mais disabled ; actions = BL-02 / BL-03.
+- D-08 (2026-10-01) Liste Support : libellés "Gauche" / "Droite" (common.left / common.right) au lieu des N° de support.
 
 ## Légende statuts
 

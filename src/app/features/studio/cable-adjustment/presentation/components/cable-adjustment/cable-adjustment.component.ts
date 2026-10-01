@@ -46,9 +46,13 @@ import {
   DISTANCE_MIN,
   PARAMETER_DECIMALS,
   PARAMETER_MAX,
-  PARAMETER_MIN
+  PARAMETER_MIN,
+  SUPPORT_OPTIONS
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.constantes';
-import { CableAdjustmentSpan } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
+import {
+  CableAdjustmentSpan,
+  CableAdjustmentSupportSide
+} from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 import {
   createAngleControl,
   getSpanLength,
@@ -102,7 +106,7 @@ export class CableAdjustmentComponent {
     rightHorizontalAngle: createAngleControl(),
     leftVerticalAngle: createAngleControl(),
     rightVerticalAngle: createAngleControl(),
-    support: new FormControl<'LEFT' | 'RIGHT' | null>({ value: null, disabled: true }, Validators.required),
+    support: new FormControl<CableAdjustmentSupportSide | null>({ value: null, disabled: true }, Validators.required),
     tacheometerHorizontalDistance: new FormControl<number | null>(null, [
       Validators.required,
       Validators.min(DISTANCE_MIN),
@@ -122,7 +126,12 @@ export class CableAdjustmentComponent {
     initialValue: this.form.valid
   });
 
-  readonly supportOptions = computed(() => this.spanService.getSupportOptions(this.selectedSpan()?.uuid ?? null));
+  // RG.REG.SUP.1-2: no side to pick without span
+  readonly supportOptions = computed(() =>
+    this.selectedSpan()
+      ? SUPPORT_OPTIONS.map(({ labelKey, value }) => ({ label: this.translocoService.translate(labelKey), value }))
+      : []
+  );
   readonly spanLength = computed(() => getSpanLength(this.spanService.section(), this.selectedSpan()?.index ?? null));
 
   readonly isCalculating = signal(false);

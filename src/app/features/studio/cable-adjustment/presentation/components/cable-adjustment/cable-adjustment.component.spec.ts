@@ -95,6 +95,8 @@ describe('CableAdjustmentComponent', () => {
             en: {
               'common.required': 'Required',
               'common.meter': 'm',
+              'common.left': 'Left',
+              'common.right': 'Right',
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
@@ -202,12 +204,12 @@ describe('CableAdjustmentComponent', () => {
       expect(component.form.controls.support.disabled).toBe(true);
     });
 
-    it('RG.REG.SUP.2 lists the two supports of the selected span', () => {
+    it('RG.REG.SUP.2 lists the left and right supports of the selected span', () => {
       component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
       fixture.detectChanges();
       expect(selects()[1].options).toEqual([
-        { label: 'FGHIJ', value: 'LEFT' },
-        { label: 'KLMNO', value: 'RIGHT' }
+        { label: 'Left', value: 'LEFT' },
+        { label: 'Right', value: 'RIGHT' }
       ]);
       expect(component.form.controls.support.enabled).toBe(true);
     });
