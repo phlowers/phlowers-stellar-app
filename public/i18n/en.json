@@ -9,16 +9,6 @@
     "tools": "Tools"
   },
   "common": {
-    "search": "Search",
-    "yes": "Yes",
-    "no": "No",
-    "cancel": "Cancel",
-    "clear-selection": "Clear selection",
-    "close": "Close",
-    "save": "Save",
-    "studio": "Studio"
-  },
-  "common": {
     "actions-label": "Actions",
     "add": "Add",
     "add-load-case-label": "Add a load case",
@@ -39,6 +29,7 @@
     "cancel": "Cancel",
     "chain-name-label": "Chain name",
     "changelog-label": "Changelog",
+    "clear-selection": "Clear selection",
     "close": "Close",
     "comment-label": "Comment",
     "counter-weight-label": "Counter weight",
@@ -111,6 +102,7 @@
     "sign-in-label": "Sign in",
     "span-label": "Span",
     "studies-label": "Studies",
+    "studio": "Studio",
     "study-and-section-label": "Study and section",
     "study-label": "Study",
     "success": "Success",
@@ -122,6 +114,8 @@
     "view": "View",
     "yes": "Yes",
     "you-are-offline-label": "You are offline",
+    "left": "Left",
+    "right": "Right",
     "section-type": {
       "phase": "Phase",
       "guard": "Guard"
@@ -1117,6 +1111,22 @@
       "failed-to-save-pose-table": "Failed to save pose table",
       "max-two-decimals-error": "Maximum 2 decimal places",
       "integer-error": "Value must be a whole number"
+    },
+    "cable-adjustment": {
+      "span-length-label": "Span length",
+      "left-horizontal-angle-label": "HL horizontal angle at left support",
+      "right-horizontal-angle-label": "HR horizontal angle at right support",
+      "left-vertical-angle-label": "VL vertical angle at left support",
+      "right-vertical-angle-label": "VR vertical angle at right support",
+      "support-label": "Support",
+      "tacheometer-horizontal-distance-label": "Tacheometer horizontal distance",
+      "adjustment-parameter-label": "Adjustment parameter",
+      "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
+      "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",
+      "vertical-sight-angle-label": "V vertical sighting angle at mid-span sag",
+      "grade-unit": "gr",
+      "aria-help": "Cable adjustment help",
+      "calculation-failed": "Failed to calculate the cable adjustment"
     },
     "rrts-cut-strands": {
       "layers-detail": "Layers detail",
