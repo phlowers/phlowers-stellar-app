@@ -627,6 +627,48 @@ describe('createPlot', () => {
     });
   });
 
+  describe('cut strands marking', () => {
+    const cutStrands = {
+      spanUuid: 's0',
+      supportRef: 'LEFT' as const,
+      distanceSupportRef: null,
+      cutStrands: [1],
+      addMarking: true
+    };
+    const markingParams = () => ({
+      ...createDefaultParams(),
+      endSupport: 1,
+      spanUuidToIndex: new Map([['s0', 0]]),
+      cutStrands
+    });
+    const isMarkingIcon = (a: { hovertext?: string }) => a.hovertext === 'Cut strands';
+
+    it('should draw the marking in the 3D scene', () => {
+      createPlot({ ...markingParams(), view: '3d' });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as { scene: { annotations: { hovertext?: string }[] } };
+      expect(layoutArg.scene.annotations.filter(isMarkingIcon)).toHaveLength(1);
+    });
+
+    it('should draw the marking in the 2D layout', () => {
+      createPlot({ ...markingParams(), view: '2d' });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as { annotations: { hovertext?: string }[] };
+      expect(layoutArg.annotations.filter(isMarkingIcon)).toHaveLength(1);
+    });
+
+    it.each(['2d', '3d'] as const)('should draw no marking in %s when the entry does not ask for one', (view) => {
+      createPlot({ ...markingParams(), view, cutStrands: { ...cutStrands, addMarking: false } });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        annotations?: { hovertext?: string }[];
+        scene?: { annotations: { hovertext?: string }[] };
+      };
+      const annotations = layoutArg.annotations ?? layoutArg.scene?.annotations ?? [];
+      expect(annotations.filter(isMarkingIcon)).toHaveLength(0);
+    });
+  });
+
   describe('modebar camera reset buttons removal', () => {
     it.each(['resetCameraDefault3d', 'resetCameraLastSave3d', 'resetScale2d', 'zoom3d', 'pan3d'])(
       'should include %s in modeBarButtonsToRemove',

@@ -386,7 +386,8 @@
       "zoom": "Zoom",
       "pan": "Pan",
       "cable-mod-lengthening": "Lengthening",
-      "cable-mod-shortening": "Shortening"
+      "cable-mod-shortening": "Shortening",
+      "cut-strands-marking": "Cut strands"
     },
     "loads-service": {
       "update-detail": "Load updated",
