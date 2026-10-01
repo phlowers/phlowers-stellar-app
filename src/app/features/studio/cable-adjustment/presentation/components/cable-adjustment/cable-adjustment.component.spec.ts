@@ -336,6 +336,24 @@ describe('CableAdjustmentComponent', () => {
       expect(getByTestId('results-frame')).toBeNull();
     });
 
+    it('RG.REG.RES-CAD.1 locks the inputs while calculating so results match them', async () => {
+      let resolveTask!: (value: unknown) => void;
+      mockWorkerPythonService.runTask.mockReturnValueOnce(new Promise((resolve) => (resolveTask = resolve)));
+      fillRequiredFields();
+
+      const pending = component.calculate();
+      fixture.detectChanges();
+      expect(component.form.disabled).toBe(true);
+      expect((getByTestId('adjustment-parameter-input') as HTMLInputElement).disabled).toBe(true);
+
+      resolveTask({ result: ENGINE_RESULT, error: null, diagnostics: [] });
+      await pending;
+      fixture.detectChanges();
+      expect(component.form.enabled).toBe(true);
+      expect(component.form.controls.support.enabled).toBe(true);
+      expect(getByTestId('results-frame')).not.toBeNull();
+    });
+
     it('RG.REG.AHF.1 / RG.REG.AVF.1 show both angles rounded to the grade', async () => {
       fillRequiredFields();
       await calculate();

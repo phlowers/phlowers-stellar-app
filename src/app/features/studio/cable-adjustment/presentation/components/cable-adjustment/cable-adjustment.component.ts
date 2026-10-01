@@ -62,6 +62,7 @@ import {
 
 @Component({
   selector: 'app-cable-adjustment',
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DecimalPipe,
@@ -170,6 +171,8 @@ export class CableAdjustmentComponent {
     if (!inputs) return;
 
     this.isCalculating.set(true);
+    // No events: enabling back would otherwise clear the results just set
+    this.form.disable({ emitEvent: false });
     try {
       const { result, error } = await this.workerPythonService.runTask(Task.calculateCableAdjustment, inputs);
       if (error) throw new Error(error);
@@ -179,6 +182,7 @@ export class CableAdjustmentComponent {
       this.results.set(null);
       this.notificationService.error(this.translocoService.translate('studio.cable-adjustment.calculation-failed'));
     } finally {
+      this.form.enable({ emitEvent: false });
       this.isCalculating.set(false);
     }
   }
