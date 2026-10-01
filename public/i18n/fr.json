@@ -9,16 +9,8 @@
     "tools": "Outils"
   },
   "common": {
-    "search": "Rechercher",
     "clear-selection": "Effacer la sélection",
-    "yes": "Oui",
-    "no": "Non",
-    "cancel": "Annuler",
-    "close": "Fermer",
-    "save": "Enregistrer",
-    "studio": "Studio"
-  },
-  "common": {
+    "studio": "Studio",
     "actions-label": "Actions",
     "add": "Ajouter",
     "add-load-case-label": "Ajouter un cas de charge",

@@ -57,7 +57,8 @@ describe('HeaderComponent', () => {
               'field-measuring.header.phase-number-label': 'Phase number',
               'common.span-label': 'Span',
               'field-measuring.header.span-type-label': 'Span type',
-              'field-measuring.header.voltage-label': 'Voltage'
+              'field-measuring.header.voltage-label': 'Voltage',
+              'field-measuring.header.localization-not-available': 'Localization not available in study'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
