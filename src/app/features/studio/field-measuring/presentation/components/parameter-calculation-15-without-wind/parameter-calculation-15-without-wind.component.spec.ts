@@ -152,24 +152,24 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       outputs: {
         ...d.outputs,
         papoto: {
-          parameter: 1900,
+          parameter: 1900.99,
           parameter_1_2: 0,
           parameter_2_3: 0,
           parameter_1_3: 0,
           checkValidity: true,
-          uncertainty: 12
+          uncertainty: 12.99
         },
-        cableTemperature: { cableSolarFlux: 0, cableTemperature: 45, cableTemperatureUncertainty: 3 }
+        cableTemperature: { cableSolarFlux: 0, cableTemperature: 45.99, cableTemperatureUncertainty: 3.99 }
       }
     }));
 
     component.updateMeasureData('updateMode15C', 'manual');
 
     expect(component.measureData().manualParameterCalculation15CWithoutWind).toEqual({
-      parameterPapoto: 1900,
-      parameterUncertaintyPapoto: 12,
-      cableTemperatureCalibration: 45,
-      cableTemperatureCalibrationUncertainty: 3
+      parameterPapoto: 1900.9,
+      parameterUncertaintyPapoto: 12.9,
+      cableTemperatureCalibration: 45.9,
+      cableTemperatureCalibrationUncertainty: 3.9
     });
   });
 
@@ -656,6 +656,34 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       const el = getByTestId('cable-temperature-input');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('INPUT');
+    });
+
+    it('should truncate Auto parameter and cable-temperature values and uncertainties to 1 decimal', () => {
+      component.measureData.update((data) => ({
+        ...data,
+        outputs: {
+          ...data.outputs,
+          papoto: {
+            parameter: 1.59,
+            parameter_1_2: 0,
+            parameter_2_3: 0,
+            parameter_1_3: 0,
+            checkValidity: true,
+            uncertainty: 0.59
+          },
+          cableTemperature: { cableSolarFlux: 0, cableTemperature: 45.99, cableTemperatureUncertainty: 3.99 }
+        }
+      }));
+      fixture.detectChanges();
+
+      expect(getByTestId('parameter-papoto-display')?.textContent).toContain('1.5');
+      expect(getByTestId('parameter-papoto-display')?.textContent).not.toContain('1.6');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).toContain('0.5');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).not.toContain('0.6');
+      expect(getByTestId('cable-temperature-display')?.textContent).toContain('45.9');
+      expect(getByTestId('cable-temperature-display')?.textContent).not.toContain('46.0');
+      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).toContain('3.9');
+      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).not.toContain('4.0');
     });
 
     describe('HTML rendering - result values truncation', () => {

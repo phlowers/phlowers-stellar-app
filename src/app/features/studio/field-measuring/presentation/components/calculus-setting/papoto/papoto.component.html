@@ -287,7 +287,9 @@
 
       <div class="incertainParam">
         <dt>{{ 'field-measuring.papoto.uncertainty-parameter-label' | transloco }}</dt>
-        <dd>{{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }} m</dd>
+        <dd data-testid="papoto-uncertainty">
+          {{ (truncate1Decimal(measureData().outputs.papoto?.uncertainty) | number: '1.0-1') ?? '-' }} m
+        </dd>
       </div>
 
       <div class="param12">

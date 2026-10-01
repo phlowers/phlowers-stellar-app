@@ -129,15 +129,15 @@
           {{ 'field-measuring.parameter-calculation-15.uncertainty-parameter-label' | transloco }}
         </dt>
         <dd data-testid="parameter-uncertainty-papoto-display">
-          {{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }}
+          {{ (truncate1Decimal(measureData().outputs.papoto?.uncertainty) | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
 
       <div class="cableTemperature">
         <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
-        <dd>
-          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
+        <dd data-testid="cable-temperature-display">
+          {{ (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperature) | number: '1.0-1') ?? '-' }}
           °C
         </dd>
       </div>
@@ -147,7 +147,11 @@
           {{ 'field-measuring.parameter-calculation-15.uncertainty-cable-temperature' | transloco }}
         </dt>
         <dd data-testid="cable-temperature-uncertainty-display">
-          {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-1') ?? '-' }} °C
+          {{
+            (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperatureUncertainty) | number: '1.0-1') ??
+              '-'
+          }}
+          °C
         </dd>
       </div>
     </dl>

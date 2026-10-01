@@ -549,7 +549,7 @@ describe('Papoto component', () => {
             parameter_2_3: 3.17,
             parameter_1_3: 4.85,
             checkValidity: true,
-            uncertainty: 0.5
+            uncertainty: 0.59
           },
           error: null,
           diagnostics: []
@@ -577,6 +577,12 @@ describe('Papoto component', () => {
         const text = getByTestId('papoto-parameter')?.textContent?.trim();
         expect(text).toContain('1.5');
         expect(text).not.toContain('1.6');
+      });
+
+      it('should display uncertainty truncated to 1 decimal, not rounded (0.59 → 0.5)', () => {
+        const text = getByTestId('papoto-uncertainty')?.textContent?.trim();
+        expect(text).toContain('0.5');
+        expect(text).not.toContain('0.6');
       });
 
       it('should display parameter-1-2 truncated to 1 decimal, not rounded (2.99 → 2.9)', () => {

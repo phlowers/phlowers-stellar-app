@@ -22,11 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Task } from '@services/worker_python/tasks/types';
 import { DecimalPipe } from '@angular/common';
 import { isNumber } from 'lodash';
-import {
-  truncateNumberToNoDecimal,
-  truncateNumberToOneDecimal,
-  truncateNumberToTwoDecimals
-} from '@shared/helpers/truncateDecimals';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -139,11 +135,11 @@ export class ParameterCalculation15WithoutWindComponent {
             ? {
                 parameterPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterPapoto ??
-                  (d.outputs.papoto?.parameter != null ? truncateNumberToNoDecimal(d.outputs.papoto.parameter) : null),
+                  (d.outputs.papoto?.parameter != null ? truncateNumberToOneDecimal(d.outputs.papoto.parameter) : null),
                 parameterUncertaintyPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ??
                   (d.outputs.papoto?.uncertainty != null
-                    ? truncateNumberToTwoDecimals(d.outputs.papoto.uncertainty)
+                    ? truncateNumberToOneDecimal(d.outputs.papoto.uncertainty)
                     : null),
                 cableTemperatureCalibration:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ??
