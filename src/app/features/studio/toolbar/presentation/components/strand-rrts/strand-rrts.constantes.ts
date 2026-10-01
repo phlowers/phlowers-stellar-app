@@ -6,6 +6,9 @@ export const DISTANCE_MAX = 5000;
 // Cut strands of each layer with strands until some are entered, or saved for the engine
 export const DEFAULT_CUT_STRANDS = 0;
 
+// Only the first layers are shown in the form: the others are sent to the engine at 0
+export const MAX_SHOWN_LAYER = 3;
+
 // Cable catalog keys holding the strand count of each layer
 export const STRAND_LAYER_KEYS = [
   'nb_strand_layer_1',
