@@ -5,10 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import {
-  truncateOneDecimalValue,
-  truncateNumberToOneDecimal
-} from './truncateDecimals';
+import { truncateOneDecimalValue, truncateNumberToOneDecimal } from './truncateDecimals';
 
 describe('truncateOneDecimalValue', () => {
   it('should return the value unchanged when it has no decimal separator', () => {
