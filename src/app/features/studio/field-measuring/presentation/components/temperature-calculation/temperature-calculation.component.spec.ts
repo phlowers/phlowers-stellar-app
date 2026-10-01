@@ -442,7 +442,9 @@ describe('TemperatureCalculationComponent', () => {
     fixture.detectChanges();
 
     expect(component.temperatureCalculationError()).toBe(false);
-    const temperatureText = fixture.nativeElement.querySelector('[data-testid="cable-temperature-result"]')?.textContent;
+    const temperatureText = fixture.nativeElement.querySelector(
+      '[data-testid="cable-temperature-result"]'
+    )?.textContent;
     const uncertaintyText = fixture.nativeElement.querySelector(
       '[data-testid="cable-temperature-uncertainty-result"]'
     )?.textContent;

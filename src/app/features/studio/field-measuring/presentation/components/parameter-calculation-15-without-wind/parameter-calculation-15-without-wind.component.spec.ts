@@ -383,9 +383,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -12);
       fixture.detectChanges();
 
-      const btn = fixture.nativeElement.querySelector(
-        '[data-testid="calculate-parameter-btn"]'
-      ) as HTMLButtonElement;
+      const btn = fixture.nativeElement.querySelector('[data-testid="calculate-parameter-btn"]') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 

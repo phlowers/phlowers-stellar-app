@@ -209,7 +209,10 @@
           {{ 'common.uncertainty-cable-temperature-label' | transloco }}
         </dt>
         <dd data-testid="cable-temperature-uncertainty-result">
-          {{ (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperatureUncertainty) | number: '1.0-1') ?? '-' }}
+          {{
+            (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperatureUncertainty) | number: '1.0-1') ??
+              '-'
+          }}
           °C
         </dd>
       </div>

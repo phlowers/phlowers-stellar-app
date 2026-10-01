@@ -313,7 +313,7 @@ describe('HeaderComponent', () => {
           { spanLength: 10, spanAngle: 20 },
           { spanLength: 12, spanAngle: 18 }
         ]
-      } as any);
+      } as unknown as Section);
 
       const startupFixture = TestBed.createComponent(HeaderComponent);
       const startupComponent = startupFixture.componentInstance;
