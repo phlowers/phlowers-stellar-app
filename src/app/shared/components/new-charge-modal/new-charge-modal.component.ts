@@ -77,7 +77,7 @@ export class NewChargeModalComponent {
       if (this.isOpen()) {
         const emptyCase = newCharge(
           this.spanService.section()?.charges ?? [],
-          this.translocoService.translate('shared.new-charge-modal.default-name')
+          this.translocoService.translate('shared.new-load-modal.default-name')
         );
         this.name.set(emptyCase.name);
         this.personnelPresence.set(emptyCase.personnelPresence);

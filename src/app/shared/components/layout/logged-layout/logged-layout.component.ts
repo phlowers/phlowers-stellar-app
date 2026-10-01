@@ -26,13 +26,13 @@ export class LoggedLayoutComponent {
       main: [
         {
           id: 'sideB-home',
-          label: this.translocoService.translate('shared.logged-layout.home'),
+          label: this.translocoService.translate('common.home-label'),
           route: '/',
           icon: 'home'
         },
         {
           id: 'sideB-studies',
-          label: this.translocoService.translate('shared.logged-layout.studies'),
+          label: this.translocoService.translate('common.studies-label'),
           route: '/studies',
           icon: 'folder'
         },

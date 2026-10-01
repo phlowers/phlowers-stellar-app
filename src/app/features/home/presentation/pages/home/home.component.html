@@ -1,7 +1,7 @@
 <section class="btn-wrapper">
   <a routerLink="/studies" [queryParams]="{ create: 'true' }" app-btn data-testid="create-study-btn">
     <app-icon icon="add" />
-    {{ 'home.create-study' | transloco }}
+    {{ 'common.create-a-new-study' | transloco }}
   </a>
 </section>
 
@@ -43,7 +43,7 @@
 
 <article>
   <header>
-    <h2 class="text-xl-400 underline-text">{{ 'home.my-last-studies' | transloco }}</h2>
+    <h2 class="text-xl-400 underline-text">{{ 'common.my-last-studies-label' | transloco }}</h2>
   </header>
 
   <main class="study-cards" data-testid="latest-studies-list">

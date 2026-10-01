@@ -6,7 +6,7 @@
       [alt]="'auth.login-page.logo-alt' | transloco"
     />
 
-    <h1 class="login-page__title" data-testid="login-title">{{ 'auth.login-page.title' | transloco }}</h1>
+    <h1 class="login-page__title" data-testid="login-title">{{ 'common.sign-in-label' | transloco }}</h1>
 
     @if (isResolvingMode()) {
       <output class="login-page__subtitle" aria-live="polite" data-testid="login-resolving">
@@ -58,7 +58,7 @@
         </div>
 
         <button class="login-page__submit" type="submit" pButton [disabled]="isSubmitting()" data-testid="submit-btn">
-          {{ 'auth.login-page.submit-btn' | transloco }}
+          {{ 'common.sign-in-label' | transloco }}
         </button>
       </form>
     }

@@ -8,14 +8,14 @@
 <section class="base-info">
   @if (mode() === 'view') {
     <dl class="contents">
-      <dt class="load-name-label">{{ 'studio.loads-table.load-case-name-label' | transloco }}</dt>
+      <dt class="load-name-label">{{ 'common.load-case-name-label' | transloco }}</dt>
       <dd class="load-name-value">{{ name() }}</dd>
 
-      <dt class="load-desc-label">{{ 'shared.new-charge-modal.description-label' | transloco }}</dt>
+      <dt class="load-desc-label">{{ 'common.description-label' | transloco }}</dt>
       <dd class="load-desc-value">{{ description() || '-' }}</dd>
     </dl>
   } @else {
-    <label for="loadName" class="load-name-label">{{ 'studio.loads-table.load-case-name-label' | transloco }}</label>
+    <label for="loadName" class="load-name-label">{{ 'common.load-case-name-label' | transloco }}</label>
     <input
       type="text"
       class="load-name-value"
@@ -43,9 +43,7 @@
     ></textarea>
   }
 
-  <label for="personnelPresence" class="load-person-label">{{
-    'shared.new-charge-modal.personnel-presence' | transloco
-  }}</label>
+  <label for="personnelPresence" class="load-person-label">{{ 'common.personnel-presence-label' | transloco }}</label>
   <p-toggleswitch
     inputId="personnelPresence"
     name="personnelPresence"
@@ -65,14 +63,14 @@
       <tr>
         <th id="wind-pressure-col">{{ 'studio.conformity.wind-pressure-label' | transloco }}</th>
         <th id="cable-temp-col">{{ 'studio.loads-table.cable-temp-label' | transloco }}</th>
-        <th id="ice-indicator-col">{{ 'studio.loads-table.ice-indicator-label' | transloco }}</th>
+        <th id="ice-indicator-col">{{ 'common.ice-indicator-label' | transloco }}</th>
         @if (climate()?.symmetryType === SymmetryType.SYMMETRIC) {
           <th id="ice-thickness-col">{{ 'loads.climate.ice-thickness-label' | transloco }}</th>
         }
         @if (climate()?.symmetryType === SymmetryType.DIS_SYMMETRIC) {
           <th id="frontier-support-col">{{ 'loads.climate.frontier-support-label' | transloco }}</th>
-          <th id="ice-before-col">{{ 'studio.loads-table.ice-thickness-before-label' | transloco }}</th>
-          <th id="ice-after-col">{{ 'studio.loads-table.ice-thickness-after-label' | transloco }}</th>
+          <th id="ice-before-col">{{ 'common.ice-thickness-before-support-frontier' | transloco }}</th>
+          <th id="ice-after-col">{{ 'common.ice-thickness-after-support-frontier' | transloco }}</th>
         }
       </tr>
     </ng-template>
@@ -103,7 +101,7 @@
       <ng-template pTemplate="header">
         <tr>
           <th id="index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
-          <th id="span-col">{{ 'studio.shared.span-label' | transloco }}</th>
+          <th id="span-col">{{ 'common.span-label' | transloco }}</th>
           <th id="ref-support-col">{{ 'studio.loads-table.ref-support-label' | transloco }}</th>
           <th id="type-col">{{ 'loads.load-marking.load-type-label' | transloco }}</th>
           <th id="position-col">{{ 'studio.loads-table.distance-to-ref-support-label' | transloco }}</th>
@@ -137,7 +135,7 @@
       <ng-template pTemplate="header">
         <tr>
           <th id="cable-modif-index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
-          <th id="cable-modif-span-col">{{ 'studio.shared.span-label' | transloco }}</th>
+          <th id="cable-modif-span-col">{{ 'common.span-label' | transloco }}</th>
           <th id="cable-modif-ref-support-col">{{ 'studio.loads-table.ref-support-label' | transloco }}</th>
           <th id="cable-modif-type-col">{{ 'studio.loads-table.modification-type-label' | transloco }}</th>
           <th id="cable-modif-length-col">{{ 'loads.cable-length-change.cable-length-mod-label' | transloco }}</th>
@@ -167,7 +165,7 @@
       <ng-template pTemplate="header">
         <tr>
           <th id="support-manip-index-col">{{ 'studio.loads-table.index-label' | transloco }}</th>
-          <th id="support-manip-ref-support-col">{{ 'loads.shared.reference-support-label' | transloco }}</th>
+          <th id="support-manip-ref-support-col">{{ 'common.reference-support-label' | transloco }}</th>
           <th id="support-manip-type-col">{{ 'loads.cable-support-manip.manipulation-type-label' | transloco }}</th>
           @if (hasShiftingSupportManip()) {
             <th id="support-manip-shifting-clamp-length-col">
@@ -186,12 +184,12 @@
             </th>
           }
           @if (hasChainSupportManip()) {
-            <th id="support-manip-chain-name-col">{{ 'loads.cable-span-manip.chain-name-label' | transloco }}</th>
-            <th id="support-manip-chain-length-col">{{ 'loads.cable-span-manip.chain-length-label' | transloco }}</th>
-            <th id="support-manip-chain-weight-col">{{ 'loads.cable-span-manip.chain-weight-label' | transloco }}</th>
+            <th id="support-manip-chain-name-col">{{ 'common.chain-name-label' | transloco }}</th>
+            <th id="support-manip-chain-length-col">{{ 'common.chain-length-label' | transloco }}</th>
+            <th id="support-manip-chain-weight-col">{{ 'common.chain-weight-label' | transloco }}</th>
             <th id="support-manip-chain-surface-col">{{ 'loads.cable-span-manip.chain-surface-label' | transloco }}</th>
             <th id="support-manip-counter-weight-col">
-              {{ 'loads.cable-span-manip.counter-weight-label' | transloco }}
+              {{ 'common.counter-weight-label' | transloco }}
             </th>
           }
           @if (hasRopeSupportManip()) {
@@ -258,17 +256,17 @@
           <th id="span-manip-lateral-distance-col">
             {{ 'loads.cable-span-manip.lateral-distance-label' | transloco }}
           </th>
-          <th id="span-manip-altitude-col">{{ 'loads.cable-span-manip.altitude-label' | transloco }}</th>
+          <th id="span-manip-altitude-col">{{ 'common.altitude-label' | transloco }}</th>
           <th id="span-manip-anchoring-col">{{ 'loads.cable-span-manip.anchoring-label' | transloco }}</th>
           @if (hasSlingSpanManip()) {
             <th id="span-manip-sling-length-col">{{ 'loads.cable-span-manip.sling-length-label' | transloco }}</th>
           }
           @if (hasChainSpanManip()) {
-            <th id="span-manip-chain-name-col">{{ 'loads.cable-span-manip.chain-name-label' | transloco }}</th>
-            <th id="span-manip-chain-length-col">{{ 'loads.cable-span-manip.chain-length-label' | transloco }}</th>
-            <th id="span-manip-chain-weight-col">{{ 'loads.cable-span-manip.chain-weight-label' | transloco }}</th>
+            <th id="span-manip-chain-name-col">{{ 'common.chain-name-label' | transloco }}</th>
+            <th id="span-manip-chain-length-col">{{ 'common.chain-length-label' | transloco }}</th>
+            <th id="span-manip-chain-weight-col">{{ 'common.chain-weight-label' | transloco }}</th>
             <th id="span-manip-chain-surface-col">{{ 'loads.cable-span-manip.chain-surface-label' | transloco }}</th>
-            <th id="span-manip-counter-weight-col">{{ 'loads.cable-span-manip.counter-weight-label' | transloco }}</th>
+            <th id="span-manip-counter-weight-col">{{ 'common.counter-weight-label' | transloco }}</th>
           }
         </tr>
       </ng-template>
@@ -334,7 +332,7 @@
 
     <button app-btn type="button" (click)="switchToEditMode()" data-testid="modify-btn">
       <app-icon icon="edit" />
-      <ng-container>{{ 'studio.loads-table.modify-btn' | transloco }}</ng-container>
+      <ng-container>{{ 'common.modify-label' | transloco }}</ng-container>
     </button>
   } @else {
     <button app-btn type="button" btnStyle="outlined" (click)="cancelEdit()" data-testid="cancel-edit-btn">

@@ -52,7 +52,7 @@ function createData(overrides: Partial<LoadsReportData> = {}): LoadsReportData {
     author: 'test.author@example.invalid',
     studyTitle: 'Test study',
     studyDescription: 'Test study description',
-    cantonName: 'Test canton',
+    sectionName: 'Test canton',
     cantonComment: 'Test canton comment',
     icName: 'Test initial condition',
     chargeName: 'Test charge',

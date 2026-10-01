@@ -13,7 +13,8 @@ import { TranslocoTestingModule } from '@jsverse/transloco';
 class MockTopbarComponent {}
 
 @Component({
-  selector: 'app-sidebar'
+  selector: 'app-sidebar',
+  template: ''
 })
 class MockSidebarComponent {
   logoIconExpanded = input<string>();
@@ -38,6 +39,8 @@ describe('LoggedLayoutComponent', () => {
               'shared.logged-layout.home': 'Home',
               'shared.logged-layout.studies': 'Studies',
               'shared.logged-layout.tools': 'Tools',
+              'common.home-label': 'Home',
+              'common.studies-label': 'Studies',
               'shared.logged-layout.documentation': 'Documentation',
               'shared.logged-layout.ver-maj': 'Ver.MAJ',
               'shared.logged-layout.version-maj': 'Version / MAJ'

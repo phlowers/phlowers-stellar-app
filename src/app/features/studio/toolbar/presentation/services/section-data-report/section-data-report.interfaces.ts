@@ -64,7 +64,7 @@ export interface CantonReportData {
   author: string;
   studyTitle: string;
   studyDescription: string;
-  cantonName: string;
+  sectionName: string;
   comment: string;
   icName: string;
   chargeName: string;
