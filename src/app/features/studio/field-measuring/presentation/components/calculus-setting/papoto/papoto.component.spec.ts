@@ -585,6 +585,26 @@ describe('Papoto component', () => {
         expect(text).not.toContain('0.6');
       });
 
+      it('should preserve tenths for large parameters and show one decimal for whole-number values', () => {
+        component.measureData.update((data) => ({
+          ...data,
+          outputs: {
+            ...data.outputs,
+            papoto: {
+              ...data.outputs.papoto!,
+              parameter: 2000.79,
+              parameter_1_2: 2,
+              uncertainty: 5
+            }
+          }
+        }));
+        fixture.detectChanges();
+
+        expect(getByTestId('papoto-parameter')?.textContent).toContain('2,000.7 m');
+        expect(getByTestId('papoto-uncertainty')?.textContent).toContain('5.0 m');
+        expect(getByTestId('papoto-parameter-1-2')?.textContent).toContain('2.0 m');
+      });
+
       it('should display parameter-1-2 truncated to 1 decimal, not rounded (2.99 → 2.9)', () => {
         const text = getByTestId('papoto-parameter-1-2')?.textContent?.trim();
         expect(text).toContain('2.9');
