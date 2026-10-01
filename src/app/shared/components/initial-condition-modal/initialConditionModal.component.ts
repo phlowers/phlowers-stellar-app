@@ -193,7 +193,7 @@ export class InitialConditionModalComponent {
 
     effect(() => {
       if (this.isOpen()) {
-        this.cablesService.getCables().then((cables) => {
+        void this.cablesService.getCables().then((cables) => {
           const sectionCableName = this.section().cable_name;
           if (sectionCableName) {
             const isNarcisse = !!cables?.find((c) => c.name === sectionCableName)?.is_polynomial;

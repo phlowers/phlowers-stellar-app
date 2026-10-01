@@ -23,6 +23,7 @@ import { cloneDeep } from 'lodash';
 import { LocationData } from './manualSection/location/location.interfaces';
 import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -88,6 +89,7 @@ export class NewSectionModalComponent {
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
   private readonly transloco = inject(TranslocoService);
+  private readonly logger = inject(LoggerService);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
@@ -177,7 +179,10 @@ export class NewSectionModalComponent {
   }
 
   onDeleteSection() {
-    this.sectionService.deleteSection(this.study()!, this.section());
+    this.sectionService.deleteSection(this.study()!, this.section()).catch((error: unknown) => {
+      this.logger.error('Failed to delete section', error);
+      this.notificationService.error(this.transloco.translate('section-import.delete-error'));
+    });
     this.isOpenChange.emit(false);
   }
 
@@ -211,6 +216,6 @@ export class NewSectionModalComponent {
     this.setSection.emit(cloneDeep(section));
     this.setMode.emit(mode);
     this.isOpenChange.emit(false);
-    Promise.resolve().then(() => this.isOpenChange.emit(true));
+    void Promise.resolve().then(() => this.isOpenChange.emit(true));
   }
 }

@@ -31,9 +31,9 @@ import { SymmetryType } from '@shared/domain/models/charge.model';
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
   'studio.loads-report.title': 'Rapport des charges',
-  'studio.loads-report.page-label': 'Page',
-  'studio.loads-report.report-generated-success': 'Report generated successfully',
-  'studio.loads-report.report-generation-failed': 'Failed to generate report',
+  'common.page-label': 'Page',
+  'common.report-generated-successfully-label': 'Report generated successfully',
+  'common.failed-to-generate-report': 'Failed to generate report',
   'common.symmetric': 'Symmetric',
   'common.dis-symmetric': 'Dissymmetric',
   'common.yes': 'Oui',
@@ -72,7 +72,7 @@ function createSpanLoad(index: number): SpanLoadReportRow {
   return {
     spanLabel: `S${index} - S${index + 1}`,
     referenceSupport: `S${index}`,
-    type: 'Punctual charge',
+    type: 'Punctual load',
     loadWeight: 120,
     loadPosition: 15.5
   };
@@ -132,7 +132,7 @@ function createMockReportData(overrides: Partial<LoadsReportData> = {}): LoadsRe
     author: 'test@example.com',
     studyTitle: 'Test Study',
     studyDescription: 'Description',
-    cantonName: 'Canton A',
+    sectionName: 'Canton A',
     cantonComment: 'Canton comment',
     icName: 'IC 1',
     chargeName: 'Charge 1',

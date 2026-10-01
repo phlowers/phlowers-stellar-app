@@ -7,6 +7,7 @@ Cette section couvre les fonctionnalités et la configuration générales de l'a
 Mise à jour de l'application <application_update>
 Mise à jour du catalogue <catalog_update>
 Composants personnalisés <custom_components>
+CRR de brins coupés <cut_strands>
 Worker moteur <engine_worker>
 Codes d'erreur <how_to_add_error_codes>
 i18n

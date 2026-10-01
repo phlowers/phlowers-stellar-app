@@ -177,6 +177,9 @@ a.app-btn {
 .app-btn-danger {
   background-color: var(--error-600);
   color: var(--grey-white);
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
 
   &:hover {
     background-color: var(--error-700);
@@ -184,6 +187,12 @@ a.app-btn {
 
   &:active {
     background-color: var(--error-800);
+  }
+
+  &:disabled,
+  &.disabled,
+  &[disabled] {
+    box-shadow: inset 0 0 0 0.0625rem var(--grey-200);
   }
 }
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -28,6 +28,8 @@ export class CardInfoComponent {
   linkRoute = input<string>();
   /** Additional CSS class appended to the card element. */
   additionalClass = input<string>();
+  /** Emitted when the action button is clicked (rendered when `linkText` is set without `linkRoute`). */
+  linkClick = output<void>();
 
   computedClass = computed(() => {
     return [this.statusState() ? 'card-' + this.statusState() : '', this.additionalClass() ?? '']

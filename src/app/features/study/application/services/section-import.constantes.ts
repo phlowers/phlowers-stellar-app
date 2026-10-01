@@ -7,9 +7,9 @@
 
 /** Transloco translation keys for section import error messages. */
 export const SECTION_IMPORT_ERROR_KEYS = {
-  fileTypeNotAllowed: 'section-import.file-type-not-allowed',
-  fileReadError: 'section-import.file-read-error',
-  fileParseError: 'section-import.file-parse-error',
+  fileTypeNotAllowed: 'common.import.error.file-type-not-allowed',
+  fileReadError: 'common.error-reading-file-label',
+  fileParseError: 'common.error-parsing-file-label',
   validationErrorRequiredFields: 'section-import.validation-required-fields',
   validationErrorSupportsBounds: 'section-import.validation-supports-bounds',
   sectionImportError: 'section-import.import-error',

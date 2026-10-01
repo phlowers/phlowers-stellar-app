@@ -222,10 +222,10 @@ export class ManualSectionComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.setupFilterTables();
+    void this.setupFilterTables();
     // Re-populate line dropdowns if the catalog import completes after this component opens.
     this.linesService.imported$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.setupLinesFilter();
+      void this.setupLinesFilter();
     });
   }
 

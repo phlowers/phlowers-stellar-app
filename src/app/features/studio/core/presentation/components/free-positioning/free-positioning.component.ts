@@ -119,7 +119,7 @@ export class FreePositioningComponent implements OnDestroy {
       const litData = this.plotService.litData();
 
       if (workerReady && litData && plotOptions) {
-        untracked(() => this.recreatePlots());
+        untracked(() => void this.recreatePlots());
       }
     });
 
@@ -184,10 +184,10 @@ export class FreePositioningComponent implements OnDestroy {
     const facePlot = this.plotFace();
     const profilePlot = this.plotProfile();
     if (facePlot) {
-      Plotly.relayout(facePlot, this.getPlotLayout());
+      void Plotly.relayout(facePlot, this.getPlotLayout());
     }
     if (profilePlot) {
-      Plotly.relayout(profilePlot, this.getPlotLayout());
+      void Plotly.relayout(profilePlot, this.getPlotLayout());
     }
   }
 

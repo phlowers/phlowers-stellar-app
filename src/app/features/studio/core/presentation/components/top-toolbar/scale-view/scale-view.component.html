@@ -43,7 +43,7 @@
 
         <div data-testid="scale-radio-auto" class="view-config__radio-item">
           <p-radioButton name="scale" value="auto" formControlName="scale" inputId="auto"></p-radioButton>
-          <label for="auto">{{ 'studio.scale-view.scale-auto' | transloco }}</label>
+          <label for="auto">{{ 'common.auto-label' | transloco }}</label>
         </div>
       </div>
     </fieldset>
@@ -64,7 +64,7 @@
             [min]="scaleMin"
             [max]="scaleMax"
             class="view-config__slider"
-            [attr.aria-label]="'studio.scale-view.slider-aria-label' | transloco"
+            [attr.aria-label]="'common.number-of-points-per-range' | transloco"
           ></p-slider>
           <span class="view-config__limit" aria-hidden="true">{{ scaleMax }}</span>
         </div>
@@ -74,7 +74,7 @@
           formControlName="pointsCount"
           [min]="scaleMin"
           [max]="scaleMax"
-          [attr.aria-label]="'studio.scale-view.input-aria-label' | transloco"
+          [attr.aria-label]="'common.number-of-points-per-range' | transloco"
         />
       </div>
     </fieldset>

@@ -171,14 +171,14 @@ export class LoadMarkingComponent {
   });
 
   loadTypeOptions = [
-    { label: this.translocoService.translate('loads.load-marking.punctual-charge-option'), value: 'punctual' },
-    { label: this.translocoService.translate('loads.load-marking.marking-option'), value: 'marking' }
+    { label: this.translocoService.translate('common.punctual-load-label'), value: 'punctual' },
+    { label: this.translocoService.translate('common.marking-label'), value: 'marking' }
   ];
 
   resetForm() {
     this.form.reset();
     this.form.controls.referenceSupport.disable();
-    this.loadFormsService.initTemporaryLoadData();
+    void this.loadFormsService.initTemporaryLoadData();
   }
 
   async deleteCharge(): Promise<void> {

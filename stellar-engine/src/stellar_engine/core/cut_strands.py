@@ -9,7 +9,7 @@
 import logging
 
 import numpy as np
-from mechaphlowers import SectionStudy
+from mechaphlowers import SectionStudy, units
 
 from stellar_engine.entities.errors import _Errors
 
@@ -87,9 +87,10 @@ def get_rrts(study: SectionStudy) -> dict:
         study: The current section study.
 
     Returns:
-        A dictionary with the residual RTS under the ``rrts`` key.
+        A dictionary with the residual RTS in daN under the ``rrts`` key.
     """
-    return {"rrts": study.balance_engine.cable_array.rrts}
+    rrts = study.balance_engine.cable_array.rrts
+    return {"rrts": units(rrts, "N").to("daN").magnitude}
 
 
 def get_utilization_rate(study: SectionStudy) -> dict:

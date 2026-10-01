@@ -83,7 +83,7 @@ export class SupportPlotComponent {
       const attachmentSets = this.attachmentSetNumbers();
 
       if (coords?.length && attachmentSets?.length && this.workerPythonService.ready) {
-        this.refreshPlot(coords, attachmentSets, this.selectedAttachmentSetNumber());
+        void this.refreshPlot(coords, attachmentSets, this.selectedAttachmentSetNumber());
       } else {
         this.clearPlot();
       }
@@ -182,7 +182,7 @@ export class SupportPlotComponent {
       plotData.push(selectedMarkerData);
     }
 
-    plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
+    void plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
   }
 
   private createShapeData(shapePoints: number[][]): Data {

@@ -3,16 +3,16 @@
 <section>
   <app-new-study-modal [isOpen]="isNewStudyModalOpen()" (isOpenChange)="isNewStudyModalOpen.set($event)" />
   <div class="flex justify-between items-start">
-    <h2>{{ 'shared.logged-layout.studies' | transloco }}</h2>
+    <h2>{{ 'common.studies-label' | transloco }}</h2>
     <button app-btn type="submit" btnSize="m" (click)="isNewStudyModalOpen.set(true)" data-testid="create-study-btn">
       <app-icon icon="add" />
-      <span>{{ 'home.create-study' | transloco }}</span>
+      <span>{{ 'common.create-a-new-study' | transloco }}</span>
     </button>
   </div>
 </section>
 <p-tabs value="myStudies">
   <p-tablist>
-    <p-tab value="myStudies" data-testid="my-studies-tab">{{ 'studies.tabs.my-studies' | transloco }}</p-tab>
+    <p-tab value="myStudies" data-testid="my-studies-tab">{{ 'common.my-last-studies-label' | transloco }}</p-tab>
     @if (false) {
       <p-tab value="searchStudy" disabled="true" data-testid="search-study-tab">{{
         'studies.tabs.search-study' | transloco

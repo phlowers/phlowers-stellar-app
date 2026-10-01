@@ -113,8 +113,8 @@ export class ImportStudyComponent {
           message: this.translocoService.translate('studies.import.collision-message', { label }),
           accept: () => resolve(true),
           reject: () => resolve(false),
-          acceptLabel: this.translocoService.translate('common.import.collision.yes'),
-          rejectLabel: this.translocoService.translate('common.import.collision.no')
+          acceptLabel: this.translocoService.translate('common.yes'),
+          rejectLabel: this.translocoService.translate('common.no')
         })
       );
   }

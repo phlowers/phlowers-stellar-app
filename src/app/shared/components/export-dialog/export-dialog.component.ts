@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StudiesService } from '@services/studies/studies.service';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 
 import { SelectModule } from 'primeng/select';
 
@@ -40,6 +42,9 @@ export class ExportDialogComponent {
   }>;
 
   readonly studiesService = inject(StudiesService);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor() {
     this.form = new FormGroup({
@@ -63,7 +68,10 @@ export class ExportDialogComponent {
     const filename = this.form.value.filename;
     const uuid = this.studiesService.exportDialogData()?.uuid;
     if (this.form.valid && uuid && filename && filename) {
-      this.studiesService.downloadStudy(uuid, filename);
+      this.studiesService.downloadStudy(uuid, filename).catch((error: unknown) => {
+        this.logger.error('Failed to export study', error);
+        this.notificationService.error(this.translocoService.translate('shared.global-error-handler.unexpected-error'));
+      });
       this.studiesService.exportDialogData.set(null);
     }
   }

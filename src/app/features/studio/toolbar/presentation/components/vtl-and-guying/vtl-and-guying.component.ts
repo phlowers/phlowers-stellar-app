@@ -37,6 +37,7 @@ import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { VtlGuyingReportService } from '../../services/vtl-guying-report/vtl-guying-report.service';
 import { VtlGuyingReportData } from '../../services/vtl-guying-report/vtl-guying-report.interfaces';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
+import { NotificationService } from '@services/notification/notification.service';
 
 /** Option for selecting a reference support direction. */
 interface SupportOption {
@@ -84,6 +85,7 @@ export class VhlAndGuyingComponent {
   private readonly logger = inject(LoggerService);
   private readonly vtlGuyingReportService = inject(VtlGuyingReportService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly notificationService = inject(NotificationService);
 
   form: FormGroup<{
     selectedSpan: FormControl<VtlAndGuying['inputs']['selectedSpan']>;
@@ -362,7 +364,10 @@ export class VhlAndGuyingComponent {
       comment: formValue.comment ?? ''
     };
     section.vtl_and_guying = vtlAndGuying;
-    this.sectionService.createOrUpdateSection(study, section);
+    this.sectionService.createOrUpdateSection(study, section).catch((error: unknown) => {
+      this.logger.error('Failed to save VTL and guying', error);
+      this.notificationService.error(this.translocoService.translate('shared.global-error-handler.unexpected-error'));
+    });
     this.messageService.add({
       severity: 'success',
       summary: this.translocoService.translate('common.success'),

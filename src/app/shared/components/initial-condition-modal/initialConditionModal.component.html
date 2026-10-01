@@ -23,12 +23,12 @@
     <div class="form">
       <dl class="form__col">
         <div>
-          <dt>{{ 'shared.initial-condition-modal.section-name' | transloco }}</dt>
+          <dt>{{ 'common.section-name-label' | transloco }}</dt>
           <dd class="read-only-info test">{{ section().name }}</dd>
         </div>
 
         <div>
-          <dt>{{ 'shared.initial-condition-modal.cable-name' | transloco }}</dt>
+          <dt>{{ 'common.cable-name-label' | transloco }}</dt>
           <dd class="read-only-info test">{{ section().cable_name }}</dd>
         </div>
 
@@ -71,7 +71,7 @@
           </div>
           <div>
             <label for="initial-condition-base-parameter">
-              <ng-container>{{ 'shared.initial-condition-modal.base-parameter' | transloco }}</ng-container>
+              <ng-container>{{ 'common.base-parameter-label' | transloco }}</ng-container>
               <sup class="mandatory">*</sup>
             </label>
             <input
@@ -103,7 +103,7 @@
           </div>
           <div>
             <label for="initial-condition-base-temperature">
-              <ng-container>{{ 'shared.initial-condition-modal.base-temperature' | transloco }}</ng-container>
+              <ng-container>{{ 'common.base-temperature-label' | transloco }}</ng-container>
               <sup class="mandatory">*</sup>
             </label>
             <p-inputgroup>
@@ -136,9 +136,7 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <label for="initial-condition-cable-pretension">{{
-                'shared.initial-condition-modal.cable-pretension' | transloco
-              }}</label>
+              <label for="initial-condition-cable-pretension">{{ 'common.cable-pretension-label' | transloco }}</label>
               <p-inputgroup>
                 <input
                   name="initial-condition-cable-pretension"
@@ -170,9 +168,7 @@
               <p class="font-bold mb-0">{{ 'shared.initial-condition-modal.extreme-historical' | transloco }}</p>
             </div>
             <div>
-              <label for="initial-condition-min-temperature">{{
-                'shared.initial-condition-modal.min-temperature' | transloco
-              }}</label>
+              <label for="initial-condition-min-temperature">{{ 'common.min-temperature-label' | transloco }}</label>
               <p-inputgroup>
                 <input
                   name="initial-condition-min-temperature"
@@ -201,7 +197,7 @@
             </div>
             <div>
               <label for="initial-condition-max-wind-pressure">{{
-                'shared.initial-condition-modal.max-wind-pressure' | transloco
+                'common.max-wind-pressure-label' | transloco
               }}</label>
               <p-inputgroup>
                 <input
@@ -264,12 +260,12 @@
       } @else if (mode() === 'view') {
         <dl class="form__col form__col--right">
           <div>
-            <dt>{{ 'shared.initial-condition-modal.ic-name-view' | transloco }}</dt>
+            <dt>{{ 'shared.initial-condition-modal.ic-name-label' | transloco }}</dt>
             <dd class="read-only-info test">{{ initialCondition().name }}</dd>
           </div>
 
           <div>
-            <dt>{{ 'shared.initial-condition-modal.base-parameter' | transloco }}</dt>
+            <dt>{{ 'common.base-parameter-label' | transloco }}</dt>
             <dd class="read-only-info test">
               {{ initialCondition().base_parameters }}
             </dd>
@@ -286,7 +282,7 @@
           </div>
           @if (isCableNarcisse()) {
             <div>
-              <dt>{{ 'shared.initial-condition-modal.cable-pretension' | transloco }}</dt>
+              <dt>{{ 'common.cable-pretension-label' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().cable_pretension }}
                 @if (isNumber(initialCondition().cable_pretension)) {
@@ -300,7 +296,7 @@
               </dt>
             </div>
             <div>
-              <dt>{{ 'shared.initial-condition-modal.min-temperature' | transloco }}</dt>
+              <dt>{{ 'common.min-temperature-label' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().min_temperature }}
                 @if (isNumber(initialCondition().min_temperature)) {
@@ -309,7 +305,7 @@
               </dd>
             </div>
             <div>
-              <dt>{{ 'shared.initial-condition-modal.max-wind-pressure' | transloco }}</dt>
+              <dt>{{ 'common.max-wind-pressure-label' | transloco }}</dt>
               <dd class="read-only-info test">
                 {{ initialCondition().max_wind_pressure }}
                 @if (isNumber(initialCondition().max_wind_pressure)) {

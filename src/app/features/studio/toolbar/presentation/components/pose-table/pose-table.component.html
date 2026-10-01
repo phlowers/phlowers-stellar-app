@@ -7,10 +7,10 @@
 
 <form [formGroup]="form" (ngSubmit)="calculate()">
   <dl>
-    <dt>{{ 'shared.initial-condition-modal.base-parameter' | transloco }}</dt>
+    <dt>{{ 'common.base-parameter-label' | transloco }}</dt>
     <dd data-testid="base-param-value">{{ baseParam() !== null ? (baseParam() | number: '1.0-2') + ' m' : '-' }}</dd>
 
-    <dt>{{ 'shared.initial-condition-modal.base-temperature' | transloco }}</dt>
+    <dt>{{ 'common.base-temperature-label' | transloco }}</dt>
     <dd data-testid="base-temp-value">{{ baseTemp() !== null ? (baseTemp() | number: '1.0-1') + ' °C' : '-' }}</dd>
 
     <dt>{{ 'studio.pose-table.equivalent-span-label' | transloco }}</dt>

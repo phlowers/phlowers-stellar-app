@@ -39,7 +39,7 @@ export class IconComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.isSymbolsReady();
+    void this.isSymbolsReady();
   }
 
   private async isSymbolsReady() {

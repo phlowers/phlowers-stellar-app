@@ -28,6 +28,6 @@ export class CardStudyComponent {
   private readonly router = inject(Router);
 
   onCardClick() {
-    this.router.navigate(['/study', this.uuid()]);
+    void this.router.navigate(['/study', this.uuid()]);
   }
 }

@@ -7,6 +7,7 @@ This section covers general application features and configuration.
 application_update
 catalog_update
 custom_components
+cut_strands
 engine_worker
 how_to_add_error_codes
 i18n

@@ -18,12 +18,12 @@
   <p-tabpanels class="grow">
     <p-tabpanel value="general">
       <div class="section-form-part">
-        <h3 class="title-underline">{{ 'manual-section.section-group' | transloco }}</h3>
+        <h3 class="title-underline">{{ 'common.section-label' | transloco }}</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid">
             <div class="flex flex-col col-span-2">
               <label for="sectionName">
-                {{ 'manual-section.label-section-name' | transloco }}
+                {{ 'common.section-name-label' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <input
@@ -47,7 +47,7 @@
 
             <div class="flex flex-col">
               <label for="sectionType">
-                {{ 'manual-section.label-section-type' | transloco }}
+                {{ 'common.section-type-label' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <p-select
@@ -68,7 +68,7 @@
             <div class="flex flex-col">
               @if (section().type === 'phase') {
                 <label for="electricPhaseNumber">
-                  <ng-container>{{ 'manual-section.label-phase-number' | transloco }}</ng-container>
+                  <ng-container>{{ 'common.electric-phase-number-label' | transloco }}</ng-container>
                 </label>
                 <p-select
                   inputId="electricPhaseNumber"
@@ -81,7 +81,7 @@
 
             <div class="flex flex-col">
               <label for="cableName">
-                {{ 'manual-section.label-cable-name' | transloco }}
+                {{ 'common.cable-name-label' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <p-select
@@ -103,7 +103,7 @@
 
             <div class="flex flex-col">
               <label for="cableAmount">
-                {{ 'manual-section.label-cable-amount' | transloco }}
+                {{ 'common.cable-amount-label' | transloco }}
                 <sup class="mandatory">*</sup>
               </label>
               <p-select
@@ -119,12 +119,12 @@
         } @else if (mode() === 'view') {
           <dl class="section-form-part-grid section-form-part-grid--infos">
             <div class="section-form-part-grid__cell--a" data-testid="section-name-view">
-              <dt>{{ 'manual-section.label-section-name' | transloco }}</dt>
+              <dt>{{ 'common.section-name-label' | transloco }}</dt>
               <dd class="read-only-info">{{ section().name }}</dd>
             </div>
 
             <div class="section-form-part-grid__cell--b" data-testid="section-type-view">
-              <dt>{{ 'manual-section.label-section-type' | transloco }}</dt>
+              <dt>{{ 'common.section-type-label' | transloco }}</dt>
               <dd class="read-only-info">
                 @if (section().type === 'phase') {
                   <ng-container>{{ 'common.section-type.phase' | transloco }}</ng-container>
@@ -136,7 +136,7 @@
 
             <div class="section-form-part-grid__cell--c" data-testid="phase-number-view">
               @if (section().type === 'phase') {
-                <dt>{{ 'manual-section.label-phase-number' | transloco }}</dt>
+                <dt>{{ 'common.electric-phase-number-label' | transloco }}</dt>
                 <dd class="read-only-info">
                   {{ section().electric_phase_number }}
                 </dd>
@@ -144,12 +144,12 @@
             </div>
 
             <div class="section-form-part-grid__cell--d" data-testid="cable-name-view">
-              <dt>{{ 'manual-section.label-cable-name' | transloco }}</dt>
+              <dt>{{ 'common.cable-name-label' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cable_name }}</dd>
             </div>
 
             <div class="section-form-part-grid__cell--e" data-testid="cable-amount-view">
-              <dt>{{ 'manual-section.label-cable-amount' | transloco }}</dt>
+              <dt>{{ 'common.cable-amount-label' | transloco }}</dt>
               <dd class="read-only-info">{{ section().cables_amount }}</dd>
             </div>
           </dl>
@@ -197,7 +197,7 @@
             </div>
 
             <div class="flex flex-col">
-              <label for="maintenanceTeam">{{ 'manual-section.label-maintenance-team' | transloco }}</label>
+              <label for="maintenanceTeam">{{ 'common.eel-label' | transloco }}</label>
               <p-select
                 inputId="maintenanceTeam"
                 [options]="uniqueMaintenanceTeams()"
@@ -227,7 +227,7 @@
             </div>
 
             <div>
-              <dt>{{ 'manual-section.label-maintenance-team' | transloco }}</dt>
+              <dt>{{ 'common.eel-label' | transloco }}</dt>
               <dd class="read-only-info">{{ maintenanceTeamRead() }}</dd>
             </div>
           </dl>
@@ -235,7 +235,7 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline">{{ 'manual-section.link-group' | transloco }}</h3>
+        <h3 class="title-underline">{{ 'common.link-label' | transloco }}</h3>
 
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="section-form-part-grid lines-form-grid">
@@ -345,7 +345,7 @@
             </div>
 
             <div class="flex flex-col section-form-part-grid__cell--f">
-              <label for="linkBm">{{ 'manual-section.label-branch' | transloco }}</label>
+              <label for="linkBm">{{ 'common.branch-label' | transloco }}</label>
               <p-select
                 inputId="linkBm"
                 [options]="uniqueBranchIdr()"
@@ -393,7 +393,7 @@
             </div>
 
             <div class="section-form-part-grid__cell--f">
-              <dt>{{ 'manual-section.label-branch' | transloco }}</dt>
+              <dt>{{ 'common.branch-label' | transloco }}</dt>
               <dd class="read-only-info" data-testid="branch-idr-view">{{ branchNumberRead() }}</dd>
             </div>
           </dl>
@@ -401,12 +401,12 @@
       </div>
 
       <div class="section-form-part">
-        <h3 class="title-underline">{{ 'manual-section.comment-group' | transloco }}</h3>
+        <h3 class="title-underline">{{ 'common.comment-label' | transloco }}</h3>
         @if (mode() === 'create' || mode() === 'edit') {
           <textarea
             pTextarea
             id="comment"
-            [attr.aria-label]="'manual-section.aria-comment' | transloco"
+            [attr.aria-label]="'common.comment-label' | transloco"
             class="w-full"
             [(ngModel)]="section().comment"
             (ngModelChange)="onSectionChange()"
@@ -428,7 +428,7 @@
         @if (mode() === 'create' || mode() === 'edit') {
           <div class="flex gap-4 items-start">
             <div class="flex flex-col">
-              <label for="supportsAmount">{{ 'manual-section.label-supports-amount' | transloco }}</label>
+              <label for="supportsAmount">{{ 'common.supports-amount-label' | transloco }}</label>
               <div class="flex flex-row gap-2 justify-between items-start w-[9.375rem]">
                 <p-inputnumber
                   [min]="2"
@@ -438,7 +438,7 @@
                   buttonLayout="horizontal"
                   inputId="supportsAmount"
                   spinnerMode="horizontal"
-                  [attr.aria-label]="'supports-table.aria-supports-amount' | transloco"
+                  [attr.aria-label]="'common.supports-amount-label' | transloco"
                   (onBlur)="onSupportsAmountChangeBlur($event)"
                   (onInput)="onSupportsAmountChangeInput($event)"
                   data-testid="supports-amount-input"
@@ -481,7 +481,7 @@
         } @else if (mode() === 'view') {
           <div class="flex flex-row justify-between items-center">
             <dl>
-              <dt>{{ 'manual-section.label-supports-amount' | transloco }}</dt>
+              <dt>{{ 'common.supports-amount-label' | transloco }}</dt>
               <dd class="read-only-info">{{ section().supports.length }}</dd>
             </dl>
             <p-paginator

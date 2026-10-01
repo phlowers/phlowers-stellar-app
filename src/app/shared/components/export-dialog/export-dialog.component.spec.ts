@@ -6,6 +6,7 @@ import { ExportDialogComponent } from './export-dialog.component';
 import { StudiesService } from '@services/studies/studies.service';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { MessageService } from 'primeng/api';
 describe('ExportDialogComponent', () => {
   let component: ExportDialogComponent;
   let fixture: ComponentFixture<ExportDialogComponent>;
@@ -17,7 +18,7 @@ describe('ExportDialogComponent', () => {
   beforeEach(async () => {
     mockStudiesService = {
       exportDialogData: signal({ isOpen: true, uuid: 'test-uuid', title: 'Test Study' }),
-      downloadStudy: vi.fn()
+      downloadStudy: vi.fn().mockResolvedValue(undefined)
     };
 
     await TestBed.configureTestingModule({
@@ -88,7 +89,7 @@ describe('ExportDialogComponent', () => {
       const exportDialogData = signal({ isOpen: true, uuid: 'test-uuid', title: 'My Study.clst' });
       mockStudiesService = {
         exportDialogData,
-        downloadStudy: vi.fn()
+        downloadStudy: vi.fn().mockResolvedValue(undefined)
       };
 
       await TestBed.resetTestingModule()
@@ -103,7 +104,10 @@ describe('ExportDialogComponent', () => {
             ReactiveFormsModule,
             NoopAnimationsModule
           ],
-          providers: [{ provide: StudiesService, useValue: mockStudiesService }]
+          providers: [
+            { provide: StudiesService, useValue: mockStudiesService },
+            { provide: MessageService, useValue: { add: vi.fn() } }
+          ]
         })
         .compileComponents();
 

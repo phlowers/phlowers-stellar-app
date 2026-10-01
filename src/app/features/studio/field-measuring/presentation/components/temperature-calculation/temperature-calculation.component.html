@@ -5,7 +5,7 @@
 
 <div class="temperature-calculation__form">
   <dl class="contents">
-    <dt class="conductor__label">{{ 'field-measuring.temperature-calculation.cable-name-label' | transloco }}</dt>
+    <dt class="conductor__label">{{ 'common.cable-name-label' | transloco }}</dt>
     <dd class="conductor__value">{{ measureData().cableName }}</dd>
 
     <dt class="ambientTemp__label">
@@ -206,7 +206,7 @@
       </div>
       <div class="uncertaintyCableTemperature">
         <dt>
-          {{ 'field-measuring.shared.uncertainty-cable-temperature' | transloco }}
+          {{ 'common.uncertainty-cable-temperature-label' | transloco }}
         </dt>
         <dd data-testid="cable-temperature-uncertainty-result">
           {{ (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperatureUncertainty) | number: '1.0-1') ?? '-' }}

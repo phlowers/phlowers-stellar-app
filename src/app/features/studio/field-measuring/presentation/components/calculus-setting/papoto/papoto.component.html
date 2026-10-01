@@ -275,18 +275,18 @@
 
 @if (measureData().outputs.papoto) {
   <div class="papoto__results" [@expand]>
-    <h2 class="papoto__results__title">{{ 'field-measuring.papoto.results-title' | transloco }}</h2>
+    <h2 class="papoto__results__title">{{ 'common.results' | transloco }}</h2>
 
     <dl class="papoto__results__list">
       <div class="param">
-        <dt>{{ 'field-measuring.papoto.parameter-label' | transloco }}</dt>
+        <dt>{{ 'common.parameter-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter">
           {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.1-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="incertainParam">
-        <dt>{{ 'field-measuring.papoto.uncertainty-parameter-label' | transloco }}</dt>
+        <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
         <dd data-testid="papoto-uncertainty">
           {{ (truncate1Decimal(measureData().outputs.papoto?.uncertainty) | number: '1.1-1') ?? '-' }} m
         </dd>
@@ -331,7 +331,7 @@
 
 @if (papotoError()) {
   <div class="papoto__error">
-    <p>{{ 'field-measuring.papoto.error-message' | transloco }}</p>
+    <p>{{ 'common.error-occurred-label' | transloco }}</p>
   </div>
 }
 

@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { ApplicationConfig, ErrorHandler, inject, provideAppInitializer } from '@angular/core';
+import { ApplicationConfig, DOCUMENT, ErrorHandler, inject, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
@@ -66,6 +66,7 @@ export async function initializeApp(): Promise<void> {
   const updateService = inject(UpdateService);
   const translocoService = inject(TranslocoService);
   const appConfigService = inject(AppConfigService);
+  const document = inject(DOCUMENT);
 
   // Flush any errors that occurred during bootstrap phase (e.g., Service Worker registration)
   const bootstrapErrors = getAndClearBootstrapErrors();
@@ -82,6 +83,7 @@ export async function initializeApp(): Promise<void> {
     (async () => {
       const defaultLang = await appConfigService.loadDefaultLang();
       translocoService.setActiveLang(defaultLang);
+      document.documentElement.lang = defaultLang;
       // Fire-and-forget: the `transloco` pipe loads reactively on its own once
       // components request keys, so first render never waits on this fetch.
       firstValueFrom(translocoService.load(defaultLang)).catch((err) => {

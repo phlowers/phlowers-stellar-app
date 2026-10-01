@@ -63,11 +63,11 @@ describe('AdminComponent', () => {
     } as unknown as vi.Mocked<MessageService>;
 
     studiesServiceMock = {
-      deleteAllStudies: vi.fn()
+      deleteAllStudies: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<StudiesService>;
 
     storageServiceMock = {
-      resetDatabase: vi.fn()
+      resetDatabase: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<StorageService>;
 
     confirmationServiceMock = {

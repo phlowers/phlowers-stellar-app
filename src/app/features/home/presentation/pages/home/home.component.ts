@@ -102,7 +102,7 @@ export class HomeComponent {
 
     effect(() => {
       if (this.studiesReady()) {
-        this.studiesService.getLatestStudies().then((studies) => {
+        void this.studiesService.getLatestStudies().then((studies) => {
           this.latestStudies.set(
             studies?.map((study) => ({
               ...study,
@@ -116,7 +116,7 @@ export class HomeComponent {
 
   private buildDefaultTexts(): HomeTexts {
     return {
-      newsTitle: this.translocoService.translate('home.news-title'),
+      newsTitle: this.translocoService.translate('common.news-label'),
       newsText: this.translocoService.translate('home.news-text'),
       newsLinkText: this.translocoService.translate('home.news-link-text'),
       updateTitle: this.translocoService.translate('home.update-title'),

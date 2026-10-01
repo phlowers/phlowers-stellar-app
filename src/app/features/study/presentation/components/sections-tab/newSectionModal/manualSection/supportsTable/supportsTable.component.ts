@@ -175,7 +175,7 @@ export class SupportsTableComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getData();
+    void this.getData();
     this.supports().forEach((support) => {
       void this.refreshAttachmentSetRestriction(support.uuid, support.name, support.attachmentSet);
     });

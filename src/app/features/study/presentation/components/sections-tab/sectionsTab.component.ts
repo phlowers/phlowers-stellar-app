@@ -33,6 +33,8 @@ import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/co
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -93,6 +95,8 @@ export class SectionsTabComponent {
   private readonly linesService = inject(LinesService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly sectionDataReportService = inject(SectionDataReportService);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
 
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
@@ -157,7 +161,7 @@ export class SectionsTabComponent {
       author: study?.author_email ?? '',
       studyTitle: study?.title ?? '',
       studyDescription: study?.description ?? '',
-      cantonName: section.name ?? '',
+      sectionName: section.name ?? '',
       comment: section.comment ?? '',
       icName: ic?.name ?? '',
       chargeName: charge?.name ?? '',
@@ -328,15 +332,30 @@ export class SectionsTabComponent {
   }
 
   selectChargeCase(charge: { label: string; value: string } | undefined, section: Section) {
-    this.chargesService.setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
+    this.chargesService
+      .setSelectedCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '')
+      .catch((error: unknown) => {
+        this.logger.error('Failed to select charge case', error);
+        this.notificationService.error(this.transloco.translate('shared.global-error-handler.unexpected-error'));
+      });
   }
 
   deleteChargeCase(charge: { label: string; value: string }, section: Section) {
-    this.chargesService.deleteCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
+    this.chargesService
+      .deleteCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '')
+      .catch((error: unknown) => {
+        this.logger.error('Failed to delete charge case', error);
+        this.notificationService.error(this.transloco.translate('shared.global-error-handler.unexpected-error'));
+      });
   }
 
   duplicateChargeCase(charge: { label: string; value: string }, section: Section) {
-    this.chargesService.duplicateCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '');
+    this.chargesService
+      .duplicateCharge(this.study()?.uuid ?? '', section.uuid, charge?.value ?? '')
+      .catch((error: unknown) => {
+        this.logger.error('Failed to duplicate charge case', error);
+        this.notificationService.error(this.transloco.translate('shared.global-error-handler.unexpected-error'));
+      });
   }
 
   viewOrEditChargeCase(charge: { label: string; value: string }, mode: 'view' | 'edit', section: Section) {

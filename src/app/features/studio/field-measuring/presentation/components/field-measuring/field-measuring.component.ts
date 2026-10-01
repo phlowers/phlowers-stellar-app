@@ -136,8 +136,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     effect(() => {
       if (this.toolbarDialogService.isOpen() && this.toolbarDialogService.phase() === 'main') {
         // Initialize data from PlotService when dialog opens
-        this.initializeMeasureData();
-        this.cableService.getCables().then((cables) => {
+        void this.initializeMeasureData();
+        void this.cableService.getCables().then((cables) => {
           this.cableOptions.set(
             cables.map((cable) => ({
               label: cable.name,
@@ -344,21 +344,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     this.measureData.set(updated);
   }
 
+  /** Export is always allowed, even with incomplete/invalid data (RG.MES.EXP-BTN.1): missing fields are exported as `null`. */
   async onExport() {
-    if (
-      !this.isFormValid() ||
-      !this.isParameterCalculationValid() ||
-      !this.isTemperatureCalculationValid() ||
-      !this.isParameter15CValid()
-    ) {
-      this.messageService.add({
-        severity: 'error',
-        summary: this.translocoService.translate('common.error'),
-        detail: this.translocoService.translate('field-measuring.actions.export-invalid-detail')
-      });
-      return;
-    }
-
     const measureData = this.measureData();
     const section = this.spanService.section();
     const study = this.plotService.study();

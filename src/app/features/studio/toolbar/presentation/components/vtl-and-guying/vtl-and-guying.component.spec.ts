@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
+import { Component, signal, input } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { VhlAndGuyingComponent } from './vtl-and-guying.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
@@ -17,11 +17,15 @@ import { MessageService } from 'primeng/api';
 import { VtlGuyingReportService } from '../../services/vtl-guying-report/vtl-guying-report.service';
 
 @Component({
-  selector: 'app-button',
+  selector: `button[app-btn], button[app-button], a[app-btn], a[app-button]`,
   standalone: true,
-  template: '<button><ng-content></ng-content></button>'
+  template: '<ng-content></ng-content>'
 })
-class MockButtonComponent {}
+class MockButtonComponent {
+  btnSize = input<'s' | 'm' | 'l'>('m');
+  btnStyle = input<'base' | 'outlined' | 'text' | 'danger'>('base');
+  btnLoading = input<boolean>(false);
+}
 
 @Component({
   selector: 'app-icon',

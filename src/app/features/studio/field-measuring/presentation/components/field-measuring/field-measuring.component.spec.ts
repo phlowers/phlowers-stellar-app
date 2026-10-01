@@ -155,7 +155,6 @@ describe('FieldMeasuringComponent', () => {
               'common.report': 'Report',
               'common.save': 'Save',
               'field-measuring.actions.success-detail': 'Data saved successfully',
-              'field-measuring.actions.export-invalid-detail': 'Please fix invalid fields in all tabs before exporting',
               'common.success': 'Success',
               'common.error': 'Error',
               'field-measuring.tabs.parameter-15c': 'Parameter at 15\u00b0C without wind',
@@ -479,18 +478,22 @@ describe('FieldMeasuringComponent', () => {
         ...overrides
       });
 
-    it('should show an error notification and not export when a tab is invalid', () => {
+    it('should export successfully even when a tab is invalid, exporting missing fields as null', () => {
       component.measureData.set(createTestMeasureData({ name: 'Invalid' }));
       const messageService = TestBed.inject(MessageService);
       const addSpy = vi.spyOn(messageService, 'add');
-      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL');
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+      const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
       component.onExport();
 
-      expect(addSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
-      expect(createObjectUrlSpy).not.toHaveBeenCalled();
+      expect(addSpy).not.toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
+      expect(createObjectUrlSpy).toHaveBeenCalledTimes(1);
 
       createObjectUrlSpy.mockRestore();
+      revokeObjectUrlSpy.mockRestore();
+      clickSpy.mockRestore();
     });
 
     it('should download the measure data as a JSON file via the Blob fallback when showSaveFilePicker is unavailable', () => {
