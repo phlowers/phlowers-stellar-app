@@ -1112,7 +1112,7 @@
       "lowest-temperature-label": "Température la plus basse (°C)",
       "computing-step-label": "Pas de calcul (°C)",
       "pose-parameter-label": "Paramètre de pose",
-      "horizontal-tension-th-label": "Tension horizontale T0",
+      "horizontal-tension-t0-label": "Tension horizontale T0",
       "calculation-error-text": "Une erreur s'est produite lors du calcul du tableau de pose",
       "failed-to-compute-equivalent-span": "Échec du calcul de la portée équivalente",
       "failed-to-compute-pose-table": "Échec du calcul du tableau de pose",
@@ -1136,6 +1136,18 @@
       "grade-unit": "gr",
       "aria-help": "Aide sur le réglage d'un câble",
       "calculation-failed": "Échec du calcul de réglage du câble"
+    },
+    "pose-table-report": {
+      "title": "Rapport Tableau de pose",
+      "pose-calculation-title": "Calcul de pose",
+      "lowest-temperature-label": "Température la plus basse",
+      "computing-step-label": "Pas de calcul",
+      "pose-parameter-label": "Paramètre de pose (m)",
+      "horizontal-tension-label": "Tension horizontale (daN)",
+      "results-title": "Résultats du tableau de pose",
+      "page-label": "Page",
+      "report-generated-success": "Rapport généré avec succès",
+      "report-generation-failed": "Échec de la génération du rapport"
     },
     "rrts-cut-strands": {
       "layers-detail": "Détail des couches",

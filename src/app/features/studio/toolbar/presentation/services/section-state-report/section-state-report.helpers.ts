@@ -25,9 +25,8 @@ import {
 } from '@shared/pdf/pdf-layout.constantes';
 import {
   drawBulletItem,
-  drawBulletList,
   drawSectionTitle,
-  drawSeparator,
+  drawTitledBulletSection,
   formatValue
 } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
@@ -132,10 +131,6 @@ export function drawCartoucheSection(
   labels: SectionReportLabels,
   startY: number
 ): number {
-  let y = drawSectionTitle(doc, labels.cartoucheTitle, startY);
-  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
-  const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
-
   const items: PdfBulletItem[] = [
     { label: labels.author, value: data.author || '-' },
     { label: labels.study, value: data.studyTitle || '-', wrap: true },
@@ -146,9 +141,7 @@ export function drawCartoucheSection(
     { label: labels.chargeName, value: data.chargeName || '-' },
     { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
   ];
-  y = drawBulletList(doc, items, y, leftX, wrapWidth);
-
-  return drawSeparator(doc, y);
+  return drawTitledBulletSection(doc, labels.cartoucheTitle, items, startY);
 }
 
 /** Draws the section state section (page 1, portrait): max parameter + max stress rate. */
