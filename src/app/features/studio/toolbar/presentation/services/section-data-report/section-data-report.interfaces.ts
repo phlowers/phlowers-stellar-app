@@ -127,9 +127,3 @@ export interface CantonReportLabels extends BaseReportLabels {
   minTemperature: string;
   maxFrostWidth: string;
 }
-
-/** A single bullet item (label + value) drawn on page 1. */
-export interface CantonBullet {
-  label: string;
-  value: string;
-}

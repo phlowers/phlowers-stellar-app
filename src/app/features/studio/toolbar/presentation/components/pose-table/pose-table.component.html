@@ -78,14 +78,14 @@
         <tr>
           <th scope="row">{{ 'studio.pose-table.pose-parameter-label' | transloco }}</th>
           @for (param of res.poseParams; track $index) {
-            <td>{{ param | number: '1.0-2' }} m</td>
+            <td>{{ param | number: '1.1-1' }} m</td>
           }
         </tr>
 
         <tr>
-          <th scope="row">{{ 'studio.pose-table.horizontal-tension-th-label' | transloco }}</th>
+          <th scope="row">{{ 'studio.pose-table.horizontal-tension-t0-label' | transloco }}</th>
           @for (tension of res.horizontalTensions; track $index) {
-            <td>{{ tension | number: '1.0-2' }} daN</td>
+            <td>{{ tension | number: '1.1-1' }} daN</td>
           }
         </tr>
       </tbody>
@@ -118,7 +118,7 @@
     type="button"
     data-testid="report-btn"
     [disabled]="!results() || form.invalid || isBusy()"
-    [btnLoading]="isBusy()"
+    (click)="onGenerateReport()"
   >
     <app-icon icon="description" aria-hidden="true" />
     <ng-container>{{ 'common.report' | transloco }}</ng-container>

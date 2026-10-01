@@ -27,6 +27,8 @@ import { MessageModule } from 'primeng/message';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
+import { PoseTableReportService } from '@features/studio/toolbar/presentation/services/pose-table-report/pose-table-report.service';
+import { getReportDateLocale } from '@features/studio/toolbar/presentation/services/pose-table-report/pose-table-report.helpers';
 
 @Component({
   selector: 'app-pose-table',
@@ -75,6 +77,7 @@ export class PoseTableComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly poseTableReportService = inject(PoseTableReportService);
 
   readonly isPlotReady = computed(() => this.plotService.litData() !== null);
 
@@ -222,6 +225,34 @@ export class PoseTableComponent {
     } catch {
       this.notificationService.error(this.translocoService.translate('studio.pose-table.failed-to-save-pose-table'));
     }
+  }
+
+  /** Builds the pose table report data from the current results and triggers PDF generation. */
+  async onGenerateReport(): Promise<void> {
+    const results = this.results();
+    if (!results) return;
+
+    const study = this.plotService.study();
+    const section = this.spanService.section();
+    const charge = section?.charges.find((c) => c.uuid === section.selected_charge_uuid);
+
+    await this.poseTableReportService.generateReport({
+      date: new Date().toLocaleDateString(getReportDateLocale(this.translocoService.getActiveLang())),
+      author: study?.author_email ?? '-',
+      studyTitle: study?.title ?? '-',
+      studyDescription: study?.description ?? '',
+      cantonName: section?.name ?? '-',
+      cantonComment: section?.comment ?? '',
+      icName: this.selectedInitialCondition()?.name ?? '-',
+      chargeName: charge?.name ?? '-',
+      chargeDescription: charge?.description ?? '',
+      baseParameter: this.baseParam(),
+      baseTemperature: this.baseTemp(),
+      equivalentSpan: this.equivalentSpan(),
+      lowestTemp: this.form.controls.lowestTemp.value,
+      computingStep: this.form.controls.computingStep.value,
+      results
+    });
   }
 
   getLowestTempError(): string {

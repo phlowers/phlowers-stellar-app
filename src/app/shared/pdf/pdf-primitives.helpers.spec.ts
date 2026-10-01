@@ -20,6 +20,9 @@ import {
   drawPageFooters,
   drawSectionTitle,
   drawSeparator,
+  drawTitledBulletSection,
+  drawTwoColumnBulletSection,
+  drawTwoColumnBullets,
   drawWrappingBulletItem,
   formatValue,
   generatePdfReport,
@@ -79,6 +82,10 @@ describe('pdf-primitives helpers', () => {
 
     it('should format zero correctly', () => {
       expect(formatValue(0, '°')).toBe('0.000 °');
+    });
+
+    it('should omit the unit and its separator when the unit is empty', () => {
+      expect(formatValue(1234.56, '', 1)).toBe('1234.6');
     });
   });
 
@@ -322,6 +329,72 @@ describe('pdf-primitives helpers', () => {
 
       expect(doc.line).toHaveBeenCalledWith(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + 267, lineY);
       expect(nextY).toBe(40 + SEPARATOR_HEIGHT);
+    });
+  });
+
+  describe('drawTitledBulletSection', () => {
+    it('should draw the title, the bullet items, and a separator, returning the advanced Y', () => {
+      const doc = createMockDoc();
+      const nextY = drawTitledBulletSection(
+        doc,
+        'My section',
+        [
+          { label: 'A', value: '1' },
+          { label: 'B', value: '2' }
+        ],
+        40
+      );
+
+      expect(doc.text).toHaveBeenCalledWith('My section', PAGE_MARGIN.left, 40);
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + 2 * LINE_HEIGHT + SEPARATOR_HEIGHT);
+    });
+
+    it('should return the section title Y plus separator height for an empty list', () => {
+      const doc = createMockDoc();
+      const nextY = drawTitledBulletSection(doc, 'Empty', [], 40);
+
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + SEPARATOR_HEIGHT);
+    });
+  });
+
+  describe('drawTwoColumnBullets', () => {
+    it('should advance each column independently and return the Y below the taller column', () => {
+      const doc = createMockDoc();
+      const nextY = drawTwoColumnBullets(
+        doc,
+        [{ label: 'L1', value: '1' }],
+        [
+          { label: 'R1', value: '1' },
+          { label: 'R2', value: '2' }
+        ],
+        40
+      );
+
+      expect(nextY).toBe(40 + 2 * LINE_HEIGHT);
+    });
+
+    it('should skip drawing an item whose label is empty', () => {
+      const doc = createMockDoc();
+      drawTwoColumnBullets(doc, [{ label: '', value: 'hidden' }], [], 40);
+
+      const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      expect(calls.some((call) => call[0] === 'hidden')).toBe(false);
+    });
+  });
+
+  describe('drawTwoColumnBulletSection', () => {
+    it('should draw the title, both columns, and a separator, returning the advanced Y', () => {
+      const doc = createMockDoc();
+      const nextY = drawTwoColumnBulletSection(
+        doc,
+        'Two columns',
+        [{ label: 'L1', value: '1' }],
+        [{ label: 'R1', value: '1' }],
+        40
+      );
+
+      expect(doc.text).toHaveBeenCalledWith('Two columns', PAGE_MARGIN.left, 40);
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + LINE_HEIGHT + SEPARATOR_HEIGHT);
     });
   });
 

@@ -21,6 +21,7 @@ import {
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE,
+  PARAGRAPH_INDENT,
   SECTION_TITLE_HEIGHT,
   SEPARATOR_MARGIN_Y
 } from '@shared/pdf/pdf-layout.constantes';
@@ -74,12 +75,13 @@ export function registerNunitoFont(doc: jsPDF, regularB64: string, boldB64: stri
   doc.addFont('Nunito-Italic.ttf', 'Nunito', 'italic');
 }
 
-/** Formats a numeric value to fixed decimals with unit, or returns "-" if null/undefined. */
+/** Formats a numeric value to fixed decimals with unit (omitted when empty), or returns "-" if null/undefined. */
 export function formatValue(value: number | null | undefined, unit: string, decimals: number = DECIMAL_PLACES): string {
   if (value === null || value === undefined) {
     return '-';
   }
-  return `${value.toFixed(decimals)} ${unit}`;
+  const formatted = value.toFixed(decimals);
+  return unit ? `${formatted} ${unit}` : formatted;
 }
 
 /** Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true). */
@@ -216,6 +218,65 @@ export function drawSeparator(doc: jsPDF, y: number, width: number = CONTENT_WID
   doc.setLineWidth(LINE_WIDTH_THIN);
   doc.line(PAGE_MARGIN.left, lineY, PAGE_MARGIN.left + width, lineY);
   return lineY + SEPARATOR_MARGIN_Y;
+}
+
+/**
+ * Draws a titled single-column bullet section (title + wrapped bullet list + separator).
+ * Shared by every report whose page 1 renders one metadata block in a single column.
+ * Returns the next Y position (below the separator).
+ */
+export function drawTitledBulletSection(doc: jsPDF, title: string, items: PdfBulletItem[], startY: number): number {
+  const y = drawSectionTitle(doc, title, startY);
+  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
+  const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
+  return drawSeparator(doc, drawBulletList(doc, items, y, leftX, wrapWidth));
+}
+
+/**
+ * Draws two columns of bullet items side by side, each column advancing independently.
+ * Returns the Y position below the taller column.
+ */
+export function drawTwoColumnBullets(
+  doc: jsPDF,
+  left: PdfBulletItem[],
+  right: PdfBulletItem[],
+  startY: number
+): number {
+  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
+  const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
+
+  let leftY = startY;
+  left.forEach((item) => {
+    if (item.label) {
+      drawBulletItem(doc, item.label, item.value, leftX, leftY);
+    }
+    leftY += LINE_HEIGHT;
+  });
+
+  let rightY = startY;
+  right.forEach((item) => {
+    if (item.label) {
+      drawBulletItem(doc, item.label, item.value, rightX, rightY);
+    }
+    rightY += LINE_HEIGHT;
+  });
+
+  return Math.max(leftY, rightY);
+}
+
+/**
+ * Draws a titled two-column bullet section (title + two independent bullet columns + separator).
+ * Returns the next Y position (below the separator).
+ */
+export function drawTwoColumnBulletSection(
+  doc: jsPDF,
+  title: string,
+  left: PdfBulletItem[],
+  right: PdfBulletItem[],
+  startY: number
+): number {
+  const y = drawSectionTitle(doc, title, startY);
+  return drawSeparator(doc, drawTwoColumnBullets(doc, left, right, y));
 }
 
 /** Sanitizes a filename fragment by replacing characters that are illegal on common filesystems. */
