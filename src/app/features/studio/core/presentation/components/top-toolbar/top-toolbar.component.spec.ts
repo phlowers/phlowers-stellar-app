@@ -224,11 +224,11 @@ describe('StudioTopToolbarComponent', () => {
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('l0-sum');
     });
 
-    it('should execute tablesDropdown command for Pose table', () => {
+    it('should execute tablesDropdown command for Hanging table', () => {
       const tables = component.tablesDropdown();
 
       tables[2].command?.({});
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('pose-table');
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('hanging-table');
     });
 
     it('should execute tablesDropdown command for Obstacles table', () => {

@@ -8,18 +8,18 @@
 import { PoseResults } from '@shared/domain/models/section.model';
 import { BaseReportLabels } from '@shared/pdf/pdf-report.interfaces';
 
-/** One column of the pose table result tables (one per computed temperature). */
-export interface PoseTableResultRow {
+/** One column of the hanging table result tables (one per computed temperature). */
+export interface HangingTableResultRow {
   /** Formatted temperature (e.g. "-10 °C"), used as the column identifier. */
   temperature: string;
-  /** Pose parameter (m). */
-  poseParam: number | null;
+  /** Hanging parameter (m). */
+  hangingParam: number | null;
   /** Horizontal tension T0 (daN). */
   horizontalTension: number | null;
 }
 
-/** Data required to generate the pose table PDF report. */
-export interface PoseTableReportData {
+/** Data required to generate the hanging table PDF report. */
+export interface HangingTableReportData {
   /** Report generation date (localized string, used for header and filename). */
   date: string;
 
@@ -40,18 +40,18 @@ export interface PoseTableReportData {
   lowestTemp: number;
   computingStep: number;
 
-  /** Computed pose table results, in the order returned by the engine. */
+  /** Computed hanging table results, in the order returned by the engine. */
   results: PoseResults;
 }
 
-/** Translated pose table report labels, resolved at report-generation time via TranslocoService. */
-export interface PoseTableReportLabels extends BaseReportLabels {
+/** Translated hanging table report labels, resolved at report-generation time via TranslocoService. */
+export interface HangingTableReportLabels extends BaseReportLabels {
   cartoucheTitle: string;
   canton: string;
   cantonComment: string;
   initialCondition: string;
 
-  poseCalculationTitle: string;
+  hangingCalculationTitle: string;
   baseParameter: string;
   baseTemperature: string;
   equivalentSpan: string;

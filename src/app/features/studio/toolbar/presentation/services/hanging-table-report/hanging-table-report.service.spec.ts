@@ -12,16 +12,16 @@ import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 
-import { PoseTableReportService } from './pose-table-report.service';
-import { POSE_TABLE_METRICS } from './pose-table-report.constantes';
-import { PoseTableReportData } from './pose-table-report.interfaces';
+import { HangingTableReportService } from './hanging-table-report.service';
+import { HANGING_TABLE_METRICS } from './hanging-table-report.constantes';
+import { HangingTableReportData } from './hanging-table-report.interfaces';
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
-  'studio.pose-table-report.title': 'Rapport Tableau de pose',
-  'studio.pose-table-report.page-label': 'Page',
-  'studio.pose-table-report.results-title': 'Résultats',
-  'studio.pose-table-report.report-generated-success': 'Report generated successfully',
-  'studio.pose-table-report.report-generation-failed': 'Failed to generate report'
+  'studio.hanging-table-report.title': 'Rapport Tableau de pose',
+  'studio.hanging-table-report.page-label': 'Page',
+  'studio.hanging-table-report.results-title': 'Résultats',
+  'studio.hanging-table-report.report-generated-success': 'Report generated successfully',
+  'studio.hanging-table-report.report-generation-failed': 'Failed to generate report'
 };
 
 vi.mock('jspdf', () => {
@@ -56,7 +56,7 @@ async function getMockDoc(): Promise<MockDoc> {
   return __mockDoc;
 }
 
-function createData(overrides: Partial<PoseTableReportData> = {}): PoseTableReportData {
+function createData(overrides: Partial<HangingTableReportData> = {}): HangingTableReportData {
   return {
     date: '2026-09-30',
     author: 'author@example.test',
@@ -81,8 +81,8 @@ function createData(overrides: Partial<PoseTableReportData> = {}): PoseTableRepo
   };
 }
 
-describe('PoseTableReportService', () => {
-  let service: PoseTableReportService;
+describe('HangingTableReportService', () => {
+  let service: HangingTableReportService;
   let mockLogger: { error: ReturnType<typeof vi.fn>; log: ReturnType<typeof vi.fn> };
   let mockNotificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let mockTranslocoService: { translate: ReturnType<typeof vi.fn> };
@@ -94,14 +94,14 @@ describe('PoseTableReportService', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        PoseTableReportService,
+        HangingTableReportService,
         { provide: LoggerService, useValue: mockLogger },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: TranslocoService, useValue: mockTranslocoService }
       ]
     });
 
-    service = TestBed.inject(PoseTableReportService);
+    service = TestBed.inject(HangingTableReportService);
 
     const doc = await getMockDoc();
     doc.addPage.mockClear();
@@ -120,7 +120,7 @@ describe('PoseTableReportService', () => {
     await service.generateReport(createData());
 
     expect(mockNotificationService.success).toHaveBeenCalledWith('Report generated successfully');
-    expect(mockTranslocoService.translate).toHaveBeenCalledWith('studio.pose-table-report.title');
+    expect(mockTranslocoService.translate).toHaveBeenCalledWith('studio.hanging-table-report.title');
   });
 
   it('should name the file with report title, canton, initial condition and sanitized date', async () => {
@@ -137,7 +137,7 @@ describe('PoseTableReportService', () => {
     const texts = doc.text.mock.calls.map((call) => call[0]);
     expect(doc.addPage).not.toHaveBeenCalled();
     expect(texts).toContain('Résultats');
-    POSE_TABLE_METRICS.forEach((metric) => expect(texts).toContain(metric.labelKey));
+    HANGING_TABLE_METRICS.forEach((metric) => expect(texts).toContain(metric.labelKey));
     expect(texts).toContain('-10 °C');
     expect(texts).toContain('1200.1');
     expect(texts).toContain('2100.5');

@@ -26,11 +26,11 @@ import { MessageModule } from 'primeng/message';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
-import { PoseTableReportService } from '@features/studio/toolbar/presentation/services/pose-table-report/pose-table-report.service';
-import { getReportDateLocale } from '@features/studio/toolbar/presentation/services/pose-table-report/pose-table-report.helpers';
+import { HangingTableReportService } from '@features/studio/toolbar/presentation/services/hanging-table-report/hanging-table-report.service';
+import { getReportDateLocale } from '@features/studio/toolbar/presentation/services/hanging-table-report/hanging-table-report.helpers';
 
 @Component({
-  selector: 'app-pose-table',
+  selector: 'app-hanging-table',
   imports: [
     IconComponent,
     ButtonComponent,
@@ -40,12 +40,12 @@ import { getReportDateLocale } from '@features/studio/toolbar/presentation/servi
     MessageModule,
     TranslocoModule
   ],
-  templateUrl: './pose-table.component.html',
-  styleUrl: './pose-table.component.scss',
+  templateUrl: './hanging-table.component.html',
+  styleUrl: './hanging-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PoseTableComponent {
-  poseTableError = signal<boolean>(false);
+export class HangingTableComponent {
+  hangingTableError = signal<boolean>(false);
 
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
   readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
@@ -68,7 +68,7 @@ export class PoseTableComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly translocoService = inject(TranslocoService);
-  private readonly poseTableReportService = inject(PoseTableReportService);
+  private readonly hangingTableReportService = inject(HangingTableReportService);
 
   readonly isPlotReady = computed(() => this.plotService.litData() !== null);
 
@@ -126,7 +126,7 @@ export class PoseTableComponent {
         });
       } else {
         this.results.set(null);
-        this.poseTableError.set(false);
+        this.hangingTableError.set(false);
       }
     } else {
       this.form.setValue({
@@ -159,7 +159,7 @@ export class PoseTableComponent {
         if (error || result === null) {
           this.equivalentSpan.set(null);
           this.notificationService.error(
-            this.translocoService.translate('studio.pose-table.failed-to-compute-equivalent-span')
+            this.translocoService.translate('studio.hanging-table.failed-to-compute-equivalent-span')
           );
         } else {
           this.equivalentSpan.set(result.equivalentSpan);
@@ -168,7 +168,7 @@ export class PoseTableComponent {
         if (runId !== this.equivalentSpanRunId) return;
         this.equivalentSpan.set(null);
         this.notificationService.error(
-          this.translocoService.translate('studio.pose-table.failed-to-compute-equivalent-span')
+          this.translocoService.translate('studio.hanging-table.failed-to-compute-equivalent-span')
         );
       } finally {
         if (runId === this.equivalentSpanRunId) {
@@ -180,7 +180,7 @@ export class PoseTableComponent {
 
   async calculate(): Promise<void> {
     if (this.form.invalid) return;
-    this.poseTableError.set(false);
+    this.hangingTableError.set(false);
     this.isCalculating.set(true);
     try {
       const { result, error } = await this.workerPythonService.runTask(Task.getPoseTable, {
@@ -189,13 +189,15 @@ export class PoseTableComponent {
         numberValues: this.TABLE_NUMBER_VALUES
       });
       if (error) {
-        this.poseTableError.set(true);
+        this.hangingTableError.set(true);
       }
       this.results.set(result);
     } catch {
-      this.poseTableError.set(true);
+      this.hangingTableError.set(true);
       this.results.set(null);
-      this.notificationService.error(this.translocoService.translate('studio.pose-table.failed-to-compute-pose-table'));
+      this.notificationService.error(
+        this.translocoService.translate('studio.hanging-table.failed-to-compute-hanging-table')
+      );
     } finally {
       this.isCalculating.set(false);
     }
@@ -212,13 +214,15 @@ export class PoseTableComponent {
     };
     try {
       await this.sectionService.createOrUpdateSection(study, { ...section, pose_table: data });
-      this.notificationService.success(this.translocoService.translate('studio.pose-table.pose-table-saved'));
+      this.notificationService.success(this.translocoService.translate('studio.hanging-table.hanging-table-saved'));
     } catch {
-      this.notificationService.error(this.translocoService.translate('studio.pose-table.failed-to-save-pose-table'));
+      this.notificationService.error(
+        this.translocoService.translate('studio.hanging-table.failed-to-save-hanging-table')
+      );
     }
   }
 
-  /** Builds the pose table report data from the current results and triggers PDF generation. */
+  /** Builds the hanging table report data from the current results and triggers PDF generation. */
   async onGenerateReport(): Promise<void> {
     const results = this.results();
     if (!results) return;
@@ -227,7 +231,7 @@ export class PoseTableComponent {
     const section = this.spanService.section();
     const charge = section?.charges.find((c) => c.uuid === section.selected_charge_uuid);
 
-    await this.poseTableReportService.generateReport({
+    await this.hangingTableReportService.generateReport({
       date: new Date().toLocaleDateString(getReportDateLocale(this.translocoService.getActiveLang())),
       author: study?.author_email ?? '-',
       studyTitle: study?.title ?? '-',

@@ -6,8 +6,8 @@
  */
 
 // ─── PDF LAYOUT OVERVIEW ─────────────────────────────────────────────────────
-//  Single A4 portrait page: header, study & canton cartouche, pose calculation context (2 columns),
-//  then the pose results as one transposed table row set (@shared/pdf/pdf-table.helpers)
+//  Single A4 portrait page: header, study & canton cartouche, hanging calculation context (2 columns),
+//  then the hanging results as one transposed table row set (@shared/pdf/pdf-table.helpers)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type jsPDF from 'jspdf';
@@ -22,18 +22,22 @@ import {
 } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
-import { PoseTableReportData, PoseTableReportLabels, PoseTableResultRow } from './pose-table-report.interfaces';
+import {
+  HangingTableReportData,
+  HangingTableReportLabels,
+  HangingTableResultRow
+} from './hanging-table-report.interfaces';
 
-/** Formats a temperature as entered/computed, without rounding (mirrors the pose table UI). */
+/** Formats a temperature as entered/computed, without rounding (mirrors the hanging table UI). */
 export function formatTemperature(value: number): string {
   return `${value} ${PDF_UNITS.celsius}`;
 }
 
-/** Builds one result row per computed temperature, pairing it with its pose parameter and tension. */
-export function buildPoseTableRows(results: PoseResults): PoseTableResultRow[] {
+/** Builds one result row per computed temperature, pairing it with its hanging parameter and tension. */
+export function buildHangingTableRows(results: PoseResults): HangingTableResultRow[] {
   return results.temperatures.map((temperature, index) => ({
     temperature: formatTemperature(temperature),
-    poseParam: results.poseParams[index] ?? null,
+    hangingParam: results.poseParams[index] ?? null,
     horizontalTension: results.horizontalTensions[index] ?? null
   }));
 }
@@ -46,8 +50,8 @@ export function getReportDateLocale(activeLang: string): string {
 /** Draws the study & canton metadata section (page 1, portrait, 1 column). Returns the next Y. */
 export function drawStudyAndCantonSection(
   doc: jsPDF,
-  data: PoseTableReportData,
-  labels: PoseTableReportLabels,
+  data: HangingTableReportData,
+  labels: HangingTableReportLabels,
   startY: number
 ): number {
   const items: PdfBulletItem[] = [
@@ -63,11 +67,11 @@ export function drawStudyAndCantonSection(
   return drawTitledBulletSection(doc, labels.cartoucheTitle, items, startY);
 }
 
-/** Draws the pose calculation context section (page 1, portrait, 2 columns). Returns the next Y. */
-export function drawPoseCalculationSection(
+/** Draws the hanging calculation context section (page 1, portrait, 2 columns). Returns the next Y. */
+export function drawHangingCalculationSection(
   doc: jsPDF,
-  data: PoseTableReportData,
-  labels: PoseTableReportLabels,
+  data: HangingTableReportData,
+  labels: HangingTableReportLabels,
   startY: number
 ): number {
   const left: PdfBulletItem[] = [
@@ -79,12 +83,16 @@ export function drawPoseCalculationSection(
     { label: labels.lowestTemperature, value: formatTemperature(data.lowestTemp) },
     { label: labels.computingStep, value: formatTemperature(data.computingStep) }
   ];
-  return drawTwoColumnBulletSection(doc, labels.poseCalculationTitle, left, right, startY);
+  return drawTwoColumnBulletSection(doc, labels.hangingCalculationTitle, left, right, startY);
 }
 
 /** Draws the report's context sections (portrait). Returns the Y where the results can start. */
-export function drawPoseTableReportPage1(doc: jsPDF, data: PoseTableReportData, labels: PoseTableReportLabels): number {
+export function drawHangingTableReportPage1(
+  doc: jsPDF,
+  data: HangingTableReportData,
+  labels: HangingTableReportLabels
+): number {
   let y = drawHeader(doc, data.date || '-', labels.reportTitle);
   y = drawStudyAndCantonSection(doc, data, labels, y);
-  return drawPoseCalculationSection(doc, data, labels, y);
+  return drawHangingCalculationSection(doc, data, labels, y);
 }

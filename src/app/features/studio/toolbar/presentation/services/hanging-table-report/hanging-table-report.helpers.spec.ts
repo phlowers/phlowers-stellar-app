@@ -9,14 +9,14 @@ import { vi } from 'vitest';
 import type jsPDF from 'jspdf';
 
 import {
-  buildPoseTableRows,
-  drawPoseCalculationSection,
-  drawPoseTableReportPage1,
+  buildHangingTableRows,
+  drawHangingCalculationSection,
+  drawHangingTableReportPage1,
   drawStudyAndCantonSection,
   formatTemperature,
   getReportDateLocale
-} from './pose-table-report.helpers';
-import { PoseTableReportData, PoseTableReportLabels } from './pose-table-report.interfaces';
+} from './hanging-table-report.helpers';
+import { HangingTableReportData, HangingTableReportLabels } from './hanging-table-report.interfaces';
 
 function createMockDoc() {
   return {
@@ -38,8 +38,8 @@ function textCalls(doc: ReturnType<typeof createMockDoc>): string[] {
   });
 }
 
-const LABELS: PoseTableReportLabels = {
-  reportTitle: 'Pose report',
+const LABELS: HangingTableReportLabels = {
+  reportTitle: 'Hanging report',
   pageLabel: 'Page',
   cartoucheTitle: 'Study and canton',
   author: 'Author',
@@ -50,7 +50,7 @@ const LABELS: PoseTableReportLabels = {
   initialCondition: 'IC',
   chargeName: 'Load case',
   chargeDescription: 'Description',
-  poseCalculationTitle: 'Pose calculation',
+  hangingCalculationTitle: 'Hanging calculation',
   baseParameter: 'Base parameter',
   baseTemperature: 'Base temperature',
   equivalentSpan: 'Equivalent span',
@@ -59,7 +59,7 @@ const LABELS: PoseTableReportLabels = {
   resultsTitle: 'Results'
 };
 
-function createData(overrides: Partial<PoseTableReportData> = {}): PoseTableReportData {
+function createData(overrides: Partial<HangingTableReportData> = {}): HangingTableReportData {
   return {
     date: '30/09/2026',
     author: 'author@example.test',
@@ -80,7 +80,7 @@ function createData(overrides: Partial<PoseTableReportData> = {}): PoseTableRepo
   };
 }
 
-describe('pose-table-report.helpers', () => {
+describe('hanging-table-report.helpers', () => {
   describe('formatTemperature', () => {
     it('keeps the raw value without rounding', () => {
       expect(formatTemperature(-10.25)).toBe('-10.25 °C');
@@ -95,22 +95,22 @@ describe('pose-table-report.helpers', () => {
     });
   });
 
-  describe('buildPoseTableRows', () => {
-    it('pairs each temperature with its pose parameter and tension, preserving order', () => {
-      const rows = buildPoseTableRows(createData().results);
+  describe('buildHangingTableRows', () => {
+    it('pairs each temperature with its hanging parameter and tension, preserving order', () => {
+      const rows = buildHangingTableRows(createData().results);
       expect(rows).toEqual([
-        { temperature: '-10 °C', poseParam: 1200, horizontalTension: 2000 },
-        { temperature: '-5 °C', poseParam: 1300, horizontalTension: 2100 }
+        { temperature: '-10 °C', hangingParam: 1200, horizontalTension: 2000 },
+        { temperature: '-5 °C', hangingParam: 1300, horizontalTension: 2100 }
       ]);
     });
 
     it('falls back to null when a value is missing for a temperature', () => {
-      const rows = buildPoseTableRows({ temperatures: [0], poseParams: [], horizontalTensions: [] });
-      expect(rows).toEqual([{ temperature: '0 °C', poseParam: null, horizontalTension: null }]);
+      const rows = buildHangingTableRows({ temperatures: [0], poseParams: [], horizontalTensions: [] });
+      expect(rows).toEqual([{ temperature: '0 °C', hangingParam: null, horizontalTension: null }]);
     });
 
     it('returns no rows for empty results', () => {
-      expect(buildPoseTableRows({ temperatures: [], poseParams: [], horizontalTensions: [] })).toEqual([]);
+      expect(buildHangingTableRows({ temperatures: [], poseParams: [], horizontalTensions: [] })).toEqual([]);
     });
   });
 
@@ -151,13 +151,13 @@ describe('pose-table-report.helpers', () => {
     });
   });
 
-  describe('drawPoseCalculationSection', () => {
+  describe('drawHangingCalculationSection', () => {
     it('formats values with their units and precisions', () => {
       const doc = createMockDoc();
-      drawPoseCalculationSection(doc as unknown as jsPDF, createData(), LABELS, 20);
+      drawHangingCalculationSection(doc as unknown as jsPDF, createData(), LABELS, 20);
       const texts = textCalls(doc);
 
-      expect(texts).toContain('Pose calculation');
+      expect(texts).toContain('Hanging calculation');
       expect(texts).toContain('1500.46 m');
       expect(texts).toContain('15.3 °C');
       expect(texts).toContain('312.3 m');
@@ -167,7 +167,7 @@ describe('pose-table-report.helpers', () => {
 
     it('renders "-" for missing base values and equivalent span', () => {
       const doc = createMockDoc();
-      drawPoseCalculationSection(
+      drawHangingCalculationSection(
         doc as unknown as jsPDF,
         createData({ baseParameter: null, baseTemperature: null, equivalentSpan: null }),
         LABELS,
@@ -177,16 +177,16 @@ describe('pose-table-report.helpers', () => {
     });
   });
 
-  describe('drawPoseTableReportPage1', () => {
+  describe('drawHangingTableReportPage1', () => {
     it('draws the header title, date and both section titles, and returns the next Y', () => {
       const doc = createMockDoc();
-      const y = drawPoseTableReportPage1(doc as unknown as jsPDF, createData(), LABELS);
+      const y = drawHangingTableReportPage1(doc as unknown as jsPDF, createData(), LABELS);
       const texts = textCalls(doc);
 
-      expect(texts).toContain('Pose report');
+      expect(texts).toContain('Hanging report');
       expect(texts).toContain('30/09/2026');
       expect(texts).toContain('Study and canton');
-      expect(texts).toContain('Pose calculation');
+      expect(texts).toContain('Hanging calculation');
       expect(y).toBeGreaterThan(0);
     });
   });
