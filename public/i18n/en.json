@@ -1252,6 +1252,22 @@
       "max-two-decimals-error": "Maximum 2 decimal places",
       "integer-error": "Value must be a whole number"
     },
+    "cable-adjustment": {
+      "span-length-label": "Span length",
+      "left-horizontal-angle-label": "HL horizontal angle at left support",
+      "right-horizontal-angle-label": "HR horizontal angle at right support",
+      "left-vertical-angle-label": "VL vertical angle at left support",
+      "right-vertical-angle-label": "VR vertical angle at right support",
+      "support-label": "Support",
+      "tacheometer-horizontal-distance-label": "Tacheometer horizontal distance",
+      "adjustment-parameter-label": "Adjustment parameter",
+      "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
+      "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",
+      "vertical-sight-angle-label": "V vertical sighting angle at mid-span sag",
+      "grade-unit": "gr",
+      "aria-help": "Cable adjustment help",
+      "calculation-failed": "Failed to calculate the cable adjustment"
+    },
     "rrts-cut-strands": {
       "layers-detail": "Layers detail",
       "cable-name-label": "Cable name",
