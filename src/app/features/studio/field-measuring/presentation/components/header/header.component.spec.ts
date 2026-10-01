@@ -747,6 +747,16 @@ describe('HeaderComponent', () => {
       expect(notificationServiceMock.info).not.toHaveBeenCalled();
     });
 
+    it('should prefer the stored support index over a matching display label', async () => {
+      await setup(localizedSection, { span: [0, 1], leftSupport: '1' });
+
+      expect(localizationCalls()).toEqual([
+        { field: 'longitude', value: 2.2 },
+        { field: 'latitude', value: 20.2 },
+        { field: 'azimuth', value: 30 }
+      ]);
+    });
+
     it('should fill localization from the selected reference support', async () => {
       await setup(localizedSection, { span: [0, 1], leftSupport: '2' });
 

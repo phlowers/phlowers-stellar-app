@@ -110,7 +110,9 @@ export class ParameterCalculation15WithoutWindComponent {
         isNumber(manualData?.cableTemperatureCalibration) &&
         isNumber(manualData?.parameterPapoto) &&
         isNumber(manualData?.parameterUncertaintyPapoto) &&
-        isNumber(manualData?.cableTemperatureCalibrationUncertainty)
+        manualData.parameterUncertaintyPapoto >= 0 &&
+        isNumber(manualData?.cableTemperatureCalibrationUncertainty) &&
+        manualData.cableTemperatureCalibrationUncertainty >= 0
       );
     }
     return (

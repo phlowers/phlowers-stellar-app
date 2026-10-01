@@ -60,6 +60,7 @@
         <input
           id="parameterUncertaintyPapoto-input"
           type="number"
+          min="0"
           pInputText
           [ngModel]="measureData().manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ?? null"
           (ngModelChange)="updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', $event)"
@@ -96,6 +97,7 @@
         <input
           id="cableTemperatureUncertainty-input"
           type="number"
+          min="0"
           pInputText
           [ngModel]="
             measureData().manualParameterCalculation15CWithoutWind?.cableTemperatureCalibrationUncertainty ?? null
@@ -105,6 +107,7 @@
           "
           aria-describedby="mandatory-parameter-15c"
           [required]="true"
+          data-testid="cable-temperature-uncertainty-input"
         />
         <p-inputgroup-addon>°C</p-inputgroup-addon>
       </p-inputgroup>

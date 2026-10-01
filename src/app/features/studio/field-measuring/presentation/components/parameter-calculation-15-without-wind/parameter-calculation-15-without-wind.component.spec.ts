@@ -341,6 +341,65 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(component.isFormValid()).toBe(true);
   });
 
+  describe('negative uncertainty rejection', () => {
+    const fillValidManualForm = () => {
+      component.updateMeasureData('updateMode15C', 'manual');
+      component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+    };
+
+    it('should invalidate the form when parameterUncertaintyPapoto is negative', () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -1);
+
+      expect(component.isFormValid()).toBe(false);
+    });
+
+    it('should invalidate the form when cableTemperatureCalibrationUncertainty is negative', () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', -0.5);
+
+      expect(component.isFormValid()).toBe(false);
+    });
+
+    it('should not run the calculation and flag an error when an uncertainty is negative', async () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -12);
+
+      await component.calculateParameter15C();
+
+      expect(workerPythonServiceMock.runTask).not.toHaveBeenCalledWith(
+        Task.calculateParameter15CWithoutWind,
+        expect.anything()
+      );
+      expect(component.parameter15CError()).toBe(true);
+      expect(component.measureData().outputs.parameter15C).toBeNull();
+    });
+
+    it('should disable the calculate button when an uncertainty is negative', () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -12);
+      fixture.detectChanges();
+
+      const btn = fixture.nativeElement.querySelector(
+        '[data-testid="calculate-parameter-btn"]'
+      ) as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should set min="0" on both uncertainty inputs', () => {
+      component.updateMeasureData('updateMode15C', 'manual');
+      fixture.detectChanges();
+
+      const query = (testId: string) =>
+        fixture.nativeElement.querySelector(`[data-testid="${testId}"]`) as HTMLInputElement;
+      expect(query('parameter-uncertainty-papoto-input').getAttribute('min')).toBe('0');
+      expect(query('cable-temperature-uncertainty-input').getAttribute('min')).toBe('0');
+    });
+  });
+
   it('should validate form correctly for auto mode', () => {
     component.measureData.update((d) => ({
       ...d,

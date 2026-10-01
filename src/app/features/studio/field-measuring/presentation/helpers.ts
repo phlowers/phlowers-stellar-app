@@ -139,7 +139,7 @@ export const buildSectionLocalizationPayload = (
  * @param localization - The computed section localization (one entry per support)
  * @param section - The current section, used to resolve support labels
  * @param span - The `[leftIndex, rightIndex]` support indices of the span (or `null`)
- * @param referenceSupport - The reference support label, as selected in the PAPOTO form (or `null`)
+ * @param referenceSupport - The stored support index, or a legacy support label (or `null`)
  * @returns The support localization, or `null` when it is not available
  */
 export const getSpanLocalization = (
@@ -152,7 +152,10 @@ export const getSpanLocalization = (
     return null;
   }
   const supports = section?.supports ?? [];
-  const referenceIndex = span.find((index) => formatSupportLabel(supports, index) === referenceSupport) ?? span[0];
+  const referenceIndex =
+    span.find((index) => String(index) === referenceSupport) ??
+    span.find((index) => formatSupportLabel(supports, index) === referenceSupport) ??
+    span[0];
   const longitude = localization.longitude[referenceIndex];
   const latitude = localization.latitude[referenceIndex];
   const azimuth = localization.azimuth[referenceIndex];
