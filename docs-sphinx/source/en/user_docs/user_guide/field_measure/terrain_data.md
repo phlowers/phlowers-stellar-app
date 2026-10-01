@@ -2,7 +2,7 @@
 
 ## What is the Terrain Data Tab?
 
-The **Terrain Data** tab in the Field Measuring tool captures the environmental and geographic information recorded during your site visit. This data is essential to compute the electrical parameter and cable temperature under the specific conditions you observed on the day of measurement.
+The **Terrain Data** tab in the Field Measuring tool captures the environmental and geographic information recorded during your site visit. This data is essential to compute the parameter and cable temperature under the specific conditions you observed on the day of measurement.
 
 You use this tab to record:
 - When you took the measurement (date and time)
@@ -112,10 +112,6 @@ At the bottom of the dialog, three buttons control the measurement session:
 
 ```{tip}
 **Coordinate entry**: Use decimal degrees for coordinates (e.g., 45.1234 for latitude, 2.5678 for longitude). Avoid mixing degrees/minutes/seconds format.
-```
-
-```{tip}
-**Wind direction**: If you are unsure of the exact direction, pick the closest cardinal or intercardinal direction (N, NE, E, SE, S, SW, W, NW).
 ```
 
 See also: {doc}`Parameter calculation <parameter_calculation>`, {doc}`Temperature calculation <temperature_calculation>`, {doc}`Parameter at 15°C without wind <parameter_15c_without_wind>`.

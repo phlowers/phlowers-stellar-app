@@ -36,7 +36,7 @@ When in **Manual** mode, you must enter all of the following:
 
 | Field | Unit | Meaning | Example |
 |---|---|---|---|
-| **Parameter (Papoto, etc.)** | m | Measured cable sag or extension | 2500 |
+| **Parameter (Papoto, etc.)** | m | Measured cable sag or extension | 2500.1 |
 | **Uncertainty parameter** | m | Measurement uncertainty (standard deviation or similar) | 15.5 |
 | **Cable temperature** | °C | Cable temperature at the time of measurement | 18.5 |
 | **Uncertainty cable temperature** | °C | Temperature measurement uncertainty | 1.8 |

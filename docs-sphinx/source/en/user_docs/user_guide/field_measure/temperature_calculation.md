@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Temperature calculation** tab computes the cable temperature under real measured field conditions. Using ambient temperature, electrical current, wind speed and direction, and solar radiation, {{app_name}} applies thermal equilibrium equations via mechaphlowers to estimate what the conductor core temperature will be at steady state. This value is critical for assessing line capacity and safety margins in the field.
+The **Temperature calculation** tab computes the cable temperature under real measured field conditions. Using ambient temperature, electrical current, wind speed and direction, and solar radiation, {{app_name}} applies thermal equilibrium equations via mechaphlowers library to estimate what the conductor temperature will be at steady state. This value is critical for assessing the cable position on the field.
 
 All fields shown in this tab are mandatory to run the calculation, except for the **Solar beam radiation (not required)** input, which may be left empty if you choose not to measure it directly.
 

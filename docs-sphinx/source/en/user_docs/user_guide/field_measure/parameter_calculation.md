@@ -2,7 +2,7 @@
 
 ## What Is It For?
 
-The **Parameter calculation** tab allows line engineers to measure the electrical sag parameter of a cable span by taking field measurements. You record angles and distances from two or three observation points, and {{app_name}} computes the cable parameter using the PAPOTO method.
+The **Parameter calculation** tab allows line operators to measure the sag parameter of a cable span by taking field measurements. You record angles and distances from two or three observation points, and {{app_name}} computes the cable parameter using the PAPOTO method.
 
 The computed parameter is then used by the **Parameter at 15°C without wind** tab to generate an initial condition (base state) for the line simulation.
 
