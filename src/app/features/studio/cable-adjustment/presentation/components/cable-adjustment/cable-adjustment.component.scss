@@ -1,0 +1,64 @@
+@use 'abstract.extracts' as app;
+
+dt {
+  @extend %label-style;
+}
+
+dd {
+  @extend %read-only-info;
+}
+
+h2 {
+  @extend %heading-s;
+  margin-bottom: 0.75rem;
+}
+
+.cable-adjustment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 2rem;
+    row-gap: 0.75rem;
+
+    &--measure {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+  }
+
+  &__separator {
+    border-top: 1px solid var(--star-dust-300);
+    margin: 0;
+  }
+
+  &__help-btn {
+    align-self: flex-start;
+  }
+
+  &__calculate {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  // Empty until calculated: the separator comes with the results
+  &__results {
+    display: block;
+  }
+
+  &__results-content {
+    border-top: 1px solid var(--star-dust-300);
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+}

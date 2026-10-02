@@ -77,6 +77,18 @@ describe('Task handlers', () => {
       });
     });
 
+    it('should call calculate_cable_adjustment for the calculateCableAdjustment task', async () => {
+      const mockResult = { horizontalSightAngle: 100, verticalSightAngle: 100 };
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
+
+      const result = await handleTask(mockPyodide, Task.calculateCableAdjustment, undefined);
+
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('calculate_cable_adjustment');
+      expect(result.result).toEqual(mockResult);
+      expect(result.error).toBeNull();
+    });
+
     it('should handle unknown task', async () => {
       // Setup
       vi.spyOn(console, 'error').mockReturnValue(undefined);
