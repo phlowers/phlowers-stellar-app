@@ -867,7 +867,9 @@ describe('VhlAndGuyingComponent', () => {
         comment: 'Section comment',
         supports: [{ chainV: true }, { chainV: false }],
         charges: [{ uuid: 'charge-uuid-1', name: 'Charge 1', description: 'Charge desc' }],
-        selected_charge_uuid: 'charge-uuid-1'
+        selected_charge_uuid: 'charge-uuid-1',
+        initial_conditions: [{ uuid: 'ic-uuid-1', name: 'CI 1' }],
+        selected_initial_condition_uuid: 'ic-uuid-1'
       };
       Object.defineProperty(mockPlotService, 'study', {
         value: signal(mockStudyForReport),
@@ -904,6 +906,7 @@ describe('VhlAndGuyingComponent', () => {
           studyDescription: 'Study description',
           sectionName: 'Section A-B',
           sectionComment: 'Section comment',
+          initialConditionName: 'CI 1',
           chargeName: 'Charge 1',
           chargeDescription: 'Charge desc',
           altitude: 150,

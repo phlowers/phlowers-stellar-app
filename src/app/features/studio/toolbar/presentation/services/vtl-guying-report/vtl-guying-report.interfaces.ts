@@ -21,6 +21,8 @@ export interface VtlGuyingReportData {
   sectionName: string;
   /** Section (canton) comment. */
   sectionComment: string;
+  /** Selected initial condition name. */
+  initialConditionName: string;
   /** Selected charge name. */
   chargeName: string;
   /** Selected charge description. */
@@ -72,6 +74,7 @@ export interface PdfLabels extends BaseReportLabels {
   date: string;
   section: string;
   sectionComment: string;
+  initialCondition: string;
   vtlWithoutGuyingTitle: string;
   chargeV: string;
   chargeH: string;
