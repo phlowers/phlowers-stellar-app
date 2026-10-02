@@ -411,7 +411,7 @@ describe('TemperatureCalculationComponent', () => {
     });
   });
 
-  it('should calculate temperature and show results', async () => {
+  it('should calculate temperature and show results rounded to 1 decimal', async () => {
     const mockResult = {
       cableSolarFlux: 123,
       cableTemperature: 123.59,
@@ -448,10 +448,10 @@ describe('TemperatureCalculationComponent', () => {
     const uncertaintyText = fixture.nativeElement.querySelector(
       '[data-testid="cable-temperature-uncertainty-result"]'
     )?.textContent;
-    expect(temperatureText).toContain('123.5');
-    expect(temperatureText).not.toContain('123.6');
-    expect(uncertaintyText).toContain('5.5');
-    expect(uncertaintyText).not.toContain('5.6');
+    expect(temperatureText).toContain('123.6');
+    expect(temperatureText).not.toContain('123.5');
+    expect(uncertaintyText).toContain('5.6');
+    expect(uncertaintyText).not.toContain('5.5');
   });
 
   describe('estimateSkyCover', () => {

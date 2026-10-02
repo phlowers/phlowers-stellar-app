@@ -705,7 +705,7 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).toContain('2.0');
     });
 
-    it('should truncate Auto parameter and cable-temperature values and uncertainties to 1 decimal', () => {
+    it('should round Auto parameter and cable-temperature values and uncertainties to at most 1 decimal', () => {
       component.measureData.update((data) => ({
         ...data,
         outputs: {
@@ -723,17 +723,17 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       }));
       fixture.detectChanges();
 
-      expect(getByTestId('parameter-papoto-display')?.textContent).toContain('1.5');
-      expect(getByTestId('parameter-papoto-display')?.textContent).not.toContain('1.6');
-      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).toContain('0.5');
-      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).not.toContain('0.6');
-      expect(getByTestId('cable-temperature-display')?.textContent).toContain('45.9');
-      expect(getByTestId('cable-temperature-display')?.textContent).not.toContain('46.0');
-      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).toContain('3.9');
-      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).not.toContain('4.0');
+      expect(getByTestId('parameter-papoto-display')?.textContent).toContain('1.6');
+      expect(getByTestId('parameter-papoto-display')?.textContent).not.toContain('1.5');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).toContain('0.6');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).not.toContain('0.5');
+      expect(getByTestId('cable-temperature-display')?.textContent).toContain('46 °C');
+      expect(getByTestId('cable-temperature-display')?.textContent).not.toContain('45.9');
+      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).toContain('4 °C');
+      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).not.toContain('3.9');
     });
 
-    describe('HTML rendering - result values truncation', () => {
+    describe('HTML rendering - result values rounding', () => {
       beforeEach(async () => {
         workerPythonServiceMock.runTask.mockResolvedValue({
           result: {
@@ -755,22 +755,22 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         fixture.detectChanges();
       });
 
-      it('should display parameter15CMinusUncertainty truncated to 1 decimal, not rounded (1885.17 → 1885.1)', () => {
+      it('should display parameter15CMinusUncertainty rounded to 1 decimal (1885.17 -> 1885.2)', () => {
         const text = getByTestId('parameter-15c-minus')?.textContent?.trim();
-        expect(text).toContain('1,885.1');
-        expect(text).not.toContain('1,885.2');
+        expect(text).toContain('1,885.2');
+        expect(text).not.toContain('1,885.1');
       });
 
-      it('should display parameter15C truncated to 1 decimal, not rounded (1900.99 → 1900.9)', () => {
+      it('should display parameter15C rounded without a trailing decimal (1900.99 -> 1901)', () => {
         const text = getByTestId('parameter-15c')?.textContent?.trim();
-        expect(text).toContain('1,900.9');
-        expect(text).not.toContain('1,901.0');
+        expect(text).toContain('1,901 m');
+        expect(text).not.toContain('1,900.9');
       });
 
-      it('should display parameter15CPlusUncertainty truncated to 1 decimal, not rounded (1915.35 → 1915.3)', () => {
+      it('should display parameter15CPlusUncertainty rounded to 1 decimal (1915.35 -> 1915.4)', () => {
         const text = getByTestId('parameter-15c-plus')?.textContent?.trim();
-        expect(text).toContain('1,915.3');
-        expect(text).not.toContain('1,915.4');
+        expect(text).toContain('1,915.4');
+        expect(text).not.toContain('1,915.3');
       });
     });
   });

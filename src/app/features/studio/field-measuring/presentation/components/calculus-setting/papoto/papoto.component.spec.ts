@@ -540,7 +540,7 @@ describe('Papoto component', () => {
       expect(el?.tagName).toBe('BUTTON');
     });
 
-    describe('HTML rendering - result values truncation', () => {
+    describe('HTML rendering - result values rounding', () => {
       beforeEach(async () => {
         workerPythonServiceMock.runTask.mockResolvedValue({
           result: {
@@ -573,19 +573,19 @@ describe('Papoto component', () => {
         fixture.detectChanges();
       });
 
-      it('should display parameter truncated to 1 decimal, not rounded (1.59 → 1.5)', () => {
+      it('should display parameter rounded to 1 decimal (1.59 -> 1.6)', () => {
         const text = getByTestId('papoto-parameter')?.textContent?.trim();
-        expect(text).toContain('1.5');
-        expect(text).not.toContain('1.6');
+        expect(text).toContain('1.6');
+        expect(text).not.toContain('1.5');
       });
 
-      it('should display uncertainty truncated to 1 decimal, not rounded (0.59 → 0.5)', () => {
+      it('should display uncertainty rounded to 1 decimal (0.59 -> 0.6)', () => {
         const text = getByTestId('papoto-uncertainty')?.textContent?.trim();
-        expect(text).toContain('0.5');
-        expect(text).not.toContain('0.6');
+        expect(text).toContain('0.6');
+        expect(text).not.toContain('0.5');
       });
 
-      it('should preserve tenths for large parameters and show one decimal for whole-number values', () => {
+      it('should round large parameters to tenths and show one decimal for whole-number values', () => {
         component.measureData.update((data) => ({
           ...data,
           outputs: {
@@ -600,27 +600,27 @@ describe('Papoto component', () => {
         }));
         fixture.detectChanges();
 
-        expect(getByTestId('papoto-parameter')?.textContent).toContain('2,000.7 m');
+        expect(getByTestId('papoto-parameter')?.textContent).toContain('2,000.8 m');
         expect(getByTestId('papoto-uncertainty')?.textContent).toContain('5.0 m');
         expect(getByTestId('papoto-parameter-1-2')?.textContent).toContain('2.0 m');
       });
 
-      it('should display parameter-1-2 truncated to 1 decimal, not rounded (2.99 → 2.9)', () => {
+      it('should display parameter-1-2 rounded to 1 decimal (2.99 -> 3.0)', () => {
         const text = getByTestId('papoto-parameter-1-2')?.textContent?.trim();
-        expect(text).toContain('2.9');
-        expect(text).not.toContain('3.0');
+        expect(text).toContain('3.0');
+        expect(text).not.toContain('2.9');
       });
 
-      it('should display parameter-2-3 truncated to 1 decimal, not rounded (3.17 → 3.1)', () => {
+      it('should display parameter-2-3 rounded to 1 decimal (3.17 -> 3.2)', () => {
         const text = getByTestId('papoto-parameter-2-3')?.textContent?.trim();
-        expect(text).toContain('3.1');
-        expect(text).not.toContain('3.2');
+        expect(text).toContain('3.2');
+        expect(text).not.toContain('3.1');
       });
 
-      it('should display parameter-1-3 truncated to 1 decimal, not rounded (4.85 → 4.8)', () => {
+      it('should display parameter-1-3 rounded to 1 decimal (4.85 -> 4.9)', () => {
         const text = getByTestId('papoto-parameter-1-3')?.textContent?.trim();
-        expect(text).toContain('4.8');
-        expect(text).not.toContain('4.9');
+        expect(text).toContain('4.9');
+        expect(text).not.toContain('4.8');
       });
     });
   });
