@@ -199,20 +199,18 @@
     <dl class="temperature-calculation__results__list">
       <div class="cableTemperature">
         <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
-        <dd>
-          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
+        <dd data-testid="cable-temperature-result">
+          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-1') ?? '-' }}
           °C
         </dd>
       </div>
       <div class="uncertaintyCableTemperature">
         <dt>
-          <del>{{ 'common.uncertainty-cable-temperature-label' | transloco }}</del>
+          {{ 'common.uncertainty-cable-temperature-label' | transloco }}
         </dt>
-        <dd>
-          <del>
-            {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-3') ?? '-' }}
-            °C
-          </del>
+        <dd data-testid="cable-temperature-uncertainty-result">
+          {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-1') ?? '-' }}
+          °C
         </dd>
       </div>
       <div class="solarFlux">

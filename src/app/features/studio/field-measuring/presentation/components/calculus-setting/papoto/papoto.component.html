@@ -275,39 +275,41 @@
 
 @if (measureData().outputs.papoto) {
   <div class="papoto__results" [@expand]>
-    <h2 class="papoto__results__title">{{ 'field-measuring.papoto.results-title' | transloco }}</h2>
+    <h2 class="papoto__results__title">{{ 'common.results' | transloco }}</h2>
 
     <dl class="papoto__results__list">
       <div class="param">
         <dt>{{ 'common.parameter-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }} m
+          {{ (measureData().outputs.papoto?.parameter | number: '1.1-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="incertainParam">
         <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
-        <dd>{{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }} m</dd>
+        <dd data-testid="papoto-uncertainty">
+          {{ (measureData().outputs.papoto?.uncertainty | number: '1.1-1') ?? '-' }} m
+        </dd>
       </div>
 
       <div class="param12">
         <dt>{{ 'field-measuring.papoto.parameter-1-2-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter-1-2">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_2) | number: '1.0-1') ?? '-' }} m
+          {{ (measureData().outputs.papoto?.parameter_1_2 | number: '1.1-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="param23">
         <dt>{{ 'field-measuring.papoto.parameter-2-3-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter-2-3">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_2_3) | number: '1.0-1') ?? '-' }} m
+          {{ (measureData().outputs.papoto?.parameter_2_3 | number: '1.1-1') ?? '-' }} m
         </dd>
       </div>
 
       <div class="param13">
         <dt>{{ 'field-measuring.papoto.parameter-1-3-label' | transloco }}</dt>
         <dd data-testid="papoto-parameter-1-3">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_3) | number: '1.0-1') ?? '-' }} m
+          {{ (measureData().outputs.papoto?.parameter_1_3 | number: '1.1-1') ?? '-' }} m
         </dd>
       </div>
 

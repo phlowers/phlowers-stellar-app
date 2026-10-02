@@ -21,6 +21,7 @@ import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, Se
 import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -69,6 +70,11 @@ export class TemperatureCalculationComponent {
   readonly measuredSolarFluxBounds = MEASURED_SOLAR_FLUX_BOUNDS;
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
+
+  truncate1Decimal(value: number | undefined | null): number | null {
+    if (value == null) return null;
+    return truncateNumberToOneDecimal(value);
+  }
 
   private readonly translocoService = inject(TranslocoService);
   private readonly activeLang = toSignal(this.translocoService.langChanges$, {
