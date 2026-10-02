@@ -290,6 +290,30 @@ describe('SectionService', () => {
         })
       );
     });
+
+    it('should drop the RRTS cut strands saved on the stored section when its cable changes', async () => {
+      const rrtsCutStrands = {
+        spanUuid: null,
+        supportRef: null,
+        distanceSupportRef: null,
+        cutStrands: [1, 0, 0, 0, 0, 0, 0, 0],
+        addMarking: false
+      };
+      const study = { ...mockStudy, sections: [{ ...mockSection, rrts_cut_strands: rrtsCutStrands }] };
+
+      const result = await service.createOrUpdateSection(study, {
+        ...mockSection,
+        cable_name: 'Other Cable',
+        rrts_cut_strands: rrtsCutStrands
+      });
+
+      expect(result).toEqual({ removedGeometryBoundObjects: true });
+      expect(mockStudiesService.updateStudy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sections: [expect.objectContaining({ uuid: mockSection.uuid, rrts_cut_strands: null })]
+        })
+      );
+    });
   });
 
   describe('deleteSection', () => {

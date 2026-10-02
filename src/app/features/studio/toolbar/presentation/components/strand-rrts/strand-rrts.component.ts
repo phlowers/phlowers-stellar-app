@@ -15,7 +15,7 @@ import { DecimalPipe } from '@angular/common';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -33,18 +33,14 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { LoggerService } from '@core/services/logger/logger.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
+import { maxOf } from '@shared/helpers/maxOf';
+import { STRAND_LAYER_KEYS } from '@shared/domain/helpers/cut-strands.helpers';
 import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
+import { RrtsResults } from '@features/studio/toolbar/application/services/strand-rrts.interfaces';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { maxOf } from '../../services/section-state-report/section-state-report.helpers';
-import {
-  DEFAULT_CUT_STRANDS,
-  DISTANCE_MAX,
-  MAX_SHOWN_LAYER,
-  STRAND_LAYER_KEYS,
-  WORK_LOAD_ICONS
-} from './strand-rrts.constantes';
+import { DEFAULT_CUT_STRANDS, DISTANCE_MAX, MAX_SHOWN_LAYER, WORK_LOAD_ICONS } from './strand-rrts.constantes';
 import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
-import { NotificationKey, RrtsFormValue, RrtsResults } from './strand-rrts.interfaces';
+import { NotificationKey, RrtsFormValue } from './strand-rrts.interfaces';
 
 @Component({
   selector: 'app-strand-rrts',
@@ -88,6 +84,9 @@ export class StrandRrtsComponent {
   readonly spanService = inject(PlotSpanService);
 
   readonly DISTANCE_MAX = DISTANCE_MAX;
+
+  // Opened from the preview of a section being edited: the saved entry is shown, with nothing to change it
+  readonly isViewMode = computed(() => this.toolbarDialogService.strandRrtsContext()?.mode === 'view');
 
   readonly form = new FormGroup({
     span: new FormControl<{ index: number; uuid: string } | null>(null),
@@ -148,21 +147,22 @@ export class StrandRrtsComponent {
   private readonly formValue = toSignal(this.form.valueChanges.pipe(map(() => this.form.getRawValue())), {
     initialValue: this.form.getRawValue()
   });
-  // Saving is only allowed while the inputs still match the results, so they never disagree
+  // Saving is only allowed while the inputs still match the results, so they never disagree. The marking takes no
+  // part in the calculation: switching it keeps the results
   readonly canSave = computed(() => {
     const calculatedValue = this.calculatedValue();
-    return calculatedValue !== null && isEqual(calculatedValue, this.formValue());
+    return (
+      calculatedValue !== null && isEqual(omit(calculatedValue, 'addMarking'), omit(this.formValue(), 'addMarking'))
+    );
   });
 
-  // Deep equality: the section is reloaded after every save, only a content change matters
-  private readonly savedEntry = computed(() => this.spanService.section()?.rrts_cut_strands ?? null, {
-    equal: isEqual
-  });
+  private readonly savedEntry = this.spanService.savedCutStrands;
   readonly isSaved = computed(() => this.savedEntry() !== null);
   readonly isCalculating = signal(false);
   readonly isSaving = signal(false);
   readonly isDeleting = signal(false);
-  // Each of them sets the engine cut strands: one at a time
+  // Each of them sets the engine cut strands: one at a time. Saving and deleting last until the studio follows the
+  // new entry
   readonly isBusy = computed(() => this.isCalculating() || this.isSaving() || this.isDeleting());
 
   readonly newWorkLoadIcon = computed(() => {
@@ -175,7 +175,8 @@ export class StrandRrtsComponent {
       const header = this.headerTemplate();
       const footer = this.footerTemplate();
       if (header && footer) {
-        this.toolbarDialogService.setTemplates({ header, footer });
+        // The footer only holds the actions
+        this.toolbarDialogService.setTemplates({ header, footer: this.isViewMode() ? undefined : footer });
       }
     });
 
@@ -228,7 +229,7 @@ export class StrandRrtsComponent {
     const layers = this.layers().map(({ layer }) => layer);
     this.isCalculating.set(true);
     try {
-      this.results.set(await this.calculateResults(toCatalogCutStrands(value.cutStrands, layers)));
+      this.results.set(await this.strandRrtsService.calculate(toCatalogCutStrands(value.cutStrands, layers)));
       this.calculatedValue.set(value);
     } catch (error) {
       this.logger.error('Failed to calculate the RRTS', error);
@@ -244,16 +245,17 @@ export class StrandRrtsComponent {
   async save(): Promise<void> {
     const study = this.plotService.study();
     const section = this.spanService.section();
-    const calculatedValue = this.calculatedValue();
-    if (!study || !section || !calculatedValue || !this.canSave() || this.isBusy()) return;
+    if (!study || !section || !this.canSave() || this.isBusy()) return;
 
     const layers = this.layers().map(({ layer }) => layer);
-    const updated = { ...section, rrts_cut_strands: toCutStrandsData(calculatedValue, layers) };
+    // The calculated value, with the marking as it is now
+    const updated = { ...section, rrts_cut_strands: toCutStrandsData(this.form.getRawValue(), layers) };
     this.isSaving.set(true);
     try {
       await this.sectionService.createOrUpdateSection(study, updated);
       this.spanService.section.set(updated);
       this.notify('success', 'saved');
+      await this.plotService.syncCutStrands();
     } catch (error) {
       this.logger.error('Failed to save RRTS cut strands', error);
       this.notify('error', 'failed-to-save');
@@ -273,6 +275,7 @@ export class StrandRrtsComponent {
       await this.sectionService.createOrUpdateSection(study, updated);
       this.spanService.section.set(updated);
       this.notify('success', 'deleted');
+      await this.plotService.syncCutStrands();
     } catch (error) {
       this.logger.error('Failed to delete RRTS cut strands', error);
       this.notify('error', 'failed-to-delete');
@@ -285,16 +288,6 @@ export class StrandRrtsComponent {
     if (control.errors?.['required']) return this.translocoService.translate('common.required');
     const numberError = getNumberInputErrorParams(control);
     return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
-  }
-
-  // The engine keeps the cut strands it is given: the saved ones go back once the results are read. Saving or
-  // deleting needs no such step, the studio applies the new saved entry itself
-  private async calculateResults(cutStrands: number[]): Promise<RrtsResults> {
-    try {
-      return await this.strandRrtsService.calculate(cutStrands);
-    } finally {
-      await this.strandRrtsService.applySaved(this.savedEntry());
-    }
   }
 
   private notify(kind: 'success' | 'error', key: NotificationKey): void {

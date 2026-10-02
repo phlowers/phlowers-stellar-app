@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest';
 import type * as Plotly from 'plotly.js-dist-min';
 import { TranslocoService } from '@jsverse/transloco';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
-import { createCutStrandsAnnotations } from './createCutStrandsAnnotations';
+import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
 import {
   CUT_STRANDS_COLOR,
   CUT_STRANDS_DASH_GAP,
@@ -246,7 +246,7 @@ describe('createCutStrandsAnnotations', () => {
     });
   });
 
-  describe('dashed line', () => {
+  describe('3D dashed line', () => {
     it('should be made of arrow-only annotations in the marking color', () => {
       const dashes = dashesOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
@@ -295,6 +295,64 @@ describe('createCutStrandsAnnotations', () => {
       dashesOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]).forEach((dash) => {
         expect(dash.ax).toBe(0);
       });
+    });
+
+    it('should not be made of shapes, which do not exist in 3D', () => {
+      expect(createCutStrandsShapes(makePlotParams({ view: '3d' }))).toEqual([]);
+    });
+  });
+
+  describe('2D dashed line', () => {
+    const params2d = (overrides: Partial<CreatePlotParams> = {}) => makePlotParams({ view: '2d', ...overrides });
+
+    it('should leave the icon as the only annotation', () => {
+      const annotations = createCutStrandsAnnotations(params2d()) as Annotation[];
+
+      expect(annotations).toHaveLength(1);
+      expect(annotations[0].text).toBe(CUT_STRANDS_ICON);
+    });
+
+    it('should be a single dashed shape in the marking color', () => {
+      const shapes = createCutStrandsShapes(params2d());
+
+      expect(shapes).toHaveLength(1);
+      expect(shapes[0].type).toBe('line');
+      expect(shapes[0].line).toEqual({
+        color: CUT_STRANDS_COLOR,
+        width: 1,
+        dash: `${CUT_STRANDS_DASH_LENGTH}px,${CUT_STRANDS_DASH_GAP}px`
+      });
+    });
+
+    // The left support top is [0, 1, 20]: x and z in the profile view
+    it('should go from the anchor point up to the icon, sized in pixels', () => {
+      const [shape] = createCutStrandsShapes(params2d());
+
+      expect(shape).toMatchObject({
+        xref: 'x',
+        yref: 'y',
+        xsizemode: 'pixel',
+        ysizemode: 'pixel',
+        xanchor: 0,
+        yanchor: 20,
+        x0: 0,
+        x1: 0,
+        y0: 0,
+        y1: CUT_STRANDS_LINE_LENGTH
+      });
+    });
+
+    it('should follow the anchor of the face view', () => {
+      const [shape] = createCutStrandsShapes(params2d({ side: 'face' }));
+
+      expect([shape.xanchor, shape.yanchor]).toEqual([1, 20]);
+    });
+
+    it.each([
+      ['no marking is asked for', { cutStrands: makeCutStrands({ addMarking: false }) }],
+      ['the span is not displayed', { startSupport: 1, endSupport: 3 }]
+    ])('should not be drawn when %s', (_, overrides) => {
+      expect(createCutStrandsShapes(params2d(overrides))).toEqual([]);
     });
   });
 });

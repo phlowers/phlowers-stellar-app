@@ -1,4 +1,4 @@
-import { getWorkLoadStatus, hasCutStrand, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
+import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
 
 describe('getWorkLoadStatus', () => {
   it.each([
@@ -18,24 +18,6 @@ describe('getWorkLoadStatus', () => {
 describe('toCatalogCutStrands', () => {
   it('spreads the cut strands of the layers with strands over every catalog layer', () => {
     expect(toCatalogCutStrands([2, 5], [1, 3])).toEqual([2, 0, 5, 0, 0, 0, 0, 0]);
-  });
-});
-
-describe('hasCutStrand', () => {
-  const makeEntry = (cutStrands: number[]) => ({
-    spanUuid: null,
-    supportRef: null,
-    distanceSupportRef: null,
-    cutStrands,
-    addMarking: false
-  });
-
-  it.each([
-    ['a cut strand on a layer', makeEntry([0, 0, 2, 0, 0, 0, 0, 0]), true],
-    ['no cut strand on any layer', makeEntry([0, 0, 0, 0, 0, 0, 0, 0]), false],
-    ['no saved entry', null, false]
-  ])('is decided from %s', (_, entry, expected) => {
-    expect(hasCutStrand(entry)).toBe(expected);
   });
 });
 

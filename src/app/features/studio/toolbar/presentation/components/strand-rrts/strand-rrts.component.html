@@ -6,10 +6,12 @@
 </ng-template>
 
 <form [formGroup]="form" (ngSubmit)="calculate()">
-  <button type="button" app-btn btnStyle="outlined" disabled>
-    <app-icon icon="help" aria-hidden="true" />
-    {{ 'studio.rrts-cut-strands.layers-detail' | transloco }}
-  </button>
+  @if (!isViewMode()) {
+    <button type="button" app-btn btnStyle="outlined" disabled>
+      <app-icon icon="help" aria-hidden="true" />
+      {{ 'studio.rrts-cut-strands.layers-detail' | transloco }}
+    </button>
+  }
 
   <dl class="grid-structure grid-structure--infos">
     <dt class="cable-name-label">{{ 'studio.rrts-cut-strands.cable-name-label' | transloco }}</dt>
@@ -35,7 +37,8 @@
         formControlName="span"
         appendTo="body"
         fluid
-        [showClear]="true"
+        [showClear]="!isViewMode()"
+        [readonly]="isViewMode()"
         data-testid="rrts-span-select"
       />
     </div>
@@ -50,6 +53,7 @@
         formControlName="supportRef"
         appendTo="body"
         fluid
+        [readonly]="isViewMode()"
         data-testid="rrts-support-ref-select"
       />
     </div>
@@ -69,6 +73,7 @@
           min="0"
           [attr.max]="DISTANCE_MAX"
           step="0.01"
+          [readonly]="isViewMode()"
           data-testid="rrts-distance-support-ref-input"
           [attr.aria-invalid]="distanceError ? 'true' : null"
           [attr.aria-errormessage]="distanceError ? 'distanceSupportRef-error' : null"
@@ -104,6 +109,7 @@
             [attr.max]="item.strands"
             step="1"
             required
+            [readonly]="isViewMode()"
             [attr.data-testid]="'rrts-cut-strands-layer' + item.layer + '-input'"
             [attr.aria-invalid]="error ? 'true' : null"
             [attr.aria-errormessage]="error ? 'cutStrandsLayer' + item.layer + '-error' : null"
@@ -125,24 +131,27 @@
         formControlName="addMarking"
         inputId="rrts-add-marking"
         [binary]="true"
+        [readonly]="isViewMode()"
         data-testid="rrts-add-marking-checkbox"
       />
       <label for="rrts-add-marking">{{ 'studio.rrts-cut-strands.add-marking-label' | transloco }}</label>
     </div>
   </div>
 
-  <div class="calculate-btn-wrapper">
-    <button
-      type="submit"
-      app-btn
-      data-testid="calculate-btn"
-      [disabled]="form.invalid || !hasLayers() || isBusy()"
-      [btnLoading]="isCalculating()"
-    >
-      <app-icon icon="rocket_launch" aria-hidden="true" />
-      {{ 'common.calculate' | transloco }}
-    </button>
-  </div>
+  @if (!isViewMode()) {
+    <div class="calculate-btn-wrapper">
+      <button
+        type="submit"
+        app-btn
+        data-testid="calculate-btn"
+        [disabled]="form.invalid || !hasLayers() || isBusy()"
+        [btnLoading]="isCalculating()"
+      >
+        <app-icon icon="rocket_launch" aria-hidden="true" />
+        {{ 'common.calculate' | transloco }}
+      </button>
+    </div>
+  }
 </form>
 
 <!-- Always on the page: screen readers only announce results added to a live region that is already there -->

@@ -3,7 +3,7 @@ import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View } from 
 import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
-import { createCutStrandsAnnotations } from './createCutStrandsAnnotations';
+import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
 import { CableModification, SpanLoad } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
@@ -420,7 +420,8 @@ const layout2d = (
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
-    ]
+    ],
+    shapes: createCutStrandsShapes(plotParams)
   };
 };
 

@@ -52,6 +52,12 @@ export interface LoadTableContext {
   chargeUuid: string;
 }
 
+/** Context passed when opening the RRTS cut strands tool. */
+export interface StrandRrtsContext {
+  /** Whether the saved entry is only shown, or can be calculated, saved and deleted. */
+  mode: 'view' | 'edit';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -62,6 +68,7 @@ export class ToolbarDialogService {
   readonly phase = signal<DialogPhase>('main');
   readonly templates = signal<ToolTemplates>({});
   readonly loadTableContext = signal<LoadTableContext | null>(null);
+  readonly strandRrtsContext = signal<StrandRrtsContext | null>(null);
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
@@ -103,14 +110,17 @@ export class ToolbarDialogService {
     }
   };
 
-  openTool(tool: Tool, context?: LoadTableContext): void {
+  openTool(tool: 'load-table', context?: LoadTableContext): void;
+  openTool(tool: 'strand-rrts', context?: StrandRrtsContext): void;
+  openTool(tool: Tool): void;
+  openTool(tool: Tool, context?: LoadTableContext | StrandRrtsContext): void {
     this.currentTool.set(tool);
     const config = this.toolMap[tool];
 
-    if (tool === 'load-table' && context) {
-      this.loadTableContext.set(context);
-    } else if (tool === 'load-table') {
-      this.loadTableContext.set(null);
+    if (tool === 'load-table') {
+      this.loadTableContext.set((context as LoadTableContext | undefined) ?? null);
+    } else if (tool === 'strand-rrts') {
+      this.strandRrtsContext.set((context as StrandRrtsContext | undefined) ?? null);
     }
 
     if (config.initComponent) {
@@ -127,6 +137,7 @@ export class ToolbarDialogService {
     setTimeout(() => {
       this.currentTool.set(null);
       this.loadTableContext.set(null);
+      this.strandRrtsContext.set(null);
     }, 300);
   }
 
