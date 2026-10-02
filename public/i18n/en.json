@@ -1144,10 +1144,7 @@
       "computing-step-label": "Computing step",
       "hanging-parameter-label": "Hanging parameter (m)",
       "horizontal-tension-label": "Horizontal tension (daN)",
-      "results-title": "Hanging table results",
-      "page-label": "Page",
-      "report-generated-success": "Report generated successfully",
-      "report-generation-failed": "Failed to generate report"
+      "results-title": "Hanging table results"
     },
     "rrts-cut-strands": {
       "layers-detail": "Layers detail",

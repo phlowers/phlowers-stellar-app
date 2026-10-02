@@ -1144,10 +1144,7 @@
       "computing-step-label": "Pas de calcul",
       "hanging-parameter-label": "Paramètre de pose (m)",
       "horizontal-tension-label": "Tension horizontale (daN)",
-      "results-title": "Résultats du tableau de pose",
-      "page-label": "Page",
-      "report-generated-success": "Rapport généré avec succès",
-      "report-generation-failed": "Échec de la génération du rapport"
+      "results-title": "Résultats du tableau de pose"
     },
     "rrts-cut-strands": {
       "layers-detail": "Détail des couches",

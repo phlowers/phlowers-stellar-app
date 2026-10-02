@@ -18,10 +18,10 @@ import { HangingTableReportData } from './hanging-table-report.interfaces';
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
   'studio.hanging-table-report.title': 'Rapport Tableau de pose',
-  'studio.hanging-table-report.page-label': 'Page',
+  'common.page-label': 'Page',
   'studio.hanging-table-report.results-title': 'Résultats',
-  'studio.hanging-table-report.report-generated-success': 'Report generated successfully',
-  'studio.hanging-table-report.report-generation-failed': 'Failed to generate report'
+  'common.report-generated-successfully-label': 'Report generated successfully',
+  'common.failed-to-generate-report': 'Failed to generate report'
 };
 
 vi.mock('jspdf', () => {
@@ -163,6 +163,19 @@ describe('HangingTableReportService', () => {
     );
     expect(temperatureLabelCalls).toHaveLength(1);
     expect(doc.addPage).not.toHaveBeenCalled();
+  });
+
+  it('should continue the results on a new page when the wrapped metadata fills the first page', async () => {
+    const doc = (await getMockDoc()) as MockDoc & { splitTextToSize: ReturnType<typeof vi.fn> };
+    doc.splitTextToSize.mockImplementation((text: string) =>
+      text === 'Fake description' ? Array.from({ length: 80 }, () => 'long line') : [text]
+    );
+
+    await service.generateReport(createData());
+
+    expect(doc.addPage).toHaveBeenCalledWith('a4', 'portrait');
+    expect(doc.text.mock.calls.map((call) => call[0])).toContain('Résultats');
+    doc.splitTextToSize.mockImplementation((text: string) => [text]);
   });
 
   it('should log and notify error when PDF generation fails', async () => {
