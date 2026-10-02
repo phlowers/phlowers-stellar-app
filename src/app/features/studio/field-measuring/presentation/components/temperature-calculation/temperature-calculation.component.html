@@ -200,7 +200,7 @@
       <div class="cableTemperature">
         <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
         <dd data-testid="cable-temperature-result">
-          {{ (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperature) | number: '1.0-1') ?? '-' }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-1') ?? '-' }}
           °C
         </dd>
       </div>
@@ -209,10 +209,7 @@
           {{ 'common.uncertainty-cable-temperature-label' | transloco }}
         </dt>
         <dd data-testid="cable-temperature-uncertainty-result">
-          {{
-            (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperatureUncertainty) | number: '1.0-1') ??
-              '-'
-          }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-1') ?? '-' }}
           °C
         </dd>
       </div>

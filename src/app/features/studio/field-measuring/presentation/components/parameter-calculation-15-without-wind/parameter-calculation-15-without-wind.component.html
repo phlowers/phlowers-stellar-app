@@ -119,7 +119,7 @@
           {{ 'field-measuring.parameter-calculation-15.parameter-papoto-label' | transloco }}
         </dt>
         <dd data-testid="parameter-papoto-display">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.1-1') ?? '-' }}
+          {{ (measureData().outputs.papoto?.parameter | number: '1.1-1') ?? '-' }}
           m
         </dd>
       </div>
@@ -129,7 +129,7 @@
           {{ 'common.uncertainty-parameter-label' | transloco }}
         </dt>
         <dd data-testid="parameter-uncertainty-papoto-display">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.uncertainty) | number: '1.1-1') ?? '-' }}
+          {{ (measureData().outputs.papoto?.uncertainty | number: '1.1-1') ?? '-' }}
           m
         </dd>
       </div>
@@ -137,7 +137,7 @@
       <div class="cableTemperature">
         <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
         <dd data-testid="cable-temperature-display">
-          {{ (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperature) | number: '1.0-1') ?? '-' }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-1') ?? '-' }}
           °C
         </dd>
       </div>
@@ -147,10 +147,7 @@
           {{ 'common.uncertainty-cable-temperature-label' | transloco }}
         </dt>
         <dd data-testid="cable-temperature-uncertainty-display">
-          {{
-            (truncate1Decimal(measureData().outputs.cableTemperature?.cableTemperatureUncertainty) | number: '1.0-1') ??
-              '-'
-          }}
+          {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-1') ?? '-' }}
           °C
         </dd>
       </div>
@@ -181,26 +178,21 @@
       <div class="parameter15CMinusUncertainty">
         <dt>{{ 'field-measuring.parameter-calculation-15.parameter-15c-minus-label' | transloco }}</dt>
         <dd data-testid="parameter-15c-minus">
-          {{
-            (truncate1Decimal(measureData().outputs.parameter15C?.parameter15CMinusUncertainty) | number: '1.0-1') ??
-              '-'
-          }}
+          {{ (measureData().outputs.parameter15C?.parameter15CMinusUncertainty | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15C">
         <dt>{{ 'field-measuring.parameter-calculation-15.parameter-15c-label' | transloco }}</dt>
         <dd data-testid="parameter-15c">
-          {{ (truncate1Decimal(measureData().outputs.parameter15C?.parameter15C) | number: '1.0-1') ?? '-' }}
+          {{ (measureData().outputs.parameter15C?.parameter15C | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
       <div class="parameter15CPlusUncertainty">
         <dt>{{ 'field-measuring.parameter-calculation-15.parameter-15c-plus-label' | transloco }}</dt>
         <dd data-testid="parameter-15c-plus">
-          {{
-            (truncate1Decimal(measureData().outputs.parameter15C?.parameter15CPlusUncertainty) | number: '1.0-1') ?? '-'
-          }}
+          {{ (measureData().outputs.parameter15C?.parameter15CPlusUncertainty | number: '1.0-1') ?? '-' }}
           m
         </dd>
       </div>
