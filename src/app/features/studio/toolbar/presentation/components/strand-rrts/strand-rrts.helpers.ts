@@ -1,5 +1,5 @@
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
-import { STRAND_LAYER_KEYS } from './strand-rrts.constantes';
+import { STRAND_LAYER_KEYS } from '@shared/domain/helpers/cut-strands.helpers';
 import { RrtsFormValue, WorkLoadStatus } from './strand-rrts.interfaces';
 
 // Satisfactory up to 75 %, concerning up to 100 %, dangerous above 100 % or below 0 %

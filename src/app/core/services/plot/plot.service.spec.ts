@@ -31,6 +31,10 @@ import { PlotOptions, PLOT_ID } from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { BehaviorSubject } from 'rxjs';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
+import { isEqual } from 'lodash';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 // Mock plotly
@@ -804,6 +808,365 @@ describe('PlotService', () => {
           [Task.setHighSafety, { highSafety: true }],
           [Task.setHighSafety, { highSafety: false }]
         ]);
+      });
+    });
+  });
+
+  describe('cut strands', () => {
+    const CUT = [1, 3, 0, 0, 0, 0, 0, 0];
+    const OTHER_CUT = [5, 3, 0, 0, 0, 0, 0, 0];
+    const NONE = [0, 0, 0, 0, 0, 0, 0, 0];
+
+    const sectionWithCutStrands = (cutStrands: number[] | null, overrides: Partial<Section> = {}): Section => {
+      const entry: RrtsCutStrandsData | null = cutStrands && {
+        spanUuid: null,
+        supportRef: null,
+        distanceSupportRef: null,
+        cutStrands,
+        addMarking: false
+      };
+      return { ...mockSection, rrts_cut_strands: entry, ...overrides };
+    };
+
+    // Answers like the engine, rejecting the given cut strands
+    const engine =
+      (rejectedCutStrands: number[] | null = null) =>
+      (task: unknown, inputs?: unknown) => {
+        if (task === Task.initLit) {
+          return Promise.resolve({ result: { success: true }, error: null, diagnostics: [] });
+        }
+        if (task === Task.refreshProjection) {
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+            error: null,
+            diagnostics: []
+          });
+        }
+        if (
+          task === Task.setCutStrands &&
+          isEqual((inputs as { cutStrands: number[] }).cutStrands, rejectedCutStrands)
+        ) {
+          return Promise.resolve({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
+        }
+        return Promise.resolve({ result: null, error: null, diagnostics: [] });
+      };
+
+    const runTasks = () => mockWorkerPythonService.runTask.mock.calls.map(([task]) => task);
+    const engineCutStrands = () =>
+      mockWorkerPythonService.runTask.mock.calls
+        .filter(([task]) => task === Task.setCutStrands)
+        .map(([, inputs]) => (inputs as { cutStrands: number[] }).cutStrands);
+
+    let notificationService: NotificationService;
+    let logger: LoggerService;
+
+    beforeEach(() => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockImplementation(engine());
+      notificationService = TestBed.inject(NotificationService);
+      vi.spyOn(notificationService, 'error').mockImplementation(() => undefined);
+      logger = TestBed.inject(LoggerService);
+      vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+    });
+
+    describe('at studio load', () => {
+      it('should apply the saved ones right after high safety, before any output is calculated', async () => {
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        const tasks = runTasks();
+        expect(engineCutStrands()).toEqual([CUT]);
+        expect(tasks.indexOf(Task.setCutStrands)).toBe(tasks.indexOf(Task.setHighSafety) + 1);
+        expect(tasks.indexOf(Task.setCutStrands)).toBeLessThan(tasks.indexOf(Task.refreshProjection));
+      });
+
+      it('should flag the outputs as accounting for a cut strand', async () => {
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(service.isCutStrandApplied()).toBe(true);
+      });
+
+      it.each([
+        ['without saved entry', null],
+        ['with an entry saved at 0 on every layer', NONE]
+      ])('should leave the new engine study without cut strands %s', async (_, cutStrands) => {
+        await service.initSectionStudio(sectionWithCutStrands(cutStrands));
+
+        expect(engineCutStrands()).toEqual([]);
+        expect(service.isCutStrandApplied()).toBe(false);
+      });
+
+      it('should go on without them when the engine rejects them, and report it in the studio', async () => {
+        service.isStudioActive.set(true);
+        mockWorkerPythonService.runTask.mockImplementation(engine(CUT));
+
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(runTasks()).toContain(Task.refreshProjection);
+        expect(service.isCutStrandApplied()).toBe(false);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to apply the saved RRTS cut strands',
+          TaskError.CALCULATION_ERROR
+        );
+        expect(notificationService.error).toHaveBeenCalledOnce();
+      });
+
+      it.each([
+        ['returns an error', { result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] }],
+        [
+          'returns no current output',
+          {
+            result: { sectionOutput: { current: null, base: null }, obstacles: [], distances: [] },
+            error: null,
+            diagnostics: []
+          }
+        ]
+      ])('should not flag the cut strands as applied when the projection %s', async (_, projection) => {
+        const answer = engine();
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.refreshProjection ? Promise.resolve(projection) : answer(task, inputs)
+        );
+
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(engineCutStrands()).toEqual([CUT]);
+        expect(service.litData()).toBeNull();
+        expect(service.isCutStrandApplied()).toBe(false);
+      });
+
+      it('should handle the task rejecting like an engine error, and not cache the cut strands', async () => {
+        service.isStudioActive.set(true);
+        const timeout = new Error('Task setCutStrands timed out after 30000ms');
+        const answer = engine();
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.setCutStrands ? Promise.reject(timeout) : answer(task, inputs)
+        );
+
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(runTasks()).toContain(Task.refreshProjection);
+        expect(service.isCutStrandApplied()).toBe(false);
+        expect(logger.error).toHaveBeenCalledWith('Failed to apply the saved RRTS cut strands', timeout);
+        expect(notificationService.error).toHaveBeenCalledOnce();
+      });
+
+      it('should not report a failure outside the studio, in the section preview', async () => {
+        mockWorkerPythonService.runTask.mockImplementation(engine(CUT));
+
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(logger.error).toHaveBeenCalledWith(
+          'Failed to apply the saved RRTS cut strands',
+          TaskError.CALCULATION_ERROR
+        );
+        expect(notificationService.error).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the saved ones change in the studio', () => {
+      // The RRTS tool saves and deletes them, which reloads the section
+      const reloadSection = async (section: Section) => {
+        spanService.section.set(section);
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve));
+      };
+
+      beforeEach(async () => {
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+        service.isStudioActive.set(true);
+        TestBed.flushEffects();
+        mockWorkerPythonService.runTask.mockClear();
+      });
+
+      it('should apply them, then refresh the outputs depending on them', async () => {
+        await reloadSection(sectionWithCutStrands(OTHER_CUT));
+
+        expect(engineCutStrands()).toEqual([OTHER_CUT]);
+        expect(runTasks().slice(0, 2)).toEqual([Task.setCutStrands, Task.refreshProjection]);
+        expect(service.isCutStrandApplied()).toBe(true);
+      });
+
+      it('should report a rejected worker task as a failed sync, without throwing', async () => {
+        const timeout = new Error('Task refreshProjection timed out after 30000ms');
+        const answer = engine();
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.refreshProjection ? Promise.reject(timeout) : answer(task, inputs)
+        );
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT));
+
+        await expect(service.syncCutStrands()).resolves.toBeUndefined();
+
+        expect(logger.error).toHaveBeenCalledWith('Failed to apply the saved RRTS cut strands', timeout);
+        expect(notificationService.error).toHaveBeenCalledOnce();
+      });
+
+      it('should clear them, and the cut flag, once the entry is deleted', async () => {
+        await reloadSection(sectionWithCutStrands(null));
+
+        expect(engineCutStrands()).toEqual([NONE]);
+        expect(service.isCutStrandApplied()).toBe(false);
+      });
+
+      it('should only raise the cut flag once the outputs account for them', async () => {
+        await reloadSection(sectionWithCutStrands(null));
+        mockWorkerPythonService.runTask.mockClear();
+        let answerProjection!: () => void;
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.refreshProjection
+            ? new Promise((resolve) => (answerProjection = () => resolve(engine()(task, inputs))))
+            : engine()(task, inputs)
+        );
+
+        spanService.section.set(sectionWithCutStrands(CUT));
+        TestBed.flushEffects();
+        await vi.waitFor(() => expect(runTasks()).toContain(Task.refreshProjection));
+        expect(service.isCutStrandApplied()).toBe(false);
+
+        answerProjection();
+        await vi.waitFor(() => expect(service.isCutStrandApplied()).toBe(true));
+      });
+
+      it('should do nothing when the section reloads with the same ones', async () => {
+        const section = sectionWithCutStrands(CUT, { name: 'renamed' });
+
+        await reloadSection({ ...section, rrts_cut_strands: { ...section.rrts_cut_strands!, addMarking: true } });
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+
+      it('should do nothing outside the studio', async () => {
+        service.isStudioActive.set(false);
+
+        await reloadSection(sectionWithCutStrands(OTHER_CUT));
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+
+      it('should not apply them to the engine study of the previous section', async () => {
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT, { uuid: 'section-uuid-2' }));
+
+        await service.syncCutStrands();
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+
+      it('should leave them to the engine study of a new section, once it is created', async () => {
+        await reloadSection(sectionWithCutStrands(OTHER_CUT, { uuid: 'section-uuid-2' }));
+
+        expect(runTasks()[0]).toBe(Task.initLit);
+        expect(engineCutStrands()).toEqual([OTHER_CUT]);
+      });
+
+      it('should keep the previous ones when the engine rejects them, and retry them on the next request', async () => {
+        mockWorkerPythonService.runTask.mockImplementation(engine(OTHER_CUT));
+        await reloadSection(sectionWithCutStrands(OTHER_CUT));
+        expect(notificationService.error).toHaveBeenCalledOnce();
+        expect(runTasks()).not.toContain(Task.refreshProjection);
+
+        mockWorkerPythonService.runTask.mockImplementation(engine());
+        mockWorkerPythonService.runTask.mockClear();
+        await service.syncCutStrands();
+
+        expect(engineCutStrands()).toEqual([OTHER_CUT]);
+        expect(runTasks()).toContain(Task.refreshProjection);
+      });
+
+      it('should not refresh the outputs once the studio is left while they are being applied', async () => {
+        let answerCutStrands!: () => void;
+        mockWorkerPythonService.runTask.mockImplementationOnce(
+          () =>
+            new Promise((resolve) => (answerCutStrands = () => resolve({ result: null, error: null, diagnostics: [] })))
+        );
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT));
+        TestBed.flushEffects();
+
+        service.resetAll();
+        answerCutStrands();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(runTasks()).not.toContain(Task.refreshProjection);
+        expect(service.litData()).toBeNull();
+      });
+
+      it('should resolve once the outputs account for them, for the RRTS tool to await', async () => {
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT));
+
+        await service.syncCutStrands();
+
+        expect(runTasks()).toEqual(expect.arrayContaining([Task.setCutStrands, Task.refreshProjection]));
+        expect(service.isCutStrandApplied()).toBe(true);
+        mockWorkerPythonService.runTask.mockClear();
+        TestBed.flushEffects();
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('after an RRTS calculation with other cut strands', () => {
+      beforeEach(async () => {
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+        service.isStudioActive.set(true);
+        TestBed.flushEffects();
+        mockWorkerPythonService.runTask.mockClear();
+      });
+
+      it('should give the engine study the saved ones back, the outputs already accounting for them', async () => {
+        await service.restoreCutStrands(OTHER_CUT);
+
+        expect(engineCutStrands()).toEqual([CUT]);
+        expect(runTasks()).not.toContain(Task.refreshProjection);
+      });
+
+      it('should give them back in the preview of a section being edited too', async () => {
+        service.isStudioActive.set(false);
+
+        await service.restoreCutStrands(OTHER_CUT);
+
+        expect(engineCutStrands()).toEqual([CUT]);
+      });
+
+      it('should leave the engine study alone after a calculation with the saved ones', async () => {
+        await service.restoreCutStrands([...CUT]);
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      });
+
+      it('should refresh the outputs when they were calculated without the saved ones', async () => {
+        // Applying the saved ones failed: the outputs still account for the previous ones
+        mockWorkerPythonService.runTask.mockImplementation(engine(OTHER_CUT));
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT));
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve));
+        mockWorkerPythonService.runTask.mockImplementation(engine());
+        mockWorkerPythonService.runTask.mockClear();
+
+        await service.restoreCutStrands([2, 0, 0, 0, 0, 0, 0, 0]);
+
+        expect(engineCutStrands()).toEqual([OTHER_CUT]);
+        expect(runTasks()).toContain(Task.refreshProjection);
+      });
+
+      it('should catch up on the outputs once the engine study holds the saved ones', async () => {
+        // Giving the saved ones back failed: the engine study kept the calculated ones
+        mockWorkerPythonService.runTask.mockImplementation(engine(CUT));
+        await service.restoreCutStrands(OTHER_CUT);
+        mockWorkerPythonService.runTask.mockImplementation(engine());
+        mockWorkerPythonService.runTask.mockClear();
+
+        // Saving the calculated ones needs no engine call, only outputs that account for them
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT));
+        await service.syncCutStrands();
+
+        expect(engineCutStrands()).toEqual([]);
+        expect(runTasks()).toContain(Task.refreshProjection);
+      });
+
+      it('should do nothing without engine study', async () => {
+        service.resetAll();
+        mockWorkerPythonService.runTask.mockClear();
+
+        await service.restoreCutStrands(OTHER_CUT);
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
       });
     });
   });

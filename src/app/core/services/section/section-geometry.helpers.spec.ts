@@ -247,5 +247,41 @@ describe('sanitizeSectionGeometry', () => {
       expect(result.section).toBe(section);
       expect(result.removedGeometryBoundObjects).toBe(false);
     });
+
+    describe('when the cable changes', () => {
+      const saved = makeCutStrands('sup-1');
+      const previousSection = makeSection({ cable_name: 'ASTER 570', rrts_cut_strands: saved });
+
+      it('should drop the RRTS cut strands saved on the previous cable', () => {
+        const section = makeSection({ cable_name: 'PETUNIA 612', rrts_cut_strands: saved });
+
+        const result = sanitizeSectionGeometry(section, previousSection);
+
+        expect(result.section.rrts_cut_strands).toBeNull();
+        expect(result.removedGeometryBoundObjects).toBe(true);
+      });
+
+      it('should keep the RRTS cut strands that come with the new cable', () => {
+        const section = makeSection({
+          cable_name: 'PETUNIA 612',
+          rrts_cut_strands: { ...saved, cutStrands: [2, 0] }
+        });
+
+        const result = sanitizeSectionGeometry(section, previousSection);
+
+        expect(result.section).toBe(section);
+        expect(result.removedGeometryBoundObjects).toBe(false);
+      });
+
+      it.each([
+        ['on the same cable', makeSection({ cable_name: 'ASTER 570', rrts_cut_strands: saved }), previousSection],
+        ['on a new section', makeSection({ cable_name: 'PETUNIA 612', rrts_cut_strands: saved }), undefined]
+      ])('should keep the RRTS cut strands %s', (_, section, previous) => {
+        const result = sanitizeSectionGeometry(section, previous);
+
+        expect(result.section).toBe(section);
+        expect(result.removedGeometryBoundObjects).toBe(false);
+      });
+    });
   });
 });

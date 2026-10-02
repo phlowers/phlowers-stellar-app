@@ -3,8 +3,8 @@
 ## Objectif
 
 Lorsque certains brins d'un câble sont coupés, le câble perd une partie de sa résistance. L'outil
-**CRR de brins coupés** permet de saisir le nombre de brins coupés dans chaque couche du câble, et
-calcule :
+**CRR de brins coupés** permet de saisir le nombre de brins coupés dans les trois premières
+couches du câble, et calcule :
 
 - la **CRR** (charge de rupture résiduelle) du câble, en daN : la résistance qu'il reste au câble ;
 - le **nouveau taux de travail max** du canton avec cette résistance réduite, en %.
@@ -59,10 +59,11 @@ droit de la portée. Le support gauche est sélectionné par défaut.
 Saisissez la distance en mètres entre le support de référence et la coupure. Le champ est
 facultatif. La valeur doit être comprise entre **0** et **5 000 m**, avec au plus 2 décimales.
 
-### Brins coupés couche 1, 2, …
+### Brins coupés couche 1, 2 et 3
 
-Un champ pour chaque couche du câble qui a des brins dans le catalogue de câbles. Le nombre à côté
-du champ (par exemple **/ 12**) est le nombre de brins de la couche.
+Un champ pour chacune des trois premières couches du câble qui ont des brins dans le catalogue de
+câbles. Le nombre à côté du champ (par exemple **/ 12**) est le nombre de brins de la couche. Les
+autres couches ne sont pas affichées : aucun brin n'y est considéré comme coupé.
 
 Saisissez le nombre de brins coupés dans la couche : un nombre entier entre **0** et le nombre de
 brins de la couche. Les champs sont obligatoires et valent **0** par défaut.
@@ -72,12 +73,29 @@ de couche de brins disponible pour ce câble** remplace ces champs, et le calcul
 
 ### Ajouter un marquage
 
-Cochez cette case pour indiquer que la coupure doit être marquée sur le graphique du studio.
+Cochez cette case pour marquer la coupure sur le graphique du studio, en 2D comme en 3D. Le
+marquage apparaît une fois l'entrée enregistrée : une icône de ciseaux, reliée par un trait en
+pointillés à son point d'ancrage.
+
+- Sans distance au support de référence, l'icône se tient au-dessus du support de référence.
+- Avec une distance, elle se tient au-dessus du point du câble situé à cette distance du support de
+  référence.
+
+L'icône reste à la même distance de son point d'ancrage à l'écran, quel que soit le zoom. Survolez-la
+pour afficher **Brins coupés**, et cliquez dessus pour ouvrir l'outil **CRR de brins coupés**. Le
+marquage s'affiche aussi dans l'onglet **Vue graphique** du formulaire de canton : voir
+[Consulter l'entrée depuis le formulaire de canton](#view-mode).
+
+Le marquage n'est affiché que lorsque la portée fait partie des supports affichés. Il disparaît
+quand l'entrée est supprimée, ou enregistrée sans la case cochée.
 
 :::{note}
 La portée, le support de référence et la distance situent la coupure, et le marquage est une
 option d'affichage : aucun d'eux ne modifie les résultats. La résistance réduite s'applique au
 canton entier, quelle que soit la portée sur laquelle les brins sont coupés.
+
+Cocher ou décocher **Ajouter un marquage** après un calcul laisse **Enregistrer** disponible, avec
+le marquage tel qu'il est maintenant.
 :::
 
 ---
@@ -141,10 +159,33 @@ travail est donc 1,5 fois plus élevé.
 | Bouton | Rôle |
 |---|---|
 | **Calculer** | Calcule la CRR et le nouveau taux de travail max. Disponible uniquement quand chaque champ de brins coupés est valide. |
-| **Enregistrer** | Enregistre l'entrée avec le canton. Disponible uniquement après un calcul, tant qu'aucun champ n'a changé depuis. |
+| **Enregistrer** | Enregistre l'entrée avec le canton. Disponible uniquement après un calcul, tant qu'aucun champ autre que **Ajouter un marquage** n'a changé depuis. |
 | **Supprimer** | Supprime l'entrée enregistrée. Disponible uniquement quand le canton en a une. |
 
 Pendant un calcul, un enregistrement ou une suppression, les trois boutons sont indisponibles.
+
+---
+
+(view-mode)=
+## Consulter l'entrée depuis le formulaire de canton
+
+Sur la page de l'étude, l'onglet **Vue graphique** du formulaire de canton affiche lui aussi le
+marquage. Un clic dessus ouvre l'outil **CRR de brins coupés** en consultation : l'entrée
+enregistrée est affichée avec ses résultats, mais chaque champ est en lecture seule et aucun bouton
+n'est affiché. Utilisez l'outil depuis le **Studio** pour modifier ou supprimer l'entrée.
+
+---
+
+## Effets dans le studio
+
+Les brins coupés enregistrés s'appliquent au studio, même outil fermé :
+
+- à l'ouverture du canton, puis après chaque enregistrement ou suppression, le studio en tient
+  compte : le **Taux de travail** sous le graphique est calculé avec la CRR réduite ;
+- l'icône de ciseaux à côté du **Taux de travail** est rouge quand au moins un brin est coupé dans
+  l'entrée enregistrée, et grise sinon ;
+- si le studio ne peut pas en tenir compte, le message **Échec de la mise à jour du studio avec les
+  brins coupés CRR** s'affiche. Enregistrer de nouveau l'entrée retente.
 
 ---
 
@@ -163,9 +204,10 @@ remplace la précédente.
 :::
 
 :::{note}
-Toute modification après un calcul, y compris la portée, la distance ou le marquage, rend
-**Enregistrer** indisponible. Cliquez de nouveau sur **Calculer** avant d'enregistrer : l'entrée
-enregistrée correspond toujours aux résultats affichés.
+Toute modification après un calcul, y compris la portée, le support de référence ou la distance,
+rend **Enregistrer** indisponible. Cliquez de nouveau sur **Calculer** avant d'enregistrer :
+l'entrée enregistrée correspond toujours aux résultats affichés. **Ajouter un marquage** fait
+exception : il ne modifie pas les résultats.
 :::
 
 ---
@@ -178,8 +220,9 @@ enregistrée correspond toujours aux résultats affichés.
 - Si la portée d'une entrée enregistrée disparaît du canton, par exemple quand l'un de ses
   supports est supprimé, l'entrée est supprimée aussi, et une notification vous en informe. Une
   entrée liée au canton entier est conservée.
-- Le bouton **Détail des couches** n'est pas encore disponible, et aucun marquage n'est encore
-  dessiné sur le graphique du studio.
+- Si le câble du canton change, l'entrée enregistrée est supprimée, et une notification vous en
+  informe : les brins coupés étaient comptés sur les couches du câble précédent.
+- Le bouton **Détail des couches** n'est pas encore disponible.
 
 ## Messages
 
@@ -190,4 +233,4 @@ enregistrée correspond toujours aux résultats affichés.
 | **Échec du calcul de la CRR** | Le calcul n'a pas pu aboutir. Les résultats sont effacés. |
 | **Échec de l'enregistrement des brins coupés CRR** | L'entrée n'a pas pu être enregistrée. La précédente est conservée. |
 | **Échec de la suppression des brins coupés CRR** | L'entrée n'a pas pu être supprimée. |
-| **Échec de la mise à jour du studio avec les brins coupés CRR** | L'entrée est enregistrée ou supprimée, mais les calculs du studio n'ont pas pu en tenir compte. |
+| **Échec de la mise à jour du studio avec les brins coupés CRR** | Les calculs du studio n'ont pas pu tenir compte de l'entrée enregistrée, après un enregistrement, une suppression ou un calcul. |

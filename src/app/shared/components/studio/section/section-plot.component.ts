@@ -43,6 +43,7 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 
 import { STUDIO_PLOT_DEBOUNCE_DELAY } from '@shared/components/studio/section/helpers/plot.constants';
 import { ClickAnnotationEvent } from './section-plot.interfaces';
@@ -62,6 +63,8 @@ export class SectionPlotComponent implements OnDestroy {
   // Input
   /** Lit data output used to draw the section plot. `null` when no data is available. */
   litData = input<GetSectionOutput | null>(null);
+  // In the preview of a section being edited, outside the studio
+  readonly isPreview = input(false);
 
   // Services
   private readonly plotService = inject(PlotService);
@@ -76,6 +79,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly distanceMeasuringService = inject(DistanceMeasuringService);
   private readonly floorFormService = inject(FloorFormService);
+  private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly documentRef = inject(DOCUMENT);
   private readonly translocoService = inject(TranslocoService);
 
@@ -124,7 +128,8 @@ export class SectionPlotComponent implements OnDestroy {
     cableModifications: this.plotService.temporaryLoadData?.cableModifParams ?? [],
     floors: this.spanService.section()?.floors ?? [],
     selectedFloorUuid: this.floorFormService.savedFloorUuid(),
-    selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex()
+    selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex(),
+    cutStrands: this.spanService.section()?.rrts_cut_strands ?? null
   }));
 
   // Debounced plot refresh with signal
@@ -282,6 +287,7 @@ export class SectionPlotComponent implements OnDestroy {
         selectedDisplayOptions,
         cableModifications,
         spanUuidToIndex,
+        cutStrands: section?.rrts_cut_strands ?? null,
         translocoService: this.translocoService
       });
       if (plot) {
@@ -339,6 +345,9 @@ export class SectionPlotComponent implements OnDestroy {
         this.sideTabsService.sideTabs.set(0);
         this.loadFormsService.activeLoadTab.set('2');
         this.cableModificationsService.selectSpan(data.spanUuid);
+      } else if (event?.annotation?.data?.type === 'cutStrands') {
+        // The preview edits a copy of the section: the saved entry is only shown there
+        this.toolbarDialogService.openTool('strand-rrts', { mode: this.isPreview() ? 'view' : 'edit' });
       }
     });
 

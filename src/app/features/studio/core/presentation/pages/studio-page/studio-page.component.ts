@@ -69,9 +69,9 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 import {
   buildSpanRows,
-  buildSupportRows,
-  maxOf
+  buildSupportRows
 } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
+import { maxOf } from '@shared/helpers/maxOf';
 import { SectionStateReportData } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.interfaces';
 
 /** Display mode for global section parameters: middle span or section maximum. */
@@ -163,7 +163,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   globalStressRate = computed<number | null>(() =>
     this.resolveGlobalValue(this.plotService.litData()?.output_parameters.utilization_rate)
   );
-  isGlobalCutStrand = signal<boolean>(false);
+  isGlobalCutStrand = computed(() => this.plotService.isCutStrandApplied());
 
   private readonly maxSupportIndex = computed(() => (this.spanService.section()?.supports?.length ?? 0) - 1);
 

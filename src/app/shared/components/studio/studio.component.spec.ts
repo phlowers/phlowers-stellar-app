@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Component, input, signal, WritableSignal } from '@angular/core';
 import { StudioComponent } from './studio.component';
 import { SectionPlotComponent } from './section/section-plot.component';
@@ -20,6 +21,7 @@ import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 })
 class SectionPlotStubComponent {
   litData = input<GetSectionOutput | null>();
+  isPreview = input(false);
 }
 
 const mockSection: Section = {
@@ -188,6 +190,15 @@ describe('StudioComponent', () => {
 
     it('should have isPreview input set to false', () => {
       expect(component.isPreview()).toBe(false);
+    });
+
+    it.each([true, false])('should tell the section plot whether it is a preview: %s', (isPreview) => {
+      fixture.componentRef.setInput('isPreview', isPreview);
+      fixture.detectChanges();
+
+      const plot = fixture.debugElement.query(By.directive(SectionPlotStubComponent))
+        .componentInstance as SectionPlotStubComponent;
+      expect(plot.isPreview()).toBe(isPreview);
     });
   });
 

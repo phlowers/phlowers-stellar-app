@@ -47,13 +47,6 @@ function at(values: number[] | undefined, index: number): number | null {
   return values?.[index] ?? null;
 }
 
-/** Returns the maximum finite value of an array, or null when empty/absent. */
-export function maxOf(values: number[] | undefined): number | null {
-  if (!values || values.length === 0) return null;
-  const max = Math.max(...values);
-  return Number.isFinite(max) ? max : null;
-}
-
 /**
  * Builds per-span result rows for the contiguous support range [startSupport, endSupport].
  * Span `i` sits between supports `i` and `i + 1`, so span rows cover indices [start, end - 1].
