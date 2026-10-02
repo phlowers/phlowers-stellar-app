@@ -494,13 +494,13 @@
 
 ---
 
-## 36. `studio.pose-table.max-two-decimals-error` + `studio.pose-table.integer-error` i18n keys
+## 36. `studio.hanging-table.max-two-decimals-error` + `studio.hanging-table.integer-error` i18n keys
 
 | | |
 |---|---|
-| 📍 Source | `public/i18n/en.json` / `public/i18n/fr.json` (`studio.pose-table` namespace) |
+| 📍 Source | `public/i18n/en.json` / `public/i18n/fr.json` (`studio.hanging-table` namespace) |
 | Code | `"max-two-decimals-error": "Maximum 2 decimal places"`, `"integer-error": "Value must be a whole number"` (en) + French equivalents |
-| 🔍 Evidence | Were displayed by `pose-table.component.ts`'s `getLowestTempError()`/`getComputingStepError()` methods; replaced by the unified `common.max-decimals-error` message during the number-input validators/messages unification. No remaining reference found in `src/app`. |
+| 🔍 Evidence | Were displayed by `hanging-table.component.ts`'s `getLowestTempError()`/`getComputingStepError()` methods; replaced by the unified `common.max-decimals-error` message during the number-input validators/messages unification. No remaining reference found in `src/app`. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove both keys from `en.json` and `fr.json` once confirmed unused elsewhere |
 | ✅ Validated | ⏳ Pending review |

@@ -815,7 +815,7 @@
       "organize-tools-info-text": "Sélectionnez et organisez les outils avec un accès rapide (maximum 5).",
       "loads-table-label": "Tableau de charges",
       "l0-table-label": "Tableau des longueurs L0",
-      "pose-table-label": "Tableau de pose",
+      "hanging-table-label": "Tableau de pose",
       "obstacles-table-label": "Tableau d'obstacles",
       "grounds-table-label": "Tableau de sols",
       "profile-option": "Profil",
@@ -1097,18 +1097,18 @@
       "attachment-position": "Position accr.",
       "tower-model": "Fichier Tower"
     },
-    "pose-table": {
+    "hanging-table": {
       "equivalent-span-label": "Portée équivalente",
       "calculation-engine-waiting-label": "En attente du moteur de calcul",
       "lowest-temperature-label": "Température la plus basse (°C)",
       "computing-step-label": "Pas de calcul (°C)",
-      "pose-parameter-label": "Paramètre de pose",
-      "horizontal-tension-th-label": "Tension horizontale T0",
+      "hanging-parameter-label": "Paramètre de pose",
+      "horizontal-tension-t0-label": "Tension horizontale T0",
       "calculation-error-text": "Une erreur s'est produite lors du calcul du tableau de pose",
       "failed-to-compute-equivalent-span": "Échec du calcul de la portée équivalente",
-      "failed-to-compute-pose-table": "Échec du calcul du tableau de pose",
-      "pose-table-saved": "Tableau de pose sauvegardé",
-      "failed-to-save-pose-table": "Échec de la sauvegarde du tableau de pose",
+      "failed-to-compute-hanging-table": "Échec du calcul du tableau de pose",
+      "hanging-table-saved": "Tableau de pose sauvegardé",
+      "failed-to-save-hanging-table": "Échec de la sauvegarde du tableau de pose",
       "max-two-decimals-error": "Valeur à 2 décimales maximum",
       "integer-error": "La valeur doit être un nombre entier"
     },
@@ -1127,6 +1127,15 @@
       "grade-unit": "gr",
       "aria-help": "Aide sur le réglage d'un câble",
       "calculation-failed": "Échec du calcul de réglage du câble"
+    },
+    "hanging-table-report": {
+      "title": "Rapport Tableau de pose",
+      "hanging-calculation-title": "Calcul de pose",
+      "lowest-temperature-label": "Température la plus basse",
+      "computing-step-label": "Pas de calcul",
+      "hanging-parameter-label": "Paramètre de pose (m)",
+      "horizontal-tension-label": "Tension horizontale (daN)",
+      "results-title": "Résultats du tableau de pose"
     },
     "rrts-cut-strands": {
       "layers-detail": "Détail des couches",

@@ -50,14 +50,15 @@ export function chunk<T>(items: T[], size: number): T[][] {
 
 /**
  * Builds the transposed table models for a set of result rows.
- * Columns are chunked into groups of MAX_COLS_PER_TABLE; each metric becomes a table row.
+ * Columns are chunked into groups of `maxCols` (MAX_COLS_PER_TABLE by default); each metric becomes a table row.
  */
 export function buildTables<T>(
   rows: T[],
   metrics: MetricDescriptor<T>[],
-  resolveLabel: (key: string) => string
+  resolveLabel: (key: string) => string,
+  maxCols: number = MAX_COLS_PER_TABLE
 ): PdfTableModel[] {
-  return chunk(rows, MAX_COLS_PER_TABLE).map((columns) => ({
+  return chunk(rows, maxCols).map((columns) => ({
     rows: metrics.map((metric) => ({
       label: resolveLabel(metric.labelKey),
       values: columns.map((column) => formatCell(column, metric))
@@ -104,12 +105,21 @@ function computeRowHeight(
 }
 
 /**
+ * Width (mm) of one value column. Tables keep MAX_COLS_PER_TABLE slots so chunks line up;
+ * a table built with more columns spreads them over the full content width instead.
+ */
+function computeValueColWidth(table: PdfTableModel, pageWidth: number, labelColWidth: number): number {
+  const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
+  const numCols = table.rows[0]?.values.length ?? 0;
+  return (contentWidth - labelColWidth) / Math.max(MAX_COLS_PER_TABLE, numCols);
+}
+
+/**
  * Computes the total rendered height (mm) of a table without drawing it.
  * Takes the same `pageWidth` as `drawTable` so both derive the column widths identically.
  */
 export function computeTableHeight(doc: jsPDF, table: PdfTableModel, pageWidth: number, labelColWidth: number): number {
-  const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
-  const valueColWidth = (contentWidth - labelColWidth) / MAX_COLS_PER_TABLE;
+  const valueColWidth = computeValueColWidth(table, pageWidth, labelColWidth);
   return table.rows.reduce((total, row) => total + computeRowHeight(doc, row, labelColWidth, valueColWidth), 0);
 }
 
@@ -127,7 +137,7 @@ export function computeLabelColWidth(doc: jsPDF, tables: PdfTableModel[]): numbe
   return maxLabelWidth + 2 * TABLE_CELL_PADDING_X;
 }
 
-/** Draws one transposed result table (metric rows × up to 5 value columns). Returns the next Y. */
+/** Draws one transposed result table (metric rows × value columns). Returns the next Y. */
 export function drawTable(
   doc: jsPDF,
   table: PdfTableModel,
@@ -135,8 +145,7 @@ export function drawTable(
   pageWidth: number,
   labelColWidth: number
 ): number {
-  const contentWidth = pageWidth - PAGE_MARGIN.left - PAGE_MARGIN.right;
-  const valueColWidth = (contentWidth - labelColWidth) / MAX_COLS_PER_TABLE;
+  const valueColWidth = computeValueColWidth(table, pageWidth, labelColWidth);
   const numCols = table.rows[0]?.values.length ?? 0;
   let y = startY;
 
