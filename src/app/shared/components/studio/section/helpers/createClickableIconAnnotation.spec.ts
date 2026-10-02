@@ -1,13 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
-import { ClickableIconAnnotationParams } from './createClickableIconAnnotation.interfaces';
+import {
+  ClickableIconWithArrowParams,
+  ClickableIconWithoutArrowParams
+} from './createClickableIconAnnotation.interfaces';
 
 type AnnotationWithExtras = ReturnType<typeof buildClickableIconAnnotation> & {
   z?: number;
+  yshift?: number;
+  hovertext?: string;
+  hoverlabel?: { bgcolor?: string; bordercolor?: string; font?: { color?: string } };
   data?: Record<string, unknown>;
 };
 
-const makeParams = (overrides: Partial<ClickableIconAnnotationParams> = {}): ClickableIconAnnotationParams => ({
+const makeParams = (overrides: Partial<ClickableIconWithArrowParams> = {}): ClickableIconWithArrowParams => ({
   arrowTipX: 1,
   arrowTipY: 2,
   arrowTipZ: 3,
@@ -15,6 +21,20 @@ const makeParams = (overrides: Partial<ClickableIconAnnotationParams> = {}): Cli
   color: '#4A355A',
   arrowYOffset: -50,
   data: { type: 'spanLoad', supportUuid: 'uuid-1' },
+  ...overrides
+});
+
+const makeStandaloneParams = (
+  overrides: Partial<ClickableIconWithoutArrowParams> = {}
+): ClickableIconWithoutArrowParams => ({
+  showArrow: false,
+  arrowTipX: 1,
+  arrowTipY: 2,
+  arrowTipZ: 3,
+  icon: '&#xf0c4;',
+  color: '#7D5A9F',
+  yShift: 90,
+  data: { type: 'cutStrands' },
   ...overrides
 });
 
@@ -142,6 +162,64 @@ describe('buildClickableIconAnnotation', () => {
       const data = { type: 'obstacle', obstacleUuid: 'obs-1', obstaclePositionIndex: 2 };
       const result = buildClickableIconAnnotation(makeParams({ data })) as AnnotationWithExtras;
       expect(result.data).toStrictEqual(data);
+    });
+  });
+
+  describe('click capture', () => {
+    it('should capture events explicitly, with or without arrow and hover label', () => {
+      expect(buildClickableIconAnnotation(makeParams()).captureevents).toBe(true);
+      expect(buildClickableIconAnnotation(makeStandaloneParams()).captureevents).toBe(true);
+    });
+  });
+
+  describe('icon size and border padding', () => {
+    it('should set font.size and borderpad from iconSize and borderPad when provided', () => {
+      const result = buildClickableIconAnnotation(makeParams({ iconSize: 12, borderPad: 4 }));
+      expect(result.font?.size).toBe(12);
+      expect(result.borderpad).toBe(4);
+    });
+
+    it('should default to 8 and 6 when omitted', () => {
+      const result = buildClickableIconAnnotation(makeParams());
+      expect(result.font?.size).toBe(8);
+      expect(result.borderpad).toBe(6);
+    });
+  });
+
+  describe('hover label', () => {
+    it('should not set a hover label by default', () => {
+      const result = buildClickableIconAnnotation(makeParams()) as AnnotationWithExtras;
+      expect(result.hovertext).toBeUndefined();
+      expect(result.hoverlabel).toBeUndefined();
+    });
+
+    it('should show its text over the icon color', () => {
+      const result = buildClickableIconAnnotation(
+        makeParams({ color: '#ff0000', hover: { text: 'Cut strands', textColor: '#ffffff' } })
+      ) as AnnotationWithExtras;
+      expect(result.hovertext).toBe('Cut strands');
+      expect(result.hoverlabel).toEqual({ bgcolor: '#ff0000', bordercolor: '#ff0000', font: { color: '#ffffff' } });
+    });
+  });
+
+  describe('without arrow', () => {
+    it('should hide the arrow and shift the icon above its anchor', () => {
+      const result = buildClickableIconAnnotation(makeStandaloneParams({ yShift: 90 })) as AnnotationWithExtras;
+      expect(result.showarrow).toBe(false);
+      expect(result.yshift).toBe(90);
+      expect(result.ax).toBeUndefined();
+      expect(result.ay).toBeUndefined();
+      expect(result.arrowcolor).toBeUndefined();
+    });
+
+    it('should keep the position, color and data payload', () => {
+      const data = { type: 'cutStrands' };
+      const result = buildClickableIconAnnotation(
+        makeStandaloneParams({ arrowTipX: 10, arrowTipY: 20, arrowTipZ: 30, color: '#ff0000', data })
+      ) as AnnotationWithExtras;
+      expect([result.x, result.y, result.z]).toEqual([10, 20, 30]);
+      expect(result.bordercolor).toBe('#ff0000');
+      expect(result.data).toEqual(data);
     });
   });
 });

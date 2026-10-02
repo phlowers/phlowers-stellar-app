@@ -277,8 +277,9 @@ export class PlotService {
     });
     this.litData.set(result?.sectionOutput?.current ?? null);
     this.baseLitData.set(result?.sectionOutput?.base ?? null);
-    this.projectedCutStrands.set(cutStrands);
     const currentLitData = result?.sectionOutput?.current ?? null;
+    // Only a successful current output was calculated with them
+    this.projectedCutStrands.set(!error && currentLitData ? cutStrands : NO_CUT_STRANDS);
     const obstacles = result?.obstacles ?? [];
     if (currentLitData && obstacles.length > 0) {
       this.litData.set({ ...currentLitData, obstacles });
@@ -419,7 +420,12 @@ export class PlotService {
     if (!isEqual(cutStrands, this.cutStrands) && !(await this.applyCutStrands(cutStrands))) return;
     // Not when the engine study was dropped (the studio was left), or a newer request replaced this one, in the meantime
     if (isEqual(cutStrands, this.cutStrands) && !isEqual(cutStrands, this.projectedCutStrands())) {
-      await this.refreshProjection();
+      try {
+        await this.refreshProjection();
+      } catch (error) {
+        this.loading.set(false);
+        this.reportCutStrandsSyncFailure(error);
+      }
     }
   }
 
@@ -428,18 +434,26 @@ export class PlotService {
     const previous = this.cutStrands;
     // Cached before the call: the worker runs tasks in order, so the last request sent wins
     this.cutStrands = cutStrands;
-    const { error } = await this.workerPythonService.runTask(Task.setCutStrands, { cutStrands });
+    // runTask rejects on timeout or when the worker is unavailable, which leaves the engine study in an unknown state
+    const error = await this.workerPythonService
+      .runTask(Task.setCutStrands, { cutStrands })
+      .then(({ error }) => error)
+      .catch((error_: unknown) => error_ ?? new Error('setCutStrands rejected'));
     if (!error) return true;
 
     // Only roll back if no newer request replaced this one in the meantime
     if (this.cutStrands === cutStrands) {
       this.cutStrands = previous;
     }
+    this.reportCutStrandsSyncFailure(error);
+    return false;
+  }
+
+  private reportCutStrandsSyncFailure(error: unknown): void {
     this.logger.error('Failed to apply the saved RRTS cut strands', error);
     if (this.isStudioActive()) {
       this.notificationService.error(this.translocoService.translate('studio.rrts-cut-strands.failed-to-sync'));
     }
-    return false;
   }
 
   private async updateAspectRatio(

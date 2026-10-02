@@ -132,6 +132,33 @@ describe('ToolbarDialogService', () => {
     });
   });
 
+  describe('closeTool then reopening during the close animation', () => {
+    it('should keep the tool and its RRTS context of the reopened dialog', async () => {
+      service.openTool('strand-rrts', { mode: 'edit' });
+      service.closeTool();
+
+      await wait(100);
+      service.openTool('strand-rrts', { mode: 'view' });
+      await wait(350);
+
+      expect(service.currentTool()).toBe('strand-rrts');
+      expect(service.strandRrtsContext()).toEqual({ mode: 'view' });
+      expect(service.isOpen()).toBe(true);
+    });
+
+    it('should still clean up after the last close', async () => {
+      service.openTool('strand-rrts', { mode: 'edit' });
+      service.closeTool();
+      await wait(100);
+      service.openTool('strand-rrts', { mode: 'view' });
+      service.closeTool();
+
+      await wait(350);
+      expect(service.currentTool()).toBeNull();
+      expect(service.strandRrtsContext()).toBeNull();
+    });
+  });
+
   describe('getComponent', () => {
     it('should return null when no tool is selected', () => {
       expect(service.getComponent()).toBeNull();

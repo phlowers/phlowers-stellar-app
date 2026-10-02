@@ -12,7 +12,8 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
-import { StrandRrtsContext, ToolbarDialogService } from '../../services/toolbar-dialog.service';
+import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
+import { StrandRrtsContext } from '../../services/toolbar-dialog.interfaces';
 import { Section } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 
