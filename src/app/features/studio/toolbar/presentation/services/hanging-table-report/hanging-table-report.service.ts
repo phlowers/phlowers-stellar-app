@@ -10,15 +10,16 @@ import { TranslocoService } from '@jsverse/transloco';
 
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PdfBaseService } from '@shared/pdf/pdf-base.service';
-import { PAGE_SIZE } from '@shared/pdf/pdf-layout.constantes';
+import { PAGE_MARGIN, PAGE_SIZE, SECTION_TITLE_HEIGHT } from '@shared/pdf/pdf-layout.constantes';
 import {
   buildReportLabels,
+  drawHeader,
   drawPageFooters,
   drawSectionTitle,
   generatePdfReport,
   sanitizeFilenamePart
 } from '@shared/pdf/pdf-primitives.helpers';
-import { buildTables, computeLabelColWidth, drawTable } from '@shared/pdf/pdf-table.helpers';
+import { buildTables, computeLabelColWidth, computeTableHeight, drawTable } from '@shared/pdf/pdf-table.helpers';
 
 import { PDF_HANGING_TABLE_LABEL_KEYS, HANGING_TABLE_METRICS } from './hanging-table-report.constantes';
 import { buildHangingTableRows, drawHangingTableReportPage1 } from './hanging-table-report.helpers';
@@ -39,19 +40,25 @@ export class HangingTableReportService extends PdfBaseService {
       notificationService: this.notificationService,
       translate,
       errorLogMessage: 'Failed to generate hanging table report',
-      successKey: 'studio.hanging-table-report.report-generated-success',
-      errorKey: 'studio.hanging-table-report.report-generation-failed',
+      successKey: 'common.report-generated-successfully-label',
+      errorKey: 'common.failed-to-generate-report',
       build: async () => {
         const doc = await this.createDoc();
         const labels = buildReportLabels<HangingTableReportLabels>(translate, PDF_HANGING_TABLE_LABEL_KEYS);
 
-        const y = drawHangingTableReportPage1(doc, data, labels);
+        let y = drawHangingTableReportPage1(doc, data, labels);
 
-        // Single portrait page: every temperature on one row, below the context sections
+        // Every temperature on one row, below the context sections
         const rows = buildHangingTableRows(data.results);
         const [table] = buildTables(rows, HANGING_TABLE_METRICS, translate, Math.max(rows.length, 1));
         if (table) {
           const labelColWidth = computeLabelColWidth(doc, [table]);
+          const tableHeight = computeTableHeight(doc, table, PAGE_SIZE.width, labelColWidth);
+          // Long wrapped metadata can push the results past the page bottom: continue on a new page
+          if (y + SECTION_TITLE_HEIGHT + tableHeight > PAGE_SIZE.height - PAGE_MARGIN.bottom) {
+            doc.addPage('a4', 'portrait');
+            y = drawHeader(doc, data.date || '-', labels.reportTitle);
+          }
           drawTable(doc, table, drawSectionTitle(doc, labels.resultsTitle, y), PAGE_SIZE.width, labelColWidth);
         }
 
