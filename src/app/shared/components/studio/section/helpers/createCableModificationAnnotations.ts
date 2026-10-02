@@ -88,8 +88,9 @@ const buildLabelAnnotation = (
  * Pure function (no DI, no side effects) so it can be unit-tested in isolation.
  * Only renders annotations for modifications whose span is currently visible
  * (within `startSupport` ≤ index < `endSupport`). The arrow tail of the icon
- * is anchored at the exact point on the cable polyline corresponding to
- * (`supportRef`, `distanceSupportRef`), so the connecting line moves whenever
+ * is anchored at the point on the cable polyline corresponding to
+ * (`supportRef`, `distanceSupportRef`) in `resolveAnchorCoord`, which only
+ * approximates the engine's load placement, so the connecting line moves whenever
  * those values change.
  *
  * The icon uses the same visual style as the load annotation (solid arrow,

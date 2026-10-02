@@ -911,6 +911,45 @@ describe('PlotService', () => {
         expect(notificationService.error).toHaveBeenCalledOnce();
       });
 
+      it.each([
+        ['returns an error', { result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] }],
+        [
+          'returns no current output',
+          {
+            result: { sectionOutput: { current: null, base: null }, obstacles: [], distances: [] },
+            error: null,
+            diagnostics: []
+          }
+        ]
+      ])('should not flag the cut strands as applied when the projection %s', async (_, projection) => {
+        const answer = engine();
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.refreshProjection ? Promise.resolve(projection) : answer(task, inputs)
+        );
+
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(engineCutStrands()).toEqual([CUT]);
+        expect(service.litData()).toBeNull();
+        expect(service.isCutStrandApplied()).toBe(false);
+      });
+
+      it('should handle the task rejecting like an engine error, and not cache the cut strands', async () => {
+        service.isStudioActive.set(true);
+        const timeout = new Error('Task setCutStrands timed out after 30000ms');
+        const answer = engine();
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.setCutStrands ? Promise.reject(timeout) : answer(task, inputs)
+        );
+
+        await service.initSectionStudio(sectionWithCutStrands(CUT));
+
+        expect(runTasks()).toContain(Task.refreshProjection);
+        expect(service.isCutStrandApplied()).toBe(false);
+        expect(logger.error).toHaveBeenCalledWith('Failed to apply the saved RRTS cut strands', timeout);
+        expect(notificationService.error).toHaveBeenCalledOnce();
+      });
+
       it('should not report a failure outside the studio, in the section preview', async () => {
         mockWorkerPythonService.runTask.mockImplementation(engine(CUT));
 
@@ -945,6 +984,20 @@ describe('PlotService', () => {
         expect(engineCutStrands()).toEqual([OTHER_CUT]);
         expect(runTasks().slice(0, 2)).toEqual([Task.setCutStrands, Task.refreshProjection]);
         expect(service.isCutStrandApplied()).toBe(true);
+      });
+
+      it('should report a rejected worker task as a failed sync, without throwing', async () => {
+        const timeout = new Error('Task refreshProjection timed out after 30000ms');
+        const answer = engine();
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown, inputs?: unknown) =>
+          task === Task.refreshProjection ? Promise.reject(timeout) : answer(task, inputs)
+        );
+        spanService.section.set(sectionWithCutStrands(OTHER_CUT));
+
+        await expect(service.syncCutStrands()).resolves.toBeUndefined();
+
+        expect(logger.error).toHaveBeenCalledWith('Failed to apply the saved RRTS cut strands', timeout);
+        expect(notificationService.error).toHaveBeenCalledOnce();
       });
 
       it('should clear them, and the cut flag, once the entry is deleted', async () => {

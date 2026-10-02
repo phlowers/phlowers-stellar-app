@@ -21,6 +21,7 @@ import {
   CUT_STRANDS_OFFSET_Y,
   getCutStrandsLabel
 } from './createCutStrandsAnnotations.constantes';
+import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
 import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor';
 
 type MappedAnchor = ReturnType<typeof mapAnchorToAxes>;
@@ -33,8 +34,9 @@ const findSupportTop = (support: number[][] | undefined): number[] | null =>
  * Resolves the point the marking hangs from.
  *
  * @remarks
- * Without a distance, the marking stands above the reference support itself. With one, it hangs from the exact
- * point of the cable at that distance, found like the anchor of a cable modification or of a punctual load.
+ * Without a distance, the marking stands above the reference support itself. With one, it hangs from the point of
+ * the cable found like the anchor of a cable modification, which only approximates where the engine places a load
+ * at the same distance (see `resolveAnchorCoord`).
  */
 const resolveAnchor = (
   litData: GetSectionOutput,
@@ -106,32 +108,24 @@ const buildDashedLineShape = ({ x, y }: MappedAnchor): Partial<Plotly.Shape> => 
   }
 });
 
-// Clicking the icon opens the RRTS tool: the hover label is also what makes it capture mouse events
+// Clicking the icon opens the RRTS tool. The dashed line is drawn apart, so the icon stands on its own
 const buildIcon = (
-  anchor: MappedAnchor,
+  { x, y, z }: MappedAnchor,
   translocoService?: CreatePlotParams['translocoService']
 ): Partial<Plotly.Annotations> =>
-  ({
-    ...atAnchor(anchor),
-    showarrow: false,
-    yshift: CUT_STRANDS_OFFSET_Y,
-    text: CUT_STRANDS_ICON,
-    hovertext: getCutStrandsLabel(translocoService),
-    hoverlabel: {
-      bgcolor: CUT_STRANDS_COLOR,
-      bordercolor: CUT_STRANDS_COLOR,
-      font: { color: CUT_STRANDS_HOVER_TEXT_COLOR }
-    },
-    bordercolor: CUT_STRANDS_COLOR,
-    borderpad: CUT_STRANDS_ICON_PADDING,
-    bgcolor: 'rgba(0,0,0,0)',
-    font: {
-      family: 'FontAwesome',
-      color: CUT_STRANDS_COLOR,
-      size: CUT_STRANDS_ICON_SIZE
-    },
+  buildClickableIconAnnotation({
+    showArrow: false,
+    arrowTipX: x,
+    arrowTipY: y,
+    arrowTipZ: z,
+    yShift: CUT_STRANDS_OFFSET_Y,
+    icon: CUT_STRANDS_ICON,
+    iconSize: CUT_STRANDS_ICON_SIZE,
+    borderPad: CUT_STRANDS_ICON_PADDING,
+    color: CUT_STRANDS_COLOR,
+    hover: { text: getCutStrandsLabel(translocoService), textColor: CUT_STRANDS_HOVER_TEXT_COLOR },
     data: { type: 'cutStrands' } satisfies CutStrandsAnnotationData
-  }) as Partial<Plotly.Annotations>;
+  });
 
 /**
  * Resolves where the marking is drawn, on the plot axes.

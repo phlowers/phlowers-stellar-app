@@ -23,12 +23,10 @@ export interface SpanAnchorRef {
  * (`coord[0]`, world x along the line) matches `targetX`.
  *
  * @remarks
- * Cable abscissa (the same semantics used by `loadPosition` /
- * `distanceSupportRef` in mechaphlowers) maps to horizontal x distance from
- * the left support, **not** to arc length along the sagging cable. Using arc
- * length puts the anchor too far down the curve. Interpolating by `x` keeps
- * the cable modification icon on the same data point as a punctual load
- * placed at the same `loadPosition`.
+ * The distance is read as an offset along the world x axis, **not** as an arc
+ * length along the sagging cable, which would put the anchor too far down the
+ * curve. This is an approximation of where the engine places a load at the same
+ * distance (see `resolveAnchorCoord`).
  *
  * - Returns `null` for empty polylines.
  * - Returns the single point when the polyline has only one sample.
@@ -68,9 +66,12 @@ const findPointAtAbscissa = (polyline: number[][] | undefined, targetX: number):
  *   (`polyline[0].x`).
  * - `supportRef === 'RIGHT'`: abscissa starts at the right support
  *   (`polyline[last].x`).
- * - Matches the semantics of `loadPosition` used by mechaphlowers, so an
- *   annotation placed with it shares the exact same anchor as a punctual load
- *   placed at the same distance from the same reference support.
+ * - Approximate: the engine turns the distance of a load into a ratio of the
+ *   support-to-support span length, applied between the hanging points, whereas
+ *   this reads it as an x offset in the plot frame. The result can therefore
+ *   differ from the engine's load node, by about 1 m on a straight line and by
+ *   more on spans that are not parallel to the x axis (line angle). Only the
+ *   anchor of the annotations is affected, not any calculated value.
  *
  * @category Studio
  * @param litData - Raw section output, whose `coords.spans` holds the polylines.

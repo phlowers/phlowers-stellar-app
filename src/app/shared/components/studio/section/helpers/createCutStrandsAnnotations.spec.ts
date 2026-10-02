@@ -219,6 +219,12 @@ describe('createCutStrandsAnnotations', () => {
       expect(icon.font?.color).toBe(CUT_STRANDS_COLOR);
     });
 
+    it('should capture the click that opens the RRTS tool, whatever the hover label', () => {
+      const icon = iconOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
+
+      expect(icon.captureevents).toBe(true);
+    });
+
     it('should use the primary-600 color', () => {
       expect(CUT_STRANDS_COLOR).toBe('#7D5A9F');
     });
