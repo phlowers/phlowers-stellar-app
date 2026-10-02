@@ -298,6 +298,9 @@ export class VhlAndGuyingComponent {
     }
 
     const selectedCharge = section.charges.find((c) => c.uuid === section.selected_charge_uuid);
+    const initialCondition = section.initial_conditions.find(
+      (ic) => ic.uuid === section.selected_initial_condition_uuid
+    );
     const spanOptions = this.spanService.getSpanOptionsWithIndex();
     const selectedSpanOption = spanOptions.find((opt) => opt.value?.uuid === formValue.selectedSpan?.uuid);
 
@@ -313,6 +316,7 @@ export class VhlAndGuyingComponent {
       studyDescription: study.description ?? '',
       sectionName: section.name ?? '-',
       sectionComment: section.comment ?? '',
+      initialConditionName: initialCondition?.name ?? '-',
       chargeName: selectedCharge?.name ?? '-',
       chargeDescription: selectedCharge?.description ?? '',
       guyingSpan: selectedSpanOption?.label ?? '-',

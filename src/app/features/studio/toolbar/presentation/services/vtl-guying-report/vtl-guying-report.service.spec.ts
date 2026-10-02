@@ -48,6 +48,7 @@ function createMockReportData(): VtlGuyingReportData {
     studyDescription: 'Description',
     sectionName: 'Section A',
     sectionComment: 'Comment',
+    initialConditionName: 'CI 1',
     chargeName: 'Charge 1',
     chargeDescription: 'Charge desc',
     guyingSpan: '42 - 43',
