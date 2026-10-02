@@ -650,11 +650,15 @@ describe('createPlot', () => {
       expect(layoutArg.scene.annotations.filter(isMarkingIcon)).toHaveLength(1);
     });
 
-    it('should draw the marking in the 2D layout', () => {
+    it('should draw the marking in the 2D layout, its dashed line as a shape', () => {
       createPlot({ ...markingParams(), view: '2d' });
 
-      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as { annotations: { hovertext?: string }[] };
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        annotations: { hovertext?: string }[];
+        shapes: { type?: string }[];
+      };
       expect(layoutArg.annotations.filter(isMarkingIcon)).toHaveLength(1);
+      expect(layoutArg.shapes).toEqual([expect.objectContaining({ type: 'line' })]);
     });
 
     it.each(['2d', '3d'] as const)('should draw no marking in %s when the entry does not ask for one', (view) => {

@@ -4,7 +4,7 @@ import { DecimalPipe } from '@angular/common';
 import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { ElementRef, signal } from '@angular/core';
+import { ElementRef, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
@@ -29,8 +29,6 @@ import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
-import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
-import { LoggerService } from '@core/services/logger/logger.service';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 interface SignalFn<T> {
@@ -53,11 +51,11 @@ class PlotServiceMock {
   isStudioActive: SignalFn<boolean> = createSignalMock<boolean>(false);
   study: SignalFn<Study | null> = createSignalMock<Study | null>(null);
   litData = signal<{ output_parameters?: { parameter?: number[]; utilization_rate?: number[] } } | null>(null);
-  loading = signal<boolean>(false);
+  loading: SignalFn<boolean> = createSignalMock<boolean>(false);
   section = signal<Section | null>(null);
   plotOptions = vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
   plotOptionsChange = vi.fn();
-  refreshProjection = vi.fn().mockResolvedValue(undefined);
+  isCutStrandApplied = signal<boolean>(false);
   resetAll = vi.fn();
   workerReady: SignalFn<boolean> = createSignalMock<boolean>(true);
 }
@@ -111,10 +109,8 @@ describe('StudioPageComponent', () => {
   let obstaclesService: ObstaclesService;
   let obstacleFormService: vi.Mocked<ObstacleFormService>;
   let mockObstacleStateService: { distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> };
-  let mockNotificationService: { warning: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
+  let mockNotificationService: { warning: ReturnType<typeof vi.fn> };
   let mockSectionStateReportService: { generateReport: ReturnType<typeof vi.fn> };
-  let mockStrandRrtsService: { applySaved: ReturnType<typeof vi.fn> };
-  let mockLoggerService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
@@ -147,10 +143,8 @@ describe('StudioPageComponent', () => {
       clearPositions: vi.fn()
     } as unknown as vi.Mocked<ObstacleFormService>;
     mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
-    mockNotificationService = { warning: vi.fn(), error: vi.fn() };
+    mockNotificationService = { warning: vi.fn() };
     mockSectionStateReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
-    mockStrandRrtsService = { applySaved: vi.fn().mockResolvedValue(undefined) };
-    mockLoggerService = { error: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -164,7 +158,6 @@ describe('StudioPageComponent', () => {
               'studio.studio-page.cable-manip-support-label': 'Cable manip. at support',
               'studio.studio-page.climate-condition-label': 'Climate condition',
               'studio.studio-page.distances-label': 'Distances',
-              'studio.rrts-cut-strands.failed-to-sync': 'Failed to update the studio with the RRTS cut strands',
               'studio.shared.horizontal': 'Horizontal',
               'studio.studio-page.load-marking-label': 'Load / Marking',
               'studio.studio-page.max-section-option': 'Max section',
@@ -217,8 +210,6 @@ describe('StudioPageComponent', () => {
         { provide: StudioViewPersistenceService, useValue: mockPersistenceService },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: SectionStateReportService, useValue: mockSectionStateReportService },
-        { provide: StrandRrtsService, useValue: mockStrandRrtsService },
-        { provide: LoggerService, useValue: mockLoggerService },
         provideHttpClient(),
         provideHttpClientTesting(),
         {
@@ -1173,181 +1164,11 @@ describe('StudioPageComponent', () => {
     });
   });
 
-  describe('saved RRTS cut strands', () => {
-    const makeCutStrands = (cutStrands: number[]) => ({
-      spanUuid: null,
-      supportRef: null,
-      distanceSupportRef: null,
-      cutStrands,
-      addMarking: false
-    });
-    const makeSection = (cutStrands: number[] | null) =>
-      ({ supports: [], rrts_cut_strands: cutStrands && makeCutStrands(cutStrands) }) as unknown as Section;
-    const savedSection = makeSection([1, 3, 0, 0, 0, 0, 0, 0]);
-    const sectionWithoutCutStrands = { supports: [] } as unknown as Section;
-    const engineOutput = { output_parameters: { utilization_rate: [40, 90] } };
-
-    // The engine study is ready once initSectionStudio has populated the plot data
-    const makeEngineReady = (section: Section) => {
-      spanService.section.set(section);
-      plotService.litData.set(engineOutput);
-      fixture.detectChanges();
-    };
-
-    // The section of the studio changes: the RRTS dialog saves or deletes the entry
-    const changeSection = (section: Section) => {
-      spanService.section.set(section);
-      fixture.detectChanges();
-    };
-
-    it('should apply them to the engine, refresh the plot data, then flag the strand as cut', async () => {
-      let resolveRefresh!: () => void;
-      plotService.refreshProjection.mockReturnValue(new Promise<void>((resolve) => (resolveRefresh = resolve)));
-
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(plotService.refreshProjection).toHaveBeenCalledOnce());
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledExactlyOnceWith(savedSection.rrts_cut_strands);
-      expect(mockStrandRrtsService.applySaved.mock.invocationCallOrder[0]).toBeLessThan(
-        plotService.refreshProjection.mock.invocationCallOrder[0]
-      );
+  describe('isGlobalCutStrand', () => {
+    it('should follow the cut strands the plot data account for', () => {
       expect(component.isGlobalCutStrand()).toBe(false);
 
-      resolveRefresh();
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-    });
-
-    it('should leave the engine and the strand flag alone without saved cut strands', () => {
-      makeEngineReady(sectionWithoutCutStrands);
-
-      expect(mockStrandRrtsService.applySaved).not.toHaveBeenCalled();
-      expect(plotService.refreshProjection).not.toHaveBeenCalled();
-      expect(component.isGlobalCutStrand()).toBe(false);
-    });
-
-    it('should apply cut strands saved at 0 on every layer, without flagging the strand as cut', async () => {
-      const noCutStrand = makeSection([0, 0, 0, 0, 0, 0, 0, 0]);
-
-      makeEngineReady(noCutStrand);
-      await vi.waitFor(() => expect(plotService.refreshProjection).toHaveBeenCalledOnce());
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledExactlyOnceWith(noCutStrand.rrts_cut_strands);
-      expect(component.isGlobalCutStrand()).toBe(false);
-    });
-
-    it('should clear the strand flag when the saved cut strands are replaced by 0 on every layer', async () => {
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-
-      changeSection(makeSection([0, 0, 0, 0, 0, 0, 0, 0]));
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(false));
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledTimes(2);
-      expect(plotService.refreshProjection).toHaveBeenCalledTimes(2);
-    });
-
-    it('should wait for the plot data', () => {
-      spanService.section.set(savedSection);
-      fixture.detectChanges();
-
-      expect(mockStrandRrtsService.applySaved).not.toHaveBeenCalled();
-    });
-
-    it('should wait for the engine to stop loading', () => {
-      plotService.loading.set(true);
-      makeEngineReady(savedSection);
-      expect(mockStrandRrtsService.applySaved).not.toHaveBeenCalled();
-
-      plotService.loading.set(false);
-      fixture.detectChanges();
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledOnce();
-    });
-
-    it('should not apply them again when the plot data refreshes or the section reloads with the same entry', async () => {
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-
-      plotService.litData.set({ ...engineOutput });
-      changeSection(makeSection([1, 3, 0, 0, 0, 0, 0, 0]));
-      await Promise.resolve();
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledOnce();
-      expect(plotService.refreshProjection).toHaveBeenCalledOnce();
-    });
-
-    it('should apply cut strands saved after the opening, and flag the strand as cut', async () => {
-      makeEngineReady(sectionWithoutCutStrands);
-
-      changeSection(savedSection);
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledExactlyOnceWith(savedSection.rrts_cut_strands);
-      expect(plotService.refreshProjection).toHaveBeenCalledOnce();
-    });
-
-    it('should apply cut strands replaced after the opening', async () => {
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-
-      const replacement = makeSection([5, 3, 0, 0, 0, 0, 0, 0]);
-      changeSection(replacement);
-      await vi.waitFor(() => expect(mockStrandRrtsService.applySaved).toHaveBeenCalledTimes(2));
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenLastCalledWith(replacement.rrts_cut_strands);
-      await vi.waitFor(() => expect(plotService.refreshProjection).toHaveBeenCalledTimes(2));
-      expect(component.isGlobalCutStrand()).toBe(true);
-    });
-
-    it('should clear the cut strands of the engine, and the strand flag, once the entry is deleted', async () => {
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-
-      changeSection(makeSection(null));
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(false));
-
-      expect(mockStrandRrtsService.applySaved).toHaveBeenLastCalledWith(null);
-      expect(plotService.refreshProjection).toHaveBeenCalledTimes(2);
-    });
-
-    it('should report an engine failure and keep the strand flag off', async () => {
-      const error = new Error('engine failure');
-      mockStrandRrtsService.applySaved.mockRejectedValue(error);
-
-      makeEngineReady(savedSection);
-      await vi.waitFor(() =>
-        expect(mockNotificationService.error).toHaveBeenCalledExactlyOnceWith(
-          'Failed to update the studio with the RRTS cut strands'
-        )
-      );
-
-      expect(mockLoggerService.error).toHaveBeenCalledWith('Failed to apply the saved RRTS cut strands', error);
-      expect(plotService.refreshProjection).not.toHaveBeenCalled();
-      expect(component.isGlobalCutStrand()).toBe(false);
-    });
-
-    it('should not retry a failure on the next plot refresh, but on the next change', async () => {
-      mockStrandRrtsService.applySaved.mockRejectedValueOnce(new Error('engine failure'));
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(mockNotificationService.error).toHaveBeenCalledOnce());
-
-      plotService.litData.set({ ...engineOutput });
-      fixture.detectChanges();
-      await Promise.resolve();
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledOnce();
-
-      changeSection(makeSection([2, 0, 0, 0, 0, 0, 0, 0]));
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-      expect(mockStrandRrtsService.applySaved).toHaveBeenCalledTimes(2);
-    });
-
-    it('should keep the strand flag as is when a later change fails', async () => {
-      makeEngineReady(savedSection);
-      await vi.waitFor(() => expect(component.isGlobalCutStrand()).toBe(true));
-
-      mockStrandRrtsService.applySaved.mockRejectedValueOnce(new Error('engine failure'));
-      changeSection(makeSection(null));
-      await vi.waitFor(() => expect(mockNotificationService.error).toHaveBeenCalledOnce());
+      plotService.isCutStrandApplied.set(true);
 
       expect(component.isGlobalCutStrand()).toBe(true);
     });
@@ -1393,6 +1214,7 @@ describe('StudioPageComponent', () => {
 
 describe('StudioPageComponent - HTML rendering', () => {
   let fixture: ComponentFixture<StudioPageComponent>;
+  let plotServiceMock: { isCutStrandApplied: WritableSignal<boolean> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -1409,9 +1231,11 @@ describe('StudioPageComponent - HTML rendering', () => {
       spanAmountChoice: signal<'single' | 'double' | 'all'>('all'),
       study: signal(null),
       isStudioActive: signal(false),
+      isCutStrandApplied: signal(false),
       resetAll: vi.fn(),
       workerReady: signal(true)
     };
+    plotServiceMock = mockPlotService;
 
     const mockLoadFormsService = {
       activeLoadTab: signal('0')
@@ -1512,6 +1336,19 @@ describe('StudioPageComponent - HTML rendering', () => {
     it('should render global-state-select', () => {
       const el = getByTestId('global-state-select');
       expect(el).toBeTruthy();
+    });
+  });
+
+  describe('HTML rendering - cut strand status', () => {
+    const cutStatus = (): HTMLElement | null => fixture.nativeElement.querySelector('.global-params__list__cut-status');
+
+    it('should show the strand as cut once the plot data account for cut strands', () => {
+      expect(cutStatus()?.classList).toContain('global-params__list__cut-status--uncut');
+
+      plotServiceMock.isCutStrandApplied.set(true);
+      fixture.detectChanges();
+
+      expect(cutStatus()?.classList).toContain('global-params__list__cut-status--cut');
     });
   });
 });

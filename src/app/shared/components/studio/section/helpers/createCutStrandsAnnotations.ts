@@ -52,7 +52,7 @@ const resolveAnchor = (
 const atAnchor = ({ x, y, z }: MappedAnchor) => ({ xref: 'x' as const, yref: 'y' as const, x, y, z });
 
 /**
- * Dashed line from the anchor point up to the icon.
+ * Dashed line of the 3D view, from the anchor point up to the icon.
  *
  * @remarks
  * A Plotly annotation arrow cannot be dashed, and shapes do not exist in 3D. Each dash is therefore its own
@@ -78,6 +78,33 @@ const buildDashedLine = (anchor: MappedAnchor): Partial<Plotly.Annotations>[] =>
   }
   return dashes;
 };
+
+/**
+ * Dashed line of the 2D view, from the anchor point up to the icon.
+ *
+ * @remarks
+ * A single shape, anchored on the data point and sized in pixels: the line keeps its length at any zoom level, like
+ * the 3D one.
+ */
+const buildDashedLineShape = ({ x, y }: MappedAnchor): Partial<Plotly.Shape> => ({
+  type: 'line',
+  xref: 'x',
+  yref: 'y',
+  xsizemode: 'pixel',
+  ysizemode: 'pixel',
+  xanchor: x,
+  yanchor: y,
+  x0: 0,
+  x1: 0,
+  y0: 0,
+  y1: CUT_STRANDS_LINE_LENGTH,
+  line: {
+    color: CUT_STRANDS_COLOR,
+    width: 1,
+    // Plotly takes a dash pattern in pixels, which its typings do not list
+    dash: `${CUT_STRANDS_DASH_LENGTH}px,${CUT_STRANDS_DASH_GAP}px` as Plotly.Dash
+  }
+});
 
 // Clicking the icon opens the RRTS tool: the hover label is also what makes it capture mouse events
 const buildIcon = (
@@ -107,30 +134,57 @@ const buildIcon = (
   }) as Partial<Plotly.Annotations>;
 
 /**
+ * Resolves where the marking is drawn, on the plot axes.
+ *
+ * @remarks
+ * Nothing is drawn unless the saved cut strands ask for a marking and are linked to a span that is
+ * currently visible (within `startSupport` ≤ index < `endSupport`).
+ */
+const resolveMarkingAnchor = (plotParams: CreatePlotParams): MappedAnchor | null => {
+  const { cutStrands, spanUuidToIndex, startSupport, endSupport, litData, view, side } = plotParams;
+  if (!cutStrands?.addMarking || !cutStrands.spanUuid) return null;
+
+  const spanIndex = spanUuidToIndex?.get(cutStrands.spanUuid);
+  if (spanIndex === undefined || spanIndex < startSupport || spanIndex >= endSupport) return null;
+
+  const anchor = resolveAnchor(litData, spanIndex, cutStrands);
+  return anchor ? mapAnchorToAxes(anchor, view, side) : null;
+};
+
+/**
  * Creates the Plotly annotations of the RRTS cut strands marking on the section plot: a scissors icon,
  * {@link CUT_STRANDS_OFFSET_Y} px above its anchor point and joined to it by a dashed line.
  *
  * @remarks
  * Pure function (no DI, no side effects) so it can be unit-tested in isolation.
- * Nothing is drawn unless the saved cut strands ask for a marking and are linked to a span that is
- * currently visible (within `startSupport` ≤ index < `endSupport`).
+ * The dashed line is only made of annotations in 3D: the 2D view draws it as a shape (see {@link createCutStrandsShapes}).
  *
  * The icon shows a "Cut strands" label on hover, and opens the RRTS tool when clicked (see `SectionPlotComponent`).
  *
  * @category Studio
  * @param plotParams - The plot parameters (view, side, support range, lit data, saved cut strands).
- * @returns The dashed line annotations followed by the icon annotation, or `[]` when there is no marking to draw.
+ * @returns The 3D dashed line annotations followed by the icon annotation, or `[]` when there is no marking to draw.
  */
 export const createCutStrandsAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] => {
-  const { cutStrands, spanUuidToIndex, startSupport, endSupport, litData, view, side } = plotParams;
-  if (!cutStrands?.addMarking || !cutStrands.spanUuid) return [];
-
-  const spanIndex = spanUuidToIndex?.get(cutStrands.spanUuid);
-  if (spanIndex === undefined || spanIndex < startSupport || spanIndex >= endSupport) return [];
-
-  const anchor = resolveAnchor(litData, spanIndex, cutStrands);
+  const anchor = resolveMarkingAnchor(plotParams);
   if (!anchor) return [];
 
-  const mapped = mapAnchorToAxes(anchor, view, side);
-  return [...buildDashedLine(mapped), buildIcon(mapped, plotParams.translocoService)];
+  const icon = buildIcon(anchor, plotParams.translocoService);
+  return plotParams.view === '3d' ? [...buildDashedLine(anchor), icon] : [icon];
+};
+
+/**
+ * Creates the Plotly shapes of the RRTS cut strands marking on the 2D section plot: its dashed line.
+ *
+ * @remarks
+ * Shapes do not exist in 3D, where {@link createCutStrandsAnnotations} draws the dashed line.
+ *
+ * @category Studio
+ * @param plotParams - The plot parameters (view, side, support range, lit data, saved cut strands).
+ * @returns The dashed line shape, or `[]` in 3D or when there is no marking to draw.
+ */
+export const createCutStrandsShapes = (plotParams: CreatePlotParams): Partial<Plotly.Shape>[] => {
+  if (plotParams.view === '3d') return [];
+  const anchor = resolveMarkingAnchor(plotParams);
+  return anchor ? [buildDashedLineShape(anchor)] : [];
 };

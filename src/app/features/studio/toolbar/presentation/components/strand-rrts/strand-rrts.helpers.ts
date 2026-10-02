@@ -1,5 +1,5 @@
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
-import { STRAND_LAYER_KEYS } from './strand-rrts.constantes';
+import { STRAND_LAYER_KEYS } from '@shared/domain/helpers/cut-strands.helpers';
 import { RrtsFormValue, WorkLoadStatus } from './strand-rrts.interfaces';
 
 // Satisfactory up to 75 %, concerning up to 100 %, dangerous above 100 % or below 0 %
@@ -18,10 +18,6 @@ export const toCatalogCutStrands = (cutStrands: number[], layers: number[]): num
   layers.forEach((layer, i) => (catalogCutStrands[layer - 1] = cutStrands[i]));
   return catalogCutStrands;
 };
-
-// A saved entry can hold 0 on every layer: nothing is cut then
-export const hasCutStrand = (entry: RrtsCutStrandsData | null): boolean =>
-  entry?.cutStrands.some((cutStrands) => cutStrands > 0) ?? false;
 
 export const toCutStrandsData = (value: RrtsFormValue, layers: number[]): RrtsCutStrandsData => ({
   spanUuid: value.span?.uuid ?? null,

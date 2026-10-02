@@ -63,6 +63,8 @@ export class SectionPlotComponent implements OnDestroy {
   // Input
   /** Lit data output used to draw the section plot. `null` when no data is available. */
   litData = input<GetSectionOutput | null>(null);
+  // In the preview of a section being edited, outside the studio
+  readonly isPreview = input(false);
 
   // Services
   private readonly plotService = inject(PlotService);
@@ -344,7 +346,8 @@ export class SectionPlotComponent implements OnDestroy {
         this.loadFormsService.activeLoadTab.set('2');
         this.cableModificationsService.selectSpan(data.spanUuid);
       } else if (event?.annotation?.data?.type === 'cutStrands') {
-        this.toolbarDialogService.openTool('strand-rrts');
+        // The preview edits a copy of the section: the saved entry is only shown there
+        this.toolbarDialogService.openTool('strand-rrts', { mode: this.isPreview() ? 'view' : 'edit' });
       }
     });
 

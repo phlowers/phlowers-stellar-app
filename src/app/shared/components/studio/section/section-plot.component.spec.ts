@@ -1197,7 +1197,16 @@ describe('SectionPlotComponent', () => {
 
       capturedHandler!({ annotation: { data: { type: 'cutStrands' } } });
 
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledExactlyOnceWith('strand-rrts');
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledExactlyOnceWith('strand-rrts', { mode: 'edit' });
+    });
+
+    it('should only show the saved entry in the RRTS tool from the preview of a section being edited', () => {
+      fixture.componentRef.setInput('isPreview', true);
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'cutStrands' } } });
+
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledExactlyOnceWith('strand-rrts', { mode: 'view' });
     });
 
     it('should not open the RRTS tool for other annotation types', () => {

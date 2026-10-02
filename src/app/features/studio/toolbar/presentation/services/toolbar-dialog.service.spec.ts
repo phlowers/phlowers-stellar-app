@@ -83,6 +83,14 @@ describe('ToolbarDialogService', () => {
       expect(service.isOpen()).toBe(true);
       expect(service.phase()).toBe('init');
     });
+
+    it('should keep the context the RRTS tool is opened with, and none without', () => {
+      service.openTool('strand-rrts', { mode: 'view' });
+      expect(service.strandRrtsContext()).toEqual({ mode: 'view' });
+
+      service.openTool('strand-rrts');
+      expect(service.strandRrtsContext()).toBeNull();
+    });
   });
 
   describe('closeTool', () => {
@@ -103,6 +111,14 @@ describe('ToolbarDialogService', () => {
 
       await wait(350);
       expect(service.currentTool()).toBeNull();
+    });
+
+    it('should drop the RRTS tool context after delay', async () => {
+      service.openTool('strand-rrts', { mode: 'view' });
+      service.closeTool();
+
+      await wait(350);
+      expect(service.strandRrtsContext()).toBeNull();
     });
 
     it('should allow reopening tool before timeout completes', async () => {

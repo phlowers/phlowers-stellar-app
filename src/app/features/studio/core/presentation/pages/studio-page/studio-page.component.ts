@@ -8,15 +8,14 @@ import {
   inject,
   OnDestroy,
   OnInit,
-  signal,
-  untracked
+  signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
-import { debounce, isEqual, round } from 'lodash';
+import { debounce, round } from 'lodash';
 import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 import { StudiesService } from '@services/studies/studies.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
@@ -65,17 +64,14 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Section, Study } from '@shared/domain';
-import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 import {
   buildSpanRows,
-  buildSupportRows,
-  maxOf
+  buildSupportRows
 } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
+import { maxOf } from '@shared/helpers/maxOf';
 import { SectionStateReportData } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.interfaces';
-import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
-import { hasCutStrand } from '@features/studio/toolbar/presentation/components/strand-rrts/strand-rrts.helpers';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -157,7 +153,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   globalStressRate = computed<number | null>(() =>
     this.resolveGlobalValue(this.plotService.litData()?.output_parameters.utilization_rate)
   );
-  isGlobalCutStrand = signal<boolean>(false);
+  isGlobalCutStrand = computed(() => this.plotService.isCutStrandApplied());
 
   private readonly maxSupportIndex = computed(() => (this.spanService.section()?.supports?.length ?? 0) - 1);
 
@@ -220,19 +216,12 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly persistenceService = inject(StudioViewPersistenceService);
   private readonly notificationService = inject(NotificationService);
   private readonly sectionStateReportService = inject(SectionStateReportService);
-  private readonly strandRrtsService = inject(StrandRrtsService);
 
   previousSectionUuid = signal<string | null>(null);
   private readonly activeSectionUuid = signal<string | null>(null);
   private readonly isViewReady = signal<boolean>(false);
   private previousStartSupport: number | null = null;
   private previousEndSupport: number | null = null;
-  // Cut strands of the engine study, which starts without any
-  private appliedCutStrands: RrtsCutStrandsData | null = null;
-  // Deep equality: the section is reloaded after every save, only a content change matters
-  private readonly savedCutStrands = computed(() => this.spanService.section()?.rrts_cut_strands ?? null, {
-    equal: isEqual
-  });
 
   constructor() {
     effect(() => {
@@ -257,30 +246,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       if (!sectionUuid || !this.isViewReady()) return;
       this.persistenceService.save(sectionUuid, this.buildViewState());
     });
-
-    // The saved cut strands are applied once the engine study is ready, i.e. once initSectionStudio has populated the
-    // plot data, and again on every change: the RRTS dialog saves and deletes them
-    effect(() => {
-      const savedCutStrands = this.savedCutStrands();
-      if (!this.plotService.litData() || this.plotService.loading()) return;
-      untracked(() => void this.applyCutStrands(savedCutStrands));
-    });
-  }
-
-  // A failure is not retried before the saved cut strands change again: it would notify on every plot refresh
-  private async applyCutStrands(savedCutStrands: RrtsCutStrandsData | null): Promise<void> {
-    if (isEqual(savedCutStrands, this.appliedCutStrands)) return;
-    this.appliedCutStrands = savedCutStrands;
-
-    try {
-      await this.strandRrtsService.applySaved(savedCutStrands);
-      // The working load is an output of the engine: read it again with the cut strands
-      await this.plotService.refreshProjection();
-      this.isGlobalCutStrand.set(hasCutStrand(savedCutStrands));
-    } catch (error) {
-      this.logger.error('Failed to apply the saved RRTS cut strands', error);
-      this.notificationService.error(this.translocoService.translate('studio.rrts-cut-strands.failed-to-sync'));
-    }
   }
 
   private resolveGlobalValue(values: number[] | undefined): number | null {
