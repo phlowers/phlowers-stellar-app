@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, input, signal, computed, inject } from '@angular/core';
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -29,27 +28,6 @@ interface DataSection {
   templateUrl: './section-plot-card.component.html',
   styleUrl: './section-plot-card.component.scss',
   imports: [CardComponent, IconComponent, TranslocoModule],
-  animations: [
-    trigger('expandCollapse', [
-      state(
-        'collapsed',
-        style({
-          height: '0',
-          opacity: '0',
-          overflow: 'hidden'
-        })
-      ),
-      state(
-        'expanded',
-        style({
-          height: '*',
-          opacity: '1',
-          overflow: 'hidden'
-        })
-      ),
-      transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
-    ])
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Card component displaying computed section plot data for a support or span. */

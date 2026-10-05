@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { TabsModule } from 'primeng/tabs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -170,7 +169,6 @@ describe('FieldMeasuringComponent', () => {
       ],
       providers: [
         ToolbarDialogService,
-        provideAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: MessageService, useValue: mockMessageService },

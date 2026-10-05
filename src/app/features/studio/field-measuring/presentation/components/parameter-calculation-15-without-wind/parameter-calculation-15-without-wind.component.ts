@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, model, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -45,15 +44,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   ],
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ParameterCalculation15WithoutWindComponent {
   /** Field measure data model bound two-way. */

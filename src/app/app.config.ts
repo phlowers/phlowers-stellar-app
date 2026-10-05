@@ -6,7 +6,6 @@
  */
 import { ApplicationConfig, DOCUMENT, ErrorHandler, inject, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
   provideRouter,
   TitleStrategy,
@@ -94,7 +93,7 @@ export async function initializeApp(): Promise<void> {
   void updateService.checkForUpdateOnce();
 }
 
-/** Root Angular application configuration with routing, HTTP, animations, PrimeNG theme, and markdown support. */
+/** Root Angular application configuration with routing, HTTP, PrimeNG theme, and markdown support. */
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(
@@ -106,7 +105,6 @@ export const appConfig: ApplicationConfig = {
       withEnabledBlockingInitialNavigation()
     ),
     provideHttpClient(withFetch(), withInterceptors([authSessionInterceptor])),
-    provideAnimationsAsync(),
     providePrimeNG({
       theme: {
         preset: primengPreset,

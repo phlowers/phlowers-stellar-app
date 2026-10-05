@@ -8,7 +8,6 @@ import { vi } from 'vitest';
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { LoginPageComponent } from './login-page.component';
 import { AuthService } from '@services/auth/auth.service';
@@ -81,7 +80,6 @@ describe('LoginPageComponent', () => {
         LoginPageComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: AuthService, useValue: authServiceMock },
         { provide: Router, useValue: routerMock }
       ]

@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { CableSpanManipComponent } from './cable-span-manip';
@@ -94,7 +93,6 @@ describe('CableSpanManipComponent', () => {
         })
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: CableSpanManipService, useValue: mockCableSpanManipService },

@@ -10,7 +10,6 @@ import { PlotService } from '@services/plot/plot.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { BehaviorSubject } from 'rxjs';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { NumberInputErrorParams } from '@shared/helpers/formErrors.interfaces';
 
@@ -225,7 +224,6 @@ describe('ObstaclesFormComponent', () => {
         })
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: mockPlotOptionsService },
         { provide: ObstacleFormService, useValue: mockObstacleFormService },
@@ -538,7 +536,6 @@ describe('ObstaclesFormComponent', () => {
             })
           ],
           providers: [
-            provideNoopAnimations(),
             { provide: PlotSpanService, useValue: mockSpanService },
             { provide: PlotOptionsService, useValue: mockPlotOptionsService },
             { provide: ObstacleFormService, useValue: mockObstacleFormService },

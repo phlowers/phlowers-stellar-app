@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { SelectModule, Select } from 'primeng/select';
 import { DividerModule } from 'primeng/divider';
@@ -46,8 +45,7 @@ describe('SelectWithButtonsComponent', () => {
         SelectWithButtonsComponent,
         FormsModule,
         SelectModule,
-        DividerModule,
-        NoopAnimationsModule
+        DividerModule
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

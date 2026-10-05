@@ -18,7 +18,6 @@ import {
   signal,
   untracked
 } from '@angular/core';
-import { animate, style, transition, trigger } from '@angular/animations';
 import { DecimalPipe, DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -80,27 +79,7 @@ import { Task, TaskInputs } from '@services/worker_python/tasks/types';
   templateUrl: './conformity.component.html',
   styleUrl: './conformity.component.scss',
   host: { '[class.graph-enlarged]': 'isGraphEnlarged()' },
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expandHeight', [
-      transition(':enter', [
-        style({ height: 0, overflow: 'hidden', opacity: 0 }),
-        animate('300ms ease-out', style({ height: '*', overflow: 'hidden', opacity: 1 }))
-      ])
-    ]),
-    // Collapse/expand the form and result table when the graph is enlarged/reduced, so the figure
-    // grows into their space instead of them vanishing abruptly.
-    trigger('collapse', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, marginBottom: 0, overflow: 'hidden' }),
-        animate('300ms ease', style({ height: '*', opacity: 1, marginBottom: '*' }))
-      ]),
-      transition(':leave', [
-        style({ height: '*', opacity: 1, marginBottom: '*', overflow: 'hidden' }),
-        animate('300ms ease', style({ height: 0, opacity: 0, marginBottom: 0 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConformityComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);

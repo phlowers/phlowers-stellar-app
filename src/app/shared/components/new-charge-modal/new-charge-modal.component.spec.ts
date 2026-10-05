@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewChargeModalComponent } from './new-charge-modal.component';
 import { Charge, Section, Study, SymmetryType } from '@shared/domain';
 import { By } from '@angular/platform-browser';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -153,7 +152,6 @@ describe('NewChargeModalComponent (Jest)', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideNoopAnimations(),
         { provide: ChargesService, useValue: chargesService },
         { provide: PlotService, useValue: plotService },
         { provide: PlotSpanService, useValue: spanService }

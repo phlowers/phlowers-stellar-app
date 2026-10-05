@@ -193,7 +193,7 @@
 </div>
 
 @if (measureData().outputs.cableTemperature) {
-  <div class="temperature-calculation__results" [@expand]>
+  <div class="temperature-calculation__results" animate.enter="anim-expand-height">
     <h2 class="temperature-calculation__results__title">{{ 'common.results' | transloco }}</h2>
 
     <dl class="temperature-calculation__results__list">
@@ -227,7 +227,7 @@
 }
 
 @if (temperatureCalculationError()) {
-  <div class="temperature-calculation__error" [@expandCollapse]>
+  <div class="temperature-calculation__error" animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
     <p>{{ 'field-measuring.temperature-calculation.error-message' | transloco }}</p>
   </div>
 }

@@ -1,5 +1,4 @@
 import { DecimalPipe } from '@angular/common';
-import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -120,16 +119,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
   ],
   templateUrl: './studio-page.component.html',
   styleUrl: './studio-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('pointSelect', [
-      transition(':enter', [
-        style({ width: 0, opacity: 0, overflow: 'hidden' }),
-        animate('200ms ease-out', style({ width: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [style({ overflow: 'hidden' }), animate('200ms ease-in', style({ width: 0, opacity: 0 }))])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly translocoService = inject(TranslocoService);

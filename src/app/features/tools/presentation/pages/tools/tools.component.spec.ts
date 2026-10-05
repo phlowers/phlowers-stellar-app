@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { ToolsComponent } from './tools.component';
 import { TOOLS } from './tools.constantes';
@@ -33,8 +32,7 @@ describe('ToolsComponent', () => {
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
-        ToolsComponent,
-        BrowserAnimationsModule
+        ToolsComponent
       ]
     }).compileComponents();
 

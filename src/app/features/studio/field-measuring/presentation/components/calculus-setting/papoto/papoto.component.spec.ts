@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -51,7 +50,6 @@ describe('Papoto component', () => {
         PapotoComponent
       ],
       providers: [
-        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },

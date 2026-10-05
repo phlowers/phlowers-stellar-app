@@ -4,7 +4,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { animate, style, transition, trigger } from '@angular/animations';
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -29,25 +28,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
   imports: [DecimalPipe, FormsModule, TranslocoModule, RadioButtonModule, SelectModule],
   templateUrl: './quick-measures.component.html',
   styleUrl: './quick-measures.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('pointSelect', [
-      transition(':enter', [
-        style({ width: 0, opacity: 0, overflow: 'hidden' }),
-        animate('200ms ease-out', style({ width: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [style({ overflow: 'hidden' }), animate('200ms ease-in', style({ width: 0, opacity: 0 }))])
-    ]),
-    // Swaps the obstacle rows for the floor rows (and back) when the selection changes.
-    // Applied per row: `.quick-measures__list` is `display: contents`, so it has no box to animate.
-    trigger('measureRow', [
-      transition(':enter', [
-        style({ width: 0, opacity: 0, overflow: 'hidden' }),
-        animate('200ms ease-out', style({ width: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [style({ overflow: 'hidden' }), animate('200ms ease-in', style({ width: 0, opacity: 0 }))])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QuickMeasuresComponent {
   private readonly translocoService = inject(TranslocoService);

@@ -10,7 +10,8 @@
 
 @if (obstaclePointOptions().length > 1) {
   <p-select
-    @pointSelect
+    animate.enter="anim-expand-width"
+    animate.leave="anim-collapse-width"
     [ariaLabel]="'studio.quick-measures.select-obstacle-point-aria-label' | transloco"
     styleClass="quick-measures__select"
     [options]="obstaclePointOptions()"
@@ -22,7 +23,7 @@
 
 <dl class="quick-measures__list">
   @if (isFloorSelected()) {
-    <div @measureRow>
+    <div animate.enter="anim-expand-width" animate.leave="anim-collapse-width">
       <dt class="quick-measures__list__title quick-measures__list__title--floor">
         {{ 'studio.shared.vertical' | transloco }}
       </dt>
@@ -35,7 +36,7 @@
       </dd>
     </div>
 
-    <div @measureRow>
+    <div animate.enter="anim-expand-width" animate.leave="anim-collapse-width">
       <dt class="quick-measures__list__title quick-measures__list__title--floor">
         {{ 'studio.floor.cable-altitude-label' | transloco }}
       </dt>
@@ -48,7 +49,7 @@
       </dd>
     </div>
   } @else {
-    <div @measureRow>
+    <div animate.enter="anim-expand-width" animate.leave="anim-collapse-width">
       <dt class="quick-measures__list__title">
         <label for="oblique-distance">{{ 'studio.shared.oblique' | transloco }}</label>
         <p-radiobutton
@@ -69,7 +70,7 @@
       </dd>
     </div>
 
-    <div @measureRow>
+    <div animate.enter="anim-expand-width" animate.leave="anim-collapse-width">
       <dt class="quick-measures__list__title">
         <label for="vertical-distance">{{ 'studio.shared.vertical' | transloco }}</label>
         <p-radiobutton
@@ -90,7 +91,7 @@
       </dd>
     </div>
 
-    <div @measureRow>
+    <div animate.enter="anim-expand-width" animate.leave="anim-collapse-width">
       <dt class="quick-measures__list__title">
         <label for="horizontal-distance">{{ 'studio.shared.horizontal' | transloco }}</label>
         <p-radiobutton

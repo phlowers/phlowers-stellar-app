@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, TemplateRef, WritableSignal } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { StrandRrtsComponent } from './strand-rrts.component';
 import { PlotService } from '@services/plot/plot.service';
@@ -146,7 +145,6 @@ describe('StrandRrtsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         StrandRrtsComponent,
-        NoopAnimationsModule,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
