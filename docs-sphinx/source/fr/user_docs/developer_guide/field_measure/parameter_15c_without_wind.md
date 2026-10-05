@@ -113,7 +113,7 @@ L'état invalide est contrôlé par le signal `isFormValid()`.
 Chacun des trois résultats dispose d'un bouton **Créer une condition initiale**. En cliquant dessus :
 
 1. la modale de création de condition initiale s'ouvre avec `mode: 'create'`
-2. `base_parameters` est prérempli avec la valeur du résultat sélectionné (tronquée à 1 décimale)
+2. `base_parameters` est prérempli avec la valeur du résultat sélectionné (déjà arrondie à 1 décimale au niveau Python)
 3. `base_temperature` est prérempli à `15`
 4. `InitialConditionService.addInitialCondition()` est appelé lorsque l'utilisateur confirme
 

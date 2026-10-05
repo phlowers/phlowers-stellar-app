@@ -147,4 +147,4 @@ If the user switches to **"manual"** mode, the auto-populated values are preserv
   - Calculated elevation difference (from plot service)
   These assist users in validating their manual measurements.
 - Angles are displayed and input in **gradians (Gr)** in the UI; the Python backend expects the same unit.
-- Parameter values are truncated to one decimal place for display (via `truncateNumberToOneDecimal`), while uncertainty is shown to two decimal places.
+- Parameter values are **rounded to one decimal place at the Python calculation level**.

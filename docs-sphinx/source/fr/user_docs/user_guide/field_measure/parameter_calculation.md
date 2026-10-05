@@ -87,7 +87,7 @@ Après le calcul, les résultats suivants sont affichés :
 | **Paramètre 2-3** | m | Paramètre de fléchage calculé à partir des points de mesure 2 et 3 uniquement. |
 | **Paramètre 1-3** | m | Paramètre de fléchage calculé à partir des points de mesure 1 et 3 uniquement (sans le point 2). |
 
-Toutes les valeurs de paramètre sont affichées à une décimale près (par exemple, 12,5 m).
+Toutes les valeurs de paramètre sont **arrondies à une décimale au niveau Python** (par exemple, 12,5 m) et affichées en conséquence.
 
 ### Critère de validité
 

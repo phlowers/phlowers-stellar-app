@@ -147,4 +147,4 @@ Si l'utilisateur bascule en mode **« manuel »**, les valeurs préremplies auto
   - Différence calculée d'altitude (depuis le service de traçage)
   Ces champs aident les utilisateurs à valider leurs mesures manuelles.
 - Les angles sont affichés et saisis en **grads (Gr)** dans l'interface ; le backend Python attend la même unité.
-- Les valeurs de paramètre sont tronquées à une décimale pour l'affichage (via `truncateNumberToOneDecimal`), tandis que l'incertitude est affichée à deux décimales.
+- Les valeurs de paramètre sont **arrondies à une décimale au niveau du calcul Python**.

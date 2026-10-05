@@ -87,7 +87,7 @@ After calculation, the following results are displayed:
 | **Parameter 2-3** | m | Sag parameter computed from measurement points 2 and 3 only. |
 | **Parameter 1-3** | m | Sag parameter computed from measurement points 1 and 3 only (skipping point 2). |
 
-All parameter values are displayed to one decimal place (e.g., 12.5 m).
+All parameter values are **rounded to one decimal place at the Python level** (e.g., 12.5 m) and displayed accordingly.
 
 ### Validity Criterion
 

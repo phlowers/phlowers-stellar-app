@@ -78,7 +78,7 @@ où :
 Chacun des trois résultats dispose d'un bouton **Créer une condition initiale**. En cliquant dessus :
 
 1. une boîte de dialogue s'ouvre pour créer une nouvelle **condition initiale** (état de référence pour les calculs mécaniques)
-2. le **paramètre de base** est prérempli avec le résultat sélectionné (arrondi à 1 décimale)
+2. le **paramètre de base** est prérempli avec le résultat sélectionné (arrondi à 1 décimale au niveau Python)
 3. la **température de base** est préremplie avec 15 °C
 4. vous pouvez saisir un nom et d'autres champs optionnels
 5. la condition initiale est enregistrée lorsque vous cliquez sur le bouton de confirmation dans la boîte de dialogue

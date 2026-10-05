@@ -114,7 +114,7 @@ Invalid state is checked by `isFormValid()` signal.
 Each of the three results has a **Create initial condition** button. Clicking it:
 
 1. Opens the initial condition modal with `mode: 'create'`
-2. Pre-fills `base_parameters` with the chosen result value (truncated to 1 decimal)
+2. Pre-fills `base_parameters` with the chosen result value (already rounded to 1 decimal at the Python level)
 3. Pre-fills `base_temperature: 15`
 4. Calls `InitialConditionService.addInitialCondition()` when the user confirms
 

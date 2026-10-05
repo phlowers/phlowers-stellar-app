@@ -78,7 +78,7 @@ where:
 Each of the three results has a **Create initial condition** button. Clicking it:
 
 1. Opens a dialog to create a new **initial condition** (baseline state for mechanical calculations)
-2. Pre-fills the **base parameter** with the selected result (rounded to 1 decimal place)
+2. Pre-fills the **base parameter** with the selected result (rounded to 1 decimal place at the Python level)
 3. Pre-fills the **base temperature** with 15°C
 4. Lets you enter a name and other optional fields
 5. Saves the initial condition when you click the confirm button in the dialog
