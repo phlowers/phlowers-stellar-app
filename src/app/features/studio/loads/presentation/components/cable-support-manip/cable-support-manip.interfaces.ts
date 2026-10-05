@@ -10,9 +10,19 @@ export const CABLE_SUPPORT_MANIP_DEFAULTS = {
   lateralDistance: 0,
   ropeLength: 0,
   shiftingClampLength: 0,
-  manip2Type: 'shifting' as SupportManipType | null,
+  manip2Type: 'shifting' as SupportManipType,
   manip2ShiftingClampLength: 0
 };
+
+export type CableSupportManipControlName =
+  | 'manip1Type'
+  | 'anchoring'
+  | 'lateralDistance'
+  | 'vertDisplacement'
+  | 'ropeLength'
+  | 'shiftingClampLength'
+  | 'manip2Type'
+  | 'manip2ShiftingClampLength';
 
 export interface CableSupportManipFormControls {
   /** Selected support UUID. */

@@ -24,7 +24,11 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AnchoringType, CableManipMethod, CableManipType, CableSpanManipulation } from '@shared/domain';
 import { CableSpanManipService } from '../../services/cableSpanManip.service';
-import { CABLE_SPAN_MANIP_DEFAULTS, CableSpanManipFormControls } from './cable-span-manip.interfaces';
+import {
+  CABLE_SPAN_MANIP_DEFAULTS,
+  CableSpanManipControlName,
+  CableSpanManipFormControls
+} from './cable-span-manip.interfaces';
 import {
   ALTITUDE_MAX,
   ALTITUDE_MIN,
@@ -220,7 +224,7 @@ export class CableSpanManipComponent implements OnInit {
     untracked(() => this.onScopeChange(this.form.controls.spanUuid.value));
   });
 
-  private readonly cableModificationControlSignals: Record<any, Signal<unknown>> = {
+  private readonly cableModificationControlSignals: Record<CableSpanManipControlName, Signal<unknown>> = {
     referenceSupport: toSignal(this.form.controls.referenceSupport.valueChanges, {
       initialValue: this.form.controls.referenceSupport.value,
       equal: () => false
@@ -593,7 +597,7 @@ export class CableSpanManipComponent implements OnInit {
     return nextSpanManipulation;
   }
 
-  private onSpanManipulationControlChange(controlName: any, value: unknown): void {
+  private onSpanManipulationControlChange(controlName: CableSpanManipControlName, value: unknown): void {
     const spanManipulation = this.ensureSelectedSpanManipulation();
     if (!spanManipulation) {
       return;
@@ -601,32 +605,38 @@ export class CableSpanManipComponent implements OnInit {
 
     switch (controlName) {
       case 'referenceSupport':
-        spanManipulation.referenceSupport = value === 'LEFT' || value === 'RIGHT' ? value : 'LEFT';
+        spanManipulation.referenceSupport =
+          value === 'LEFT' || value === 'RIGHT' ? value : CABLE_SPAN_MANIP_DEFAULTS.referenceSupport;
         break;
       case 'distanceToRefSupport':
-        spanManipulation.distanceToRefSupport = typeof value === 'number' ? value : 0;
+        spanManipulation.distanceToRefSupport =
+          typeof value === 'number' ? value : CABLE_SPAN_MANIP_DEFAULTS.distanceToRefSupport;
         break;
       case 'cableManipType':
         spanManipulation.cableManipType =
-          value === 'with_a_crane' || value === 'temporary_support' ? value : 'with_a_crane';
+          value === 'with_a_crane' || value === 'temporary_support' ? value : CABLE_SPAN_MANIP_DEFAULTS.cableManipType;
         break;
       case 'cableManipMethod':
-        spanManipulation.cableManipMethod = value === 'clamp' || value === 'pulley' ? value : 'clamp';
+        spanManipulation.cableManipMethod =
+          value === 'clamp' || value === 'pulley' ? value : CABLE_SPAN_MANIP_DEFAULTS.cableManipMethod;
         break;
       case 'lateralDistance':
-        spanManipulation.lateralDistance = typeof value === 'number' ? value : 0;
+        spanManipulation.lateralDistance =
+          typeof value === 'number' ? value : CABLE_SPAN_MANIP_DEFAULTS.lateralDistance;
         break;
       case 'longitudinalDistance':
-        spanManipulation.longitudinalDistance = typeof value === 'number' ? value : 0;
+        spanManipulation.longitudinalDistance =
+          typeof value === 'number' ? value : CABLE_SPAN_MANIP_DEFAULTS.longitudinalDistance;
         break;
       case 'altitude':
-        spanManipulation.altitude = typeof value === 'number' ? value : 0;
+        spanManipulation.altitude = typeof value === 'number' ? value : CABLE_SPAN_MANIP_DEFAULTS.altitude;
         break;
       case 'anchoring':
-        spanManipulation.anchoring = value === 'with_chain' || value === 'with_sling' ? value : 'with_sling';
+        spanManipulation.anchoring =
+          value === 'with_chain' || value === 'with_sling' ? value : CABLE_SPAN_MANIP_DEFAULTS.anchoring;
         break;
       case 'slingLength':
-        spanManipulation.slingLength = typeof value === 'number' ? value : 0;
+        spanManipulation.slingLength = typeof value === 'number' ? value : CABLE_SPAN_MANIP_DEFAULTS.slingLength;
         break;
     }
     console.log('EEEEEEEEEEEEEEEEE');

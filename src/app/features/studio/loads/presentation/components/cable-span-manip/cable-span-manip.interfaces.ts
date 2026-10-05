@@ -19,6 +19,17 @@ export const CABLE_SPAN_MANIP_DEFAULTS = {
   slingLength: SLING_LENGTH_DEFAULT
 };
 
+export type CableSpanManipControlName =
+  | 'referenceSupport'
+  | 'distanceToRefSupport'
+  | 'cableManipType'
+  | 'cableManipMethod'
+  | 'lateralDistance'
+  | 'longitudinalDistance'
+  | 'altitude'
+  | 'anchoring'
+  | 'slingLength';
+
 /** Typed form controls for the cable span manipulation form. */
 export interface CableSpanManipFormControls {
   /** Selected span UUID. */

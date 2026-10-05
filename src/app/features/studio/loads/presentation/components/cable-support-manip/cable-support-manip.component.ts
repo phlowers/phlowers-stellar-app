@@ -29,6 +29,7 @@ import { CableSupportManipService } from '../../services/cableSupportManip.servi
 import type { CableSupportManipItem, CableSupportManipulation } from '@shared/domain';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
+  CableSupportManipControlName,
   CableSupportManipFormControls,
   SupportAnchoringType,
   SupportManipType
@@ -244,7 +245,7 @@ export class CableSupportManipComponent {
     }
   });
 
-  private readonly cableModificationControlSignals: Record<any, Signal<unknown>> = {
+  private readonly cableModificationControlSignals: Record<CableSupportManipControlName, Signal<unknown>> = {
     manip1Type: toSignal(this.form.controls.manip1Type.valueChanges, {
       initialValue: this.form.controls.manip1Type.value,
       equal: () => false
@@ -582,7 +583,7 @@ export class CableSupportManipComponent {
     return nextSupportManipulation;
   }
 
-  private onSupportManipulationControlChange(controlName: any, value: unknown): void {
+  private onSupportManipulationControlChange(controlName: CableSupportManipControlName, value: unknown): void {
     const supportManipulation = this.ensureSelectedSupportManipulation();
     if (!supportManipulation) {
       return;
@@ -594,34 +595,44 @@ export class CableSupportManipComponent {
           value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'crane';
         break;
       case 'anchoring':
-        supportManipulation.manip1.anchoring = value === 'with_chain' ? value : 'without_chain';
+        supportManipulation.manip1.anchoring =
+          value === 'with_chain' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.anchoring;
         break;
       case 'lateralDistance':
-        supportManipulation.manip1.lateralDistance = typeof value === 'number' ? value : 0;
+        supportManipulation.manip1.lateralDistance =
+          typeof value === 'number' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.lateralDistance;
         break;
       case 'vertDisplacement':
-        supportManipulation.manip1.vertDisplacement = typeof value === 'number' ? value : 0;
+        supportManipulation.manip1.vertDisplacement =
+          typeof value === 'number' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.vertDisplacement;
         break;
       case 'ropeLength':
-        supportManipulation.manip1.ropeLength = typeof value === 'number' ? value : 0;
+        supportManipulation.manip1.ropeLength =
+          typeof value === 'number' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.ropeLength;
         break;
       case 'shiftingClampLength':
-        supportManipulation.manip1.shiftingClampLength = typeof value === 'number' ? value : 0;
+        supportManipulation.manip1.shiftingClampLength =
+          typeof value === 'number' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.shiftingClampLength;
         break;
 
       case 'manip2Type':
         if (supportManipulation.manip2 !== null) {
           // should only be shifting
           supportManipulation.manip2.type =
-            value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'shifting';
+            value === 'crane' || value === 'rope' || value === 'shifting'
+              ? value
+              : CABLE_SUPPORT_MANIP_DEFAULTS.manip2Type;
         } else {
           supportManipulation.manip2 = {
-            type: value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'shifting',
+            type:
+              value === 'crane' || value === 'rope' || value === 'shifting'
+                ? value
+                : CABLE_SUPPORT_MANIP_DEFAULTS.manip2Type,
             vertDisplacement: null,
             anchoring: null,
             lateralDistance: null,
             ropeLength: null,
-            shiftingClampLength: 0,
+            shiftingClampLength: CABLE_SUPPORT_MANIP_DEFAULTS.manip2ShiftingClampLength,
             chainName: null,
             chainLength: null,
             chainWeight: null,
@@ -632,9 +643,12 @@ export class CableSupportManipComponent {
         break;
       case 'manip2ShiftingClampLength':
         if (supportManipulation.manip2 !== null) {
-          supportManipulation.manip2.shiftingClampLength = typeof value === 'number' ? value : 0;
+          supportManipulation.manip2.shiftingClampLength =
+            typeof value === 'number' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.manip2ShiftingClampLength;
         }
         break;
     }
+    console.log('EEEEEEEEEEEEEEEEE');
+    console.log(supportManipulation);
   }
 }
