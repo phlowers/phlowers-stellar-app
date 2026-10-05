@@ -5,9 +5,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
-from mechaphlowers import PapotoParameterMeasure
-
 import numpy as np
+from mechaphlowers import PapotoParameterMeasure
 
 DECIMAL_PRECISION = 1
 
@@ -43,9 +42,17 @@ def calculate_papoto(inputs):
     std_parameter = uncertainty_dict["std_parameter_valid_values"]
     return {
         "parameter": float(np.round(papoto.parameter[0], DECIMAL_PRECISION)),
-        "parameter_1_2": float(np.round(papoto.parameter_1_2[0], DECIMAL_PRECISION)),
-        "parameter_2_3": float(np.round(papoto.parameter_2_3[0], DECIMAL_PRECISION)),
-        "parameter_1_3": float(np.round(papoto.parameter_1_3[0], DECIMAL_PRECISION)),
+        "parameter_1_2": float(
+            np.round(papoto.parameter_1_2[0], DECIMAL_PRECISION)
+        ),
+        "parameter_2_3": float(
+            np.round(papoto.parameter_2_3[0], DECIMAL_PRECISION)
+        ),
+        "parameter_1_3": float(
+            np.round(papoto.parameter_1_3[0], DECIMAL_PRECISION)
+        ),
         "checkValidity": bool(papoto.check_validity()[0]),
-        "uncertainty": float(np.round(float(2 * std_parameter), DECIMAL_PRECISION)),
+        "uncertainty": float(
+            np.round(float(2 * std_parameter), DECIMAL_PRECISION)
+        ),
     }

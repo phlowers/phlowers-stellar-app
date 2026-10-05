@@ -52,7 +52,10 @@ def parameter_15_without_wind(inputs: dict, engine: BalanceEngine):
     return {
         "parameter15CMinusUncertainty": float(
             np.round(
-                calibrate(parameter - parameter_delta, temperature - temperature_delta),
+                calibrate(
+                    parameter - parameter_delta,
+                    temperature - temperature_delta,
+                ),
                 DECIMAL_PRECISION,
             )
         ),
@@ -62,7 +65,8 @@ def parameter_15_without_wind(inputs: dict, engine: BalanceEngine):
         "parameter15CPlusUncertainty": float(
             np.round(
                 calibrate(
-                    parameter + parameter_delta, temperature + temperature_delta
+                    parameter + parameter_delta,
+                    temperature + temperature_delta,
                 ),
                 DECIMAL_PRECISION,
             )

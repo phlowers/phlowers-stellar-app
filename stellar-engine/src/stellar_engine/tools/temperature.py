@@ -117,7 +117,10 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
     return {
         "cableSolarFlux": None,
         "cableTemperature": float(
-            np.round(temperature_result.data["core_temperature"].iloc[0], DECIMAL_PRECISION)
+            np.round(
+                temperature_result.data["core_temperature"].iloc[0],
+                DECIMAL_PRECISION,
+            )
         ),
         "cableTemperatureUncertainty": float(
             np.round(temperature_result.uncertainty[0], DECIMAL_PRECISION)
@@ -138,10 +141,16 @@ def compute_diffuse_and_beam_radiations(inputs: dict) -> dict[str, float]:
     )
     return {
         "diffuseRadiation": float(
-            np.round(radiation_result.data["diffuse_radiation"].iloc[0], DECIMAL_PRECISION)
+            np.round(
+                radiation_result.data["diffuse_radiation"].iloc[0],
+                DECIMAL_PRECISION,
+            )
         ),
         "beamRadiation": float(
-            np.round(radiation_result.data["beam_radiation"].iloc[0], DECIMAL_PRECISION)
+            np.round(
+                radiation_result.data["beam_radiation"].iloc[0],
+                DECIMAL_PRECISION,
+            )
         ),
         "diffusePlusBeamRadiation": float(
             np.round(
@@ -158,7 +167,9 @@ def get_wind_attack_angle(inputs: dict):
     wind_incidence = ThermalEngine.compute_wind_attack_angle(
         np.array(wind_inputs.azimuth), np.array(wind_azimuth)
     )
-    return {"windIncidence": float(np.round(wind_incidence, DECIMAL_PRECISION))}
+    return {
+        "windIncidence": float(np.round(wind_incidence, DECIMAL_PRECISION))
+    }
 
 
 def compute_nebulosity(inputs: dict) -> dict[str, str]:

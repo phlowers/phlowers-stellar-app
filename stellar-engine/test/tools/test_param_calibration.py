@@ -49,7 +49,9 @@ def test_parameter_15_without_wind_uncertainties(
     assert result["parameter15CMinusUncertainty"] == pytest.approx(
         expected_min_rounded, abs=0.05
     )
-    assert result["parameter15C"] == pytest.approx(expected_nominal_rounded, abs=0.05)
+    assert result["parameter15C"] == pytest.approx(
+        expected_nominal_rounded, abs=0.05
+    )
     assert result["parameter15CPlusUncertainty"] == pytest.approx(
         expected_max_rounded, abs=0.05
     )
