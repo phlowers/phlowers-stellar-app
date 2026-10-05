@@ -18,6 +18,8 @@ from stellar_engine.entities.inputs import (
     WindAngleCalculationInputs,
 )
 
+DECIMAL_PRECISION = 1
+
 DIRECTION_MAP = {
     'North': 0,
     'North-East': 45,
@@ -114,10 +116,12 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
     )
     return {
         "cableSolarFlux": None,
-        "cableTemperature": temperature_result.data["core_temperature"].iloc[
-            0
-        ],
-        "cableTemperatureUncertainty": temperature_result.uncertainty[0],
+        "cableTemperature": float(
+            np.round(temperature_result.data["core_temperature"].iloc[0], DECIMAL_PRECISION)
+        ),
+        "cableTemperatureUncertainty": float(
+            np.round(temperature_result.uncertainty[0], DECIMAL_PRECISION)
+        ),
     }
 
 
@@ -133,11 +137,18 @@ def compute_diffuse_and_beam_radiations(inputs: dict) -> dict[str, float]:
         nebulosity=np.array([nebulosity]),
     )
     return {
-        "diffuseRadiation": radiation_result.data["diffuse_radiation"].iloc[0],
-        "beamRadiation": radiation_result.data["beam_radiation"].iloc[0],
-        "diffusePlusBeamRadiation": radiation_result.data[
-            "diffuse_plus_beam_radiation"
-        ].iloc[0],
+        "diffuseRadiation": float(
+            np.round(radiation_result.data["diffuse_radiation"].iloc[0], DECIMAL_PRECISION)
+        ),
+        "beamRadiation": float(
+            np.round(radiation_result.data["beam_radiation"].iloc[0], DECIMAL_PRECISION)
+        ),
+        "diffusePlusBeamRadiation": float(
+            np.round(
+                radiation_result.data["diffuse_plus_beam_radiation"].iloc[0],
+                DECIMAL_PRECISION,
+            )
+        ),
     }
 
 
@@ -147,7 +158,7 @@ def get_wind_attack_angle(inputs: dict):
     wind_incidence = ThermalEngine.compute_wind_attack_angle(
         np.array(wind_inputs.azimuth), np.array(wind_azimuth)
     )
-    return {"windIncidence": wind_incidence}
+    return {"windIncidence": float(np.round(wind_incidence, DECIMAL_PRECISION))}
 
 
 def compute_nebulosity(inputs: dict) -> dict[str, str]:
@@ -172,6 +183,6 @@ def compute_nebulosity(inputs: dict) -> dict[str, str]:
         nebulosity_str = REVERSED_SKY_COVER_MAP[nebulosity_value]
     except (KeyError, ValueError) as e:
         raise ValueError(
-            f"Unexpected nebulosity value: {nebulosity_value}"
+            f"Unexpected sky cover value: {result_sky_cover}"
         ) from e
     return {"skyCover": nebulosity_str}

@@ -7,6 +7,10 @@
 
 from mechaphlowers import PapotoParameterMeasure
 
+import numpy as np
+
+DECIMAL_PRECISION = 1
+
 
 def calculate_papoto(inputs):
     spanLength = inputs["spanLength"]
@@ -38,10 +42,10 @@ def calculate_papoto(inputs):
     uncertainty_dict = papoto.uncertainty(draw_number=1000, angle_error=0.01)
     std_parameter = uncertainty_dict["std_parameter_valid_values"]
     return {
-        "parameter": papoto.parameter[0],
-        "parameter_1_2": papoto.parameter_1_2[0],
-        "parameter_2_3": papoto.parameter_2_3[0],
-        "parameter_1_3": papoto.parameter_1_3[0],
+        "parameter": float(np.round(papoto.parameter[0], DECIMAL_PRECISION)),
+        "parameter_1_2": float(np.round(papoto.parameter_1_2[0], DECIMAL_PRECISION)),
+        "parameter_2_3": float(np.round(papoto.parameter_2_3[0], DECIMAL_PRECISION)),
+        "parameter_1_3": float(np.round(papoto.parameter_1_3[0], DECIMAL_PRECISION)),
         "checkValidity": bool(papoto.check_validity()[0]),
-        "uncertainty": float(2 * std_parameter),
+        "uncertainty": float(np.round(float(2 * std_parameter), DECIMAL_PRECISION)),
     }

@@ -36,15 +36,23 @@ def test_parameter_15_without_wind_uncertainties(
     result = parameter_15_without_wind(inputs, balance_engine_base)
 
     # P ± 0.5 * 1.65 * IncP = 2000 ± 16.5 ; T ± 0.9 * 1.65 * IncT = 40 ± 5.94
+    # Note: results are rounded to 1 decimal place
     expected_min = _calibrate(balance_engine_base, 1983.5, 34.06)
     expected_nominal = _calibrate(balance_engine_base, 2000.0, 40.0)
     expected_max = _calibrate(balance_engine_base, 2016.5, 45.94)
 
+    # Round expected values to 1 decimal place to match function output
+    expected_min_rounded = round(expected_min, 1)
+    expected_nominal_rounded = round(expected_nominal, 1)
+    expected_max_rounded = round(expected_max, 1)
+
     assert result["parameter15CMinusUncertainty"] == pytest.approx(
-        expected_min
+        expected_min_rounded, abs=0.05
     )
-    assert result["parameter15C"] == pytest.approx(expected_nominal)
-    assert result["parameter15CPlusUncertainty"] == pytest.approx(expected_max)
+    assert result["parameter15C"] == pytest.approx(expected_nominal_rounded, abs=0.05)
+    assert result["parameter15CPlusUncertainty"] == pytest.approx(
+        expected_max_rounded, abs=0.05
+    )
     assert (
         result["parameter15CMinusUncertainty"]
         < result["parameter15C"]
