@@ -177,7 +177,7 @@
 <!-- Always on the page: screen readers only announce results added to a live region that is already there -->
 <output class="cable-adjustment__results" data-testid="results">
   @if (displayedResults(); as res) {
-    <div class="cable-adjustment__results-content" data-testid="results-frame">
+    <div class="cable-adjustment__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
       <h2>{{ 'common.results' | transloco }}</h2>
       <dl class="cable-adjustment__grid">
         <div class="cable-adjustment__field">

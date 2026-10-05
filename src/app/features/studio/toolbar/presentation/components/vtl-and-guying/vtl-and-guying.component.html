@@ -153,41 +153,51 @@
 
       <hr class="my-3" />
 
-      @if (results()) {
-        <section class="vtl-guying__results-section">
-          <div>
-            <h3 class="vtl-guying__section-title">{{ 'common.results' | transloco }}</h3>
-          </div>
-          <dl class="vtl-guying__results-fields">
-            <div class="vtl-guying__result-field tensionInGuy">
-              <dt>{{ 'studio.vtl-and-guying.tension-in-guy-line-label' | transloco }}</dt>
-              <dd class="vtl-guying__result-value">
-                {{ (results()?.tensionInGuy | number: '1.0-1') ?? '-' }}&nbsp;daN
-              </dd>
-            </div>
-            <div class="vtl-guying__result-field guyAngle">
-              <dt>{{ 'studio.vtl-and-guying.angle-guy-line-label' | transloco }}</dt>
-              <dd class="vtl-guying__result-value">{{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°</dd>
-            </div>
-            <div class="vtl-guying__result-field chargeVUnderConsole">
-              <dt>{{ 'studio.vtl-and-guying.load-v-under-console-label' | transloco }}</dt>
-              <dd class="vtl-guying__result-value">
-                {{ (results()?.chargeVUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
-              </dd>
-            </div>
-            <div class="vtl-guying__result-field chargeHUnderConsole">
-              <dt>{{ 'studio.vtl-and-guying.load-t-under-console-label' | transloco }}</dt>
-              <dd class="vtl-guying__result-value">
-                {{ (results()?.chargeHUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
-              </dd>
-            </div>
-            <div class="vtl-guying__result-field chargeLIfPulley">
-              <dt>{{ 'studio.vtl-and-guying.load-l-if-pulley-label' | transloco }}</dt>
-              <dd class="vtl-guying__result-value">
-                {{ (results()?.chargeLIfPulley | number: '1.0-1') ?? '-' }}&nbsp;daN
-              </dd>
-            </div>
-            <div class="vtl-guying__result-field comment">
+      <div class="vtl-guying__results-section">
+        <div class="vtl-guying__results-layout">
+          <!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+          <output class="vtl-guying__results">
+            @if (results()) {
+              <div class="vtl-guying__results-content" animate.enter="anim-expand-height">
+                <h3 class="vtl-guying__section-title">{{ 'common.results' | transloco }}</h3>
+                <dl class="vtl-guying__results-fields">
+                  <div class="vtl-guying__result-field tensionInGuy">
+                    <dt>{{ 'studio.vtl-and-guying.tension-in-guy-line-label' | transloco }}</dt>
+                    <dd class="vtl-guying__result-value">
+                      {{ (results()?.tensionInGuy | number: '1.0-1') ?? '-' }}&nbsp;daN
+                    </dd>
+                  </div>
+                  <div class="vtl-guying__result-field guyAngle">
+                    <dt>{{ 'studio.vtl-and-guying.angle-guy-line-label' | transloco }}</dt>
+                    <dd class="vtl-guying__result-value">
+                      {{ (results()?.guyAngle | number: '1.0-3') ?? '-' }}&nbsp;°
+                    </dd>
+                  </div>
+                  <div class="vtl-guying__result-field chargeVUnderConsole">
+                    <dt>{{ 'studio.vtl-and-guying.load-v-under-console-label' | transloco }}</dt>
+                    <dd class="vtl-guying__result-value">
+                      {{ (results()?.chargeVUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
+                    </dd>
+                  </div>
+                  <div class="vtl-guying__result-field chargeHUnderConsole">
+                    <dt>{{ 'studio.vtl-and-guying.load-t-under-console-label' | transloco }}</dt>
+                    <dd class="vtl-guying__result-value">
+                      {{ (results()?.chargeHUnderConsole | number: '1.0-1') ?? '-' }}&nbsp;daN
+                    </dd>
+                  </div>
+                  <div class="vtl-guying__result-field chargeLIfPulley">
+                    <dt>{{ 'studio.vtl-and-guying.load-l-if-pulley-label' | transloco }}</dt>
+                    <dd class="vtl-guying__result-value">
+                      {{ (results()?.chargeLIfPulley | number: '1.0-1') ?? '-' }}&nbsp;daN
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            }
+          </output>
+
+          @if (results()) {
+            <div class="vtl-guying__result-field" animate.enter="anim-expand-height">
               <label for="comment-textarea">{{ 'common.comment-label' | transloco }}</label>
               <textarea
                 pTextarea
@@ -199,15 +209,18 @@
                 data-testid="comment-textarea"
               ></textarea>
             </div>
-          </dl>
-          <div class="vtl-guying__info-text">
+          }
+        </div>
+
+        @if (results()) {
+          <div class="vtl-guying__info-text" animate.enter="anim-expand-height">
             <app-icon icon="info" class="vtl-guying__info-icon" />
             <p>
               {{ 'studio.vtl-and-guying.info-text' | transloco }}
             </p>
           </div>
-        </section>
-      }
+        }
+      </div>
     </div>
 
     <div class="vtl-guying__right">
