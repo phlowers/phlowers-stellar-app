@@ -10,6 +10,7 @@ import {
   Signal,
   untracked
 } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -25,7 +26,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
-import type { CableSupportManipItem } from '@shared/domain';
+import type { CableSupportManipItem, CableSupportManipulation } from '@shared/domain';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
   CableSupportManipFormControls,
@@ -243,6 +244,94 @@ export class CableSupportManipComponent {
     }
   });
 
+  private readonly cableModificationControlSignals: Record<any, Signal<unknown>> = {
+    manip1Type: toSignal(this.form.controls.manip1Type.valueChanges, {
+      initialValue: this.form.controls.manip1Type.value,
+      equal: () => false
+    }),
+    anchoring: toSignal(this.form.controls.anchoring.valueChanges, {
+      initialValue: this.form.controls.anchoring.value,
+      equal: () => false
+    }),
+    lateralDistance: toSignal(this.form.controls.lateralDistance.valueChanges, {
+      initialValue: this.form.controls.lateralDistance.value,
+      equal: () => false
+    }),
+    vertDisplacement: toSignal(this.form.controls.vertDisplacement.valueChanges, {
+      initialValue: this.form.controls.vertDisplacement.value,
+      equal: () => false
+    }),
+    ropeLength: toSignal(this.form.controls.ropeLength.valueChanges, {
+      initialValue: this.form.controls.ropeLength.value,
+      equal: () => false
+    }),
+    shiftingClampLength: toSignal(this.form.controls.shiftingClampLength.valueChanges, {
+      initialValue: this.form.controls.shiftingClampLength.value,
+      equal: () => false
+    }),
+    manip2Type: toSignal(this.form.controls.manip2Type.valueChanges, {
+      initialValue: this.form.controls.manip2Type.value,
+      equal: () => false
+    }),
+    manip2ShiftingClampLength: toSignal(this.form.controls.manip2ShiftingClampLength.valueChanges, {
+      initialValue: this.form.controls.manip2ShiftingClampLength.value,
+      equal: () => false
+    })
+  };
+
+  private readonly manip1TypeEffect = effect(() => {
+    const value = this.cableModificationControlSignals.manip1Type();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('manip1Type', value);
+    }
+  });
+
+  private readonly anchoringEffect = effect(() => {
+    const value = this.cableModificationControlSignals.anchoring();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('anchoring', value);
+    }
+  });
+
+  private readonly lateralDistanceEffect = effect(() => {
+    const value = this.cableModificationControlSignals.lateralDistance();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('lateralDistance', value);
+    }
+  });
+
+  private readonly vertDisplacementEffect = effect(() => {
+    const value = this.cableModificationControlSignals.vertDisplacement();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('vertDisplacement', value);
+    }
+  });
+
+  private readonly ropeLengthEffect = effect(() => {
+    const value = this.cableModificationControlSignals.ropeLength();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('ropeLength', value);
+    }
+  });
+  private readonly shiftingClampLengthEffect = effect(() => {
+    const value = this.cableModificationControlSignals.shiftingClampLength();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('shiftingClampLength', value);
+    }
+  });
+  private readonly manip2TypeEffect = effect(() => {
+    const value = this.cableModificationControlSignals.manip2Type();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('manip2Type', value);
+    }
+  });
+  private readonly manip2ShiftingClampLengthEffect = effect(() => {
+    const value = this.cableModificationControlSignals.manip2ShiftingClampLength();
+    if (value !== null) {
+      this.onSupportManipulationControlChange('manip2ShiftingClampLength', value);
+    }
+  });
+
   zoomToSupport(): void {
     const uuid = this.form.controls.support.value;
     if (!uuid) return;
@@ -267,6 +356,7 @@ export class CableSupportManipComponent {
     this.form.controls.manip2Type.reset('shifting');
     this.form.controls.manip2ShiftingClampLength.reset(0, { emitEvent: false });
     this.form.controls.manip2ShiftingClampLength.updateValueAndValidity({ emitEvent: false });
+    this.onSupportManipulationControlChange('manip2ShiftingClampLength', 0);
   }
 
   onSupportChange(uuid: string | null): void {
@@ -313,32 +403,15 @@ export class CableSupportManipComponent {
 
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
-    const raw = this.form.getRawValue();
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    if (!chargeUuid) return;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid;
+    if (!chargeUuid) {
+      this.isLoading.set(false);
+      return;
+    }
     this.isLoading.set(true);
+    const createdSupportManip = this.createSupportManipFromForm(chargeUuid);
     try {
-      const manip1 = this.buildManip1(raw);
-      await this.cableSupportManipService.save({
-        supportUuid: raw.support!,
-        chargeUuid,
-        manip1,
-        manip2: this.showManip2()
-          ? {
-              type: raw.manip2Type!,
-              vertDisplacement: null,
-              anchoring: null,
-              lateralDistance: null,
-              ropeLength: null,
-              shiftingClampLength: raw.manip2ShiftingClampLength,
-              chainName: null,
-              chainLength: null,
-              chainWeight: null,
-              chainSurface: null,
-              counterWeight: null
-            }
-          : null
-      });
+      await this.cableSupportManipService.save(createdSupportManip);
       this.hasSavedManipulation.set(true);
       await this.cableSupportManipService.reloadSection();
       this.notificationService.success(this.translocoService.translate('loads.cable-support-manip.saved-notification'));
@@ -349,6 +422,32 @@ export class CableSupportManipComponent {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  private createSupportManipFromForm(chargeUuid: string) {
+    const raw = this.form.getRawValue();
+    const manip1 = this.buildManip1(raw);
+    const createdSupportManip = {
+      supportUuid: raw.support!,
+      chargeUuid,
+      manip1,
+      manip2: this.showManip2()
+        ? {
+            type: raw.manip2Type!,
+            vertDisplacement: null,
+            anchoring: null,
+            lateralDistance: null,
+            ropeLength: null,
+            shiftingClampLength: raw.manip2ShiftingClampLength,
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null
+          }
+        : null
+    };
+    return createdSupportManip;
   }
 
   async deleteForm(): Promise<void> {
@@ -445,5 +544,110 @@ export class CableSupportManipComponent {
 
   getErrorIds(controlName: keyof CableSupportManipFormControls, errorTypes: string[]): string | null {
     return getControlErrorIds(this.form, controlName, errorTypes);
+  }
+
+  private findSupportManipulationFromSpanService(supportUuid: string): CableSupportManipulation | undefined {
+    return this.spanService
+      .section()
+      ?.cable_support_manipulations?.find((supportManip) => supportManip.supportUuid === supportUuid);
+  }
+
+  private findSelectedSupportManipulation(): CableSupportManipulation | undefined {
+    const supportUuidToFind = this.form.controls.support.value;
+    if (!supportUuidToFind) {
+      return undefined;
+    }
+    return this.plotService.temporaryLoadData?.supportManipParams.find(
+      (supportManip) => supportManip.supportUuid === supportUuidToFind
+    );
+  }
+
+  private ensureSelectedSupportManipulation(): CableSupportManipulation | undefined {
+    const supportUuid = this.form.controls.support.value;
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    if (!supportUuid || !temporaryLoadData) {
+      return undefined;
+    }
+
+    const selectedSupportManipulation = this.findSelectedSupportManipulation();
+    if (selectedSupportManipulation) {
+      return selectedSupportManipulation;
+    }
+    const fallbackSupportManipulation = this.findSupportManipulationFromSpanService(supportUuid);
+
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid;
+    if (!chargeUuid) return;
+    const nextSupportManipulation: CableSupportManipulation = fallbackSupportManipulation
+      ? { ...fallbackSupportManipulation }
+      : { ...this.createSupportManipFromForm(chargeUuid), uuid: uuidv4() };
+
+    temporaryLoadData.supportManipParams = [...(temporaryLoadData.supportManipParams ?? []), nextSupportManipulation];
+    return nextSupportManipulation;
+  }
+
+  private onSupportManipulationControlChange(controlName: any, value: unknown): void {
+    const supportManipulation = this.ensureSelectedSupportManipulation();
+    if (!supportManipulation) {
+      return;
+    }
+
+    console.log(supportManipulation);
+    switch (controlName) {
+      // case 'supportUuid':
+      //   supportManipulation.supportUuid = value;
+      //   break;
+      case 'manip1Type':
+        supportManipulation.manip1.type =
+          value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'crane';
+        break;
+      case 'anchoring':
+        supportManipulation.manip1.anchoring = value === 'with_chain' ? value : 'without_chain';
+        break;
+      case 'lateralDistance':
+        supportManipulation.manip1.lateralDistance = typeof value === 'number' ? value : 0;
+        break;
+      case 'vertDisplacement':
+        supportManipulation.manip1.vertDisplacement = typeof value === 'number' ? value : 0;
+        break;
+      case 'ropeLength':
+        supportManipulation.manip1.ropeLength = typeof value === 'number' ? value : 0;
+        break;
+      case 'shiftingClampLength':
+        supportManipulation.manip1.shiftingClampLength = typeof value === 'number' ? value : 0;
+        break;
+
+      // TODO: manage case with manip2 not existing + being able to remove it
+      // assume that always exists? python has to interpret a 0 shift as -> no shift?
+      case 'manip2Type':
+        // if for type verification, should supportManipulation.manip2 should always exist
+        if (supportManipulation.manip2 !== null) {
+          // should only be shifting
+          supportManipulation.manip2.type =
+            value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'shifting';
+        } else {
+          // create the object, or give an existing object
+          supportManipulation.manip2 = {
+            type: value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'shifting',
+            vertDisplacement: null,
+            anchoring: null,
+            lateralDistance: null,
+            ropeLength: null,
+            shiftingClampLength: 0,
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null
+          };
+        }
+        break;
+      case 'manip2ShiftingClampLength':
+        if (supportManipulation.manip2 !== null) {
+          supportManipulation.manip2.shiftingClampLength = typeof value === 'number' ? value : 0;
+        }
+        break;
+    }
+    console.log('OOOOOOOOOOOOOOOOO');
+    console.log(supportManipulation);
   }
 }

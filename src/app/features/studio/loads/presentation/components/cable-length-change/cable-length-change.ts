@@ -406,7 +406,7 @@ export class CableLengthChangeComponent {
       (cableModification) => cableModification.spanUuid === spanUuid
     );
   }
-
+  // could be removed when recheckCableModif() is used (initTemporaryLoadData() in loadForms.service.ts)
   private ensureSelectedCableModification(): CableModification | undefined {
     const spanUuid = this.form.controls.scope.value;
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -415,11 +415,13 @@ export class CableLengthChangeComponent {
     }
 
     const selectedCableModification = this.findSelectedCableModification();
+    console.log('IIIIIIIIIIIIIIIIIII');
     if (selectedCableModification) {
       return selectedCableModification;
     }
 
     const fallbackCableModification = this.findCableModification(spanUuid);
+    console.log(fallbackCableModification);
     const nextCableModification: CableModification = fallbackCableModification
       ? { ...fallbackCableModification }
       : {
@@ -450,6 +452,7 @@ export class CableLengthChangeComponent {
 
   private onCableModificationControlChange(controlName: CableModificationControlName, value: unknown): void {
     const cableModification = this.ensureSelectedCableModification();
+    // console.log(cableModification)
     if (!cableModification) {
       return;
     }
@@ -470,5 +473,7 @@ export class CableLengthChangeComponent {
           typeof value === 'number' ? value : CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef;
         break;
     }
+    // console.log("FFFFFFFFFFFFFFFFFFFFF")
+    // console.log(cableModification)
   }
 }

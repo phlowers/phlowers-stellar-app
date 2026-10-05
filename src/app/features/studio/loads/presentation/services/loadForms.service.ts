@@ -82,14 +82,23 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
     const rawCableModif = newData.cableModifParams || [];
+    const supportManip = newData.supportManipParams || [];
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
     // ideally, we want to call recheckCableModif and create an initial state,
     // but this cause inconsistencies with python task that only calls manipulations one by one
+    // can refacto ensureSelectedCableModification when initial state is created
     // ponytail: merge persisted section.cable_modifications into charge params on import
     newData.cableModifParams = [
       ...rawCableModif,
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
+    ];
+    // TODO : re read this
+    newData.supportManipParams = [
+      ...supportManip,
+      ...(section?.cable_support_manipulations?.filter(
+        (suppManip) => !supportManip.some((p) => p.supportUuid === suppManip.supportUuid)
+      ) ?? [])
     ];
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
@@ -207,6 +216,8 @@ export class LoadFormsService {
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
+    console.log('--------------EEEEEEEEEEEEEE-----------------');
+    console.log(temporaryLoadData);
     if (!temporaryLoadData) {
       return;
     }
