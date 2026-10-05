@@ -568,3 +568,42 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the function and the imports it alone required (`CableSupportManipulation`, `SupportAnchoringType`, `SupportManipType`, `SupportManipReportRow`). No behavioral change: the report keeps using the component's inline flattening. |
 | ✅ Validated | 🗑️ REMOVED — dead on arrival, never wired |
+
+---
+
+## 41. `RuleClimaticCondition.set_wind_pressure` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` (`RuleClimaticCondition.set_wind_pressure`) |
+| Code | `def set_wind_pressure(self, wind_pressure: float)` |
+| 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; wind pressure is resolved at construction time (`wind_zone_pressure`) and by `apply_wind_minus`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 42. `ConformityResult.compute_table_result` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityResult.compute_table_result`) |
+| Code | `def compute_table_result(self, points_list: list) -> None: pass` |
+| 🔍 Evidence | Empty body (`pass`) and no caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 43. `ConformityTableResult.set_conformity_point` + `current_conformity_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.set_conformity_point`) |
+| Code | `def set_conformity_point(self, conformity_point)` assigning the undeclared attribute `current_conformity_point` |
+| 🔍 Evidence | `get_conformity` no longer calls it: compliance is now computed from `scenario_compliances` over every scenario. `current_conformity_point` is no longer read. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method; no other change. |
+| ✅ Validated | ⏳ Pending review |

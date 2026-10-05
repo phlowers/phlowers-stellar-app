@@ -6,8 +6,8 @@
 
 import logging
 from copy import copy
-from dataclasses import dataclass, field
-from typing import ClassVar, Optional
+from dataclasses import InitVar, dataclass, field
+from typing import Optional
 
 from stellar_engine.entities.conformity import (
     ConformityParametersInput,
@@ -65,27 +65,29 @@ class Scenario:
 class ClimaticPoint:
     """Represents climatic conditions for a conformity point."""
 
-    # Class attribute for default wind pressure when wind_input is "WindZoneInput"
-    default_wind_pressure: ClassVar[float] = 0.0
-
     temperature: Optional[float]
     wind_input: float | str  # Can be numeric or "WindZoneInput"
     red_zone: bool
     wind_pressure: float = field(init=False)
+    # Pressure used when wind_input is "WindZoneInput"
+    wind_zone_pressure: InitVar[float] = 0.0
 
-    def __post_init__(self):
+    def __post_init__(self, wind_zone_pressure: float):
         """Set wind_pressure based on wind_input."""
         if self.wind_input == "WindZoneInput":
-            self.wind_pressure = ClimaticPoint.default_wind_pressure
+            self.wind_pressure = float(wind_zone_pressure)
         else:
             self.wind_pressure = float(self.wind_input)
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'ClimaticPoint':
+    def from_dict(
+        cls, data: dict, wind_zone_pressure: float = 0.0
+    ) -> 'ClimaticPoint':
         """Create ClimaticPoint from dictionary with validation.
 
         Args:
             data: Dictionary containing temperature, wind_pressure, and red_zone
+            wind_zone_pressure: Pressure resolving a "WindZoneInput" value
 
         Returns:
             ClimaticPoint instance
@@ -107,6 +109,7 @@ class ClimaticPoint:
             temperature=data.get("temperature"),
             wind_input=data["pressure"],
             red_zone=data["red_zone"],
+            wind_zone_pressure=wind_zone_pressure,
         )
 
     def to_dict(self) -> dict:
@@ -139,6 +142,11 @@ class RuleClimaticCondition:
     overhang_point: ClimaticPoint
     inverse_lateral_point: Optional[ClimaticPoint] = None
 
+    def apply_wind_minus(self):
+        """Negate the lateral wind pressure (windMinus); overhang is untouched."""
+        if self.lateral_point is not None:
+            self.lateral_point.wind_pressure = -self.lateral_point.wind_pressure
+
     def add_inverse_lateral_pressure(self):
         """Return a copy of the rule with the lateral pressure inverted."""
         self.inverse_lateral_point = copy(self.lateral_point)
@@ -148,15 +156,18 @@ class RuleClimaticCondition:
             )
 
     def set_repartition_temperature(self, temperature: float):
-        """Set the repartition temperature for both lateral and overhang points."""
-        if self.overhang_point is not None:
+        """Set the repartition temperature on the overhang point when it has none."""
+        if (
+            self.overhang_point is not None
+            and self.overhang_point.temperature is None
+        ):
             self.overhang_point.temperature = temperature
 
     def set_lateral_temperature(self, temperature: float):
-        if self.lateral_point is not None:
-            self.lateral_point.temperature = temperature
-        if self.inverse_lateral_point is not None:
-            self.inverse_lateral_point.temperature = temperature
+        """Set the lateral temperature on the lateral points that have none."""
+        for point in (self.lateral_point, self.inverse_lateral_point):
+            if point is not None and point.temperature is None:
+                point.temperature = temperature
 
     def set_wind_pressure(self, wind_pressure: float):
         if self.lateral_point is not None:
@@ -184,11 +195,11 @@ class RuleClimaticCondition:
         inverse_lateral_pressure = -lateral_pressure
 
         for point in intermediate_points:
-            # Interpolate from inverse lateral to overhang
+            # Interpolate from overhang to inverse lateral
             inverse_to_overhang = copy(self.lateral_point)
             inverse_to_overhang.wind_pressure = (
-                inverse_lateral_pressure * (1 - point)
-                + overhang_pressure * point
+                overhang_pressure * (1 - point)
+                + inverse_lateral_pressure * point
             )
             interpolated_points.append(inverse_to_overhang)
 
@@ -202,11 +213,14 @@ class RuleClimaticCondition:
         return interpolated_points
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'RuleClimaticCondition':
+    def from_dict(
+        cls, data: dict, wind_zone_pressure: float = 0.0
+    ) -> 'RuleClimaticCondition':
         """Create RuleClimaticCondition from dictionary with validation.
 
         Args:
             data: Dictionary containing rule configuration
+            wind_zone_pressure: Pressure resolving "WindZoneInput" values
 
         Returns:
             RuleClimaticCondition instance
@@ -232,8 +246,12 @@ class RuleClimaticCondition:
         return cls(
             rule_type=data["ruleType"],
             rule_name=data["ruleName"],
-            lateral_point=ClimaticPoint.from_dict(data["lateralPoint"]),
-            overhang_point=ClimaticPoint.from_dict(data["overhangPoint"]),
+            lateral_point=ClimaticPoint.from_dict(
+                data["lateralPoint"], wind_zone_pressure
+            ),
+            overhang_point=ClimaticPoint.from_dict(
+                data["overhangPoint"], wind_zone_pressure
+            ),
         )
 
     def to_dict(self) -> dict:
@@ -248,12 +266,13 @@ class RuleClimaticCondition:
     @staticmethod
     def build_rules_climatic_conditions(
         rules_climatic_conditions_data: list[dict],
+        wind_zone_pressure: float = 0.0,
     ) -> list['RuleClimaticCondition']:
         """Build list of RuleClimaticCondition from list of dictionaries."""
 
         rules = []
         for rcc in rules_climatic_conditions_data:
-            rule = RuleClimaticCondition.from_dict(rcc)
+            rule = RuleClimaticCondition.from_dict(rcc, wind_zone_pressure)
             rules.append(rule)
 
         return rules
@@ -285,6 +304,9 @@ def build_scenario(
     # Map temperature_key to ConformityParameters attribute name
     # default_temperature = getattr(parameters, temperature_key)
     scenarios = []
+
+    if parameters.wind_minus:
+        rule.apply_wind_minus()
 
     if (
         security_distance.lateral is not None
@@ -323,7 +345,6 @@ def build_scenario(
         security_distance.overhang is not None
         and rule.overhang_point is not None
     ):
-        rule.add_inverse_lateral_pressure()
         rule.set_repartition_temperature(parameters.repartition_temperature)
         target_state = TargetState(
             new_temperature=rule.overhang_point.temperature,

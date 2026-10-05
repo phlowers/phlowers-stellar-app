@@ -14,7 +14,6 @@ from stellar_engine.core.conformity.compute import (
     ConformityResult,
 )
 from stellar_engine.core.conformity.scenarios import (
-    ClimaticPoint,
     RuleClimaticCondition,
     build_scenario_bulk,
 )
@@ -100,9 +99,6 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         raise
 
     # - Validate and create RuleClimaticCondition objects
-    # --- set wind pressure for "WindZoneInput" cases before
-    ClimaticPoint.default_wind_pressure = parameters.wind_pressure
-    # --- build RuleClimaticCondition objects
     if not rules_climatic_conditions_data:
         logger.warning(
             "No climatic conditions provided. Returning empty conformity result."
@@ -112,7 +108,8 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
     try:
         rules_climatic_conditions = (
             RuleClimaticCondition.build_rules_climatic_conditions(
-                rules_climatic_conditions_data
+                rules_climatic_conditions_data,
+                wind_zone_pressure=parameters.wind_pressure,
             )
         )
     except ValueError as e:
@@ -214,8 +211,10 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
                 ),
             )
 
-            conformity_result.table_results[rule_type].set_conformity_point(
-                scenario.conformity_point
+            conformity_result.table_results[rule_type].add_scenario_compliance(
+                dist_result,
+                scenario.conformity_point,
+                scenario.security_distance,
             )
             conformity_result.table_results[rule_type].set_target_state(
                 scenario.target_state, scenario.conformity_point

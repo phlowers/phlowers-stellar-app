@@ -120,6 +120,7 @@ class ConformityPlotRules:
     """Class to manage conformity plot rules and their distances."""
 
     default_radius = 1.0
+    default_zone_width = 10.0
 
     def __init__(
         self,
@@ -147,8 +148,19 @@ class ConformityPlotRules:
 
         max_x = max(p.x for p in points) + lateral_security_distance
         min_x = min(p.x for p in points) - lateral_security_distance
-        max_y = max(p.y for p in points) + overhang_security_distance
-        min_y = min(p.y for p in points) - overhang_security_distance
+        if max_x == min_x:
+            center_x = min_x
+            min_x = center_x - self.default_zone_width / 2
+            max_x = center_x + self.default_zone_width / 2
+
+        if self.conformity_plot == "overhang":
+            # Flat rectangle: the zone is a single line below the lowest point
+            max_y = min_y = (
+                min(p.y for p in points) - overhang_security_distance
+            )
+        else:
+            max_y = max(p.y for p in points) + overhang_security_distance
+            min_y = min(p.y for p in points) - overhang_security_distance
 
         lower_left = Point2D(x=min_x, y=min_y)
         upper_right = Point2D(x=max_x, y=max_y)
@@ -164,6 +176,8 @@ class ConformityPlotRules:
 
         if self.conformity_plot == "overhang":
             zone_border = [
+                lower_left.to_dict(),
+                lower_right.to_dict(),
                 upper_right.to_dict(),
                 upper_left.to_dict(),
             ]
@@ -209,6 +223,7 @@ class ConformityTableResult:
     lateral_wind_pressure: Optional[float] = None
     overhang_minimal_distance: Optional[float] = None
     lateral_minimal_distance: Optional[float] = None
+    scenario_compliances: list[bool] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         """Convert to dictionary format."""
@@ -216,31 +231,27 @@ class ConformityTableResult:
 
     @property
     def conformity_compliance_status(self) -> Optional[bool]:
-        """Determine if the conformity is compliant based on distances."""
-        if (
-            self.lateral_cable_line_axis_distance is None
-            or self.lateral_distance_to_comply is None
-            or self.overhang_cable_line_axis_distance is None
-            or self.overhang_distance_to_comply is None
-        ):
+        """Compliant when every scenario of the rule complies, None without scenario."""
+        if not self.scenario_compliances:
             return None
+        return all(self.scenario_compliances)
 
-        lateral_compliance = self.lateral_compliance_line_axis_distance
-        overhang_compliance = self.overhang_compliance_line_axis_distance
-
-        if self.current_conformity_point == "lateral":
-            if lateral_compliance is None:
-                return None
-            return lateral_compliance > 0
-        elif self.current_conformity_point == "overhang":
-            if overhang_compliance is None:
-                return None
-            return overhang_compliance > 0
+    def add_scenario_compliance(
+        self,
+        distance: DistanceResult,
+        conformity_point: str,
+        security_distance: Optional[float],
+    ) -> None:
+        """Record whether a scenario respects its security distance."""
+        if security_distance is None:
+            return
+        if conformity_point in ("lateral", "lateral_inverse", "intermediate"):
+            measured = distance.distance_projection_u
+        elif conformity_point == "overhang":
+            measured = distance.distance_projection_v
         else:
-            logger.warning(
-                "Current conformity point is not set. Cannot determine compliance status."
-            )
-            return None
+            return
+        self.scenario_compliances.append(bool(measured > security_distance))
 
     @property
     def lateral_compliance_line_axis_distance(self) -> Optional[float]:

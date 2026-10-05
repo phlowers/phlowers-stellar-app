@@ -192,21 +192,23 @@ class RuleDistanceInput:
                     f"RuleDistance missing required field: {fields}"
                 )
 
-        if not isinstance(data["lateral"], dict):
+        lateral = data["lateral"]
+        if not isinstance(lateral, dict):
             logger.warning(
                 "RuleDistance lateral is missing, it could be normal if this is the configuration"
             )
-            data["lateral"] = {}
-        if not isinstance(data["overhang"], dict):
+            lateral = {}
+        overhang = data["overhang"]
+        if not isinstance(overhang, dict):
             logger.warning(
                 "RuleDistance overhang is missing, it could be normal if this is the configuration"
             )
-            data["overhang"] = {}
+            overhang = {}
 
         return cls(
             rule_type=data["ruleType"],
-            lateral=data["lateral"],
-            overhang=data["overhang"],
+            lateral=lateral,
+            overhang=overhang,
         )
 
     def to_dict(self) -> dict:
