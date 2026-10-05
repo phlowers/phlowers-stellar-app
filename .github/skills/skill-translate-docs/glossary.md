@@ -52,6 +52,9 @@ guide terms EN→FR), but they're kept in a single table for easier lookup and m
 | espace de travail | workspace |
 | guard (keep as code concept) | guard (Angular route guard) |
 | intercepteur | interceptor |
+| conditions nuageuses | sky condition |
+| paramètre (attention en tant que grandeur) | sag parameter |
+| wheel (dans le contexte python/pyodide) | wheel (context python/pyodide)
 
 ## Quotes & typography (English → French only)
 

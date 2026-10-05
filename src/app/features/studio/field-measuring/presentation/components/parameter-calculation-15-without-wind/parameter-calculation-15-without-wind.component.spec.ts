@@ -152,24 +152,24 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       outputs: {
         ...d.outputs,
         papoto: {
-          parameter: 1900,
+          parameter: 1900.99,
           parameter_1_2: 0,
           parameter_2_3: 0,
           parameter_1_3: 0,
           checkValidity: true,
-          uncertainty: 12
+          uncertainty: 12.99
         },
-        cableTemperature: { cableSolarFlux: 0, cableTemperature: 45, cableTemperatureUncertainty: 3 }
+        cableTemperature: { cableSolarFlux: 0, cableTemperature: 45.99, cableTemperatureUncertainty: 3.99 }
       }
     }));
 
     component.updateMeasureData('updateMode15C', 'manual');
 
     expect(component.measureData().manualParameterCalculation15CWithoutWind).toEqual({
-      parameterPapoto: 1900,
-      parameterUncertaintyPapoto: 12,
-      cableTemperatureCalibration: 45,
-      cableTemperatureCalibrationUncertainty: 3
+      parameterPapoto: 1900.9,
+      parameterUncertaintyPapoto: 12.9,
+      cableTemperatureCalibration: 45.9,
+      cableTemperatureCalibrationUncertainty: 3.9
     });
   });
 
@@ -285,12 +285,9 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     // Set all required fields for manual mode
     component.updateMeasureData('updateMode15C', 'manual');
     component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
     component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
     component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
-
-    // Set top-level fields for the calculation to read
-    component.updateMeasureData('parameterPapoto', 1700);
-    component.updateMeasureData('parameterUncertaintyPapoto', 12);
 
     fixture.detectChanges();
 
@@ -298,12 +295,36 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
 
     expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(expect.any(String), {
       parameterPapoto: 1700,
-      parameterUncertaintyPapoto: null,
+      parameterUncertaintyPapoto: 12,
       cableTemperatureCalibration: 45,
       cableTemperatureCalibrationUncertainty: 3,
       span_index: 11
     });
     expect(component.parameter15CError()).toBe(false);
+  });
+
+  it('should send zero uncertainties as 0 instead of null', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: { parameter15CMinusUncertainty: 1700, parameter15C: 1700, parameter15CPlusUncertainty: 1700 },
+      error: null,
+      diagnostics: []
+    });
+
+    component.updateMeasureData('updateMode15C', 'manual');
+    component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+    component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 0);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 0);
+    component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 0);
+
+    await component.calculateParameter15C();
+
+    expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(expect.any(String), {
+      parameterPapoto: 1700,
+      parameterUncertaintyPapoto: 0,
+      cableTemperatureCalibration: 0,
+      cableTemperatureCalibrationUncertainty: 0,
+      span_index: 11
+    });
   });
 
   it('should validate form correctly for manual mode', () => {
@@ -318,6 +339,63 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
 
     expect(component.isFormValid()).toBe(true);
+  });
+
+  describe('negative uncertainty rejection', () => {
+    const fillValidManualForm = () => {
+      component.updateMeasureData('updateMode15C', 'manual');
+      component.updateManualParameterCalculation15CWithoutWind('parameterPapoto', 1700);
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', 12);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibration', 45);
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', 3);
+    };
+
+    it('should invalidate the form when parameterUncertaintyPapoto is negative', () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -1);
+
+      expect(component.isFormValid()).toBe(false);
+    });
+
+    it('should invalidate the form when cableTemperatureCalibrationUncertainty is negative', () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('cableTemperatureCalibrationUncertainty', -0.5);
+
+      expect(component.isFormValid()).toBe(false);
+    });
+
+    it('should not run the calculation and flag an error when an uncertainty is negative', async () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -12);
+
+      await component.calculateParameter15C();
+
+      expect(workerPythonServiceMock.runTask).not.toHaveBeenCalledWith(
+        Task.calculateParameter15CWithoutWind,
+        expect.anything()
+      );
+      expect(component.parameter15CError()).toBe(true);
+      expect(component.measureData().outputs.parameter15C).toBeNull();
+    });
+
+    it('should disable the calculate button when an uncertainty is negative', () => {
+      fillValidManualForm();
+      component.updateManualParameterCalculation15CWithoutWind('parameterUncertaintyPapoto', -12);
+      fixture.detectChanges();
+
+      const btn = fixture.nativeElement.querySelector('[data-testid="calculate-parameter-btn"]') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+
+    it('should set min="0" on both uncertainty inputs', () => {
+      component.updateMeasureData('updateMode15C', 'manual');
+      fixture.detectChanges();
+
+      const query = (testId: string) =>
+        fixture.nativeElement.querySelector(`[data-testid="${testId}"]`) as HTMLInputElement;
+      expect(query('parameter-uncertainty-papoto-input').getAttribute('min')).toBe('0');
+      expect(query('cable-temperature-uncertainty-input').getAttribute('min')).toBe('0');
+    });
   });
 
   it('should validate form correctly for auto mode', () => {
@@ -568,6 +646,34 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       const el = getByTestId('parameter-papoto-input');
       expect(el).toBeTruthy();
       expect(el?.tagName).toBe('INPUT');
+      expect(el?.getAttribute('step')).toBe('0.1');
+    });
+
+    it('should keep fractional PAPOTO values when switching to Manual', async () => {
+      component.measureData.update((data) => ({
+        ...data,
+        outputs: {
+          ...data.outputs,
+          papoto: {
+            parameter: 2000.79,
+            parameter_1_2: 0,
+            parameter_2_3: 0,
+            parameter_1_3: 0,
+            checkValidity: true,
+            uncertainty: 5.19
+          }
+        }
+      }));
+      component.updateMeasureData('updateMode15C', 'manual');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.measureData().manualParameterCalculation15CWithoutWind?.parameterPapoto).toBe(2000.7);
+      expect(component.measureData().manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto).toBe(5.1);
+      expect((getByTestId('parameter-papoto-input') as HTMLInputElement).value).toBe('2000.7');
+      expect((getByTestId('parameter-uncertainty-papoto-input') as HTMLInputElement).value).toBe('5.1');
+      expect(getByTestId('parameter-uncertainty-papoto-input')?.getAttribute('step')).toBe('0.1');
     });
 
     it('should render cable-temperature-input when mode is manual', () => {
@@ -578,7 +684,56 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       expect(el?.tagName).toBe('INPUT');
     });
 
-    describe('HTML rendering - result values truncation', () => {
+    it('should display a fractional digit for whole-number Auto PAPOTO values', () => {
+      component.measureData.update((data) => ({
+        ...data,
+        outputs: {
+          ...data.outputs,
+          papoto: {
+            parameter: 12,
+            parameter_1_2: 0,
+            parameter_2_3: 0,
+            parameter_1_3: 0,
+            checkValidity: true,
+            uncertainty: 2
+          }
+        }
+      }));
+      fixture.detectChanges();
+
+      expect(getByTestId('parameter-papoto-display')?.textContent).toContain('12.0');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).toContain('2.0');
+    });
+
+    it('should round Auto parameter and cable-temperature values and uncertainties to at most 1 decimal', () => {
+      component.measureData.update((data) => ({
+        ...data,
+        outputs: {
+          ...data.outputs,
+          papoto: {
+            parameter: 1.59,
+            parameter_1_2: 0,
+            parameter_2_3: 0,
+            parameter_1_3: 0,
+            checkValidity: true,
+            uncertainty: 0.59
+          },
+          cableTemperature: { cableSolarFlux: 0, cableTemperature: 45.99, cableTemperatureUncertainty: 3.99 }
+        }
+      }));
+      fixture.detectChanges();
+
+      expect(getByTestId('parameter-papoto-display')?.textContent).toContain('1.6');
+      expect(getByTestId('parameter-papoto-display')?.textContent).not.toContain('1.5');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).toContain('0.6');
+      expect(getByTestId('parameter-uncertainty-papoto-display')?.textContent).not.toContain('0.5');
+      expect(getByTestId('cable-temperature-display')?.textContent).toContain('46 °C');
+      expect(getByTestId('cable-temperature-display')?.textContent).not.toContain('45.9');
+      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).toContain('4 °C');
+      expect(getByTestId('cable-temperature-uncertainty-display')?.textContent).not.toContain('3.9');
+    });
+
+    describe('HTML rendering - result values rounding', () => {
       beforeEach(async () => {
         workerPythonServiceMock.runTask.mockResolvedValue({
           result: {
@@ -600,22 +755,22 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         fixture.detectChanges();
       });
 
-      it('should display parameter15CMinusUncertainty truncated to 1 decimal, not rounded (1885.17 → 1885.1)', () => {
+      it('should display parameter15CMinusUncertainty rounded to 1 decimal (1885.17 -> 1885.2)', () => {
         const text = getByTestId('parameter-15c-minus')?.textContent?.trim();
-        expect(text).toContain('1,885.1');
-        expect(text).not.toContain('1,885.2');
+        expect(text).toContain('1,885.2');
+        expect(text).not.toContain('1,885.1');
       });
 
-      it('should display parameter15C truncated to 1 decimal, not rounded (1900.99 → 1900.9)', () => {
+      it('should display parameter15C rounded without a trailing decimal (1900.99 -> 1901)', () => {
         const text = getByTestId('parameter-15c')?.textContent?.trim();
-        expect(text).toContain('1,900.9');
-        expect(text).not.toContain('1,901.0');
+        expect(text).toContain('1,901 m');
+        expect(text).not.toContain('1,900.9');
       });
 
-      it('should display parameter15CPlusUncertainty truncated to 1 decimal, not rounded (1915.35 → 1915.3)', () => {
+      it('should display parameter15CPlusUncertainty rounded to 1 decimal (1915.35 -> 1915.4)', () => {
         const text = getByTestId('parameter-15c-plus')?.textContent?.trim();
-        expect(text).toContain('1,915.3');
-        expect(text).not.toContain('1,915.4');
+        expect(text).toContain('1,915.4');
+        expect(text).not.toContain('1,915.3');
       });
     });
   });
