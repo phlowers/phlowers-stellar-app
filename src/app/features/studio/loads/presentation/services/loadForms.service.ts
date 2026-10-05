@@ -82,7 +82,8 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
     const rawCableModif = newData.cableModifParams || [];
-    const supportManip = newData.supportManipParams || [];
+    const supportManipParams = newData.supportManipParams || [];
+    const spanManipParams = newData.spanManipParams || [];
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
     // ideally, we want to call recheckCableModif and create an initial state,
@@ -94,12 +95,20 @@ export class LoadFormsService {
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
     ];
     // TODO : re read this
-    newData.supportManipParams = [
-      ...supportManip,
-      ...(section?.cable_support_manipulations?.filter(
-        (suppManip) => !supportManip.some((p) => p.supportUuid === suppManip.supportUuid)
-      ) ?? [])
-    ];
+    newData.supportManipParams = supportManipParams;
+    newData.spanManipParams = spanManipParams;
+    // newData.supportManipParams = [
+    //   ...supportManipParams,
+    //   ...(section?.cable_support_manipulations?.filter(
+    //     (suppManip) => !supportManipParams.some((p) => p.supportUuid === suppManip.supportUuid)
+    //   ) ?? [])
+    // ];
+    // newData.spanManipParams = [
+    //   ...spanManipParams,
+    //   ...(section?.cable_span_manipulations?.filter(
+    //     (spanManip) => !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid)
+    //   ) ?? [])
+    // ];
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
@@ -216,7 +225,6 @@ export class LoadFormsService {
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
-    console.log('--------------EEEEEEEEEEEEEE-----------------');
     console.log(temporaryLoadData);
     if (!temporaryLoadData) {
       return;

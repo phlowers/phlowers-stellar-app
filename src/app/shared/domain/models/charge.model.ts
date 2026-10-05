@@ -6,6 +6,7 @@
  */
 
 import { CableModification } from './cable-modification.model';
+import { CableSpanManipulation } from './cable-span-manipulation.model';
 import { CableSupportManipulation } from './cable-support-manipulation.model';
 
 /**
@@ -20,6 +21,7 @@ export interface ChargeData {
   spanLoads: SpanLoad[];
   cableModifParams: CableModification[];
   supportManipParams: CableSupportManipulation[];
+  spanManipParams: CableSpanManipulation[];
 }
 
 /**

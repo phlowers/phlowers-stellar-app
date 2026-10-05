@@ -554,9 +554,6 @@ export class CableSupportManipComponent {
 
   private findSelectedSupportManipulation(): CableSupportManipulation | undefined {
     const supportUuidToFind = this.form.controls.support.value;
-    if (!supportUuidToFind) {
-      return undefined;
-    }
     return this.plotService.temporaryLoadData?.supportManipParams.find(
       (supportManip) => supportManip.supportUuid === supportUuidToFind
     );
@@ -591,11 +588,7 @@ export class CableSupportManipComponent {
       return;
     }
 
-    console.log(supportManipulation);
     switch (controlName) {
-      // case 'supportUuid':
-      //   supportManipulation.supportUuid = value;
-      //   break;
       case 'manip1Type':
         supportManipulation.manip1.type =
           value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'crane';
@@ -616,16 +609,12 @@ export class CableSupportManipComponent {
         supportManipulation.manip1.shiftingClampLength = typeof value === 'number' ? value : 0;
         break;
 
-      // TODO: manage case with manip2 not existing + being able to remove it
-      // assume that always exists? python has to interpret a 0 shift as -> no shift?
       case 'manip2Type':
-        // if for type verification, should supportManipulation.manip2 should always exist
         if (supportManipulation.manip2 !== null) {
           // should only be shifting
           supportManipulation.manip2.type =
             value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'shifting';
         } else {
-          // create the object, or give an existing object
           supportManipulation.manip2 = {
             type: value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'shifting',
             vertDisplacement: null,
@@ -647,7 +636,5 @@ export class CableSupportManipComponent {
         }
         break;
     }
-    console.log('OOOOOOOOOOOOOOOOO');
-    console.log(supportManipulation);
   }
 }

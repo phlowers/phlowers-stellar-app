@@ -22,7 +22,7 @@ export const CABLE_SPAN_MANIP_DEFAULTS = {
 /** Typed form controls for the cable span manipulation form. */
 export interface CableSpanManipFormControls {
   /** Selected span UUID. */
-  scope: FormControl<string | null>;
+  spanUuid: FormControl<string | null>;
   /** Reference support side. */
   referenceSupport: FormControl<'LEFT' | 'RIGHT' | null>;
   /** Distance from the reference support to the manipulated point (meters). */
