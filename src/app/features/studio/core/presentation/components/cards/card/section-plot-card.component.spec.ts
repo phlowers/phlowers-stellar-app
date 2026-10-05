@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SectionPlotCardComponent } from './section-plot-card.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -119,8 +118,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
         SectionPlotCardComponent,
         TestHostComponent,
         CardComponent,
-        IconComponent,
-        NoopAnimationsModule
+        IconComponent
       ],
       providers: [{ provide: PlotSpanService, useValue: mockPlotSpanService }]
     }).compileComponents();

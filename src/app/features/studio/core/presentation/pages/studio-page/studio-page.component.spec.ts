@@ -7,7 +7,6 @@ import { of, Subject } from 'rxjs';
 import { ElementRef, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -1278,7 +1277,6 @@ describe('StudioPageComponent - HTML rendering', () => {
         StudioPageComponent
       ],
       providers: [
-        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: Router, useValue: { navigate: vi.fn() } },

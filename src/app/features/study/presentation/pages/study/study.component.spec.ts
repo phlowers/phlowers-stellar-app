@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -241,7 +240,6 @@ describe('StudyComponent', () => {
         { provide: CablesService, useValue: mockCablesService },
         { provide: Router, useValue: mockRouter },
         { provide: NotificationService, useValue: mockNotificationService },
-        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting()
       ]

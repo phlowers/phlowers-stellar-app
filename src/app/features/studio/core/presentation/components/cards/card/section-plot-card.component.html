@@ -38,7 +38,7 @@
       }
 
       <!-- Expanded Support Content -->
-      <div [@expandCollapse]="isExpanded() ? 'expanded' : 'collapsed'">
+      <div class="collapsible" [class.collapsible--collapsed]="!isExpanded()">
         @for (section of supportExpandedData(); track $index) {
           @if (section.title) {
             <p class="title">{{ section.title }}</p>
@@ -65,7 +65,7 @@
       }
 
       <!-- Expanded Span Content -->
-      <div [@expandCollapse]="isExpanded() ? 'expanded' : 'collapsed'">
+      <div class="collapsible" [class.collapsible--collapsed]="!isExpanded()">
         @for (field of spanExpandedData(); track $index) {
           <dl class="details">
             <dt>{{ field.label }}</dt>

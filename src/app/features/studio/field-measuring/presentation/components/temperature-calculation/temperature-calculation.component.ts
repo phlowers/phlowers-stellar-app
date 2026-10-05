@@ -3,7 +3,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgClass, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -42,15 +41,7 @@ import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 // Component for computing cable temperature based on environmental conditions and transit data.
 export class TemperatureCalculationComponent {

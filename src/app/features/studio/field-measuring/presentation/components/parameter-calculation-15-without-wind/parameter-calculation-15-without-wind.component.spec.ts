@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ParameterCalculation15WithoutWindComponent } from './parameter-calculation-15-without-wind.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
@@ -91,7 +90,6 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
         ParameterCalculation15WithoutWindComponent
       ],
       providers: [
-        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },

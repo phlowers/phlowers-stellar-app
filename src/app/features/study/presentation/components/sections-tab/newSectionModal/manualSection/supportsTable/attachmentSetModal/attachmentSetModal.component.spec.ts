@@ -30,7 +30,6 @@ vi.mock('plotly.js-dist-min', () => {
 });
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -227,7 +226,6 @@ describe('AttachmentSetModalComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         AttachmentSetModalComponent,
-        BrowserAnimationsModule,
         FormsModule,
         TranslocoTestingModule.forRoot({
           langs: {

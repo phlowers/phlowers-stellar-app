@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import {
   afterEveryRender,
   ChangeDetectionStrategy,
@@ -51,19 +50,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   ],
   templateUrl: './cable-support-manip.component.html',
   styleUrl: './cable-support-manip.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expandCollapse', [
-      transition(':enter', [
-        style({ height: 0, overflow: 'hidden', opacity: 0 }),
-        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)', style({ height: '*', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ overflow: 'hidden' }),
-        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)', style({ height: 0, opacity: 0 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CableSupportManipComponent {
   private readonly fb = inject(FormBuilder);

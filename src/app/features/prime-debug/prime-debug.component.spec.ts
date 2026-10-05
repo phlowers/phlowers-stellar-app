@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MessageService } from 'primeng/api';
 import { vi, type MockInstance } from 'vitest';
 
@@ -20,8 +19,7 @@ describe('PrimeDebugComponent', () => {
           preloadLangs: true
         }),
         PrimeDebugComponent
-      ],
-      providers: [provideNoopAnimations()]
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PrimeDebugComponent);

@@ -3,7 +3,6 @@ import { SupportsTableComponent } from '@features/study/presentation/components/
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Support, CatalogChain, Section } from '@shared/domain';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
@@ -181,7 +180,6 @@ describe('SupportsTableComponent', () => {
       imports: [
         FormsModule,
         SupportsTableComponent,
-        NoopAnimationsModule,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {

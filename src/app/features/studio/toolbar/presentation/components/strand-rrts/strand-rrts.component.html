@@ -148,7 +148,7 @@
 <!-- Always on the page: screen readers only announce results added to a live region that is already there -->
 <output class="results" data-testid="results">
   @if (results(); as res) {
-    <div class="results__content" @expand>
+    <div class="results__content" animate.enter="anim-expand-height">
       <h2>{{ 'common.results' | transloco }}</h2>
 
       <dl class="grid-structure grid-structure--results">
