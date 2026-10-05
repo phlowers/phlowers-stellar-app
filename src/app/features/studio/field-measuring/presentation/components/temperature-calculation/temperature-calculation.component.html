@@ -192,39 +192,42 @@
   </button>
 </div>
 
-@if (measureData().outputs.cableTemperature) {
-  <div class="temperature-calculation__results" animate.enter="anim-expand-height">
-    <h2 class="temperature-calculation__results__title">{{ 'common.results' | transloco }}</h2>
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="block">
+  @if (measureData().outputs.cableTemperature) {
+    <div class="temperature-calculation__results" animate.enter="anim-expand-height">
+      <h2 class="temperature-calculation__results__title">{{ 'common.results' | transloco }}</h2>
 
-    <dl class="temperature-calculation__results__list">
-      <div class="cableTemperature">
-        <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
-        <dd>
-          {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
-          °C
-        </dd>
-      </div>
-      <div class="uncertaintyCableTemperature">
-        <dt>
-          <del>{{ 'common.uncertainty-cable-temperature-label' | transloco }}</del>
-        </dt>
-        <dd>
-          <del>
-            {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-3') ?? '-' }}
+      <dl class="temperature-calculation__results__list">
+        <div class="cableTemperature">
+          <dt>{{ 'field-measuring.shared.cable-temperature-label' | transloco }}</dt>
+          <dd>
+            {{ (measureData().outputs.cableTemperature?.cableTemperature | number: '1.0-2') ?? '-' }}
             °C
-          </del>
-        </dd>
-      </div>
-      <div class="solarFlux">
-        <dt>{{ 'field-measuring.temperature-calculation.solar-flux-on-cable-label' | transloco }}</dt>
-        <dd>
-          {{ (measureData().outputs.cableTemperature?.cableSolarFlux | number: '1.0-3') ?? '-' }}
-          W/m²
-        </dd>
-      </div>
-    </dl>
-  </div>
-}
+          </dd>
+        </div>
+        <div class="uncertaintyCableTemperature">
+          <dt>
+            <del>{{ 'common.uncertainty-cable-temperature-label' | transloco }}</del>
+          </dt>
+          <dd>
+            <del>
+              {{ (measureData().outputs.cableTemperature?.cableTemperatureUncertainty | number: '1.0-3') ?? '-' }}
+              °C
+            </del>
+          </dd>
+        </div>
+        <div class="solarFlux">
+          <dt>{{ 'field-measuring.temperature-calculation.solar-flux-on-cable-label' | transloco }}</dt>
+          <dd>
+            {{ (measureData().outputs.cableTemperature?.cableSolarFlux | number: '1.0-3') ?? '-' }}
+            W/m²
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
+</output>
 
 @if (temperatureCalculationError()) {
   <div class="temperature-calculation__error" animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
