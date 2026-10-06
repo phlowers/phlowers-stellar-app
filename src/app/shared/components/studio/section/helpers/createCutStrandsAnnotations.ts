@@ -28,7 +28,7 @@ type MappedAnchor = ReturnType<typeof mapAnchorToAxes>;
 
 // Highest point of a support: the one its number is written on
 const findSupportTop = (support: number[][] | undefined): number[] | null =>
-  support?.length ? support.reduce((top, point) => (point[2] > top[2] ? point : top)) : null;
+  support?.length ? support.reduce((top, point) => (point[2] > top[2] ? point : top), support[0]) : null;
 
 /**
  * Resolves the point the marking hangs from.
