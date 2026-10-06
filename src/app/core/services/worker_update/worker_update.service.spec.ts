@@ -1041,6 +1041,153 @@ describe('UpdateService', () => {
     });
   });
 
+  describe('update monitoring', () => {
+    let messageHandler: (event: { data: Record<string, unknown> }) => Promise<void>;
+
+    beforeEach(() => {
+      messageHandler = mockServiceWorker.addEventListener.mock.calls[0][1] as typeof messageHandler;
+      service.pendingAction.set('update-available');
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const startUpdate = () => service.confirmUpdate();
+    const interruptedToast = () =>
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: 'shared.update-service.update-interrupted-summary',
+          detail: 'shared.update-service.update-interrupted-detail'
+        })
+      );
+
+    it('should give up when the service worker never becomes ready', async () => {
+      mockServiceWorker.ready = new Promise(() => undefined);
+
+      const result = startUpdate();
+      await vi.advanceTimersByTimeAsync(10000);
+
+      await expect(result).resolves.toBe(false);
+      expect(service.updateLoading()).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "[UPDATE page] service worker not ready after 10s, 'update' not sent"
+      );
+    });
+
+    it('should show the SW progress as a percentage and restart it at 0 for each update', async () => {
+      await startUpdate();
+      expect(service.updateProgress()).toBe(0);
+
+      await messageHandler({
+        data: { message: 'progress', run: { runId: 'r1', type: 'update', filesTotal: 8, filesDone: 6 } }
+      });
+
+      expect(service.updateProgress()).toBe(75);
+    });
+
+    it('should leave the loading state at once when the SW answers a keepalive without a run', async () => {
+      await startUpdate();
+
+      await messageHandler({ data: { message: 'progress', run: null } });
+
+      expect(service.updateLoading()).toBe(false);
+      interruptedToast();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[UPDATE page] update interrupted: the service worker has no update in progress (it was stopped)'
+      );
+    });
+
+    it('should stop pinging the SW once the update is interrupted', async () => {
+      await startUpdate();
+      await messageHandler({ data: { message: 'progress', run: null } });
+      mockPostMessage.mockClear();
+
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a progress message when this tab is not updating', async () => {
+      await messageHandler({ data: { message: 'progress', run: null } });
+      await messageHandler({
+        data: { message: 'progress', run: { runId: 'r1', type: 'update', filesTotal: 2, filesDone: 1 } }
+      });
+
+      expect(service.updateProgress()).toBe(0);
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should declare the update interrupted after 45 s without any SW message', async () => {
+      await startUpdate();
+
+      await vi.advanceTimersByTimeAsync(44999);
+      expect(service.updateLoading()).toBe(true);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(service.updateLoading()).toBe(false);
+      interruptedToast();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[UPDATE page] update interrupted: no message from the service worker for 45s'
+      );
+    });
+
+    it('should restart the 45 s countdown on every SW message', async () => {
+      await startUpdate();
+
+      await vi.advanceTimersByTimeAsync(30000);
+      await messageHandler({
+        data: { message: 'log', entry: { runId: 'r1', level: 'info', step: 'progress', elapsedMs: 1 } }
+      });
+      await vi.advanceTimersByTimeAsync(30000);
+      expect(service.updateLoading()).toBe(true);
+
+      await vi.advanceTimersByTimeAsync(15000);
+      expect(service.updateLoading()).toBe(false);
+    });
+
+    it('should not start a countdown when the update could not be sent', async () => {
+      mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
+      await startUpdate();
+
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should stop the countdown when the SW reports the end of the update', async () => {
+      await startUpdate();
+      await messageHandler({ data: { message: 'error', error: 'boom' } });
+      vi.mocked(mockMessageService.add).mockClear();
+
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should allow a new attempt after an interruption', async () => {
+      await startUpdate();
+      await messageHandler({ data: { message: 'progress', run: null } });
+      mockPostMessage.mockClear();
+
+      const retried = await service.confirmUpdate();
+
+      expect(retried).toBe(true);
+      expect(service.updateLoading()).toBe(true);
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'update' });
+    });
+
+    it('should notify success without being in the loading state for an update done by another tab', async () => {
+      await messageHandler({ data: { message: 'update_complete' } });
+
+      expect(service.updateLoading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
+    });
+  });
+
   describe('manifest caching', () => {
     it('should return the same promise on subsequent calls to getLatestAssetList', async () => {
       const mockAssetList = {

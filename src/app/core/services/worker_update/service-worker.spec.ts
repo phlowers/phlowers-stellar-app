@@ -1229,7 +1229,7 @@ describe('Service Worker Functions', () => {
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
+      expect(page.postMessage).toHaveBeenCalledWith({
         message: 'install_complete',
         latest_version: mockManifest.app_version,
         data_hashes: {}
