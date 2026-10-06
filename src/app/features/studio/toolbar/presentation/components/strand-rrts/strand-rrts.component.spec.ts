@@ -30,6 +30,7 @@ const engineAnswer = (task: Task, error: TaskError | null = null) => ({
 
 function makeCutStrandsData(overrides: Partial<RrtsCutStrandsData> = {}): RrtsCutStrandsData {
   return {
+    cableName: 'ASTER 570',
     spanUuid: 's2',
     supportRef: 'RIGHT',
     distanceSupportRef: 12.5,

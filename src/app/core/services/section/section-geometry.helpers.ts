@@ -4,7 +4,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { isEqual } from 'lodash';
 import { Charge, Section } from '@shared/domain';
 import { SanitizedCharges, SectionGeometrySanitizeResult } from './section-geometry.interfaces';
 
@@ -34,13 +33,12 @@ const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): Sanit
   return { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad };
 };
 
-// RRTS cut strands count strands of the cable layers they were saved on: they mean nothing on another cable. Only the
-// entry already saved is dropped, an entry coming with the new cable (an imported section) belongs to it
-const isCutStrandsOfReplacedCable = (section: Section, previousSection: Section | undefined): boolean =>
-  !!section.rrts_cut_strands &&
-  !!previousSection &&
-  previousSection.cable_name !== section.cable_name &&
-  isEqual(previousSection.rrts_cut_strands, section.rrts_cut_strands);
+// RRTS cut strands count strands of the cable layers they were saved on: they mean nothing on another cable. An entry
+// saved before the cable was recorded can't be told apart, it is kept
+const isCutStrandsOfAnotherCable = (section: Section): boolean => {
+  const savedCableName = section.rrts_cut_strands?.cableName;
+  return savedCableName !== undefined && savedCableName !== section.cable_name;
+};
 
 /**
  * Removes obstacles, floors, RRTS cut strands and span loads that reference a support/span no longer
@@ -51,12 +49,12 @@ const isCutStrandsOfReplacedCable = (section: Section, previousSection: Section 
  * from, and with N supports there are N-1 spans, so the last support never starts a span and cannot
  * host either. RRTS cut strands are span-bound only when they have a span: without one they are
  * linked to the whole section and always kept. They are also bound to the cable they were saved on,
- * and dropped when `previousSection` had another one. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
+ * and dropped when the section has another one. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
  * support (including the last), so a load is only stale when its `supportUuid` no longer exists at
  * all. Charges are kept even when all their span loads are removed, since a charge also carries its
  * own climate configuration.
  */
-export const sanitizeSectionGeometry = (section: Section, previousSection?: Section): SectionGeometrySanitizeResult => {
+export const sanitizeSectionGeometry = (section: Section): SectionGeometrySanitizeResult => {
   const spanStartSupportUuids = new Set(section.supports.slice(0, -1).map((support) => support.uuid));
   const allSupportUuids = new Set(section.supports.map((support) => support.uuid));
 
@@ -64,8 +62,7 @@ export const sanitizeSectionGeometry = (section: Section, previousSection?: Sect
   const sanitizedFloors = sanitizeSpanBound(section.floors ?? [], spanStartSupportUuids);
   const cutStrandsSpanUuid = section.rrts_cut_strands?.spanUuid;
   const cutStrandsChanged =
-    (!!cutStrandsSpanUuid && !spanStartSupportUuids.has(cutStrandsSpanUuid)) ||
-    isCutStrandsOfReplacedCable(section, previousSection);
+    (!!cutStrandsSpanUuid && !spanStartSupportUuids.has(cutStrandsSpanUuid)) || isCutStrandsOfAnotherCable(section);
   const { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad } = sanitizeCharges(
     section.charges,
     allSupportUuids

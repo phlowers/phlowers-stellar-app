@@ -240,7 +240,10 @@ export class StrandRrtsComponent {
 
     const layers = this.layers().map(({ layer }) => layer);
     // The calculated value, with the marking as it is now
-    const updated = { ...section, rrts_cut_strands: toCutStrandsData(this.form.getRawValue(), layers) };
+    const updated = {
+      ...section,
+      rrts_cut_strands: toCutStrandsData(this.form.getRawValue(), layers, section.cable_name)
+    };
     this.isSaving.set(true);
     try {
       await this.sectionService.createOrUpdateSection(study, updated);

@@ -291,8 +291,9 @@ describe('SectionService', () => {
       );
     });
 
-    it('should drop the RRTS cut strands saved on the stored section when its cable changes', async () => {
+    it('should drop the RRTS cut strands saved on another cable than the section one', async () => {
       const rrtsCutStrands = {
+        cableName: 'Test Cable',
         spanUuid: null,
         supportRef: null,
         distanceSupportRef: null,

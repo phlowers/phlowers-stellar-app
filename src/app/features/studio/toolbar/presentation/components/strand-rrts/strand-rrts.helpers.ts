@@ -19,7 +19,12 @@ export const toCatalogCutStrands = (cutStrands: number[], layers: number[]): num
   return catalogCutStrands;
 };
 
-export const toCutStrandsData = (value: RrtsFormValue, layers: number[]): RrtsCutStrandsData => ({
+export const toCutStrandsData = (
+  value: RrtsFormValue,
+  layers: number[],
+  cableName: string | undefined
+): RrtsCutStrandsData => ({
+  cableName,
   spanUuid: value.span?.uuid ?? null,
   supportRef: value.supportRef,
   distanceSupportRef: value.distanceSupportRef,
