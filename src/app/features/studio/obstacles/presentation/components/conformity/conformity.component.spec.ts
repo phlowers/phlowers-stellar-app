@@ -27,6 +27,7 @@ interface DbData {
   conformityConfig: {
     wind_zone_default: string | null;
     repartition_temperature_default: number | null;
+    lateral_temperature_default: number | null;
     lateral_temperature_rule_type: string | null;
     lateral_temperature_message: string | null;
   } | null;
@@ -48,6 +49,7 @@ const defaultDbData = (): DbData => ({
   conformityConfig: {
     wind_zone_default: 'Z1',
     repartition_temperature_default: 15,
+    lateral_temperature_default: 65,
     lateral_temperature_rule_type: 'rule_lat',
     lateral_temperature_message: 'Temperature from lateral rule'
   },
@@ -530,7 +532,7 @@ describe('ConformityComponent', () => {
       await createComponent();
       expect(component.form.controls.windZone.value).toBe('Z1');
       expect(component.form.controls.repartitionTemperature.value).toBe(15);
-      expect(component.form.controls.lateralDistanceTemperature.value).toBe(5);
+      expect(component.form.controls.lateralDistanceTemperature.value).toBe(65);
     });
 
     it('should populate fields from saved conformity data over defaults', async () => {

@@ -241,6 +241,7 @@
     "defaultValue": 70
   },
   "lateralTemperatureFields": {
+    "defaultValue": 65,
     "ruleType": "RULE_2",
     "message": "Value of 65°C in RULE_2 (2023) or the equivalent 2024 setting"
   },
