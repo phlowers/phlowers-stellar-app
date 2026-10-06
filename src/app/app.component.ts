@@ -142,9 +142,8 @@ export class AppComponent implements OnInit {
       if (this.destroyed) {
         return;
       }
-      this.autoInstallTriggered.set(false);
       this.logger.error('Automatic first-install failed', err);
-      this.notificationService.error(installFailedMessage);
+      this.failAutomaticFirstInstall(installFailedMessage);
     }
   }
 
@@ -154,33 +153,47 @@ export class AppComponent implements OnInit {
       this.autoInstallTriggered.set(false);
       return;
     }
-    try {
-      await navigator.serviceWorker.ready;
-    } catch (err) {
-      if (this.destroyed) {
-        return;
-      }
-      this.autoInstallTriggered.set(false);
-      this.logger.error('Service Worker never became ready for first-install', err);
-      this.notificationService.error(installFailedMessage);
-      return;
-    }
+
+    const workerReady = await this.waitForServiceWorkerReady();
     if (this.destroyed) {
       return;
     }
-    let retryStarted = false;
-    try {
-      retryStarted = await this.updateService.installFirstLaunch();
-    } catch (err) {
-      this.logger.error('Automatic first-install retry failed', err);
+    if (!workerReady) {
+      this.failAutomaticFirstInstall(installFailedMessage);
+      return;
     }
+
+    const retryStarted = await this.tryInstallFirstLaunch();
     if (this.destroyed) {
       return;
     }
     if (!retryStarted) {
-      this.autoInstallTriggered.set(false);
-      this.notificationService.error(installFailedMessage);
+      this.failAutomaticFirstInstall(installFailedMessage);
     }
+  }
+
+  private async waitForServiceWorkerReady(): Promise<boolean> {
+    try {
+      await navigator.serviceWorker.ready;
+      return true;
+    } catch (err) {
+      this.logger.error('Service Worker never became ready for first-install', err);
+      return false;
+    }
+  }
+
+  private async tryInstallFirstLaunch(): Promise<boolean> {
+    try {
+      return await this.updateService.installFirstLaunch();
+    } catch (err) {
+      this.logger.error('Automatic first-install retry failed', err);
+      return false;
+    }
+  }
+
+  private failAutomaticFirstInstall(installFailedMessage: string): void {
+    this.autoInstallTriggered.set(false);
+    this.notificationService.error(installFailedMessage);
   }
 
   async setupWorker() {
