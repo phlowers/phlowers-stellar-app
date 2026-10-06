@@ -1,104 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
-import { Snapshot } from './update-flow.interfaces';
-
-/**
- * Reads the app/catalog state through real browser APIs (Cache Storage +
- * IndexedDB), resolving the active/previous versioned caches via the
- * activation pointer (`app-assets-control`) instead of a fixed cache name —
- * mirrors `resolveActiveCache()` in service-worker.ts.
- */
-async function readSnapshot(page: Page): Promise<Snapshot> {
-  return page.evaluate(async () => {
-    const controlCache = await caches.open('app-assets-control');
-    const controlResponse = await controlCache.match('/control');
-    const controlState = controlResponse
-      ? ((await controlResponse.json()) as { active: string; previous: string | null })
-      : null;
-    const activeCacheName = controlState?.active ?? null;
-
-    let appVersion: string | null = null;
-    let cacheKeys: string[] = [];
-    if (activeCacheName && (await caches.has(activeCacheName))) {
-      const activeCache = await caches.open(activeCacheName);
-      const appVersionResponse = await activeCache.match('/app_version');
-      const appVersionJson = appVersionResponse ? await appVersionResponse.json() : null;
-      appVersion = appVersionJson?.version ?? null;
-      cacheKeys = (await activeCache.keys()).map((key) => new URL(key.url).pathname);
-    }
-
-    const allCacheNames = await caches.keys();
-    const versionedCacheNames = allCacheNames.filter((name) => name.startsWith('app-assets-v-'));
-
-    const dbRequest = indexedDB.open('stellar-db');
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      dbRequest.onsuccess = () => resolve(dbRequest.result);
-      dbRequest.onerror = () => reject(dbRequest.error);
-    });
-
-    const readStoreValue = (storeName: string, key: string): Promise<Record<string, unknown> | null> => {
-      return new Promise((resolve, reject) => {
-        if (!db.objectStoreNames.contains(storeName)) {
-          resolve(null);
-          return;
-        }
-        const transaction = db.transaction(storeName, 'readonly');
-        const store = transaction.objectStore(storeName);
-        const getRequest = store.get(key);
-        getRequest.onsuccess = () => resolve(getRequest.result ?? null);
-        getRequest.onerror = () => reject(getRequest.error);
-      });
-    };
-
-    const firstCable = await new Promise<Record<string, unknown> | null>((resolve, reject) => {
-      if (!db.objectStoreNames.contains('catCables')) {
-        resolve(null);
-        return;
-      }
-      const transaction = db.transaction('catCables', 'readonly');
-      const store = transaction.objectStore('catCables');
-      const cursorRequest = store.openCursor();
-      cursorRequest.onsuccess = () => resolve(cursorRequest.result?.value ?? null);
-      cursorRequest.onerror = () => reject(cursorRequest.error);
-    });
-
-    const cableHashMetadata = await readStoreValue('metadata', 'catalog_hash:cables.csv');
-
-    db.close();
-
-    return {
-      appVersion,
-      activeCacheName,
-      previousCacheName: controlState?.previous ?? null,
-      versionedCacheNames,
-      hasAssetV1: cacheKeys.includes('/e2e-app-v1.js'),
-      hasAssetV2: cacheKeys.includes('/e2e-app-v2.js'),
-      hasAssetV3: cacheKeys.includes('/e2e-app-v3.js'),
-      cableHash: (cableHashMetadata?.['value'] as string) ?? null,
-      cableName: (firstCable?.['name'] as string) ?? null
-    };
-  });
-}
-
-/** Sets the app-version/catalog scenario served by the sim server. */
-async function setScenario(request: import('@playwright/test').APIRequestContext, scenario: string): Promise<void> {
-  const response = await request.post(`/__e2e/scenario?v=${scenario}`);
-  expect(response.ok()).toBeTruthy();
-}
-
-/** Toggles the simulated `/auth/userinfo` authenticated session. */
-async function setAuthenticated(
-  request: import('@playwright/test').APIRequestContext,
-  authenticated: boolean
-): Promise<void> {
-  const response = await request.post(`/__e2e/auth?authenticated=${authenticated}`);
-  expect(response.ok()).toBeTruthy();
-}
-
-/** Waits for the automatic first install (authenticated + empty cache) and its catalog import to complete. */
-async function waitForFirstInstall(page: Page, expectedVersion: string, expectedCableName: string): Promise<void> {
-  await expect.poll(async () => (await readSnapshot(page)).appVersion, { timeout: 30_000 }).toBe(expectedVersion);
-  await expect.poll(async () => (await readSnapshot(page)).cableName, { timeout: 30_000 }).toBe(expectedCableName);
-}
+import { expect, test } from '@playwright/test';
+import { readSnapshot, setAuthenticated, setScenario, waitForFirstInstall } from './update-flow.helpers';
 
 test.describe('first install and authentication gating', () => {
   test('installs the app and imports catalogs automatically once the user is authenticated', async ({
@@ -118,7 +19,7 @@ test.describe('first install and authentication gating', () => {
     expect(snapshot.previousCacheName).toBeNull();
 
     // No auto-install/update prompt should ever be shown once the app is up to date.
-    await expect(page.getByTestId('update-dialog')).toBeHidden();
+    await expect(page.getByRole('dialog')).toBeHidden();
   });
 
   test('never installs the app or imports catalogs for an unauthenticated user', async ({ page, request }) => {
@@ -151,9 +52,9 @@ test.describe('application update popup', () => {
     await setScenario(request, 'v2');
     await page.reload();
 
-    await expect(page.getByTestId('update-dialog')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
     await page.getByTestId('update-later-btn').click();
-    await expect(page.getByTestId('update-dialog')).toBeHidden();
+    await expect(page.getByRole('dialog')).toBeHidden();
 
     // Refusing the app update must never block the independent catalog refresh.
     await expect.poll(async () => (await readSnapshot(page)).cableName, { timeout: 30_000 }).toBe('E2E_CABLE_V2');
@@ -176,7 +77,7 @@ test.describe('application update popup', () => {
 
     await setScenario(request, 'v2');
     await page.reload();
-    await expect(page.getByTestId('update-dialog')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
     await page.getByTestId('update-now-btn').click();
 
     // A successful update navigates the page back to '/' once activated.
@@ -210,7 +111,7 @@ test.describe('application update popup', () => {
 
     await setScenario(request, 'v3');
     await page.reload();
-    await expect(page.getByTestId('update-dialog')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
     await page.getByTestId('update-now-btn').click();
     await expect.poll(async () => (await readSnapshot(page)).appVersion, { timeout: 30_000 }).toBe('3.0.0-e2e');
 
@@ -231,6 +132,9 @@ test.describe('admin explicit update', () => {
 
     await setScenario(request, 'v2');
     await page.goto('/admin');
+    // The update popup is modal and blocks the admin page until dismissed.
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByTestId('update-later-btn').click();
     await page.getByTestId('check-app-version-btn').click();
     await expect(page.getByTestId('force-update-btn')).toBeVisible();
     await page.getByTestId('force-update-btn').click();
@@ -251,7 +155,7 @@ test.describe('resilience', () => {
 
     await setScenario(request, 'v2-broken');
     await page.reload();
-    await expect(page.getByTestId('update-dialog')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
     await page.getByTestId('update-now-btn').click();
 
     // The candidate precache fails (one asset 404s): the app must never end up
@@ -327,11 +231,13 @@ test.describe('offline root and deep link', () => {
     try {
       const rootResponse = await page.goto('/');
       expect(rootResponse?.ok()).toBeTruthy();
-      await expect(page.locator('router-outlet')).toBeAttached();
+      await expect(page.locator('router-outlet').first()).toBeAttached();
 
       const deepLinkResponse = await page.goto('/admin');
       expect(deepLinkResponse?.ok()).toBeTruthy();
-      await expect(page.getByTestId('check-app-version-btn')).toBeVisible();
+      // The admin page renders from the cached shell; the version check button is online-only by design.
+      await expect(page.locator('main table')).toBeVisible();
+      await expect(page.getByTestId('check-app-version-btn')).toBeHidden();
     } finally {
       await context.setOffline(false);
     }

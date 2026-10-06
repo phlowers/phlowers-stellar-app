@@ -5,14 +5,18 @@ import datetime
 import json
 import os
 import subprocess
+import sys
+import uuid
 
 # Read package.json file
 with open("package.json", "r") as file:
     package_json = json.load(file)
     version = package_json["version"]
 
-# Get current time in ISO format
-build_time = datetime.datetime.now().isoformat()
+# This script is the single source of the build identity: the JS placeholders and
+# dist/version.json (read back by create_assets_list_for_service_worker.py) share it.
+build_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
+build_id = uuid.uuid4().hex
 
 
 def get_git_revision_hash() -> str:
@@ -31,6 +35,9 @@ def get_git_revision_hash() -> str:
 
 
 git_hash = get_git_revision_hash()
+if git_hash == "unknown":
+    print("Error: git hash is unknown. Set CI_COMMIT_SHA (e.g. --build-arg CI_COMMIT_SHA=...).")
+    sys.exit(1)
 
 env_variables = [
     "{API_URL}",
@@ -50,12 +57,14 @@ def replace_in_file(file_path):
             for placeholder in [
                 "{BUILD_VERSION}",
                 "{BUILD_TIME}",
+                "{BUILD_ID}",
                 "{GIT_HASH}",
                 *env_variables,
             ]
         ):
             content = content.replace("{BUILD_VERSION}", version)
             content = content.replace("{BUILD_TIME}", build_time)
+            content = content.replace("{BUILD_ID}", build_id)
             content = content.replace("{GIT_HASH}", git_hash)
             for env_variable in env_variables:
                 variable_key = env_variable.replace("{", "").replace("}", "")
@@ -81,6 +90,17 @@ def process_directory_recursively(directory):
 # Process all files in dist folder recursively
 if os.path.exists("dist"):
     process_directory_recursively("dist")
+    with open(os.path.join("dist", "version.json"), "w") as file:
+        json.dump(
+            {
+                "build_id": build_id,
+                "git_hash": git_hash,
+                "build_datetime_utc": build_time,
+                "version": version,
+            },
+            file,
+            indent=2,
+        )
     print("Updated all files in dist folder")
 else:
     print("dist directory not found")

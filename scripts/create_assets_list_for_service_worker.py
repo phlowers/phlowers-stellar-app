@@ -4,33 +4,11 @@ Script to recursively list all files in the dist/phlowers-stellar-app directory 
 The JSON file is used to create the asset list for the service worker to precache.
 """
 
-import subprocess
 import os
 import sys
 import json
 import hashlib
-from datetime import datetime, tzinfo, timedelta
 from pathlib import Path
-
-
-# https://stackoverflow.com/a/23705687/9346979 real ISO 8601 format for UTC
-class simple_utc(tzinfo):
-    def tzname(self, **kwargs):
-        return "UTC"
-
-    def utcoffset(self, dt):
-        return timedelta(0)
-
-
-def get_git_revision_hash() -> str:
-    """Get the git revision hash from environment variable or git command"""
-    # First check if hash is available in environment variable
-    env_hash = os.environ.get("CI_COMMIT_SHA")
-    if env_hash:
-        return env_hash
-
-    # Fall back to git command if environment variable is not set
-    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
 blacklist = [
@@ -109,25 +87,17 @@ def collect_data_file_hashes(directory):
 def main():
     target_dir = "dist"
 
-    package_json_file = "package.json"
-    with open(package_json_file, "r") as f:
-        package_json = json.load(f)
-    version = package_json["version"]
-
-    # Build the app_version object once — reused for version.json and assets_list.json.
-    app_version = {
-        "git_hash": get_git_revision_hash(),
-        "build_datetime_utc": datetime.utcnow()
-        .replace(tzinfo=simple_utc())
-        .isoformat(),
-        "version": version,
-    }
-
-    # Write version.json BEFORE listing files so it is included in the asset manifest.
+    # version.json is written by set-env-variables.py, the single source of the build
+    # identity (build_id, build time): never generate a second one here.
     version_file = os.path.join(target_dir, "version.json")
-    with open(version_file, "w") as f:
-        json.dump(app_version, f, indent=2)
-    print(f"Generated {version_file}")
+    if not os.path.exists(version_file):
+        print(f"Error: {version_file} is missing. Run set-env-variables.py first.")
+        sys.exit(1)
+    with open(version_file, "r") as f:
+        app_version = json.load(f)
+    if not app_version.get("build_id"):
+        print(f"Error: {version_file} has no build_id.")
+        sys.exit(1)
 
     print(f"Listing all files in '{target_dir}':")
     print("-" * 50)

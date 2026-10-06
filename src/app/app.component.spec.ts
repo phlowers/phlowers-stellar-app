@@ -91,7 +91,8 @@ describe('AppComponent', () => {
       isFirstLaunch: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
-      installFirstLaunch: vi.fn().mockResolvedValue(true)
+      installFirstLaunch: vi.fn().mockResolvedValue(true),
+      confirmUpdate: vi.fn().mockResolvedValue(true)
     } as unknown as UpdateService;
 
     await TestBed.configureTestingModule({
@@ -101,6 +102,7 @@ describe('AppComponent', () => {
           langs: {
             en: {
               'app.install-failed': 'Install failed',
+              'app.update-start-failed': 'Update could not start',
               'app.update': 'Update',
               'app.new-version-available': 'New version available',
               'app.version': 'Version',
@@ -134,6 +136,35 @@ describe('AppComponent', () => {
 
   it('should have the correct title', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
+  });
+
+  describe('onConfirmUpdate', () => {
+    const confirmUpdate = () => vi.mocked(mockUpdateService.confirmUpdate);
+
+    it('should stay silent when the update was started', async () => {
+      confirmUpdate().mockResolvedValue(true);
+
+      await component.onConfirmUpdate();
+
+      expect(confirmUpdate()).toHaveBeenCalledTimes(1);
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
+    });
+
+    it('should notify the user when the update could not be started', async () => {
+      confirmUpdate().mockResolvedValue(false);
+
+      await component.onConfirmUpdate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Update could not start');
+    });
+
+    it('should notify the user when confirmUpdate throws', async () => {
+      confirmUpdate().mockRejectedValue(new Error('boom'));
+
+      await component.onConfirmUpdate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Update could not start');
+    });
   });
 
   describe('ngOnInit — deferred startup work', () => {

@@ -19,6 +19,8 @@
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
     "e2e:update": "playwright test e2e/update-flow.spec.ts",
+    "e2e:update-faults": "playwright test e2e/update-faults.spec.ts",
+    "update:sim": "node e2e/update-sim-server.mjs",
     "e2e:prepare": "npm run build",
     "prime-debug:screenshots": "node scripts/capture-prime-debug-screenshots.mjs",
     "set-up-mechaphlowers": "uv run ./scripts/set_up_mechaphlowers_v2.py",

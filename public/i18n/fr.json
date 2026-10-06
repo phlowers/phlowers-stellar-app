@@ -170,6 +170,7 @@
     "update-warning": "Merci de ne pas fermer l'application pendant la mise à jour.",
     "later": "Plus tard",
     "update-now": "Mettre à jour",
+    "update-start-failed": "La mise à jour n'a pas pu démarrer. Veuillez réessayer.",
     "install-failed": "L'installation initiale de l'application n'a pas pu démarrer. Veuillez recharger la page pour réessayer."
   },
   "auth": {
@@ -295,6 +296,8 @@
       "update-failed-summary": "Échec de la mise à jour",
       "update-failed-detail": "Une erreur inconnue s'est produite lors de la mise à jour",
       "update-failed-auth-detail": "La mise à jour n'a pas pu être téléchargée car votre session a expiré. Veuillez vous reconnecter, puis relancer la mise à jour",
+      "update-interrupted-summary": "Mise à jour interrompue",
+      "update-interrupted-detail": "La mise à jour n'a pas abouti. Veuillez réessayer.",
       "version-checked-detail": "Version de l'application vérifiée"
     },
     "obstacle-form-service": {

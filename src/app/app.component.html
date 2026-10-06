@@ -53,7 +53,7 @@
         <app-icon icon="warning" />
         <ng-container> {{ 'app.update-warning' | transloco }} </ng-container>
       </p>
-      <p-progressbar mode="indeterminate" [style]="{ height: '.375rem' }" />
+      <p-progressbar [value]="updateService.updateProgress()" [style]="{ height: '.375rem' }" />
     }
   </ng-template>
   @if (!updateService.updateLoading()) {
@@ -68,7 +68,7 @@
         <app-icon icon="close" />
         <span>{{ 'app.later' | transloco }}</span>
       </button>
-      <button app-btn (click)="updateService.confirmUpdate()" data-testid="update-now-btn">
+      <button app-btn (click)="onConfirmUpdate()" data-testid="update-now-btn">
         <app-icon icon="sync" />
         <span>{{ 'app.update-now' | transloco }}</span>
       </button>

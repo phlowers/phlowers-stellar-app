@@ -196,6 +196,18 @@ export class AppComponent implements OnInit {
     this.notificationService.error(installFailedMessage);
   }
 
+  /** Starts the update from the dialog; a refused start (no user, no SW...) must never be silent. */
+  async onConfirmUpdate(): Promise<void> {
+    const started = await this.updateService.confirmUpdate().catch((err) => {
+      this.logger.error('Update confirmation failed', err);
+      return false;
+    });
+    if (!started) {
+      this.logger.warn('Update could not be started from the update dialog');
+      this.notificationService.error(this.transloco.translate('app.update-start-failed'));
+    }
+  }
+
   async setupWorker() {
     try {
       this.workerService.setup();

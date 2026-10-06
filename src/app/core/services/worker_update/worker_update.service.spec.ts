@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { UpdateService } from './worker_update.service';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '@services/auth/auth.service';
+import { LoggerService } from '@services/logger/logger.service';
 import { User } from '@shared/domain';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -10,7 +11,8 @@ vi.mock('@src/environments/environment', () => ({
   environment: {
     version: '1.0.0',
     buildTime: '2024-01-01T00:00:00.000000',
-    gitHash: 'env-hash-123'
+    gitHash: 'env-hash-123',
+    buildId: 'env-hash-123'
   }
 }));
 
@@ -29,6 +31,7 @@ describe('UpdateService', () => {
   let originalFetch: typeof fetch;
   let mockMessageService: MessageService;
   let mockPostMessage: vi.Mock;
+  let mockLogger: { log: vi.Mock; info: vi.Mock; warn: vi.Mock; error: vi.Mock };
   /** Authenticated by default; individual tests set it to null to prove the auth guard. */
   let currentUser: ReturnType<typeof signal<User | null>>;
 
@@ -40,6 +43,7 @@ describe('UpdateService', () => {
     } as unknown as MessageService;
 
     mockPostMessage = vi.fn();
+    mockLogger = { log: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
     const mockRegistration = { active: { postMessage: mockPostMessage } };
 
     // Mock service worker
@@ -87,6 +91,7 @@ describe('UpdateService', () => {
       providers: [
         UpdateService,
         { provide: MessageService, useValue: mockMessageService },
+        { provide: LoggerService, useValue: mockLogger },
         { provide: AuthService, useValue: { currentUser } }
       ]
     });
@@ -115,6 +120,7 @@ describe('UpdateService', () => {
     expect(service.currentVersion()).toEqual({
       version: '1.0.0',
       build_datetime_utc: '2024-01-01T00:00:00.000000',
+      build_id: 'env-hash-123',
       git_hash: 'env-hash-123'
     });
   });
@@ -137,6 +143,7 @@ describe('UpdateService', () => {
   describe('checkAppVersion', () => {
     it('should fetch latest version from assets_list.json', async () => {
       const mockLatestVersion = {
+        build_id: 'abc123',
         git_hash: 'abc123',
         build_datetime_utc: '2023-01-01T00:00:00.000000',
         version: '2.0.0'
@@ -171,6 +178,7 @@ describe('UpdateService', () => {
 
     it('should detect update needed when server version differs', async () => {
       const mockLatestVersion = {
+        build_id: 'abc123',
         git_hash: 'abc123',
         build_datetime_utc: '2023-01-01T00:00:00.000000',
         version: '2.0.0'
@@ -192,6 +200,7 @@ describe('UpdateService', () => {
 
     it('should detect no update needed when versions match', async () => {
       const mockLatestVersion = {
+        build_id: 'env-hash-123',
         git_hash: 'env-hash-123',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
@@ -220,6 +229,7 @@ describe('UpdateService', () => {
 
     it('should preserve existing latestVersion when fetch fails', async () => {
       const existingLatest = {
+        build_id: 'existing-latest',
         git_hash: 'existing-latest',
         build_datetime_utc: '2023-06-02T00:00:00.000000',
         version: '2.1.0'
@@ -244,6 +254,7 @@ describe('UpdateService', () => {
 
     it('should show toast when silent is false (default)', async () => {
       const mockVersion = {
+        build_id: 'env-hash-123',
         git_hash: 'env-hash-123',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
@@ -264,6 +275,7 @@ describe('UpdateService', () => {
 
     it('should not show toast when silent is true', async () => {
       const mockVersion = {
+        build_id: 'env-hash-123',
         git_hash: 'env-hash-123',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
@@ -281,11 +293,64 @@ describe('UpdateService', () => {
 
       expect(mockMessageService.add).not.toHaveBeenCalled();
     });
+
+    it('should log current and server versions with the update decision', async () => {
+      const serverVersion = {
+        build_id: 'new-hash',
+        git_hash: 'new-hash',
+        build_datetime_utc: '2025-01-01',
+        version: '1.0.0'
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValueOnce({ app_version: serverVersion, files: [] })
+      });
+
+      await service.checkAppVersion({ silent: true });
+
+      expect(mockLogger.info).toHaveBeenCalledWith('[UPDATE page] version check', {
+        current: service.currentVersion(),
+        latest: serverVersion,
+        updateAvailable: true
+      });
+    });
+
+    it('should log a warning when the server version is unavailable', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 502 });
+
+      await service.checkAppVersion({ silent: true });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('[UPDATE page] assets_list.json fetch failed', { status: 502 });
+      expect(mockLogger.warn).toHaveBeenCalledWith('[UPDATE page] version check: server version unavailable');
+    });
+
+    it('should log a timeout when the manifest fetch is aborted by its timeout', async () => {
+      mockFetch.mockRejectedValueOnce(new DOMException('assets_list.json fetch timeout', 'TimeoutError'));
+
+      await service.checkAppVersion({ silent: true });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[UPDATE page] assets_list.json fetch failed: timeout',
+        expect.any(DOMException)
+      );
+    });
+
+    it('should log a network error when the manifest fetch rejects', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('offline'));
+
+      await service.checkAppVersion({ silent: true });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[UPDATE page] assets_list.json fetch failed: network error',
+        expect.any(Error)
+      );
+    });
   });
 
   describe('loadCurrentVersion', () => {
     it('should update currentVersion from /version.json when fetch succeeds', async () => {
       const serverVersion = {
+        build_id: 'server-hash-456',
         git_hash: 'server-hash-456',
         build_datetime_utc: '2025-06-01T00:00:00.000000',
         version: '2.0.0'
@@ -306,6 +371,7 @@ describe('UpdateService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: vi.fn().mockResolvedValueOnce({
+          build_id: 'server-hash-456',
           git_hash: 'server-hash-456',
           build_datetime_utc: '2025-06-01T00:00:00.000000',
           version: '2.0.0'
@@ -328,6 +394,7 @@ describe('UpdateService', () => {
       expect(service.currentVersion()).toEqual({
         version: '1.0.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
+        build_id: 'env-hash-123',
         git_hash: 'env-hash-123'
       });
     });
@@ -340,6 +407,7 @@ describe('UpdateService', () => {
       expect(service.currentVersion()).toEqual({
         version: '1.0.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
+        build_id: 'env-hash-123',
         git_hash: 'env-hash-123'
       });
     });
@@ -405,7 +473,7 @@ describe('UpdateService', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue({
-          app_version: { git_hash: 'abc', build_datetime_utc: '2024', version: '1.0.0' },
+          app_version: { build_id: 'abc', git_hash: 'abc', build_datetime_utc: '2024', version: '1.0.0' },
           files: []
         })
       });
@@ -419,7 +487,7 @@ describe('UpdateService', () => {
     });
 
     it('should set needUpdate true when versions differ and cache is populated', async () => {
-      const latest = { git_hash: 'new', build_datetime_utc: '2025', version: '2.0.0' };
+      const latest = { build_id: 'new', git_hash: 'new', build_datetime_utc: '2025', version: '2.0.0' };
       mockCache.match.mockResolvedValue(new Response('{}')); // cache populated
       mockFetch.mockResolvedValue({
         ok: true,
@@ -434,7 +502,12 @@ describe('UpdateService', () => {
     });
 
     it('should not set needUpdate when versions are equal', async () => {
-      const version = { git_hash: 'env-hash-123', build_datetime_utc: '2024', version: '1.0.0' };
+      const version = {
+        build_id: 'env-hash-123',
+        git_hash: 'env-hash-123',
+        build_datetime_utc: '2024',
+        version: '1.0.0'
+      };
       mockCache.match.mockResolvedValue(new Response('{}')); // cache populated
       mockFetch.mockResolvedValue({
         ok: true,
@@ -459,7 +532,12 @@ describe('UpdateService', () => {
       // Simulate a previous run that left pendingAction in 'update-available'.
       service.pendingAction.set('update-available');
 
-      const version = { git_hash: 'env-hash-123', build_datetime_utc: '2024', version: '1.0.0' };
+      const version = {
+        build_id: 'env-hash-123',
+        git_hash: 'env-hash-123',
+        build_datetime_utc: '2024',
+        version: '1.0.0'
+      };
       mockCache.match.mockResolvedValue(new Response('{}'));
       mockFetch.mockResolvedValue({
         ok: true,
@@ -520,6 +598,70 @@ describe('UpdateService', () => {
       await service.confirmUpdate();
 
       expect(service.updateLoading()).toBe(false);
+    });
+
+    it('should log why the update was refused', async () => {
+      currentUser.set(null);
+      service.pendingAction.set('update-available');
+
+      await service.confirmUpdate();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('[UPDATE page] confirmUpdate refused: no authenticated user');
+    });
+
+    it('should log the refusal when no service worker registration exists', async () => {
+      mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
+      service.pendingAction.set('update-available');
+
+      await service.confirmUpdate();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[UPDATE page] postMessageToSW refused: no service worker registration'
+      );
+    });
+
+    it('should ping the service worker every 10 s until the run ends', async () => {
+      vi.useFakeTimers();
+      try {
+        service.pendingAction.set('update-available');
+        const messageHandler = mockServiceWorker.addEventListener.mock.calls[0][1] as (event: {
+          data: Record<string, unknown>;
+        }) => Promise<void>;
+
+        const keepaliveCount = () =>
+          mockPostMessage.mock.calls.filter(([message]) => (message as { type: string }).type === 'keepalive').length;
+
+        await service.confirmUpdate();
+        await vi.advanceTimersByTimeAsync(20000);
+        expect(keepaliveCount()).toBe(2);
+
+        await messageHandler({ data: { message: 'error', error: 'boom' } });
+        await vi.advanceTimersByTimeAsync(30000);
+        expect(keepaliveCount()).toBe(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('should log when the message is sent to the service worker', async () => {
+      service.pendingAction.set('update-available');
+
+      await service.confirmUpdate();
+
+      expect(mockLogger.info).toHaveBeenCalledWith("[UPDATE page] 'update' message sent to SW");
+    });
+
+    it('should log an error when posting to the service worker throws', async () => {
+      mockServiceWorker.getRegistration.mockRejectedValueOnce(new Error('boom'));
+      service.pendingAction.set('update-available');
+
+      const result = await service.confirmUpdate();
+
+      expect(result).toBe(false);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "[UPDATE page] could not post 'update' message to SW",
+        expect.any(Error)
+      );
     });
   });
 
@@ -657,6 +799,37 @@ describe('UpdateService', () => {
       );
     });
 
+    it('should log SW-relayed entries with the same [UPDATE <runId>] line as the SW console', async () => {
+      await messageHandler({
+        data: {
+          message: 'log',
+          entry: { runId: 'abc12345', level: 'warn', step: 'file-failed', elapsedMs: 42, details: { path: '/a.js' } }
+        }
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('[UPDATE abc12345] file-failed +42ms', { path: '/a.js' });
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should log every non-log message received from the service worker', async () => {
+      await messageHandler({ data: { message: 'error', error: 'boom' } });
+
+      expect(mockLogger.info).toHaveBeenCalledWith('[UPDATE page] message received from SW', {
+        message: 'error',
+        error: 'boom'
+      });
+    });
+
+    it('should show the re-login message when the SW reports an expired session (redirect to login)', async () => {
+      await messageHandler({
+        data: { message: 'error', error: 'Precache failed for /main.js: authentication required (redirected to login)' }
+      });
+
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', detail: 'shared.update-service.update-failed-auth-detail' })
+      );
+    });
+
     it('should show the re-login message when the error reports an auth-like HTTP status', async () => {
       service.updateLoading.set(true);
 
@@ -675,9 +848,159 @@ describe('UpdateService', () => {
     });
   });
 
+  describe('update monitoring', () => {
+    let messageHandler: (event: { data: Record<string, unknown> }) => Promise<void>;
+
+    beforeEach(() => {
+      messageHandler = mockServiceWorker.addEventListener.mock.calls[0][1] as typeof messageHandler;
+      service.pendingAction.set('update-available');
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const startUpdate = () => service.confirmUpdate();
+    const interruptedToast = () =>
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: 'shared.update-service.update-interrupted-summary',
+          detail: 'shared.update-service.update-interrupted-detail'
+        })
+      );
+
+    it('should give up when the service worker never becomes ready', async () => {
+      mockServiceWorker.ready = new Promise(() => undefined);
+
+      const result = startUpdate();
+      await vi.advanceTimersByTimeAsync(10000);
+
+      await expect(result).resolves.toBe(false);
+      expect(service.updateLoading()).toBe(false);
+      expect(mockPostMessage).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "[UPDATE page] service worker not ready after 10s, 'update' not sent"
+      );
+    });
+
+    it('should show the SW progress as a percentage and restart it at 0 for each update', async () => {
+      await startUpdate();
+      expect(service.updateProgress()).toBe(0);
+
+      await messageHandler({
+        data: { message: 'progress', run: { runId: 'r1', type: 'update', filesTotal: 8, filesDone: 6 } }
+      });
+
+      expect(service.updateProgress()).toBe(75);
+    });
+
+    it('should leave the loading state at once when the SW answers a keepalive without a run', async () => {
+      await startUpdate();
+
+      await messageHandler({ data: { message: 'progress', run: null } });
+
+      expect(service.updateLoading()).toBe(false);
+      interruptedToast();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[UPDATE page] update interrupted: the service worker has no update in progress (it was stopped)'
+      );
+    });
+
+    it('should stop pinging the SW once the update is interrupted', async () => {
+      await startUpdate();
+      await messageHandler({ data: { message: 'progress', run: null } });
+      mockPostMessage.mockClear();
+
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a progress message when this tab is not updating', async () => {
+      await messageHandler({ data: { message: 'progress', run: null } });
+      await messageHandler({
+        data: { message: 'progress', run: { runId: 'r1', type: 'update', filesTotal: 2, filesDone: 1 } }
+      });
+
+      expect(service.updateProgress()).toBe(0);
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should declare the update interrupted after 45 s without any SW message', async () => {
+      await startUpdate();
+
+      await vi.advanceTimersByTimeAsync(44999);
+      expect(service.updateLoading()).toBe(true);
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(service.updateLoading()).toBe(false);
+      interruptedToast();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[UPDATE page] update interrupted: no message from the service worker for 45s'
+      );
+    });
+
+    it('should restart the 45 s countdown on every SW message', async () => {
+      await startUpdate();
+
+      await vi.advanceTimersByTimeAsync(30000);
+      await messageHandler({
+        data: { message: 'log', entry: { runId: 'r1', level: 'info', step: 'progress', elapsedMs: 1 } }
+      });
+      await vi.advanceTimersByTimeAsync(30000);
+      expect(service.updateLoading()).toBe(true);
+
+      await vi.advanceTimersByTimeAsync(15000);
+      expect(service.updateLoading()).toBe(false);
+    });
+
+    it('should not start a countdown when the update could not be sent', async () => {
+      mockServiceWorker.getRegistration.mockResolvedValueOnce(null);
+      await startUpdate();
+
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should stop the countdown when the SW reports the end of the update', async () => {
+      await startUpdate();
+      await messageHandler({ data: { message: 'error', error: 'boom' } });
+      vi.mocked(mockMessageService.add).mockClear();
+
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(mockMessageService.add).not.toHaveBeenCalled();
+    });
+
+    it('should allow a new attempt after an interruption', async () => {
+      await startUpdate();
+      await messageHandler({ data: { message: 'progress', run: null } });
+      mockPostMessage.mockClear();
+
+      const retried = await service.confirmUpdate();
+
+      expect(retried).toBe(true);
+      expect(service.updateLoading()).toBe(true);
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'update' });
+    });
+
+    it('should notify success without being in the loading state for an update done by another tab', async () => {
+      await messageHandler({ data: { message: 'update_complete' } });
+
+      expect(service.updateLoading()).toBe(false);
+      expect(mockMessageService.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
+    });
+  });
+
   describe('manifest caching', () => {
     it('should return the same promise on subsequent calls to getLatestAssetList', async () => {
-      const mockAssetList = { app_version: { git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' }, files: [] };
+      const mockAssetList = {
+        app_version: { build_id: 'a', git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' },
+        files: []
+      };
       mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(mockAssetList) });
 
       const first = await service.getLatestAssetList();
@@ -688,7 +1011,10 @@ describe('UpdateService', () => {
     });
 
     it('should re-fetch after clearManifestCache is called', async () => {
-      const mockAssetList = { app_version: { git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' }, files: [] };
+      const mockAssetList = {
+        app_version: { build_id: 'a', git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' },
+        files: []
+      };
       mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(mockAssetList) });
 
       await service.getLatestAssetList();
@@ -699,7 +1025,12 @@ describe('UpdateService', () => {
     });
 
     it('should auto-invalidate cache after checkAppVersion completes', async () => {
-      const mockVersion = { git_hash: 'env-hash-123', build_datetime_utc: '2024', version: '1.0.0' };
+      const mockVersion = {
+        build_id: 'env-hash-123',
+        git_hash: 'env-hash-123',
+        build_datetime_utc: '2024',
+        version: '1.0.0'
+      };
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue({ app_version: mockVersion, files: [] })
@@ -719,11 +1050,12 @@ describe('UpdateService', () => {
   });
 
   describe('areVersionsEqual (via checkAppVersion)', () => {
-    it('should compare only version and git_hash, ignoring build_datetime_utc', async () => {
+    it('should compare only build_id, ignoring version, git_hash and build_datetime_utc', async () => {
       const mockLatestVersion = {
-        git_hash: 'env-hash-123',
+        build_id: 'env-hash-123',
+        git_hash: 'other-git-hash',
         build_datetime_utc: '9999-12-31T23:59:59.999999',
-        version: '1.0.0'
+        version: '9.9.9'
       };
 
       mockFetch.mockResolvedValueOnce({
@@ -736,12 +1068,13 @@ describe('UpdateService', () => {
 
       await service.checkAppVersion({ silent: true });
 
-      // Same git_hash and version but different build_datetime_utc → should be equal
+      // Same build_id but different version/git_hash/build_datetime_utc → should be equal
       expect(service.needUpdate()).toBe(false);
     });
 
-    it('should detect update when git_hash differs', async () => {
+    it('should detect update when build_id differs', async () => {
       const mockLatestVersion = {
+        build_id: 'different-build',
         git_hash: 'different-hash',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
@@ -760,11 +1093,12 @@ describe('UpdateService', () => {
       expect(service.needUpdate()).toBe(true);
     });
 
-    it('should detect update when version differs', async () => {
+    it('should detect update when only build_id differs (same git_hash and version)', async () => {
       const mockLatestVersion = {
+        build_id: 'new-build',
         git_hash: 'env-hash-123',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
-        version: '2.0.0'
+        version: '1.0.0'
       };
 
       mockFetch.mockResolvedValueOnce({

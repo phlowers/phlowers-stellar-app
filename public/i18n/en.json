@@ -170,6 +170,7 @@
     "update-warning": "Thank you for not closing the app when the update is in progress.",
     "later": "Later",
     "update-now": "Update now",
+    "update-start-failed": "The update could not be started. Please try again.",
     "install-failed": "Initial application installation could not start. Please reload the page to try again."
   },
   "auth": {
@@ -295,6 +296,8 @@
       "update-failed-summary": "Update failed",
       "update-failed-detail": "An unknown error occurred during the update",
       "update-failed-auth-detail": "The update could not be downloaded because your session has expired. Please sign in again, then retry the update",
+      "update-interrupted-summary": "Update interrupted",
+      "update-interrupted-detail": "The update did not finish. Please try again.",
       "version-checked-detail": "App version checked"
     },
     "obstacle-form-service": {

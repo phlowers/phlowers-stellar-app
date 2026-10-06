@@ -1,12 +1,77 @@
 export interface AppVersion {
+  /** Unique per build: the only identity used to compare versions and name caches. */
+  build_id: string;
+  /** Display only: two distinct builds can share it (or have `unknown`). */
   git_hash: string;
   build_datetime_utc: string;
   version: string;
 }
 
+export type UpdateLogLevel = 'info' | 'warn' | 'error';
+
+/** One step of an install/update run, emitted by the Service Worker. */
+export interface UpdateLogEntry {
+  runId: string;
+  level: UpdateLogLevel;
+  step: string;
+  /** Milliseconds since the run started. */
+  elapsedMs: number;
+  details?: Record<string, unknown>;
+}
+
+/** SW -> page message carrying one `UpdateLogEntry`. */
+export interface UpdateLogMessage {
+  message: 'log';
+  entry: UpdateLogEntry;
+}
+
+export interface UpdateLogger {
+  readonly runId: string;
+  info(step: string, details?: Record<string, unknown>): void;
+  warn(step: string, details?: Record<string, unknown>): void;
+  error(step: string, details?: Record<string, unknown>): void;
+}
+
 export interface CacheControlState {
   active: string;
   previous: string | null;
+}
+
+export type UpdateRunType = 'update' | 'install';
+
+/** The single install/update run currently executing in the SW. */
+export interface ActiveRun {
+  runId: string;
+  log: UpdateLogger;
+  type: UpdateRunType;
+  startedAt: number;
+  filesTotal: number;
+  filesDone: number;
+  promise: Promise<AssetManifest>;
+}
+
+/** Files-based progress of the running install/update. */
+export type UpdateRunProgress = Pick<ActiveRun, 'runId' | 'type' | 'filesTotal' | 'filesDone'>;
+
+/**
+ * SW -> page progress of the running install/update. `run: null` (reply to a `keepalive`)
+ * means the SW has no run in progress, e.g. it was stopped and restarted by the browser.
+ */
+export interface UpdateProgressMessage {
+  message: 'progress';
+  run: UpdateRunProgress | null;
+}
+
+export interface ServiceWorkerStatus {
+  run: (UpdateRunProgress & { elapsedMs: number }) | null;
+  control: CacheControlState | null;
+  caches: string[];
+}
+
+/** SW -> page reply to a `status` request. */
+export interface ServiceWorkerStatusMessage {
+  message: 'status';
+  status: ServiceWorkerStatus;
 }
 
 export interface AssetManifest {
