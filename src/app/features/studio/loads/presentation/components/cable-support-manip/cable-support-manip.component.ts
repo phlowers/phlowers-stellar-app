@@ -370,14 +370,10 @@ export class CableSupportManipComponent {
     }
   }
 
-  async calculate(): Promise<void> {
+  calculate(): void {
     if (this.isFormInvalid()) return;
-    this.isLoading.set(true);
-    try {
-      // Python task placeholder — to be wired once the calculation API is defined.
-    } finally {
-      this.isLoading.set(false);
-    }
+    // Python task placeholder — to be wired once the calculation API is defined.
+    // Make this async and toggle isLoading around the call at that point.
   }
 
   isFormInvalid(): boolean {
