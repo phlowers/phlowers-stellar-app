@@ -206,59 +206,71 @@ export const buildDistancePoints = (params: AggregatePointsParams): FreePosition
 };
 
 /**
- * Builds load points for the given frozen span.
+ * Returns the [x, y, z] coordinates computed by the python task for the frozen span, if available.
  */
-export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningPoint[] => {
-  const points: FreePositioningPoint[] = [];
+const getLoadCoord = (params: AggregatePointsParams): number[] | null => {
+  const coord = params.litData?.output_parameters?.loads_coords?.[params.frozenSpan];
+  return Array.isArray(coord) && coord.length >= 3 ? coord : null;
+};
+
+const getLoadNameKey = (isPunctual: boolean): string => (isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY);
+
+/**
+ * Builds the point of the load being edited in the form.
+ */
+const buildEditableLoadPoint = (
+  params: AggregatePointsParams,
+  loadPosition: number,
+  coord: number[] | null
+): FreePositioningPoint => {
+  // x/y/z come from the python task output (loads_coords): the form loadPosition is an
+  // input and does not match exactly what the calculus computes. Only when the task output
+  // is not available yet do we fall back to converting the form value (which is relative to
+  // the reference support) to an absolute abscissa measured from the left support.
+  const spanLength = params.litData?.output_parameters?.span_length?.[params.frozenSpan];
+  return {
+    id: `load-active-${params.frozenSpan}`,
+    category: 'loads',
+    alongSpan: coord?.[0] ?? mirrorPositionForReferenceSupport(loadPosition, spanLength, params.loadReferenceSupport),
+    lateral: coord?.[1] ?? 0,
+    altitude: coord?.[2] ?? getSupportAltitudeNgf(params.litData, params.frozenSpan),
+    editable: true,
+    nameKey: getLoadNameKey(params.loadType === 'punctual')
+  };
+};
+
+/**
+ * Builds the point of the saved load of the selected charge from the computed coordinates.
+ */
+const buildComputedLoadPoint = (params: AggregatePointsParams, coord: number[]): FreePositioningPoint => {
   const selectedChargeUuid = params.section?.selected_charge_uuid;
   const charge = params.section?.charges?.find((c) => c.uuid === selectedChargeUuid);
   const spanLoad = charge?.data?.spanLoads?.[params.frozenSpan];
+  return {
+    id: `load-${params.frozenSpan}`,
+    category: 'loads',
+    alongSpan: coord[0],
+    lateral: coord[1],
+    altitude: coord[2],
+    editable: params.editableCategory === 'loads',
+    nameKey: getLoadNameKey(spanLoad?.type === 'punctual' || params.loadType === 'punctual')
+  };
+};
 
-  const loadsCoords = params.litData?.output_parameters?.loads_coords;
-  const coord = loadsCoords?.[params.frozenSpan];
-  const hasCoord = Array.isArray(coord) && coord.length >= 3;
-
+/**
+ * Builds load points for the given frozen span.
+ */
+export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningPoint[] => {
+  const coord = getLoadCoord(params);
   const loadPosition = params.loadPosition;
-  const hasEditableLoadPosition =
+  const isEditing =
     params.editableCategory === 'loads' &&
     loadPosition !== null &&
     loadPosition !== undefined &&
     !Number.isNaN(loadPosition);
 
-  if (hasEditableLoadPosition) {
-    const isPunctual = params.loadType === 'punctual';
-    // x/y/z come from the python task output (loads_coords): the form loadPosition is an
-    // input and does not match exactly what the calculus computes. Only when the task output
-    // is not available yet do we fall back to converting the form value (which is relative to
-    // the reference support) to an absolute abscissa measured from the left support.
-    const spanLength = params.litData?.output_parameters?.span_length?.[params.frozenSpan];
-    const fallbackAlongSpan =
-      params.loadReferenceSupport === 'RIGHT' && typeof spanLength === 'number' && !Number.isNaN(spanLength)
-        ? spanLength - loadPosition
-        : loadPosition;
-    points.push({
-      id: `load-active-${params.frozenSpan}`,
-      category: 'loads',
-      alongSpan: hasCoord ? coord[0] : fallbackAlongSpan,
-      lateral: hasCoord ? coord[1] : 0,
-      altitude: hasCoord ? coord[2] : getSupportAltitudeNgf(params.litData, params.frozenSpan),
-      editable: true,
-      nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
-    });
-  } else if (hasCoord) {
-    const isPunctual = spanLoad?.type === 'punctual' || params.loadType === 'punctual';
-    points.push({
-      id: `load-${params.frozenSpan}`,
-      category: 'loads',
-      alongSpan: coord[0],
-      lateral: coord[1],
-      altitude: coord[2],
-      editable: params.editableCategory === 'loads',
-      nameKey: isPunctual ? PUNCTUAL_LOAD_KEY : MARKING_LOAD_KEY
-    });
-  }
-
-  return points;
+  if (isEditing) return [buildEditableLoadPoint(params, loadPosition, coord)];
+  return coord ? [buildComputedLoadPoint(params, coord)] : [];
 };
 
 /**
