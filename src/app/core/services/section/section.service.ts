@@ -37,8 +37,7 @@ export class SectionService {
    * loads are removed silently and do not set the flag.
    */
   async createOrUpdateSection(study: StudyEntity, section: Section): Promise<SectionUpdateResult> {
-    const previousSection = study.sections.some((s) => s?.uuid === section?.uuid);
-    const existingSection = !!previousSection;
+    const existingSection = study.sections.some((s) => s?.uuid === section?.uuid);
     const studyKeep = cloneDeep(study);
 
     const { section: sanitizedSection, removedGeometryBoundObjects } = sanitizeSectionGeometry(section);
