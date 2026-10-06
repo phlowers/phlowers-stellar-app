@@ -211,7 +211,7 @@
       "ruleName": "RULE_2",
       "color": "#FFA500",
       "lateralPoint": {
-        "temperature": 68,
+        "temperature": null,
         "pressure": "WindZoneInput",
         "redZone": true
       },

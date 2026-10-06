@@ -600,7 +600,11 @@ export interface MeasureDistanceAngleResult {
 
 export interface ConformityPointInput {
   temperature: number | null;
+  // Numeric pressure (Pa), or 'WindZoneInput' to use `ConformityFormInput.windPressure`.
   pressure: number | 'WindZoneInput';
+  // Catalog flag, required by the engine but not used in its computation: the red zone acts through
+  // `ConformityFormInput.windPressure`, which the application resolves before calling the engine.
+  red_zone: boolean;
 }
 
 export interface ConformityRuleClimaticConditionInput {
@@ -618,8 +622,11 @@ export interface ConformityRuleDistanceInput {
 
 export interface ConformityFormInput {
   windZone: string | null;
+  // Pressure (Pa) of the wind zone, already resolved by the application: the red zone value when
+  // `redZonePresence` is on, the normal value otherwise. The engine rejects a null value.
   windPressure: number | null;
   windMinus: boolean;
+  // Validated by the engine, but only informative: the red zone is already applied in `windPressure`.
   redZonePresence: boolean;
   repartitionTemperature: number | null;
   lateralDistanceTemperature: number | null;

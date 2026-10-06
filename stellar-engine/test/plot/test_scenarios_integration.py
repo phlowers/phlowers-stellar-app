@@ -476,11 +476,8 @@ def test_wind_minus_true_negates_lateral_wind_pressure(
     """Test that when windMinus=True, lateral wind pressure is negated.
 
     Rule: When windMinus is True:
-    - Lateral scenarios should have wind_pressure = -form.windPressure
-    - Overhang scenarios should have wind_pressure = +form.windPressure (not affected by windMinus)
-
-    NOTE: This test documents current behavior - windMinus parameter is currently
-    NOT implemented in build_scenario(), so lateral pressures remain positive.
+    - Lateral scenarios should have the negated lateral wind pressure
+    - Overhang scenarios keep their own wind pressure (not affected by windMinus)
     """
     scenarios_by_rule = build_scenarios(
         [
@@ -511,10 +508,7 @@ def test_wind_minus_true_negates_lateral_wind_pressure(
     lateral_scenarios = [s for s in scenarios if s.conformity_point == "lateral"]
     assert len(lateral_scenarios) > 0, "No lateral scenarios found"
     for scenario in lateral_scenarios:
-        print(
-            f"Lateral wind pressure with windMinus=True: {scenario.target_state.wind_pressure} "
-            f"(expected: -200, but windMinus is not implemented)"
-        )
+        assert scenario.target_state.wind_pressure == -200
 
 
 # ============================================================================

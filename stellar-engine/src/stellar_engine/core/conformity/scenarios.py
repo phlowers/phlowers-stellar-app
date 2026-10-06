@@ -67,6 +67,8 @@ class ClimaticPoint:
 
     temperature: Optional[float]
     wind_input: float | str  # Can be numeric or "WindZoneInput"
+    # Carried to the output only. The red zone is handled by the caller, which sends
+    # the red zone wind pressure as `windPressure` (see ConformityParametersInput).
     red_zone: bool
     wind_pressure: float = field(init=False)
     # Pressure used when wind_input is "WindZoneInput"
@@ -86,7 +88,7 @@ class ClimaticPoint:
         """Create ClimaticPoint from dictionary with validation.
 
         Args:
-            data: Dictionary containing temperature, wind_pressure, and red_zone
+            data: Dictionary containing temperature (optional), pressure and red_zone
             wind_zone_pressure: Pressure resolving a "WindZoneInput" value
 
         Returns:
@@ -99,9 +101,7 @@ class ClimaticPoint:
             raise ValueError("ClimaticPoint data must be a dictionary")
 
         if "pressure" not in data:
-            raise ValueError(
-                "ClimaticPoint missing required field: wind_pressure"
-            )
+            raise ValueError("ClimaticPoint missing required field: pressure")
         if "red_zone" not in data:
             raise ValueError("ClimaticPoint missing required field: red_zone")
 

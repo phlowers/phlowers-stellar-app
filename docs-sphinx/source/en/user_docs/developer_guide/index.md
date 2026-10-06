@@ -13,6 +13,8 @@ plot/index
 authentification/index
 translation
 geographic_system
+conformity
+configure_conformity
 ```
 
 

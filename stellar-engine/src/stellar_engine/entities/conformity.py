@@ -246,7 +246,12 @@ class ElectricTensionMapper:
 
 @dataclass
 class ConformityParametersInput:
-    """Represents form parameters for conformity computation."""
+    """Represents form parameters for conformity computation.
+
+    The red zone is handled by the caller: `wind_pressure` already holds the red zone
+    pressure of the wind zone when `red_zone_presence` is True. `red_zone_presence`
+    is validated here but does not change the computation.
+    """
 
     wind_zone: str
     wind_pressure: float

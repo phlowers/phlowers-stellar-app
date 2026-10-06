@@ -7,10 +7,9 @@
 
 /**
  * Contract for the conformity graph data the python task returns, consumed by the
- * `#conformity-plot` Plotly cross-section. Values are a fixed mock today
- * (`CONFORMITY_PLOT_MOCK`); the real calculation will populate this same shape, making it a
- * drop-in replacement. Colors are the only styling sourced outside this response (from the
- * catalog rule definitions, keyed by `rule_type`).
+ * `#conformity-plot` Plotly cross-section. It is the `obstacle` and `conformity` part of the
+ * output of the python `get_conformity` task (`Task.getConformity`). Colors are the only styling
+ * sourced outside this response (from the catalog rule definitions, keyed by `rule_type`).
  */
 
 /** A point in the sliced (2D) view: x = distance to line axis (m), y = altitude (m). */
