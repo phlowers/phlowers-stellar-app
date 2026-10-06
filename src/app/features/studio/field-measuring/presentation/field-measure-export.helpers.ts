@@ -97,6 +97,12 @@ export const buildGeneralExport = (section: Section | null, study: Study | null)
   loadCase: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? null
 });
 
+// The legacy French span type 'garde' maps to the 'guard' translation key.
+const getSectionTypeKey = (spanType: string): string => {
+  const keySuffix = spanType.toLowerCase() === 'garde' ? 'guard' : spanType;
+  return `common.section-type.${keySuffix}`;
+};
+
 /**
  * Builds the `measure` export block (formerly `measureData`).
  * @param measureData - The field measure to export
@@ -108,11 +114,7 @@ export const buildMeasureExport = (measureData: FieldMeasure, translocoService: 
   date: formatExportDate(measureData.date),
   time: formatExportTime(measureData.time),
   voltage: createValueUnit(measureData.voltage, 'KV'),
-  sectionType: measureData.spanType
-    ? translocoService.translate(
-        'common.section-type.' + (measureData.spanType.toLowerCase() === 'garde' ? 'guard' : measureData.spanType)
-      )
-    : null,
+  sectionType: measureData.spanType ? translocoService.translate(getSectionTypeKey(measureData.spanType)) : null,
   cable: measureData.cableName,
   cablesNumber: measureData.numberOfConductors,
   phaseNumber: measureData.phaseNumber
