@@ -331,7 +331,7 @@
   }
 
   @if (papotoError()) {
-    <div class="papoto__error">
+    <div class="papoto__error" role="alert" aria-live="assertive">
       <p>{{ 'common.error-occurred-label' | transloco }}</p>
     </div>
   }

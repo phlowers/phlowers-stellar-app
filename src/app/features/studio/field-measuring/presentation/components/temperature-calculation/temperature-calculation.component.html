@@ -227,7 +227,13 @@
   }
 
   @if (temperatureCalculationError()) {
-    <div class="temperature-calculation__error" animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
+    <div
+      class="temperature-calculation__error"
+      role="alert"
+      aria-live="assertive"
+      animate.enter="anim-expand-height"
+      animate.leave="anim-collapse-height"
+    >
       <p>{{ 'field-measuring.temperature-calculation.error-message' | transloco }}</p>
     </div>
   }
