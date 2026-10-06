@@ -368,11 +368,7 @@ export class CableSupportManipComponent {
       this.form.controls.manip1Type.updateValueAndValidity();
       return;
     }
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    const saved = this.spanService
-      .section()
-      ?.cable_support_manipulations?.find((m) => m.supportUuid === uuid && m.chargeUuid === chargeUuid);
-
+    const saved = this.findSupportManipulation(uuid)
     if (saved) {
       this.hasSavedManipulation.set(true);
       this.showManip2.set(saved.manip2 != null);
@@ -547,11 +543,18 @@ export class CableSupportManipComponent {
     return getControlErrorIds(this.form, controlName, errorTypes);
   }
 
-  private findSupportManipulationFromSpanService(supportUuid: string): CableSupportManipulation | undefined {
-    return this.spanService
-      .section()
-      ?.cable_support_manipulations?.find((supportManip) => supportManip.supportUuid === supportUuid);
+  private findSupportManipulation(supportUuid: string): CableSupportManipulation | undefined {
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    return (
+      this.plotService.temporaryLoadData?.supportManipParams.find(
+        (supportManip) => supportManip.supportUuid === supportUuid
+      ) ??
+      this.spanService
+        .section()
+        ?.cable_support_manipulations?.find((manip) => manip.supportUuid === supportUuid && manip.chargeUuid === chargeUuid)
+    );
   }
+
 
   private findSelectedSupportManipulation(): CableSupportManipulation | undefined {
     const supportUuidToFind = this.form.controls.support.value;
@@ -571,7 +574,9 @@ export class CableSupportManipComponent {
     if (selectedSupportManipulation) {
       return selectedSupportManipulation;
     }
-    const fallbackSupportManipulation = this.findSupportManipulationFromSpanService(supportUuid);
+    const fallbackSupportManipulation = this.spanService
+      .section()
+      ?.cable_support_manipulations?.find((supportManip) => supportManip.supportUuid === supportUuid);
 
     const chargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!chargeUuid) return;
@@ -595,8 +600,7 @@ export class CableSupportManipComponent {
           value === 'crane' || value === 'rope' || value === 'shifting' ? value : 'crane';
         break;
       case 'anchoring':
-        supportManipulation.manip1.anchoring =
-          value === 'with_chain' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.anchoring;
+        supportManipulation.manip1.anchoring = value === 'with_chain' ? value : CABLE_SUPPORT_MANIP_DEFAULTS.anchoring;
         break;
       case 'lateralDistance':
         supportManipulation.manip1.lateralDistance =

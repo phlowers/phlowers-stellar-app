@@ -64,7 +64,7 @@ export class CableLengthChangeComponent {
   readonly isDirtySinceLastSave = signal(false);
 
   readonly form = this.fb.group<CableLengthChangeFormControls>({
-    scope: new FormControl<string | null>(null, { validators: [Validators.required] }),
+    spanUuid: new FormControl<string | null>(null, { validators: [Validators.required] }),
     supportRef: new FormControl<'LEFT' | 'RIGHT' | null>(
       { value: null, disabled: true },
       { validators: [Validators.required] }
@@ -88,8 +88,8 @@ export class CableLengthChangeComponent {
     })
   });
 
-  private readonly scopeSignal = toSignal(this.form.controls.scope.valueChanges, {
-    initialValue: this.form.controls.scope.value
+  private readonly scopeSignal = toSignal(this.form.controls.spanUuid.valueChanges, {
+    initialValue: this.form.controls.spanUuid.value
   });
 
   readonly scopeValue = computed(() => this.scopeSignal());
@@ -197,7 +197,7 @@ export class CableLengthChangeComponent {
       const startIndex = untracked(() => this.plotOptionsService.plotOptions().startSupport);
       const defaultUuid = section.supports?.[startIndex]?.uuid ?? section.supports?.[0]?.uuid ?? null;
       untracked(() => {
-        this.form.controls.scope.setValue(defaultUuid);
+        this.form.controls.spanUuid.setValue(defaultUuid);
         if (defaultUuid) this.onScopeChange(defaultUuid);
       });
     });
@@ -210,7 +210,7 @@ export class CableLengthChangeComponent {
       const spanUuid = this.cableModificationsService.selectedSpanUuid();
       if (!spanUuid) return;
       untracked(() => {
-        this.form.controls.scope.setValue(spanUuid);
+        this.form.controls.spanUuid.setValue(spanUuid);
         this.onScopeChange(spanUuid);
         this.cableModificationsService.clearSelectedSpan();
       });
@@ -233,7 +233,6 @@ export class CableLengthChangeComponent {
 
     this.supportRefOptions.set(untracked(() => this.spanService.getSupportOptions(uuid)));
     this.form.controls.supportRef.enable({ emitEvent: false });
-    this.form.controls.supportRef.setValue('LEFT', { emitEvent: false });
 
     const savedMod = untracked(() => this.findCableModification(uuid));
     if (savedMod) {
@@ -250,6 +249,7 @@ export class CableLengthChangeComponent {
     } else {
       this.form.patchValue(
         {
+          supportRef: 'LEFT',
           modificationType: 'lengthening',
           modifiedLengthCable: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable,
           distanceSupportRef: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef
@@ -263,7 +263,7 @@ export class CableLengthChangeComponent {
   }
 
   zoomToSpan(): void {
-    const uuid = this.form.controls.scope.value;
+    const uuid = this.form.controls.spanUuid.value;
     if (!uuid) return;
     const index = this.spanService.getSupportIndex(uuid);
     if (index < 0) return;
@@ -272,7 +272,7 @@ export class CableLengthChangeComponent {
 
   resetForm(): void {
     this.cableModificationsService.clearPreview();
-    const currentScope = this.form.controls.scope.value;
+    const currentScope = this.form.controls.spanUuid.value;
     this.form.patchValue(
       {
         supportRef: 'LEFT',
@@ -284,7 +284,7 @@ export class CableLengthChangeComponent {
     );
     // If there is an active span, keep it selected and its support options
     if (currentScope) {
-      this.form.controls.scope.setValue(currentScope, { emitEvent: false });
+      this.form.controls.spanUuid.setValue(currentScope, { emitEvent: false });
     }
     this.statesFormControls();
     this.isDirtySinceLastSave.set(false);
@@ -341,7 +341,7 @@ export class CableLengthChangeComponent {
   }
 
   deleteForm(): void {
-    const spanUuid = this.form.controls.scope.value;
+    const spanUuid = this.form.controls.spanUuid.value;
     const uuid = spanUuid ? (this.findCableModification(spanUuid)?.uuid ?? null) : null;
     if (uuid) {
       this.cableModificationsService
@@ -397,18 +397,14 @@ export class CableLengthChangeComponent {
   }
 
   private findSelectedCableModification(): CableModification | undefined {
-    const spanUuid = this.form.controls.scope.value;
-    if (!spanUuid) {
-      return undefined;
-    }
-
+    const spanUuid = this.form.controls.spanUuid.value;
     return this.plotService.temporaryLoadData?.cableModifParams?.find(
       (cableModification) => cableModification.spanUuid === spanUuid
     );
   }
   // could be removed when recheckCableModif() is used (initTemporaryLoadData() in loadForms.service.ts)
   private ensureSelectedCableModification(): CableModification | undefined {
-    const spanUuid = this.form.controls.scope.value;
+    const spanUuid = this.form.controls.spanUuid.value;
     const temporaryLoadData = this.plotService.temporaryLoadData;
     if (!spanUuid || !temporaryLoadData) {
       return undefined;
@@ -419,7 +415,9 @@ export class CableLengthChangeComponent {
       return selectedCableModification;
     }
 
-    const fallbackCableModification = this.findCableModification(spanUuid);
+    const fallbackCableModification = this.spanService
+      .section()
+      ?.cable_modifications?.find((cableModification) => cableModification.spanUuid === spanUuid);
     const nextCableModification: CableModification = fallbackCableModification
       ? { ...fallbackCableModification }
       : {

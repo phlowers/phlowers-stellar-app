@@ -34,12 +34,12 @@
   </div>
 
   <div>
-    <label for="scope">{{ 'loads.shared.span-label' | transloco }}</label>
+    <label for="spanUuid">{{ 'loads.shared.span-label' | transloco }}</label>
     <p-select
-      inputId="scope"
+      inputId="spanUuid"
       [options]="spansOptions()"
       fluid
-      formControlName="scope"
+      formControlName="spanUuid"
       optionLabel="label"
       optionValue="value"
       (onChange)="onScopeChange($event.value)"

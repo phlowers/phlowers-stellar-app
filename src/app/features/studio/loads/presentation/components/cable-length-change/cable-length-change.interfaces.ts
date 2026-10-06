@@ -9,7 +9,7 @@ export type CableModificationControlName =
 /** Typed form controls for the cable length change form. */
 export interface CableLengthChangeFormControls {
   /** Selected span UUID (scope). */
-  scope: FormControl<string | null>;
+  spanUuid: FormControl<string | null>;
   /** Reference support side. */
   supportRef: FormControl<'LEFT' | 'RIGHT' | null>;
   /** Type of cable length modification. */
