@@ -504,6 +504,7 @@ describe('Service Worker Functions', () => {
 
       await expect(updateApp()).rejects.toThrow(/Manifest fetch failed: authentication required/);
       expect(mockCaches.open).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it('should fail within the timeout when the manifest never answers', async () => {
@@ -519,6 +520,8 @@ describe('Service Worker Functions', () => {
         const run = expect(updateApp()).rejects.toThrow('Manifest fetch timed out after 13s');
         await vi.advanceTimersByTimeAsync(13000);
         await run;
+        await vi.advanceTimersByTimeAsync(30000);
+        expect(mockFetch).toHaveBeenCalledTimes(1);
       } finally {
         vi.useRealTimers();
       }
@@ -1266,7 +1269,7 @@ describe('Service Worker Functions', () => {
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(page.postMessage).toHaveBeenCalledWith({
+      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'install_complete',
         latest_version: mockManifest.app_version,
         data_hashes: {}
