@@ -444,7 +444,7 @@ describe('AppComponent - automatic first-install resilience', () => {
 
   interface ResilienceOptions {
     serviceWorkerSupported?: boolean;
-    swReadyResult?: 'resolve' | 'reject';
+    swReadyResult?: 'resolve' | 'reject' | 'never';
     install?: ReturnType<typeof vi.fn>;
   }
 
@@ -468,10 +468,11 @@ describe('AppComponent - automatic first-install resilience', () => {
     Object.defineProperty(navigator, 'serviceWorker', {
       configurable: true,
       value: {
-        ready:
-          swReadyResult === 'resolve'
-            ? Promise.resolve({ active: { postMessage: vi.fn() } })
-            : Promise.reject(new Error('SW never ready')),
+        ready: {
+          resolve: () => Promise.resolve({ active: { postMessage: vi.fn() } }),
+          reject: () => Promise.reject(new Error('SW never ready')),
+          never: () => new Promise(() => undefined)
+        }[swReadyResult](),
         getRegistration: vi.fn(),
         addEventListener: vi.fn()
       }
@@ -583,6 +584,28 @@ describe('AppComponent - automatic first-install resilience', () => {
     );
     expect(notificationError).toHaveBeenCalledTimes(1);
     expect(component['autoInstallTriggered']()).toBe(false);
+  });
+
+  it('should reset guard and notify user when serviceWorker.ready never settles', async () => {
+    const install = vi.fn().mockResolvedValue(false);
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'never', install });
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(9999);
+      expect(notificationError).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.stringContaining('Service Worker never became ready'),
+        expect.any(DOMException)
+      );
+      expect(notificationError).toHaveBeenCalledTimes(1);
+      expect(component['autoInstallTriggered']()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('should reset guard and notify user when install rejects', async () => {

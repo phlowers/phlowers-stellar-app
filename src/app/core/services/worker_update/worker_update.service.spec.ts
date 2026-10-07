@@ -11,8 +11,7 @@ vi.mock('@src/environments/environment', () => ({
   environment: {
     version: '1.0.0',
     buildTime: '2024-01-01T00:00:00.000000',
-    gitHash: 'env-hash-123',
-    buildId: 'env-hash-123'
+    gitHash: 'e1e1e1e1'
   }
 }));
 
@@ -120,8 +119,7 @@ describe('UpdateService', () => {
     expect(service.currentVersion()).toEqual({
       version: '1.0.0',
       build_datetime_utc: '2024-01-01T00:00:00.000000',
-      build_id: 'env-hash-123',
-      git_hash: 'env-hash-123'
+      git_hash: 'e1e1e1e1'
     });
   });
 
@@ -143,8 +141,7 @@ describe('UpdateService', () => {
   describe('checkAppVersion', () => {
     it('should fetch latest version from assets_list.json', async () => {
       const mockLatestVersion = {
-        build_id: 'abc123',
-        git_hash: 'abc123',
+        git_hash: 'abc1234',
         build_datetime_utc: '2023-01-01T00:00:00.000000',
         version: '2.0.0'
       };
@@ -178,8 +175,7 @@ describe('UpdateService', () => {
 
     it('should detect update needed when server version differs', async () => {
       const mockLatestVersion = {
-        build_id: 'abc123',
-        git_hash: 'abc123',
+        git_hash: 'abc1234',
         build_datetime_utc: '2023-01-01T00:00:00.000000',
         version: '2.0.0'
       };
@@ -200,8 +196,7 @@ describe('UpdateService', () => {
 
     it('should detect no update needed when versions match', async () => {
       const mockLatestVersion = {
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123',
+        git_hash: 'e1e1e1e1',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
       };
@@ -229,8 +224,7 @@ describe('UpdateService', () => {
 
     it('should preserve existing latestVersion when fetch fails', async () => {
       const existingLatest = {
-        build_id: 'existing-latest',
-        git_hash: 'existing-latest',
+        git_hash: 'eee1234',
         build_datetime_utc: '2023-06-02T00:00:00.000000',
         version: '2.1.0'
       };
@@ -254,8 +248,7 @@ describe('UpdateService', () => {
 
     it('should show toast when silent is false (default)', async () => {
       const mockVersion = {
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123',
+        git_hash: 'e1e1e1e1',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
       };
@@ -275,8 +268,7 @@ describe('UpdateService', () => {
 
     it('should not show toast when silent is true', async () => {
       const mockVersion = {
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123',
+        git_hash: 'e1e1e1e1',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
         version: '1.0.0'
       };
@@ -296,8 +288,7 @@ describe('UpdateService', () => {
 
     it('should log current and server versions with the update decision', async () => {
       const serverVersion = {
-        build_id: 'new-hash',
-        git_hash: 'new-hash',
+        git_hash: 'fed1234',
         build_datetime_utc: '2025-01-01',
         version: '1.0.0'
       };
@@ -350,8 +341,7 @@ describe('UpdateService', () => {
   describe('loadCurrentVersion', () => {
     it('should update currentVersion from /version.json when fetch succeeds', async () => {
       const serverVersion = {
-        build_id: 'server-hash-456',
-        git_hash: 'server-hash-456',
+        git_hash: '5e5e456',
         build_datetime_utc: '2025-06-01T00:00:00.000000',
         version: '2.0.0'
       };
@@ -371,8 +361,7 @@ describe('UpdateService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: vi.fn().mockResolvedValueOnce({
-          build_id: 'server-hash-456',
-          git_hash: 'server-hash-456',
+          git_hash: '5e5e456',
           build_datetime_utc: '2025-06-01T00:00:00.000000',
           version: '2.0.0'
         })
@@ -394,8 +383,7 @@ describe('UpdateService', () => {
       expect(service.currentVersion()).toEqual({
         version: '1.0.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123'
+        git_hash: 'e1e1e1e1'
       });
     });
 
@@ -407,8 +395,7 @@ describe('UpdateService', () => {
       expect(service.currentVersion()).toEqual({
         version: '1.0.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000',
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123'
+        git_hash: 'e1e1e1e1'
       });
     });
   });
@@ -473,7 +460,7 @@ describe('UpdateService', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue({
-          app_version: { build_id: 'abc', git_hash: 'abc', build_datetime_utc: '2024', version: '1.0.0' },
+          app_version: { git_hash: 'abc0001', build_datetime_utc: '2024', version: '1.0.0' },
           files: []
         })
       });
@@ -487,7 +474,7 @@ describe('UpdateService', () => {
     });
 
     it('should set needUpdate true when versions differ and cache is populated', async () => {
-      const latest = { build_id: 'new', git_hash: 'new', build_datetime_utc: '2025', version: '2.0.0' };
+      const latest = { git_hash: 'fed0001', build_datetime_utc: '2025', version: '2.0.0' };
       mockCache.match.mockResolvedValue(new Response('{}')); // cache populated
       mockFetch.mockResolvedValue({
         ok: true,
@@ -503,8 +490,7 @@ describe('UpdateService', () => {
 
     it('should not set needUpdate when versions are equal', async () => {
       const version = {
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123',
+        git_hash: 'e1e1e1e1',
         build_datetime_utc: '2024',
         version: '1.0.0'
       };
@@ -533,8 +519,7 @@ describe('UpdateService', () => {
       service.pendingAction.set('update-available');
 
       const version = {
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123',
+        git_hash: 'e1e1e1e1',
         build_datetime_utc: '2024',
         version: '1.0.0'
       };
@@ -987,6 +972,54 @@ describe('UpdateService', () => {
       expect(mockPostMessage).toHaveBeenCalledWith({ type: 'update' });
     });
 
+    describe('no-progress countdown', () => {
+      const progress = (filesDone: number) =>
+        messageHandler({
+          data: { message: 'progress', run: { runId: 'r1', type: 'update', filesTotal: 100, filesDone } }
+        });
+
+      it('should declare the update interrupted when the SW keeps answering but no file is cached for 180 s', async () => {
+        await startUpdate();
+        await progress(3);
+
+        for (let elapsed = 0; elapsed < 170000; elapsed += 10000) {
+          await vi.advanceTimersByTimeAsync(10000);
+          await progress(3);
+        }
+        expect(service.updateLoading()).toBe(true);
+        await vi.advanceTimersByTimeAsync(10000);
+
+        expect(service.updateLoading()).toBe(false);
+        interruptedToast();
+        expect(mockLogger.error).toHaveBeenCalledWith('[UPDATE page] update interrupted: no file cached for 180s');
+      });
+
+      it('should never interrupt a slow update that keeps caching files', async () => {
+        await startUpdate();
+
+        for (let filesDone = 1; filesDone <= 10; filesDone++) {
+          for (let tick = 0; tick < 6; tick++) {
+            await vi.advanceTimersByTimeAsync(10000);
+            await progress(filesDone);
+          }
+        }
+
+        expect(service.updateLoading()).toBe(true);
+        expect(mockMessageService.add).not.toHaveBeenCalled();
+      });
+
+      it('should stop the no-progress countdown once the SW reports the end of the update', async () => {
+        await startUpdate();
+        await progress(3);
+        await messageHandler({ data: { message: 'error', error: 'boom' } });
+        vi.mocked(mockMessageService.add).mockClear();
+
+        await vi.advanceTimersByTimeAsync(300000);
+
+        expect(mockMessageService.add).not.toHaveBeenCalled();
+      });
+    });
+
     it('should notify success without being in the loading state for an update done by another tab', async () => {
       await messageHandler({ data: { message: 'update_complete' } });
 
@@ -998,7 +1031,7 @@ describe('UpdateService', () => {
   describe('manifest caching', () => {
     it('should return the same promise on subsequent calls to getLatestAssetList', async () => {
       const mockAssetList = {
-        app_version: { build_id: 'a', git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' },
+        app_version: { git_hash: 'aaa0001', build_datetime_utc: '2024', version: '1.0.0' },
         files: []
       };
       mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(mockAssetList) });
@@ -1012,7 +1045,7 @@ describe('UpdateService', () => {
 
     it('should re-fetch after clearManifestCache is called', async () => {
       const mockAssetList = {
-        app_version: { build_id: 'a', git_hash: 'a', build_datetime_utc: '2024', version: '1.0.0' },
+        app_version: { git_hash: 'aaa0001', build_datetime_utc: '2024', version: '1.0.0' },
         files: []
       };
       mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(mockAssetList) });
@@ -1026,8 +1059,7 @@ describe('UpdateService', () => {
 
     it('should auto-invalidate cache after checkAppVersion completes', async () => {
       const mockVersion = {
-        build_id: 'env-hash-123',
-        git_hash: 'env-hash-123',
+        git_hash: 'e1e1e1e1',
         build_datetime_utc: '2024',
         version: '1.0.0'
       };
@@ -1050,68 +1082,53 @@ describe('UpdateService', () => {
   });
 
   describe('areVersionsEqual (via checkAppVersion)', () => {
-    it('should compare only build_id, ignoring version, git_hash and build_datetime_utc', async () => {
-      const mockLatestVersion = {
-        build_id: 'env-hash-123',
-        git_hash: 'other-git-hash',
-        build_datetime_utc: '9999-12-31T23:59:59.999999',
-        version: '9.9.9'
-      };
-
+    /** Answers the next manifest fetch with `appVersion`. */
+    function serveVersion(appVersion: Record<string, unknown>): void {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockLatestVersion,
-          files: ['file1.js']
-        })
+        json: vi.fn().mockResolvedValueOnce({ app_version: appVersion, files: ['file1.js'] })
       });
+    }
+
+    it('should compare only git_hash: a rebuild of the same commit is not an update', async () => {
+      serveVersion({ git_hash: 'e1e1e1e1', build_datetime_utc: '9999-12-31T23:59:59.999999', version: '9.9.9' });
 
       await service.checkAppVersion({ silent: true });
 
-      // Same build_id but different version/git_hash/build_datetime_utc → should be equal
       expect(service.needUpdate()).toBe(false);
     });
 
-    it('should detect update when build_id differs', async () => {
-      const mockLatestVersion = {
-        build_id: 'different-build',
-        git_hash: 'different-hash',
-        build_datetime_utc: '2024-01-01T00:00:00.000000',
-        version: '1.0.0'
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockLatestVersion,
-          files: ['file1.js']
-        })
-      });
+    it('should detect update when git_hash differs', async () => {
+      serveVersion({ git_hash: 'd1ff3e7', build_datetime_utc: '2024-01-01T00:00:00.000000', version: '1.0.0' });
 
       await service.checkAppVersion({ silent: true });
 
       expect(service.needUpdate()).toBe(true);
     });
 
-    it('should detect update when only build_id differs (same git_hash and version)', async () => {
-      const mockLatestVersion = {
-        build_id: 'new-build',
-        git_hash: 'env-hash-123',
-        build_datetime_utc: '2024-01-01T00:00:00.000000',
-        version: '1.0.0'
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: vi.fn().mockResolvedValueOnce({
-          app_version: mockLatestVersion,
-          files: ['file1.js']
-        })
-      });
+    it.each([
+      ['missing', undefined],
+      ['unknown', 'unknown'],
+      ['an unreplaced placeholder', '{GIT_HASH}']
+    ])('should not propose an update when the server git_hash is %s', async (_label, gitHash) => {
+      serveVersion({ git_hash: gitHash, build_datetime_utc: '2024-01-01T00:00:00.000000', version: '2.0.0' });
 
       await service.checkAppVersion({ silent: true });
 
-      expect(service.needUpdate()).toBe(true);
+      expect(service.pendingAction()).toBe('none');
+      expect(mockLogger.warn).toHaveBeenCalledWith('[UPDATE page] server manifest has no valid git_hash', {
+        gitHash
+      });
+    });
+
+    it('should not propose a first install when the server git_hash is invalid', async () => {
+      vi.spyOn(service, 'loadCurrentVersion').mockResolvedValue();
+      mockCache.match.mockResolvedValue(undefined);
+      serveVersion({ git_hash: 'unknown', build_datetime_utc: '2024', version: '2.0.0' });
+
+      await service.checkForUpdateOnce();
+
+      expect(service.pendingAction()).toBe('none');
     });
   });
 });

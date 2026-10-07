@@ -22,13 +22,12 @@ function stampBuildIdentity(body, filePath) {
     return body;
   }
   const text = body.toString('utf8');
-  if (!text.includes(BUILT_VERSION.build_id)) {
+  if (!text.includes(BUILT_VERSION.git_hash)) {
     return body;
   }
   const stamp = SCENARIO_VERSIONS[state.scenario];
   return Buffer.from(
     text
-      .replaceAll(BUILT_VERSION.build_id, stamp.build_id)
       .replaceAll(BUILT_VERSION.git_hash, stamp.git_hash)
       .replaceAll(BUILT_VERSION.build_datetime_utc, stamp.build_datetime_utc)
       .replaceAll(`"${BUILT_VERSION.version}"`, `"${stamp.version}"`)
@@ -45,7 +44,9 @@ function emptyFaults() {
     failures: new Map(),
     // Answers 302 -> /auth/login once more than N app files were requested since reset.
     redirectAfter: null,
-    appFileRequestCount: 0
+    appFileRequestCount: 0,
+    // `/assets_list.json` never answers (connection left open).
+    stallManifest: false
   };
 }
 
@@ -74,7 +75,7 @@ const csvVersions = {
 // app asset, 'v2-badhash' deliberately declares a wrong data_hashes entry.
 csvVersions['v2-broken'] = csvVersions.v2;
 csvVersions['v2-badhash'] = csvVersions.v2;
-csvVersions['v2-samehash'] = csvVersions.v2;
+csvVersions['v1-rebuild'] = csvVersions.v1;
 csvVersions['v2-slow'] = csvVersions.v2;
 csvVersions['v2-big'] = csvVersions.v2;
 
@@ -84,31 +85,28 @@ const BIG_FILE_PATH = '/e2e-big.bin';
 const BIG_FILE_SIZE_BYTES = 30 * 1024 * 1024;
 
 // Per-scenario application version stamp + which JS asset(s) the manifest lists.
+// git_hash must look like a commit SHA: the app and the SW refuse any other identity.
 const SCENARIO_VERSIONS = {
   v1: {
-    build_id: 'e2e-build-v1',
-    git_hash: 'e2e-hash-v1',
+    git_hash: 'e2e0001',
     version: '1.0.0-e2e',
     build_datetime_utc: '2026-03-10T09:00:00.000000+00:00',
     asset: '/e2e-app-v1.js'
   },
   v2: {
-    build_id: 'e2e-build-v2',
-    git_hash: 'e2e-hash-v2',
+    git_hash: 'e2e0002',
     version: '2.0.0-e2e',
     build_datetime_utc: '2026-03-10T09:10:00.000000+00:00',
     asset: '/e2e-app-v2.js'
   },
   v3: {
-    build_id: 'e2e-build-v3',
-    git_hash: 'e2e-hash-v3',
+    git_hash: 'e2e0003',
     version: '3.0.0-e2e',
     build_datetime_utc: '2026-03-10T09:20:00.000000+00:00',
     asset: '/e2e-app-v3.js'
   },
   'v2-broken': {
-    build_id: 'e2e-build-v2-broken',
-    git_hash: 'e2e-hash-v2-broken',
+    git_hash: 'e2e0b02',
     version: '2.0.0-e2e-broken',
     build_datetime_utc: '2026-03-10T09:30:00.000000+00:00',
     asset: '/e2e-app-v2.js',
@@ -117,23 +115,20 @@ const SCENARIO_VERSIONS = {
     extraFile: '/e2e-app-v2-broken.js'
   },
   'v2-badhash': {
-    build_id: 'e2e-build-v2-badhash',
-    git_hash: 'e2e-hash-v2-badhash',
+    git_hash: 'e2e0ba2',
     version: '2.0.0-e2e-badhash',
     build_datetime_utc: '2026-03-10T09:40:00.000000+00:00',
     asset: '/e2e-app-v2.js'
   },
-  // Same git_hash and version as v1 but different content: only build_id and the build date differ.
-  'v2-samehash': {
-    build_id: 'e2e-build-v2-samehash',
-    git_hash: 'e2e-hash-v1',
+  // Same commit as v1 built again (e.g. the daily dev redeploy): only the build date differs.
+  'v1-rebuild': {
+    git_hash: 'e2e0001',
     version: '1.0.0-e2e',
-    build_datetime_utc: '2026-03-10T09:50:00.000000+00:00',
-    asset: '/e2e-app-v2.js'
+    build_datetime_utc: '2026-03-11T09:00:00.000000+00:00',
+    asset: '/e2e-app-v1.js'
   },
   'v2-slow': {
-    build_id: 'e2e-build-v2-slow',
-    git_hash: 'e2e-hash-v2-slow',
+    git_hash: 'e2e05a2',
     version: '2.0.0-e2e-slow',
     build_datetime_utc: '2026-03-10T10:00:00.000000+00:00',
     asset: '/e2e-app-v2.js',
@@ -141,8 +136,7 @@ const SCENARIO_VERSIONS = {
     latencyMs: 300
   },
   'v2-big': {
-    build_id: 'e2e-build-v2-big',
-    git_hash: 'e2e-hash-v2-big',
+    git_hash: 'e2e0b19',
     version: '2.0.0-e2e-big',
     build_datetime_utc: '2026-03-10T10:10:00.000000+00:00',
     asset: '/e2e-app-v2.js',
@@ -222,7 +216,6 @@ function currentManifest() {
 
   return {
     app_version: {
-      build_id: versionInfo.build_id,
       git_hash: versionInfo.git_hash,
       build_datetime_utc: versionInfo.build_datetime_utc,
       version: versionInfo.version
@@ -271,7 +264,8 @@ function describeFaults() {
     stallPaths: [...faults.stallPaths],
     failures: Object.fromEntries(faults.failures),
     redirectAfter: faults.redirectAfter,
-    appFileRequestCount: faults.appFileRequestCount
+    appFileRequestCount: faults.appFileRequestCount,
+    stallManifest: faults.stallManifest
   };
 }
 
@@ -335,6 +329,9 @@ function handleFaultsRoute(request, response, requestUrl) {
   if (params.has('redirectAfter')) {
     state.faults.redirectAfter = Number(params.get('redirectAfter'));
     state.faults.appFileRequestCount = 0;
+  }
+  if (params.has('stallManifest')) {
+    state.faults.stallManifest = params.get('stallManifest') === 'true';
   }
   sendJson(response, describeFaults());
 }
@@ -418,6 +415,9 @@ function handleRequest(request, response, requestUrl) {
   }
 
   if (pathname === '/assets_list.json') {
+    if (state.faults.stallManifest) {
+      return;
+    }
     send(response, 200, JSON.stringify(currentManifest()), 'application/json; charset=utf-8');
     return;
   }

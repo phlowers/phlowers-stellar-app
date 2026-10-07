@@ -133,13 +133,12 @@ describe('Service Worker Functions', () => {
     const mockManifest = {
       files: ['/index.html', '/app.js', '/styles.css'],
       app_version: {
-        build_id: 'v1-hash',
-        git_hash: 'v1-hash',
+        git_hash: 'a1b2c3d1',
         version: '1.0.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
       }
     };
-    const versionCacheName = 'app-assets-v-v1-hash';
+    const versionCacheName = 'app-assets-v-a1b2c3d1';
 
     beforeEach(() => {
       mockFetch.mockImplementation((url: string) => {
@@ -200,8 +199,7 @@ describe('Service Worker Functions', () => {
       const emptyManifest = {
         files: [],
         app_version: {
-          build_id: 'v1-empty',
-          git_hash: 'v1-empty',
+          git_hash: 'a1b2c3e1',
           version: '1.0.0',
           build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
         }
@@ -309,13 +307,12 @@ describe('Service Worker Functions', () => {
     const mockManifest = {
       files: ['/index.html', '/app.js', '/pyodide/file1.whl'],
       app_version: {
-        build_id: 'v2-hash',
-        git_hash: 'v2-hash',
+        git_hash: 'b2c3d4e2',
         version: '1.1.0',
         build_datetime_utc: '2024-02-01T00:00:00.000000+00:00'
       }
     };
-    const versionCacheName = 'app-assets-v-v2-hash';
+    const versionCacheName = 'app-assets-v-b2c3d4e2';
 
     beforeEach(() => {
       mockFetch.mockImplementation((url: string) => {
@@ -355,8 +352,7 @@ describe('Service Worker Functions', () => {
       const manifestWithWheels = {
         files: ['/index.html', '/pyodide/numpy.whl', '/pyodide/pandas.whl'],
         app_version: {
-          build_id: 'v2-wheels-hash',
-          git_hash: 'v2-wheels-hash',
+          git_hash: 'b2c3d4f2',
           version: '1.1.0',
           build_datetime_utc: '2024-02-01T00:00:00.000000+00:00'
         }
@@ -370,7 +366,7 @@ describe('Service Worker Functions', () => {
 
       await updateApp();
 
-      const versionCache = cacheStore.get('app-assets-v-v2-wheels-hash')!;
+      const versionCache = cacheStore.get('app-assets-v-b2c3d4f2')!;
       // All files including .whl should be individually re-fetched and cached (full reset)
       for (const file of manifestWithWheels.files) {
         expect(versionCache.put).toHaveBeenCalledWith(file, expect.objectContaining({ ok: true }));
@@ -381,8 +377,7 @@ describe('Service Worker Functions', () => {
       const emptyManifest = {
         files: [],
         app_version: {
-          build_id: 'v2-empty',
-          git_hash: 'v2-empty',
+          git_hash: 'b2c3d4a2',
           version: '1.1.0',
           build_datetime_utc: '2024-02-01T00:00:00.000000+00:00'
         }
@@ -412,6 +407,43 @@ describe('Service Worker Functions', () => {
       await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
     });
 
+    it('should fetch the manifest without following redirects and with a bounded signal', async () => {
+      await updateApp();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/assets_list.json',
+        expect.objectContaining({ redirect: 'manual', signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it.each([
+      ['redirect to login', { ok: false, status: 0, type: 'opaqueredirect' }],
+      ['401', { ok: false, status: 401 }]
+    ])('should report an authentication error when the manifest answers a %s', async (_label, response) => {
+      mockFetch.mockResolvedValue(response);
+
+      await expect(updateApp()).rejects.toThrow(/Manifest fetch failed: authentication required/);
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should fail within the timeout when the manifest never answers', async () => {
+      vi.useFakeTimers();
+      try {
+        mockFetch.mockImplementation(
+          (_url: string, init: RequestInit) =>
+            new Promise((_resolve, reject) =>
+              init.signal!.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+            )
+        );
+
+        const run = expect(updateApp()).rejects.toThrow('Manifest fetch timed out after 13s');
+        await vi.advanceTimersByTimeAsync(13000);
+        await run;
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('should delete the incomplete candidate cache and never touch the previously active version when a file fails to precache', async () => {
       // Simulate an already-active version to prove it is left untouched.
       await seedControlState({ active: 'app-assets-v-current', previous: null });
@@ -439,7 +471,21 @@ describe('Service Worker Functions', () => {
       expect(controlCache.put).not.toHaveBeenCalled();
     });
 
-    it('should refuse to precache into the cache named like the active one (same build_id)', async () => {
+    it('should report success without any write when the complete target cache is already active', async () => {
+      await seedControlState({ active: versionCacheName, previous: 'app-assets-v-older' });
+      const activeCache = (await mockCaches.open(versionCacheName))!;
+      activeCache.match.mockImplementation(async (key: string) => (key === '/app_version' ? {} : undefined));
+
+      await expect(updateApp()).resolves.toEqual(mockManifest);
+
+      // Only the manifest was fetched; nothing was written, deleted or re-activated.
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(activeCache.put).not.toHaveBeenCalled();
+      expect(mockCaches.delete).not.toHaveBeenCalled();
+      expect(cacheStore.get(CONTROL_CACHE_NAME)!.put).not.toHaveBeenCalled();
+    });
+
+    it('should refuse to precache into an incomplete cache named like the active one (same git_hash)', async () => {
       await seedControlState({ active: versionCacheName, previous: null });
       const activeCache = await mockCaches.open(versionCacheName);
 
@@ -451,19 +497,61 @@ describe('Service Worker Functions', () => {
       expect(mockCaches.delete).not.toHaveBeenCalled();
     });
 
-    it('should refuse a manifest without build_id', async () => {
-      const manifestWithoutBuildId = {
-        files: mockManifest.files,
-        app_version: { git_hash: 'v2-hash', version: '1.1.0', build_datetime_utc: '2024-02-01T00:00:00.000000+00:00' }
-      };
-      mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(manifestWithoutBuildId) });
+    it('should activate a complete non-active cache (e.g. the previous version) without writing into it', async () => {
+      await seedControlState({ active: 'app-assets-v-current', previous: versionCacheName });
+      const previousCache = (await mockCaches.open(versionCacheName))!;
+      previousCache.match.mockImplementation(async (key: string) => (key === '/app_version' ? {} : undefined));
 
-      await expect(updateApp()).rejects.toThrow(/no build_id/);
+      await expect(updateApp()).resolves.toEqual(mockManifest);
+
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(mockCaches.delete).not.toHaveBeenCalled();
+      expect(previousCache.put).not.toHaveBeenCalled();
+      expect(cacheStore.get(CONTROL_CACHE_NAME)!.put).toHaveBeenCalledWith(CONTROL_KEY, expect.anything());
     });
 
-    it('should never delete the previous cache when precaching into it fails', async () => {
+    it('should download and write a file listed twice in the manifest only once', async () => {
+      const duplicated = { ...mockManifest, files: ['/index.html', '/app.js', '/app.js'] };
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/assets_list.json') {
+          return Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(duplicated) });
+        }
+        return Promise.resolve({ ok: true, status: 200 });
+      });
+
+      await updateApp();
+
+      expect(mockFetch.mock.calls.filter(([url]) => url === '/app.js')).toHaveLength(1);
+      expect(cacheStore.get(versionCacheName)!.put.mock.calls.filter(([path]) => path === '/app.js')).toHaveLength(1);
+    });
+
+    it.each([
+      ['missing', undefined],
+      ['unknown', 'unknown'],
+      ['not a commit SHA', 'v2-hash']
+    ])('should refuse a manifest whose git_hash is %s', async (_label, gitHash) => {
+      const manifestWithoutHash = {
+        files: mockManifest.files,
+        app_version: { git_hash: gitHash, version: '1.1.0', build_datetime_utc: '2024-02-01T00:00:00.000000+00:00' }
+      };
+      mockFetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue(manifestWithoutHash) });
+
+      await expect(updateApp()).rejects.toThrow(/no valid git_hash/);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should rebuild an incomplete previous cache from scratch instead of writing into it', async () => {
+      await seedControlState({ active: 'app-assets-v-current', previous: versionCacheName });
+      await mockCaches.open(versionCacheName);
+
+      await updateApp();
+
+      expect(mockCaches.delete).toHaveBeenCalledWith(versionCacheName);
+      const rebuilt = cacheStore.get(versionCacheName)!;
+      expect(rebuilt.put).toHaveBeenCalledWith('/app_version', expect.anything());
+    });
+
+    it('should delete a candidate cache named like the previous one when precaching it fails', async () => {
       await seedControlState({ active: 'app-assets-v-current', previous: versionCacheName });
       mockFetch.mockImplementation((url: string) => {
         if (url === '/assets_list.json') {
@@ -474,7 +562,7 @@ describe('Service Worker Functions', () => {
 
       await expect(updateApp()).rejects.toThrow(/Precache failed for .+: HTTP 404/);
 
-      expect(mockCaches.delete).not.toHaveBeenCalledWith(versionCacheName);
+      expect(mockCaches.delete).toHaveBeenCalledWith(versionCacheName);
       expect(mockCaches.delete).not.toHaveBeenCalledWith('app-assets-v-current');
     });
   });
@@ -1041,8 +1129,7 @@ describe('Service Worker Functions', () => {
       const mockManifest = {
         files: ['/index.html', '/app.js'],
         app_version: {
-          build_id: 'msg-update-hash',
-          git_hash: 'msg-update-hash',
+          git_hash: 'c3d4e5f3',
           version: '1.1.0',
           build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
         }
@@ -1074,8 +1161,7 @@ describe('Service Worker Functions', () => {
       const mockManifest = {
         files: ['/index.html', '/app.js'],
         app_version: {
-          build_id: 'msg-install-hash',
-          git_hash: 'msg-install-hash',
+          git_hash: 'c3d4e5a3',
           version: '1.0.0',
           build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
         }
@@ -1122,8 +1208,7 @@ describe('Service Worker Functions', () => {
       const mockManifest = {
         files: ['/index.html', '/app.js'],
         app_version: {
-          build_id: 'msg-nosource-hash',
-          git_hash: 'msg-nosource-hash',
+          git_hash: 'c3d4e5b3',
           version: '1.1.0',
           build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
         }
@@ -1144,8 +1229,7 @@ describe('Service Worker Functions', () => {
     const manifest = {
       files: ['/index.html', '/app.js'],
       app_version: {
-        build_id: 'log-hash',
-        git_hash: 'log-hash',
+        git_hash: 'd4e5f6a4',
         version: '1.2.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
       }
@@ -1197,7 +1281,7 @@ describe('Service Worker Functions', () => {
       ]);
       expect(new Set(entries.map((entry) => entry.runId)).size).toBe(1);
       expect(entries.find((entry) => entry.step === 'manifest-loaded')!.details).toEqual(
-        expect.objectContaining({ gitHash: 'log-hash', files: 2 })
+        expect.objectContaining({ gitHash: 'd4e5f6a4', files: 2 })
       );
       expect(entries.filter((entry) => entry.step === 'progress').at(-1)!.details).toEqual(
         expect.objectContaining({ percent: 100, files: 2, total: 2, bytes: 20 })
@@ -1243,13 +1327,12 @@ describe('Service Worker Functions', () => {
     const manifest = {
       files: ['/index.html', '/app.js'],
       app_version: {
-        build_id: 'rob-hash',
-        git_hash: 'rob-hash',
+        git_hash: 'e5f6a7b5',
         version: '1.3.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
       }
     };
-    const versionCacheName = 'app-assets-v-rob-hash';
+    const versionCacheName = 'app-assets-v-e5f6a7b5';
 
     /** Serves the manifest; `onFile` answers every other request. */
     function serve(onFile: (url: string, init?: RequestInit) => unknown): void {
@@ -1343,6 +1426,20 @@ describe('Service Worker Functions', () => {
       expect(countCalls('/app.js')).toBe(1);
     });
 
+    it('should not retry a storage quota error and report it', async () => {
+      serve(okResponse);
+      const target = (await mockCaches.open(versionCacheName))!;
+      target.put.mockImplementation(async (path: string) => {
+        if (path === '/app.js') {
+          throw new DOMException('quota', 'QuotaExceededError');
+        }
+      });
+
+      await expect(installApp()).rejects.toThrow('Precache failed for /app.js: storage quota exceeded');
+
+      expect(countCalls('/app.js')).toBe(1);
+    });
+
     it('should download at most 5 files at the same time', async () => {
       const files = ['/index.html', ...Array.from({ length: 11 }, (_, i) => `/chunk-${i}.js`)];
       let inFlight = 0;
@@ -1383,7 +1480,7 @@ describe('Service Worker Functions', () => {
       expect(versionCachePuts()).toContain('/app_version');
     });
 
-    it('should not reuse the files of a complete cache (an /app_version marker is present)', async () => {
+    it('should not download nor write anything into a complete cache (an /app_version marker is present)', async () => {
       const complete = (await mockCaches.open(versionCacheName))!;
       complete.match.mockImplementation(async (key: string) => (key === '/app_version' ? {} : undefined));
       complete.keys.mockResolvedValue([{ url: 'https://example.com/index.html' }]);
@@ -1391,7 +1488,61 @@ describe('Service Worker Functions', () => {
 
       await installApp();
 
-      expect(countCalls('/index.html')).toBe(1);
+      expect(countCalls('/index.html')).toBe(0);
+      expect(countCalls('/app.js')).toBe(0);
+      expect(complete.put).not.toHaveBeenCalled();
+    });
+
+    describe('across service worker instances (Web Locks)', () => {
+      /** Makes a mock cache keep what is written to it, like a real Cache. */
+      function makeStateful(cache: MockCacheInstance): void {
+        const entries = new Map<string, { text: () => Promise<string> }>();
+        cache.put.mockImplementation(async (key: string, value: { text: () => Promise<string> }) => {
+          entries.set(key, value);
+        });
+        cache.match.mockImplementation(async (key: string) => {
+          const stored = entries.get(key);
+          return stored && { json: async () => JSON.parse(await stored.text()) };
+        });
+      }
+
+      /** Grants the lock to one callback at a time, in request order, like `navigator.locks`. */
+      function installSerializingLocks(): ReturnType<typeof vi.fn> {
+        let tail: Promise<unknown> = Promise.resolve();
+        const request = vi.fn((_name: string, callback: () => Promise<unknown>) => {
+          const result = tail.then(callback);
+          tail = result.catch(() => undefined);
+          return result;
+        });
+        Object.assign(mockSelf, { navigator: { locks: { request } } });
+        return request;
+      }
+
+      afterEach(() => {
+        delete (mockSelf as { navigator?: unknown }).navigator;
+      });
+
+      it('should run the whole install under the precache lock', async () => {
+        const request = installSerializingLocks();
+        serve(okResponse);
+
+        await installApp();
+
+        expect(request).toHaveBeenCalledWith('app-assets-precache', expect.any(Function));
+      });
+
+      it('should write each file once when two instances update to the same version at the same time', async () => {
+        installSerializingLocks();
+        makeStateful((await mockCaches.open(CONTROL_CACHE_NAME))!);
+        makeStateful((await mockCaches.open(versionCacheName))!);
+        serve(okResponse);
+
+        const results = await Promise.all([installApp(), installApp()]);
+
+        expect(results).toEqual([manifest, manifest]);
+        expect(countCalls('/app.js')).toBe(1);
+        expect(versionCachePuts().filter((path) => path === '/app.js')).toHaveLength(1);
+      });
     });
   });
 
@@ -1399,8 +1550,7 @@ describe('Service Worker Functions', () => {
     const manifest = {
       files: ['/index.html'],
       app_version: {
-        build_id: 'life-hash',
-        git_hash: 'life-hash',
+        git_hash: 'f6a7b8c6',
         version: '1.4.0',
         build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
       }

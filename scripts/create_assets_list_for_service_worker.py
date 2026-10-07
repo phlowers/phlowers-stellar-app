@@ -5,6 +5,7 @@ The JSON file is used to create the asset list for the service worker to precach
 """
 
 import os
+import re
 import sys
 import json
 import hashlib
@@ -88,15 +89,15 @@ def main():
     target_dir = "dist"
 
     # version.json is written by set-env-variables.py, the single source of the build
-    # identity (build_id, build time): never generate a second one here.
+    # identity (git_hash, build time): never generate a second one here.
     version_file = os.path.join(target_dir, "version.json")
     if not os.path.exists(version_file):
         print(f"Error: {version_file} is missing. Run set-env-variables.py first.")
         sys.exit(1)
     with open(version_file, "r") as f:
         app_version = json.load(f)
-    if not app_version.get("build_id"):
-        print(f"Error: {version_file} has no build_id.")
+    if not re.match(r"^[0-9a-f]{7,40}$", app_version.get("git_hash") or ""):
+        print(f"Error: {version_file} has no valid git_hash.")
         sys.exit(1)
 
     print(f"Listing all files in '{target_dir}':")

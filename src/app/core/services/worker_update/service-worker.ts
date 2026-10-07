@@ -3,6 +3,7 @@ import type {
   AppVersion,
   AssetManifest,
   CacheControlState,
+  PrecacheResult,
   ServiceWorkerStatus,
   ServiceWorkerStatusMessage,
   UpdateLogEntry,
@@ -37,6 +38,10 @@ const MAX_FILE_ATTEMPTS = 4;
 const RETRY_BASE_DELAY_MS = 1000;
 /** Angular hashed output names (`chunk-4JLWSDW7.js`): the hash is content-based, so a file with that name is the same in any version. */
 const HASHED_ASSET_PATTERN = /-[A-Z0-9]{8}\.(?:js|css)$/;
+/** Web Lock held for a whole install/update: `activeRun` only covers one SW instance, not an old and a new one. */
+const PRECACHE_LOCK_NAME = 'app-assets-precache';
+/** Commit SHA identifying a version; mirrors `GIT_HASH_PATTERN` of the build scripts (the SW cannot import shared code). */
+const GIT_HASH_PATTERN = /^[0-9a-f]{7,40}$/;
 
 /** The single install/update run in progress; concurrent requests join it. */
 let activeRun: ActiveRun | null = null;
@@ -155,17 +160,38 @@ function fetchWithTimeout(
 }
 
 /**
- * Fetches the latest asset manifest (`assets_list.json`) from the server.
- * @returns A `Response` promise for the manifest file.
+ * Fetches and parses the latest asset manifest (`assets_list.json`). Headers and body are bounded
+ * by `NAVIGATE_TIMEOUT_MS`: a hanging manifest would otherwise freeze the run at 0% while the SW
+ * still answers keepalives. A redirect (expired OIDC session) is reported, never followed.
  */
-function fetchLatestManifest() {
-  return fetch('/assets_list.json', {
-    cache: 'no-store',
-    headers: {
-      'cache-control': 'no-cache',
-      pragma: 'no-cache'
+async function fetchLatestManifest(): Promise<AssetManifest> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NAVIGATE_TIMEOUT_MS);
+  try {
+    const response = await fetch('/assets_list.json', {
+      cache: 'no-store',
+      redirect: 'manual',
+      signal: controller.signal,
+      headers: {
+        'cache-control': 'no-cache',
+        pragma: 'no-cache'
+      }
+    });
+    if (isRedirectResponse(response) || response.status === 401 || response.status === 403) {
+      throw new Error(`Manifest fetch failed: authentication required (HTTP ${response.status})`);
     }
-  });
+    if (!response.ok) {
+      throw new Error(`Manifest fetch failed with status ${response.status}`);
+    }
+    return (await response.json()) as AssetManifest;
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error(`Manifest fetch timed out after ${NAVIGATE_TIMEOUT_MS / 1000}s`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /**
@@ -286,6 +312,9 @@ async function fetchAndStoreFile(cache: Cache, assetPath: string, parentSignal: 
         `Precache timed out for ${assetPath}: no data received for ${FILE_STALL_TIMEOUT_MS / 1000}s`,
         false
       );
+    }
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      throw new PrecacheFileError(`Precache failed for ${assetPath}: storage quota exceeded`, false);
     }
     throw error;
   } finally {
@@ -416,24 +445,49 @@ async function cacheFiles(cache: Cache, files: string[], log: UpdateLogger): Pro
  * @returns The installed asset manifest.
  */
 export async function installApp(log: UpdateLogger = createUpdateLogger()) {
+  return withPrecacheLock(log, () => installLatestManifest(log));
+}
+
+/**
+ * Runs `task` while holding `PRECACHE_LOCK_NAME`, so two SW instances never write into the same
+ * cache nor delete a cache another one is filling. Runs unlocked where Web Locks are unavailable.
+ */
+async function withPrecacheLock<T>(log: UpdateLogger, task: () => Promise<T>): Promise<T> {
+  const locks = (self as unknown as ServiceWorkerGlobalScope).navigator?.locks;
+  if (!locks) {
+    return task();
+  }
+  const waitStartedAt = Date.now();
+  return locks.request(PRECACHE_LOCK_NAME, () => {
+    log.info('lock-acquired', { waitedMs: Date.now() - waitStartedAt });
+    return task();
+  });
+}
+
+async function installLatestManifest(log: UpdateLogger): Promise<AssetManifest> {
   const manifestStartedAt = Date.now();
   log.info('manifest-fetch-start');
-  const response = await fetchLatestManifest();
-  if (!response.ok) {
-    log.error('manifest-failed', { status: response.status, durationMs: Date.now() - manifestStartedAt });
-    throw new Error(`Manifest fetch failed with status ${response.status}`);
+  let manifest: AssetManifest;
+  try {
+    manifest = await fetchLatestManifest();
+  } catch (error) {
+    log.error('manifest-failed', {
+      error: error instanceof Error ? error.message : String(error),
+      durationMs: Date.now() - manifestStartedAt
+    });
+    throw error;
   }
-  const manifest: AssetManifest = await response.json();
   log.info('manifest-loaded', {
     version: manifest.app_version?.version,
-    buildId: manifest.app_version?.build_id,
     gitHash: manifest.app_version?.git_hash,
     buildTime: manifest.app_version?.build_datetime_utc,
     files: manifest.files?.length ?? 0,
     durationMs: Date.now() - manifestStartedAt
   });
-  const cacheName = await precacheVersion(manifest, log);
-  await activateVersion(cacheName, log);
+  const { cacheName, alreadyActive } = await precacheVersion(manifest, log);
+  if (!alreadyActive) {
+    await activateVersion(cacheName, log);
+  }
   return manifest;
 }
 
@@ -462,9 +516,9 @@ const NO_CACHE_INIT: RequestInit = {
   }
 };
 
-/** Deterministic cache name for one build; `git_hash` is display-only and may collide between builds. */
+/** Deterministic cache name for one version: rebuilding the same commit reuses the same cache. */
 function cacheNameForVersion(appVersion: AppVersion): string {
-  return `app-assets-v-${appVersion.build_id}`;
+  return `app-assets-v-${appVersion.git_hash}`;
 }
 
 /** Reads the activation pointer, or `null` if none has ever been written. */
@@ -490,33 +544,57 @@ async function writeControlState(state: CacheControlState): Promise<void> {
   );
 }
 
+/** True when `cacheName` exists and holds the `/app_version` marker, written only once every file is stored. */
+async function isCompleteVersionCache(cacheName: string): Promise<boolean> {
+  if (!(await caches.has(cacheName))) {
+    return false;
+  }
+  return (await (await caches.open(cacheName)).match(APP_VERSION_CACHE_KEY)) !== undefined;
+}
+
 /**
  * Downloads and fully precaches one application version into its own
  * immutable, uniquely named cache. Does NOT activate it — the caller
  * decides when (and if) to switch the active pointer via
- * `activateVersion()`. A manifest with no files, no `build_id` or missing
- * `/index.html` is refused outright, as is a target cache named like the active
- * one (it would be overwritten in place). A partially precached version (a file
- * failed) is deleted so it never lingers half-written — except the active and
- * previous caches, which are never deleted.
+ * `activateVersion()`. A manifest with no files, no valid `git_hash` or missing
+ * `/index.html` is refused outright. A cache that is already complete is never
+ * written again: it is reused as is (or reported already active). An incomplete
+ * active cache is refused, and an incomplete previous cache is rebuilt from scratch.
+ * A partially precached version (a file failed) is deleted so it never lingers
+ * half-written.
  */
-async function precacheVersion(manifest: AssetManifest, log: UpdateLogger): Promise<string> {
-  const files = manifest.files || [];
+async function precacheVersion(manifest: AssetManifest, log: UpdateLogger): Promise<PrecacheResult> {
+  const files = [...new Set(manifest.files || [])];
   if (files.length === 0 || !files.includes('/index.html')) {
     log.error('manifest-invalid', { files: files.length });
     throw new Error(
       'Application manifest is empty or missing /index.html — refusing to precache an incomplete version'
     );
   }
-  if (!manifest.app_version?.build_id) {
-    log.error('manifest-invalid', { reason: 'missing build_id' });
-    throw new Error('Application manifest has no build_id — refusing to precache an unidentifiable version');
+  if (!GIT_HASH_PATTERN.test(manifest.app_version?.git_hash ?? '')) {
+    log.error('manifest-invalid', { reason: 'invalid git_hash', gitHash: manifest.app_version?.git_hash });
+    throw new Error('Application manifest has no valid git_hash — refusing to precache an unidentifiable version');
   }
   const cacheName = cacheNameForVersion(manifest.app_version);
   const control = await readControlState();
+  const complete = await isCompleteVersionCache(cacheName);
   if (control?.active === cacheName) {
+    if (complete) {
+      // Typically installed by another tab or SW instance while this page still ran the old code.
+      log.info('already-active', { cacheName });
+      return { cacheName, alreadyActive: true };
+    }
     log.error('precache-refused-active', { cacheName });
     throw new Error(`Refusing to precache into the active cache ${cacheName}`);
+  }
+  if (complete) {
+    log.info('precache-skipped-complete', { cacheName });
+    return { cacheName, alreadyActive: false };
+  }
+  if (cacheName === control?.previous && (await caches.has(cacheName))) {
+    // A previous version is always complete once activated: a missing marker means it is corrupted.
+    log.warn('previous-incomplete-rebuilt', { cacheName });
+    await caches.delete(cacheName);
   }
   const cache = await caches.open(cacheName);
   const startedAt = Date.now();
@@ -530,15 +608,12 @@ async function precacheVersion(manifest: AssetManifest, log: UpdateLogger): Prom
       })
     );
   } catch (error) {
-    const cacheDeleted = cacheName !== control?.previous;
-    if (cacheDeleted) {
-      await caches.delete(cacheName);
-    }
-    log.error('precache-failed', { cacheName, cacheDeleted, durationMs: Date.now() - startedAt });
+    await caches.delete(cacheName);
+    log.error('precache-failed', { cacheName, durationMs: Date.now() - startedAt });
     throw error;
   }
   log.info('precache-done', { cacheName, files: files.length, durationMs: Date.now() - startedAt });
-  return cacheName;
+  return { cacheName, alreadyActive: false };
 }
 
 /**

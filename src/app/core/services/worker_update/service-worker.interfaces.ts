@@ -1,8 +1,7 @@
 export interface AppVersion {
-  /** Unique per build: the only identity used to compare versions and name caches. */
-  build_id: string;
-  /** Display only: two distinct builds can share it (or have `unknown`). */
+  /** Commit SHA: the only identity used to compare versions and name caches (same commit => no update). */
   git_hash: string;
+  /** Display only: differs between two builds of the same commit. */
   build_datetime_utc: string;
   version: string;
 }
@@ -35,6 +34,12 @@ export interface UpdateLogger {
 export interface CacheControlState {
   active: string;
   previous: string | null;
+}
+
+/** Outcome of `precacheVersion`: `alreadyActive` means there is nothing to download nor activate. */
+export interface PrecacheResult {
+  cacheName: string;
+  alreadyActive: boolean;
 }
 
 export type UpdateRunType = 'update' | 'install';

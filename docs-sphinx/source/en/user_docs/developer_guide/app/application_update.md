@@ -23,7 +23,7 @@ downloads or caches them. Only their SHA-256 hashes are listed, under
 
 ### How Updates Work
 
-1. When a user navigates to the application, `UpdateService` fetches `/assets_list.json` and compares the `build_id` of the running build (baked into the JS at build time) with the `build_id` of the server manifest. `git_hash` and the build timestamp are display-only: two builds can share them (or have `unknown` as hash), only `build_id` identifies a build.
+1. When a user navigates to the application, `UpdateService` fetches `/assets_list.json` and compares the `git_hash` (commit SHA) of the running build (baked into the JS at build time) with the `git_hash` of the server manifest. The build timestamp and `version` are display-only: rebuilding and redeploying the same commit (e.g. the daily dev deployment) does not trigger an update. A server manifest without a valid `git_hash` is ignored (no popup).
 
 2. If the two differ, the application shows the update popup (`pendingAction === 'update-available'`).
 
@@ -58,13 +58,13 @@ not match.
 Application versions are activated atomically to avoid any offline window with a
 partially-populated cache:
 
-- Each version is cached under its own `app-assets-v-<build_id>` name; a small control
+- Each version is cached under its own `app-assets-v-<git_hash>` name; a small control
   cache (`app-assets-control`) stores the pointer to the currently `active`
   cache and keeps the `previous` one for rollback.
 - A candidate version is only fully prepared (including a check that
   `/index.html` and every manifest asset are present) **before** the control
   pointer is switched — a single write, done only on full success.
-- A download into the cache that is currently active is refused (`Refusing to precache into the active cache`), and a manifest without `build_id` is refused too.
+- A cache is never written twice: a single install/update runs at a time, including across two Service Worker instances (Web Lock `app-assets-precache`); an already complete cache (`/app_version` marker) is reused without any download, or reported as already active; a file listed twice in the manifest is downloaded once. A download into an incomplete active cache is refused (`Refusing to precache into the active cache`), and a manifest without a valid `git_hash` is refused too. An incomplete `previous` cache is deleted and rebuilt, never completed in place.
 - On failure before activation, only the incomplete candidate is discarded; the
   active version keeps serving the app unaffected.
 - Fetch handling resolves a single, consistent version per request (active, or
@@ -77,11 +77,14 @@ partially-populated cache:
 
 - One install/update at a time: a request received during a run joins it. Every handler is
   passed to `event.waitUntil()` so the browser does not stop the service worker mid-download.
+- The manifest (`/assets_list.json`) is fetched without following redirects and must answer
+  within 13 s (headers and body); otherwise the update fails at once instead of staying at 0 %.
 - 5 files are downloaded in parallel. A file fails when **no byte** (headers or body) arrives for
   30 s; a stalled file is not retried and the error names it.
 - Network errors and 5xx are retried 3 times (1 s, 2 s, 4 s). 401, 403, redirects (expired OIDC
   session) and other 4xx are never retried: the error contains "authentication required" and the
-  page asks the user to sign in again.
+  page asks the user to sign in again. A full storage quota (`QuotaExceededError`) is not retried
+  either.
 - Resume: a cache without the `/app_version` marker is a partial earlier attempt (e.g. the service
   worker was stopped); the files it already holds are not downloaded again.
 
@@ -98,8 +101,11 @@ While an update runs, `UpdateService`:
   service worker reports its own error first). It then logs the error and shows "Update interrupted".
   The dialog shows its "Later" / "Update now" buttons again: it can be closed, or the update retried
   (the partial cache is resumed).
+- Also leaves the loading state when the service worker keeps answering but no file is cached for
+  180 s (`UPDATE_NO_PROGRESS_TIMEOUT_MS`, above the worst case of one file: 4 attempts x 30 s +
+  retry delays). Keepalive answers restart the 45 s countdown, not this one.
 - Gives up after 10 s when `navigator.serviceWorker.ready` never settles
-  (`UPDATE_SW_READY_TIMEOUT_MS`).
+  (`UPDATE_SW_READY_TIMEOUT_MS`), for an update as well as for the automatic first install.
 - Notifies the user when the "Update now" button of the popup could not start the update
   (`AppComponent.onConfirmUpdate()`).
 
@@ -111,12 +117,12 @@ are only sent to the page that asked for them.
 
 ### Build identity
 
-`scripts/set-env-variables.py` is the only generator of the build identity: a unique `build_id`
-(uuid4), the UTC build time and the `git_hash`. It injects them into the JS and writes
-`dist/version.json`; `create_assets_list_for_service_worker.py` copies that file into
-`assets_list.json`. The build fails when the git hash is `unknown`: provide a git repository or
-`CI_COMMIT_SHA` (the `Dockerfile` has `ARG CI_COMMIT_SHA`; the CI must pass
-`--build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA`).
+`scripts/set-env-variables.py` is the only generator of the build identity: the `git_hash`
+(commit SHA, the version identity) and the UTC build time (display only). It injects them into the
+JS and writes `dist/version.json`; `create_assets_list_for_service_worker.py` copies that file into
+`assets_list.json`. The build fails when the git hash is not a commit SHA (`unknown`, empty...):
+the build pipeline must provide `CI_COMMIT_SHA` with the built commit SHA, or build from a git
+checkout.
 
 ### Logs
 
@@ -152,13 +158,14 @@ curl -X POST "localhost:4310/__e2e/scenario?v=v2"
 ```
 
 Scenarios: `v1`, `v2`, `v3`, `v2-broken` (one asset 404s), `v2-badhash` (wrong catalog hash),
-`v2-samehash` (same `git_hash` and `version` as `v1`, different `build_id`), `v2-slow` (300 ms per
+`v1-rebuild` (same commit as `v1` rebuilt: same `git_hash`, new build date), `v2-slow` (300 ms per
 file) and `v2-big` (30 MB file). Fault injection (`/__e2e/faults`, query string):
 
 | Parameter | Effect |
 |---|---|
 | `latencyMs=N` | delay every app file by N ms |
 | `stall=/path` | the file never answers (connection left open) |
+| `stallManifest=true` | `/assets_list.json` never answers |
 | `fail=/path&status=502&count=2` | the next `count` requests of the file fail with `status` |
 | `redirectAfter=N` | answer 302 to `/auth/login` once more than N app files were requested |
 | `reset=true` | remove every fault and clear the request log |
@@ -172,7 +179,8 @@ Automated tests (run `npm run build` first, the service worker is recompiled):
 
 - `npm run e2e:update` — the update flow (first install, popup, rollback, catalogs, offline).
 - `npm run e2e:update-faults` — the failures: service worker stopped mid-download, stalled file,
-  transient 502, same `git_hash` and `version`, other tab reloaded, resume after a retry.
+  transient 502, rebuild of the same commit (no popup), manifest that never answers, other tab
+  reloaded, resume after a retry.
 
 ### Asset List Generation
 
@@ -203,8 +211,7 @@ This command runs the Python script that:
 2. Creates a list of all files (excluding blacklisted items like the service worker itself)
 3. Includes Python packages from `public/pyodide/` (managed by `set_up_mechaphlowers.py`)
 4. Generates version information, read from `dist/version.json` (written by `set-env-variables.py`), including:
-   - The unique `build_id`
-   - Git commit hash (display only)
+   - Git commit hash (`git_hash`, the version identity)
    - Build timestamp
    - Application version from package.json
 5. Writes the complete asset list to `assets_list.json`

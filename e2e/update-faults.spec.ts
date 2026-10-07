@@ -108,16 +108,39 @@ test.describe('update hangs reproduction', () => {
     await expect.poll(async () => (await readSnapshot(page)).appVersion, { timeout: 30_000 }).toBe('2.0.0-e2e');
   });
 
-  test('RC3: detects a new build that has the same git_hash and version', async ({ page, request }) => {
+  test('RC3: a rebuild of the same commit (same git_hash, new build date) does not open the update dialog', async ({
+    page,
+    request
+  }) => {
     await setScenario(request, 'v1');
     await setAuthenticated(request, true);
     await page.goto('/');
     await waitForFirstInstall(page, '1.0.0-e2e', 'E2E_CABLE_V1');
 
-    await setScenario(request, 'v2-samehash');
+    await setScenario(request, 'v1-rebuild');
     await page.reload();
 
+    // The startup check is in the background: give it time to (wrongly) open the dialog.
+    await page.waitForTimeout(5_000);
+    await expect(page.getByRole('dialog')).toBeHidden();
+    expect((await readSnapshot(page)).versionedCacheNames).toHaveLength(1);
+  });
+
+  test('RC7: a manifest that never answers ends the update within the manifest timeout', async ({ page, request }) => {
+    await setScenario(request, 'v1');
+    await setAuthenticated(request, true);
+    await page.goto('/');
+    await waitForFirstInstall(page, '1.0.0-e2e', 'E2E_CABLE_V1');
+
+    await setScenario(request, 'v2');
+    await page.reload();
     await expect(page.getByRole('dialog')).toBeVisible();
+    await setFaults(request, { stallManifest: 'true' });
+    await page.getByTestId('update-now-btn').click();
+    await expect(page.getByTestId('update-now-btn')).toBeHidden();
+
+    await expectDialogRecovered(page, 30_000);
+    expect((await readSnapshot(page)).appVersion).toBe('1.0.0-e2e');
   });
 
   test('RC6: another open tab is reloaded once the update is applied', async ({ page, request, context }) => {

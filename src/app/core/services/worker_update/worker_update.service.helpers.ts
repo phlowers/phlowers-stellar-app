@@ -1,4 +1,10 @@
 import type { UpdateLogEntry, UpdateRunProgress } from './service-worker.interfaces';
+import { GIT_HASH_PATTERN } from './worker_update.service.constantes';
+
+/** True when `value` is a commit SHA usable as a version identity. */
+export function isValidGitHash(value: unknown): boolean {
+  return typeof value === 'string' && GIT_HASH_PATTERN.test(value);
+}
 
 /** Formats a SW log entry exactly like the SW console line: `[UPDATE <runId>] <step> +<ms>ms`. */
 export function formatSwLogLine(entry: UpdateLogEntry): string {

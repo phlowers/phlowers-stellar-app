@@ -4,9 +4,9 @@
 import datetime
 import json
 import os
+import re
 import subprocess
 import sys
-import uuid
 
 # Read package.json file
 with open("package.json", "r") as file:
@@ -15,8 +15,10 @@ with open("package.json", "r") as file:
 
 # This script is the single source of the build identity: the JS placeholders and
 # dist/version.json (read back by create_assets_list_for_service_worker.py) share it.
+# git_hash identifies the version: rebuilding the same commit must not trigger an app update.
 build_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
-build_id = uuid.uuid4().hex
+
+GIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,40}$")
 
 
 def get_git_revision_hash() -> str:
@@ -35,8 +37,8 @@ def get_git_revision_hash() -> str:
 
 
 git_hash = get_git_revision_hash()
-if git_hash == "unknown":
-    print("Error: git hash is unknown. Set CI_COMMIT_SHA (e.g. --build-arg CI_COMMIT_SHA=...).")
+if not GIT_HASH_PATTERN.match(git_hash):
+    print(f"Error: invalid git hash '{git_hash}'. Set CI_COMMIT_SHA to the built commit SHA or build from a git checkout.")
     sys.exit(1)
 
 env_variables = [
@@ -57,14 +59,12 @@ def replace_in_file(file_path):
             for placeholder in [
                 "{BUILD_VERSION}",
                 "{BUILD_TIME}",
-                "{BUILD_ID}",
                 "{GIT_HASH}",
                 *env_variables,
             ]
         ):
             content = content.replace("{BUILD_VERSION}", version)
             content = content.replace("{BUILD_TIME}", build_time)
-            content = content.replace("{BUILD_ID}", build_id)
             content = content.replace("{GIT_HASH}", git_hash)
             for env_variable in env_variables:
                 variable_key = env_variable.replace("{", "").replace("}", "")
@@ -93,7 +93,6 @@ if os.path.exists("dist"):
     with open(os.path.join("dist", "version.json"), "w") as file:
         json.dump(
             {
-                "build_id": build_id,
                 "git_hash": git_hash,
                 "build_datetime_utc": build_time,
                 "version": version,

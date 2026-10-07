@@ -2,6 +2,7 @@ import {
   computeUpdateProgressPercent,
   formatSwLogLine,
   isTimeoutError,
+  isValidGitHash,
   withTimeout
 } from './worker_update.service.helpers';
 
@@ -42,6 +43,19 @@ describe('worker_update.service.helpers', () => {
 
       await assertion;
     });
+  });
+
+  describe('isValidGitHash', () => {
+    it.each(['abc1234', 'a'.repeat(40)])('should accept the commit SHA %s', (hash) => {
+      expect(isValidGitHash(hash)).toBe(true);
+    });
+
+    it.each([undefined, null, '', 'unknown', '{GIT_HASH}', 'abc123', 'ABC1234', 'a'.repeat(41)])(
+      'should reject %s',
+      (hash) => {
+        expect(isValidGitHash(hash)).toBe(false);
+      }
+    );
   });
 
   describe('computeUpdateProgressPercent', () => {

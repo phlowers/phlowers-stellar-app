@@ -8,6 +8,7 @@ import { AuthService } from '@services/auth/auth.service';
 import { LoggerService } from '@services/logger/logger.service';
 import {
   UPDATE_KEEPALIVE_INTERVAL_MS,
+  UPDATE_NO_PROGRESS_TIMEOUT_MS,
   UPDATE_PAGE_LOG_PREFIX,
   UPDATE_SW_READY_TIMEOUT_MS,
   UPDATE_WATCHDOG_TIMEOUT_MS
@@ -16,6 +17,7 @@ import {
   computeUpdateProgressPercent,
   formatSwLogLine,
   isTimeoutError,
+  isValidGitHash,
   withTimeout
 } from './worker_update.service.helpers';
 
@@ -84,8 +86,7 @@ export class UpdateService {
   currentVersion = signal<AppVersion>({
     version: environment.version,
     build_datetime_utc: environment.buildTime,
-    git_hash: environment.gitHash,
-    build_id: environment.buildId
+    git_hash: environment.gitHash
   });
   /** Signal containing the latest available application version, or null if unknown */
   latestVersion = signal<AssetManifest['app_version'] | null>(null);
@@ -123,6 +124,8 @@ export class UpdateService {
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
   private keepaliveTimer: ReturnType<typeof setInterval> | null = null;
   private watchdogTimer: ReturnType<typeof setTimeout> | null = null;
+  private noProgressTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastFilesDone = -1;
 
   constructor() {
     if (!UpdateService.hasServiceWorker) {
@@ -231,6 +234,13 @@ export class UpdateService {
   async getLatestVersion(): Promise<AppVersion | null> {
     const data = await this.getLatestAssetList();
     if (!data) {
+      return null;
+    }
+    if (!isValidGitHash(data.app_version?.git_hash)) {
+      // The SW would refuse this manifest: proposing it would loop on failing updates.
+      this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} server manifest has no valid git_hash`, {
+        gitHash: data.app_version?.git_hash
+      });
       return null;
     }
     return data.app_version;
@@ -536,6 +546,7 @@ export class UpdateService {
     this.stopMonitoring();
     this.keepaliveTimer = setInterval(() => worker.postMessage({ type: 'keepalive' }), UPDATE_KEEPALIVE_INTERVAL_MS);
     this.armWatchdog();
+    this.armNoProgressTimer();
   }
 
   private stopMonitoring(): void {
@@ -547,6 +558,22 @@ export class UpdateService {
       clearTimeout(this.watchdogTimer);
       this.watchdogTimer = null;
     }
+    if (this.noProgressTimer !== null) {
+      clearTimeout(this.noProgressTimer);
+      this.noProgressTimer = null;
+    }
+    this.lastFilesDone = -1;
+  }
+
+  /** Unlike the watchdog, only a newly cached file restarts this countdown (keepalive answers do not). */
+  private armNoProgressTimer(): void {
+    if (this.noProgressTimer !== null) {
+      clearTimeout(this.noProgressTimer);
+    }
+    this.noProgressTimer = setTimeout(
+      () => this.failUpdate(`no file cached for ${UPDATE_NO_PROGRESS_TIMEOUT_MS / 1000}s`),
+      UPDATE_NO_PROGRESS_TIMEOUT_MS
+    );
   }
 
   private armWatchdog(): void {
@@ -567,6 +594,10 @@ export class UpdateService {
     if (!run) {
       this.failUpdate('the service worker has no update in progress (it was stopped)');
       return;
+    }
+    if (run.filesDone !== this.lastFilesDone) {
+      this.lastFilesDone = run.filesDone;
+      this.armNoProgressTimer();
     }
     this.updateProgress.set(computeUpdateProgressPercent(run));
   }
@@ -605,6 +636,6 @@ export class UpdateService {
   }
 
   private areVersionsEqual(a: AppVersion, b: AppVersion): boolean {
-    return a.build_id === b.build_id;
+    return a.git_hash === b.git_hash;
   }
 }

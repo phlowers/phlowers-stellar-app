@@ -22,6 +22,8 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { UpdateService } from '@services/worker_update/worker_update.service';
+import { withTimeout } from '@services/worker_update/worker_update.service.helpers';
+import { UPDATE_SW_READY_TIMEOUT_MS } from '@services/worker_update/worker_update.service.constantes';
 import { AuthService } from '@services/auth/auth.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogUpdateService } from '@shared/catalog/services/catalog-update.service';
@@ -174,7 +176,7 @@ export class AppComponent implements OnInit {
 
   private async waitForServiceWorkerReady(): Promise<boolean> {
     try {
-      await navigator.serviceWorker.ready;
+      await withTimeout(navigator.serviceWorker.ready, UPDATE_SW_READY_TIMEOUT_MS, 'service worker ready');
       return true;
     } catch (err) {
       this.logger.error('Service Worker never became ready for first-install', err);
