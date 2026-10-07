@@ -227,6 +227,14 @@ describe('createConformityPlot', () => {
       expect(disk.y1).toBe(50); // 49 + radius(1)
     });
 
+    it('should make cable-track disk fills fully opaque', () => {
+      createConformityPlot(mockDocument, mockResponse, { ...cableTrackOptions, selectedRuleTypes: ['RULE_1'] });
+
+      const layout = (Plotly.react as Mock).mock.calls[0][2] as Partial<Layout>;
+      const disk = layout.shapes?.[0] as { fillcolor: string };
+      expect(disk.fillcolor).toBe('rgba(1, 122, 163, 1)');
+    });
+
     it('should color disk centers with the shared cable point color, not the rule color', () => {
       createConformityPlot(mockDocument, mockResponse, { ...cableTrackOptions, selectedRuleTypes: ['RULE_2'] });
 
