@@ -26,7 +26,15 @@ describe('toEngineCutStrands', () => {
 
   it('gives 0 on every catalog layer for an entry without cut strands', () => {
     const entry = { ...makeEntry([]), cutStrands: undefined } as unknown as RrtsCutStrandsData;
-    expect(toEngineCutStrands(entry)).toBe(NO_CUT_STRANDS);
+    expect(toEngineCutStrands(entry)).toEqual(NO_CUT_STRANDS);
+  });
+
+  it.each([
+    ['fills the missing layers with 0', [2, 1], [2, 1, 0, 0, 0, 0, 0, 0]],
+    ['gives 0 on every layer for an empty list', [], [0, 0, 0, 0, 0, 0, 0, 0]],
+    ['drops the layers beyond the catalog ones', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 2, 3, 4, 5, 6, 7, 8]]
+  ])('normalizes a saved list of another length: %s', (_, saved, expected) => {
+    expect(toEngineCutStrands(makeEntry(saved))).toEqual(expected);
   });
 });
 

@@ -21,9 +21,10 @@ export const STRAND_LAYER_KEYS = [
 // Engine input without cut strand on any catalog layer
 export const NO_CUT_STRANDS = STRAND_LAYER_KEYS.map(() => 0);
 
-// The engine takes one value per catalog layer: nothing is cut without saved entry, or on an entry without values
+// The engine takes one value per catalog layer: nothing is cut without saved entry, or on an entry without values.
+// A legacy or imported entry can hold another count of layers: missing ones are not cut, extra ones are dropped
 export const toEngineCutStrands = (entry: RrtsCutStrandsData | null | undefined): number[] =>
-  entry?.cutStrands ?? NO_CUT_STRANDS;
+  STRAND_LAYER_KEYS.map((_, index) => entry?.cutStrands?.[index] ?? 0);
 
 // Cut strands can be 0 on every layer: nothing is cut then
 export const hasCutStrand = (cutStrands: number[]): boolean => cutStrands.some((count) => count > 0);
