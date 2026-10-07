@@ -624,6 +624,15 @@ async function precacheVersion(manifest: AssetManifest, log: UpdateLogger): Prom
     log.warn('previous-incomplete-rebuilt', { cacheName });
     await caches.delete(cacheName);
   }
+  if (complete) {
+    log.info('precache-skipped-complete', { cacheName });
+    return { cacheName, alreadyActive: false };
+  }
+  if (cacheName === control?.previous && (await caches.has(cacheName))) {
+    // A previous version is always complete once activated: a missing marker means it is corrupted.
+    log.warn('previous-incomplete-rebuilt', { cacheName });
+    await caches.delete(cacheName);
+  }
   const cache = await caches.open(cacheName);
   const startedAt = Date.now();
   log.info('precache-start', { cacheName, files: files.length });

@@ -487,6 +487,43 @@ describe('Service Worker Functions', () => {
       }
     });
 
+    it('should fetch the manifest without following redirects and with a bounded signal', async () => {
+      await updateApp();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/assets_list.json',
+        expect.objectContaining({ redirect: 'manual', signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it.each([
+      ['redirect to login', { ok: false, status: 0, type: 'opaqueredirect' }],
+      ['401', { ok: false, status: 401 }]
+    ])('should report an authentication error when the manifest answers a %s', async (_label, response) => {
+      mockFetch.mockResolvedValue(response);
+
+      await expect(updateApp()).rejects.toThrow(/Manifest fetch failed: authentication required/);
+      expect(mockCaches.open).not.toHaveBeenCalled();
+    });
+
+    it('should fail within the timeout when the manifest never answers', async () => {
+      vi.useFakeTimers();
+      try {
+        mockFetch.mockImplementation(
+          (_url: string, init: RequestInit) =>
+            new Promise((_resolve, reject) =>
+              init.signal!.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+            )
+        );
+
+        const run = expect(updateApp()).rejects.toThrow('Manifest fetch timed out after 13s');
+        await vi.advanceTimersByTimeAsync(13000);
+        await run;
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('should delete the incomplete candidate cache and never touch the previously active version when a file fails to precache', async () => {
       // Simulate an already-active version to prove it is left untouched.
       await seedControlState({ active: 'app-assets-v-current', previous: null });

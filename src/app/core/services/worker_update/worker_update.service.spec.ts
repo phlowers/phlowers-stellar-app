@@ -1180,6 +1180,54 @@ describe('UpdateService', () => {
       expect(mockPostMessage).toHaveBeenCalledWith({ type: 'update' });
     });
 
+    describe('no-progress countdown', () => {
+      const progress = (filesDone: number) =>
+        messageHandler({
+          data: { message: 'progress', run: { runId: 'r1', type: 'update', filesTotal: 100, filesDone } }
+        });
+
+      it('should declare the update interrupted when the SW keeps answering but no file is cached for 180 s', async () => {
+        await startUpdate();
+        await progress(3);
+
+        for (let elapsed = 0; elapsed < 170000; elapsed += 10000) {
+          await vi.advanceTimersByTimeAsync(10000);
+          await progress(3);
+        }
+        expect(service.updateLoading()).toBe(true);
+        await vi.advanceTimersByTimeAsync(10000);
+
+        expect(service.updateLoading()).toBe(false);
+        interruptedToast();
+        expect(mockLogger.error).toHaveBeenCalledWith('[UPDATE page] update interrupted: no file cached for 180s');
+      });
+
+      it('should never interrupt a slow update that keeps caching files', async () => {
+        await startUpdate();
+
+        for (let filesDone = 1; filesDone <= 10; filesDone++) {
+          for (let tick = 0; tick < 6; tick++) {
+            await vi.advanceTimersByTimeAsync(10000);
+            await progress(filesDone);
+          }
+        }
+
+        expect(service.updateLoading()).toBe(true);
+        expect(mockMessageService.add).not.toHaveBeenCalled();
+      });
+
+      it('should stop the no-progress countdown once the SW reports the end of the update', async () => {
+        await startUpdate();
+        await progress(3);
+        await messageHandler({ data: { message: 'error', error: 'boom' } });
+        vi.mocked(mockMessageService.add).mockClear();
+
+        await vi.advanceTimersByTimeAsync(300000);
+
+        expect(mockMessageService.add).not.toHaveBeenCalled();
+      });
+    });
+
     it('should notify success without being in the loading state for an update done by another tab', async () => {
       await messageHandler({ data: { message: 'update_complete' } });
 

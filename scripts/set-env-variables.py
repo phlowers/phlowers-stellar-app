@@ -59,14 +59,12 @@ def replace_in_file(file_path):
             for placeholder in [
                 "{BUILD_VERSION}",
                 "{BUILD_TIME}",
-                "{BUILD_ID}",
                 "{GIT_HASH}",
                 *env_variables,
             ]
         ):
             content = content.replace("{BUILD_VERSION}", version)
             content = content.replace("{BUILD_TIME}", build_time)
-            content = content.replace("{BUILD_ID}", build_id)
             content = content.replace("{GIT_HASH}", git_hash)
             for env_variable in env_variables:
                 variable_key = env_variable.replace("{", "").replace("}", "")

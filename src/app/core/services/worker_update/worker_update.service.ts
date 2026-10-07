@@ -86,8 +86,7 @@ export class UpdateService {
   currentVersion = signal<AppVersion>({
     version: environment.version,
     build_datetime_utc: environment.buildTime,
-    git_hash: environment.gitHash,
-    build_id: environment.buildId
+    git_hash: environment.gitHash
   });
   /** Signal containing the latest available application version, or null if unknown */
   latestVersion = signal<AssetManifest['app_version'] | null>(null);

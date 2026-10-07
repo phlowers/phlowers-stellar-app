@@ -216,7 +216,6 @@ function currentManifest() {
 
   return {
     app_version: {
-      build_id: versionInfo.build_id,
       git_hash: versionInfo.git_hash,
       build_datetime_utc: versionInfo.build_datetime_utc,
       version: versionInfo.version
