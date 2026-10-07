@@ -13,10 +13,7 @@ export const UPDATE_SW_READY_TIMEOUT_MS = 10000;
  */
 export const UPDATE_WATCHDOG_TIMEOUT_MS = 45000;
 
-/**
- * The update is declared interrupted when the SW keeps answering but no file is cached for this long.
- * Must stay above the worst case of one file in the SW: 4 attempts x 30 s stall + 7 s of retry delays.
- */
+/** No file cached for this long => interrupted; above the SW worst case (one 30 s stall, not retried, plus 5xx retries). */
 export const UPDATE_NO_PROGRESS_TIMEOUT_MS = 180000;
 
 /** Commit SHA identifying an application version (mirrors the build scripts and the SW). */

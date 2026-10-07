@@ -33,7 +33,7 @@ downloads or caches them. Only their SHA-256 hashes are listed, under
    - Downloads the new assets into their own cache (the active version is never touched)
    - Writes `/app_version` last, which marks the cache as complete
    - Switches the activation pointer, keeps the previous version for rollback and deletes older caches
-   - Sends `update_complete` to every open tab
+   - Sends `update_complete` to every open tab (for a first install, `install_complete` is only sent to the requesting tab)
 
 ### Authorization and entry points
 
@@ -64,7 +64,7 @@ partially-populated cache:
 - A candidate version is only fully prepared (including a check that
   `/index.html` and every manifest asset are present) **before** the control
   pointer is switched — a single write, done only on full success.
-- A cache is never written twice: a single install/update runs at a time, including across two Service Worker instances (Web Lock `app-assets-precache`); an already complete cache (`/app_version` marker) is reused without any download, or reported as already active; a file listed twice in the manifest is downloaded once. A download into an incomplete active cache is refused (`Refusing to precache into the active cache`), and a manifest without a valid `git_hash` is refused too. An incomplete `previous` cache is deleted and rebuilt, never completed in place.
+- A cache is never written twice: a single install/update runs at a time, including across two Service Worker instances (Web Lock `app-assets-precache`); an already complete cache (`/app_version` marker) is reused without any download, or reported as already active; a file listed twice in the manifest is downloaded once. A download into an incomplete active cache is refused (`Refusing to precache into the active cache`), and a manifest without a valid `git_hash` is refused too. If the active cache no longer exists (deleted while `/control` still points to it), the version is reinstalled normally instead of being refused. An incomplete `previous` cache is deleted and rebuilt, never completed in place.
 - On failure before activation, only the incomplete candidate is discarded; the
   active version keeps serving the app unaffected.
 - Fetch handling resolves a single, consistent version per request (active, or

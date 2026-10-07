@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { GIT_HASH_PATTERN } from './worker_update.service.constantes';
 import {
   computeUpdateProgressPercent,
   formatSwLogLine,
@@ -56,6 +59,15 @@ describe('worker_update.service.helpers', () => {
         expect(isValidGitHash(hash)).toBe(false);
       }
     );
+
+    it.each([
+      ['src/app/core/services/worker_update/service-worker.ts', /const GIT_HASH_PATTERN = \/(.+)\/;/],
+      ['scripts/set-env-variables.py', /GIT_HASH_PATTERN = re\.compile\(r"(.+)"\)/],
+      ['scripts/create_assets_list_for_service_worker.py', /re\.match\(r"(.+?)", app_version/]
+    ])('GIT_HASH_PATTERN copy in %s should match the page constant', (file, extractor) => {
+      const source = readFileSync(resolve(process.cwd(), file), 'utf8');
+      expect(extractor.exec(source)?.[1]).toBe(GIT_HASH_PATTERN.source);
+    });
   });
 
   describe('computeUpdateProgressPercent', () => {

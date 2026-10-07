@@ -821,7 +821,7 @@ describe('UpdateService', () => {
       await messageHandler({
         data: {
           message: 'error',
-          error: 'Precache failed for /main.js: HTTP 502'
+          error: 'Precache failed for /main.js: HTTP 401'
         }
       });
 
@@ -829,6 +829,19 @@ describe('UpdateService', () => {
       // TranslocoTestingModule returns the key itself for unknown translations.
       expect(mockMessageService.add).toHaveBeenCalledWith(
         expect.objectContaining({ severity: 'error', detail: 'shared.update-service.update-failed-auth-detail' })
+      );
+    });
+
+    it('should show the generic error, not the re-login message, for an HTTP 502', async () => {
+      await messageHandler({
+        data: { message: 'error', error: 'Precache failed for /main.js: HTTP 502' }
+      });
+
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', detail: 'Precache failed for /main.js: HTTP 502' })
+      );
+      expect(mockMessageService.add).not.toHaveBeenCalledWith(
+        expect.objectContaining({ detail: 'shared.update-service.update-failed-auth-detail' })
       );
     });
   });

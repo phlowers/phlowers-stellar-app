@@ -401,10 +401,50 @@ describe('Service Worker Functions', () => {
     it('should throw when manifest response is not ok', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
-        status: 500
+        status: 404
       });
 
-      await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
+      await expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 404');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should give up after the last manifest attempt on repeated 5xx', async () => {
+      vi.useFakeTimers();
+      try {
+        mockFetch.mockResolvedValue({ ok: false, status: 500 });
+
+        const run = expect(updateApp()).rejects.toThrow('Manifest fetch failed with status 500');
+        await vi.advanceTimersByTimeAsync(3000);
+        await run;
+        expect(mockFetch).toHaveBeenCalledTimes(3);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it.each([
+      ['502', () => Promise.resolve({ ok: false, status: 502 })],
+      ['network error', () => Promise.reject(new TypeError('Failed to fetch'))]
+    ])('should retry the manifest after a %s and succeed', async (_label, failure) => {
+      vi.useFakeTimers();
+      try {
+        let manifestCalls = 0;
+        mockFetch.mockImplementation((url: string) => {
+          if (url !== '/assets_list.json') {
+            return Promise.resolve({ ok: true, status: 200 });
+          }
+          return ++manifestCalls === 1
+            ? failure()
+            : Promise.resolve({ ok: true, json: vi.fn().mockResolvedValue(mockManifest) });
+        });
+
+        const run = updateApp();
+        await vi.advanceTimersByTimeAsync(1000);
+        await expect(run).resolves.toBeDefined();
+        expect(manifestCalls).toBe(2);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should fetch the manifest without following redirects and with a bounded signal', async () => {
@@ -424,6 +464,7 @@ describe('Service Worker Functions', () => {
 
       await expect(updateApp()).rejects.toThrow(/Manifest fetch failed: authentication required/);
       expect(mockCaches.open).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it('should fail within the timeout when the manifest never answers', async () => {
@@ -439,6 +480,8 @@ describe('Service Worker Functions', () => {
         const run = expect(updateApp()).rejects.toThrow('Manifest fetch timed out after 13s');
         await vi.advanceTimersByTimeAsync(13000);
         await run;
+        await vi.advanceTimersByTimeAsync(30000);
+        expect(mockFetch).toHaveBeenCalledTimes(1);
       } finally {
         vi.useRealTimers();
       }
@@ -495,6 +538,17 @@ describe('Service Worker Functions', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(activeCache!.put).not.toHaveBeenCalled();
       expect(mockCaches.delete).not.toHaveBeenCalled();
+    });
+
+    it('should reinstall when the active pointer targets a deleted cache', async () => {
+      await seedControlState({ active: versionCacheName, previous: null });
+
+      await expect(updateApp()).resolves.toEqual(mockManifest);
+
+      const reinstalled = cacheStore.get(versionCacheName)!;
+      expect(reinstalled.put).toHaveBeenCalledWith('/app_version', expect.anything());
+      const controlPut = cacheStore.get(CONTROL_CACHE_NAME)!.put.mock.calls.find(([key]) => key === CONTROL_KEY)!;
+      expect(JSON.parse(await controlPut[1].text())).toEqual(expect.objectContaining({ active: versionCacheName }));
     });
 
     it('should activate a complete non-active cache (e.g. the previous version) without writing into it', async () => {
@@ -1156,7 +1210,7 @@ describe('Service Worker Functions', () => {
       expect(mockClients.matchAll).toHaveBeenCalledWith({ includeUncontrolled: true, type: 'window' });
     });
 
-    it('should handle install message type', async () => {
+    it('should send install_complete only to the requesting page', async () => {
       mockEvent.data.type = 'install';
       const mockManifest = {
         files: ['/index.html', '/app.js'],
@@ -1166,8 +1220,8 @@ describe('Service Worker Functions', () => {
           build_datetime_utc: '2024-01-01T00:00:00.000000+00:00'
         }
       };
-      const page = { postMessage: vi.fn() };
-      mockClients.matchAll.mockResolvedValue([page]);
+      const otherTab = { postMessage: vi.fn() };
+      mockClients.matchAll.mockResolvedValue([otherTab]);
       mockFetch.mockResolvedValue({
         ok: true,
         json: vi.fn().mockResolvedValue(mockManifest)
@@ -1175,11 +1229,12 @@ describe('Service Worker Functions', () => {
 
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
-      expect(page.postMessage).toHaveBeenCalledWith({
+      expect(mockEvent.source!.postMessage).toHaveBeenCalledWith({
         message: 'install_complete',
         latest_version: mockManifest.app_version,
         data_hashes: {}
       });
+      expect(otherTab.postMessage.mock.calls.filter(([m]) => m.message === 'install_complete')).toHaveLength(0);
     });
 
     it('should handle unknown message type', async () => {
@@ -1188,6 +1243,13 @@ describe('Service Worker Functions', () => {
       await handleMessage(mockEvent as unknown as ExtendableMessageEvent);
 
       expect(mockEvent.source!.postMessage).not.toHaveBeenCalled();
+    });
+
+    it('should not throw on a message without data', async () => {
+      const event = { data: undefined, source: { postMessage: vi.fn() }, waitUntil: vi.fn() };
+
+      await expect(handleMessage(event as unknown as ExtendableMessageEvent)).resolves.toBeUndefined();
+      expect(event.source.postMessage).not.toHaveBeenCalled();
     });
 
     it('should handle errors and send error message', async () => {
@@ -1598,6 +1660,33 @@ describe('Service Worker Functions', () => {
       const completions = page.postMessage.mock.calls.filter(([m]) => /_complete$/.test(m.message));
       expect(completions).toHaveLength(1);
       expect(completions[0][0].message).toBe('update_complete');
+    });
+
+    it('should send install_complete to a page that joins a running install', async () => {
+      let releaseManifest!: () => void;
+      const manifestGate = new Promise<void>((resolve) => {
+        releaseManifest = resolve;
+      });
+      mockFetch.mockImplementation((url: string) =>
+        url === '/assets_list.json'
+          ? manifestGate.then(() => ({ ok: true, json: vi.fn().mockResolvedValue(manifest) }))
+          : Promise.resolve({ ok: true, status: 200 })
+      );
+      const bystander = { postMessage: vi.fn() };
+      mockClients.matchAll.mockResolvedValue([bystander]);
+      const first = messageEvent({ type: 'install' });
+      const joiner = messageEvent({ type: 'install' });
+
+      const firstTask = handleMessage(first.event);
+      const joinerTask = handleMessage(joiner.event);
+      releaseManifest();
+      await Promise.all([firstTask, joinerTask]);
+
+      const installCompletions = (calls: unknown[][]) =>
+        calls.filter(([m]) => (m as { message: string }).message === 'install_complete');
+      expect(installCompletions(first.source!.postMessage.mock.calls)).toHaveLength(1);
+      expect(installCompletions(joiner.source!.postMessage.mock.calls)).toHaveLength(1);
+      expect(installCompletions(bystander.postMessage.mock.calls)).toHaveLength(0);
     });
 
     it('should send a failure only to the page that asked for the run', async () => {

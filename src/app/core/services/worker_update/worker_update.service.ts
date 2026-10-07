@@ -72,7 +72,7 @@ export class UpdateService {
    * failing updates; pointing them to a re-login is actionable.
    */
   private static isAuthLikeFailure(error: unknown): boolean {
-    return typeof error === 'string' && /HTTP (401|403|5\d\d)|authentication required/.test(error);
+    return typeof error === 'string' && /HTTP (401|403)|authentication required/.test(error);
   }
 
   /**

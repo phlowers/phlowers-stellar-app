@@ -143,6 +143,54 @@ test.describe('update hangs reproduction', () => {
     expect((await readSnapshot(page)).appVersion).toBe('1.0.0-e2e');
   });
 
+  test('A -> B -> A: going back to an already cached version does not download it again', async ({ page, request }) => {
+    await setScenario(request, 'v1');
+    await setAuthenticated(request, true);
+    await page.goto('/');
+    await waitForFirstInstall(page, '1.0.0-e2e', 'E2E_CABLE_V1');
+
+    await setScenario(request, 'v2');
+    await page.reload();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByTestId('update-now-btn').click();
+    await expect.poll(async () => (await readSnapshot(page)).appVersion, { timeout: 30_000 }).toBe('2.0.0-e2e');
+
+    await resetFaults(request);
+    await setScenario(request, 'v1');
+    await page.reload();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByTestId('update-now-btn').click();
+    await expect.poll(async () => (await readSnapshot(page)).appVersion, { timeout: 30_000 }).toBe('1.0.0-e2e');
+
+    expect(await getRequestLog(request)).not.toContain('/e2e-app-v1.js');
+    expect((await readSnapshot(page)).hasAssetV1).toBe(true);
+  });
+
+  test('a deleted active cache is reinstalled without an update popup loop', async ({ page, request }) => {
+    await setScenario(request, 'v1');
+    await setAuthenticated(request, true);
+    await page.goto('/');
+    await waitForFirstInstall(page, '1.0.0-e2e', 'E2E_CABLE_V1');
+
+    const deletedCacheName = (await readSnapshot(page)).activeCacheName;
+    expect(deletedCacheName).not.toBeNull();
+    await page.evaluate((name) => caches.delete(name as string), deletedCacheName);
+    await page.reload();
+
+    // Either the automatic install or the update popup restores the version.
+    const updateNow = page.getByTestId('update-now-btn');
+    if (await updateNow.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      await updateNow.click();
+    }
+    await expect.poll(async () => (await readSnapshot(page)).appVersion, { timeout: 30_000 }).toBe('1.0.0-e2e');
+    expect((await readSnapshot(page)).hasAssetV1).toBe(true);
+
+    await page.reload();
+    await page.waitForTimeout(5_000);
+    await expect(page.getByRole('dialog')).toBeHidden();
+    expect((await readSnapshot(page)).appVersion).toBe('1.0.0-e2e');
+  });
+
   test('RC6: another open tab is reloaded once the update is applied', async ({ page, request, context }) => {
     await setScenario(request, 'v1');
     await setAuthenticated(request, true);

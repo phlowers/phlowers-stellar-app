@@ -95,9 +95,11 @@ make test     # pytest + coverage report
 You can also build and run {{app_name}} as a container using the provided `Dockerfile`:
 
 ```shell
-docker build -t stellar-app .
+docker build --build-arg CI_COMMIT_SHA=$(git rev-parse HEAD) -t stellar-app .
 docker run -p 8080:80 stellar-app
 ```
+
+`CI_COMMIT_SHA` is the version identity of the build: without this commit SHA, the build fails.
 
 ## Documentation
 

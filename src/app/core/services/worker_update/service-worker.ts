@@ -36,6 +36,8 @@ const FILE_STALL_TIMEOUT_MS = 30000;
 const MAX_FILE_ATTEMPTS = 4;
 /** Delay before the first retry; doubles at each further retry. */
 const RETRY_BASE_DELAY_MS = 1000;
+/** Manifest attempts on network errors and 5xx: 3 x 13 s + 1 s + 2 s = 42 s, below the 45 s page watchdog. */
+const MAX_MANIFEST_ATTEMPTS = 3;
 /** Angular hashed output names (`chunk-4JLWSDW7.js`): the hash is content-based, so a file with that name is the same in any version. */
 const HASHED_ASSET_PATTERN = /-[A-Z0-9]{8}\.(?:js|css)$/;
 /** Web Lock held for a whole install/update: `activeRun` only covers one SW instance, not an old and a new one. */
@@ -88,7 +90,7 @@ function getRunProgress(): UpdateRunProgress | null {
  * The run id is local to the SW (it cannot import shared helpers at runtime).
  */
 function createUpdateLogger(): UpdateLogger {
-  const runId = crypto.randomUUID().slice(0, 8);
+  const runId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const startedAt = Date.now();
   const emit = (level: UpdateLogLevel, step: string, details?: Record<string, unknown>) => {
     const entry: UpdateLogEntry = { runId, level, step, elapsedMs: Date.now() - startedAt, details };
@@ -163,8 +165,24 @@ function fetchWithTimeout(
  * Fetches and parses the latest asset manifest (`assets_list.json`). Headers and body are bounded
  * by `NAVIGATE_TIMEOUT_MS`: a hanging manifest would otherwise freeze the run at 0% while the SW
  * still answers keepalives. A redirect (expired OIDC session) is reported, never followed.
+ * Network errors and 5xx are retried (`MAX_MANIFEST_ATTEMPTS`); auth errors, redirects and timeouts are not.
  */
-async function fetchLatestManifest(): Promise<AssetManifest> {
+async function fetchLatestManifest(log: UpdateLogger): Promise<AssetManifest> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetchManifestOnce();
+    } catch (error) {
+      if (!(error instanceof PrecacheFileError) || !error.retryable || attempt >= MAX_MANIFEST_ATTEMPTS) {
+        throw error;
+      }
+      const delayMs = RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
+      log.warn('manifest-retry', { error: error.message, status: error.status, attempt, delayMs });
+      await sleep(delayMs, new AbortController().signal);
+    }
+  }
+}
+
+async function fetchManifestOnce(): Promise<AssetManifest> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), NAVIGATE_TIMEOUT_MS);
   try {
@@ -181,12 +199,16 @@ async function fetchLatestManifest(): Promise<AssetManifest> {
       throw new Error(`Manifest fetch failed: authentication required (HTTP ${response.status})`);
     }
     if (!response.ok) {
-      throw new Error(`Manifest fetch failed with status ${response.status}`);
+      const message = `Manifest fetch failed with status ${response.status}`;
+      throw response.status >= 500 ? new PrecacheFileError(message, true, response.status) : new Error(message);
     }
     return (await response.json()) as AssetManifest;
   } catch (error) {
     if (controller.signal.aborted) {
       throw new Error(`Manifest fetch timed out after ${NAVIGATE_TIMEOUT_MS / 1000}s`);
+    }
+    if (error instanceof TypeError) {
+      throw new PrecacheFileError(error.message, true);
     }
     throw error;
   } finally {
@@ -469,7 +491,7 @@ async function installLatestManifest(log: UpdateLogger): Promise<AssetManifest> 
   log.info('manifest-fetch-start');
   let manifest: AssetManifest;
   try {
-    manifest = await fetchLatestManifest();
+    manifest = await fetchLatestManifest(log);
   } catch (error) {
     log.error('manifest-failed', {
       error: error instanceof Error ? error.message : String(error),
@@ -559,7 +581,8 @@ async function isCompleteVersionCache(cacheName: string): Promise<boolean> {
  * `activateVersion()`. A manifest with no files, no valid `git_hash` or missing
  * `/index.html` is refused outright. A cache that is already complete is never
  * written again: it is reused as is (or reported already active). An incomplete
- * active cache is refused, and an incomplete previous cache is rebuilt from scratch.
+ * active cache is refused (a deleted one is reinstalled), and an incomplete previous
+ * cache is rebuilt from scratch.
  * A partially precached version (a file failed) is deleted so it never lingers
  * half-written.
  */
@@ -584,8 +607,11 @@ async function precacheVersion(manifest: AssetManifest, log: UpdateLogger): Prom
       log.info('already-active', { cacheName });
       return { cacheName, alreadyActive: true };
     }
-    log.error('precache-refused-active', { cacheName });
-    throw new Error(`Refusing to precache into the active cache ${cacheName}`);
+    if (await caches.has(cacheName)) {
+      log.error('precache-refused-active', { cacheName });
+      throw new Error(`Refusing to precache into the active cache ${cacheName}`);
+    }
+    log.warn('active-cache-missing-reinstalled', { cacheName });
   }
   if (complete) {
     log.info('precache-skipped-complete', { cacheName });
@@ -859,12 +885,10 @@ function startRun(type: UpdateRunType): ActiveRun {
     try {
       const manifest = await (type === 'update' ? updateApp(log) : installApp(log));
       log.info('done', { type });
-      // Awaited while the run is still active: a later `keepalive` reply (`run: null`) can then never overtake it.
-      await broadcastToClients({
-        message: `${type}_complete`,
-        latest_version: manifest.app_version,
-        data_hashes: manifest.data_hashes || {}
-      });
+      if (type === 'update') {
+        // Awaited while the run is still active: a later `keepalive` reply (`run: null`) can then never overtake it.
+        await broadcastToClients(completionMessage(type, manifest));
+      }
       return manifest;
     } catch (e: unknown) {
       log.error('failed', { type, error: e instanceof Error ? e.message : String(e) });
@@ -879,16 +903,27 @@ function startRun(type: UpdateRunType): ActiveRun {
   return activeRun;
 }
 
+function completionMessage(type: UpdateRunType, manifest: AssetManifest) {
+  return {
+    message: `${type}_complete`,
+    latest_version: manifest.app_version,
+    data_hashes: manifest.data_hashes || {}
+  };
+}
+
 /**
- * Runs (or joins) the install/update. Success is broadcast to every page by `startRun`
- * (other tabs must reload too); only the failure goes to the requesting page.
+ * Runs (or joins) the install/update. `update_complete` is broadcast to every page by `startRun`
+ * (other tabs must reload too); `install_complete` and failures go to the requesting pages only.
  */
 async function handleRunRequest(event: ExtendableMessageEvent, type: UpdateRunType): Promise<void> {
   const joinedRun = activeRun;
   joinedRun?.log.info('request-joined', { type });
   const run = joinedRun ?? startRun(type);
   try {
-    await run.promise;
+    const manifest = await run.promise;
+    if (run.type === 'install') {
+      event.source?.postMessage(completionMessage(run.type, manifest));
+    }
   } catch (e: unknown) {
     event.source?.postMessage({ message: 'error', error: e instanceof Error ? e.message : String(e) });
   }
@@ -920,7 +955,7 @@ async function handleStatusRequest(event: ExtendableMessageEvent): Promise<void>
  * @param event - The ExtendableMessageEvent containing the command
  */
 export function handleMessage(event: ExtendableMessageEvent): Promise<void> {
-  const type = event.data.type;
+  const type = event.data?.type;
   let task: Promise<void>;
   switch (type) {
     case 'update':

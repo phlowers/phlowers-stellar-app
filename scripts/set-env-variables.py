@@ -23,7 +23,7 @@ GIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,40}$")
 
 def get_git_revision_hash() -> str:
     """Get the git revision hash from environment variable or git command"""
-    env_hash = os.environ.get("CI_COMMIT_SHA")
+    env_hash = (os.environ.get("CI_COMMIT_SHA") or "").strip().lower()
     if env_hash:
         return env_hash
     try:

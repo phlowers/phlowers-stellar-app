@@ -33,7 +33,7 @@ télécharge ni ne les met en cache. Seuls leurs hachages SHA-256 sont listés, 
    - Télécharge les nouvelles ressources dans leur propre cache (la version active n'est jamais touchée)
    - Écrit `/app_version` en dernier, ce qui marque le cache comme complet
    - Bascule le pointeur d'activation, conserve la version précédente pour un rollback et supprime les caches plus anciens
-   - Envoie `update_complete` à tous les onglets ouverts
+   - Envoie `update_complete` à tous les onglets ouverts (pour une première installation, `install_complete` n'est envoyé qu'à l'onglet demandeur)
 
 ### Autorisation et points d'entrée
 
@@ -64,7 +64,7 @@ cache partiellement rempli :
 - Une version candidate n'est entièrement préparée (y compris une vérification que
   `/index.html` et toutes les ressources du manifeste sont présentes) **qu'avant** le basculement
   du pointeur de contrôle — une seule écriture, effectuée uniquement en cas de succès complet.
-- Un cache n'est jamais écrit deux fois : une seule installation/mise à jour s'exécute à la fois, y compris entre deux instances du Service Worker (Web Lock `app-assets-precache`) ; un cache déjà complet (marqueur `/app_version`) est réutilisé sans téléchargement, ou signalé comme déjà actif ; un fichier listé deux fois dans le manifeste n'est téléchargé qu'une fois. Un téléchargement dans un cache actif incomplet est refusé (`Refusing to precache into the active cache`), de même qu'un manifeste sans `git_hash` valide. Un cache `previous` incomplet est supprimé puis reconstruit, jamais complété sur place.
+- Un cache n'est jamais écrit deux fois : une seule installation/mise à jour s'exécute à la fois, y compris entre deux instances du Service Worker (Web Lock `app-assets-precache`) ; un cache déjà complet (marqueur `/app_version`) est réutilisé sans téléchargement, ou signalé comme déjà actif ; un fichier listé deux fois dans le manifeste n'est téléchargé qu'une fois. Un téléchargement dans un cache actif incomplet est refusé (`Refusing to precache into the active cache`), de même qu'un manifeste sans `git_hash` valide. Si le cache actif n'existe plus (supprimé alors que `/control` pointe encore dessus), la version est réinstallée normalement au lieu d'être refusée. Un cache `previous` incomplet est supprimé puis reconstruit, jamais complété sur place.
 - En cas d'échec avant l'activation, seule la version candidate incomplète est écartée ; la
   version active continue de servir l'application sans être affectée.
 - La gestion des requêtes fetch résout une unique version cohérente par requête (active, ou
