@@ -576,3 +576,48 @@ def test_conformity_compliance_is_boolean(
     result_dict = run_conformity(python_inputs)
 
     assert isinstance(result_dict["results"]["AT"]["conformityCompliance"], bool)
+
+
+def test_table_results_match_lateral_and_overhang_points_of_each_rule(
+    run_conformity, make_python_inputs, make_form, make_rule, make_distances
+):
+    """Table values come from the rule's own lateral and overhang points."""
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(conformityPlot="vegetation", intermediatePoints=[]),
+        [
+            make_rule("AT"),
+            make_rule("RULE_2", lateral_temp=40, overhang_temp=50),
+        ],
+        [
+            make_distances("AT"),
+            make_distances(
+                "RULE_2", lateral={"400": 2.5}, overhang={"400": 3.5}
+            ),
+        ],
+    )
+
+    result_dict = run_conformity(python_inputs)
+
+    expected_distances = {"AT": (1.0, 1.5), "RULE_2": (2.5, 3.5)}
+    for rule_type, (lateral_d, overhang_d) in expected_distances.items():
+        # Scenario order without intermediate points:
+        # lateral, lateral_inverse, overhang.
+        lateral, lateral_inverse, overhang = result_dict["conformity"][
+            rule_type
+        ]["points"]
+        table = result_dict["results"][rule_type]
+
+        # Otherwise the test could not tell lateral from lateral_inverse.
+        assert lateral["x"] != pytest.approx(lateral_inverse["x"])
+
+        assert table["lateralCableAltitude"] == pytest.approx(lateral["y"])
+        assert table["lateralCableLineAxisDistance"] == pytest.approx(
+            lateral["x"]
+        )
+        assert table["overhangCableAltitude"] == pytest.approx(overhang["y"])
+        assert table["overhangCableLineAxisDistance"] == pytest.approx(
+            overhang["x"]
+        )
+        assert table["lateralDistanceToComply"] == pytest.approx(lateral_d)
+        assert table["overhangDistanceToComply"] == pytest.approx(overhang_d)

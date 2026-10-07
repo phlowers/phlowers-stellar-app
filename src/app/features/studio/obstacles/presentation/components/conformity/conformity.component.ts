@@ -560,6 +560,7 @@ export class ConformityComponent implements OnDestroy {
 
       const conformityInputs: TaskInputs[Task.getConformity] = {
         obstacle,
+        pointIndex: this.hasMultiplePoints() ? (this.selectedPointValue() ?? 0) : 0,
         electricTension,
         form: {
           windZone: v.windZone,

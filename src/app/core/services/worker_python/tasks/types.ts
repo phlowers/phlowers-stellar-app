@@ -638,6 +638,8 @@ export interface ConformityFormInput {
 
 export interface ConformityTaskInput {
   obstacle: Obstacle;
+  // 0-based index of the obstacle point the conformity is computed for.
+  pointIndex: number;
   electricTension: string;
   form: ConformityFormInput;
   rulesClimaticConditions: ConformityRuleClimaticConditionInput[];

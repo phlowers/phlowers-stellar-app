@@ -143,6 +143,59 @@ def test_compliance_none_without_scenario():
     assert ConformityTableResult().conformity_compliance_status is None
 
 
+@pytest.mark.parametrize(
+    ("conformity_point", "altitude_field", "axis_distance_field"),
+    [
+        (
+            "lateral",
+            "lateral_cable_altitude",
+            "lateral_cable_line_axis_distance",
+        ),
+        (
+            "overhang",
+            "overhang_cable_altitude",
+            "overhang_cable_line_axis_distance",
+        ),
+    ],
+)
+def test_table_result_uses_point_coordinates_for_cable_values(
+    conformity_point, altitude_field, axis_distance_field
+):
+    table = ConformityTableResult()
+    table.set_projected_point((12.0, 7.5), conformity_point)
+
+    assert getattr(table, altitude_field) == pytest.approx(7.5)
+    assert getattr(table, axis_distance_field) == pytest.approx(12.0)
+
+
+@pytest.mark.parametrize("other_point", ["lateral_inverse", "intermediate"])
+def test_table_result_lateral_values_ignore_other_lateral_scenarios(
+    other_point,
+):
+    table = ConformityTableResult()
+    table.set_projected_point((12.0, 7.5), "lateral")
+    table.set_projected_point((-20.0, 3.0), other_point)
+
+    assert table.lateral_cable_altitude == pytest.approx(7.5)
+    assert table.lateral_cable_line_axis_distance == pytest.approx(12.0)
+
+
+@pytest.mark.parametrize(
+    ("conformity_point", "field_name"),
+    [
+        ("lateral", "lateral_distance_to_comply"),
+        ("overhang", "overhang_distance_to_comply"),
+    ],
+)
+def test_table_result_uses_security_distance_for_distance_to_comply(
+    conformity_point, field_name
+):
+    table = ConformityTableResult()
+    table.set_rule_distances(4.25, conformity_point)
+
+    assert getattr(table, field_name) == pytest.approx(4.25)
+
+
 def test_get_radius_raises_on_unknown_plot_type():
     with pytest.raises(ValueError):
         _plot_rules("unknown").get_radius(1.0)

@@ -887,6 +887,48 @@ def test_get_conformity_with_unknown_obstacle_raises(
         get_conformity(python_inputs, study_base)
 
 
+@pytest.mark.parametrize("point_index", [0, 1])
+def test_get_conformity_obstacle_name_includes_point_number(
+    run_conformity,
+    make_python_inputs,
+    make_form,
+    make_rule,
+    make_distances,
+    point_index,
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(),
+        [make_rule("RULE_1")],
+        [make_distances("RULE_1")],
+        obstacle_name="ttt",
+    )
+    python_inputs["obstacle"]["positions"] = [
+        {"x": 10, "y": 5, "z": 65},
+        {"x": 20, "y": 6, "z": 66},
+    ]
+    python_inputs["pointIndex"] = point_index
+
+    result = run_conformity(python_inputs)
+
+    assert result["obstacle"]["name"] == f"ttt point {point_index + 1}"
+
+
+def test_get_conformity_with_out_of_range_point_index_raises(
+    run_conformity, make_python_inputs, make_form, make_rule, make_distances
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(),
+        [make_rule("RULE_1")],
+        [make_distances("RULE_1")],
+    )
+    python_inputs["pointIndex"] = 5
+
+    with pytest.raises(ValueError, match="out of range"):
+        run_conformity(python_inputs)
+
+
 @pytest.mark.parametrize(
     "override",
     [

@@ -350,12 +350,12 @@ class ConformityResult:
 
     @staticmethod
     def create_with_empty_zones(
-        obstacle_id: str, rule_types: list[str]
+        obstacle_name: str, rule_types: list[str]
     ) -> 'ConformityResult':
         """Create ConformityResult with empty zones for each rule type.
 
         Args:
-            obstacle_id: Obstacle UUID
+            obstacle_name: Obstacle display name
             rule_types: List of rule type identifiers
 
         Returns:
@@ -372,7 +372,7 @@ class ConformityResult:
             table_results[rule_type] = ConformityTableResult()
 
         return ConformityResult(
-            obstacle=ObstacleOutput(name=obstacle_id, points=[]),
+            obstacle=ObstacleOutput(name=obstacle_name, points=[]),
             conformity=conformity_zones,
             table_results=table_results,
         )

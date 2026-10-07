@@ -645,6 +645,39 @@ describe('ConformityComponent', () => {
       expect(Object.keys(results ?? {})).toEqual(['rule_a', 'rule_b']);
     });
 
+    it('should send the selected point index to the worker', async () => {
+      obstacle = {
+        ...defaultObstacle(),
+        positions: [
+          { x: 1, y: 1, z: 1 },
+          { x: 2, y: 2, z: 2 }
+        ]
+      };
+      await createComponent();
+      component.form.controls.selectedPoint.setValue(1);
+      fixture.detectChanges();
+      mockWorkerPython.runTask.mockClear();
+
+      await component.calculate();
+
+      expect(mockWorkerPython.runTask).toHaveBeenCalledWith(
+        Task.getConformity,
+        expect.objectContaining({ pointIndex: 1 })
+      );
+    });
+
+    it('should send point index 0 for a single-point obstacle', async () => {
+      await createComponent();
+      mockWorkerPython.runTask.mockClear();
+
+      await component.calculate();
+
+      expect(mockWorkerPython.runTask).toHaveBeenCalledWith(
+        Task.getConformity,
+        expect.objectContaining({ pointIndex: 0 })
+      );
+    });
+
     it('should not run when canCalculate is false', async () => {
       await createComponent();
       component.form.controls.conformity.setValue(null);

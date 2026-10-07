@@ -43,6 +43,8 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
 
     logger.debug(f"Getting conformity for inputs: {python_inputs}")
     obstacle_id = python_inputs.get("obstacle", {}).get("uuid")
+    point_index = python_inputs.get("pointIndex", 0)
+    obstacle_name = python_inputs.get("obstacle", {}).get("name", obstacle_id)
     obstacle_support_index = python_inputs.get("obstacle", {}).get(
         "supportIndex"
     )
@@ -158,12 +160,18 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
             f"Obstacle with uuid: {obstacle_id} not found in study."
         )
 
+    if not 0 <= point_index < len(obstacle_coords):
+        raise ValueError(
+            f"Point index {point_index} out of range for obstacle {obstacle_id}"
+        )
+    obstacle_point = obstacle_coords[point_index]
+
     # Initialize conformity result structure with empty zones for each rule type
     conformity_result = ConformityResult.create_with_empty_zones(
-        obstacle_id=obstacle_id,
+        obstacle_name=f"{obstacle_name} point {point_index + 1}",
         rule_types=list(tension_rules.keys()),
     )
-    u_plane, v_plane = dist_engine.define_distance_plane(obstacle_coords[0])
+    u_plane, v_plane = dist_engine.define_distance_plane(obstacle_point)
     conformity_result.set_plane_basis(u_plane=u_plane, v_plane=v_plane)
 
     # Simulation ------------------------------
@@ -185,7 +193,7 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
             )
             # get the distance from the obstacle to the cable curve in the section plane
             dist_result = dist_engine.plane_distance(
-                obstacle_coords[0], frame="section"
+                obstacle_point, frame="section"
             )
 
             projected_point = conformity_result.project_onto_plane(
@@ -230,7 +238,7 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
             )
 
     # Add obstacle point
-    conformity_result.add_obstacle_3d_point(point=obstacle_coords[0])
+    conformity_result.add_obstacle_3d_point(point=obstacle_point)
 
     # Build zone plots (only for non-cable_track conformity plots)
     for zone_name, zone_conformity in conformity_result.conformity.items():
