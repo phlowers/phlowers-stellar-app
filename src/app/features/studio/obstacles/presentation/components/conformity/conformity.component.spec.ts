@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ConformityComponent } from './conformity.component';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
@@ -265,7 +264,6 @@ describe('ConformityComponent', () => {
         ConformityComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: ObstacleFormService, useValue: mockFormService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },

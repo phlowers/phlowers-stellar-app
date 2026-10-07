@@ -51,7 +51,7 @@ try {
   log('debug', 'Pyodide loaded', loadTime);
   for (const file of pythonFiles) {
     log('debug', `Running Python file: ${file.name}`);
-    await pyodide.runPython(file.content);
+    pyodide.runPython(file.content);
     log('debug', `Finished running Python file: ${file.name}`);
   }
   const importEnd = performance.now();

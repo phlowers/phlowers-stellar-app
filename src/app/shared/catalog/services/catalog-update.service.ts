@@ -19,6 +19,9 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 
+/** Imports one catalog; when `expectedHash` is given, the downloaded content is verified against it. */
+type CatalogImporter = (expectedHash?: string) => Promise<void>;
+
 /**
  * Orchestrates catalog CSV/JSON updates independently of the application
  * update flow.
@@ -56,7 +59,7 @@ export class CatalogUpdateService {
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstaclesService = inject(ObstaclesService);
 
-  private readonly importers: Record<string, (expectedHash?: string) => Promise<void>>;
+  private readonly importers: Record<string, CatalogImporter>;
 
   constructor() {
     this.importers = {
@@ -95,27 +98,31 @@ export class CatalogUpdateService {
       return;
     }
 
+    const staleCatalogs = await this.findStaleCatalogs(dataHashes);
     const failedCatalogs: string[] = [];
-    for (const [fileName, importFn] of Object.entries(this.importers)) {
-      const latestHash = dataHashes[fileName];
-      if (!latestHash) {
-        continue;
-      }
-
-      const metadataKey = `catalog_hash:${fileName}`;
-      const storedHash = await this.storageService.db?.metadata.get(metadataKey);
-      if (storedHash?.value === latestHash) {
-        continue;
-      }
-
+    for (const { fileName, latestHash, importFn } of staleCatalogs) {
       try {
-        await importFn(latestHash);
+        await importFn(latestHash); //NOSONAR — catalogs are imported one at a time
       } catch (error) {
         this.logger.error(`Error updating catalog '${fileName}'`, error);
         failedCatalogs.push(fileName);
       }
     }
     this.notifyCatalogFailures(failedCatalogs);
+  }
+
+  /** Catalogs listed in the manifest whose stored hash is missing or differs from the latest one. */
+  private async findStaleCatalogs(
+    dataHashes: Record<string, string>
+  ): Promise<{ fileName: string; latestHash: string; importFn: CatalogImporter }[]> {
+    const candidates = Object.entries(this.importers).flatMap(([fileName, importFn]) => {
+      const latestHash = dataHashes[fileName];
+      return latestHash ? [{ fileName, latestHash, importFn }] : [];
+    });
+    const storedHashes = await Promise.all(
+      candidates.map(({ fileName }) => this.storageService.db?.metadata.get(`catalog_hash:${fileName}`))
+    );
+    return candidates.filter((_, index) => storedHashes[index]?.value !== candidates[index].latestHash);
   }
 
   private async fetchLatestManifestSafe(): Promise<AssetManifest | null> {
@@ -131,7 +138,7 @@ export class CatalogUpdateService {
     const failedCatalogs: string[] = [];
     for (const [fileName, importFn] of Object.entries(this.importers)) {
       try {
-        await importFn();
+        await importFn(); //NOSONAR — catalogs are imported one at a time
       } catch (error) {
         this.logger.error(`Error importing catalog '${fileName}' (legacy fallback, no hash)`, error);
         failedCatalogs.push(fileName);

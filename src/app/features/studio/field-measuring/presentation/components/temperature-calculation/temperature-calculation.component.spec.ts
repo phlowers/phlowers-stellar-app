@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
@@ -123,7 +122,6 @@ describe('TemperatureCalculationComponent', () => {
         TemperatureCalculationComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock }
       ]

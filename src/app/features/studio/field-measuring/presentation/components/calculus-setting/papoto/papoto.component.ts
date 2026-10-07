@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, model, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -34,15 +33,7 @@ import { TranslocoModule } from '@jsverse/transloco';
   ],
   templateUrl: './papoto.component.html',
   styleUrl: './papoto.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Component for PAPOTO parameter calculation from field measurement angles and distances. */
 export class PapotoComponent {

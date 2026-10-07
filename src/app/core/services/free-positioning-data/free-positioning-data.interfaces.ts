@@ -4,10 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import {
-  FreePositioningCategory,
-  FreePositioningPoint
-} from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';
+import { FreePositioningCategory } from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';
 import { Section, Support } from '@shared/domain';
 import { GetSectionOutput } from '@core/services/worker_python/tasks/types';
 import { Position3D } from '@shared/domain/models/obstacle.model';
@@ -42,4 +39,5 @@ export interface AggregatePointsParams {
   loadReferenceSupport?: 'LEFT' | 'RIGHT' | null;
 }
 
-export type { FreePositioningCategory, FreePositioningPoint };
+export type { FreePositioningCategory };
+export type { FreePositioningPoint } from '@features/studio/core/presentation/components/free-positioning/free-positioning.interfaces';

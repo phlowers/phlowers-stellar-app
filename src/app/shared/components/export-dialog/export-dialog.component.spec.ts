@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { signal } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ExportDialogComponent } from './export-dialog.component';
 import { StudiesService } from '@services/studies/studies.service';
 
@@ -29,8 +28,7 @@ describe('ExportDialogComponent', () => {
           preloadLangs: true
         }),
         ExportDialogComponent,
-        ReactiveFormsModule,
-        NoopAnimationsModule
+        ReactiveFormsModule
       ],
       providers: [{ provide: StudiesService, useValue: mockStudiesService }]
     }).compileComponents();
@@ -101,8 +99,7 @@ describe('ExportDialogComponent', () => {
               preloadLangs: true
             }),
             ExportDialogComponent,
-            ReactiveFormsModule,
-            NoopAnimationsModule
+            ReactiveFormsModule
           ],
           providers: [
             { provide: StudiesService, useValue: mockStudiesService },

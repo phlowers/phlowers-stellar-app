@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MessageService } from 'primeng/api';
 
 import { StudyHeaderComponent } from './study-header.component';
@@ -26,7 +25,7 @@ describe('StudyHeader', () => {
         }),
         StudyHeaderComponent
       ],
-      providers: [provideNoopAnimations(), { provide: MessageService, useValue: mockMessageService }]
+      providers: [{ provide: MessageService, useValue: mockMessageService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudyHeaderComponent);

@@ -342,7 +342,7 @@
 
     <hr class="obstacles-form__sticky__divider" />
 
-    <div class="obstacles-form__sticky__results" data-testid="results">
+    <output class="obstacles-form__sticky__results" data-testid="results">
       <h2 class="obstacles-form__sticky__results__title">{{ 'common.results' | transloco }}</h2>
 
       @if (obstacleFormService.calculationError()) {
@@ -400,7 +400,7 @@
           </dd>
         </div>
       </dl>
-    </div>
+    </output>
   </div>
 </form>
 

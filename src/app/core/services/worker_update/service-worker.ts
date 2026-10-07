@@ -247,14 +247,11 @@ async function activateVersion(cacheName: string): Promise<void> {
 
   try {
     const allCacheNames = await caches.keys();
-    for (const name of allCacheNames) {
-      if (name === cacheName || name === previousActive || name === CONTROL_CACHE_NAME) {
-        continue;
-      }
-      if (name.startsWith('app-assets')) {
-        await caches.delete(name);
-      }
-    }
+    const obsoleteCacheNames = allCacheNames.filter(
+      (name) =>
+        name !== cacheName && name !== previousActive && name !== CONTROL_CACHE_NAME && name.startsWith('app-assets')
+    );
+    await Promise.all(obsoleteCacheNames.map((name) => caches.delete(name)));
   } catch {
     // Best-effort cleanup only — must never undo the activation above.
   }
@@ -333,7 +330,7 @@ function shouldBypassSW(url: string): boolean {
  *
  * @param event - The FetchEvent from the Service Worker
  */
-export async function handleFetch(event: FetchEvent) {
+export function handleFetch(event: FetchEvent): void {
   const url = event.request.url;
   const scope = (self as unknown as ServiceWorkerGlobalScope).registration?.scope;
 

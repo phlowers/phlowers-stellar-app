@@ -43,10 +43,10 @@ export const createLinesConfig = (): CsvImportConfig<LineCsvDto> => {
     csvKey: 'lines',
     filename: 'lines.csv',
     tableName: 'catLines',
-    async processChunk(rows) {
+    processChunk(rows) {
       const entities = rows.map(mapLineRow).filter((e): e is CatalogLineEntity => e !== null);
       accumulator.push(...entities);
-      return { processedRows: rows.length };
+      return Promise.resolve({ processedRows: rows.length });
     },
     async finalize({ table }) {
       if (accumulator.length === 0) return;

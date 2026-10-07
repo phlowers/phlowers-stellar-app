@@ -4,8 +4,8 @@
     class="form"
     (ngSubmit)="calculate()"
     data-testid="conformity-form"
-    @collapse
-    [@.disabled]="!animationsReady()"
+    [animate.enter]="animationsReady() ? 'anim-expand-height' : ''"
+    animate.leave="anim-collapse-height"
   >
     <fieldset>
       <legend class="form__title-obstacle underline-text">{{ 'studio.conformity.obstacle-legend' | transloco }}</legend>
@@ -241,7 +241,7 @@
 </output>
 
 @if (conformityResults()) {
-  <div class="results" @expandHeight>
+  <div class="results" animate.enter="anim-expand-height">
     <hr class="results__separator" />
 
     <h2 class="results__title">{{ 'common.results' | transloco }}</h2>

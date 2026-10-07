@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { PoseTableComponent } from './pose-table.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -86,7 +85,6 @@ describe('PoseTableComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         PoseTableComponent,
-        NoopAnimationsModule,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {

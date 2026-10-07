@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, WritableSignal } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -244,8 +243,7 @@ describe('SectionPlotCardsComponent - HTML rendering', () => {
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
-        SectionPlotCardsComponent,
-        NoopAnimationsModule
+        SectionPlotCardsComponent
       ],
       providers: [
         { provide: PlotService, useValue: plotServiceMock },
