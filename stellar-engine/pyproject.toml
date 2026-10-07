@@ -40,16 +40,12 @@ dev = [
     "mypy==1.11.2",
     "ipython==9.14.1",
     "pygments>=2.20.0",
-    "ipykernel==7.3.0",
-    # Force recent version of following lib to avoid CVE
-    # see https://github.com/phlowers/phlowers-stellar-app/security/dependabot/77
-    "tornado>=6.5.6",
-    # Force recent version of following lib to avoid CVE
-    # see https://github.com/phlowers/phlowers-stellar-app/security/dependabot/111
-    "lxml>=6.1.0",
-    # Force recent version of following lib to avoid CVE
-    # see https://github.com/phlowers/phlowers-stellar-app/security/dependabot/126
-    "idna>=3.15",
+    "ipykernel==7.4.0",
+    # Force recent version of following lib to avoid CVE:
+    # https://github.com/phlowers/phlowers-stellar-app/security/dependabot/191
+    # https://github.com/phlowers/phlowers-stellar-app/security/dependabot/193
+    # https://github.com/phlowers/phlowers-stellar-app/security/dependabot/190
+    "tornado>=6.5.8",
     "unittest-xml-reporting==3.2.0",
     "pandas-stubs==2.2.3.241009",
     "scipy==1.14.1",
