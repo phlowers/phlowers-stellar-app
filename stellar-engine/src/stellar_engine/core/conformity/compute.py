@@ -7,13 +7,17 @@
 """Conformity output entities for structured conformity computation results."""
 
 import logging
+import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, Optional
 
 import numpy as np
 from mechaphlowers.core.geometry.distances import DistanceResult
 
-from stellar_engine.core.conformity.scenarios import TargetState
+from stellar_engine.core.conformity.scenarios import (
+    LATERAL_SIDE_POINTS,
+    TargetState,
+)
 from stellar_engine.entities.conformity import (
     ConformityWriter,
     ObstacleOutput,
@@ -223,7 +227,12 @@ class ConformityTableResult:
     lateral_wind_pressure: Optional[float] = None
     overhang_minimal_distance: Optional[float] = None
     lateral_minimal_distance: Optional[float] = None
-    scenario_compliances: list[bool] = field(default_factory=list)
+    conformity_plot: Optional[str] = None
+    obstacle_point: Optional[tuple[float, float]] = None
+    overhang_point: Optional[tuple[float, float]] = None
+    lateral_side_points: list[tuple[float, float]] = field(
+        default_factory=list
+    )
 
     def to_dict(self) -> dict:
         """Convert to dictionary format."""
@@ -231,39 +240,55 @@ class ConformityTableResult:
 
     @property
     def conformity_compliance_status(self) -> Optional[bool]:
-        """Compliant when every scenario of the rule complies, None without scenario."""
-        if not self.scenario_compliances:
+        """Compliance judged on the filled compliance values, None without value."""
+        values = [
+            value
+            for value in (
+                self.overhang_compliance_altitude,
+                self.lateral_compliance_line_axis_distance,
+            )
+            if value is not None
+        ]
+        if not values:
             return None
-        return all(self.scenario_compliances)
+        if self.conformity_plot == "vegetation":
+            return not self._is_inside_vegetation_u()
+        return all(value >= 0 for value in values)
 
-    def add_scenario_compliance(
-        self,
-        distance: DistanceResult,
-        conformity_point: str,
-        security_distance: Optional[float],
-    ) -> None:
-        """Record whether a scenario respects its security distance."""
-        if security_distance is None:
-            return
-        if conformity_point in ("lateral", "lateral_inverse", "intermediate"):
-            measured = distance.distance_projection_u
-        elif conformity_point == "overhang":
-            measured = distance.distance_projection_v
-        else:
-            return
-        self.scenario_compliances.append(bool(measured > security_distance))
+    def _is_inside_vegetation_u(self) -> bool:
+        """Inside the U: too close vertically and laterally within the lateral band."""
+        overhang = self.overhang_compliance_altitude
+        lateral = self.lateral_compliance_line_axis_distance
+        if overhang is None or overhang >= 0:
+            # Without overhang value, only the lateral side can be judged.
+            return overhang is None and lateral is not None and lateral < 0
+        if lateral is None or lateral < 0:
+            return True
+        # The absolute lateral gap is positive between the lateral points.
+        obstacle_x = self.obstacle_point[0]
+        lateral_xs = [x for x, _ in self.lateral_side_points]
+        return min(lateral_xs) <= obstacle_x <= max(lateral_xs)
 
     @property
     def lateral_compliance_line_axis_distance(self) -> Optional[float]:
         if (
-            self.lateral_cable_line_axis_distance is None
+            self.conformity_plot not in ("cable_track", "vegetation")
+            or self.obstacle_point is None
             or self.lateral_distance_to_comply is None
+            or not self.lateral_side_points
         ):
             return None
-        return (
-            self.lateral_cable_line_axis_distance
-            - self.lateral_distance_to_comply
-        )
+        obstacle_x, obstacle_y = self.obstacle_point
+        if self.conformity_plot == "cable_track":
+            closest = min(
+                math.hypot(obstacle_x - x, obstacle_y - y)
+                for x, y in self.lateral_side_points
+            )
+        else:
+            closest = min(
+                abs(obstacle_x - x) for x, _ in self.lateral_side_points
+            )
+        return closest - self.lateral_distance_to_comply
 
     @property
     def overhang_compliance_line_axis_distance(self) -> Optional[float]:
@@ -280,11 +305,22 @@ class ConformityTableResult:
     @property
     def overhang_compliance_altitude(self) -> Optional[float]:
         if (
-            self.overhang_cable_altitude is None
+            self.conformity_plot
+            not in ("cable_track", "vegetation", "overhang")
+            or self.obstacle_point is None
+            or self.overhang_point is None
             or self.overhang_distance_to_comply is None
         ):
             return None
-        return self.overhang_cable_altitude - self.overhang_distance_to_comply
+        obstacle_x, obstacle_y = self.obstacle_point
+        overhang_x, overhang_y = self.overhang_point
+        if self.conformity_plot == "cable_track":
+            distance = math.hypot(
+                obstacle_x - overhang_x, obstacle_y - overhang_y
+            )
+        else:
+            distance = abs(obstacle_y - overhang_y)
+        return distance - self.overhang_distance_to_comply
 
     def set_conformity_point(
         self, conformity_point: Literal["overhang", "lateral"]
@@ -305,9 +341,16 @@ class ConformityTableResult:
         conformity_point,
     ) -> None:
         if conformity_point == "lateral":
-            self.lateral_cable_altitude = point[0]
+            self.lateral_cable_altitude = point[1]
+            self.lateral_cable_line_axis_distance = point[0]
         elif conformity_point == "overhang":
             self.overhang_cable_altitude = point[1]
+            self.overhang_cable_line_axis_distance = point[0]
+
+        if conformity_point == "overhang":
+            self.overhang_point = point
+        elif conformity_point in LATERAL_SIDE_POINTS:
+            self.lateral_side_points.append(point)
 
     def set_rule_distances(self, security_distance, conformity_point) -> None:
         if conformity_point == "lateral":
@@ -317,18 +360,10 @@ class ConformityTableResult:
 
     def set_distance(self, distance: DistanceResult, conformity_point) -> None:
         if conformity_point == "lateral":
-            self.lateral_cable_line_axis_distance = (
-                distance.distance_projection_u
-            )
-
             # probably not the intended behavior, but keeping it for now to avoid breaking existing code
             # requirements was unclear about this field
             self.lateral_minimal_distance = distance.distance_projection_u
         elif conformity_point == "overhang":
-            self.overhang_cable_line_axis_distance = (
-                distance.distance_projection_v
-            )
-
             # probably not the intended behavior, but keeping it for now to avoid breaking existing code
             # requirements was unclear about this field
             self.overhang_minimal_distance = distance.distance_projection_v
@@ -350,7 +385,9 @@ class ConformityResult:
 
     @staticmethod
     def create_with_empty_zones(
-        obstacle_name: str, rule_types: list[str]
+        obstacle_name: str,
+        rule_types: list[str],
+        conformity_plot: Optional[str] = None,
     ) -> 'ConformityResult':
         """Create ConformityResult with empty zones for each rule type.
 
@@ -369,7 +406,9 @@ class ConformityResult:
                 zone_plot=ZonePlot(zone_points=[], zone_border=[]),
                 points=[],
             )
-            table_results[rule_type] = ConformityTableResult()
+            table_results[rule_type] = ConformityTableResult(
+                conformity_plot=conformity_plot
+            )
 
         return ConformityResult(
             obstacle=ObstacleOutput(name=obstacle_name, points=[]),

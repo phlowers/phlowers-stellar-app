@@ -101,7 +101,9 @@ def make_distances():
 
 @pytest.fixture
 def make_obstacle():
-    def _make_obstacle(obstacle_type: str, name: str = "test_obstacle") -> dict:
+    def _make_obstacle(
+        obstacle_type: str, name: str = "test_obstacle", position=None
+    ) -> dict:
         return {
             "uuid": "52b6cc64-72c2-442f-8159-89dba631a066",
             "supportUuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
@@ -111,7 +113,7 @@ def make_obstacle():
             "altitudeType": "absolute",
             "lateralDistanceType": "SPAN_AXIS",
             "referenceSupport": "LEFT",
-            "positions": [{"x": 10, "y": 5, "z": 65}],
+            "positions": [position or {"x": 10, "y": 5, "z": 65}],
         }
 
     return _make_obstacle
@@ -126,9 +128,12 @@ def make_python_inputs(make_obstacle):
         distances: list[dict],
         tension: str = "400 KV",
         obstacle_name: str = "test_obstacle",
+        obstacle_position=None,
     ) -> dict:
         return {
-            "obstacle": make_obstacle(obstacle_type, name=obstacle_name),
+            "obstacle": make_obstacle(
+                obstacle_type, name=obstacle_name, position=obstacle_position
+            ),
             "electricTension": tension,
             "form": _with_rule_names(form, rules),
             "rulesClimaticConditions": rules,

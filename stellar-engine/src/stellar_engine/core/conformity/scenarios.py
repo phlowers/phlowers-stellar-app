@@ -16,6 +16,9 @@ from stellar_engine.entities.conformity import (
 
 logger = logging.getLogger("stellar_engine")
 
+# Scenarios reported in the lateral column of the conformity table.
+LATERAL_SIDE_POINTS = ("lateral", "lateral_inverse", "intermediate")
+
 
 # ---------------------------scenario classes----------------
 
@@ -46,7 +49,8 @@ class Scenario:
 
     rule_type: str
     conformity_rule: str
-    conformity_point: str  # "lateral" or "overhang" or "cable_track"
+    # "lateral", "lateral_inverse", "overhang" or "intermediate"
+    conformity_point: str
     security_distance: float
     target_state: TargetState
 

@@ -4,8 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from types import SimpleNamespace
-
 import pytest
 
 from stellar_engine.core.conformity.compute import (
@@ -102,44 +100,103 @@ def test_cable_track_zone_has_empty_border():
 # ============================================================================
 
 
-def _distance(u=2.0, v=2.0):
-    return SimpleNamespace(distance_projection_u=u, distance_projection_v=v)
+def _table(
+    conformity_plot,
+    overhang_point=(0.0, 10.0),
+    lateral_side_points=((5.0, 10.0), (-5.0, 10.0)),
+    lateral_d=1.0,
+    overhang_d=1.5,
+):
+    return ConformityTableResult(
+        conformity_plot=conformity_plot,
+        obstacle_point=(0.0, 0.0),
+        overhang_point=overhang_point,
+        lateral_side_points=list(lateral_side_points),
+        lateral_distance_to_comply=lateral_d,
+        overhang_distance_to_comply=overhang_d,
+    )
 
 
-def test_compliance_true_when_all_scenarios_comply():
-    table = ConformityTableResult()
-    table.add_scenario_compliance(_distance(u=2.0), "lateral", 1.0)
-    table.add_scenario_compliance(_distance(u=2.0), "lateral_inverse", 1.0)
-    table.add_scenario_compliance(_distance(v=2.0), "overhang", 1.5)
+@pytest.mark.parametrize(
+    ("lateral_d", "overhang_d", "expected"),
+    [
+        (1.0, 1.5, True),
+        (100.0, 1.5, False),
+        (1.0, 100.0, False),
+        (100.0, 100.0, False),
+    ],
+)
+def test_cable_track_compliance_false_when_any_side_negative(
+    lateral_d, overhang_d, expected
+):
+    table = _table("cable_track", lateral_d=lateral_d, overhang_d=overhang_d)
 
+    assert table.conformity_compliance_status is expected
+
+
+@pytest.mark.parametrize(
+    ("lateral_d", "overhang_d", "expected"),
+    [
+        (1.0, 1.5, True),
+        (100.0, 1.5, True),
+        (1.0, 100.0, True),
+        (100.0, 100.0, False),
+    ],
+)
+def test_vegetation_compliance_false_only_when_both_sides_negative(
+    lateral_d, overhang_d, expected
+):
+    # Both lateral points on the same side: the obstacle is outside the U.
+    table = _table(
+        "vegetation",
+        lateral_side_points=((5.0, 10.0), (3.0, 10.0)),
+        lateral_d=lateral_d,
+        overhang_d=overhang_d,
+    )
+
+    assert table.conformity_compliance_status is expected
+
+
+@pytest.mark.parametrize(
+    ("overhang_d", "expected"), [(1.5, True), (100.0, False)]
+)
+def test_vegetation_obstacle_between_lateral_points_is_inside_u(
+    overhang_d, expected
+):
+    table = _table("vegetation", overhang_d=overhang_d)
+
+    assert table.lateral_compliance_line_axis_distance > 0
+    assert table.conformity_compliance_status is expected
+
+
+@pytest.mark.parametrize(
+    ("lateral_d", "overhang_d", "expected"),
+    [(100.0, 1.5, True), (1.0, 100.0, False)],
+)
+def test_overhang_compliance_ignores_lateral_side_points(
+    lateral_d, overhang_d, expected
+):
+    table = _table("overhang", lateral_d=lateral_d, overhang_d=overhang_d)
+
+    assert table.lateral_compliance_line_axis_distance is None
+    assert table.conformity_compliance_status is expected
+
+
+@pytest.mark.parametrize("conformity_plot", ["cable_track", "vegetation"])
+def test_compliance_value_of_zero_is_compliant(conformity_plot):
+    table = _table(
+        conformity_plot,
+        lateral_side_points=[(5.0, 0.0)],
+        lateral_d=5.0,
+        overhang_d=10.0,
+    )
+
+    assert table.overhang_compliance_altitude == pytest.approx(0.0)
+    assert table.lateral_compliance_line_axis_distance == pytest.approx(0.0)
     assert table.conformity_compliance_status is True
 
 
-def test_compliance_false_when_lateral_inverse_does_not_comply():
-    table = ConformityTableResult()
-    table.add_scenario_compliance(_distance(u=2.0), "lateral", 1.0)
-    table.add_scenario_compliance(_distance(u=0.5), "lateral_inverse", 1.0)
-    table.add_scenario_compliance(_distance(v=2.0), "overhang", 1.5)
-
-    assert table.conformity_compliance_status is False
-
-
-def test_compliance_false_when_intermediate_does_not_comply():
-    table = ConformityTableResult()
-    table.add_scenario_compliance(_distance(u=2.0), "lateral", 1.0)
-    table.add_scenario_compliance(_distance(u=0.5), "intermediate", 1.0)
-
-    assert table.conformity_compliance_status is False
-
-
-def test_compliance_true_for_overhang_only_rule():
-    table = ConformityTableResult()
-    table.add_scenario_compliance(_distance(v=2.0), "overhang", 1.5)
-
-    assert table.conformity_compliance_status is True
-
-
-def test_compliance_none_without_scenario():
+def test_compliance_none_without_point():
     assert ConformityTableResult().conformity_compliance_status is None
 
 

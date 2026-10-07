@@ -170,9 +170,13 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
     conformity_result = ConformityResult.create_with_empty_zones(
         obstacle_name=f"{obstacle_name} point {point_index + 1}",
         rule_types=list(tension_rules.keys()),
+        conformity_plot=parameters.conformity_plot,
     )
     u_plane, v_plane = dist_engine.define_distance_plane(obstacle_point)
     conformity_result.set_plane_basis(u_plane=u_plane, v_plane=v_plane)
+    obstacle_2d = conformity_result.project_onto_plane(obstacle_point)
+    for table_result in conformity_result.table_results.values():
+        table_result.obstacle_point = obstacle_2d
 
     # Simulation ------------------------------
 
@@ -219,11 +223,6 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
                 ),
             )
 
-            conformity_result.table_results[rule_type].add_scenario_compliance(
-                dist_result,
-                scenario.conformity_point,
-                scenario.security_distance,
-            )
             conformity_result.table_results[rule_type].set_target_state(
                 scenario.target_state, scenario.conformity_point
             )

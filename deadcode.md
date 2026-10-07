@@ -607,3 +607,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the method; no other change. |
 | ✅ Validated | ⏳ Pending review |
+
+---
+
+## 44. `ConformityTableResult.add_scenario_compliance` + `scenario_compliances` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult`), call in `simulation.py` (`get_conformity`) |
+| Code | `scenario_compliances: list[bool]` and `add_scenario_compliance(distance, conformity_point, security_distance)` |
+| 🔍 Evidence | Encoded the old rule (every scenario's u/v projection > distance to comply). `conformity_compliance_status` is now derived from `overhang_compliance_altitude` / `lateral_compliance_line_axis_distance` per conformity plot. The 5 related unit tests in `test_conformity_compute.py` were replaced. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Field, method, call and 5 obsolete unit tests removed. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-07 |
