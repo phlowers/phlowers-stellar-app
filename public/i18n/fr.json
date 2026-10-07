@@ -1154,7 +1154,7 @@
       "staff-presence-label": "Présence du personnel",
       "distance-support-ref-label": "Distance au support de référence",
       "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
-      "add-marking-label": "Ajouter un marquage",
+      "add-marking-label": "Ajouter une indication \"brins coupés\"",
       "result-cable-rrts-label": "CRR du câble",
       "result-new-working-load-label": "Nouveau taux de travail max",
       "result-new-working-load-null": "aucun nouveau taux de travail max",
