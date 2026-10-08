@@ -578,3 +578,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the function and the imports it alone required (`CableSupportManipulation`, `SupportAnchoringType`, `SupportManipType`, `SupportManipReportRow`). No behavioral change: the report keeps using the component's inline flattening. |
 | ✅ Validated | 🗑️ REMOVED — dead on arrival, never wired |
+
+---
+
+## 41. `app-assets-candidate-*` cache cleanup — `features/admin/presentation/pages/admin/admin.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/admin/presentation/pages/admin/admin.ts` line 161 (`resetApp()`), covered by `admin.spec.ts` lines 276 and 299 |
+| Code | `name.startsWith('app-assets-candidate-')` in the cache deletion filter |
+| 🔍 Evidence | The service worker no longer creates `app-assets-candidate-*` caches: every version is cached under `app-assets-v-<git_hash>` (`cacheNameForVersion` in `service-worker.ts`). Only leftovers from very old installs could still match. |
+| ⚠️ Confidence | **MEDIUM** — harmless to keep; removing it would leave such leftovers on very old installs |
+| Removal impact | Remove the condition and the `app-assets-candidate-xyz789` fixture/assertion in `admin.spec.ts` |
+| ✅ Validated | ⏳ Pending review |
