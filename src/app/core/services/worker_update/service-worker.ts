@@ -47,6 +47,8 @@ const GIT_HASH_PATTERN = /^[0-9a-f]{7,40}$/;
 
 /** The single install/update run in progress; concurrent requests join it. */
 let activeRun: ActiveRun | null = null;
+/** Makes run ids unique within one SW instance; the id is only a log correlation key. */
+let runCounter = 0;
 
 /** A precache failure that knows whether trying the same file again can help. */
 class PrecacheFileError extends Error {
@@ -90,7 +92,7 @@ function getRunProgress(): UpdateRunProgress | null {
  * The run id is local to the SW (it cannot import shared helpers at runtime).
  */
 function createUpdateLogger(): UpdateLogger {
-  const runId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const runId = `${Date.now().toString(36)}-${(++runCounter).toString(36)}`;
   const startedAt = Date.now();
   const emit = (level: UpdateLogLevel, step: string, details?: Record<string, unknown>) => {
     const entry: UpdateLogEntry = { runId, level, step, elapsedMs: Date.now() - startedAt, details };
