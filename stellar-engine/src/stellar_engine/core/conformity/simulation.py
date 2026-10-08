@@ -68,9 +68,13 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
             )
             for outcome in outcomes
         ]
-        conformity[rule_type] = ZoneConformity(
-            strategy.zone(points, distances), points
+        zone_width = request.parameters.zone_width
+        zone = (
+            strategy.zone(points, distances)
+            if zone_width is None
+            else strategy.zone(points, distances, zone_width)
         )
+        conformity[rule_type] = ZoneConformity(zone, points)
         table_results[rule_type] = ConformityTableResult.from_outcomes(
             outcomes, runner.obstacle, strategy
         )

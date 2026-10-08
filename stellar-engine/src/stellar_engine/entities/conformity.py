@@ -186,6 +186,8 @@ class ConformityParametersInput:
     selected_conformity_rules: list[str]
     conformity_plot: ConformityPlot
     intermediate_points: list[float] = field(default_factory=list)
+    # Width of a zero-width zone, None to use the engine default.
+    zone_width: float | None = None
 
     @classmethod
     def from_dict(cls, data: dict) -> 'ConformityParametersInput':
@@ -253,6 +255,12 @@ class ConformityParametersInput:
                 "intermediatePoints must be a list of numbers between 0 and 1"
             )
 
+        zone_width = data.get("zoneWidth")
+        if zone_width is not None and (
+            not _is_number(zone_width) or zone_width <= 0
+        ):
+            raise ConformityInputError("zoneWidth must be a positive number")
+
         try:
             conformity_plot = ConformityPlot(data["conformityPlot"])
         except ValueError:
@@ -270,4 +278,5 @@ class ConformityParametersInput:
             selected_conformity_rules=data["selectedConformityRules"],
             intermediate_points=intermediate_points,
             conformity_plot=conformity_plot,
+            zone_width=zone_width,
         )

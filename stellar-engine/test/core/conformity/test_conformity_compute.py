@@ -111,6 +111,16 @@ def test_zero_width_zone_gets_minimum_width_centered_on_point(
     assert corners["LowerRight"]["x"] == pytest.approx(2.0 + 5)
 
 
+def test_zero_width_zone_uses_given_width():
+    zone = get_strategy("overhang").zone(
+        [Point2D(2.0, 3.0)], TensionRules(lateral=None, overhang=1.5), 4.0
+    )
+
+    corners = _corners(zone)
+    assert corners["LowerLeft"]["x"] == pytest.approx(0.0)
+    assert corners["LowerRight"]["x"] == pytest.approx(4.0)
+
+
 def test_cable_track_has_no_zone():
     zone = _zone("cable_track", [Point2D(0, 0), Point2D(4, 3)])
 

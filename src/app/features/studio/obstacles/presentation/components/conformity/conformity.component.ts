@@ -44,6 +44,7 @@ import {
   getLateralDistanceTypeLabels
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
+import { computeOverhangZoneWidth } from './conformity.helpers';
 import { ConformityPlotResponse } from './conformity-plot.model';
 import {
   createConformityPlot,
@@ -538,6 +539,10 @@ export class ConformityComponent implements OnDestroy {
     const selectedRuleTypes = v.conformity ?? [];
     const obstacleType = obstacle.type ?? '';
     const electricTension = this.spanService.section()?.voltage_idr;
+    const zoneWidth =
+      conformityType === 'overhang'
+        ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
+        : undefined;
 
     this.isCalculating.set(true);
     this.calculationError.set(null);
@@ -572,7 +577,8 @@ export class ConformityComponent implements OnDestroy {
           selectedConformityRules: selectedRuleTypes,
           conformity: v.conformity,
           conformityPlot: conformityType,
-          intermediatePoints: this.intermediatePointsConfig()
+          intermediatePoints: this.intermediatePointsConfig(),
+          zoneWidth
         },
         rulesClimaticConditions: rules.map((r) => ({
           ruleType: r.rule_type,

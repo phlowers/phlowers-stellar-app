@@ -634,6 +634,8 @@ export interface ConformityFormInput {
   conformity: string[] | null;
   conformityPlot: 'vegetation' | 'cable_track' | 'overhang';
   intermediatePoints: number[];
+  // Width (m) of the overhang conformity zone (2 times the arm length); the engine default applies when omitted.
+  zoneWidth?: number;
 }
 
 export interface ConformityTaskInput {

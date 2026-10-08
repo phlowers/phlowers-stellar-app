@@ -51,7 +51,10 @@ class PlotStrategy(ABC):
         """Compliance judged on the compliance values, None without value."""
 
     def zone(
-        self, points: Sequence[Point2D], distances: TensionRules
+        self,
+        points: Sequence[Point2D],
+        distances: TensionRules,
+        width: float = DEFAULT_ZONE_WIDTH,
     ) -> ZonePlot:
         """Zone drawn around the cable points, empty when the plot has none."""
         return ZonePlot([], [])
@@ -103,7 +106,10 @@ class _BoxZoneStrategy(PlotStrategy):
         return cable.y - obstacle.y
 
     def zone(
-        self, points: Sequence[Point2D], distances: TensionRules
+        self,
+        points: Sequence[Point2D],
+        distances: TensionRules,
+        width: float = DEFAULT_ZONE_WIDTH,
     ) -> ZonePlot:
         if not points:
             return ZonePlot([], [])
@@ -115,8 +121,8 @@ class _BoxZoneStrategy(PlotStrategy):
         min_x = min(p.x for p in points) - lateral
         if math.isclose(max_x, min_x, abs_tol=1e-9):
             center_x = min_x
-            min_x = center_x - DEFAULT_ZONE_WIDTH / 2
-            max_x = center_x + DEFAULT_ZONE_WIDTH / 2
+            min_x = center_x - width / 2
+            max_x = center_x + width / 2
 
         min_y = min(p.y for p in points) - overhang
         max_y = min_y if self.flat else max(p.y for p in points) + overhang
