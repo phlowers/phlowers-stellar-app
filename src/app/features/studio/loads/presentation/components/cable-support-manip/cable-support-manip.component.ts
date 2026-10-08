@@ -449,7 +449,7 @@ export class CableSupportManipComponent {
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
     return (
       this.plotService.temporaryLoadData?.supportManipParams.find(
-        (supportManip) => supportManip.supportUuid === supportUuid
+        (supportManip) => supportManip.supportUuid === supportUuid && supportManip.chargeUuid === chargeUuid
       ) ??
       this.spanService
         .section()

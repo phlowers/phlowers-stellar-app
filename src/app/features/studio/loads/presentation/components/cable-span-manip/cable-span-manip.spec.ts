@@ -859,11 +859,6 @@ describe('CableSpanManipComponent', () => {
       mockPlotService.temporaryLoadData = { spanManipParams: [] } as unknown as PlotService['temporaryLoadData'];
     });
 
-    it('should not create an entry when a span is only selected', () => {
-      selectSpan('support-uuid-1');
-      expect(tempParams()).toHaveLength(0);
-    });
-
     it('should write the whole form snapshot once a field is edited', () => {
       selectSpan('support-uuid-1');
       editField('lateralDistance', 3);

@@ -97,13 +97,17 @@ export class LoadFormsService {
     newData.supportManipParams = [
       ...supportManipParams,
       ...(section?.cable_support_manipulations?.filter(
-        (suppManip) => !supportManipParams.some((p) => p.supportUuid === suppManip.supportUuid)
+        (suppManip) =>
+          !supportManipParams.some(
+            (p) => p.supportUuid === suppManip.supportUuid && suppManip.chargeUuid === currentChargeUuid
+          )
       ) ?? [])
     ];
     newData.spanManipParams = [
       ...spanManipParams,
       ...(section?.cable_span_manipulations?.filter(
-        (spanManip) => !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid)
+        (spanManip) =>
+          !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid && spanManip.chargeUuid === currentChargeUuid)
       ) ?? [])
     ];
     this.plotService.temporaryLoadData = newData;

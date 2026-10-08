@@ -39,7 +39,9 @@ const createTemporaryLoadData = (overrides: Partial<SpanLoad> = {}): ChargeData 
       ...overrides
     }
   ],
-  cableModifParams: []
+  cableModifParams: [],
+  supportManipParams: [],
+  spanManipParams: []
 });
 
 describe('LoadMarkingComponent', () => {

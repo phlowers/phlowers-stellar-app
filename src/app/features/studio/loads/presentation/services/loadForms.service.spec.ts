@@ -132,7 +132,9 @@ describe('LoadFormsService', () => {
         referenceSupport: 'LEFT'
       }
     ],
-    cableModifParams: []
+    cableModifParams: [],
+    supportManipParams: [],
+    spanManipParams: []
   };
 
   const mockCharge: Charge = {
