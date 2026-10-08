@@ -12,6 +12,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { SectionExportService } from '@services/section/section-export.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { ScaleViewComponent } from './scale-view/scale-view.component';
@@ -43,6 +44,7 @@ export class StudioTopToolbarComponent implements OnInit {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly logger = inject(LoggerService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly sectionExportService = inject(SectionExportService);
 
   items = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
@@ -52,6 +54,15 @@ export class StudioTopToolbarComponent implements OnInit {
   readonly toolbarDisabled = computed(() => this.plotOptionsService.isFreePositioningMode());
 
   private readonly hasCharges = computed(() => !!this.spanService.section()?.charges?.length);
+  readonly hasSection = computed(() => !!this.spanService.section());
+
+  /** Downloads the section currently displayed in the studio as a `.stsec` file. */
+  onExportSection(): void {
+    const section = this.spanService.section();
+    if (section) {
+      this.sectionExportService.exportSection(section);
+    }
+  }
 
   tablesDropdown = computed<MenuItem[]>(() => [
     {

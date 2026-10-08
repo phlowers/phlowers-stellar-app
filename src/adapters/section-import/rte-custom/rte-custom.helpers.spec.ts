@@ -4,22 +4,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Section, Support } from '@shared/domain';
-import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
-import { Attachment, SectionImportFile } from './section-import.interfaces';
+import { Support } from '@shared/domain';
+import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { Attachment, SectionImportFile } from './rte-custom.interfaces';
 import {
-  applyFootCoordinates,
-  buildReprojectionAngles,
   buildSectionName,
-  computeMeanReprojectionDiffMeters,
   extractAttachmentPosition,
-  extractBranchIdr,
-  getMissingRequiredFields,
+  extractCantonUuid,
+  hasCantons,
+  isRteCantonFormat,
   normalizeVoltage,
-  parseBooleanOrNull,
-  parseFloatOrNull,
   validateImportedSectionFields
-} from './section-import.helpers';
+} from './rte-custom.helpers';
 
 /** Builds a minimal Support for helper tests, overriding only the fields under test. */
 const buildSupport = (overrides: Partial<Support> = {}): Support => ({
@@ -63,6 +59,7 @@ const buildSectionImportFile = (overrides: {
     cantons: [
       {
         general: {
+          CANTON_CUR: 'CANTON-1',
           CABLE_ADR: 'GeoSection',
           CANTON_TYPE: 'PHASE',
           FAISCEAU_CABLES_NOMBRE: '2',
@@ -82,69 +79,39 @@ const buildSectionImportFile = (overrides: {
     ]
   }) as unknown as SectionImportFile;
 
-describe('extractBranchIdr', () => {
-  it('should return "1" for "TESTLINE73STB01"', () => {
-    expect(extractBranchIdr('TESTLINE73STB01')).toBe('1');
+describe('hasCantons', () => {
+  it('should be true for a non-empty cantons array', () => {
+    expect(hasCantons({ cantons: [{}] })).toBe(true);
   });
 
-  it('should return "2" for a branch ending with "02"', () => {
-    expect(extractBranchIdr('SOMELINE02')).toBe('2');
-  });
-
-  it('should strip leading zero — "08" becomes "8"', () => {
-    expect(extractBranchIdr('TESTLINE73STB08')).toBe('8');
-  });
-
-  it('should return "10" for a two-digit branch number without leading zero', () => {
-    expect(extractBranchIdr('TESTLINE73STB10')).toBe('10');
-  });
-
-  it('should return "1" for a legacy short decimal value "1.0" instead of NaN', () => {
-    expect(extractBranchIdr('1.0')).toBe('1');
-  });
-
-  it('should return "10" for a legacy short decimal value "10.0"', () => {
-    expect(extractBranchIdr('10.0')).toBe('10');
-  });
-
-  it('should return the raw value unchanged when it cannot be parsed as a number', () => {
-    expect(extractBranchIdr('N/A')).toBe('N/A');
+  it('should be false for an empty array, a missing key and non-objects', () => {
+    expect(hasCantons({ cantons: [] })).toBe(false);
+    expect(hasCantons({})).toBe(false);
+    expect(hasCantons(null)).toBe(false);
+    expect(hasCantons('text')).toBe(false);
   });
 });
 
-describe('parseBooleanOrNull', () => {
-  it('should return null for null/undefined', () => {
-    expect(parseBooleanOrNull(null)).toBeNull();
-    expect(parseBooleanOrNull(undefined)).toBeNull();
+describe('isRteCantonFormat', () => {
+  it('should be true for a canton with a string CANTON_CUR', () => {
+    expect(isRteCantonFormat(buildSectionImportFile({}))).toBe(true);
   });
 
-  it('should return the value unchanged for native booleans', () => {
-    expect(parseBooleanOrNull(true)).toBe(true);
-    expect(parseBooleanOrNull(false)).toBe(false);
+  it('should be false when the first canton or its general block is malformed', () => {
+    expect(isRteCantonFormat({ cantons: [null] })).toBe(false);
+    expect(isRteCantonFormat({ cantons: [{ general: null }] })).toBe(false);
+    expect(isRteCantonFormat({ cantons: [{ general: { CANTON_CUR: 12 } }] })).toBe(false);
+  });
+});
+
+describe('extractCantonUuid', () => {
+  it('should return the trimmed CANTON_CUR', () => {
+    expect(extractCantonUuid(buildSectionImportFile({ general: { CANTON_CUR: '  ABC  ' } }))).toBe('ABC');
   });
 
-  it('should recognize lowercase "true"/"false"', () => {
-    expect(parseBooleanOrNull('true')).toBe(true);
-    expect(parseBooleanOrNull('false')).toBe(false);
-  });
-
-  it('should recognize capitalized "True"/"False"', () => {
-    expect(parseBooleanOrNull('True')).toBe(true);
-    expect(parseBooleanOrNull('False')).toBe(false);
-  });
-
-  it('should recognize "OUI"/"NON" case-insensitively', () => {
-    expect(parseBooleanOrNull('oui')).toBe(true);
-    expect(parseBooleanOrNull('non')).toBe(false);
-  });
-
-  it('should recognize "1"/"0"', () => {
-    expect(parseBooleanOrNull('1')).toBe(true);
-    expect(parseBooleanOrNull('0')).toBe(false);
-  });
-
-  it('should return null for unrecognized values', () => {
-    expect(parseBooleanOrNull('maybe')).toBeNull();
+  it('should return null for a blank CANTON_CUR or a malformed file', () => {
+    expect(extractCantonUuid(buildSectionImportFile({ general: { CANTON_CUR: '   ' } }))).toBeNull();
+    expect(extractCantonUuid({ cantons: [] })).toBeNull();
   });
 });
 
@@ -157,32 +124,6 @@ describe('normalizeVoltage', () => {
   it('should return an empty string for null/undefined', () => {
     expect(normalizeVoltage(null)).toBe('');
     expect(normalizeVoltage(undefined)).toBe('');
-  });
-});
-
-describe('parseFloatOrNull', () => {
-  it('should return null for null, undefined and empty string', () => {
-    expect(parseFloatOrNull(null)).toBeNull();
-    expect(parseFloatOrNull(undefined)).toBeNull();
-    expect(parseFloatOrNull('')).toBeNull();
-  });
-
-  it('should parse a valid numeric string to a number', () => {
-    expect(parseFloatOrNull('42.5')).toBe(42.5);
-    expect(parseFloatOrNull('0')).toBe(0);
-    expect(parseFloatOrNull('-13.2')).toBe(-13.2);
-  });
-
-  it('should parse a native number value via String() conversion', () => {
-    expect(parseFloatOrNull(4)).toBe(4);
-  });
-
-  it('should return null for a non-numeric string', () => {
-    expect(parseFloatOrNull('abc')).toBeNull();
-  });
-
-  it('should return null for an object value', () => {
-    expect(parseFloatOrNull({})).toBeNull();
   });
 });
 
@@ -247,68 +188,6 @@ describe('buildSectionName', () => {
 
   it('should return an empty string when given no supports and no branch/type/phase', () => {
     expect(buildSectionName(null, null, null, [])).toBe('');
-  });
-});
-
-describe('buildReprojectionAngles', () => {
-  it('should return spanLength/lineAngle arrays with NaN/0 placeholders on the last support', () => {
-    const supports = [
-      buildSupport({ spanLength: 100, spanAngle: 5 }),
-      buildSupport({ spanLength: 200, spanAngle: 10 }),
-      buildSupport({ spanLength: 300, spanAngle: 15 })
-    ];
-    const { spanLength, lineAngle } = buildReprojectionAngles(supports);
-
-    expect(spanLength.slice(0, 2)).toEqual([100, 200]);
-    expect(Number.isNaN(spanLength[2])).toBe(true);
-    expect(lineAngle).toEqual([5, 10, 0]);
-  });
-});
-
-describe('applyFootCoordinates', () => {
-  it('should set footLatitude/footLongitude by index', () => {
-    const supports = [buildSupport(), buildSupport()];
-    const result = applyFootCoordinates(supports, [45.1, 45.2], [3.1, 3.2]);
-
-    expect(result[0].footLatitude).toBe(45.1);
-    expect(result[0].footLongitude).toBe(3.1);
-    expect(result[1].footLatitude).toBe(45.2);
-    expect(result[1].footLongitude).toBe(3.2);
-  });
-
-  it('should default to null when the coordinate array is shorter than the supports array', () => {
-    const supports = [buildSupport(), buildSupport()];
-    const result = applyFootCoordinates(supports, [45.1], [3.1]);
-
-    expect(result[1].footLatitude).toBeNull();
-    expect(result[1].footLongitude).toBeNull();
-  });
-
-  it('should not mutate the original support objects', () => {
-    const supports = [buildSupport()];
-    const result = applyFootCoordinates(supports, [45.1], [3.1]);
-
-    expect(supports[0].footLatitude).toBeNull();
-    expect(result[0]).not.toBe(supports[0]);
-  });
-});
-
-describe('computeMeanReprojectionDiffMeters', () => {
-  it('should return 0 when reconstructed coordinates equal the surveyed ones', () => {
-    expect(computeMeanReprojectionDiffMeters([100, 200], [300, 400], [100, 200], [300, 400])).toBe(0);
-  });
-
-  it('should compute the mean euclidean distance across all points', () => {
-    const expectedDiffs = [0, 1, 2].map((i) => Math.hypot(123456.0 - (100 + i), 789012.0 - (200 + i)));
-    const expectedMean = expectedDiffs.reduce((a, b) => a + b, 0) / expectedDiffs.length;
-
-    const result = computeMeanReprojectionDiffMeters(
-      [123456.0, 123456.0, 123456.0],
-      [789012.0, 789012.0, 789012.0],
-      [100, 101, 102],
-      [200, 201, 202]
-    );
-    expect(result).toBeCloseTo(expectedMean, 6);
   });
 });
 
@@ -386,72 +265,5 @@ describe('validateImportedSectionFields', () => {
 
     const errors = validateImportedSectionFields(payload);
     expect(errors.filter((e) => e.field === 'ANGLE_LIGNE')).toHaveLength(1);
-  });
-});
-
-describe('getMissingRequiredFields', () => {
-  const buildValidSection = (): Section => ({
-    ...createEmptySection(),
-    name: 'Valid Section',
-    type: 'phase',
-    cables_amount: 1,
-    cable_name: 'ASTER 570',
-    supports: [
-      buildSupport({ number: '1', spanLength: 100, spanAngle: 0, chainLength: 5, attachmentHeight: 10 }),
-      buildSupport({ number: '2', spanLength: null, spanAngle: 0, chainLength: 5, attachmentHeight: 10 })
-    ]
-  });
-
-  it('should return no missing fields for a fully valid section', () => {
-    expect(getMissingRequiredFields(buildValidSection())).toEqual([]);
-  });
-
-  it('should report "name" when empty or blank', () => {
-    expect(getMissingRequiredFields({ ...buildValidSection(), name: '' })).toContain('name');
-    expect(getMissingRequiredFields({ ...buildValidSection(), name: '   ' })).toContain('name');
-  });
-
-  it('should report "type" when falsy', () => {
-    expect(getMissingRequiredFields({ ...buildValidSection(), type: '' as unknown as Section['type'] })).toContain(
-      'type'
-    );
-  });
-
-  it('should report "cables_amount" when 0', () => {
-    expect(getMissingRequiredFields({ ...buildValidSection(), cables_amount: 0 })).toContain('cables_amount');
-  });
-
-  it('should report "cable_name" when missing and requireCableName is true (default)', () => {
-    expect(getMissingRequiredFields({ ...buildValidSection(), cable_name: undefined })).toContain('cable_name');
-  });
-
-  it('should not report "cable_name" when requireCableName is false', () => {
-    expect(getMissingRequiredFields({ ...buildValidSection(), cable_name: undefined }, false)).not.toContain(
-      'cable_name'
-    );
-  });
-
-  it('should report per-support missing number/spanAngle/chainLength/attachmentHeight', () => {
-    const section = buildValidSection();
-    section.supports[0].number = null;
-    section.supports[0].spanAngle = null;
-    section.supports[0].chainLength = null;
-    section.supports[0].attachmentHeight = null;
-
-    const missing = getMissingRequiredFields(section);
-    expect(missing).toContain('supports[0].number');
-    expect(missing).toContain('supports[0].spanAngle');
-    expect(missing).toContain('supports[0].chainLength');
-    expect(missing).toContain('supports[0].attachmentHeight');
-  });
-
-  it('should report spanLength missing on a non-last support but not on the last support', () => {
-    const section = buildValidSection();
-    section.supports[0].spanLength = null;
-    // supports[1] (last) already has spanLength: null and must NOT be reported.
-
-    const missing = getMissingRequiredFields(section);
-    expect(missing).toContain('supports[0].spanLength');
-    expect(missing).not.toContain('supports[1].spanLength');
   });
 });

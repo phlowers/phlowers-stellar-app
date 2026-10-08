@@ -10,16 +10,13 @@ export const SECTION_IMPORT_ERROR_KEYS = {
   fileTypeNotAllowed: 'common.import.error.file-type-not-allowed',
   fileReadError: 'common.error-reading-file-label',
   fileParseError: 'common.error-parsing-file-label',
+  noMatchingAdapter: 'section-import.no-matching-adapter',
   validationErrorRequiredFields: 'section-import.validation-required-fields',
   validationErrorSupportsBounds: 'section-import.validation-supports-bounds',
   sectionImportError: 'section-import.import-error',
   sectionDeleteError: 'section-import.delete-error',
-  sectionFormatError: 'section-import.section-format-error',
   lambertReprojectionError: 'section-import.lambert-reprojection-error'
 } as const;
-
-/** Transloco translation key for the section catalog-missing warning. */
-export const SECTION_CATALOG_MISSING_KEY = 'section-import.catalog-missing-warning';
 
 /** Transloco translation key for the Lambert93-to-GPS reprojection info toast. */
 export const REPROJECTION_INFO_KEY = 'section-import.reprojection-info';

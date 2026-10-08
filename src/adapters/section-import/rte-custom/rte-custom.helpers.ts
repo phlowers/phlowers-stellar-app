@@ -4,72 +4,44 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { isNil } from 'lodash';
-import { Section, Support } from '@shared/domain';
-import { FieldError, SectionImportFile, Attachment } from './section-import.interfaces';
+import { Support } from '@shared/domain';
+import { parseFloatOrNull } from '@shared/import/section-adapter/section-import-parse.helpers';
+import { Attachment, FieldError, ImportedSection, SectionImportFile } from './rte-custom.interfaces';
 
 // ---------------------------------------------------------------------------
-// Lambert93 to GPS reprojection helpers
+// Format detection
 // ---------------------------------------------------------------------------
 
-/**
- * Builds the `spanLength`/`lineAngle` arrays consumed by the Lambert93-to-GPS reprojection
- * tasks. The last support has no outgoing span, so it gets `NaN`/`0` placeholders.
- */
-export function buildReprojectionAngles(supports: Support[]): { spanLength: number[]; lineAngle: number[] } {
-  const lastIndex = supports.length - 1;
-  return {
-    spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
-    lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
-  };
-}
-
-/** Returns a copy of `supports` with `footLatitude`/`footLongitude` set from the given arrays (by index). */
-export function applyFootCoordinates(supports: Support[], latitude: number[], longitude: number[]): Support[] {
-  return supports.map((support, i) => ({
-    ...support,
-    footLatitude: latitude[i] ?? null,
-    footLongitude: longitude[i] ?? null
-  }));
-}
-
-/**
- * Computes the mean absolute distance (meters) between two Lambert93 coordinate arrays —
- * the surveyed positions vs. the app's span/angle data model reconstruction.
- */
-export function computeMeanReprojectionDiffMeters(
-  lambertX: number[],
-  lambertY: number[],
-  reconstructedX: number[],
-  reconstructedY: number[]
-): number {
+/** Returns `true` when the parsed JSON has a non-empty `cantons` array (the file claims to be a canton file). */
+export function hasCantons(json: unknown): boolean {
   return (
-    lambertX.reduce((sum, x, i) => sum + Math.hypot(x - reconstructedX[i], lambertY[i] - reconstructedY[i]), 0) /
-    lambertX.length
+    typeof json === 'object' &&
+    json !== null &&
+    Array.isArray((json as Record<string, unknown>)['cantons']) &&
+    ((json as Record<string, unknown>)['cantons'] as unknown[]).length > 0
   );
+}
+
+/** Returns `true` when the parsed JSON is a well-formed canton file (`cantons[0].general.CANTON_CUR` is a string). */
+export function isRteCantonFormat(json: unknown): json is SectionImportFile {
+  if (!hasCantons(json)) return false;
+  const canton0 = ((json as Record<string, unknown>)['cantons'] as unknown[])[0];
+  if (typeof canton0 !== 'object' || canton0 === null) return false;
+  const general = (canton0 as Record<string, unknown>)['general'];
+  if (typeof general !== 'object' || general === null) return false;
+  return typeof (general as Record<string, unknown>)['CANTON_CUR'] === 'string';
+}
+
+/** Trimmed `CANTON_CUR` of the first canton, or `null` when the file is not a well-formed canton file. */
+export function extractCantonUuid(json: unknown): string | null {
+  if (!isRteCantonFormat(json)) return null;
+  const uuid = (json.cantons[0] as ImportedSection).general.CANTON_CUR.trim();
+  return uuid === '' ? null : uuid;
 }
 
 // ---------------------------------------------------------------------------
 // Pure helper functions
 // ---------------------------------------------------------------------------
-
-/** Converts a JSON string/null value to `number | null`. */
-export function parseFloatOrNull(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') return null;
-  // Only strings and numbers can carry a number: anything else (object, boolean, function) is null.
-  const n = typeof value === 'number' || typeof value === 'string' ? Number.parseFloat(String(value)) : Number.NaN;
-  return Number.isNaN(n) ? null : n;
-}
-
-/** Converts a JSON string/boolean/null value to `boolean | null`. Case-insensitive on string values. */
-export function parseBooleanOrNull(value: unknown): boolean | null {
-  if (value === null || value === undefined) return null;
-  if (typeof value === 'boolean') return value;
-  const normalized = typeof value === 'string' ? value.toUpperCase() : value;
-  if (normalized === 'TRUE' || normalized === '1' || normalized === 'OUI') return true;
-  if (normalized === 'FALSE' || normalized === '0' || normalized === 'NON') return false;
-  return null;
-}
 
 /**
  * Normalizes a voltage string for catalog matching: strips all whitespace and uppercases it,
@@ -77,26 +49,6 @@ export function parseBooleanOrNull(value: unknown): boolean | null {
  */
 export function normalizeVoltage(value: string | null | undefined): string {
   return (value ?? '').replace(/\s+/g, '').toUpperCase();
-}
-
-/**
- * Extracts the branch number from a BRANCHE_IDR string.
- * Rule RG.CAN.BRA — takes the last 2 characters (always digits) and converts them to an integer string.
- * e.g. "TESTLINE73STB01" → "1", "TESTLINE73STB08" → "8", "TESTLINE73STB10" → "10".
- *
- * @remarks
- * Legacy manually-edited records (pre-dating the catalog rename to `branch_idr`) may already hold
- * a short catalog branch number instead of the raw BRANCHE_IDR code (e.g. "1", "1.0"). In that case
- * the last-2-characters rule can land mid-decimal (e.g. ".0") and produce `NaN`; fall back to parsing
- * the whole value as a number so these legacy values still display correctly.
- */
-export function extractBranchIdr(value: string): string {
-  const lastTwoDigits = Number.parseInt(value.slice(-2), 10);
-  if (!Number.isNaN(lastTwoDigits)) {
-    return String(lastTwoDigits);
-  }
-  const wholeValue = Number.parseFloat(value);
-  return Number.isNaN(wholeValue) ? value : String(wholeValue);
 }
 
 /**
@@ -235,25 +187,4 @@ export function validateImportedSectionFields(raw: SectionImportFile): FieldErro
   });
 
   return errors;
-}
-
-/**
- * Returns the list of model field paths that fail the required-field check.
- * Used for legacy Section JSON imports where JSON keys already match model names.
- * When `requireCableName` is false, the cable_name check is skipped.
- */
-export function getMissingRequiredFields(section: Section, requireCableName = true): string[] {
-  const missing: string[] = [];
-  if (!section.name.trim()) missing.push('name');
-  if (!section.type) missing.push('type');
-  if (!section.cables_amount) missing.push('cables_amount');
-  if (requireCableName && !section.cable_name) missing.push('cable_name');
-  section.supports.forEach((s, i) => {
-    if (isNil(s.number)) missing.push(`supports[${i}].number`);
-    if (isNil(s.spanLength) && i !== section.supports.length - 1) missing.push(`supports[${i}].spanLength`);
-    if (isNil(s.spanAngle)) missing.push(`supports[${i}].spanAngle`);
-    if (isNil(s.chainLength)) missing.push(`supports[${i}].chainLength`);
-    if (isNil(s.attachmentHeight)) missing.push(`supports[${i}].attachmentHeight`);
-  });
-  return missing;
 }

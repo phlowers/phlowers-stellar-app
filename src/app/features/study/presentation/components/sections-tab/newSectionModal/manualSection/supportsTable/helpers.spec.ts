@@ -9,9 +9,9 @@ import {
   calculateSupportNumber,
   createEmptyChain,
   findSupplementaryNames,
-  getSupportFieldValues,
-  SUPPORT_FIELD_LIMITS
+  getSupportFieldValues
 } from './helpers';
+import { SUPPORT_FIELD_LIMITS } from '@shared/domain/helpers/support-limits.constantes';
 
 const makeSupport = (uuid: string, overrides: Partial<Support> = {}): Support => ({
   uuid,

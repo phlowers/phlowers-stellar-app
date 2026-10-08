@@ -1,0 +1,4 @@
+{
+  "format-error": "The section file to import is invalid.",
+  "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog"
+}
