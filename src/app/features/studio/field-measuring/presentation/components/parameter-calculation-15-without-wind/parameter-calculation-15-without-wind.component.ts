@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, model, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -45,15 +44,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   ],
   templateUrl: './parameter-calculation-15-without-wind.component.html',
   styleUrl: './parameter-calculation-15-without-wind.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ParameterCalculation15WithoutWindComponent {
   /** Field measure data model bound two-way. */
@@ -82,7 +73,7 @@ export class ParameterCalculation15WithoutWindComponent {
   readonly updateModeOptions = computed(() => {
     this.activeLang();
     return [
-      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      { label: this.translocoService.translate('common.auto-label'), value: 'auto' },
       {
         label: this.translocoService.translate('field-measuring.parameter-calculation-15.manual-option'),
         value: 'manual'
@@ -105,12 +96,15 @@ export class ParameterCalculation15WithoutWindComponent {
       return (
         isNumber(manualData?.cableTemperatureCalibration) &&
         isNumber(manualData?.parameterPapoto) &&
-        isNumber(manualData?.cableTemperatureCalibrationUncertainty)
+        isNumber(manualData?.parameterUncertaintyPapoto) &&
+        manualData.parameterUncertaintyPapoto >= 0 &&
+        isNumber(manualData?.cableTemperatureCalibrationUncertainty) &&
+        manualData.cableTemperatureCalibrationUncertainty >= 0
       );
     }
     return (
       isNumber(this.measureData().outputs.papoto?.parameter) &&
-      // data.parameterUncertaintyPapoto !== null && // TODO: Uncomment when parameterUncertaintyPapoto is available
+      isNumber(this.measureData().outputs.papoto?.uncertainty) &&
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperature) &&
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty)
     );
@@ -131,19 +125,23 @@ export class ParameterCalculation15WithoutWindComponent {
           value === 'manual'
             ? {
                 parameterPapoto:
-                  d.manualParameterCalculation15CWithoutWind?.parameterPapoto ?? d.outputs.papoto?.parameter ?? null,
+                  d.manualParameterCalculation15CWithoutWind?.parameterPapoto ??
+                  (d.outputs.papoto?.parameter != null ? truncateNumberToOneDecimal(d.outputs.papoto.parameter) : null),
                 parameterUncertaintyPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ??
-                  d.outputs.papoto?.uncertainty ??
-                  null,
+                  (d.outputs.papoto?.uncertainty != null
+                    ? truncateNumberToOneDecimal(d.outputs.papoto.uncertainty)
+                    : null),
                 cableTemperatureCalibration:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ??
-                  d.outputs.cableTemperature?.cableTemperature ??
-                  null,
+                  (d.outputs.cableTemperature?.cableTemperature != null
+                    ? truncateNumberToOneDecimal(d.outputs.cableTemperature.cableTemperature)
+                    : null),
                 cableTemperatureCalibrationUncertainty:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibrationUncertainty ??
-                  d.outputs.cableTemperature?.cableTemperatureUncertainty ??
-                  null
+                  (d.outputs.cableTemperature?.cableTemperatureUncertainty != null
+                    ? truncateNumberToOneDecimal(d.outputs.cableTemperature.cableTemperatureUncertainty)
+                    : null)
               }
             : d.manualParameterCalculation15CWithoutWind
       }));
@@ -180,17 +178,16 @@ export class ParameterCalculation15WithoutWindComponent {
     const isManual = data.updateMode15C === 'manual';
     const manualData = data.manualParameterCalculation15CWithoutWind;
     const manualDataToSend = {
-      parameterPapoto: manualData?.parameterPapoto || null,
-      parameterUncertaintyPapoto: manualData?.parameterUncertaintyPapoto || null,
-      cableTemperatureCalibration: manualData?.cableTemperatureCalibration || null,
-      cableTemperatureCalibrationUncertainty: manualData?.cableTemperatureCalibrationUncertainty || null
+      parameterPapoto: manualData?.parameterPapoto ?? null,
+      parameterUncertaintyPapoto: manualData?.parameterUncertaintyPapoto ?? null,
+      cableTemperatureCalibration: manualData?.cableTemperatureCalibration ?? null,
+      cableTemperatureCalibrationUncertainty: manualData?.cableTemperatureCalibrationUncertainty ?? null
     };
     const autoDataToSend = {
-      parameterPapoto: data.outputs.papoto?.parameter || null,
-      // Uncertainties currently unused
-      parameterUncertaintyPapoto: data.parameterUncertaintyPapoto || null,
-      cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature || null,
-      cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty || null
+      parameterPapoto: data.outputs.papoto?.parameter ?? null,
+      parameterUncertaintyPapoto: data.outputs.papoto?.uncertainty ?? null,
+      cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature ?? null,
+      cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty ?? null
     };
     const dataToSend = isManual ? manualDataToSend : autoDataToSend;
     this.isCalculating.set(true);
@@ -266,7 +263,7 @@ export class ParameterCalculation15WithoutWindComponent {
       this.messageService.add({
         severity: 'success',
         summary: this.translocoService.translate('common.success'),
-        detail: this.translocoService.translate('field-measuring.parameter-calculation-15.success-detail'),
+        detail: this.translocoService.translate('study.notifications.ic-added'),
         life: 3000
       });
     }

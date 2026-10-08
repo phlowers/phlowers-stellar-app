@@ -7,6 +7,7 @@ import { LoadsTableComponent } from '../components/loads-table/loads-table.compo
 import { PoseTableComponent } from '../components/pose-table/pose-table.component';
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
+import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
 
 /** Identifier for a toolbar tool. */
 export type Tool =
@@ -17,6 +18,7 @@ export type Tool =
   | 'pose-table'
   | 'obstacles-table'
   | 'strand-rrts'
+  | 'cable-adjustment'
   | 'other-tool';
 
 /** Phase of the toolbar dialog lifecycle. */
@@ -90,6 +92,10 @@ export class ToolbarDialogService {
     },
     'strand-rrts': {
       component: StrandRrtsComponent,
+      dialogStyle: { width: '43.5rem', 'max-width': '90%' }
+    },
+    'cable-adjustment': {
+      component: CableAdjustmentComponent,
       dialogStyle: { width: '43.5rem', 'max-width': '90%' }
     },
     'other-tool': {

@@ -31,7 +31,6 @@ import { ManualSectionComponent } from './manualSection.component';
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Section, Support, CatalogMaintenance, CatalogLine } from '@shared/domain';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -199,7 +198,6 @@ describe('ManualSectionComponent', () => {
         ManualSectionComponent,
         MockSupportsTableComponent,
         MockStudioComponent,
-        NoopAnimationsModule,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {

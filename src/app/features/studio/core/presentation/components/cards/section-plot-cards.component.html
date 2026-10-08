@@ -1,7 +1,7 @@
 <article
-  class="articles"
+  class="articles collapsible"
   data-testid="cards-article"
-  [@expandCollapse]="arraysOfSupports().length <= 3 ? 'expanded' : 'collapsed'"
+  [class.collapsible--collapsed]="arraysOfSupports().length > 3"
 >
   @for (support of arraysOfSupports(); track $index) {
     <app-section-plot-card data-testid="support-card" [litData]="litData()" [type]="'support'" [index]="support" />

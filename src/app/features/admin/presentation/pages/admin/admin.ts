@@ -146,23 +146,19 @@ export class AdminComponent {
       accept: async () => {
         // Unregister all service workers.
         const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          await registration.unregister();
-        }
+        await Promise.all(registrations.map((registration) => registration.unregister()));
 
         // Delete all application caches: legacy, control, and all versioned caches.
         // IndexedDB and catalogs are preserved.
         const cacheNames = await caches.keys();
-        for (const name of cacheNames) {
-          if (
+        const appCacheNames = cacheNames.filter(
+          (name) =>
             name === LEGACY_CACHE_NAME ||
             name === CONTROL_CACHE_NAME ||
             name.startsWith('app-assets-v-') ||
             name.startsWith('app-assets-candidate-')
-          ) {
-            await caches.delete(name);
-          }
-        }
+        );
+        await Promise.all(appCacheNames.map((name) => caches.delete(name)));
 
         this.messageService.add({
           severity: 'success',

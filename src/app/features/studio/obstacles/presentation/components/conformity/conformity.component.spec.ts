@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ConformityComponent } from './conformity.component';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
@@ -241,7 +240,7 @@ describe('ConformityComponent', () => {
               'studio.conformity.obstacle-legend': 'Obstacle',
               'studio.conformity.obstacle-point-label': "Obstacle's point",
               'studio.conformity.overhang-column-suffix': 'overhang',
-              'studio.conformity.point-option-label': 'Point {{ index }}',
+              'common.point-index-label': 'Point {{ index }}',
               'studio.conformity.red-zone-presence-label': 'Red zone presence',
               'studio.conformity.reduce-graphic-view-btn': 'Reduce graphic view',
               'studio.conformity.reference-support-distance-label': 'Reference support distance',
@@ -254,9 +253,9 @@ describe('ConformityComponent', () => {
               'studio.conformity.wind-zone-label': 'Wind zone',
               'studio.shared.conformity-label': 'Conformity',
               'studio.shared.lateral-distance-type-label': 'Lateral distance type',
-              'studio.shared.reference-support-label': 'Reference support',
+              'common.reference-support-label': 'Reference support',
               'common.results': 'Results:',
-              'studio.shared.span-label': 'Span'
+              'common.span-label': 'Span'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -265,7 +264,6 @@ describe('ConformityComponent', () => {
         ConformityComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: ObstacleFormService, useValue: mockFormService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },

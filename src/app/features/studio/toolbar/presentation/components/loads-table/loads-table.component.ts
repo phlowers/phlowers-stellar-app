@@ -367,7 +367,7 @@ export class LoadsTableComponent {
       author: study?.author_email ?? '-',
       studyTitle: study?.title ?? '-',
       studyDescription: study?.description ?? '',
-      cantonName: section?.name ?? '-',
+      sectionName: section?.name ?? '-',
       cantonComment: section?.comment ?? '',
       icName: initialCondition?.name ?? '-',
       chargeName: this.name(),

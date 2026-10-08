@@ -12,7 +12,8 @@ import { FieldMeasure } from '../domain/types';
 import { formatSpanLabel } from './helpers';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
-  PARAMETER_CALCULATION_METHOD_EXPORT_KEYS,
+  PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS,
+  TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE,
   UPDATE_MODE_15C_EXPORT_KEYS,
   WIND_SPEED_UNIT_EXPORT_KEYS,
   CALCULATION_TYPE_EXPORT_KEYS
@@ -96,6 +97,12 @@ export const buildGeneralExport = (section: Section | null, study: Study | null)
   loadCase: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? null
 });
 
+// The legacy French span type 'garde' maps to the 'guard' translation key.
+const getSectionTypeKey = (spanType: string): string => {
+  const keySuffix = spanType.toLowerCase() === 'garde' ? 'guard' : spanType;
+  return `common.section-type.${keySuffix}`;
+};
+
 /**
  * Builds the `measure` export block (formerly `measureData`).
  * @param measureData - The field measure to export
@@ -107,11 +114,7 @@ export const buildMeasureExport = (measureData: FieldMeasure, translocoService: 
   date: formatExportDate(measureData.date),
   time: formatExportTime(measureData.time),
   voltage: createValueUnit(measureData.voltage, 'KV'),
-  sectionType: measureData.spanType
-    ? translocoService.translate(
-        'common.section-type.' + (measureData.spanType.toLowerCase() === 'garde' ? 'guard' : measureData.spanType)
-      )
-    : null,
+  sectionType: measureData.spanType ? translocoService.translate(getSectionTypeKey(measureData.spanType)) : null,
   cable: measureData.cableName,
   cablesNumber: measureData.numberOfConductors,
   phaseNumber: measureData.phaseNumber
@@ -276,8 +279,12 @@ export const buildParameterCalculationExport = (
       method.pep = buildPepMethodExport(measureData);
       break;
   }
+  const methodName: ParameterCalculationExport['methodName'] =
+    measureData.calculationMethod === 'tangente-aiming'
+      ? TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE
+      : translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS[measureData.calculationMethod]);
   return {
-    methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_EXPORT_KEYS[measureData.calculationMethod]),
+    methodName,
     subMethodName: null,
     leftSupport: measureData.leftSupport,
     method

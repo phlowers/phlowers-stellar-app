@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { TemperatureCalculationComponent } from './temperature-calculation.component';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
@@ -83,17 +82,17 @@ describe('TemperatureCalculationComponent', () => {
               'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.',
               'shared.python-errors.night-time-error':
                 'Sky cover cannot be estimated because the provided time is during the night.',
-              'field-measuring.shared.auto-option': 'Auto',
+              'common.auto-label': 'Auto',
               'field-measuring.shared.cable-temperature-label': 'Cable temperature',
               'common.calculate': 'Calculate',
               'common.results': 'Results:',
               'field-measuring.shared.sky-cover-label': 'Sky cover',
-              'field-measuring.shared.uncertainty-cable-temperature': ' Uncertainty cable temperature ',
+              'common.uncertainty-cable-temperature-label': ' Uncertainty cable temperature ',
               'field-measuring.shared.wind-direction-label': 'Wind direction',
               'field-measuring.shared.wind-speed-label': 'Wind speed',
               'field-measuring.temperature-calculation.ambient-temperature-label': 'Ambient temperature (\u00b0C)',
               'field-measuring.temperature-calculation.beam-solar-radiation-label': 'Beam solar radiation',
-              'field-measuring.temperature-calculation.cable-name-label': 'Cable name',
+              'common.cable-name-label': 'Cable name',
               'field-measuring.temperature-calculation.computing-wind-incidence-aria-label': 'Computing wind incidence',
               'field-measuring.temperature-calculation.diffuse-plus-beam-label': 'Diffuse + beam solar radiation',
               'field-measuring.temperature-calculation.diffuse-solar-radiation-label': 'Diffuse solar radiation',
@@ -123,7 +122,6 @@ describe('TemperatureCalculationComponent', () => {
         TemperatureCalculationComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: WorkerPythonService, useValue: workerPythonServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock }
       ]
@@ -411,11 +409,11 @@ describe('TemperatureCalculationComponent', () => {
     });
   });
 
-  it('should calculate temperature and show results', async () => {
+  it('should calculate temperature and show results rounded to 1 decimal', async () => {
     const mockResult = {
       cableSolarFlux: 123,
-      cableTemperature: 123,
-      cableTemperatureUncertainty: 5
+      cableTemperature: 123.59,
+      cableTemperatureUncertainty: 5.59
     };
 
     workerPythonServiceMock.runTask.mockResolvedValue({
@@ -439,8 +437,19 @@ describe('TemperatureCalculationComponent', () => {
     expect(component.temperatureCalculationError()).toBe(false);
 
     await component.calculateTemperature();
+    fixture.detectChanges();
 
     expect(component.temperatureCalculationError()).toBe(false);
+    const temperatureText = fixture.nativeElement.querySelector(
+      '[data-testid="cable-temperature-result"]'
+    )?.textContent;
+    const uncertaintyText = fixture.nativeElement.querySelector(
+      '[data-testid="cable-temperature-uncertainty-result"]'
+    )?.textContent;
+    expect(temperatureText).toContain('123.6');
+    expect(temperatureText).not.toContain('123.5');
+    expect(uncertaintyText).toContain('5.6');
+    expect(uncertaintyText).not.toContain('5.5');
   });
 
   describe('estimateSkyCover', () => {

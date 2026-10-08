@@ -23,8 +23,8 @@ import { LoadType, SymmetryType } from '@shared/domain/models/charge.model';
 
 /** Load type → translation key. */
 export const LOAD_TYPE_LABEL_KEYS: Record<LoadType, string> = {
-  [LoadType.PUNCTUAL]: 'studio.loads-table.punctual-load-label',
-  [LoadType.MARKING]: 'studio.loads-table.marking-label'
+  [LoadType.PUNCTUAL]: 'common.punctual-load-label',
+  [LoadType.MARKING]: 'common.marking-label'
 };
 
 /** Climate symmetry type → translation key. */

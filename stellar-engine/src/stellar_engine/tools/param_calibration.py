@@ -7,25 +7,68 @@
 
 import logging
 
+import numpy as np
 from mechaphlowers import BalanceEngine, param_calibration
 
 from stellar_engine.entities.inputs import ParameterCalibrationInputs
 
 logger = logging.getLogger(__name__)
 
+DECIMAL_PRECISION = 1
+
+COVERAGE_FACTOR = 1.65
+TEMPERATURE_UNCERTAINTY_WEIGHT = 0.9
+PARAMETER_UNCERTAINTY_WEIGHT = 0.5
+
 
 def parameter_15_without_wind(inputs: dict, engine: BalanceEngine):
     param_calibr_inputs = ParameterCalibrationInputs(**inputs)
     logger.debug("%s", param_calibr_inputs)
-    param_result = param_calibration(
-        measured_parameter=param_calibr_inputs.parameterPapoto,
-        measured_temperature=param_calibr_inputs.cableTemperatureCalibration,
-        section_array=engine.section_array,
-        cable_array=engine.cable_array,
-        span_index=param_calibr_inputs.span_index,
+
+    temperature = param_calibr_inputs.cableTemperatureCalibration
+    parameter = param_calibr_inputs.parameterPapoto
+    temperature_delta = (
+        TEMPERATURE_UNCERTAINTY_WEIGHT
+        * COVERAGE_FACTOR
+        * param_calibr_inputs.cableTemperatureCalibrationUncertainty
     )
+    parameter_delta = (
+        PARAMETER_UNCERTAINTY_WEIGHT
+        * COVERAGE_FACTOR
+        * param_calibr_inputs.parameterUncertaintyPapoto
+    )
+
+    def calibrate(
+        measured_parameter: float, measured_temperature: float
+    ) -> float:
+        return param_calibration(
+            measured_parameter=measured_parameter,
+            measured_temperature=measured_temperature,
+            section_array=engine.section_array,
+            cable_array=engine.cable_array,
+            span_index=param_calibr_inputs.span_index,
+        )
+
     return {
-        "parameter15CMinusUncertainty": None,
-        "parameter15C": param_result,
-        "parameter15CPlusUncertainty": None,
+        "parameter15CMinusUncertainty": float(
+            np.round(
+                calibrate(
+                    parameter - parameter_delta,
+                    temperature - temperature_delta,
+                ),
+                DECIMAL_PRECISION,
+            )
+        ),
+        "parameter15C": float(
+            np.round(calibrate(parameter, temperature), DECIMAL_PRECISION)
+        ),
+        "parameter15CPlusUncertainty": float(
+            np.round(
+                calibrate(
+                    parameter + parameter_delta,
+                    temperature + temperature_delta,
+                ),
+                DECIMAL_PRECISION,
+            )
+        ),
     }

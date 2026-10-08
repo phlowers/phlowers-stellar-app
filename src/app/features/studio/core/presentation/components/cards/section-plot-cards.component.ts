@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SectionPlotCardComponent } from './card/section-plot-card.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -11,29 +10,6 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
   templateUrl: './section-plot-cards.component.html',
   imports: [SectionPlotCardComponent],
   styleUrl: './section-plot-cards.component.scss',
-  animations: [
-    trigger('expandCollapse', [
-      state(
-        'collapsed',
-        style({
-          height: '0',
-          opacity: '0',
-          paddingBottom: '0',
-          overflow: 'hidden'
-        })
-      ),
-      state(
-        'expanded',
-        style({
-          height: '*',
-          opacity: '1',
-          paddingBottom: '0.5rem',
-          overflow: 'hidden'
-        })
-      ),
-      transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
-    ])
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Container component that renders `SectionPlotCardComponent` cards for visible supports and spans. */

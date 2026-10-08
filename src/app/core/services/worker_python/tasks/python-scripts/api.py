@@ -13,6 +13,7 @@ from stellar_engine.core import loads
 from stellar_engine.core.conformity import simulation as conformity_simulation
 from stellar_engine.data import geography
 from stellar_engine.tools import (
+    cable_adjustment,
     guying,
     param_calibration,
     temperature,
@@ -50,6 +51,11 @@ def calculate_guying(js_inputs):
     inputs = js_inputs.to_py()
 
     return guying.calculate_guying(inputs, engine=study.balance_engine)
+
+
+@debug_log
+def calculate_cable_adjustment(js_inputs):
+    return cable_adjustment.calculate_cable_adjustment(inputs=js_inputs.to_py())
 
 
 @debug_log

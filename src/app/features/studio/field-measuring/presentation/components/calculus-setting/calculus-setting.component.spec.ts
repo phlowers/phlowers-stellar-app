@@ -19,8 +19,8 @@ describe('CalculusSetting component', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'field-measuring.calculus-setting.papoto-radio-label': 'PAPOTO',
-              'field-measuring.calculus-setting.pep-radio-label': 'PEP',
+              'common.papoto-label': 'PAPOTO',
+              'common.pep-label': 'PEP',
               'field-measuring.calculus-setting.tangent-aiming-radio-label': 'Tangent aiming'
             }
           },

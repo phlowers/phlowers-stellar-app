@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { QuickMeasuresComponent } from './quick-measures.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -74,7 +73,7 @@ describe('QuickMeasuresComponent', () => {
           langs: {
             en: {
               'studio.quick-measures.not-selected-option': 'Not selected',
-              'studio.quick-measures.point-option': 'Point {{ index }}',
+              'common.point-index-label': 'Point {{ index }}',
               'studio.quick-measures.floor-option': 'floor {{ span }}',
               'studio.floor.point-title': 'Point {{ distance }} m'
             }
@@ -85,7 +84,6 @@ describe('QuickMeasuresComponent', () => {
         QuickMeasuresComponent
       ],
       providers: [
-        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: PlotSpanService, useValue: spanService },

@@ -27,7 +27,7 @@
     </button>
   </div>
 
-  <label for="support">{{ 'loads.shared.reference-support-label' | transloco }}</label>
+  <label for="support">{{ 'common.reference-support-label' | transloco }}</label>
   <p-select
     inputId="support"
     fluid
@@ -57,7 +57,7 @@
       />
 
       @if (isCrane()) {
-        <div @expandCollapse>
+        <div animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
           <div class="crane-divide">
             <label for="vertDisplacement" class="crane-divide__label1">{{
               'loads.cable-support-manip.vert-displacement-cable-label' | transloco
@@ -157,7 +157,7 @@
           }
         </div>
       } @else if (isRope()) {
-        <div @expandCollapse>
+        <div animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
           <div class="rope-divide">
             <button app-btn type="button" disabled aria-disabled="true" data-testid="cable-support-manip-auto-descent">
               <app-icon icon="rocket_launch" aria-hidden="true" />
@@ -201,7 +201,7 @@
           }
         </div>
       } @else if (isShifting()) {
-        <div @expandCollapse>
+        <div animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
           <label for="shiftingClampLength">{{
             'loads.cable-support-manip.shifting-clamp-length-label' | transloco
           }}</label>
@@ -238,9 +238,9 @@
     </fieldset>
   </div>
 
-  <div [@.disabled]="disableManip2Anim()">
+  <div [class.animations-disabled]="disableManip2Anim()">
     @if (!showManip2()) {
-      <div @expandCollapse>
+      <div animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
         <button
           app-btn
           type="button"
@@ -256,7 +256,7 @@
     }
 
     @if (showManip2()) {
-      <div class="bypass-anonymous-box" @expandCollapse>
+      <div class="bypass-anonymous-box" animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
         <fieldset class="manip2">
           <legend>{{ 'loads.cable-support-manip.manipulation-2-label' | transloco }}</legend>
 
@@ -287,7 +287,7 @@
           />
 
           @if (isManip2Shifting()) {
-            <div @expandCollapse>
+            <div animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
               <label for="manip2ShiftingClampLength">{{
                 'loads.cable-support-manip.shifting-clamp-length-label' | transloco
               }}</label>

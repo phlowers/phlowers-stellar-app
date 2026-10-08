@@ -45,7 +45,7 @@ import {
 } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 
-import { DIAGRAM_WIDTH } from './vtl-guying-report.constantes';
+import { DIAGRAM_WIDTH, VTL_GUYING_DECIMALS } from './vtl-guying-report.constantes';
 import { PdfLabels, VtlGuyingReportData } from './vtl-guying-report.interfaces';
 
 // ─── SECTION 1: STUDY AND SECTION ───────────────────────────────────────────────
@@ -56,8 +56,9 @@ import { PdfLabels, VtlGuyingReportData } from './vtl-guying-report.interfaces';
 //    Row 3 — Description (left, wraps full width)
 //    Row 4 — Section (left)
 //    Row 5 — Comment (left, wraps full width)
-//    Row 6 — Load case (left)
-//    Row 7 — Description (left, wraps full width)
+//    Row 6 — Initial condition (left, wraps full width)
+//    Row 7 — Load case (left)
+//    Row 8 — Description (left, wraps full width)
 //  Bottom: full-width separator line (lineWidth 0.2)
 /** Draws the study and section metadata section. Returns the next Y position. */
 export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, labels: PdfLabels, startY: number): number {
@@ -73,6 +74,7 @@ export function drawStudySection(doc: jsPDF, data: VtlGuyingReportData, labels: 
     { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
     { label: labels.section, value: data.sectionName || '-' },
     { label: labels.sectionComment, value: data.sectionComment || '-', wrap: true },
+    { label: labels.initialCondition, value: data.initialConditionName || '-', wrap: true },
     { label: labels.chargeName, value: data.chargeName || '-' },
     { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
   ];
@@ -102,17 +104,24 @@ export function drawVtlWithoutGuyingSection(
   y = drawSectionTitle(doc, labels.vtlWithoutGuyingTitle, y);
 
   // Charge V
-  drawBulletItem(doc, labels.chargeV, formatValue(data.vtlChargeV, PDF_UNITS.daN), leftX, y);
+  drawBulletItem(doc, labels.chargeV, formatValue(data.vtlChargeV, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load), leftX, y);
   // Resultant (right column)
-  drawBulletItem(doc, labels.resultant, formatValue(data.vtlResultant, PDF_UNITS.daN), rightX, y, true);
+  drawBulletItem(
+    doc,
+    labels.resultant,
+    formatValue(data.vtlResultant, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load),
+    rightX,
+    y,
+    true
+  );
   y += LINE_HEIGHT;
 
   // Charge H
-  drawBulletItem(doc, labels.chargeH, formatValue(data.vtlChargeH, PDF_UNITS.daN), leftX, y);
+  drawBulletItem(doc, labels.chargeH, formatValue(data.vtlChargeH, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load), leftX, y);
   y += LINE_HEIGHT;
 
   // Charge L
-  drawBulletItem(doc, labels.chargeL, formatValue(data.vtlChargeL, PDF_UNITS.daN), leftX, y);
+  drawBulletItem(doc, labels.chargeL, formatValue(data.vtlChargeL, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load), leftX, y);
   y += LINE_HEIGHT;
   y -= 2; // tighten gap before separator
 
@@ -147,9 +156,21 @@ export function drawGuyingSection(doc: jsPDF, data: VtlGuyingReportData, labels:
   leftY += LINE_HEIGHT;
   drawBulletItem(doc, labels.supportType, data.supportType || '-', leftX, leftY);
   leftY += LINE_HEIGHT;
-  drawBulletItem(doc, labels.altitude, formatValue(data.altitude, PDF_UNITS.meters), leftX, leftY);
+  drawBulletItem(
+    doc,
+    labels.altitude,
+    formatValue(data.altitude, PDF_UNITS.meters, VTL_GUYING_DECIMALS.altitude),
+    leftX,
+    leftY
+  );
   leftY += LINE_HEIGHT;
-  drawBulletItem(doc, labels.horizontalDistance, formatValue(data.horizontalDistance, PDF_UNITS.meters), leftX, leftY);
+  drawBulletItem(
+    doc,
+    labels.horizontalDistance,
+    formatValue(data.horizontalDistance, PDF_UNITS.meters, VTL_GUYING_DECIMALS.horizontalDistance),
+    leftX,
+    leftY
+  );
   leftY += LINE_HEIGHT;
   const pulleyValue = data.hasPulley ? labels.yes : labels.no;
   drawBulletItem(doc, labels.hasPulley, pulleyValue, leftX, leftY);
@@ -219,22 +240,36 @@ export function drawVtlWithGuyingSection(
   y += explanation2Lines.length * LINE_HEIGHT;
 
   // Results - left column (all result values rendered in bold per spec)
-  drawBulletItem(doc, labels.tensionInGuy, formatValue(data.tensionInGuy, PDF_UNITS.daN), leftX, y, true);
+  drawBulletItem(
+    doc,
+    labels.tensionInGuy,
+    formatValue(data.tensionInGuy, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load),
+    leftX,
+    y,
+    true
+  );
   drawBulletItem(
     doc,
     labels.chargeVUnderConsole,
-    formatValue(data.chargeVUnderConsole, PDF_UNITS.daN),
+    formatValue(data.chargeVUnderConsole, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load),
     rightX,
     y,
     true
   );
   y += LINE_HEIGHT;
 
-  drawBulletItem(doc, labels.guyAngle, formatValue(data.guyAngle, PDF_UNITS.degrees), leftX, y, true);
+  drawBulletItem(
+    doc,
+    labels.guyAngle,
+    formatValue(data.guyAngle, PDF_UNITS.degrees, VTL_GUYING_DECIMALS.guyAngle),
+    leftX,
+    y,
+    true
+  );
   drawBulletItem(
     doc,
     labels.chargeHUnderConsole,
-    formatValue(data.chargeHUnderConsole, PDF_UNITS.daN),
+    formatValue(data.chargeHUnderConsole, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load),
     rightX,
     y,
     true
@@ -242,7 +277,14 @@ export function drawVtlWithGuyingSection(
   y += LINE_HEIGHT;
 
   // Charge L (if pulley) - only on right, bold per spec
-  drawBulletItem(doc, labels.chargeLIfPulley, formatValue(data.chargeLIfPulley, PDF_UNITS.daN), rightX, y, true);
+  drawBulletItem(
+    doc,
+    labels.chargeLIfPulley,
+    formatValue(data.chargeLIfPulley, PDF_UNITS.daN, VTL_GUYING_DECIMALS.load),
+    rightX,
+    y,
+    true
+  );
   y += LINE_HEIGHT + 2;
 
   // Comment: label on its own line, value below indented and justified

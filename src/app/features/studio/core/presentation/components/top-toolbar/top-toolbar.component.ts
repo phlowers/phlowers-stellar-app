@@ -240,9 +240,9 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 8,
       label: this.translocoService.translate('studio.top-toolbar.cable-adjustment-tool'),
       checked: false,
-      disabled: true,
+      disabled: false,
       action: () => {
-        alert('click Cable adjustment');
+        this.toolbarDialogService.openTool('cable-adjustment');
       }
     }
   ]);

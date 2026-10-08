@@ -186,13 +186,14 @@ export class LoadFormsService {
     for (const modification of modifications) {
       const spanIndex = this.spanService.getSupportIndex(modification.spanUuid);
       if (spanIndex < 0) continue;
-      await this.workerPythonService.runTask(Task.shortenLengthenCable, {
+      const inputs = {
         spanIndex,
         modificationType: modification.modificationType,
         modifiedLengthCable: modification.modifiedLengthCable,
         distanceSupportRef: modification.distanceSupportRef,
         supportRef: modification.supportRef
-      });
+      };
+      await this.workerPythonService.runTask(Task.shortenLengthenCable, inputs); //NOSONAR — must run in order, see remarks above
     }
   }
 

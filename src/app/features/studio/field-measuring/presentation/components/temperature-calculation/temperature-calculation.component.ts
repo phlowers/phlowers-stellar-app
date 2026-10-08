@@ -3,7 +3,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgClass, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -21,6 +20,7 @@ import { WIND_SPEED_UNIT_OPTIONS, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS, Se
 import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -41,15 +41,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   ],
   templateUrl: './temperature-calculation.component.html',
   styleUrl: './temperature-calculation.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 // Component for computing cable temperature based on environmental conditions and transit data.
 export class TemperatureCalculationComponent {
@@ -70,6 +62,11 @@ export class TemperatureCalculationComponent {
 
   readonly windSpeedUnitOptions = WIND_SPEED_UNIT_OPTIONS;
 
+  truncate1Decimal(value: number | undefined | null): number | null {
+    if (value == null) return null;
+    return truncateNumberToOneDecimal(value);
+  }
+
   private readonly translocoService = inject(TranslocoService);
   private readonly activeLang = toSignal(this.translocoService.langChanges$, {
     initialValue: this.translocoService.getActiveLang()
@@ -78,7 +75,7 @@ export class TemperatureCalculationComponent {
   readonly windIncidenceModeOptions = computed(() => {
     this.activeLang();
     return [
-      { label: this.translocoService.translate('field-measuring.shared.auto-option'), value: 'auto' },
+      { label: this.translocoService.translate('common.auto-label'), value: 'auto' },
       {
         label: this.translocoService.translate('field-measuring.temperature-calculation.perpendicular-option'),
         value: 'perpendicular'

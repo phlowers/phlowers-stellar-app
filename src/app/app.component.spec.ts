@@ -12,7 +12,6 @@ import { OnlineService } from '@services/online/online.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { UpdateService, type PendingPwaAction } from '@services/worker_update/worker_update.service';
@@ -97,7 +96,6 @@ describe('AppComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: {
@@ -163,7 +161,6 @@ describe('AppComponent - HTML rendering', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: { en: {} },
@@ -255,7 +252,6 @@ describe('AppComponent - auth-gated PWA flow', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: { en: {} },
@@ -452,7 +448,6 @@ describe('AppComponent - automatic first-install resilience', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: { en: {} },

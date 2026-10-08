@@ -6,7 +6,6 @@
  */
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { animate, style, transition, trigger } from '@angular/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
@@ -40,15 +39,7 @@ import { FreePositioningToggleComponent } from '@features/studio/core/presentati
   ],
   templateUrl: './distance-measuring.component.html',
   styleUrl: './distance-measuring.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expandHeight', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DistanceMeasuringComponent {
   readonly service = inject(DistanceMeasuringService);

@@ -5,7 +5,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CatalogCable, ClimateCharge, PapotoResult, Section, SkyCover, SpanLoad } from '@shared/domain';
+import {
+  CableAdjustmentInputs,
+  CableAdjustmentResult,
+  CatalogCable,
+  ClimateCharge,
+  PapotoResult,
+  Section,
+  SkyCover,
+  SpanLoad
+} from '@shared/domain';
 import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { PoseResults } from '@shared/domain/models/section.model';
@@ -32,6 +41,8 @@ export enum Task {
   calculatePapoto = 'calculatePapoto',
   // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
+  // Calculate sighting angles at mid-span sag for cable adjustment
+  calculateCableAdjustment = 'calculateCableAdjustment',
   // Set Python logging level
   setLogLevel = 'setLogLevel',
   // Calculate cable temperature from ambient conditions
@@ -345,6 +356,8 @@ export interface TaskInputs {
     selectedSpanIndex: number;
     selectedSupport: 'LEFT' | 'RIGHT' | null;
   };
+  // Inputs for calculateCableAdjustment task
+  [Task.calculateCableAdjustment]: CableAdjustmentInputs;
   // Inputs for setLogLevel task
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
@@ -727,6 +740,8 @@ export interface TaskOutputs {
     chargeHUnderConsole: number;
     chargeLIfPulley: number;
   };
+  // Output from calculateCableAdjustment task
+  [Task.calculateCableAdjustment]: CableAdjustmentResult;
   // Output from setLogLevel task
   [Task.setLogLevel]: { success: boolean };
   // Output from temperatureCalculation task

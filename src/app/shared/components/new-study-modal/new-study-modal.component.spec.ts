@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NewStudyModalComponent } from './new-study-modal.component';
 import { MessageService } from 'primeng/api';
@@ -50,8 +49,7 @@ describe('NewStudyModalComponent', () => {
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
-        NewStudyModalComponent,
-        BrowserAnimationsModule
+        NewStudyModalComponent
       ],
       providers: [
         {

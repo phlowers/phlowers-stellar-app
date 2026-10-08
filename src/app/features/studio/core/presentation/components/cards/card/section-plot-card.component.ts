@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, input, signal, computed, inject } from '@angular/core';
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -29,27 +28,6 @@ interface DataSection {
   templateUrl: './section-plot-card.component.html',
   styleUrl: './section-plot-card.component.scss',
   imports: [CardComponent, IconComponent, TranslocoModule],
-  animations: [
-    trigger('expandCollapse', [
-      state(
-        'collapsed',
-        style({
-          height: '0',
-          opacity: '0',
-          overflow: 'hidden'
-        })
-      ),
-      state(
-        'expanded',
-        style({
-          height: '*',
-          opacity: '1',
-          overflow: 'hidden'
-        })
-      ),
-      transition('collapsed <=> expanded', [animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')])
-    ])
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 /** Card component displaying computed section plot data for a support or span. */
@@ -188,17 +166,17 @@ export class SectionPlotCardComponent {
         title: this.translocoService.translate('studio.section-plot-card.chain-displacement-acc-title'),
         fields: [
           {
-            label: this.translocoService.translate('studio.section-plot-card.x-label'),
+            label: this.translocoService.translate('common.x-label'),
             value: this.getFormatedNumberIndex(displacement?.[0], 2),
             unit: 'm'
           },
           {
-            label: this.translocoService.translate('studio.section-plot-card.y-label'),
+            label: this.translocoService.translate('common.y-label'),
             value: this.getFormatedNumberIndex(displacement?.[1], 2),
             unit: 'm'
           },
           {
-            label: this.translocoService.translate('studio.section-plot-card.z-label'),
+            label: this.translocoService.translate('common.z-label'),
             value: this.getFormatedNumberIndex(displacement?.[2], 2),
             unit: 'm'
           }

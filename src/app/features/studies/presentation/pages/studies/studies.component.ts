@@ -106,8 +106,8 @@ export class StudiesComponent {
           this.notificationService.error(this.translocoService.translate('studies.import.error-delete'));
         });
       },
-      acceptLabel: this.translocoService.translate('common.import.collision.yes'),
-      rejectLabel: this.translocoService.translate('common.import.collision.no')
+      acceptLabel: this.translocoService.translate('common.yes'),
+      rejectLabel: this.translocoService.translate('common.no')
     });
   }
 }

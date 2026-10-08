@@ -91,7 +91,7 @@ export class PlotService {
     // duplication, deletion, edition), so the engine study follows the selected charge from here
     effect(() => {
       const highSafety = this.selectedChargeHighSafety();
-      untracked(() => this.syncHighSafety(highSafety));
+      untracked(() => void this.syncHighSafety(highSafety));
     });
     // Restore the view and camera captured when free positioning mode was switched on. Lives here
     // (not in PlotOptionsService) because restoring the support window requires refreshProjection,

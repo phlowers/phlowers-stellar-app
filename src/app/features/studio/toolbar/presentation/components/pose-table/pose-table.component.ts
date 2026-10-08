@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -41,15 +40,7 @@ import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
   ],
   templateUrl: './pose-table.component.html',
   styleUrl: './pose-table.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PoseTableComponent {
   poseTableError = signal<boolean>(false);

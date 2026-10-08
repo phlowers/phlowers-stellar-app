@@ -1,0 +1,114 @@
+// Shared enter/leave animations, used through Angular's `animate.enter` / `animate.leave`:
+//   <div animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
+// Angular adds the class while the element enters/leaves and waits for the animation to end before removing it.
+
+$_anim-height-duration: 300ms;
+$_anim-width-duration: 200ms;
+
+// Lets `height`/`width` animate from/to `auto` (the equivalent of `'*'` in @angular/animations).
+// Inherited, so setting it once on the root covers every element.
+:root {
+  interpolate-size: allow-keywords;
+}
+
+// The animated value is only given on the collapsed side; the other side is the element's own computed
+// size, so nothing is hard-coded about the content.
+@keyframes expand-height {
+  from {
+    height: 0;
+    margin-block: 0;
+    padding-block: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  to {
+    opacity: 1;
+    overflow: hidden;
+  }
+}
+
+@keyframes collapse-height {
+  from {
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  to {
+    height: 0;
+    margin-block: 0;
+    padding-block: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+}
+
+@keyframes expand-width {
+  from {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  to {
+    opacity: 1;
+    overflow: hidden;
+  }
+}
+
+@keyframes collapse-width {
+  from {
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  to {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+}
+
+.anim-expand-height {
+  animation: expand-height $_anim-height-duration ease-out;
+}
+
+.anim-collapse-height {
+  // `forwards` keeps the collapsed state until Angular removes the element, so it doesn't flash back.
+  animation: collapse-height $_anim-height-duration ease-in forwards;
+}
+
+.anim-expand-width {
+  animation: expand-width $_anim-width-duration ease-out;
+}
+
+.anim-collapse-width {
+  animation: collapse-width $_anim-width-duration ease-in forwards;
+}
+
+// Wrap the content in `.animations-disabled` to skip the enter/leave animations below it
+// (Angular then removes leaving elements right away).
+.animations-disabled {
+  .anim-expand-height,
+  .anim-collapse-height,
+  .anim-expand-width,
+  .anim-collapse-width {
+    animation: none;
+  }
+}
+
+// For an element that stays in the DOM and collapses/expands on a state change
+// (toggle `collapsible--collapsed`): `animate.enter`/`animate.leave` don't apply there.
+.collapsible {
+  overflow: hidden;
+  transition:
+    height $_anim-height-duration cubic-bezier(0.4, 0, 0.2, 1),
+    padding-block $_anim-height-duration cubic-bezier(0.4, 0, 0.2, 1),
+    opacity $_anim-height-duration cubic-bezier(0.4, 0, 0.2, 1);
+
+  &--collapsed {
+    height: 0;
+    padding-block: 0;
+    opacity: 0;
+  }
+}

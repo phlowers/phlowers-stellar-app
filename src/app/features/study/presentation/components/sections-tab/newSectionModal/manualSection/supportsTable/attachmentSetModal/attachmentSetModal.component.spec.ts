@@ -30,7 +30,6 @@ vi.mock('plotly.js-dist-min', () => {
 });
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -227,15 +226,14 @@ describe('AttachmentSetModalComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         AttachmentSetModalComponent,
-        BrowserAnimationsModule,
         FormsModule,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'attachment-modal.title': 'Attachment set',
+              'common.attachment-set-label': 'Attachment set',
               'attachment-modal.choose-hint':
                 'Choose the attachment set in the list or on the graph to find the right arm length.',
-              'attachment-modal.label-support-name': 'Support name',
+              'common.support-name-label': 'Support name',
               'attachment-modal.label-attachment-set': 'Attachment set',
               'attachment-modal.arm-length': 'Arm length',
               'common.meter': 'm',

@@ -8,9 +8,9 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { VtlGuyingReportData } from './vtl-guying-report.interfaces';
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
-  'studio.vtl-guying-report.page-label': 'Page',
-  'studio.vtl-guying-report.report-generated-success': 'Report generated successfully',
-  'studio.vtl-guying-report.report-generation-failed': 'Failed to generate report'
+  'common.page-label': 'Page',
+  'common.report-generated-successfully-label': 'Report generated successfully',
+  'common.failed-to-generate-report': 'Failed to generate report'
 };
 
 vi.mock('jspdf', () => {
@@ -48,6 +48,7 @@ function createMockReportData(): VtlGuyingReportData {
     studyDescription: 'Description',
     sectionName: 'Section A',
     sectionComment: 'Comment',
+    initialConditionName: 'CI 1',
     chargeName: 'Charge 1',
     chargeDescription: 'Charge desc',
     guyingSpan: '42 - 43',

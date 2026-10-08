@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { LocationComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.component';
@@ -27,9 +26,9 @@ describe('LocationComponent', () => {
           langs: {
             en: {
               'location.title': 'Support 1 coordinates:',
-              'location.label-latitude': 'Latitude',
-              'location.label-longitude': 'Longitude',
-              'location.label-azimuth': 'Azimuth',
+              'common.latitude-label': 'Latitude',
+              'common.longitude-label': 'Longitude',
+              'common.azimuth-label': 'Azimuth',
               'common.max-value': 'Maximum value:',
               'common.min-value': 'Minimum value:'
             }
@@ -39,8 +38,7 @@ describe('LocationComponent', () => {
             defaultLang: 'en'
           }
         })
-      ],
-      providers: [provideNoopAnimations()]
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LocationComponent);

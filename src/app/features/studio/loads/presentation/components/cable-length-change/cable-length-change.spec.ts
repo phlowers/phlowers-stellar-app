@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { CableLengthChangeComponent } from './cable-length-change';
@@ -105,7 +104,6 @@ describe('CableLengthChangeComponent', () => {
         CableLengthChangeComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },

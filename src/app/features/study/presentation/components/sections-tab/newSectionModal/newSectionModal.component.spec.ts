@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
 import { Section, Study, Support } from '@shared/domain';
 import { By } from '@angular/platform-browser';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
@@ -140,7 +139,7 @@ describe('NewSectionModalComponent', () => {
               'section-import.import-error': 'The imported section could not be found. Please try again.',
               'section-modal.create-btn': 'Create section',
               'section-modal.update-btn': 'Update section',
-              'section-modal.create-section': 'Create a section'
+              'common.create-a-section-label': 'Create a section'
             }
           },
           translocoConfig: {
@@ -151,7 +150,6 @@ describe('NewSectionModalComponent', () => {
         })
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: MaintenanceService, useClass: MockMaintenanceService },
         { provide: LinesService, useClass: MockLinesService },
         { provide: ChainsService, useClass: MockChainsService },

@@ -6,7 +6,6 @@ import { OnlineService } from '@services/online/online.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { provideMarkdown } from 'ngx-markdown';
 import { provideHttpClient } from '@angular/common/http';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('Changelog component', () => {
@@ -44,7 +43,6 @@ describe('Changelog component', () => {
       providers: [
         provideHttpClient(),
         provideMarkdown(),
-        provideNoopAnimations(),
         { provide: ChangelogService, useValue: changelogServiceMock },
         { provide: OnlineService, useValue: onlineServiceMock }
       ]
@@ -62,7 +60,7 @@ describe('Changelog component', () => {
     await fixture.whenStable();
 
     expect(changelogServiceMock.getChangelogs).toHaveBeenCalled();
-    expect(component.changelogs().length).toBe(1);
+    expect(component.changelogs()).toHaveLength(1);
     expect(component.isLoading()).toBe(false);
   });
 

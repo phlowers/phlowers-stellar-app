@@ -7,7 +7,6 @@ import { of, Subject } from 'rxjs';
 import { ElementRef, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -151,7 +150,7 @@ describe('StudioPageComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.studio-page.add-charge-case-label': 'Add a charge case',
+              'common.add-load-case-label': 'Add a load case',
               'studio.studio-page.all-option': 'All',
               'studio.studio-page.cable-length-change-label': 'Cable length change',
               'studio.studio-page.cable-manip-span-label': 'Cable manip. at span',
@@ -162,16 +161,16 @@ describe('StudioPageComponent', () => {
               'studio.studio-page.load-marking-label': 'Load / Marking',
               'studio.studio-page.max-section-option': 'Max section',
               'studio.studio-page.next-support-aria-label': 'Next support',
-              'studio.studio-page.no-charge-case-message': 'In order to add charges, you need to create a charge case.',
+              'studio.studio-page.no-load-case-message': 'In order to add loads, you need to create a load case.',
               'studio.quick-measures.not-selected-option': 'Not selected',
               'studio.shared.oblique': 'Oblique',
               'studio.studio-page.one-span-option': 'One span',
-              'studio.studio-page.parameter-label': 'Parameter',
-              'studio.quick-measures.point-option': 'Point {{ index }}',
+              'common.parameter-label': 'Parameter',
+              'common.point-index-label': 'Point {{ index }}',
               'studio.studio-page.previous-support-aria-label': 'Previous support',
               'studio.quick-measures.select-obstacle-aria-label': 'select an obstacle',
               'studio.quick-measures.select-obstacle-point-aria-label': "select an obstacle's point",
-              'studio.studio-page.span-option': 'Span',
+              'common.span-label': 'Span',
               'studio.studio-page.strand-cut-aria-label': 'strand is cut',
               'studio.studio-page.strand-not-cut-aria-label': 'strand is not cut',
               'studio.studio-page.two-spans-option': 'Two spans',
@@ -1240,7 +1239,7 @@ describe('StudioPageComponent - HTML rendering', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'studio.studio-page.add-charge-case-label': 'Add a charge case',
+              'common.add-load-case-label': 'Add a load case',
               'studio.studio-page.all-option': 'All',
               'studio.studio-page.cable-length-change-label': 'Cable length change',
               'studio.studio-page.cable-manip-span-label': 'Cable manip. at span',
@@ -1251,16 +1250,16 @@ describe('StudioPageComponent - HTML rendering', () => {
               'studio.studio-page.load-marking-label': 'Load / Marking',
               'studio.studio-page.max-section-option': 'Max section',
               'studio.studio-page.next-support-aria-label': 'Next support',
-              'studio.studio-page.no-charge-case-message': 'In order to add charges, you need to create a charge case.',
+              'studio.studio-page.no-load-case-message': 'In order to add loads, you need to create a load case.',
               'studio.quick-measures.not-selected-option': 'Not selected',
               'studio.shared.oblique': 'Oblique',
               'studio.studio-page.one-span-option': 'One span',
-              'studio.studio-page.parameter-label': 'Parameter',
-              'studio.quick-measures.point-option': 'Point {{ index }}',
+              'common.parameter-label': 'Parameter',
+              'common.point-index-label': 'Point {{ index }}',
               'studio.studio-page.previous-support-aria-label': 'Previous support',
               'studio.quick-measures.select-obstacle-aria-label': 'select an obstacle',
               'studio.quick-measures.select-obstacle-point-aria-label': "select an obstacle's point",
-              'studio.studio-page.span-option': 'Span',
+              'common.span-label': 'Span',
               'studio.studio-page.strand-cut-aria-label': 'strand is cut',
               'studio.studio-page.strand-not-cut-aria-label': 'strand is not cut',
               'studio.studio-page.two-spans-option': 'Two spans',
@@ -1278,7 +1277,6 @@ describe('StudioPageComponent - HTML rendering', () => {
         StudioPageComponent
       ],
       providers: [
-        provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: Router, useValue: { navigate: vi.fn() } },

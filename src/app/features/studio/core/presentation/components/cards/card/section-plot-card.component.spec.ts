@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SectionPlotCardComponent } from './section-plot-card.component';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -108,9 +107,9 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
               'studio.section-plot-card.v-label': 'V:',
               'studio.section-plot-card.vtl-under-chain-title': 'VTL (under chain)',
               'studio.section-plot-card.vtl-under-console-title': 'VTL (under console)',
-              'studio.section-plot-card.x-label': 'X:',
-              'studio.section-plot-card.y-label': 'Y:',
-              'studio.section-plot-card.z-label': 'Z:'
+              'common.x-label': 'X:',
+              'common.y-label': 'Y:',
+              'common.z-label': 'Z:'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -119,8 +118,7 @@ describe('SectionPlotCardComponent (Angular 19)', () => {
         SectionPlotCardComponent,
         TestHostComponent,
         CardComponent,
-        IconComponent,
-        NoopAnimationsModule
+        IconComponent
       ],
       providers: [{ provide: PlotSpanService, useValue: mockPlotSpanService }]
     }).compileComponents();

@@ -104,13 +104,27 @@
   @apply flex flex-col gap-3;
 }
 
+// The comment sits beside the live region, not in it: it is an input, not a result.
+.vtl-guying__results-layout {
+  @apply grid gap-x-4;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.vtl-guying__results {
+  display: block;
+}
+
+.vtl-guying__results-content {
+  @apply flex flex-col gap-3;
+}
+
 .vtl-guying__results-fields {
   @apply grid gap-x-4 gap-y-3;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   grid-template-areas:
-    'tensionInGuy chargeVUnderConsole comment comment'
-    'guyAngle chargeHUnderConsole comment comment'
-    '. chargeLIfPulley comment comment';
+    'tensionInGuy chargeVUnderConsole'
+    'guyAngle chargeHUnderConsole'
+    '. chargeLIfPulley';
 }
 
 .vtl-guying__result-field {
@@ -140,10 +154,6 @@
 
 .chargeLIfPulley {
   grid-area: chargeLIfPulley;
-}
-
-.comment {
-  grid-area: comment;
 }
 
 .vtl-guying__result-value {
