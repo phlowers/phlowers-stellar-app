@@ -24,11 +24,15 @@ Paths are relative to `src/app/`, except `stellar-engine/`, relative to the repo
 | File | Purpose |
 |---|---|
 | `stellar-engine/src/stellar_engine/core/conformity/simulation.py` | `get_conformity()`: the entry point, orchestrates the whole computation |
+| `stellar-engine/src/stellar_engine/core/conformity/request.py` | `ConformityRequest`: parsing and validation of every input |
 | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` | Climatic points, **overwrite rules**, and the scenario builder |
-| `stellar-engine/src/stellar_engine/core/conformity/compute.py` | Result classes, zone geometry, compliance |
-| `stellar-engine/src/stellar_engine/entities/conformity.py` | Input classes with validation, output writers, tension mapper |
-| `stellar-engine/src/stellar_engine/entities/errors.py` | `ObstacleNotFoundError` |
-| `stellar-engine/test/plot/` | Tests of the module (`conftest.py` holds the input factories) |
+| `stellar-engine/src/stellar_engine/core/conformity/strategies.py` | Per graph type: radius, compliance values, verdict, zone geometry |
+| `stellar-engine/src/stellar_engine/core/conformity/runner.py` | `ScenarioRunner`: solves the scenarios on a study copy and projects the cable |
+| `stellar-engine/src/stellar_engine/core/conformity/compute.py` | `ConformityTableResult`, built from the scenario outcomes |
+| `stellar-engine/src/stellar_engine/core/conformity/writer.py` | Serialization of the result |
+| `stellar-engine/src/stellar_engine/entities/conformity.py` | Input classes with validation, graph type and scenario point enums, tension mapper |
+| `stellar-engine/src/stellar_engine/entities/errors.py` | `ConformityInputError`, `ObstacleNotFoundError`, `SupportOutOfRangeError` |
+| `stellar-engine/test/core/conformity/` | Tests of the module (`conftest.py` holds the input factories) |
 | `core/services/worker_python/tasks/python-scripts/api.py` | `get_conformity()` task entry, converts the JS inputs |
 | `core/services/worker_python/tasks/types.ts` | `ConformityTaskInput` and `ConformityTaskOutput` |
 | `features/studio/obstacles/presentation/components/conformity/conformity.component.ts` | The modal: form, input building, results |
@@ -78,10 +82,15 @@ simulates and measures.
 
 | Module | Contents |
 |---|---|
-| `entities/conformity.py` | Inputs: `RuleDistanceInput`, `ConformityParametersInput`, `ElectricTensionMapper`, `TensionRules`. Outputs: `ObstacleOutput`, `ConformityWriter`, `TableResultWriter`. |
-| `core/conformity/scenarios.py` | `TargetState`, `Scenario`, `ClimaticPoint`, `RuleClimaticCondition`, `build_scenario()`, `build_scenario_bulk()`. |
-| `core/conformity/compute.py` | `Point2D`, `ZoneCorner`, `ZonePlot`, `ZoneConformity`, `ConformityPlotRules`, `ConformityTableResult`, `ConformityResult`. |
-| `core/conformity/simulation.py` | `get_conformity()`. |
+| `entities/conformity.py` | Inputs: `RuleDistanceInput`, `ConformityParametersInput`, `ElectricTensionMapper`, `TensionRules`. Enums: `ConformityPlot` (graph types), `ScenarioPoint`, and `LATERAL_SIDE_POINTS`. |
+| `core/conformity/request.py` | `ConformityRequest.from_dict()`: parses and validates every input. |
+| `core/conformity/scenarios.py` | `TargetState`, `Scenario`, `ClimaticPoint`, `RuleClimaticCondition` (all frozen) and `ScenarioBuilder`, which never mutates its inputs. |
+| `core/conformity/strategies.py` | `PlotStrategy` and its three implementations (`CableTrackStrategy`, `VegetationStrategy`, `OverhangStrategy`), `get_strategy()`. |
+| `core/conformity/runner.py` | `find_obstacle_point()`, `ScenarioOutcome`, `ScenarioRunner`. |
+| `core/conformity/plot_data.py` | `Point2D`, `ZoneCorner`, `ZonePlot`, `ZoneConformity`, `ObstacleOutput`. |
+| `core/conformity/compute.py` | `ConformityTableResult` (built by `from_outcomes()`), `ConformityResult`. |
+| `core/conformity/writer.py` | `ConformityWriter`, `TableResultWriter`. |
+| `core/conformity/simulation.py` | `get_conformity()`: orchestration only. |
 
 The `get_conformity` task of `api.py` converts the JS object with `js_to_python()`, calls
 `conformity_simulation.get_conformity(python_inputs, study)` on the global engine study, and
@@ -126,14 +135,14 @@ returns its dictionary.
 
 | Key | Used for | Validation |
 |---|---|---|
-| `obstacle.uuid` | Finds the obstacle in the study. | `ObstacleNotFoundError` when the study does not hold it. |
+| `obstacle.uuid` | Finds the obstacle in the study. | `ConformityInputError` when missing or not a string; `ObstacleNotFoundError` when the study does not hold it. |
 | `obstacle.name` | Names the obstacle in the output (`"<name> point <pointIndex + 1>"`). Falls back to the `uuid` when missing. | — |
-| `pointIndex` | 0-based index, in the positions of the obstacle, of the point the conformity is computed for. Optional, `0` by default. | `ValueError` (`out of range`) when it is not a valid index. |
-| `obstacle.supportIndex` | Selects the span: the plane frame uses supports `supportIndex` and `supportIndex + 1`, and so does the cable curve. | — |
-| `electricTension` | Label such as `"400 KV"`, mapped by `ElectricTensionMapper` to the code `"400"` (`63`, `90`, `150`, `225`, `400`). | `ValueError` when missing, not a string, or unknown. |
-| `form` | `ConformityParametersInput.from_dict()`. See below. | `ValueError` on a missing or wrongly typed field. |
-| `rulesClimaticConditions` | One `RuleClimaticCondition` per rule: `ruleType`, `ruleName`, `lateralPoint`, `overhangPoint` (each with `temperature`, `pressure`, `red_zone`). | `ValueError` on a missing field. |
-| `rulesDistances` | `RuleDistanceInput`: `ruleType`, `lateral`, `overhang` (voltage code → distance). A `null` distance becomes `{}` with a warning. | `ValueError` when a field is missing. |
+| `pointIndex` | 0-based index, in the positions of the obstacle, of the point the conformity is computed for. Optional, `0` by default. | `ConformityInputError` when it is not a non-negative integer or is outside the positions (`out of range`). |
+| `obstacle.supportIndex` | Selects the span: the plane frame uses supports `supportIndex` and `supportIndex + 1`, and so does the cable curve. | `ConformityInputError` when it is not a non-negative integer; `SupportOutOfRangeError` when there is no span at this index. |
+| `electricTension` | Label such as `"400 KV"`, mapped by `ElectricTensionMapper` to the code `"400"` (`63`, `90`, `150`, `225`, `400`). | `ConformityInputError` when missing, not a string, or unknown. |
+| `form` | `ConformityParametersInput.from_dict()`. See below. | `ConformityInputError` on a missing or wrongly typed field. |
+| `rulesClimaticConditions` | One `RuleClimaticCondition` per rule: `ruleType`, `ruleName`, `lateralPoint`, `overhangPoint` (each with `temperature`, `pressure`, `red_zone`). | `ConformityInputError` when empty, on a duplicate `ruleType`, a missing field, or a wrongly typed `temperature` (number or `null`), `pressure` (number or `"WindZoneInput"`) or `red_zone` (boolean). |
+| `rulesDistances` | `RuleDistanceInput`: `ruleType`, `lateral`, `overhang` (voltage code → distance). A `null` distance becomes `{}` with a warning. | `ConformityInputError` when empty, on a duplicate `ruleType`, a missing field, a non-numeric distance, or a distance map without the voltage of `electricTension`. |
 
 Form fields:
 
@@ -144,21 +153,22 @@ Form fields:
 | `repartitionTemperature` | number | Temperature of the overhang points with no temperature. |
 | `lateralDistanceTemperature` | number | Temperature of the lateral points with no temperature. |
 | `conformityPlot` | `"vegetation"`, `"cable_track"`, `"overhang"` | Sets the intermediate scenarios, the radius and the zone geometry. |
-| `intermediatePoints` | number[] | Fractions locating the intermediate states, `cable_track` only. Optional, `[]` by default. |
+| `intermediatePoints` | number[] | Fractions locating the intermediate states, `cable_track` only. Each is a number between 0 and 1. Optional, `[]` by default. |
 | `windZone`, `redZonePresence` | string, boolean | Required and type-checked, **not used by the computation**. See [Red zone](#conformity-red-zone). |
 | `selectedConformityRules` | string[] | Required and type-checked, **not used to filter**: the engine computes the rules it receives. |
 
-An empty `rulesDistances`, or empty `rulesClimaticConditions`, makes `get_conformity` log a
-warning and return `{}`. The application cannot reach this case: the modal does not open for an
-obstacle type without distances.
+An empty `rulesDistances`, or empty `rulesClimaticConditions`, raises a `ConformityInputError`.
+The application cannot reach this case: the modal does not open for an obstacle type without
+distances.
 
 (conformity-overwrite-rules)=
 ### Overwrite rules
 
 The catalog fixes part of the climatic condition of each rule, and the user supplies the rest.
 These rules decide which value wins. They are applied by `ClimaticPoint`,
-`RuleClimaticCondition.build_rules_climatic_conditions()` and `build_scenario()`, and each one is
-covered by a test of `test_scenarios_integration.py`.
+`RuleClimaticCondition.build_rules_climatic_conditions()` and `ScenarioBuilder`, and each one is
+covered by a test of `test_conformity_scenarios.py`. The builder never mutates the rules, so
+building the scenarios twice gives the same list.
 
 | # | Input | Rule |
 |---|---|---|
@@ -172,7 +182,7 @@ covered by a test of `test_scenarios_integration.py`.
 | 8 | Lateral scenario built | A `lateral_inverse` scenario is added with the **opposite** lateral pressure, same temperature, same distance. |
 | 9 | `lateral` distance is `null` | No lateral and no `lateral_inverse` scenario. |
 | 10 | `overhang` distance is `null` | No `overhang` scenario. |
-| 11 | `form.conformityPlot` is `cable_track` | Intermediate scenarios are added (see below). Otherwise `intermediatePoints` is ignored. |
+| 11 | `form.conformityPlot` is `cable_track` and the `lateral` distance is set | Intermediate scenarios are added (see below). Otherwise `intermediatePoints` is ignored. |
 | 12 | Security distance | `rule.lateral[code]` or `rule.overhang[code]`, with `code` from `electricTension`. |
 | 13 | Rule with no distance row | Skipped with a warning: no scenario. |
 
@@ -231,7 +241,7 @@ the selected rules.
 
 ### Scenarios
 
-`build_scenario_bulk()` builds, for each rule, the list of `Scenario` objects the simulation
+`ScenarioBuilder.build_all()` builds, for each rule, the list of `Scenario` objects the simulation
 runs. A scenario holds the rule, the `conformity_point`, the security distance and the
 `TargetState` (temperature in °C, wind pressure in Pa).
 
@@ -240,7 +250,7 @@ runs. A scenario holds the rule, the `conformity_point`, the security distance a
 | `lateral` | lateral distance is set | lateral |
 | `lateral_inverse` | lateral distance is set | lateral |
 | `overhang` | overhang distance is set | overhang |
-| `intermediate` | `cable_track`, two per fraction of `intermediatePoints` | lateral |
+| `intermediate` | `cable_track` and lateral distance set, two per fraction of `intermediatePoints` | lateral |
 
 Scenarios per rule: `2 + 1` for a rule with both distances, `2` lateral only, `1` overhang only,
 plus `2 × len(intermediatePoints)` for `cable_track`. With `[0.33, 0.66]` a `cable_track` rule
@@ -251,28 +261,32 @@ has 7 scenarios and a `vegetation` rule 3 (`test_both_lateral_and_overhang_produ
 
 `get_conformity()` runs these steps:
 
-1. **Read and validate** the inputs. Errors are logged and re-raised.
-2. **Build the objects**: the `TensionRules` per rule (distances at the voltage of the study),
-   the `ConformityPlotRules` (zone and radius logic of the graph type), and the scenarios.
-3. **Define the plane**. A `DistanceEngine` is given the span frame (ground supports
-   `supportIndex` and `supportIndex + 1`). The plane is **vertical and perpendicular to the span
-   axis, through the obstacle point**: `u_plane` is horizontal in it, `v_plane` is vertical.
-   The obstacle point is the position of the obstacle selected by `pointIndex`.
-4. **Run every scenario**:
-   - `study.solve_change_state(wind_pressure, new_temperature)` moves the cable to the
-     scenario state;
+1. **Parse and validate** every input up front: `ConformityRequest.from_dict()` raises a
+   `ConformityInputError` before any computation. The rule distances give the `TensionRules` per
+   rule (distances at the voltage of the study).
+2. **Pick the strategy** of the graph type (`get_strategy()`): radius, compliance and zone logic
+   are not branched on the graph type anywhere else.
+3. **Find the obstacle point** selected by `pointIndex`, then create the `ScenarioRunner`. It
+   works on a **deep copy of the study**, so the study of the caller is left unchanged. It
+   defines the plane: the span frame uses the ground supports `supportIndex` and
+   `supportIndex + 1`, and the plane is **vertical and perpendicular to the span axis, through
+   the obstacle point** (`u_plane` is horizontal in it, `v_plane` is vertical). The origin of the
+   plane is the start of the span axis, at altitude 0.
+4. **Build the scenarios** with `ScenarioBuilder`.
+5. **Run every scenario** with `ScenarioRunner.run()`:
+   - `solve_change_state(wind_pressure, new_temperature)` moves the cable to the scenario state,
+     with **clockwise wind** (the convention of the rest of the application) and **no ice**;
    - the cable curve of the span is given to the distance engine, which intersects it with the
-     plane and measures the distance between the obstacle point and the cable point:
-     `distance_projection_u` (horizontal) and `distance_projection_v` (vertical), both absolute;
-   - the cable point is projected in the plane and stored in the zone of the rule, with a radius;
-   - the table result of the rule receives the projected point (the cable coordinates of the
-     `lateral` and `overhang` scenarios, and the points used by the compliance), the security
-     distance, and the closest point of each side (temperature, wind pressure, minimal distance).
-5. **Add the obstacle point**, projected in the plane.
-6. **Build the zone** of each rule from its points (`ConformityPlotRules.get_zone()`).
+     plane and finds the cable point closest to the obstacle point;
+   - the cable point is projected in the plane. A climatic state (wind pressure, temperature)
+     is solved **once**, even when several rules or scenarios share it.
+6. **Build the results of each rule**, in the order of `rulesDistances`: the points (with their
+   radius), the zone (`strategy.zone()`), and the table (`ConformityTableResult.from_outcomes()`,
+   which takes the closest point of each side and applies the compliance rules of the strategy).
+   A rule without climatic condition gets no point and a table of `null` values.
 7. **Serialize** with `ConformityWriter`.
 
-The engine study is moved to each scenario state and **is not restored** by the function.
+The study given to `get_conformity()` is never modified.
 
 ### Output
 
@@ -301,10 +315,10 @@ distance to the line axis of the figure) and `y` is the altitude.
 
 - `points`: the cable point of **each scenario**, in the order the scenarios ran. `radius` is the
   security distance of the scenario for `cable_track`, and `1.0` for the other graph types.
-- `zonePlot`: the zone of the rule, see below. The corners are always given, in the order
-  `LowerLeft`, `LowerRight`, `UpperRight`, `UpperLeft`.
+- `zonePlot`: the zone of the rule, see below. The corners of a `vegetation` or `overhang` zone
+  are given in the order `LowerLeft`, `LowerRight`, `UpperRight`, `UpperLeft`.
 
-#### Zone geometry (`ConformityPlotRules.get_zone()`)
+#### Zone geometry (`PlotStrategy.zone()`)
 
 With $d_{lat}$ and $d_{over}$ the lateral and overhang distances of the rule (0 when `null`):
 
@@ -312,7 +326,7 @@ With $d_{lat}$ and $d_{over}$ the lateral and overhang distances of the rule (0 
 |---|---|---|
 | `vegetation` | Box around the points, extended by $d_{lat}$ left and right and $d_{over}$ above and below. | Left side, bottom, right side: `UpperLeft`, `LowerLeft`, `LowerRight`, `UpperRight` (a trench). |
 | `overhang` | A flat line: $y$ is the lowest point minus $d_{over}$. Width: the points extended by $d_{lat}$. | The four corners, all at the same `y`. |
-| `cable_track` | Computed, but not drawn. | `[]` |
+| `cable_track` | None: `zonePoints` is empty (the figure never draws it). | `[]` |
 
 When the zone has no width (all points have the same `x` and no lateral distance), it is given a
 width of 10 m centered on the points (`test_zero_width_zone_gets_minimum_width_centered_on_point`).
@@ -327,10 +341,10 @@ the scenarios did not produce is `null`.
 |---|---|
 | `overhangCableAltitude` | Altitude (`y` in the plane) of the cable point in the `overhang` scenario. |
 | `lateralCableAltitude` | Altitude (`y` in the plane) of the cable point in the `lateral` scenario. |
-| `overhangCableLineAxisDistance` | Distance to the line axis (`x` in the plane) of the cable point in the `overhang` scenario. |
-| `lateralCableLineAxisDistance` | Distance to the line axis (`x` in the plane) of the cable point in the `lateral` scenario. |
+| `overhangCableLineAxisDistance` | Distance to the line axis (`x` in the plane, measured from the axis of the span) of the cable point in the `overhang` scenario. |
+| `lateralCableLineAxisDistance` | Distance to the line axis (`x` in the plane, measured from the axis of the span) of the cable point in the `lateral` scenario. |
 | `overhangDistanceToComply`, `lateralDistanceToComply` | Security distance of the rule at the voltage. |
-| `overhangComplianceAltitude` | Distance from the obstacle to the `overhang` point minus `overhangDistanceToComply`, negative when too close. Filled for `cable_track`, `vegetation` and `overhang`. See [Compliance values](#conformity-compliance-values). |
+| `overhangComplianceAltitude` | Gap between the obstacle and the `overhang` point minus `overhangDistanceToComply`, negative when too close. For `vegetation` and `overhang` the gap is **signed**, so it is also negative when the obstacle is **above the cable**. Filled for `cable_track`, `vegetation` and `overhang`. See [Compliance values](#conformity-compliance-values). |
 | `lateralComplianceLineAxisDistance` | Distance from the obstacle to the closest lateral side point minus `lateralDistanceToComply`, negative when too close. Filled for `cable_track` and `vegetation`. See [Compliance values](#conformity-compliance-values). |
 | `overhangTemperature`, `lateralTemperature` | Temperature (°C) of the scenario producing the closest overhang / lateral side point. |
 | `overhangWindPressure`, `lateralWindPressure` | Wind pressure (Pa) of the scenario producing the closest overhang / lateral side point. |
@@ -340,7 +354,7 @@ the scenarios did not produce is `null`.
 :::{note}
 The **lateral side** groups the `lateral`, `lateral_inverse` and `intermediate` scenarios
 (`LATERAL_SIDE_POINTS`). The temperature, wind pressure and minimal distance of each side come
-from the point of that side closest to the obstacle (`ConformityTableResult.set_closest_point`),
+from the point of that side closest to the obstacle (`ConformityTableResult.from_outcomes`),
 so `lateralWindPressure` is negative when the `lateral_inverse` point is the closest.
 :::
 
@@ -348,13 +362,14 @@ so `lateralWindPressure` is negative when the `lateral_inverse` point is the clo
 #### Compliance values
 
 The compliance values are computed per graph type from the obstacle point and the projected cable
-points, all in the plane (`ConformityTableResult`). The *lateral side points* are the points of
+points, all in the plane (the `PlotStrategy` of the graph type, applied by
+`ConformityTableResult.from_outcomes()`). The *lateral side points* are the points of
 the `lateral`, `lateral_inverse` and `intermediate` scenarios.
 
 | Graph type | `overhangComplianceAltitude` | `lateralComplianceLineAxisDistance` |
 |---|---|---|
 | `cable_track` | Euclidean distance obstacle to overhang point, minus distance to comply. | Euclidean distance obstacle to the closest lateral side point, minus distance to comply. |
-| `vegetation` | $\lvert y_{obstacle} - y_{overhang} \rvert$ minus distance to comply. | $\min \lvert x_{obstacle} - x_{side} \rvert$ over the lateral side points, minus distance to comply. |
+| `vegetation` | $y_{overhang} - y_{obstacle}$ minus distance to comply (signed: negative when the obstacle is above the cable). | $\min \lvert x_{obstacle} - x_{side} \rvert$ over the lateral side points, minus distance to comply. |
 | `overhang` | Same as `vegetation`. | `null`. |
 
 A value is `null` when the point or the distance it needs is missing (for example a `null`
@@ -363,7 +378,7 @@ lateral distance).
 #### Compliance
 
 `conformityCompliance` is derived from these two values, not from per-scenario verdicts
-(`ConformityTableResult.conformity_compliance_status`):
+(`PlotStrategy.is_compliant()`):
 
 | Graph type | `conformityCompliance` is `false` when |
 |---|---|
@@ -384,13 +399,16 @@ verdict is this test.
 
 | Case | Result |
 |---|---|
-| Missing, non-string or unknown `electricTension` | `ValueError` |
-| Missing or invalid `form`, `rulesDistances` or `rulesClimaticConditions` field | `ValueError` |
-| `pointIndex` outside the positions of the obstacle | `ValueError` (`out of range`) |
-| `conformityPlot` not in the three graph types | `ValueError` |
-| Obstacle `uuid` not in the study | `ObstacleNotFoundError` (a `ValueError`) |
-| Empty `rulesDistances` or `rulesClimaticConditions` | `{}` and a warning |
-| A non-null distance map without the voltage key | `KeyError` |
+| Missing, non-string or unknown `electricTension` | `ConformityInputError` |
+| Missing or invalid `form`, `rulesDistances` or `rulesClimaticConditions` field, empty or duplicated rules, non-numeric distance, distance map without the voltage | `ConformityInputError` |
+| Missing `obstacle.uuid`, invalid `supportIndex` or `pointIndex` | `ConformityInputError` |
+| `pointIndex` outside the positions of the obstacle | `ConformityInputError` (`out of range`) |
+| `conformityPlot` not in the three graph types | `ConformityInputError` |
+| `supportIndex` with no span in the study | `SupportOutOfRangeError` |
+| Obstacle `uuid` not in the study | `ObstacleNotFoundError` |
+
+All these errors are `ValueError`s, raised before any scenario is solved, except the obstacle and
+support lookups that need the study.
 
 `WorkerPythonService.runTask()` never rejects: it resolves with `{ result, error }`, and the
 component turns `error` into a notification.
@@ -403,24 +421,22 @@ These are the behaviors of the current implementation, worth knowing before exte
   selected by `pointIndex`: an obstacle with several points needs one calculation per point.
 - `…CableLineAxisDistance` is the position of the cable point in the plane, not a distance
   to the obstacle: the distance is in the compliance values and `…MinimalDistance`.
-- `ConformityTableResult.overhang_compliance_line_axis_distance` is computed from
-  `lateral_distance_to_comply` and is not part of the output.
 
 ### Tests
 
 Run them from `stellar-engine/`:
 
 ```bash
-uv run pytest test/plot
+uv run pytest test/core/conformity
 ```
 
 | File | Covers |
 |---|---|
-| `test_scenarios_integration.py` | The [overwrite rules](#conformity-overwrite-rules), scenario counts per rule, intermediate pressures, voltage mapping, `get_conformity()` end to end for the three graph types, errors and input validation. |
-| `test_conformity_points.py` | Output structure: one `conformity` and `results` entry per rule, `radius` per graph type, point counts, zone structure, compliance is a boolean. |
-| `test_conformity_compute.py` | Zone geometry of the three graph types, minimum zone width, compliance logic (including the vegetation U), closest-point values, `get_radius()`. |
-| `test_conformity_table_rules.py` | Table values and compliance per graph type, end to end, for several obstacle positions. |
-| `conftest.py` | Factories building fresh inputs: `make_form`, `make_rule`, `make_distances`, `make_obstacle`, `make_python_inputs`, plus `build_scenarios` and `run_conformity`. |
+| `test_conformity_scenarios.py` | The [overwrite rules](#conformity-overwrite-rules), scenario counts per rule, intermediate pressures, voltage mapping, `get_conformity()` end to end (study left unchanged, clockwise wind, one solve per climatic state, line axis distances on angled sections), `ConformityRequest` validation and errors. |
+| `test_conformity_points.py` | Output structure: one `conformity` and `results` entry per rule in the order of `rulesDistances`, `radius` per graph type, point counts, zone structure, compliance is a boolean. |
+| `test_conformity_compute.py` | Zone geometry of the three graph types, minimum zone width, compliance logic (including the vegetation U and the signed gap), closest-point values, `get_strategy()`. |
+| `test_conformity_table_rules.py` | Table values and compliance per graph type, end to end, for several obstacle positions, and the output keys of the frontend contract. |
+| `conftest.py` | Factories building fresh inputs: `make_form`, `make_rule`, `make_distances`, `make_obstacle`, `make_python_inputs`, plus `build_scenarios`, `run_conformity` (on a copy of a study solved once per module) and `study_angled`. |
 
 `make_form()` defaults to wind zone `"200"`, pressure 200, `windMinus` off, repartition
 temperature 70, lateral temperature 68 and the `vegetation` graph. A new test builds its inputs
@@ -592,10 +608,10 @@ Run one with `npm run test -- conformity.component`.
 to `ConformityRuleResult` (`conformity.model.ts`) and `ConformityTaskOutput` (`types.ts`), then add
 a `ResultRow` in `conformity.constantes.ts` with its label in `public/i18n/*.json`.
 
-**Add a graph type.** Add the value to the Python `Literal` of `conformity_plot`, to
-`ConformityPlotRules.get_zone()` and `get_radius()`, to the validation of
-`ConformityParametersInput.from_dict()`, to `ObstacleConformityType` and `ALLOWED_CONFORMITY`
-(`obstacles.config.helpers.ts`), and handle it in `createConformityPlot()`.
+**Add a graph type.** Add the value to the Python `ConformityPlot` enum and a `PlotStrategy`
+implementation in `strategies.py` (radius, gaps, verdict, zone), registered in `STRATEGIES`, to
+`ObstacleConformityType` and `ALLOWED_CONFORMITY` (`obstacles.config.helpers.ts`), and handle it
+in `createConformityPlot()`.
 
 ---
 

@@ -142,7 +142,7 @@ distance, an *overhang* and a *lateral* column.
 | **Cable altitude** | Altitude of the cable in the case, in the graph. |
 | **Cable line axis distance** | Position of the cable in the case, as a distance to the line axis, in the graph. |
 | **Distance to comply** | The distance required by the rule, at the electric tension of the study. |
-| **Compliance altitude** | *Overhang* only. Distance between the obstacle and the cable in the overhang case, minus the distance to comply. A negative value means the obstacle is too close. |
+| **Compliance altitude** | *Overhang* only. Vertical gap between the obstacle and the cable in the overhang case, minus the distance to comply. A negative value means the obstacle is too close **or above the cable**. |
 | **Compliance line axis distance** | *Lateral* only. Distance between the obstacle and the closest cable position of the lateral side (both wind directions and intermediate positions), minus the distance to comply. A negative value means the obstacle is too close. |
 | **Conformity compliance** | The verdict for the rule: **Yes**, **No** or **Unknown**. |
 
@@ -179,11 +179,12 @@ The verdict is computed from the two compliance values of the table, and depends
 - `vegetation`: the obstacle is compared to a **rectangle**. The overhang value is the vertical
   gap to the overhang position and the lateral value the horizontal gap to the closest lateral
   position, each minus its distance to comply. The verdict is **No** only when the obstacle is
-  **inside the rectangle**: too close vertically, and either too close laterally or horizontally
-  between the lateral positions. Being too close on a single axis is not enough.
+  **inside the rectangle**: too close vertically (or above the cable), and either too close
+  laterally or horizontally between the lateral positions. Being too close on a single axis is
+  not enough.
 - `overhang`: the obstacle is compared to a **line**. Only the overhang value exists: the vertical
   gap to the overhang position minus the overhang distance. The verdict is **Yes** when it is not
-  negative.
+  negative, so it is **No** when the obstacle is too close or above the cable.
 
 The verdict is **Unknown** when the rule has no result: for example a rule you selected **after**
 the calculation. Click **Calculate** again to include it.

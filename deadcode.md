@@ -580,7 +580,7 @@
 | 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; wind pressure is resolved at construction time (`wind_zone_pressure`) and by `apply_wind_minus`. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the method only. |
-| ✅ Validated | ⏳ Pending review |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
 
 ---
 
@@ -593,7 +593,7 @@
 | 🔍 Evidence | Empty body (`pass`) and no caller. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the method only. |
-| ✅ Validated | ⏳ Pending review |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
 
 ---
 
@@ -606,7 +606,7 @@
 | 🔍 Evidence | `get_conformity` no longer calls it: compliance is now computed from `scenario_compliances` over every scenario. `current_conformity_point` is no longer read. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the method; no other change. |
-| ✅ Validated | ⏳ Pending review |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
 
 ---
 
@@ -632,4 +632,69 @@
 | 🔍 Evidence | `get_conformity` now calls `set_closest_point`, which fills `*Temperature`, `*WindPressure` and `*MinimalDistance` from the point closest to the obstacle (lateral side = lateral + lateral_inverse + intermediate). No other caller. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove both methods; the `DistanceResult` import becomes unused and must be removed too. |
-| ✅ Validated | ⏳ Pending review |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 46. `ConformityResult.add_zone_3d_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityResult.add_zone_3d_point`) |
+| Code | `def add_zone_3d_point(self, rule_type, point, radius)` projecting a 3D point then calling `add_zone_2d_point` |
+| 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; `get_conformity` projects the point itself and calls `add_zone_2d_point`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 47. `ConformityTableResult.overhang_compliance_line_axis_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.overhang_compliance_line_axis_distance`) |
+| Code | `@property def overhang_compliance_line_axis_distance(self)` |
+| 🔍 Evidence | Not serialized by `TableResultWriter` and no caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the property only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 48. `Point2D.from_array` + `TableResultWriter.__init__` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`, `stellar-engine/src/stellar_engine/entities/conformity.py`
+
+| | |
+|---|---|
+| 📍 Source | `Point2D.from_array` (`compute.py`), `TableResultWriter.__init__` (`entities/conformity.py`) |
+| Code | `Point2D.from_array(arr)` and `TableResultWriter.__init__(self, result)` storing `self.result` |
+| 🔍 Evidence | No caller: `Point2D` is always built from coordinates and `TableResultWriter.write` is a static method that never reads `self.result`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 49. `to_dict` of the conformity inputs — `stellar-engine/src/stellar_engine/entities/conformity.py`, `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `TensionRules.to_dict`, `RuleDistanceInput.to_dict`, `ConformityParametersInput.to_dict` (`entities/conformity.py`); `RuleClimaticCondition.to_dict`, `ClimaticPoint.to_dict` (`scenarios.py`) |
+| Code | `def to_dict(self) -> dict` serializing the parsed inputs back to dictionaries |
+| 🔍 Evidence | Inputs are only parsed (`from_dict`); no caller serializes them in `stellar-engine/src` or `stellar-engine/test`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the five methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 50. `Scenario.to_dict` + `TargetState.to_dict` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` (`Scenario.to_dict`, `TargetState.to_dict`) |
+| Code | `def to_dict(self) -> dict` serializing a scenario and its target state |
+| 🔍 Evidence | Only caller was a `logger.debug` dump in `get_conformity`, replaced by lazy `%s` formatting of the scenario in `ScenarioRunner.run`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |

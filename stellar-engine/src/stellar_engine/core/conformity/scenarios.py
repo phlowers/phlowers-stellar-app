@@ -4,86 +4,61 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+"""Climatic scenarios of the conformity rules and their pure builder."""
+
 import logging
-from copy import copy
-from dataclasses import InitVar, dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
+from stellar_engine.core.conformity.strategies import PlotStrategy
 from stellar_engine.entities.conformity import (
     ConformityParametersInput,
+    ConformityPlot,
+    ScenarioPoint,
     TensionRules,
+    _is_number,
 )
+from stellar_engine.entities.errors import ConformityInputError
 
 logger = logging.getLogger("stellar_engine")
-
-# Scenarios reported in the lateral column of the conformity table.
-LATERAL_SIDE_POINTS = ("lateral", "lateral_inverse", "intermediate")
 
 
 # ---------------------------scenario classes----------------
 
 
-@dataclass
+@dataclass(frozen=True)
 class TargetState:
     """Represents the target climatic state for a scenario."""
 
     new_temperature: float
     wind_pressure: float
 
-    def to_dict(self) -> dict:
-        """Convert to dictionary format."""
-        return {
-            "new_temperature": self.new_temperature,
-            "wind_pressure": self.wind_pressure,
-        }
 
-
-@dataclass
+@dataclass(frozen=True)
 class Scenario:
     """Represents a conformity computation scenario.
 
-    This scenario encapsulates the rule type, conformity rule, conformity point (lateral, overhang, or cable_track), security distance, and the target climatic state.
+    This scenario encapsulates the rule type, conformity plot, conformity point (lateral, overhang, or cable_track), security distance, and the target climatic state.
     It is intended to be used in the loop that computes conformity for each rule and point.
 
     """
 
     rule_type: str
-    conformity_rule: str
-    # "lateral", "lateral_inverse", "overhang" or "intermediate"
-    conformity_point: str
+    conformity_plot: ConformityPlot
+    conformity_point: ScenarioPoint
     security_distance: float
     target_state: TargetState
 
-    def to_dict(self) -> dict:
-        """Convert to dictionary format."""
-        return {
-            "rule_type": self.rule_type,
-            "conformity_rule": self.conformity_rule,
-            "conformity_point": self.conformity_point,
-            "security_distance": self.security_distance,
-            "target_state": self.target_state.to_dict(),
-        }
 
-
-@dataclass
+@dataclass(frozen=True)
 class ClimaticPoint:
     """Represents climatic conditions for a conformity point."""
 
     temperature: Optional[float]
-    wind_input: float | str  # Can be numeric or "WindZoneInput"
+    wind_pressure: float
     # Carried to the output only. The red zone is handled by the caller, which sends
     # the red zone wind pressure as `windPressure` (see ConformityParametersInput).
     red_zone: bool
-    wind_pressure: float = field(init=False)
-    # Pressure used when wind_input is "WindZoneInput"
-    wind_zone_pressure: InitVar[float] = 0.0
-
-    def __post_init__(self, wind_zone_pressure: float):
-        """Set wind_pressure based on wind_input."""
-        if self.wind_input == "WindZoneInput":
-            self.wind_pressure = float(wind_zone_pressure)
-        else:
-            self.wind_pressure = float(self.wind_input)
 
     @classmethod
     def from_dict(
@@ -99,44 +74,47 @@ class ClimaticPoint:
             ClimaticPoint instance
 
         Raises:
-            ValueError: If required fields are missing or invalid
+            ConformityInputError: If required fields are missing or invalid
         """
         if not isinstance(data, dict):
-            raise ValueError("ClimaticPoint data must be a dictionary")
+            raise ConformityInputError(
+                "ClimaticPoint data must be a dictionary"
+            )
 
         if "pressure" not in data:
-            raise ValueError("ClimaticPoint missing required field: pressure")
+            raise ConformityInputError(
+                "ClimaticPoint missing required field: pressure"
+            )
         if "red_zone" not in data:
-            raise ValueError("ClimaticPoint missing required field: red_zone")
+            raise ConformityInputError(
+                "ClimaticPoint missing required field: red_zone"
+            )
+
+        pressure = data["pressure"]
+        if pressure != "WindZoneInput" and not _is_number(pressure):
+            raise ConformityInputError(
+                "ClimaticPoint pressure must be a number or 'WindZoneInput'"
+            )
+        temperature = data.get("temperature")
+        if temperature is not None and not _is_number(temperature):
+            raise ConformityInputError(
+                "ClimaticPoint temperature must be a number or null"
+            )
+        if not isinstance(data["red_zone"], bool):
+            raise ConformityInputError(
+                "ClimaticPoint red_zone must be a boolean"
+            )
 
         return cls(
-            temperature=data.get("temperature"),
-            wind_input=data["pressure"],
+            temperature=temperature,
+            wind_pressure=float(
+                wind_zone_pressure if pressure == "WindZoneInput" else pressure
+            ),
             red_zone=data["red_zone"],
-            wind_zone_pressure=wind_zone_pressure,
         )
 
-    def to_dict(self) -> dict:
-        """Convert to dictionary format."""
-        return {
-            "temperature": self.temperature,
-            "wind_pressure": self.wind_pressure,
-            "red_zone": self.red_zone,
-        }
 
-    def __copy__(self):
-        """Create a deep copy of the ClimaticPoint."""
-        c = ClimaticPoint(
-            temperature=self.temperature,
-            wind_input=self.wind_pressure,
-            red_zone=self.red_zone,
-        )
-        c.wind_pressure = self.wind_pressure
-
-        return c
-
-
-@dataclass
+@dataclass(frozen=True)
 class RuleClimaticCondition:
     """Represents climatic conditions for a conformity rule."""
 
@@ -144,77 +122,6 @@ class RuleClimaticCondition:
     rule_name: str
     lateral_point: ClimaticPoint
     overhang_point: ClimaticPoint
-    inverse_lateral_point: Optional[ClimaticPoint] = None
-
-    def apply_wind_minus(self):
-        """Negate the lateral wind pressure (windMinus); overhang is untouched."""
-        if self.lateral_point is not None:
-            self.lateral_point.wind_pressure = -self.lateral_point.wind_pressure
-
-    def add_inverse_lateral_pressure(self):
-        """Return a copy of the rule with the lateral pressure inverted."""
-        self.inverse_lateral_point = copy(self.lateral_point)
-        if isinstance(self.lateral_point.wind_pressure, (int, float)):
-            self.inverse_lateral_point.wind_pressure = (
-                -self.lateral_point.wind_pressure
-            )
-
-    def set_repartition_temperature(self, temperature: float):
-        """Set the repartition temperature on the overhang point when it has none."""
-        if (
-            self.overhang_point is not None
-            and self.overhang_point.temperature is None
-        ):
-            self.overhang_point.temperature = temperature
-
-    def set_lateral_temperature(self, temperature: float):
-        """Set the lateral temperature on the lateral points that have none."""
-        for point in (self.lateral_point, self.inverse_lateral_point):
-            if point is not None and point.temperature is None:
-                point.temperature = temperature
-
-    def set_wind_pressure(self, wind_pressure: float):
-        if self.lateral_point is not None:
-            self.lateral_point.wind_pressure = wind_pressure
-        if self.inverse_lateral_point is not None:
-            self.inverse_lateral_point.wind_pressure = -wind_pressure
-        if self.overhang_point is not None:
-            self.overhang_point.wind_pressure = wind_pressure
-
-    def interpolate_between_points(
-        self, intermediate_points: list[float]
-    ) -> list['ClimaticPoint']:
-        """Interpolate between lateral and overhang points for given intermediate points."""
-
-        if self.overhang_point is None:
-            logger.warning("Overhang point is None, cannot interpolate.")
-            return []
-        if self.lateral_point is None:
-            logger.warning("Lateral point is None, cannot interpolate.")
-            return []
-
-        interpolated_points = []
-        lateral_pressure = float(self.lateral_point.wind_pressure)
-        overhang_pressure = float(self.overhang_point.wind_pressure)
-        inverse_lateral_pressure = -lateral_pressure
-
-        for point in intermediate_points:
-            # Interpolate from overhang to inverse lateral
-            inverse_to_overhang = copy(self.lateral_point)
-            inverse_to_overhang.wind_pressure = (
-                overhang_pressure * (1 - point)
-                + inverse_lateral_pressure * point
-            )
-            interpolated_points.append(inverse_to_overhang)
-
-            # Interpolate from overhang to lateral
-            overhang_to_lateral = copy(self.lateral_point)
-            overhang_to_lateral.wind_pressure = (
-                overhang_pressure * (1 - point) + lateral_pressure * point
-            )
-            interpolated_points.append(overhang_to_lateral)
-
-        return interpolated_points
 
     @classmethod
     def from_dict(
@@ -230,10 +137,12 @@ class RuleClimaticCondition:
             RuleClimaticCondition instance
 
         Raises:
-            ValueError: If required fields are missing or invalid
+            ConformityInputError: If required fields are missing or invalid
         """
         if not isinstance(data, dict):
-            raise ValueError("RuleClimaticCondition data must be a dictionary")
+            raise ConformityInputError(
+                "RuleClimaticCondition data must be a dictionary"
+            )
 
         required_fields = [
             "ruleType",
@@ -243,7 +152,7 @@ class RuleClimaticCondition:
         ]
         for fields in required_fields:
             if fields not in data:
-                raise ValueError(
+                raise ConformityInputError(
                     f"RuleClimaticCondition missing required field: {fields}"
                 )
 
@@ -257,15 +166,6 @@ class RuleClimaticCondition:
                 data["overhangPoint"], wind_zone_pressure
             ),
         )
-
-    def to_dict(self) -> dict:
-        """Convert to dictionary format."""
-        return {
-            "ruleType": self.rule_type,
-            "ruleName": self.rule_name,
-            "lateralPoint": self.lateral_point.to_dict(),
-            "overhangPoint": self.overhang_point.to_dict(),
-        }
 
     @staticmethod
     def build_rules_climatic_conditions(
@@ -285,144 +185,127 @@ class RuleClimaticCondition:
 # ---------------------------Conformity----------------
 
 
-def build_scenario(
-    rule: RuleClimaticCondition,
-    # conformity_point: str,
-    # temperature_key: Literal["lateral_distance_temperature", "repartition_temperature"],
-    parameters: ConformityParametersInput,
-    security_distance: TensionRules,
-) -> list[Scenario]:
-    """Build a scenario object from rule and parameters.
+class ScenarioBuilder:
+    """Builds the climatic scenarios of the rules, without mutating them."""
 
-    Args:
-        rule: RuleClimaticCondition containing climatic conditions
-        conformity_point: Either "lateral" or "overhang"
-        temperature_key: Key to retrieve default temperature from parameters
-        parameters: ConformityParameters with form configuration
-        security_distance: Security distance for this scenario
-
-    Returns:
-        Scenario object with all scenario configuration
-    """
-
-    # Map temperature_key to ConformityParameters attribute name
-    # default_temperature = getattr(parameters, temperature_key)
-    scenarios = []
-
-    if parameters.wind_minus:
-        rule.apply_wind_minus()
-
-    if (
-        security_distance.lateral is not None
-        and rule.lateral_point is not None
+    def __init__(
+        self, parameters: ConformityParametersInput, strategy: PlotStrategy
     ):
-        rule.set_lateral_temperature(parameters.lateral_distance_temperature)
-        target_state = TargetState(
-            new_temperature=rule.lateral_point.temperature,
-            wind_pressure=rule.lateral_point.wind_pressure,
-        )
-        scenarios.append(
-            Scenario(
-                rule_type=rule.rule_type,
-                conformity_rule=parameters.conformity_plot,
-                conformity_point="lateral",
-                security_distance=security_distance.lateral,
-                target_state=target_state,
-            )
-        )
-        rule.add_inverse_lateral_pressure()
-        target_state_inverse = TargetState(
-            new_temperature=rule.inverse_lateral_point.temperature,
-            wind_pressure=rule.inverse_lateral_point.wind_pressure,
-        )
-        scenarios.append(
-            Scenario(
-                rule_type=rule.rule_type,
-                conformity_rule=parameters.conformity_plot,
-                conformity_point="lateral_inverse",
-                security_distance=security_distance.lateral,
-                target_state=target_state_inverse,
-            )
-        )
+        self._parameters = parameters
+        self._strategy = strategy
 
-    if (
-        security_distance.overhang is not None
-        and rule.overhang_point is not None
-    ):
-        rule.set_repartition_temperature(parameters.repartition_temperature)
-        target_state = TargetState(
-            new_temperature=rule.overhang_point.temperature,
-            wind_pressure=rule.overhang_point.wind_pressure,
+    def build(
+        self, rule: RuleClimaticCondition, distances: TensionRules
+    ) -> list[Scenario]:
+        """Build the scenarios of a rule: lateral, lateral inverse, overhang, then intermediates."""
+        parameters = self._parameters
+        lateral_temperature = (
+            rule.lateral_point.temperature
+            if rule.lateral_point.temperature is not None
+            else parameters.lateral_distance_temperature
         )
-        scenarios.append(
-            Scenario(
-                rule_type=rule.rule_type,
-                conformity_rule=parameters.conformity_plot,
-                conformity_point="overhang",
-                security_distance=security_distance.overhang,
-                target_state=target_state,
-            )
+        overhang_temperature = (
+            rule.overhang_point.temperature
+            if rule.overhang_point.temperature is not None
+            else parameters.repartition_temperature
         )
+        lateral_pressure = rule.lateral_point.wind_pressure
+        if parameters.wind_minus:
+            lateral_pressure = -lateral_pressure
+        overhang_pressure = rule.overhang_point.wind_pressure
 
-    if parameters.conformity_plot == "cable_track":
-        additional_points = rule.interpolate_between_points(
-            parameters.intermediate_points
-        )
-        if additional_points:
-            for point in additional_points:
-                target_state = TargetState(
-                    new_temperature=point.temperature,
-                    wind_pressure=point.wind_pressure,
+        scenarios = []
+        if distances.lateral is not None:
+            scenarios.append(
+                self._scenario(
+                    rule,
+                    ScenarioPoint.LATERAL,
+                    distances.lateral,
+                    lateral_temperature,
+                    lateral_pressure,
                 )
-                scenarios.append(
-                    Scenario(
-                        rule_type=rule.rule_type,
-                        conformity_rule=parameters.conformity_plot,
-                        conformity_point="intermediate",
-                        security_distance=security_distance.lateral,  # Assuming overhang distance for cable_track
-                        target_state=target_state,
+            )
+            scenarios.append(
+                self._scenario(
+                    rule,
+                    ScenarioPoint.LATERAL_INVERSE,
+                    distances.lateral,
+                    lateral_temperature,
+                    -lateral_pressure,
+                )
+            )
+
+        if distances.overhang is not None:
+            scenarios.append(
+                self._scenario(
+                    rule,
+                    ScenarioPoint.OVERHANG,
+                    distances.overhang,
+                    overhang_temperature,
+                    overhang_pressure,
+                )
+            )
+
+        if (
+            self._strategy.uses_intermediate_points
+            and distances.lateral is not None
+        ):
+            for fraction in parameters.intermediate_points:
+                for target in (-lateral_pressure, lateral_pressure):
+                    scenarios.append(
+                        self._scenario(
+                            rule,
+                            ScenarioPoint.INTERMEDIATE,
+                            distances.lateral,
+                            # intermediate scenarios keep the lateral temperature
+                            lateral_temperature,
+                            overhang_pressure * (1 - fraction)
+                            + target * fraction,
+                        )
                     )
+
+        return scenarios
+
+    def build_all(
+        self,
+        rules: list[RuleClimaticCondition],
+        tension_rules: dict[str, TensionRules],
+    ) -> dict[str, list[Scenario]]:
+        """Build the scenarios of every rule, organized by rule type.
+
+        A rule without tension rules gets an empty list.
+        """
+        scenarios_by_rule: dict[str, list[Scenario]] = {
+            rule.rule_type: [] for rule in rules
+        }
+
+        for rule in rules:
+            distances = tension_rules.get(rule.rule_type)
+            if distances is None:
+                logger.warning(
+                    f"No tension rules found for rule type: {rule.rule_type}. Skipping scenario generation."
                 )
-                logger.debug(
-                    f"Added intermediate scenario for rule {rule.rule_type} with wind pressure {point.wind_pressure} and temperature {point.temperature}"
-                )
-
-    return scenarios
-
-
-def build_scenario_bulk(
-    rules_climatic_conditions: list[RuleClimaticCondition],
-    parameters: ConformityParametersInput,
-    tension_rules: dict[str, TensionRules],
-) -> dict[str, list[Scenario]]:
-    """Build scenarios from climatic conditions and tension rules, organized by rule type.
-
-    Args:
-        rules_climatic_conditions: List of RuleClimaticCondition objects
-        parameters: ConformityParameters with form configuration
-        tension_rules: Dictionary mapping rule type to TensionRules
-
-    Returns:
-        Dictionary mapping rule type to list of Scenario objects for that rule
-    """
-    scenarios_by_rule: dict[str, list[Scenario]] = {
-        rule.rule_type: [] for rule in rules_climatic_conditions
-    }
-
-    for rule in rules_climatic_conditions:
-        tension_rules_distance = tension_rules.get(rule.rule_type, None)
-
-        if tension_rules_distance is None:
-            logger.warning(
-                f"No tension rules found for rule type: {rule.rule_type}. Skipping scenario generation."
+                continue
+            scenarios_by_rule[rule.rule_type].extend(
+                self.build(rule, distances)
             )
-            continue
 
-        build_scenario_list = build_scenario(
-            rule=rule,
-            parameters=parameters,
-            security_distance=tension_rules_distance,
+        return scenarios_by_rule
+
+    def _scenario(
+        self,
+        rule: RuleClimaticCondition,
+        point: ScenarioPoint,
+        security_distance: float,
+        temperature: float,
+        wind_pressure: float,
+    ) -> Scenario:
+        return Scenario(
+            rule_type=rule.rule_type,
+            conformity_plot=self._parameters.conformity_plot,
+            conformity_point=point,
+            security_distance=security_distance,
+            target_state=TargetState(
+                new_temperature=temperature, wind_pressure=wind_pressure
+            ),
         )
-        scenarios_by_rule[rule.rule_type] = build_scenario_list
-
-    return scenarios_by_rule

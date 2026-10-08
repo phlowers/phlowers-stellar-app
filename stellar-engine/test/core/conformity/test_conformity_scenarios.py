@@ -5,171 +5,48 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from copy import deepcopy
+from unittest.mock import patch
 
+import numpy as np
 import pytest
+from mechaphlowers import SectionStudy
 
+from stellar_engine.core.conformity.request import ConformityRequest
 from stellar_engine.core.conformity.scenarios import (
     RuleClimaticCondition,
-    build_scenario,
-    build_scenario_bulk,
+    ScenarioBuilder,
 )
 from stellar_engine.core.conformity.simulation import get_conformity
+from stellar_engine.core.conformity.strategies import get_strategy
 from stellar_engine.entities.conformity import (
     ConformityParametersInput,
     RuleDistanceInput,
     TensionRules,
 )
-from stellar_engine.entities.errors import ObstacleNotFoundError
+from stellar_engine.entities.errors import (
+    ConformityInputError,
+    ObstacleNotFoundError,
+    SupportOutOfRangeError,
+)
 from stellar_engine.plot.obstacles import add_single_obstacle
 
 
-def test_conformity_vegetation_with_lateral_and_overhang(
-    run_conformity,
-    make_python_inputs,
-    make_form,
-    make_rule,
-    make_distances,
-):
-    """Test conformity for vegetation obstacle with both lateral and overhang distances."""
-    python_inputs = make_python_inputs(
-        "vegetation",
-        make_form(conformityPlot="vegetation", intermediatePoints=[0.33, 0.66]),
-        [
-            make_rule("RULE_1"),
-            make_rule("RULE_2", lateral_temp=68, lateral_red_zone=True),
-        ],
-        [
-            make_distances("RULE_1"),
-            make_distances(
-                "RULE_2",
-                lateral={"63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2},
-                overhang={"63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5},
-            ),
-        ],
-        obstacle_name="ttt",
-    )
-
-    result = run_conformity(python_inputs)
-    assert result is not None
-
-
-def test_conformity_traffic_lane_overhang_only(
-    run_conformity,
-    make_python_inputs,
-    make_form,
-    make_rule,
-    make_distances,
-):
-    """Test conformity for traffic lane obstacle with overhang distances only."""
-    python_inputs = make_python_inputs(
-        "traffic_lane",
-        make_form(conformityPlot="overhang", intermediatePoints=[0.33, 0.66]),
-        [
-            make_rule("RULE_1"),
-            make_rule("RULE_2", lateral_temp=68, lateral_red_zone=True),
-        ],
-        [
-            make_distances("RULE_1", lateral=None),
-            make_distances(
-                "RULE_2",
-                lateral=None,
-                overhang={"63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5},
-            ),
-        ],
-        obstacle_name="ttt",
-    )
-
-    result = run_conformity(python_inputs)
-    assert result is not None
-
-
-def test_conformity_accessible_building_cable_track(
-    run_conformity,
-    make_python_inputs,
-    make_form,
-    make_rule,
-    make_distances,
-):
-    """Test conformity for accessible building obstacle with cable track conformity plot."""
-    python_inputs = make_python_inputs(
-        "accessible_building",
-        make_form(conformityPlot="cable_track", intermediatePoints=[0.33, 0.66]),
-        [
-            make_rule("RULE_1"),
-            make_rule("RULE_2", lateral_temp=68, lateral_red_zone=True),
-        ],
-        [
-            make_distances("RULE_1"),
-            make_distances(
-                "RULE_2",
-                lateral={"63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2},
-                overhang={"63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5},
-            ),
-        ],
-        obstacle_name="ttt",
-    )
-
-    result = run_conformity(python_inputs)
-    assert result is not None
-
-
-def test_scenario_building_preserves_overhang_rule_temperature(
-    build_scenarios, make_form, make_rule, make_distances
-):
-    """Test that scenario building preserves the rule's overhang temperature.
-
-    This test verifies that when a rule has overhangPoint.temperature = None (from input),
-    the built scenarios use that, NOT the parameters.repartition_temperature.
-
-    Currently this may be a FAILING test if overhang temperatures are being overwritten
-    by set_repartition_temperature.
-    """
-    scenarios_by_rule = build_scenarios(
-        [make_rule("RULE_2", lateral_temp=68, lateral_red_zone=True)],
-        make_form(intermediatePoints=[0.33, 0.66]),
-        [
-            make_distances(
-                "RULE_2",
-                lateral={"63": 1.6, "90": 1.7, "150": 1.8, "225": 1.9, "400": 2},
-                overhang={"63": 2.1, "90": 2.2, "150": 2.3, "225": 2.4, "400": 2.5},
-            )
-        ],
-    )
-
-    assert "RULE_2" in scenarios_by_rule
-    scenarios = scenarios_by_rule["RULE_2"]
-    assert len(scenarios) > 0
-
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
-    assert len(overhang_scenarios) > 0, "No overhang scenarios found"
-
-    for scenario in overhang_scenarios:
-        print(f"Overhang scenario temperature: {scenario.target_state.new_temperature}")
-
-
-# Rule 1: Pressure handling - "WindZoneInput" vs numeric value
 def test_pressure_rule_with_wind_zone_input(
     build_scenarios, make_form, make_rule, make_distances
 ):
-    """Test that pressure "WindZoneInput" is overwritten by form.windPressure.
-
-    Rule: If pressure == "WindZoneInput", use form.windPressure to overwrite.
-    NOTE: This test documents current behavior - WindZoneInput defaults to 0.0
-    """
+    """A "WindZoneInput" pressure resolves to the form windPressure."""
     scenarios_by_rule = build_scenarios(
         [make_rule("RULE_1", overhang_pressure="WindZoneInput")],
-        make_form(intermediatePoints=[0.33, 0.66]),
+        make_form(windPressure=250, intermediatePoints=[0.33, 0.66]),
         [make_distances("RULE_1")],
     )
 
-    assert "RULE_1" in scenarios_by_rule
-    scenarios = scenarios_by_rule["RULE_1"]
-    assert len(scenarios) > 0
-
-    for scenario in scenarios:
-        print(
-            f"Scenario: {scenario.conformity_point}, wind_pressure: {scenario.target_state.wind_pressure}"
-        )
+    overhang = next(
+        s
+        for s in scenarios_by_rule["RULE_1"]
+        if s.conformity_point == "overhang"
+    )
+    assert overhang.target_state.wind_pressure == 250
 
 
 @pytest.mark.parametrize("wind_pressure", [200, 300])
@@ -184,7 +61,9 @@ def test_wind_zone_input_resolved_with_given_pressure(
     )
 
     lateral = next(
-        s for s in scenarios_by_rule["RULE_1"] if s.conformity_point == "lateral"
+        s
+        for s in scenarios_by_rule["RULE_1"]
+        if s.conformity_point == "lateral"
     )
     assert lateral.target_state.wind_pressure == wind_pressure
 
@@ -227,21 +106,17 @@ def test_pressure_rule_with_numeric_value(
     scenarios = scenarios_by_rule["RULE_1"]
     assert len(scenarios) > 0
 
-    lateral_scenarios = [s for s in scenarios if s.conformity_point == "lateral"]
+    lateral_scenarios = [
+        s for s in scenarios if s.conformity_point == "lateral"
+    ]
     for scenario in lateral_scenarios:
-        assert scenario.target_state.wind_pressure == 150, (
-            f"Expected lateral pressure to be 150 (from rule), "
-            f"but got {scenario.target_state.wind_pressure}. "
-            f"Numeric pressure values should NOT be overwritten."
-        )
+        assert scenario.target_state.wind_pressure == 150
 
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
+    overhang_scenarios = [
+        s for s in scenarios if s.conformity_point == "overhang"
+    ]
     for scenario in overhang_scenarios:
-        assert scenario.target_state.wind_pressure == 250, (
-            f"Expected overhang pressure to be 250 (from rule), "
-            f"but got {scenario.target_state.wind_pressure}. "
-            f"Numeric pressure values should NOT be overwritten."
-        )
+        assert scenario.target_state.wind_pressure == 250
 
 
 # Rule 2: Overhang temperature handling
@@ -259,24 +134,19 @@ def test_overhang_temperature_when_none_uses_repartition_temperature(
     scenarios = scenarios_by_rule["RULE_1"]
     assert len(scenarios) > 0
 
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
-    assert len(overhang_scenarios) > 0, "No overhang scenarios found"
+    overhang_scenarios = [
+        s for s in scenarios if s.conformity_point == "overhang"
+    ]
+    assert len(overhang_scenarios) > 0
 
     for scenario in overhang_scenarios:
-        assert scenario.target_state.new_temperature == 70, (
-            f"Expected overhang temperature to be 70 (from repartitionTemperature), "
-            f"but got {scenario.target_state.new_temperature}. "
-            f"When overhangPoint.temperature is None, should use form.repartitionTemperature."
-        )
+        assert scenario.target_state.new_temperature == 70
 
 
 def test_overhang_temperature_when_explicit_uses_rule_value(
     build_scenarios, make_form, make_rule, make_distances
 ):
-    """Test that explicit overhangPoint.temperature is preserved.
-
-    Rule: If overhangPoint.temperature is not None, use that value (not repartitionTemperature).
-    """
+    """An explicit overhangPoint.temperature wins over repartitionTemperature."""
     scenarios_by_rule = build_scenarios(
         [make_rule("RULE_1", overhang_temp=55)],
         make_form(intermediatePoints=[0.33, 0.66]),
@@ -287,15 +157,13 @@ def test_overhang_temperature_when_explicit_uses_rule_value(
     scenarios = scenarios_by_rule["RULE_1"]
     assert len(scenarios) > 0
 
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
-    assert len(overhang_scenarios) > 0, "No overhang scenarios found"
+    overhang_scenarios = [
+        s for s in scenarios if s.conformity_point == "overhang"
+    ]
+    assert len(overhang_scenarios) > 0
 
     for scenario in overhang_scenarios:
-        assert scenario.target_state.new_temperature == 55, (
-            f"Expected overhang temperature to be 55 (from rule), "
-            f"but got {scenario.target_state.new_temperature}. "
-            f"set_repartition_temperature must only set the temperature if None."
-        )
+        assert scenario.target_state.new_temperature == 55
 
 
 # Rule 3: Lateral temperature handling
@@ -313,24 +181,19 @@ def test_lateral_temperature_when_none_uses_lateral_distance_temperature(
     scenarios = scenarios_by_rule["RULE_1"]
     assert len(scenarios) > 0
 
-    lateral_scenarios = [s for s in scenarios if s.conformity_point == "lateral"]
-    assert len(lateral_scenarios) > 0, "No lateral scenarios found"
+    lateral_scenarios = [
+        s for s in scenarios if s.conformity_point == "lateral"
+    ]
+    assert len(lateral_scenarios) > 0
 
     for scenario in lateral_scenarios:
-        assert scenario.target_state.new_temperature == 68, (
-            f"Expected lateral temperature to be 68 (from lateralDistanceTemperature), "
-            f"but got {scenario.target_state.new_temperature}. "
-            f"When lateralPoint.temperature is None, should use form.lateralDistanceTemperature."
-        )
+        assert scenario.target_state.new_temperature == 68
 
 
 def test_lateral_temperature_when_explicit_uses_rule_value(
     build_scenarios, make_form, make_rule, make_distances
 ):
-    """Test that explicit lateralPoint.temperature is preserved.
-
-    Rule: If lateralPoint.temperature is not None, use that value (not lateralDistanceTemperature).
-    """
+    """An explicit lateralPoint.temperature wins over lateralDistanceTemperature."""
     scenarios_by_rule = build_scenarios(
         [make_rule("RULE_1", lateral_temp=25, overhang_temp=55)],
         make_form(intermediatePoints=[0.33, 0.66]),
@@ -341,15 +204,13 @@ def test_lateral_temperature_when_explicit_uses_rule_value(
     scenarios = scenarios_by_rule["RULE_1"]
     assert len(scenarios) > 0
 
-    lateral_scenarios = [s for s in scenarios if s.conformity_point == "lateral"]
-    assert len(lateral_scenarios) > 0, "No lateral scenarios found"
+    lateral_scenarios = [
+        s for s in scenarios if s.conformity_point == "lateral"
+    ]
+    assert len(lateral_scenarios) > 0
 
     for scenario in lateral_scenarios:
-        assert scenario.target_state.new_temperature == 25, (
-            f"Expected lateral temperature to be 25 (from rule), "
-            f"but got {scenario.target_state.new_temperature}. "
-            f"set_lateral_temperature must only set the temperature if None."
-        )
+        assert scenario.target_state.new_temperature == 25
 
 
 def test_lateral_inverse_temperature_when_explicit_uses_rule_value(
@@ -410,23 +271,19 @@ def test_electric_tension_mapping_lateral_and_overhang(
     scenarios = scenarios_by_rule["RULE_1"]
     assert len(scenarios) > 0
 
-    lateral_scenarios = [s for s in scenarios if s.conformity_point == "lateral"]
-    assert len(lateral_scenarios) > 0, f"No lateral scenarios found for {electric_tension}"
+    lateral_scenarios = [
+        s for s in scenarios if s.conformity_point == "lateral"
+    ]
+    assert len(lateral_scenarios) > 0
     for scenario in lateral_scenarios:
-        assert scenario.security_distance == expected_lateral, (
-            f"For {electric_tension}: Expected lateral security distance {expected_lateral}, "
-            f"but got {scenario.security_distance}. "
-            f"Security distance should match rule.lateral[{tension_code}]"
-        )
+        assert scenario.security_distance == expected_lateral
 
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
-    assert len(overhang_scenarios) > 0, f"No overhang scenarios found for {electric_tension}"
+    overhang_scenarios = [
+        s for s in scenarios if s.conformity_point == "overhang"
+    ]
+    assert len(overhang_scenarios) > 0
     for scenario in overhang_scenarios:
-        assert scenario.security_distance == expected_overhang, (
-            f"For {electric_tension}: Expected overhang security distance {expected_overhang}, "
-            f"but got {scenario.security_distance}. "
-            f"Security distance should match rule.overhang[{tension_code}]"
-        )
+        assert scenario.security_distance == expected_overhang
 
 
 # Rule 5: Wind Minus Handling
@@ -470,47 +327,6 @@ def test_wind_minus_true_flips_lateral_sign(
     assert by_point["overhang"].target_state.wind_pressure == 250
 
 
-def test_wind_minus_true_negates_lateral_wind_pressure(
-    build_scenarios, make_form, make_rule, make_distances
-):
-    """Test that when windMinus=True, lateral wind pressure is negated.
-
-    Rule: When windMinus is True:
-    - Lateral scenarios should have the negated lateral wind pressure
-    - Overhang scenarios keep their own wind pressure (not affected by windMinus)
-    """
-    scenarios_by_rule = build_scenarios(
-        [
-            make_rule(
-                "RULE_1",
-                lateral_pressure=200,
-                overhang_temp=55,
-                overhang_pressure=250,
-            )
-        ],
-        make_form(windMinus=True, intermediatePoints=[0.33, 0.66]),
-        [make_distances("RULE_1")],
-    )
-
-    assert "RULE_1" in scenarios_by_rule
-    scenarios = scenarios_by_rule["RULE_1"]
-    assert len(scenarios) > 0
-
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
-    assert len(overhang_scenarios) > 0, "No overhang scenarios found"
-    for scenario in overhang_scenarios:
-        assert scenario.target_state.wind_pressure == 250, (
-            f"Expected overhang wind pressure to be 250 (unaffected by windMinus), "
-            f"but got {scenario.target_state.wind_pressure}. "
-            f"Overhang pressure should never be negated."
-        )
-
-    lateral_scenarios = [s for s in scenarios if s.conformity_point == "lateral"]
-    assert len(lateral_scenarios) > 0, "No lateral scenarios found"
-    for scenario in lateral_scenarios:
-        assert scenario.target_state.wind_pressure == -200
-
-
 # ============================================================================
 # SCENARIOS BUILDER LOGIC TESTS
 # ============================================================================
@@ -549,19 +365,36 @@ def test_overhang_point_only_produces_one_scenario(
     )
 
 
-def test_overhang_only_rule_has_no_inverse_lateral_point(make_form, make_rule):
-    """An overhang-only rule must not create an inverse lateral point."""
-    rule = RuleClimaticCondition.from_dict(make_rule("RULE_1", overhang_temp=55))
+def test_build_does_not_mutate_rule(make_form, make_rule):
+    rule_data = make_rule("RULE_1", overhang_temp=55)
+    rule = RuleClimaticCondition.from_dict(rule_data)
     parameters = ConformityParametersInput.from_dict(
-        {**make_form(conformityPlot="overhang"), "selectedConformityRules": ["RULE_1"]}
+        {
+            **make_form(conformityPlot="overhang", windMinus=True),
+            "selectedConformityRules": ["RULE_1"],
+        }
+    )
+    builder = ScenarioBuilder(parameters, get_strategy("overhang"))
+    distances = TensionRules(lateral=1.0, overhang=1.5)
+
+    first = builder.build(rule, distances)
+    second = builder.build(rule, distances)
+
+    assert first == second
+    assert rule == RuleClimaticCondition.from_dict(rule_data)
+
+
+def test_cable_track_without_lateral_distance_has_no_intermediate_scenario(
+    build_scenarios, make_form, make_rule, make_distances
+):
+    scenarios_by_rule = build_scenarios(
+        [make_rule("RULE_1")],
+        make_form(conformityPlot="cable_track", intermediatePoints=[0.5]),
+        [make_distances("RULE_1", lateral=None)],
     )
 
-    scenarios = build_scenario(
-        rule, parameters, TensionRules(lateral=None, overhang=1.5)
-    )
-
-    assert [s.conformity_point for s in scenarios] == ["overhang"]
-    assert rule.inverse_lateral_point is None
+    points = [s.conformity_point for s in scenarios_by_rule["RULE_1"]]
+    assert points == ["overhang"]
 
 
 def test_rule_distance_from_dict_does_not_mutate_input(make_distances):
@@ -615,7 +448,9 @@ def test_lateral_point_only_produces_two_scenarios(
         f"but got {scenarios[0].security_distance} and {scenarios[1].security_distance}"
     )
 
-    lateral_scenario = next(s for s in scenarios if s.conformity_point == "lateral")
+    lateral_scenario = next(
+        s for s in scenarios if s.conformity_point == "lateral"
+    )
     lateral_inverse_scenario = next(
         s for s in scenarios if s.conformity_point == "lateral_inverse"
     )
@@ -664,19 +499,23 @@ def test_both_lateral_and_overhang_produces_three_scenarios(
         f"but got {conformity_points}"
     )
 
-    lateral_scenarios = [s for s in scenarios if "lateral" in s.conformity_point]
-    overhang_scenarios = [s for s in scenarios if s.conformity_point == "overhang"]
+    lateral_scenarios = [
+        s for s in scenarios if "lateral" in s.conformity_point
+    ]
+    overhang_scenarios = [
+        s for s in scenarios if s.conformity_point == "overhang"
+    ]
 
     assert len(lateral_scenarios) == 2, "Should have 2 lateral scenarios"
     assert len(overhang_scenarios) == 1, "Should have 1 overhang scenario"
 
     lateral_distances = [s.security_distance for s in lateral_scenarios]
-    assert lateral_distances[0] == lateral_distances[1], (
-        "Both lateral scenarios should have the same security distance"
-    )
-    assert lateral_distances[0] != overhang_scenarios[0].security_distance, (
-        "Lateral and overhang security distances should be different"
-    )
+    assert (
+        lateral_distances[0] == lateral_distances[1]
+    ), "Both lateral scenarios should have the same security distance"
+    assert (
+        lateral_distances[0] != overhang_scenarios[0].security_distance
+    ), "Lateral and overhang security distances should be different"
 
 
 def test_multiple_rules_scenario_count(
@@ -712,8 +551,20 @@ def test_multiple_rules_scenario_count(
             make_distances("RULE_2", lateral=None),
             make_distances(
                 "RULE_3",
-                lateral={"63": 0.5, "90": 0.6, "150": 0.7, "225": 0.8, "400": 0.9},
-                overhang={"63": 1.2, "90": 1.3, "150": 1.4, "225": 1.5, "400": 1.6},
+                lateral={
+                    "63": 0.5,
+                    "90": 0.6,
+                    "150": 0.7,
+                    "225": 0.8,
+                    "400": 0.9,
+                },
+                overhang={
+                    "63": 1.2,
+                    "90": 1.3,
+                    "150": 1.4,
+                    "225": 1.5,
+                    "400": 1.6,
+                },
             ),
         ],
     )
@@ -735,7 +586,9 @@ def test_multiple_rules_scenario_count(
         f"but got {len(scenarios_by_rule['RULE_3'])}"
     )
 
-    total_scenarios = sum(len(scenarios) for scenarios in scenarios_by_rule.values())
+    total_scenarios = sum(
+        len(scenarios) for scenarios in scenarios_by_rule.values()
+    )
     assert total_scenarios == 6, (
         f"Expected total of 6 scenarios (2+1+3), "
         f"but got {total_scenarios}. "
@@ -782,15 +635,21 @@ def test_cable_track_with_intermediate_points_produces_intermediate_scenarios(
     """
     scenarios_by_rule = build_scenarios(
         [make_rule("RULE_1", lateral_pressure=200, overhang_temp=55)],
-        make_form(conformityPlot="cable_track", intermediatePoints=[0.33, 0.66]),
+        make_form(
+            conformityPlot="cable_track", intermediatePoints=[0.33, 0.66]
+        ),
         [make_distances("RULE_1")],
     )
 
     assert "RULE_1" in scenarios_by_rule
     scenarios = scenarios_by_rule["RULE_1"]
 
-    overhang_count = len([s for s in scenarios if s.conformity_point == "overhang"])
-    lateral_count = len([s for s in scenarios if s.conformity_point == "lateral"])
+    overhang_count = len(
+        [s for s in scenarios if s.conformity_point == "overhang"]
+    )
+    lateral_count = len(
+        [s for s in scenarios if s.conformity_point == "lateral"]
+    )
     lateral_inverse_count = len(
         [s for s in scenarios if s.conformity_point == "lateral_inverse"]
     )
@@ -798,15 +657,15 @@ def test_cable_track_with_intermediate_points_produces_intermediate_scenarios(
         [s for s in scenarios if s.conformity_point == "intermediate"]
     )
 
-    assert overhang_count == 1, (
-        f"Expected 1 overhang scenario, but got {overhang_count}"
-    )
-    assert lateral_count == 1, (
-        f"Expected 1 lateral scenario, but got {lateral_count}"
-    )
-    assert lateral_inverse_count == 1, (
-        f"Expected 1 lateral_inverse scenario, but got {lateral_inverse_count}"
-    )
+    assert (
+        overhang_count == 1
+    ), f"Expected 1 overhang scenario, but got {overhang_count}"
+    assert (
+        lateral_count == 1
+    ), f"Expected 1 lateral scenario, but got {lateral_count}"
+    assert (
+        lateral_inverse_count == 1
+    ), f"Expected 1 lateral_inverse scenario, but got {lateral_inverse_count}"
 
     # Intermediate scenarios: 2 per intermediate fraction (forward and inverse)
     assert intermediate_count == 4, (
@@ -816,7 +675,10 @@ def test_cable_track_with_intermediate_points_produces_intermediate_scenarios(
     )
 
     total_expected = (
-        overhang_count + lateral_count + lateral_inverse_count + intermediate_count
+        overhang_count
+        + lateral_count
+        + lateral_inverse_count
+        + intermediate_count
     )
     assert len(scenarios) == total_expected, (
         f"Expected {total_expected} total scenarios, "
@@ -831,27 +693,139 @@ def test_cable_track_with_intermediate_points_produces_intermediate_scenarios(
 # ============================================================================
 
 
-def test_build_scenario_bulk_skips_rule_missing_from_tension_rules(
-    make_form, make_rule
-):
+def test_build_all_skips_rule_missing_from_tension_rules(make_form, make_rule):
     rules = RuleClimaticCondition.build_rules_climatic_conditions(
         [make_rule("RULE_1")]
     )
     parameters = ConformityParametersInput.from_dict(
         {**make_form(), "selectedConformityRules": ["RULE_1"]}
     )
+    builder = ScenarioBuilder(
+        parameters, get_strategy(parameters.conformity_plot)
+    )
 
-    assert build_scenario_bulk(rules, parameters, {}) == {"RULE_1": []}
+    assert builder.build_all(rules, {}) == {"RULE_1": []}
 
 
-def test_get_conformity_with_empty_rules_distances_returns_empty_dict(
+def test_get_conformity_with_empty_rules_distances_raises(
     study_base, make_python_inputs, make_form, make_rule
 ):
     python_inputs = make_python_inputs(
         "vegetation", make_form(), [make_rule("RULE_1")], []
     )
 
-    assert get_conformity(python_inputs, study_base) == {}
+    with pytest.raises(ConformityInputError):
+        get_conformity(python_inputs, study_base)
+
+
+def _set(*path, value):
+    def mutate(inputs):
+        target = inputs
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+
+    return mutate
+
+
+def _duplicate_first(key):
+    def mutate(inputs):
+        inputs[key].append(deepcopy(inputs[key][0]))
+
+    return mutate
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(
+            lambda inputs: inputs["obstacle"].pop("uuid"),
+            id="no-obstacle-uuid",
+        ),
+        pytest.param(
+            _set("obstacle", "supportIndex", value=None),
+            id="support-index-none",
+        ),
+        pytest.param(
+            _set("obstacle", "supportIndex", value=-1),
+            id="support-index-negative",
+        ),
+        pytest.param(_set("pointIndex", value="a"), id="point-index-text"),
+        pytest.param(
+            _set("rulesClimaticConditions", value=[]),
+            id="no-climatic-condition",
+        ),
+        pytest.param(
+            _duplicate_first("rulesClimaticConditions"),
+            id="duplicate-climatic-rule",
+        ),
+        pytest.param(
+            _duplicate_first("rulesDistances"), id="duplicate-distance-rule"
+        ),
+        pytest.param(
+            _set("rulesDistances", 0, "lateral", value={"63": 1.0}),
+            id="distance-without-tension",
+        ),
+        pytest.param(
+            _set(
+                "rulesClimaticConditions",
+                0,
+                "lateralPoint",
+                "pressure",
+                value=None,
+            ),
+            id="lateral-pressure-none",
+        ),
+        pytest.param(
+            _set(
+                "rulesClimaticConditions",
+                0,
+                "lateralPoint",
+                "temperature",
+                value="hot",
+            ),
+            id="lateral-temperature-text",
+        ),
+        pytest.param(
+            _set("form", "windPressure", value=True), id="wind-pressure-bool"
+        ),
+        pytest.param(
+            _set("form", "intermediatePoints", value=[1.5]),
+            id="intermediate-point-above-one",
+        ),
+    ],
+)
+def test_conformity_request_rejects_invalid_inputs(
+    make_python_inputs, make_form, make_rule, make_distances, mutate
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(),
+        [make_rule("RULE_1")],
+        [make_distances("RULE_1")],
+    )
+    mutate(python_inputs)
+
+    with pytest.raises(ConformityInputError):
+        ConformityRequest.from_dict(python_inputs)
+
+
+def test_get_conformity_with_last_support_index_raises(
+    study_base, make_python_inputs, make_form, make_rule, make_distances
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(),
+        [make_rule("RULE_1")],
+        [make_distances("RULE_1")],
+    )
+    add_single_obstacle(
+        {"obstacles": [python_inputs["obstacle"]]}, study_base, support_index=0
+    )
+    python_inputs["obstacle"]["supportIndex"] = 3
+
+    with pytest.raises(SupportOutOfRangeError):
+        get_conformity(python_inputs, study_base)
 
 
 def test_get_conformity_with_invalid_voltage_raises(
@@ -885,6 +859,29 @@ def test_get_conformity_with_unknown_obstacle_raises(
 
     with pytest.raises(ObstacleNotFoundError):
         get_conformity(python_inputs, study_base)
+
+
+def test_get_conformity_leaves_study_unchanged(
+    study_base, make_python_inputs, make_form, make_rule, make_distances
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(),
+        [make_rule("RULE_1", lateral_pressure=400)],
+        [make_distances("RULE_1")],
+    )
+    study_base.solve_adjustment()
+    study_base.solve_change_state()
+    add_single_obstacle(
+        {"obstacles": [python_inputs["obstacle"]]}, study_base, support_index=0
+    )
+    coords_calculator = study_base.position_engine.coords_calculator
+    before = np.array(coords_calculator.get_spans(frame="section").coords)
+
+    get_conformity(python_inputs, study_base)
+
+    after = np.array(coords_calculator.get_spans(frame="section").coords)
+    np.testing.assert_allclose(after, before)
 
 
 @pytest.mark.parametrize("point_index", [0, 1])
@@ -934,6 +931,7 @@ def test_get_conformity_with_out_of_range_point_index_raises(
     [
         {"windMinus": "yes"},
         {"conformityPlot": "unknown"},
+        {"conformityPlot": None},
         {"intermediatePoints": ["a"]},
         {"intermediatePoints": 0.5},
     ],
@@ -943,3 +941,83 @@ def test_conformity_parameters_reject_invalid_values(make_form, override):
 
     with pytest.raises(ValueError):
         ConformityParametersInput.from_dict(data)
+
+
+@pytest.mark.parametrize("span_index", [0, 1, 2])
+def test_line_axis_distances_are_measured_from_the_span_axis(
+    study_angled,
+    make_python_inputs,
+    make_form,
+    make_rule,
+    make_distances,
+    span_index,
+):
+    python_inputs = make_python_inputs(
+        "traffic_lane",
+        make_form(conformityPlot="overhang"),
+        [make_rule("AT")],
+        [make_distances("AT", lateral=None)],
+        obstacle_position={"x": 250, "y": 0, "z": 30},
+    )
+    python_inputs["obstacle"]["supportIndex"] = span_index
+    add_single_obstacle(
+        {"obstacles": [python_inputs["obstacle"]]},
+        study_angled,
+        support_index=span_index,
+    )
+
+    result = get_conformity(python_inputs, study_angled)
+
+    assert result["obstacle"]["points"][0]["x"] == pytest.approx(0, abs=1e-6)
+    # The crossarm is 10 m long.
+    assert result["results"]["AT"][
+        "overhangCableLineAxisDistance"
+    ] == pytest.approx(10, abs=2.5)
+
+
+def test_scenarios_are_solved_with_clockwise_wind(
+    run_conformity, make_python_inputs, make_form, make_rule, make_distances
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(),
+        [make_rule("RULE_1")],
+        [make_distances("RULE_1")],
+    )
+    original = SectionStudy.solve_change_state
+
+    with patch.object(
+        SectionStudy,
+        "solve_change_state",
+        autospec=True,
+        side_effect=original,
+    ) as spy:
+        run_conformity(python_inputs)
+
+    assert spy.call_args_list
+    assert all(
+        call.kwargs["wind_direction"] == "clockwise"
+        for call in spy.call_args_list
+    )
+
+
+def test_runner_solves_each_climatic_state_once(
+    run_conformity, make_python_inputs, make_form, make_rule, make_distances
+):
+    python_inputs = make_python_inputs(
+        "vegetation",
+        make_form(intermediatePoints=[]),
+        [make_rule("RULE_1"), make_rule("RULE_2")],
+        [make_distances("RULE_1"), make_distances("RULE_2")],
+    )
+    original = SectionStudy.solve_change_state
+
+    with patch.object(
+        SectionStudy,
+        "solve_change_state",
+        autospec=True,
+        side_effect=original,
+    ) as spy:
+        run_conformity(python_inputs)
+
+    assert len(spy.call_args_list) == 3

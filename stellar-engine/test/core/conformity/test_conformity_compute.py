@@ -4,21 +4,48 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import dataclasses
+
 import pytest
 
-from stellar_engine.core.conformity.compute import (
-    ConformityPlotRules,
-    ConformityTableResult,
-    Point2D,
+from stellar_engine.core.conformity.compute import ConformityTableResult
+from stellar_engine.core.conformity.plot_data import Point2D
+from stellar_engine.core.conformity.runner import ScenarioOutcome
+from stellar_engine.core.conformity.scenarios import Scenario, TargetState
+from stellar_engine.core.conformity.strategies import get_strategy
+from stellar_engine.entities.conformity import (
+    ConformityPlot,
+    ScenarioPoint,
+    TensionRules,
 )
-from stellar_engine.core.conformity.scenarios import TargetState
-from stellar_engine.entities.conformity import TensionRules
 
 
-def _plot_rules(conformity_plot, lateral=1.0, overhang=1.5):
-    return ConformityPlotRules(
-        conformity_plot,
-        tension_rules={"AT": TensionRules(lateral=lateral, overhang=overhang)},
+def _zone(conformity_plot, points, lateral=1.0, overhang=1.5):
+    return get_strategy(conformity_plot).zone(
+        points, TensionRules(lateral=lateral, overhang=overhang)
+    )
+
+
+def _outcome(
+    conformity_point, xy, temperature=17.0, wind=200.0, distance=1.0
+):
+    return ScenarioOutcome(
+        Scenario(
+            rule_type="AT",
+            conformity_plot=ConformityPlot.VEGETATION,
+            conformity_point=ScenarioPoint(conformity_point),
+            security_distance=distance,
+            target_state=TargetState(
+                new_temperature=temperature, wind_pressure=wind
+            ),
+        ),
+        Point2D(*xy),
+    )
+
+
+def _from_outcomes(outcomes, conformity_plot="vegetation", obstacle=(0.0, 0.0)):
+    return ConformityTableResult.from_outcomes(
+        outcomes, Point2D(*obstacle), get_strategy(conformity_plot)
     )
 
 
@@ -36,9 +63,7 @@ def _corners(zone_plot):
 
 
 def test_vegetation_zone_border_is_four_vertex_polyline():
-    zone = _plot_rules("vegetation").get_zone(
-        [Point2D(0, 0), Point2D(4, 3)], rule_type="AT"
-    )
+    zone = _zone("vegetation", [Point2D(0, 0), Point2D(4, 3)])
 
     assert zone.zone_border == [
         {"x": -1.0, "y": 4.5},  # UpperLeft
@@ -56,8 +81,8 @@ def test_vegetation_zone_border_is_four_vertex_polyline():
 
 @pytest.mark.parametrize("lateral", [None, 1.0])
 def test_overhang_zone_is_flat_rectangle_below_lowest_point(lateral):
-    zone = _plot_rules("overhang", lateral=lateral).get_zone(
-        [Point2D(0, 2), Point2D(4, 3)], rule_type="AT"
+    zone = _zone(
+        "overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=lateral
     )
 
     corners = _corners(zone)
@@ -78,9 +103,7 @@ def test_overhang_zone_is_flat_rectangle_below_lowest_point(lateral):
 def test_zero_width_zone_gets_minimum_width_centered_on_point(
     conformity_plot,
 ):
-    zone = _plot_rules(conformity_plot, lateral=None).get_zone(
-        [Point2D(2.0, 3.0)], rule_type="AT"
-    )
+    zone = _zone(conformity_plot, [Point2D(2.0, 3.0)], lateral=None)
 
     corners = _corners(zone)
     assert corners["UpperRight"]["x"] - corners["UpperLeft"]["x"] == 10
@@ -88,12 +111,10 @@ def test_zero_width_zone_gets_minimum_width_centered_on_point(
     assert corners["LowerRight"]["x"] == pytest.approx(2.0 + 5)
 
 
-def test_cable_track_zone_has_empty_border():
-    zone = _plot_rules("cable_track").get_zone(
-        [Point2D(0, 0), Point2D(4, 3)], rule_type="AT"
-    )
+def test_cable_track_has_no_zone():
+    zone = _zone("cable_track", [Point2D(0, 0), Point2D(4, 3)])
 
-    assert zone.zone_border == []
+    assert zone.to_dict() == {"zonePoints": [], "zoneBorder": []}
 
 
 # ============================================================================
@@ -108,14 +129,16 @@ def _table(
     lateral_d=1.0,
     overhang_d=1.5,
 ):
-    return ConformityTableResult(
-        conformity_plot=conformity_plot,
-        obstacle_point=(0.0, 0.0),
-        overhang_point=overhang_point,
-        lateral_side_points=list(lateral_side_points),
-        lateral_distance_to_comply=lateral_d,
-        overhang_distance_to_comply=overhang_d,
-    )
+    first_side, *other_sides = lateral_side_points
+    outcomes = [
+        _outcome("lateral", first_side, distance=lateral_d),
+        *(
+            _outcome("lateral_inverse", xy, distance=lateral_d)
+            for xy in other_sides
+        ),
+        _outcome("overhang", overhang_point, distance=overhang_d),
+    ]
+    return _from_outcomes(outcomes, conformity_plot)
 
 
 @pytest.mark.parametrize(
@@ -183,6 +206,13 @@ def test_overhang_compliance_ignores_lateral_side_points(
     assert table.conformity_compliance_status is expected
 
 
+def test_overhang_obstacle_above_cable_is_not_compliant():
+    table = _table("overhang", overhang_point=(0.0, -5.0))
+
+    assert table.overhang_compliance_altitude == pytest.approx(-6.5)
+    assert table.conformity_compliance_status is False
+
+
 @pytest.mark.parametrize("conformity_plot", ["cable_track", "vegetation"])
 def test_compliance_value_of_zero_is_compliant(conformity_plot):
     table = _table(
@@ -198,7 +228,9 @@ def test_compliance_value_of_zero_is_compliant(conformity_plot):
 
 
 def test_compliance_none_without_point():
-    assert ConformityTableResult().conformity_compliance_status is None
+    table = _from_outcomes([])
+
+    assert all(value is None for value in dataclasses.asdict(table).values())
 
 
 # ============================================================================
@@ -216,16 +248,12 @@ SCENARIO_POINTS = [
 
 
 def _fill_closest_points(scenario_points):
-    table = ConformityTableResult(obstacle_point=(0.0, 0.0))
-    for conformity_point, point, temperature, wind_pressure in scenario_points:
-        table.set_closest_point(
-            point,
-            TargetState(
-                new_temperature=temperature, wind_pressure=wind_pressure
-            ),
-            conformity_point,
-        )
-    return table
+    return _from_outcomes(
+        [
+            _outcome(conformity_point, point, temperature, wind_pressure)
+            for conformity_point, point, temperature, wind_pressure in scenario_points
+        ]
+    )
 
 
 @pytest.mark.parametrize(
@@ -255,9 +283,13 @@ def test_overhang_values_come_from_closest_overhang_point(scenario_points):
 
 
 def test_minimal_distance_is_euclidean_distance_to_obstacle():
-    table = ConformityTableResult(obstacle_point=(1.0, 1.0))
-    table.set_closest_point((4.0, 5.0), TargetState(17.0, 200.0), "lateral")
-    table.set_closest_point((1.0, -2.0), TargetState(70.0, 0.0), "overhang")
+    table = _from_outcomes(
+        [
+            _outcome("lateral", (4.0, 5.0), 17.0, 200.0),
+            _outcome("overhang", (1.0, -2.0), 70.0, 0.0),
+        ],
+        obstacle=(1.0, 1.0),
+    )
 
     assert table.lateral_minimal_distance == pytest.approx(5.0)
     assert table.overhang_minimal_distance == pytest.approx(3.0)
@@ -302,8 +334,7 @@ def test_overhang_point_does_not_fill_lateral_values():
 def test_table_result_uses_point_coordinates_for_cable_values(
     conformity_point, altitude_field, axis_distance_field
 ):
-    table = ConformityTableResult()
-    table.set_projected_point((12.0, 7.5), conformity_point)
+    table = _from_outcomes([_outcome(conformity_point, (12.0, 7.5))])
 
     assert getattr(table, altitude_field) == pytest.approx(7.5)
     assert getattr(table, axis_distance_field) == pytest.approx(12.0)
@@ -313,9 +344,12 @@ def test_table_result_uses_point_coordinates_for_cable_values(
 def test_table_result_lateral_values_ignore_other_lateral_scenarios(
     other_point,
 ):
-    table = ConformityTableResult()
-    table.set_projected_point((12.0, 7.5), "lateral")
-    table.set_projected_point((-20.0, 3.0), other_point)
+    table = _from_outcomes(
+        [
+            _outcome("lateral", (12.0, 7.5)),
+            _outcome(other_point, (-20.0, 3.0)),
+        ]
+    )
 
     assert table.lateral_cable_altitude == pytest.approx(7.5)
     assert table.lateral_cable_line_axis_distance == pytest.approx(12.0)
@@ -331,12 +365,21 @@ def test_table_result_lateral_values_ignore_other_lateral_scenarios(
 def test_table_result_uses_security_distance_for_distance_to_comply(
     conformity_point, field_name
 ):
-    table = ConformityTableResult()
-    table.set_rule_distances(4.25, conformity_point)
+    table = _from_outcomes(
+        [_outcome(conformity_point, (0.0, 0.0), distance=4.25)]
+    )
 
     assert getattr(table, field_name) == pytest.approx(4.25)
 
 
-def test_get_radius_raises_on_unknown_plot_type():
+def test_get_strategy_raises_on_unknown_plot_type():
     with pytest.raises(ValueError):
-        _plot_rules("unknown").get_radius(1.0)
+        get_strategy("unknown")
+
+
+@pytest.mark.parametrize(
+    ("conformity_plot", "expected"),
+    [("cable_track", 2.5), ("vegetation", 1.0), ("overhang", 1.0)],
+)
+def test_radius_per_plot(conformity_plot, expected):
+    assert get_strategy(conformity_plot).radius(2.5) == expected

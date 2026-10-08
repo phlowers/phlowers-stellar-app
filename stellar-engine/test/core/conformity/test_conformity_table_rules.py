@@ -19,12 +19,14 @@ import math
 
 import pytest
 
-from stellar_engine.core.conformity.scenarios import LATERAL_SIDE_POINTS
+from stellar_engine.entities.conformity import LATERAL_SIDE_POINTS
 
 LATERAL_D = 1.0
 OVERHANG_D = 1.5
 TINY_D = 0.01
 HUGE_D = 100.0
+
+BELOW_CABLE = {"x": 10, "y": 5, "z": 30}
 
 OBSTACLE_TYPES = {
     "cable_track": "accessible_building",
@@ -49,7 +51,7 @@ def compute_conformity(
         lateral_d=LATERAL_D,
         overhang_d=OVERHANG_D,
         intermediate_points=(),
-        obstacle_position=None,
+        obstacle_position=BELOW_CABLE,
     ):
         python_inputs = make_python_inputs(
             OBSTACLE_TYPES[conformity_plot],
@@ -162,22 +164,6 @@ def test_cable_track_overhang_compliance_altitude_is_euclidean_distance_minus_di
     )
 
 
-def test_cable_track_overhang_compliance_line_axis_distance_is_not_filled(
-    compute_conformity,
-):
-    *_, table = compute_conformity("cable_track", intermediate_points=[0.5])
-
-    assert table.get("overhangComplianceLineAxisDistance") is None
-
-
-def test_cable_track_lateral_compliance_altitude_is_not_filled(
-    compute_conformity,
-):
-    *_, table = compute_conformity("cable_track", intermediate_points=[0.5])
-
-    assert table.get("lateralComplianceAltitude") is None
-
-
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
 @pytest.mark.parametrize("intermediate_points", [[], [0.5], [0.33, 0.66]])
 def test_cable_track_lateral_compliance_line_axis_distance_uses_closest_lateral_point(
@@ -227,7 +213,7 @@ def test_cable_track_compliance_false_when_any_side_is_negative(
 
 
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
-def test_vegetation_overhang_compliance_altitude_is_altitude_gap_minus_distance_to_comply(
+def test_vegetation_overhang_compliance_altitude_is_signed_altitude_gap_minus_distance_to_comply(
     compute_conformity, obstacle_position
 ):
     obstacle, overhang, _, table = compute_conformity(
@@ -235,7 +221,7 @@ def test_vegetation_overhang_compliance_altitude_is_altitude_gap_minus_distance_
     )
 
     assert table["overhangComplianceAltitude"] == pytest.approx(
-        abs(obstacle["y"] - overhang["y"]) - OVERHANG_D
+        overhang["y"] - obstacle["y"] - OVERHANG_D
     )
 
 
@@ -251,15 +237,6 @@ def test_vegetation_lateral_compliance_line_axis_distance_is_closest_x_gap_minus
     assert table["lateralComplianceLineAxisDistance"] == pytest.approx(
         closest_gap - LATERAL_D
     )
-
-
-def test_vegetation_only_fills_overhang_altitude_and_lateral_line_axis_distance(
-    compute_conformity,
-):
-    *_, table = compute_conformity("vegetation")
-
-    assert table.get("overhangComplianceLineAxisDistance") is None
-    assert table.get("lateralComplianceAltitude") is None
 
 
 @pytest.mark.parametrize(
@@ -302,6 +279,34 @@ def test_vegetation_compliance_false_when_obstacle_between_lateral_points_and_ov
     assert table["conformityCompliance"] is False
 
 
+def test_vegetation_obstacle_above_cable_inside_lateral_band_is_not_compliant(
+    compute_conformity,
+):
+    *_, table = compute_conformity(
+        "vegetation",
+        lateral_d=TINY_D,
+        overhang_d=TINY_D,
+        obstacle_position={"x": 10, "y": 10, "z": 65},
+    )
+
+    assert table["overhangComplianceAltitude"] < 0
+    assert table["conformityCompliance"] is False
+
+
+def test_vegetation_obstacle_above_cable_outside_lateral_band_is_compliant(
+    compute_conformity,
+):
+    *_, table = compute_conformity(
+        "vegetation",
+        lateral_d=TINY_D,
+        overhang_d=TINY_D,
+        obstacle_position={"x": 10, "y": 5, "z": 65},
+    )
+
+    assert table["overhangComplianceAltitude"] < 0
+    assert table["conformityCompliance"] is True
+
+
 def test_vegetation_u_shape_compliance_is_judged_per_rule(
     run_conformity, make_python_inputs, make_form, make_rule, make_distances
 ):
@@ -337,7 +342,7 @@ def test_vegetation_u_shape_compliance_is_judged_per_rule(
 
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
 @pytest.mark.parametrize("lateral_d", [None, LATERAL_D])
-def test_overhang_compliance_altitude_is_altitude_gap_minus_distance_to_comply(
+def test_overhang_compliance_altitude_is_signed_altitude_gap_minus_distance_to_comply(
     compute_conformity, obstacle_position, lateral_d
 ):
     obstacle, overhang, _, table = compute_conformity(
@@ -345,8 +350,20 @@ def test_overhang_compliance_altitude_is_altitude_gap_minus_distance_to_comply(
     )
 
     assert table["overhangComplianceAltitude"] == pytest.approx(
-        abs(obstacle["y"] - overhang["y"]) - OVERHANG_D
+        overhang["y"] - obstacle["y"] - OVERHANG_D
     )
+
+
+def test_overhang_obstacle_above_cable_is_not_compliant(compute_conformity):
+    *_, table = compute_conformity(
+        "overhang",
+        lateral_d=None,
+        overhang_d=TINY_D,
+        obstacle_position={"x": 10, "y": 5, "z": 65},
+    )
+
+    assert table["overhangComplianceAltitude"] < 0
+    assert table["conformityCompliance"] is False
 
 
 @pytest.mark.parametrize("lateral_d", [None, LATERAL_D])
@@ -356,8 +373,6 @@ def test_overhang_only_fills_compliance_altitude(
     *_, table = compute_conformity("overhang", lateral_d=lateral_d)
 
     assert table["overhangComplianceAltitude"] is not None
-    assert table.get("overhangComplianceLineAxisDistance") is None
-    assert table.get("lateralComplianceAltitude") is None
     assert table.get("lateralComplianceLineAxisDistance") is None
 
 
@@ -456,7 +471,7 @@ def test_lateral_climatic_conditions_and_distance_come_from_closest_lateral_side
     ("obstacle_position", "intermediate_points", "expected_conformity_point"),
     [
         pytest.param(
-            {"x": 10, "y": -20, "z": 30},
+            {"x": 10, "y": 20, "z": 30},
             [],
             "lateral_inverse",
             id="lateral-inverse",
@@ -493,3 +508,36 @@ def test_lateral_climatic_conditions_are_not_always_from_lateral_scenario(
     assert table["lateralWindPressure"] == pytest.approx(
         scenario.target_state.wind_pressure
     )
+
+
+# ============================================================================
+# FRONTEND CONTRACT
+# ============================================================================
+
+# `ConformityRuleResult` in src/app/core/services/worker_python/tasks/types.ts
+FRONTEND_RESULT_KEYS = {
+    "overhangCableAltitude",
+    "lateralCableAltitude",
+    "overhangCableLineAxisDistance",
+    "lateralCableLineAxisDistance",
+    "overhangDistanceToComply",
+    "lateralDistanceToComply",
+    "overhangComplianceAltitude",
+    "lateralComplianceLineAxisDistance",
+    "conformityCompliance",
+    "overhangTemperature",
+    "lateralTemperature",
+    "overhangWindPressure",
+    "lateralWindPressure",
+    "overhangMinimalDistance",
+    "lateralMinimalDistance",
+}
+
+
+@pytest.mark.parametrize("conformity_plot", list(OBSTACLE_TYPES))
+def test_result_keys_match_frontend_contract(
+    compute_conformity, conformity_plot
+):
+    *_, table = compute_conformity(conformity_plot)
+
+    assert set(table) == FRONTEND_RESULT_KEYS

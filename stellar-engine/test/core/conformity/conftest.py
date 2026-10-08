@@ -8,13 +8,17 @@
 
 from copy import deepcopy
 
+import numpy as np
+import pandas as pd
 import pytest
+from mechaphlowers import SectionArray, SectionStudy, sample_cable_catalog
 
 from stellar_engine.core.conformity.scenarios import (
     RuleClimaticCondition,
-    build_scenario_bulk,
+    ScenarioBuilder,
 )
 from stellar_engine.core.conformity.simulation import get_conformity
+from stellar_engine.core.conformity.strategies import get_strategy
 from stellar_engine.entities.conformity import (
     ConformityParametersInput,
     RuleDistanceInput,
@@ -27,6 +31,38 @@ DEFAULT_OVERHANG = {"63": 1.1, "90": 1.2, "150": 1.3, "225": 1.4, "400": 1.5}
 
 # Distinguishes "use the default map" from an explicit None (no distance).
 _DEFAULT = object()
+
+
+def build_section_study(line_angles: list[float]) -> SectionStudy:
+    """Section of the root `study_base` with the given line angles (grad)."""
+    section_array = SectionArray(
+        pd.DataFrame(
+            {
+                "name": ["1", "2", "3", "4"],
+                "suspension": [False, True, True, False],
+                "conductor_attachment_altitude": [50, 100, 50, 50],
+                "crossarm_length": [10, 10, 10, 10],
+                "line_angle": line_angles,
+                "insulator_length": [3, 3, 3, 3],
+                "span_length": [500, 500, 500, np.nan],
+                "insulator_mass": [100.0, 50.0, 5.0, 100.0],
+                "load_mass": [0, 0, 0, 0],
+                "load_position": [0, 0, 0, 0],
+            }
+        ),
+        sagging_parameter=2000,
+        sagging_temperature=15,
+    )
+    section_array.add_units({"line_angle": "grad"})
+    return SectionStudy(
+        cable_array=sample_cable_catalog.get_as_object(["ASTER600"]),
+        section_array=section_array,
+    )
+
+
+@pytest.fixture
+def study_angled() -> SectionStudy:
+    return build_section_study([0, 30, 30, 0])
 
 
 def _with_rule_names(form: dict, rules: list[dict]) -> dict:
@@ -163,21 +199,30 @@ def build_scenarios():
         tension_rules = TensionRules.build_tension_rules(
             tension, rule_distances
         )
-        return build_scenario_bulk(
-            rules_climatic_conditions, parameters, tension_rules
-        )
+        return ScenarioBuilder(
+            parameters, get_strategy(parameters.conformity_plot)
+        ).build_all(rules_climatic_conditions, tension_rules)
 
     return _build_scenarios
 
 
+@pytest.fixture(scope="module")
+def solved_study() -> SectionStudy:
+    study = build_section_study([0, 0, 0, 0])
+    study.solve_adjustment()
+    study.solve_change_state()
+    return study
+
+
 @pytest.fixture
-def run_conformity(study_base):
+def run_conformity(solved_study):
     def _run_conformity(python_inputs: dict) -> dict:
+        study = deepcopy(solved_study)
         add_single_obstacle(
             {"obstacles": [python_inputs["obstacle"]]},
-            study_base,
+            study,
             support_index=0,
         )
-        return get_conformity(python_inputs, study_base)
+        return get_conformity(python_inputs, study)
 
     return _run_conformity
