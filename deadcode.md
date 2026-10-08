@@ -620,3 +620,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Field, method, call and 5 obsolete unit tests removed. |
 | ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-07 |
+
+---
+
+## 45. `ConformityTableResult.set_target_state` + `set_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.set_target_state`, `ConformityTableResult.set_distance`) |
+| Code | `set_target_state(point, conformity_point)` (temperature / wind pressure of the `lateral` and `overhang` scenarios only) and `set_distance(distance, conformity_point)` (minimal distance from `distance_projection_u` / `distance_projection_v`) |
+| 🔍 Evidence | `get_conformity` now calls `set_closest_point`, which fills `*Temperature`, `*WindPressure` and `*MinimalDistance` from the point closest to the obstacle (lateral side = lateral + lateral_inverse + intermediate). No other caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; the `DistanceResult` import becomes unused and must be removed too. |
+| ✅ Validated | ⏳ Pending review |

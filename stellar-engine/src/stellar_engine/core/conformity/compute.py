@@ -358,6 +358,34 @@ class ConformityTableResult:
         elif conformity_point == "overhang":
             self.overhang_distance_to_comply = security_distance
 
+    def set_closest_point(
+        self,
+        point: tuple[float, float],
+        target_state: 'TargetState',
+        conformity_point: str,
+    ) -> None:
+        """Keep the distance and climatic state of the point closest to the obstacle, per table side."""
+        distance = math.hypot(
+            point[0] - self.obstacle_point[0],
+            point[1] - self.obstacle_point[1],
+        )
+        if conformity_point == "overhang":
+            if (
+                self.overhang_minimal_distance is None
+                or distance < self.overhang_minimal_distance
+            ):
+                self.overhang_minimal_distance = distance
+                self.overhang_temperature = target_state.new_temperature
+                self.overhang_wind_pressure = target_state.wind_pressure
+        elif conformity_point in LATERAL_SIDE_POINTS:
+            if (
+                self.lateral_minimal_distance is None
+                or distance < self.lateral_minimal_distance
+            ):
+                self.lateral_minimal_distance = distance
+                self.lateral_temperature = target_state.new_temperature
+                self.lateral_wind_pressure = target_state.wind_pressure
+
     def set_distance(self, distance: DistanceResult, conformity_point) -> None:
         if conformity_point == "lateral":
             # probably not the intended behavior, but keeping it for now to avoid breaking existing code

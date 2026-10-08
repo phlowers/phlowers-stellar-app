@@ -11,6 +11,7 @@ from stellar_engine.core.conformity.compute import (
     ConformityTableResult,
     Point2D,
 )
+from stellar_engine.core.conformity.scenarios import TargetState
 from stellar_engine.entities.conformity import TensionRules
 
 
@@ -198,6 +199,89 @@ def test_compliance_value_of_zero_is_compliant(conformity_plot):
 
 def test_compliance_none_without_point():
     assert ConformityTableResult().conformity_compliance_status is None
+
+
+# ============================================================================
+# CLOSEST POINT: TEMPERATURE, WIND PRESSURE, MINIMAL DISTANCE
+# ============================================================================
+
+# (conformity_point, projected point, temperature, wind pressure); obstacle at (0, 0)
+SCENARIO_POINTS = [
+    ("lateral", (6.0, 8.0), 17.0, 200.0),  # distance 10
+    ("lateral_inverse", (-3.0, 4.0), 18.0, -200.0),  # distance 5
+    ("intermediate", (0.0, 7.0), 19.0, 50.0),  # distance 7
+    ("overhang", (0.0, 2.0), 70.0, 0.0),  # distance 2
+    ("overhang", (0.0, 3.0), 71.0, 10.0),  # distance 3
+]
+
+
+def _fill_closest_points(scenario_points):
+    table = ConformityTableResult(obstacle_point=(0.0, 0.0))
+    for conformity_point, point, temperature, wind_pressure in scenario_points:
+        table.set_closest_point(
+            point,
+            TargetState(
+                new_temperature=temperature, wind_pressure=wind_pressure
+            ),
+            conformity_point,
+        )
+    return table
+
+
+@pytest.mark.parametrize(
+    "scenario_points",
+    [SCENARIO_POINTS, SCENARIO_POINTS[::-1]],
+    ids=["forward", "reversed"],
+)
+def test_lateral_values_come_from_closest_lateral_side_point(scenario_points):
+    table = _fill_closest_points(scenario_points)
+
+    assert table.lateral_minimal_distance == pytest.approx(5.0)
+    assert table.lateral_temperature == 18.0
+    assert table.lateral_wind_pressure == -200.0
+
+
+@pytest.mark.parametrize(
+    "scenario_points",
+    [SCENARIO_POINTS, SCENARIO_POINTS[::-1]],
+    ids=["forward", "reversed"],
+)
+def test_overhang_values_come_from_closest_overhang_point(scenario_points):
+    table = _fill_closest_points(scenario_points)
+
+    assert table.overhang_minimal_distance == pytest.approx(2.0)
+    assert table.overhang_temperature == 70.0
+    assert table.overhang_wind_pressure == 0.0
+
+
+def test_minimal_distance_is_euclidean_distance_to_obstacle():
+    table = ConformityTableResult(obstacle_point=(1.0, 1.0))
+    table.set_closest_point((4.0, 5.0), TargetState(17.0, 200.0), "lateral")
+    table.set_closest_point((1.0, -2.0), TargetState(70.0, 0.0), "overhang")
+
+    assert table.lateral_minimal_distance == pytest.approx(5.0)
+    assert table.overhang_minimal_distance == pytest.approx(3.0)
+
+
+@pytest.mark.parametrize(
+    "conformity_point", ["lateral", "lateral_inverse", "intermediate"]
+)
+def test_lateral_side_point_does_not_fill_overhang_values(conformity_point):
+    table = _fill_closest_points([(conformity_point, (3.0, 4.0), 17.0, 200.0)])
+
+    assert table.lateral_minimal_distance == pytest.approx(5.0)
+    assert table.overhang_minimal_distance is None
+    assert table.overhang_temperature is None
+    assert table.overhang_wind_pressure is None
+
+
+def test_overhang_point_does_not_fill_lateral_values():
+    table = _fill_closest_points([("overhang", (3.0, 4.0), 70.0, 0.0)])
+
+    assert table.overhang_minimal_distance == pytest.approx(5.0)
+    assert table.lateral_minimal_distance is None
+    assert table.lateral_temperature is None
+    assert table.lateral_wind_pressure is None
 
 
 @pytest.mark.parametrize(

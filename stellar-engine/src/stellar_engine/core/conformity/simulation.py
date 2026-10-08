@@ -223,14 +223,13 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
                 ),
             )
 
-            conformity_result.table_results[rule_type].set_target_state(
-                scenario.target_state, scenario.conformity_point
+            conformity_result.table_results[rule_type].set_closest_point(
+                projected_point,
+                scenario.target_state,
+                scenario.conformity_point,
             )
             conformity_result.table_results[rule_type].set_projected_point(
                 projected_point, scenario.conformity_point
-            )
-            conformity_result.table_results[rule_type].set_distance(
-                dist_result, scenario.conformity_point
             )
             conformity_result.table_results[rule_type].set_rule_distances(
                 scenario.security_distance, scenario.conformity_point

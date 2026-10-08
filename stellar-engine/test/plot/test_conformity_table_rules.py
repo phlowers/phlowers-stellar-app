@@ -19,6 +19,8 @@ import math
 
 import pytest
 
+from stellar_engine.core.conformity.scenarios import LATERAL_SIDE_POINTS
+
 LATERAL_D = 1.0
 OVERHANG_D = 1.5
 TINY_D = 0.01
@@ -78,8 +80,66 @@ def compute_conformity(
     return _compute
 
 
+@pytest.fixture
+def compute_scenario_points(
+    run_conformity,
+    build_scenarios,
+    make_python_inputs,
+    make_form,
+    make_rule,
+    make_distances,
+):
+    """Return the obstacle, each plotted point paired with its scenario, and the table."""
+
+    def _compute(
+        conformity_plot, intermediate_points=(), obstacle_position=None
+    ):
+        form = make_form(
+            conformityPlot=conformity_plot,
+            intermediatePoints=list(intermediate_points),
+        )
+        rules = [make_rule("AT")]
+        distances = [
+            make_distances(
+                "AT",
+                lateral={"400": LATERAL_D},
+                overhang={"400": OVERHANG_D},
+            )
+        ]
+        result_dict = run_conformity(
+            make_python_inputs(
+                OBSTACLE_TYPES[conformity_plot],
+                form,
+                rules,
+                distances,
+                obstacle_position=obstacle_position,
+            )
+        )
+        scenarios = build_scenarios(rules, form, distances)["AT"]
+        points = result_dict["conformity"]["AT"]["points"]
+        assert len(points) == len(scenarios)
+        return (
+            result_dict["obstacle"]["points"][0],
+            list(zip(points, scenarios)),
+            result_dict["results"]["AT"],
+        )
+
+    return _compute
+
+
 def _euclidean(a, b):
     return math.hypot(a["x"] - b["x"], a["y"] - b["y"])
+
+
+def _closest(obstacle, scenario_points, conformity_points):
+    return min(
+        (
+            (point, scenario)
+            for point, scenario in scenario_points
+            if scenario.conformity_point in conformity_points
+        ),
+        key=lambda point_scenario: _euclidean(obstacle, point_scenario[0]),
+    )
 
 
 # ============================================================================
@@ -319,3 +379,117 @@ def test_overhang_compliance_false_only_when_compliance_altitude_is_negative(
 
     assert (table["overhangComplianceAltitude"] < 0) is (overhang_d == HUGE_D)
     assert table["conformityCompliance"] is expected
+
+
+# ============================================================================
+# CLOSEST POINT: TEMPERATURE, WIND PRESSURE, MINIMAL DISTANCE
+# ============================================================================
+
+CLOSEST_POINT_CASES = [
+    pytest.param("cable_track", [], id="cable_track"),
+    pytest.param("cable_track", [0.5], id="cable_track-1-intermediate"),
+    pytest.param(
+        "cable_track", [0.33, 0.66], id="cable_track-2-intermediates"
+    ),
+    pytest.param("vegetation", [], id="vegetation"),
+    pytest.param("overhang", [], id="overhang"),
+]
+
+
+@pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
+@pytest.mark.parametrize(
+    ("conformity_plot", "intermediate_points"), CLOSEST_POINT_CASES
+)
+def test_overhang_climatic_conditions_and_distance_come_from_closest_overhang_point(
+    compute_scenario_points,
+    conformity_plot,
+    intermediate_points,
+    obstacle_position,
+):
+    obstacle, scenario_points, table = compute_scenario_points(
+        conformity_plot,
+        intermediate_points=intermediate_points,
+        obstacle_position=obstacle_position,
+    )
+
+    point, scenario = _closest(obstacle, scenario_points, ("overhang",))
+    assert table["overhangMinimalDistance"] == pytest.approx(
+        _euclidean(obstacle, point)
+    )
+    assert table["overhangTemperature"] == pytest.approx(
+        scenario.target_state.new_temperature
+    )
+    assert table["overhangWindPressure"] == pytest.approx(
+        scenario.target_state.wind_pressure
+    )
+
+
+@pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
+@pytest.mark.parametrize(
+    ("conformity_plot", "intermediate_points"), CLOSEST_POINT_CASES
+)
+def test_lateral_climatic_conditions_and_distance_come_from_closest_lateral_side_point(
+    compute_scenario_points,
+    conformity_plot,
+    intermediate_points,
+    obstacle_position,
+):
+    obstacle, scenario_points, table = compute_scenario_points(
+        conformity_plot,
+        intermediate_points=intermediate_points,
+        obstacle_position=obstacle_position,
+    )
+
+    point, scenario = _closest(obstacle, scenario_points, LATERAL_SIDE_POINTS)
+    assert table["lateralMinimalDistance"] == pytest.approx(
+        _euclidean(obstacle, point)
+    )
+    assert table["lateralTemperature"] == pytest.approx(
+        scenario.target_state.new_temperature
+    )
+    assert table["lateralWindPressure"] == pytest.approx(
+        scenario.target_state.wind_pressure
+    )
+
+
+@pytest.mark.parametrize(
+    ("obstacle_position", "intermediate_points", "expected_conformity_point"),
+    [
+        pytest.param(
+            {"x": 10, "y": -20, "z": 30},
+            [],
+            "lateral_inverse",
+            id="lateral-inverse",
+        ),
+        pytest.param(
+            {"x": 10, "y": 10, "z": 30},
+            [0.5],
+            "intermediate",
+            id="intermediate",
+        ),
+    ],
+)
+def test_lateral_climatic_conditions_are_not_always_from_lateral_scenario(
+    compute_scenario_points,
+    obstacle_position,
+    intermediate_points,
+    expected_conformity_point,
+):
+    obstacle, scenario_points, table = compute_scenario_points(
+        "cable_track",
+        intermediate_points=intermediate_points,
+        obstacle_position=obstacle_position,
+    )
+
+    _, scenario = _closest(obstacle, scenario_points, LATERAL_SIDE_POINTS)
+    lateral_scenario = next(
+        s for _, s in scenario_points if s.conformity_point == "lateral"
+    )
+    assert scenario.conformity_point == expected_conformity_point
+    assert (
+        scenario.target_state.wind_pressure
+        != lateral_scenario.target_state.wind_pressure
+    )
+    assert table["lateralWindPressure"] == pytest.approx(
+        scenario.target_state.wind_pressure
+    )

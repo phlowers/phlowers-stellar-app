@@ -328,14 +328,16 @@ the scenarios did not produce is `null`.
 | `overhangDistanceToComply`, `lateralDistanceToComply` | Security distance of the rule at the voltage. |
 | `overhangComplianceAltitude` | `overhangCableAltitude - overhangDistanceToComply`: the highest altitude the obstacle may reach under the cable. |
 | `lateralComplianceLineAxisDistance` | `lateralCableLineAxisDistance - lateralDistanceToComply`: the horizontal margin, negative when too close. |
-| `overhangTemperature`, `lateralTemperature` | Temperature of the `overhang` / `lateral` scenario (°C). |
-| `overhangWindPressure`, `lateralWindPressure` | Wind pressure of the `overhang` / `lateral` scenario (Pa). |
-| `overhangMinimalDistance`, `lateralMinimalDistance` | Same value as the corresponding `…CableLineAxisDistance`. |
+| `overhangTemperature`, `lateralTemperature` | Temperature (°C) of the scenario producing the closest overhang / lateral side point. |
+| `overhangWindPressure`, `lateralWindPressure` | Wind pressure (Pa) of the scenario producing the closest overhang / lateral side point. |
+| `overhangMinimalDistance`, `lateralMinimalDistance` | Euclidean distance, in the distance plane, from the obstacle to the closest overhang / lateral side point. |
 | `conformityCompliance` | `true` / `false`, or `null` when the rule has no scenario. |
 
 :::{note}
-Only the `lateral` and `overhang` scenarios feed the table values. The `lateral_inverse` and
-`intermediate` scenarios only add **points to the figure** and **a compliance verdict**.
+The **lateral side** groups the `lateral`, `lateral_inverse` and `intermediate` scenarios
+(`LATERAL_SIDE_POINTS`). The temperature, wind pressure and minimal distance of each side come
+from the point of that side closest to the obstacle (`ConformityTableResult.set_closest_point`),
+so `lateralWindPressure` is negative when the `lateral_inverse` point is the closest.
 :::
 
 #### Compliance
@@ -375,8 +377,6 @@ These are the behaviors of the current implementation, worth knowing before exte
   saved with the form (`selectedPoint`) but is **not sent** to the engine.
 - **`lateralCableAltitude`** holds a horizontal coordinate, not an altitude, despite its name and
   its table label.
-- **`…MinimalDistance`** duplicates the line axis distances of the `lateral` and `overhang`
-  scenarios: it is **not** a minimum over the intermediate scenarios.
 - `ConformityTableResult.overhang_compliance_line_axis_distance` is computed from
   `lateral_distance_to_comply` and is not part of the output.
 
