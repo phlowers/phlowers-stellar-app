@@ -891,6 +891,8 @@
       "two-spans-option": "Deux portées",
       "all-option": "Toutes",
       "max-section-option": "Max canton",
+      "charges-label": "Charges",
+      "obstacles-label": "Obstacles",
       "distances-label": "Distances",
       "floor-sidetab-label": "Sol",
       "no-load-case-message": "Pour ajouter des charges, vous devez créer un cas de charge."
