@@ -71,11 +71,12 @@ A recap of the obstacle: **Name**, **Type**, **Span**, **Reference support**, **
 and the **Altitude point**, **Reference support distance** and **Distance to line axis** of the
 point. These fields cannot be edited here.
 
-When the obstacle has several points, choose the one to display in **Obstacle's point**. The
+When the obstacle has several points, choose the one to check in **Obstacle's point**. The
 choice is mandatory to calculate.
 
 :::{note}
-The calculation measures the distances from the **first point** of the obstacle.
+The calculation measures the distances from the **selected point**, and the graph shows its
+position as *"<obstacle name> point N"*. To check another point, select it and calculate again.
 :::
 
 ### Electric tension
@@ -138,62 +139,85 @@ distance, an *overhang* and a *lateral* column.
 
 | Row | Meaning |
 |---|---|
-| **Cable altitude** | Position of the cable in the case. In the *overhang* column, its altitude. In the *lateral* column, its horizontal position in the graph. |
-| **Cable line axis distance** | Distance between the obstacle and the cable in the case: vertical for *overhang*, horizontal for *lateral*. |
+| **Cable altitude** | Altitude of the cable in the case, in the graph. |
+| **Cable line axis distance** | Position of the cable in the case, as a distance to the line axis, in the graph. |
 | **Distance to comply** | The distance required by the rule, at the electric tension of the study. |
-| **Compliance altitude** | *Overhang* only. The highest altitude the obstacle may reach under the cable: cable altitude minus distance to comply. |
-| **Compliance line axis distance** | *Lateral* only. The horizontal margin: distance between the obstacle and the cable minus distance to comply. A negative value means the obstacle is too close. |
+| **Compliance altitude** | *Overhang* only. Distance between the obstacle and the cable in the overhang case, minus the distance to comply. A negative value means the obstacle is too close. |
+| **Compliance line axis distance** | *Lateral* only. Distance between the obstacle and the closest cable position of the lateral side (both wind directions and intermediate positions), minus the distance to comply. A negative value means the obstacle is too close. |
 | **Conformity compliance** | The verdict for the rule: **Yes**, **No** or **Unknown**. |
-
-For the obstacle types drawn with disks, a **Minimum distance case** block adds the
-**Temperature** (°C), the **Wind pressure** (Pa) and the **Minimal distance** (m) of the overhang
-and lateral cases.
 
 A cell is empty when the value does not apply.
 
+#### Minimum distance case
+
+For the `cable_track` conformity plot, a **Minimum distance case** block adds, for the overhang
+and the lateral columns, the **Temperature** (°C), the **Wind pressure** (Pa) and the
+**Minimal distance** (m).
+
+These values describe the **closest cable position** to the obstacle. Each rule moves the cable
+through several scenarios, and each scenario gives one cable position in the graph:
+
+- *overhang* column: the overhang position;
+- *lateral* column: the lateral position in both wind directions and the intermediate positions
+  between them.
+
+For each column, the position closest to the obstacle is kept. **Minimal distance** is the
+distance, in the graph, between the obstacle and this position, and **Temperature** and **Wind
+pressure** are those of the scenario that produced it. It tells in which climatic condition the
+obstacle is the closest to the cable. The wind pressure of the lateral column is negative when
+the closest position is the one of the opposite wind direction.
+
 ### Conformity compliance
 
-The verdict is **Yes** only if **every** position of the cable checked for the rule respects its
-distance:
+The verdict is computed from the two compliance values of the table, and depends on the
+**conformity plot** of the obstacle type (see [Graph](#conformity-user-graph)):
 
-- the lateral case, in both wind directions, and the intermediate positions of the disks graph:
-  the **horizontal** distance to the obstacle must be **greater** than the lateral distance;
-- the overhang case: the **vertical** distance to the obstacle must be **greater** than the
-  overhang distance.
+- `cable_track`: the obstacle is compared to **radius zones**. The overhang value is the distance
+  to the overhang position and the lateral value the distance to the closest lateral position,
+  each minus its distance to comply. The verdict is **Yes** when the obstacle is outside the
+  radius zones, that is when no value is negative (a value of 0 complies).
+- `vegetation`: the obstacle is compared to a **rectangle**. The overhang value is the vertical
+  gap to the overhang position and the lateral value the horizontal gap to the closest lateral
+  position, each minus its distance to comply. The verdict is **No** only when the obstacle is
+  **inside the rectangle**: too close vertically, and either too close laterally or horizontally
+  between the lateral positions. Being too close on a single axis is not enough.
+- `overhang`: the obstacle is compared to a **line**. Only the overhang value exists: the vertical
+  gap to the overhang position minus the overhang distance. The verdict is **Yes** when it is not
+  negative.
 
-The verdict is **No** as soon as one position is too close, and **Unknown** when the rule has no
-result: for example a rule you selected **after** the calculation. Click **Calculate** again to
-include it.
+The verdict is **Unknown** when the rule has no result: for example a rule you selected **after**
+the calculation. Click **Calculate** again to include it.
 
 The graph helps to see the situation; the **Conformity compliance** row is the reference result.
 
+(conformity-user-graph)=
 ### Graph
 
 Each rule has its own color. The obstacle is the dark **diamond**. The cable positions are
 markers; hover a point to read its coordinates, scroll to zoom, and use the toolbar of the graph
 to pan or save an image. Both axes have the same scale, so distances are not distorted.
 
-The graph depends on the type of obstacle. The assignment below is the one of the default
-catalog.
+The graph depends on the **conformity plot** of the obstacle type: `overhang`, `vegetation` or
+`cable_track`. The assignment below is the one of the default catalog.
 
-#### Horizontal line
+#### `overhang`: horizontal line
 
 For obstacles with an overhang distance only. Each rule draws a horizontal line, at the altitude
 of the cable position minus the overhang distance. The obstacle must stay **below** the line.
 
-#### Trench
+#### `vegetation`: trench (rectangle)
 
 Used for vegetation. The cable positions of each rule (overhang, lateral, and lateral in the
 opposite direction) are surrounded by a clearance zone, extended by the lateral distance on the
 sides and by the overhang distance above and below. The border is drawn on the sides and the
 bottom, like a trench.
 
-#### Disks
+#### `cable_track`: disks (radius zones)
 
 Used for buildings and structures. Each position of the cable is the center of a **disk** whose
 radius is the distance to respect. The positions are the overhang case, the lateral case in both
 directions, and intermediate positions between them, which give the *track* of the cable. The
-obstacle must stay **outside** all the disks.
+obstacle must stay **outside** all the disks. The disks are fully opaque.
 
 ### Enlarge the graph
 

@@ -53,7 +53,7 @@ Entities are in `src/app/infrastructure/database/entities/`, the JSON-to-entity 
   "obstacles": [ /* one entry per obstacle type */ ],
   "rules": [ /* one entry per regulatory rule */ ],
   "repartitionTemperatureFields": { "defaultValue": 70 },
-  "lateralTemperatureFields": { "ruleType": "RULE_2", "message": "..." },
+  "lateralTemperatureFields": { "defaultValue": 65, "ruleType": "RULE_2", "message": "..." },
   "windZone": { "default": "200", "values": [ /* wind zones */ ] },
   "intermediatePointPositions": [0.33, 0.66]
 }
@@ -230,15 +230,15 @@ reads them: they do not restrict the rules that get the red zone pressure.
 | Key | Meaning |
 |---|---|
 | `repartitionTemperatureFields.defaultValue` | Initial value (°C) of **Repartition temperature**. |
-| `lateralTemperatureFields.ruleType` | Rule whose `lateralPoint.temperature` is the **initial value** of **Lateral distance temperature**, and whose name prefixes the field label. |
+| `lateralTemperatureFields.defaultValue` | Initial value (°C) of **Lateral distance temperature**. Mandatory, finite number. |
+| `lateralTemperatureFields.ruleType` | Rule whose name prefixes the **Lateral distance temperature** label. Its `lateralPoint.temperature` is only the fallback initial value, when `defaultValue` is missing from the stored configuration. |
 | `lateralTemperatureFields.message` | Hint displayed under **Lateral distance temperature**. |
 | `intermediatePointPositions` | Fractions in `]0, 1[` locating the intermediate cable states of the `cable_track` graph. `[0.33, 0.66]` gives four intermediate points. Ignored for the other graph types. |
 
 :::{note}
-The initial lateral temperature is read from the rule `lateralTemperatureFields.ruleType`. When
-that rule has `"temperature": null`, as `RULE_2` in the shipped file, no value can be read and the
-field **starts empty**: it is mandatory, so the user has to type it before the calculation is
-enabled. Conversely, a rule with a fixed `lateralPoint.temperature` ignores the field.
+The initial lateral temperature is `lateralTemperatureFields.defaultValue`, whatever the
+`temperature` of the rule `lateralTemperatureFields.ruleType` (`null` for `RULE_2` in the shipped
+file). A rule with a fixed `lateralPoint.temperature` ignores the field when calculating.
 :::
 
 The two temperature fields accept 0 to 250 °C with at most 2 decimals
