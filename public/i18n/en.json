@@ -891,6 +891,8 @@
       "two-spans-option": "Two spans",
       "all-option": "All",
       "max-section-option": "Max section",
+      "charges-label": "Charges",
+      "obstacles-label": "Obstacles",
       "distances-label": "Distances",
       "floor-sidetab-label": "Floor",
       "no-load-case-message": "In order to add loads, you need to create a load case."
