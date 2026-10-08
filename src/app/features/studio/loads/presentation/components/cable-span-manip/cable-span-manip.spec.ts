@@ -841,4 +841,117 @@ describe('CableSpanManipComponent', () => {
       expect(component.isFormInvalid()).toBe(false);
     });
   });
+
+  describe('temporary load data sync', () => {
+    const selectSpan = (uuid: string | null): void => {
+      component.form.controls.spanUuid.setValue(uuid);
+      component.form.controls.spanUuid.markAsDirty();
+      component.onScopeChange(uuid);
+      fixture.detectChanges();
+    };
+
+    const editField = (name: 'lateralDistance' | 'altitude', value: number): void => {
+      component.form.controls[name].setValue(value);
+      component.form.controls[name].markAsDirty();
+    };
+
+    const tempParams = () => mockPlotService.temporaryLoadData!.spanManipParams;
+
+    beforeEach(() => {
+      mockPlotService.temporaryLoadData = { spanManipParams: [] } as unknown as PlotService['temporaryLoadData'];
+    });
+
+    it('should not create an entry when a span is only selected', () => {
+      selectSpan('support-uuid-1');
+      expect(tempParams()).toHaveLength(0);
+    });
+
+    it('should write the whole form snapshot once a field is edited', () => {
+      selectSpan('support-uuid-1');
+      editField('lateralDistance', 3);
+      editField('altitude', 4);
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0]).toMatchObject({
+        spanUuid: 'support-uuid-1',
+        chargeUuid: 'charge-uuid-1',
+        referenceSupport: 'LEFT',
+        lateralDistance: 3,
+        altitude: 4,
+        slingLength: 5
+      });
+    });
+
+    it('should update the same entry on subsequent edits', () => {
+      selectSpan('support-uuid-1');
+      editField('lateralDistance', 3);
+      fixture.detectChanges();
+      const firstUuid = tempParams()[0].uuid;
+
+      editField('lateralDistance', 7);
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0].uuid).toBe(firstUuid);
+      expect(tempParams()[0].lateralDistance).toBe(7);
+    });
+
+    it('should reuse the persisted manipulation uuid for the current charge', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        cable_span_manipulations: [
+          {
+            uuid: 'persisted-span-manip-uuid',
+            spanUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            referenceSupport: 'RIGHT',
+            distanceToRefSupport: 10,
+            cableManipType: 'with_a_crane',
+            cableManipMethod: 'clamp',
+            longitudinalDistance: 0,
+            lateralDistance: 1,
+            altitude: 2,
+            anchoring: 'with_sling',
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null,
+            slingLength: 5
+          }
+        ]
+      } as unknown as Section);
+      selectSpan('support-uuid-1');
+
+      editField('altitude', 9);
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0]).toMatchObject({
+        uuid: 'persisted-span-manip-uuid',
+        referenceSupport: 'RIGHT',
+        distanceToRefSupport: 10,
+        altitude: 9
+      });
+    });
+
+    it('should not write anything when no span is selected', () => {
+      selectSpan(null);
+      editField('lateralDistance', 3);
+      fixture.detectChanges();
+      expect(tempParams()).toHaveLength(0);
+    });
+
+    it('should not overwrite the entry when switching back to an edited span', () => {
+      selectSpan('support-uuid-1');
+      editField('lateralDistance', 3);
+      fixture.detectChanges();
+
+      selectSpan('support-uuid-1');
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0].lateralDistance).toBe(3);
+    });
+  });
 });

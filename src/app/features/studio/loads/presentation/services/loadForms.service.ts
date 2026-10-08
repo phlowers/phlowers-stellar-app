@@ -95,20 +95,20 @@ export class LoadFormsService {
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
     ];
     // TODO : re read this
-    newData.supportManipParams = supportManipParams;
-    newData.spanManipParams = spanManipParams;
-    // newData.supportManipParams = [
-    //   ...supportManipParams,
-    //   ...(section?.cable_support_manipulations?.filter(
-    //     (suppManip) => !supportManipParams.some((p) => p.supportUuid === suppManip.supportUuid)
-    //   ) ?? [])
-    // ];
-    // newData.spanManipParams = [
-    //   ...spanManipParams,
-    //   ...(section?.cable_span_manipulations?.filter(
-    //     (spanManip) => !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid)
-    //   ) ?? [])
-    // ];
+    // newData.supportManipParams = supportManipParams;
+    // newData.spanManipParams = spanManipParams;
+    newData.supportManipParams = [
+      ...supportManipParams,
+      ...(section?.cable_support_manipulations?.filter(
+        (suppManip) => !supportManipParams.some((p) => p.supportUuid === suppManip.supportUuid)
+      ) ?? [])
+    ];
+    newData.spanManipParams = [
+      ...spanManipParams,
+      ...(section?.cable_span_manipulations?.filter(
+        (spanManip) => !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid)
+      ) ?? [])
+    ];
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
@@ -231,7 +231,8 @@ export class LoadFormsService {
     }
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
-
+    console.log("CALCULATE!!!!!!!!!!!!!!!!!!!!")
+    console.log(temporaryLoadData)
     try {
       const currentSection = this.spanService.section();
       const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
