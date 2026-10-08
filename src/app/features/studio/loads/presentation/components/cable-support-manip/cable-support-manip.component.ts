@@ -29,7 +29,6 @@ import { CableSupportManipService } from '../../services/cableSupportManip.servi
 import type { CableSupportManipItem, CableSupportManipulation } from '@shared/domain';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
-  CableSupportManipControlName,
   CableSupportManipFormControls,
   SupportAnchoringType,
   SupportManipType
@@ -288,7 +287,7 @@ export class CableSupportManipComponent {
       this.form.controls.manip1Type.updateValueAndValidity();
       return;
     }
-    const saved = this.findSupportManipulation(uuid)
+    const saved = this.findSupportManipulation(uuid);
     if (saved) {
       this.hasSavedManipulation.set(true);
       this.showManip2.set(saved.manip2 != null);
@@ -471,10 +470,11 @@ export class CableSupportManipComponent {
       ) ??
       this.spanService
         .section()
-        ?.cable_support_manipulations?.find((manip) => manip.supportUuid === supportUuid && manip.chargeUuid === chargeUuid)
+        ?.cable_support_manipulations?.find(
+          (manip) => manip.supportUuid === supportUuid && manip.chargeUuid === chargeUuid
+        )
     );
   }
-
 
   private syncTemporaryManipulation(): void {
     const temporaryLoadData = this.plotService.temporaryLoadData;
@@ -496,7 +496,5 @@ export class CableSupportManipComponent {
         ?.uuid ??
       uuidv4();
     temporaryLoadData.supportManipParams = [...others, { ...this.createSupportManipFromForm(chargeUuid), uuid }];
-    console.log("SYNC!!!!!!!!!!!!!!!")
-    console.log(temporaryLoadData.supportManipParams)
   }
 }

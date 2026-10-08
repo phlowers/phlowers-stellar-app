@@ -94,9 +94,6 @@ export class LoadFormsService {
       ...rawCableModif,
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
     ];
-    // TODO : re read this
-    // newData.supportManipParams = supportManipParams;
-    // newData.spanManipParams = spanManipParams;
     newData.supportManipParams = [
       ...supportManipParams,
       ...(section?.cable_support_manipulations?.filter(
@@ -225,14 +222,11 @@ export class LoadFormsService {
    */
   calculateLoad = async () => {
     const temporaryLoadData = this.plotService.temporaryLoadData;
-    console.log(temporaryLoadData);
     if (!temporaryLoadData) {
       return;
     }
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
-    console.log("CALCULATE!!!!!!!!!!!!!!!!!!!!")
-    console.log(temporaryLoadData)
     try {
       const currentSection = this.spanService.section();
       const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);

@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  OnInit,
-  signal,
-  untracked
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -222,7 +213,6 @@ export class CableSpanManipComponent implements OnInit {
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.value });
 
-  // Effects are batched, so several control changes result in a single write of the final state.
   private readonly _syncTemporaryManipulation = effect(() => {
     this.formValue();
     untracked(() => this.syncTemporaryManipulation());
@@ -471,9 +461,12 @@ export class CableSpanManipComponent implements OnInit {
       this.spanService.section()?.cable_span_manipulations,
       chargeUuid
     );
-    return this.plotService.temporaryLoadData?.spanManipParams.find(
-        (manip) => manip.spanUuid === spanUuid && manip.chargeUuid === chargeUuid) ?? normalizedManips.find((m) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid);  
-}
+    return (
+      this.plotService.temporaryLoadData?.spanManipParams.find(
+        (manip) => manip.spanUuid === spanUuid && manip.chargeUuid === chargeUuid
+      ) ?? normalizedManips.find((m) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid)
+    );
+  }
 
   private syncTemporaryManipulation(): void {
     const temporaryLoadData = this.plotService.temporaryLoadData;

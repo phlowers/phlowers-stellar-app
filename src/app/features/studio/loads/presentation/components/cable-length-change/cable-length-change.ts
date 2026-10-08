@@ -402,7 +402,7 @@ export class CableLengthChangeComponent {
       (cableModification) => cableModification.spanUuid === spanUuid
     );
   }
-  // could be removed when recheckCableModif() is used (initTemporaryLoadData() in loadForms.service.ts)
+  // could be removed if recheckCableModif() is used (initTemporaryLoadData() in loadForms.service.ts)
   private ensureSelectedCableModification(): CableModification | undefined {
     const spanUuid = this.form.controls.spanUuid.value;
     const temporaryLoadData = this.plotService.temporaryLoadData;
