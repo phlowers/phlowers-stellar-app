@@ -407,13 +407,18 @@
     "validation-supports-bounds": "Section has supports with values out of bounds",
     "import-error": "Error importing section",
     "delete-error": "Error deleting section",
-    "section-format-error": "The section file to import is invalid.",
     "lambert-reprojection-error": "Error computing GPS coordinates from Lambert93 data",
-    "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog",
     "import-success": "Section imported successfully",
+    "no-matching-adapter": "This file format is not supported for section import.",
+    "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog",
+    "stellar-json": {
+      "format-label": "Stellar section (.stsec, .json)",
+      "invalid-envelope": "The Stellar section file is invalid.",
+      "unsupported-version": "Unsupported Stellar section file version {{ version }} (maximum supported: {{ maxVersion }})."
+    },
     "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
     "from-file": {
-      "file-format": "File format: .json",
+      "file-format": "File formats: {{ formats }}",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
       "upload-prompt": "Upload a JSON file",
       "import-error": "The imported section could not be found. Please try again."
@@ -819,6 +824,7 @@
       "tables-label": "Tables",
       "tools-label": "Tools",
       "edit-shortcuts-aria-label": "Edit your selected tools shortcuts",
+      "export-section-aria-label": "Export the section as a Stellar section file",
       "inset-title": "Inset",
       "organize-tools-info-text": "Select and organise the tools with quick access (maximum 5).",
       "loads-table-label": "Loads table",

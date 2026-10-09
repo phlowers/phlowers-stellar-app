@@ -12,6 +12,8 @@ import { ImportSectionComponent } from './import-section.component';
 import { SectionImportService } from '@features/study/application/services/section-import.service';
 import { IMPORT_ADAPTER_TOKEN } from '@shared/import/domain/import-contracts';
 import { GenericImportEngineService } from '@shared/import/application/services/generic-import-engine.service';
+import { SECTION_IMPORT_ADAPTERS, SectionImportAdapter } from '@shared/import/section-adapter/section-import-adapter';
+import { SECTION_IMPORT_ADAPTER_PROVIDERS } from '@shared/import/section-adapter/section-import-adapters.providers';
 import { Study } from '@shared/domain';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -42,6 +44,15 @@ describe('ImportSectionComponent', () => {
   let fixture: ComponentFixture<ImportSectionComponent>;
   let sectionImportServiceMock: vi.Mocked<SectionImportService>;
   let engineMock: vi.Mocked<GenericImportEngineService>;
+  const fakeAdapter: SectionImportAdapter = {
+    id: 'fake',
+    formatLabel: 'Fake format',
+    extensions: ['.fake'],
+    mimeTypes: ['application/fake'],
+    canHandle: () => true,
+    extractUuid: () => null,
+    import: () => Promise.reject(new Error('not used'))
+  };
 
   beforeEach(async () => {
     sectionImportServiceMock = {
@@ -62,7 +73,8 @@ describe('ImportSectionComponent', () => {
           langs: {
             en: {
               'common.edit': 'Edit',
-              'common.import.action.consult': 'Consult'
+              'common.import.action.consult': 'Consult',
+              'section-import.from-file.file-format': 'Formats: {{ formats }}'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -81,10 +93,15 @@ describe('ImportSectionComponent', () => {
     })
       .overrideComponent(ImportSectionComponent, {
         remove: {
-          providers: [SectionImportService, { provide: IMPORT_ADAPTER_TOKEN, useExisting: SectionImportService }]
+          providers: [
+            ...SECTION_IMPORT_ADAPTER_PROVIDERS,
+            SectionImportService,
+            { provide: IMPORT_ADAPTER_TOKEN, useExisting: SectionImportService }
+          ]
         },
         add: {
           providers: [
+            { provide: SECTION_IMPORT_ADAPTERS, useValue: [fakeAdapter] },
             { provide: SectionImportService, useValue: sectionImportServiceMock },
             { provide: IMPORT_ADAPTER_TOKEN, useValue: sectionImportServiceMock }
           ]
@@ -166,8 +183,11 @@ describe('ImportSectionComponent', () => {
   // -------------------------------------------------------------------------
 
   describe('config', () => {
-    it('should have .json in accepted extensions', () => {
-      expect(component.config().acceptedFiles.extensions).toContain('.json');
+    it('should accept the extensions, mime types and format labels declared by the adapters', () => {
+      const { acceptedFiles } = component.config();
+      expect(acceptedFiles.extensions).toEqual(['.fake']);
+      expect(acceptedFiles.mimeTypes).toEqual(['application/fake']);
+      expect(acceptedFiles.hint).toContain('Fake format');
     });
 
     it('should not have a navigationRoute (sections do not navigate on import)', () => {

@@ -210,6 +210,17 @@
               app-btn
               btnSize="s"
               btnStyle="text"
+              (click)="popover.hide(); onExportSection(section)"
+              data-testid="section-export-btn"
+            >
+              <app-icon icon="download" />
+              <span>{{ 'common.export' | transloco }}</span>
+            </button>
+
+            <button
+              app-btn
+              btnSize="s"
+              btnStyle="text"
               (click)="popover.hide(); onGenerateCantonReport(section)"
               data-testid="section-report-btn"
             >

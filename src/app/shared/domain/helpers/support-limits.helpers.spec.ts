@@ -1,5 +1,5 @@
 import { Section, Support } from '@shared/domain';
-import { hasSupportsBoundsErrors } from './newSectionModal.constants';
+import { hasSupportsBoundsErrors } from './support-limits.helpers';
 
 const validSupport: Support = {
   uuid: 'sup1',

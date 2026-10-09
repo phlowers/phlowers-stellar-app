@@ -150,6 +150,16 @@
 
   <button
     class="toolbar__specifbtn toolbar__specifbtn--icon"
+    [disabled]="toolbarDisabled() || !hasSection()"
+    [attr.aria-label]="'studio.top-toolbar.export-section-aria-label' | transloco"
+    (click)="onExportSection()"
+    data-testid="export-section-btn"
+  >
+    <app-icon icon="download" />
+  </button>
+
+  <button
+    class="toolbar__specifbtn toolbar__specifbtn--icon"
     [disabled]="toolbarDisabled()"
     [attr.aria-label]="'studio.top-toolbar.edit-shortcuts-aria-label' | transloco"
     (click)="shortcutsModal.set(true)"

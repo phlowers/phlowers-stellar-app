@@ -3,6 +3,7 @@ import { SectionsTabComponent } from './sectionsTab.component';
 import { By } from '@angular/platform-browser';
 import { InitialCondition, Section } from '@shared/domain';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
+import { SectionExportService } from '@services/section/section-export.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionDataReportService } from '@features/studio/toolbar/presentation/services/section-data-report/section-data-report.service';
@@ -358,6 +359,25 @@ describe('SectionsTabComponent', () => {
     fixture.detectChanges();
 
     expect(component.duplicateSection.emit).toHaveBeenCalledWith(mockSection);
+  });
+
+  it('should export the section as a .stsec file when export button clicked in popover', async () => {
+    const exportSpy = vi.spyOn(TestBed.inject(SectionExportService), 'exportSection').mockReturnValue(undefined);
+    fixture.componentRef.setInput('study', { sections: [mockSection] });
+    fixture.detectChanges();
+
+    const triggerBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.section__content-action');
+    triggerBtn.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const exportButton = document.body.querySelector('[data-testid="section-export-btn"]') as HTMLButtonElement;
+    expect(exportButton).toBeTruthy();
+
+    exportButton.click();
+
+    expect(exportSpy).toHaveBeenCalledWith(mockSection);
   });
 
   it('should render the report button and generate the canton report when clicked', async () => {

@@ -407,13 +407,18 @@
     "validation-supports-bounds": "Le canton contient des supports avec des valeurs hors limites",
     "import-error": "Erreur lors de l'importation du canton",
     "delete-error": "Erreur lors de la suppression du canton",
-    "section-format-error": "Fichier de canton à importer non conforme.",
     "lambert-reprojection-error": "Erreur lors du calcul des coordonnées GPS à partir des données Lambert93",
-    "catalog-missing-warning": "Le support d'accrochage du fichier de canton n'est pas présent au catalogue des supports de l'application",
     "import-success": "Canton importé avec succès",
+    "no-matching-adapter": "Ce format de fichier n'est pas pris en charge pour l'importation de canton.",
+    "catalog-missing-warning": "Le support d'accrochage du fichier de canton n'est pas présent au catalogue des supports de l'application",
+    "stellar-json": {
+      "format-label": "Canton Stellar (.stsec, .json)",
+      "invalid-envelope": "Le fichier de canton Stellar est invalide.",
+      "unsupported-version": "Version {{ version }} du fichier de canton Stellar non prise en charge (maximum pris en charge : {{ maxVersion }})."
+    },
     "reprojection-info": "La reprojection sur le modèle de données {{ appName }} semble ajouter une erreur absolue moyenne de {{ error }} m",
     "from-file": {
-      "file-format": "Format de fichier : .json",
+      "file-format": "Formats de fichier : {{ formats }}",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
       "upload-prompt": "Importer un fichier JSON",
       "import-error": "Le canton importé est introuvable. Veuillez réessayer."
@@ -819,6 +824,7 @@
       "tables-label": "Tableau",
       "tools-label": "Outils",
       "edit-shortcuts-aria-label": "Modifier les raccourcis des outils sélectionnés",
+      "export-section-aria-label": "Exporter le canton dans un fichier canton Stellar",
       "inset-title": "Insertion",
       "organize-tools-info-text": "Sélectionnez et organisez les outils avec un accès rapide (maximum 5).",
       "loads-table-label": "Tableau de charges",

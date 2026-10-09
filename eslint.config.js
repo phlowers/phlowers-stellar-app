@@ -61,6 +61,36 @@ export default tseslint.config(
     }
   },
   {
+    // Only the adapter composition file may reach into `@adapters`: keeps optional adapters removable.
+    files: ['src/app/**/*.ts'],
+    ignores: ['src/app/shared/import/section-adapter/section-import-adapters.providers.ts', '**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@adapters/*', '@adapters/**'],
+              message: 'Import adapters only from shared/import/section-adapter/section-import-adapters.providers.ts.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    // Adapters depend on the public contract and shared code, never on feature code.
+    files: ['src/adapters/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [{ group: ['@features/*', '@features/**'], message: 'Adapters must not import feature code.' }]
+        }
+      ]
+    }
+  },
+  {
     files: ['**/*.html'],
     languageOptions: {
       parser: templateParser

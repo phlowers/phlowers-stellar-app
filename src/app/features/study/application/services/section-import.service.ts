@@ -5,58 +5,57 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { inject, Injectable, signal } from '@angular/core';
-import { Section, Study, Support } from '@shared/domain';
+import { Section, Study } from '@shared/domain';
 import { SectionService } from '@services/section/section.service';
-import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { ImportAdapter, ImportError, UUIDCollisionResolver } from '@shared/import/domain/import-contracts.interfaces';
+import {
+  buildImportSource,
+  isFileAccepted,
+  isImportError,
+  SECTION_IMPORT_ADAPTERS,
+  SectionImportAdapter,
+  SectionImportCoordinates,
+  SectionImportNotice,
+  SectionImportPayload,
+  SectionImportSource,
+  selectAdapter
+} from '@shared/import/section-adapter/section-import-adapter';
+import {
+  applyFootCoordinates,
+  areCoordinatesComplete,
+  buildReprojectionAngles,
+  getMissingRequiredFields
+} from '@shared/import/section-adapter/section-import-pipeline.helpers';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, Localization } from '@core/services/worker_python/tasks/types';
-import { hasSupportsBoundsErrors } from '@features/study/presentation/components/sections-tab/newSectionModal/newSectionModal.constants';
-import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
-import { AttachmentService } from '@shared/catalog/services/attachment.service';
-import { ChainsService } from '@shared/catalog/services/chains.service';
-import { LinesService } from '@shared/catalog/services/lines.service';
-import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
-import {
-  Attachment,
-  Appartenance,
-  SectionImportFile,
-  ImportedSection,
-  Span,
-  StartGps
-} from './section-import.interfaces';
+import { hasSupportsBoundsErrors } from '@shared/domain/helpers/support-limits.helpers';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
 import {
-  SECTION_CATALOG_MISSING_KEY,
+  CATALOG_MISSING_WARNING_KEY,
   IMPORT_SUCCESS_KEY,
   REPROJECTION_INFO_KEY,
   SECTION_IMPORT_ERROR_KEYS
 } from './section-import.constantes';
-import {
-  applyFootCoordinates,
-  buildReprojectionAngles,
-  buildSectionName,
-  extractAttachmentPosition,
-  getMissingRequiredFields,
-  normalizeVoltage,
-  parseBooleanOrNull,
-  parseFloatOrNull,
-  validateImportedSectionFields
-} from './section-import.helpers';
+import { StartLocation } from './section-import.interfaces';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { AttachmentCorrectionService } from './catalog-correction/attachment-correction.service';
+import { ChainCorrectionService } from './catalog-correction/chain-correction.service';
+import { LineCorrectionService } from './catalog-correction/line-correction.service';
+import { MaintenanceCorrectionService } from './catalog-correction/maintenance-correction.service';
+import { buildSupportNameEntries } from './catalog-correction/catalog-correction.helpers';
 
 // ---------------------------------------------------------------------------
 // Service
 // ---------------------------------------------------------------------------
 
 /**
- * Service responsible for all Section JSON import business logic.
+ * Format-independent section import pipeline.
  *
- * Implements `ImportAdapter` for `Section` entities.
- * Accepts `.json` files containing a single serialized section object
- * or a canton export (structure `cantons > general + portee unitaire`).
+ * Implements `ImportAdapter` for `Section` entities and delegates the file format to the
+ * `SectionImportAdapter`s registered under `SECTION_IMPORT_ADAPTERS` (see `section-import-adapters.config.ts`).
  *
  * ### Study context
  * Before processing files, the host component **must** call
@@ -64,9 +63,13 @@ import {
  * service can check collisions and persist the imported section.
  *
  * ### Pipeline stages performed internally
- * - **FILE_VALIDATION**: checks `.json` extension.
- * - **DECODING/PARSING**: reads raw text and parses JSON.
- * - **VALIDATION**: required fields + supports bounds (mirrors modal validation).
+ * - **FILE_VALIDATION**: at least one adapter declares the file extension.
+ * - **DECODING/PARSING**: reads the text once and picks the first adapter that recognizes the content.
+ * - **MAPPING**: the selected adapter parses, validates its own format and maps it to a `Section`.
+ * - **VALIDATION**: required fields + supports bounds on the mapped section, for every adapter.
+ * - **CATALOG CORRECTION**: when the adapter asks for it, maintenance, voltage, attachment and chain
+ *   values are corrected against the local catalogs, then new support names are added to the catalog.
+ * - **MAPPING (coordinates)**: Lambert93 to GPS reprojection when the adapter provides projected coordinates.
  * - **COLLISION_CHECK**: detects whether the UUID already exists in the study.
  * - **PERSISTENCE**: calls `SectionService.createOrUpdateSection`.
  */
@@ -75,15 +78,17 @@ export class SectionImportService implements ImportAdapter<Section> {
   /** Writable signal holding the active study; must be set before processing. */
   readonly studyContext = signal<Study | null>(null);
 
+  private readonly adapters: readonly SectionImportAdapter[] = inject(SECTION_IMPORT_ADAPTERS);
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
-  private readonly maintenanceService = inject(MaintenanceService);
-  private readonly attachmentService = inject(AttachmentService);
-  private readonly chainsService = inject(ChainsService);
-  private readonly linesService = inject(LinesService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly transloco = inject(TranslocoService);
+  private readonly attachmentService = inject(AttachmentService);
+  private readonly maintenanceCorrection = inject(MaintenanceCorrectionService);
+  private readonly lineCorrection = inject(LineCorrectionService);
+  private readonly attachmentCorrection = inject(AttachmentCorrectionService);
+  private readonly chainCorrection = inject(ChainCorrectionService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -103,16 +108,14 @@ export class SectionImportService implements ImportAdapter<Section> {
   // ImportAdapter implementation
   // ---------------------------------------------------------------------------
 
-  /**
-   * Returns `true` if the file has a `.json` extension.
-   */
+  /** Returns `true` if at least one registered adapter accepts the file extension. */
   accepts(file: File): boolean {
-    return file.name.toLowerCase().endsWith('.json');
+    return isFileAccepted(this.adapters, file.name);
   }
 
   /**
-   * Checks whether the UUID encoded in the JSON file collides with an existing
-   * section in the current study. Supports both legacy Section JSON and external section format.
+   * Checks whether the UUID found by the matching adapter collides with an existing section
+   * in the current study.
    *
    * @returns Collision info `{ uuid, label }` or `null` if no collision.
    */
@@ -121,29 +124,19 @@ export class SectionImportService implements ImportAdapter<Section> {
     if (!study) return null;
 
     try {
-      const text = await file.text();
-      const parsed = JSON.parse(text) as Record<string, unknown>;
-
-      let uuid: string;
-      if (this.isExternalSectionFormat(parsed)) {
-        const sections = parsed['cantons'] as ImportedSection[];
-        uuid = sections[0].general.CANTON_CUR.trim();
-      } else {
-        uuid = typeof parsed['uuid'] === 'string' ? parsed['uuid'].trim() : '';
-      }
-
+      const source = buildImportSource(file.name, await file.text());
+      const uuid = selectAdapter(this.adapters, source)?.extractUuid(source);
       if (!uuid) return null;
       const existing = study.sections.find((s) => s.uuid === uuid);
-      if (!existing) return null;
-      return { uuid, label: existing.name };
+      return existing ? { uuid, label: existing.name } : null;
     } catch {
-      // If we cannot parse at check time, let processFile handle the error properly.
+      // If we cannot read at check time, let processFile handle the error properly.
       return null;
     }
   }
 
   /**
-   * Runs the full import pipeline for the given JSON file.
+   * Runs the full import pipeline for the given file.
    *
    * @returns The created or updated `Section`, or `null` if the user rejected a
    *   UUID collision prompt.
@@ -161,60 +154,40 @@ export class SectionImportService implements ImportAdapter<Section> {
     }
 
     // Stage: DECODING + PARSING
-    const { section, isExternalFormat, rawExternalSection, hasCatalogFallbackWarnings } =
-      await this.parseJsonFile(file);
+    const source = await this.readSource(file);
 
-    // Stage: VALIDATION
-    // External format: validate on the raw JSON so error messages show original field names
-    // and values (e.g. "SUPPORT_NUMERO: null").
-    // Legacy Section: validate on the mapped model (JSON keys already match model names).
-    if (isExternalFormat && rawExternalSection) {
-      this.validateExternalSection(rawExternalSection);
-    } else {
-      this.validateSection(section);
+    // Stage: adapter selection + MAPPING (format-specific parsing and validation)
+    const adapter = this.pickAdapter(source);
+    const payload = await this.runAdapter(adapter, source);
+
+    // Stage: VALIDATION (format-independent)
+    this.validateSection(payload.section);
+
+    // Stage: catalog correction (opt-in per adapter)
+    const notices: SectionImportNotice[] = [...(payload.notices ?? [])];
+    let corrected = payload.section;
+    if (payload.applyCatalogCorrections) {
+      const result = await this.applyCatalogCorrections(payload.section);
+      corrected = result.section;
+      if (result.hasMissingCatalogEntries) {
+        notices.push({ severity: 'warning', message: this.transloco.translate(CATALOG_MISSING_WARNING_KEY) });
+      }
     }
 
+    // Stage: MAPPING (coordinates)
+    const section = await this.applyCoordinates(corrected, payload.coordinates);
+
     // Stage: COLLISION_CHECK + PERSISTENCE
-    return this.persistSection(section, study, collisionResolver, isExternalFormat && hasCatalogFallbackWarnings);
+    return this.persistSection(section, study, collisionResolver, notices);
   }
 
   // ---------------------------------------------------------------------------
-  // Private — format detection
+  // Private — reading and adapter selection
   // ---------------------------------------------------------------------------
 
-  /** Returns `true` when the raw object has a `cantons` array with at least one entry. */
-  private hasSections(raw: Record<string, unknown>): boolean {
-    return Array.isArray(raw['cantons']) && (raw['cantons'] as unknown[]).length > 0;
-  }
-
-  /**
-   * Returns `true` when the raw object is a valid external section format
-   * (has `cantons[0].general.CANTON_CUR`).
-   */
-  private isExternalSectionFormat(raw: unknown): boolean {
-    if (typeof raw !== 'object' || raw === null) return false;
-    const r = raw as Record<string, unknown>;
-    if (!Array.isArray(r['cantons']) || (r['cantons'] as unknown[]).length === 0) return false;
-    const canton0 = (r['cantons'] as unknown[])[0];
-    if (typeof canton0 !== 'object' || canton0 === null) return false;
-    const general = (canton0 as Record<string, unknown>)['general'];
-    if (typeof general !== 'object' || general === null) return false;
-    return typeof (general as Record<string, unknown>)['CANTON_CUR'] === 'string';
-  }
-
-  // ---------------------------------------------------------------------------
-  // Private — parsing
-  // ---------------------------------------------------------------------------
-
-  private async parseJsonFile(file: File): Promise<{
-    section: Section;
-    isExternalFormat: boolean;
-    rawExternalSection?: SectionImportFile;
-    hasCatalogFallbackWarnings: boolean;
-  }> {
-    let text: string;
+  private async readSource(file: File): Promise<SectionImportSource> {
     try {
-      text = await file.text();
+      return buildImportSource(file.name, await file.text());
     } catch (err: unknown) {
       this.logger.error('Error reading section file', err);
       const error: ImportError = {
@@ -225,381 +198,128 @@ export class SectionImportService implements ImportAdapter<Section> {
       };
       throw error;
     }
+  }
 
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(text) as Record<string, unknown>;
-    } catch (err: unknown) {
-      this.logger.error('Error parsing section JSON', err);
-      const error: ImportError = {
+  private pickAdapter(source: SectionImportSource): SectionImportAdapter {
+    const adapter = selectAdapter(this.adapters, source);
+    if (adapter) return adapter;
+
+    if (source.json === undefined) {
+      this.logger.error('Error parsing section JSON', source.fileName);
+      const parseError: ImportError = {
         code: 'FILE_PARSE_ERROR',
         message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.fileParseError),
-        stage: 'PARSING',
+        stage: 'PARSING'
+      };
+      throw parseError;
+    }
+
+    const error: ImportError = {
+      code: 'FILE_TYPE_NOT_ALLOWED',
+      message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.noMatchingAdapter),
+      stage: 'FILE_VALIDATION'
+    };
+    throw error;
+  }
+
+  /** Runs the adapter; its own `ImportError`s pass through, anything else becomes a generic mapping error. */
+  private async runAdapter(adapter: SectionImportAdapter, source: SectionImportSource): Promise<SectionImportPayload> {
+    try {
+      return await adapter.import(source);
+    } catch (err: unknown) {
+      if (isImportError(err)) throw err;
+      this.logger.error(`Section import adapter "${adapter.id}" failed`, err);
+      const error: ImportError = {
+        code: 'MAPPING_ERROR',
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
+        stage: 'MAPPING',
         cause: err
       };
       throw error;
     }
-
-    // External section format detection (RG.CAN.OUV-BTN.3)
-    if (this.hasSections(parsed)) {
-      if (!this.isExternalSectionFormat(parsed)) {
-        const error: ImportError = {
-          code: 'VALIDATION_ERROR',
-          message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionFormatError),
-          stage: 'VALIDATION'
-        };
-        throw error;
-      }
-      const rawExternalSection = parsed as unknown as SectionImportFile;
-      const { section, hasCatalogFallbackWarnings } = await this.mapExternalSectionToSection(rawExternalSection);
-      return { section, isExternalFormat: true, rawExternalSection, hasCatalogFallbackWarnings };
-    }
-
-    return { section: this.mapToSection(parsed), isExternalFormat: false, hasCatalogFallbackWarnings: false };
   }
 
   // ---------------------------------------------------------------------------
-  // Private — External section mapping
+  // Private — catalog correction
   // ---------------------------------------------------------------------------
 
-  private async mapExternalSectionToSection(raw: SectionImportFile): Promise<{
-    section: Section;
-    hasCatalogFallbackWarnings: boolean;
-  }> {
-    const external = raw.cantons[0];
-    const general = external.general;
-    const spans = external['portee unitaire'] ?? [];
-
-    // Sort spans by PORTEE_UNITAIRE_ORDRE (ascending)
-    const sortedSpans = [...spans].sort(
-      (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
-    );
-
-    const firstSpan = sortedSpans[0];
-    const appartenance = general.appartenance?.[0];
-
-    // Maintenance lookups (RG.CAN.CEM / RG.CAN.EEL / RG.CAN.GMR)
-    const allMaintenance = (await this.maintenanceService.getMaintenance()) ?? [];
-
-    const cmDesignation = firstSpan?.CM_DESIGNATION ?? null;
-    const eelDesignation = firstSpan?.EEL_DESIGNATION ?? null;
-    const gmrDesignation = firstSpan?.GMR_DESIGNATION ?? null;
-
-    const maintenanceCenterEntry = cmDesignation
-      ? allMaintenance.find((m) => m.maintenance_center === cmDesignation)
-      : undefined;
-    const maintenanceTeamEntry = eelDesignation
-      ? allMaintenance.find((m) => m.maintenance_team === eelDesignation)
-      : undefined;
-    const regionalTeamEntry = gmrDesignation
-      ? allMaintenance.find((m) => m.regional_team === gmrDesignation)
-      : undefined;
-
-    const supports = this.mapSpansToSupports(sortedSpans);
-    const attachments =
-      sortedSpans.length === 0
-        ? []
-        : [...sortedSpans.map((p) => p['accroche depart']), sortedSpans.at(-1)!['accroche arrivee']];
-    const { supports: supportsWithCatalogResolution, hasCatalogFallbackWarnings } = await this.resolveCatalogFields(
-      supports,
-      attachments
-    );
-
-    // Persist new support names in the local catalog (RG.CAN.ATT)
-    const supportNameEntries: SupportNameEntry[] = attachments
-      .map((a) => ({ supportName: a.SUPPORT_IDR || a.SUPPORT_ADR || '', supportTower: a.SUPPORT_TOWER ?? null }))
-      .filter((e) => !!e.supportName);
-    await this.attachmentService.addSupportNamesIfAbsent(supportNameEntries);
-
-    const lambertX = attachments.map((a) => parseFloatOrNull(a.PIED_X_LAMBERT93));
-    const lambertY = attachments.map((a) => parseFloatOrNull(a.PIED_Y_LAMBERT93));
-    const {
-      supports: reprojectedSupports,
-      meanReprojectionDiffMeters,
-      startGps
-    } = await this.applyLambertReprojection(supportsWithCatalogResolution, lambertX, lambertY);
-
-    const voltageIdr = await this.resolveCatalogVoltage(appartenance);
-
-    return {
-      section: {
-        ...createEmptySection(),
-        uuid: general.CANTON_CUR.trim(),
-        name: buildSectionName(
-          appartenance?.BRANCHE_IDR ?? null,
-          general.CANTON_TYPE,
-          general.PHASE_ELECTRIQUE_NUMERO,
-          supportsWithCatalogResolution
-        ),
-        cable_name: general.CABLE_ADR ?? undefined,
-        type: general.CANTON_TYPE?.toLowerCase() ?? '',
-        cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
-        electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
-        lit_adr: appartenance?.LIT_ADR ?? undefined,
-        lit_idr: appartenance?.LIT_IDR ?? undefined,
-        link_idr: appartenance?.LIAISON_IDR ?? undefined,
-        link_adr: appartenance?.LIAISON_ADR ?? undefined,
-        branch_idr: appartenance?.BRANCHE_IDR ?? undefined,
-        branch_adr: appartenance?.BRANCHE_ADR ?? undefined,
-        voltage_idr: voltageIdr,
-        voltage_adr: appartenance?.TENSION_ELECTRIQUE_ADR ?? undefined,
-        maintenance_center_id: maintenanceCenterEntry?.maintenance_center_id ?? undefined,
-        maintenance_team_id: maintenanceTeamEntry?.maintenance_team_id ?? undefined,
-        regional_team_id: regionalTeamEntry?.regional_team_id ?? undefined,
-        cm_designation: cmDesignation ?? undefined,
-        gmr_designation: gmrDesignation ?? undefined,
-        eel_designation: eelDesignation ?? undefined,
-        initial_conditions: [],
-        selected_initial_condition_uuid: undefined,
-        start_latitude: startGps?.startLatitude ?? null,
-        start_longitude: startGps?.startLongitude ?? null,
-        start_azimuth: startGps?.startAzimuth ?? null,
-        supports: reprojectedSupports,
-        mean_reprojection_diff_meters: meanReprojectionDiffMeters
-      },
-      hasCatalogFallbackWarnings
-    };
-  }
-
   /**
-   * Resolves every support field the local catalogs are authoritative for: the attachment fields
-   * against the attachment catalog, then the chain details against the chain catalog.
-   *
-   * Resolves `voltage_idr` against the line catalog (RG.CAN.TEN).
-   *
-   * `TENSION_ELECTRIQUE_IDR` and `TENSION_ELECTRIQUE_ADR` are compared, in order, to each
-   * catalog line's `voltage_idr` after normalizing both sides (whitespace stripped, uppercased)
-   * so formats such as "225kV" and "225 KV" match. The catalog's own `voltage_idr` value is
-   * returned (not the raw external section value) so it matches the `branch_idr`-style `p-select`
-   * `optionValue` exactly. Returns `undefined` when no candidate matches.
+   * Corrects the section against each catalog, then registers the new support names in the
+   * attachment catalog. Unexpected failures become a generic `MAPPING_ERROR`.
    */
-  private async resolveCatalogVoltage(appartenance: Appartenance | undefined): Promise<string | undefined> {
-    const candidates = [appartenance?.TENSION_ELECTRIQUE_IDR, appartenance?.TENSION_ELECTRIQUE_ADR].filter(
-      (v): v is string => !!v
-    );
-    if (candidates.length === 0) return undefined;
-
-    let catalogLines: Awaited<ReturnType<LinesService['getLines']>>;
+  private async applyCatalogCorrections(
+    section: Section
+  ): Promise<{ section: Section; hasMissingCatalogEntries: boolean }> {
     try {
-      catalogLines = await this.linesService.getLines();
-    } catch (err) {
-      this.logger.warn('Error reading line catalog, cannot resolve voltage_idr', err);
-      return undefined;
-    }
-    if (!catalogLines || catalogLines.length === 0) return undefined;
+      const withMaintenance = await this.maintenanceCorrection.correctMaintenance(section);
+      const withVoltage = await this.lineCorrection.correctVoltage(withMaintenance);
+      const { supports: withAttachments, hasMissingCatalogEntries } = await this.attachmentCorrection.correctSupports(
+        withVoltage.supports
+      );
+      const supports = await this.chainCorrection.correctSupports(withAttachments);
 
-    for (const candidate of candidates) {
-      const normalizedCandidate = normalizeVoltage(candidate);
-      const match = catalogLines.find((line) => normalizeVoltage(line.voltage_idr) === normalizedCandidate);
-      if (match) return match.voltage_idr;
-    }
+      await this.attachmentService.addSupportNamesIfAbsent(buildSupportNameEntries(supports));
 
-    this.logger.warn(
-      `Voltage candidates "${candidates.join('", "')}" not found in the line catalog, voltage_idr left unresolved`
-    );
-    return undefined;
-  }
-
-  private async resolveCatalogFields(
-    supports: Support[],
-    attachments: Attachment[]
-  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
-    const { supports: supportsWithAttachments, hasCatalogFallbackWarnings } = await this.resolveCatalogSupportFields(
-      supports,
-      attachments
-    );
-
-    return {
-      supports: await this.resolveCatalogChainFields(supportsWithAttachments, attachments),
-      hasCatalogFallbackWarnings
-    };
-  }
-
-  /**
-   * Overrides each support's chain details with the chain catalog entry matching `CHAINE_DRN_IDR`.
-   *
-   * The catalog is authoritative whenever it holds the chain: `chainLength`, `chainWeight`,
-   * `chainV` and `chainSurface` are all taken from the catalog entry, including when its value is
-   * `0`. Chains absent from the catalog keep the external section file values mapped by
-   * `mapAttachmentToSupport`. `counterWeight` (`CONTREPOIDS`) has no catalog counterpart and is
-   * always kept from the file.
-   */
-  private async resolveCatalogChainFields(supports: Support[], attachments: Attachment[]): Promise<Support[]> {
-    let catalogChains: Awaited<ReturnType<ChainsService['getChains']>>;
-    try {
-      catalogChains = await this.chainsService.getChains();
-    } catch (err) {
-      this.logger.warn('Error reading chain catalog, keeping external section file chain values', err);
-      return supports;
-    }
-    if (!catalogChains || catalogChains.length === 0) {
-      return supports;
-    }
-
-    const catalogChainsByName = new Map(catalogChains.map((chain) => [chain.chain_name, chain]));
-
-    return supports.map((support, index) => {
-      const chainName = attachments[index]?.CHAINE_DRN_IDR?.trim();
-      if (!chainName) {
-        this.logger.warn(`Support #${index}: missing CHAINE_DRN_IDR, keeping external section file chain values`);
-        return support;
-      }
-
-      const catalogChain = catalogChainsByName.get(chainName);
-      if (!catalogChain) {
-        this.logger.warn(
-          `Support #${index}: chain "${chainName}" not found in the chain catalog, keeping external section file chain values`
-        );
-        return support;
-      }
-
-      return {
-        ...support,
-        chainName: catalogChain.chain_name,
-        chainLength: catalogChain.mean_length,
-        chainWeight: catalogChain.mean_mass,
-        chainV: catalogChain.v_chain,
-        chainSurface: catalogChain.chain_surface
+      return { section: { ...withVoltage, supports }, hasMissingCatalogEntries };
+    } catch (err: unknown) {
+      this.logger.error('Section catalog correction failed', err);
+      const error: ImportError = {
+        code: 'MAPPING_ERROR',
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
+        stage: 'MAPPING',
+        cause: err
       };
-    });
-  }
-
-  /**
-   * Resolves each support's name/attachmentSet/armLength/heightBelowConsole against the local
-   * attachment catalog (RG.CAN.SUP-NOM/SET/BRA).
-   *
-   * `AttachmentService.resolveCatalogAttachment` already guarantees a complete
-   * (L/X/Y/Z) entry when it returns one, so an `undefined` result is the single signal that the
-   * support is absent from the catalog — in that case the external section file values are kept as-is,
-   * including `armLength` (`LONGUEUR_BRAS`) and `heightBelowConsole` (`HAUTEUR_SOUS_CONSOLE`).
-   *
-   * The SUPPORT_ADR fallback is only attempted when SUPPORT_IDR is absent. When SUPPORT_IDR is
-   * present (even a placeholder value not registered in the catalog), the file values take
-   * priority: we must not silently resolve against a SUPPORT_ADR catalog match, which would
-   * override the file's own armLength/heightBelowConsole.
-   */
-  private async resolveCatalogSupportFields(
-    supports: Support[],
-    attachments: Attachment[]
-  ): Promise<{ supports: Support[]; hasCatalogFallbackWarnings: boolean }> {
-    let hasCatalogFallbackWarnings = false;
-
-    const resolvedSupports = await Promise.all(
-      supports.map(async (support, index) => {
-        const attachment = attachments[index];
-        if (!attachment) {
-          return support;
-        }
-
-        const hasSupportIdr = !!attachment.SUPPORT_IDR?.trim();
-        const catalogEntry = await this.attachmentService.resolveCatalogAttachment(
-          attachment.SUPPORT_IDR,
-          hasSupportIdr ? null : attachment.SUPPORT_ADR,
-          support.attachmentSet
-        );
-
-        if (!catalogEntry) {
-          hasCatalogFallbackWarnings = true;
-          // Support absent from catalog: keep the external section file values for armLength
-          // (LONGUEUR_BRAS) and heightBelowConsole (HAUTEUR_SOUS_CONSOLE) already mapped
-          // into `support` by `mapAttachmentToSupport`.
-          // Fall back to SUPPORT_ADR if SUPPORT_IDR is missing, as it's already used
-          // in the catalog lookup and elsewhere as a secondary identifier.
-          return {
-            ...support,
-            name: attachment.SUPPORT_IDR ?? attachment.SUPPORT_ADR ?? null
-          };
-        }
-
-        return {
-          ...support,
-          name: attachment.SUPPORT_IDR ?? attachment.SUPPORT_ADR ?? null,
-          attachmentSet: catalogEntry.attachment_set ?? null,
-          armLength: catalogEntry.cross_arm_length ?? null,
-          heightBelowConsole: catalogEntry.attachment_altitude ?? null
-        };
-      })
-    );
-
-    return { supports: resolvedSupports, hasCatalogFallbackWarnings };
-  }
-
-  private mapSpansToSupports(sortedSpans: Span[]): Support[] {
-    if (sortedSpans.length === 0) return [];
-
-    const supports: Support[] = [];
-
-    for (const span of sortedSpans) {
-      supports.push(this.mapAttachmentToSupport(span['accroche depart'], span));
+      throw error;
     }
-
-    // Last support comes from 'accroche arrivee' of the last span
-    // spanLength must be null on the last support (no span after it)
-    const lastSpan = sortedSpans.at(-1)!;
-    const lastSupport = this.mapAttachmentToSupport(lastSpan['accroche arrivee'], lastSpan);
-    lastSupport.spanLength = null;
-    supports.push(lastSupport);
-
-    return supports;
   }
 
-  private mapAttachmentToSupport(attachment: Attachment, span: Span): Support {
+  // ---------------------------------------------------------------------------
+  // Private — coordinates reprojection
+  // ---------------------------------------------------------------------------
+
+  private applyCoordinates(section: Section, coordinates: SectionImportCoordinates | undefined): Promise<Section> {
+    if (!coordinates) return Promise.resolve(section);
+    return coordinates.crs === 'WGS84'
+      ? Promise.resolve(this.applyWgs84(section, coordinates))
+      : this.applyLambert93(section, coordinates);
+  }
+
+  /** WGS84 coordinates are used as-is: `x` is the longitude, `y` the latitude. */
+  private applyWgs84(section: Section, coordinates: SectionImportCoordinates): Section {
+    if (!areCoordinatesComplete(coordinates, section.supports.length)) {
+      this.logger.warn('Skipping WGS84 coordinates: missing or mismatching values for at least one support');
+      return section;
+    }
+    const longitude = coordinates.x as number[];
+    const latitude = coordinates.y as number[];
     return {
-      ...createEmptySupport(),
-      spanLength: parseFloatOrNull(span.PORTEE_LONGUEUR),
-      spanAzimut: parseFloatOrNull(span.PORTEE_AZIMUT),
-      spanAngle: parseFloatOrNull(attachment.ANGLE_LIGNE),
-      attachmentSet: parseFloatOrNull(attachment.ACCROCHE_SET),
-      attachmentHeight: parseFloatOrNull(attachment.ACCROCHE_CABLE_Z_LAMBERT93),
-      heightBelowConsole: parseFloatOrNull(attachment.HAUTEUR_SOUS_CONSOLE),
-      armLength: parseFloatOrNull(attachment.LONGUEUR_BRAS),
-      chainName: attachment.CHAINE_DRN_IDR ?? null,
-      chainLength: parseFloatOrNull(attachment.CHAINE_DRN_LONGUEUR),
-      chainWeight: parseFloatOrNull(attachment.CHAINE_DRN_POIDS),
-      chainV: parseBooleanOrNull(attachment.CHAINE_EN_V),
-      counterWeight: parseFloatOrNull(attachment.CONTREPOIDS),
-      chainSurface: parseFloatOrNull(attachment.CHAINE_DRN_SURFACE),
-      supportFootAltitude: parseFloatOrNull(attachment.PIED_Z_LAMBERT93),
-      name: attachment.SUPPORT_IDR ?? null,
-      number: attachment.SUPPORT_NUMERO ?? null,
-      towerModel: attachment.SUPPORT_TOWER ?? null,
-      attachmentPosition: extractAttachmentPosition(span.PORTEE_UNITAIRE_DESIGNATION)
+      ...section,
+      supports: applyFootCoordinates(section.supports, latitude, longitude),
+      start_latitude: latitude[0],
+      start_longitude: longitude[0]
     };
   }
 
-  // ---------------------------------------------------------------------------
-  // Private — Lambert93 to GPS reprojection
-  // ---------------------------------------------------------------------------
-
   /**
-   * Converts each support's raw Lambert93 foot coordinates to GPS (`footLatitude`/`footLongitude`)
-   * and reports the mean GPS reprojection error (meters) returned by the validation task.
+   * Converts each support's Lambert93 foot coordinates to GPS (`footLatitude`/`footLongitude`),
+   * stores the section start location and the mean GPS reprojection error (meters).
    *
-   * Uses only the existing `Task.importLambert` and `Task.importLambertAndValidate` Python
-   * tasks — no new conversion logic is introduced.
-   * If any support is missing its raw Lambert93 coordinates, the whole reprojection is skipped
-   * (supports are returned unchanged, `meanReprojectionDiffMeters` is `null`) rather than blocking the import.
+   * Uses only the existing `Task.importLambert` and `Task.importLambertAndValidate` Python tasks.
+   * If any support is missing its coordinates, the whole reprojection is skipped (section returned
+   * unchanged) rather than blocking the import.
    *
    * @throws An `ImportError` (`MAPPING_ERROR`/`MAPPING`) if the worker reports an error or returns
    *   no result for either call.
    */
-  private async applyLambertReprojection(
-    supports: Support[],
-    lambertX: (number | null)[],
-    lambertY: (number | null)[]
-  ): Promise<{
-    supports: Support[];
-    meanReprojectionDiffMeters: number | null;
-    startGps: StartGps | null;
-  }> {
-    if (lambertX.includes(null) || lambertY.includes(null)) {
+  private async applyLambert93(section: Section, coordinates: SectionImportCoordinates): Promise<Section> {
+    if (!areCoordinatesComplete(coordinates, section.supports.length)) {
       this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
-      return { supports, meanReprojectionDiffMeters: null, startGps: null };
+      return section;
     }
 
-    const lambert_x = lambertX as number[];
-    const lambert_y = lambertY as number[];
-    const { spanLength, lineAngle } = buildReprojectionAngles(supports);
+    const lambert_x = coordinates.x as number[];
+    const lambert_y = coordinates.y as number[];
+    const { spanLength, lineAngle } = buildReprojectionAngles(section.supports);
 
     const start = await this.bootstrapLambertStartPoint(lambert_x, lambert_y);
     const { localization, meanGpsDiffMeter } = await this.validateLambertLocalization(
@@ -610,24 +330,18 @@ export class SectionImportService implements ImportAdapter<Section> {
       lineAngle
     );
 
-    const updatedSupports = applyFootCoordinates(supports, localization.latitude, localization.longitude);
-
     return {
-      supports: updatedSupports,
-      meanReprojectionDiffMeters: meanGpsDiffMeter,
-      startGps: {
-        startLatitude: localization.latitude[0],
-        startLongitude: localization.longitude[0],
-        startAzimuth: localization.azimuth[0]
-      }
+      ...section,
+      supports: applyFootCoordinates(section.supports, localization.latitude, localization.longitude),
+      start_latitude: localization.latitude[0],
+      start_longitude: localization.longitude[0],
+      start_azimuth: localization.azimuth[0],
+      mean_reprojection_diff_meters: meanGpsDiffMeter
     };
   }
 
   /** Call 1 — bootstrap: direct conversion of the raw Lambert93 arrays to get a start point. */
-  private async bootstrapLambertStartPoint(
-    lambert_x: number[],
-    lambert_y: number[]
-  ): Promise<{ startLatitude: number; startLongitude: number; startAzimuth: number }> {
+  private async bootstrapLambertStartPoint(lambert_x: number[], lambert_y: number[]): Promise<StartLocation> {
     const bootstrap = await this.workerPythonService.runTask(Task.importLambert, { lambert_x, lambert_y });
     if (bootstrap.error || !bootstrap.result) {
       throw this.buildLambertReprojectionError();
@@ -643,7 +357,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private async validateLambertLocalization(
     lambert_x: number[],
     lambert_y: number[],
-    start: { startLatitude: number; startLongitude: number; startAzimuth: number },
+    start: StartLocation,
     spanLength: number[],
     lineAngle: number[]
   ): Promise<{ localization: Localization; meanGpsDiffMeter: number }> {
@@ -669,47 +383,8 @@ export class SectionImportService implements ImportAdapter<Section> {
   }
 
   // ---------------------------------------------------------------------------
-  // Private — legacy mapping
-  // ---------------------------------------------------------------------------
-
-  private mapToSection(raw: Record<string, unknown>): Section {
-    const supports = this.mapSupports(raw['supports']);
-    const uuid = typeof raw['uuid'] === 'string' ? raw['uuid'].trim() : raw['uuid'];
-    return {
-      ...createEmptySection(),
-      ...raw,
-      uuid,
-      supports
-    } as Section;
-  }
-
-  private mapSupports(rawSupports: unknown): Support[] {
-    if (!Array.isArray(rawSupports) || rawSupports.length === 0) {
-      // Fall back to the default pair created by createEmptySection.
-      return [];
-    }
-    return (rawSupports as unknown[]).map((s) => ({
-      ...createEmptySupport(),
-      ...(s as Record<string, unknown>)
-    })) as Support[];
-  }
-
-  // ---------------------------------------------------------------------------
   // Private — validation
   // ---------------------------------------------------------------------------
-
-  private validateExternalSection(raw: SectionImportFile): void {
-    const fieldErrors = validateImportedSectionFields(raw);
-    if (fieldErrors.length > 0) {
-      const detail = fieldErrors.map((e) => `${e.field}: ${String(e.value)}`).join('; ');
-      const error: ImportError = {
-        code: 'VALIDATION_ERROR',
-        message: `${this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.validationErrorRequiredFields)}: ${detail}`,
-        stage: 'VALIDATION'
-      };
-      throw error;
-    }
-  }
 
   private validateSection(section: Section): void {
     const missingFields = getMissingRequiredFields(section);
@@ -740,7 +415,7 @@ export class SectionImportService implements ImportAdapter<Section> {
     section: Section,
     study: Study,
     collisionResolver: UUIDCollisionResolver,
-    hasCatalogFallbackWarnings: boolean
+    notices: readonly SectionImportNotice[]
   ): Promise<Section | null> {
     const existingSection = study.sections.find((s) => s.uuid === section.uuid);
 
@@ -779,9 +454,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         throw error;
       }
 
-      this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
-      this.notifyGpsReprojection(section);
-      this.notifyCatalogFallbackWarnings(hasCatalogFallbackWarnings);
+      this.notifyImported(section, notices);
       return section;
     }
 
@@ -798,15 +471,25 @@ export class SectionImportService implements ImportAdapter<Section> {
       throw error;
     }
 
+    this.notifyImported(section, notices);
+    return section;
+  }
+
+  private notifyImported(section: Section, notices: readonly SectionImportNotice[]): void {
     this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
     this.notifyGpsReprojection(section);
-    this.notifyCatalogFallbackWarnings(hasCatalogFallbackWarnings);
-    return section;
+    for (const notice of notices) {
+      if (notice.severity === 'warning') {
+        this.notificationService.warning(notice.message);
+      } else {
+        this.notificationService.info(notice.message);
+      }
+    }
   }
 
   /**
    * Shows an info toast reporting the mean Lambert93-to-GPS reprojection error (meters), when one
-   * was computed for this import (see `applyLambertReprojection`).
+   * was computed for this import (see `applyLambert93`).
    */
   private notifyGpsReprojection(section: Section): void {
     if (section.mean_reprojection_diff_meters != null) {
@@ -817,13 +500,5 @@ export class SectionImportService implements ImportAdapter<Section> {
         })
       );
     }
-  }
-
-  private notifyCatalogFallbackWarnings(hasCatalogFallbackWarnings: boolean): void {
-    if (!hasCatalogFallbackWarnings) {
-      return;
-    }
-
-    this.notificationService.warning(this.transloco.translate(SECTION_CATALOG_MISSING_KEY));
   }
 }

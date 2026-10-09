@@ -21,7 +21,9 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
-import fakeCanton101To103 from './section-import.fixtures/fake-canton.json';
+import { of } from 'rxjs';
+import { SECTION_IMPORT_ADAPTER_PROVIDERS } from '@shared/import/section-adapter/section-import-adapters.providers';
+import fakeCanton101To103 from '@adapters/section-import/rte-custom/fixtures/fake-canton.json';
 
 const sectionSupportCatalogMissingWarning =
   'The attachment support from the section file is not present in the application support catalog';
@@ -34,7 +36,7 @@ const sectionImportTranslations: Record<string, string> = {
   'section-import.validation-supports-bounds': 'Section has supports with values out of bounds',
   'section-import.import-error': 'Error importing section',
   'section-import.delete-error': 'Error deleting section',
-  'section-import.section-format-error': 'The section file to import is invalid.',
+  'rte-custom.format-error': 'The section file to import is invalid.',
   'section-import.lambert-reprojection-error': 'Error computing GPS coordinates from Lambert93 data',
   'section-import.catalog-missing-warning': sectionSupportCatalogMissingWarning,
   'section-import.import-success': 'Section imported successfully'
@@ -301,6 +303,7 @@ describe('SectionImportService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        ...SECTION_IMPORT_ADAPTER_PROVIDERS,
         SectionImportService,
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
@@ -318,7 +321,9 @@ describe('SectionImportService', () => {
                 return `Reprojection using ${params?.['appName']} data model seems to add a mean absolute error of ${params?.['error']} m`;
               }
               return sectionImportTranslations[key] ?? key;
-            }
+            },
+            selectTranslate: (key: string, _params?: Record<string, unknown>, scope?: { scope?: string }) =>
+              of(sectionImportTranslations[scope?.scope ? `${scope.scope}.${key}` : key] ?? key)
           }
         }
       ]
@@ -945,8 +950,8 @@ describe('SectionImportService', () => {
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
 
-      // SUPPORT_IDR absent: the ADR is passed as the fallback identifier.
-      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith(null, 'Support A', 19);
+      // SUPPORT_IDR absent: the ADR becomes the support name used for the catalog lookup.
+      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith('Support A', null, 19);
 
       // The catalog values apply, and the support name falls back to SUPPORT_ADR.
       expect(result?.supports[0].name).toBe('Support A');
@@ -1161,7 +1166,7 @@ describe('SectionImportService', () => {
       };
       const file = makeJsonFile(payload);
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
-        code: 'VALIDATION_ERROR',
+        code: 'RTE_CUSTOM_REQUIRED_FIELDS',
         message: expect.stringContaining('ANGLE_LIGNE: null')
       });
     });
@@ -1620,7 +1625,7 @@ describe('SectionImportService', () => {
   // -------------------------------------------------------------------------
 
   describe('processFile() — invalid canton format', () => {
-    it('should throw VALIDATION_ERROR with canton message when cantons present but CANTON_CUR missing', async () => {
+    it('should throw the adapter format error when cantons present but CANTON_CUR missing', async () => {
       service.setStudyContext(buildMockStudy());
       const invalidPayload = {
         cantons: [
@@ -1635,7 +1640,7 @@ describe('SectionImportService', () => {
       };
       const file = makeJsonFile(invalidPayload);
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
-        code: 'VALIDATION_ERROR',
+        code: 'RTE_CUSTOM_FORMAT_ERROR',
         message: 'The section file to import is invalid.',
         stage: 'VALIDATION'
       });

@@ -38,7 +38,7 @@ src/app/features/studies/application/services/
   study-import.service.ts                ← Study adapter (CSV / CLST)
 
 src/app/features/study/application/services/
-  section-import.service.ts              ← Section adapter (JSON)
+  section-import.service.ts              ← Section orchestrator, delegates the file format to section import adapters (see section_import_adapters)
   section-import.constantes.ts           ← section error messages
 
 src/app/features/study/.../import-section/
