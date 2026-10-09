@@ -406,6 +406,7 @@
     "lambert-reprojection-error": "Error computing GPS coordinates from Lambert93 data",
     "import-success": "Section imported successfully",
     "no-matching-adapter": "This file format is not supported for section import.",
+    "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog",
     "stellar-json": {
       "format-label": "Stellar section (.stsec, .json)",
       "invalid-envelope": "The Stellar section file is invalid.",

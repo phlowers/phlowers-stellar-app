@@ -33,8 +33,19 @@ import { Task, Localization } from '@core/services/worker_python/tasks/types';
 import { hasSupportsBoundsErrors } from '@shared/domain/helpers/support-limits.helpers';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
-import { IMPORT_SUCCESS_KEY, REPROJECTION_INFO_KEY, SECTION_IMPORT_ERROR_KEYS } from './section-import.constantes';
+import {
+  CATALOG_MISSING_WARNING_KEY,
+  IMPORT_SUCCESS_KEY,
+  REPROJECTION_INFO_KEY,
+  SECTION_IMPORT_ERROR_KEYS
+} from './section-import.constantes';
 import { StartLocation } from './section-import.interfaces';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { AttachmentCorrectionService } from './catalog-correction/attachment-correction.service';
+import { ChainCorrectionService } from './catalog-correction/chain-correction.service';
+import { LineCorrectionService } from './catalog-correction/line-correction.service';
+import { MaintenanceCorrectionService } from './catalog-correction/maintenance-correction.service';
+import { buildSupportNameEntries } from './catalog-correction/catalog-correction.helpers';
 
 // ---------------------------------------------------------------------------
 // Service
@@ -56,6 +67,8 @@ import { StartLocation } from './section-import.interfaces';
  * - **DECODING/PARSING**: reads the text once and picks the first adapter that recognizes the content.
  * - **MAPPING**: the selected adapter parses, validates its own format and maps it to a `Section`.
  * - **VALIDATION**: required fields + supports bounds on the mapped section, for every adapter.
+ * - **CATALOG CORRECTION**: when the adapter asks for it, maintenance, voltage, attachment and chain
+ *   values are corrected against the local catalogs, then new support names are added to the catalog.
  * - **MAPPING (coordinates)**: Lambert93 to GPS reprojection when the adapter provides projected coordinates.
  * - **COLLISION_CHECK**: detects whether the UUID already exists in the study.
  * - **PERSISTENCE**: calls `SectionService.createOrUpdateSection`.
@@ -71,6 +84,11 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly logger = inject(LoggerService);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly transloco = inject(TranslocoService);
+  private readonly attachmentService = inject(AttachmentService);
+  private readonly maintenanceCorrection = inject(MaintenanceCorrectionService);
+  private readonly lineCorrection = inject(LineCorrectionService);
+  private readonly attachmentCorrection = inject(AttachmentCorrectionService);
+  private readonly chainCorrection = inject(ChainCorrectionService);
 
   // ---------------------------------------------------------------------------
   // Context setter
@@ -143,15 +161,24 @@ export class SectionImportService implements ImportAdapter<Section> {
     const payload = await this.runAdapter(adapter, source);
 
     // Stage: VALIDATION (format-independent)
-    if (!payload.skipSectionValidation) {
-      this.validateSection(payload.section);
+    this.validateSection(payload.section);
+
+    // Stage: catalog correction (opt-in per adapter)
+    const notices: SectionImportNotice[] = [...(payload.notices ?? [])];
+    let corrected = payload.section;
+    if (payload.applyCatalogCorrections) {
+      const result = await this.applyCatalogCorrections(payload.section);
+      corrected = result.section;
+      if (result.hasMissingCatalogEntries) {
+        notices.push({ severity: 'warning', message: this.transloco.translate(CATALOG_MISSING_WARNING_KEY) });
+      }
     }
 
     // Stage: MAPPING (coordinates)
-    const section = await this.applyCoordinates(payload.section, payload.coordinates);
+    const section = await this.applyCoordinates(corrected, payload.coordinates);
 
     // Stage: COLLISION_CHECK + PERSISTENCE
-    return this.persistSection(section, study, collisionResolver, payload.notices ?? []);
+    return this.persistSection(section, study, collisionResolver, notices);
   }
 
   // ---------------------------------------------------------------------------
@@ -202,6 +229,40 @@ export class SectionImportService implements ImportAdapter<Section> {
     } catch (err: unknown) {
       if (isImportError(err)) throw err;
       this.logger.error(`Section import adapter "${adapter.id}" failed`, err);
+      const error: ImportError = {
+        code: 'MAPPING_ERROR',
+        message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),
+        stage: 'MAPPING',
+        cause: err
+      };
+      throw error;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private — catalog correction
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Corrects the section against each catalog, then registers the new support names in the
+   * attachment catalog. Unexpected failures become a generic `MAPPING_ERROR`.
+   */
+  private async applyCatalogCorrections(
+    section: Section
+  ): Promise<{ section: Section; hasMissingCatalogEntries: boolean }> {
+    try {
+      const withMaintenance = await this.maintenanceCorrection.correctMaintenance(section);
+      const withVoltage = await this.lineCorrection.correctVoltage(withMaintenance);
+      const { supports: withAttachments, hasMissingCatalogEntries } = await this.attachmentCorrection.correctSupports(
+        withVoltage.supports
+      );
+      const supports = await this.chainCorrection.correctSupports(withAttachments);
+
+      await this.attachmentService.addSupportNamesIfAbsent(buildSupportNameEntries(supports));
+
+      return { section: { ...withVoltage, supports }, hasMissingCatalogEntries };
+    } catch (err: unknown) {
+      this.logger.error('Section catalog correction failed', err);
       const error: ImportError = {
         code: 'MAPPING_ERROR',
         message: this.transloco.translate(SECTION_IMPORT_ERROR_KEYS.sectionImportError),

@@ -1,12 +1,19 @@
 /**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Support } from '@shared/domain';
 import { parseFloatOrNull } from '@shared/import/section-adapter/section-import-parse.helpers';
-import { Attachment, FieldError, ImportedSection, SectionImportFile } from './rte-custom.interfaces';
+import {
+  Appartenance,
+  Attachment,
+  FieldError,
+  ImportedSection,
+  SectionImportFile,
+  Span
+} from './rte-custom.interfaces';
 
 // ---------------------------------------------------------------------------
 // Format detection
@@ -44,11 +51,49 @@ export function extractCantonUuid(json: unknown): string | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Normalizes a voltage string for catalog matching: strips all whitespace and uppercases it,
- * so e.g. "225kV" and "225 KV" compare equal.
+ * Support name used as catalog lookup key: `SUPPORT_IDR` when present, otherwise `SUPPORT_ADR`
+ * (the ADR is never used as a fallback when an IDR exists, even one absent from the catalog).
  */
-export function normalizeVoltage(value: string | null | undefined): string {
-  return (value ?? '').replace(/\s+/g, '').toUpperCase();
+export function pickSupportName(attachment: Attachment): string | null {
+  return attachment.SUPPORT_IDR?.trim() ? attachment.SUPPORT_IDR : (attachment.SUPPORT_ADR ?? null);
+}
+
+/** Returns the first non-empty appartenance record from the raw canton file. */
+export function findFirstMeaningfulAppartenance(
+  general: ImportedSection['general'] | undefined
+): Appartenance | undefined {
+  const appartenance = general?.appartenance ?? [];
+  return appartenance.find((entry): entry is Appartenance => {
+    if (typeof entry !== 'object' || entry === null) return false;
+
+    const record = entry as unknown as Record<string, unknown>;
+    return Object.values(record).some((value) => {
+      if (typeof value === 'string') return value.trim() !== '';
+      return value !== null && value !== undefined;
+    });
+  });
+}
+
+/** Removes blank placeholder rows (empty objects, null values) from the raw "portee unitaire" array. */
+export function filterMeaningfulSpans(spans: unknown[] | null | undefined): Span[] {
+  if (!Array.isArray(spans)) return [];
+
+  return spans.filter((span): span is Span => {
+    if (typeof span !== 'object' || span === null) return false;
+
+    const record = span as Record<string, unknown>;
+    const hasDeparture = typeof record['accroche depart'] === 'object' && record['accroche depart'] !== null;
+    const hasArrival = typeof record['accroche arrivee'] === 'object' && record['accroche arrivee'] !== null;
+
+    return (
+      hasDeparture ||
+      hasArrival ||
+      typeof record.PORTEE_UNITAIRE_ORDRE === 'string' ||
+      typeof record.PORTEE_LONGUEUR === 'string' ||
+      typeof record.PORTEE_AZIMUT === 'string' ||
+      typeof record.PORTEE_UNITAIRE_DESIGNATION === 'string'
+    );
+  }) as Span[];
 }
 
 /**
@@ -129,7 +174,7 @@ export function validateImportedSectionFields(raw: SectionImportFile): FieldErro
 
   const section = raw.cantons[0];
   const general = section.general;
-  const spans = [...(section['portee unitaire'] ?? [])].sort(
+  const spans = [...filterMeaningfulSpans(section['portee unitaire'] ?? [])].sort(
     (a, b) => Number.parseFloat(a.PORTEE_UNITAIRE_ORDRE ?? '0') - Number.parseFloat(b.PORTEE_UNITAIRE_ORDRE ?? '0')
   );
 

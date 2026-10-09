@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -13,7 +13,7 @@ import {
   extractCantonUuid,
   hasCantons,
   isRteCantonFormat,
-  normalizeVoltage,
+  pickSupportName,
   validateImportedSectionFields
 } from './rte-custom.helpers';
 
@@ -115,15 +115,18 @@ describe('extractCantonUuid', () => {
   });
 });
 
-describe('normalizeVoltage', () => {
-  it('should strip whitespace and uppercase', () => {
-    expect(normalizeVoltage('225 KV')).toBe('225KV');
-    expect(normalizeVoltage('225kV')).toBe('225KV');
+describe('pickSupportName', () => {
+  it('should return SUPPORT_IDR when present', () => {
+    expect(pickSupportName(buildAccroche())).toBe('Support_IDR_A');
   });
 
-  it('should return an empty string for null/undefined', () => {
-    expect(normalizeVoltage(null)).toBe('');
-    expect(normalizeVoltage(undefined)).toBe('');
+  it('should fall back to SUPPORT_ADR when SUPPORT_IDR is null or blank', () => {
+    expect(pickSupportName(buildAccroche({ SUPPORT_IDR: null }))).toBe('Support A');
+    expect(pickSupportName(buildAccroche({ SUPPORT_IDR: '  ' }))).toBe('Support A');
+  });
+
+  it('should return null when both identifiers are absent', () => {
+    expect(pickSupportName(buildAccroche({ SUPPORT_IDR: null, SUPPORT_ADR: null }))).toBeNull();
   });
 });
 

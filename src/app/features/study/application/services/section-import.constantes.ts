@@ -23,3 +23,6 @@ export const REPROJECTION_INFO_KEY = 'section-import.reprojection-info';
 
 /** Transloco translation key for the section import success toast. */
 export const IMPORT_SUCCESS_KEY = 'section-import.import-success';
+
+/** Transloco translation key for the warning shown when a support is absent from the attachment catalog. */
+export const CATALOG_MISSING_WARNING_KEY = 'section-import.catalog-missing-warning';

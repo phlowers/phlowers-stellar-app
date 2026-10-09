@@ -49,18 +49,20 @@ export interface SectionImportPayload {
   readonly coordinates?: SectionImportCoordinates;
   readonly notices?: readonly SectionImportNotice[];
   /**
-   * Skips the core required-fields and supports-bounds checks. Defaults to `false`.
-   * Set to `true` only when the adapter already validated its own format and the mapped values may
-   * legitimately fall outside the section form rules.
+   * Asks the core to correct the section against the local catalogs (maintenance, voltage, attachments,
+   * chains) and to register the new support names. Defaults to `false`.
+   * The adapter must then provide the lookup keys in the mapped section: `cm_designation`,
+   * `eel_designation`, `gmr_designation`, `voltage_idr` / `voltage_adr`, and per support `name`,
+   * `attachmentSet`, `chainName`, `towerModel`.
    */
-  readonly skipSectionValidation?: boolean;
+  readonly applyCatalogCorrections?: boolean;
 }
 
 /**
  * Contract of a section import format.
  *
  * An adapter parses and maps its own format into a `SectionImportPayload`. Collision handling,
- * coordinate reprojection, generic validation, persistence and notifications are done by the core.
+ * generic validation, catalog correction, coordinate reprojection, persistence and notifications are done by the core.
  *
  * Errors: `import()` must reject with an `ImportError`-shaped object whose `code` is built with
  * `adapterErrorCode(...)` (or a canonical code) and whose `message` is localized by the adapter.

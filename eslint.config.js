@@ -71,8 +71,7 @@ export default tseslint.config(
           patterns: [
             {
               group: ['@adapters/*', '@adapters/**'],
-              message:
-                'Import adapters only from shared/import/section-adapter/section-import-adapters.providers.ts.'
+              message: 'Import adapters only from shared/import/section-adapter/section-import-adapters.providers.ts.'
             }
           ]
         }
@@ -86,9 +85,7 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
-            { group: ['@features/*', '@features/**'], message: 'Adapters must not import feature code.' }
-          ]
+          patterns: [{ group: ['@features/*', '@features/**'], message: 'Adapters must not import feature code.' }]
         }
       ]
     }

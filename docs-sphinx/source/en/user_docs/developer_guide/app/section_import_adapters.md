@@ -26,9 +26,10 @@ src/app/features/study/application/services/
 The orchestrator reads the file once, picks the first adapter (registry order) whose extensions include the file extension and whose `canHandle` returns `true`, then runs:
 
 1. `adapter.import(source)` — parse, validate its own format, map to a `Section`.
-2. Core validation of the mapped `Section` (required fields, supports bounds), unless the adapter sets `skipSectionValidation`.
-3. Coordinates reprojection, when the adapter returned `coordinates`.
-4. Collision check and persistence, then notifications (success, reprojection info, adapter notices).
+2. Core validation of the mapped `Section` (required fields, supports bounds), for every adapter.
+3. Catalog correction, when the adapter set `applyCatalogCorrections`: maintenance IDs, voltage, attachments and chains are corrected against the local catalogs (one correction service per catalog under `src/app/features/study/application/services/catalog-correction/`), then the new support names are added to the attachment catalog. A missing attachment catalog entry raises one warning.
+4. Coordinates reprojection, when the adapter returned `coordinates`.
+5. Collision check and persistence, then notifications (success, reprojection info, adapter and catalog notices).
 
 ---
 
@@ -49,7 +50,7 @@ interface SectionImportPayload {
   section: Section;
   coordinates?: { crs: 'LAMBERT93' | 'WGS84'; x: (number | null)[]; y: (number | null)[] };
   notices?: { severity: 'info' | 'warning'; message: string }[];
-  skipSectionValidation?: boolean;           // default false
+  applyCatalogCorrections?: boolean;         // default false
 }
 ```
 
@@ -59,7 +60,7 @@ interface SectionImportPayload {
   - `WGS84`: `x` is the longitude and `y` the latitude, in degrees; applied as-is.
   - Any `null` entry skips the reprojection without blocking the import.
 - `notices.message` must already be localized.
-- `skipSectionValidation: true` skips the core required-fields and supports-bounds checks; use it only when the adapter already validated its own format and the mapped values may legitimately fall outside the section form rules (e.g. `rte_custom`).
+- `applyCatalogCorrections: true` asks the core to correct the mapped section against the local catalogs. The adapter only maps and must provide the lookup keys in the `Section`: `cm_designation`, `eel_designation`, `gmr_designation`, `voltage_idr`/`voltage_adr` and, per support, `name`, `attachmentSet`, `chainName`, `towerModel` (e.g. `rte_custom`).
 
 ### Errors
 

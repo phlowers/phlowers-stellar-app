@@ -26,9 +26,10 @@ src/app/features/study/application/services/
 L'orchestrateur lit le fichier une seule fois, choisit le premier adaptateur (dans l'ordre du registre) dont les extensions contiennent celle du fichier et dont `canHandle` renvoie `true`, puis exécute :
 
 1. `adapter.import(source)` — analyse, validation de son propre format, conversion en `Section`.
-2. Validation par le cœur de la `Section` obtenue (champs requis, bornes des supports), sauf si l'adaptateur définit `skipSectionValidation`.
-3. Reprojection des coordonnées, si l'adaptateur a renvoyé `coordinates`.
-4. Contrôle de collision et persistance, puis notifications (succès, information de reprojection, notices de l'adaptateur).
+2. Validation par le cœur de la `Section` obtenue (champs requis, bornes des supports), pour tous les adaptateurs.
+3. Correction par les catalogues, si l'adaptateur a défini `applyCatalogCorrections` : identifiants de maintenance, tension, accroches et chaînes sont corrigés avec les catalogues locaux (un service de correction par catalogue dans `src/app/features/study/application/services/catalog-correction/`), puis les nouveaux noms de supports sont ajoutés au catalogue des accroches. Une entrée absente du catalogue des accroches lève un avertissement.
+4. Reprojection des coordonnées, si l'adaptateur a renvoyé `coordinates`.
+5. Contrôle de collision et persistance, puis notifications (succès, information de reprojection, notices de l'adaptateur et des catalogues).
 
 ---
 
@@ -49,7 +50,7 @@ interface SectionImportPayload {
   section: Section;
   coordinates?: { crs: 'LAMBERT93' | 'WGS84'; x: (number | null)[]; y: (number | null)[] };
   notices?: { severity: 'info' | 'warning'; message: string }[];
-  skipSectionValidation?: boolean;           // false par défaut
+  applyCatalogCorrections?: boolean;         // false par défaut
 }
 ```
 
@@ -59,7 +60,7 @@ interface SectionImportPayload {
   - `WGS84` : `x` est la longitude et `y` la latitude, en degrés ; appliquées telles quelles.
   - Une entrée `null` ignore la reprojection sans bloquer l'import.
 - `notices.message` doit déjà être traduit.
-- `skipSectionValidation: true` désactive les contrôles du cœur sur les champs obligatoires et les limites des supports ; à utiliser uniquement si l'adaptateur a déjà validé son propre format et que les valeurs mappées peuvent légitimement sortir des règles du formulaire de canton (ex. `rte_custom`).
+- `applyCatalogCorrections: true` demande au cœur de corriger le canton converti avec les catalogues locaux. L'adaptateur se limite à la conversion et doit renseigner les clés de recherche dans la `Section` : `cm_designation`, `eel_designation`, `gmr_designation`, `voltage_idr`/`voltage_adr` et, par support, `name`, `attachmentSet`, `chainName`, `towerModel` (ex. `rte_custom`).
 
 ### Erreurs
 

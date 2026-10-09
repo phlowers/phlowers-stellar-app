@@ -406,6 +406,7 @@
     "lambert-reprojection-error": "Erreur lors du calcul des coordonnées GPS à partir des données Lambert93",
     "import-success": "Canton importé avec succès",
     "no-matching-adapter": "Ce format de fichier n'est pas pris en charge pour l'importation de canton.",
+    "catalog-missing-warning": "Le support d'accrochage du fichier de canton n'est pas présent au catalogue des supports de l'application",
     "stellar-json": {
       "format-label": "Canton Stellar (.stsec, .json)",
       "invalid-envelope": "Le fichier de canton Stellar est invalide.",

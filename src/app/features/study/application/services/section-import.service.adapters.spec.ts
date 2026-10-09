@@ -19,6 +19,11 @@ import {
   SectionImportPayload
 } from '@shared/import/section-adapter/section-import-adapter';
 import { SectionImportService } from './section-import.service';
+import { AttachmentService } from '@shared/catalog/services/attachment.service';
+import { AttachmentCorrectionService } from './catalog-correction/attachment-correction.service';
+import { ChainCorrectionService } from './catalog-correction/chain-correction.service';
+import { LineCorrectionService } from './catalog-correction/line-correction.service';
+import { MaintenanceCorrectionService } from './catalog-correction/maintenance-correction.service';
 
 // jsdom does not implement File.prototype.text
 if (typeof File !== 'undefined' && !File.prototype.text) {
@@ -81,6 +86,11 @@ describe('SectionImportService — adapter orchestration', () => {
   let notificationMock: Record<'success' | 'info' | 'warning' | 'error', ReturnType<typeof vi.fn>>;
   let loggerMock: Record<'error' | 'warn' | 'log' | 'info', ReturnType<typeof vi.fn>>;
   let runTaskMock: ReturnType<typeof vi.fn>;
+  let attachmentServiceMock: { addSupportNamesIfAbsent: ReturnType<typeof vi.fn> };
+  let maintenanceCorrectionMock: { correctMaintenance: ReturnType<typeof vi.fn> };
+  let lineCorrectionMock: { correctVoltage: ReturnType<typeof vi.fn> };
+  let attachmentCorrectionMock: { correctSupports: ReturnType<typeof vi.fn> };
+  let chainCorrectionMock: { correctSupports: ReturnType<typeof vi.fn> };
 
   const configure = (list: SectionImportAdapter[]) => {
     adapters = list;
@@ -92,6 +102,11 @@ describe('SectionImportService — adapter orchestration', () => {
         { provide: NotificationService, useValue: notificationMock },
         { provide: LoggerService, useValue: loggerMock },
         { provide: WorkerPythonService, useValue: { runTask: runTaskMock } },
+        { provide: AttachmentService, useValue: attachmentServiceMock },
+        { provide: MaintenanceCorrectionService, useValue: maintenanceCorrectionMock },
+        { provide: LineCorrectionService, useValue: lineCorrectionMock },
+        { provide: AttachmentCorrectionService, useValue: attachmentCorrectionMock },
+        { provide: ChainCorrectionService, useValue: chainCorrectionMock },
         { provide: TranslocoService, useValue: { translate: (key: string) => key } }
       ]
     });
@@ -107,6 +122,15 @@ describe('SectionImportService — adapter orchestration', () => {
     notificationMock = { success: vi.fn(), info: vi.fn(), warning: vi.fn(), error: vi.fn() };
     loggerMock = { error: vi.fn(), warn: vi.fn(), log: vi.fn(), info: vi.fn() };
     runTaskMock = vi.fn();
+    attachmentServiceMock = { addSupportNamesIfAbsent: vi.fn().mockResolvedValue(undefined) };
+    maintenanceCorrectionMock = { correctMaintenance: vi.fn((section: Section) => Promise.resolve(section)) };
+    lineCorrectionMock = { correctVoltage: vi.fn((section: Section) => Promise.resolve(section)) };
+    attachmentCorrectionMock = {
+      correctSupports: vi.fn((supports: Section['supports']) =>
+        Promise.resolve({ supports, hasMissingCatalogEntries: false })
+      )
+    };
+    chainCorrectionMock = { correctSupports: vi.fn((supports: Section['supports']) => Promise.resolve(supports)) };
   });
 
   describe('accepts()', () => {
@@ -219,7 +243,7 @@ describe('SectionImportService — adapter orchestration', () => {
       return { section };
     };
 
-    it('should enforce the supports bounds by default', async () => {
+    it('should enforce the supports bounds', async () => {
       configure([buildAdapter({ import: () => Promise.resolve(outOfBounds()) })]);
 
       await expect(service.processFile(makeFile('{}'), accept)).rejects.toMatchObject({
@@ -228,22 +252,128 @@ describe('SectionImportService — adapter orchestration', () => {
       });
     });
 
-    it('should skip the supports bounds check when the adapter opts out', async () => {
-      configure([
-        buildAdapter({ import: () => Promise.resolve({ ...outOfBounds(), skipSectionValidation: true }) })
-      ]);
-
-      await expect(service.processFile(makeFile('{}'), accept)).resolves.toBeTruthy();
-    });
-
-    it('should skip the required-fields check when the adapter opts out', async () => {
+    it('should validate the adapter output before any catalog correction', async () => {
       configure([
         buildAdapter({
-          import: () => Promise.resolve({ section: buildSection({ name: '' }), skipSectionValidation: true })
+          import: () => Promise.resolve({ ...outOfBounds(), applyCatalogCorrections: true })
         })
       ]);
 
-      await expect(service.processFile(makeFile('{}'), accept)).resolves.toBeTruthy();
+      await expect(service.processFile(makeFile('{}'), accept)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      expect(maintenanceCorrectionMock.correctMaintenance).not.toHaveBeenCalled();
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('catalog correction', () => {
+    it('should not correct nor register anything when the adapter does not ask for it', async () => {
+      configure([buildAdapter()]);
+
+      await service.processFile(makeFile('{}'), accept);
+
+      expect(maintenanceCorrectionMock.correctMaintenance).not.toHaveBeenCalled();
+      expect(lineCorrectionMock.correctVoltage).not.toHaveBeenCalled();
+      expect(attachmentCorrectionMock.correctSupports).not.toHaveBeenCalled();
+      expect(chainCorrectionMock.correctSupports).not.toHaveBeenCalled();
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).not.toHaveBeenCalled();
+    });
+
+    it('should run every catalog correction in order and persist the corrected section', async () => {
+      const calls: string[] = [];
+      maintenanceCorrectionMock.correctMaintenance.mockImplementation((section: Section) => {
+        calls.push('maintenance');
+        return Promise.resolve({ ...section, maintenance_center_id: 'center-id' });
+      });
+      lineCorrectionMock.correctVoltage.mockImplementation((section: Section) => {
+        calls.push('line');
+        return Promise.resolve({ ...section, voltage_idr: '225 KV' });
+      });
+      attachmentCorrectionMock.correctSupports.mockImplementation((supports: Section['supports']) => {
+        calls.push('attachment');
+        return Promise.resolve({
+          supports: supports.map((s) => ({ ...s, armLength: 9 })),
+          hasMissingCatalogEntries: false
+        });
+      });
+      chainCorrectionMock.correctSupports.mockImplementation((supports: Section['supports']) => {
+        calls.push('chain');
+        return Promise.resolve(supports.map((s) => ({ ...s, chainWeight: 7 })));
+      });
+      attachmentServiceMock.addSupportNamesIfAbsent.mockImplementation(() => {
+        calls.push('support-names');
+        return Promise.resolve();
+      });
+      configure([
+        buildAdapter({ import: () => Promise.resolve({ section: buildSection(), applyCatalogCorrections: true }) })
+      ]);
+
+      const result = await service.processFile(makeFile('{}'), accept);
+
+      expect(calls).toEqual(['maintenance', 'line', 'attachment', 'chain', 'support-names']);
+      expect(result?.maintenance_center_id).toBe('center-id');
+      expect(result?.voltage_idr).toBe('225 KV');
+      expect(result?.supports.every((s) => s.armLength === 9 && s.chainWeight === 7)).toBe(true);
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledWith(expect.anything(), result);
+    });
+
+    it('should register the support names and towers of the corrected supports', async () => {
+      const section = buildSection();
+      section.supports[0] = { ...section.supports[0], name: 'FAKE-SUP-A', towerModel: 'FAKE-TOWER' };
+      configure([buildAdapter({ import: () => Promise.resolve({ section, applyCatalogCorrections: true }) })]);
+
+      await service.processFile(makeFile('{}'), accept);
+
+      expect(attachmentServiceMock.addSupportNamesIfAbsent).toHaveBeenCalledWith([
+        { supportName: 'FAKE-SUP-A', supportTower: 'FAKE-TOWER' }
+      ]);
+    });
+
+    it('should add one catalog warning notice when a support is missing from the attachment catalog', async () => {
+      attachmentCorrectionMock.correctSupports.mockImplementation((supports: Section['supports']) =>
+        Promise.resolve({ supports, hasMissingCatalogEntries: true })
+      );
+      configure([
+        buildAdapter({ import: () => Promise.resolve({ section: buildSection(), applyCatalogCorrections: true }) })
+      ]);
+
+      await service.processFile(makeFile('{}'), accept);
+
+      expect(notificationMock.warning).toHaveBeenCalledTimes(1);
+      expect(notificationMock.warning).toHaveBeenCalledWith('section-import.catalog-missing-warning');
+    });
+
+    it('should turn a catalog failure into a MAPPING_ERROR and persist nothing', async () => {
+      const cause = new Error('db down');
+      maintenanceCorrectionMock.correctMaintenance.mockRejectedValue(cause);
+      configure([
+        buildAdapter({ import: () => Promise.resolve({ section: buildSection(), applyCatalogCorrections: true }) })
+      ]);
+
+      await expect(service.processFile(makeFile('{}'), accept)).rejects.toMatchObject({
+        code: 'MAPPING_ERROR',
+        stage: 'MAPPING',
+        cause
+      });
+      expect(sectionServiceMock.createOrUpdateSection).not.toHaveBeenCalled();
+    });
+
+    it('should correct before reprojecting the coordinates', async () => {
+      const coordinates = { crs: 'WGS84' as const, x: [3.1, 3.2], y: [45.1, 45.2] };
+      attachmentCorrectionMock.correctSupports.mockImplementation((supports: Section['supports']) =>
+        Promise.resolve({ supports: supports.map((s) => ({ ...s, armLength: 9 })), hasMissingCatalogEntries: false })
+      );
+      configure([
+        buildAdapter({
+          import: () => Promise.resolve({ section: buildSection(), coordinates, applyCatalogCorrections: true })
+        })
+      ]);
+
+      const result = await service.processFile(makeFile('{}'), accept);
+
+      expect(result?.supports.map((s) => [s.armLength, s.footLatitude])).toEqual([
+        [9, 45.1],
+        [9, 45.2]
+      ]);
     });
   });
 

@@ -38,7 +38,7 @@ const sectionImportTranslations: Record<string, string> = {
   'section-import.delete-error': 'Error deleting section',
   'rte-custom.format-error': 'The section file to import is invalid.',
   'section-import.lambert-reprojection-error': 'Error computing GPS coordinates from Lambert93 data',
-  'rte-custom.catalog-missing-warning': sectionSupportCatalogMissingWarning,
+  'section-import.catalog-missing-warning': sectionSupportCatalogMissingWarning,
   'section-import.import-success': 'Section imported successfully'
 };
 
@@ -322,7 +322,8 @@ describe('SectionImportService', () => {
               }
               return sectionImportTranslations[key] ?? key;
             },
-            selectTranslate: (key: string) => of(sectionImportTranslations[key] ?? key)
+            selectTranslate: (key: string, _params?: Record<string, unknown>, scope?: { scope?: string }) =>
+              of(sectionImportTranslations[scope?.scope ? `${scope.scope}.${key}` : key] ?? key)
           }
         }
       ]
@@ -949,8 +950,8 @@ describe('SectionImportService', () => {
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
 
-      // SUPPORT_IDR absent: the ADR is passed as the fallback identifier.
-      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith(null, 'Support A', 19);
+      // SUPPORT_IDR absent: the ADR becomes the support name used for the catalog lookup.
+      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith('Support A', null, 19);
 
       // The catalog values apply, and the support name falls back to SUPPORT_ADR.
       expect(result?.supports[0].name).toBe('Support A');
