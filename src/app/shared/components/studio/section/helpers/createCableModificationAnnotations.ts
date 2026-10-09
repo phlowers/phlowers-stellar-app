@@ -16,7 +16,7 @@ import {
   getCableModificationLabel
 } from './createCableModificationAnnotations.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
-import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor';
+import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
 
 /**
  * Icon annotation (FontAwesome glyph) with an arrow line connecting it back

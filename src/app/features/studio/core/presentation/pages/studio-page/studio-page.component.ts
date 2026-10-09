@@ -56,8 +56,8 @@ import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { CableSupportManipComponent } from '@features/studio/loads/presentation/components/cable-support-manip/cable-support-manip.component';
 import { DistanceMeasuringComponent } from '@features/studio/distance-measuring/distance-measuring.component';
 import { DistanceFreePositioningComponent } from '@features/studio/distance-measuring/components/distance-free-positioning/distance-free-positioning.component';
-import { FloorComponent } from '@src/app/features/studio/floor/presentation/floor.component';
-import { FloorFreePositioningComponent } from '@src/app/features/studio/floor/presentation/components/floor-free-positioning/floor-free-positioning.component';
+import { FloorComponent } from '@features/studio/floor/presentation/floor.component';
+import { FloorFreePositioningComponent } from '@features/studio/floor/presentation/components/floor-free-positioning/floor-free-positioning.component';
 import { Camera } from 'plotly.js-dist-min';
 import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -70,7 +70,7 @@ import {
   buildSpanRows,
   buildSupportRows
 } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
-import { maxOf } from '@shared/helpers/maxOf';
+import { maxOf } from '@shared/helpers/maxOf.helpers';
 import { SectionStateReportData } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.interfaces';
 
 /** Display mode for global section parameters: middle span or section maximum. */

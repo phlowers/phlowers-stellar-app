@@ -32,7 +32,7 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { LoggerService } from '@core/services/logger/logger.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
-import { maxOf } from '@shared/helpers/maxOf';
+import { maxOf } from '@shared/helpers/maxOf.helpers';
 import { STRAND_LAYER_KEYS } from '@shared/domain/helpers/cut-strands.helpers';
 import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
 import { RrtsResults } from '@features/studio/toolbar/application/services/strand-rrts.interfaces';

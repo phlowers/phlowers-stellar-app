@@ -1,4 +1,4 @@
-import { maxOf } from './maxOf';
+import { maxOf } from './maxOf.helpers';
 
 describe('maxOf', () => {
   it('should return the maximum value of the array', () => {

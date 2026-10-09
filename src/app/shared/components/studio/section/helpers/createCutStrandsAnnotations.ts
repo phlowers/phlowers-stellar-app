@@ -22,7 +22,7 @@ import {
   getCutStrandsLabel
 } from './createCutStrandsAnnotations.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
-import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor';
+import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
 
 type MappedAnchor = ReturnType<typeof mapAnchorToAxes>;
 

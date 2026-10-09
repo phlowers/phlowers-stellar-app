@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { PlotService } from '@services/plot/plot.service';
-import { maxOf } from '@shared/helpers/maxOf';
+import { maxOf } from '@shared/helpers/maxOf.helpers';
 import { RrtsResults } from './strand-rrts.interfaces';
 
 // Runs the RRTS tasks of the Python engine, which keeps the cut strands it is given until it is given others
