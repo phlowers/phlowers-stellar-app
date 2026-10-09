@@ -10,7 +10,12 @@ import type jsPDF from 'jspdf';
 import { SymmetryType } from '@shared/domain/models/charge.model';
 import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
-import { drawHeader, drawTitledBulletSection, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  drawHeader,
+  drawStudyCartoucheSection,
+  drawTitledBulletSection,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
 
 import { LoadsReportData, LoadsReportLabels } from './loads-data-report.interfaces';
 
@@ -21,17 +26,13 @@ export function drawStudyAndCantonSection(
   labels: LoadsReportLabels,
   startY: number
 ): number {
-  const items: PdfBulletItem[] = [
-    { label: labels.author, value: data.author || '-', wrap: true },
-    { label: labels.study, value: data.studyTitle || '-', wrap: true },
-    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
-    { label: labels.canton, value: data.sectionName || '-', wrap: true },
-    { label: labels.cantonComment, value: data.cantonComment || '-', wrap: true },
-    { label: labels.initialCondition, value: data.icName || '-', wrap: true },
-    { label: labels.chargeName, value: data.chargeName || '-', wrap: true },
-    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
-  ];
-  return drawTitledBulletSection(doc, labels.cartoucheTitle, items, startY);
+  return drawStudyCartoucheSection(
+    doc,
+    labels.cartoucheTitle,
+    { ...labels, comment: labels.cantonComment },
+    { ...data, cantonName: data.sectionName, comment: data.cantonComment },
+    startY
+  );
 }
 
 /** Draws the climate conditions section (always exactly one row) + personnel presence. Returns the next Y. */

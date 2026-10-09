@@ -16,7 +16,7 @@ import { PoseResults } from '@shared/domain/models/section.model';
 import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import {
   drawHeader,
-  drawTitledBulletSection,
+  drawStudyCartoucheSection,
   drawTwoColumnBulletSection,
   formatValue
 } from '@shared/pdf/pdf-primitives.helpers';
@@ -54,17 +54,13 @@ export function drawStudyAndCantonSection(
   labels: HangingTableReportLabels,
   startY: number
 ): number {
-  const items: PdfBulletItem[] = [
-    { label: labels.author, value: data.author || '-', wrap: true },
-    { label: labels.study, value: data.studyTitle || '-', wrap: true },
-    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
-    { label: labels.canton, value: data.cantonName || '-', wrap: true },
-    { label: labels.cantonComment, value: data.cantonComment || '-', wrap: true },
-    { label: labels.initialCondition, value: data.icName || '-', wrap: true },
-    { label: labels.chargeName, value: data.chargeName || '-', wrap: true },
-    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
-  ];
-  return drawTitledBulletSection(doc, labels.cartoucheTitle, items, startY);
+  return drawStudyCartoucheSection(
+    doc,
+    labels.cartoucheTitle,
+    { ...labels, comment: labels.cantonComment },
+    { ...data, comment: data.cantonComment },
+    startY
+  );
 }
 
 /** Draws the hanging calculation context section (page 1, portrait, 2 columns). Returns the next Y. */

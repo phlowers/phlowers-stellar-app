@@ -25,7 +25,7 @@ import {
   SECTION_TITLE_HEIGHT,
   SEPARATOR_MARGIN_Y
 } from '@shared/pdf/pdf-layout.constantes';
-import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
+import { PdfBulletItem, StudyCartoucheData, StudyCartoucheLabels } from '@shared/pdf/pdf-report.interfaces';
 
 /**
  * Chunk size used when converting binary data to a latin1 string before base64 encoding.
@@ -230,6 +230,27 @@ export function drawTitledBulletSection(doc: jsPDF, title: string, items: PdfBul
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
   return drawSeparator(doc, drawBulletList(doc, items, y, leftX, wrapWidth));
+}
+
+/** Draws the study & canton metadata cartouche (1 column, all values wrapping). Returns the next Y. */
+export function drawStudyCartoucheSection(
+  doc: jsPDF,
+  title: string,
+  labels: StudyCartoucheLabels,
+  data: StudyCartoucheData,
+  startY: number
+): number {
+  const items: PdfBulletItem[] = [
+    { label: labels.author, value: data.author || '-', wrap: true },
+    { label: labels.study, value: data.studyTitle || '-', wrap: true },
+    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
+    { label: labels.canton, value: data.cantonName || '-', wrap: true },
+    { label: labels.comment, value: data.comment || '-', wrap: true },
+    { label: labels.initialCondition, value: data.icName || '-', wrap: true },
+    { label: labels.chargeName, value: data.chargeName || '-', wrap: true },
+    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
+  ];
+  return drawTitledBulletSection(doc, title, items, startY);
 }
 
 /**

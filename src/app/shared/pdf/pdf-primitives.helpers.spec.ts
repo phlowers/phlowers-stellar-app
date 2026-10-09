@@ -20,6 +20,7 @@ import {
   drawPageFooters,
   drawSectionTitle,
   drawSeparator,
+  drawStudyCartoucheSection,
   drawTitledBulletSection,
   drawTwoColumnBulletSection,
   drawTwoColumnBullets,
@@ -354,6 +355,45 @@ describe('pdf-primitives helpers', () => {
       const nextY = drawTitledBulletSection(doc, 'Empty', [], 40);
 
       expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + SEPARATOR_HEIGHT);
+    });
+  });
+
+  describe('drawStudyCartoucheSection', () => {
+    const labels = {
+      author: 'Author',
+      study: 'Study',
+      studyDescription: 'Study description',
+      canton: 'Canton',
+      comment: 'Comment',
+      initialCondition: 'Initial condition',
+      chargeName: 'Load case',
+      chargeDescription: 'Load description'
+    };
+    const data = {
+      author: 'author@example.test',
+      studyTitle: 'Study title',
+      studyDescription: 'Study desc',
+      cantonName: 'Canton A',
+      comment: 'Some comment',
+      icName: 'IC 1',
+      chargeName: 'Load 1',
+      chargeDescription: 'Load desc'
+    };
+
+    it('should draw the title and one wrapped bullet per metadata field, then a separator', () => {
+      const doc = createMockDoc();
+      const nextY = drawStudyCartoucheSection(doc, 'Cartouche', labels, data, 40);
+
+      expect(doc.text).toHaveBeenCalledWith('Cartouche', PAGE_MARGIN.left, 40);
+      expect(doc.splitTextToSize).toHaveBeenCalledTimes(8);
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + 8 * LINE_HEIGHT + SEPARATOR_HEIGHT);
+    });
+
+    it('should fall back to "-" for empty values', () => {
+      const doc = createMockDoc();
+      drawStudyCartoucheSection(doc, 'Cartouche', labels, { ...data, author: '', comment: '' }, 40);
+
+      expect(doc.splitTextToSize).toHaveBeenCalledWith('-', expect.any(Number));
     });
   });
 
