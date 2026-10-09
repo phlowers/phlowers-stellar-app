@@ -376,6 +376,7 @@ export interface TaskInputs {
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
     windDirection: string;
+    windIncidenceMode?: 'auto' | 'perpendicular';
     skyCover: SkyCover;
   };
   // Inputs for computeDiffuseAndBeamRadiation task

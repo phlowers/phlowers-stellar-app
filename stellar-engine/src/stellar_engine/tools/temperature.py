@@ -94,7 +94,10 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         .to("m/s")
         .m
     )
-    wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
+    if temp_inputs.windIncidenceMode == 'perpendicular':
+        wind_angle = (temp_inputs.azimuth + 90) % 360
+    else:
+        wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
     sky_cover = SKY_COVER_MAP[temp_inputs.skyCover]
     thermal_engine.set(
         cable_array=engine.cable_array,

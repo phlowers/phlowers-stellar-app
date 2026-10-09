@@ -292,6 +292,7 @@ class TemperatureCalculationInputs:
     windSpeed: float
     windSpeedUnit: Literal['kmh', 'ms']
     windDirection: str
+    windIncidenceMode: Literal['auto', 'perpendicular'] = 'auto'
 
 
 @dataclass

@@ -510,7 +510,7 @@ describe('FieldMeasuringComponent', () => {
 
       const anchor = createElementSpy.mock.results.find((result) => result.value.tagName === 'A')
         ?.value as HTMLAnchorElement;
-      expect(anchor.download).toMatch(/^Export Mesure de terrain_MT-1_.*\.json$/);
+      expect(anchor.download).toMatch(/^Export Mesure de terrain_MT 1_.*\.json$/);
       expect(anchor.href).toBe('blob:test');
       expect(clickSpy).toHaveBeenCalledTimes(1);
       expect(revokeObjectUrlSpy).toHaveBeenCalledWith('blob:test');
