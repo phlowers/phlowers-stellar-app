@@ -822,7 +822,7 @@
       "organize-tools-info-text": "Select and organise the tools with quick access (maximum 5).",
       "loads-table-label": "Loads table",
       "l0-table-label": "L0 table",
-      "pose-table-label": "Pose table",
+      "hanging-table-label": "Hanging table",
       "obstacles-table-label": "Obstacles table",
       "grounds-table-label": "Grounds table",
       "profile-option": "Profile",
@@ -1106,18 +1106,18 @@
       "attachment-position": "Attach. position",
       "tower-model": "Tower file"
     },
-    "pose-table": {
+    "hanging-table": {
       "equivalent-span-label": "Equivalent span",
       "calculation-engine-waiting-label": "waiting for calculation engine",
       "lowest-temperature-label": "Lowest temperature (°C)",
       "computing-step-label": "Computing step (°C)",
-      "pose-parameter-label": "Pose parameter",
-      "horizontal-tension-th-label": "Horizontal tension Th",
-      "calculation-error-text": "An error occurred while calculating the pose table",
+      "hanging-parameter-label": "Hanging parameter",
+      "horizontal-tension-t0-label": "Horizontal tension T0",
+      "calculation-error-text": "An error occurred while calculating the hanging table",
       "failed-to-compute-equivalent-span": "Failed to compute equivalent span",
-      "failed-to-compute-pose-table": "Failed to compute pose table",
-      "pose-table-saved": "Pose table saved",
-      "failed-to-save-pose-table": "Failed to save pose table",
+      "failed-to-compute-hanging-table": "Failed to compute hanging table",
+      "hanging-table-saved": "Hanging table saved",
+      "failed-to-save-hanging-table": "Failed to save hanging table",
       "max-two-decimals-error": "Maximum 2 decimal places",
       "integer-error": "Value must be a whole number"
     },
@@ -1136,6 +1136,15 @@
       "grade-unit": "gr",
       "aria-help": "Cable adjustment help",
       "calculation-failed": "Failed to calculate the cable adjustment"
+    },
+    "hanging-table-report": {
+      "title": "Hanging Table Report",
+      "hanging-calculation-title": "Hanging calculation",
+      "lowest-temperature-label": "Lowest temperature",
+      "computing-step-label": "Computing step",
+      "hanging-parameter-label": "Hanging parameter (m)",
+      "horizontal-tension-label": "Horizontal tension (daN)",
+      "results-title": "Hanging table results"
     },
     "rrts-cut-strands": {
       "layers-detail": "Layers detail",

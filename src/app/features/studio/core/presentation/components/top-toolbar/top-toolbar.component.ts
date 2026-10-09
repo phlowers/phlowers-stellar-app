@@ -69,10 +69,10 @@ export class StudioTopToolbarComponent implements OnInit {
       }
     },
     {
-      label: this.translocoService.translate('studio.top-toolbar.pose-table-label'),
+      label: this.translocoService.translate('studio.top-toolbar.hanging-table-label'),
       disabled: false,
       command: () => {
-        this.toolbarDialogService.openTool('pose-table');
+        this.toolbarDialogService.openTool('hanging-table');
       }
     },
     {

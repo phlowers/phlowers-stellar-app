@@ -7,7 +7,8 @@
 
 /**
  * Descriptor for one metric row of a result table.
- * `unit` is `null` for the (string) identifier row (e.g. span/support number).
+ * `unit` is `null` for the (string) identifier row (e.g. span/support number), and `''` for a
+ * numeric row whose unit is already carried by its label.
  * `decimals` is the number of decimal places to render (unused/0 when `unit` is `null`).
  */
 export interface MetricDescriptor<T> {

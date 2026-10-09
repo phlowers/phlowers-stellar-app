@@ -4,7 +4,7 @@ import { InitComponent } from '@features/studio/field-measuring/presentation/com
 import { L0SumComponent } from '../components/l0-sum/l0-sum.component';
 import { VhlAndGuyingComponent } from '../components/vtl-and-guying/vtl-and-guying.component';
 import { LoadsTableComponent } from '../components/loads-table/loads-table.component';
-import { PoseTableComponent } from '../components/pose-table/pose-table.component';
+import { HangingTableComponent } from '../components/hanging-table/hanging-table.component';
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
@@ -15,7 +15,7 @@ export type Tool =
   | 'l0-sum'
   | 'vtl-and-guying'
   | 'load-table'
-  | 'pose-table'
+  | 'hanging-table'
   | 'obstacles-table'
   | 'strand-rrts'
   | 'cable-adjustment'
@@ -82,8 +82,8 @@ export class ToolbarDialogService {
       component: LoadsTableComponent,
       dialogStyle: { width: '83.125rem', 'max-width': '90%' }
     },
-    'pose-table': {
-      component: PoseTableComponent,
+    'hanging-table': {
+      component: HangingTableComponent,
       dialogStyle: { width: '64.375rem', 'max-width': '90%' }
     },
     'obstacles-table': {

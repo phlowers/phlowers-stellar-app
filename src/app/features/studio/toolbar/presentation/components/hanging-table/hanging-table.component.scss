@@ -124,10 +124,10 @@ th {
 }
 
 .spinner {
-  animation: poseTableSpin 0.6s linear infinite;
+  animation: hangingTableSpin 0.6s linear infinite;
 }
 
-@keyframes poseTableSpin {
+@keyframes hangingTableSpin {
   from {
     transform: rotate(0deg);
   }
