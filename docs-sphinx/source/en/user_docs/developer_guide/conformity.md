@@ -502,7 +502,7 @@ obstacle has several. The temperatures are required, between 0 and 250 °C, with
   obstacle,                                  // the whole obstacle
   pointIndex,                                // selected point (0 when the obstacle has one point)
   electricTension: section.voltage_idr,
-  form: { …form values, windPressure: effectiveWindPressure(),
+  form: { /* form values, */ windPressure: effectiveWindPressure(),
           conformityPlot: conformityType, intermediatePoints },
   rulesClimaticConditions: rules.map(r => ({ ruleType, ruleName, lateralPoint, overhangPoint })),
   rulesDistances: distances.map(d => ({ ruleType, lateral, overhang }))
