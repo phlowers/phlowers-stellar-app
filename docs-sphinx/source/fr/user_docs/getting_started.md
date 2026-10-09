@@ -111,9 +111,11 @@ Vous pouvez également construire et exécuter {{app_name}} sous forme de conten
 `Dockerfile` fourni :
 
 ```shell
-docker build -t stellar-app .
+docker build --build-arg CI_COMMIT_SHA=$(git rev-parse HEAD) -t stellar-app .
 docker run -p 8080:80 stellar-app
 ```
+
+`CI_COMMIT_SHA` est l'identité de version du build : sans ce SHA de commit, le build échoue.
 
 ## Documentation
 

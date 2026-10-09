@@ -170,6 +170,7 @@
     "update-warning": "Thank you for not closing the app when the update is in progress.",
     "later": "Later",
     "update-now": "Update now",
+    "update-start-failed": "The update could not be started. Please try again.",
     "install-failed": "Initial application installation could not start. Please reload the page to try again."
   },
   "auth": {
@@ -295,6 +296,8 @@
       "update-failed-summary": "Update failed",
       "update-failed-detail": "An unknown error occurred during the update",
       "update-failed-auth-detail": "The update could not be downloaded because your session has expired. Please sign in again, then retry the update",
+      "update-interrupted-summary": "Update interrupted",
+      "update-interrupted-detail": "The update did not finish. Please try again.",
       "version-checked-detail": "App version checked"
     },
     "obstacle-form-service": {
@@ -709,7 +712,11 @@
       "span-type-label": "Span type",
       "phase-number-label": "Phase number",
       "degree-addon": "°",
-      "azimuth-label": "Azimuth (clockwise — 0° North/South)"
+      "latitude-label": "Latitude",
+      "altitude-label": "Altitude",
+      "meter-addon": "m",
+      "azimuth-label": "Azimuth (clockwise — 0° North/South)",
+      "localization-not-available": "Localization not available in study"
     },
     "init": {
       "create-or-select-intro": "Create a new measurment or select an existing one",
@@ -887,6 +894,8 @@
       "two-spans-option": "Two spans",
       "all-option": "All",
       "max-section-option": "Max section",
+      "charges-label": "Charges",
+      "obstacles-label": "Obstacles",
       "distances-label": "Distances",
       "floor-sidetab-label": "Floor",
       "no-load-case-message": "In order to add loads, you need to create a load case."

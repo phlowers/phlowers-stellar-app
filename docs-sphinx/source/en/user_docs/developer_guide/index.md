@@ -10,11 +10,13 @@ Technical documentation for developers contributing to {{app_name}}.
 installation/index
 app/index
 plot/index
+field_measure/index
 authentification/index
 translation
 geographic_system
 conformity
 configure_conformity
+e2e_tests
 ```
 
 

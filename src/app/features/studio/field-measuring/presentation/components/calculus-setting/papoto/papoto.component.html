@@ -273,65 +273,69 @@
   </button>
 </div>
 
-@if (measureData().outputs.papoto) {
-  <div class="papoto__results" [@expand]>
-    <h2 class="papoto__results__title">{{ 'field-measuring.papoto.results-title' | transloco }}</h2>
+<output class="block">
+  @if (measureData().outputs.papoto) {
+    <div class="papoto__results" animate.enter="anim-expand-height">
+      <h2 class="papoto__results__title">{{ 'common.results' | transloco }}</h2>
 
-    <dl class="papoto__results__list">
-      <div class="param">
-        <dt>{{ 'common.parameter-label' | transloco }}</dt>
-        <dd data-testid="papoto-parameter">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter) | number: '1.0-1') ?? '-' }} m
-        </dd>
-      </div>
+      <dl class="papoto__results__list">
+        <div class="param">
+          <dt>{{ 'common.parameter-label' | transloco }}</dt>
+          <dd data-testid="papoto-parameter">
+            {{ (measureData().outputs.papoto?.parameter | number: '1.1-1') ?? '-' }} m
+          </dd>
+        </div>
 
-      <div class="incertainParam">
-        <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
-        <dd>{{ (measureData().outputs.papoto?.uncertainty | number: '1.0-2') ?? '-' }} m</dd>
-      </div>
+        <div class="incertainParam">
+          <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
+          <dd data-testid="papoto-uncertainty">
+            {{ (measureData().outputs.papoto?.uncertainty | number: '1.1-1') ?? '-' }} m
+          </dd>
+        </div>
 
-      <div class="param12">
-        <dt>{{ 'field-measuring.papoto.parameter-1-2-label' | transloco }}</dt>
-        <dd data-testid="papoto-parameter-1-2">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_2) | number: '1.0-1') ?? '-' }} m
-        </dd>
-      </div>
+        <div class="param12">
+          <dt>{{ 'field-measuring.papoto.parameter-1-2-label' | transloco }}</dt>
+          <dd data-testid="papoto-parameter-1-2">
+            {{ (measureData().outputs.papoto?.parameter_1_2 | number: '1.1-1') ?? '-' }} m
+          </dd>
+        </div>
 
-      <div class="param23">
-        <dt>{{ 'field-measuring.papoto.parameter-2-3-label' | transloco }}</dt>
-        <dd data-testid="papoto-parameter-2-3">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_2_3) | number: '1.0-1') ?? '-' }} m
-        </dd>
-      </div>
+        <div class="param23">
+          <dt>{{ 'field-measuring.papoto.parameter-2-3-label' | transloco }}</dt>
+          <dd data-testid="papoto-parameter-2-3">
+            {{ (measureData().outputs.papoto?.parameter_2_3 | number: '1.1-1') ?? '-' }} m
+          </dd>
+        </div>
 
-      <div class="param13">
-        <dt>{{ 'field-measuring.papoto.parameter-1-3-label' | transloco }}</dt>
-        <dd data-testid="papoto-parameter-1-3">
-          {{ (truncate1Decimal(measureData().outputs.papoto?.parameter_1_3) | number: '1.0-1') ?? '-' }} m
-        </dd>
-      </div>
+        <div class="param13">
+          <dt>{{ 'field-measuring.papoto.parameter-1-3-label' | transloco }}</dt>
+          <dd data-testid="papoto-parameter-1-3">
+            {{ (measureData().outputs.papoto?.parameter_1_3 | number: '1.1-1') ?? '-' }} m
+          </dd>
+        </div>
 
-      <div class="crit">
-        <dt>{{ 'field-measuring.papoto.criterion-label' | transloco }}</dt>
-        <dd class="crit__result">
-          @if (measureData().outputs.papoto?.checkValidity) {
-            <ng-container>{{ 'common.yes' | transloco }}</ng-container>
-            <app-icon icon="check" class="criterion-ok" />
-          } @else {
-            <ng-container>{{ 'common.no' | transloco }}</ng-container>
-            <app-icon icon="close" class="criterion-ko" />
-          }
-        </dd>
-      </div>
-    </dl>
-  </div>
-}
+        <div class="crit">
+          <dt>{{ 'field-measuring.papoto.criterion-label' | transloco }}</dt>
+          <dd class="crit__result">
+            @if (measureData().outputs.papoto?.checkValidity) {
+              <ng-container>{{ 'common.yes' | transloco }}</ng-container>
+              <app-icon icon="check" class="criterion-ok" />
+            } @else {
+              <ng-container>{{ 'common.no' | transloco }}</ng-container>
+              <app-icon icon="close" class="criterion-ko" />
+            }
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
 
-@if (papotoError()) {
-  <div class="papoto__error">
-    <p>{{ 'common.error-occurred-label' | transloco }}</p>
-  </div>
-}
+  @if (papotoError()) {
+    <div class="papoto__error" role="alert" aria-live="assertive">
+      <p>{{ 'common.error-occurred-label' | transloco }}</p>
+    </div>
+  }
+</output>
 
 <p-dialog
   [closeAriaLabel]="'field-measuring.papoto.close-aria-label' | transloco"

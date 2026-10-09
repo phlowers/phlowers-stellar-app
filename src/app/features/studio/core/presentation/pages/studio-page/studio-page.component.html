@@ -160,7 +160,7 @@
   </div>
 
   <app-side-tabs>
-    <app-side-tab label="Charges">
+    <app-side-tab [label]="'studio.studio-page.charges-label' | transloco">
       <ng-template>
         <p-tabs
           [value]="loadFormsService.activeLoadTab()"
@@ -270,7 +270,7 @@
       </ng-template>
     </app-side-tab>
 
-    <app-side-tab label="Obstacles">
+    <app-side-tab [label]="'studio.studio-page.obstacles-label' | transloco">
       <ng-template><app-obstacles-form /></ng-template>
     </app-side-tab>
 

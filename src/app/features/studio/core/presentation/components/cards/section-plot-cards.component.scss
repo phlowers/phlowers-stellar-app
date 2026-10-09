@@ -3,4 +3,8 @@
   $_bxh-retrieve: 0.5rem;
   margin-left: -#{$_bxh-retrieve};
   padding-left: $_bxh-retrieve;
+
+  &:not(.collapsible--collapsed) {
+    padding-bottom: 0.5rem;
+  }
 }

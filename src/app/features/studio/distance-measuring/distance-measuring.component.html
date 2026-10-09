@@ -41,7 +41,7 @@
     inputId="distanceFreePositioning"
     [disabled]="!service.selectedSupportUuid()"
     [spanIndex]="service.selectedSpanIndex()"
-    labelKey="studio.distance-measuring.free-positioning-label"
+    labelKey="common.free-positioning-label"
   />
 </div>
 
@@ -154,48 +154,50 @@
     </button>
   </div>
 
-  @if (service.results(); as results) {
-    <div class="distance-measuring__sticky__results" [@expandHeight] data-testid="results">
-      <hr class="distance-measuring__sticky__divider" />
-      <h2 class="distance-measuring__sticky__results__title">
-        {{ 'common.results' | transloco }}
-      </h2>
-      <dl class="distance-measuring__sticky__results__grid">
-        <div class="distance-measuring__sticky__results__grid__item">
-          <dt class="distance-measuring__sticky__results__grid__item__term">
-            {{ 'studio.distance-measuring.distance-12-label' | transloco }}
-          </dt>
-          <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-12">
-            {{ results.distance12 | number: '1.0-2' }} m
-          </dd>
-        </div>
+  <output>
+    @if (service.results(); as results) {
+      <div class="distance-measuring__sticky__results" animate.enter="anim-expand-height" data-testid="results">
+        <hr class="distance-measuring__sticky__divider" />
+        <h2 class="distance-measuring__sticky__results__title">
+          {{ 'common.results' | transloco }}
+        </h2>
+        <dl class="distance-measuring__sticky__results__grid">
+          <div class="distance-measuring__sticky__results__grid__item">
+            <dt class="distance-measuring__sticky__results__grid__item__term">
+              {{ 'studio.distance-measuring.distance-12-label' | transloco }}
+            </dt>
+            <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-12">
+              {{ results.distance12 | number: '1.0-2' }} m
+            </dd>
+          </div>
 
-        <div class="distance-measuring__sticky__results__grid__item">
-          <dt class="distance-measuring__sticky__results__grid__item__term">
-            {{ 'studio.distance-measuring.distance-23-label' | transloco }}
-          </dt>
-          <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-23">
-            @if (results.distance23 !== null) {
-              {{ results.distance23 | number: '1.0-2' }} m
-            } @else {
-              -
-            }
-          </dd>
-        </div>
+          <div class="distance-measuring__sticky__results__grid__item">
+            <dt class="distance-measuring__sticky__results__grid__item__term">
+              {{ 'studio.distance-measuring.distance-23-label' | transloco }}
+            </dt>
+            <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-distance-23">
+              @if (results.distance23 !== null) {
+                {{ results.distance23 | number: '1.0-2' }} m
+              } @else {
+                -
+              }
+            </dd>
+          </div>
 
-        <div class="distance-measuring__sticky__results__grid__item">
-          <dt class="distance-measuring__sticky__results__grid__item__term">
-            {{ 'studio.distance-measuring.angle-123-label' | transloco }}
-          </dt>
-          <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-angle-123">
-            @if (results.angle123 !== null) {
-              {{ results.angle123 | number: '1.0-2' }}°
-            } @else {
-              -
-            }
-          </dd>
-        </div>
-      </dl>
-    </div>
-  }
+          <div class="distance-measuring__sticky__results__grid__item">
+            <dt class="distance-measuring__sticky__results__grid__item__term">
+              {{ 'studio.distance-measuring.angle-123-label' | transloco }}
+            </dt>
+            <dd class="distance-measuring__sticky__results__grid__item__def" data-testid="result-angle-123">
+              @if (results.angle123 !== null) {
+                {{ results.angle123 | number: '1.0-2' }}°
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+        </dl>
+      </div>
+    }
+  </output>
 </div>

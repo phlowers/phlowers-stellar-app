@@ -22,6 +22,7 @@ const MOCK_LABELS: PdfLabels = {
   section: 'Section',
   studyDescription: 'Description',
   sectionComment: 'Comment',
+  initialCondition: 'Initial condition',
   chargeName: 'Load case',
   chargeDescription: 'Description',
   vtlWithoutGuyingTitle: 'VTL without guying',
@@ -75,6 +76,7 @@ function createMockReportData(overrides: Partial<VtlGuyingReportData> = {}): Vtl
     studyDescription: 'A test study description',
     sectionName: 'Section A-B',
     sectionComment: 'Test section comment',
+    initialConditionName: 'CI 1',
     chargeName: 'Charge 1',
     chargeDescription: 'Test charge description',
     guyingSpan: '42 - 43',
@@ -217,13 +219,13 @@ describe('vtl-guying-report helpers', () => {
       expect(authorLabelCall).toBeDefined();
     });
 
-    it('should draw every metadata label (author, study, description, section, comment, load case)', () => {
+    it('should draw every metadata label (author, study, description, section, comment, initial condition, load case)', () => {
       const doc = createMockDoc();
       drawStudySection(doc, createMockReportData(), MOCK_LABELS, 40);
 
       const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
       const texts = calls.flatMap((c) => (Array.isArray(c[0]) ? (c[0] as string[]) : [String(c[0])]));
-      for (const label of ['Author', 'Study', 'Description', 'Section', 'Comment', 'Load case']) {
+      for (const label of ['Author', 'Study', 'Description', 'Section', 'Comment', 'Initial condition', 'Load case']) {
         expect(texts.some((t) => t.includes(label))).toBe(true);
       }
     });
@@ -406,6 +408,42 @@ describe('vtl-guying-report helpers', () => {
       const calls = (doc.setFont as unknown as { mock: { calls: string[][] } }).mock.calls;
       const normalCount = calls.filter(([, style]) => style === 'normal').length;
       expect(normalCount).toBe(1);
+    });
+  });
+
+  describe('PO decimal precision', () => {
+    function collectTexts(doc: jsPDF): string[] {
+      const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      return calls.flatMap((c) => (Array.isArray(c[0]) ? (c[0] as string[]) : [String(c[0])]));
+    }
+
+    it('should render loads with 1 decimal in the VTL without guying section', () => {
+      const doc = createMockDoc();
+      drawVtlWithoutGuyingSection(doc, createMockReportData(), MOCK_LABELS, 80);
+
+      const texts = collectTexts(doc);
+      for (const expected of ['1234.6 daN', '987.7 daN', '456.8 daN', '1500.1 daN']) {
+        expect(texts.some((t) => t.includes(expected))).toBe(true);
+      }
+    });
+
+    it('should render altitude and horizontal distance with 2 decimals', () => {
+      const doc = createMockDoc();
+      drawGuyingSection(doc, createMockReportData({ altitude: 150, horizontalDistance: 25.456 }), MOCK_LABELS, 110);
+
+      const texts = collectTexts(doc);
+      expect(texts.some((t) => t.includes('150.00 m'))).toBe(true);
+      expect(texts.some((t) => t.includes('25.46 m'))).toBe(true);
+    });
+
+    it('should render guy angle with 0 decimals and other results with 1 decimal', () => {
+      const doc = createMockDoc();
+      drawVtlWithGuyingSection(doc, createMockReportData({ chargeLIfPulley: 12.34 }), MOCK_LABELS, 180);
+
+      const texts = collectTexts(doc);
+      for (const expected of ['2000.5 daN', '36 °', '1100.2 daN', '800.6 daN', '12.3 daN']) {
+        expect(texts.some((t) => t.includes(expected))).toBe(true);
+      }
     });
   });
 

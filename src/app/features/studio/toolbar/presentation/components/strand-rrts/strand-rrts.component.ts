@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -58,15 +57,7 @@ import { NotificationKey, RrtsFormValue, RrtsResults } from './strand-rrts.inter
     DecimalPipe
   ],
   templateUrl: './strand-rrts.component.html',
-  styleUrl: './strand-rrts.component.scss',
-  animations: [
-    trigger('expand', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0, overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: 1 }))
-      ])
-    ])
-  ]
+  styleUrl: './strand-rrts.component.scss'
 })
 export class StrandRrtsComponent {
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');

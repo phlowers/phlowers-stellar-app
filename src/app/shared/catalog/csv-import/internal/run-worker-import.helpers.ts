@@ -25,6 +25,15 @@ interface MetadataRow {
 /** Rows promoted per round-trip — bounds peak memory regardless of catalog size. */
 const PROMOTION_BATCH_SIZE = 2000;
 
+/** Reads the next batch (rows and their primary keys) from the front of a staging table. */
+async function readStagingBatch(stagingTable: Table<unknown, unknown>): Promise<{ key: unknown; row: unknown }[]> {
+  const batch: { key: unknown; row: unknown }[] = [];
+  await stagingTable.limit(PROMOTION_BATCH_SIZE).each((row, cursor) => {
+    batch.push({ key: cursor.primaryKey, row });
+  });
+  return batch;
+}
+
 /**
  * Copies `stagingTable` into `liveTable` (already cleared) in bounded
  * batches, deleting each promoted batch from staging as it goes.
@@ -32,22 +41,21 @@ const PROMOTION_BATCH_SIZE = 2000;
  * @remarks
  * Never materializes the full table: each iteration reads at most
  * `PROMOTION_BATCH_SIZE` rows via a cursor, so staging always shrinks from
- * the front and the same rows are never re-scanned.
+ * the front and the same rows are never re-scanned. Iterations depend on each
+ * other (the next read only sees what the previous delete left), so they must
+ * run one after the other.
  */
 async function promoteTableInBatches(
   liveTable: Table<unknown, unknown>,
   stagingTable: Table<unknown, unknown>
 ): Promise<void> {
   for (;;) {
-    const batch: { key: unknown; row: unknown }[] = [];
-    await stagingTable.limit(PROMOTION_BATCH_SIZE).each((row, cursor) => {
-      batch.push({ key: cursor.primaryKey, row });
-    });
+    const batch = await readStagingBatch(stagingTable); //NOSONAR — batches must run in order
     if (batch.length === 0) {
       break;
     }
-    await liveTable.bulkPut(batch.map((entry) => entry.row));
-    await stagingTable.bulkDelete(batch.map((entry) => entry.key));
+    await liveTable.bulkPut(batch.map((entry) => entry.row)); //NOSONAR — batches must run in order
+    await stagingTable.bulkDelete(batch.map((entry) => entry.key)); //NOSONAR — batches must run in order
   }
 }
 
@@ -73,8 +81,8 @@ async function promoteStagingToLive(
 
   await db.transaction('rw', [...liveTables, ...stagingTables, metadataTable], async () => {
     for (let i = 0; i < tableNames.length; i++) {
-      await liveTables[i].clear();
-      await promoteTableInBatches(liveTables[i], stagingTables[i]);
+      await liveTables[i].clear(); //NOSONAR — tables are promoted one at a time inside the transaction
+      await promoteTableInBatches(liveTables[i], stagingTables[i]); //NOSONAR — same as above
     }
     await metadataTable.put({
       key: metadataKey,

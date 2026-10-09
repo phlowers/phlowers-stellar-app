@@ -60,38 +60,43 @@
   </button>
 </form>
 
-@if (results(); as res) {
-  <div @expand>
-    <hr />
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="block">
+  @if (results(); as res) {
+    <div animate.enter="anim-expand-height">
+      <hr />
 
-    <h2>{{ 'common.results' | transloco }}</h2>
+      <h2>{{ 'common.results' | transloco }}</h2>
 
-    <table>
-      <tbody>
-        <tr>
-          <th scope="row">{{ 'studio.conformity.temperature-label' | transloco }}</th>
-          @for (temp of res.temperatures; track $index) {
-            <td>{{ temp }} °C</td>
-          }
-        </tr>
+      <table>
+        <tbody>
+          <tr>
+            <th scope="row">{{ 'studio.conformity.temperature-label' | transloco }}</th>
+            @for (temp of res.temperatures; track $index) {
+              <td>{{ temp }} °C</td>
+            }
+          </tr>
 
-        <tr>
-          <th scope="row">{{ 'studio.pose-table.pose-parameter-label' | transloco }}</th>
-          @for (param of res.poseParams; track $index) {
-            <td>{{ param | number: '1.0-2' }} m</td>
-          }
-        </tr>
+          <tr>
+            <th scope="row">{{ 'studio.pose-table.pose-parameter-label' | transloco }}</th>
+            @for (param of res.poseParams; track $index) {
+              <td>{{ param | number: '1.0-2' }} m</td>
+            }
+          </tr>
 
-        <tr>
-          <th scope="row">{{ 'studio.pose-table.horizontal-tension-th-label' | transloco }}</th>
-          @for (tension of res.horizontalTensions; track $index) {
-            <td>{{ tension | number: '1.0-2' }} daN</td>
-          }
-        </tr>
-      </tbody>
-    </table>
-  </div>
-} @else if (poseTableError()) {
+          <tr>
+            <th scope="row">{{ 'studio.pose-table.horizontal-tension-th-label' | transloco }}</th>
+            @for (tension of res.horizontalTensions; track $index) {
+              <td>{{ tension | number: '1.0-2' }} daN</td>
+            }
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  }
+</output>
+
+@if (!results() && poseTableError()) {
   <p-message
     severity="error"
     class="calculation-error"

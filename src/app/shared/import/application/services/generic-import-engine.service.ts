@@ -57,7 +57,7 @@ export class GenericImportEngineService {
   async processFiles(files: readonly File[], collisionResolver: UUIDCollisionResolver): Promise<ImportOutcome[]> {
     const outcomes: ImportOutcome[] = [];
     for (const file of files) {
-      outcomes.push(await this.processSingleFile(file, collisionResolver));
+      outcomes.push(await this.processSingleFile(file, collisionResolver)); //NOSONAR — one collision dialog at a time
     }
     return outcomes;
   }

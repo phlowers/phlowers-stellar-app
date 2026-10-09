@@ -17,44 +17,7 @@
     <ul>
       @for (item of mainLinks(); track item.id) {
         <li>
-          @if (item.externalUrl) {
-            <a
-              [href]="item.externalUrl"
-              [target]="item.target ?? null"
-              rel="noopener noreferrer"
-              [id]="item.id"
-              class="stellar-sidebar__link"
-              data-testid="nav-link"
-            >
-              <app-icon [icon]="item.icon" />
-              <span>
-                @if (item.shortLabel && expandedStatus() === false) {
-                  {{ item.shortLabel }}
-                } @else {
-                  {{ item.label }}
-                }
-              </span>
-            </a>
-          } @else {
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              ariaCurrentWhenActive="page"
-              [id]="item.id"
-              class="stellar-sidebar__link"
-              data-testid="nav-link"
-            >
-              <app-icon [icon]="item.icon" />
-              <span>
-                @if (item.shortLabel && expandedStatus() === false) {
-                  {{ item.shortLabel }}
-                } @else {
-                  {{ item.label }}
-                }
-              </span>
-            </a>
-          }
+          <ng-container [ngTemplateOutlet]="linkTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
         </li>
       }
     </ul>
@@ -66,44 +29,7 @@
     <ul>
       @for (item of footerLinks(); track item.id) {
         <li>
-          @if (item.externalUrl) {
-            <a
-              [href]="item.externalUrl"
-              [target]="item.target ?? null"
-              rel="noopener noreferrer"
-              [id]="item.id"
-              class="stellar-sidebar__link"
-              data-testid="nav-link"
-            >
-              <app-icon [icon]="item.icon" />
-              <span>
-                @if (item.shortLabel && expandedStatus() === false) {
-                  {{ item.shortLabel }}
-                } @else {
-                  {{ item.label }}
-                }
-              </span>
-            </a>
-          } @else {
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              ariaCurrentWhenActive="page"
-              [id]="item.id"
-              class="stellar-sidebar__link"
-              data-testid="nav-link"
-            >
-              <app-icon [icon]="item.icon" />
-              <span>
-                @if (item.shortLabel && expandedStatus() === false) {
-                  {{ item.shortLabel }}
-                } @else {
-                  {{ item.label }}
-                }
-              </span>
-            </a>
-          }
+          <ng-container [ngTemplateOutlet]="linkTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
         </li>
       }
     </ul>
@@ -120,3 +46,41 @@
     </button>
   </footer>
 </nav>
+
+<ng-template #linkTemplate let-item>
+  @if (item.externalUrl) {
+    <a
+      [href]="item.externalUrl"
+      [target]="item.target ?? null"
+      rel="noopener noreferrer"
+      [id]="item.id"
+      class="stellar-sidebar__link"
+      data-testid="nav-link"
+    >
+      <ng-container [ngTemplateOutlet]="linkContentTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </a>
+  } @else {
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      ariaCurrentWhenActive="page"
+      [id]="item.id"
+      class="stellar-sidebar__link"
+      data-testid="nav-link"
+    >
+      <ng-container [ngTemplateOutlet]="linkContentTemplate" [ngTemplateOutletContext]="{ $implicit: item }" />
+    </a>
+  }
+</ng-template>
+
+<ng-template #linkContentTemplate let-item>
+  <app-icon [icon]="item.icon" />
+  <span>
+    @if (item.shortLabel && expandedStatus() === false) {
+      {{ item.shortLabel }}
+    } @else {
+      {{ item.label }}
+    }
+  </span>
+</ng-template>

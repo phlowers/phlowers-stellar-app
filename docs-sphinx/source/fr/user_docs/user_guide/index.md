@@ -8,6 +8,7 @@ Guides pas à pas pour utiliser l'application {{app_name}}.
 
  - {doc}`Bienvenue <welcome>` — Présentation de l'application {{app_name}} et de ses principales fonctionnalités.
  - {doc}`Mise à jour de l'application <application_update>` — Comprenez comment les fichiers de l'application et les données du catalogue sont mis à jour en toute sécurité.
+ - {doc}`Mesure de terrain <field_measure/index>` — Calculez le paramètre de base à partir de mesures de terrain et préparez une condition initiale.
  - {doc}`Positionnement libre <plot/free-positioning>` — Placez obstacles, sol, charges et repères de distance sur une portée figée.
  - {doc}`CRR de brins coupés <cut_strands>` — Calculez la résistance résiduelle d'un câble aux brins coupés, et le taux de travail qui en découle.
 
@@ -19,6 +20,7 @@ Bienvenue <welcome>
 Obstacles <obstacles>
 Mise à jour de l'application <application_update>
 Modification de câble <charge-cable-manip-at-span>
+Mesure de terrain <field_measure/index>
 CRR de brins coupés <cut_strands>
 Positionnement libre <plot/free-positioning>
 ```

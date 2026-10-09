@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SectionsTabComponent } from './sectionsTab.component';
 import { By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { InitialCondition, Section } from '@shared/domain';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
@@ -212,8 +211,7 @@ describe('SectionsTabComponent', () => {
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
-        SectionsTabComponent,
-        NoopAnimationsModule
+        SectionsTabComponent
       ],
       providers: [
         { provide: MaintenanceService, useClass: MockMaintenanceService },

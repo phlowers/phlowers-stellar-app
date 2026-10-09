@@ -2,9 +2,24 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 
 import { MessageService } from 'primeng/api';
-import type { AssetManifest, AppVersion } from './service-worker.interfaces';
+import type { AssetManifest, AppVersion, UpdateLogMessage, UpdateProgressMessage } from './service-worker.interfaces';
 import { environment } from '@src/environments/environment';
 import { AuthService } from '@services/auth/auth.service';
+import { LoggerService } from '@services/logger/logger.service';
+import {
+  UPDATE_KEEPALIVE_INTERVAL_MS,
+  UPDATE_NO_PROGRESS_TIMEOUT_MS,
+  UPDATE_PAGE_LOG_PREFIX,
+  UPDATE_SW_READY_TIMEOUT_MS,
+  UPDATE_WATCHDOG_TIMEOUT_MS
+} from './worker_update.service.constantes';
+import {
+  computeUpdateProgressPercent,
+  formatSwLogLine,
+  isTimeoutError,
+  isValidGitHash,
+  withTimeout
+} from './worker_update.service.helpers';
 
 /**
  * Pending PWA action determined by `checkForUpdateOnce` or `checkAppVersion`.
@@ -57,7 +72,7 @@ export class UpdateService {
    * failing updates; pointing them to a re-login is actionable.
    */
   private static isAuthLikeFailure(error: unknown): boolean {
-    return typeof error === 'string' && /HTTP (401|403|5\d\d)/.test(error);
+    return typeof error === 'string' && /HTTP (401|403)|authentication required/.test(error);
   }
 
   /**
@@ -77,6 +92,8 @@ export class UpdateService {
   latestVersion = signal<AssetManifest['app_version'] | null>(null);
   /** Signal indicating whether an update or install operation is in progress */
   updateLoading = signal(false);
+  /** Whole percentage (0-100) of the running update, reported by the SW. */
+  readonly updateProgress = signal(0);
 
   /**
    * Pending PWA action computed at startup or by an explicit version check.
@@ -103,7 +120,12 @@ export class UpdateService {
   private readonly translocoService = inject(TranslocoService);
   /** Read-only: install/update must never be authorized for an unauthenticated user. */
   private readonly authService = inject(AuthService);
+  private readonly logger = inject(LoggerService);
   private cachedManifestPromise: Promise<AssetManifest | null> | null = null;
+  private keepaliveTimer: ReturnType<typeof setInterval> | null = null;
+  private watchdogTimer: ReturnType<typeof setTimeout> | null = null;
+  private noProgressTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastFilesDone = -1;
 
   constructor() {
     if (!UpdateService.hasServiceWorker) {
@@ -111,17 +133,42 @@ export class UpdateService {
     }
     navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data.message) {
+        if (event.data.message === 'log') {
+          this.relaySwLog((event.data as UpdateLogMessage).entry);
+        } else {
+          this.logger.info(`${UPDATE_PAGE_LOG_PREFIX} message received from SW`, {
+            message: event.data.message,
+            error: event.data.error
+          });
+        }
+        // Any SW message proves it is alive: restart the silence countdown (once monitoring has started).
+        if (this.keepaliveTimer !== null) {
+          this.armWatchdog();
+        }
         switch (event.data.message) {
-          case 'update_complete':
+          case 'progress':
+            this.handleProgress(event.data as UpdateProgressMessage);
+            break;
+          case 'update_complete': {
+            // Every open tab receives this message: only the one that started the update was loading.
+            const startedHere = this.updateLoading();
+            this.stopMonitoring();
             this.updateLoading.set(false);
             this.messageService.add({
               severity: 'success',
               summary: this.translocoService.translate('shared.update-service.update-success-summary'),
               detail: this.translocoService.translate('shared.update-service.update-success-detail')
             });
-            globalThis.location.href = '/';
+            if (startedHere) {
+              globalThis.location.href = '/';
+            } else {
+              // Reload in place: this tab still runs the old code, whose lazy chunks may be gone.
+              globalThis.location.assign(globalThis.location.href);
+            }
             break;
+          }
           case 'install_complete':
+            this.stopMonitoring();
             this.updateLoading.set(false);
             this.pendingAction.set('none');
             await this.loadCurrentVersion();
@@ -132,6 +179,7 @@ export class UpdateService {
             });
             break;
           case 'error': {
+            this.stopMonitoring();
             this.updateLoading.set(false);
             const detail = UpdateService.isAuthLikeFailure(event.data.error)
               ? this.translocoService.translate('shared.update-service.update-failed-auth-detail')
@@ -188,6 +236,13 @@ export class UpdateService {
     if (!data) {
       return null;
     }
+    if (!isValidGitHash(data.app_version?.git_hash)) {
+      // The SW would refuse this manifest: proposing it would loop on failing updates.
+      this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} server manifest has no valid git_hash`, {
+        gitHash: data.app_version?.git_hash
+      });
+      return null;
+    }
     return data.app_version;
   }
 
@@ -223,12 +278,14 @@ export class UpdateService {
       });
 
       if (!response.ok) {
+        this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} assets_list.json fetch failed`, { status: response.status });
         return null;
       }
 
       const data = (await response.json()) as AssetManifest;
       return data;
-    } catch {
+    } catch (error) {
+      this.logFetchFailure('assets_list.json', error);
       return null;
     } finally {
       clearTimeout(timeoutId);
@@ -246,7 +303,8 @@ export class UpdateService {
     let latestVersion: AppVersion | null = null;
     try {
       latestVersion = await this.getLatestVersion();
-    } catch {
+    } catch (error) {
+      this.logger.error(`${UPDATE_PAGE_LOG_PREFIX} version check failed`, error);
       this.pendingAction.set('none');
       return;
     } finally {
@@ -256,14 +314,17 @@ export class UpdateService {
       this.latestVersion.set(latestVersion);
     }
     if (!latestVersion) {
+      this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} version check: server version unavailable`);
       this.pendingAction.set('none');
       return;
     }
-    if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
-      this.pendingAction.set('update-available');
-    } else {
-      this.pendingAction.set('none');
-    }
+    const updateAvailable = !this.areVersionsEqual(this.currentVersion(), latestVersion);
+    this.logger.info(`${UPDATE_PAGE_LOG_PREFIX} version check`, {
+      current: this.currentVersion(),
+      latest: latestVersion,
+      updateAvailable
+    });
+    this.pendingAction.set(updateAvailable ? 'update-available' : 'none');
     if (!silent) {
       this.messageService.add({
         severity: 'info',
@@ -293,16 +354,24 @@ export class UpdateService {
 
       if (!latestVersion) {
         // Server unreachable — nothing to do.
+        this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} startup check: server version unavailable`, { cachePopulated });
         return;
       }
 
       if (!cachePopulated) {
         // First launch: nothing cached yet — record a pending first install.
+        this.logger.info(`${UPDATE_PAGE_LOG_PREFIX} startup check: first install pending`, { latest: latestVersion });
         this.pendingAction.set('first-install');
         return;
       }
 
-      if (!this.areVersionsEqual(this.currentVersion(), latestVersion)) {
+      const updateAvailable = !this.areVersionsEqual(this.currentVersion(), latestVersion);
+      this.logger.info(`${UPDATE_PAGE_LOG_PREFIX} startup check`, {
+        current: this.currentVersion(),
+        latest: latestVersion,
+        updateAvailable
+      });
+      if (updateAvailable) {
         // An update is available — signal the UI.
         this.pendingAction.set('update-available');
       } else {
@@ -310,8 +379,9 @@ export class UpdateService {
         // remain idempotent and a previous 'update-available' does not persist.
         this.pendingAction.set('none');
       }
-    } catch {
+    } catch (error) {
       // Non-blocking: startup must not fail because of an update-check failure.
+      this.logger.error(`${UPDATE_PAGE_LOG_PREFIX} startup check failed`, error);
     } finally {
       this.clearManifestCache();
     }
@@ -333,7 +403,7 @@ export class UpdateService {
    */
   async confirmUpdate(): Promise<boolean> {
     if (!this.authService.currentUser()) {
-      return false;
+      return this.refuse('confirmUpdate', 'no authenticated user');
     }
     if (this.pendingAction() === 'first-install') {
       return this.postMessageToSW('install');
@@ -341,7 +411,7 @@ export class UpdateService {
     if (this.pendingAction() === 'update-available') {
       return this.postMessageToSW('update');
     }
-    return false;
+    return this.refuse('confirmUpdate', `unexpected pending action '${this.pendingAction()}'`);
   }
 
   /**
@@ -356,7 +426,10 @@ export class UpdateService {
    */
   async forceUpdateFromAdmin(): Promise<boolean> {
     if (!this.authService.currentUser() || this.pendingAction() !== 'update-available') {
-      return false;
+      return this.refuse(
+        'forceUpdateFromAdmin',
+        this.authService.currentUser() ? `unexpected pending action '${this.pendingAction()}'` : 'no authenticated user'
+      );
     }
     return this.postMessageToSW('update');
   }
@@ -373,7 +446,10 @@ export class UpdateService {
    */
   async installFirstLaunch(): Promise<boolean> {
     if (!this.authService.currentUser() || this.pendingAction() !== 'first-install') {
-      return false;
+      return this.refuse(
+        'installFirstLaunch',
+        this.authService.currentUser() ? `unexpected pending action '${this.pendingAction()}'` : 'no authenticated user'
+      );
     }
     return this.postMessageToSW('install');
   }
@@ -406,9 +482,12 @@ export class UpdateService {
       if (response.ok) {
         const version = (await response.json()) as AppVersion;
         this.currentVersion.set(version);
+      } else {
+        this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} version.json fetch failed`, { status: response.status });
       }
-    } catch {
+    } catch (error) {
       // Keep environment-based fallback already set in the signal.
+      this.logFetchFailure('version.json', error);
     } finally {
       clearTimeout(timeoutId);
     }
@@ -423,29 +502,140 @@ export class UpdateService {
    */
   private async postMessageToSW(type: 'update' | 'install'): Promise<boolean> {
     if (!UpdateService.hasServiceWorker) {
-      return false;
+      return this.refuse('postMessageToSW', 'service workers not supported');
     }
     this.updateLoading.set(true);
+    this.updateProgress.set(0);
     try {
       const registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
         this.updateLoading.set(false);
-        return false;
+        return this.refuse('postMessageToSW', 'no service worker registration');
       }
-      const ready = await navigator.serviceWorker.ready;
+      const ready = await withTimeout(
+        navigator.serviceWorker.ready,
+        UPDATE_SW_READY_TIMEOUT_MS,
+        'service worker ready'
+      );
       if (!ready.active) {
         this.updateLoading.set(false);
-        return false;
+        return this.refuse('postMessageToSW', 'no active service worker');
       }
       ready.active.postMessage({ type });
+      this.startMonitoring(ready.active);
+      this.logger.info(`${UPDATE_PAGE_LOG_PREFIX} '${type}' message sent to SW`);
       return true;
-    } catch {
+    } catch (error) {
       this.updateLoading.set(false);
+      if (isTimeoutError(error)) {
+        this.logger.error(
+          `${UPDATE_PAGE_LOG_PREFIX} service worker not ready after ${UPDATE_SW_READY_TIMEOUT_MS / 1000}s, '${type}' not sent`
+        );
+        return false;
+      }
+      this.logger.error(`${UPDATE_PAGE_LOG_PREFIX} could not post '${type}' message to SW`, error);
       return false;
     }
   }
 
+  /**
+   * Pings the SW while a run is in progress so the browser does not stop it as idle, and
+   * starts the silence countdown. The SW answers each ping with a `progress` message.
+   */
+  private startMonitoring(worker: ServiceWorker): void {
+    this.stopMonitoring();
+    this.keepaliveTimer = setInterval(() => worker.postMessage({ type: 'keepalive' }), UPDATE_KEEPALIVE_INTERVAL_MS);
+    this.armWatchdog();
+    this.armNoProgressTimer();
+  }
+
+  private stopMonitoring(): void {
+    if (this.keepaliveTimer !== null) {
+      clearInterval(this.keepaliveTimer);
+      this.keepaliveTimer = null;
+    }
+    if (this.watchdogTimer !== null) {
+      clearTimeout(this.watchdogTimer);
+      this.watchdogTimer = null;
+    }
+    if (this.noProgressTimer !== null) {
+      clearTimeout(this.noProgressTimer);
+      this.noProgressTimer = null;
+    }
+    this.lastFilesDone = -1;
+  }
+
+  /** Unlike the watchdog, only a newly cached file restarts this countdown (keepalive answers do not). */
+  private armNoProgressTimer(): void {
+    if (this.noProgressTimer !== null) {
+      clearTimeout(this.noProgressTimer);
+    }
+    this.noProgressTimer = setTimeout(
+      () => this.failUpdate(`no file cached for ${UPDATE_NO_PROGRESS_TIMEOUT_MS / 1000}s`),
+      UPDATE_NO_PROGRESS_TIMEOUT_MS
+    );
+  }
+
+  private armWatchdog(): void {
+    if (this.watchdogTimer !== null) {
+      clearTimeout(this.watchdogTimer);
+    }
+    this.watchdogTimer = setTimeout(
+      () => this.failUpdate(`no message from the service worker for ${UPDATE_WATCHDOG_TIMEOUT_MS / 1000}s`),
+      UPDATE_WATCHDOG_TIMEOUT_MS
+    );
+  }
+
+  /** Updates the progress bar; a SW without any run while the page waits means the run was lost. */
+  private handleProgress({ run }: UpdateProgressMessage): void {
+    if (!this.updateLoading()) {
+      return;
+    }
+    if (!run) {
+      this.failUpdate('the service worker has no update in progress (it was stopped)');
+      return;
+    }
+    if (run.filesDone !== this.lastFilesDone) {
+      this.lastFilesDone = run.filesDone;
+      this.armNoProgressTimer();
+    }
+    this.updateProgress.set(computeUpdateProgressPercent(run));
+  }
+
+  /**
+   * Leaves the loading state of an update that will not finish. The dialog is idle again, so the
+   * user can close it or retry (the SW resumes a partially downloaded version).
+   */
+  private failUpdate(reason: string): void {
+    this.stopMonitoring();
+    this.updateLoading.set(false);
+    this.logger.error(`${UPDATE_PAGE_LOG_PREFIX} update interrupted: ${reason}`);
+    this.messageService.add({
+      severity: 'error',
+      summary: this.translocoService.translate('shared.update-service.update-interrupted-summary'),
+      detail: this.translocoService.translate('shared.update-service.update-interrupted-detail')
+    });
+  }
+
+  /** Logs why an update/install action was not started and returns `false`. */
+  private refuse(caller: string, reason: string): false {
+    this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} ${caller} refused: ${reason}`);
+    return false;
+  }
+
+  /** Mirrors a SW log entry in the page console with the same `[UPDATE <runId>]` line. */
+  private relaySwLog(entry: UpdateLogMessage['entry'] | undefined): void {
+    if (entry) {
+      this.logger[entry.level](formatSwLogLine(entry), entry.details ?? '');
+    }
+  }
+
+  private logFetchFailure(resource: string, error: unknown): void {
+    const reason = isTimeoutError(error) ? 'timeout' : 'network error';
+    this.logger.warn(`${UPDATE_PAGE_LOG_PREFIX} ${resource} fetch failed: ${reason}`, error);
+  }
+
   private areVersionsEqual(a: AppVersion, b: AppVersion): boolean {
-    return a.git_hash === b.git_hash && a.version === b.version;
+    return a.git_hash === b.git_hash;
   }
 }

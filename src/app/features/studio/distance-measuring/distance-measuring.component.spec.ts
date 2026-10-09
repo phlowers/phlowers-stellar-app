@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { DistanceMeasuringComponent } from './distance-measuring.component';
 import { DistanceMeasuringService } from './distance-measuring.service';
 import { PlotService } from '@services/plot/plot.service';
@@ -85,7 +84,6 @@ describe('DistanceMeasuringComponent', () => {
         DistanceMeasuringComponent
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         {

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -9,7 +10,7 @@ const version = environment.version;
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, IconComponent, TranslocoModule],
+  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, IconComponent, TranslocoModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   encapsulation: ViewEncapsulation.None,

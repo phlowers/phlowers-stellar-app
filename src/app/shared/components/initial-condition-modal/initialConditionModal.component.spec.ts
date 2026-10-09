@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { InitialConditionModalComponent } from './initialConditionModal.component';
 import { Section, InitialCondition } from '@shared/domain';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -118,8 +117,7 @@ describe('InitialConditionModalComponent', () => {
       ],
       providers: [
         { provide: StorageService, useValue: mockStorageService },
-        { provide: CablesService, useValue: mockCablesService },
-        provideNoopAnimations()
+        { provide: CablesService, useValue: mockCablesService }
       ]
     }).compileComponents();
 

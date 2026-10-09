@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { CableSupportManipComponent } from './cable-support-manip.component';
@@ -76,7 +75,6 @@ describe('CableSupportManipComponent', () => {
         })
       ],
       providers: [
-        provideNoopAnimations(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: CableSupportManipService, useValue: mockCableSupportManipService },

@@ -4,20 +4,26 @@
 import datetime
 import json
 import os
+import re
 import subprocess
+import sys
 
 # Read package.json file
 with open("package.json", "r") as file:
     package_json = json.load(file)
     version = package_json["version"]
 
-# Get current time in ISO format
-build_time = datetime.datetime.now().isoformat()
+# This script is the single source of the build identity: the JS placeholders and
+# dist/version.json (read back by create_assets_list_for_service_worker.py) share it.
+# git_hash identifies the version: rebuilding the same commit must not trigger an app update.
+build_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+GIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,40}$")
 
 
 def get_git_revision_hash() -> str:
     """Get the git revision hash from environment variable or git command"""
-    env_hash = os.environ.get("CI_COMMIT_SHA")
+    env_hash = (os.environ.get("CI_COMMIT_SHA") or "").strip().lower()
     if env_hash:
         return env_hash
     try:
@@ -31,6 +37,9 @@ def get_git_revision_hash() -> str:
 
 
 git_hash = get_git_revision_hash()
+if not GIT_HASH_PATTERN.match(git_hash):
+    print(f"Error: invalid git hash '{git_hash}'. Set CI_COMMIT_SHA to the built commit SHA or build from a git checkout.")
+    sys.exit(1)
 
 env_variables = [
     "{API_URL}",
@@ -81,6 +90,16 @@ def process_directory_recursively(directory):
 # Process all files in dist folder recursively
 if os.path.exists("dist"):
     process_directory_recursively("dist")
+    with open(os.path.join("dist", "version.json"), "w") as file:
+        json.dump(
+            {
+                "git_hash": git_hash,
+                "build_datetime_utc": build_time,
+                "version": version,
+            },
+            file,
+            indent=2,
+        )
     print("Updated all files in dist folder")
 else:
     print("dist directory not found")

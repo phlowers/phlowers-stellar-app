@@ -12,7 +12,6 @@ import { OnlineService } from '@services/online/online.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { StorageService } from '@services/storage/storage.service';
 import { BehaviorSubject } from 'rxjs';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { UpdateService, type PendingPwaAction } from '@services/worker_update/worker_update.service';
@@ -92,17 +91,18 @@ describe('AppComponent', () => {
       isFirstLaunch: signal(false),
       updateLoading: vi.fn().mockReturnValue(false),
       latestVersion: vi.fn().mockReturnValue(null),
-      installFirstLaunch: vi.fn().mockResolvedValue(true)
+      installFirstLaunch: vi.fn().mockResolvedValue(true),
+      confirmUpdate: vi.fn().mockResolvedValue(true)
     } as unknown as UpdateService;
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
               'app.install-failed': 'Install failed',
+              'app.update-start-failed': 'Update could not start',
               'app.update': 'Update',
               'app.new-version-available': 'New version available',
               'app.version': 'Version',
@@ -138,6 +138,35 @@ describe('AppComponent', () => {
     expect(component.title).toEqual('phlowers-stellar-app');
   });
 
+  describe('onConfirmUpdate', () => {
+    const confirmUpdate = () => vi.mocked(mockUpdateService.confirmUpdate);
+
+    it('should stay silent when the update was started', async () => {
+      confirmUpdate().mockResolvedValue(true);
+
+      await component.onConfirmUpdate();
+
+      expect(confirmUpdate()).toHaveBeenCalledTimes(1);
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
+    });
+
+    it('should notify the user when the update could not be started', async () => {
+      confirmUpdate().mockResolvedValue(false);
+
+      await component.onConfirmUpdate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Update could not start');
+    });
+
+    it('should notify the user when confirmUpdate throws', async () => {
+      confirmUpdate().mockRejectedValue(new Error('boom'));
+
+      await component.onConfirmUpdate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Update could not start');
+    });
+  });
+
   describe('ngOnInit — deferred startup work', () => {
     it('should call workerService.setup() once the browser is idle', async () => {
       component.ngOnInit();
@@ -163,7 +192,6 @@ describe('AppComponent - HTML rendering', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: { en: {} },
@@ -255,7 +283,6 @@ describe('AppComponent - auth-gated PWA flow', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: { en: {} },
@@ -417,7 +444,7 @@ describe('AppComponent - automatic first-install resilience', () => {
 
   interface ResilienceOptions {
     serviceWorkerSupported?: boolean;
-    swReadyResult?: 'resolve' | 'reject';
+    swReadyResult?: 'resolve' | 'reject' | 'never';
     install?: ReturnType<typeof vi.fn>;
   }
 
@@ -441,10 +468,11 @@ describe('AppComponent - automatic first-install resilience', () => {
     Object.defineProperty(navigator, 'serviceWorker', {
       configurable: true,
       value: {
-        ready:
-          swReadyResult === 'resolve'
-            ? Promise.resolve({ active: { postMessage: vi.fn() } })
-            : Promise.reject(new Error('SW never ready')),
+        ready: {
+          resolve: () => Promise.resolve({ active: { postMessage: vi.fn() } }),
+          reject: () => Promise.reject(new Error('SW never ready')),
+          never: () => new Promise(() => undefined)
+        }[swReadyResult](),
         getRegistration: vi.fn(),
         addEventListener: vi.fn()
       }
@@ -452,7 +480,6 @@ describe('AppComponent - automatic first-install resilience', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule,
         AppComponent,
         TranslocoTestingModule.forRoot({
           langs: { en: {} },
@@ -557,6 +584,28 @@ describe('AppComponent - automatic first-install resilience', () => {
     );
     expect(notificationError).toHaveBeenCalledTimes(1);
     expect(component['autoInstallTriggered']()).toBe(false);
+  });
+
+  it('should reset guard and notify user when serviceWorker.ready never settles', async () => {
+    const install = vi.fn().mockResolvedValue(false);
+    await setup({ serviceWorkerSupported: true, swReadyResult: 'never', install });
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(9999);
+      expect(notificationError).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(1);
+
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.stringContaining('Service Worker never became ready'),
+        expect.any(DOMException)
+      );
+      expect(notificationError).toHaveBeenCalledTimes(1);
+      expect(component['autoInstallTriggered']()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('should reset guard and notify user when install rejects', async () => {

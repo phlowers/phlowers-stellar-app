@@ -10,6 +10,14 @@ import { PdfLabels } from './vtl-guying-report.interfaces';
 /** Diagram image width in mm (square ratio 1:1 — source is 2248×2248 px). */
 export const DIAGRAM_WIDTH = 60;
 
+/** Number of decimal places per value, as specified by the PO. */
+export const VTL_GUYING_DECIMALS = {
+  load: 1,
+  altitude: 2,
+  horizontalDistance: 2,
+  guyAngle: 0
+} as const;
+
 /** Transloco translation keys for each PDF report label, resolved at report-generation time. */
 export const PDF_LABEL_KEYS: PdfLabels = {
   reportTitle: 'studio.vtl-guying-report.title',
@@ -20,6 +28,7 @@ export const PDF_LABEL_KEYS: PdfLabels = {
   section: 'common.section-label',
   studyDescription: 'common.description-label',
   sectionComment: 'common.comment-label',
+  initialCondition: 'common.initial-condition-label',
   chargeName: 'common.load-name-label',
   chargeDescription: 'common.description-label',
   vtlWithoutGuyingTitle: 'studio.vtl-and-guying.vtl-without-guying-title',

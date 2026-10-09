@@ -2,6 +2,16 @@
 
 > This file lists all dead code identified in the project. Each entry requires validation before deletion.
 
+## Pending review
+
+### Unused `truncate1Decimal` display methods
+
+- **Sources**: `src/app/features/studio/field-measuring/presentation/components/calculus-setting/papoto/papoto.component.ts`, `src/app/features/studio/field-measuring/presentation/components/temperature-calculation/temperature-calculation.component.ts`, `src/app/features/studio/field-measuring/presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.ts`.
+- **Evidence**: All 14 template calls now use the `number` pipe directly; no callers of these three methods remain in `src`.
+- **Removal impact**: Remove the three methods and the `truncateNumberToOneDecimal` imports in Papoto and temperature calculation. Keep the import in parameter calculation, where calculation-time truncation is still used.
+- **Detected on**: 2026-10-02.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead
@@ -698,3 +708,13 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove both methods; no other change. |
 | ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+## 41. `app-assets-candidate-*` cache cleanup — `features/admin/presentation/pages/admin/admin.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/admin/presentation/pages/admin/admin.ts` line 161 (`resetApp()`), covered by `admin.spec.ts` lines 276 and 299 |
+| Code | `name.startsWith('app-assets-candidate-')` in the cache deletion filter |
+| 🔍 Evidence | The service worker no longer creates `app-assets-candidate-*` caches: every version is cached under `app-assets-v-<git_hash>` (`cacheNameForVersion` in `service-worker.ts`). Only leftovers from very old installs could still match. |
+| ⚠️ Confidence | **MEDIUM** — harmless to keep; removing it would leave such leftovers on very old installs |
+| Removal impact | Remove the condition and the `app-assets-candidate-xyz789` fixture/assertion in `admin.spec.ts` |
+| ✅ Validated | ⏳ Pending review |

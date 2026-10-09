@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { ScaleViewComponent } from './scale-view.component';
 
@@ -73,8 +72,7 @@ describe('ScaleViewComponent', () => {
       providers: [
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },
-        { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
-        provideNoopAnimations()
+        { provide: PlotOptionsService, useValue: plotOptionsServiceMock }
       ]
     }).compileComponents();
 

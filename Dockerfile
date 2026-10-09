@@ -2,6 +2,9 @@ ARG DEFAULT_LANGUAGE=en
 
 FROM node:22-alpine AS build
 
+# The build fails when empty: git is not available in this image.
+ARG CI_COMMIT_SHA
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /usr/src/app

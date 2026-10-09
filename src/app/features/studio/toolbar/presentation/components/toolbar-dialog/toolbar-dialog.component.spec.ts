@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -65,7 +64,6 @@ describe('ToolbarDialogComponent', () => {
         })
       ],
       providers: [
-        provideAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: MessageService, useValue: mockMessageService },

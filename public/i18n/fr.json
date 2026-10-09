@@ -170,6 +170,7 @@
     "update-warning": "Merci de ne pas fermer l'application pendant la mise à jour.",
     "later": "Plus tard",
     "update-now": "Mettre à jour",
+    "update-start-failed": "La mise à jour n'a pas pu démarrer. Veuillez réessayer.",
     "install-failed": "L'installation initiale de l'application n'a pas pu démarrer. Veuillez recharger la page pour réessayer."
   },
   "auth": {
@@ -295,6 +296,8 @@
       "update-failed-summary": "Échec de la mise à jour",
       "update-failed-detail": "Une erreur inconnue s'est produite lors de la mise à jour",
       "update-failed-auth-detail": "La mise à jour n'a pas pu être téléchargée car votre session a expiré. Veuillez vous reconnecter, puis relancer la mise à jour",
+      "update-interrupted-summary": "Mise à jour interrompue",
+      "update-interrupted-detail": "La mise à jour n'a pas abouti. Veuillez réessayer.",
       "version-checked-detail": "Version de l'application vérifiée"
     },
     "obstacle-form-service": {
@@ -709,7 +712,11 @@
       "span-type-label": "Type de canton",
       "phase-number-label": "Numéro de phase électrique",
       "degree-addon": "°",
-      "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)"
+      "latitude-label": "Latitude",
+      "altitude-label": "Altitude",
+      "meter-addon": "m",
+      "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)",
+      "localization-not-available": "Localisation non disponible dans l'étude"
     },
     "init": {
       "create-or-select-intro": "Créer une nouvelle mesure ou sélectionner une mesure existante",
@@ -887,6 +894,8 @@
       "two-spans-option": "Deux portées",
       "all-option": "Toutes",
       "max-section-option": "Max canton",
+      "charges-label": "Charges",
+      "obstacles-label": "Obstacles",
       "distances-label": "Distances",
       "floor-sidetab-label": "Sol",
       "no-load-case-message": "Pour ajouter des charges, vous devez créer un cas de charge."

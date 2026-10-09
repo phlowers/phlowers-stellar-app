@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { vi } from 'vitest';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { LocationComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.component';
@@ -39,8 +38,7 @@ describe('LocationComponent', () => {
             defaultLang: 'en'
           }
         })
-      ],
-      providers: [provideNoopAnimations()]
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LocationComponent);
