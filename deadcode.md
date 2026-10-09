@@ -581,6 +581,133 @@
 
 ---
 
+## 41. `RuleClimaticCondition.set_wind_pressure` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` (`RuleClimaticCondition.set_wind_pressure`) |
+| Code | `def set_wind_pressure(self, wind_pressure: float)` |
+| 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; wind pressure is resolved at construction time (`wind_zone_pressure`) and by `apply_wind_minus`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 42. `ConformityResult.compute_table_result` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityResult.compute_table_result`) |
+| Code | `def compute_table_result(self, points_list: list) -> None: pass` |
+| 🔍 Evidence | Empty body (`pass`) and no caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 43. `ConformityTableResult.set_conformity_point` + `current_conformity_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.set_conformity_point`) |
+| Code | `def set_conformity_point(self, conformity_point)` assigning the undeclared attribute `current_conformity_point` |
+| 🔍 Evidence | `get_conformity` no longer calls it: compliance is now computed from `scenario_compliances` over every scenario. `current_conformity_point` is no longer read. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 44. `ConformityTableResult.add_scenario_compliance` + `scenario_compliances` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult`), call in `simulation.py` (`get_conformity`) |
+| Code | `scenario_compliances: list[bool]` and `add_scenario_compliance(distance, conformity_point, security_distance)` |
+| 🔍 Evidence | Encoded the old rule (every scenario's u/v projection > distance to comply). `conformity_compliance_status` is now derived from `overhang_compliance_altitude` / `lateral_compliance_line_axis_distance` per conformity plot. The 5 related unit tests in `test_conformity_compute.py` were replaced. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Field, method, call and 5 obsolete unit tests removed. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-07 |
+
+---
+
+## 45. `ConformityTableResult.set_target_state` + `set_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.set_target_state`, `ConformityTableResult.set_distance`) |
+| Code | `set_target_state(point, conformity_point)` (temperature / wind pressure of the `lateral` and `overhang` scenarios only) and `set_distance(distance, conformity_point)` (minimal distance from `distance_projection_u` / `distance_projection_v`) |
+| 🔍 Evidence | `get_conformity` now calls `set_closest_point`, which fills `*Temperature`, `*WindPressure` and `*MinimalDistance` from the point closest to the obstacle (lateral side = lateral + lateral_inverse + intermediate). No other caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; the `DistanceResult` import becomes unused and must be removed too. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 46. `ConformityResult.add_zone_3d_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityResult.add_zone_3d_point`) |
+| Code | `def add_zone_3d_point(self, rule_type, point, radius)` projecting a 3D point then calling `add_zone_2d_point` |
+| 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; `get_conformity` projects the point itself and calls `add_zone_2d_point`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 47. `ConformityTableResult.overhang_compliance_line_axis_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.overhang_compliance_line_axis_distance`) |
+| Code | `@property def overhang_compliance_line_axis_distance(self)` |
+| 🔍 Evidence | Not serialized by `TableResultWriter` and no caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the property only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 48. `Point2D.from_array` + `TableResultWriter.__init__` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`, `stellar-engine/src/stellar_engine/entities/conformity.py`
+
+| | |
+|---|---|
+| 📍 Source | `Point2D.from_array` (`compute.py`), `TableResultWriter.__init__` (`entities/conformity.py`) |
+| Code | `Point2D.from_array(arr)` and `TableResultWriter.__init__(self, result)` storing `self.result` |
+| 🔍 Evidence | No caller: `Point2D` is always built from coordinates and `TableResultWriter.write` is a static method that never reads `self.result`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 49. `to_dict` of the conformity inputs — `stellar-engine/src/stellar_engine/entities/conformity.py`, `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `TensionRules.to_dict`, `RuleDistanceInput.to_dict`, `ConformityParametersInput.to_dict` (`entities/conformity.py`); `RuleClimaticCondition.to_dict`, `ClimaticPoint.to_dict` (`scenarios.py`) |
+| Code | `def to_dict(self) -> dict` serializing the parsed inputs back to dictionaries |
+| 🔍 Evidence | Inputs are only parsed (`from_dict`); no caller serializes them in `stellar-engine/src` or `stellar-engine/test`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the five methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 50. `Scenario.to_dict` + `TargetState.to_dict` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` (`Scenario.to_dict`, `TargetState.to_dict`) |
+| Code | `def to_dict(self) -> dict` serializing a scenario and its target state |
+| 🔍 Evidence | Only caller was a `logger.debug` dump in `get_conformity`, replaced by lazy `%s` formatting of the scenario in `ScenarioRunner.run`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
 ## 41. `app-assets-candidate-*` cache cleanup — `features/admin/presentation/pages/admin/admin.ts`
 
 | | |

@@ -45,7 +45,7 @@
     "source": "cdn"
   },
   "pandera": {
-    "file_name": "pandera-0.33.1-cp313-none-any.whl",
+    "file_name": "pandera-0.34.1-cp313-none-any.whl",
     "name": "pandera",
     "source": "local"
   },
@@ -100,12 +100,12 @@
     "source": "cdn"
   },
   "stellar-engine": {
-    "file_name": "stellar_engine-0.3.0-cp313-none-any.whl",
+    "file_name": "stellar_engine-0.4.0-cp313-none-any.whl",
     "name": "stellar_engine",
     "source": "local"
   },
   "tenacity": {
-    "file_name": "tenacity-9.1.4-cp313-none-any.whl",
+    "file_name": "tenacity-9.2.1-cp313-none-any.whl",
     "name": "tenacity",
     "source": "local"
   },

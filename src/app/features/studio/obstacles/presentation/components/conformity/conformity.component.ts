@@ -43,6 +43,7 @@ import {
   getLateralDistanceTypeLabels
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult } from './conformity.model';
+import { computeOverhangZoneWidth } from './conformity.helpers';
 import { ConformityPlotResponse } from './conformity-plot.model';
 import {
   createConformityPlot,
@@ -304,9 +305,15 @@ export class ConformityComponent implements OnDestroy {
         if (!db) return { defaultTemp: null, message: null, ruleName: null };
         const config = await db.catObstacleConformityConfig.get(OBSTACLE_CONFORMITY_CONFIG_KEY);
         const message = config?.lateral_temperature_message ?? null;
-        if (!config?.lateral_temperature_rule_type) return { defaultTemp: null, message, ruleName: null };
+        const defaultTemp = config?.lateral_temperature_default ?? null;
+        if (!config?.lateral_temperature_rule_type)
+          return { defaultTemp: defaultTemp ?? null, message, ruleName: null };
         const rule = await db.catObstacleRuleDefinitions.get(config.lateral_temperature_rule_type);
-        return { defaultTemp: rule?.lateral_point.temperature ?? null, message, ruleName: rule?.rule_name ?? null };
+        return {
+          defaultTemp: defaultTemp ?? rule?.lateral_point.temperature ?? null,
+          message,
+          ruleName: rule?.rule_name ?? null
+        };
       })()
     ),
     {
@@ -512,6 +519,10 @@ export class ConformityComponent implements OnDestroy {
     const selectedRuleTypes = v.conformity ?? [];
     const obstacleType = obstacle.type ?? '';
     const electricTension = this.spanService.section()?.voltage_idr;
+    const zoneWidth =
+      conformityType === 'overhang'
+        ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
+        : undefined;
 
     this.isCalculating.set(true);
     this.calculationError.set(null);
@@ -534,6 +545,7 @@ export class ConformityComponent implements OnDestroy {
 
       const conformityInputs: TaskInputs[Task.getConformity] = {
         obstacle,
+        pointIndex: this.hasMultiplePoints() ? (this.selectedPointValue() ?? 0) : 0,
         electricTension,
         form: {
           windZone: v.windZone,
@@ -545,7 +557,8 @@ export class ConformityComponent implements OnDestroy {
           selectedConformityRules: selectedRuleTypes,
           conformity: v.conformity,
           conformityPlot: conformityType,
-          intermediatePoints: this.intermediatePointsConfig()
+          intermediatePoints: this.intermediatePointsConfig(),
+          zoneWidth
         },
         rulesClimaticConditions: rules.map((r) => ({
           ruleType: r.rule_type,

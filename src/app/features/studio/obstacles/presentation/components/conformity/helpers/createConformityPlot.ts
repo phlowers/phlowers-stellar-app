@@ -17,8 +17,10 @@ import {
 /** Id of the div the conformity cross-section renders into (see conformity.component.html). */
 export const CONFORMITY_PLOT_ID = 'conformity-plot';
 
-/** Opacity of a zone / disk fill (the "background"). */
+/** Opacity of a zone fill (the "background"). */
 const FILL_OPACITY = 0.2;
+/** Opacity of a cable-track disk fill (fully opaque). */
+const CABLE_TRACK_FILL_OPACITY = 1;
 /** Width (px) of the bright hard borders. */
 const BORDER_WIDTH = 2;
 /** Marker size (px) for cable candidate points. */
@@ -117,7 +119,7 @@ function diskShapes(points: ConformityCablePoint[], color: string): Partial<Shap
     x1: p.x + p.radius,
     y0: p.y - p.radius,
     y1: p.y + p.radius,
-    fillcolor: hexToRgba(color, FILL_OPACITY),
+    fillcolor: hexToRgba(color, CABLE_TRACK_FILL_OPACITY),
     line: { color, width: BORDER_WIDTH }
   }));
 }

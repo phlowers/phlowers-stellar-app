@@ -211,7 +211,7 @@
       "ruleName": "RULE_2",
       "color": "#FFA500",
       "lateralPoint": {
-        "temperature": 68,
+        "temperature": null,
         "pressure": "WindZoneInput",
         "redZone": true
       },
@@ -241,6 +241,7 @@
     "defaultValue": 70
   },
   "lateralTemperatureFields": {
+    "defaultValue": 65,
     "ruleType": "RULE_2",
     "message": "Value of 65°C in RULE_2 (2023) or the equivalent 2024 setting"
   },
@@ -252,5 +253,5 @@
       { "label": "300-400", "normal": 300, "redZone": 400 }
     ]
   },
-  "intermediatePointPositions": [0.33, 0.66]
+  "intermediatePointPositions": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 }

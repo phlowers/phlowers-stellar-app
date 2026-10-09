@@ -294,7 +294,7 @@ describe('csv-import.worker - runWorkerImport', () => {
         }
       ],
       repartitionTemperatureFields: { defaultValue: 75 },
-      lateralTemperatureFields: { ruleType: 'CCG-LA', message: 'm' },
+      lateralTemperatureFields: { defaultValue: 65, ruleType: 'CCG-LA', message: 'm' },
       windZone: { default: 'ZVN', values: [{ label: 'ZVN', normal: 240, redZone: 360 }] },
       intermediatePointPositions: [0.33, 0.66]
     };

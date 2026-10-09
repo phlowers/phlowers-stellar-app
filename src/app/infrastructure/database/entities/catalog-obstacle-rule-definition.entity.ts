@@ -23,7 +23,11 @@ export interface ObstacleRulePoint {
   temperature: number | null;
   /** Wind pressure (Pa) or `'WindZoneInput'` when it depends on the wind zone selection. */
   pressure: ObstacleRulePressure;
-  /** Whether the rule may apply to the obstacle's "red zone" for this point. */
+  /**
+   * Red zone flag of the point, forwarded to the engine as is. No code reads it: the red zone acts
+   * through the wind zone pressure (`CatalogObstacleWindZoneEntity.red_zone`) chosen in the
+   * Conformity modal, for every rule.
+   */
   red_zone: boolean;
 }
 

@@ -14,6 +14,8 @@ field_measure/index
 authentification/index
 translation
 geographic_system
+conformity
+configure_conformity
 e2e_tests
 ```
 

@@ -225,7 +225,8 @@
       [btnLoading]="isCalculating()"
       data-testid="conformity-calculate-btn"
     >
-      {{ 'common.calculate' | transloco }}
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
     </button>
   </form>
 }
