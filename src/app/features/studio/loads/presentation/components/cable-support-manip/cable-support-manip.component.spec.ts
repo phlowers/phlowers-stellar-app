@@ -649,6 +649,123 @@ describe('CableSupportManipComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Temporary load data sync
+  // ---------------------------------------------------------------------------
+  describe('temporary load data sync', () => {
+    const selectSupport = (uuid: string | null): void => {
+      component.form.controls.support.setValue(uuid);
+      component.onSupportChange(uuid);
+      fixture.detectChanges();
+    };
+
+    const tempParams = () => mockPlotService.temporaryLoadData!.supportManipParams;
+
+    beforeEach(() => {
+      mockPlotService.temporaryLoadData = { supportManipParams: [] } as unknown as PlotService['temporaryLoadData'];
+    });
+
+    it('should restore manip1 type and manip2 visibility per support when switching back and forth', () => {
+      selectSupport('support-uuid-1');
+      component.form.controls.manip1Type.setValue('crane');
+      component.addManip2();
+      fixture.detectChanges();
+
+      selectSupport('support-uuid-2');
+      expect(component.showManip2()).toBe(false);
+      component.form.controls.manip1Type.setValue('rope');
+      fixture.detectChanges();
+
+      selectSupport('support-uuid-1');
+      expect(component.form.controls.manip1Type.value).toBe('crane');
+      expect(component.showManip2()).toBe(true);
+
+      selectSupport('support-uuid-2');
+      expect(component.form.controls.manip1Type.value).toBe('rope');
+      expect(component.showManip2()).toBe(false);
+    });
+
+    it('should keep manip1 type unselected when coming back to an untouched support', () => {
+      selectSupport('support-uuid-1');
+      selectSupport('support-uuid-2');
+      component.form.controls.manip1Type.setValue('crane');
+      fixture.detectChanges();
+
+      selectSupport('support-uuid-1');
+
+      expect(component.form.controls.manip1Type.value).toBeNull();
+      expect(tempParams().some((m) => m.supportUuid === 'support-uuid-1')).toBe(false);
+    });
+
+    it('should store manip2 as null while manip2 is hidden', () => {
+      selectSupport('support-uuid-1');
+      component.form.controls.manip1Type.setValue('crane');
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0].manip2).toBeNull();
+    });
+
+    it('should store manip2 when shown and drop it when removed', () => {
+      selectSupport('support-uuid-1');
+      component.form.controls.manip1Type.setValue('crane');
+      component.addManip2();
+      component.form.controls.manip2ShiftingClampLength.setValue(4);
+      fixture.detectChanges();
+      expect(tempParams()[0].manip2?.shiftingClampLength).toBe(4);
+
+      component.removeManip2();
+      fixture.detectChanges();
+      expect(tempParams()[0].manip2).toBeNull();
+    });
+
+    it('should remove the temporary entry when the form is reset', () => {
+      selectSupport('support-uuid-1');
+      component.form.controls.manip1Type.setValue('rope');
+      fixture.detectChanges();
+      expect(tempParams()).toHaveLength(1);
+
+      component.resetForm();
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(0);
+    });
+
+    it('should reuse the persisted manipulation uuid for the current charge', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        cable_support_manipulations: [
+          {
+            uuid: 'persisted-manip-uuid',
+            supportUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            manip1: {
+              type: 'shifting',
+              vertDisplacement: null,
+              anchoring: null,
+              lateralDistance: null,
+              ropeLength: null,
+              shiftingClampLength: 2
+            },
+            manip2: null
+          }
+        ]
+      } as unknown as Section);
+      fixture.detectChanges();
+
+      selectSupport('support-uuid-1');
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0].uuid).toBe('persisted-manip-uuid');
+      expect(tempParams()[0].manip1.shiftingClampLength).toBe(2);
+    });
+
+    it('should not write anything when no support is selected', () => {
+      selectSupport(null);
+      expect(tempParams()).toHaveLength(0);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // zoomToSupport()
   // ---------------------------------------------------------------------------
   describe('zoomToSupport()', () => {

@@ -9,6 +9,7 @@ import {
   Signal,
   untracked
 } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -24,7 +25,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { CableSupportManipService } from '../../services/cableSupportManip.service';
-import type { CableSupportManipItem } from '@shared/domain';
+import type { CableSupportManipItem, CableSupportManipulation } from '@shared/domain';
 import {
   CABLE_SUPPORT_MANIP_DEFAULTS,
   CableSupportManipFormControls,
@@ -230,6 +231,15 @@ export class CableSupportManipComponent {
     }
   });
 
+  private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.value });
+
+  // effect when any value in the form is modified
+  private readonly _syncTemporaryManipulation = effect(() => {
+    this.formValue();
+    this.showManip2();
+    untracked(() => this.syncTemporaryManipulation());
+  });
+
   zoomToSupport(): void {
     const uuid = this.form.controls.support.value;
     if (!uuid) return;
@@ -264,11 +274,7 @@ export class CableSupportManipComponent {
       this.form.controls.manip1Type.updateValueAndValidity();
       return;
     }
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    const saved = this.spanService
-      .section()
-      ?.cable_support_manipulations?.find((m) => m.supportUuid === uuid && m.chargeUuid === chargeUuid);
-
+    const saved = this.findSupportManipulation(uuid);
     if (saved) {
       this.hasSavedManipulation.set(true);
       this.showManip2.set(saved.manip2 != null);
@@ -300,32 +306,15 @@ export class CableSupportManipComponent {
 
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
-    const raw = this.form.getRawValue();
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    if (!chargeUuid) return;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid;
+    if (!chargeUuid) {
+      this.isLoading.set(false);
+      return;
+    }
     this.isLoading.set(true);
+    const createdSupportManip = this.createSupportManipFromForm(chargeUuid);
     try {
-      const manip1 = this.buildManip1(raw);
-      await this.cableSupportManipService.save({
-        supportUuid: raw.support!,
-        chargeUuid,
-        manip1,
-        manip2: this.showManip2()
-          ? {
-              type: raw.manip2Type!,
-              vertDisplacement: null,
-              anchoring: null,
-              lateralDistance: null,
-              ropeLength: null,
-              shiftingClampLength: raw.manip2ShiftingClampLength,
-              chainName: null,
-              chainLength: null,
-              chainWeight: null,
-              chainSurface: null,
-              counterWeight: null
-            }
-          : null
-      });
+      await this.cableSupportManipService.save(createdSupportManip);
       this.hasSavedManipulation.set(true);
       await this.cableSupportManipService.reloadSection();
       this.notificationService.success(this.translocoService.translate('loads.cable-support-manip.saved-notification'));
@@ -336,6 +325,32 @@ export class CableSupportManipComponent {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  private createSupportManipFromForm(chargeUuid: string) {
+    const raw = this.form.getRawValue();
+    const manip1 = this.buildManip1(raw);
+    const createdSupportManip = {
+      supportUuid: raw.support!,
+      chargeUuid,
+      manip1,
+      manip2: this.showManip2()
+        ? {
+            type: raw.manip2Type!,
+            vertDisplacement: null,
+            anchoring: null,
+            lateralDistance: null,
+            ropeLength: null,
+            shiftingClampLength: raw.manip2ShiftingClampLength,
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null
+          }
+        : null
+    };
+    return createdSupportManip;
   }
 
   async deleteForm(): Promise<void> {
@@ -428,5 +443,41 @@ export class CableSupportManipComponent {
 
   getErrorIds(controlName: keyof CableSupportManipFormControls, errorTypes: string[]): string | null {
     return getControlErrorIds(this.form, controlName, errorTypes);
+  }
+
+  private findSupportManipulation(supportUuid: string): CableSupportManipulation | undefined {
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    return (
+      this.plotService.temporaryLoadData?.supportManipParams.find(
+        (supportManip) => supportManip.supportUuid === supportUuid && supportManip.chargeUuid === chargeUuid
+      ) ??
+      this.spanService
+        .section()
+        ?.cable_support_manipulations?.find(
+          (manip) => manip.supportUuid === supportUuid && manip.chargeUuid === chargeUuid
+        )
+    );
+  }
+
+  private syncTemporaryManipulation(): void {
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    const section = this.spanService.section();
+    const chargeUuid = section?.selected_charge_uuid;
+    const { support, manip1Type } = this.form.getRawValue();
+    if (!temporaryLoadData || !support || !chargeUuid) return;
+
+    const params = temporaryLoadData.supportManipParams ?? [];
+    const others = params.filter((m) => m.supportUuid !== support);
+    if (manip1Type === null) {
+      temporaryLoadData.supportManipParams = others;
+      return;
+    }
+
+    const uuid =
+      params.find((m) => m.supportUuid === support)?.uuid ??
+      section.cable_support_manipulations?.find((m) => m.supportUuid === support && m.chargeUuid === chargeUuid)
+        ?.uuid ??
+      uuidv4();
+    temporaryLoadData.supportManipParams = [...others, { ...this.createSupportManipFromForm(chargeUuid), uuid }];
   }
 }

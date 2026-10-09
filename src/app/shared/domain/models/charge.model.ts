@@ -1,11 +1,13 @@
 /**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
+ * Copyright (c) 2026, RTE (http://www.rte-france.com)
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 import { CableModification } from './cable-modification.model';
+import { CableSpanManipulation } from './cable-span-manipulation.model';
+import { CableSupportManipulation } from './cable-support-manipulation.model';
 
 /**
  * Data structure containing climate and span load information.
@@ -18,6 +20,8 @@ export interface ChargeData {
   /** Array of loads applied on spans */
   spanLoads: SpanLoad[];
   cableModifParams: CableModification[];
+  supportManipParams: CableSupportManipulation[];
+  spanManipParams: CableSpanManipulation[];
 }
 
 /**

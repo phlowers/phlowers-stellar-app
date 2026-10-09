@@ -10,7 +10,7 @@ export const CABLE_SUPPORT_MANIP_DEFAULTS = {
   lateralDistance: 0,
   ropeLength: 0,
   shiftingClampLength: 0,
-  manip2Type: 'shifting' as SupportManipType | null,
+  manip2Type: 'shifting' as SupportManipType,
   manip2ShiftingClampLength: 0
 };
 

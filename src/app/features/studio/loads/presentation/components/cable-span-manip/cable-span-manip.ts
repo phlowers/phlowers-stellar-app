@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -21,6 +22,7 @@ import {
   LATERAL_DISTANCE_MIN,
   LONGITUDINAL_DISTANCE_MAX,
   LONGITUDINAL_DISTANCE_MIN,
+  SLING_LENGTH_DEFAULT,
   SLING_LENGTH_MAX,
   SLING_LENGTH_MIN
 } from './cable-span-manip.constantes';
@@ -89,7 +91,7 @@ export class CableSpanManipComponent implements OnInit {
   readonly hasSavedManipulation = signal(false);
 
   readonly form = this.fb.group<CableSpanManipFormControls>({
-    scope: new FormControl<string | null>(null, { validators: [Validators.required] }),
+    spanUuid: new FormControl<string | null>(null, { validators: [Validators.required] }),
     referenceSupport: new FormControl<'LEFT' | 'RIGHT' | null>(
       { value: null, disabled: true },
       { validators: [Validators.required] }
@@ -120,11 +122,11 @@ export class CableSpanManipComponent implements OnInit {
     chainWeight: new FormControl<number | null>(null),
     chainSurface: new FormControl<number | null>(null),
     counterWeight: new FormControl<number | null>(null),
-    slingLength: new FormControl<number | null>(5)
+    slingLength: new FormControl<number | null>(SLING_LENGTH_DEFAULT)
   });
 
-  private readonly scopeValueSignal = toSignal(this.form.controls.scope.valueChanges, {
-    initialValue: this.form.controls.scope.value
+  private readonly scopeValueSignal = toSignal(this.form.controls.spanUuid.valueChanges, {
+    initialValue: this.form.controls.spanUuid.value
   });
   readonly scopeValue = computed(() => this.scopeValueSignal());
 
@@ -206,7 +208,14 @@ export class CableSpanManipComponent implements OnInit {
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
     if (chargeUuid === this._previousChargeUuid) return;
     this._previousChargeUuid = chargeUuid;
-    untracked(() => this.onScopeChange(this.form.controls.scope.value));
+    untracked(() => this.onScopeChange(this.form.controls.spanUuid.value));
+  });
+
+  private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.value });
+
+  private readonly _syncTemporaryManipulation = effect(() => {
+    this.formValue();
+    untracked(() => this.syncTemporaryManipulation());
   });
 
   constructor() {
@@ -304,20 +313,14 @@ export class CableSpanManipComponent implements OnInit {
     this.supportRefOptions.set(this.spanService.getSupportOptions(uuid));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
 
-    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    // Normalize legacy records (lacking chargeUuid) before filtering.
-    const normalizedManips = CableSpanManipComponent.normalizeLegacyManipulations(
-      this.spanService.section()?.cable_span_manipulations,
-      chargeUuid
-    );
-    const savedManip = normalizedManips.find((m) => m.spanUuid === uuid && m.chargeUuid === chargeUuid);
+    const savedManip = this.findSpanManipulation(uuid);
 
     if (savedManip) {
       this.hasSavedManipulation.set(true);
       this.form.reset(
         {
           ...CABLE_SPAN_MANIP_DEFAULTS,
-          scope: uuid,
+          spanUuid: uuid,
           referenceSupport: savedManip.referenceSupport,
           distanceToRefSupport: savedManip.distanceToRefSupport,
           longitudinalDistance: savedManip.longitudinalDistance ?? 0,
@@ -333,7 +336,7 @@ export class CableSpanManipComponent implements OnInit {
         { emitEvent: false }
       );
     } else {
-      this.form.reset({ ...CABLE_SPAN_MANIP_DEFAULTS, scope: uuid }, { emitEvent: false });
+      this.form.reset({ ...CABLE_SPAN_MANIP_DEFAULTS, spanUuid: uuid }, { emitEvent: false });
       this.hasSavedManipulation.set(false);
     }
 
@@ -343,12 +346,16 @@ export class CableSpanManipComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.form.reset({ ...CABLE_SPAN_MANIP_DEFAULTS, scope: this.form.controls.scope.value }, { emitEvent: false });
+    this.form.reset(
+      { ...CABLE_SPAN_MANIP_DEFAULTS, spanUuid: this.form.controls.spanUuid.value },
+      { emitEvent: false }
+    );
+    this.syncTemporaryManipulation();
     this.isDirtySinceLastSave.set(false);
   }
 
   zoomToSpan(): void {
-    const uuid = this.form.controls.scope.value;
+    const uuid = this.form.controls.spanUuid.value;
     if (!uuid) return;
     const index = this.spanService.getSupportIndex(uuid);
     if (index < 0) return;
@@ -357,31 +364,14 @@ export class CableSpanManipComponent implements OnInit {
 
   async saveForm(): Promise<void> {
     if (this.form.invalid) return;
-    const raw = this.form.getRawValue();
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
-    if (!chargeUuid) return;
     // form.invalid guard above ensures required fields are non-null;
     // disabled controls (cableManipType, cableManipMethod, anchoring) are always initialised.
+    if (!chargeUuid) return;
     this.isLoading.set(true);
+    const createdSupportManip = this.createSpanManipFromForm(chargeUuid);
     try {
-      await this.cableSpanManipService.save({
-        spanUuid: raw.scope!,
-        chargeUuid,
-        referenceSupport: raw.referenceSupport!,
-        distanceToRefSupport: raw.distanceToRefSupport!,
-        cableManipType: raw.cableManipType!,
-        cableManipMethod: raw.cableManipMethod!,
-        longitudinalDistance: raw.longitudinalDistance,
-        lateralDistance: raw.lateralDistance!,
-        altitude: raw.altitude!,
-        anchoring: raw.anchoring!,
-        chainName: raw.chainName,
-        chainLength: raw.chainLength,
-        chainWeight: raw.chainWeight,
-        chainSurface: raw.chainSurface,
-        counterWeight: raw.counterWeight,
-        slingLength: raw.slingLength!
-      });
+      await this.cableSpanManipService.save(createdSupportManip);
       this.hasSavedManipulation.set(true);
       await this.cableSpanManipService.reloadSection();
       this.isDirtySinceLastSave.set(false);
@@ -390,8 +380,31 @@ export class CableSpanManipComponent implements OnInit {
     }
   }
 
+  private createSpanManipFromForm(chargeUuid: string) {
+    const raw = this.form.getRawValue();
+    const createdSupportManip = {
+      spanUuid: raw.spanUuid!,
+      chargeUuid,
+      referenceSupport: raw.referenceSupport!,
+      distanceToRefSupport: raw.distanceToRefSupport!,
+      cableManipType: raw.cableManipType!,
+      cableManipMethod: raw.cableManipMethod!,
+      longitudinalDistance: raw.longitudinalDistance,
+      lateralDistance: raw.lateralDistance!,
+      altitude: raw.altitude!,
+      anchoring: raw.anchoring!,
+      chainName: raw.chainName,
+      chainLength: raw.chainLength,
+      chainWeight: raw.chainWeight,
+      chainSurface: raw.chainSurface,
+      counterWeight: raw.counterWeight,
+      slingLength: raw.slingLength!
+    };
+    return createdSupportManip;
+  }
+
   deleteForm(): void {
-    const spanUuid = this.form.controls.scope.value;
+    const spanUuid = this.form.controls.spanUuid.value;
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
     // Normalize legacy records (lacking chargeUuid) before filtering.
     const normalizedManips = CableSpanManipComponent.normalizeLegacyManipulations(
@@ -422,7 +435,10 @@ export class CableSpanManipComponent implements OnInit {
       this.cableSpanManipService.clearPersistedFormData(spanUuid);
     }
 
-    this.form.reset({ ...CABLE_SPAN_MANIP_DEFAULTS, scope: this.form.controls.scope.value }, { emitEvent: false });
+    this.form.reset(
+      { ...CABLE_SPAN_MANIP_DEFAULTS, spanUuid: this.form.controls.spanUuid.value },
+      { emitEvent: false }
+    );
     this.hasSavedManipulation.set(false);
   }
 
@@ -437,5 +453,39 @@ export class CableSpanManipComponent implements OnInit {
 
   getErrorIds(controlName: keyof CableSpanManipFormControls, errorTypes: string[]): string | null {
     return getControlErrorIds(this.form, controlName, errorTypes);
+  }
+
+  private findSpanManipulation(spanUuid: string): CableSpanManipulation | Partial<CableSpanManipulation> | undefined {
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    // Normalize legacy records (lacking chargeUuid) before filtering.
+    const normalizedManips = CableSpanManipComponent.normalizeLegacyManipulations(
+      this.spanService.section()?.cable_span_manipulations,
+      chargeUuid
+    );
+    return (
+      this.plotService.temporaryLoadData?.spanManipParams.find(
+        (manip) => manip.spanUuid === spanUuid && manip.chargeUuid === chargeUuid
+      ) ?? normalizedManips.find((m) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid)
+    );
+  }
+
+  private syncTemporaryManipulation(): void {
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+    const spanUuid = this.form.controls.spanUuid.value;
+    if (!temporaryLoadData || !spanUuid || !chargeUuid) return;
+
+    const params = temporaryLoadData.spanManipParams ?? [];
+    const uuid =
+      params.find((m) => m.spanUuid === spanUuid)?.uuid ??
+      CableSpanManipComponent.normalizeLegacyManipulations(
+        this.spanService.section()?.cable_span_manipulations,
+        chargeUuid
+      ).find((m) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid)?.uuid ??
+      uuidv4();
+    temporaryLoadData.spanManipParams = [
+      ...params.filter((m) => m.spanUuid !== spanUuid),
+      { ...this.createSpanManipFromForm(chargeUuid), uuid }
+    ];
   }
 }
