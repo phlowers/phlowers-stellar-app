@@ -120,6 +120,8 @@ export class ParameterCalculation15WithoutWindComponent {
       this.measureData.update((d) => ({
         ...d,
         [field]: value,
+        // A result computed in the previous mode is stale.
+        outputs: { ...d.outputs, parameter15C: null },
         // On switch to manual, fill only fields still unset from Auto; never overwrite existing manual values.
         manualParameterCalculation15CWithoutWind:
           value === 'manual'

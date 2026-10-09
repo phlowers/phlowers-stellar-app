@@ -80,6 +80,28 @@ export const formatExportTime = (time: Date | null): string | null => {
 };
 
 /**
+ * Formats an ISO date-time string as `YYYY-MM-DDTHH:mm:ss.SSS±HH:MM` in local time with its offset.
+ * @param value - The ISO date-time string to format (or `null`/empty)
+ * @returns The formatted date-time, or `null` when `value` is missing or invalid
+ */
+export const formatExportDateTimeWithOffset = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  const pad = (n: number, length = 2): string => String(n).padStart(length, '0');
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const absOffset = Math.abs(offsetMinutes);
+  const datePart = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const timePart = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
+  return `${datePart}T${timePart}${sign}${pad(Math.floor(absOffset / 60))}:${pad(absOffset % 60)}`;
+};
+
+/**
  * Builds the `general` export block (study/section context, formerly `metaData`).
  * @param section - The current section (or `null`)
  * @param study - The current study (or `null`)
@@ -87,7 +109,7 @@ export const formatExportTime = (time: Date | null): string | null => {
  */
 export const buildGeneralExport = (section: Section | null, study: Study | null): GeneralExport => ({
   author: study?.author_email ?? null,
-  date: study?.updated_at_offline ?? null,
+  date: formatExportDateTimeWithOffset(study?.updated_at_offline),
   study: study?.title ?? null,
   litCode: section?.lit_idr ?? null,
   litName: section?.lit_adr ?? null,
@@ -113,6 +135,7 @@ export const buildMeasureExport = (measureData: FieldMeasure, translocoService: 
   name: measureData.name,
   date: formatExportDate(measureData.date),
   time: formatExportTime(measureData.time),
+  season: measureData.season ?? null,
   voltage: createValueUnit(measureData.voltage, 'KV'),
   sectionType: measureData.spanType ? translocoService.translate(getSectionTypeKey(measureData.spanType)) : null,
   cable: measureData.cableName,
@@ -130,7 +153,8 @@ export const buildSpanExport = (measureData: FieldMeasure, section: Section | nu
   name: formatSpanLabel(section, measureData.span),
   longitude: createValueUnit(measureData.longitude, '°'),
   latitude: createValueUnit(measureData.latitude, '°'),
-  azimuth: createValueUnit(measureData.azimuth, '°')
+  azimuth: createValueUnit(measureData.azimuth, '°'),
+  altitude: createValueUnit(measureData.altitude, 'm')
 });
 
 /**
@@ -152,7 +176,10 @@ export const buildTemperatureCalculationExport = (
         translocoService.translate(WIND_SPEED_UNIT_EXPORT_KEYS[measureData.windSpeedUnit])
       ),
       direction: measureData.windDirection,
-      incidence: createValueUnit(measureData.windIncidence, '°')
+      incidence: createValueUnit(
+        measureData.windIncidenceMode === 'perpendicular' ? 90 : measureData.windIncidence,
+        '°'
+      )
     },
     solarFlux: {
       measured: createValueUnit(measureData.measuredDiffusedPlusDirectSolarFlux, 'W/m²'),

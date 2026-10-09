@@ -48,6 +48,7 @@ export interface MeasureExport {
   name: string;
   date: string | null;
   time: string | null;
+  season: string | null;
   voltage: ValueUnit<string | null>;
   sectionType: string | null;
   cable: string | null;
@@ -61,6 +62,7 @@ export interface SpanExport {
   longitude: ValueUnit;
   latitude: ValueUnit;
   azimuth: ValueUnit;
+  altitude: ValueUnit;
 }
 
 /** Temperature calculation tab data, including environment inputs and computed cable temperature. */
