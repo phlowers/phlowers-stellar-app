@@ -306,7 +306,8 @@ export class ConformityComponent implements OnDestroy {
         const config = await db.catObstacleConformityConfig.get(OBSTACLE_CONFORMITY_CONFIG_KEY);
         const message = config?.lateral_temperature_message ?? null;
         const defaultTemp = config?.lateral_temperature_default ?? null;
-        if (!config?.lateral_temperature_rule_type) return { defaultTemp: defaultTemp ?? null, message, ruleName: null };
+        if (!config?.lateral_temperature_rule_type)
+          return { defaultTemp: defaultTemp ?? null, message, ruleName: null };
         const rule = await db.catObstacleRuleDefinitions.get(config.lateral_temperature_rule_type);
         return {
           defaultTemp: defaultTemp ?? rule?.lateral_point.temperature ?? null,

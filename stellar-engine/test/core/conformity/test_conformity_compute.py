@@ -26,9 +26,7 @@ def _zone(conformity_plot, points, lateral=1.0, overhang=1.5):
     )
 
 
-def _outcome(
-    conformity_point, xy, temperature=17.0, wind=200.0, distance=1.0
-):
+def _outcome(conformity_point, xy, temperature=17.0, wind=200.0, distance=1.0):
     return ScenarioOutcome(
         Scenario(
             rule_type="AT",
@@ -43,7 +41,9 @@ def _outcome(
     )
 
 
-def _from_outcomes(outcomes, conformity_plot="vegetation", obstacle=(0.0, 0.0)):
+def _from_outcomes(
+    outcomes, conformity_plot="vegetation", obstacle=(0.0, 0.0)
+):
     return ConformityTableResult.from_outcomes(
         outcomes, Point2D(*obstacle), get_strategy(conformity_plot)
     )
@@ -81,9 +81,7 @@ def test_vegetation_zone_border_is_four_vertex_polyline():
 
 @pytest.mark.parametrize("lateral", [None, 1.0])
 def test_overhang_zone_is_flat_rectangle_below_lowest_point(lateral):
-    zone = _zone(
-        "overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=lateral
-    )
+    zone = _zone("overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=lateral)
 
     corners = _corners(zone)
     expected_y = 2 - 1.5
