@@ -192,6 +192,12 @@ describe('field-measure-export.helpers', () => {
       expect(result.calculatedTemperature).toBeUndefined();
     });
 
+    it('should export 90° as incidence when the wind incidence mode is perpendicular', () => {
+      const measureData = createTestMeasureData({ windIncidenceMode: 'perpendicular', windIncidence: 10 });
+      const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
+      expect(result.wind.incidence).toEqual({ value: 90, unit: '°' });
+    });
+
     it('should map calculatedTemperature when outputs.cableTemperature is present', () => {
       const measureData = createTestMeasureData({
         outputs: {
