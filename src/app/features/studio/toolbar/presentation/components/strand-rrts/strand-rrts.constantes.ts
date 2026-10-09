@@ -3,20 +3,11 @@ import { WorkLoadIcon, WorkLoadStatus } from './strand-rrts.interfaces';
 // Max distance to the reference support, in meters
 export const DISTANCE_MAX = 5000;
 
-// Cut strands of each layer with strands until some are entered, or saved for the engine
+// Cut strands of each layer with strands until some are entered
 export const DEFAULT_CUT_STRANDS = 0;
 
-// Cable catalog keys holding the strand count of each layer
-export const STRAND_LAYER_KEYS = [
-  'nb_strand_layer_1',
-  'nb_strand_layer_2',
-  'nb_strand_layer_3',
-  'nb_strand_layer_4',
-  'nb_strand_layer_5',
-  'nb_strand_layer_6',
-  'nb_strand_layer_7',
-  'nb_strand_layer_8'
-] as const;
+// Only the first layers are shown in the form: the others are sent to the engine at 0
+export const MAX_SHOWN_LAYER = 3;
 
 export const WORK_LOAD_ICONS: Record<WorkLoadStatus, WorkLoadIcon> = {
   null: { name: 'counter_0', label: 'studio.rrts-cut-strands.result-new-working-load-null' },

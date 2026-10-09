@@ -3,7 +3,9 @@ import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View } from 
 import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
+import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
 import { CableModification, SpanLoad } from '@shared/domain';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
 import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPointsTraces';
@@ -78,6 +80,8 @@ export interface CreatePlotParams {
   cableModifications?: readonly CableModification[];
   /** Lookup mapping a span uuid (left support uuid) to its absolute support index. */
   spanUuidToIndex?: ReadonlyMap<string, number>;
+  /** Saved RRTS cut strands, whose marking is drawn when it asks for one. */
+  cutStrands?: RrtsCutStrandsData | null;
   /**
    * When `true`, forces Plotly to reset to the layout camera instead of preserving
    * any cached UI state. Set on the first render after a back-navigation that has a
@@ -179,6 +183,7 @@ const createScene = (
         plotParams.cableModifications ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
+      ...createCutStrandsAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
@@ -411,10 +416,12 @@ const layout2d = (
         plotParams.cableModifications ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
+      ...createCutStrandsAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
-    ]
+    ],
+    shapes: createCutStrandsShapes(plotParams)
   };
 };
 

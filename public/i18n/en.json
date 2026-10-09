@@ -386,7 +386,8 @@
       "zoom": "Zoom",
       "pan": "Pan",
       "cable-mod-lengthening": "Lengthening",
-      "cable-mod-shortening": "Shortening"
+      "cable-mod-shortening": "Shortening",
+      "cut-strands-marking": "Cut strands"
     },
     "loads-service": {
       "update-detail": "Load updated",
@@ -1153,7 +1154,7 @@
       "staff-presence-label": "Staff presence",
       "distance-support-ref-label": "Distance to reference support",
       "cut-strands-layer-label": "Cut strands layer {{ layer }}",
-      "add-marking-label": "Add a marking",
+      "add-marking-label": "Add an indication \"cut strands\"",
       "result-cable-rrts-label": "Cable's RRTS",
       "result-new-working-load-label": "New max working load",
       "result-new-working-load-null": "No new max working load",

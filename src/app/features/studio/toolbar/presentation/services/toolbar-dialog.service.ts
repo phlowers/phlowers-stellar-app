@@ -1,4 +1,4 @@
-import { Injectable, signal, TemplateRef, Type } from '@angular/core';
+import { Injectable, signal, Type } from '@angular/core';
 import { FieldMeasuringComponent } from '@features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component';
 import { InitComponent } from '@features/studio/field-measuring/presentation/components/init/init.component';
 import { L0SumComponent } from '../components/l0-sum/l0-sum.component';
@@ -8,49 +8,14 @@ import { HangingTableComponent } from '../components/hanging-table/hanging-table
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
-
-/** Identifier for a toolbar tool. */
-export type Tool =
-  | 'field-measuring'
-  | 'l0-sum'
-  | 'vtl-and-guying'
-  | 'load-table'
-  | 'hanging-table'
-  | 'obstacles-table'
-  | 'strand-rrts'
-  | 'cable-adjustment'
-  | 'other-tool';
-
-/** Phase of the toolbar dialog lifecycle. */
-export type DialogPhase = 'init' | 'main';
-
-/** Configuration for a toolbar tool, including its component and dialog sizing. */
-export interface ToolConfig {
-  /** Main component rendered when the tool is active. */
-  component: Type<unknown>;
-  /** CSS styles applied to the dialog in main phase. */
-  dialogStyle?: Record<string, string>;
-  /** Optional initialization component shown before the main phase. */
-  initComponent?: Type<unknown>;
-  /** CSS styles applied to the dialog during the init phase. */
-  initDialogStyle?: Record<string, string>;
-}
-
-/** Custom header/footer templates injected into the dialog by child components. */
-export interface ToolTemplates {
-  /** Header template reference. */
-  header?: TemplateRef<unknown>;
-  /** Footer template reference. */
-  footer?: TemplateRef<unknown>;
-}
-
-/** Context passed when opening the load table tool. */
-export interface LoadTableContext {
-  /** Whether the table opens in view or edit mode. */
-  mode: 'view' | 'edit';
-  /** UUID of the charge case to display. */
-  chargeUuid: string;
-}
+import {
+  DialogPhase,
+  LoadTableContext,
+  StrandRrtsContext,
+  Tool,
+  ToolConfig,
+  ToolTemplates
+} from './toolbar-dialog.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +27,7 @@ export class ToolbarDialogService {
   readonly phase = signal<DialogPhase>('main');
   readonly templates = signal<ToolTemplates>({});
   readonly loadTableContext = signal<LoadTableContext | null>(null);
+  readonly strandRrtsContext = signal<StrandRrtsContext | null>(null);
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
@@ -103,14 +69,19 @@ export class ToolbarDialogService {
     }
   };
 
-  openTool(tool: Tool, context?: LoadTableContext): void {
+  openTool(tool: 'load-table', context?: LoadTableContext): void;
+  openTool(tool: 'strand-rrts', context?: StrandRrtsContext): void;
+  openTool(tool: Tool): void;
+  openTool(tool: Tool, context?: LoadTableContext | StrandRrtsContext): void {
+    // A close still animating must not clear the tool being opened
+    this.cancelPendingCleanup();
     this.currentTool.set(tool);
     const config = this.toolMap[tool];
 
-    if (tool === 'load-table' && context) {
-      this.loadTableContext.set(context);
-    } else if (tool === 'load-table') {
-      this.loadTableContext.set(null);
+    if (tool === 'load-table') {
+      this.loadTableContext.set((context as LoadTableContext | undefined) ?? null);
+    } else if (tool === 'strand-rrts') {
+      this.strandRrtsContext.set((context as StrandRrtsContext | undefined) ?? null);
     }
 
     if (config.initComponent) {
@@ -124,10 +95,22 @@ export class ToolbarDialogService {
   closeTool(): void {
     this.isOpen.set(false);
 
-    setTimeout(() => {
+    this.cancelPendingCleanup();
+    this.cleanupTimeout = setTimeout(() => {
+      this.cleanupTimeout = null;
       this.currentTool.set(null);
       this.loadTableContext.set(null);
+      this.strandRrtsContext.set(null);
     }, 300);
+  }
+
+  private cleanupTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  private cancelPendingCleanup(): void {
+    if (this.cleanupTimeout !== null) {
+      clearTimeout(this.cleanupTimeout);
+      this.cleanupTimeout = null;
+    }
   }
 
   private transitioning = false;

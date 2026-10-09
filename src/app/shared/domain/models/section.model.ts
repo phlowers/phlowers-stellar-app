@@ -30,6 +30,8 @@ export interface PoseTableData {
 
 // Linked to the span starting at spanUuid, or to the whole section when spanUuid is null
 export interface RrtsCutStrandsData {
+  // Cable the cut strands were saved on, their layers mean nothing on another one. Missing on entries saved before it was recorded
+  cableName?: string;
   spanUuid: string | null;
   supportRef: 'LEFT' | 'RIGHT' | null;
   distanceSupportRef: number | null;

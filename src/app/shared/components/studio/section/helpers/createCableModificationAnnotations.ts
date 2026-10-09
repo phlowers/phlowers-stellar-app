@@ -16,90 +16,7 @@ import {
   getCableModificationLabel
 } from './createCableModificationAnnotations.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
-
-/**
- * Returns the 3D point on a span polyline whose horizontal abscissa
- * (`coord[0]`, world x along the line) matches `targetX`.
- *
- * @remarks
- * Cable abscissa (the same semantics used by `loadPosition` /
- * `distanceSupportRef` in mechaphlowers) maps to horizontal x distance from
- * the left support, **not** to arc length along the sagging cable. Using arc
- * length puts the anchor too far down the curve. Interpolating by `x` keeps
- * the cable modification icon on the same data point as a punctual load
- * placed at the same `loadPosition`.
- *
- * - Returns `null` for empty polylines.
- * - Returns the single point when the polyline has only one sample.
- * - Clamps to the first/last point when `targetX` is outside the polyline range.
- * - Handles both increasing and decreasing x ordering (line direction
- *   independent).
- */
-const findPointAtAbscissa = (polyline: number[][] | undefined, targetX: number): number[] | null => {
-  if (!polyline || polyline.length === 0) return null;
-  if (polyline.length === 1) return polyline[0];
-
-  for (let i = 1; i < polyline.length; i++) {
-    const p0 = polyline[i - 1];
-    const p1 = polyline[i];
-    const x0 = p0[0];
-    const x1 = p1[0];
-    const lo = Math.min(x0, x1);
-    const hi = Math.max(x0, x1);
-    if (targetX >= lo && targetX <= hi) {
-      const dx = x1 - x0;
-      const t = dx === 0 ? 0 : (targetX - x0) / dx;
-      return [x0 + t * (x1 - x0), p0[1] + t * (p1[1] - p0[1]), p0[2] + t * (p1[2] - p0[2])];
-    }
-  }
-  // Clamp: pick the endpoint whose x is closest to targetX.
-  const first = polyline[0];
-  const last = polyline.at(-1)!;
-  return Math.abs(targetX - first[0]) <= Math.abs(targetX - last[0]) ? first : last;
-};
-
-/**
- * Resolves the anchor coordinate for a cable modification annotation by
- * interpolating along the span polyline at the horizontal abscissa
- * corresponding to the modification's `supportRef` and `distanceSupportRef`.
- *
- * @remarks
- * - `supportRef === 'LEFT'`: abscissa starts at the left support
- *   (`polyline[0].x`).
- * - `supportRef === 'RIGHT'`: abscissa starts at the right support
- *   (`polyline[last].x`).
- * - Matches the semantics of `loadPosition` used by mechaphlowers so the
- *   cable modification icon shares the exact same anchor as a punctual load
- *   placed at the same distance from the same reference support.
- */
-const resolveAnchorCoord = (
-  plotParams: CreatePlotParams,
-  absoluteSpanIndex: number,
-  modification: CableModification
-): number[] | null => {
-  const polyline = plotParams.litData.coords.spans?.[absoluteSpanIndex];
-  if (!polyline || polyline.length === 0) return null;
-
-  const distance = Math.max(0, modification.distanceSupportRef);
-  const leftX = polyline[0][0];
-  const rightX = polyline.at(-1)![0];
-  // Line direction sign: +1 when x increases from left to right, -1 otherwise.
-  const direction = rightX >= leftX ? 1 : -1;
-  const targetX = modification.supportRef === 'LEFT' ? leftX + direction * distance : rightX - direction * distance;
-
-  return findPointAtAbscissa(polyline, targetX);
-};
-
-/** Maps a 3D anchor `[x,y,z]` to the active 2D/3D plot axes. */
-const mapAnchorToAxes = (
-  anchor: number[],
-  view: CreatePlotParams['view'],
-  side: CreatePlotParams['side']
-): { x: number; y: number; z: number } => ({
-  x: side === 'face' && view === '2d' ? anchor[1] : anchor[0],
-  y: view === '2d' ? anchor[2] : anchor[1],
-  z: anchor[2]
-});
+import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
 
 /**
  * Icon annotation (FontAwesome glyph) with an arrow line connecting it back
@@ -171,8 +88,9 @@ const buildLabelAnnotation = (
  * Pure function (no DI, no side effects) so it can be unit-tested in isolation.
  * Only renders annotations for modifications whose span is currently visible
  * (within `startSupport` ≤ index < `endSupport`). The arrow tail of the icon
- * is anchored at the exact point on the cable polyline corresponding to
- * (`supportRef`, `distanceSupportRef`), so the connecting line moves whenever
+ * is anchored at the point on the cable polyline corresponding to
+ * (`supportRef`, `distanceSupportRef`) in `resolveAnchorCoord`, which only
+ * approximates the engine's load placement, so the connecting line moves whenever
  * those values change.
  *
  * The icon uses the same visual style as the load annotation (solid arrow,
@@ -203,7 +121,7 @@ export const createCableModificationAnnotations = (
     if (absoluteSpanIndex === undefined || absoluteSpanIndex < 0) return;
     if (absoluteSpanIndex < startSupport || absoluteSpanIndex >= endSupport) return;
 
-    const anchor = resolveAnchorCoord(plotParams, absoluteSpanIndex, modification);
+    const anchor = resolveAnchorCoord(plotParams.litData, absoluteSpanIndex, modification);
     if (!anchor) return;
 
     annotations.push(

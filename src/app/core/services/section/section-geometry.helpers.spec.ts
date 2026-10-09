@@ -247,5 +247,36 @@ describe('sanitizeSectionGeometry', () => {
       expect(result.section).toBe(section);
       expect(result.removedGeometryBoundObjects).toBe(false);
     });
+
+    describe('cable the cut strands were saved on', () => {
+      const makeCutStrandsOn = (cableName?: string) => ({ ...makeCutStrands('sup-1'), cableName });
+
+      it('should drop the RRTS cut strands saved on another cable', () => {
+        const section = makeSection({ cable_name: 'PETUNIA 612', rrts_cut_strands: makeCutStrandsOn('ASTER 570') });
+
+        const result = sanitizeSectionGeometry(section);
+
+        expect(result.section.rrts_cut_strands).toBeNull();
+        expect(result.removedGeometryBoundObjects).toBe(true);
+      });
+
+      it('should keep the RRTS cut strands saved on the section cable', () => {
+        const section = makeSection({ cable_name: 'ASTER 570', rrts_cut_strands: makeCutStrandsOn('ASTER 570') });
+
+        const result = sanitizeSectionGeometry(section);
+
+        expect(result.section).toBe(section);
+        expect(result.removedGeometryBoundObjects).toBe(false);
+      });
+
+      it('should keep the RRTS cut strands saved before the cable was recorded', () => {
+        const section = makeSection({ cable_name: 'PETUNIA 612', rrts_cut_strands: makeCutStrandsOn() });
+
+        const result = sanitizeSectionGeometry(section);
+
+        expect(result.section).toBe(section);
+        expect(result.removedGeometryBoundObjects).toBe(false);
+      });
+    });
   });
 });

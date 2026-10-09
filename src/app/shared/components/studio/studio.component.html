@@ -14,7 +14,7 @@
     </div>
   } @else {
     <figure class="contents m-0">
-      <app-section-plot class="h-full" [litData]="plotService.litData()"></app-section-plot>
+      <app-section-plot class="h-full" [litData]="plotService.litData()" [isPreview]="isPreview()"></app-section-plot>
       <figcaption class="sr-only">{{ 'shared.studio.section-caption' | transloco }}</figcaption>
     </figure>
   }

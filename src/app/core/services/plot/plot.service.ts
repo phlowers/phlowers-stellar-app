@@ -28,6 +28,10 @@ import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.se
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { alignSectionSpanLoadsToSupports } from './plot-section-loads.helpers';
 import { computeMissingFloorDistances, mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
+import { hasCutStrand, NO_CUT_STRANDS, toEngineCutStrands } from '@shared/domain/helpers/cut-strands.helpers';
+import { NotificationService } from '@core/services/notification/notification.service';
+import { TranslocoService } from '@jsverse/transloco';
+import { isEqual } from 'lodash';
 import * as plotly from 'plotly.js-dist-min';
 
 @Injectable({
@@ -51,6 +55,11 @@ export class PlotService {
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
 
+  // Cut strands the outputs in litData were calculated with
+  private readonly projectedCutStrands = signal<number[]>(NO_CUT_STRANDS);
+  // Whether the outputs in litData account for at least one cut strand
+  readonly isCutStrandApplied = computed(() => hasCutStrand(this.projectedCutStrands()));
+
   private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly spanService = inject(PlotSpanService);
@@ -61,6 +70,8 @@ export class PlotService {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly document = inject(DOCUMENT);
 
   /** UUID of the section currently loaded in the Python engine — used to skip redundant initSectionStudio calls. */
@@ -73,6 +84,11 @@ export class PlotService {
     const section = this.spanService.section();
     const selectedCharge = section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
     return selectedCharge?.personnelPresence ?? true;
+  });
+  // Cut strands of the engine study, to skip redundant setCutStrands calls. Null while no engine study is ready
+  private cutStrands: number[] | null = null;
+  private readonly savedCutStrands = computed(() => toEngineCutStrands(this.spanService.savedCutStrands()), {
+    equal: isEqual
   });
 
   constructor() {
@@ -92,6 +108,11 @@ export class PlotService {
     effect(() => {
       const highSafety = this.selectedChargeHighSafety();
       untracked(() => void this.syncHighSafety(highSafety));
+    });
+    // The RRTS tool saves and deletes the cut strands of the studio section, which the engine study follows
+    effect(() => {
+      this.savedCutStrands();
+      untracked(() => void this.syncCutStrands());
     });
     // Restore the view and camera captured when free positioning mode was switched on. Lives here
     // (not in PlotOptionsService) because restoring the support window requires refreshProjection,
@@ -120,6 +141,7 @@ export class PlotService {
     this.diagnostics.set([]);
     this.litData.set(null);
     this.baseLitData.set(null);
+    this.projectedCutStrands.set(NO_CUT_STRANDS);
     this.distanceMeasuringPoints.set([]);
     this.loading.set(false);
     this.plotOptionsService.reset();
@@ -129,6 +151,7 @@ export class PlotService {
     this.study.set(null);
     this.currentSectionUuid = null;
     this.highSafety = null;
+    this.cutStrands = null;
     this.obstacleStateService.reset();
     this.obstaclesService.setSelectedMeasure(null, null);
     this.sideTabsService.sideTabs.set(null);
@@ -168,12 +191,14 @@ export class PlotService {
 
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
-    // The engine study is being replaced: high safety is applied once the new one exists
+    // The engine study is being replaced: high safety and cut strands are applied once the new one exists
     this.highSafety = null;
+    this.cutStrands = null;
     this.error.set(null);
     this.diagnostics.set([]);
     this.litData.set(null);
     this.baseLitData.set(null);
+    this.projectedCutStrands.set(NO_CUT_STRANDS);
     this.spanService.section.set(section);
     if (!this.workerPythonService.ready || !section?.cable_name) {
       this.logger.error('refreshSection error');
@@ -204,6 +229,13 @@ export class PlotService {
 
     // A new engine study has no high safety. Read the latest section, the selected charge may have changed during initLit
     await this.applyHighSafety(untracked(() => this.selectedChargeHighSafety()));
+
+    // A new engine study has no cut strands either: the saved ones are part of the section, like high safety
+    this.cutStrands = NO_CUT_STRANDS;
+    const savedCutStrands = untracked(() => this.savedCutStrands());
+    if (!isEqual(savedCutStrands, this.cutStrands)) {
+      await this.applyCutStrands(savedCutStrands);
+    }
 
     // When no charge is selected, apply base climate so the engine reflects
     // the default state (wind=0, ice=0, base temperature) instead of the raw
@@ -236,6 +268,8 @@ export class PlotService {
   refreshProjection = async () => {
     this.loading.set(true);
     const plotOptions = this.plotOptionsService.plotOptions();
+    // The engine study calculates the outputs with the cut strands it holds when the projection is requested
+    const cutStrands = this.cutStrands ?? NO_CUT_STRANDS;
     const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
       startSupport: plotOptions.startSupport,
       endSupport: plotOptions.endSupport,
@@ -244,6 +278,8 @@ export class PlotService {
     this.litData.set(result?.sectionOutput?.current ?? null);
     this.baseLitData.set(result?.sectionOutput?.base ?? null);
     const currentLitData = result?.sectionOutput?.current ?? null;
+    // Only a successful current output was calculated with them
+    this.projectedCutStrands.set(!error && currentLitData ? cutStrands : NO_CUT_STRANDS);
     const obstacles = result?.obstacles ?? [];
     if (currentLitData && obstacles.length > 0) {
       this.litData.set({ ...currentLitData, obstacles });
@@ -356,6 +392,67 @@ export class PlotService {
     // Only roll back if no newer request replaced this one in the meantime
     if (error && this.highSafety === highSafety) {
       this.highSafety = previous;
+    }
+  }
+
+  // The RRTS tool saved or deleted the cut strands of the studio section: the engine study and the outputs depending on
+  // them follow. The RRTS tool awaits it, so that none of its calculations runs in between
+  async syncCutStrands(): Promise<void> {
+    // Outside the studio, or while the engine study still belongs to the previous section, there is nothing to update:
+    // initSectionStudio applies them
+    if (!this.isStudioActive() || this.spanService.section()?.uuid !== this.currentSectionUuid) return;
+    await this.updateCutStrands();
+  }
+
+  // The RRTS tool calculated with other cut strands: the engine study gets the saved ones back, in the studio as in the
+  // preview of a section being edited
+  async restoreCutStrands(calculated: number[]): Promise<void> {
+    if (this.cutStrands === null) return;
+    // The engine study holds the calculated ones until the saved ones are back
+    this.cutStrands = calculated;
+    await this.updateCutStrands();
+  }
+
+  private async updateCutStrands(): Promise<void> {
+    const cutStrands = this.savedCutStrands();
+    // Before initSectionStudio created the engine study, there is nothing to update
+    if (this.cutStrands === null) return;
+    if (!isEqual(cutStrands, this.cutStrands) && !(await this.applyCutStrands(cutStrands))) return;
+    // Not when the engine study was dropped (the studio was left), or a newer request replaced this one, in the meantime
+    if (isEqual(cutStrands, this.cutStrands) && !isEqual(cutStrands, this.projectedCutStrands())) {
+      try {
+        await this.refreshProjection();
+      } catch (error) {
+        this.loading.set(false);
+        this.reportCutStrandsSyncFailure(error);
+      }
+    }
+  }
+
+  // A failure is reported, not thrown: the studio goes on with the cut strands the engine study still holds
+  private async applyCutStrands(cutStrands: number[]): Promise<boolean> {
+    const previous = this.cutStrands;
+    // Cached before the call: the worker runs tasks in order, so the last request sent wins
+    this.cutStrands = cutStrands;
+    // runTask rejects on timeout or when the worker is unavailable, which leaves the engine study in an unknown state
+    const error = await this.workerPythonService
+      .runTask(Task.setCutStrands, { cutStrands })
+      .then(({ error }) => error)
+      .catch((error_: unknown) => error_ ?? new Error('setCutStrands rejected'));
+    if (!error) return true;
+
+    // Only roll back if no newer request replaced this one in the meantime
+    if (this.cutStrands === cutStrands) {
+      this.cutStrands = previous;
+    }
+    this.reportCutStrandsSyncFailure(error);
+    return false;
+  }
+
+  private reportCutStrandsSyncFailure(error: unknown): void {
+    this.logger.error('Failed to apply the saved RRTS cut strands', error);
+    if (this.isStudioActive()) {
+      this.notificationService.error(this.translocoService.translate('studio.rrts-cut-strands.failed-to-sync'));
     }
   }
 
