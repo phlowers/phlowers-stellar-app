@@ -6,6 +6,7 @@
 
 import numpy as np
 import pytest
+
 from stellar_engine.core.study import initialize_study
 
 
@@ -197,4 +198,7 @@ class TestInitStudy:
 
     def test_zero_length_insulator(self, input_dict_2_supports: dict):
         study, _ = initialize_study(input_dict_2_supports)
-        np.testing.assert_array_equal(study._section_array.data["insulator_length"].to_numpy(), np.array([0.01, 0.01]))
+        np.testing.assert_array_equal(
+            study._section_array.data["insulator_length"].to_numpy(),
+            np.array([0.01, 0.01]),
+        )
