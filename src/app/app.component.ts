@@ -4,51 +4,24 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  OnInit,
-  signal,
-  untracked
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
-import { NotificationService } from '@services/notification/notification.service';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { UpdateService } from '@services/worker_update/worker_update.service';
-import { withTimeout } from '@services/worker_update/worker_update.service.helpers';
-import { UPDATE_SW_READY_TIMEOUT_MS } from '@services/worker_update/worker_update.service.constantes';
 import { AuthService } from '@services/auth/auth.service';
 import { StorageService } from '@services/storage/storage.service';
 import { CatalogUpdateService } from '@shared/catalog/services/catalog-update.service';
-import { DividerModule } from 'primeng/divider';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { ProgressBarModule } from 'primeng/progressbar';
-import { DialogModule } from 'primeng/dialog';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
-const modules = [
-  RouterModule,
-  CommonModule,
-  ToastModule,
-  DialogModule,
-  ButtonComponent,
-  IconComponent,
-  DividerModule,
-  ProgressBarModule,
-  TranslocoModule
-];
+const modules = [RouterModule, CommonModule, ToastModule, IconComponent];
 
 /**
  * Root application component.
  *
- * Handles catalog CSV setup, online/offline status monitoring, and application update prompts.
+ * Handles catalog CSV setup and the deferred Pyodide worker boot. Application updates run in the background
+ * through `AppUpdateService` (started by the app initializer), without any dialog.
  * User authentication is handled by AuthService (OIDC via Apache) and APP_INITIALIZER.
  */
 @Component({
@@ -61,153 +34,29 @@ const modules = [
 })
 export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
-  readonly isUpdateDialogOpen = signal(false);
 
-  private readonly notificationService = inject(NotificationService);
   private readonly storageService = inject(StorageService);
   private readonly workerService = inject(WorkerPythonService);
-  readonly updateService = inject(UpdateService);
   private readonly authService = inject(AuthService);
   private readonly catalogUpdateService = inject(CatalogUpdateService);
   private readonly logger = inject(LoggerService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly transloco = inject(TranslocoService);
-
-  /** Guard against repeated automatic install triggers from the reactive effect. */
-  private readonly autoInstallTriggered = signal(false);
 
   /** Guard against repeatedly triggering the catalog orchestrator on every re-render. */
   private readonly catalogUpdateTriggered = signal(false);
 
-  /** Set to true on destroy to abort any in-flight first-install retry. */
-  private destroyed = false;
-
   constructor() {
-    this.destroyRef.onDestroy(() => {
-      this.destroyed = true;
-    });
-
     effect(() => {
-      const action = this.updateService.pendingAction();
-      const user = this.authService.currentUser();
-
-      // Never surface install/update prompts for unauthenticated users.
-      if (!user) {
-        this.isUpdateDialogOpen.set(false);
+      // Catalogs only ever start once the user is authenticated.
+      if (!this.authService.currentUser() || untracked(this.catalogUpdateTriggered)) {
         return;
       }
-
-      // Catalogs are updated independently of the application update flow
-      // (accepting/refusing an app update must never gate catalog freshness),
-      // and only ever start once the user is authenticated.
-      if (!untracked(this.catalogUpdateTriggered)) {
-        this.catalogUpdateTriggered.set(true);
-        this.catalogUpdateService.updateCatalogsIfNeeded().catch((err) => {
-          // Reset the guard so a later effect run (e.g. next auth change) can retry.
-          this.catalogUpdateTriggered.set(false);
-          this.logger.error('Catalog update failed', err);
-        });
-      }
-
-      if (action === 'first-install') {
-        // First install runs automatically once the user is authenticated.
-        this.isUpdateDialogOpen.set(false);
-        // Read the guard untracked: resetting it to false on a failure path must not
-        // re-trigger this effect (it would otherwise loop while pendingAction stays 'first-install').
-        if (!untracked(this.autoInstallTriggered)) {
-          this.autoInstallTriggered.set(true);
-          void this.tryAutomaticFirstInstall();
-        }
-        return;
-      }
-
-      if (action === 'update-available') {
-        // Updates always require explicit user confirmation via the dialog.
-        this.isUpdateDialogOpen.set(true);
-        return;
-      }
-
-      this.isUpdateDialogOpen.set(false);
+      this.catalogUpdateTriggered.set(true);
+      this.catalogUpdateService.updateCatalogsIfNeeded().catch((err) => {
+        // Reset the guard so a later effect run (e.g. next auth change) can retry.
+        this.catalogUpdateTriggered.set(false);
+        this.logger.error('Catalog update failed', err);
+      });
     });
-  }
-
-  private async tryAutomaticFirstInstall(): Promise<void> {
-    const installFailedMessage = this.transloco.translate('app.install-failed');
-
-    try {
-      const started = await this.updateService.installFirstLaunch();
-      if (started || this.destroyed) {
-        return;
-      }
-      await this.retryFirstInstallOnceWorkerReady(installFailedMessage);
-    } catch (err) {
-      if (this.destroyed) {
-        return;
-      }
-      this.logger.error('Automatic first-install failed', err);
-      this.failAutomaticFirstInstall(installFailedMessage);
-    }
-  }
-
-  private async retryFirstInstallOnceWorkerReady(installFailedMessage: string): Promise<void> {
-    this.logger.warn('Automatic first-install deferred: Service Worker not ready, awaiting registration');
-    if (!this.updateService.serviceWorkerSupported) {
-      this.autoInstallTriggered.set(false);
-      return;
-    }
-
-    const workerReady = await this.waitForServiceWorkerReady();
-    if (this.destroyed) {
-      return;
-    }
-    if (!workerReady) {
-      this.failAutomaticFirstInstall(installFailedMessage);
-      return;
-    }
-
-    const retryStarted = await this.tryInstallFirstLaunch();
-    if (this.destroyed) {
-      return;
-    }
-    if (!retryStarted) {
-      this.failAutomaticFirstInstall(installFailedMessage);
-    }
-  }
-
-  private async waitForServiceWorkerReady(): Promise<boolean> {
-    try {
-      await withTimeout(navigator.serviceWorker.ready, UPDATE_SW_READY_TIMEOUT_MS, 'service worker ready');
-      return true;
-    } catch (err) {
-      this.logger.error('Service Worker never became ready for first-install', err);
-      return false;
-    }
-  }
-
-  private async tryInstallFirstLaunch(): Promise<boolean> {
-    try {
-      return await this.updateService.installFirstLaunch();
-    } catch (err) {
-      this.logger.error('Automatic first-install retry failed', err);
-      return false;
-    }
-  }
-
-  private failAutomaticFirstInstall(installFailedMessage: string): void {
-    this.autoInstallTriggered.set(false);
-    this.notificationService.error(installFailedMessage);
-  }
-
-  /** Starts the update from the dialog; a refused start (no user, no SW...) must never be silent. */
-  async onConfirmUpdate(): Promise<void> {
-    const started = await this.updateService.confirmUpdate().catch((err) => {
-      this.logger.error('Update confirmation failed', err);
-      return false;
-    });
-    if (!started) {
-      this.logger.warn('Update could not be started from the update dialog');
-      this.notificationService.error(this.transloco.translate('app.update-start-failed'));
-    }
   }
 
   async setupWorker() {

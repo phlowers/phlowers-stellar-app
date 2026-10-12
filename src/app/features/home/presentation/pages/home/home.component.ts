@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { CardInfoComponent } from '@shared/components/atoms/card-info/card-info.component';
-import { UpdateService } from '@services/worker_update/worker_update.service';
+import { AppUpdateService } from '@services/app-update/app-update.service';
+import { APP_UPDATE_I18N } from '@services/app-update/app-update.constantes';
 import { OnlineService, ServerStatus } from '@services/online/online.service';
 import { combineLatest } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -49,7 +50,7 @@ type ServerStates = CardState;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent {
-  private readonly updateService = inject(UpdateService);
+  private readonly appUpdateService = inject(AppUpdateService);
   private readonly onlineService = inject(OnlineService);
   private readonly studiesService = inject(StudiesService);
   private readonly translocoService = inject(TranslocoService);
@@ -71,7 +72,7 @@ export class HomeComponent {
     return !isOnline;
   }
 
-  private readonly pendingAction = this.updateService.pendingAction;
+  private readonly updateWaiting = computed(() => this.appUpdateService.state() === 'update-waiting');
   private readonly connectivity = toSignal(
     combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]),
     { initialValue: [false, ServerStatus.LOADING] as [boolean, ServerStatus] }
@@ -80,9 +81,14 @@ export class HomeComponent {
 
   constructor() {
     effect(() => {
-      const updateAvailable = this.pendingAction() === 'update-available';
+      const updateWaiting = this.updateWaiting();
+      // The news card repeats the "applied at next start" message while a downloaded version waits (offline too).
+      this.updateText(
+        'newsText',
+        this.translocoService.translate(updateWaiting ? APP_UPDATE_I18N.updateWaitingDetail : 'home.news-text')
+      );
       // prettier-ignore
-      if (updateAvailable) { //NOSONAR
+      if (updateWaiting) { //NOSONAR
         this.updateStatus.set('warning');
         this.updateText('updateTitle', this.translocoService.translate('home.update-available'));
         this.updateText('updateText', this.translocoService.translate('home.update-new-available'));

@@ -23,14 +23,6 @@ import { provideTransloco } from '@jsverse/transloco';
 registerLocaleData(localeFr, 'fr-FR', localeFrExtra);
 registerLocaleData(localeEn, 'en-US', localeEnExtra);
 
-// Register Service Worker before bootstrap so registration starts early.
-// Note: activation may still complete after APP_INITIALIZER runs.
-if ('serviceWorker' in navigator && !isDevMode()) {
-  navigator.serviceWorker.register('/service-worker.js').catch((error) => {
-    logBootstrapError('Service Worker registration', error);
-  });
-}
-
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [

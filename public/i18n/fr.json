@@ -161,18 +161,6 @@
     "z-label": "Z :",
     "support-name-full-label": "Nom du support"
   },
-  "app": {
-    "update": "Mise à jour",
-    "new-version-available": "La nouvelle version de votre application est disponible !",
-    "version": "Version :",
-    "hash": "Hash :",
-    "update-in-progress": "La mise à jour de votre application est en cours",
-    "update-warning": "Merci de ne pas fermer l'application pendant la mise à jour.",
-    "later": "Plus tard",
-    "update-now": "Mettre à jour",
-    "update-start-failed": "La mise à jour n'a pas pu démarrer. Veuillez réessayer.",
-    "install-failed": "L'installation initiale de l'application n'a pas pu démarrer. Veuillez recharger la page pour réessayer."
-  },
   "auth": {
     "login-page": {
       "logo-alt": "Stellar",
@@ -231,13 +219,26 @@
   },
   "admin": {
     "app-version": "Version de l'application",
-    "check-app-version": "Vérifier la version de l'application",
-    "current-version": "Version actuelle",
-    "latest-version": "Version la plus récente",
+    "check-app-version": "Vérifier les mises à jour",
     "build-hash": "Hash du build",
     "build-datetime": "Date et heure du build",
     "build-version": "Version du build",
-    "update-to-latest": "Mettre à jour vers la version la plus récente",
+    "offline-status": "Mode hors ligne",
+    "pending-version": "Version en attente",
+    "no-pending-version": "Aucune",
+    "last-refusal": "Dernière mise à jour reportée",
+    "network": "Débit réseau estimé",
+    "downlink-value": "{{ downlink }} Mbit/s (téléchargements en arrière-plan à partir de {{ threshold }} Mbit/s)",
+    "storage": "Stockage",
+    "storage-value": "{{ usage }} Mo utilisés sur {{ quota }} Mo",
+    "not-available": "Non disponible",
+    "refusal": {
+      "api-unavailable": "Débit réseau inconnu du navigateur",
+      "downlink-unknown": "Débit réseau inconnu du navigateur",
+      "downlink-below-threshold": "Réseau trop lent",
+      "save-data": "Économiseur de données activé",
+      "storage-insufficient": "Espace de stockage insuffisant"
+    },
     "activate-python-logs": "Activer les logs Python",
     "danger-zone": "Zone Danger",
     "delete-all-studies": "Supprimer toutes les études",
@@ -288,17 +289,20 @@
       "unauthorized-summary": "Non autorisé",
       "imported-from-protov4": "Étude importée depuis le protoV4"
     },
-    "update-service": {
-      "update-success-summary": "Mise à jour réussie",
-      "update-success-detail": "L'application a été mise à jour vers la dernière version",
-      "install-success-summary": "Installation réussie",
-      "install-success-detail": "L'application a été installée",
-      "update-failed-summary": "Échec de la mise à jour",
-      "update-failed-detail": "Une erreur inconnue s'est produite lors de la mise à jour",
-      "update-failed-auth-detail": "La mise à jour n'a pas pu être téléchargée car votre session a expiré. Veuillez vous reconnecter, puis relancer la mise à jour",
-      "update-interrupted-summary": "Mise à jour interrompue",
-      "update-interrupted-detail": "La mise à jour n'a pas abouti. Veuillez réessayer.",
-      "version-checked-detail": "Version de l'application vérifiée"
+    "app-update-service": {
+      "offline-status": {
+        "ready": "Prêt hors ligne",
+        "preparing": "Préparation du mode hors ligne",
+        "waiting-network": "Mode hors ligne en attente d'un réseau suffisant",
+        "storage-insufficient": "Mode hors ligne : espace de stockage insuffisant",
+        "not-prepared": "Mode hors ligne non préparé"
+      },
+      "update-deferred-network": "Mise à jour reportée : le réseau est trop lent, elle sera téléchargée plus tard.",
+      "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
+      "update-waiting-summary": "Mise à jour téléchargée",
+      "update-waiting-detail": "Elle sera appliquée au prochain démarrage de l'application (fermez toutes les fenêtres de Stellar, puis rouvrez-la).",
+      "storage-insufficient-summary": "Espace de stockage insuffisant",
+      "storage-insufficient-detail": "Espace de stockage insuffisant pour télécharger la mise à jour : libérez de l'espace sur l'appareil."
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle supprimé",
