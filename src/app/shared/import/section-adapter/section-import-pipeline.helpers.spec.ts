@@ -82,7 +82,7 @@ describe('getMissingRequiredFields', () => {
     name: 'Valid Section',
     type: 'phase',
     cables_amount: 1,
-    cable_name: 'ASTER 570',
+    cable_name: 'ASTER600',
     supports: [
       buildSupport({ number: '1', spanLength: 100, spanAngle: 0, chainLength: 5, attachmentHeight: 10 }),
       buildSupport({ number: '2', spanLength: null, spanAngle: 0, chainLength: 5, attachmentHeight: 10 })

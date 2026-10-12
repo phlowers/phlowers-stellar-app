@@ -19,7 +19,7 @@
 export interface CableCsvDto {
   /** Unique cable identifier */
   cable_id: string;
-  /** Cable model name (e.g. "ASTER_570") */
+  /** Cable model name (e.g. "ASTER600") */
   name: string;
   /** Origin of the data */
   data_source: string;

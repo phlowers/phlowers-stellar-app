@@ -30,7 +30,7 @@ const engineAnswer = (task: Task, error: TaskError | null = null) => ({
 
 function makeCutStrandsData(overrides: Partial<RrtsCutStrandsData> = {}): RrtsCutStrandsData {
   return {
-    cableName: 'ASTER 570',
+    cableName: 'ASTER600',
     spanUuid: 's2',
     supportRef: 'RIGHT',
     distanceSupportRef: 12.5,
@@ -43,7 +43,7 @@ function makeCutStrandsData(overrides: Partial<RrtsCutStrandsData> = {}): RrtsCu
 function makeSection(overrides: Partial<Section> = {}): Section {
   return {
     uuid: 'section-uuid',
-    cable_name: 'ASTER 570',
+    cable_name: 'ASTER600',
     supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }],
     charges: [],
     ...overrides
@@ -217,7 +217,7 @@ describe('StrandRrtsComponent', () => {
   describe('infos', () => {
     it('shows the cable name and the max working load over the section', async () => {
       await setup();
-      expect(textOf('cable-name-value')).toBe('ASTER 570');
+      expect(textOf('cable-name-value')).toBe('ASTER600');
       expect(textOf('work-load-value')).toBe('45.3\u00a0%');
     });
 
@@ -255,7 +255,7 @@ describe('StrandRrtsComponent', () => {
 
     it('adds a cut strands input for each cable layer with strands, next to its strand count', async () => {
       await setup();
-      expect(mockCablesService.getCable).toHaveBeenCalledWith('ASTER 570');
+      expect(mockCablesService.getCable).toHaveBeenCalledWith('ASTER600');
       expect(textOf('rrts-cut-strands-layer1-max')).toBe('/ 6');
       expect(textOf('rrts-cut-strands-layer2-max')).toBe('/ 12');
       expect(getByTestId('rrts-cut-strands-layer3-input')).toBeNull();
