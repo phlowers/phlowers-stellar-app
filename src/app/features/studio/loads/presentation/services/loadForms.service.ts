@@ -82,8 +82,10 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
     const rawCableModif = newData.cableModifParams || [];
-    const supportManipParams = newData.supportManipParams || [];
-    const spanManipParams = newData.spanManipParams || [];
+    const supportManipParams = (newData.supportManipParams || []).filter(
+      (manip) => manip.chargeUuid === currentChargeUuid
+    );
+    const spanManipParams = (newData.spanManipParams || []).filter((manip) => manip.chargeUuid === currentChargeUuid);
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
     // ideally, we want to call recheckCableModif and create an initial state,

@@ -308,7 +308,6 @@ export class CableSupportManipComponent {
     if (this.form.invalid) return;
     const chargeUuid = this.spanService.section()?.selected_charge_uuid;
     if (!chargeUuid) {
-      this.isLoading.set(false);
       return;
     }
     this.isLoading.set(true);

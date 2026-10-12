@@ -439,6 +439,7 @@ export class CableSpanManipComponent implements OnInit {
       { ...CABLE_SPAN_MANIP_DEFAULTS, spanUuid: this.form.controls.spanUuid.value },
       { emitEvent: false }
     );
+    this.syncTemporaryManipulation();
     this.hasSavedManipulation.set(false);
   }
 
