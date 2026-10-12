@@ -31,7 +31,7 @@ def generate_section_array(supports: list[Support]):
             suspension.append(True)
         altitude.append(support.attachmentHeight)
         crossarm_length.append(support.armLength or 0)
-        insulator_length.append(support.chainLength or 1)
+        insulator_length.append(support.chainLength)
         span_length.append(support.spanLength)
         line_angle.append(support.spanAngle)
         insulator_mass.append(support.chainWeight or 0)
