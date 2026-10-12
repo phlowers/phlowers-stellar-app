@@ -1,14 +1,8 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* Compiler options of the application Web Workers (angular.json "webWorkerTsConfig"); the builder adds the worker entry points. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./public",
-    "lib": [
-      "webworker",
-      "es2022"
-    ],
+    "lib": ["webworker", "es2022"]
   },
-  "include": [
-    "./src/app/core/services/worker_update/service-worker.ts"
-  ]
+  "include": ["./src/**/*.d.ts"]
 }

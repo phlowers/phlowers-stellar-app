@@ -8,7 +8,6 @@ export const environment = {
   production: true,
   apiUrl: '{API_URL}',
   version: '{BUILD_VERSION}',
-  buildTime: '{BUILD_TIME}',
   gitHash: '{GIT_HASH}',
   appName: '{APP_NAME}',
   changelogUrl: 'https://api.github.com/repos/phlowers/mechaphlowers/releases'
