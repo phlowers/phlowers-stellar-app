@@ -1,6 +1,16 @@
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { STRAND_LAYER_KEYS } from '@shared/domain/helpers/cut-strands.helpers';
+import type { CatalogCableEntity } from '@infrastructure/database';
+import { MAX_SHOWN_LAYER } from './strand-rrts.constantes';
 import { RrtsFormValue, WorkLoadStatus } from './strand-rrts.interfaces';
+
+// Layers of the cable with strands, up to MAX_SHOWN_LAYER: the only ones where cut strands can be entered
+export const getCableStrandLayers = (
+  cable: Partial<Pick<CatalogCableEntity, (typeof STRAND_LAYER_KEYS)[number]>>
+): { layer: number; strands: number }[] =>
+  STRAND_LAYER_KEYS.map((key, i) => ({ layer: i + 1, strands: cable[key] ?? 0 })).filter(
+    ({ layer, strands }) => layer <= MAX_SHOWN_LAYER && strands > 0
+  );
 
 // Satisfactory up to 75 %, concerning up to 100 %, dangerous above 100 % or below 0 %
 export const getWorkLoadStatus = (workLoad: number | null): WorkLoadStatus => {

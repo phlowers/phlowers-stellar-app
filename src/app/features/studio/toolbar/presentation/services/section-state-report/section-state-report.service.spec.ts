@@ -103,6 +103,7 @@ function createMockReportData(): SectionStateReportData {
     chargeDescription: 'Charge desc',
     maxParameter: 1700,
     maxStressRate: 72.5,
+    cutStrands: [{ layer: 1, count: 2 }],
     spans: Array.from({ length: 6 }, (_, i) => createSpanRow(i + 1)),
     supports: Array.from({ length: 7 }, (_, i) => createSupportRow(i + 1))
   };
@@ -199,6 +200,14 @@ describe('SectionStateReportService', () => {
 
       const { __mockDoc } = (await import('jspdf')) as unknown as { __mockDoc: { save: ReturnType<typeof vi.fn> } };
       expect(__mockDoc.save).toHaveBeenCalledWith('Rapport État de canton_Section A_Charge 1_20-05-2026.pdf');
+    });
+
+    it('should translate the cut strands label with the layer number', async () => {
+      await service.generateReport(createMockReportData());
+
+      expect(mockTranslocoService.translate).toHaveBeenCalledWith('common.cut-strands-layer-label', {
+        layer: 1
+      });
     });
 
     it('should log and notify error when PDF generation fails', async () => {

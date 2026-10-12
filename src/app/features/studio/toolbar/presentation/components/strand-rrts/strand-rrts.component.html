@@ -96,7 +96,7 @@
       @let error = item.control.dirty ? getError(item.control) : '';
       <div>
         <label [for]="'rrts-cut-strands-layer' + item.layer">
-          {{ 'studio.rrts-cut-strands.cut-strands-layer-label' | transloco: { layer: item.layer } }}
+          {{ 'common.cut-strands-layer-label' | transloco: { layer: item.layer } }}
           <sup class="mandatory" aria-hidden="true">*</sup>
         </label>
         <p-inputgroup>

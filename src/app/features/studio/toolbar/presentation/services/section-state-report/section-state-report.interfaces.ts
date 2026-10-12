@@ -47,6 +47,14 @@ export interface SupportReportRow {
   loadAngle: number | null;
 }
 
+/** Cut strands of one cable layer, shown under the max parameter. */
+export interface CutStrandsReportRow {
+  /** 1-based cable layer. */
+  layer: number;
+  /** Number of cut strands on the layer, 0 when none. */
+  count: number;
+}
+
 /** Data required to generate the section state PDF report. */
 export interface SectionStateReportData {
   /** Study author email or name. */
@@ -72,6 +80,8 @@ export interface SectionStateReportData {
   maxParameter: number | null;
   /** Maximum utilization (stress) rate over the selected section (%). */
   maxStressRate: number | null;
+  /** Cut strands of the cable layers that exist in the catalog (first layers only). */
+  cutStrands: CutStrandsReportRow[];
 
   /** Per-span result rows for the selected span range. */
   spans: SpanReportRow[];
