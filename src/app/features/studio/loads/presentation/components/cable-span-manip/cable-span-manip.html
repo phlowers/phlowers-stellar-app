@@ -28,14 +28,14 @@
   </div>
 
   <div class="split-1-line">
-    <label for="scope" class="split-1-line__label-1"
+    <label for="spanUuid" class="split-1-line__label-1"
       >{{ 'loads.cable-span-manip.manipulated-span-label' | transloco }}</label
     >
     <p-select
-      inputId="scope"
+      inputId="spanUuid"
       fluid
       [options]="spansOptions()"
-      formControlName="scope"
+      formControlName="spanUuid"
       optionLabel="label"
       optionValue="value"
       (onChange)="onScopeChange($event.value)"

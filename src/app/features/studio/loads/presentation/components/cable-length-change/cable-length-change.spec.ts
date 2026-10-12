@@ -132,7 +132,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should be true during calculate() without params then false after', async () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'lengthening',
         modifiedLengthCable: 1,
         distanceSupportRef: 5
@@ -159,7 +159,7 @@ describe('CableLengthChangeComponent', () => {
       mockPlotService.error.mockReturnValue('CALCULATION_ERROR');
 
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'lengthening',
         modifiedLengthCable: 1,
         distanceSupportRef: 5
@@ -246,14 +246,14 @@ describe('CableLengthChangeComponent', () => {
   // ---------------------------------------------------------------------------
   describe('HTML rendering - button states', () => {
     it('should disable zoom button when no scope is selected', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       fixture.detectChanges();
       const btn = getByTestId('cable-length-change-zoom') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
     it('should enable zoom button when a scope is selected and not loading', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.isLoading.set(false);
       fixture.detectChanges();
       const btn = getByTestId('cable-length-change-zoom') as HTMLButtonElement;
@@ -267,7 +267,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should disable calculate button when form is invalid', () => {
       // On force le formulaire dans un état invalide
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       component.form.controls.supportRef.setValue(null);
       fixture.detectChanges();
       const btn = getByTestId('cable-length-change-calculate') as HTMLButtonElement;
@@ -276,7 +276,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should disable save button when form is valid but not dirty', () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'lengthening',
         modifiedLengthCable: 1,
         distanceSupportRef: 5
@@ -292,7 +292,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should enable save button when form is valid and dirty', () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'lengthening',
         modifiedLengthCable: 1,
         distanceSupportRef: 5
@@ -325,7 +325,7 @@ describe('CableLengthChangeComponent', () => {
           }
         ]
       } as unknown as Section);
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       fixture.detectChanges();
       const btn = getByTestId('cable-length-change-delete') as HTMLButtonElement;
       // With current logic, the button can stay disabled if other conditions are not met
@@ -386,7 +386,7 @@ describe('CableLengthChangeComponent', () => {
   describe('calculate()', () => {
     beforeEach(() => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'lengthening',
         modifiedLengthCable: 1,
         distanceSupportRef: 5
@@ -397,7 +397,7 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should not call calculate service if form is invalid', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       component.calculateCableLength();
       expect(mockLoadFormsService.calculateLoad).not.toHaveBeenCalled();
     });
@@ -430,7 +430,7 @@ describe('CableLengthChangeComponent', () => {
   describe('saveForm()', () => {
     it('should not call save service if form is invalid', async () => {
       // Form is forced into an invalid state
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       component.form.controls.supportRef.setValue(null);
       await component.saveForm();
       expect(mockLoadFormsService.saveTemporaryLoadDataInSection).not.toHaveBeenCalled();
@@ -438,7 +438,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should save through loadFormsService then reload the section from storage', async () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'shortening',
         modifiedLengthCable: 2,
         distanceSupportRef: 8
@@ -468,7 +468,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should reset isDirtySinceLastSave after save', async () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'shortening',
         modifiedLengthCable: 2,
         distanceSupportRef: 8
@@ -484,7 +484,7 @@ describe('CableLengthChangeComponent', () => {
 
     it('should reset isLoading to false even if save throws', async () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         modificationType: 'shortening',
         modifiedLengthCable: 2,
         distanceSupportRef: 8
@@ -504,7 +504,7 @@ describe('CableLengthChangeComponent', () => {
   // ---------------------------------------------------------------------------
   describe('deleteForm()', () => {
     it('should call cableModificationsService.delete when a modification exists for the selected span', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       mockSpanService.section.set({
         ...mockSection,
         cable_modifications: [
@@ -525,7 +525,7 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should not call delete when no modification exists for the selected span', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       mockSpanService.section.set({
         ...mockSection,
         cable_modifications: []
@@ -537,10 +537,10 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should reset the form after deletion', () => {
-      component.form.patchValue({ scope: 'support-uuid-1' });
+      component.form.patchValue({ spanUuid: 'support-uuid-1' });
       component.deleteForm();
       // The scope field is reset to the default value (first support of the section)
-      expect(component.form.controls.scope.value).toBe('support-uuid-1');
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-1');
     });
 
     it('should reset isDirtySinceLastSave after deletion', () => {
@@ -557,10 +557,10 @@ describe('CableLengthChangeComponent', () => {
   // ---------------------------------------------------------------------------
   describe('resetForm()', () => {
     it('should reset all form controls', () => {
-      component.form.patchValue({ scope: 'support-uuid-1', modificationType: 'lengthening' });
+      component.form.patchValue({ spanUuid: 'support-uuid-1', modificationType: 'lengthening' });
       component.resetForm();
       // scope is reset to the default value (first support of the section)
-      expect(component.form.controls.scope.value).toBe('support-uuid-1');
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-1');
       expect(component.form.controls.modificationType.value).toBe('lengthening');
     });
 
@@ -675,21 +675,21 @@ describe('CableLengthChangeComponent', () => {
     });
 
     it('should not call plotOptionsChange when scope is null', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       component.zoomToSpan();
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
     it('should not call plotOptionsChange when getSupportIndex returns -1', () => {
       mockSpanService.getSupportIndex.mockReturnValue(-1);
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.zoomToSpan();
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
     it('should call plotOptionsChange with the correct startSupport and endSupport for a valid span', () => {
       mockSpanService.getSupportIndex.mockReturnValue(2);
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.zoomToSpan();
       expect(mockPlotService.plotOptionsChange).toHaveBeenCalledOnce();
       expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 2, endSupport: 3 });
@@ -718,7 +718,7 @@ describe('CableLengthChangeComponent', () => {
   // ---------------------------------------------------------------------------
   describe('deleteForm() — null scope', () => {
     it('should not call delete or clearPersistedFormData when scope is null', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
 
       component.deleteForm();
 
@@ -801,7 +801,7 @@ describe('CableLengthChangeComponent', () => {
       );
       fixture.detectChanges();
       await fixture.whenStable();
-      expect(component.form.controls.scope.value).toBe('support-uuid-1');
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-1');
       expect(onScopeChangeSpy).toHaveBeenCalledWith('support-uuid-1');
       expect(mockCableModificationsService.clearSelectedSpan).toHaveBeenCalled();
     });

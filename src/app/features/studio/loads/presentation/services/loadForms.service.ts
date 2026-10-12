@@ -82,14 +82,35 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
     const rawCableModif = newData.cableModifParams || [];
+    const supportManipParams = (newData.supportManipParams || []).filter(
+      (manip) => manip.chargeUuid === currentChargeUuid
+    );
+    const spanManipParams = (newData.spanManipParams || []).filter((manip) => manip.chargeUuid === currentChargeUuid);
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
     // ideally, we want to call recheckCableModif and create an initial state,
     // but this cause inconsistencies with python task that only calls manipulations one by one
+    // can refacto ensureSelectedCableModification when initial state is created
     // ponytail: merge persisted section.cable_modifications into charge params on import
     newData.cableModifParams = [
       ...rawCableModif,
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
+    ];
+    newData.supportManipParams = [
+      ...supportManipParams,
+      ...(section?.cable_support_manipulations?.filter(
+        (suppManip) =>
+          !supportManipParams.some(
+            (p) => p.supportUuid === suppManip.supportUuid && suppManip.chargeUuid === currentChargeUuid
+          )
+      ) ?? [])
+    ];
+    newData.spanManipParams = [
+      ...spanManipParams,
+      ...(section?.cable_span_manipulations?.filter(
+        (spanManip) =>
+          !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid && spanManip.chargeUuid === currentChargeUuid)
+      ) ?? [])
     ];
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
@@ -213,7 +234,6 @@ export class LoadFormsService {
     }
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
-
     try {
       const currentSection = this.spanService.section();
       const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
