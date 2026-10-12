@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { HomeComponent } from './home.component';
-import { UpdateService } from '@services/worker_update/worker_update.service';
+import { AppUpdateService } from '@services/app-update/app-update.service';
+import { AppUpdateState } from '@services/app-update/app-update.interfaces';
 import { OnlineService, ServerStatus } from '@services/online/online.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
@@ -16,7 +17,7 @@ import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-  let updateServiceMock: vi.Mocked<UpdateService>;
+  let appUpdateState: ReturnType<typeof signal<AppUpdateState>>;
   let onlineServiceMock: vi.Mocked<OnlineService>;
   let studiesServiceMock: vi.Mocked<StudiesService>;
 
@@ -49,10 +50,7 @@ describe('HomeComponent', () => {
   ];
 
   beforeEach(async () => {
-    updateServiceMock = {
-      pendingAction: signal<'none' | 'first-install' | 'update-available'>('none'),
-      needUpdate: signal(false)
-    } as unknown as vi.Mocked<UpdateService>;
+    appUpdateState = signal<AppUpdateState>('ready-offline');
 
     onlineServiceMock = {
       online$: new BehaviorSubject<boolean>(true),
@@ -89,7 +87,9 @@ describe('HomeComponent', () => {
               'home.update-link-text': 'Learn more',
               'home.update-new-available': 'A new application update is available!',
               'home.update-text': 'View latest updates.',
-              'home.update-title': 'Changelogs'
+              'home.update-title': 'Changelogs',
+              'shared.app-update-service.update-waiting-detail':
+                'It will be applied the next time the application starts.'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -103,7 +103,7 @@ describe('HomeComponent', () => {
       ],
       providers: [
         provideRouter([]),
-        { provide: UpdateService, useValue: updateServiceMock },
+        { provide: AppUpdateService, useValue: { state: appUpdateState } },
         { provide: OnlineService, useValue: onlineServiceMock },
         { provide: StudiesService, useValue: studiesServiceMock }
       ]
@@ -133,8 +133,8 @@ describe('HomeComponent', () => {
   });
 
   describe('Constructor Behavior', () => {
-    it('should set update status to warning when update is needed', () => {
-      (updateServiceMock.pendingAction as ReturnType<typeof signal>).set('update-available');
+    it('should set update status to warning when a downloaded version is waiting', () => {
+      appUpdateState.set('update-waiting');
 
       const newFixture = TestBed.createComponent(HomeComponent);
       const newComponent = newFixture.componentInstance;
@@ -143,10 +143,20 @@ describe('HomeComponent', () => {
       expect(newComponent.updateStatus()).toBe('warning');
     });
 
-    it('should not change update status when no update is needed', () => {
-      (updateServiceMock.pendingAction as ReturnType<typeof signal>).set('none');
+    it('should not change update status when no update is waiting', () => {
+      appUpdateState.set('ready-offline');
 
       expect(component.updateStatus()).toBe('unknown');
+    });
+
+    it('should show the next-start message in the news card while a version waits, then the usual text', () => {
+      appUpdateState.set('update-waiting');
+      fixture.detectChanges();
+      expect(component.homeText().newsText).toBe('It will be applied the next time the application starts.');
+
+      appUpdateState.set('ready-offline');
+      fixture.detectChanges();
+      expect(component.homeText().newsText).toContain('Welcome to Celeste');
     });
   });
 

@@ -7,6 +7,7 @@
 import { inject, Injectable } from '@angular/core';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { resolveCsvImportConfig } from './configs';
+import { catalogDataUrl } from './csv-import.client.helpers';
 import type { CsvKey } from './csv-import.engine.interfaces';
 import type {
   CsvImportDoneMessage,
@@ -51,7 +52,7 @@ export class CsvImportClientService {
    */
   async importCsv(csvKey: CsvKey, options: CsvImportClientOptions = {}): Promise<CsvImportDoneMessage> {
     const config = resolveCsvImportConfig(csvKey);
-    const url = `${globalThis.location.origin}/data/${config.filename}`;
+    const url = catalogDataUrl(globalThis.location.origin, config.filename, options.expectedHash);
     const request: CsvImportWorkerRequest = {
       csvKey,
       url,

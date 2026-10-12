@@ -12,6 +12,33 @@
 - **Detected on**: 2026-10-02.
 - **Status**: PENDING REVIEW; deletion requires user validation.
 
+### Previous application update system (replaced by Workbox, task P5-05)
+
+- **Sources**:
+  - `src/app/core/services/worker_update/` (whole folder: `service-worker.ts`, `service-worker.interfaces.ts`,
+    `service-worker.spec.ts`, `worker_update.service.ts`, `worker_update.service.spec.ts`,
+    `worker_update.service.helpers.ts`, `worker_update.service.helpers.spec.ts`, `worker_update.service.constantes.ts`,
+    `tsconfig.json`).
+  - `tsconfig.worker.json`: NOT dead (correction 2026-10-12) — `angular.json` uses it as `webWorkerTsConfig` for
+    the application Web Workers; only its `include` (old service worker) and `outDir` were replaced.
+  - `package.json`: script `build:service-worker` (no longer called by `build`).
+  - `.gitignore` lines 49-50 (`public/service-worker.js`, `public/service-worker.interfaces.js`) and
+    `eslint.config.js` ignore `public/service-worker.js`: outputs of the old script. The local generated files
+    `public/service-worker.js` / `public/service-worker.interfaces.js` are still copied into `dist/` by `ng build`
+    (the first is overwritten by `build:sw`, the second is excluded from the precache).
+  - `public/i18n/{en,fr}.json`: `shared.update-service.*` (10 keys, only used by `worker_update.service.ts`).
+  - `src/app/features/admin/presentation/pages/admin/admin.ts`: fields `updateAvailable` and `newVersion` (never
+    read, leftovers of the old admin update flow) and their assertions in `admin.spec.ts`.
+- **Evidence**: no file outside `src/app/core/services/worker_update/` imports it any more (checked on 2026-10-12:
+  `grep -rln worker_update src --include=*.ts` only lists the folder itself); the Workbox service worker
+  (`src/sw/`, `scripts/build-service-worker.mjs`) and `AppUpdateService` replace it (tasks P3 to P5-04).
+- **Keep**: `scripts/create_assets_list_for_service_worker.py` and `dist/assets_list.json` (hypothesis H8: still
+  needed by workstations on the old system to reach the Workbox version; removal is backlog item BL-01).
+- **Removal impact**: delete the files and lines above; `npm run lint-check`, `npm run test` and `npm run build`
+  must stay green; no runtime behavior change.
+- **Detected on**: 2026-10-12.
+- **Status**: 🗑️ REMOVED — 2026-10-12, validated by the user (task P5-05).
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead

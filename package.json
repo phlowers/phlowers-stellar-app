@@ -5,8 +5,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4200",
-    "build:service-worker": "tsc -p tsconfig.worker.json && sed -i 's/export //g' public/service-worker.js",
-    "build": "npm run build:service-worker && ng build --configuration=production && npm run set-env-variables && npm run create-assets-list-for-service-worker",
+    "build": "ng build --configuration=production && npm run set-env-variables && npm run build:sw && npm run create-assets-list-for-service-worker",
+    "build:sw": "node scripts/build-service-worker.mjs",
+    "check:sw-manifest": "node scripts/check-sw-manifest.mjs",
     "watch": "ng build --watch --configuration development",
     "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
     "prettier-check": "prettier --check \"**/*.{js,mjs,ts,mts,d.ts,html}\"",
@@ -93,6 +94,12 @@
     "tailwindcss-primeui": "0.5.1",
     "tslib": "2.3.0",
     "uuid": "14.0.0",
+    "workbox-core": "7.4.1",
+    "workbox-expiration": "7.4.1",
+    "workbox-precaching": "7.4.1",
+    "workbox-routing": "7.4.1",
+    "workbox-strategies": "7.4.1",
+    "workbox-window": "7.4.1",
     "zone.js": "0.16.2"
   },
   "overrides": {
@@ -150,6 +157,7 @@
     "typescript-eslint": "8.63.0",
     "vite-tsconfig-paths": "6.1.1",
     "vitest": "4.1.10",
-    "vitest-sonar-reporter": "3.0.0"
+    "vitest-sonar-reporter": "3.0.0",
+    "workbox-build": "7.4.1"
   }
 }

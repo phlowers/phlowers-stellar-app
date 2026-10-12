@@ -40,5 +40,19 @@
     <span class="calculation__txt" [class.show]="workerError()">{{ 'common.error' | transloco }}</span>
   </p>
 
+  <p
+    class="offline-status mb-0"
+    [class.offline-status--ready]="offlineKind() === 'ready'"
+    [class.offline-status--warning]="offlineWarning()"
+    [attr.title]="offlineTooltipKey() ? (offlineTooltipKey()! | transloco) : null"
+    role="status"
+    aria-live="polite"
+    data-testid="offline-status-indicator"
+    [attr.data-status]="offlineKind()"
+  >
+    <app-icon [icon]="offlineIcon()" aria-hidden="true" />
+    <span>{{ offlineLabelKey() | transloco }}</span>
+  </p>
+
   <p class="user" data-testid="user-info">{{ user()?.email ?? 'No user' }}</p>
 </header>
