@@ -46,8 +46,6 @@ testem.log
 Thumbs.db
 
 public/pyodide/*
-public/service-worker.js
-public/service-worker.interfaces.js
 
 .vscode/settings.json
 

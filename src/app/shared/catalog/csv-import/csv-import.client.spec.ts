@@ -107,6 +107,16 @@ describe('CsvImportClientService', () => {
     await expect(promise).resolves.toMatchObject({ verifiedHash: 'abc123' });
   });
 
+  it('downloads the versioned URL (?v=<sha>) when the expected hash is known', async () => {
+    const promise = service.importCsv('cables', { expectedHash: 'abc123' });
+    const worker = FakeWorker.instances[0];
+    expect(worker.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ url: `${globalThis.location.origin}/data/cables.csv?v=abc123` })
+    );
+    worker.emit({ type: 'done', csvKey: 'cables', totalRows: 0, totalKeys: 0, verifiedHash: 'abc123' });
+    await promise;
+  });
+
   it('invokes onProgress for every progress message', async () => {
     const onProgress = vi.fn();
     const promise = service.importCsv('cables', { onProgress });
