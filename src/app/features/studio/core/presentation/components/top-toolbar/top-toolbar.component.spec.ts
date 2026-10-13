@@ -821,6 +821,16 @@ describe('StudioTopToolbarComponent', () => {
       expect(toggle).toBeTruthy();
     });
 
+    it('should keep the invert toggle disabled regardless of toolbar state', () => {
+      const toggle = getByTestId('invert-toggle');
+      expect(toggle?.querySelector('input')?.disabled).toBe(true);
+
+      plotOptionsServiceMock.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+
+      expect(toggle?.querySelector('input')?.disabled).toBe(true);
+    });
+
     it('UC-TT2: should render tables dropdown', () => {
       const dropdown = getByTestId('tables-dropdown');
       expect(dropdown).toBeTruthy();
