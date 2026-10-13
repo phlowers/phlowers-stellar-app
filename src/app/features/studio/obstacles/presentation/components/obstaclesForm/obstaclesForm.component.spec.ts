@@ -775,10 +775,20 @@ describe('ObstaclesFormComponent', () => {
   });
 
   describe('create new obstacle button', () => {
-    it('should call resetFormForNewObstacle with null on click', () => {
+    it('should call resetFormForNewObstacle with null on click when no span is selected', () => {
       (getByTestId('create-new-obstacle') as HTMLButtonElement).click();
 
       expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith(null);
+    });
+
+    it('should keep the selected span on click', () => {
+      mockObstacleFormService.form.get('supportUuid')?.setValue('support-1');
+      fixture.detectChanges();
+      mockObstacleFormService.resetFormForNewObstacle.mockClear();
+
+      (getByTestId('create-new-obstacle') as HTMLButtonElement).click();
+
+      expect(mockObstacleFormService.resetFormForNewObstacle).toHaveBeenCalledWith('support-1');
     });
   });
 
