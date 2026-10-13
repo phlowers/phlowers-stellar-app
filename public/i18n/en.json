@@ -295,7 +295,7 @@
         "preparing": "Preparing offline mode",
         "waiting-network": "Offline mode waiting for a fast enough network",
         "storage-insufficient": "Offline mode: not enough storage",
-        "not-prepared": "Offline mode not prepared"
+        "not-prepared": "Offline mode unavailable"
       },
       "update-deferred-network": "Update postponed: the network is too slow, it will be downloaded later.",
       "check-started": "Checking for updates: a new version will be downloaded in the background.",

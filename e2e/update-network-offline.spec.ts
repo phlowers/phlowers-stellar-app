@@ -5,6 +5,7 @@ import {
   resetFaults,
   setAuthenticated,
   setDownlink,
+  setFaults,
   setScenario,
   waitForFirstInstall
 } from './update-flow.helpers';
@@ -164,6 +165,34 @@ test.describe('offline, expired session and catalogs (Workbox)', () => {
     expect(shell?.fromServiceWorker()).toBe(true);
     await expect.poll(() => authResponses.length, { timeout: 15_000 }).toBeGreaterThan(0);
     expect(authResponses.every((response) => !response.fromServiceWorker)).toBe(true);
+  });
+
+  test('a raw 401 on navigation is never seen while the shell is cached', async ({ page, request }) => {
+    await page.goto('/');
+    await waitForFirstInstall(page, '1.0.0-e2e', 'E2E_CABLE_V1');
+    await setFaults(request, { navigationStatus: 401 });
+
+    const response = await page.goto('/studies/42');
+
+    expect(response?.fromServiceWorker()).toBe(true);
+    expect(new URL(page.url()).pathname).toBe('/studies/42');
+  });
+
+  test('without a cached shell, a raw 401 on navigation is redirected to /auth/relogin', async ({ page, request }) => {
+    await page.goto('/');
+    await waitForFirstInstall(page, '1.0.0-e2e', 'E2E_CABLE_V1');
+    await page.evaluate(async () => {
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        await cache.delete('/index.html', { ignoreSearch: true });
+      }
+    });
+    await setFaults(request, { navigationStatus: 401 });
+
+    await page.goto('/studies/42');
+
+    expect(new URL(page.url()).pathname).toBe('/auth/relogin');
+    await expect(page.locator('body')).toHaveText('E2E relogin');
   });
 
   test('a new catalog is prefetched in the background, then imported at the next start from the cache', async ({

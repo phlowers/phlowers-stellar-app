@@ -1692,9 +1692,26 @@ id: P6-04
 title: "Transition depuis l'ancien système, kill-switch et retour par redéploiement"
 phase: "Phase 6 - Acceptation, transition et déploiement"
 priority: critical
-status: todo
-completion: 0%
-last_update: "2026-10-08"
+status: in_progress
+completion: 70%
+last_update: "2026-10-13"
+progress_notes: |
+  e2e/update-transition.spec.ts (3 tests) + mode de service worker du serveur de simulation (POST
+  /__e2e/service-worker?mode=workbox|legacy|kill-switch, helper setServiceWorkerMode). Le mode legacy est un
+  substitut de l'ancien service worker reprenant ses traits utiles à la transition (même URL, skipWaiting à
+  l'installation, clients.claim à l'activation, caches app-assets-control et app-assets-v-<hash>, navigations servies
+  depuis son shell) ; le mode kill-switch sert ops/kill-switch/service-worker.js tel quel.
+  Couvert : (1) ancien système -> Workbox : version Workbox en attente tant que l'ancien contrôle la page (F5
+  compris), un seul téléchargement complet supplémentaire, activation à la fermeture de toutes les fenêtres, caches
+  app-assets* supprimés, IndexedDB conservée ; (2) kill-switch : désenregistré, caches vides, page ouverte non
+  rechargée, IndexedDB intacte, application utilisable en ligne ; (3) retour par redéploiement de l'ancien système :
+  l'ancien service worker reprend la main (skipWaiting), l'application reste utilisable et prête hors ligne.
+  Stabilité : 3 exécutions consécutives des 5 suites de mise à jour, 25/25 vertes (2026-10-13).
+  Risques notés : après un retour à l'ancien système, le précache Workbox (~73 Mo) reste orphelin (l'ancien ne
+  supprime que les caches app-assets*) ; il est réutilisé si Workbox est redéployé. Un retour arrière reste
+  impossible si la version Workbox a monté la version du schéma Dexie (garde-fou à documenter en P6-05).
+  RESTE (humain) : transition-pilote et retour-redeploiement sur poste réel avec le build de référence ; validation
+  de la procédure par le tech lead.
 responsible: { lead: "dev-front", support: ["qa", "devops"] }
 sizing: { estimate: M, human_effort: "~2h", augmented_effort: "~15min" }
 description: |
@@ -1712,22 +1729,22 @@ definition_of_ready:
   - "Artefacts de l'ancienne version disponibles (build du commit de référence)"
 success_criteria:
   - description: "Caches app-assets-control et app-assets-v-* supprimés à l'activation du service worker Workbox"
-    validated: false
+    validated: true
   - description: "Un poste équipé de l'ancien système atteint le nouveau sans perte de données, avec un seul téléchargement complet supplémentaire"
-    validated: false
+    validated: partial  # e2e avec le substitut ; poste pilote à faire
   - description: "Kill-switch servi à la place de service-worker.js : service worker désenregistré, caches vidés, pages ouvertes non rechargées"
-    validated: false
+    validated: true
   - description: "Retour par redéploiement de l'ancien commit : l'application reste utilisable en ligne et se réinstalle toute seule"
-    validated: false
+    validated: partial  # e2e avec le substitut ; recette à faire
 tests:
   - name: "nettoyage-legacy"
     type: "e2e"
     assertion: "Avec des caches app-assets-control et app-assets-v-abc1234 créés avant l'activation, caches.keys() ne contient plus aucun nom commençant par app-assets après l'activation"
-    validated: false
+    validated: true
   - name: "kill-switch-e2e"
     type: "e2e"
     assertion: "Un marqueur posé sur window avant le déploiement du kill-switch est toujours présent après ; registration.active est nul et caches.keys() est vide"
-    validated: false
+    validated: true
   - name: "transition-pilote"
     type: "manual"
     assertion: "Sur un poste pilote : modale ancienne version, nouveau code, service worker Workbox en attente, fermeture complète, activation ; IndexedDB conservée ; un seul téléchargement complet supplémentaire constaté"
@@ -1739,7 +1756,7 @@ tests:
 definition_of_done:
   - "success_criteria et tests validés ; contrat qualité respecté ; relu par l'humain pilote"
   - "Procédure de transition validée par le tech lead"
-files: { create: ["e2e/update-transition.spec.ts"], modify: [], reference: ["ops/kill-switch/service-worker.js"] }
+files: { create: ["e2e/update-transition.spec.ts"], modify: ["e2e/update-sim-server.mjs", "e2e/update-flow.helpers.ts", "e2e/update-flow.interfaces.ts"], reference: ["ops/kill-switch/service-worker.js"] }
 ```
 
 #### P6-05: Documentation fr/en et procédure d'exploitation
@@ -1748,9 +1765,27 @@ id: P6-05
 title: "Documentation fr/en et procédure d'exploitation"
 phase: "Phase 6 - Acceptation, transition et déploiement"
 priority: high
-status: todo
-completion: 0%
-last_update: "2026-10-08"
+status: in_progress
+completion: 90%
+last_update: "2026-10-13"
+progress_notes: |
+  application_update.md réécrite (en, source de vérité du developer_guide, puis fr via skill-translate-docs) :
+  principes, cycle de vie, règles réseau et d'espace, interface, routes du service worker, build, journaux et
+  diagnostic, exploitation (transition, kill-switch, retour par redéploiement avec le garde-fou Dexie, changement du
+  seuil et de la réserve), différences connues, tests locaux. Hors liste initiale mais nécessaires (références
+  devenues fausses) : catalog_update.md fr/en (catalog-manifest.json, URL versionnées, import au démarrage suivant),
+  authentification.md fr/en (références à worker_update/service-worker.ts et à checkForUpdateOnce), api/services.rst
+  fr/en (app-update.service). package.json : e2e:update lance les 4 suites hors pannes.
+  Build Sphinx : un {@link} ajouté dans sw-messages.interfaces.ts faisait planter sphinx-js (« Not implemented »),
+  remplacé par du code inline ; make html-en et html-fr sans avertissement Sphinx (les avertissements TypeDoc sur les
+  *.spec.ts existent pour tous les services).
+  POINT TRANCHÉ (2026-10-13, utilisateur) : la redirection de l'ancien service worker est reproduite.
+  createShellNavigationHandler (src/sw/service-worker.helpers.ts) sert le shell en cache sans réseau ; sans shell en
+  cache, il interroge le réseau et transforme un 401/403 brut en 302 vers /auth/relogin. AuthService et Apache
+  inchangés. Tests : 5 unitaires + 2 e2e (faute navigationStatus du serveur de simulation) ; 5 suites e2e 27/27 sur
+  3 exécutions ; vitest 214 fichiers / 4997 tests ; docs fr/en (authentification.md §4.6, application_update.md)
+  mises à jour, build Sphinx sans avertissement.
+  RESTE : relecture humaine des pages.
 responsible: { lead: "dev-front", support: ["devops"] }
 sizing: { estimate: M, human_effort: "~2h", augmented_effort: "~15min" }
 description: |
@@ -1764,18 +1799,18 @@ definition_of_ready:
   - "P6-04 et P3-04 en statut done"
 success_criteria:
   - description: "Pages fr et en alignées (mêmes titres, même ordre) et sans référence à l'ancien mécanisme (keepalive, build_id, modale)"
-    validated: false
+    validated: true
   - description: "Procédure d'exploitation complète : kill-switch, retour par redéploiement, changement de seuil, diagnostic"
-    validated: false
+    validated: true
 tests:
   - name: "parite-fr-en"
     type: "review"
     assertion: "Les titres de niveau ## et ### sont identiques en nombre et en ordre entre les deux langues"
-    validated: false
+    validated: true
   - name: "plus-d-ancien-mecanisme"
     type: "review"
     assertion: "Recherche de keepalive, build_id et UPDATE_WATCHDOG dans les deux pages : 0 occurrence"
-    validated: false
+    validated: true
 definition_of_done:
   - "success_criteria et tests validés ; contrat qualité respecté ; relu par l'humain pilote"
   - "Build Sphinx sans avertissement"

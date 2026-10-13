@@ -295,7 +295,7 @@
         "preparing": "Préparation du mode hors ligne",
         "waiting-network": "Mode hors ligne en attente d'un réseau suffisant",
         "storage-insufficient": "Mode hors ligne : espace de stockage insuffisant",
-        "not-prepared": "Mode hors ligne non préparé"
+        "not-prepared": "Mode hors ligne indisponible"
       },
       "update-deferred-network": "Mise à jour reportée : le réseau est trop lent, elle sera téléchargée plus tard.",
       "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",

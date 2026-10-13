@@ -6,6 +6,7 @@ import { SHELL_URL } from './service-worker.constantes';
 import { createCatalogRoute, createCatalogStrategy, isPrefetchCatalogsMessage, prefetchCatalogs } from './catalogs';
 import {
   createSafeResponsePlugin,
+  createShellNavigationHandler,
   createShellNavigationRoute,
   createSwLogger,
   runActivation,
@@ -64,4 +65,12 @@ sw.addEventListener('message', (event) => {
 
 registerRoute(createCatalogRoute(sw.location.origin, catalogStrategy));
 registerRoute(new PrecacheRoute(controller));
-registerRoute(createShellNavigationRoute(controller.createHandlerBoundToURL(SHELL_URL)));
+registerRoute(
+  createShellNavigationRoute(
+    createShellNavigationHandler({
+      matchShell: () => controller.matchPrecache(SHELL_URL),
+      fetch: (request) => fetch(request),
+      origin: sw.location.origin
+    })
+  )
+);

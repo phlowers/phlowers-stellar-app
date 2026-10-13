@@ -25,7 +25,7 @@ export type SwOutgoingMessage = SwLogMessage | SwInstallRefusedMessage;
 /**
  * Page -> service worker: download the versioned catalog URLs (`/data/<file>?v=<sha>`) into the catalog cache,
  * one at a time. Subject to the network rule unless `force` (no catalog in IndexedDB yet). When a
- * `MessagePort` is transferred, the {@link PrefetchCatalogsResult} is posted back on it.
+ * `MessagePort` is transferred, the `PrefetchCatalogsResult` is posted back on it.
  */
 export interface PrefetchCatalogsMessage {
   type: 'PREFETCH_CATALOGS';

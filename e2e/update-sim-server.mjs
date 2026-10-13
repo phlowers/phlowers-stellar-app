@@ -49,7 +49,9 @@ function emptyFaults() {
     // `/assets_list.json` never answers (connection left open).
     stallManifest: false,
     // Paths answered 200 with bytes that differ from the manifest (integrity must reject them).
-    tamperedPaths: new Set()
+    tamperedPaths: new Set(),
+    // Status answered to every page navigation outside /auth/ (e.g. 401: Apache refusing a stale session).
+    navigationStatus: null
   };
 }
 
@@ -62,7 +64,9 @@ const state = {
   // Every app file path requested since the last reset (used to count re-downloads).
   requestLog: [],
   // Downlink (Mbit/s) seen by the service worker network rule, see SW_NETWORK_PRELUDE.
-  downlinkMbps: 10
+  downlinkMbps: 10,
+  // Script served at /service-worker.js: 'workbox' (built), 'legacy' (previous system stand-in) or 'kill-switch'.
+  serviceWorkerMode: 'workbox'
 };
 
 const csvVersions = {
@@ -271,7 +275,8 @@ function describeFaults() {
     redirectAfter: faults.redirectAfter,
     appFileRequestCount: faults.appFileRequestCount,
     stallManifest: faults.stallManifest,
-    tamperedPaths: [...faults.tamperedPaths]
+    tamperedPaths: [...faults.tamperedPaths],
+    navigationStatus: faults.navigationStatus
   };
 }
 
@@ -349,6 +354,9 @@ function handleFaultsRoute(request, response, requestUrl) {
   if (params.has('tamper')) {
     state.faults.tamperedPaths.add(params.get('tamper'));
   }
+  if (params.has('navigationStatus')) {
+    state.faults.navigationStatus = Number(params.get('navigationStatus'));
+  }
   sendJson(response, describeFaults());
 }
 
@@ -380,8 +388,33 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (pathname === '/__e2e/service-worker') {
+    if (request.method === 'POST') {
+      const mode = requestUrl.searchParams.get('mode');
+      if (!SERVICE_WORKER_MODES.has(mode)) {
+        send(response, 400, `Invalid mode, expected one of: ${[...SERVICE_WORKER_MODES].join(', ')}`);
+        return;
+      }
+      state.serviceWorkerMode = mode;
+    }
+    sendJson(response, { mode: state.serviceWorkerMode });
+    return;
+  }
+
   if (pathname === '/service-worker.js') {
-    send(response, 200, scenarioServiceWorker().code, 'application/javascript; charset=utf-8');
+    send(response, 200, servedServiceWorkerCode(), 'application/javascript; charset=utf-8');
+    return;
+  }
+
+  const isNavigation = request.headers['sec-fetch-mode'] === 'navigate';
+  if (state.faults.navigationStatus !== null && isNavigation && !pathname.startsWith('/auth/')) {
+    send(response, state.faults.navigationStatus, `Injected ${state.faults.navigationStatus} for ${pathname}`);
+    return;
+  }
+
+  // Stand-in for Apache's recovery endpoint (clears the OIDC session, then signs in again).
+  if (pathname === '/auth/relogin') {
+    send(response, 200, 'E2E relogin');
     return;
   }
 
@@ -583,6 +616,37 @@ function scenarioServiceWorker() {
   const result = { code, urls: new Set(manifest.map((entry) => entry.url)) };
   scenarioServiceWorkers.set(state.scenario, result);
   return result;
+}
+
+const KILL_SWITCH_CODE = fs.readFileSync(path.resolve(process.cwd(), 'ops/kill-switch/service-worker.js'), 'utf8');
+
+// Stand-in for the previous update system's worker, with the traits that matter for the transition: skipWaiting at
+// install, clients.claim at activation, app-assets-* cache names, navigations served from its cached shell.
+const LEGACY_SERVICE_WORKER_CODE = `const VERSION_CACHE = 'app-assets-v-e2e0001';
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil((async () => {
+    await (await caches.open('app-assets-control')).put('/__control', new Response('{}'));
+    await (await caches.open(VERSION_CACHE)).add('/index.html');
+  })());
+});
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode !== 'navigate') return;
+  event.respondWith(caches.match('/index.html', { cacheName: VERSION_CACHE }).then((cached) => cached || fetch(event.request)));
+});
+`;
+
+const SERVICE_WORKER_MODES = new Set(['workbox', 'legacy', 'kill-switch']);
+
+function servedServiceWorkerCode() {
+  if (state.serviceWorkerMode === 'legacy') {
+    return LEGACY_SERVICE_WORKER_CODE;
+  }
+  if (state.serviceWorkerMode === 'kill-switch') {
+    return KILL_SWITCH_CODE;
+  }
+  return scenarioServiceWorker().code;
 }
 
 server.listen(PORT, '127.0.0.1', () => {

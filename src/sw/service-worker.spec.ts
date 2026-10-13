@@ -4,17 +4,15 @@ import { NavigationRoute, Route } from 'workbox-routing';
 import { CacheFirst } from 'workbox-strategies';
 
 const precaching = vi.hoisted(() => {
-  const shellHandler = vi.fn();
   const controller = {
     addToCacheList: vi.fn(),
-    createHandlerBoundToURL: vi.fn(() => shellHandler),
+    matchPrecache: vi.fn(async (): Promise<Response | undefined> => undefined),
     install: vi.fn(async () => ({})),
     activate: vi.fn(async () => ({})),
     getCacheKeyForURL: vi.fn(),
     strategy: { cacheName: 'workbox-precache-v2-test' }
   };
   return {
-    shellHandler,
     controller,
     PrecacheController: vi.fn(function () {
       return controller;
@@ -74,7 +72,7 @@ describe('service worker entry point', () => {
     ]);
   });
 
-  it('registers the catalog route, the precache route and a shell navigation route bound to /index.html', () => {
+  it('registers the catalog route, the precache route and a shell navigation route serving /index.html', async () => {
     expect(routing.registerRoute).toHaveBeenCalledTimes(3);
     const catalogRoute = routing.registerRoute.mock.calls[0][0] as Route;
     expect(catalogRoute).toBeInstanceOf(Route);
@@ -82,8 +80,17 @@ describe('service worker entry point', () => {
     expect(routing.registerRoute.mock.calls[1][0]).toMatchObject({ kind: 'precache-route' });
     const navigationRoute = routing.registerRoute.mock.calls[2][0] as NavigationRoute;
     expect(navigationRoute).toBeInstanceOf(NavigationRoute);
-    expect(precaching.controller.createHandlerBoundToURL).toHaveBeenCalledWith('/index.html');
-    expect(navigationRoute.handler).toEqual({ handle: precaching.shellHandler });
+
+    const shell = new Response('shell');
+    precaching.controller.matchPrecache.mockResolvedValueOnce(shell);
+    const response = await navigationRoute.handler.handle({
+      request: new Request('https://stellar.test/studies/42'),
+      url: new URL('https://stellar.test/studies/42'),
+      event: {} as ExtendableEvent
+    });
+
+    expect(precaching.controller.matchPrecache).toHaveBeenCalledWith('/index.html');
+    expect(response).toBe(shell);
   });
 
   it('only listens to install, activate and message (fetch is handled by the Workbox router)', () => {

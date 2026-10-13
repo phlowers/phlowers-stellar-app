@@ -1,13 +1,15 @@
 import type { PrecacheEntry } from 'workbox-precaching';
-import type { RouteHandler, WorkboxPlugin } from 'workbox-core/types';
+import type { RouteHandler, RouteHandlerCallback, WorkboxPlugin } from 'workbox-core/types';
 import { NavigationRoute } from 'workbox-routing';
 import { evaluateBackgroundDownload } from '@services/app-update/network-rule.helpers';
 import { USER_DATA_STORAGE_RESERVE_BYTES } from '@services/app-update/storage-rule.constantes';
 import { computeMissingBytes, evaluateStorageForInstall } from '@services/app-update/storage-rule.helpers';
 import type { SizedManifestEntry } from '@services/app-update/storage-rule.interfaces';
 import {
+  AUTH_ERROR_STATUSES,
   LEGACY_CACHE_PREFIX,
   NAVIGATION_DENYLIST,
+  RELOGIN_URL,
   SW_INSTALL_REFUSED_MESSAGE_TYPE,
   SW_LOG_MESSAGE_TYPE
 } from './service-worker.constantes';
@@ -15,6 +17,7 @@ import type {
   ActivationDeps,
   GuardedInstallDeps,
   InstallRefusalReason,
+  ShellNavigationDeps,
   SwClients,
   SwInstallRefusedMessage,
   SwLogger,
@@ -67,6 +70,25 @@ export function createSafeResponsePlugin(): WorkboxPlugin {
 /** Serves the cached shell for navigations, except the paths the browser must handle natively. */
 export function createShellNavigationRoute(shellHandler: RouteHandler): NavigationRoute {
   return new NavigationRoute(shellHandler, { denylist: [...NAVIGATION_DENYLIST] });
+}
+
+/**
+ * Navigation handler: the cached shell without any network wait. Without a cached shell (e.g. caches cleared), the
+ * navigation goes to the network and a raw `401`/`403` from Apache is turned into a redirect to `/auth/relogin`
+ * instead of showing its error body.
+ */
+export function createShellNavigationHandler(deps: ShellNavigationDeps): RouteHandlerCallback {
+  return async ({ request }) => {
+    const cachedShell = await deps.matchShell();
+    if (cachedShell) {
+      return cachedShell;
+    }
+    const response = await deps.fetch(request);
+    if (AUTH_ERROR_STATUSES.includes(response.status)) {
+      return Response.redirect(new URL(RELOGIN_URL, deps.origin).href, 302);
+    }
+    return response;
+  };
 }
 
 /** Deletes the caches of the previous update system; returns the deleted names. */
