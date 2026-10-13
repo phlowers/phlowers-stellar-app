@@ -86,7 +86,7 @@ export class AdminComponent implements OnInit {
   });
   readonly downlinkText = computed(() => {
     const diagnostics = this.diagnostics();
-    if (!diagnostics || diagnostics.downlinkMbps === null) {
+    if (diagnostics?.downlinkMbps == null) {
       return this.translocoService.translate('admin.not-available');
     }
     return this.translocoService.translate('admin.downlink-value', {
@@ -107,8 +107,8 @@ export class AdminComponent implements OnInit {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.refreshDiagnostics();
+  ngOnInit(): void {
+    void this.refreshDiagnostics();
   }
 
   /** Asks for an update check; the download itself happens in the background and is never applied from here. */
