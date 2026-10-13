@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 
 const plotlyMocks = vi.hoisted(() => ({
   newPlot: vi.fn(),
@@ -89,8 +91,7 @@ describe('SupportPlotComponent', () => {
     const [plotId, plotData, layout] = plotlyMocks.newPlot.mock.calls[0];
     expect(plotId).toBe('plotly-output-support');
     expect(layout).toEqual({
-      autosize: true,
-      showlegend: false,
+      ...getPlotlyBaseLayout(),
       margin: { l: 0, r: 0, t: 0, b: 0 },
       width: 550
     });
@@ -101,7 +102,7 @@ describe('SupportPlotComponent', () => {
       z: [0, 1],
       type: 'scatter3d',
       mode: 'lines',
-      line: { color: 'blue', width: 2 }
+      line: { color: PlotlyDrawings.supportPlot.shapeLine.color, width: 2 }
     });
     expect(plotData[1]).toEqual({
       x: [10, 40],
@@ -120,7 +121,7 @@ describe('SupportPlotComponent', () => {
       z: [30],
       type: 'scatter3d',
       mode: 'markers',
-      marker: { color: 'red', opacity: 0.5, size: 10 }
+      marker: { color: PlotlyDrawings.supportPlot.selectedMarker.color, opacity: 0.5, size: 10 }
     });
   });
 

@@ -7,6 +7,8 @@ import plotly, { Data } from 'plotly.js-dist-min';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 
 /**
  * Formatted text data for plot annotations.
@@ -49,22 +51,9 @@ interface PlotData {
 export class SupportPlotComponent {
   private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
   private static readonly PLOT_LAYOUT = {
-    autosize: true,
-    showlegend: false,
+    ...getPlotlyBaseLayout(),
     margin: { l: 0, r: 0, t: 0, b: 0 },
     width: 550
-  } as const;
-  private static readonly SHAPE_LINE_CONFIG = {
-    color: 'blue',
-    width: 2
-  } as const;
-  private static readonly SELECTED_MARKER_CONFIG = {
-    color: 'red',
-    opacity: 0.5,
-    size: 10
-  } as const;
-  private static readonly TEXT_FONT_CONFIG = {
-    size: 15
   } as const;
 
   /** 2D array of coordinate tuples describing the support geometry. */
@@ -192,7 +181,7 @@ export class SupportPlotComponent {
       z: shapePoints.map((point) => point[2]),
       type: 'scatter3d',
       mode: 'lines',
-      line: SupportPlotComponent.SHAPE_LINE_CONFIG
+      line: PlotlyDrawings.supportPlot.shapeLine
     };
   }
 
@@ -204,7 +193,7 @@ export class SupportPlotComponent {
       type: 'scatter3d',
       mode: 'text',
       text: textToDisplay,
-      textfont: SupportPlotComponent.TEXT_FONT_CONFIG,
+      textfont: { size: PlotlyDrawings.supportPlot.textFontSize },
       insidetextanchor: 'start',
       textposition: 'middle center'
     };
@@ -217,7 +206,7 @@ export class SupportPlotComponent {
       z: [attachmentSetPoints[2]],
       type: 'scatter3d',
       mode: 'markers',
-      marker: SupportPlotComponent.SELECTED_MARKER_CONFIG
+      marker: PlotlyDrawings.supportPlot.selectedMarker
     };
   }
 }

@@ -1,12 +1,10 @@
 import { Dash } from 'plotly.js-dist-min';
+import { View } from '@shared/types/plot.types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { Distance, DistancePoint, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 import { Coord3, DistanceType, PointVisuals } from './distance.types';
-
-const DISTANCE_COLOR = '#674883';
-const DISTANCE_LINE_WIDTH = 4;
-const LINE_POINT_MARKER_SIZE = 6;
 
 /**
  * Maps a 3D coordinate tuple to Plotly x/y(/z) values based on the current view and side.
@@ -15,7 +13,7 @@ const LINE_POINT_MARKER_SIZE = 6;
  * - 2D profile: x → x, z → y
  * - 2D face:    y → x, z → y
  */
-const mapCoord = (coord: Coord3, view: string, side: string): { x: number; y: number; z?: number } => {
+const mapCoord = (coord: Coord3, view: View, side: string): { x: number; y: number; z?: number } => {
   const [cx, cy, cz] = coord;
   if (view === '3d') {
     return { x: cx, y: cy, z: cz };
@@ -28,7 +26,7 @@ const mapCoord = (coord: Coord3, view: string, side: string): { x: number; y: nu
 
 const midpoint3d = (a: Coord3, b: Coord3): Coord3 => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
 
-const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string, dash: Dash): DataObject => {
+const createLineTrace = (from: Coord3, to: Coord3, view: View, side: string, dash: Dash): DataObject => {
   const fromMapped = mapCoord(from, view, side);
   const toMapped = mapCoord(to, view, side);
   const is3d = view === '3d';
@@ -39,7 +37,7 @@ const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string, d
     z: is3d ? [fromMapped.z, toMapped.z] : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'lines',
-    line: { color: DISTANCE_COLOR, width: DISTANCE_LINE_WIDTH, dash },
+    line: { color: PlotlyDrawings.distance.color, width: PlotlyDrawings.distance.lineWidth[view], dash },
     showlegend: false,
     hoverinfo: 'skip',
     name: 'distance-line',
@@ -47,7 +45,7 @@ const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string, d
   } as DataObject;
 };
 
-const createMarkerTrace = (point: Coord3, view: string, side: string): DataObject => {
+const createMarkerTrace = (point: Coord3, view: View, side: string): DataObject => {
   const mapped = mapCoord(point, view, side);
   const is3d = view === '3d';
 
@@ -57,7 +55,11 @@ const createMarkerTrace = (point: Coord3, view: string, side: string): DataObjec
     z: is3d ? [mapped.z] : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'markers',
-    marker: { color: DISTANCE_COLOR, size: LINE_POINT_MARKER_SIZE, symbol: 'circle' },
+    marker: {
+      color: PlotlyDrawings.distance.color,
+      size: PlotlyDrawings.distance.markerSize[view],
+      symbol: PlotlyDrawings.distance.symbol
+    },
     showlegend: false,
     hoverinfo: 'skip',
     name: 'distance-marker',
@@ -79,7 +81,7 @@ const createTextTrace = (mid: { x: number; y: number }, text: string): DataObjec
     mode: 'text',
     text: [text],
     textposition: 'top center',
-    textfont: { color: DISTANCE_COLOR, size: 11 },
+    textfont: { color: PlotlyDrawings.distance.color, size: PlotlyDrawings.distance.label.size['2d'] },
     showlegend: false,
     hoverinfo: 'skip',
     name: 'distance-label',
@@ -104,7 +106,7 @@ const createPointVisuals = (
   obstacleCoord: Coord3,
   distancePoint: DistancePoint,
   distanceType: DistanceType,
-  view: string,
+  view: View,
   side: string,
   isFloor: boolean
 ): PointVisuals => {
@@ -112,20 +114,20 @@ const createPointVisuals = (
   const traces: DataObject[] = [];
 
   if (distanceType === 'oblique') {
-    traces.push(createLineTrace(linePoint, obstacleCoord, view, side, 'solid'));
+    traces.push(createLineTrace(linePoint, obstacleCoord, view, side, PlotlyDrawings.distance.lineStyle.direct));
   } else if (distanceType === 'vertical') {
     // Dotted: linePoint → virtualPointVertical (horizontal segment at wire altitude)
     // Solid:  virtualPointVertical → obstacleCoord (vertical drop)
     traces.push(
-      createLineTrace(linePoint, virtualPointVertical, view, side, 'dot'),
-      createLineTrace(virtualPointVertical, obstacleCoord, view, side, 'solid')
+      createLineTrace(linePoint, virtualPointVertical, view, side, PlotlyDrawings.distance.lineStyle.virtual),
+      createLineTrace(virtualPointVertical, obstacleCoord, view, side, PlotlyDrawings.distance.lineStyle.direct)
     );
   } else {
     // Dotted: linePoint → virtualPointHorizontal (vertical segment)
     // Solid:  virtualPointHorizontal → obstacleCoord (horizontal span)
     traces.push(
-      createLineTrace(linePoint, virtualPointHorizontal, view, side, 'dot'),
-      createLineTrace(virtualPointHorizontal, obstacleCoord, view, side, 'solid')
+      createLineTrace(linePoint, virtualPointHorizontal, view, side, PlotlyDrawings.distance.lineStyle.virtual),
+      createLineTrace(virtualPointHorizontal, obstacleCoord, view, side, PlotlyDrawings.distance.lineStyle.direct)
     );
   }
 
@@ -161,7 +163,7 @@ const createPointVisuals = (
   const annotation = {
     showarrow: false,
     text: labelText,
-    font: { color: DISTANCE_COLOR, size: 11 },
+    font: { color: PlotlyDrawings.distance.color, size: PlotlyDrawings.distance.label.size['3d'] },
     x: solidMidMapped.x,
     y: solidMidMapped.y,
     z: solidMidMapped.z,
@@ -178,7 +180,7 @@ const buildDistanceVisuals = (
   currentObstaclePointIndex: number,
   distanceType: DistanceType,
   litData: GetSectionOutput,
-  view: string,
+  view: View,
   side: string,
   isFloor: boolean
 ): { traces: DataObject[]; annotations: Partial<Plotly.Annotations>[] } => {

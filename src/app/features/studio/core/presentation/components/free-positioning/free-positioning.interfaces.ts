@@ -86,20 +86,6 @@ export interface PlotLayout {
   };
 }
 
-export interface PlotAnnotation {
-  x: number;
-  y: number;
-  text: string;
-  showarrow: boolean;
-  arrowhead?: number;
-  standoff?: number;
-  yshift?: number;
-  font?: {
-    color?: string;
-    size?: number;
-  };
-}
-
 export interface PlotElement extends HTMLElement {
   _fullLayout?: PlotLayout;
 }

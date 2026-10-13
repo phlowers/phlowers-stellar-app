@@ -5,38 +5,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { TranslocoService } from '@jsverse/transloco';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { View } from '@shared/types/plot.types';
 
-// primary-600 of the app palette
-export const CUT_STRANDS_COLOR = '#7D5A9F';
-
-/**
- * FontAwesome glyph for the cut strands marking.
- * `scissors` from FontAwesome Free 6+ Solid (unicode `f0c4`).
- */
-export const CUT_STRANDS_ICON = '&#xf0c4;';
-
-export const CUT_STRANDS_ICON_SIZE = 12;
-export const CUT_STRANDS_ICON_PADDING = 6;
+// Plotly's default annotation border width, which the icon keeps
+const ICON_BORDER_WIDTH = 1;
 
 /**
- * Vertical pixel distance between the anchor point and the centre of the icon.
+ * Length of the dashed line, from the anchor point up to the bottom edge of the icon box (pixels, whatever the zoom).
  *
  * @remarks
- * Always in pixels, never in data units: the marking keeps the same gap at any zoom level.
+ * The icon box is centered `offsetY` px above the anchor. Its half height is half the glyph, its padding and its
+ * border, taken up to the next whole pixel: Plotly sizes the glyph box from the font metrics, up to 1 px taller than
+ * the icon size (13 px for a 12 px icon).
  */
-export const CUT_STRANDS_OFFSET_Y = 90;
-
-// Half height of the icon box (glyph, padding and border), so the dashed line stops at the box edge
-const CUT_STRANDS_ICON_HALF_HEIGHT = 14;
-
-// Length of the dashed line, from the anchor point up to the bottom of the icon
-export const CUT_STRANDS_LINE_LENGTH = CUT_STRANDS_OFFSET_Y - CUT_STRANDS_ICON_HALF_HEIGHT;
-
-export const CUT_STRANDS_DASH_LENGTH = 6;
-export const CUT_STRANDS_DASH_GAP = 4;
-
-// Text color of the hover label, over a CUT_STRANDS_COLOR background
-export const CUT_STRANDS_HOVER_TEXT_COLOR = '#ffffff';
+export const getCutStrandsLineLength = (view: View): number => {
+  const { offsetY, iconSize, borderPad } = PlotlyDrawings.cutStrands;
+  const iconHalfHeight = Math.floor(iconSize[view] / 2 + borderPad[view] + ICON_BORDER_WIDTH) + 1;
+  return offsetY - iconHalfHeight;
+};
 
 /**
  * Returns the hover label of the cut strands marking.

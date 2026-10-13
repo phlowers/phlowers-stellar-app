@@ -10,16 +10,12 @@ import {
   filterPointsForSide,
   findNearestPointAtPixel
 } from './free-positioning-traces.helpers';
-import {
-  CATEGORY_COLORS,
-  CATEGORY_SYMBOLS,
-  DEFAULT_POINT_SIZE,
-  EDITABLE_POINT_COLOR,
-  EDITABLE_POINT_SIZE
-} from './free-positioning.constantes';
 import { FreePositioningPoint, PlotLayout } from './free-positioning.interfaces';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 describe('free-positioning-traces helpers', () => {
+  const { obstacle, loads } = PlotlyDrawings.freePositioning.category;
+
   const samplePoints: FreePositioningPoint[] = [
     {
       id: 'obs-1',
@@ -140,9 +136,81 @@ describe('free-positioning-traces helpers', () => {
       expect(obstacleTrace.x).toEqual([50, 80]);
       expect(obstacleTrace.y).toEqual([120, 110]);
       expect(obstacleTrace.mode).toBe('text+markers');
-      expect(obstacleTrace.marker.size).toEqual([EDITABLE_POINT_SIZE, DEFAULT_POINT_SIZE]);
-      expect(obstacleTrace.marker.color).toEqual([EDITABLE_POINT_COLOR, CATEGORY_COLORS.obstacle]);
-      expect(obstacleTrace.marker.symbol).toBe(CATEGORY_SYMBOLS.obstacle);
+      expect(obstacleTrace.marker.size).toEqual([obstacle.selected.size, obstacle.unselected.size]);
+      expect(obstacleTrace.marker.color).toEqual([obstacle.selected.color, obstacle.unselected.color]);
+      expect(obstacleTrace.marker.symbol).toBe(obstacle.symbol);
+    });
+
+    describe('floor line', () => {
+      interface FloorTrace {
+        mode: string;
+        x: number[];
+        y: number[];
+        line?: { color: string; width: number; dash: string };
+      }
+      const floorPoint = (id: string, alongSpan: number, altitude: number): FreePositioningPoint => ({
+        id,
+        category: 'floor',
+        alongSpan,
+        lateral: null,
+        altitude,
+        editable: false
+      });
+
+      it('should join the floor points, in their order, with the configured line', () => {
+        const points = [floorPoint('f-1', 10, 100), floorPoint('f-2', 40, 90), floorPoint('f-3', 25, 95)];
+        const [trace] = buildFreePositioningTraces(points, 'profile', ['floor']) as unknown as FloorTrace[];
+
+        expect(trace.mode).toBe('lines+markers');
+        expect(trace.x).toEqual([10, 40, 25]);
+        expect(trace.y).toEqual([100, 90, 95]);
+        expect(trace.line).toEqual({
+          color: PlotlyDrawings.freePositioning.floorLine.color,
+          width: PlotlyDrawings.freePositioning.floorLine.width,
+          dash: PlotlyDrawings.freePositioning.floorLine.style
+        });
+      });
+
+      it('should keep the labels of the floor points when it draws the line', () => {
+        const points = [{ ...floorPoint('f-1', 10, 100), name: 'Floor 1' }, floorPoint('f-2', 40, 90)];
+        const [trace] = buildFreePositioningTraces(points, 'profile', ['floor']) as unknown as FloorTrace[];
+
+        expect(trace.mode).toBe('text+lines+markers');
+      });
+
+      it('should not draw a line for a single floor point', () => {
+        const [trace] = buildFreePositioningTraces([floorPoint('f-1', 10, 100)], 'profile', [
+          'floor'
+        ]) as unknown as FloorTrace[];
+
+        expect(trace.mode).toBe('markers');
+        expect(trace.line).toBeUndefined();
+      });
+
+      it('should not draw a line for the other categories', () => {
+        const traces = buildFreePositioningTraces(samplePoints, 'profile', [
+          'obstacle',
+          'loads',
+          'distance'
+        ]) as unknown as FloorTrace[];
+
+        traces.forEach((trace) => expect(trace.line).toBeUndefined());
+      });
+    });
+
+    it('should outline each point with the outline of its category and state', () => {
+      const traces = buildFreePositioningTraces(samplePoints, 'profile', ['obstacle', 'loads']);
+      const lineOf = (name: string) =>
+        (traces.find((t) => (t as { name: string }).name === name) as { marker: { line: unknown } }).marker.line;
+
+      expect(lineOf('obstacle-markers')).toEqual({
+        width: [obstacle.selected.outlineWidth, obstacle.unselected.outlineWidth],
+        color: [obstacle.selected.outlineColor, obstacle.unselected.outlineColor]
+      });
+      expect(lineOf('loads-markers')).toEqual({
+        width: [loads.unselected.outlineWidth],
+        color: [loads.unselected.outlineColor]
+      });
     });
 
     it('should render loads points as square markers on their category trace', () => {
@@ -159,7 +227,7 @@ describe('free-positioning-traces helpers', () => {
       expect(loadTrace.name).toBe('loads-markers');
       expect(loadTrace.x).toEqual([40]);
       expect(loadTrace.y).toEqual([135]);
-      expect(loadTrace.marker.symbol).toBe(CATEGORY_SYMBOLS.loads);
+      expect(loadTrace.marker.symbol).toBe(PlotlyDrawings.freePositioning.category.loads.symbol);
     });
 
     it('should use lateral coordinate when side is face', () => {
@@ -183,9 +251,9 @@ describe('free-positioning-traces helpers', () => {
 
       const traces = buildFreePositioningTraces(points, 'profile', ['loads']);
       const trace = traces[0] as { marker: { color: string[]; size: number[]; symbol: string } };
-      expect(trace.marker.color).toEqual([EDITABLE_POINT_COLOR]);
-      expect(trace.marker.size).toEqual([EDITABLE_POINT_SIZE]);
-      expect(trace.marker.symbol).toBe(CATEGORY_SYMBOLS.loads);
+      expect(trace.marker.color).toEqual([loads.selected.color]);
+      expect(trace.marker.size).toEqual([loads.selected.size]);
+      expect(trace.marker.symbol).toBe(loads.symbol);
     });
 
     it('should disable hover on all point traces', () => {

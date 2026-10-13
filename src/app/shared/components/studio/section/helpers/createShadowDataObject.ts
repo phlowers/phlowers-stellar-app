@@ -5,62 +5,52 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
-import { getShadowColor, SHADOW_OPACITY } from './plot.constants';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getLine, getMarker } from './createPlotDataObject';
 import { PlotObjectsType, Side, View } from '@shared/types/plot.types';
+
+const RGBA_PATTERN = /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/;
+
+/**
+ * Color of the shadow traces, and the trace opacity that goes with it.
+ *
+ * @remarks
+ * Every shadow trace uses the span shadow color, alpha included. The 2D view (SVG) draws it as is. Plotly's WebGL
+ * renderer (3D) does not apply the alpha of a color: it blends the color as if its alpha was already applied, which
+ * washes it out. In 3D, an `rgba()` color is therefore split into its opaque color and its alpha, given as the trace
+ * opacity: the only transparency WebGL blends correctly. Either way the alpha is applied once, never stacked.
+ */
+const getShadowLook = (view: View): { color: string; opacity?: number } => {
+  if (view === '2d') return { color: PlotlyDrawings.span.shadow.color2d };
+  const color = PlotlyDrawings.span.shadow.color3d;
+  const rgba = RGBA_PATTERN.exec(color);
+  return rgba ? { color: `rgb(${rgba[1]}, ${rgba[2]}, ${rgba[3]})`, opacity: Number(rgba[4]) } : { color };
+};
 
 /**
  * Creates line style for shadow traces.
- * Uses same width as normal traces but with reduced opacity for overlay effect.
- * All shadow traces use the same color as spans (dodgerblue) for consistency.
+ * Uses the same width as normal traces for a perfect overlay, in the shadow color.
  */
 const getShadowLine = (
-  view: View
+  type: PlotObjectsType,
+  view: View,
+  color: string
 ): {
   color: string;
   dash: Dash;
   width: number;
-} => {
-  // Same width as normal traces (8 for 3d, 4 for 2d) for perfect overlay
-  const width = view === '3d' ? 8 : 4;
+} => ({ ...getLine(type, view), color });
 
-  return {
-    color: getShadowColor(view),
-    dash: 'solid',
-    width
-  };
-};
-
-/**
- * Creates marker style for shadow traces.
- * Uses same size as normal traces but with reduced opacity.
- * All shadow traces use the same color as spans (dodgerblue) for consistency.
- */
-const getShadowMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
-  let size: number;
-  switch (type) {
-    case 'spans':
-      size = view === '3d' ? 3 : 5;
-      break;
-    case 'supports':
-      size = view === '3d' ? 3 : 4;
-      break;
-    case 'insulators':
-      size = view === '3d' ? 4 : 6;
-      break;
-    default:
-      size = 3;
-  }
-  return {
-    size,
-    opacity: SHADOW_OPACITY,
-    color: getShadowColor(view)
-  };
-};
+/** Creates marker style for shadow traces: same size as normal traces, in the shadow color. */
+const getShadowMarker = (type: PlotObjectsType, view: View, color: string): PlotData['marker'] => ({
+  ...getMarker(type, view),
+  color
+});
 
 /**
  * Creates an array of shadow Plotly data objects from raw 3D coordinate arrays
- * for a specific section object type. Shadow objects use a uniform color with
- * reduced opacity to serve as background reference traces.
+ * for a specific section object type. Shadow objects use a uniform, translucent color
+ * to serve as background reference traces.
  * @category Studio
  * @param data - Array of polyline coordinate arrays (`[x, y, z][][]`).
  * @param startSupport - Zero-based index of the first support to include.
@@ -79,6 +69,7 @@ export const createShadowDataObject = (
   side: Side
 ): Data[] => {
   const slidedData = data.slice(startSupport, type === 'spans' ? endSupport : endSupport + 1);
+  const shadow = getShadowLook(view);
   return slidedData.map((points) => {
     const x = points.map((point) => point[0]);
     const y = points.map((point) => point[1]);
@@ -89,9 +80,9 @@ export const createShadowDataObject = (
       y: view === '3d' ? y : z,
       type: view === '3d' ? 'scatter3d' : 'scatter',
       mode: 'lines+markers',
-      line: getShadowLine(view),
-      marker: getShadowMarker(type, view),
-      opacity: view === '3d' ? SHADOW_OPACITY : undefined,
+      line: getShadowLine(type, view, shadow.color),
+      marker: getShadowMarker(type, view, shadow.color),
+      ...(shadow.opacity !== undefined && { opacity: shadow.opacity }),
       hoverinfo: 'skip',
       showlegend: false,
       name: `Base ${type}`
