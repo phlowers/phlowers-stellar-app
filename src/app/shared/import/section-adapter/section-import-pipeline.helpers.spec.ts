@@ -98,6 +98,19 @@ describe('getMissingRequiredFields', () => {
     expect(getMissingRequiredFields({ ...buildValidSection(), name: '   ' })).toContain('name');
   });
 
+  it.each([
+    { name: null },
+    { name: undefined },
+    { name: 42 },
+    { name: false },
+    { name: {} },
+    { name: [] }
+  ])('should report "name" without throwing for a non-string value: $name', ({ name }) => {
+    const section = { ...buildValidSection(), name } as unknown as Section;
+
+    expect(getMissingRequiredFields(section)).toEqual(['name']);
+  });
+
   it('should report "type" when falsy', () => {
     expect(getMissingRequiredFields({ ...buildValidSection(), type: '' as unknown as Section['type'] })).toContain(
       'type'
@@ -110,6 +123,10 @@ describe('getMissingRequiredFields', () => {
 
   it('should report "cable_name" when missing and requireCableName is true (default)', () => {
     expect(getMissingRequiredFields({ ...buildValidSection(), cable_name: undefined })).toContain('cable_name');
+  });
+
+  it.each([[], [buildSupport()]])('should report "supports" when fewer than two supports are present', (supports) => {
+    expect(getMissingRequiredFields({ ...buildValidSection(), supports })).toContain('supports');
   });
 
   it('should not report "cable_name" when requireCableName is false', () => {
