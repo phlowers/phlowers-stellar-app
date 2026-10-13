@@ -25,8 +25,7 @@ import {
 } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
-import { DEFAULT_CUT_STRANDS } from '@features/studio/toolbar/presentation/components/strand-rrts/strand-rrts.constantes';
-import { getCableStrandLayers } from '@features/studio/toolbar/presentation/components/strand-rrts/strand-rrts.helpers';
+import { DEFAULT_CUT_STRANDS, getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 import { Support } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';

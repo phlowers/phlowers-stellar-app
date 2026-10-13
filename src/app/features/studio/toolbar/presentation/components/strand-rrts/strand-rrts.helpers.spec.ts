@@ -1,4 +1,5 @@
-import { getCableStrandLayers, getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
+import { getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
+import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
 
 describe('getCableStrandLayers', () => {
   it('keeps the layers with strands, with their strand count', () => {

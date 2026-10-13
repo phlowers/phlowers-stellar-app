@@ -36,8 +36,9 @@ import { maxOf } from '@shared/helpers/maxOf.helpers';
 import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
 import { RrtsResults } from '@features/studio/toolbar/application/services/strand-rrts.interfaces';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { DISTANCE_MAX, DEFAULT_CUT_STRANDS, WORK_LOAD_ICONS } from './strand-rrts.constantes';
-import { getCableStrandLayers, getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
+import { DEFAULT_CUT_STRANDS, getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
+import { DISTANCE_MAX, WORK_LOAD_ICONS } from './strand-rrts.constantes';
+import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
 import { NotificationKey, RrtsFormValue } from './strand-rrts.interfaces';
 
 @Component({
