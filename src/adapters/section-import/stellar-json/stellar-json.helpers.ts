@@ -43,9 +43,11 @@ export function extractStellarUuid(json: unknown): string | null {
 
 /** Merges a raw section onto an empty one so missing optional fields get defaults. */
 export function mapRawToSection(raw: Record<string, unknown>): Section {
-  const uuid = typeof raw['uuid'] === 'string' ? raw['uuid'].trim() : raw['uuid'];
+  const emptySection = createEmptySection();
+  const rawUuid = typeof raw['uuid'] === 'string' ? raw['uuid'].trim() : '';
+  const uuid = rawUuid || emptySection.uuid;
   return {
-    ...createEmptySection(),
+    ...emptySection,
     ...raw,
     uuid,
     supports: mapRawSupports(raw['supports'])

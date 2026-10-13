@@ -95,6 +95,15 @@ describe('StellarJsonAdapter', () => {
       expect(coordinates).toBeUndefined();
     });
 
+    it.each([
+      ['missing', { supports: [] }],
+      ['blank', { uuid: '  ', supports: [] }]
+    ])('should keep a generated uuid when the raw uuid is %s', async (_label, rawSection) => {
+      const { section } = await adapter.import(sourceOf(rawSection, 'a.json'));
+
+      expect(section.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    });
+
     it('should map supports to an empty array when absent, empty or not an array', async () => {
       for (const supports of [undefined, [], 'nope']) {
         const { section } = await adapter.import(sourceOf(buildSectionJson({ supports }), 'a.json'));
