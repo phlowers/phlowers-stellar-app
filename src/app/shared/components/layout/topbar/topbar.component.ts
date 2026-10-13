@@ -15,11 +15,12 @@ import { AppUpdateService } from '@services/app-update/app-update.service';
 import { offlineStatusKind } from '@services/app-update/app-update.helpers';
 import { APP_UPDATE_I18N, OFFLINE_STATUS_I18N_PREFIX } from '@services/app-update/app-update.constantes';
 import { TranslocoModule } from '@jsverse/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 import { OFFLINE_STATUS_ICONS, OFFLINE_STATUS_WARNING_KINDS } from './topbar.constantes';
 
 @Component({
   selector: 'app-topbar',
-  imports: [IconComponent, TranslocoModule],
+  imports: [IconComponent, TranslocoModule, TooltipModule],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

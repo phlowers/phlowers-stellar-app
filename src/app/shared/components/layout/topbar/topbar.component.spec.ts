@@ -187,10 +187,12 @@ describe('TopbarComponent', () => {
       expect(indicator.classList).not.toContain('offline-status--warning');
     });
 
-    it('explains a postponed update in a tooltip while staying ready', () => {
+    it('explains a postponed update as status text and a focusable tooltip while staying ready', () => {
       updateState.set('ready-offline');
       fixture.detectChanges();
-      expect(getByTestId('offline-status-indicator')!.getAttribute('title')).toBeNull();
+      const indicator = getByTestId('offline-status-indicator')!;
+      expect(indicator.getAttribute('tabindex')).toBeNull();
+      expect(getByTestId('offline-status-detail')).toBeNull();
 
       lastRefusal.set({
         type: 'SW_INSTALL_REFUSED',
@@ -200,11 +202,30 @@ describe('TopbarComponent', () => {
         freeBytes: null
       });
       fixture.detectChanges();
-      expect(getByTestId('offline-status-indicator')!.getAttribute('title')).toBe('Update postponed: network too slow');
+      expect(indicator.getAttribute('tabindex')).toBe('0');
+      expect(indicator.getAttribute('title')).toBeNull();
+      expect(getByTestId('offline-status-detail')?.textContent).toBe('Update postponed: network too slow');
 
       lastRefusal.set({ ...lastRefusal()!, reason: 'storage-insufficient' });
       fixture.detectChanges();
-      expect(getByTestId('offline-status-indicator')!.getAttribute('title')).toBe('Free up space');
+      expect(getByTestId('offline-status-detail')?.textContent).toBe('Free up space');
+    });
+
+    it('shows the tooltip on keyboard focus', () => {
+      updateState.set('ready-offline');
+      lastRefusal.set({
+        type: 'SW_INSTALL_REFUSED',
+        reason: 'save-data',
+        downlinkMbps: null,
+        requiredBytes: null,
+        freeBytes: null
+      });
+      fixture.detectChanges();
+
+      getByTestId('offline-status-indicator')!.dispatchEvent(new FocusEvent('focus'));
+      fixture.detectChanges();
+
+      expect(document.body.querySelector('.p-tooltip')?.textContent).toContain('Update postponed: network too slow');
     });
   });
 });
