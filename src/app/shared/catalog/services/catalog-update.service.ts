@@ -21,7 +21,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { catalogDataUrl } from '@shared/catalog/csv-import/csv-import.client.helpers';
 import { CATALOG_MANIFEST_TIMEOUT_MS, CATALOG_MANIFEST_URL } from './catalog-update.constantes';
 import { fetchCatalogHashes } from './catalog-update.helpers';
-import { CatalogImporter, StaleCatalog } from './catalog-update.interfaces';
+import { CatalogImporter, StaleCatalog, StaleCatalogsOutcome } from './catalog-update.interfaces';
 
 /**
  * Orchestrates catalog CSV/JSON updates independently of the application
@@ -90,6 +90,15 @@ export class CatalogUpdateService {
     if (staleCatalogs.length === 0) {
       return;
     }
+    const { failedCatalogs, toPrefetch } = await this.processStaleCatalogs(staleCatalogs);
+    this.notifyCatalogFailures(failedCatalogs);
+    if (toPrefetch.length > 0) {
+      this.requestPrefetch(toPrefetch);
+    }
+  }
+
+  /** Imports what can be imported right now and lists the catalogs to prefetch in the background. */
+  private async processStaleCatalogs(staleCatalogs: StaleCatalog[]): Promise<StaleCatalogsOutcome> {
     const cache = await this.openCatalogCache();
     const prefetchAvailable = Boolean(navigator.serviceWorker?.controller);
     const failedCatalogs: string[] = [];
@@ -98,17 +107,15 @@ export class CatalogUpdateService {
       const url = catalogDataUrl(globalThis.location.origin, catalog.fileName, catalog.latestHash);
       const cached = cache ? (await cache.match(url)) !== undefined : false; //NOSONAR — one catalog at a time
       if (cached || catalog.storedHash === undefined || !prefetchAvailable) {
-        if (!(await this.importCatalog(catalog, cached ? cache : null, url))) {
+        const imported = await this.importCatalog(catalog, cached ? cache : null, url); //NOSONAR — one at a time
+        if (!imported) {
           failedCatalogs.push(catalog.fileName);
         }
       } else {
         toPrefetch.push(url);
       }
     }
-    this.notifyCatalogFailures(failedCatalogs);
-    if (toPrefetch.length > 0) {
-      this.requestPrefetch(toPrefetch);
-    }
+    return { failedCatalogs, toPrefetch };
   }
 
   /** Catalogs listed in the manifest whose stored hash is missing or differs from the latest one. */

@@ -96,7 +96,7 @@ export async function prefetchCatalogs(deps: PrefetchCatalogsDeps): Promise<Pref
   for (const url of urls) {
     try {
       const request = new Request(url, { redirect: 'error', credentials: 'same-origin' });
-      const response = await deps.strategy.handle({ request, event: deps.event });
+      const response = await deps.strategy.handle({ request, event: deps.event }); //NOSONAR — one download at a time
       (response.ok && !response.redirected ? result.cached : result.failed).push(url);
     } catch {
       result.failed.push(url);

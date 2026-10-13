@@ -379,6 +379,7 @@ describe('AdminComponent', () => {
         quotaBytes: null
       });
       const newFixture = TestBed.createComponent(AdminComponent);
+      newFixture.detectChanges();
       await newFixture.whenStable();
 
       expect(newFixture.componentInstance.downlinkText()).toBe('admin.not-available');

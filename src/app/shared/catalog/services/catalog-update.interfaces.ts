@@ -13,3 +13,10 @@ export interface StaleCatalog {
   storedHash: string | undefined;
   importFn: CatalogImporter;
 }
+
+/** Outcome of processing the stale catalogs of one start. */
+export interface StaleCatalogsOutcome {
+  failedCatalogs: string[];
+  /** URLs of the catalogs to download in the background for the next start. */
+  toPrefetch: string[];
+}

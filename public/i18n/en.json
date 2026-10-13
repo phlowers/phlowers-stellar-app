@@ -220,6 +220,8 @@
   "admin": {
     "app-version": "App version",
     "check-app-version": "Check for updates",
+    "col-property": "Property",
+    "col-value": "Value",
     "build-hash": "Build Hash",
     "build-datetime": "Build datetime",
     "build-version": "Build version",

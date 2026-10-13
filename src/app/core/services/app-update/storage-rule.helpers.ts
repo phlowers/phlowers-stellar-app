@@ -24,11 +24,9 @@ export async function computeMissingBytes(
   entries: readonly SizedManifestEntry[],
   isCached: (entry: SizedManifestEntry) => Promise<boolean>
 ): Promise<number> {
-  let missingBytes = 0;
-  for (const entry of entries) {
-    if (!(await isCached(entry))) {
-      missingBytes += entry.sizeBytes ?? 0;
-    }
-  }
-  return missingBytes;
+  const cachedFlags = await Promise.all(entries.map((entry) => isCached(entry)));
+  return entries.reduce(
+    (missingBytes, entry, index) => missingBytes + (cachedFlags[index] ? 0 : (entry.sizeBytes ?? 0)),
+    0
+  );
 }

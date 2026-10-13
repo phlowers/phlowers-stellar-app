@@ -220,6 +220,8 @@
   "admin": {
     "app-version": "Version de l'application",
     "check-app-version": "Vérifier les mises à jour",
+    "col-property": "Propriété",
+    "col-value": "Valeur",
     "build-hash": "Hash du build",
     "build-datetime": "Date et heure du build",
     "build-version": "Version du build",

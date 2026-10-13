@@ -171,8 +171,7 @@ describe('TopbarComponent', () => {
       expect(indicator.dataset['status']).toBe(kind);
       expect(indicator.textContent).toContain(label);
       expect(component.offlineIcon()).toBe(icon);
-      expect(indicator.getAttribute('role')).toBe('status');
-      expect(indicator.getAttribute('aria-live')).toBe('polite');
+      expect(indicator.tagName).toBe('OUTPUT');
       expect(indicator.querySelector('app-icon')?.getAttribute('aria-hidden')).toBe('true');
     });
 
