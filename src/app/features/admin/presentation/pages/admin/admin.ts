@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
 import { AppUpdateService } from '@services/app-update/app-update.service';
@@ -56,7 +56,7 @@ import { checkResultKey, refusalReasonKey, toMegabytes } from './admin.helpers';
   providers: [ConfirmationService, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit {
   readonly appUpdateService = inject(AppUpdateService);
   readonly onlineService = inject(OnlineService);
   private readonly messageService = inject(MessageService);
@@ -105,7 +105,10 @@ export class AdminComponent {
 
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
-    void this.refreshDiagnostics();
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.refreshDiagnostics();
   }
 
   /** Asks for an update check; the download itself happens in the background and is never applied from here. */

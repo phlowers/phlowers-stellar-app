@@ -63,7 +63,7 @@ export function toPrecacheEntry(entry: SizedManifestEntry): PrecacheEntry {
 /** Refuses redirected (e.g. OIDC login page) or non-OK responses: the installation then fails atomically. */
 export function createSafeResponsePlugin(): WorkboxPlugin {
   return {
-    cacheWillUpdate: async ({ response }) => (response.ok && !response.redirected ? response : null)
+    cacheWillUpdate: ({ response }) => Promise.resolve(response.ok && !response.redirected ? response : null)
   };
 }
 

@@ -12,6 +12,12 @@
     </button>
     }
     <table class="my-2 w-full">
+      <thead>
+        <tr>
+          <th scope="col" class="text-left">{{ 'admin.col-property' | transloco }}</th>
+          <th scope="col" class="text-left">{{ 'admin.col-value' | transloco }}</th>
+        </tr>
+      </thead>
       <tr>
         <td>{{ 'admin.build-version' | transloco }}</td>
         <td>{{ appUpdateService.runningVersion().version }}</td>
