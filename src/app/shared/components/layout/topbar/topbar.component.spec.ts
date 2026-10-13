@@ -57,7 +57,7 @@ describe('TopbarComponent', () => {
               'shared.app-update-service.offline-status.preparing': 'Preparing offline mode',
               'shared.app-update-service.offline-status.waiting-network': 'Waiting for a fast enough network',
               'shared.app-update-service.offline-status.storage-insufficient': 'Not enough storage',
-              'shared.app-update-service.offline-status.not-prepared': 'Offline mode not prepared',
+              'shared.app-update-service.offline-status.not-prepared': 'Offline mode unavailable',
               'shared.app-update-service.update-deferred-network': 'Update postponed: network too slow',
               'shared.app-update-service.storage-insufficient-detail': 'Free up space'
             }
@@ -161,8 +161,8 @@ describe('TopbarComponent', () => {
       ['installing', 'preparing', 'Preparing offline mode', 'cloud_sync'],
       ['deferred-network', 'waiting-network', 'Waiting for a fast enough network', 'network_check'],
       ['storage-insufficient', 'storage-insufficient', 'Not enough storage', 'sd_card_alert'],
-      ['not-installed', 'not-prepared', 'Offline mode not prepared', 'cloud_off'],
-      ['unsupported', 'not-prepared', 'Offline mode not prepared', 'cloud_off']
+      ['not-installed', 'not-prepared', 'Offline mode unavailable', 'cloud_off'],
+      ['unsupported', 'not-prepared', 'Offline mode unavailable', 'cloud_off']
     ])('state %s renders the %s status', (state, kind, label, icon) => {
       updateState.set(state);
       fixture.detectChanges();

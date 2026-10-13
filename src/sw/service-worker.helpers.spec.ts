@@ -4,6 +4,7 @@ import type { SizedManifestEntry } from '@services/app-update/storage-rule.inter
 import { SHELL_URL } from './service-worker.constantes';
 import {
   createSafeResponsePlugin,
+  createShellNavigationHandler,
   createShellNavigationRoute,
   createSwLogger,
   deleteLegacyCaches,
@@ -191,6 +192,56 @@ describe('service worker helpers', () => {
 
     it('binds the shell to /index.html', () => {
       expect(SHELL_URL).toBe('/index.html');
+    });
+  });
+
+  describe('createShellNavigationHandler', () => {
+    const navigate = (deps: Partial<Parameters<typeof createShellNavigationHandler>[0]>) => {
+      const fetch = deps.fetch ?? vi.fn(async () => new Response('network'));
+      const handler = createShellNavigationHandler({
+        matchShell: async () => undefined,
+        origin: ORIGIN,
+        ...deps,
+        fetch
+      });
+      const request = new Request(`${ORIGIN}/studies/42`);
+      return {
+        fetch,
+        request,
+        run: () => handler({ request, url: new URL(request.url), event: {} as ExtendableEvent })
+      };
+    };
+
+    it('serves the cached shell without any network request', async () => {
+      const shell = new Response('shell');
+      const { fetch, run } = navigate({ matchShell: async () => shell });
+
+      expect(await run()).toBe(shell);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the network when the shell is not cached', async () => {
+      const network = new Response('page');
+      const { fetch, request, run } = navigate({ fetch: vi.fn(async () => network) });
+
+      expect(await run()).toBe(network);
+      expect(fetch).toHaveBeenCalledWith(request);
+    });
+
+    it.each([401, 403])('redirects a raw %s to /auth/relogin when the shell is not cached', async (status) => {
+      const { run } = navigate({ fetch: vi.fn(async () => new Response('denied', { status })) });
+
+      const response = (await run()) as Response;
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toBe(`${ORIGIN}/auth/relogin`);
+    });
+
+    it('passes other errors through unchanged', async () => {
+      const serverError = new Response('down', { status: 503 });
+      const { run } = navigate({ fetch: vi.fn(async () => serverError) });
+
+      expect(await run()).toBe(serverError);
     });
   });
 

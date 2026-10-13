@@ -1,5 +1,5 @@
 import { APIRequestContext, expect, Page } from '@playwright/test';
-import { Snapshot } from './update-flow.interfaces';
+import { ServiceWorkerMode, Snapshot } from './update-flow.interfaces';
 
 /**
  * Reads the app/catalog state through observable behavior only (running version,
@@ -99,6 +99,12 @@ export async function setScenario(request: APIRequestContext, scenario: string):
 /** Toggles the simulated `/auth/userinfo` authenticated session. */
 export async function setAuthenticated(request: APIRequestContext, authenticated: boolean): Promise<void> {
   const response = await request.post(`/__e2e/auth?authenticated=${authenticated}`);
+  expect(response.ok()).toBeTruthy();
+}
+
+/** Chooses the script served at /service-worker.js (simulates a deployment of that script). */
+export async function setServiceWorkerMode(request: APIRequestContext, mode: ServiceWorkerMode): Promise<void> {
+  const response = await request.post(`/__e2e/service-worker?mode=${mode}`);
   expect(response.ok()).toBeTruthy();
 }
 

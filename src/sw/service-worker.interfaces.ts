@@ -59,6 +59,13 @@ export interface CatalogStrategyLike {
   handle(options: { request: Request; event: ExtendableEvent }): Promise<Response>;
 }
 
+export interface ShellNavigationDeps {
+  /** Cached shell, or undefined when it is missing from the precache. */
+  matchShell(): Promise<Response | undefined>;
+  fetch(request: Request): Promise<Response>;
+  origin: string;
+}
+
 export interface PrefetchCatalogsDeps {
   message: PrefetchCatalogsMessage;
   event: ExtendableEvent;

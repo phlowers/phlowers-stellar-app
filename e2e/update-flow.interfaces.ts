@@ -6,3 +6,6 @@ export interface Snapshot {
   cableHash: string | null;
   cableName: string | null;
 }
+
+/** Script served at /service-worker.js by the sim server: built Workbox worker, previous system stand-in, kill-switch. */
+export type ServiceWorkerMode = 'workbox' | 'legacy' | 'kill-switch';

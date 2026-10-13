@@ -1,6 +1,12 @@
 /** App shell served for every navigation. */
 export const SHELL_URL = '/index.html';
 
+/** Recovery endpoint (clears the local OIDC session, then signs in again); handled by Apache, never by the app. */
+export const RELOGIN_URL = '/auth/relogin';
+
+/** Raw statuses Apache answers a navigation with when the session is stale. */
+export const AUTH_ERROR_STATUSES: readonly number[] = [401, 403];
+
 /** Caches of the previous update system (`app-assets`, `app-assets-v-*`, `app-assets-control`). */
 export const LEGACY_CACHE_PREFIX = 'app-assets';
 
