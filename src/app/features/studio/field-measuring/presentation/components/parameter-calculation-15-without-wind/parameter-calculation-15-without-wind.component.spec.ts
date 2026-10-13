@@ -144,6 +144,17 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(component.measureData().updateMode15C).toBe('auto');
   });
 
+  it('should clear the 15°C output when the update mode changes', () => {
+    component.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, parameter15C: { parameter: 1, minusParameter: 0, plusParameter: 2 } as never }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    expect(component.measureData().outputs.parameter15C).toBeNull();
+  });
+
   it('should pre-fill manual fields from Auto values on first switch to manual', () => {
     component.measureData.update((d) => ({
       ...d,
