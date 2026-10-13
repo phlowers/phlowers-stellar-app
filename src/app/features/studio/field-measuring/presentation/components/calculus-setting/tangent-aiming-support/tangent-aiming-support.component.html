@@ -1,0 +1,161 @@
+<div class="tangent-aiming-support__header">
+  <button
+    app-btn
+    disabled
+    [attr.aria-label]="'field-measuring.tangent-aiming-support.open-help-aria-label' | transloco"
+    data-testid="help-btn"
+  >
+    <app-icon icon="help" aria-hidden="true" />
+  </button>
+
+  <p id="mandatory-tangent-aiming-support" class="tangent-aiming-support__mandatory-msg">
+    <app-icon icon="info" />
+    <span>{{ 'field-measuring.papoto.mandatory-msg' | transloco }}</span>
+  </p>
+</div>
+
+<div class="tangent-aiming-support__form">
+  <div class="leftSupport">
+    <label for="tasLeftSupport">{{ 'field-measuring.papoto.left-support-label' | transloco }}</label>
+    <p-select
+      inputId="tasLeftSupport"
+      [options]="leftSupportOption()"
+      [ngModel]="measureData().leftSupport"
+      (ngModelChange)="updateField('leftSupport', $event)"
+      optionLabel="label"
+      optionValue="value"
+      [fluid]="true"
+      aria-describedby="mandatory-tangent-aiming-support"
+      [required]="true"
+      data-testid="left-support-select"
+    />
+  </div>
+
+  <div class="spanLength">
+    <label for="tasSpanLength">{{ 'field-measuring.papoto.span-length-label' | transloco }}</label>
+    <p-inputgroup>
+      <input
+        id="tasSpanLength"
+        type="number"
+        pInputText
+        [ngModel]="measureData().spanLength"
+        (ngModelChange)="updateField('spanLength', $event)"
+        [min]="0"
+        aria-describedby="mandatory-tangent-aiming-support tasSpanLength-calculated"
+        required
+        data-testid="span-length-input"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="spanLengthDesc">
+    <p id="tasSpanLength-calculated" class="spanLength__desc">
+      {{ 'field-measuring.papoto.calculated-value-label' | transloco }}
+      @if (calculatedSpanLength() !== null) {
+        {{ calculatedSpanLength() | number: '1.0-2' }} m
+      } @else {
+        -
+      }
+    </p>
+  </div>
+
+  <div class="hDistance">
+    <label for="tasHAccDistance">{{ 'field-measuring.tangent-aiming-support.h-acc-distance-label' | transloco }}</label>
+    <p-inputgroup>
+      <input
+        id="tasHAccDistance"
+        type="number"
+        pInputText
+        [ngModel]="measureData().cableHAccDistance"
+        (ngModelChange)="updateField('cableHAccDistance', $event)"
+        aria-describedby="mandatory-tangent-aiming-support"
+        required
+        data-testid="h-acc-distance-input"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="vAngle">
+    <label for="tasVerticalAccAngle">{{
+      'field-measuring.tangent-aiming-support.vertical-acc-angle-label' | transloco
+    }}</label>
+    <p-inputgroup>
+      <input
+        id="tasVerticalAccAngle"
+        type="number"
+        pInputText
+        [ngModel]="measureData().cableVerticalAccAngle"
+        (ngModelChange)="updateField('cableVerticalAccAngle', $event)"
+        aria-describedby="mandatory-tangent-aiming-support"
+        required
+        data-testid="vertical-acc-angle-input"
+      />
+      <p-inputgroup-addon>Gr</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+
+  <div class="calculationType">
+    <p id="tasCalculationTypeLabel" class="mb-0 font-bold">
+      {{ 'field-measuring.tangent-aiming-support.calculation-type-label' | transloco }}
+    </p>
+    <p-selectbutton
+      [options]="calculationTypeOptions()"
+      [ngModel]="measureData().calculationType"
+      (onChange)="updateField('calculationType', $event.value)"
+      optionLabel="label"
+      optionValue="value"
+      allowEmpty="false"
+      ariaLabelledBy="tasCalculationTypeLabel"
+      data-testid="calculation-type-selector"
+    />
+  </div>
+
+  <div class="tangentAngle">
+    <label for="tasTangentAngle">{{ 'field-measuring.tangent-aiming-support.tangent-angle-label' | transloco }}</label>
+    <p-inputgroup>
+      <input
+        id="tasTangentAngle"
+        type="number"
+        pInputText
+        [ngModel]="measureData().cableTangentAngle"
+        (ngModelChange)="updateField('cableTangentAngle', $event)"
+        aria-describedby="mandatory-tangent-aiming-support"
+        required
+        data-testid="tangent-angle-input"
+      />
+      <p-inputgroup-addon>Gr</p-inputgroup-addon>
+    </p-inputgroup>
+  </div>
+</div>
+
+<div class="text-right">
+  <button app-btn disabled data-testid="calculate-tangent-aiming-support-btn">
+    <app-icon icon="rocket_launch" />
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
+  </button>
+</div>
+
+<output class="block">
+  <div class="tangent-aiming-support__results">
+    <h2 class="tangent-aiming-support__results__title">{{ 'common.results' | transloco }}</h2>
+
+    <dl class="tangent-aiming-support__results__list">
+      <div class="param">
+        <dt>{{ 'common.parameter-label' | transloco }}</dt>
+        <dd data-testid="tangent-aiming-support-parameter">- m</dd>
+      </div>
+
+      <div class="incertainParam">
+        <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
+        <dd data-testid="tangent-aiming-support-uncertainty">- m</dd>
+      </div>
+
+      <div class="crit">
+        <dt>{{ 'field-measuring.tangent-aiming-support.criterion-label' | transloco }}</dt>
+        <dd class="crit__result" data-testid="tangent-aiming-support-criterion">- m</dd>
+      </div>
+    </dl>
+  </div>
+</output>

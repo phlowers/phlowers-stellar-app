@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, model, computed, signal } from '@an
 import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
-import { TangentAimingComponent } from './tangent-aiming/tangent-aiming.component';
+import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-aiming-support.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-calculus-setting',
-  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingComponent, TranslocoModule],
+  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingSupportComponent, TranslocoModule],
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

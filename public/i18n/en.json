@@ -680,7 +680,16 @@
       "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Tangent aiming"
+      "tangent-aiming-radio-label": "Tangent aiming (Support)"
+    },
+    "tangent-aiming-support": {
+      "open-help-aria-label": "open tangent aiming help",
+      "h-acc-distance-label": "Horiz. dist. of cable attach. above the device",
+      "vertical-acc-angle-label": "Vertical angle of cable attach. to opposite support\u00a0(2)",
+      "calculation-type-label": "Calculation type:",
+      "calculation-type-tangent": "Tangent",
+      "tangent-angle-label": "Cable tangent angle",
+      "criterion-label": "Side D must be greater than 2 m"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
