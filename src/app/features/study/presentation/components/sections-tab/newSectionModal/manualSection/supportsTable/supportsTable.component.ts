@@ -38,9 +38,9 @@ import {
   buildSupportNameFilterTables,
   buildSupplementaryChains,
   findSupplementaryNames,
-  getSupportFieldValues,
-  SUPPORT_FIELD_LIMITS
+  getSupportFieldValues
 } from './helpers';
+import { SUPPORT_FIELD_LIMITS } from '@shared/domain/helpers/support-limits.constantes';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { LOCATION_CONFIG } from '../location/location.constantes';

@@ -21,7 +21,9 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { CatalogMaintenance } from '@shared/domain';
 import { SupportNameEntry } from '@shared/catalog/services/attachment.interfaces';
 import { TranslocoService } from '@jsverse/transloco';
-import fakeCanton101To103 from './section-import.fixtures/fake-canton.json';
+import { of } from 'rxjs';
+import { SECTION_IMPORT_ADAPTER_PROVIDERS } from '@shared/import/section-adapter/section-import-adapters.providers';
+import fakeCanton101To103 from '@adapters/section-import/rte-custom/fixtures/fake-canton.json';
 
 const sectionSupportCatalogMissingWarning =
   'The attachment support from the section file is not present in the application support catalog';
@@ -34,7 +36,7 @@ const sectionImportTranslations: Record<string, string> = {
   'section-import.validation-supports-bounds': 'Section has supports with values out of bounds',
   'section-import.import-error': 'Error importing section',
   'section-import.delete-error': 'Error deleting section',
-  'section-import.section-format-error': 'The section file to import is invalid.',
+  'rte-custom.format-error': 'The section file to import is invalid.',
   'section-import.lambert-reprojection-error': 'Error computing GPS coordinates from Lambert93 data',
   'section-import.catalog-missing-warning': sectionSupportCatalogMissingWarning,
   'section-import.import-success': 'Section imported successfully'
@@ -301,6 +303,7 @@ describe('SectionImportService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        ...SECTION_IMPORT_ADAPTER_PROVIDERS,
         SectionImportService,
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: MessageService, useValue: messageServiceMock },
@@ -318,7 +321,9 @@ describe('SectionImportService', () => {
                 return `Reprojection using ${params?.['appName']} data model seems to add a mean absolute error of ${params?.['error']} m`;
               }
               return sectionImportTranslations[key] ?? key;
-            }
+            },
+            selectTranslate: (key: string, _params?: Record<string, unknown>, scope?: { scope?: string }) =>
+              of(sectionImportTranslations[scope?.scope ? `${scope.scope}.${key}` : key] ?? key)
           }
         }
       ]
@@ -945,8 +950,8 @@ describe('SectionImportService', () => {
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
 
-      // SUPPORT_IDR absent: the ADR is passed as the fallback identifier.
-      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith(null, 'Support A', 19);
+      // SUPPORT_IDR absent: the ADR becomes the support name used for the catalog lookup.
+      expect(attachmentServiceMock.resolveCatalogAttachment).toHaveBeenCalledWith('Support A', null, 19);
 
       // The catalog values apply, and the support name falls back to SUPPORT_ADR.
       expect(result?.supports[0].name).toBe('Support A');
@@ -1161,7 +1166,7 @@ describe('SectionImportService', () => {
       };
       const file = makeJsonFile(payload);
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
-        code: 'VALIDATION_ERROR',
+        code: 'RTE_CUSTOM_REQUIRED_FIELDS',
         message: expect.stringContaining('ANGLE_LIGNE: null')
       });
     });
@@ -1620,7 +1625,7 @@ describe('SectionImportService', () => {
   // -------------------------------------------------------------------------
 
   describe('processFile() — invalid canton format', () => {
-    it('should throw VALIDATION_ERROR with canton message when cantons present but CANTON_CUR missing', async () => {
+    it('should throw the adapter format error when cantons present but CANTON_CUR missing', async () => {
       service.setStudyContext(buildMockStudy());
       const invalidPayload = {
         cantons: [
@@ -1635,7 +1640,7 @@ describe('SectionImportService', () => {
       };
       const file = makeJsonFile(invalidPayload);
       await expect(service.processFile(file, neverAccept)).rejects.toMatchObject({
-        code: 'VALIDATION_ERROR',
+        code: 'RTE_CUSTOM_FORMAT_ERROR',
         message: 'The section file to import is invalid.',
         stage: 'VALIDATION'
       });
@@ -1739,40 +1744,46 @@ describe('SectionImportService', () => {
       expect(rest).toEqual({ ...emptySectionDefaults, ...expectedRest });
     });
 
-    it('should map supports to an empty array when the "supports" key is absent', async () => {
+    it('should throw VALIDATION_ERROR when the "supports" key is absent', async () => {
       service.setStudyContext(buildMockStudy());
       const { supports: _supports, ...payloadWithoutSupports } = buildValidSectionPayload();
 
-      const result = await service.processFile(makeJsonFile(payloadWithoutSupports), neverAccept);
-
-      expect(result?.supports).toEqual([]);
+      await expect(service.processFile(makeJsonFile(payloadWithoutSupports), neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        stage: 'VALIDATION',
+        message: expect.stringContaining('supports')
+      });
     });
 
-    it('should map supports to an empty array when "supports" is an empty array', async () => {
+    it('should throw VALIDATION_ERROR when "supports" is an empty array', async () => {
       service.setStudyContext(buildMockStudy());
       const payload = { ...buildValidSectionPayload(), supports: [] };
 
-      const result = await service.processFile(makeJsonFile(payload), neverAccept);
-
-      expect(result?.supports).toEqual([]);
+      await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        stage: 'VALIDATION',
+        message: expect.stringContaining('supports')
+      });
     });
 
-    it('should map supports to an empty array when "supports" is not an array', async () => {
+    it('should throw VALIDATION_ERROR when "supports" is not an array', async () => {
       service.setStudyContext(buildMockStudy());
       const payload = { ...buildValidSectionPayload(), supports: 'not-an-array' };
 
-      const result = await service.processFile(makeJsonFile(payload), neverAccept);
-
-      expect(result?.supports).toEqual([]);
+      await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        stage: 'VALIDATION',
+        message: expect.stringContaining('supports')
+      });
     });
 
-    it('should keep a non-string uuid unchanged (no trim applied)', async () => {
+    it('should generate a UUID when the imported uuid is not a string', async () => {
       service.setStudyContext(buildMockStudy());
       const payload = { ...buildValidSectionPayload(), uuid: 12345 };
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
 
-      expect(result?.uuid).toBe(12345);
+      expect(result?.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     });
 
     it('should trim a string uuid with surrounding whitespace', async () => {

@@ -10,6 +10,8 @@ import { ImportComponent } from '@shared/components/import/import.component';
 import { IMPORT_ADAPTER_TOKEN, ImportOutcome } from '@shared/import/domain/import-contracts';
 import { ImportContextConfig } from '@shared/import/domain/import-contracts.interfaces';
 import { SectionImportService } from '@features/study/application/services/section-import.service';
+import { SECTION_IMPORT_ADAPTERS } from '@shared/import/section-adapter/section-import-adapter';
+import { SECTION_IMPORT_ADAPTER_PROVIDERS } from '@shared/import/section-adapter/section-import-adapters.providers';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { createSectionImportConfig } from './import-section.constantes';
@@ -29,6 +31,7 @@ import { TranslocoService } from '@jsverse/transloco';
   standalone: true,
   imports: [ImportComponent, ConfirmDialogModule],
   providers: [
+    ...SECTION_IMPORT_ADAPTER_PROVIDERS,
     SectionImportService,
     { provide: IMPORT_ADAPTER_TOKEN, useExisting: SectionImportService },
     ConfirmationService
@@ -62,10 +65,11 @@ export class ImportSectionComponent {
   readonly viewRequested = output<string>();
 
   private readonly transloco = inject(TranslocoService);
+  private readonly adapters = inject(SECTION_IMPORT_ADAPTERS);
 
   /** Full config including success actions, built as a computed signal. */
   readonly config = computed<ImportContextConfig>(() => ({
-    ...createSectionImportConfig(this.transloco),
+    ...createSectionImportConfig(this.transloco, this.adapters),
     successActions: [
       {
         label: this.transloco.translate('common.edit'),

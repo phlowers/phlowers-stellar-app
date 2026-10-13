@@ -35,6 +35,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
+import { SectionExportService } from '@services/section/section-export.service';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -97,6 +98,7 @@ export class SectionsTabComponent {
   private readonly sectionDataReportService = inject(SectionDataReportService);
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
+  private readonly sectionExportService = inject(SectionExportService);
 
   currentSection = signal<Section>(createEmptySection());
   currentInitialCondition = signal<InitialCondition>(this.createInitialCondition(this.currentSection()));
@@ -134,6 +136,10 @@ export class SectionsTabComponent {
     this.currentSection.set(cloneDeep(section));
     this.newSectionModalMode.set('view');
     this.isNewSectionModalOpen.set(true);
+  }
+
+  onExportSection(section: Section): void {
+    this.sectionExportService.exportSection(section);
   }
 
   async onGenerateCantonReport(section: Section): Promise<void> {

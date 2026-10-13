@@ -7,6 +7,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { PlotResolutionService } from '@services/plot/plot-resolution.service';
+import { SectionExportService } from '@services/section/section-export.service';
 import { Section } from '@shared/domain';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
@@ -41,6 +42,7 @@ describe('StudioTopToolbarComponent', () => {
     applyResolution: ReturnType<typeof vi.fn>;
   };
   let mockToolbarDialogService: vi.Mocked<ToolbarDialogService>;
+  let sectionExportServiceMock: { exportSection: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -88,6 +90,8 @@ describe('StudioTopToolbarComponent', () => {
       openTool: vi.fn()
     } as unknown as vi.Mocked<ToolbarDialogService>;
 
+    sectionExportServiceMock = { exportSection: vi.fn() };
+
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
@@ -112,7 +116,8 @@ describe('StudioTopToolbarComponent', () => {
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },
-        { provide: ToolbarDialogService, useValue: mockToolbarDialogService }
+        { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
+        { provide: SectionExportService, useValue: sectionExportServiceMock }
       ]
     }).compileComponents();
 
@@ -805,6 +810,39 @@ describe('StudioTopToolbarComponent', () => {
     it('UC-TT6: should render side view selector', () => {
       const el = getByTestId('side-view-selector');
       expect(el).toBeTruthy();
+    });
+  });
+
+  describe('section export', () => {
+    const section = { uuid: 's1', name: 'Section' } as unknown as Section;
+
+    it('should disable the export button when no section is displayed', () => {
+      fixture.detectChanges();
+
+      expect((getByTestId('export-section-btn') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('should export the displayed section when the button is clicked', () => {
+      mockSpanService.section.set(section);
+      fixture.detectChanges();
+
+      (getByTestId('export-section-btn') as HTMLButtonElement).click();
+
+      expect(sectionExportServiceMock.exportSection).toHaveBeenCalledWith(section);
+    });
+
+    it('should not export anything when there is no section', () => {
+      component.onExportSection();
+
+      expect(sectionExportServiceMock.exportSection).not.toHaveBeenCalled();
+    });
+
+    it('should disable the export button while free positioning is active', () => {
+      mockSpanService.section.set(section);
+      plotOptionsServiceMock.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+
+      expect((getByTestId('export-section-btn') as HTMLButtonElement).disabled).toBe(true);
     });
   });
 });
