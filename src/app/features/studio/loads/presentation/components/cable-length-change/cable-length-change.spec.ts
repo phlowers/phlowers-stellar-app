@@ -17,6 +17,7 @@ import { Section } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { MessageService } from 'primeng/api';
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
   const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
@@ -583,6 +584,59 @@ describe('CableLengthChangeComponent', () => {
       component.isDirtySinceLastSave.set(true);
       component.resetForm();
       expect(component.isDirtySinceLastSave()).toBe(false);
+    });
+
+    it('should reset content fields to defaults and keep the span selection', () => {
+      component.form.patchValue({
+        spanUuid: 'support-uuid-1',
+        supportRef: 'RIGHT',
+        modificationType: 'shortening',
+        modifiedLengthCable: 12,
+        distanceSupportRef: 34
+      });
+      component.resetForm();
+      expect(component.form.getRawValue()).toEqual({
+        spanUuid: 'support-uuid-1',
+        supportRef: 'LEFT',
+        modificationType: 'lengthening',
+        modifiedLengthCable: 0,
+        distanceSupportRef: 0
+      });
+    });
+  });
+
+  describe('charge change', () => {
+    it('should reload the form for the current span when the load case changes', () => {
+      const sectionSignal = signal<Partial<Section> | null>({ ...mockSection, selected_charge_uuid: 'charge-1' });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [
+          TranslocoTestingModule.forRoot({
+            langs: { en: {} },
+            translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+            preloadLangs: true
+          }),
+          CableLengthChangeComponent
+        ],
+        providers: [
+          { provide: PlotService, useValue: mockPlotService },
+          { provide: PlotSpanService, useValue: { ...mockSpanService, section: sectionSignal } },
+          { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
+          { provide: CableModificationsService, useValue: mockCableModificationsService },
+          { provide: LoadFormsService, useValue: mockLoadFormsService },
+          MessageService
+        ]
+      });
+      const localFixture = TestBed.createComponent(CableLengthChangeComponent);
+      const localComponent = localFixture.componentInstance;
+      localFixture.detectChanges();
+      localComponent.form.patchValue({ modifiedLengthCable: 12 }, { emitEvent: false });
+
+      sectionSignal.set({ ...mockSection, selected_charge_uuid: 'charge-2' });
+      localFixture.detectChanges();
+
+      expect(localComponent.form.controls.spanUuid.value).toBe('support-uuid-1');
+      expect(localComponent.form.controls.modifiedLengthCable.value).toBe(0);
     });
   });
 

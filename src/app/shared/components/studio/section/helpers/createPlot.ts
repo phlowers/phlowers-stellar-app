@@ -378,7 +378,7 @@ const layout2d = (
     scaleratio = 1;
   }
 
-  const xAutorange: 'reversed' | true = plotParams.side === 'face' || plotParams.invert ? 'reversed' : true;
+  const xAutorange: 'reversed' | true = plotParams.invert ? 'reversed' : true;
 
   return {
     autosize: true,
