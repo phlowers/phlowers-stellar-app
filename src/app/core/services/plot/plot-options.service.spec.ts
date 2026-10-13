@@ -44,6 +44,8 @@ describe('PlotOptionsService', () => {
       const opts = service.selectedDisplayOptions();
       expect(opts.loads).toBe(true);
       expect(opts.baseState).toBe(false);
+      expect(opts.floor).toBe(true);
+      expect(opts.obstacles).toBe(true);
     });
 
     it('should initialize scalingFactors with default values', () => {

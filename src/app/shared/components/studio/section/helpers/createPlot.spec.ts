@@ -231,6 +231,109 @@ describe('createPlot', () => {
     });
   });
 
+  describe('floor and obstacle visibility', () => {
+    const floors = [
+      {
+        uuid: 'floor-1',
+        supportUuid: 's0',
+        referenceSupport: 'LEFT',
+        points: [{ altitude: 5, distanceToRefSupport: 12 }]
+      }
+    ] as Floor[];
+    const litData = {
+      ...mockLitData,
+      obstacles: [
+        { uuid: 'floor-1', points: [[0, 0, 5]] },
+        { uuid: 'obstacle-1', points: [[10, 0, 5]] }
+      ]
+    } as GetSectionOutput;
+
+    it.each([
+      ['2d', true, true],
+      ['2d', false, true],
+      ['2d', true, false],
+      ['2d', false, false],
+      ['3d', true, true],
+      ['3d', false, true],
+      ['3d', true, false],
+      ['3d', false, false]
+    ] as const)('should render %s with floor=%s and obstacles=%s', (view, floor, obstacles) => {
+      createPlot({
+        ...createDefaultParams(),
+        view,
+        floors,
+        litData,
+        supports: [{ uuid: 's0' }] as Support[],
+        endSupport: 1,
+        selectedDisplayOptions: {
+          loads: false,
+          baseState: false,
+          transparentBackground: false,
+          measurePoints: true,
+          floor,
+          obstacles
+        }
+      });
+
+      const [, data, layout] = (Plotly.react as Mock).mock.calls[0];
+      const annotations = view === '3d' ? layout.scene.annotations : layout.annotations;
+      expect(annotations.some((annotation: { data?: { type?: string } }) => annotation.data?.type === 'floor')).toBe(
+        floor
+      );
+      expect(annotations.some((annotation: { data?: { type?: string } }) => annotation.data?.type === 'obstacle')).toBe(
+        obstacles
+      );
+      expect(data.length > mockData.length).toBe(floor);
+      expect(litData.obstacles).toHaveLength(2);
+    });
+
+    it.each(['floor-1', 'obstacle-1'])('should hide distance visuals for hidden entity %s', (currentObstacleUuid) => {
+      const params = {
+        ...createDefaultParams(),
+        floors,
+        litData,
+        currentObstacleUuid,
+        supports: [{ uuid: 's0' }] as Support[],
+        endSupport: 1,
+        distances: [
+          {
+            obstacleUuid: currentObstacleUuid,
+            points: [
+              {
+                pointIndex: 0,
+                linePoint: [10, 0, 40] as [number, number, number],
+                virtualPointHorizontal: [10, 0, 5] as [number, number, number],
+                virtualPointVertical: [10, 0, 40] as [number, number, number],
+                distanceDiagonal: 35,
+                distanceHorizontal: 0,
+                distanceVertical: 35
+              }
+            ]
+          }
+        ]
+      };
+      createPlot(params);
+      expect((Plotly.react as Mock).mock.calls[0][1].some((trace: DataObject) => trace.name === 'distance-line')).toBe(
+        true
+      );
+
+      createPlot({
+        ...params,
+        selectedDisplayOptions: {
+          loads: false,
+          baseState: false,
+          transparentBackground: false,
+          measurePoints: true,
+          floor: false,
+          obstacles: false
+        }
+      });
+
+      expect((Plotly.react as Mock).mock.calls[1][1]).toEqual(mockData);
+      expect((Plotly.react as Mock).mock.calls[1][2].scene.annotations).toEqual([]);
+    });
+  });
+
   describe('uirevision', () => {
     it('should use uirevision stable by default', () => {
       createPlot({ ...createDefaultParams() });

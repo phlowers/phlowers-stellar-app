@@ -30,7 +30,9 @@ const defaultSelectedDisplayOptions: SelectedDisplayOptions = {
   loads: true,
   baseState: false,
   transparentBackground: false,
-  measurePoints: true
+  measurePoints: true,
+  floor: true,
+  obstacles: true
 };
 
 /** Service managing plot display options, camera state, and axes norms for the studio section view. */
