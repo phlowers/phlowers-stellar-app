@@ -71,7 +71,7 @@ export function drawHangingCalculationSection(
   startY: number
 ): number {
   const left: PdfBulletItem[] = [
-    { label: labels.baseParameter, value: formatValue(data.baseParameter, PDF_UNITS.meters, 2) },
+    { label: labels.baseParameter, value: formatValue(data.baseParameter, PDF_UNITS.meters, 1) },
     { label: labels.baseTemperature, value: formatValue(data.baseTemperature, PDF_UNITS.celsius, 1) },
     { label: labels.equivalentSpan, value: formatValue(data.equivalentSpan, PDF_UNITS.meters, 1) }
   ];
