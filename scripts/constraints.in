@@ -150,6 +150,7 @@ optlang==1.8.3
 orjson==3.10.16
 packaging==26.2
 pandas==2.3.3
+pandera==0.34.1
 parso==0.8.4
 patsy==1.0.1
 pcodec==0.3.3
@@ -250,6 +251,7 @@ svgwrite==1.4.3
 swiglpk==5.0.12
 sympy==1.13.3
 tblib==3.0.0
+tenacity==9.2.1
 termcolor==2.5.0
 texttable==1.7.0
 texture2ddecoder==1.0.6

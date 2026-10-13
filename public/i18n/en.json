@@ -304,7 +304,7 @@
         "storage-insufficient": "Offline mode: not enough storage",
         "not-prepared": "Offline mode unavailable"
       },
-      "update-deferred-network": "Update postponed: the network is too slow, it will be downloaded later.",
+      "update-deferred-network": "Update postponed: the connection does not allow downloading it now (slow or unmeasurable network, or data saver enabled), it will be downloaded later.",
       "check-started": "Checking for updates: a new version will be downloaded in the background.",
       "update-waiting-summary": "Update downloaded",
       "update-waiting-detail": "It will be applied the next time the application starts (close every Stellar window, then reopen it).",

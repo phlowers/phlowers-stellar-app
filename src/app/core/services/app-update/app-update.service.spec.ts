@@ -181,6 +181,44 @@ describe('AppUpdateService', () => {
       expect(service.state()).toBe('ready-offline');
     });
 
+    it('returns to not-installed when the first installation becomes redundant', async () => {
+      await service.start();
+      registration.dispatchEvent(new Event('updatefound'));
+      expect(service.state()).toBe('installing');
+
+      workbox().emit('redundant', { isUpdate: false });
+
+      expect(service.state()).toBe('not-installed');
+    });
+
+    it('stays ready offline when an update becomes redundant', async () => {
+      registration.active = {};
+      await service.start();
+
+      workbox().emit('redundant', { isUpdate: true });
+      expect(service.state()).toBe('ready-offline');
+
+      service.state.set('installing');
+      workbox().emit('redundant', { isUpdate: true });
+      expect(service.state()).toBe('ready-offline');
+    });
+
+    it('keeps a refusal state when the refused installation becomes redundant', async () => {
+      await service.start();
+      postFromServiceWorker({
+        type: 'SW_INSTALL_REFUSED',
+        reason: 'downlink-below-threshold',
+        downlinkMbps: 1,
+        requiredBytes: null,
+        freeBytes: null
+      });
+      expect(service.state()).toBe('deferred-network');
+
+      workbox().emit('redundant', { isUpdate: false });
+
+      expect(service.state()).toBe('deferred-network');
+    });
+
     it('keeps update-waiting when an update is installed or activated elsewhere', async () => {
       registration.active = {};
       await service.start();
@@ -278,6 +316,47 @@ describe('AppUpdateService', () => {
       registration.active = {};
       await service.start();
       workbox().update.mockRejectedValueOnce(new Error('offline'));
+
+      await expect(service.checkForUpdate()).resolves.toEqual({ allowed: true, reason: null });
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('re-registers once when the browser dropped the registration after a refused install', async () => {
+      registration.active = {};
+      await service.start();
+      await flush();
+      const stale = workbox();
+      const staleCalls = stale.update.mock.calls.length;
+      container.getRegistration.mockResolvedValue(undefined);
+
+      await Promise.all([service.checkForUpdate(), service.checkForUpdate()]);
+
+      expect(workboxMock.Workbox).toHaveBeenCalledTimes(2);
+      expect(workbox()).not.toBe(stale);
+      expect(workbox().register).toHaveBeenCalledTimes(1);
+      expect(stale.update.mock.calls.length).toBe(staleCalls);
+    });
+
+    it('allows a new re-registration once the previous one finished', async () => {
+      registration.active = {};
+      await service.start();
+      await flush();
+      container.getRegistration.mockResolvedValue(undefined);
+
+      await service.checkForUpdate();
+      await service.checkForUpdate();
+
+      expect(workboxMock.Workbox).toHaveBeenCalledTimes(3);
+    });
+
+    it('logs a failed re-registration without throwing', async () => {
+      registration.active = {};
+      await service.start();
+      await flush();
+      container.getRegistration.mockResolvedValue(undefined);
+      workboxMock.Workbox.mockImplementationOnce(function () {
+        throw new Error('register failed');
+      });
 
       await expect(service.checkForUpdate()).resolves.toEqual({ allowed: true, reason: null });
       expect(logger.warn).toHaveBeenCalled();

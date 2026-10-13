@@ -304,7 +304,7 @@
         "storage-insufficient": "Mode hors ligne : espace de stockage insuffisant",
         "not-prepared": "Mode hors ligne indisponible"
       },
-      "update-deferred-network": "Mise à jour reportée : le réseau est trop lent, elle sera téléchargée plus tard.",
+      "update-deferred-network": "Mise à jour reportée : la connexion ne permet pas de la télécharger maintenant (réseau lent ou non mesurable, ou économiseur de données activé), elle sera téléchargée plus tard.",
       "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
       "update-waiting-summary": "Mise à jour téléchargée",
       "update-waiting-detail": "Elle sera appliquée au prochain démarrage de l'application (fermez toutes les fenêtres de Stellar, puis rouvrez-la).",

@@ -61,6 +61,7 @@ export class AppUpdateService {
   });
 
   private workbox: Workbox | null = null;
+  private reRegistration: Promise<void> | null = null;
   private started = false;
   private waitingNotified = false;
   private storageNotified = false;
@@ -108,9 +109,16 @@ export class AppUpdateService {
       return decision;
     }
     if (this.workbox) {
-      await this.workbox.update().catch((error: unknown) => {
+      try {
+        // A refused first install makes the browser drop the registration, leaving this.workbox stale.
+        if (await navigator.serviceWorker.getRegistration()) {
+          await this.workbox.update();
+        } else {
+          await this.reRegister();
+        }
+      } catch (error: unknown) {
         this.logger.warn(`${APP_UPDATE_LOG_PREFIX} update check failed`, error);
-      });
+      }
     }
     return decision;
   }
@@ -127,6 +135,13 @@ export class AppUpdateService {
     };
   }
 
+  private reRegister(): Promise<void> {
+    this.reRegistration ??= this.register().finally(() => {
+      this.reRegistration = null;
+    });
+    return this.reRegistration;
+  }
+
   private async register(): Promise<void> {
     const workbox = new Workbox(SERVICE_WORKER_URL);
     workbox.addEventListener('waiting', () => this.onUpdateWaiting());
@@ -138,6 +153,12 @@ export class AppUpdateService {
     workbox.addEventListener('activated', (event) => {
       if (!event.isUpdate) {
         this.state.set('ready-offline');
+      }
+    });
+    workbox.addEventListener('redundant', (event) => {
+      // Only leaves 'installing': a refusal state set by the service worker message must survive.
+      if (this.state() === 'installing') {
+        this.state.set(event.isUpdate ? 'ready-offline' : 'not-installed');
       }
     });
     this.workbox = workbox;
