@@ -1744,40 +1744,46 @@ describe('SectionImportService', () => {
       expect(rest).toEqual({ ...emptySectionDefaults, ...expectedRest });
     });
 
-    it('should map supports to an empty array when the "supports" key is absent', async () => {
+    it('should throw VALIDATION_ERROR when the "supports" key is absent', async () => {
       service.setStudyContext(buildMockStudy());
       const { supports: _supports, ...payloadWithoutSupports } = buildValidSectionPayload();
 
-      const result = await service.processFile(makeJsonFile(payloadWithoutSupports), neverAccept);
-
-      expect(result?.supports).toEqual([]);
+      await expect(service.processFile(makeJsonFile(payloadWithoutSupports), neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        stage: 'VALIDATION',
+        message: expect.stringContaining('supports')
+      });
     });
 
-    it('should map supports to an empty array when "supports" is an empty array', async () => {
+    it('should throw VALIDATION_ERROR when "supports" is an empty array', async () => {
       service.setStudyContext(buildMockStudy());
       const payload = { ...buildValidSectionPayload(), supports: [] };
 
-      const result = await service.processFile(makeJsonFile(payload), neverAccept);
-
-      expect(result?.supports).toEqual([]);
+      await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        stage: 'VALIDATION',
+        message: expect.stringContaining('supports')
+      });
     });
 
-    it('should map supports to an empty array when "supports" is not an array', async () => {
+    it('should throw VALIDATION_ERROR when "supports" is not an array', async () => {
       service.setStudyContext(buildMockStudy());
       const payload = { ...buildValidSectionPayload(), supports: 'not-an-array' };
 
-      const result = await service.processFile(makeJsonFile(payload), neverAccept);
-
-      expect(result?.supports).toEqual([]);
+      await expect(service.processFile(makeJsonFile(payload), neverAccept)).rejects.toMatchObject({
+        code: 'VALIDATION_ERROR',
+        stage: 'VALIDATION',
+        message: expect.stringContaining('supports')
+      });
     });
 
-    it('should keep a non-string uuid unchanged (no trim applied)', async () => {
+    it('should generate a UUID when the imported uuid is not a string', async () => {
       service.setStudyContext(buildMockStudy());
       const payload = { ...buildValidSectionPayload(), uuid: 12345 };
 
       const result = await service.processFile(makeJsonFile(payload), neverAccept);
 
-      expect(result?.uuid).toBe(12345);
+      expect(result?.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     });
 
     it('should trim a string uuid with surrounding whitespace', async () => {
