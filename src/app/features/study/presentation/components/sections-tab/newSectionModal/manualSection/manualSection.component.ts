@@ -51,7 +51,7 @@ import {
 import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
 import { LineTableProperties } from './manualSection.interfaces';
 import { LocationData } from './location/location.interfaces';
-import { extractBranchIdr } from '@shared/helpers/extractBranchIdr';
+import { extractBranchIdr } from '@shared/helpers/extract-branch-idr.helpers';
 
 /**
  * Manual section editor component.

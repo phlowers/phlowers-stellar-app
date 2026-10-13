@@ -125,9 +125,12 @@ describe('getMissingRequiredFields', () => {
     expect(getMissingRequiredFields({ ...buildValidSection(), cable_name: undefined })).toContain('cable_name');
   });
 
-  it.each([[], [buildSupport()]])('should report "supports" when fewer than two supports are present', (supports) => {
+  it.each([{ supports: [] }, { supports: [buildSupport()] }])(
+    'should report "supports" when fewer than two supports are present',
+    ({ supports }) => {
     expect(getMissingRequiredFields({ ...buildValidSection(), supports })).toContain('supports');
-  });
+    }
+  );
 
   it('should not report "cable_name" when requireCableName is false', () => {
     expect(getMissingRequiredFields({ ...buildValidSection(), cable_name: undefined }, false)).not.toContain(

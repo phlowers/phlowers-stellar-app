@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { extractBranchIdr } from './extractBranchIdr';
+import { extractBranchIdr } from './extract-branch-idr.helpers';
 
 describe('extractBranchIdr', () => {
   it('should return "1" for "TESTLINE73STB01"', () => {
