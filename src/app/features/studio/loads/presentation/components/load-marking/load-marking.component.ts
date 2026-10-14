@@ -257,7 +257,7 @@ export class LoadMarkingComponent {
   private resetLoadFields(options: { emitEvent: boolean }): void {
     const { referenceSupport, type, loadPosition, loadWeight } = this.form.controls;
     const hasSpan = !!this.form.controls.spanSelect.value;
-    referenceSupport.reset(hasSpan ? emptySpanLoad.referenceSupport : null, options);
+    referenceSupport.reset(emptySpanLoad.referenceSupport, options);
     if (!hasSpan) {
       referenceSupport.disable(options);
     }

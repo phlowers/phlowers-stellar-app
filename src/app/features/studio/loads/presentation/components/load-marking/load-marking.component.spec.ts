@@ -193,11 +193,11 @@ describe('LoadMarkingComponent', () => {
       expect(component.form.controls.loadWeight.value).toBe(0);
     });
 
-    it('keeps referenceSupport disabled when no span is selected', () => {
+    it('sets referenceSupport to LEFT but keeps it disabled when no span is selected', () => {
       component.resetForm();
 
       expect(component.form.controls.spanSelect.value).toBeNull();
-      expect(component.form.controls.referenceSupport.value).toBeNull();
+      expect(component.form.controls.referenceSupport.value).toBe('LEFT');
       expect(component.form.controls.referenceSupport.disabled).toBe(true);
     });
   });

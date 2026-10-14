@@ -603,6 +603,13 @@ describe('CableLengthChangeComponent', () => {
         distanceSupportRef: 0
       });
     });
+
+    it('should reset supportRef to LEFT even when no span is selected', () => {
+      component.form.controls.spanUuid.setValue(null);
+      component.form.controls.supportRef.setValue('RIGHT', { emitEvent: false });
+      component.resetForm();
+      expect(component.form.controls.supportRef.value).toBe('LEFT');
+    });
   });
 
   describe('charge change', () => {

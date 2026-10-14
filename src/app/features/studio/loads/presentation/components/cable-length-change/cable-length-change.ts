@@ -282,14 +282,14 @@ export class CableLengthChangeComponent {
   resetForm(): void {
     this.cableModificationsService.clearPreview();
     const defaults = {
-      supportRef: this.form.controls.spanUuid.value ? ('LEFT' as const) : null,
+      supportRef: 'LEFT' as const,
       modificationType: 'lengthening' as const,
       modifiedLengthCable: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable,
       distanceSupportRef: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef
     };
     this.form.patchValue(defaults, { emitEvent: false });
     const cableModification = this.findSelectedCableModification();
-    if (cableModification && defaults.supportRef) {
+    if (cableModification) {
       Object.assign(cableModification, defaults);
     }
     this.statesFormControls();
