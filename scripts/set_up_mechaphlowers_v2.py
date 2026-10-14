@@ -20,6 +20,7 @@ Usage:
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -46,6 +47,12 @@ CORE_FILES = (
     "python_stdlib.zip",
     "pyodide-lock.json",
 )
+# Compiled wheels must be byte-for-byte reproducible: every deployment rebuilds them, and any
+# changed byte makes every workstation download them again (service worker precache).
+WHEEL_COMPRESSION_LEVEL = 6
+# 1980-01-01T00:00:00Z, the earliest date a zip entry can hold.
+REPRODUCIBLE_EPOCH = "315532800"
+REPRODUCIBLE_ZIP_DATE = (1980, 1, 1, 0, 0, 0)
 
 
 # ── Utilities ────────────────────────────────────────────────────────────────
@@ -99,6 +106,22 @@ def wheel_deps(whl: Path) -> list[str]:
                         deps.append(dep)
             return deps
     return []
+
+
+def normalize_wheel(whl: Path) -> None:
+    """Rewrite *whl* with fixed entry dates and permissions, keeping entry order and content."""
+    tmp = whl.with_name(f"{whl.name}.tmp")
+    with zipfile.ZipFile(whl) as src, zipfile.ZipFile(tmp, "w") as dst:
+        for info in src.infolist():
+            entry = zipfile.ZipInfo(info.filename, date_time=REPRODUCIBLE_ZIP_DATE)
+            entry.compress_type = info.compress_type
+            entry.external_attr = (
+                (0o40755 << 16) | 0x10 if info.is_dir() else 0o100644 << 16
+            )
+            dst.writestr(
+                entry, src.read(info), compresslevel=WHEEL_COMPRESSION_LEVEL
+            )
+    tmp.replace(whl)
 
 
 def pyodide_version() -> str:
@@ -336,11 +359,13 @@ def compile_wheels(cdn_names: set[str]) -> None:
             "pyodide",
             "py-compile",
             "--compression-level",
-            "6",
+            str(WHEEL_COMPRESSION_LEVEL),
             str(PYODIDE_DIR),
         ],
         capture_output=True,
         text=True,
+        # Makes py_compile write hash-based .pyc instead of embedding the source mtime.
+        env={**os.environ, "SOURCE_DATE_EPOCH": REPRODUCIBLE_EPOCH},
     )
 
     if result.returncode:
@@ -348,6 +373,10 @@ def compile_wheels(cdn_names: set[str]) -> None:
         print(f"    stdout: {result.stdout}")
         print(f"    stderr: {result.stderr}")
         raise SystemExit(1)
+
+    # Only the freshly compiled wheels are here: CDN wheels are still in .protected.
+    for whl in PYODIDE_DIR.glob("*.whl"):
+        normalize_wheel(whl)
 
     for name in moved:
         shutil.move(str(safe / name), str(PYODIDE_DIR / name))
