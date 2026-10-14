@@ -10,7 +10,7 @@ import { signal } from '@angular/core';
 import { LateralDistanceType, Obstacle, Position3D, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { Section, Study, Support } from '@shared/domain';
 import { ObstacleFormService } from './obstaclesForm.service';
-import { DEBOUNCED_UPDATE_POINT_DELAY } from '@shared/domain/obstacles/obstacle-form.constants';
+import { DEBOUNCED_UPDATE_POINT_DELAY, defaultObstacleForm } from '@shared/domain/obstacles/obstacle-form.constants';
 import { Distance } from '@services/worker_python/tasks/types';
 import { ChargeData } from '@shared/domain/models/charge.model';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
@@ -451,6 +451,25 @@ describe('ObstacleFormService', () => {
       ]);
 
       tick(DEBOUNCED_UPDATE_POINT_DELAY);
+    }));
+
+    it('should retain the span and reference support when both are passed', fakeAsync(() => {
+      service.form.patchValue({ supportUuid: 'sup-1', referenceSupport: ReferenceSupport.RIGHT });
+
+      service.resetFormForNewObstacle('sup-1', ReferenceSupport.RIGHT);
+      tick(DEBOUNCED_UPDATE_POINT_DELAY);
+
+      expect(service.form.get('supportUuid')?.value).toBe('sup-1');
+      expect(service.form.get('referenceSupport')?.value).toBe(ReferenceSupport.RIGHT);
+    }));
+
+    it('should reset referenceSupport to default when no span is passed', fakeAsync(() => {
+      service.form.patchValue({ referenceSupport: ReferenceSupport.RIGHT });
+
+      service.resetFormForNewObstacle(null, ReferenceSupport.RIGHT);
+      tick(DEBOUNCED_UPDATE_POINT_DELAY);
+
+      expect(service.form.get('referenceSupport')?.value).toBe(defaultObstacleForm.referenceSupport);
     }));
   });
 
