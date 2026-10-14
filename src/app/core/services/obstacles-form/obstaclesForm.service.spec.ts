@@ -471,6 +471,34 @@ describe('ObstacleFormService', () => {
 
       expect(service.form.get('referenceSupport')?.value).toBe(defaultObstacleForm.referenceSupport);
     }));
+
+    it('should clear the previous obstacle results and calculation error', () => {
+      mockObstacleStateService.distances.set([
+        {
+          obstacleUuid: 'previous-obs',
+          points: [
+            {
+              pointIndex: 0,
+              linePoint: [10, 0, 5],
+              virtualPointHorizontal: [10, 5, 0],
+              virtualPointVertical: [10, 0, 5],
+              distanceDiagonal: 12,
+              distanceHorizontal: 6,
+              distanceVertical: 4,
+              signedDistanceVertical: 4
+            }
+          ]
+        }
+      ]);
+      mockObstaclesService.setSelectedMeasure('previous-obs', 0);
+      service.calculationError.set('previous error');
+      expect(service.results().oblique).toBe(12);
+
+      service.resetFormForNewObstacle('sup-1');
+
+      expect(service.results()).toEqual({ oblique: null, vertical: null, horizontal: null });
+      expect(service.calculationError()).toBeNull();
+    });
   });
 
   describe('loadObstacle', () => {

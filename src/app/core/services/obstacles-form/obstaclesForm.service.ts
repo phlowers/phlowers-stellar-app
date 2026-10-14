@@ -238,6 +238,9 @@ export class ObstacleFormService {
       // Clear supportUuid and emit value to ensure the re-slection of the same span won't block support selection.
       this.form.get('supportUuid')?.setValue(null, { emitEvent: true });
     }
+    // Drop the previous obstacle's selection so its distances no longer feed `results`.
+    this.obstaclesService.setSelectedMeasure(null, null);
+    this.calculationError.set(null);
     this.debouncedResetForm(supportUuid, supportUuid ? referenceSupport : null);
     return this.form.value as Obstacle;
   }
