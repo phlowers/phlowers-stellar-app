@@ -9,7 +9,7 @@
   </button>
 
   <p id="mandatory-tangent-aiming-support" class="tangent-aiming-support__mandatory-msg">
-    <app-icon icon="info" />
+    <app-icon icon="info" aria-hidden="true" />
     <span>{{ 'field-measuring.tangent-aiming-support.mandatory-msg' | transloco }}</span>
   </p>
 </div>
@@ -36,7 +36,7 @@
         required
         [attr.data-testid]="field.view.testId"
       />
-      <p-inputgroup-addon>{{ field.view.unit }}</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ field.view.unitKey | transloco }}</p-inputgroup-addon>
     </p-inputgroup>
     @if (error) {
       <p-message [id]="field.view.id + '-error'" severity="error" size="small" variant="simple" role="alert">
@@ -91,7 +91,7 @@
     <p id="tasSpanLength-calculated" class="spanLength__desc">
       {{ 'common.calculated-value-label' | transloco }}
       @if (calculatedSpanLength() !== null) {
-        {{ calculatedSpanLength() | number: '1.0-2' }} m
+        {{ calculatedSpanLength() | number: '1.0-2' }} {{ 'common.meter' | transloco }}
       } @else {
         -
       }
@@ -176,7 +176,7 @@
     (click)="calculate()"
     data-testid="calculate-tangent-aiming-support-btn"
   >
-    <app-icon icon="rocket_launch" />
+    <app-icon icon="rocket_launch" aria-hidden="true" />
     <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
   </button>
 </div>
@@ -195,12 +195,16 @@
       <dl class="tangent-aiming-support__results__list">
         <div class="param">
           <dt>{{ 'common.parameter-label' | transloco }}</dt>
-          <dd data-testid="tangent-aiming-support-parameter">{{ result.parameter.toFixed(0) }} m</dd>
+          <dd data-testid="tangent-aiming-support-parameter">
+            {{ result.parameter.toFixed(0) }} {{ 'common.meter' | transloco }}
+          </dd>
         </div>
 
         <div class="incertainParam">
           <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
-          <dd data-testid="tangent-aiming-support-uncertainty">{{ result.uncertainty.toFixed(0) }} m</dd>
+          <dd data-testid="tangent-aiming-support-uncertainty">
+            {{ result.uncertainty.toFixed(0) }} {{ 'common.meter' | transloco }}
+          </dd>
         </div>
 
         <div class="crit">

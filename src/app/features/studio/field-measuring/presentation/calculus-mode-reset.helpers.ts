@@ -1,12 +1,7 @@
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { applyTangentAimingSupportDefaults } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
 import { PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
-
-/** Context shared by the calculus mode resetters. */
-export interface CalculusModeResetContext {
-  /** Default left support of the tangent aiming (support) mode. */
-  defaultTangentLeftSupport: string | null;
-}
+import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
 
 type CalculationMethod = FieldMeasure['calculationMethod'];
 

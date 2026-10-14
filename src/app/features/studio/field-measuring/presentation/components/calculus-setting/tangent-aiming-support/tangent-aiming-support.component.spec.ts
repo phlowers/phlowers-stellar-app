@@ -41,7 +41,7 @@ describe('TangentAimingSupport component', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {} },
+          langs: { en: { 'common.meter': 'm', 'common.grade-unit': 'gr' } },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),

@@ -71,7 +71,7 @@
             [attr.aria-invalid]="error ? 'true' : null"
             [attr.aria-errormessage]="error ? field.id + '-error' : null"
           />
-          <p-inputgroup-addon>{{ 'studio.cable-adjustment.grade-unit' | transloco }}</p-inputgroup-addon>
+          <p-inputgroup-addon>{{ 'common.grade-unit' | transloco }}</p-inputgroup-addon>
         </p-inputgroup>
         @if (error) {
           <p-message [id]="field.id + '-error'" severity="error" size="small" variant="simple" role="alert">
@@ -183,13 +183,13 @@
         <div class="cable-adjustment__field">
           <dt>{{ 'studio.cable-adjustment.horizontal-sight-angle-label' | transloco }}</dt>
           <dd data-testid="horizontal-sight-angle-value">
-            {{ res.horizontalSightAngle }}&nbsp;{{ 'studio.cable-adjustment.grade-unit' | transloco }}
+            {{ res.horizontalSightAngle }}&nbsp;{{ 'common.grade-unit' | transloco }}
           </dd>
         </div>
         <div class="cable-adjustment__field">
           <dt>{{ 'studio.cable-adjustment.vertical-sight-angle-label' | transloco }}</dt>
           <dd data-testid="vertical-sight-angle-value">
-            {{ res.verticalSightAngle }}&nbsp;{{ 'studio.cable-adjustment.grade-unit' | transloco }}
+            {{ res.verticalSightAngle }}&nbsp;{{ 'common.grade-unit' | transloco }}
           </dd>
         </div>
       </dl>

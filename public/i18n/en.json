@@ -66,6 +66,7 @@
     "max-decimals-error": "Max decimals: {{ maxDecimals }}",
     "max-value-error": "Max. value: {{ max }}",
     "meter": "m",
+    "grade-unit": "gr",
     "min-value-error": "Min. value: {{ min }}",
     "my-last-studies-label": "My last studies",
     "news-label": "News",
@@ -1153,7 +1154,6 @@
       "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
       "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",
       "vertical-sight-angle-label": "V vertical sighting angle at mid-span sag",
-      "grade-unit": "gr",
       "aria-help": "Cable adjustment help",
       "calculation-failed": "Failed to calculate the cable adjustment"
     },

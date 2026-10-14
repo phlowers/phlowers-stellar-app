@@ -22,7 +22,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   tangentSpanLength: {
     id: 'tasSpanLength',
     labelKey: 'common.measured-span-length-label',
-    unit: 'm',
+    unitKey: 'common.meter',
     testId: 'span-length-input',
     step: 0.01,
     area: 'spanLength'
@@ -30,7 +30,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   cableHAccDistance: {
     id: 'tasHAccDistance',
     labelKey: `${I18N}.h-acc-distance-label`,
-    unit: 'm',
+    unitKey: 'common.meter',
     testId: 'h-acc-distance-input',
     step: 0.01,
     area: 'hDistance'
@@ -38,7 +38,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   cableVerticalAccAngle: {
     id: 'tasVerticalAccAngle',
     labelKey: `${I18N}.vertical-acc-angle-label`,
-    unit: 'Gr',
+    unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-input',
     step: 0.01,
     area: 'vAngle'
@@ -46,7 +46,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   cableParameter: {
     id: 'tasParameter',
     labelKey: 'common.parameter-label',
-    unit: 'm',
+    unitKey: 'common.meter',
     testId: 'parameter-input',
     step: 1,
     area: 'parameter'
@@ -54,7 +54,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   cableTangentAngle: {
     id: 'tasTangentAngle',
     labelKey: `${I18N}.tangent-angle-label`,
-    unit: 'Gr',
+    unitKey: 'common.grade-unit',
     testId: 'tangent-angle-input',
     step: 0.01,
     area: 'tangentAngle'

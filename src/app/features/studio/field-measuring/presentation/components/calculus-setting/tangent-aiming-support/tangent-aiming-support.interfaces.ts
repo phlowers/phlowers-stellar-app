@@ -27,7 +27,8 @@ export interface TangentAimingSupportFieldRule {
 export interface TangentAimingSupportNumberFieldView {
   id: string;
   labelKey: string;
-  unit: string;
+  /** Transloco key of the unit displayed next to the input. */
+  unitKey: string;
   testId: string;
   step: number;
   /** CSS grid area class. */

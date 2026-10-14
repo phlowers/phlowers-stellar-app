@@ -1,6 +1,6 @@
 import { Section, Support } from '@shared/domain';
 import { Localization, Task, TaskInputs } from '@services/worker_python/tasks/types';
-import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
+import { FieldMeasure, FieldMeasureOutputs, TangentAimingSupportResult } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
@@ -349,4 +349,20 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   cableTemperature: null,
   parameter15C: null,
   tangentAimingSupport: null
+};
+
+/**
+ * Returns the parameter and uncertainty produced by the calculation method currently selected for the field measure:
+ * the tangent aiming (support) result for the `tangente-aiming` method, the PAPOTO result otherwise.
+ * @param measureData - The field measure, providing the calculation method and its outputs
+ * @returns The active `parameter` and `uncertainty`, or `null` when the selected method has no result yet
+ */
+export const getActiveParameterOutput = (
+  measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
+): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
+  const source =
+    measureData.calculationMethod === 'tangente-aiming'
+      ? measureData.outputs.tangentAimingSupport
+      : measureData.outputs.papoto;
+  return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };

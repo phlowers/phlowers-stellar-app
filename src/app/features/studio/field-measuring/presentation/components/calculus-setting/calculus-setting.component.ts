@@ -10,12 +10,7 @@ import {
   applyTangentAimingSupportDefaults,
   getDefaultLeftSupport
 } from './tangent-aiming-support/tangent-aiming-support.helpers';
-
-const CALCULUS_TYPE_BY_METHOD: Record<FieldMeasure['calculationMethod'], string> = {
-  papoto: 'PAPOTO',
-  'tangente-aiming': 'TANGENT_AIMING_SUPPORT',
-  pep: 'PEP'
-};
+import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
 @Component({
   selector: 'app-calculus-setting',

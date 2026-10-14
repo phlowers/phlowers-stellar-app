@@ -66,6 +66,7 @@
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
     "meter": "m",
+    "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
     "my-last-studies-label": "Mes dernières études",
     "news-label": "Actualités",
@@ -1153,7 +1154,6 @@
       "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
       "horizontal-sight-angle-label": "Angle H horizontal de visée à la flèche médiane",
       "vertical-sight-angle-label": "Angle V vertical de visée à la flèche médiane",
-      "grade-unit": "gr",
       "aria-help": "Aide sur le réglage d'un câble",
       "calculation-failed": "Échec du calcul de réglage du câble"
     },
