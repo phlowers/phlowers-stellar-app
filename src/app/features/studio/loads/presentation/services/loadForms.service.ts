@@ -31,6 +31,9 @@ export class LoadFormsService {
   /** Position updated from free positioning plot click. */
   readonly activeLoadPosition = signal<number | null>(null);
 
+  /** Plot abscissa (from the left support) of the last free-positioning click, cleared once calculated. */
+  readonly pendingLoadAlongSpan = signal<number | null>(null);
+
   /** Sets load position from free positioning, updating temporary load data and notifying subscribers. */
   setLoadPosition(position: number): void {
     const spanIndex = this.getActiveSpanIndex();
@@ -48,6 +51,7 @@ export class LoadFormsService {
       spanLoad.loadPosition = referenceRelativePosition;
     }
     this.activeLoadPosition.set(referenceRelativePosition);
+    this.pendingLoadAlongSpan.set(position);
   }
 
   /** Resolves the span index frozen for free positioning, snapshotted when the mode was switched on. */
@@ -272,6 +276,7 @@ export class LoadFormsService {
 
       // refreshProjection gets all data (litData, baseLitData, obstacles, distances)
       await this.plotService.refreshProjection();
+      this.pendingLoadAlongSpan.set(null);
     } finally {
       this.plotService.loading.set(false);
     }

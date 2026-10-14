@@ -39,6 +39,8 @@ export interface FreePositioningPoint {
   nameKey?: string;
   nameParams?: Record<string, string | number>;
   color?: string;
+  /** Placed by the user but not yet calculated; rendered semi-transparent. */
+  pending?: boolean;
 }
 
 /** Configuration for the core free-positioning plot component. */

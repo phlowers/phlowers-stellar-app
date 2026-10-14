@@ -35,6 +35,8 @@ export const CATEGORY_SYMBOLS: Record<FreePositioningCategory, string> = {
 export const EDITABLE_POINT_COLOR = '#dc2626';
 export const EDITABLE_POINT_SIZE = 14;
 export const DEFAULT_POINT_SIZE = 10;
+/** Opacity of a point placed on the plot but not yet calculated (e.g. a load awaiting calculate & save). */
+export const PENDING_POINT_OPACITY = 0.45;
 export const POINT_SELECTION_PIXEL_RADIUS = 15;
 
 export const CORE_FREE_POSITIONING_PLOT_IDS = {
