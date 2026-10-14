@@ -15,6 +15,7 @@ import { ChargesService } from '@services/charges/charges.service';
 import { LoadFormsService } from '../../services/loadForms.service';
 import { signal } from '@angular/core';
 import { Charge, SymmetryType } from '@shared/domain';
+import { ClimateCharge } from '@shared/domain/models/charge.model';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 describe('getBaseClimate', () => {
@@ -724,6 +725,115 @@ describe('ClimateComponent', () => {
 
       // shift removes first, pop removes last → 0 options remain from 2 supports
       expect(component.frontierSupportOptions().length).toBe(0);
+    });
+  });
+
+  describe('initForm async behaviour', () => {
+    const flush = () => new Promise<void>((resolve) => setTimeout(resolve));
+
+    const deferred = <T>() => {
+      let resolve!: (value: T) => void;
+      const promise = new Promise<T>((res) => {
+        resolve = res;
+      });
+      return { promise, resolve };
+    };
+
+    // Climate is intentionally partial to emulate sparse persisted charges
+    const chargeWith = (uuid: string, climate: Partial<ClimateCharge>): Charge =>
+      ({ ...mockCharge, uuid, data: { ...mockCharge.data, climate } }) as Charge;
+
+    const switchTo = async (uuid: string) => {
+      fixture.componentRef.setInput('chargeUuid', uuid);
+      fixture.detectChanges();
+      await flush();
+    };
+
+    beforeEach(async () => {
+      await flush();
+    });
+
+    it('should not let an older getCharge response overwrite the latest charge', async () => {
+      const chargesService = TestBed.inject(ChargesService);
+      const plotService = TestBed.inject(PlotService);
+      const a = deferred<Charge>();
+      const b = deferred<Charge>();
+      vi.mocked(chargesService.getCharge).mockImplementation((_study, _section, uuid) =>
+        uuid === 'charge-a' ? a.promise : b.promise
+      );
+
+      await switchTo('charge-a');
+      await switchTo('charge-b');
+
+      b.resolve(chargeWith('charge-b', { windPressure: 200 }));
+      await flush();
+      a.resolve(chargeWith('charge-a', { windPressure: 999 }));
+      await flush();
+
+      expect(component.form.value.windPressure).toBe(200);
+      expect(plotService.temporaryLoadData?.climate.windPressure).toBe(200);
+    });
+
+    it('should show defaults, not the previous charge values, while the new charge is loading', async () => {
+      const chargesService = TestBed.inject(ChargesService);
+      const pending = deferred<Charge>();
+      vi.mocked(chargesService.getCharge).mockResolvedValueOnce(
+        chargeWith('charge-a', { windPressure: 300, iceThickness: 5 })
+      );
+      await switchTo('charge-a');
+      expect(component.form.value.windPressure).toBe(300);
+
+      vi.mocked(chargesService.getCharge).mockReturnValueOnce(pending.promise);
+      await switchTo('charge-b');
+
+      expect(component.form.value.windPressure).toBe(0);
+      expect(component.form.value.iceThickness).toBe(0);
+    });
+
+    it('should skip applying the loaded charge when the request is cancelled', async () => {
+      const chargesService = TestBed.inject(ChargesService);
+      vi.mocked(chargesService.getCharge).mockResolvedValue(chargeWith('test-charge-uuid', { windPressure: 999 }));
+
+      await component.initForm(() => true);
+
+      expect(component.form.value.windPressure).toBe(0);
+    });
+
+    it('should reset fields absent from a sparse charge to defaults', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      (spanService.section as ReturnType<typeof signal>).set({
+        uuid: 'section-uuid-1',
+        supports: [{ uuid: 's1' }, { uuid: 's2' }, { uuid: 's3' }]
+      });
+      const chargesService = TestBed.inject(ChargesService);
+      vi.mocked(chargesService.getCharge)
+        .mockResolvedValueOnce(
+          chargeWith('charge-a', {
+            windPressure: 300,
+            cableTemperature: 30,
+            symmetryType: SymmetryType.DIS_SYMMETRIC,
+            iceThickness: 5,
+            frontierSupportNumber: 99,
+            iceThicknessBefore: 4,
+            iceThicknessAfter: 6
+          })
+        )
+        .mockResolvedValueOnce(chargeWith('charge-b', { windPressure: 100 }));
+
+      await switchTo('charge-a');
+      expect(component.form.value.cableTemperature).toBe(30);
+
+      await switchTo('charge-b');
+
+      expect(component.form.value).toEqual({
+        windPressure: 100,
+        cableTemperature: 15,
+        symmetryType: SymmetryType.SYMMETRIC,
+        iceThickness: 0,
+        frontierSupportNumber: 2,
+        iceThicknessBefore: 0,
+        iceThicknessAfter: 0
+      });
     });
   });
 });
