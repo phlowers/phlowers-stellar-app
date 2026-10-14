@@ -12,6 +12,14 @@
 - **Detected on**: 2026-10-02.
 - **Status**: PENDING REVIEW; deletion requires user validation.
 
+### `ClimateComponent.deleteCharge()`
+
+- **Source**: `src/app/features/studio/loads/presentation/components/climate/climate.component.ts`.
+- **Evidence**: The trash button calling it was removed from the climate tab template; no other caller in `src`.
+- **Removal impact**: Remove the method and its `deleteCharge` spec block; check whether `AppIconComponent` and the `loads.shared.erase-load-case-aria-label` key are still used.
+- **Detected on**: 2026-10-13.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead

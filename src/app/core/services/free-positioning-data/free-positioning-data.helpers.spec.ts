@@ -420,6 +420,44 @@ describe('free-positioning-data.helpers', () => {
       const points = buildLoadPoints(params);
       expect(points[0].alongSpan).toBe(30);
     });
+
+    it('should keep the computed load in place and add a pending point at the reference support altitude', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'loads',
+        litData: {
+          coords: { supports: [[[0, 0, 10]], [[100, 0, 20]]] },
+          output_parameters: { loads_coords: { 0: [120, 0, 75] } }
+        } as unknown as GetSectionOutput,
+        loadPosition: 42,
+        loadReferenceSupport: 'RIGHT',
+        pendingLoadAlongSpan: 58
+      };
+
+      const points = buildLoadPoints(params);
+      expect(points).toHaveLength(2);
+      expect(points[0]).toMatchObject({ alongSpan: 120, altitude: 75 });
+      expect(points[0].pending).toBeUndefined();
+      expect(points[1]).toMatchObject({ alongSpan: 58, altitude: 20, pending: true, editable: true });
+    });
+
+    it('should only show the pending point when no load has been computed yet', () => {
+      const params: AggregatePointsParams = {
+        ...baseParams,
+        editableCategory: 'loads',
+        litData: {
+          coords: { supports: [[[0, 0, 10]], [[100, 0, 20]]] },
+          output_parameters: { loads_coords: {} }
+        } as unknown as GetSectionOutput,
+        loadPosition: 30,
+        loadReferenceSupport: 'LEFT',
+        pendingLoadAlongSpan: 30
+      };
+
+      const points = buildLoadPoints(params);
+      expect(points).toHaveLength(1);
+      expect(points[0]).toMatchObject({ alongSpan: 30, altitude: 10, pending: true });
+    });
   });
 
   describe('aggregateFreePositioningPoints', () => {

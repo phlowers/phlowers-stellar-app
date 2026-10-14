@@ -12,6 +12,7 @@ import {
   DEFAULT_POINT_SIZE,
   EDITABLE_POINT_COLOR,
   EDITABLE_POINT_SIZE,
+  PENDING_POINT_OPACITY,
   POINT_SELECTION_PIXEL_RADIUS
 } from './free-positioning.constantes';
 import { FreePositioningCategory, FreePositioningPoint, PlotLayout } from './free-positioning.interfaces';
@@ -77,6 +78,7 @@ export const buildFreePositioningTraces = (
         size: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_SIZE : DEFAULT_POINT_SIZE)),
         color: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_COLOR : (p.color ?? CATEGORY_COLORS[category]))),
         symbol: CATEGORY_SYMBOLS[category],
+        opacity: categoryPoints.map((p) => (p.pending ? PENDING_POINT_OPACITY : 1)),
         line: {
           width: categoryPoints.map((p) => (p.editable ? 2 : 1)),
           color: categoryPoints.map((p) => (p.editable ? '#7f1d1d' : '#1f2937'))

@@ -152,12 +152,14 @@ export class StudioTopToolbarComponent implements OnInit {
       label: this.translocoService.translate('studio.top-toolbar.transparent-background-option'),
       value: 'transparentBackground'
     },
-    { label: this.translocoService.translate('studio.top-toolbar.measurement-points-option'), value: 'measurePoints' }
+    { label: this.translocoService.translate('studio.top-toolbar.measurement-points-option'), value: 'measurePoints' },
+    { label: this.translocoService.translate('studio.free-positioning.floor'), value: 'floor' },
+    { label: this.translocoService.translate('studio.free-positioning.obstacle'), value: 'obstacles' }
   ]);
 
   selectedDisplayOptions = computed(() =>
     Object.keys(this.plotOptionsService.selectedDisplayOptions()).map((key) => ({
-      label: key,
+      label: this.displayOptions().find((option) => option.value === key)?.label ?? key,
       value: key
     }))
   );
@@ -178,7 +180,9 @@ export class StudioTopToolbarComponent implements OnInit {
       loads: selectedDisplayOptions.includes('loads'),
       baseState: selectedDisplayOptions.includes('baseState'),
       transparentBackground: selectedDisplayOptions.includes('transparentBackground'),
-      measurePoints: selectedDisplayOptions.includes('measurePoints')
+      measurePoints: selectedDisplayOptions.includes('measurePoints'),
+      floor: selectedDisplayOptions.includes('floor'),
+      obstacles: selectedDisplayOptions.includes('obstacles')
     });
   }
 

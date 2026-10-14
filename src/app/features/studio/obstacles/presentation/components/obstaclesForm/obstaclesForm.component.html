@@ -18,7 +18,12 @@
       type="button"
       btnStyle="outlined"
       btnSize="s"
-      (click)="obstacleFormService.resetFormForNewObstacle(null)"
+      (click)="
+        obstacleFormService.resetFormForNewObstacle(
+          supportUuidValue(),
+          obstacleFormService.form.get('referenceSupport')?.value ?? null
+        )
+      "
       data-testid="create-new-obstacle"
     >
       <app-icon icon="add_circle" aria-hidden="true" />

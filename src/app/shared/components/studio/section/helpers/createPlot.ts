@@ -378,7 +378,7 @@ const layout2d = (
     scaleratio = 1;
   }
 
-  const xAutorange: 'reversed' | true = plotParams.side === 'face' || plotParams.invert ? 'reversed' : true;
+  const xAutorange: 'reversed' | true = plotParams.invert ? 'reversed' : true;
 
   return {
     autosize: true,
@@ -443,10 +443,22 @@ export const createPlot = (plotParams: CreatePlotParams) => {
   // This prevents Plotly's internal setViewport() from resetting the camera to a
   // stale value when the user interacts with the modebar (e.g. switches dragmode).
   // The DOM camera is the source of truth after the first render.
-  const resolvedParams =
-    plotParams.view === '3d'
-      ? { ...plotParams, camera: getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera }
-      : plotParams;
+  const floorUuids = new Set((plotParams.floors ?? []).map((floor) => floor.uuid));
+  const resolvedParams = {
+    ...plotParams,
+    camera:
+      plotParams.view === '3d'
+        ? (getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera)
+        : plotParams.camera,
+    litData: {
+      ...plotParams.litData,
+      obstacles: plotParams.litData.obstacles?.filter((obstacle) =>
+        floorUuids.has(obstacle.uuid)
+          ? (plotParams.selectedDisplayOptions?.floor ?? true)
+          : (plotParams.selectedDisplayOptions?.obstacles ?? true)
+      )
+    }
+  };
   const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
   const distanceMeasuringPointsTraces =
     (resolvedParams.selectedDisplayOptions?.measurePoints ?? true)

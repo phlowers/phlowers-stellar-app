@@ -26,7 +26,8 @@ describe('LoadsFreePositioningComponent', () => {
 
   const mockLoadFormsService = {
     setLoadPosition: vi.fn(),
-    activeSpanSupportUuid: signal<string | null>(null)
+    activeSpanSupportUuid: signal<string | null>(null),
+    pendingLoadAlongSpan: signal<number | null>(null)
   };
 
   const mockPlotOptionsService = {
@@ -90,7 +91,7 @@ describe('LoadsFreePositioningComponent', () => {
 
     it('should query dataService with frozenSpan and loads category', () => {
       fixture.detectChanges();
-      expect(mockDataService.getPoints).toHaveBeenCalledWith(1, 'loads');
+      expect(mockDataService.getPoints).toHaveBeenCalledWith(1, 'loads', { pendingLoadAlongSpan: null });
     });
 
     it('should not follow the load-marking form span selection once frozen', () => {

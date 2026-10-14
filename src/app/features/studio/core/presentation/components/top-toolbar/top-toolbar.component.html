@@ -37,7 +37,7 @@
     <p-toggleswitch
       inputId="invert"
       data-testid="invert-toggle"
-      [disabled]="toolbarDisabled()"
+      [disabled]="true"
       [(ngModel)]="plotOptionsService.plotOptions().invert"
       (onChange)="plotService.plotOptionsChange({ invert: $event.checked })"
     />

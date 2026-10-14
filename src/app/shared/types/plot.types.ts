@@ -61,6 +61,10 @@ export interface SelectedDisplayOptions {
   transparentBackground: boolean;
   /** Whether registered distance/angle measurement points are displayed. */
   measurePoints: boolean;
+  /** Whether floors are displayed; defaults to true when omitted. */
+  floor?: boolean;
+  /** Whether obstacles are displayed; defaults to true when omitted. */
+  obstacles?: boolean;
 }
 
 /** User-controlled scaling factors per axis and Plotly aspect mode. Used as input to getAspectRatio and for 2D scaleratio. */

@@ -222,11 +222,14 @@ export class ObstacleFormService {
     );
   });
 
-  private readonly debouncedResetForm = debounce((supportUuid: string | null) => {
-    this.resetForm(supportUuid);
-  }, DEBOUNCED_UPDATE_POINT_DELAY);
+  private readonly debouncedResetForm = debounce(
+    (supportUuid: string | null, referenceSupport: ReferenceSupport | null) => {
+      this.resetForm(supportUuid, referenceSupport);
+    },
+    DEBOUNCED_UPDATE_POINT_DELAY
+  );
 
-  resetFormForNewObstacle(supportUuid: string | null): Obstacle {
+  resetFormForNewObstacle(supportUuid: string | null, referenceSupport: ReferenceSupport | null = null): Obstacle {
     if (supportUuid) {
       const supports = this.spanService.getSupportOptions(supportUuid);
       this.supportsOptions.set(supports.map((s) => ({ label: String(s.label), value: s.value })));
@@ -235,7 +238,10 @@ export class ObstacleFormService {
       // Clear supportUuid and emit value to ensure the re-slection of the same span won't block support selection.
       this.form.get('supportUuid')?.setValue(null, { emitEvent: true });
     }
-    this.debouncedResetForm(supportUuid);
+    // Drop the previous obstacle's selection so its distances no longer feed `results`.
+    this.obstaclesService.setSelectedMeasure(null, null);
+    this.calculationError.set(null);
+    this.debouncedResetForm(supportUuid, supportUuid ? referenceSupport : null);
     return this.form.value as Obstacle;
   }
 
@@ -252,12 +258,13 @@ export class ObstacleFormService {
     );
   }
 
-  private resetForm(supportUuid: string | null) {
+  private resetForm(supportUuid: string | null, referenceSupport: ReferenceSupport | null) {
     this.form.reset(
       {
         ...defaultObstacleForm,
         uuid: uuidv4(),
-        supportUuid: supportUuid ?? null
+        supportUuid: supportUuid ?? null,
+        referenceSupport: referenceSupport ?? defaultObstacleForm.referenceSupport
       },
       { emitEvent: false }
     );

@@ -129,8 +129,8 @@ export class LoadMarkingComponent {
   private readonly chargeChangeEffect = effect(() => {
     this.chargeUuid(); // Tracking: when the UUID changes, the effect rerun
     untracked(() => {
-      this.form.reset();
-      this.form.controls.referenceSupport.disable();
+      this.resetLoadFields({ emitEvent: false });
+      this.applySelectedLoadValues();
     });
   });
 
@@ -176,9 +176,7 @@ export class LoadMarkingComponent {
   ];
 
   resetForm() {
-    this.form.reset();
-    this.form.controls.referenceSupport.disable();
-    void this.loadFormsService.initTemporaryLoadData();
+    this.resetLoadFields({ emitEvent: true });
   }
 
   async deleteCharge(): Promise<void> {
@@ -253,6 +251,19 @@ export class LoadMarkingComponent {
     this.supportsOptions.set(untracked(() => this.spanService.getSupportOptions(supportUuid)));
     this.form.controls.referenceSupport.enable({ emitEvent: false });
     this.applySelectedLoadValues();
+  }
+
+  /** Resets every field except the span selection to its default value. */
+  private resetLoadFields(options: { emitEvent: boolean }): void {
+    const { referenceSupport, type, loadPosition, loadWeight } = this.form.controls;
+    const hasSpan = !!this.form.controls.spanSelect.value;
+    referenceSupport.reset(emptySpanLoad.referenceSupport, options);
+    if (!hasSpan) {
+      referenceSupport.disable(options);
+    }
+    type.reset(emptySpanLoad.type, options);
+    loadPosition.reset(emptySpanLoad.loadPosition, options);
+    loadWeight.reset(emptySpanLoad.loadWeight, options);
   }
 
   private applySelectedLoadValues(): void {
