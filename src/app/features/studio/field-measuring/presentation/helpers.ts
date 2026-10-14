@@ -221,6 +221,35 @@ function isDaylightSavingTime(date: Date = new Date()): boolean {
   return date.getTimezoneOffset() < stdTimezoneOffset;
 }
 
+/** Default values of the papoto calculation inputs. */
+export const PAPOTO_INPUT_DEFAULTS = {
+  leftSupport: null,
+  spanLength: null,
+  measuredElevationDifference: null,
+  HL: null,
+  H1: null,
+  H2: null,
+  H3: null,
+  HR: null,
+  VL: null,
+  V1: null,
+  V2: null,
+  V3: null,
+  VR: null
+} satisfies Partial<FieldMeasure>;
+
+/** Default values of the PEP calculation inputs. */
+export const PEP_INPUT_DEFAULTS = {
+  lengthBetweenSightGD: null,
+  elevationDifferenceBetweenSightGD: null,
+  xSight1: null,
+  xSight2: null,
+  xSight3: null,
+  ySight1: null,
+  ySight2: null,
+  ySight3: null
+} satisfies Partial<FieldMeasure>;
+
 /**
  * Creates the initial field measure data for a new measurement session.
  * @param section - The current section, used to pre-populate cable/link metadata.
@@ -258,19 +287,7 @@ export const createInitialMeasureData = (
     windDirection: null,
     skyCover: null,
     calculationMethod: 'papoto',
-    leftSupport: null,
-    spanLength: null,
-    measuredElevationDifference: null,
-    HL: null,
-    H1: null,
-    H2: null,
-    H3: null,
-    HR: null,
-    VL: null,
-    V1: null,
-    V2: null,
-    V3: null,
-    VR: null,
+    ...PAPOTO_INPUT_DEFAULTS,
     cableHAccDistance: null,
     cableVerticalAccAngle: null,
     calculationType: 'parametre',
@@ -278,14 +295,7 @@ export const createInitialMeasureData = (
     cableParameter: null,
     tangentLeftSupport: null,
     tangentSpanLength: null,
-    lengthBetweenSightGD: null,
-    elevationDifferenceBetweenSightGD: null,
-    xSight1: null,
-    xSight2: null,
-    xSight3: null,
-    ySight1: null,
-    ySight2: null,
-    ySight3: null,
+    ...PEP_INPUT_DEFAULTS,
     transit: null,
     windIncidence: null,
     windIncidenceMode: 'auto',

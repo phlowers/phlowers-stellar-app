@@ -21,7 +21,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
 > = {
   tangentSpanLength: {
     id: 'tasSpanLength',
-    labelKey: `${I18N}.span-length-label`,
+    labelKey: 'common.measured-span-length-label',
     unit: 'm',
     testId: 'span-length-input',
     step: 0.01,

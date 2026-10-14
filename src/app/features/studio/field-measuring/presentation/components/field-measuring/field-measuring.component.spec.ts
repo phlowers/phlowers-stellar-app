@@ -684,13 +684,12 @@ describe('FieldMeasuringComponent', () => {
       toolbarDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const measureData = component.measureData();
       const section = spanService.section();
 
       await component.onSave();
 
       expect(modifySectionSpy).toHaveBeenCalledWith({
-        field_measures: [...(section?.field_measures || []), measureData]
+        field_measures: [...(section?.field_measures || []), component.measureData()]
       });
     });
 
@@ -744,6 +743,37 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.cableParameter).toBe(100);
       expect(saved?.cableTangentAngle).toBeNull();
       expect(component.measureData().cableTangentAngle).toBeNull();
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should reset the papoto inputs when tangent aiming is active', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableParameter: 100 })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.leftSupport).toBeNull();
+      expect(saved?.cableParameter).toBe(100);
+    });
+
+    it('should reset tangent aiming to defaults when papoto is active', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({ calculationMethod: 'papoto', HL: 5, tangentSpanLength: 12, cableTangentAngle: 5 })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.HL).toBe(5);
+      expect(saved?.tangentSpanLength).not.toBe(12);
+      expect(saved?.cableTangentAngle).not.toBe(5);
       expect(component.hasUnsavedChanges()).toBe(false);
     });
 
@@ -1023,7 +1053,7 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
 
       expect(modifySpy).toHaveBeenCalledWith({
-        field_measures: [existingMeasure, newMeasure]
+        field_measures: [existingMeasure, component.measureData()]
       });
     });
 

@@ -37,9 +37,11 @@ import {
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
 import {
+  getDefaultLeftSupport,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields
 } from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { resetInactiveCalculusModes } from '../../calculus-mode-reset.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber, isEqual } from 'lodash';
@@ -408,10 +410,13 @@ export class FieldMeasuringComponent implements OnDestroy {
       return;
     }
     // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2)
-    const measureData =
+    const activeMeasureData =
       currentMeasureData.calculationMethod === 'tangente-aiming'
         ? resetNonDisplayedParameterFields(currentMeasureData)
         : currentMeasureData;
+    const measureData = resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
+      defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
+    });
     const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);
     if (isExistingMeasure) {
       await this.plotService.modifySection({

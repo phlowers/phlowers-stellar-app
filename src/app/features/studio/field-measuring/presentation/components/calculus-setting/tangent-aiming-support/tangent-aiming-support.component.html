@@ -49,7 +49,7 @@
 <div class="tangent-aiming-support__form">
   <div class="leftSupport">
     @let leftSupportError = getError(form.controls.tangentLeftSupport);
-    <label for="tasLeftSupport">{{ 'field-measuring.tangent-aiming-support.left-support-label' | transloco }}</label>
+    <label for="tasLeftSupport">{{ 'common.left-support-label' | transloco }}</label>
     <p-select
       inputId="tasLeftSupport"
       [options]="supportOptions()"
@@ -89,7 +89,7 @@
 
   <div class="spanLengthDesc">
     <p id="tasSpanLength-calculated" class="spanLength__desc">
-      {{ 'field-measuring.tangent-aiming-support.calculated-value-label' | transloco }}
+      {{ 'common.calculated-value-label' | transloco }}
       @if (calculatedSpanLength() !== null) {
         {{ calculatedSpanLength() | number: '1.0-2' }} m
       } @else {

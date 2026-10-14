@@ -159,7 +159,10 @@
     "x-label": "X:",
     "y-label": "Y:",
     "z-label": "Z:",
-    "support-name-full-label": "Support name"
+    "support-name-full-label": "Support name",
+    "left-support-label": "Left support",
+    "measured-span-length-label": "Measured span length",
+    "calculated-value-label": "Calculated value:"
   },
   "app": {
     "update": "Update",
@@ -685,9 +688,6 @@
     "tangent-aiming-support": {
       "open-help-aria-label": "open tangent aiming help",
       "mandatory-msg": "All fields are mandatory for calculus setting",
-      "left-support-label": "Left support",
-      "span-length-label": "Measured span length",
-      "calculated-value-label": "Calculated value:",
       "h-acc-distance-label": "Vertical dist. from the device to the cable attach. of the left support",
       "vertical-acc-angle-label": "Vertical angle from the device to the cable attach. of the right support",
       "calculation-type-label": "Calculation type:",
@@ -703,9 +703,6 @@
       "close-aria-label": "close PAPOTO help",
       "import-station-data": "Import station's datas",
       "mandatory-msg": "All fields are mandatory for calculus setting",
-      "left-support-label": "Left support",
-      "span-length-label": "Measured span length",
-      "calculated-value-label": "Calculated value:",
       "elevation-diff-label": "Elevation diff. of measured attach.",
       "hl-label": "HL",
       "h1-label": "H1",
