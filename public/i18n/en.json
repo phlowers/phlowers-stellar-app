@@ -161,18 +161,6 @@
     "z-label": "Z:",
     "support-name-full-label": "Support name"
   },
-  "app": {
-    "update": "Update",
-    "new-version-available": "The new version of your application is available!",
-    "version": "Version:",
-    "hash": "Hash:",
-    "update-in-progress": "The update of your application is in progress",
-    "update-warning": "Thank you for not closing the app when the update is in progress.",
-    "later": "Later",
-    "update-now": "Update now",
-    "update-start-failed": "The update could not be started. Please try again.",
-    "install-failed": "Initial application installation could not start. Please reload the page to try again."
-  },
   "auth": {
     "login-page": {
       "logo-alt": "Stellar",
@@ -231,13 +219,28 @@
   },
   "admin": {
     "app-version": "App version",
-    "check-app-version": "Check app version",
-    "current-version": "Current version",
-    "latest-version": "Latest version",
+    "check-app-version": "Check for updates",
+    "col-property": "Property",
+    "col-value": "Value",
     "build-hash": "Build Hash",
     "build-datetime": "Build datetime",
     "build-version": "Build version",
-    "update-to-latest": "Update to latest version",
+    "offline-status": "Offline mode",
+    "pending-version": "Pending version",
+    "no-pending-version": "None",
+    "last-refusal": "Last postponed update",
+    "network": "Estimated network speed",
+    "downlink-value": "{{ downlink }} Mbit/s (background downloads from {{ threshold }} Mbit/s)",
+    "storage": "Storage",
+    "storage-value": "{{ usage }} MB used out of {{ quota }} MB",
+    "not-available": "Not available",
+    "refusal": {
+      "api-unavailable": "Network speed unknown to the browser",
+      "downlink-unknown": "Network speed unknown to the browser",
+      "downlink-below-threshold": "Network too slow",
+      "save-data": "Data saver enabled",
+      "storage-insufficient": "Not enough storage space"
+    },
     "activate-python-logs": "Activate Python logs",
     "danger-zone": "Danger zone",
     "delete-all-studies": "Delete all studies",
@@ -288,17 +291,20 @@
       "unauthorized-summary": "Unauthorized",
       "imported-from-protov4": "Study imported from protoV4"
     },
-    "update-service": {
-      "update-success-summary": "Update successful",
-      "update-success-detail": "The application has been updated to the latest version",
-      "install-success-summary": "Install successful",
-      "install-success-detail": "The application has been installed",
-      "update-failed-summary": "Update failed",
-      "update-failed-detail": "An unknown error occurred during the update",
-      "update-failed-auth-detail": "The update could not be downloaded because your session has expired. Please sign in again, then retry the update",
-      "update-interrupted-summary": "Update interrupted",
-      "update-interrupted-detail": "The update did not finish. Please try again.",
-      "version-checked-detail": "App version checked"
+    "app-update-service": {
+      "offline-status": {
+        "ready": "Ready offline",
+        "preparing": "Preparing offline mode",
+        "waiting-network": "Offline mode waiting for a fast enough network",
+        "storage-insufficient": "Offline mode: not enough storage",
+        "not-prepared": "Offline mode unavailable"
+      },
+      "update-deferred-network": "Update postponed: the connection does not allow downloading it now (slow or unmeasurable network, or data saver enabled), it will be downloaded later.",
+      "check-started": "Checking for updates: a new version will be downloaded in the background.",
+      "update-waiting-summary": "Update downloaded",
+      "update-waiting-detail": "It will be applied the next time the application starts (close every Stellar window, then reopen it).",
+      "storage-insufficient-summary": "Not enough storage space",
+      "storage-insufficient-detail": "Not enough storage space to download the update: free up space on this device."
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle deleted",

@@ -14,6 +14,7 @@ from pathlib import Path
 
 blacklist = [
     "service-worker.js",
+    "catalog-manifest.json",
 ]
 
 # Catalog data files (CSV/JSON under dist/data) are described by data_hashes
@@ -142,8 +143,14 @@ def main():
         "data_hashes": csv_hashes,
         "files": app_files,
     }
+    # Kept for workstations still on the previous update system: it is how they reach the Workbox version.
     with open(output_file, "w") as f:
         json.dump(res, f, indent=2)
+
+    # Read by the Workbox-based app: catalog hashes only (the precache manifest lives in service-worker.js).
+    catalog_manifest = {"app_version": app_version, "data_hashes": csv_hashes}
+    with open(os.path.join(target_dir, "catalog-manifest.json"), "w") as f:
+        json.dump(catalog_manifest, f, indent=2)
 
 
 if __name__ == "__main__":

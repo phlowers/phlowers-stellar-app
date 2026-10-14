@@ -5,10 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
-import { UpdateService } from '@services/worker_update/worker_update.service';
+import { AppUpdateService } from '@services/app-update/app-update.service';
+import { isAppCacheName, offlineStatusKind } from '@services/app-update/app-update.helpers';
+import { APP_UPDATE_I18N, OFFLINE_STATUS_I18N_PREFIX } from '@services/app-update/app-update.constantes';
+import { UpdateDiagnostics } from '@services/app-update/app-update.interfaces';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -25,11 +28,7 @@ import { WINDOW } from '@core/tokens/window.token';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
-
-/** Pre-migration legacy cache name (kept for cleanup). */
-const LEGACY_CACHE_NAME = 'app-assets';
-/** Control cache holding the activation pointer. */
-const CONTROL_CACHE_NAME = 'app-assets-control';
+import { checkResultKey, refusalReasonKey, toMegabytes } from './admin.helpers';
 
 /**
  * Administration page component.
@@ -57,8 +56,8 @@ const CONTROL_CACHE_NAME = 'app-assets-control';
   providers: [ConfirmationService, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminComponent {
-  readonly updateService = inject(UpdateService);
+export class AdminComponent implements OnInit {
+  readonly appUpdateService = inject(AppUpdateService);
   readonly onlineService = inject(OnlineService);
   private readonly messageService = inject(MessageService);
   private readonly studyService = inject(StudiesService);
@@ -71,8 +70,61 @@ export class AdminComponent {
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
 
+  readonly checking = signal(false);
+  readonly diagnostics = signal<UpdateDiagnostics | null>(null);
+  readonly offlineLabelKey = computed(
+    () => `${OFFLINE_STATUS_I18N_PREFIX}.${offlineStatusKind(this.appUpdateService.state())}`
+  );
+  readonly pendingVersionKey = computed(() =>
+    this.appUpdateService.state() === 'update-waiting'
+      ? APP_UPDATE_I18N.updateWaitingSummary
+      : 'admin.no-pending-version'
+  );
+  readonly lastRefusalKey = computed(() => {
+    const refusal = this.appUpdateService.lastRefusal();
+    return refusal ? refusalReasonKey(refusal.reason) : null;
+  });
+  readonly downlinkText = computed(() => {
+    const diagnostics = this.diagnostics();
+    if (diagnostics?.downlinkMbps == null) {
+      return this.translocoService.translate('admin.not-available');
+    }
+    return this.translocoService.translate('admin.downlink-value', {
+      downlink: diagnostics.downlinkMbps,
+      threshold: diagnostics.thresholdMbps
+    });
+  });
+  readonly storageText = computed(() => {
+    const usage = toMegabytes(this.diagnostics()?.usageBytes ?? null);
+    const quota = toMegabytes(this.diagnostics()?.quotaBytes ?? null);
+    if (usage === null || quota === null) {
+      return this.translocoService.translate('admin.not-available');
+    }
+    return this.translocoService.translate('admin.storage-value', { usage, quota });
+  });
+
   constructor() {
     this.activateDebugLogs.set(localStorage.getItem('activateDebugLogs') === 'true');
+  }
+
+  ngOnInit(): void {
+    void this.refreshDiagnostics();
+  }
+
+  /** Asks for an update check; the download itself happens in the background and is never applied from here. */
+  async checkForUpdates(): Promise<void> {
+    this.checking.set(true);
+    try {
+      const decision = await this.appUpdateService.checkForUpdate();
+      this.notificationService.info(this.translocoService.translate(checkResultKey(decision)));
+    } finally {
+      await this.refreshDiagnostics();
+      this.checking.set(false);
+    }
+  }
+
+  private async refreshDiagnostics(): Promise<void> {
+    this.diagnostics.set(await this.appUpdateService.readDiagnostics());
   }
 
   /**
@@ -94,8 +146,6 @@ export class AdminComponent {
       return value;
     }
   }
-  updateAvailable = false;
-  newVersion = '';
   activateDebugLogsOptions = [
     { label: this.translocoService.translate('admin.admin.on'), value: LogLevel.DEBUG },
     { label: this.translocoService.translate('admin.admin.off'), value: LogLevel.WARNING }
@@ -148,17 +198,10 @@ export class AdminComponent {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map((registration) => registration.unregister()));
 
-        // Delete all application caches: legacy, control, and all versioned caches.
-        // IndexedDB and catalogs are preserved.
+        // Delete the application caches (Workbox precache, catalog files, previous update system).
+        // IndexedDB (studies, imported catalogs) is preserved.
         const cacheNames = await caches.keys();
-        const appCacheNames = cacheNames.filter(
-          (name) =>
-            name === LEGACY_CACHE_NAME ||
-            name === CONTROL_CACHE_NAME ||
-            name.startsWith('app-assets-v-') ||
-            name.startsWith('app-assets-candidate-')
-        );
-        await Promise.all(appCacheNames.map((name) => caches.delete(name)));
+        await Promise.all(cacheNames.filter(isAppCacheName).map((name) => caches.delete(name)));
 
         this.messageService.add({
           severity: 'success',
