@@ -92,7 +92,17 @@ class ScenarioRunner:
         )
 
     def run(self, scenario: Scenario) -> ScenarioOutcome:
-        """Solve the climatic state of a scenario, once per distinct state."""
+        """Solve the climatic state of a scenario, once per distinct state.
+
+        Steps performed for each scenario:
+        1. Build a cache key from the scenario target state
+           (wind pressure and new temperature).
+        2. Reuse a previously computed result when the same state was already solved.
+        3. Apply the target climate to a deep copy of the study.
+        4. Refresh the span geometry for the current support span.
+        5. Compute the cable point closest to the obstacle in the obstacle plane.
+        6. Project that point back into the plane coordinates and cache it.
+        """
         state = scenario.target_state
         key = (state.wind_pressure, state.new_temperature)
         point = self._cache.get(key)

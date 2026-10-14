@@ -4,7 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Per-plot conformity rules: radius, compliance values, status and zone geometry."""
+"""Per-plot conformity behavior: drawing geometry and obstacle compliance rules."""
 
 import math
 from abc import ABC, abstractmethod
@@ -22,7 +22,7 @@ DEFAULT_ZONE_WIDTH = 10.0
 
 
 class PlotStrategy(ABC):
-    """Behavior of a conformity plot type."""
+    """Behavior specific to a conformity plot type for both drawing and judging."""
 
     uses_intermediate_points: ClassVar[bool] = False
 
@@ -61,6 +61,8 @@ class PlotStrategy(ABC):
 
 
 class CableTrackStrategy(PlotStrategy):
+    """Cable track: circular gaps and compliance based on Euclidean distances."""
+
     uses_intermediate_points = True
 
     def radius(self, security_distance: float) -> float:
@@ -94,7 +96,7 @@ class CableTrackStrategy(PlotStrategy):
 
 
 class _BoxZoneStrategy(PlotStrategy):
-    """Plots drawn as a box around the cable points."""
+    """Shared box-shaped plots: vertical overhang gap and zone geometry."""
 
     # Flat box: a single line below the lowest point.
     flat: ClassVar[bool] = False
@@ -148,6 +150,8 @@ class _BoxZoneStrategy(PlotStrategy):
 
 
 class VegetationStrategy(_BoxZoneStrategy):
+    """Vegetation: U-shaped validation based on overhang and lateral distances."""
+
     border = ("UpperLeft", "LowerLeft", "LowerRight", "UpperRight")
 
     def lateral_gap(
@@ -189,6 +193,8 @@ class VegetationStrategy(_BoxZoneStrategy):
 
 
 class OverhangStrategy(_BoxZoneStrategy):
+    """Overhang: flat zone judged only by the vertical gap to the obstacle."""
+
     flat = True
     border = ("LowerLeft", "LowerRight", "UpperRight", "UpperLeft")
 
