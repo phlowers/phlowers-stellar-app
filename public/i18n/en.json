@@ -189,15 +189,20 @@
     "update-text": "View latest updates.",
     "update-link-text": "Learn more",
     "update-link-explicit-text": "Learn more about latest updates",
-    "server-title": "Server state",
-    "server-text-default": "Trying to reach the servers!",
     "update-available": "Update available",
     "update-new-available": "A new application update is available!",
-    "server-offline": "Application in offline mode.",
-    "server-unknown": "Cannot reach data. Please check your internet connectivity.",
-    "server-warning": "Trying to reach the servers.",
-    "server-error": "An error occured while trying to reach servers.",
-    "server-success": "Server connexion success!",
+    "offline-card": {
+      "title": "Offline mode",
+      "connection-online": "Online.",
+      "connection-offline": "No connection.",
+      "status-ready": "Ready for offline use.",
+      "status-preparing": "Preparing offline mode.",
+      "status-waiting-network": "Network too slow to prepare offline mode.",
+      "status-storage-insufficient": "Not enough storage for offline mode.",
+      "status-not-prepared": "Offline mode unavailable.",
+      "update-postponed-network": "Update postponed: network too slow.",
+      "update-blocked-storage": "Update blocked: not enough storage."
+    },
     "no-recent-studies": "No recent studies",
     "go-to-studies": "Go to my studies"
   },
@@ -298,11 +303,11 @@
     },
     "app-update-service": {
       "offline-status": {
-        "ready": "Ready offline",
-        "preparing": "Preparing offline mode",
-        "waiting-network": "Offline mode waiting for a fast enough network",
-        "storage-insufficient": "Offline mode: not enough storage",
-        "not-prepared": "Offline mode unavailable"
+        "ready": "Ready",
+        "preparing": "Preparing",
+        "waiting-network": "Network too slow",
+        "storage-insufficient": "Not enough storage",
+        "not-prepared": "Unavailable"
       },
       "update-deferred-network": "Update postponed: the connection does not allow downloading it now (slow or unmeasurable network, or data saver enabled), it will be downloaded later.",
       "check-started": "Checking for updates: a new version will be downloaded in the background.",

@@ -20,22 +20,6 @@ header {
   @extend %text-m-600;
 }
 
-.offline-status {
-  @extend %text-m-600;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: var(--grey-750);
-
-  &--ready {
-    color: var(--success-700);
-  }
-
-  &--warning {
-    color: var(--warning-700);
-  }
-}
-
 .calculation {
   gap: 0.625rem;
   justify-content: flex-end;
