@@ -36,6 +36,10 @@ import {
   buildFieldMeasureExportFilename
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
+import {
+  isTangentAimingSupportDataValid,
+  resetNonDisplayedParameterFields
+} from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber, isEqual } from 'lodash';
@@ -193,12 +197,18 @@ export class FieldMeasuringComponent implements OnDestroy {
     return isValid && !this.isNameAlreadyTaken();
   });
 
+  /** Whether the tangent aiming (support) method is selected. */
+  readonly isTangentAimingMethod = computed(() => this.measureData().calculationMethod === 'tangente-aiming');
+
   /**
    * Validity of the "Parameter calculation" tab (RG.MES.EXP-BTN.2). Only the PAPOTO method has an
    * implemented form to validate; the other methods (placeholders) are always considered valid.
    */
   readonly isParameterCalculationValid = computed(() => {
     const measureData = this.measureData();
+    if (measureData.calculationMethod === 'tangente-aiming') {
+      return isTangentAimingSupportDataValid(measureData);
+    }
     if (measureData.calculationMethod !== 'papoto') {
       return true;
     }
@@ -259,7 +269,10 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   /** Whether the measure has been computed at least once (PAPOTO is currently the only implemented method). */
-  readonly hasComputedOutputs = computed(() => this.measureData().outputs.papoto !== null);
+  readonly hasComputedOutputs = computed(() => {
+    const { calculationMethod, outputs } = this.measureData();
+    return calculationMethod === 'tangente-aiming' ? outputs.tangentAimingSupport !== null : outputs.papoto !== null;
+  });
 
   /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
   readonly canExport = computed(
@@ -390,10 +403,15 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   async onSave() {
     const section = this.spanService.section();
-    const measureData = this.measureData();
-    if (!section || !measureData) {
+    const currentMeasureData = this.measureData();
+    if (!section || !currentMeasureData) {
       return;
     }
+    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2)
+    const measureData =
+      currentMeasureData.calculationMethod === 'tangente-aiming'
+        ? resetNonDisplayedParameterFields(currentMeasureData)
+        : currentMeasureData;
     const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);
     if (isExistingMeasure) {
       await this.plotService.modifySection({
@@ -411,6 +429,7 @@ export class FieldMeasuringComponent implements OnDestroy {
       summary: this.translocoService.translate('common.success'),
       detail: this.translocoService.translate('field-measuring.actions.success-detail')
     });
+    this.measureData.set(measureData);
     this.lastSavedMeasureData.set(measureData);
   }
 

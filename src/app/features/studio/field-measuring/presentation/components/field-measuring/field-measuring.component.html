@@ -50,14 +50,20 @@
 
 <ng-template #footer>
   <div class="dialog-footer">
-    <button app-btn type="button" [disabled]="hasUnsavedChanges()" btnStyle="outlined" (click)="onReport()">
+    <button
+      app-btn
+      type="button"
+      [disabled]="hasUnsavedChanges() || isTangentAimingMethod()"
+      btnStyle="outlined"
+      (click)="onReport()"
+    >
       <app-icon icon="description" />
       <span>{{ 'common.report' | transloco }}</span>
     </button>
     <button
       app-btn
       type="button"
-      [disabled]="hasUnsavedChanges()"
+      [disabled]="hasUnsavedChanges() || isTangentAimingMethod()"
       btnStyle="outlined"
       (click)="onExport()"
       data-testid="export-btn"
@@ -68,7 +74,7 @@
     <button
       app-btn
       type="button"
-      [disabled]="!isFormValid() || !hasUnsavedChanges()"
+      [disabled]="!isFormValid() || (isTangentAimingMethod() && !isParameterCalculationValid()) || !hasUnsavedChanges()"
       (click)="onSave()"
       data-testid="save-btn"
     >

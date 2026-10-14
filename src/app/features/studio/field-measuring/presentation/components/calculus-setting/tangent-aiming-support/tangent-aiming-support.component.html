@@ -10,48 +10,86 @@
 
   <p id="mandatory-tangent-aiming-support" class="tangent-aiming-support__mandatory-msg">
     <app-icon icon="info" />
-    <span>{{ 'field-measuring.papoto.mandatory-msg' | transloco }}</span>
+    <span>{{ 'field-measuring.tangent-aiming-support.mandatory-msg' | transloco }}</span>
   </p>
 </div>
 
-<div class="tangent-aiming-support__form">
-  <div class="leftSupport">
-    <label for="tasLeftSupport">{{ 'field-measuring.papoto.left-support-label' | transloco }}</label>
-    <p-select
-      inputId="tasLeftSupport"
-      [options]="leftSupportOption()"
-      [ngModel]="measureData().leftSupport"
-      (ngModelChange)="updateField('leftSupport', $event)"
-      optionLabel="label"
-      optionValue="value"
-      [fluid]="true"
-      aria-describedby="mandatory-tangent-aiming-support"
-      [required]="true"
-      data-testid="left-support-select"
-    />
-  </div>
-
-  <div class="spanLength">
-    <label for="tasSpanLength">{{ 'field-measuring.papoto.span-length-label' | transloco }}</label>
+<ng-template #numberField let-field>
+  @let control = field.control;
+  @let error = getError(control);
+  <div [class]="field.view.area">
+    <label [for]="field.view.id">{{ field.view.labelKey | transloco }}</label>
     <p-inputgroup>
       <input
-        id="tasSpanLength"
+        [id]="field.view.id"
         type="number"
         pInputText
-        [ngModel]="measureData().spanLength"
-        (ngModelChange)="updateField('spanLength', $event)"
-        [min]="0"
-        aria-describedby="mandatory-tangent-aiming-support tasSpanLength-calculated"
+        [formControl]="control"
+        [attr.min]="field.rule.min"
+        [attr.max]="field.rule.max"
+        [attr.step]="field.view.step"
+        [attr.aria-describedby]="
+          'mandatory-tangent-aiming-support' + (field.describedBy ? ' ' + field.describedBy : '')
+        "
+        [attr.aria-invalid]="error ? 'true' : null"
+        [attr.aria-errormessage]="error ? field.view.id + '-error' : null"
         required
-        data-testid="span-length-input"
+        [attr.data-testid]="field.view.testId"
       />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
+      <p-inputgroup-addon>{{ field.view.unit }}</p-inputgroup-addon>
     </p-inputgroup>
+    @if (error) {
+      <p-message [id]="field.view.id + '-error'" severity="error" size="small" variant="simple" role="alert">
+        {{ error }}
+      </p-message>
+    }
   </div>
+</ng-template>
+
+<div class="tangent-aiming-support__form">
+  <div class="leftSupport">
+    @let leftSupportError = getError(form.controls.tangentLeftSupport);
+    <label for="tasLeftSupport">{{ 'field-measuring.tangent-aiming-support.left-support-label' | transloco }}</label>
+    <p-select
+      inputId="tasLeftSupport"
+      [options]="supportOptions()"
+      [formControl]="form.controls.tangentLeftSupport"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      [fluid]="true"
+      appendTo="body"
+      aria-describedby="mandatory-tangent-aiming-support"
+      [attr.aria-invalid]="leftSupportError ? 'true' : null"
+      [attr.aria-errormessage]="leftSupportError ? 'tasLeftSupport-error' : null"
+      [required]="true"
+      (onHide)="form.controls.tangentLeftSupport.markAsTouched()"
+      data-testid="left-support-select"
+    />
+    @if (leftSupportError) {
+      <p-message id="tasLeftSupport-error" severity="error" size="small" variant="simple" role="alert">
+        {{ leftSupportError }}
+      </p-message>
+    }
+  </div>
+
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: {
+          control: form.controls.tangentSpanLength,
+          view: fields.tangentSpanLength,
+          rule: rules.tangentSpanLength,
+          describedBy: 'tasSpanLength-calculated'
+        }
+      }
+    "
+  />
 
   <div class="spanLengthDesc">
     <p id="tasSpanLength-calculated" class="spanLength__desc">
-      {{ 'field-measuring.papoto.calculated-value-label' | transloco }}
+      {{ 'field-measuring.tangent-aiming-support.calculated-value-label' | transloco }}
       @if (calculatedSpanLength() !== null) {
         {{ calculatedSpanLength() | number: '1.0-2' }} m
       } @else {
@@ -60,41 +98,31 @@
     </p>
   </div>
 
-  <div class="hDistance">
-    <label for="tasHAccDistance">{{ 'field-measuring.tangent-aiming-support.h-acc-distance-label' | transloco }}</label>
-    <p-inputgroup>
-      <input
-        id="tasHAccDistance"
-        type="number"
-        pInputText
-        [ngModel]="measureData().cableHAccDistance"
-        (ngModelChange)="updateField('cableHAccDistance', $event)"
-        aria-describedby="mandatory-tangent-aiming-support"
-        required
-        data-testid="h-acc-distance-input"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
-    </p-inputgroup>
-  </div>
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: {
+          control: form.controls.cableHAccDistance,
+          view: fields.cableHAccDistance,
+          rule: rules.cableHAccDistance
+        }
+      }
+    "
+  />
 
-  <div class="vAngle">
-    <label for="tasVerticalAccAngle">{{
-      'field-measuring.tangent-aiming-support.vertical-acc-angle-label' | transloco
-    }}</label>
-    <p-inputgroup>
-      <input
-        id="tasVerticalAccAngle"
-        type="number"
-        pInputText
-        [ngModel]="measureData().cableVerticalAccAngle"
-        (ngModelChange)="updateField('cableVerticalAccAngle', $event)"
-        aria-describedby="mandatory-tangent-aiming-support"
-        required
-        data-testid="vertical-acc-angle-input"
-      />
-      <p-inputgroup-addon>Gr</p-inputgroup-addon>
-    </p-inputgroup>
-  </div>
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: {
+          control: form.controls.cableVerticalAccAngle,
+          view: fields.cableVerticalAccAngle,
+          rule: rules.cableVerticalAccAngle
+        }
+      }
+    "
+  />
 
   <div class="calculationType">
     <p id="tasCalculationTypeLabel" class="mb-0 font-bold">
@@ -103,7 +131,7 @@
     <p-selectbutton
       [options]="calculationTypeOptions()"
       [ngModel]="measureData().calculationType"
-      (onChange)="updateField('calculationType', $event.value)"
+      (onChange)="updateCalculationType($event.value)"
       optionLabel="label"
       optionValue="value"
       allowEmpty="false"
@@ -112,50 +140,93 @@
     />
   </div>
 
-  <div class="tangentAngle">
-    <label for="tasTangentAngle">{{ 'field-measuring.tangent-aiming-support.tangent-angle-label' | transloco }}</label>
-    <p-inputgroup>
-      <input
-        id="tasTangentAngle"
-        type="number"
-        pInputText
-        [ngModel]="measureData().cableTangentAngle"
-        (ngModelChange)="updateField('cableTangentAngle', $event)"
-        aria-describedby="mandatory-tangent-aiming-support"
-        required
-        data-testid="tangent-angle-input"
-      />
-      <p-inputgroup-addon>Gr</p-inputgroup-addon>
-    </p-inputgroup>
-  </div>
+  @if (showParameterField()) {
+    <ng-container
+      *ngTemplateOutlet="
+        numberField;
+        context: {
+          $implicit: { control: form.controls.cableParameter, view: fields.cableParameter, rule: rules.cableParameter }
+        }
+      "
+    />
+  }
+
+  @if (showTangentAngleField()) {
+    <ng-container
+      *ngTemplateOutlet="
+        numberField;
+        context: {
+          $implicit: {
+            control: form.controls.cableTangentAngle,
+            view: fields.cableTangentAngle,
+            rule: rules.cableTangentAngle
+          }
+        }
+      "
+    />
+  }
 </div>
 
 <div class="text-right">
-  <button app-btn disabled data-testid="calculate-tangent-aiming-support-btn">
+  <button
+    app-btn
+    type="button"
+    [disabled]="!isFormValid() || isCalculating()"
+    [btnLoading]="isCalculating()"
+    (click)="calculate()"
+    data-testid="calculate-tangent-aiming-support-btn"
+  >
     <app-icon icon="rocket_launch" />
     <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
   </button>
 </div>
 
-<output class="block">
-  <div class="tangent-aiming-support__results">
-    <h2 class="tangent-aiming-support__results__title">{{ 'common.results' | transloco }}</h2>
+<output class="block" [attr.aria-busy]="isCalculating()">
+  @if (hasError()) {
+    <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
+      {{ 'field-measuring.tangent-aiming-support.calculation-failed' | transloco }}
+    </p-message>
+  }
 
-    <dl class="tangent-aiming-support__results__list">
-      <div class="param">
-        <dt>{{ 'common.parameter-label' | transloco }}</dt>
-        <dd data-testid="tangent-aiming-support-parameter">- m</dd>
-      </div>
+  @if (measureData().outputs.tangentAimingSupport; as result) {
+    <div class="tangent-aiming-support__results">
+      <h2 class="tangent-aiming-support__results__title">{{ 'common.results' | transloco }}</h2>
 
-      <div class="incertainParam">
-        <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
-        <dd data-testid="tangent-aiming-support-uncertainty">- m</dd>
-      </div>
+      <dl class="tangent-aiming-support__results__list">
+        <div class="param">
+          <dt>{{ 'common.parameter-label' | transloco }}</dt>
+          <dd data-testid="tangent-aiming-support-parameter">{{ result.parameter.toFixed(0) }} m</dd>
+        </div>
 
-      <div class="crit">
-        <dt>{{ 'field-measuring.tangent-aiming-support.criterion-label' | transloco }}</dt>
-        <dd class="crit__result" data-testid="tangent-aiming-support-criterion">- m</dd>
-      </div>
-    </dl>
-  </div>
+        <div class="incertainParam">
+          <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
+          <dd data-testid="tangent-aiming-support-uncertainty">{{ result.uncertainty.toFixed(0) }} m</dd>
+        </div>
+
+        <div class="crit">
+          <dt>{{ 'field-measuring.tangent-aiming-support.criterion-label' | transloco }}</dt>
+          <dd class="crit__result" data-testid="tangent-aiming-support-criterion">
+            {{ result.criterion.toFixed(0) }} %
+            @if (result.checkValidity) {
+              <app-icon
+                icon="check"
+                class="criterion-ok"
+                role="img"
+                [attr.aria-label]="'field-measuring.tangent-aiming-support.criterion-respected' | transloco"
+                data-testid="tangent-aiming-support-criterion-ok"
+              />
+            } @else {
+              <app-icon
+                icon="close"
+                class="criterion-ko"
+                role="img"
+                [attr.aria-label]="'field-measuring.tangent-aiming-support.criterion-not-respected' | transloco"
+                data-testid="tangent-aiming-support-criterion-ko"
+              />
+            }
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
 </output>

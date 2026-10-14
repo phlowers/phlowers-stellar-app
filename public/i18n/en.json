@@ -684,12 +684,19 @@
     },
     "tangent-aiming-support": {
       "open-help-aria-label": "open tangent aiming help",
-      "h-acc-distance-label": "Horiz. dist. of cable attach. above the device",
-      "vertical-acc-angle-label": "Vertical angle of cable attach. to opposite support\u00a0(2)",
+      "mandatory-msg": "All fields are mandatory for calculus setting",
+      "left-support-label": "Left support",
+      "span-length-label": "Measured span length",
+      "calculated-value-label": "Calculated value:",
+      "h-acc-distance-label": "Vertical dist. from the device to the cable attach. of the left support",
+      "vertical-acc-angle-label": "Vertical angle from the device to the cable attach. of the right support",
       "calculation-type-label": "Calculation type:",
       "calculation-type-tangent": "Tangent",
       "tangent-angle-label": "Cable tangent angle",
-      "criterion-label": "Side D must be greater than 2 m"
+      "criterion-label": "Criterion",
+      "criterion-respected": "Criterion respected",
+      "criterion-not-respected": "Criterion not respected",
+      "calculation-failed": "Failed to calculate the parameter by tangent aiming"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",

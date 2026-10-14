@@ -41,6 +41,7 @@
       grid-area: calculationType;
     }
 
+    .parameter,
     .tangentAngle {
       grid-area: tangentAngle;
     }
@@ -103,6 +104,28 @@
 
       .crit {
         grid-area: crit;
+
+        &__result {
+          @apply flex items-center gap-4 py-1;
+
+          .app-icon {
+            color: var(--grey-white);
+            font-size: 1.25rem;
+            border-radius: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: center;
+
+            &.criterion-ok {
+              background-color: var(--main-success);
+            }
+
+            &.criterion-ko {
+              background-color: var(--main-error);
+            }
+          }
+        }
       }
 
       dt {

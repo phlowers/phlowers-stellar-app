@@ -114,6 +114,41 @@ describe('CalculusSetting component', () => {
     expect(fixture.debugElement.query(By.css('app-tangent-aiming-support'))).toBeFalsy();
   });
 
+  describe('method persistence', () => {
+    it('should persist the tangent aiming method and apply its defaults on selection', () => {
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      const data = component.measureData();
+      expect(data.calculationMethod).toBe('tangente-aiming');
+      expect(data.cableParameter).toBe(20);
+      expect(data.tangentSpanLength).toBe(0);
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_SUPPORT');
+    });
+
+    it('should not touch PAPOTO fields when selecting tangent aiming', () => {
+      const before = component.measureData();
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      expect(component.measureData().leftSupport).toBe(before.leftSupport);
+      expect(component.measureData().outputs.papoto).toBe(before.outputs.papoto);
+    });
+
+    it('should switch back to PAPOTO', () => {
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      component.onCalculusTypeChange('PAPOTO');
+      expect(component.measureData().calculationMethod).toBe('papoto');
+    });
+
+    it('should not persist PEP', () => {
+      component.onCalculusTypeChange('PEP');
+      expect(component.measureData().calculationMethod).toBe('papoto');
+    });
+
+    it('should restore the selection from a saved measure', () => {
+      componentRef.setInput('measureData', createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
+      fixture.detectChanges();
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_SUPPORT');
+    });
+  });
+
   describe('HTML rendering', () => {
     const getByTestId = (testId: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);

@@ -684,12 +684,19 @@
     },
     "tangent-aiming-support": {
       "open-help-aria-label": "ouvrir l'aide des visées tangentes",
-      "h-acc-distance-label": "Dist. horizontale acc. du câble au dessus de l'appareil",
-      "vertical-acc-angle-label": "Angle vertical accr. câble au support\u00a0(2) opposé",
+      "mandatory-msg": "Tous les champs sont obligatoires pour le paramétrage du calcul",
+      "left-support-label": "Support de gauche",
+      "span-length-label": "Longueur de portée mesurée",
+      "calculated-value-label": "Valeur calculée :",
+      "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
       "calculation-type-label": "Type de calcul :",
       "calculation-type-tangent": "Tangente",
       "tangent-angle-label": "Angle tangent au câble",
-      "criterion-label": "Côté D doit être supérieur à 2 m"
+      "criterion-label": "Critère",
+      "criterion-respected": "Critère respecté",
+      "criterion-not-respected": "Critère non respecté",
+      "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",

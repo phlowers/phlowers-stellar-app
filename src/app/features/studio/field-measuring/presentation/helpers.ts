@@ -275,6 +275,9 @@ export const createInitialMeasureData = (
     cableVerticalAccAngle: null,
     calculationType: 'parametre',
     cableTangentAngle: null,
+    cableParameter: null,
+    tangentLeftSupport: null,
+    tangentSpanLength: null,
     lengthBetweenSightGD: null,
     elevationDifferenceBetweenSightGD: null,
     xSight1: null,
@@ -334,5 +337,6 @@ export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldM
 export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   papoto: null,
   cableTemperature: null,
-  parameter15C: null
+  parameter15C: null,
+  tangentAimingSupport: null
 };
