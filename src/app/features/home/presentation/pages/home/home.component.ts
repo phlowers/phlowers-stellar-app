@@ -5,8 +5,10 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { CardInfoComponent } from '@shared/components/atoms/card-info/card-info.component';
 import { AppUpdateService } from '@services/app-update/app-update.service';
 import { APP_UPDATE_I18N } from '@services/app-update/app-update.constantes';
-import { OnlineService, ServerStatus } from '@services/online/online.service';
-import { combineLatest } from 'rxjs';
+import { OfflineStatusKind } from '@services/app-update/app-update.interfaces';
+import { offlineStatusKind } from '@services/app-update/app-update.helpers';
+import { SwInstallRefusedMessage } from '@services/app-update/sw-messages.interfaces';
+import { OnlineService } from '@services/online/online.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CardState } from '@shared/model/card-info.model';
 import { CardStudyComponent } from '@shared/components/atoms/card-study/card-study.component';
@@ -29,17 +31,14 @@ interface HomeTexts {
   updateText: string;
   updateLinkText: string;
   updateLinkExplicitText: string;
-  serverTitle: string;
-  serverText: string;
+  offlineTitle: string;
+  offlineText: string;
 }
-
-/** Possible visual states for the server status card. */
-type ServerStates = CardState;
 
 /**
  * Home page component.
  *
- * Displays news, changelog info, server connectivity status,
+ * Displays news, changelog info, connection and offline-mode status,
  * and the user's most recently updated studies.
  */
 @Component({
@@ -67,16 +66,10 @@ export class HomeComponent {
   }
 
   public updateStatus = signal<'unknown' | 'warning'>('unknown');
-  public serverStatus = signal<ServerStates>('unknown');
-  private isOffline(isOnline: boolean): boolean {
-    return !isOnline;
-  }
+  public offlineStatus = signal<CardState>('unknown');
 
   private readonly updateWaiting = computed(() => this.appUpdateService.state() === 'update-waiting');
-  private readonly connectivity = toSignal(
-    combineLatest([this.onlineService.online$, this.onlineService.serverOnline$]),
-    { initialValue: [false, ServerStatus.LOADING] as [boolean, ServerStatus] }
-  );
+  private readonly isOnline = toSignal(this.onlineService.online$, { initialValue: false });
   private readonly studiesReady = toSignal(this.studiesService.ready, { initialValue: false });
 
   constructor() {
@@ -100,10 +93,11 @@ export class HomeComponent {
     });
 
     effect(() => {
-      const [isOnline, serverStatus] = this.connectivity();
-      const finalStatus = this.getConnectivityStatus(isOnline, serverStatus);
-      this.serverStatus.set(finalStatus);
-      this.updateServerText(finalStatus);
+      const isOnline = this.isOnline();
+      const kind = offlineStatusKind(this.appUpdateService.state());
+      const refusal = this.appUpdateService.lastRefusal();
+      this.offlineStatus.set(this.getOfflineStatus(isOnline, kind, refusal));
+      this.updateText('offlineText', this.buildOfflineText(isOnline, kind, refusal));
     });
 
     effect(() => {
@@ -129,49 +123,51 @@ export class HomeComponent {
       updateText: this.translocoService.translate('home.update-text'),
       updateLinkText: this.translocoService.translate('home.update-link-text'),
       updateLinkExplicitText: this.translocoService.translate('home.update-link-explicit-text'),
-      serverTitle: this.translocoService.translate('home.server-title'),
-      serverText: this.translocoService.translate('home.server-text-default')
+      offlineTitle: this.translocoService.translate('home.offline-card.title'),
+      offlineText: ''
     };
   }
 
-  private getConnectivityStatus(isOnline: boolean, serverStatus: ServerStatus): ServerStates {
-    if (this.isOffline(isOnline)) {
-      return 'offline';
-    }
-
-    return this.getOnlineStatus(serverStatus);
-  }
-
-  private getOnlineStatus(serverStatus: ServerStatus): ServerStates {
-    switch (serverStatus) {
-      case ServerStatus.LOADING:
+  private getOfflineStatus(
+    isOnline: boolean,
+    kind: OfflineStatusKind,
+    refusal: SwInstallRefusedMessage | null
+  ): CardState {
+    switch (kind) {
+      case 'ready':
+        if (refusal) {
+          return 'warning';
+        }
+        return isOnline ? 'success' : 'offline';
+      case 'preparing':
+      case 'waiting-network':
         return 'warning';
-      case ServerStatus.OFFLINE:
-        return 'offline';
-      case ServerStatus.ONLINE:
-        return 'success';
+      case 'storage-insufficient':
+        return 'error';
       default:
-        return 'unknown';
+        // Not prepared: neutral while online (e.g. dev build without service worker), blocking once offline.
+        return isOnline ? 'unknown' : 'error';
     }
   }
 
-  private updateServerText(status: ServerStates): void {
-    switch (status) {
-      case 'offline':
-        this.updateText('serverText', this.translocoService.translate('home.server-offline'));
-        break;
-      case 'unknown':
-        this.updateText('serverText', this.translocoService.translate('home.server-unknown'));
-        break;
-      case 'warning':
-        this.updateText('serverText', this.translocoService.translate('home.server-warning'));
-        break;
-      case 'error':
-        this.updateText('serverText', this.translocoService.translate('home.server-error'));
-        break;
-      case 'success':
-        this.updateText('serverText', this.translocoService.translate('home.server-success'));
-        break;
+  private buildOfflineText(
+    isOnline: boolean,
+    kind: OfflineStatusKind,
+    refusal: SwInstallRefusedMessage | null
+  ): string {
+    const parts = [
+      this.translocoService.translate(`home.offline-card.connection-${isOnline ? 'online' : 'offline'}`),
+      this.translocoService.translate(`home.offline-card.status-${kind}`)
+    ];
+    if (kind === 'ready' && refusal) {
+      parts.push(
+        this.translocoService.translate(
+          refusal.reason === 'storage-insufficient'
+            ? 'home.offline-card.update-blocked-storage'
+            : 'home.offline-card.update-postponed-network'
+        )
+      );
     }
+    return parts.join(' ');
   }
 }

@@ -618,3 +618,29 @@
 | ⚠️ Confidence | **MEDIUM** — harmless to keep; removing it would leave such leftovers on very old installs |
 | Removal impact | Remove the condition and the `app-assets-candidate-xyz789` fixture/assertion in `admin.spec.ts` |
 | ✅ Validated | ⏳ Pending review |
+
+---
+
+## 42. `topbar.constantes.ts` — `shared/components/layout/topbar`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/components/layout/topbar/topbar.constantes.ts` |
+| Code | `OFFLINE_STATUS_ICONS`, `OFFLINE_STATUS_WARNING_KINDS` |
+| 🔍 Evidence | Only consumed by the top bar offline indicator, removed when the offline status moved to the home page card. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete the file. Icons `cloud_done`, `cloud_sync`, `network_check`, `sd_card_alert`, `cloud_off` may become unused in `PossibleIconNames`. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 43. `OnlineService.serverOnline$` health probe — `core/services/online/online.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/online/online.service.ts` (constructor probe, `serverOnline$`, `ServerStatus`) |
+| Code | `GET environment.apiUrl` with 2 s timeout, result published on `serverOnline$` |
+| 🔍 Evidence | The home card was the only consumer of `serverOnline$`; it now relies on `online$` and the offline readiness state. There is no backend, so the probe always fails. `online$` is still used by news, changelog, admin and home. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the probe, `serverOnline$`, `ServerStatus`, the `HttpClient` dependency and matching tests in `online.service.spec.ts`; `environment.apiUrl` / `API_URL` become unused. |
+| ✅ Validated | ⏳ Pending review |

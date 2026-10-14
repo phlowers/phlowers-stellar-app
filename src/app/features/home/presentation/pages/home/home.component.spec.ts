@@ -3,7 +3,8 @@ import { signal } from '@angular/core';
 import { HomeComponent } from './home.component';
 import { AppUpdateService } from '@services/app-update/app-update.service';
 import { AppUpdateState } from '@services/app-update/app-update.interfaces';
-import { OnlineService, ServerStatus } from '@services/online/online.service';
+import { SwInstallRefusedMessage } from '@services/app-update/sw-messages.interfaces';
+import { OnlineService } from '@services/online/online.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
 import { BehaviorSubject } from 'rxjs';
@@ -18,6 +19,7 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let appUpdateState: ReturnType<typeof signal<AppUpdateState>>;
+  let lastRefusal: ReturnType<typeof signal<SwInstallRefusedMessage | null>>;
   let onlineServiceMock: vi.Mocked<OnlineService>;
   let studiesServiceMock: vi.Mocked<StudiesService>;
 
@@ -51,10 +53,10 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     appUpdateState = signal<AppUpdateState>('ready-offline');
+    lastRefusal = signal<SwInstallRefusedMessage | null>(null);
 
     onlineServiceMock = {
-      online$: new BehaviorSubject<boolean>(true),
-      serverOnline$: new BehaviorSubject<ServerStatus>(ServerStatus.ONLINE)
+      online$: new BehaviorSubject<boolean>(true)
     } as unknown as vi.Mocked<OnlineService>;
 
     studiesServiceMock = {
@@ -75,13 +77,16 @@ describe('HomeComponent', () => {
                 'Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!',
               'common.news-label': 'News',
               'home.no-recent-studies': 'No recent studies',
-              'home.server-error': 'An error occured while trying to reach servers.',
-              'home.server-offline': 'Application in offline mode.',
-              'home.server-success': 'Server connexion success!',
-              'home.server-text-default': 'Trying to reach the servers!',
-              'home.server-title': 'Server state',
-              'home.server-unknown': 'Cannot reach data. Please check your internet connectivity.',
-              'home.server-warning': 'Trying to reach the servers.',
+              'home.offline-card.title': 'Offline mode',
+              'home.offline-card.connection-online': 'Online.',
+              'home.offline-card.connection-offline': 'No connection.',
+              'home.offline-card.status-ready': 'Ready for offline use.',
+              'home.offline-card.status-preparing': 'Preparing offline mode.',
+              'home.offline-card.status-waiting-network': 'Network too slow to prepare offline mode.',
+              'home.offline-card.status-storage-insufficient': 'Not enough storage for offline mode.',
+              'home.offline-card.status-not-prepared': 'Offline mode unavailable.',
+              'home.offline-card.update-postponed-network': 'Update postponed: network too slow.',
+              'home.offline-card.update-blocked-storage': 'Update blocked: not enough storage.',
               'home.update-available': 'Update available',
               'home.update-link-explicit-text': 'Learn more about latest updates',
               'home.update-link-text': 'Learn more',
@@ -103,7 +108,7 @@ describe('HomeComponent', () => {
       ],
       providers: [
         provideRouter([]),
-        { provide: AppUpdateService, useValue: { state: appUpdateState } },
+        { provide: AppUpdateService, useValue: { state: appUpdateState, lastRefusal } },
         { provide: OnlineService, useValue: onlineServiceMock },
         { provide: StudiesService, useValue: studiesServiceMock }
       ]
@@ -128,7 +133,7 @@ describe('HomeComponent', () => {
       expect(homeText.newsTitle).toBe('News');
       expect(homeText.newsText).toContain('Welcome to Celeste');
       expect(homeText.updateTitle).toBe('Changelogs');
-      expect(homeText.serverTitle).toBe('Server state');
+      expect(homeText.offlineTitle).toBe('Offline mode');
     });
   });
 
@@ -160,69 +165,80 @@ describe('HomeComponent', () => {
     });
   });
 
-  describe('Connectivity Status Logic', () => {
-    it('should set server status to offline when offline', () => {
+  describe('Offline card', () => {
+    const refusal = (reason: SwInstallRefusedMessage['reason']): SwInstallRefusedMessage => ({
+      type: 'SW_INSTALL_REFUSED',
+      reason,
+      downlinkMbps: null,
+      requiredBytes: null,
+      freeBytes: null
+    });
+
+    it.each<[boolean, AppUpdateState, string, string]>([
+      [true, 'ready-offline', 'success', 'Online. Ready for offline use.'],
+      [true, 'update-waiting', 'success', 'Online. Ready for offline use.'],
+      [false, 'ready-offline', 'offline', 'No connection. Ready for offline use.'],
+      [true, 'installing', 'warning', 'Online. Preparing offline mode.'],
+      [true, 'deferred-network', 'warning', 'Online. Network too slow to prepare offline mode.'],
+      [true, 'storage-insufficient', 'error', 'Online. Not enough storage for offline mode.'],
+      [true, 'not-installed', 'unknown', 'Online. Offline mode unavailable.'],
+      [false, 'unsupported', 'error', 'No connection. Offline mode unavailable.']
+    ])('online=%s state=%s gives status %s and text "%s"', (online, state, status, text) => {
+      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(online);
+      appUpdateState.set(state);
+      fixture.detectChanges();
+
+      expect(component.offlineStatus()).toBe(status);
+      expect(component.homeText().offlineText).toBe(text);
+    });
+
+    it('should warn about a postponed update while staying ready offline', () => {
+      lastRefusal.set(refusal('downlink-below-threshold'));
+      fixture.detectChanges();
+
+      expect(component.offlineStatus()).toBe('warning');
+      expect(component.homeText().offlineText).toBe(
+        'Online. Ready for offline use. Update postponed: network too slow.'
+      );
+    });
+
+    it('should explain a storage refusal while staying ready offline', () => {
+      lastRefusal.set(refusal('storage-insufficient'));
+      fixture.detectChanges();
+
+      expect(component.offlineStatus()).toBe('warning');
+      expect(component.homeText().offlineText).toBe(
+        'Online. Ready for offline use. Update blocked: not enough storage.'
+      );
+    });
+
+    it('should ignore the update refusal while the offline mode is not ready', () => {
+      appUpdateState.set('installing');
+      lastRefusal.set(refusal('save-data'));
+      fixture.detectChanges();
+
+      expect(component.homeText().offlineText).toBe('Online. Preparing offline mode.');
+    });
+
+    it('should follow connectivity changes', () => {
+      fixture.detectChanges();
+      expect(component.offlineStatus()).toBe('success');
+
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
       fixture.detectChanges();
+      expect(component.offlineStatus()).toBe('offline');
 
-      expect(component.serverStatus()).toBe('offline');
-    });
-
-    it('should set server status to success when online and server is online', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
       fixture.detectChanges();
-
-      expect(component.serverStatus()).toBe('success');
+      expect(component.offlineStatus()).toBe('success');
     });
 
-    it('should set server status to warning when online and server is loading', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
+    it('should render the card title and text', () => {
       fixture.detectChanges();
 
-      expect(component.serverStatus()).toBe('warning');
-    });
-
-    it('should set server status to offline when online and server is offline', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
-      fixture.detectChanges();
-
-      expect(component.serverStatus()).toBe('offline');
-    });
-  });
-
-  describe('Server Text Updates', () => {
-    it('should update server text for offline status', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
-      fixture.detectChanges();
-
-      expect(component.homeText().serverText).toContain('Application in offline mode');
-    });
-
-    it('should update server text for warning status', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
-      fixture.detectChanges();
-
-      expect(component.homeText().serverText).toContain('Trying to reach the servers');
-    });
-
-    it('should update server text for offline status when server is offline', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
-      fixture.detectChanges();
-
-      expect(component.homeText().serverText).toContain('Application in offline mode');
-    });
-
-    it('should update server text for success status', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
-      fixture.detectChanges();
-
-      expect(component.homeText().serverText).toContain('Server connexion success');
+      const card = getByTestId('offline-card');
+      expect(card?.textContent).toContain('Offline mode');
+      expect(card?.textContent).toContain('Online. Ready for offline use.');
     });
   });
 
@@ -261,8 +277,8 @@ describe('HomeComponent', () => {
       expect(studyElements.length).toBe(mockStudies.length);
     });
 
-    it('should display correct server status in template', () => {
-      component.serverStatus.set('success');
+    it('should display correct offline status in template', () => {
+      component.offlineStatus.set('success');
       fixture.detectChanges();
 
       const cardInfoElement = fixture.nativeElement.querySelector('app-card-info');
@@ -279,16 +295,6 @@ describe('HomeComponent', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle multiple rapid status changes', () => {
-      (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.ONLINE);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.OFFLINE);
-      (onlineServiceMock.serverOnline$ as BehaviorSubject<ServerStatus>).next(ServerStatus.LOADING);
-      fixture.detectChanges();
-
-      expect(component.serverStatus()).toBe('warning');
-    });
-
     it('should handle studies service returning empty array', async () => {
       studiesServiceMock.getLatestStudies.mockResolvedValue([]);
 
