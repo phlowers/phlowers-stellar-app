@@ -19,10 +19,11 @@
   />
 
   <app-card-info
-    [title]="homeText().serverTitle"
-    [text]="homeText().serverText"
+    [title]="homeText().offlineTitle"
+    [text]="homeText().offlineText"
     additionalClass="card-server"
-    [statusState]="serverStatus()"
+    [statusState]="offlineStatus()"
+    data-testid="offline-card"
   >
     <svg class="server-status opacity-25" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 100">
       <path

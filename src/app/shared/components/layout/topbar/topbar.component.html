@@ -40,23 +40,5 @@
     <span class="calculation__txt" [class.show]="workerError()">{{ 'common.error' | transloco }}</span>
   </p>
 
-  <output
-    class="offline-status mb-0"
-    [class.offline-status--ready]="offlineKind() === 'ready'"
-    [class.offline-status--warning]="offlineWarning()"
-    [attr.tabindex]="offlineTooltipKey() ? 0 : null"
-    [pTooltip]="offlineTooltipKey() ? (offlineTooltipKey()! | transloco) : ''"
-    tooltipEvent="both"
-    tooltipPosition="bottom"
-    data-testid="offline-status-indicator"
-    [attr.data-status]="offlineKind()"
-  >
-    <app-icon [icon]="offlineIcon()" aria-hidden="true" />
-    <span>{{ offlineLabelKey() | transloco }}</span>
-    @if (offlineTooltipKey(); as detailKey) {
-      <span class="sr-only" data-testid="offline-status-detail">{{ detailKey | transloco }}</span>
-    }
-  </output>
-
   <p class="user" data-testid="user-info">{{ user()?.email ?? 'No user' }}</p>
 </header>

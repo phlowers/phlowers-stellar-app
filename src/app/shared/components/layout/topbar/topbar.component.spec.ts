@@ -5,9 +5,6 @@ import { IconComponent } from '../../atoms/icon/icon.component';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { AppUpdateService } from '@services/app-update/app-update.service';
-import { AppUpdateState } from '@services/app-update/app-update.interfaces';
-import { SwInstallRefusedMessage } from '@services/app-update/sw-messages.interfaces';
 import { signal } from '@angular/core';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -21,8 +18,6 @@ describe('TopbarComponent', () => {
   let currentUserSignal: ReturnType<typeof signal<{ email: string } | null>>;
   let readySubject: BehaviorSubject<boolean>;
   let errorSubject: BehaviorSubject<boolean>;
-  let updateState: ReturnType<typeof signal<AppUpdateState>>;
-  let lastRefusal: ReturnType<typeof signal<SwInstallRefusedMessage | null>>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -32,8 +27,6 @@ describe('TopbarComponent', () => {
     currentUserSignal = signal<{ email: string } | null>(null);
     readySubject = new BehaviorSubject<boolean>(true);
     errorSubject = new BehaviorSubject<boolean>(false);
-    updateState = signal<AppUpdateState>('not-installed');
-    lastRefusal = signal<SwInstallRefusedMessage | null>(null);
 
     mockPageTitleService = {
       pageTitle$: pageTitleSubject.asObservable()
@@ -51,17 +44,7 @@ describe('TopbarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: {
-            en: {
-              'shared.app-update-service.offline-status.ready': 'Ready offline',
-              'shared.app-update-service.offline-status.preparing': 'Preparing offline mode',
-              'shared.app-update-service.offline-status.waiting-network': 'Waiting for a fast enough network',
-              'shared.app-update-service.offline-status.storage-insufficient': 'Not enough storage',
-              'shared.app-update-service.offline-status.not-prepared': 'Offline mode unavailable',
-              'shared.app-update-service.update-deferred-network': 'Update postponed: network too slow',
-              'shared.app-update-service.storage-insufficient-detail': 'Free up space'
-            }
-          },
+          langs: { en: {} },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
@@ -71,8 +54,7 @@ describe('TopbarComponent', () => {
       providers: [
         { provide: PageTitleService, useValue: mockPageTitleService },
         { provide: AuthService, useValue: mockAuthService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
-        { provide: AppUpdateService, useValue: { state: updateState, lastRefusal } }
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
       ]
     }).compileComponents();
 
@@ -155,77 +137,10 @@ describe('TopbarComponent', () => {
   });
 
   describe('offline status indicator', () => {
-    it.each<[AppUpdateState, string, string, string]>([
-      ['ready-offline', 'ready', 'Ready offline', 'cloud_done'],
-      ['update-waiting', 'ready', 'Ready offline', 'cloud_done'],
-      ['installing', 'preparing', 'Preparing offline mode', 'cloud_sync'],
-      ['deferred-network', 'waiting-network', 'Waiting for a fast enough network', 'network_check'],
-      ['storage-insufficient', 'storage-insufficient', 'Not enough storage', 'sd_card_alert'],
-      ['not-installed', 'not-prepared', 'Offline mode unavailable', 'cloud_off'],
-      ['unsupported', 'not-prepared', 'Offline mode unavailable', 'cloud_off']
-    ])('state %s renders the %s status', (state, kind, label, icon) => {
-      updateState.set(state);
+    it('should not render any offline status in the top bar', () => {
       fixture.detectChanges();
 
-      const indicator = getByTestId('offline-status-indicator')!;
-      expect(indicator.dataset['status']).toBe(kind);
-      expect(indicator.textContent).toContain(label);
-      expect(component.offlineIcon()).toBe(icon);
-      expect(indicator.tagName).toBe('OUTPUT');
-      expect(indicator.querySelector('app-icon')?.getAttribute('aria-hidden')).toBe('true');
-    });
-
-    it('uses the warning tone while not ready, the success tone once ready', () => {
-      updateState.set('installing');
-      fixture.detectChanges();
-      expect(getByTestId('offline-status-indicator')!.classList).toContain('offline-status--warning');
-
-      updateState.set('ready-offline');
-      fixture.detectChanges();
-      const indicator = getByTestId('offline-status-indicator')!;
-      expect(indicator.classList).toContain('offline-status--ready');
-      expect(indicator.classList).not.toContain('offline-status--warning');
-    });
-
-    it('explains a postponed update as status text and a focusable tooltip while staying ready', () => {
-      updateState.set('ready-offline');
-      fixture.detectChanges();
-      const indicator = getByTestId('offline-status-indicator')!;
-      expect(indicator.getAttribute('tabindex')).toBeNull();
-      expect(getByTestId('offline-status-detail')).toBeNull();
-
-      lastRefusal.set({
-        type: 'SW_INSTALL_REFUSED',
-        reason: 'downlink-below-threshold',
-        downlinkMbps: 1,
-        requiredBytes: null,
-        freeBytes: null
-      });
-      fixture.detectChanges();
-      expect(indicator.getAttribute('tabindex')).toBe('0');
-      expect(indicator.getAttribute('title')).toBeNull();
-      expect(getByTestId('offline-status-detail')?.textContent).toBe('Update postponed: network too slow');
-
-      lastRefusal.set({ ...lastRefusal()!, reason: 'storage-insufficient' });
-      fixture.detectChanges();
-      expect(getByTestId('offline-status-detail')?.textContent).toBe('Free up space');
-    });
-
-    it('shows the tooltip on keyboard focus', () => {
-      updateState.set('ready-offline');
-      lastRefusal.set({
-        type: 'SW_INSTALL_REFUSED',
-        reason: 'save-data',
-        downlinkMbps: null,
-        requiredBytes: null,
-        freeBytes: null
-      });
-      fixture.detectChanges();
-
-      getByTestId('offline-status-indicator')!.dispatchEvent(new FocusEvent('focus'));
-      fixture.detectChanges();
-
-      expect(document.body.querySelector('.p-tooltip')?.textContent).toContain('Update postponed: network too slow');
+      expect(getByTestId('offline-status-indicator')).toBeNull();
     });
   });
 });

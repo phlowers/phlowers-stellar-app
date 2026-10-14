@@ -184,15 +184,20 @@
     "update-text": "Voir les dernières mises à jour.",
     "update-link-text": "En savoir plus",
     "update-link-explicit-text": "En savoir plus sur les dernières mises à jour",
-    "server-title": "État du serveur",
-    "server-text-default": "Tentative de connexion au serveur !",
     "update-available": "Mise à jour disponible",
     "update-new-available": "Une nouvelle mise à jour de l'application est disponible !",
-    "server-offline": "Application en mode déconnecté.",
-    "server-unknown": "Impossible de récupérer les données. Veuillez vérifier votre connexion internet.",
-    "server-warning": "Tentative de connexion au serveur.",
-    "server-error": "Une erreur est survenue lors de la tentative de connexion au serveur.",
-    "server-success": "Connexion au serveur réussie !",
+    "offline-card": {
+      "title": "Mode hors ligne",
+      "connection-online": "Connecté.",
+      "connection-offline": "Hors connexion.",
+      "status-ready": "Prêt hors ligne.",
+      "status-preparing": "Préparation du mode hors ligne en cours.",
+      "status-waiting-network": "Réseau trop lent pour préparer le mode hors ligne.",
+      "status-storage-insufficient": "Espace insuffisant pour le mode hors ligne.",
+      "status-not-prepared": "Mode hors ligne indisponible.",
+      "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
+      "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
+    },
     "no-recent-studies": "Aucune étude récente",
     "go-to-studies": "Aller à mes études"
   },
@@ -293,11 +298,11 @@
     },
     "app-update-service": {
       "offline-status": {
-        "ready": "Prêt hors ligne",
-        "preparing": "Préparation du mode hors ligne",
-        "waiting-network": "Mode hors ligne en attente d'un réseau suffisant",
-        "storage-insufficient": "Mode hors ligne : espace de stockage insuffisant",
-        "not-prepared": "Mode hors ligne indisponible"
+        "ready": "Prêt",
+        "preparing": "Préparation en cours",
+        "waiting-network": "Réseau trop lent",
+        "storage-insufficient": "Espace insuffisant",
+        "not-prepared": "Indisponible"
       },
       "update-deferred-network": "Mise à jour reportée : la connexion ne permet pas de la télécharger maintenant (réseau lent ou non mesurable, ou économiseur de données activé), elle sera téléchargée plus tard.",
       "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
