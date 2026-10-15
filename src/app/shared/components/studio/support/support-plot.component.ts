@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import plotly, { Data } from 'plotly.js-dist-min';
+import plotly, { Camera, Data, Layout } from 'plotly.js-dist-min';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { getLiveCamera } from '@services/plot/plot-options.utils';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 
@@ -50,11 +52,6 @@ interface PlotData {
  */
 export class SupportPlotComponent {
   private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
-  private static readonly PLOT_LAYOUT = {
-    ...getPlotlyBaseLayout(),
-    margin: { l: 0, r: 0, t: 0, b: 0 },
-    width: 550
-  } as const;
 
   /** 2D array of coordinate tuples describing the support geometry. */
   coordinates = input<(number | undefined)[][]>();
@@ -65,6 +62,10 @@ export class SupportPlotComponent {
 
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly logger = inject(LoggerService);
+  private readonly document = inject(DOCUMENT);
+
+  // Last user view, carried over every redraw (support or attachment-set change, clear in between)
+  private camera: Camera | null = null;
 
   constructor() {
     effect(() => {
@@ -81,6 +82,7 @@ export class SupportPlotComponent {
 
   /** Removes the current Plotly chart from the DOM element. */
   clearPlot(): void {
+    this.saveCamera();
     plotly.purge(SupportPlotComponent.PLOT_ELEMENT_ID);
   }
 
@@ -171,7 +173,23 @@ export class SupportPlotComponent {
       plotData.push(selectedMarkerData);
     }
 
-    void plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
+    this.saveCamera();
+    void plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, this.createLayout());
+  }
+
+  private saveCamera(): void {
+    this.camera = getLiveCamera(this.document, SupportPlotComponent.PLOT_ELEMENT_ID) ?? this.camera;
+  }
+
+  // Built anew on every draw: Plotly writes the user's camera and aspect ratio back into the layout it is given,
+  // and an aspect ratio carried over from another support would distort this one. Only the camera is kept.
+  private createLayout(): Partial<Layout> {
+    return {
+      ...getPlotlyBaseLayout(),
+      margin: { l: 0, r: 0, t: 0, b: 0 },
+      width: 550,
+      ...(this.camera ? { scene: { camera: this.camera } } : {})
+    };
   }
 
   private createShapeData(shapePoints: number[][]): Data {

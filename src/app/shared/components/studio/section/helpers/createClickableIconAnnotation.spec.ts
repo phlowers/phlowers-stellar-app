@@ -168,7 +168,10 @@ describe('buildClickableIconAnnotation', () => {
 
     it('should show its text over the hover background color', () => {
       const result = buildClickableIconAnnotation(
-        makeParams({ color: '#ff0000', hover: { text: 'Cut strands', backgroundColor: '#00ff00', textColor: '#ffffff' } })
+        makeParams({
+          color: '#ff0000',
+          hover: { text: 'Cut strands', backgroundColor: '#00ff00', textColor: '#ffffff' }
+        })
       ) as AnnotationWithExtras;
       expect(result.hovertext).toBe('Cut strands');
       expect(result.hoverlabel).toEqual({ bgcolor: '#00ff00', bordercolor: '#00ff00', font: { color: '#ffffff' } });

@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Layout } from 'plotly.js-dist-min';
-import { PlotlyDrawings } from './plotly-drawings.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 /**
  * Base of every plot layout, spread first into each one.

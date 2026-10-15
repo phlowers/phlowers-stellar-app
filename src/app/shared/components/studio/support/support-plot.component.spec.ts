@@ -166,6 +166,37 @@ describe('SupportPlotComponent', () => {
     expect(plotData).toHaveLength(2);
   });
 
+  it('should give every draw its own layout', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: { shape_points: [[0, 0, 0]], text_display_points: [[10, 20, 30]], text_to_display: [1] }
+    });
+
+    await component.refreshPlot([[0, 0, 0]], [1], 1);
+    await component.refreshPlot([[0, 0, 0]], [1], 1);
+
+    const [firstLayout, secondLayout] = plotlyMocks.newPlot.mock.calls.map(([, , layout]) => layout);
+    expect(secondLayout).not.toBe(firstLayout);
+    expect(secondLayout.font).not.toBe(firstLayout.font);
+    expect(secondLayout.hoverlabel).not.toBe(firstLayout.hoverlabel);
+  });
+
+  it('should keep the user camera across redraws, even after a clear', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: { shape_points: [[0, 0, 0]], text_display_points: [[10, 20, 30]], text_to_display: [1] }
+    });
+    fixture.detectChanges();
+    const plotElement = fixture.nativeElement.querySelector('#plotly-output-support');
+    const camera = { eye: { x: 2, y: 0, z: 1 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } };
+    Object.assign(plotElement, { _fullLayout: { scene: { _scene: { getCamera: () => camera } } } });
+    plotlyMocks.purge.mockImplementation(() => delete plotElement._fullLayout);
+
+    component.clearPlot();
+    await component.refreshPlot([[0, 0, 0]], [1], 1);
+
+    const [, , layout] = plotlyMocks.newPlot.mock.calls[0];
+    expect(layout.scene).toEqual({ camera });
+  });
+
   it('should clear plot when worker throws an error', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     workerPythonServiceMock.runTask.mockRejectedValue(new Error('worker failure'));

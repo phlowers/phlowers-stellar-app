@@ -6,7 +6,7 @@
  */
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
-import { getLine, getMarker } from './createPlotDataObject';
+import { getLine, getMarker } from '@shared/components/studio/section/helpers/createPlotDataObject';
 import { PlotObjectsType, Side, View } from '@shared/types/plot.types';
 
 const RGBA_PATTERN = /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/;
