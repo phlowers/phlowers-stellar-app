@@ -7,6 +7,7 @@
 import logging
 
 import numpy as np
+from mechaphlowers import units
 from pyproj import Geod, Proj, Transformer
 
 from stellar_engine.entities.inputs import (
@@ -172,7 +173,7 @@ def compute_localization(inputs: dict) -> dict:
             startLongitude=float,  # decimal degrees
             startAzimuth=float,  # flat-plane azimuth (deg), at start point
             spanLength=list[float],  # span length (m), size N (last unused)
-            lineAngle=list[float],  # flat deflection angle (deg), size N (last unused)
+            lineAngle=list[float],  # flat deflection angle (grad), size N
         )
 
     Returns a dict::
@@ -189,7 +190,11 @@ def compute_localization(inputs: dict) -> dict:
     geo_inputs = SectionGeoData.from_dict(inputs)
 
     span_length = np.array(geo_inputs.spanLength, dtype=np.float64)
-    line_angle = np.array(geo_inputs.lineAngle, dtype=np.float64)
+    line_angle = (
+        units(np.array(geo_inputs.lineAngle, dtype=np.float64), "grad")
+        .to("deg")
+        .magnitude
+    )
     supports_number = span_length.size
 
     latitude = np.empty(supports_number, dtype=np.float64)
@@ -269,6 +274,42 @@ def gps_azimuth_from_grid_azimuth(longitude, latitude, grid_azimuth):
 def grid_azimuth_from_gps_azimuth(longitude, latitude, geodesic_azimuth):
     convergence = meridian_convergence(longitude[:-1], latitude[:-1])
     return geodesic_azimuth - convergence
+
+
+def convert_coordinates(inputs: dict) -> dict:
+    """Convert coordinates between any two coordinate reference systems.
+
+    Axis order is always (x, y) = (longitude/easting, latitude/northing).
+    NaN inputs stay NaN. Empty lists are allowed.
+
+    Expected ``inputs`` dict::
+
+        {
+            "sourceCrs": str,  # e.g. "EPSG:4326"
+            "targetCrs": str,  # e.g. "EPSG:2154"
+            "x": list[float],
+            "y": list[float],
+        }
+
+    Returns a dict ``{"x": list[float], "y": list[float]}``.
+    """
+    x = np.asarray(inputs["x"], dtype=np.float64)
+    y = np.asarray(inputs["y"], dtype=np.float64)
+    if x.shape != y.shape:
+        raise ValueError("x and y must have the same length")
+    if x.size == 0:
+        return {"x": [], "y": []}
+
+    transformer = Transformer.from_crs(
+        inputs["sourceCrs"], inputs["targetCrs"], always_xy=True
+    )
+    out_x, out_y = transformer.transform(x, y)
+    out_x = np.atleast_1d(np.asarray(out_x, dtype=np.float64))
+    out_y = np.atleast_1d(np.asarray(out_y, dtype=np.float64))
+    # pyproj may return inf for invalid points: normalise to NaN
+    out_x[~np.isfinite(out_x)] = np.nan
+    out_y[~np.isfinite(out_y)] = np.nan
+    return {"x": out_x.tolist(), "y": out_y.tolist()}
 
 
 def gps_to_lambert93(latitude, longitude):
