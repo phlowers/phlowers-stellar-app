@@ -456,8 +456,8 @@
             <hr class="vertical-separator" />
 
             <app-location
-              [initialLatitude]="section().start_latitude"
-              [initialLongitude]="section().start_longitude"
+              [initialLatitude]="startGps()?.latitude ?? null"
+              [initialLongitude]="startGps()?.longitude ?? null"
               [initialAzimuth]="section().start_azimuth"
               (locationChange)="locationChange.emit($event)"
             />

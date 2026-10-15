@@ -25,6 +25,7 @@ import { LocationData } from './manualSection/location/location.interfaces';
 import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -91,6 +92,7 @@ export class NewSectionModalComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly transloco = inject(TranslocoService);
   private readonly logger = inject(LoggerService);
+  private readonly geopositioning = inject(GeopositioningService);
 
   headerTitle = computed(() => {
     if (this.mode() === 'view') {
@@ -122,9 +124,10 @@ export class NewSectionModalComponent {
    */
   private initializeLocationData(): void {
     const section = this.section();
+    const startGps = this.geopositioning.getStartGps(section);
     this.locationData.set({
-      latitude: section.start_latitude ?? LOCATION_CONFIG.latitude.default,
-      longitude: section.start_longitude ?? LOCATION_CONFIG.longitude.default,
+      latitude: startGps?.latitude ?? LOCATION_CONFIG.latitude.default,
+      longitude: startGps?.longitude ?? LOCATION_CONFIG.longitude.default,
       azimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
       isValid: true
     });
@@ -159,12 +162,14 @@ export class NewSectionModalComponent {
   onValidate() {
     const section = this.section();
     const location = this.locationData();
-    const updatedSection = {
-      ...section,
-      start_latitude: location?.latitude ?? section.start_latitude,
-      start_longitude: location?.longitude ?? section.start_longitude,
-      start_azimuth: location?.azimuth ?? section.start_azimuth
-    };
+    const currentGps = this.geopositioning.getStartGps(section);
+    const latitude = location?.latitude ?? currentGps?.latitude;
+    const longitude = location?.longitude ?? currentGps?.longitude;
+    const azimuth = location?.azimuth ?? section.start_azimuth;
+    const updatedSection =
+      latitude != null && longitude != null
+        ? this.geopositioning.setStartGps(section, { latitude, longitude }, azimuth)
+        : { ...section, start_azimuth: azimuth };
     this.outputSection.emit(updatedSection);
     this.isOpenChange.emit(false);
   }

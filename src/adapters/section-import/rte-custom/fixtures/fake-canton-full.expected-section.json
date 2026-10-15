@@ -28,7 +28,7 @@
       "supportFootAltitude": 40,
       "attachmentPosition": "1",
       "chainSurface": 0,
-      "spanAzimut": -85.5,
+      "spanAzimut": -85.9,
       "footLongitude": -1.2,
       "footLatitude": 10.1
     },
@@ -143,7 +143,7 @@
       "supportFootAltitude": 52,
       "attachmentPosition": "1",
       "chainSurface": 0,
-      "spanAzimut": -81,
+      "spanAzimut": null,
       "footLongitude": -1.186,
       "footLatitude": 10.1025
     }
@@ -183,8 +183,6 @@
   "selected_cable_span_manipulation_uuid": null,
   "cable_support_manipulations": [],
   "selected_cable_support_manipulation_uuid": null,
-  "start_latitude": 10.1,
-  "start_longitude": -1.2,
   "start_azimuth": -85.9,
   "mean_reprojection_diff_meters": 0.025
 }

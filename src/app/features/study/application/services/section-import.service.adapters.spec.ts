@@ -10,6 +10,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { SectionService } from '@services/section/section.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Section, Study } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
@@ -378,7 +379,7 @@ describe('SectionImportService — adapter orchestration', () => {
   });
 
   describe('coordinates', () => {
-    it('should apply WGS84 coordinates as foot positions and start location without calling Python', async () => {
+    it('should apply WGS84 coordinates as foot positions without calling Python', async () => {
       const coordinates = { crs: 'WGS84' as const, x: [3.1, 3.2], y: [45.1, 45.2] };
       configure([buildAdapter({ import: () => Promise.resolve({ section: buildSection(), coordinates }) })]);
 
@@ -388,8 +389,6 @@ describe('SectionImportService — adapter orchestration', () => {
         [45.1, 3.1],
         [45.2, 3.2]
       ]);
-      expect(result?.start_latitude).toBe(45.1);
-      expect(result?.start_longitude).toBe(3.1);
       expect(runTaskMock).not.toHaveBeenCalled();
     });
 
@@ -412,6 +411,56 @@ describe('SectionImportService — adapter orchestration', () => {
       expect(result?.mean_reprojection_diff_meters).toBeNull();
       expect(runTaskMock).not.toHaveBeenCalled();
       expect(loggerMock.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('span azimuth error after Lambert93 reprojection', () => {
+    const mockReprojection = (azimuth: number[]) =>
+      runTaskMock.mockImplementation((task: Task) => {
+        const localization = { latitude: [45, 45.1], longitude: [3, 3.1], azimuth, lambert_x: [], lambert_y: [] };
+        return Promise.resolve({
+          result: task === Task.importLambert ? localization : { localization, meanGpsDiffMeter: 1 },
+          error: null,
+          diagnostics: []
+        });
+      });
+    const importWithFileAzimuth = (spanAzimut: number | null) => {
+      const section = buildSection();
+      section.supports[0] = { ...section.supports[0], spanAzimut };
+      configure([
+        buildAdapter({
+          import: () => Promise.resolve({ section, coordinates: { crs: 'LAMBERT93' as const, x: [1, 2], y: [3, 4] } })
+        })
+      ]);
+      return service.processFile(makeFile('{}'), accept);
+    };
+
+    it('should overwrite the file azimuth, log the error vector and warn above the threshold', async () => {
+      mockReprojection([92]);
+
+      const result = await importWithFileAzimuth(90);
+
+      expect(result?.supports[0].spanAzimut).toBe(92);
+      expect(loggerMock.info).toHaveBeenCalledWith(expect.any(String), [2, null]);
+      expect(notificationMock.warning).toHaveBeenCalledWith('section-import.azimuth-reprojection-warning');
+    });
+
+    it('should not warn when the error stays within the threshold', async () => {
+      mockReprojection([90.5]);
+
+      await importWithFileAzimuth(90);
+
+      expect(loggerMock.info).toHaveBeenCalled();
+      expect(notificationMock.warning).not.toHaveBeenCalled();
+    });
+
+    it('should neither log nor warn when the file has no azimuth', async () => {
+      mockReprojection([90.5]);
+
+      await importWithFileAzimuth(null);
+
+      expect(loggerMock.info).not.toHaveBeenCalled();
+      expect(notificationMock.warning).not.toHaveBeenCalled();
     });
   });
 

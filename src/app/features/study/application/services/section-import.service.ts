@@ -20,26 +20,23 @@ import {
   SectionImportSource,
   selectAdapter
 } from '@shared/import/section-adapter/section-import-adapter';
-import {
-  applyFootCoordinates,
-  areCoordinatesComplete,
-  buildReprojectionAngles,
-  getMissingRequiredFields
-} from '@shared/import/section-adapter/section-import-pipeline.helpers';
+import { getMissingRequiredFields } from '@shared/import/section-adapter/section-import-pipeline.helpers';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, Localization } from '@core/services/worker_python/tasks/types';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { GeopositioningError } from '@services/geopositioning/geopositioning.interfaces';
+import { SPAN_AZIMUTH_ERROR_THRESHOLD_DEG } from '@shared/domain/helpers/geopositioning.constantes';
+import { computeSpanAzimuthErrors } from '@shared/domain/helpers/geopositioning.helpers';
 import { hasSupportsBoundsErrors } from '@shared/domain/helpers/support-limits.helpers';
 import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '@src/environments/environment';
 import {
+  AZIMUTH_REPROJECTION_WARNING_KEY,
   CATALOG_MISSING_WARNING_KEY,
   IMPORT_SUCCESS_KEY,
   REPROJECTION_INFO_KEY,
   SECTION_IMPORT_ERROR_KEYS
 } from './section-import.constantes';
-import { StartLocation } from './section-import.interfaces';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentCorrectionService } from './catalog-correction/attachment-correction.service';
 import { ChainCorrectionService } from './catalog-correction/chain-correction.service';
@@ -69,7 +66,8 @@ import { buildSupportNameEntries } from './catalog-correction/catalog-correction
  * - **VALIDATION**: required fields + supports bounds on the mapped section, for every adapter.
  * - **CATALOG CORRECTION**: when the adapter asks for it, maintenance, voltage, attachment and chain
  *   values are corrected against the local catalogs, then new support names are added to the catalog.
- * - **MAPPING (coordinates)**: Lambert93 to GPS reprojection when the adapter provides projected coordinates.
+ * - **MAPPING (coordinates)**: Lambert93 to GPS reprojection when the adapter provides projected coordinates,
+ *   then computation of any missing support foot GPS, both delegated to `GeopositioningService`.
  * - **COLLISION_CHECK**: detects whether the UUID already exists in the study.
  * - **PERSISTENCE**: calls `SectionService.createOrUpdateSection`.
  */
@@ -82,7 +80,7 @@ export class SectionImportService implements ImportAdapter<Section> {
   private readonly sectionService = inject(SectionService);
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
-  private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly geopositioning = inject(GeopositioningService);
   private readonly transloco = inject(TranslocoService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly maintenanceCorrection = inject(MaintenanceCorrectionService);
@@ -176,6 +174,8 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Stage: MAPPING (coordinates)
     const section = await this.applyCoordinates(corrected, payload.coordinates);
+    const azimuthWarning = this.checkSpanAzimuthError(corrected, section);
+    if (azimuthWarning) notices.push(azimuthWarning);
 
     // Stage: COLLISION_CHECK + PERSISTENCE
     return this.persistSection(section, study, collisionResolver, notices);
@@ -277,101 +277,48 @@ export class SectionImportService implements ImportAdapter<Section> {
   // Private — coordinates reprojection
   // ---------------------------------------------------------------------------
 
-  private applyCoordinates(section: Section, coordinates: SectionImportCoordinates | undefined): Promise<Section> {
-    if (!coordinates) return Promise.resolve(section);
-    return coordinates.crs === 'WGS84'
-      ? Promise.resolve(this.applyWgs84(section, coordinates))
-      : this.applyLambert93(section, coordinates);
-  }
-
-  /** WGS84 coordinates are used as-is: `x` is the longitude, `y` the latitude. */
-  private applyWgs84(section: Section, coordinates: SectionImportCoordinates): Section {
-    if (!areCoordinatesComplete(coordinates, section.supports.length)) {
-      this.logger.warn('Skipping WGS84 coordinates: missing or mismatching values for at least one support');
-      return section;
+  /**
+   * Applies the adapter coordinates, then fills the missing foot GPS from the start point when possible
+   * (e.g. stellar json without coordinates). Complete foot GPS is never recomputed here.
+   *
+   * @throws An `ImportError` (`MAPPING_ERROR`/`MAPPING`) when the Lambert93 reprojection fails.
+   */
+  private async applyCoordinates(
+    section: Section,
+    coordinates: SectionImportCoordinates | undefined
+  ): Promise<Section> {
+    let located = section;
+    if (coordinates) {
+      try {
+        located = await this.geopositioning.applyImportedCoordinates(section, coordinates);
+      } catch (err: unknown) {
+        if (err instanceof GeopositioningError) throw this.buildLambertReprojectionError();
+        throw err;
+      }
     }
-    const longitude = coordinates.x as number[];
-    const latitude = coordinates.y as number[];
-    return {
-      ...section,
-      supports: applyFootCoordinates(section.supports, latitude, longitude),
-      start_latitude: latitude[0],
-      start_longitude: longitude[0]
-    };
+    return this.geopositioning.syncFootGps(located, located);
   }
 
   /**
-   * Converts each support's Lambert93 foot coordinates to GPS (`footLatitude`/`footLongitude`),
-   * stores the section start location and the mean GPS reprojection error (meters).
-   *
-   * Uses only the existing `Task.importLambert` and `Task.importLambertAndValidate` Python tasks.
-   * If any support is missing its coordinates, the whole reprojection is skipped (section returned
-   * unchanged) rather than blocking the import.
-   *
-   * @throws An `ImportError` (`MAPPING_ERROR`/`MAPPING`) if the worker reports an error or returns
-   *   no result for either call.
+   * Compares the span azimuths of the file (`before`) with the computed ones (`after`), logs the full error
+   * vector and returns a warning notice when any gap exceeds `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG`.
    */
-  private async applyLambert93(section: Section, coordinates: SectionImportCoordinates): Promise<Section> {
-    if (!areCoordinatesComplete(coordinates, section.supports.length)) {
-      this.logger.error('Skipping Lambert93 to GPS reprojection: missing raw coordinates on at least one support');
-      return section;
-    }
+  private checkSpanAzimuthError(before: Section, after: Section): SectionImportNotice | null {
+    const errors = computeSpanAzimuthErrors(before.supports, after.supports);
+    const known = errors.filter((error): error is number => error !== null);
+    if (known.length === 0) return null;
 
-    const lambert_x = coordinates.x as number[];
-    const lambert_y = coordinates.y as number[];
-    const { spanLength, lineAngle } = buildReprojectionAngles(section.supports);
-
-    const start = await this.bootstrapLambertStartPoint(lambert_x, lambert_y);
-    const { localization, meanGpsDiffMeter } = await this.validateLambertLocalization(
-      lambert_x,
-      lambert_y,
-      start,
-      spanLength,
-      lineAngle
-    );
+    this.logger.info('Span azimuth error vector after reprojection (deg)', errors);
+    const maxError = Math.max(...known);
+    if (maxError <= SPAN_AZIMUTH_ERROR_THRESHOLD_DEG) return null;
 
     return {
-      ...section,
-      supports: applyFootCoordinates(section.supports, localization.latitude, localization.longitude),
-      start_latitude: localization.latitude[0],
-      start_longitude: localization.longitude[0],
-      start_azimuth: localization.azimuth[0],
-      mean_reprojection_diff_meters: meanGpsDiffMeter
+      severity: 'warning',
+      message: this.transloco.translate(AZIMUTH_REPROJECTION_WARNING_KEY, {
+        error: maxError.toFixed(1),
+        threshold: SPAN_AZIMUTH_ERROR_THRESHOLD_DEG
+      })
     };
-  }
-
-  /** Call 1 — bootstrap: direct conversion of the raw Lambert93 arrays to get a start point. */
-  private async bootstrapLambertStartPoint(lambert_x: number[], lambert_y: number[]): Promise<StartLocation> {
-    const bootstrap = await this.workerPythonService.runTask(Task.importLambert, { lambert_x, lambert_y });
-    if (bootstrap.error || !bootstrap.result) {
-      throw this.buildLambertReprojectionError();
-    }
-    return {
-      startLatitude: bootstrap.result.latitude[0],
-      startLongitude: bootstrap.result.longitude[0],
-      startAzimuth: bootstrap.result.azimuth[0]
-    };
-  }
-
-  /** Call 2 — direct conversion + degree-based validation (the actual "import lambert validate" task). */
-  private async validateLambertLocalization(
-    lambert_x: number[],
-    lambert_y: number[],
-    start: StartLocation,
-    spanLength: number[],
-    lineAngle: number[]
-  ): Promise<{ localization: Localization; meanGpsDiffMeter: number }> {
-    const validated = await this.workerPythonService.runTask(Task.importLambertAndValidate, {
-      lambert_x,
-      lambert_y,
-      startAzimuth: start.startAzimuth,
-      spanLength,
-      lineAngle
-    });
-    if (validated.error || !validated.result) {
-      throw this.buildLambertReprojectionError();
-    }
-    return validated.result;
   }
 
   private buildLambertReprojectionError(): ImportError {

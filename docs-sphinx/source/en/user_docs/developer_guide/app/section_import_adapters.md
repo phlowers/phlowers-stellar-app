@@ -28,7 +28,7 @@ The orchestrator reads the file once, picks the first adapter (registry order) w
 1. `adapter.import(source)` — parse, validate its own format, map to a `Section`.
 2. Core validation of the mapped `Section` (required fields, supports bounds), for every adapter.
 3. Catalog correction, when the adapter set `applyCatalogCorrections`: maintenance IDs, voltage, attachments and chains are corrected against the local catalogs (one correction service per catalog under `src/app/features/study/application/services/catalog-correction/`), then the new support names are added to the attachment catalog. A missing attachment catalog entry raises one warning.
-4. Coordinates reprojection, when the adapter returned `coordinates`.
+4. Coordinates reprojection, when the adapter returned `coordinates`, then computation of any missing support foot GPS.
 5. Collision check and persistence, then notifications (success, reprojection info, adapter and catalog notices).
 
 ---
@@ -56,7 +56,7 @@ interface SectionImportPayload {
 
 - `source` carries `fileName`, the decoded `text` and the parsed `json` (`undefined` when the text is not valid JSON).
 - `coordinates` holds one `x`/`y` entry per support, in support order.
-  - `LAMBERT93`: easting/northing in meters. The core reprojects them to GPS, fills `footLatitude`/`footLongitude`, the section start location and the mean reprojection error.
+  - `LAMBERT93`: easting/northing in meters. The core (`GeopositioningService.applyImportedCoordinates`) reprojects them to GPS and fills `footLatitude`/`footLongitude` and `spanAzimut` (overwriting the file value), `start_azimuth` and the mean reprojection error. The start point is the foot of the first support. When a computed span azimuth differs from the file one by more than 1° (`SPAN_AZIMUTH_ERROR_THRESHOLD_DEG`), the full error vector is logged and a warning notice is shown.
   - `WGS84`: `x` is the longitude and `y` the latitude, in degrees; applied as-is.
   - Any `null` entry skips the reprojection without blocking the import.
 - `notices.message` must already be localized.

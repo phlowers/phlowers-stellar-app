@@ -22,7 +22,9 @@ import { TableModule } from 'primeng/table';
 import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Localization, Task } from '@core/services/worker_python/tasks/types';
+import { Localization } from '@core/services/worker_python/tasks/types';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { CRS } from '@shared/domain/helpers/geopositioning.constantes';
 import { AttachmentSetModalComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -112,6 +114,7 @@ export class SupportsTableComponent implements OnInit {
   private readonly allCatalogSupportNames = toSignal(this.attachmentService.distinctSupportNames$);
   readonly catalogLoaded = computed(() => this.allCatalogSupportNames() !== undefined);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly geopositioning = inject(GeopositioningService);
   readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   private readonly transloco = inject(TranslocoService);
   localization = signal<Localization | null>(null);
@@ -181,46 +184,42 @@ export class SupportsTableComponent implements OnInit {
     });
   }
 
-  private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
-    return (
-      supports.length > 0 &&
-      !!section &&
-      !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
-    );
-  }
-
-  private buildLocalizationPayload(section: Section, supports: Support[]) {
-    const lastIndex = supports.length - 1;
-    return {
-      startLatitude: section.start_latitude ?? LOCATION_CONFIG.latitude.default,
-      startLongitude: section.start_longitude ?? LOCATION_CONFIG.longitude.default,
-      startAzimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
-      spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
-      lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
-    };
+  /** Section used for display: falls back to the default location when no start point is stored. */
+  private withDefaultStart(section: Section, supports: Support[]): Section {
+    const located = { ...section, supports };
+    const withGps = this.geopositioning.getStartGps(located)
+      ? located
+      : this.geopositioning.setStartGps(located, {
+          latitude: LOCATION_CONFIG.latitude.default,
+          longitude: LOCATION_CONFIG.longitude.default
+        });
+    return withGps.start_azimuth == null ? { ...withGps, start_azimuth: LOCATION_CONFIG.azimuth.default } : withGps;
   }
 
   private async computeLocalization(): Promise<void> {
     if (this.mode() !== 'view') return;
 
     const section = this.section();
-    const supports = this.supports();
-
-    if (!this.hasLocalizationInputs(section, supports)) return;
-    if (!this.workerReady()) return;
+    if (!section || !this.workerReady()) return;
 
     this.localizationLoading.set(true);
 
     try {
-      const { result, error } = await this.workerPythonService.runTask(
-        Task.computeLocalization,
-        this.buildLocalizationPayload(section!, supports)
-      );
-      if (result && !error) {
-        this.localization.set(result);
-      }
+      const located = this.withDefaultStart(section, this.supports());
+      const resolved = await this.geopositioning.resolveLocalization(located);
+      if (!resolved) return;
+
+      const points = resolved.latitude.map((latitude, i) => ({ latitude, longitude: resolved.longitude[i] }));
+      const projected = await this.geopositioning.toCrs(points, CRS.LAMBERT93);
+      if (!projected) return;
+
+      this.localization.set({
+        ...resolved,
+        lambert_x: projected.map((point) => point.x),
+        lambert_y: projected.map((point) => point.y)
+      });
     } catch {
-      // runTask failure — localizationLoading is cleared in finally
+      // worker failure — localizationLoading is cleared in finally
     } finally {
       this.localizationLoading.set(false);
     }

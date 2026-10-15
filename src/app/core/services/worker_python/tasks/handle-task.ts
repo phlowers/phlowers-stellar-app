@@ -108,6 +108,10 @@ const tasks: Record<
     function: 'compute_localization',
     externalPackages: []
   },
+  [Task.convertCoordinates]: {
+    function: 'convert_coordinates',
+    externalPackages: []
+  },
   [Task.importLambert]: {
     function: 'import_lambert',
     externalPackages: []

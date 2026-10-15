@@ -96,7 +96,10 @@ describe('RTE custom canton file → Section (integration)', () => {
     const localization = {
       latitude: expectedSection.supports.map((s) => s.footLatitude),
       longitude: expectedSection.supports.map((s) => s.footLongitude),
-      azimuth: expectedSection.supports.map(() => expectedSection.start_azimuth),
+      // one azimuth per span: the first one is the start azimuth, the others stay close to the file values
+      azimuth: expectedSection.supports
+        .slice(0, -1)
+        .map((s, i) => (i === 0 ? expectedSection.start_azimuth : s.spanAzimut)),
       lambert_x: EXPECTED_LAMBERT_X,
       lambert_y: EXPECTED_LAMBERT_Y
     };

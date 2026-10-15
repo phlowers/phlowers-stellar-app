@@ -416,6 +416,7 @@
       "invalid-envelope": "The Stellar section file is invalid.",
       "unsupported-version": "Unsupported Stellar section file version {{ version }} (maximum supported: {{ maxVersion }})."
     },
+    "azimuth-reprojection-warning": "Span azimuths computed from the imported coordinates differ from the file values by up to {{ error }}° (threshold: {{ threshold }}°). The computed values were kept.",
     "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
     "from-file": {
       "file-format": "File formats: {{ formats }}",
