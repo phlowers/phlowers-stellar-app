@@ -1221,6 +1221,35 @@ describe('ImportStudyComponent', () => {
       expect(component.newStudies()).toContainEqual(mockCreatedStudy);
     });
 
+    it('should revive field measure date, time and season after a JSON round-trip', async () => {
+      const measureDate = new Date(2026, 6, 14, 10, 30);
+      const mockStudyData = {
+        title: 'Test Study',
+        sections: [
+          {
+            uuid: 'section-uuid',
+            name: 'Section 1',
+            supports: [],
+            field_measures: [{ uuid: 'measure-uuid', date: measureDate, time: measureDate, season: 'winter' }]
+          }
+        ]
+      };
+
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study);
+
+      mockFile = new File([btoa(JSON.stringify(mockStudyData))], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
+
+      const importedStudy = (studiesServiceMock.createStudy as ReturnType<typeof vi.fn>).mock.calls[0][0] as Study;
+      const importedMeasure = importedStudy.sections[0].field_measures[0];
+      expect(importedMeasure.date).toBeInstanceOf(Date);
+      expect(importedMeasure.date?.getTime()).toBe(measureDate.getTime());
+      expect(importedMeasure.time).toBeInstanceOf(Date);
+      expect(importedMeasure.time?.getTime()).toBe(measureDate.getTime());
+      expect(importedMeasure.season).toBe('winter');
+    });
+
     it('should handle file with no sections', async () => {
       const mockStudyData = {
         title: 'Test Study',

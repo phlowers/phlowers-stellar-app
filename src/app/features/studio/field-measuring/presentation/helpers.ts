@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { TranslocoService } from '@jsverse/transloco';
+import { isDaylightSavingTime } from '@shared/domain/helpers/field-measure.helpers';
 import {
   SelectOption,
   TranslatableSelectOption,
@@ -177,19 +178,6 @@ export const buildFieldMeasureExportFilename = (
     sanitizeFilename(sectionName || ''),
     formatGenerationDate(generationDate)
   ].join('_');
-
-/**
- * Determines if the current date is in Daylight Saving Time (DST)
- * Compares current timezone offset with standard time offset
- * @param date - The date to check (defaults to current date)
- * @returns true if in DST (summer), false otherwise (winter)
- */
-function isDaylightSavingTime(date: Date = new Date()): boolean {
-  const january = new Date(date.getFullYear(), 0, 1);
-  const july = new Date(date.getFullYear(), 6, 1);
-  const stdTimezoneOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
-  return date.getTimezoneOffset() < stdTimezoneOffset;
-}
 
 /**
  * Creates the initial field measure data for a new measurement session.
