@@ -29,8 +29,11 @@ def find_obstacle_point(
     study: SectionStudy, obstacle_uuid: str, point_index: int
 ) -> np.ndarray:
     """3D coordinates of an obstacle point of the study."""
-    obstacle_coords = study.position_engine.coords_calculator.obstacles_points.dict_coords().get(
-        obstacle_uuid
+    group_points = study.position_engine.get_group_points()
+    obstacle_coords = (
+        group_points.obstacles.dict_coords().get(obstacle_uuid)
+        if group_points.obstacles is not None
+        else None
     )
     if obstacle_coords is None:
         logger.error(
@@ -63,7 +66,8 @@ class ScenarioRunner:
         span_index: int,
         obstacle_point: np.ndarray,
     ):
-        ground_supports = study.position_engine.coords_calculator.supports_ground_coords.copy()
+        group_points = study.position_engine.get_group_points()
+        ground_supports = group_points.supports.coords[:, 0, :].copy()
         if not 0 <= span_index < len(ground_supports) - 1:
             raise SupportOutOfRangeError(
                 f"Support index {span_index} out of range for the section"
@@ -117,9 +121,9 @@ class ScenarioRunner:
                 wind_direction="clockwise",
             )
             self._engine.add_curves(
-                self._study.position_engine.coords_calculator.get_spans(
-                    frame="section"
-                ).coords[self._span_index]
+                self._study.position_engine.get_group_points().spans.coords[
+                    self._span_index
+                ]
             )
             dist_result = self._engine.plane_distance(
                 self._obstacle_point, frame="section"

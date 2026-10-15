@@ -18,11 +18,34 @@ from stellar_engine.entities.conformity import (
 from stellar_engine.entities.errors import ConformityInputError
 
 
-def _index(value: object, name: str, default: int | None = None) -> int:
+def _check_dict_value_nonnegative_integer_or_bool(
+    dictionary: dict, key: str, default: int | None = None
+) -> object:
+    """Validate and normalize an index-like input value.
+
+    If the value is missing (None) and a default is provided, return that default.
+    Otherwise, the value must be a non-negative integer. Boolean values are rejected
+    because they are not valid indexes, and negative numbers are rejected.
+
+    Args:
+        value: Candidate index value extracted from the task input.
+        name: Human-readable field name used in validation errors.
+        default: Optional fallback used when the input is missing.
+
+    Returns:
+        The validated non-negative integer index.
+
+    Raises:
+        ConformityInputError: If the value is not a valid non-negative integer.
+    """
+
+    value = dictionary.get(key, default)
     if value is None and default is not None:
         return default
     if not isinstance(value, int) or isinstance(value, bool) or value < 0:
-        raise ConformityInputError(f"{name} must be a non-negative integer")
+        raise ConformityInputError(
+            f"{key} must be a non-negative integer or boolean"
+        )
     return value
 
 
@@ -58,8 +81,13 @@ class ConformityRequest:
         if not isinstance(obstacle_uuid, str):
             raise ConformityInputError("obstacle uuid must be a string")
         obstacle_name = obstacle.get("name", obstacle_uuid)
-        span_index = _index(obstacle.get("supportIndex"), "supportIndex")
-        point_index = _index(python_inputs.get("pointIndex"), "pointIndex", 0)
+        span_index = _check_dict_value_nonnegative_integer_or_bool(
+            obstacle,
+            "supportIndex",
+        )
+        point_index = _check_dict_value_nonnegative_integer_or_bool(
+            python_inputs, "pointIndex", 0
+        )
 
         electric_tension_code = python_inputs.get("electricTension")
         if not isinstance(electric_tension_code, str):

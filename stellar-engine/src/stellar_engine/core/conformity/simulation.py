@@ -62,10 +62,20 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
                     "rulesDistances": [
                         {
                             "ruleType": "RULE_1",
-                            "lateral": {"63": 0.6, "90": 0.7, "150": 0.8,
-                                        "225": 0.9, "400": 1.0},
-                            "overhang": {"63": 1.1, "90": 1.2, "150": 1.3,
-                                         "225": 1.4, "400": 1.5},
+                            "lateral": {
+                                "63": 0.6,
+                                "90": 0.7,
+                                "150": 0.8,
+                                "225": 0.9,
+                                "400": 1.0,
+                            },
+                            "overhang": {
+                                "63": 1.1,
+                                "90": 1.2,
+                                "150": 1.3,
+                                "225": 1.4,
+                                "400": 1.5,
+                            },
                         }
                     ],
                     "rulesClimaticConditions": [
@@ -120,8 +130,8 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
             )
             for outcome in outcomes
         ]
-        
-        # specific for overhang 
+
+        # specific for overhang
         zone_width = request.parameters.zone_width
 
         # specific when strategy is not cable track
@@ -134,7 +144,7 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
         # setup output format for graph
         conformity[rule_type] = ZoneConformity(zone, points)
 
-        # calculus  
+        # calculus
         table_results[rule_type] = ConformityTableResult.from_outcomes(
             outcomes, runner.obstacle, strategy
         )
