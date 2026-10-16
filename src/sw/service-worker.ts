@@ -8,6 +8,7 @@ import {
   createSafeResponsePlugin,
   createShellNavigationHandler,
   createShellNavigationRoute,
+  createDownloadLogPlugin,
   createSwLogger,
   runActivation,
   runGuardedInstall,
@@ -22,7 +23,7 @@ const manifest: SizedManifestEntry[] = (self as unknown as { __WB_MANIFEST: Size
 const logger = createSwLogger(sw.clients);
 const connectionOf = (): NetworkConnectionLike | undefined =>
   (sw.navigator as WorkerNavigator & { connection?: NetworkConnectionLike }).connection;
-const controller = new PrecacheController({ plugins: [createSafeResponsePlugin()] });
+const controller = new PrecacheController({ plugins: [createSafeResponsePlugin(), createDownloadLogPlugin(logger)] });
 controller.addToCacheList(manifest.map(toPrecacheEntry));
 const catalogStrategy = createCatalogStrategy();
 

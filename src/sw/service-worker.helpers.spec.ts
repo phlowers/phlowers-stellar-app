@@ -417,7 +417,7 @@ describe('service worker helpers', () => {
       expect(logger.info).toHaveBeenCalledWith('Legacy caches deleted: app-assets-v-abc1234, app-assets-control');
     });
 
-    it('logs nothing when there is no legacy cache', async () => {
+    it('does not log a legacy cache deletion when there is no legacy cache', async () => {
       const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
       await runActivation({
@@ -428,7 +428,8 @@ describe('service worker helpers', () => {
         logger
       });
 
-      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('Legacy caches deleted'));
+      expect(logger.info).toHaveBeenCalledWith('Activation succeeded');
     });
   });
 });
