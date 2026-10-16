@@ -1,15 +1,20 @@
-import { ChangeDetectionStrategy, Component, model, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model, computed, linkedSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
-import { TangentAimingComponent } from './tangent-aiming/tangent-aiming.component';
+import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-aiming-support.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
+import {
+  applyTangentAimingSupportDefaults,
+  getDefaultLeftSupport
+} from './tangent-aiming-support/tangent-aiming-support.helpers';
+import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
 @Component({
   selector: 'app-calculus-setting',
-  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingComponent, TranslocoModule],
+  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingSupportComponent, TranslocoModule],
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -18,7 +23,22 @@ import { TranslocoModule } from '@jsverse/transloco';
 export class CalculusSettingComponent {
   /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
-  readonly selectedCalculusType = signal('PAPOTO');
+  readonly selectedCalculusType = linkedSignal(
+    () => CALCULUS_TYPE_BY_METHOD[this.measureData().calculationMethod] ?? 'PAPOTO'
+  );
+
+  /** Selects a method and persists it in the measure (PEP is not selectable yet). */
+  onCalculusTypeChange(type: string): void {
+    this.selectedCalculusType.set(type);
+    if (type === 'PAPOTO') {
+      this.measureData.update((d) => ({ ...d, calculationMethod: 'papoto' }));
+    } else if (type === 'TANGENT_AIMING_SUPPORT') {
+      this.measureData.update((d) => ({
+        ...applyTangentAimingSupportDefaults(d, getDefaultLeftSupport(d.span)),
+        calculationMethod: 'tangente-aiming'
+      }));
+    }
+  }
   leftSupportOption = computed(() => {
     const span = this.measureData().span;
     if (!span) {

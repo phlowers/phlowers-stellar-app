@@ -20,7 +20,7 @@ const TEST_TIMEOUT = 10000;
 const MOCK_CSV_CONTENT = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
 2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
+3;100;VRAI;1000,00;0;0;2;65;0;0;FAUX;400,00;;ASTER600
 4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;câble par faisceau
 5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
 6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage
@@ -277,7 +277,7 @@ describe('ImportStudyComponent', () => {
       const mockCsvContent = `num;nom;suspension;alt_acc;long_bras;angle_ligne;long_ch;pds_ch;surf_ch;ctr_poids;ch_en_V;portée;;nb_portées
 1;98;FAUX;1075,53;0;-19,1;0;0;0;0;FAUX;473,07;;19
 2;99;VRAI;1071,86;0;0;2;65;0;0;FAUX;424,53;;conducteur
-3;100;VRAI;1065,51;0;0;2;65;0;0;FAUX;453,46;;ASTER600
+3;100;VRAI;1000,00;0;0;2;65;0;0;FAUX;400,00;;ASTER600
 4;101;VRAI;1068,57;0;5;2;130;0;0;FAUX;500,07;;NONEXISTENT_CABLE
 5;102;VRAI;1006,16;0;0;2;65;0;0;FAUX;508,96;;1
 6;103;VRAI;1076,51;0;0;2;65;0;0;FAUX;496,89;;temp réglage

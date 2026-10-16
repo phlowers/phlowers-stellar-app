@@ -79,7 +79,7 @@ const buildValidSectionPayload = (): Partial<Section> & Record<string, unknown> 
   name: 'Test Section',
   type: 'phase',
   cables_amount: 1,
-  cable_name: 'ASTER570',
+  cable_name: 'ASTER600',
   supports: [
     {
       ...createEmptySupport(),
@@ -506,7 +506,7 @@ describe('SectionImportService', () => {
 
       // Fields from the payload are preserved
       expect(result?.name).toBe('Test Section');
-      expect(result?.cable_name).toBe('ASTER570');
+      expect(result?.cable_name).toBe('ASTER600');
     });
 
     it('should merge supports on top of createEmptySupport defaults', async () => {
@@ -1670,7 +1670,7 @@ describe('SectionImportService', () => {
         name: 'Legacy Section',
         type: 'phase',
         cables_amount: 3,
-        cable_name: 'ASTER570',
+        cable_name: 'ASTER600',
         branch_idr: '5',
         voltage_idr: '225kV',
         someUnknownField: 'should be preserved',

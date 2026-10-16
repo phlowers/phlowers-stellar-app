@@ -20,9 +20,7 @@
 
 <div class="papoto__form">
   <div class="papoto__form__line1">
-    <label for="leftSupport" class="leftSupport__label">{{
-      'field-measuring.papoto.left-support-label' | transloco
-    }}</label>
+    <label for="leftSupport" class="leftSupport__label">{{ 'common.left-support-label' | transloco }}</label>
     <p-select
       inputId="leftSupport"
       [options]="retrievedLeftSupportOptions()"
@@ -37,9 +35,7 @@
       data-testid="left-support-select"
     />
 
-    <label for="spanLength" class="spanLength__label">{{
-      'field-measuring.papoto.span-length-label' | transloco
-    }}</label>
+    <label for="spanLength" class="spanLength__label">{{ 'common.measured-span-length-label' | transloco }}</label>
     <p-inputgroup class="spanLength__input">
       <input
         id="spanLength"
@@ -55,7 +51,7 @@
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
     <p id="spanLength-calculated" class="spanLength__desc">
-      <ng-container>{{ 'field-measuring.papoto.calculated-value-label' | transloco }}</ng-container>
+      <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
       @if (calculatedSpanLength() !== null) {
         {{ calculatedSpanLength() | number: '1.0-2' }} m
       } @else {
@@ -80,7 +76,7 @@
       <p-inputgroup-addon>m</p-inputgroup-addon>
     </p-inputgroup>
     <p id="measuredElevationDifference-calculated" class="MED__desc">
-      <ng-container>{{ 'field-measuring.papoto.calculated-value-label' | transloco }}</ng-container>
+      <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
       @if (calculatedElevation() !== null) {
         {{ calculatedElevation() | number: '1.0-2' }} m
       } @else {

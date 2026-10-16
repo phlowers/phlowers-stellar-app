@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
+import type { CatalogCableEntity } from '@infrastructure/database';
 
 // Cable catalog keys holding the strand count of each layer
 export const STRAND_LAYER_KEYS = [
@@ -17,6 +18,20 @@ export const STRAND_LAYER_KEYS = [
   'nb_strand_layer_7',
   'nb_strand_layer_8'
 ] as const;
+
+// Cut strands of each layer with strands until some are entered
+export const DEFAULT_CUT_STRANDS = 0;
+
+// Only the first layers are shown in the form: the others are sent to the engine at 0
+export const MAX_SHOWN_LAYER = 3;
+
+// Layers of the cable with strands, up to MAX_SHOWN_LAYER: the only ones where cut strands can be entered
+export const getCableStrandLayers = (
+  cable: Partial<Pick<CatalogCableEntity, (typeof STRAND_LAYER_KEYS)[number]>>
+): { layer: number; strands: number }[] =>
+  STRAND_LAYER_KEYS.map((key, i) => ({ layer: i + 1, strands: cable[key] ?? 0 })).filter(
+    ({ layer, strands }) => layer <= MAX_SHOWN_LAYER && strands > 0
+  );
 
 // Engine input without cut strand on any catalog layer
 export const NO_CUT_STRANDS = STRAND_LAYER_KEYS.map(() => 0);

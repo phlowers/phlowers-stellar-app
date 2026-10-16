@@ -64,6 +64,9 @@ export interface FieldMeasure {
   cableVerticalAccAngle: number | null;
   calculationType: 'parametre' | 'tangente';
   cableTangentAngle: number | null;
+  cableParameter: number | null;
+  tangentLeftSupport: string | null;
+  tangentSpanLength: number | null;
   // PEP fields
   lengthBetweenSightGD: number | null;
   elevationDifferenceBetweenSightGD: number | null;
@@ -103,6 +106,16 @@ export interface FieldMeasureOutputs {
   cableTemperature: TemperatureCalculationResult | null;
   /** Parameter at 15°C calculation result, if computed. */
   parameter15C: Parameter15CResult | null;
+  /** Tangent aiming (support) calculation result, if computed. */
+  tangentAimingSupport: TangentAimingSupportResult | null;
+}
+
+/** Result of the tangent aiming (support) parameter calculation. */
+export interface TangentAimingSupportResult {
+  parameter: number;
+  uncertainty: number;
+  criterion: number;
+  checkValidity: boolean;
 }
 
 /** Result of the parameter at 15°C without wind calculation including uncertainty bounds. */

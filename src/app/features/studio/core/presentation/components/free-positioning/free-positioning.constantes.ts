@@ -18,28 +18,4 @@ export const FREE_POSITIONING_CATEGORIES: readonly FreePositioningCategory[] = [
   'loads'
 ] as const;
 
-export const CATEGORY_COLORS: Record<FreePositioningCategory, string> = {
-  obstacle: '#e11d48',
-  floor: '#16a34a',
-  distance: '#2563eb',
-  loads: '#9333ea'
-};
-
-export const CATEGORY_SYMBOLS: Record<FreePositioningCategory, string> = {
-  obstacle: 'circle',
-  floor: 'triangle-up',
-  distance: 'diamond',
-  loads: 'square'
-};
-
-export const EDITABLE_POINT_COLOR = '#dc2626';
-export const EDITABLE_POINT_SIZE = 14;
-export const DEFAULT_POINT_SIZE = 10;
-/** Opacity of a point placed on the plot but not yet calculated (e.g. a load awaiting calculate & save). */
-export const PENDING_POINT_OPACITY = 0.45;
 export const POINT_SELECTION_PIXEL_RADIUS = 15;
-
-export const CORE_FREE_POSITIONING_PLOT_IDS = {
-  PROFILE: 'plotly-output-free-positioning-profile',
-  FACE: 'plotly-output-free-positioning-face'
-} as const;

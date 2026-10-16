@@ -14,6 +14,7 @@ import { type Mock } from 'vitest';
 import { TranslocoService } from '@jsverse/transloco';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 // Mock Plotly
 vi.mock('plotly.js-dist-min', () => ({
@@ -168,7 +169,7 @@ describe('createPlot', () => {
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.scene.xaxis.showbackground).toBe(true);
-      expect(layoutArg.scene.xaxis.backgroundcolor).not.toBe('transparent');
+      expect(layoutArg.scene.xaxis.backgroundcolor).not.toBe(PlotlyDrawings.plot.backgroundTransparent);
     });
 
     it('should make axes transparent when selectedDisplayOptions.transparentBackground is true', () => {
@@ -183,10 +184,10 @@ describe('createPlot', () => {
       });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.scene.xaxis.backgroundcolor).toBe('transparent');
+      expect(layoutArg.scene.xaxis.backgroundcolor).toBe(PlotlyDrawings.plot.backgroundTransparent);
       expect(layoutArg.scene.xaxis.showbackground).toBe(false);
-      expect(layoutArg.scene.yaxis.backgroundcolor).toBe('transparent');
-      expect(layoutArg.scene.zaxis.backgroundcolor).toBe('transparent');
+      expect(layoutArg.scene.yaxis.backgroundcolor).toBe(PlotlyDrawings.plot.backgroundTransparent);
+      expect(layoutArg.scene.zaxis.backgroundcolor).toBe(PlotlyDrawings.plot.backgroundTransparent);
     });
   });
 
@@ -357,6 +358,16 @@ describe('createPlot', () => {
     });
   });
 
+  describe('plot font', () => {
+    it.each(['2d', '3d'] as const)('should set the plot font on the %s layout, hover labels included', (view) => {
+      createPlot({ ...createDefaultParams(), view });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
+      expect(layoutArg.font.family).toBe(PlotlyDrawings.plot.fontFamily);
+      expect(layoutArg.hoverlabel.font.family).toBe(PlotlyDrawings.plot.fontFamily);
+    });
+  });
+
   describe('layout2d configuration', () => {
     it('should have basic layout properties', () => {
       createPlot({ ...createDefaultParams(), view: '2d' });
@@ -364,7 +375,7 @@ describe('createPlot', () => {
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
       expect(layoutArg.autosize).toBe(true);
       expect(layoutArg.showlegend).toBe(false);
-      expect(layoutArg.plot_bgcolor).toBe('gainsboro');
+      expect(layoutArg.plot_bgcolor).toBe(PlotlyDrawings.plot.background);
     });
 
     it('should use a transparent background when transparentBackground is true', () => {
@@ -380,7 +391,7 @@ describe('createPlot', () => {
       });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.plot_bgcolor).toBe('transparent');
+      expect(layoutArg.plot_bgcolor).toBe(PlotlyDrawings.plot.backgroundTransparent);
     });
 
     it('should have correct margin configuration', () => {
@@ -413,8 +424,8 @@ describe('createPlot', () => {
       createPlot({ ...createDefaultParams(), view: '2d' });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.xaxis.backgroundcolor).toBe('gainsboro');
-      expect(layoutArg.xaxis.gridcolor).toBe('dimgray');
+      expect(layoutArg.xaxis.backgroundcolor).toBe(PlotlyDrawings.plot.axisBackground);
+      expect(layoutArg.xaxis.gridcolor).toBe(PlotlyDrawings.plot.axisGrid);
       expect(layoutArg.xaxis.showbackground).toBe(true);
       expect(layoutArg.xaxis.showticklabels).toBe(true);
       expect(layoutArg.xaxis.showgrid).toBe(true);
@@ -467,8 +478,8 @@ describe('createPlot', () => {
       createPlot({ ...createDefaultParams(), view: '2d' });
 
       const layoutArg = (Plotly.react as Mock).mock.calls[0][2];
-      expect(layoutArg.yaxis.backgroundcolor).toBe('gainsboro');
-      expect(layoutArg.yaxis.gridcolor).toBe('dimgray');
+      expect(layoutArg.yaxis.backgroundcolor).toBe(PlotlyDrawings.plot.axisBackground);
+      expect(layoutArg.yaxis.gridcolor).toBe(PlotlyDrawings.plot.axisGrid);
       expect(layoutArg.yaxis.showbackground).toBe(true);
       expect(layoutArg.yaxis.showticklabels).toBe(true);
       expect(layoutArg.yaxis.showgrid).toBe(true);

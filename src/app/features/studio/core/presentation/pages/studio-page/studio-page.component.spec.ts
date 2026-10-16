@@ -28,6 +28,7 @@ import { Camera } from 'plotly.js-dist-min';
 import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
@@ -111,6 +112,7 @@ describe('StudioPageComponent', () => {
   let mockObstacleStateService: { distanceType: SignalFn<'oblique' | 'vertical' | 'horizontal' | null> };
   let mockNotificationService: { warning: ReturnType<typeof vi.fn> };
   let mockSectionStateReportService: { generateReport: ReturnType<typeof vi.fn> };
+  let mockCablesService: { getCable: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     plotService = new PlotServiceMock();
@@ -145,6 +147,7 @@ describe('StudioPageComponent', () => {
     mockObstacleStateService = { distanceType: createSignalMock<'oblique' | 'vertical' | 'horizontal' | null>(null) };
     mockNotificationService = { warning: vi.fn() };
     mockSectionStateReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
+    mockCablesService = { getCable: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -210,6 +213,7 @@ describe('StudioPageComponent', () => {
         { provide: StudioViewPersistenceService, useValue: mockPersistenceService },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: SectionStateReportService, useValue: mockSectionStateReportService },
+        { provide: CablesService, useValue: mockCablesService },
         provideHttpClient(),
         provideHttpClientTesting(),
         {
@@ -1208,6 +1212,29 @@ describe('StudioPageComponent', () => {
       expect(data.icName).toBe('IC 1');
       expect(data.maxParameter).toBe(20);
       expect(data.maxStressRate).toBe(40);
+      expect(data.cutStrands).toEqual([]);
+    });
+
+    it('should pass the cut strands of the cable layers existing in the catalog', async () => {
+      plotOptionsServiceMock.plotOptions.mockReturnValue({ startSupport: 0, endSupport: 1 });
+      mockCablesService.getCable.mockResolvedValue({ nb_strand_layer_1: 6, nb_strand_layer_2: 12 });
+      spanService.section.set({
+        cable_name: 'CABLE-A',
+        supports: [{ number: '1' }, { number: '2' }],
+        initial_conditions: [],
+        charges: [],
+        rrts_cut_strands: { cutStrands: [2, 0, 0, 0, 0, 0, 0, 0] }
+      } as unknown as Section);
+      plotService.litData.set({ output_parameters: { parameter: [10, 20], utilization_rate: [30, 40] } });
+
+      await component.onGenerateReport();
+
+      expect(mockCablesService.getCable).toHaveBeenCalledWith('CABLE-A');
+      const data = mockSectionStateReportService.generateReport.mock.calls[0][0];
+      expect(data.cutStrands).toEqual([
+        { layer: 1, count: 2 },
+        { layer: 2, count: 0 }
+      ]);
     });
   });
 });

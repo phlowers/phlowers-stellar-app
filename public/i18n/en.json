@@ -35,6 +35,7 @@
     "counter-weight-label": "Counter weight",
     "create-a-new-study": "Create a new study",
     "create-a-section-label": "Create a section",
+    "cut-strands-layer-label": "Cut strands layer {{ layer }}",
     "date-label": "Date",
     "delete": "Delete",
     "description-label": "Description",
@@ -66,6 +67,7 @@
     "max-decimals-error": "Max decimals: {{ maxDecimals }}",
     "max-value-error": "Max. value: {{ max }}",
     "meter": "m",
+    "grade-unit": "gr",
     "min-value-error": "Min. value: {{ min }}",
     "my-last-studies-label": "My last studies",
     "news-label": "News",
@@ -159,7 +161,10 @@
     "x-label": "X:",
     "y-label": "Y:",
     "z-label": "Z:",
-    "support-name-full-label": "Support name"
+    "support-name-full-label": "Support name",
+    "left-support-label": "Left support",
+    "measured-span-length-label": "Measured span length",
+    "calculated-value-label": "Calculated value:"
   },
   "app": {
     "update": "Update",
@@ -681,16 +686,26 @@
       "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Tangent aiming"
+      "tangent-aiming-radio-label": "Tangent aiming (Support)"
+    },
+    "tangent-aiming-support": {
+      "open-help-aria-label": "open tangent aiming help",
+      "mandatory-msg": "All fields are mandatory for calculus setting",
+      "h-acc-distance-label": "Vertical dist. from the device to the cable attach. of the left support",
+      "vertical-acc-angle-label": "Vertical angle from the device to the cable attach. of the right support",
+      "calculation-type-label": "Calculation type:",
+      "calculation-type-tangent": "Tangent",
+      "tangent-angle-label": "Cable tangent angle",
+      "criterion-label": "Criterion",
+      "criterion-respected": "Criterion respected",
+      "criterion-not-respected": "Criterion not respected",
+      "calculation-failed": "Failed to calculate the parameter by tangent aiming"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
       "close-aria-label": "close PAPOTO help",
       "import-station-data": "Import station's datas",
       "mandatory-msg": "All fields are mandatory for calculus setting",
-      "left-support-label": "Left support",
-      "span-length-label": "Measured span length",
-      "calculated-value-label": "Calculated value:",
       "elevation-diff-label": "Elevation diff. of measured attach.",
       "hl-label": "HL",
       "h1-label": "H1",
@@ -1141,7 +1156,6 @@
       "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
       "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",
       "vertical-sight-angle-label": "V vertical sighting angle at mid-span sag",
-      "grade-unit": "gr",
       "aria-help": "Cable adjustment help",
       "calculation-failed": "Failed to calculate the cable adjustment"
     },
@@ -1160,7 +1174,6 @@
       "current-work-load-label": "Current max working load",
       "staff-presence-label": "Staff presence",
       "distance-support-ref-label": "Distance to reference support",
-      "cut-strands-layer-label": "Cut strands layer {{ layer }}",
       "add-marking-label": "Add an indication \"cut strands\"",
       "result-cable-rrts-label": "Cable's RRTS",
       "result-new-working-load-label": "New max working load",

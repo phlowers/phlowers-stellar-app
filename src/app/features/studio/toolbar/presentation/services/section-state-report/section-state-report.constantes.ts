@@ -94,6 +94,9 @@ export const SUPPORT_METRICS: MetricDescriptor<SupportReportRow>[] = [
   { labelKey: 'studio.section-state-report.load-angle', unit: PDF_UNITS.degrees, decimals: 1, field: 'loadAngle' }
 ];
 
+/** Transloco key of the cut strands row label, parameterized by `layer`. */
+export const CUT_STRANDS_LAYER_LABEL_KEY = 'common.cut-strands-layer-label';
+
 /** Transloco translation keys for the report's fixed labels. */
 export const PDF_LABEL_KEYS: SectionReportLabels = {
   reportTitle: 'studio.section-state-report.title',

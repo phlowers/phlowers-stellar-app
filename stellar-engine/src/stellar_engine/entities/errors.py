@@ -67,3 +67,7 @@ class ObstacleNotFoundError(ValueError):
 
 class NightTimeError(ValueError):
     """Raised when input time is night time but computation requires to be during day time."""
+
+
+class ConformityInputError(ValueError):
+    """Raised when a conformity input is missing or invalid."""

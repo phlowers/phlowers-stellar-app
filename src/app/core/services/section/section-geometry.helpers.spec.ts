@@ -252,7 +252,7 @@ describe('sanitizeSectionGeometry', () => {
       const makeCutStrandsOn = (cableName?: string) => ({ ...makeCutStrands('sup-1'), cableName });
 
       it('should drop the RRTS cut strands saved on another cable', () => {
-        const section = makeSection({ cable_name: 'PETUNIA 612', rrts_cut_strands: makeCutStrandsOn('ASTER 570') });
+        const section = makeSection({ cable_name: 'PETUNIA 612', rrts_cut_strands: makeCutStrandsOn('ASTER600') });
 
         const result = sanitizeSectionGeometry(section);
 
@@ -261,7 +261,7 @@ describe('sanitizeSectionGeometry', () => {
       });
 
       it('should keep the RRTS cut strands saved on the section cable', () => {
-        const section = makeSection({ cable_name: 'ASTER 570', rrts_cut_strands: makeCutStrandsOn('ASTER 570') });
+        const section = makeSection({ cable_name: 'ASTER600', rrts_cut_strands: makeCutStrandsOn('ASTER600') });
 
         const result = sanitizeSectionGeometry(section);
 

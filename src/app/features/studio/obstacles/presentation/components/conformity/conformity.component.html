@@ -162,7 +162,7 @@
         @if (lateralTemperatureRuleName()) {
           {{ lateralTemperatureRuleName() }} —
         }
-        <ng-container>{{ 'studio.conformity.lateral-distance-temperature-label' | transloco }}</ng-container>
+        {{ 'studio.conformity.lateral-distance-temperature-label' | transloco }}
       </label>
       <p-inputgroup class="form__lat-temp-input">
         <input
@@ -225,6 +225,7 @@
       [btnLoading]="isCalculating()"
       data-testid="conformity-calculate-btn"
     >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
       {{ 'common.calculate' | transloco }}
     </button>
   </form>
@@ -232,11 +233,11 @@
 
 <output class="sr-only" aria-live="polite">
   @if (isCalculating()) {
-    <ng-container>{{ 'studio.conformity.calculating-text' | transloco }}</ng-container>
+    {{ 'studio.conformity.calculating-text' | transloco }}
   } @else if (calculationError()) {
     {{ calculationError() }}
   } @else if (conformityResults()) {
-    <ng-container>{{ 'studio.conformity.results-updated-text' | transloco }}</ng-container>
+    {{ 'studio.conformity.results-updated-text' | transloco }}
   }
 </output>
 
@@ -260,9 +261,9 @@
       >
         <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
         @if (isGraphEnlarged()) {
-          <ng-container>{{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}</ng-container>
+          {{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}
         } @else {
-          <ng-container>{{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}</ng-container>
+          {{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}
         }
       </button>
       <div id="conformity-plot" class="results__plot"></div>
@@ -276,12 +277,12 @@
             @for (col of selectedConformityColumns(); track col.value) {
               <th scope="col">
                 {{ col.label }}
-                <ng-container>{{ 'studio.conformity.overhang-column-suffix' | transloco }}</ng-container>
+                {{ 'studio.conformity.overhang-column-suffix' | transloco }}
               </th>
               @if (showLateralColumn()) {
                 <th scope="col">
                   {{ col.label }}
-                  <ng-container>{{ 'studio.conformity.lateral-column-suffix' | transloco }}</ng-container>
+                  {{ 'studio.conformity.lateral-column-suffix' | transloco }}
                 </th>
               }
             }

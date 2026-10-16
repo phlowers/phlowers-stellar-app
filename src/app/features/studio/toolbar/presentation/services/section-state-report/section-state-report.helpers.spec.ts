@@ -9,9 +9,16 @@ import { vi } from 'vitest';
 import type jsPDF from 'jspdf';
 
 import { Support } from '@shared/domain';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 
-import { buildSpanRows, buildSupportRows, drawCartoucheSection } from './section-state-report.helpers';
+import {
+  buildCutStrandsRows,
+  buildSpanRows,
+  buildSupportRows,
+  drawCartoucheSection,
+  drawSectionStateSection
+} from './section-state-report.helpers';
 import { SectionReportLabels, SectionStateReportData } from './section-state-report.interfaces';
 
 function createMockDoc() {
@@ -113,6 +120,7 @@ function createCartoucheData(overrides: Partial<SectionStateReportData> = {}): S
     chargeDescription: 'Charge desc',
     maxParameter: 1500,
     maxStressRate: 60,
+    cutStrands: [],
     spans: [],
     supports: [],
     ...overrides
@@ -120,6 +128,88 @@ function createCartoucheData(overrides: Partial<SectionStateReportData> = {}): S
 }
 
 describe('section-state-report.helpers', () => {
+  describe('buildCutStrandsRows', () => {
+    const cable = { nb_strand_layer_1: 6, nb_strand_layer_2: 12, nb_strand_layer_3: 0, nb_strand_layer_4: 18 };
+    const entry = (cutStrands: number[]) => ({ cutStrands }) as RrtsCutStrandsData;
+
+    it('gives the saved count of each layer existing on the cable, 0 included', () => {
+      expect(buildCutStrandsRows(cable, entry([2, 0, 5, 7]))).toEqual([
+        { layer: 1, count: 2 },
+        { layer: 2, count: 0 }
+      ]);
+    });
+
+    it.each([null, undefined])('gives 0 on each existing layer without saved entry: %s', (saved) => {
+      expect(buildCutStrandsRows(cable, saved)).toEqual([
+        { layer: 1, count: 0 },
+        { layer: 2, count: 0 }
+      ]);
+    });
+
+    it('gives no row when the cable is unknown', () => {
+      expect(buildCutStrandsRows(undefined, entry([1]))).toEqual([]);
+    });
+  });
+
+  describe('drawSectionStateSection', () => {
+    const cutStrandsLabel = (layer: number) => `Cut strands layer ${layer}`;
+
+    it('draws the cut strands rows under the max parameter', () => {
+      const doc = createMockDoc();
+      const data = createCartoucheData({
+        cutStrands: [
+          { layer: 1, count: 2 },
+          { layer: 2, count: 0 }
+        ]
+      });
+      const startY = 20;
+
+      const y = drawSectionStateSection(doc as unknown as jsPDF, data, CARTOUCHE_LABELS, cutStrandsLabel, startY);
+      const texts = textCalls(doc);
+
+      expect(texts.some((t) => t.includes('Max parameter'))).toBe(true);
+      expect(texts.some((t) => t.includes('Cut strands layer 1'))).toBe(true);
+      expect(texts.some((t) => t.includes('Cut strands layer 2'))).toBe(true);
+      expect(texts).toContain('2');
+      expect(texts).toContain('0');
+      expect(texts.some((t) => t.includes('Max stress rate'))).toBe(true);
+      expect(y).toBeGreaterThan(startY);
+    });
+
+    it('draws no cut strands row without layer', () => {
+      const doc = createMockDoc();
+
+      drawSectionStateSection(doc as unknown as jsPDF, createCartoucheData(), CARTOUCHE_LABELS, cutStrandsLabel, 20);
+
+      expect(textCalls(doc).some((t) => t.includes('Cut strands'))).toBe(false);
+    });
+
+    it('advances by one line per left column row', () => {
+      const doc = createMockDoc();
+      const oneRowY = drawSectionStateSection(
+        doc as unknown as jsPDF,
+        createCartoucheData(),
+        CARTOUCHE_LABELS,
+        cutStrandsLabel,
+        20
+      );
+      const threeRowsY = drawSectionStateSection(
+        doc as unknown as jsPDF,
+        createCartoucheData({
+          cutStrands: [
+            { layer: 1, count: 1 },
+            { layer: 2, count: 1 }
+          ]
+        }),
+        CARTOUCHE_LABELS,
+        cutStrandsLabel,
+        20
+      );
+
+      expect(threeRowsY).toBeGreaterThan(oneRowY);
+    });
+  });
+
   describe('drawCartoucheSection', () => {
     it('draws the title, every metadata label with its value, and a separator', () => {
       const doc = createMockDoc();

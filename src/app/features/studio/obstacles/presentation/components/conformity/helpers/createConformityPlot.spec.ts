@@ -10,6 +10,7 @@ import Plotly, { Data, Layout } from 'plotly.js-dist-min';
 import { createConformityPlot, CONFORMITY_PLOT_ID, purgeConformityPlot } from './createConformityPlot';
 import { ConformityPlotResponse } from '../conformity-plot.model';
 import { ObstacleConformityType } from '@infrastructure/database/entities/catalog-obstacle-configuration.entity';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
@@ -145,7 +146,7 @@ describe('createConformityPlot', () => {
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const fillTrace = traces[0] as { fillcolor: string };
-      expect(fillTrace.fillcolor).toBe('rgba(1, 122, 163, 0.2)');
+      expect(fillTrace.fillcolor).toBe('rgba(1, 122, 163, 1)');
     });
 
     it('should trace the zone border along the provided zoneBorder polyline in the rule color', () => {
@@ -167,7 +168,7 @@ describe('createConformityPlot', () => {
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const pointsTrace = traces[2] as { marker: { color: string } };
-      expect(pointsTrace.marker.color).toBe('#017aa3');
+      expect(pointsTrace.marker.color).toBe(PlotlyDrawings.conformity.cablePoint.color);
     });
 
     it('should stack the first rule key on top by drawing zones in reverse key order', () => {
@@ -177,8 +178,8 @@ describe('createConformityPlot', () => {
       // RULE_2's fill is pushed first (bottom), RULE_1's fill is pushed after it (on top).
       const firstFill = traces[0] as { fillcolor: string };
       const secondFill = traces[2] as { fillcolor: string };
-      expect(firstFill.fillcolor).toBe('rgba(255, 0, 0, 0.2)'); // RULE_2
-      expect(secondFill.fillcolor).toBe('rgba(1, 122, 163, 0.2)'); // RULE_1
+      expect(firstFill.fillcolor).toBe('rgba(255, 0, 0, 1)'); // RULE_2
+      expect(secondFill.fillcolor).toBe('rgba(1, 122, 163, 1)'); // RULE_1
     });
 
     it('should not add any shapes for overhang / vegetation styling', () => {
@@ -227,13 +228,21 @@ describe('createConformityPlot', () => {
       expect(disk.y1).toBe(50); // 49 + radius(1)
     });
 
+    it('should make cable-track disk fills fully opaque', () => {
+      createConformityPlot(mockDocument, mockResponse, { ...cableTrackOptions, selectedRuleTypes: ['RULE_1'] });
+
+      const layout = (Plotly.react as Mock).mock.calls[0][2] as Partial<Layout>;
+      const disk = layout.shapes?.[0] as { fillcolor: string };
+      expect(disk.fillcolor).toBe('rgba(1, 122, 163, 1)');
+    });
+
     it('should color disk centers with the shared cable point color, not the rule color', () => {
       createConformityPlot(mockDocument, mockResponse, { ...cableTrackOptions, selectedRuleTypes: ['RULE_2'] });
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const centersTrace = traces[0] as { marker: { color: string } };
       // RULE_2's catalog color is '#ff0000', but disk centers always use the shared cable point color.
-      expect(centersTrace.marker.color).toBe('#017aa3');
+      expect(centersTrace.marker.color).toBe(PlotlyDrawings.conformity.cablePoint.color);
     });
   });
 

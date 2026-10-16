@@ -332,7 +332,8 @@ describe('FieldMeasuringComponent', () => {
             uncertainty: 0.1
           },
           cableTemperature: null,
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -361,7 +362,8 @@ describe('FieldMeasuringComponent', () => {
             uncertainty: 0.1
           },
           cableTemperature: null,
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -405,7 +407,8 @@ describe('FieldMeasuringComponent', () => {
               uncertainty: 0.1
             },
             cableTemperature: null,
-            parameter15C: null
+            parameter15C: null,
+            tangentAimingSupport: null
           }
         });
         component.measureData.set(measureDataWithOutput);
@@ -471,7 +474,8 @@ describe('FieldMeasuringComponent', () => {
             parameter15C: 480,
             parameter15CMinusUncertainty: 470,
             parameter15CPlusUncertainty: 490
-          }
+          },
+          tangentAimingSupport: null
         },
         ...overrides
       });
@@ -569,7 +573,7 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set(
         createFullyValidMeasureData({
           updateMode15C: 'auto',
-          outputs: { papoto: null, cableTemperature: null, parameter15C: null }
+          outputs: { papoto: null, cableTemperature: null, parameter15C: null, tangentAimingSupport: null }
         })
       );
       const messageService = TestBed.inject(MessageService);
@@ -633,7 +637,8 @@ describe('FieldMeasuringComponent', () => {
               uncertainty: 0.1
             },
             cableTemperature: null,
-            parameter15C: null
+            parameter15C: null,
+            tangentAimingSupport: null
           }
         })
       );
@@ -679,13 +684,12 @@ describe('FieldMeasuringComponent', () => {
       toolbarDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const measureData = component.measureData();
       const section = spanService.section();
 
       await component.onSave();
 
       expect(modifySectionSpy).toHaveBeenCalledWith({
-        field_measures: [...(section?.field_measures || []), measureData]
+        field_measures: [...(section?.field_measures || []), component.measureData()]
       });
     });
 
@@ -717,6 +721,90 @@ describe('FieldMeasuringComponent', () => {
 
       // onSave no longer closes the tool - it shows a success message instead
       expect(closeToolSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onSave - tangent aiming (support)', () => {
+    it('should reset the non displayed field and persist the displayed ones', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming',
+          calculationType: 'parametre',
+          cableParameter: 100,
+          cableTangentAngle: 5
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.cableParameter).toBe(100);
+      expect(saved?.cableTangentAngle).toBeNull();
+      expect(component.measureData().cableTangentAngle).toBeNull();
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should reset the papoto inputs when tangent aiming is active', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableParameter: 100 })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.leftSupport).toBeNull();
+      expect(saved?.cableParameter).toBe(100);
+    });
+
+    it('should reset tangent aiming to defaults when papoto is active', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({ calculationMethod: 'papoto', HL: 5, tangentSpanLength: 12, cableTangentAngle: 5 })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.HL).toBe(5);
+      expect(saved?.tangentSpanLength).not.toBe(12);
+      expect(saved?.cableTangentAngle).not.toBe(5);
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should validate the tab through the tangent aiming rules', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
+      expect(component.isParameterCalculationValid()).toBe(false);
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming',
+          tangentLeftSupport: '0',
+          tangentSpanLength: 10,
+          cableHAccDistance: 1,
+          cableVerticalAccAngle: 1,
+          cableParameter: 100
+        })
+      );
+      expect(component.isParameterCalculationValid()).toBe(true);
+    });
+
+    it('should take the tangent aiming result into account for computed outputs', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
+      expect(component.hasComputedOutputs()).toBe(false);
+      const base = component.measureData();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true }
+        }
+      });
+      expect(component.hasComputedOutputs()).toBe(true);
     });
   });
 
@@ -993,7 +1081,7 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
 
       expect(modifySpy).toHaveBeenCalledWith({
-        field_measures: [existingMeasure, newMeasure]
+        field_measures: [existingMeasure, component.measureData()]
       });
     });
 

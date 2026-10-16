@@ -95,7 +95,7 @@ const createFirstAndLastSupport = (): Support[] => {
  * ```typescript
  * const section = createEmptySection();
  * section.name = 'New Section';
- * section.cable_name = 'ASTER_570';
+ * section.cable_name = 'ASTER600';
  * ```
  */
 export const createEmptySection = (): Section => {

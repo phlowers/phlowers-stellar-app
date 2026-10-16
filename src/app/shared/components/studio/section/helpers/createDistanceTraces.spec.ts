@@ -2,8 +2,9 @@ import { createDistanceAnnotations, createDistanceTraces } from './createDistanc
 import { CreatePlotParams } from './createPlot';
 import { Distance, GetSectionOutput } from '@services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
-const DISTANCE_COLOR = '#674883';
+const DISTANCE_COLOR = PlotlyDrawings.distance.color;
 
 /**
  * Geometrically consistent mock data:
@@ -76,6 +77,7 @@ const makeLitDataWithObstacles = (): GetSectionOutput => ({
 });
 
 const basePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotParams => ({
+  documentRef: globalThis.document,
   plotId: 'plot-1',
   data: [],
   litData: makeLitDataWithObstacles(),
@@ -270,7 +272,7 @@ describe('createDistanceTraces', () => {
   });
 
   describe('marker trace', () => {
-    it('should create a purple 6px circle marker at linePoint', () => {
+    it('should create a circle marker at linePoint', () => {
       const result = createDistanceTraces(basePlotParams());
       const marker = result.find((t: DataObject) => t.name === 'distance-marker');
       expect(marker).toBeDefined();

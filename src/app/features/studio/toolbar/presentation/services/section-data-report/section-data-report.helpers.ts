@@ -84,15 +84,15 @@ export function drawCantonSection(
     { label: labels.maintenanceCenter, value: data.maintenanceCenter || '-' },
     { label: labels.lit, value: data.litName || '-' },
     { label: labels.supportsCount, value: String(data.supportsCount) },
-    { label: labels.supportsDescription, value: data.supportsDescription || '-' }
+    { label: labels.supportsDescription, value: data.supportsDescription || '-' },
+    { label: labels.branch, value: data.branchName || '-' }
   ];
 
   const phaseNumberValue = data.phaseNumber != null ? String(data.phaseNumber) : '-';
   const right: PdfBulletItem[] = [
     { label: data.isPhase ? labels.phaseNumber : '', value: data.isPhase ? phaseNumberValue : '' },
     { label: labels.cablesAmount, value: data.cablesAmount != null ? String(data.cablesAmount) : '-' },
-    { label: labels.maintenanceTeam, value: data.maintenanceTeam || '-' },
-    { label: labels.branch, value: data.branchName || '-' }
+    { label: labels.maintenanceTeam, value: data.maintenanceTeam || '-' }
   ];
 
   return drawTwoColumnBulletSection(doc, labels.cantonTitle, left, right, startY);

@@ -58,6 +58,20 @@ Rules:
 
 ---
 
+## Reuse before creating (mutualisation)
+
+Before adding any helper, constant, interface, service, i18n key, or component logic, search the repo for an
+existing equivalent (grep the behavior, not only the name) and **reuse or extend it** (optional parameter with
+the legacy default) instead of writing a parallel version.
+
+- Same rule used by two features → extract it once in the lowest shared place (feature helpers file if both
+  consumers are in the same feature, otherwise `@shared`), and make every consumer use it.
+- Same i18n text used by two places → one key under `common.*` (see `i18n.instructions.md`).
+- Prefer editing existing files over creating new ones; keep the footprint of a change as small as possible.
+- If reuse would force a risky change to an unrelated consumer, ask before diverging.
+
+---
+
 ## UUID
 
 Always `import { v4 as uuidv4 } from 'uuid'` — never `crypto.randomUUID()`.

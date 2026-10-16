@@ -123,7 +123,7 @@ describe('field-measure-export.helpers', () => {
         time: new Date(2026, 0, 5, 10, 0, 0),
         voltage: '225 kV',
         spanType: 'phase',
-        cableName: 'ASTER570',
+        cableName: 'ASTER600',
         numberOfConductors: 2,
         phaseNumber: 3,
         season: 'winter'
@@ -134,7 +134,7 @@ describe('field-measure-export.helpers', () => {
         season: 'winter',
         voltage: { value: '225 kV', unit: 'KV' },
         sectionType: 'common.section-type.phase',
-        cable: 'ASTER570',
+        cable: 'ASTER600',
         cablesNumber: 2,
         phaseNumber: 3
       });
@@ -203,7 +203,8 @@ describe('field-measure-export.helpers', () => {
         outputs: {
           papoto: null,
           cableTemperature: { cableSolarFlux: 40, cableTemperature: 35, cableTemperatureUncertainty: 2 },
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null
         }
       });
       const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
@@ -242,7 +243,8 @@ describe('field-measure-export.helpers', () => {
             uncertainty: 0.5
           },
           cableTemperature: null,
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null
         }
       });
       const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
@@ -317,7 +319,8 @@ describe('field-measure-export.helpers', () => {
             uncertainty: 0.5
           },
           cableTemperature: { cableSolarFlux: 40, cableTemperature: 30, cableTemperatureUncertainty: 1.5 },
-          parameter15C: { parameter15C: 480, parameter15CMinusUncertainty: 470, parameter15CPlusUncertainty: 490 }
+          parameter15C: { parameter15C: 480, parameter15CMinusUncertainty: 470, parameter15CPlusUncertainty: 490 },
+          tangentAimingSupport: null
         }
       });
       const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);
@@ -342,7 +345,8 @@ describe('field-measure-export.helpers', () => {
             parameter15C: -1.414,
             parameter15CMinusUncertainty: null as unknown as number,
             parameter15CPlusUncertainty: null as unknown as number
-          }
+          },
+          tangentAimingSupport: null
         }
       });
       const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);

@@ -4,7 +4,7 @@
       name="calculusType"
       value="PAPOTO"
       [ngModel]="selectedCalculusType()"
-      (ngModelChange)="selectedCalculusType.set($event)"
+      (ngModelChange)="onCalculusTypeChange($event)"
       inputId="papoto"
       data-testid="papoto-radio"
     />
@@ -14,11 +14,10 @@
   <div class="cac-set-select__item">
     <p-radiobutton
       name="calculusType"
-      value="TANGENT_AIMING"
+      value="TANGENT_AIMING_SUPPORT"
       [ngModel]="selectedCalculusType()"
-      (ngModelChange)="selectedCalculusType.set($event)"
+      (ngModelChange)="onCalculusTypeChange($event)"
       inputId="tangentAiming"
-      [disabled]="true"
       data-testid="tangent-aiming-radio"
     />
     <label for="tangentAiming">{{ 'field-measuring.calculus-setting.tangent-aiming-radio-label' | transloco }}</label>
@@ -41,8 +40,8 @@
 @if (selectedCalculusType() === 'PAPOTO') {
   <app-papoto [leftSupportOption]="leftSupportOption()" [(measureData)]="measureData" />
 }
-@if (selectedCalculusType() === 'TANGENT_AIMING') {
-  <app-tangent-aiming />
+@if (selectedCalculusType() === 'TANGENT_AIMING_SUPPORT') {
+  <app-tangent-aiming-support [(measureData)]="measureData" />
 }
 @if (selectedCalculusType() === 'PEP') {
   <app-pep />

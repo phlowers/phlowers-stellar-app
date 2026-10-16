@@ -2,7 +2,7 @@ import * as Plotly from 'plotly.js-dist-min';
 import { CreatePlotParams } from './createPlot';
 import { cloneDeep } from 'lodash';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
-import { LOAD_ARROW_Y_OFFSET, LOAD_COLOR, LOAD_ICON, MARKING_ICON } from './createLoadAnnotations.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 /**
  * Data payload attached to a Plotly span load annotation for click event handling.
@@ -40,14 +40,18 @@ export const createLoadAnnotations = (plotParams: CreatePlotParams): Partial<Plo
   plotParams.spanLoads.forEach((spanLoad, spanIndex) => {
     if (spanLoad && spanIndex + plotParams.startSupport in load_coords) {
       const current_load_coord = load_coords[spanIndex + plotParams.startSupport];
+      const drawing = spanLoad.type === LoadType.PUNCTUAL ? PlotlyDrawings.loadPunctual : PlotlyDrawings.loadMarking;
       annotations.push(
         buildClickableIconAnnotation({
           arrowTipX: side === 'face' && view === '2d' ? current_load_coord[1] : current_load_coord[0],
           arrowTipY: plotParams.view === '2d' ? current_load_coord[2] : current_load_coord[1],
           arrowTipZ: current_load_coord[2],
-          icon: spanLoad.type === LoadType.PUNCTUAL ? LOAD_ICON : MARKING_ICON,
-          color: LOAD_COLOR,
-          arrowYOffset: LOAD_ARROW_Y_OFFSET,
+          icon: drawing.icon,
+          iconSize: drawing.iconSize[view],
+          borderPad: drawing.borderPad[view],
+          arrowWidth: drawing.arrowWidth[view],
+          color: drawing.unselected.color,
+          arrowYOffset: drawing.arrowYOffset,
           data: { type: 'spanLoad', supportUuid: spanLoad.supportUuid }
         })
       );
