@@ -9,7 +9,7 @@ réglementaires, mesure sa distance par rapport à l’obstacle dans chacune d�
 règle, si la distance requise est respectée.
 
 Le résultat est un **tableau** de valeurs et un **graphique** des positions du câble autour de l’obstacle.
-?
+
 ---
 
 ## Ce qui est vérifié
