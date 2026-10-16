@@ -192,13 +192,13 @@
     "update-available": "Update available",
     "update-new-available": "A new application update is available!",
     "offline-card": {
-      "title": "Offline mode",
+      "title": "Application status",
       "connection-online": "Online.",
       "connection-offline": "No connection.",
-      "status-ready": "Ready for offline use.",
+      "status-ready": "Offline mode ready.",
       "status-preparing": "Preparing offline mode.",
-      "status-waiting-network": "Network too slow to prepare offline mode.",
-      "status-storage-insufficient": "Not enough storage for offline mode.",
+      "status-waiting-network": "Network too slow: offline mode setup on hold.",
+      "status-storage-insufficient": "Not enough storage: offline mode impossible.",
       "status-not-prepared": "Offline mode unavailable.",
       "update-postponed-network": "Update postponed: network too slow.",
       "update-blocked-storage": "Update blocked: not enough storage."

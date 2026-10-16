@@ -77,13 +77,13 @@ describe('HomeComponent', () => {
                 'Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!',
               'common.news-label': 'News',
               'home.no-recent-studies': 'No recent studies',
-              'home.offline-card.title': 'Offline mode',
+              'home.offline-card.title': 'Application status',
               'home.offline-card.connection-online': 'Online.',
               'home.offline-card.connection-offline': 'No connection.',
-              'home.offline-card.status-ready': 'Ready for offline use.',
+              'home.offline-card.status-ready': 'Offline mode ready.',
               'home.offline-card.status-preparing': 'Preparing offline mode.',
-              'home.offline-card.status-waiting-network': 'Network too slow to prepare offline mode.',
-              'home.offline-card.status-storage-insufficient': 'Not enough storage for offline mode.',
+              'home.offline-card.status-waiting-network': 'Network too slow: offline mode setup on hold.',
+              'home.offline-card.status-storage-insufficient': 'Not enough storage: offline mode impossible.',
               'home.offline-card.status-not-prepared': 'Offline mode unavailable.',
               'home.offline-card.update-postponed-network': 'Update postponed: network too slow.',
               'home.offline-card.update-blocked-storage': 'Update blocked: not enough storage.',
@@ -133,7 +133,7 @@ describe('HomeComponent', () => {
       expect(homeText.newsTitle).toBe('News');
       expect(homeText.newsText).toContain('Welcome to Celeste');
       expect(homeText.updateTitle).toBe('Changelogs');
-      expect(homeText.offlineTitle).toBe('Offline mode');
+      expect(homeText.offlineTitle).toBe('Application status');
     });
   });
 
@@ -175,12 +175,12 @@ describe('HomeComponent', () => {
     });
 
     it.each<[boolean, AppUpdateState, string, string]>([
-      [true, 'ready-offline', 'success', 'Online. Ready for offline use.'],
-      [true, 'update-waiting', 'success', 'Online. Ready for offline use.'],
-      [false, 'ready-offline', 'offline', 'No connection. Ready for offline use.'],
+      [true, 'ready-offline', 'success', 'Online. Offline mode ready.'],
+      [true, 'update-waiting', 'success', 'Online. Offline mode ready.'],
+      [false, 'ready-offline', 'offline', 'No connection. Offline mode ready.'],
       [true, 'installing', 'warning', 'Online. Preparing offline mode.'],
-      [true, 'deferred-network', 'warning', 'Online. Network too slow to prepare offline mode.'],
-      [true, 'storage-insufficient', 'error', 'Online. Not enough storage for offline mode.'],
+      [true, 'deferred-network', 'warning', 'Online. Network too slow: offline mode setup on hold.'],
+      [true, 'storage-insufficient', 'error', 'Online. Not enough storage: offline mode impossible.'],
       [true, 'not-installed', 'unknown', 'Online. Offline mode unavailable.'],
       [false, 'unsupported', 'error', 'No connection. Offline mode unavailable.']
     ])('online=%s state=%s gives status %s and text "%s"', (online, state, status, text) => {
@@ -197,9 +197,7 @@ describe('HomeComponent', () => {
       fixture.detectChanges();
 
       expect(component.offlineStatus()).toBe('warning');
-      expect(component.homeText().offlineText).toBe(
-        'Online. Ready for offline use. Update postponed: network too slow.'
-      );
+      expect(component.homeText().offlineText).toBe('Online. Offline mode ready. Update postponed: network too slow.');
     });
 
     it('should explain a storage refusal while staying ready offline', () => {
@@ -207,9 +205,7 @@ describe('HomeComponent', () => {
       fixture.detectChanges();
 
       expect(component.offlineStatus()).toBe('warning');
-      expect(component.homeText().offlineText).toBe(
-        'Online. Ready for offline use. Update blocked: not enough storage.'
-      );
+      expect(component.homeText().offlineText).toBe('Online. Offline mode ready. Update blocked: not enough storage.');
     });
 
     it('should ignore the update refusal while the offline mode is not ready', () => {
@@ -237,8 +233,8 @@ describe('HomeComponent', () => {
       fixture.detectChanges();
 
       const card = getByTestId('offline-card');
-      expect(card?.textContent).toContain('Offline mode');
-      expect(card?.textContent).toContain('Online. Ready for offline use.');
+      expect(card?.textContent).toContain('Application status');
+      expect(card?.textContent).toContain('Online. Offline mode ready.');
     });
   });
 

@@ -192,13 +192,13 @@
     "update-available": "Mise à jour disponible",
     "update-new-available": "Une nouvelle mise à jour de l'application est disponible !",
     "offline-card": {
-      "title": "Mode hors ligne",
+      "title": "État de l'application",
       "connection-online": "Connecté.",
-      "connection-offline": "Hors connexion.",
-      "status-ready": "Prêt hors ligne.",
+      "connection-offline": "Pas de connexion.",
+      "status-ready": "Mode hors ligne prêt.",
       "status-preparing": "Préparation du mode hors ligne en cours.",
-      "status-waiting-network": "Réseau trop lent pour préparer le mode hors ligne.",
-      "status-storage-insufficient": "Espace insuffisant pour le mode hors ligne.",
+      "status-waiting-network": "Réseau trop lent : préparation du mode hors ligne en attente.",
+      "status-storage-insufficient": "Espace insuffisant : mode hors ligne impossible.",
       "status-not-prepared": "Mode hors ligne indisponible.",
       "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
       "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
