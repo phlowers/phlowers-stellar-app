@@ -155,7 +155,7 @@ export const PlotlyDrawings = {
     cablePoint: { color: '#2563EB', markerSize: 7 },
     obstaclePoint: { color: '#9F1239', symbol: 'diamond', markerSize: 10 },
     defaultZoneColor: '#888888', // used when a rule has no catalog color
-    fillOpacity: 0.2,
+    fillOpacity: 1,
     borderWidth: 2,
     borderMarkerSize: 4
   },
