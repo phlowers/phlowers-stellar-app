@@ -18,6 +18,9 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { ScaleViewComponent } from './scale-view/scale-view.component';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { PluginDialogService } from '@shared/plugin/plugin-dialog.service';
+import { StellarPluginRegistryService } from '@shared/plugin/stellar-plugin-registry.service';
+import { isPluginAvailable } from '@shared/plugin/stellar-plugin.helpers';
 
 @Component({
   selector: 'app-studio-top-toolbar',
@@ -45,6 +48,8 @@ export class StudioTopToolbarComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly translocoService = inject(TranslocoService);
   private readonly sectionExportService = inject(SectionExportService);
+  private readonly pluginDialogService = inject(PluginDialogService);
+  private readonly pluginRegistry = inject(StellarPluginRegistryService);
 
   items = signal<MenuItem[] | null>(null);
   toolsDropdown = signal<MenuItem[] | null>(null);
@@ -55,6 +60,22 @@ export class StudioTopToolbarComponent implements OnInit {
 
   private readonly hasCharges = computed(() => !!this.spanService.section()?.charges?.length);
   readonly hasSection = computed(() => !!this.spanService.section());
+
+  readonly pluginToolsItems = computed<MenuItem[]>(() =>
+    this.pluginRegistry.studioEntries().map((entry) => ({
+      label: entry.title,
+      disabled: !isPluginAvailable(entry.plugin, this.hasSection()),
+      command: () => {
+        this.pluginDialogService.open(entry);
+      }
+    }))
+  );
+
+  /** Built-in tools followed by the studio plugins. */
+  readonly toolsMenu = computed<MenuItem[] | null>(() => {
+    const builtInTools = this.toolsDropdown();
+    return builtInTools && [...builtInTools, ...this.pluginToolsItems()];
+  });
 
   /** Downloads the section currently displayed in the studio as a `.stsec` file. */
   onExportSection(): void {

@@ -1,0 +1,11 @@
+{
+  "title": "Hello world (example plugin)",
+  "description": "Reference plugin showing how a tool reads the current section and notifies the user.",
+  "greeting": "Hello from a Stellar plugin!",
+  "no-section": "Open a section in the studio to see its details here.",
+  "section-name": "Section",
+  "support-count": "Supports",
+  "notify": "Send a notification",
+  "notify-detail": "Notification sent by the hello-world plugin.",
+  "close": "Close"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Hello world (plugin d'exemple)",
+  "description": "Plugin de référence montrant comment un outil lit le canton courant et notifie l'utilisateur.",
+  "greeting": "Bonjour depuis un plugin Stellar !",
+  "no-section": "Ouvrez un canton dans le studio pour voir ses détails ici.",
+  "section-name": "Canton",
+  "support-count": "Supports",
+  "notify": "Envoyer une notification",
+  "notify-detail": "Notification envoyée par le plugin hello-world.",
+  "close": "Fermer"
+}

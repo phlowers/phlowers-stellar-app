@@ -1,0 +1,24 @@
+@let entry = dialogService.activeEntry();
+<p-dialog
+  data-testid="plugin-dialog"
+  [visible]="dialogService.isOpen()"
+  (visibleChange)="onVisibleChange($event)"
+  [header]="entry?.title ?? ''"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="dialogStyle()"
+>
+  <div class="plugin-dialog" data-testid="plugin-dialog-body" [attr.aria-busy]="isLoading()">
+    @if (isLoading()) {
+      <p class="plugin-dialog__status" role="status" data-testid="plugin-dialog-loading">
+        {{ i18nKeys.loading | transloco }}
+      </p>
+    } @else if (hasLoadError()) {
+      <p-message severity="error" role="alert" aria-live="assertive" data-testid="plugin-dialog-error">
+        {{ i18nKeys.loadError | transloco }}
+      </p-message>
+    } @else if (component(); as pluginComponent) {
+      <ng-container *ngComponentOutlet="pluginComponent; injector: pluginInjector()" />
+    }
+  </div>
+</p-dialog>

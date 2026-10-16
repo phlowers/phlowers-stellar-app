@@ -17,4 +17,5 @@ plot_refresh_pipeline
 theme_styles
 generic_import_pipeline
 section_import_adapters
+plugins
 ```

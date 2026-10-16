@@ -91,6 +91,54 @@ export default tseslint.config(
     }
   },
   {
+    // Only the plugin composition file may reach into `@plugins`: keeps plugins removable.
+    // Uses the typescript-eslint variant so it does not override the `@adapters` restriction above.
+    files: ['src/app/**/*.ts', 'src/adapters/**/*.ts'],
+    ignores: ['src/app/shared/plugin/stellar-plugins.providers.ts', '**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@plugins/*', '@plugins/**'],
+              message: 'Import plugins only from shared/plugin/stellar-plugins.providers.ts.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    // Plugins only talk to Stellar through `@shared/plugin/stellar-plugin` and other `@shared` code.
+    files: ['src/plugins/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@app/*',
+                '@core/*',
+                '@core/**',
+                '@services/*',
+                '@services/**',
+                '@features/*',
+                '@features/**',
+                '@infrastructure/*',
+                '@infrastructure/**',
+                '@adapters/*',
+                '@adapters/**'
+              ],
+              message: 'Plugins must use the StellarPluginApi from @shared/plugin/stellar-plugin instead of app internals.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ['**/*.html'],
     languageOptions: {
       parser: templateParser

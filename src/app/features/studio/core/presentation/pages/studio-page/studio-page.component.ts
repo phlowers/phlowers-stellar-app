@@ -41,6 +41,7 @@ import { NewChargeModalComponent } from '@shared/components/new-charge-modal/new
 import { ObstacleFreePositioningComponent } from '@features/studio/obstacles/presentation/components/obstacle-free-positioning/obstacle-free-positioning.component';
 import { LoadsFreePositioningComponent } from '@features/studio/loads/presentation/components/loads-free-positioning/loads-free-positioning.component';
 import { ToolbarDialogComponent } from '@features/studio/toolbar/presentation/components/toolbar-dialog/toolbar-dialog.component';
+import { PluginDialogComponent } from '@shared/plugin/components/plugin-dialog/plugin-dialog.component';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -109,6 +110,7 @@ type SpanAmountChoice = 'single' | 'double' | 'all';
     LoadMarkingComponent,
     NewChargeModalComponent,
     ToolbarDialogComponent,
+    PluginDialogComponent,
     ObstaclesFormComponent,
     ObstacleFreePositioningComponent,
     LoadsFreePositioningComponent,

@@ -19,11 +19,33 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { signal } from '@angular/core';
+import { PluginDialogService } from '@shared/plugin/plugin-dialog.service';
+import { StellarPluginRegistryService } from '@shared/plugin/stellar-plugin-registry.service';
+import { STELLAR_PLUGIN_API_VERSION } from '@shared/plugin/stellar-plugin.constantes';
+import { StellarPluginEntry, StellarPluginManifest } from '@shared/plugin/stellar-plugin.interfaces';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
+
+const buildPluginEntry = (overrides: Partial<StellarPluginManifest> = {}): StellarPluginEntry => ({
+  plugin: {
+    id: 'fake-plugin',
+    apiVersion: STELLAR_PLUGIN_API_VERSION,
+    placements: ['studio'],
+    i18nScope: { scope: 'fake-plugin' },
+    titleKey: 'title',
+    descriptionKey: 'description',
+    loadComponent: () => Promise.resolve(class {}),
+    ...overrides
+  },
+  title: `Fake ${overrides.id ?? 'fake-plugin'}`,
+  description: 'Fake description'
+});
+
 describe('StudioTopToolbarComponent', () => {
   let component: StudioTopToolbarComponent;
   let fixture: ComponentFixture<StudioTopToolbarComponent>;
+  let pluginDialogServiceMock: { open: ReturnType<typeof vi.fn> };
+  let studioPluginEntries: ReturnType<typeof signal<StellarPluginEntry[]>>;
   let mockPlotService: vi.Mocked<PlotService>;
   let mockSpanService: { section: ReturnType<typeof signal<unknown>> };
   let plotOptionsServiceMock: {
@@ -91,6 +113,8 @@ describe('StudioTopToolbarComponent', () => {
     } as unknown as vi.Mocked<ToolbarDialogService>;
 
     sectionExportServiceMock = { exportSection: vi.fn() };
+    pluginDialogServiceMock = { open: vi.fn() };
+    studioPluginEntries = signal<StellarPluginEntry[]>([]);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -117,7 +141,9 @@ describe('StudioTopToolbarComponent', () => {
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
-        { provide: SectionExportService, useValue: sectionExportServiceMock }
+        { provide: SectionExportService, useValue: sectionExportServiceMock },
+        { provide: PluginDialogService, useValue: pluginDialogServiceMock },
+        { provide: StellarPluginRegistryService, useValue: { studioEntries: studioPluginEntries } }
       ]
     }).compileComponents();
 
@@ -274,6 +300,58 @@ describe('StudioTopToolbarComponent', () => {
 
       tools?.[0].command?.({});
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('field-measuring');
+    });
+  });
+
+  describe('Studio plugins in tools menu', () => {
+    it('should be null until the built-in tools are initialized', () => {
+      studioPluginEntries.set([buildPluginEntry()]);
+
+      expect(component.toolsMenu()).toBeNull();
+    });
+
+    it('should list only built-in tools when no plugin is registered', () => {
+      component.ngOnInit();
+
+      expect(component.toolsMenu()).toEqual(component.toolsDropdown());
+    });
+
+    it('should append studio plugins after the built-in tools', () => {
+      studioPluginEntries.set([buildPluginEntry({ id: 'first-plugin' }), buildPluginEntry({ id: 'second-plugin' })]);
+      component.ngOnInit();
+
+      const labels = component.toolsMenu()?.map((item) => item.label);
+
+      expect(labels).toHaveLength(9);
+      expect(labels?.slice(-2)).toEqual(['Fake first-plugin', 'Fake second-plugin']);
+    });
+
+    it('should open the plugin dialog from the menu item', () => {
+      const entry = buildPluginEntry();
+      studioPluginEntries.set([entry]);
+      component.ngOnInit();
+
+      component.toolsMenu()?.at(-1)?.command?.({});
+
+      expect(pluginDialogServiceMock.open).toHaveBeenCalledWith(entry);
+    });
+
+    it('should disable a plugin requiring a section until a section is loaded', () => {
+      studioPluginEntries.set([buildPluginEntry({ requiresSection: true })]);
+      component.ngOnInit();
+
+      expect(component.toolsMenu()?.at(-1)?.disabled).toBe(true);
+
+      mockSpanService.section.set({ uuid: 'fake-section-uuid' });
+
+      expect(component.toolsMenu()?.at(-1)?.disabled).toBe(false);
+    });
+
+    it('should enable a plugin not requiring a section without section', () => {
+      studioPluginEntries.set([buildPluginEntry()]);
+      component.ngOnInit();
+
+      expect(component.toolsMenu()?.at(-1)?.disabled).toBe(false);
     });
   });
 
