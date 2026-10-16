@@ -7,6 +7,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { PlotResolutionService } from '@services/plot/plot-resolution.service';
+import { SectionExportService } from '@services/section/section-export.service';
 import { Section } from '@shared/domain';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
@@ -41,6 +42,7 @@ describe('StudioTopToolbarComponent', () => {
     applyResolution: ReturnType<typeof vi.fn>;
   };
   let mockToolbarDialogService: vi.Mocked<ToolbarDialogService>;
+  let sectionExportServiceMock: { exportSection: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -88,6 +90,8 @@ describe('StudioTopToolbarComponent', () => {
       openTool: vi.fn()
     } as unknown as vi.Mocked<ToolbarDialogService>;
 
+    sectionExportServiceMock = { exportSection: vi.fn() };
+
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
@@ -112,7 +116,8 @@ describe('StudioTopToolbarComponent', () => {
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: PlotOptionsService, useValue: plotOptionsServiceMock },
         { provide: PlotResolutionService, useValue: resolutionServiceMock },
-        { provide: ToolbarDialogService, useValue: mockToolbarDialogService }
+        { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
+        { provide: SectionExportService, useValue: sectionExportServiceMock }
       ]
     }).compileComponents();
 
@@ -165,8 +170,15 @@ describe('StudioTopToolbarComponent', () => {
 
     it('should initialize displayOptions signal', () => {
       const options = component.displayOptions();
-      expect(options).toHaveLength(4);
-      expect(options.map((o) => o.value)).toEqual(['loads', 'baseState', 'transparentBackground', 'measurePoints']);
+      expect(options).toHaveLength(6);
+      expect(options.map((o) => o.value)).toEqual([
+        'loads',
+        'baseState',
+        'transparentBackground',
+        'measurePoints',
+        'floor',
+        'obstacles'
+      ]);
     });
 
     it('should initialize toolsItems with 7 items', () => {
@@ -224,11 +236,11 @@ describe('StudioTopToolbarComponent', () => {
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('l0-sum');
     });
 
-    it('should execute tablesDropdown command for Pose table', () => {
+    it('should execute tablesDropdown command for Hanging table', () => {
       const tables = component.tablesDropdown();
 
       tables[2].command?.({});
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('pose-table');
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('hanging-table');
     });
 
     it('should execute tablesDropdown command for Obstacles table', () => {
@@ -562,10 +574,10 @@ describe('StudioTopToolbarComponent', () => {
       const options = component.selectedDisplayOptions();
 
       expect(options).toEqual([
-        { label: 'loads', value: 'loads' },
-        { label: 'baseState', value: 'baseState' },
-        { label: 'transparentBackground', value: 'transparentBackground' },
-        { label: 'measurePoints', value: 'measurePoints' }
+        { label: 'studio.top-toolbar.loads-option', value: 'loads' },
+        { label: 'studio.top-toolbar.base-option', value: 'baseState' },
+        { label: 'studio.top-toolbar.transparent-background-option', value: 'transparentBackground' },
+        { label: 'studio.top-toolbar.measurement-points-option', value: 'measurePoints' }
       ]);
     });
 
@@ -619,6 +631,28 @@ describe('StudioTopToolbarComponent', () => {
   });
 
   describe('setSelectedDisplayOptions', () => {
+    it('should include translated floor and obstacle options in the menu', () => {
+      plotOptionsServiceMock.selectedDisplayOptions.set({ floor: true, obstacles: true });
+
+      expect(component.selectedDisplayOptions()).toEqual([
+        { label: 'studio.free-positioning.floor', value: 'floor' },
+        { label: 'studio.free-positioning.obstacle', value: 'obstacles' }
+      ]);
+      expect(component.selectedDisplayValues()).toEqual(['floor', 'obstacles']);
+    });
+
+    it.each([['floor'], ['obstacles'], ['floor', 'obstacles']])(
+      'should toggle floor and obstacles independently when selecting %j',
+      (...selected) => {
+        component.setSelectedDisplayOptions(selected);
+
+        expect(plotOptionsServiceMock.selectedDisplayOptions()).toMatchObject({
+          floor: selected.includes('floor'),
+          obstacles: selected.includes('obstacles')
+        });
+      }
+    );
+
     it('should set loads to true when included in displayOptions', () => {
       component.setSelectedDisplayOptions(['loads']);
 
@@ -626,7 +660,9 @@ describe('StudioTopToolbarComponent', () => {
         loads: true,
         baseState: false,
         transparentBackground: false,
-        measurePoints: false
+        measurePoints: false,
+        floor: false,
+        obstacles: false
       });
     });
 
@@ -637,7 +673,9 @@ describe('StudioTopToolbarComponent', () => {
         loads: false,
         baseState: false,
         transparentBackground: false,
-        measurePoints: false
+        measurePoints: false,
+        floor: false,
+        obstacles: false
       });
     });
 
@@ -648,7 +686,9 @@ describe('StudioTopToolbarComponent', () => {
         loads: false,
         baseState: false,
         transparentBackground: false,
-        measurePoints: false
+        measurePoints: false,
+        floor: false,
+        obstacles: false
       });
     });
 
@@ -659,7 +699,9 @@ describe('StudioTopToolbarComponent', () => {
         loads: false,
         baseState: true,
         transparentBackground: false,
-        measurePoints: false
+        measurePoints: false,
+        floor: false,
+        obstacles: false
       });
     });
 
@@ -670,7 +712,9 @@ describe('StudioTopToolbarComponent', () => {
         loads: true,
         baseState: true,
         transparentBackground: false,
-        measurePoints: false
+        measurePoints: false,
+        floor: false,
+        obstacles: false
       });
     });
 
@@ -681,7 +725,9 @@ describe('StudioTopToolbarComponent', () => {
         loads: false,
         baseState: false,
         transparentBackground: true,
-        measurePoints: true
+        measurePoints: true,
+        floor: false,
+        obstacles: false
       });
     });
   });
@@ -780,6 +826,16 @@ describe('StudioTopToolbarComponent', () => {
       expect(toggle).toBeTruthy();
     });
 
+    it('should keep the invert toggle disabled regardless of toolbar state', () => {
+      const toggle = getByTestId('invert-toggle');
+      expect(toggle?.querySelector('input')?.disabled).toBe(true);
+
+      plotOptionsServiceMock.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+
+      expect(toggle?.querySelector('input')?.disabled).toBe(true);
+    });
+
     it('UC-TT2: should render tables dropdown', () => {
       const dropdown = getByTestId('tables-dropdown');
       expect(dropdown).toBeTruthy();
@@ -805,6 +861,39 @@ describe('StudioTopToolbarComponent', () => {
     it('UC-TT6: should render side view selector', () => {
       const el = getByTestId('side-view-selector');
       expect(el).toBeTruthy();
+    });
+  });
+
+  describe('section export', () => {
+    const section = { uuid: 's1', name: 'Section' } as unknown as Section;
+
+    it('should disable the export button when no section is displayed', () => {
+      fixture.detectChanges();
+
+      expect((getByTestId('export-section-btn') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('should export the displayed section when the button is clicked', () => {
+      mockSpanService.section.set(section);
+      fixture.detectChanges();
+
+      (getByTestId('export-section-btn') as HTMLButtonElement).click();
+
+      expect(sectionExportServiceMock.exportSection).toHaveBeenCalledWith(section);
+    });
+
+    it('should not export anything when there is no section', () => {
+      component.onExportSection();
+
+      expect(sectionExportServiceMock.exportSection).not.toHaveBeenCalled();
+    });
+
+    it('should disable the export button while free positioning is active', () => {
+      mockSpanService.section.set(section);
+      plotOptionsServiceMock.isFreePositioningMode.set(true);
+      fixture.detectChanges();
+
+      expect((getByTestId('export-section-btn') as HTMLButtonElement).disabled).toBe(true);
     });
   });
 });

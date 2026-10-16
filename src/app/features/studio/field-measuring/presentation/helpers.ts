@@ -173,8 +173,8 @@ export const getSpanLocalization = (
 const sanitizeFilename = (name: string): string =>
   name
     .trim()
-    .replace(/[^a-zA-Z0-9 _-]/g, '')
-    .replace(/\s+/g, '-') || 'field-measure';
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\\/:*?"<>|\x00-\x1f]/g, '') || 'field-measure';
 
 /**
  * Formats a generation date as `YYYY-MM-DD` in local time.
@@ -321,7 +321,7 @@ export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldM
     type: 'phase',
     electric_phase_number: 3,
     cables_amount: 3,
-    cable_name: 'ASTER570'
+    cable_name: 'ASTER600'
   };
 
   return {

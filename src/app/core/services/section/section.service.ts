@@ -28,11 +28,12 @@ export class SectionService {
 
   /**
    * Create or update a section in a study. Obstacles, floors, RRTS cut strands and loads referencing a
-   * support/span that no longer exists in the section geometry are pruned before persisting.
+   * support/span that no longer exists in the section geometry are pruned before persisting, as are RRTS
+   * cut strands saved on another cable than the section's.
    * @param study The study containing the section
    * @param section The section to create or update
    * @returns Promise resolving with `removedGeometryBoundObjects`, which is only `true` when an
-   * obstacle, a floor, span-bound RRTS cut strands or a non-zero (user-defined) span load was pruned; stale zero-weight span
+   * obstacle, a floor, span- or cable-bound RRTS cut strands or a non-zero (user-defined) span load was pruned; stale zero-weight span
    * loads are removed silently and do not set the flag.
    */
   async createOrUpdateSection(study: StudyEntity, section: Section): Promise<SectionUpdateResult> {

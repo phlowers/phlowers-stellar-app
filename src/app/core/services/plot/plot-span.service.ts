@@ -6,6 +6,7 @@
  */
 
 import { computed, Injectable, signal } from '@angular/core';
+import { isEqual } from 'lodash';
 import { SpanOption } from '@shared/types/plot.types';
 import { Section } from '@shared/domain';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
@@ -18,6 +19,10 @@ import { Support } from '@shared/domain/models/support.model';
 export class PlotSpanService {
   /** Current section displayed in the studio. Kept here so span computeds have a single reactive source. */
   readonly section = signal<Section | null>(null);
+
+  // Saved RRTS cut strands of the section. Deep equality: the section is reloaded after every save, only a content
+  // change matters
+  readonly savedCutStrands = computed(() => this.section()?.rrts_cut_strands ?? null, { equal: isEqual });
 
   /** Current span range selection mode. */
   readonly spanAmountChoice = signal<'single' | 'double' | 'all'>('all');

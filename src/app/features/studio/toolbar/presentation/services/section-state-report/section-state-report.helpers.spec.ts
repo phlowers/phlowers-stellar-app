@@ -11,7 +11,7 @@ import type jsPDF from 'jspdf';
 import { Support } from '@shared/domain';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 
-import { buildSpanRows, buildSupportRows, drawCartoucheSection, maxOf } from './section-state-report.helpers';
+import { buildSpanRows, buildSupportRows, drawCartoucheSection } from './section-state-report.helpers';
 import { SectionReportLabels, SectionStateReportData } from './section-state-report.interfaces';
 
 function createMockDoc() {
@@ -170,17 +170,6 @@ describe('section-state-report.helpers', () => {
         20
       );
       expect(textCalls(doc)).toContain('-');
-    });
-  });
-
-  describe('maxOf', () => {
-    it('should return the maximum value of the array', () => {
-      expect(maxOf([1, 9, 3])).toBe(9);
-    });
-
-    it('should return null for an empty or missing array', () => {
-      expect(maxOf([])).toBeNull();
-      expect(maxOf(undefined)).toBeNull();
     });
   });
 

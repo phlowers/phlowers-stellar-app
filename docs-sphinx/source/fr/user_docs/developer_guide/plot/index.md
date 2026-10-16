@@ -7,5 +7,6 @@ Cette section couvre les fonctionnalités de traçage et de visualisation.
 
 Tutoriel <tutorial>
 Objets <objects>
+Dessins Plotly <plotly-drawings>
 Positionnement libre <free-positioning>
 ```

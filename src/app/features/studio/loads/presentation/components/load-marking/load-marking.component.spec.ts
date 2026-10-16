@@ -39,7 +39,9 @@ const createTemporaryLoadData = (overrides: Partial<SpanLoad> = {}): ChargeData 
       ...overrides
     }
   ],
-  cableModifParams: []
+  cableModifParams: [],
+  supportManipParams: [],
+  spanManipParams: []
 });
 
 describe('LoadMarkingComponent', () => {
@@ -173,17 +175,44 @@ describe('LoadMarkingComponent', () => {
   });
 
   describe('resetForm', () => {
-    it('resets form values and disables referenceSupport', () => {
+    it('resets every field to defaults but keeps the span selection', () => {
       component.form.controls.spanSelect.setValue('support-1');
       fixture.detectChanges();
-      component.form.controls.referenceSupport.setValue('LEFT');
+      component.form.controls.referenceSupport.setValue('RIGHT');
+      component.form.controls.type.setValue(LoadType.MARKING);
+      component.form.controls.loadPosition.setValue(5);
 
       component.resetForm();
       fixture.detectChanges();
 
-      expect(component.form.get('spanSelect')?.value).toBeNull();
-      expect(component.form.get('referenceSupport')?.disabled).toBe(true);
-      expect(mockLoadFormsService['initTemporaryLoadData']).toHaveBeenCalled();
+      expect(component.form.controls.spanSelect.value).toBe('support-1');
+      expect(component.form.controls.referenceSupport.value).toBe('LEFT');
+      expect(component.form.controls.referenceSupport.enabled).toBe(true);
+      expect(component.form.controls.type.value).toBe(LoadType.PUNCTUAL);
+      expect(component.form.controls.loadPosition.value).toBe(0);
+      expect(component.form.controls.loadWeight.value).toBe(0);
+    });
+
+    it('sets referenceSupport to LEFT but keeps it disabled when no span is selected', () => {
+      component.resetForm();
+
+      expect(component.form.controls.spanSelect.value).toBeNull();
+      expect(component.form.controls.referenceSupport.value).toBe('LEFT');
+      expect(component.form.controls.referenceSupport.disabled).toBe(true);
+    });
+  });
+
+  describe('charge change', () => {
+    it('resets the load fields but keeps the span selection', () => {
+      component.form.controls.spanSelect.setValue('support-1');
+      fixture.detectChanges();
+      component.form.controls.loadPosition.setValue(42, { emitEvent: false });
+
+      fixture.componentRef.setInput('chargeUuid', 'another-charge');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanSelect.value).toBe('support-1');
+      expect(component.form.controls.loadPosition.value).not.toBe(42);
     });
   });
 

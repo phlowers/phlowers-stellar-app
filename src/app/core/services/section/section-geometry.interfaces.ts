@@ -20,7 +20,7 @@ export interface SanitizedCharges {
 export interface SectionGeometrySanitizeResult {
   /** The section, with obstacles/floors/RRTS cut strands/span loads pruned when they reference a deleted support/span. */
   section: Section;
-  /** Whether any obstacle, any floor, span-bound RRTS cut strands, or any non-zero (user-defined) span load was removed. */
+  /** Whether any obstacle, any floor, span- or cable-bound RRTS cut strands, or any non-zero (user-defined) span load was removed. */
   removedGeometryBoundObjects: boolean;
 }
 

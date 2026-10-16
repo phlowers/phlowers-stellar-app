@@ -163,6 +163,31 @@ describe('ChargesService', () => {
     updated_at_offline: '2025-01-01T00:00:00.000Z'
   };
 
+  const chargeWithDataManips = (): Charge => ({
+    ...mockCharge,
+    data: { ...mockCharge.data, supportManipParams: [mockSupportManip], spanManipParams: [mockSpanManip] }
+  });
+
+  const studyWithCharge = (charge: Charge): StudyEntity => ({
+    ...mockStudy,
+    sections: [{ ...mockSection, charges: [charge], selected_charge_uuid: charge.uuid }]
+  });
+
+  const expectDataClonedAndRetagged = (source: Charge, result: Charge): void => {
+    expect(result.data).not.toBe(source.data);
+    expect(result.data.supportManipParams).not.toBe(source.data.supportManipParams);
+    expect(result.data.spanManipParams).not.toBe(source.data.spanManipParams);
+    expect(result.data.supportManipParams).toEqual([
+      expect.objectContaining({ supportUuid: 'support-uuid-1', chargeUuid: result.uuid })
+    ]);
+    expect(result.data.spanManipParams).toEqual([
+      expect.objectContaining({ spanUuid: 'span-uuid-1', chargeUuid: result.uuid })
+    ]);
+    // The source keeps its own records untouched.
+    expect(source.data.supportManipParams[0].chargeUuid).toBe('charge-uuid-1');
+    expect(source.data.spanManipParams[0].chargeUuid).toBe('charge-uuid-1');
+  };
+
   beforeEach(() => {
     mockStudiesService = {
       getStudy: vi.fn().mockResolvedValue(mockStudy),
@@ -533,6 +558,15 @@ describe('ChargesService', () => {
         'Charge with uuid non-existent-charge not found'
       );
     });
+
+    it('should deep-copy and retag the charge data manipulations', async () => {
+      const source = chargeWithDataManips();
+      mockStudiesService.getStudy.mockResolvedValue(studyWithCharge(source));
+
+      const result = await service.duplicateCharge('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
+
+      expectDataClonedAndRetagged(source, result);
+    });
   });
 
   describe('duplicateChargeWithoutSelecting', () => {
@@ -642,6 +676,15 @@ describe('ChargesService', () => {
         mockSpanManip,
         expect.objectContaining({ spanUuid: 'span-uuid-1', chargeUuid: result.uuid })
       ]);
+    });
+
+    it('should deep-copy and retag the charge data manipulations', async () => {
+      const source = chargeWithDataManips();
+      mockStudiesService.getStudy.mockResolvedValue(studyWithCharge(source));
+
+      const result = await service.duplicateChargeWithoutSelecting('study-uuid-1', 'section-uuid-1', 'charge-uuid-1');
+
+      expectDataClonedAndRetagged(source, result);
     });
   });
 

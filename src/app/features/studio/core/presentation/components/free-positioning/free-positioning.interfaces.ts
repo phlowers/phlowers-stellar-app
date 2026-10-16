@@ -39,6 +39,8 @@ export interface FreePositioningPoint {
   nameKey?: string;
   nameParams?: Record<string, string | number>;
   color?: string;
+  /** Placed by the user but not yet calculated; rendered semi-transparent. */
+  pending?: boolean;
 }
 
 /** Configuration for the core free-positioning plot component. */
@@ -81,20 +83,6 @@ export interface PlotLayout {
   yaxis: {
     p2c: (value: number) => number;
     c2p: (value: number) => number;
-  };
-}
-
-export interface PlotAnnotation {
-  x: number;
-  y: number;
-  text: string;
-  showarrow: boolean;
-  arrowhead?: number;
-  standoff?: number;
-  yshift?: number;
-  font?: {
-    color?: string;
-    size?: number;
   };
 }
 

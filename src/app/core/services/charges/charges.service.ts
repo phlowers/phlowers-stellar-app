@@ -137,9 +137,11 @@ export class ChargesService {
       throw new Error(`Charge with uuid ${chargeUuid} not found`);
     }
 
+    const newChargeUuid = uuidv4();
     const newCharge: Charge = {
       ...charge,
-      uuid: uuidv4(),
+      uuid: newChargeUuid,
+      data: this.cloneChargeData(charge.data, newChargeUuid),
       name: findDuplicateTitle(
         section.charges.map((c) => c.name),
         charge.name,
@@ -169,9 +171,11 @@ export class ChargesService {
       throw new Error(`Charge with uuid ${chargeUuid} not found`);
     }
 
+    const newChargeUuid = uuidv4();
     const newCharge: Charge = {
       ...charge,
-      uuid: uuidv4(),
+      uuid: newChargeUuid,
+      data: this.cloneChargeData(charge.data, newChargeUuid),
       name: findDuplicateTitle(
         section.charges.map((c) => c.name),
         charge.name,
@@ -183,6 +187,21 @@ export class ChargesService {
     this.duplicateChargeManipulations(section, chargeUuid, newCharge.uuid);
     await this.studiesService.updateStudy(study);
     return newCharge;
+  }
+
+  /**
+   * Deep-copy a charge's data so the duplicate shares no references with the source, and retag its
+   * charge-owned manipulation records with fresh uuids and the new charge uuid.
+   */
+  private cloneChargeData(data: Charge['data'], newChargeUuid: string): Charge['data'] {
+    const retag = <T extends { uuid: string; chargeUuid: string }>(items: T[] | undefined): T[] =>
+      (items ?? []).map((m) => ({ ...structuredClone(m), uuid: uuidv4(), chargeUuid: newChargeUuid }));
+
+    return {
+      ...structuredClone(data),
+      supportManipParams: retag(data.supportManipParams),
+      spanManipParams: retag(data.spanManipParams)
+    };
   }
 
   /**

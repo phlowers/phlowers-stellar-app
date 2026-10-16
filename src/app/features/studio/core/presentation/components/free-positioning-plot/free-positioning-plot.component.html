@@ -31,7 +31,10 @@
             (click)="toggleCategory(cat)"
             [attr.data-testid]="'category-toggle-' + cat"
           >
-            <span class="free-positioning-plot__category-dot" [style.backgroundColor]="categoryColors[cat]"></span>
+            <span
+              class="free-positioning-plot__category-dot"
+              [style.backgroundColor]="categoryDrawings[cat].unselected.color"
+            ></span>
             {{ 'studio.free-positioning.' + cat | transloco }}
           </button>
         }

@@ -8,13 +8,12 @@
 import type jsPDF from 'jspdf';
 
 import { SymmetryType } from '@shared/domain/models/charge.model';
-import { CONTENT_WIDTH, PAGE_MARGIN, PARAGRAPH_INDENT, PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
+import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import {
-  drawBulletList,
   drawHeader,
-  drawSectionTitle,
-  drawSeparator,
+  drawStudyCartoucheSection,
+  drawTitledBulletSection,
   formatValue
 } from '@shared/pdf/pdf-primitives.helpers';
 
@@ -27,23 +26,13 @@ export function drawStudyAndCantonSection(
   labels: LoadsReportLabels,
   startY: number
 ): number {
-  let y = drawSectionTitle(doc, labels.cartoucheTitle, startY);
-  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
-  const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
-
-  const items: PdfBulletItem[] = [
-    { label: labels.author, value: data.author || '-', wrap: true },
-    { label: labels.study, value: data.studyTitle || '-', wrap: true },
-    { label: labels.studyDescription, value: data.studyDescription || '-', wrap: true },
-    { label: labels.canton, value: data.sectionName || '-', wrap: true },
-    { label: labels.cantonComment, value: data.cantonComment || '-', wrap: true },
-    { label: labels.initialCondition, value: data.icName || '-', wrap: true },
-    { label: labels.chargeName, value: data.chargeName || '-', wrap: true },
-    { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
-  ];
-  y = drawBulletList(doc, items, y, leftX, wrapWidth);
-
-  return drawSeparator(doc, y);
+  return drawStudyCartoucheSection(
+    doc,
+    labels.cartoucheTitle,
+    { ...labels, comment: labels.cantonComment },
+    { ...data, cantonName: data.sectionName, comment: data.cantonComment },
+    startY
+  );
 }
 
 /** Draws the climate conditions section (always exactly one row) + personnel presence. Returns the next Y. */
@@ -53,8 +42,6 @@ export function drawClimateSection(
   labels: LoadsReportLabels,
   startY: number
 ): number {
-  let y = drawSectionTitle(doc, labels.climateTitle, startY);
-  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const climate = data.climate;
   const isDisSymmetric = climate.symmetryType === SymmetryType.DIS_SYMMETRIC;
 
@@ -77,9 +64,7 @@ export function drawClimateSection(
         ]
       : [{ label: labels.iceThickness, value: formatValue(climate.iceThickness, PDF_UNITS.centimeters, 0) }])
   ];
-  y = drawBulletList(doc, items, y, leftX, CONTENT_WIDTH - PARAGRAPH_INDENT);
-
-  return drawSeparator(doc, y);
+  return drawTitledBulletSection(doc, labels.climateTitle, items, startY);
 }
 
 /**

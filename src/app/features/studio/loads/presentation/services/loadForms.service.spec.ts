@@ -132,7 +132,9 @@ describe('LoadFormsService', () => {
         referenceSupport: 'LEFT'
       }
     ],
-    cableModifParams: []
+    cableModifParams: [],
+    supportManipParams: [],
+    spanManipParams: []
   };
 
   const mockCharge: Charge = {
@@ -240,6 +242,7 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.temporaryLoadData.spanLoads[0].loadPosition).toBe(70);
       expect(service.activeLoadPosition()).toBe(70);
+      expect(service.pendingLoadAlongSpan()).toBe(30);
     });
   });
 
@@ -504,6 +507,19 @@ describe('LoadFormsService', () => {
       // After recheckSpanLoads, the spanLoads should include an entry for each support
       expect(mockPlotService.temporaryLoadData?.spanLoads).toBeDefined();
       expect(mockPlotService.temporaryLoadData?.spanLoads.some((l) => l.supportUuid === 'support-uuid-1')).toBe(true);
+    });
+
+    it('should clear the pending free-positioning load only once the calculation succeeds', async () => {
+      mockPlotService.temporaryLoadData = mockChargeData;
+      mockSpanService.section.mockReturnValue(mockSection);
+      service.pendingLoadAlongSpan.set(30);
+
+      await service.calculateLoad();
+      expect(service.pendingLoadAlongSpan()).toBe(30);
+
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
+      await service.calculateLoad();
+      expect(service.pendingLoadAlongSpan()).toBeNull();
     });
 
     it('should set loading to true then false', async () => {

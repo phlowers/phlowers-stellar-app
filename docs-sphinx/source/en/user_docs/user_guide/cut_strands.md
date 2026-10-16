@@ -3,7 +3,8 @@
 ## Purpose
 
 When some strands of a cable are cut, the cable loses part of its strength. The **RRTS cut
-strands** tool lets you enter the number of cut strands in each layer of the cable, and calculates:
+strands** tool lets you enter the number of cut strands in the first three layers of the cable,
+and calculates:
 
 - the cable's **RRTS** (Residual Rated Tensile Strength), in daN: the strength the cable has left;
 - the **new max working load** of the section with this reduced strength, in %.
@@ -56,10 +57,11 @@ left support is selected by default.
 Enter the distance in metres from the reference support to the cut. The field is optional. The
 value must be between **0** and **5,000 m**, with up to 2 decimals.
 
-### Cut strands layer 1, 2, …
+### Cut strands layer 1, 2 and 3
 
-One field for each layer of the cable that has strands in the cable catalog. The number next to
-the field (for example **/ 12**) is the number of strands in the layer.
+One field for each of the first three layers of the cable that have strands in the cable catalog.
+The number next to the field (for example **/ 12**) is the number of strands in the layer. The
+other layers are not shown: no strand is considered cut in them.
 
 Enter the number of cut strands in the layer: a whole number between **0** and the number of
 strands in the layer. The fields are mandatory and set to **0** by default.
@@ -69,12 +71,27 @@ available for this cable** replaces these fields, and the calculation is unavail
 
 ### Add a marking
 
-Tick this box to record that the cut should be marked on the studio plot.
+Tick this box to mark the cut on the studio plot, in 2D and in 3D. The marking appears once the
+entry is saved: a scissors icon, joined by a dashed line to its anchor point.
+
+- Without a distance to the reference support, the icon stands above the reference support.
+- With a distance, it stands above the point of the cable at that distance from the reference
+  support.
+
+The icon stays at the same distance from its anchor point on screen, whatever the zoom. Hover it to
+show **Cut strands**, and click it to open the **Strand RRTS** tool. The marking also shows in the
+**Graphical view** tab of the section form: see [Viewing the entry from the section form](#view-mode).
+
+The marking is only shown when the span is among the displayed supports. It disappears when the
+entry is deleted, or saved with the box unticked.
 
 :::{note}
 The span, reference support and distance locate the cut, and the marking is a display option: none
 of them changes the results. The reduced strength applies to the whole section, whichever span the
 strands are cut on.
+
+Ticking or unticking **Add a marking** after a calculation keeps **Save** available, with the
+marking as it is now.
 :::
 
 ---
@@ -135,10 +152,33 @@ When staff is present, the safety coefficient is multiplied by **1.5**, so the w
 | Button | Role |
 |---|---|
 | **Calculate** | Calculates the RRTS and the new max working load. Only available when every cut strands field is valid. |
-| **Save** | Saves the entry with the section. Only available after a calculation, as long as no field has changed since. |
+| **Save** | Saves the entry with the section. Only available after a calculation, as long as no field other than **Add a marking** has changed since. |
 | **Delete** | Deletes the saved entry. Only available when the section has one. |
 
 While a calculation, a save or a deletion is running, the three buttons are unavailable.
+
+---
+
+(view-mode)=
+## Viewing the entry from the section form
+
+On the study page, the **Graphical view** tab of the section form shows the marking too. Clicking
+it opens the **Strand RRTS** tool in view mode: the saved entry is shown with its results, but
+every field is read-only and no button is shown. Use the tool from the **Studio** to change or
+delete the entry.
+
+---
+
+## Effects in the studio
+
+The saved cut strands apply to the studio, even with the tool closed:
+
+- when the section opens, then after every save or delete, the studio takes them into account: the
+  **Working load** under the plot is calculated with the reduced RRTS;
+- the scissors icon next to the **Working load** is red when at least one strand is cut in the
+  saved entry, and grey otherwise;
+- if the studio cannot take them into account, the message **Failed to update the studio with the
+  RRTS cut strands** is shown. Saving the entry again retries.
 
 ---
 
@@ -156,9 +196,9 @@ A section holds a single RRTS cut strands entry. Saving a new one replaces the p
 :::
 
 :::{note}
-Any change after a calculation, including the span, the distance or the marking, makes **Save**
-unavailable. Click **Calculate** again before saving: the saved entry always matches the results
-shown.
+Any change after a calculation, including the span, the reference support or the distance, makes
+**Save** unavailable. Click **Calculate** again before saving: the saved entry always matches the
+results shown. **Add a marking** is the exception: it does not change the results.
 :::
 
 ---
@@ -171,8 +211,9 @@ shown.
 - If the span of a saved entry disappears from the section, for example when one of its supports
   is deleted, the entry is deleted too, and a notification tells you so. An entry linked to the
   whole section is kept.
-- The **Layers detail** button is not available yet, and no marking is drawn on the studio plot
-  yet.
+- If the cable of the section changes, the saved entry is deleted, and a notification tells you
+  so: the cut strands were counted on the layers of the previous cable.
+- The **Layers detail** button is not available yet.
 
 ## Messages
 
@@ -183,4 +224,4 @@ shown.
 | **Failed to calculate the RRTS** | The calculation could not be completed. The results are cleared. |
 | **Failed to save RRTS cut strands** | The entry could not be saved. The previous one is kept. |
 | **Failed to delete RRTS cut strands** | The entry could not be deleted. |
-| **Failed to update the studio with the RRTS cut strands** | The entry is saved or deleted, but the studio calculations could not take it into account. |
+| **Failed to update the studio with the RRTS cut strands** | The studio calculations could not take the saved entry into account, after a save, a deletion or a calculation. |

@@ -258,10 +258,34 @@ const buildComputedLoadPoint = (params: AggregatePointsParams, coord: number[]):
 };
 
 /**
+ * Builds the point of a load clicked on the plot and awaiting calculation, drawn at the
+ * reference support altitude.
+ */
+const buildPendingLoadPoint = (params: AggregatePointsParams, alongSpan: number): FreePositioningPoint => {
+  const referenceSupportIndex = params.loadReferenceSupport === 'RIGHT' ? params.frozenSpan + 1 : params.frozenSpan;
+  return {
+    id: `load-pending-${params.frozenSpan}`,
+    category: 'loads',
+    alongSpan,
+    lateral: 0,
+    altitude: getSupportAltitudeNgf(params.litData, referenceSupportIndex),
+    editable: true,
+    pending: true
+  };
+};
+
+/**
  * Builds load points for the given frozen span.
  */
 export const buildLoadPoints = (params: AggregatePointsParams): FreePositioningPoint[] => {
   const coord = getLoadCoord(params);
+  const pending = params.pendingLoadAlongSpan;
+  if (pending !== null && pending !== undefined && !Number.isNaN(pending)) {
+    // The computed load stays in place until calculate & save; the click is shown separately.
+    const computed = coord ? [buildComputedLoadPoint(params, coord)] : [];
+    return [...computed, buildPendingLoadPoint(params, pending)];
+  }
+
   const loadPosition = params.loadPosition;
   const isEditing =
     params.editableCategory === 'loads' &&

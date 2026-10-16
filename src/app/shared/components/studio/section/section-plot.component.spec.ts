@@ -23,6 +23,7 @@ import { CableModificationsService } from '@features/studio/loads/presentation/s
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
+import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 
 const DEBOUNCED_REFRESH_STUDIO_DELAY = 300;
 
@@ -307,6 +308,10 @@ describe('SectionPlotComponent', () => {
     selectFloorPoint: vi.fn()
   };
 
+  const mockToolbarDialogService = {
+    openTool: vi.fn()
+  };
+
   const createFormGet =
     (uuid: string | null = null) =>
     (key: string) => {
@@ -368,7 +373,8 @@ describe('SectionPlotComponent', () => {
         { provide: CableModificationsService, useValue: mockCableModificationsService },
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
         { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService },
-        { provide: FloorFormService, useValue: mockFloorFormService }
+        { provide: FloorFormService, useValue: mockFloorFormService },
+        { provide: ToolbarDialogService, useValue: mockToolbarDialogService }
       ]
     }).compileComponents();
 
@@ -510,6 +516,31 @@ describe('SectionPlotComponent', () => {
           ])
         })
       );
+    });
+
+    it('should pass the saved cut strands to createPlot', async () => {
+      const cutStrands = {
+        spanUuid: 's0',
+        supportRef: 'LEFT' as const,
+        distanceSupportRef: 12,
+        cutStrands: [2],
+        addMarking: true
+      };
+      sectionSignal.set({ ...mockSection, rrts_cut_strands: cutStrands });
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cutStrands }));
+    });
+
+    it('should pass no cut strands to createPlot without a saved entry', async () => {
+      sectionSignal.set({ ...mockSection, rrts_cut_strands: undefined });
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cutStrands: null }));
     });
 
     it('should include distanceMeasuringPoints when the selected measurement support is within the visible span window', async () => {
@@ -1159,6 +1190,35 @@ describe('SectionPlotComponent', () => {
       expect(mockSideTabsService.sideTabs()).toBe(0);
       expect(mockLoadFormsService.activeLoadTab()).toBe('2');
       expect(mockCableModificationsService.selectSpan).toHaveBeenCalledWith('s0');
+    });
+
+    it('should open the RRTS tool when the cut strands marking is clicked', () => {
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'cutStrands' } } });
+
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledExactlyOnceWith('strand-rrts', { mode: 'edit' });
+    });
+
+    it('should only show the saved entry in the RRTS tool from the preview of a section being edited', () => {
+      fixture.componentRef.setInput('isPreview', true);
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'cutStrands' } } });
+
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledExactlyOnceWith('strand-rrts', { mode: 'view' });
+    });
+
+    it('should not open the RRTS tool for other annotation types', () => {
+      sectionSignal.set({ ...mockSection, supports: mockSupports });
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
+      capturedHandler!({
+        annotation: { data: { type: 'cableModification', spanUuid: 's0', cableModificationUuid: 'm' } }
+      });
+
+      expect(mockToolbarDialogService.openTool).not.toHaveBeenCalled();
     });
 
     it('should not trigger selection for other annotation types', () => {

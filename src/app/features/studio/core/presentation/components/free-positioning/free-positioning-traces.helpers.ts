@@ -4,16 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { Data } from 'plotly.js-dist-min';
+import { Data, PlotData } from 'plotly.js-dist-min';
 import { Side } from '@shared/types/plot.types';
-import {
-  CATEGORY_COLORS,
-  CATEGORY_SYMBOLS,
-  DEFAULT_POINT_SIZE,
-  EDITABLE_POINT_COLOR,
-  EDITABLE_POINT_SIZE,
-  POINT_SELECTION_PIXEL_RADIUS
-} from './free-positioning.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { POINT_SELECTION_PIXEL_RADIUS } from './free-positioning.constantes';
 import { FreePositioningCategory, FreePositioningPoint, PlotLayout } from './free-positioning.interfaces';
 
 /**
@@ -40,10 +34,18 @@ export const filterPointsForSide = (
   });
 };
 
+const getTraceMode = (drawsLine: boolean, hasLabels: boolean): PlotData['mode'] => {
+  if (drawsLine) {
+    return hasLabels ? 'text+lines+markers' : 'lines+markers';
+  }
+  return hasLabels ? 'text+markers' : 'markers';
+};
+
 /**
  * Builds Plotly scatter traces for free-positioning points on the given plot side.
  * All points are rendered as marker symbols so they are geometrically centered on their
- * data point.
+ * data point. The points of the floor are also joined by a line, in their order, like the floor
+ * line of the section plot; the trace draws it under its own markers.
  */
 export const buildFreePositioningTraces = (
   points: readonly FreePositioningPoint[],
@@ -62,9 +64,11 @@ export const buildFreePositioningTraces = (
   for (const category of categoriesPresent) {
     const categoryPoints = validPoints.filter((p) => p.category === category);
     const hasLabels = categoryPoints.some((p) => Boolean(p.name));
+    const drawsLine = category === 'floor' && categoryPoints.length > 1;
+    const drawing = PlotlyDrawings.freePositioning.category[category];
     const trace: Data = {
       type: 'scatter',
-      mode: hasLabels ? 'text+markers' : 'markers',
+      mode: getTraceMode(drawsLine, hasLabels),
       name: `${category}-markers`,
       x: categoryPoints.map((p) => (side === 'profile' ? p.alongSpan : (p.lateral as number))),
       y: categoryPoints.map((p) => p.altitude),
@@ -73,13 +77,25 @@ export const buildFreePositioningTraces = (
       // Hover is disabled globally for free-positioning points
       hoverinfo: 'skip',
       showlegend: false,
-      marker: {
-        size: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_SIZE : DEFAULT_POINT_SIZE)),
-        color: categoryPoints.map((p) => (p.editable ? EDITABLE_POINT_COLOR : (p.color ?? CATEGORY_COLORS[category]))),
-        symbol: CATEGORY_SYMBOLS[category],
+      ...(drawsLine && {
         line: {
-          width: categoryPoints.map((p) => (p.editable ? 2 : 1)),
-          color: categoryPoints.map((p) => (p.editable ? '#7f1d1d' : '#1f2937'))
+          color: PlotlyDrawings.freePositioning.floorLine.color,
+          width: PlotlyDrawings.freePositioning.floorLine.width,
+          dash: PlotlyDrawings.freePositioning.floorLine.style
+        }
+      }),
+      marker: {
+        size: categoryPoints.map((p) => (p.editable ? drawing.selected.size : drawing.unselected.size)),
+        color: categoryPoints.map((p) => (p.editable ? drawing.selected.color : (p.color ?? drawing.unselected.color))),
+        symbol: drawing.symbol,
+        opacity: categoryPoints.map((p) => (p.pending ? PlotlyDrawings.freePositioning.pendingPointOpacity : 1)),
+        line: {
+          width: categoryPoints.map((p) =>
+            p.editable ? drawing.selected.outlineWidth : drawing.unselected.outlineWidth
+          ),
+          color: categoryPoints.map((p) =>
+            p.editable ? drawing.selected.outlineColor : drawing.unselected.outlineColor
+          )
         }
       }
     };

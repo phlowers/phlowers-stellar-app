@@ -16,4 +16,5 @@ Base de données hors ligne <offline_database>
 Pipeline de rafraîchissement des graphiques <plot_refresh_pipeline>
 Styles et thèmes <theme_styles>
 Pipeline d'import générique <generic_import_pipeline>
+Adaptateurs d'import de canton <section_import_adapters>
 ```

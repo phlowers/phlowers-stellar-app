@@ -5,12 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { createFloorAnnotations, createFloorTraces } from './createFloorTraces';
-import {
-  FLOOR_COLOR,
-  FLOOR_POINT_SYMBOL,
-  FLOOR_SELECTED_COLOR,
-  FLOOR_SELECTED_SYMBOL
-} from './createFloorTraces.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
@@ -123,7 +118,7 @@ describe('createFloorTraces', () => {
     expect(line?.x).toEqual([1, 4]);
     expect(line?.y).toEqual([2, 5]);
     expect(line?.z).toEqual([10, 12]);
-    expect(line?.line).toMatchObject({ color: FLOOR_COLOR });
+    expect(line?.line).toMatchObject({ color: PlotlyDrawings.floor.line.color });
     expect(ribbon).toBeDefined();
   });
 
@@ -199,8 +194,8 @@ describe('createFloorTraces', () => {
     ]);
     annotations.forEach((a) => {
       expect(a.captureevents).toBe(true);
-      expect(a.text).toBe(FLOOR_POINT_SYMBOL);
-      expect(a.font?.color).toBe(FLOOR_COLOR);
+      expect(a.text).toBe(PlotlyDrawings.floor.unselected.symbol);
+      expect(a.font?.color).toBe(PlotlyDrawings.floor.unselected.color);
     });
     expect(annotations.map((a) => a.data)).toEqual([
       { type: 'floor', floorUuid: 'floor-1', pointIndex: 0 },
@@ -214,7 +209,7 @@ describe('createFloorTraces', () => {
     expect(annotations.map((a) => a.hovertext)).toEqual(['point 0.00', 'point 25.00']);
   });
 
-  it('should draw the selected point as a red diamond labelled with its name', () => {
+  it('should draw the selected point in the selected look, labelled with its name', () => {
     const annotations = buildAnnotations({
       litData,
       floors: [floor],
@@ -225,11 +220,15 @@ describe('createFloorTraces', () => {
     const [first, selected, label] = annotations;
 
     expect(annotations).toHaveLength(3);
-    expect(first.text).toBe(FLOOR_POINT_SYMBOL);
+    // the other points of the selected floor have their own look
+    expect(first).toMatchObject({
+      text: PlotlyDrawings.floor.inactivePoint.symbol,
+      font: { color: PlotlyDrawings.floor.inactivePoint.color }
+    });
     expect(selected).toMatchObject({
-      text: FLOOR_SELECTED_SYMBOL,
+      text: PlotlyDrawings.floor.selected.symbol,
       captureevents: true,
-      font: { color: FLOOR_SELECTED_COLOR }
+      font: { color: PlotlyDrawings.floor.selected.color }
     });
     expect(label).toMatchObject({ x: 4, text: 'point 25.00', captureevents: false });
     expect(label.yshift).toBeGreaterThan(0);
@@ -245,7 +244,7 @@ describe('createFloorTraces', () => {
     });
 
     expect(annotations).toHaveLength(2);
-    expect(annotations.every((a) => a.text === FLOOR_POINT_SYMBOL)).toBe(true);
+    expect(annotations.every((a) => a.text === PlotlyDrawings.floor.unselected.symbol)).toBe(true);
   });
 
   it('should skip annotations of a floor outside the visible support window', () => {

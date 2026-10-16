@@ -12,6 +12,14 @@
 - **Detected on**: 2026-10-02.
 - **Status**: PENDING REVIEW; deletion requires user validation.
 
+### `ClimateComponent.deleteCharge()`
+
+- **Source**: `src/app/features/studio/loads/presentation/components/climate/climate.component.ts`.
+- **Evidence**: The trash button calling it was removed from the climate tab template; no other caller in `src`.
+- **Removal impact**: Remove the method and its `deleteCharge` spec block; check whether `AppIconComponent` and the `loads.shared.erase-load-case-aria-label` key are still used.
+- **Detected on**: 2026-10-13.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead
@@ -504,13 +512,13 @@
 
 ---
 
-## 36. `studio.pose-table.max-two-decimals-error` + `studio.pose-table.integer-error` i18n keys
+## 36. `studio.hanging-table.max-two-decimals-error` + `studio.hanging-table.integer-error` i18n keys
 
 | | |
 |---|---|
-| 📍 Source | `public/i18n/en.json` / `public/i18n/fr.json` (`studio.pose-table` namespace) |
+| 📍 Source | `public/i18n/en.json` / `public/i18n/fr.json` (`studio.hanging-table` namespace) |
 | Code | `"max-two-decimals-error": "Maximum 2 decimal places"`, `"integer-error": "Value must be a whole number"` (en) + French equivalents |
-| 🔍 Evidence | Were displayed by `pose-table.component.ts`'s `getLowestTempError()`/`getComputingStepError()` methods; replaced by the unified `common.max-decimals-error` message during the number-input validators/messages unification. No remaining reference found in `src/app`. |
+| 🔍 Evidence | Were displayed by `hanging-table.component.ts`'s `getLowestTempError()`/`getComputingStepError()` methods; replaced by the unified `common.max-decimals-error` message during the number-input validators/messages unification. No remaining reference found in `src/app`. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove both keys from `en.json` and `fr.json` once confirmed unused elsewhere |
 | ✅ Validated | ⏳ Pending review |

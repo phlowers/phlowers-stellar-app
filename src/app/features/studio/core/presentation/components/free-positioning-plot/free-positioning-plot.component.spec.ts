@@ -7,7 +7,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import Plotly, { PlotlyHTMLElement } from 'plotly.js-dist-min';
+import Plotly, { Layout, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
@@ -251,6 +251,21 @@ describe('FreePositioningPlotComponent', () => {
         expect.any(Object),
         expect.any(Object)
       );
+    });
+
+    it('should not reverse the face x axis: negative lateral distances on the left (non-regression)', async () => {
+      fixture.componentRef.setInput('config', { showFace: true, editableCategory: 'obstacle' });
+      fixture.detectChanges();
+      vi.spyOn(document, 'getElementById').mockReturnValue(makePlotElement());
+      mockPlotService.litData.set({ coords: { spans: [], supports: [], insulators: [] } });
+
+      component.recreatePlots();
+      await component.recreatePlots.flush();
+
+      const layoutFor = (plotId: string) =>
+        vi.mocked(Plotly.newPlot).mock.calls.find(([id]) => id === plotId)?.[2] as Partial<Layout>;
+      expect(layoutFor(CORE_PLOT_IDS.FACE).xaxis?.autorange).not.toBe('reversed');
+      expect(layoutFor(CORE_PLOT_IDS.PROFILE).xaxis?.autorange).not.toBe('reversed');
     });
 
     it('should purge plots and remove listeners on destroy', async () => {

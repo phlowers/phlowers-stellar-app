@@ -85,6 +85,14 @@ describe('pdf-table.helpers', () => {
       expect(tables[0].rows[0].values).toHaveLength(5);
       expect(tables[1].rows[0].values).toHaveLength(2);
     });
+
+    it('should keep all columns in a single table when maxCols covers every row', () => {
+      const rows: TestRow[] = Array.from({ length: 8 }, (_, i) => ({ id: String(i + 1), value: i }));
+      const tables = buildTables(rows, TEST_METRICS, (key) => key, rows.length);
+
+      expect(tables).toHaveLength(1);
+      expect(tables[0].rows[0].values).toHaveLength(8);
+    });
   });
 
   describe('computeLabelColWidth', () => {
@@ -184,6 +192,19 @@ describe('pdf-table.helpers', () => {
 
       expect(endY).toBeGreaterThan(30);
       expect(doc.rect).toHaveBeenCalled();
+    });
+
+    it('should spread more than 5 columns over the content width without overflowing', () => {
+      const doc = createMockDoc();
+      const values = Array.from({ length: 8 }, (_, i) => String(i));
+      const labelColWidth = 40;
+
+      drawTable(doc as unknown as jsPDF, { rows: [{ label: 'A', values }] }, 30, LANDSCAPE_PAGE.width, labelColWidth);
+
+      const rects = doc.rect.mock.calls as number[][];
+      const [lastX, , lastWidth] = rects[rects.length - 1];
+      expect(rects).toHaveLength(9);
+      expect(lastX + lastWidth).toBeCloseTo(LANDSCAPE_PAGE.width - 15);
     });
   });
 

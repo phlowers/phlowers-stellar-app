@@ -4,13 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { View } from '@shared/types/plot.types';
 import { ObstacleOutput } from '@services/worker_python/tasks/types';
 import { DataObject } from './createPlotDataObject';
 import { Coord3 } from './distance.types';
-
-const DISTANCE_MEASURING_POINT_COLOR = '#ed6e13';
-const DISTANCE_MEASURING_POINT_LINE_WIDTH = 4;
-const DISTANCE_MEASURING_POINT_MARKER_SIZE = 5;
 
 /**
  * Maps a 3D coordinate tuple to Plotly x/y(/z) values based on the current view and side.
@@ -19,7 +17,7 @@ const DISTANCE_MEASURING_POINT_MARKER_SIZE = 5;
  * - 2D profile: x → x, z → y
  * - 2D face:    y → x, z → y
  */
-const mapCoord = (coord: Coord3, view: string, side: string): { x: number; y: number; z?: number } => {
+const mapCoord = (coord: Coord3, view: View, side: string): { x: number; y: number; z?: number } => {
   const [cx, cy, cz] = coord;
   if (view === '3d') {
     return { x: cx, y: cy, z: cz };
@@ -30,7 +28,7 @@ const mapCoord = (coord: Coord3, view: string, side: string): { x: number; y: nu
   };
 };
 
-const createMarkerTrace = (point: Coord3, view: string, side: string): DataObject => {
+const createMarkerTrace = (point: Coord3, view: View, side: string): DataObject => {
   const mapped = mapCoord(point, view, side);
   const is3d = view === '3d';
 
@@ -40,7 +38,11 @@ const createMarkerTrace = (point: Coord3, view: string, side: string): DataObjec
     z: is3d ? [mapped.z] : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'markers',
-    marker: { color: DISTANCE_MEASURING_POINT_COLOR, size: DISTANCE_MEASURING_POINT_MARKER_SIZE, symbol: 'diamond' },
+    marker: {
+      color: PlotlyDrawings.distanceMeasuringPoint.color,
+      size: PlotlyDrawings.distanceMeasuringPoint.markerSize[view],
+      symbol: PlotlyDrawings.distanceMeasuringPoint.symbol
+    },
     showlegend: false,
     hoverinfo: 'skip',
     name: 'distance-measuring-point-marker',
@@ -48,7 +50,7 @@ const createMarkerTrace = (point: Coord3, view: string, side: string): DataObjec
   } as DataObject;
 };
 
-const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string): DataObject => {
+const createLineTrace = (from: Coord3, to: Coord3, view: View, side: string): DataObject => {
   const fromMapped = mapCoord(from, view, side);
   const toMapped = mapCoord(to, view, side);
   const is3d = view === '3d';
@@ -59,7 +61,11 @@ const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string): 
     z: is3d ? [fromMapped.z, toMapped.z] : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'lines',
-    line: { color: DISTANCE_MEASURING_POINT_COLOR, width: DISTANCE_MEASURING_POINT_LINE_WIDTH, dash: 'dash' },
+    line: {
+      color: PlotlyDrawings.distanceMeasuringPoint.color,
+      width: PlotlyDrawings.distanceMeasuringPoint.lineWidth[view],
+      dash: PlotlyDrawings.distanceMeasuringPoint.lineStyle
+    },
     showlegend: false,
     hoverinfo: 'skip',
     name: 'distance-measuring-point-line',
@@ -78,7 +84,7 @@ const createLineTrace = (from: Coord3, to: Coord3, view: string, side: string): 
  */
 export const createDistanceMeasuringPointsTraces = (
   distanceMeasuringPoints: ObstacleOutput['obstacles'] | undefined,
-  view: string,
+  view: View,
   side: string
 ): DataObject[] => {
   const traces: DataObject[] = [];

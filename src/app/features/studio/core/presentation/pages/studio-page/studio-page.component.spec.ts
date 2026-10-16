@@ -4,7 +4,7 @@ import { DecimalPipe } from '@angular/common';
 import { StudioPageComponent } from './studio-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { ElementRef, signal } from '@angular/core';
+import { ElementRef, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
@@ -55,6 +55,7 @@ class PlotServiceMock {
   section = signal<Section | null>(null);
   plotOptions = vi.fn().mockReturnValue({ invert: false, startSupport: 0, endSupport: 4 });
   plotOptionsChange = vi.fn();
+  isCutStrandApplied = signal<boolean>(false);
   resetAll = vi.fn();
   workerReady: SignalFn<boolean> = createSignalMock<boolean>(true);
 }
@@ -764,10 +765,9 @@ describe('StudioPageComponent', () => {
 
       component.ngOnDestroy();
 
-      const updatedStudy = (studiesService.updateStudy as vi.Mock).mock.calls[0][0];
-      const savedState = updatedStudy.sections.find((s: { uuid: string }) => s.uuid === sectionUuid)
-        ?.studio_view_state as StudioViewState;
-      expect(savedState.camera).toBeNull();
+      const [updatedStudy] = vi.mocked(studiesService.updateStudy).mock.calls[0] as [Study];
+      const savedState = updatedStudy.sections.find((s) => s.uuid === sectionUuid)?.studio_view_state;
+      expect(savedState?.camera).toBeNull();
     });
 
     it('should not call updateStudy when study is null', () => {
@@ -1164,6 +1164,16 @@ describe('StudioPageComponent', () => {
     });
   });
 
+  describe('isGlobalCutStrand', () => {
+    it('should follow the cut strands the plot data account for', () => {
+      expect(component.isGlobalCutStrand()).toBe(false);
+
+      plotService.isCutStrandApplied.set(true);
+
+      expect(component.isGlobalCutStrand()).toBe(true);
+    });
+  });
+
   describe('onGenerateReport', () => {
     it('should warn and not generate when there is no computed data', async () => {
       spanService.section.set({ supports: [] } as unknown as Section);
@@ -1204,6 +1214,7 @@ describe('StudioPageComponent', () => {
 
 describe('StudioPageComponent - HTML rendering', () => {
   let fixture: ComponentFixture<StudioPageComponent>;
+  let plotServiceMock: { isCutStrandApplied: WritableSignal<boolean> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -1220,9 +1231,11 @@ describe('StudioPageComponent - HTML rendering', () => {
       spanAmountChoice: signal<'single' | 'double' | 'all'>('all'),
       study: signal(null),
       isStudioActive: signal(false),
+      isCutStrandApplied: signal(false),
       resetAll: vi.fn(),
       workerReady: signal(true)
     };
+    plotServiceMock = mockPlotService;
 
     const mockLoadFormsService = {
       activeLoadTab: signal('0')
@@ -1323,6 +1336,19 @@ describe('StudioPageComponent - HTML rendering', () => {
     it('should render global-state-select', () => {
       const el = getByTestId('global-state-select');
       expect(el).toBeTruthy();
+    });
+  });
+
+  describe('HTML rendering - cut strand status', () => {
+    const cutStatus = (): HTMLElement | null => fixture.nativeElement.querySelector('.global-params__list__cut-status');
+
+    it('should show the strand as cut once the plot data account for cut strands', () => {
+      expect(cutStatus()?.classList).toContain('global-params__list__cut-status--uncut');
+
+      plotServiceMock.isCutStrandApplied.set(true);
+      fixture.detectChanges();
+
+      expect(cutStatus()?.classList).toContain('global-params__list__cut-status--cut');
     });
   });
 });

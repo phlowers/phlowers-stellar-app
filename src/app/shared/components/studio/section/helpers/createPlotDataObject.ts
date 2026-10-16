@@ -1,5 +1,5 @@
 import { Dash, Data, PlotData } from 'plotly.js-dist-min';
-import { SPAN_COLOR } from './plot.constants';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { PlotObjectsType, Side, View } from '@shared/types/plot.types';
 import { Support } from '@shared/domain/models/support.model';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
@@ -10,7 +10,7 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
  * @param view - The current view mode.
  * @returns Line color, dash style, and width configuration.
  */
-const getLine = (
+export const getLine = (
   type: PlotObjectsType,
   view: View
 ): {
@@ -20,17 +20,11 @@ const getLine = (
 } => {
   switch (type) {
     case 'spans':
-      return {
-        color: SPAN_COLOR,
-        dash: 'solid',
-        width: view === '3d' ? 8 : 4
-      };
+      return { color: PlotlyDrawings.span.color, dash: 'solid', width: PlotlyDrawings.span.lineWidth[view] };
     case 'supports':
-      return { color: 'indigo', dash: 'solid', width: view === '3d' ? 8 : 4 };
+      return { color: PlotlyDrawings.support.color, dash: 'solid', width: PlotlyDrawings.support.lineWidth[view] };
     case 'insulators':
-      return { color: 'red', dash: 'solid', width: view === '3d' ? 8 : 4 };
-    default:
-      return { color: 'black', dash: 'solid', width: view === '3d' ? 8 : 4 };
+      return { color: PlotlyDrawings.insulator.color, dash: 'solid', width: PlotlyDrawings.insulator.lineWidth[view] };
   }
 };
 
@@ -51,16 +45,15 @@ const getText = (
   return points.map((_, index) => (index === highestPointIndex ? label : ''));
 };
 
-const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
+/** Marker size of a plot object type; the shadow traces reuse it. */
+export const getMarker = (type: PlotObjectsType, view: View): PlotData['marker'] => {
   switch (type) {
     case 'spans':
-      return { size: view === '3d' ? 3 : 5 };
+      return { size: PlotlyDrawings.span.markerSize[view] };
     case 'supports':
-      return { size: view === '3d' ? 3 : 4 };
+      return { size: PlotlyDrawings.support.markerSize[view] };
     case 'insulators':
-      return { size: view === '3d' ? 4 : 6 };
-    default:
-      return { size: 3 };
+      return { size: PlotlyDrawings.insulator.markerSize[view] };
   }
 };
 

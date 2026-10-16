@@ -27,6 +27,30 @@ export interface PdfBulletItem {
   wrap?: boolean;
 }
 
+/** Labels of the study & canton cartouche shared by the canton-based reports. */
+export interface StudyCartoucheLabels {
+  author: string;
+  study: string;
+  studyDescription: string;
+  canton: string;
+  comment: string;
+  initialCondition: string;
+  chargeName: string;
+  chargeDescription: string;
+}
+
+/** Values of the study & canton cartouche shared by the canton-based reports. */
+export interface StudyCartoucheData {
+  author: string;
+  studyTitle: string;
+  studyDescription: string;
+  cantonName: string;
+  comment: string;
+  icName: string;
+  chargeName: string;
+  chargeDescription: string;
+}
+
 /** Fields common to every PDF report's label set, resolved via Transloco at generation time. */
 export interface BaseReportLabels {
   reportTitle: string;

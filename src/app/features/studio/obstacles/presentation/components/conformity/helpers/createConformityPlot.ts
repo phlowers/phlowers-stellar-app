@@ -7,6 +7,8 @@
 
 import Plotly, { Config, Data, Layout, Shape } from 'plotly.js-dist-min';
 import { ObstacleConformityType } from '@infrastructure/database/entities/catalog-obstacle-configuration.entity';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 import {
   ConformityCablePoint,
   ConformityPlotResponse,
@@ -16,23 +18,6 @@ import {
 
 /** Id of the div the conformity cross-section renders into (see conformity.component.html). */
 export const CONFORMITY_PLOT_ID = 'conformity-plot';
-
-/** Opacity of a zone fill (the "background"). */
-const FILL_OPACITY = 0.2;
-/** Opacity of a cable-track disk fill (fully opaque). */
-const CABLE_TRACK_FILL_OPACITY = 1;
-/** Width (px) of the bright hard borders. */
-const BORDER_WIDTH = 2;
-/** Marker size (px) for cable candidate points. */
-const CABLE_MARKER_SIZE = 7;
-/** Marker size (px) for the hoverable border-intersection points. */
-const BORDER_MARKER_SIZE = 4;
-/** Single color of every overhang / vegetation cable candidate point. */
-const CABLE_POINT_COLOR = '#017aa3';
-/** Obstacle point marker color. */
-const OBSTACLE_COLOR = '#1f2937';
-/** Fallback zone color when a rule has no catalog color. */
-const DEFAULT_ZONE_COLOR = '#888888';
 
 const HOVER_TEMPLATE = '%{x:.2f} m, %{y:.2f} m<extra></extra>';
 
@@ -71,7 +56,7 @@ function zoneFillTrace(zonePoints: ConformityZoneCorner[], color: string): Data 
     type: 'scatter',
     mode: 'lines',
     fill: 'toself',
-    fillcolor: hexToRgba(color, FILL_OPACITY),
+    fillcolor: hexToRgba(color, PlotlyDrawings.conformity.fillOpacity),
     line: { width: 0 },
     hoverinfo: 'skip',
     showlegend: false
@@ -88,8 +73,8 @@ function zoneBorderTrace(zoneBorder: ConformityPlotXY[], color: string): Data {
     y: zoneBorder.map((p) => p.y),
     type: 'scatter',
     mode: 'lines+markers',
-    line: { color, width: BORDER_WIDTH },
-    marker: { color, size: BORDER_MARKER_SIZE },
+    line: { color, width: PlotlyDrawings.conformity.borderWidth },
+    marker: { color, size: PlotlyDrawings.conformity.borderMarkerSize },
     hovertemplate: HOVER_TEMPLATE,
     showlegend: false
   };
@@ -102,7 +87,10 @@ function zonePointsTrace(points: ConformityCablePoint[]): Data {
     y: points.map((p) => p.y),
     type: 'scatter',
     mode: 'markers',
-    marker: { color: CABLE_POINT_COLOR, size: CABLE_MARKER_SIZE },
+    marker: {
+      color: PlotlyDrawings.conformity.cablePoint.color,
+      size: PlotlyDrawings.conformity.cablePoint.markerSize
+    },
     hovertemplate: HOVER_TEMPLATE,
     showlegend: false
   };
@@ -119,8 +107,8 @@ function diskShapes(points: ConformityCablePoint[], color: string): Partial<Shap
     x1: p.x + p.radius,
     y0: p.y - p.radius,
     y1: p.y + p.radius,
-    fillcolor: hexToRgba(color, CABLE_TRACK_FILL_OPACITY),
-    line: { color, width: BORDER_WIDTH }
+    fillcolor: hexToRgba(color, PlotlyDrawings.conformity.fillOpacity),
+    line: { color, width: PlotlyDrawings.conformity.borderWidth }
   }));
 }
 
@@ -136,7 +124,11 @@ function obstacleTrace(response: ConformityPlotResponse): Data {
     y: response.obstacle.points.map((p) => p.y),
     type: 'scatter',
     mode: 'markers',
-    marker: { color: OBSTACLE_COLOR, size: 10, symbol: 'diamond' },
+    marker: {
+      color: PlotlyDrawings.conformity.obstaclePoint.color,
+      size: PlotlyDrawings.conformity.obstaclePoint.markerSize,
+      symbol: PlotlyDrawings.conformity.obstaclePoint.symbol
+    },
     hovertemplate: `${response.obstacle.name}: ${HOVER_TEMPLATE}`,
     showlegend: false
   };
@@ -148,7 +140,7 @@ function obstacleTrace(response: ConformityPlotResponse): Data {
  * Only the rules selected in the multiselect are drawn, stacked so the first rule key in
  * `response.conformity` sits on top of the following ones. Styling depends on the conformity type:
  * - `overhang` / `vegetation`: filled zone with a bright border following the task's
- *   `zoneBorder`; cable points as `#017aa3` markers.
+ *   `zoneBorder`; cable points as markers in the cable point color.
  * - `cable_track`: no zone box; cable points drawn as rule-colored disks sized by `radius`.
  */
 export function createConformityPlot(
@@ -168,7 +160,7 @@ export function createConformityPlot(
   // Zones / disks first (reversed → higher-priority rule on top).
   for (const ruleType of [...ruleTypes].reverse()) {
     const rule = response.conformity[ruleType];
-    const color = options.ruleColors[ruleType] ?? DEFAULT_ZONE_COLOR;
+    const color = options.ruleColors[ruleType] ?? PlotlyDrawings.conformity.defaultZoneColor;
     if (isCableTrack) {
       shapes.push(...diskShapes(rule.points, color));
     } else {
@@ -185,8 +177,7 @@ export function createConformityPlot(
   traces.push(obstacleTrace(response));
 
   const layout: Partial<Layout> = {
-    autosize: true,
-    showlegend: false,
+    ...getPlotlyBaseLayout(),
     dragmode: 'zoom',
     hovermode: 'closest',
     margin: { l: 55, r: 15, t: 15, b: 45 },

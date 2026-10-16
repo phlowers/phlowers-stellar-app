@@ -1,7 +1,7 @@
 import { PlotData } from 'plotly.js-dist-min';
 import { createDataObject } from './createPlotDataObject';
-import { PlotObjectsType } from '@shared/types/plot.types';
 import { Support } from '@shared/domain/models/support.model';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 const createMockSupport = (overrides: Partial<Support> = {}): Support => ({
   uuid: 'test-uuid',
@@ -43,33 +43,31 @@ describe('createPlotDataObject', () => {
       ]
     ];
 
-    it('should return red color for spans type', () => {
+    it('should return the span color for spans type', () => {
       const result = createDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
-      expect((result[0] as Partial<PlotData>).line).toEqual({ color: 'dodgerblue', dash: 'solid', width: 4 });
-    });
-
-    it('should return blue color for supports type', () => {
-      const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
-
-      expect((result[0] as Partial<PlotData>).line).toEqual({ color: 'indigo', dash: 'solid', width: 4 });
-    });
-
-    it('should return green color for insulators type', () => {
-      const result = createDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
-
       expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'red',
+        color: PlotlyDrawings.span.color,
         dash: 'solid',
         width: 4
       });
     });
 
-    it('should return black color for unknown type', () => {
-      const result = createDataObject(testData, 0, 1, 'unknown' as PlotObjectsType, '2d', 'profile');
+    it('should return the support color for supports type', () => {
+      const result = createDataObject(testData, 0, 1, 'supports', '2d', 'profile');
 
       expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'black',
+        color: PlotlyDrawings.support.color,
+        dash: 'solid',
+        width: 4
+      });
+    });
+
+    it('should return the insulator color for insulators type', () => {
+      const result = createDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
+
+      expect((result[0] as Partial<PlotData>).line).toEqual({
+        color: PlotlyDrawings.insulator.color,
         dash: 'solid',
         width: 4
       });

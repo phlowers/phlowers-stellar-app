@@ -33,6 +33,13 @@ const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): Sanit
   return { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad };
 };
 
+// RRTS cut strands count strands of the cable layers they were saved on: they mean nothing on another cable. An entry
+// saved before the cable was recorded can't be told apart, it is kept
+const isCutStrandsOfAnotherCable = (section: Section): boolean => {
+  const savedCableName = section.rrts_cut_strands?.cableName;
+  return savedCableName !== undefined && savedCableName !== section.cable_name;
+};
+
 /**
  * Removes obstacles, floors, RRTS cut strands and span loads that reference a support/span no longer
  * present in the section geometry (e.g. a support was deleted outside the Studio).
@@ -41,7 +48,8 @@ const sanitizeCharges = (charges: Charge[], allSupportUuids: Set<string>): Sanit
  * Obstacles and floors are span-bound: a span is identified by the UUID of the support it starts
  * from, and with N supports there are N-1 spans, so the last support never starts a span and cannot
  * host either. RRTS cut strands are span-bound only when they have a span: without one they are
- * linked to the whole section and always kept. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
+ * linked to the whole section and always kept. They are also bound to the cable they were saved on,
+ * and dropped when the section has another one. Span loads instead follow the `recheckSpanLoads` convention: one entry may exist per
  * support (including the last), so a load is only stale when its `supportUuid` no longer exists at
  * all. Charges are kept even when all their span loads are removed, since a charge also carries its
  * own climate configuration.
@@ -53,7 +61,8 @@ export const sanitizeSectionGeometry = (section: Section): SectionGeometrySaniti
   const sanitizedObstacles = sanitizeSpanBound(section.obstacles, spanStartSupportUuids);
   const sanitizedFloors = sanitizeSpanBound(section.floors ?? [], spanStartSupportUuids);
   const cutStrandsSpanUuid = section.rrts_cut_strands?.spanUuid;
-  const cutStrandsChanged = !!cutStrandsSpanUuid && !spanStartSupportUuids.has(cutStrandsSpanUuid);
+  const cutStrandsChanged =
+    (!!cutStrandsSpanUuid && !spanStartSupportUuids.has(cutStrandsSpanUuid)) || isCutStrandsOfAnotherCable(section);
   const { sanitizedCharges, chargesChanged, removedUserDefinedSpanLoad } = sanitizeCharges(
     section.charges,
     allSupportUuids

@@ -31,7 +31,8 @@ describe('toCutStrandsData', () => {
       addMarking: false
     };
 
-    expect(toCutStrandsData(value, [1, 3])).toEqual({
+    expect(toCutStrandsData(value, [1, 3], 'ASTER600')).toEqual({
+      cableName: 'ASTER600',
       spanUuid: 'span-uuid',
       supportRef: 'LEFT',
       distanceSupportRef: 3,

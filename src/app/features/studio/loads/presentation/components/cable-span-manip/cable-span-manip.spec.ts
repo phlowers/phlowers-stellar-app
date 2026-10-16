@@ -249,7 +249,7 @@ describe('CableSpanManipComponent', () => {
     const getById = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`#${id}`);
 
     it('should not render any distanceToRefSupport error message when the value is valid', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       component.form.controls.distanceToRefSupport.setValue(10);
       fixture.detectChanges();
@@ -259,7 +259,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should render the min error message when distanceToRefSupport is below the dynamic minimum', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       component.form.controls.distanceToRefSupport.setValue(-999);
       fixture.detectChanges();
@@ -269,7 +269,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should render the max error message when distanceToRefSupport is above the dynamic maximum', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       component.form.controls.distanceToRefSupport.setValue(999);
       fixture.detectChanges();
@@ -279,7 +279,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should render the maxDecimals error message when distanceToRefSupport has more than two decimals', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       component.form.controls.distanceToRefSupport.setValue(1.234);
       fixture.detectChanges();
@@ -428,7 +428,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should disable calculate button when form is invalid', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       component.form.controls.referenceSupport.setValue(null);
       fixture.detectChanges();
       const btn = getByTestId('cable-span-manip-calculate') as HTMLButtonElement;
@@ -437,7 +437,7 @@ describe('CableSpanManipComponent', () => {
 
     it('should disable save button when form is valid but not dirty', () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         distanceToRefSupport: 0,
         lateralDistance: 0,
         altitude: 0,
@@ -453,7 +453,7 @@ describe('CableSpanManipComponent', () => {
 
     it('should enable save button when form is valid and dirty', () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         distanceToRefSupport: 0,
         lateralDistance: 0,
         altitude: 0,
@@ -480,14 +480,14 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should disable zoom button when no scope is selected', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       fixture.detectChanges();
       const btn = getByTestId('cable-span-manip-zoom') as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
     it('should enable zoom button when a scope is selected and not loading', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.isLoading.set(false);
       fixture.detectChanges();
       const btn = getByTestId('cable-span-manip-zoom') as HTMLButtonElement;
@@ -496,7 +496,7 @@ describe('CableSpanManipComponent', () => {
 
     it('should disable buttons when isLoading is true', () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         distanceToRefSupport: 0,
         lateralDistance: 0,
         altitude: 0,
@@ -556,7 +556,7 @@ describe('CableSpanManipComponent', () => {
     it('should update distRefSupportMin and distRefSupportMax from support data', () => {
       // distRefSupportMin/Max are computed from the scope form control value and section signal,
       // so both must be updated (as the real p-select does via formControlName + onChange).
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.onScopeChange('support-uuid-1');
       // armLength = 2, spanLength = 100 → min = -2, max = 102
       expect(component.distRefSupportMin()).toBe(-2);
@@ -661,9 +661,9 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should preserve the current scope', () => {
-      component.form.controls.scope.setValue('support-uuid-1', { emitEvent: false });
+      component.form.controls.spanUuid.setValue('support-uuid-1', { emitEvent: false });
       component.resetForm();
-      expect(component.form.controls.scope.value).toBe('support-uuid-1');
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-1');
     });
   });
 
@@ -672,14 +672,14 @@ describe('CableSpanManipComponent', () => {
   // ---------------------------------------------------------------------------
   describe('zoomToSpan()', () => {
     it('should not call plotOptionsChange when no scope is selected', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       vi.clearAllMocks();
       component.zoomToSpan();
       expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
     it('should call plotOptionsChange with span index when scope is selected', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       component.zoomToSpan();
       expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 1 });
     });
@@ -691,7 +691,7 @@ describe('CableSpanManipComponent', () => {
   describe('saveForm()', () => {
     beforeEach(() => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         distanceToRefSupport: 5,
         lateralDistance: 0,
         altitude: 0,
@@ -704,7 +704,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should not call save service if form is invalid', async () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       await component.saveForm();
       expect(mockCableSpanManipService.save).not.toHaveBeenCalled();
     });
@@ -760,7 +760,7 @@ describe('CableSpanManipComponent', () => {
   // ---------------------------------------------------------------------------
   describe('deleteForm()', () => {
     it('should call delete service when a manipulation exists for the selected span', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       mockPlotSpanService.section.set({
         ...mockSection,
         cable_span_manipulations: [
@@ -792,7 +792,7 @@ describe('CableSpanManipComponent', () => {
     });
 
     it('should not call delete when no manipulation exists for the selected span', () => {
-      component.form.controls.scope.setValue('support-uuid-1');
+      component.form.controls.spanUuid.setValue('support-uuid-1');
       mockPlotSpanService.section.set({ ...mockSection, cable_span_manipulations: [] } as unknown as Section);
 
       component.deleteForm();
@@ -820,13 +820,13 @@ describe('CableSpanManipComponent', () => {
   // ---------------------------------------------------------------------------
   describe('isFormInvalid()', () => {
     it('should return true when scope is null', () => {
-      component.form.controls.scope.setValue(null);
+      component.form.controls.spanUuid.setValue(null);
       expect(component.isFormInvalid()).toBe(true);
     });
 
     it('should return false when all required fields are valid', () => {
       component.form.patchValue({
-        scope: 'support-uuid-1',
+        spanUuid: 'support-uuid-1',
         distanceToRefSupport: 0,
         lateralDistance: 0,
         altitude: 0,
@@ -837,6 +837,114 @@ describe('CableSpanManipComponent', () => {
       component.form.controls.distanceToRefSupport.setValidators([]);
       component.form.controls.distanceToRefSupport.updateValueAndValidity({ emitEvent: false });
       expect(component.isFormInvalid()).toBe(false);
+    });
+  });
+
+  describe('temporary load data sync', () => {
+    const selectSpan = (uuid: string | null): void => {
+      component.form.controls.spanUuid.setValue(uuid);
+      component.form.controls.spanUuid.markAsDirty();
+      component.onScopeChange(uuid);
+      fixture.detectChanges();
+    };
+
+    const editField = (name: 'lateralDistance' | 'altitude', value: number): void => {
+      component.form.controls[name].setValue(value);
+      component.form.controls[name].markAsDirty();
+    };
+
+    const tempParams = () => mockPlotService.temporaryLoadData!.spanManipParams;
+
+    beforeEach(() => {
+      mockPlotService.temporaryLoadData = { spanManipParams: [] } as unknown as PlotService['temporaryLoadData'];
+    });
+
+    it('should write the whole form snapshot once a field is edited', () => {
+      selectSpan('support-uuid-1');
+      editField('lateralDistance', 3);
+      editField('altitude', 4);
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0]).toMatchObject({
+        spanUuid: 'support-uuid-1',
+        chargeUuid: 'charge-uuid-1',
+        referenceSupport: 'LEFT',
+        lateralDistance: 3,
+        altitude: 4,
+        slingLength: 5
+      });
+    });
+
+    it('should update the same entry on subsequent edits', () => {
+      selectSpan('support-uuid-1');
+      editField('lateralDistance', 3);
+      fixture.detectChanges();
+      const firstUuid = tempParams()[0].uuid;
+
+      editField('lateralDistance', 7);
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0].uuid).toBe(firstUuid);
+      expect(tempParams()[0].lateralDistance).toBe(7);
+    });
+
+    it('should reuse the persisted manipulation uuid for the current charge', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        cable_span_manipulations: [
+          {
+            uuid: 'persisted-span-manip-uuid',
+            spanUuid: 'support-uuid-1',
+            chargeUuid: 'charge-uuid-1',
+            referenceSupport: 'RIGHT',
+            distanceToRefSupport: 10,
+            cableManipType: 'with_a_crane',
+            cableManipMethod: 'clamp',
+            longitudinalDistance: 0,
+            lateralDistance: 1,
+            altitude: 2,
+            anchoring: 'with_sling',
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null,
+            slingLength: 5
+          }
+        ]
+      } as unknown as Section);
+      selectSpan('support-uuid-1');
+
+      editField('altitude', 9);
+      fixture.detectChanges();
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0]).toMatchObject({
+        uuid: 'persisted-span-manip-uuid',
+        referenceSupport: 'RIGHT',
+        distanceToRefSupport: 10,
+        altitude: 9
+      });
+    });
+
+    it('should not write anything when no span is selected', () => {
+      selectSpan(null);
+      editField('lateralDistance', 3);
+      fixture.detectChanges();
+      expect(tempParams()).toHaveLength(0);
+    });
+
+    it('should not overwrite the entry when switching back to an edited span', () => {
+      selectSpan('support-uuid-1');
+      editField('lateralDistance', 3);
+      fixture.detectChanges();
+
+      selectSpan('support-uuid-1');
+
+      expect(tempParams()).toHaveLength(1);
+      expect(tempParams()[0].lateralDistance).toBe(3);
     });
   });
 });

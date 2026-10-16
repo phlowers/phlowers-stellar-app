@@ -25,9 +25,8 @@ import {
 } from '@shared/pdf/pdf-layout.constantes';
 import {
   drawBulletItem,
-  drawBulletList,
   drawSectionTitle,
-  drawSeparator,
+  drawTitledBulletSection,
   formatValue
 } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
@@ -45,13 +44,6 @@ import {
 /** Reads a numeric array value at the given index, returning null when absent. */
 function at(values: number[] | undefined, index: number): number | null {
   return values?.[index] ?? null;
-}
-
-/** Returns the maximum finite value of an array, or null when empty/absent. */
-export function maxOf(values: number[] | undefined): number | null {
-  if (!values || values.length === 0) return null;
-  const max = Math.max(...values);
-  return Number.isFinite(max) ? max : null;
 }
 
 /**
@@ -132,10 +124,6 @@ export function drawCartoucheSection(
   labels: SectionReportLabels,
   startY: number
 ): number {
-  let y = drawSectionTitle(doc, labels.cartoucheTitle, startY);
-  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
-  const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
-
   const items: PdfBulletItem[] = [
     { label: labels.author, value: data.author || '-' },
     { label: labels.study, value: data.studyTitle || '-', wrap: true },
@@ -146,9 +134,7 @@ export function drawCartoucheSection(
     { label: labels.chargeName, value: data.chargeName || '-' },
     { label: labels.chargeDescription, value: data.chargeDescription || '-', wrap: true }
   ];
-  y = drawBulletList(doc, items, y, leftX, wrapWidth);
-
-  return drawSeparator(doc, y);
+  return drawTitledBulletSection(doc, labels.cartoucheTitle, items, startY);
 }
 
 /** Draws the section state section (page 1, portrait): max parameter + max stress rate. */
