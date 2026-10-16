@@ -1,4 +1,24 @@
+import { getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
 import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
+
+describe('getCableStrandLayers', () => {
+  it('keeps the layers with strands, with their strand count', () => {
+    const cable = { nb_strand_layer_1: 6, nb_strand_layer_2: 0, nb_strand_layer_3: 12 };
+    expect(getCableStrandLayers(cable)).toEqual([
+      { layer: 1, strands: 6 },
+      { layer: 3, strands: 12 }
+    ]);
+  });
+
+  it('ignores the layers after the third one', () => {
+    const cable = { nb_strand_layer_1: 1, nb_strand_layer_2: 2, nb_strand_layer_3: 3, nb_strand_layer_4: 4 };
+    expect(getCableStrandLayers(cable).map(({ layer }) => layer)).toEqual([1, 2, 3]);
+  });
+
+  it('gives no layer for a cable without strands', () => {
+    expect(getCableStrandLayers({})).toEqual([]);
+  });
+});
 
 describe('getWorkLoadStatus', () => {
   it.each([

@@ -9,32 +9,29 @@
 //  Page 1 — A4 portrait (210 × 297 mm):
 //    drawHeader()               → report title + date + separator   (shared primitive)
 //    drawCartoucheSection()     → study & section metadata bullets
-//    drawSectionStateSection()   → max parameter + max stress rate
+//    drawSectionStateSection()   → max parameter + cut strands per layer + max stress rate
 //  Following pages — A4 landscape (297 × 210 mm):
 //    drawResultTablesSection()  → transposed result tables (@shared/pdf/pdf-table.helpers)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type jsPDF from 'jspdf';
 
+import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import {
-  CONTENT_WIDTH,
-  LINE_HEIGHT,
-  PAGE_MARGIN,
-  PARAGRAPH_INDENT,
-  PDF_UNITS
-} from '@shared/pdf/pdf-layout.constantes';
-import {
-  drawBulletItem,
   drawSectionTitle,
   drawTitledBulletSection,
+  drawTwoColumnBullets,
   formatValue
 } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { DEFAULT_CUT_STRANDS, getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
 import { SectionOutputParameters } from '@core/services/worker_python/tasks/types';
 import { Support } from '@shared/domain';
+import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 
 import {
+  CutStrandsReportRow,
   SectionReportLabels,
   SectionStateReportData,
   SpanReportRow,
@@ -137,20 +134,34 @@ export function drawCartoucheSection(
   return drawTitledBulletSection(doc, labels.cartoucheTitle, items, startY);
 }
 
-/** Draws the section state section (page 1, portrait): max parameter + max stress rate. */
+/** Builds the cut strands rows of the cable layers that exist in the catalog; 0 when nothing was entered. */
+export function buildCutStrandsRows(
+  cable: Parameters<typeof getCableStrandLayers>[0] | undefined,
+  entry: RrtsCutStrandsData | null | undefined
+): CutStrandsReportRow[] {
+  if (!cable) return [];
+  return getCableStrandLayers(cable).map(({ layer }) => ({
+    layer,
+    count: entry?.cutStrands?.[layer - 1] ?? DEFAULT_CUT_STRANDS
+  }));
+}
+
+/** Draws the section state section (page 1, portrait): max parameter, cut strands and max stress rate. */
 export function drawSectionStateSection(
   doc: jsPDF,
   data: SectionStateReportData,
   labels: SectionReportLabels,
+  cutStrandsLabel: (layer: number) => string,
   startY: number
 ): number {
-  let y = drawSectionTitle(doc, labels.sectionStateTitle, startY);
-  const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
-  const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
+  const y = drawSectionTitle(doc, labels.sectionStateTitle, startY);
+  const left: PdfBulletItem[] = [
+    { label: labels.maxParameter, value: formatValue(data.maxParameter, PDF_UNITS.meters, 0) },
+    ...data.cutStrands.map(({ layer, count }) => ({ label: cutStrandsLabel(layer), value: String(count) }))
+  ];
+  const right: PdfBulletItem[] = [
+    { label: labels.maxStressRate, value: formatValue(data.maxStressRate, PDF_UNITS.percent, 1) }
+  ];
 
-  drawBulletItem(doc, labels.maxParameter, formatValue(data.maxParameter, PDF_UNITS.meters, 0), leftX, y, false);
-  drawBulletItem(doc, labels.maxStressRate, formatValue(data.maxStressRate, PDF_UNITS.percent, 1), rightX, y, false);
-  y += LINE_HEIGHT;
-
-  return y;
+  return drawTwoColumnBullets(doc, left, right, y);
 }

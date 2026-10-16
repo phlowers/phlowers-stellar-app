@@ -33,11 +33,11 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { maxOf } from '@shared/helpers/maxOf.helpers';
-import { STRAND_LAYER_KEYS } from '@shared/domain/helpers/cut-strands.helpers';
 import { StrandRrtsService } from '@features/studio/toolbar/application/services/strand-rrts.service';
 import { RrtsResults } from '@features/studio/toolbar/application/services/strand-rrts.interfaces';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
-import { DEFAULT_CUT_STRANDS, DISTANCE_MAX, MAX_SHOWN_LAYER, WORK_LOAD_ICONS } from './strand-rrts.constantes';
+import { DEFAULT_CUT_STRANDS, getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
+import { DISTANCE_MAX, WORK_LOAD_ICONS } from './strand-rrts.constantes';
 import { getWorkLoadStatus, toCatalogCutStrands, toCutStrandsData } from './strand-rrts.helpers';
 import { NotificationKey, RrtsFormValue } from './strand-rrts.interfaces';
 
@@ -113,16 +113,13 @@ export class StrandRrtsComponent {
   // The other layers are not in the form: they are given to the engine at 0
   readonly layers = computed(() => {
     if (!this.cable.hasValue()) return [];
-    const cable = this.cable.value();
-    return STRAND_LAYER_KEYS.map((key, i) => ({ layer: i + 1, strands: cable[key] ?? 0 }))
-      .filter(({ layer, strands }) => layer <= MAX_SHOWN_LAYER && strands > 0)
-      .map((layer) => ({
-        ...layer,
-        control: new FormControl<number>(DEFAULT_CUT_STRANDS, {
-          nonNullable: true,
-          validators: [Validators.required, Validators.min(0), Validators.max(layer.strands), maxDecimalsValidator(0)]
-        })
-      }));
+    return getCableStrandLayers(this.cable.value()).map((layer) => ({
+      ...layer,
+      control: new FormControl<number>(DEFAULT_CUT_STRANDS, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(0), Validators.max(layer.strands), maxDecimalsValidator(0)]
+      })
+    }));
   });
   readonly hasLayers = computed(() => this.layers().length > 0);
 
