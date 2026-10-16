@@ -433,7 +433,7 @@
     },
     "import": {
       "description": "You can import multiple files, they will be available in the \"My studies\" tab.",
-      "file-formats": "File formats: .csv, .clst",
+      "file-formats": "File formats: .csv, .clst, .stsd",
       "error-cable-not-found": "Cable not found in database",
       "error-import": "Error importing study",
       "error-delete": "Error deleting study",
