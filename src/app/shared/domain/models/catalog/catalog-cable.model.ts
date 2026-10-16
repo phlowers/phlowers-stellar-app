@@ -15,11 +15,11 @@
  * @example
  * ```typescript
  * const cable: CatalogCable = {
- *   name: 'ASTER 570',
- *   data_source: 'RTE',
- *   section: 570.22,
- *   diameter: 31.05,
- *   linear_mass: 1.907,
+ *   name: 'ASTER600',
+ *   data_source: 'fictive',
+ *   section: 600.4,
+ *   diameter: 31.86,
+ *   linear_mass: 1.8,
  *   // ... other properties
  * };
  * ```

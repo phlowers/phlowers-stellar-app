@@ -321,7 +321,7 @@ export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldM
     type: 'phase',
     electric_phase_number: 3,
     cables_amount: 3,
-    cable_name: 'ASTER570'
+    cable_name: 'ASTER600'
   };
 
   return {

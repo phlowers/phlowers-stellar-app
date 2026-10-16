@@ -123,7 +123,7 @@ describe('field-measure-export.helpers', () => {
         time: new Date(2026, 0, 5, 10, 0, 0),
         voltage: '225 kV',
         spanType: 'phase',
-        cableName: 'ASTER570',
+        cableName: 'ASTER600',
         numberOfConductors: 2,
         phaseNumber: 3,
         season: 'winter'
@@ -134,7 +134,7 @@ describe('field-measure-export.helpers', () => {
         season: 'winter',
         voltage: { value: '225 kV', unit: 'KV' },
         sectionType: 'common.section-type.phase',
-        cable: 'ASTER570',
+        cable: 'ASTER600',
         cablesNumber: 2,
         phaseNumber: 3
       });

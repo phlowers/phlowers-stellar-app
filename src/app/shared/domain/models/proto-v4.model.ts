@@ -63,7 +63,7 @@ export interface ProtoV4Support {
  * @example
  * ```typescript
  * const params: ProtoV4Parameters = {
- *   conductor: 'ASTER_570',
+ *   conductor: 'ASTER600',
  *   cable_amount: 2,
  *   temperature_reference: 15,
  *   parameter: 1500,
