@@ -74,6 +74,7 @@ export class AppUpdateService {
     this.started = true;
     if (!('serviceWorker' in navigator)) {
       this.state.set('unsupported');
+      this.logger.info(`${APP_UPDATE_LOG_PREFIX} service workers are not supported: updates are disabled`);
       return;
     }
     const container = navigator.serviceWorker;
@@ -86,8 +87,10 @@ export class AppUpdateService {
     try {
       const existing = await container.getRegistration();
       this.state.set(stateFromRegistration(existing));
+      this.logger.info(`${APP_UPDATE_LOG_PREFIX} initial state: ${this.state()}`);
       if (!existing) {
         // The very first download only starts for an authenticated user (files would be the login page otherwise).
+        this.logger.info(`${APP_UPDATE_LOG_PREFIX} no service worker installed: waiting for an authenticated user`);
         await firstValueFrom(this.authenticatedUser$);
       }
       await this.register();
@@ -104,18 +107,26 @@ export class AppUpdateService {
    */
   async checkForUpdate(): Promise<UpdateCheckDecision> {
     const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage());
+    const downlink = this.connection()?.downlink;
+    this.logger.info(
+      `${APP_UPDATE_LOG_PREFIX} network downlink is ${typeof downlink === 'number' ? downlink : 'unknown'} Mbps ` +
+        `(minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps)`
+    );
     if (!decision.allowed) {
       this.logger.info(`${APP_UPDATE_LOG_PREFIX} update check deferred (${decision.reason})`);
       return decision;
     }
+    this.logger.info(`${APP_UPDATE_LOG_PREFIX} update check allowed: checking for a new version`);
     if (this.workbox) {
       try {
         // A refused first install makes the browser drop the registration, leaving this.workbox stale.
         if (await navigator.serviceWorker.getRegistration()) {
           await this.workbox.update();
         } else {
+          this.logger.info(`${APP_UPDATE_LOG_PREFIX} registration dropped by the browser: registering again`);
           await this.reRegister();
         }
+        this.logger.info(`${APP_UPDATE_LOG_PREFIX} update check finished`);
       } catch (error: unknown) {
         this.logger.warn(`${APP_UPDATE_LOG_PREFIX} update check failed`, error);
       }
@@ -146,27 +157,42 @@ export class AppUpdateService {
     const workbox = new Workbox(SERVICE_WORKER_URL);
     workbox.addEventListener('waiting', () => this.onUpdateWaiting());
     workbox.addEventListener('installed', (event) => {
+      this.logger.info(
+        `${APP_UPDATE_LOG_PREFIX} download finished: ${event.isUpdate ? 'new version' : 'first installation'} installed`
+      );
       if (!event.isUpdate) {
         this.state.set('ready-offline');
       }
     });
     workbox.addEventListener('activated', (event) => {
+      this.logger.info(
+        `${APP_UPDATE_LOG_PREFIX} ${event.isUpdate ? 'update' : 'first installation'} activated: running ` +
+          this.describeRunningVersion()
+      );
       if (!event.isUpdate) {
         this.state.set('ready-offline');
       }
     });
     workbox.addEventListener('redundant', (event) => {
+      this.logger.warn(`${APP_UPDATE_LOG_PREFIX} service worker became redundant (installation failed or superseded)`);
       // Only leaves 'installing': a refusal state set by the service worker message must survive.
       if (this.state() === 'installing') {
         this.state.set(event.isUpdate ? 'ready-offline' : 'not-installed');
       }
     });
     this.workbox = workbox;
+    this.logger.info(`${APP_UPDATE_LOG_PREFIX} registering the service worker`);
     const registration = await workbox.register();
     if (this.state() !== 'update-waiting') {
       this.state.set(stateFromRegistration(registration));
     }
     registration?.addEventListener('updatefound', () => {
+      if (registration.active) {
+        this.logger.info(`${APP_UPDATE_LOG_PREFIX} new version available`);
+        void this.logAvailableVersion();
+      } else {
+        this.logger.info(`${APP_UPDATE_LOG_PREFIX} first installation started`);
+      }
       if (this.state() === 'not-installed' || this.state() === 'deferred-network') {
         this.state.set('installing');
       }
@@ -189,6 +215,7 @@ export class AppUpdateService {
 
   private onUpdateWaiting(): void {
     this.state.set('update-waiting');
+    this.logger.info(`${APP_UPDATE_LOG_PREFIX} update downloaded: waiting for restart (close every window of the app)`);
     if (this.waitingNotified) {
       return;
     }
@@ -208,6 +235,10 @@ export class AppUpdateService {
       return;
     }
     this.lastRefusal.set(data);
+    this.logger.warn(
+      `${APP_UPDATE_LOG_PREFIX} installation refused: ${data.reason} (downlink ${data.downlinkMbps ?? 'unknown'} Mbps, ` +
+        `required ${data.requiredBytes ?? 'n/a'} bytes, free ${data.freeBytes ?? 'n/a'} bytes)`
+    );
     this.state.set(stateAfterRefusal(this.state(), data));
     if (data.reason === 'storage-insufficient' && !this.storageNotified) {
       this.storageNotified = true;
@@ -226,11 +257,35 @@ export class AppUpdateService {
       const file = response.ok ? ((await response.json()) as VersionFile) : null;
       const buildDateUtc = buildDateForRunningVersion(file, this.runningVersion().gitHash);
       this.runningVersion.update((current) => ({ ...current, buildDateUtc }));
+      this.logger.info(`${APP_UPDATE_LOG_PREFIX} running ${this.describeRunningVersion()}`);
     } catch (error) {
       this.logger.info(`${APP_UPDATE_LOG_PREFIX} version.json unavailable`, error);
     } finally {
       clearTimeout(timeoutId);
     }
+  }
+
+  /** Logs the version published on the server, read-only (`version.json` is not cached by the service worker). */
+  private async logAvailableVersion(): Promise<void> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), VERSION_FILE_TIMEOUT_MS);
+    try {
+      const response = await fetch(VERSION_FILE_URL, { cache: 'no-store', signal: controller.signal });
+      const file = response.ok ? ((await response.json()) as VersionFile) : null;
+      this.logger.info(
+        `${APP_UPDATE_LOG_PREFIX} new version available: v${file?.version ?? 'unknown'} hash ${file?.git_hash ?? 'unknown'} ` +
+          `built ${file?.build_datetime_utc ?? 'unknown'}`
+      );
+    } catch {
+      this.logger.info(`${APP_UPDATE_LOG_PREFIX} new version details unavailable (version.json unreachable)`);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  private describeRunningVersion(): string {
+    const { version, gitHash, buildDateUtc } = this.runningVersion();
+    return `v${version} hash ${gitHash} built ${buildDateUtc ?? 'unknown'}`;
   }
 
   private connection(): NetworkConnectionLike | undefined {

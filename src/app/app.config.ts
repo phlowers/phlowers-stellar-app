@@ -25,6 +25,7 @@ import { APP_UPDATE_ENABLED } from '@services/app-update/app-update.constantes';
 import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
 import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strategy';
 import { LoggerService } from '@services/logger/logger.service';
+import { environment } from '@src/environments/environment';
 import { AppConfigService } from '@core/config/app-config.service';
 import { getAndClearBootstrapErrors } from '../bootstrap-logger';
 import { TranslocoService } from '@jsverse/transloco';
@@ -61,6 +62,7 @@ import { firstValueFrom } from 'rxjs';
  */
 export async function initializeApp(): Promise<void> {
   const logger = inject(LoggerService);
+  logger.info(`Welcome to ${environment.appName} v${environment.version} hash ${environment.gitHash}`);
   const storageService = inject(StorageService);
   const authService = inject(AuthService);
   const appUpdateService = inject(AppUpdateService);
