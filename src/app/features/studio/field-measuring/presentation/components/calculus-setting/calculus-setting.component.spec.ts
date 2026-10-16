@@ -21,7 +21,7 @@ describe('CalculusSetting component', () => {
             en: {
               'common.papoto-label': 'PAPOTO',
               'common.pep-label': 'PEP',
-              'field-measuring.calculus-setting.tangent-aiming-radio-label': 'Tangent aiming'
+              'field-measuring.calculus-setting.tangent-aiming-radio-label': 'Tangent aiming (Support)'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -50,13 +50,13 @@ describe('CalculusSetting component', () => {
   it('should render three radio buttons with correct labels', () => {
     const labels = fixture.debugElement.queryAll(By.css('.cac-set-select label'));
     expect(labels[0].nativeElement.textContent.trim()).toBe('PAPOTO');
-    expect(labels[1].nativeElement.textContent.trim()).toBe('Tangent aiming');
+    expect(labels[1].nativeElement.textContent.trim()).toBe('Tangent aiming (Support)');
     expect(labels[2].nativeElement.textContent.trim()).toBe('PEP');
   });
 
   it('should display papoto component by default', () => {
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
-    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming'));
+    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming-support'));
     const pepComponent = fixture.debugElement.query(By.css('app-pep'));
 
     expect(papotoComponent).toBeTruthy();
@@ -65,12 +65,12 @@ describe('CalculusSetting component', () => {
   });
 
   it('should display tangent aiming component when selected', () => {
-    component.selectedCalculusType.set('TANGENT_AIMING');
+    component.selectedCalculusType.set('TANGENT_AIMING_SUPPORT');
     componentRef.changeDetectorRef.markForCheck();
     fixture.detectChanges();
 
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
-    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming'));
+    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming-support'));
     const pepComponent = fixture.debugElement.query(By.css('app-pep'));
 
     expect(papotoComponent).toBeFalsy();
@@ -84,7 +84,7 @@ describe('CalculusSetting component', () => {
     fixture.detectChanges();
 
     const papotoComponent = fixture.debugElement.query(By.css('app-papoto'));
-    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming'));
+    const tangentAimingComponent = fixture.debugElement.query(By.css('app-tangent-aiming-support'));
     const pepComponent = fixture.debugElement.query(By.css('app-pep'));
 
     expect(papotoComponent).toBeFalsy();
@@ -97,12 +97,12 @@ describe('CalculusSetting component', () => {
     expect(component.selectedCalculusType()).toBe('PAPOTO');
     expect(fixture.debugElement.query(By.css('app-papoto'))).toBeTruthy();
 
-    // Change to TANGENT_AIMING
-    component.selectedCalculusType.set('TANGENT_AIMING');
+    // Change to TANGENT_AIMING_SUPPORT
+    component.selectedCalculusType.set('TANGENT_AIMING_SUPPORT');
     componentRef.changeDetectorRef.markForCheck();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('app-tangent-aiming-support'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('app-papoto'))).toBeFalsy();
 
     // Change to PEP
@@ -111,7 +111,42 @@ describe('CalculusSetting component', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(fixture.debugElement.query(By.css('app-pep'))).toBeTruthy();
-    expect(fixture.debugElement.query(By.css('app-tangent-aiming'))).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('app-tangent-aiming-support'))).toBeFalsy();
+  });
+
+  describe('method persistence', () => {
+    it('should persist the tangent aiming method and apply its defaults on selection', () => {
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      const data = component.measureData();
+      expect(data.calculationMethod).toBe('tangente-aiming');
+      expect(data.cableParameter).toBe(20);
+      expect(data.tangentSpanLength).toBe(0);
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_SUPPORT');
+    });
+
+    it('should not touch PAPOTO fields when selecting tangent aiming', () => {
+      const before = component.measureData();
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      expect(component.measureData().leftSupport).toBe(before.leftSupport);
+      expect(component.measureData().outputs.papoto).toBe(before.outputs.papoto);
+    });
+
+    it('should switch back to PAPOTO', () => {
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      component.onCalculusTypeChange('PAPOTO');
+      expect(component.measureData().calculationMethod).toBe('papoto');
+    });
+
+    it('should not persist PEP', () => {
+      component.onCalculusTypeChange('PEP');
+      expect(component.measureData().calculationMethod).toBe('papoto');
+    });
+
+    it('should restore the selection from a saved measure', () => {
+      componentRef.setInput('measureData', createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
+      fixture.detectChanges();
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_SUPPORT');
+    });
   });
 
   describe('HTML rendering', () => {

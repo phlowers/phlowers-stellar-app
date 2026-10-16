@@ -95,12 +95,12 @@ describe('CableAdjustmentComponent', () => {
             en: {
               'common.required': 'Required',
               'common.meter': 'm',
+              'common.grade-unit': 'gr',
               'common.left': 'Left',
               'common.right': 'Right',
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
-              'studio.cable-adjustment.grade-unit': 'gr',
               'studio.cable-adjustment.aria-help': 'Cable adjustment help',
               'studio.cable-adjustment.calculation-failed': 'Failed to calculate the cable adjustment'
             }

@@ -9,7 +9,7 @@ import { Section, Study } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { FieldMeasure } from '../domain/types';
-import { formatSpanLabel } from './helpers';
+import { formatSpanLabel, getActiveParameterOutput } from './helpers';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
   PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS,
@@ -331,9 +331,14 @@ export const buildZeroWindCalculationExport = (
   const isManual = measureData.updateMode15C === 'manual';
   const manualData = measureData.manualParameterCalculation15CWithoutWind;
   const { outputs } = measureData;
+  const activeParameterOutput = getActiveParameterOutput(measureData);
   const inputParameter: UncertainValueUnit = isManual
     ? createUncertainValueUnit(manualData?.parameterPapoto ?? null, 'm', manualData?.parameterUncertaintyPapoto ?? null)
-    : createUncertainValueUnit(outputs.papoto?.parameter ?? null, 'm', outputs.papoto?.uncertainty ?? null);
+    : createUncertainValueUnit(
+        activeParameterOutput?.parameter ?? null,
+        'm',
+        activeParameterOutput?.uncertainty ?? null
+      );
   const inputTemperature: UncertainValueUnit = isManual
     ? createUncertainValueUnit(
         manualData?.cableTemperatureCalibration ?? null,

@@ -66,6 +66,7 @@
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
     "meter": "m",
+    "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
     "my-last-studies-label": "Mes dernières études",
     "news-label": "Actualités",
@@ -159,7 +160,10 @@
     "x-label": "X :",
     "y-label": "Y :",
     "z-label": "Z :",
-    "support-name-full-label": "Nom du support"
+    "support-name-full-label": "Nom du support",
+    "left-support-label": "Support de gauche",
+    "measured-span-length-label": "Longueur de portée mesurée",
+    "calculated-value-label": "Valeur calculée :"
   },
   "app": {
     "update": "Mise à jour",
@@ -680,16 +684,26 @@
       "success-detail": "Données enregistrées avec succès"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Visées tangentes"
+      "tangent-aiming-radio-label": "Visées tangentes (Support)"
+    },
+    "tangent-aiming-support": {
+      "open-help-aria-label": "ouvrir l'aide des visées tangentes",
+      "mandatory-msg": "Tous les champs sont obligatoires pour le paramétrage du calcul",
+      "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
+      "calculation-type-label": "Type de calcul :",
+      "calculation-type-tangent": "Tangente",
+      "tangent-angle-label": "Angle tangent au câble",
+      "criterion-label": "Critère",
+      "criterion-respected": "Critère respecté",
+      "criterion-not-respected": "Critère non respecté",
+      "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",
       "close-aria-label": "fermer l'aide de PAPOTO",
       "import-station-data": "Importer les données de la station",
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
-      "left-support-label": "Support de gauche",
-      "span-length-label": "Longueur de portée mesurée",
-      "calculated-value-label": "Valeur calculée :",
       "elevation-diff-label": "Dénivelé des accr. mesuré",
       "hl-label": "HG",
       "h1-label": "H1",
@@ -1140,7 +1154,6 @@
       "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
       "horizontal-sight-angle-label": "Angle H horizontal de visée à la flèche médiane",
       "vertical-sight-angle-label": "Angle V vertical de visée à la flèche médiane",
-      "grade-unit": "gr",
       "aria-help": "Aide sur le réglage d'un câble",
       "calculation-failed": "Échec du calcul de réglage du câble"
     },
