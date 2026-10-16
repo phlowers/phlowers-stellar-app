@@ -91,7 +91,8 @@ def import_lambert_and_validate(inputs: dict) -> dict:
     :class:`SectionGeoData` fields (extra keys ignored). ``startLatitude`` and
     ``startLongitude`` are not expected from the caller: they are derived
     internally from the direct Lambert93 -> GPS conversion. Among the remaining
-    :class:`SectionGeoData` fields, only ``spanLength`` is used here::
+    :class:`SectionGeoData` fields, only ``spanLength`` and the first
+    ``lineAngle`` are used here::
 
         {
             "lambert_x": list[float],  # easting, one per point (N)
@@ -100,7 +101,7 @@ def import_lambert_and_validate(inputs: dict) -> dict:
             "spanLength": list[float],  # span length (m), size N (last unused)
             "lineAngle": list[
                 float
-            ],  # flat deflection angle (deg), required but unused
+            ],  # flat deflection angle (grad), only the first one is used
         }
 
     Returns a dict::
@@ -108,7 +109,11 @@ def import_lambert_and_validate(inputs: dict) -> dict:
         {
             "localization": dict,  # same structure as import_lambert() output
             "meanGpsDiffMeter": float,  # mean reconstruction error, in meters
+            "startAzimuth": float,  # flat azimuth (deg) before the deflection at the first support
         }
+
+    ``startAzimuth`` is the value to feed back to :func:`compute_localization`,
+    which adds ``lineAngle[0]`` to it: ``azimuth[0] == startAzimuth + lineAngle[0]``.
     """
 
     result_loc = import_lambert(inputs)
@@ -147,9 +152,14 @@ def import_lambert_and_validate(inputs: dict) -> dict:
         f"error norm in meter (0.01 decdeg = 1.11 km): {dist_diff_meter}"
     )
 
+    first_line_angle_deg = (
+        units(float(section_data.lineAngle[0]), "grad").to("deg").magnitude
+    )
+
     return {
         "localization": result_loc,
         "meanGpsDiffMeter": mean_gps_diff_meter,
+        "startAzimuth": float(result_loc["azimuth"][0] - first_line_angle_deg),
     }
 
 

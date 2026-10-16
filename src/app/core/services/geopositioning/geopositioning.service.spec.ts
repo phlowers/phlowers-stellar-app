@@ -190,6 +190,20 @@ describe('GeopositioningService', () => {
       await service.syncFootGps(section, section);
       expect(workerMock.runTask).toHaveBeenCalledTimes(1);
     });
+
+    it('should clear stale derived localization but keep the start GPS when the computation fails', async () => {
+      workerMock.runTask.mockRejectedValue(new Error('boom'));
+      const previous = buildLocatedSection();
+      const next = {
+        ...previous,
+        supports: previous.supports.map((s, i) => (i === 0 ? { ...s, spanLength: 150 } : s))
+      };
+
+      const result = await service.syncFootGps(previous, next);
+
+      expect(service.getFootGps(result)).toEqual([{ latitude: 45, longitude: 3 }, null, null]);
+      expect(result.supports.map((s) => s.spanAzimut)).toEqual([null, null, null]);
+    });
   });
 
   describe('save', () => {
@@ -208,6 +222,27 @@ describe('GeopositioningService', () => {
       const section = buildSection();
       await service.save(study, undefined, section);
       expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledWith(study, section);
+    });
+
+    it('should recompute on retry after a failed save following a geometry edit', async () => {
+      const study = { sections: [] } as unknown as StudyEntity;
+      const previous = buildLocatedSection();
+      const edited = {
+        ...previous,
+        supports: previous.supports.map((s, i) => (i === 0 ? { ...s, spanLength: 150 } : s))
+      };
+
+      workerMock.runTask.mockRejectedValueOnce(new Error('boom'));
+      await service.save(study, previous, edited);
+      const failedSave = sectionServiceMock.createOrUpdateSection.mock.calls[0][1] as Section;
+      expect(failedSave.supports[1].footLatitude).toBeNull();
+      expect(failedSave.supports[0].spanAzimut).toBeNull();
+
+      await service.save(study, failedSave, { ...failedSave });
+      const retriedSave = sectionServiceMock.createOrUpdateSection.mock.calls[1][1] as Section;
+      expect(workerMock.runTask).toHaveBeenCalledTimes(2);
+      expect(retriedSave.supports.map((s) => s.footLatitude)).toEqual(LOCALIZATION.latitude);
+      expect(retriedSave.supports.map((s) => s.spanAzimut)).toEqual([90, 91, null]);
     });
   });
 
@@ -325,7 +360,8 @@ describe('GeopositioningService', () => {
         .mockResolvedValueOnce({
           result: {
             localization: { latitude: [45, 45.2], longitude: [3, 3.2], azimuth: [81], lambert_x: [], lambert_y: [] },
-            meanGpsDiffMeter: 2.5
+            meanGpsDiffMeter: 2.5,
+            startAzimuth: 36
           },
           error: null,
           diagnostics: []
@@ -350,7 +386,7 @@ describe('GeopositioningService', () => {
         [45, 81],
         [45.2, null]
       ]);
-      expect(result.start_azimuth).toBe(81);
+      expect(result.start_azimuth).toBe(36);
       expect(result.mean_reprojection_diff_meters).toBe(2.5);
     });
 

@@ -6,6 +6,7 @@
 
 
 import numpy as np
+import pytest
 
 from stellar_engine.data.geography import (
     compute_errors,
@@ -133,9 +134,62 @@ def test_import_lambert_and_validate():
     expected_keys = {
         "localization",
         "meanGpsDiffMeter",
+        "startAzimuth",
     }
     assert expected_keys == set(result.keys())
     assert result["meanGpsDiffMeter"] < 1.0  # 1 meter
+
+
+def test_import_lambert_and_validate_start_azimuth_removes_first_line_angle():
+    inputs = {
+        "lambert_x": [652469.02270914, 652471.48385573],
+        "lambert_y": [6862035.25942008, 6862335.24992367],
+        "startAzimuth": 0,
+        "spanLength": [300.0, np.nan],
+        "lineAngle": [50.0, 0.0],  # 50 grad = 45 deg
+    }
+    result = import_lambert_and_validate(inputs)
+
+    np.testing.assert_allclose(
+        result["startAzimuth"],
+        result["localization"]["azimuth"][0] - 45.0,
+    )
+
+
+@pytest.mark.parametrize("first_line_angle_grad", [0.0, 50.0, -30.0])
+def test_import_then_compute_localization_round_trip(first_line_angle_grad):
+    """Recomputing from the imported start azimuth must not rotate the section."""
+    inputs = {
+        "lambert_x": [
+            652469.02270914,
+            652471.48385573,
+            652405.05557107,
+        ],
+        "lambert_y": [
+            6862035.25942008,
+            6862335.24992367,
+            6862729.73314491,
+        ],
+        "startAzimuth": 0,
+        "spanLength": [300.0, 400.0, np.nan],
+        "lineAngle": [first_line_angle_grad, 10.0, 0.0],
+    }
+    imported = import_lambert_and_validate(inputs)
+    localization = imported["localization"]
+
+    recomputed = compute_localization(
+        {
+            "startLatitude": localization["latitude"][0],
+            "startLongitude": localization["longitude"][0],
+            "startAzimuth": imported["startAzimuth"],
+            "spanLength": inputs["spanLength"],
+            "lineAngle": inputs["lineAngle"],
+        }
+    )
+
+    np.testing.assert_allclose(
+        recomputed["azimuth"][0], localization["azimuth"][0], atol=1e-9
+    )
 
 
 def test_import_lambert_and_validate_true_value():
@@ -162,6 +216,7 @@ def test_import_lambert_and_validate_true_value():
     expected_keys = {
         "localization",
         "meanGpsDiffMeter",
+        "startAzimuth",
     }
     assert expected_keys == set(result.keys())
     print(result["meanGpsDiffMeter"])

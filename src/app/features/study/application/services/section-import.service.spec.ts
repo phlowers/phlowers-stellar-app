@@ -229,7 +229,8 @@ describe('SectionImportService', () => {
             lambert_x: lambertX,
             lambert_y: inputs['lambert_y']
           },
-          meanGpsDiffMeter: 0.0001
+          meanGpsDiffMeter: 0.0001,
+          startAzimuth: 12
         },
         error: null,
         pythonErrorCode: null
@@ -1281,7 +1282,7 @@ describe('SectionImportService', () => {
         regional_team_id: 'GMR_ID_01',
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
-        start_azimuth: 0,
+        start_azimuth: 12,
         mean_reprojection_diff_meters: 0.0001
       });
     });
@@ -1477,7 +1478,7 @@ describe('SectionImportService', () => {
 
       expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
 
-      expect(result?.start_azimuth).toBe(0);
+      expect(result?.start_azimuth).toBe(12);
     });
   });
 
@@ -1507,7 +1508,7 @@ describe('SectionImportService', () => {
 
       expect(result?.supports[0].footLatitude).toBe(45);
       expect(result?.supports[0].footLongitude).toBe(3);
-      expect(result?.start_azimuth).toBe(0);
+      expect(result?.start_azimuth).toBe(12);
     });
 
     it('should throw an ImportError and abort the import when a reprojection task fails', async () => {

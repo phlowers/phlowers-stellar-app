@@ -805,6 +805,8 @@ export interface TaskOutputs {
   [Task.importLambertAndValidate]: {
     localization: Localization;
     meanGpsDiffMeter: number;
+    /** Azimuth (deg) before the deflection at the first support: `azimuth[0] - spanAngle[0]`. */
+    startAzimuth: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;

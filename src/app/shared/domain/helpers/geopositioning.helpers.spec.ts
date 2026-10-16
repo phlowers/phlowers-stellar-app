@@ -12,6 +12,7 @@ import {
   areCoordinatesComplete,
   buildLocalizationInputs,
   buildReprojectionAngles,
+  clearDerivedLocalization,
   computeSpanAzimuthErrors,
   getFootGps,
   getStartGps,
@@ -188,6 +189,20 @@ describe('applyLocalization', () => {
       [1, 3, 90],
       [2, 4, null]
     ]);
+  });
+});
+
+describe('clearDerivedLocalization', () => {
+  it('should clear every derived foot GPS and spanAzimut but keep the start GPS', () => {
+    const supports = [1, 2, 3].map((n) => buildSupport({ footLatitude: n, footLongitude: n, spanAzimut: n }));
+    const result = clearDerivedLocalization(buildSection({ supports }));
+
+    expect(result.supports.map((s) => [s.footLatitude, s.footLongitude, s.spanAzimut])).toEqual([
+      [1, 1, null],
+      [null, null, null],
+      [null, null, null]
+    ]);
+    expect(supports[1].footLatitude).toBe(2);
   });
 });
 

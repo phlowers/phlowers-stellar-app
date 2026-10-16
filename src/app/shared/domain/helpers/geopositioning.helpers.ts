@@ -102,6 +102,21 @@ export function applyLocalization(supports: Support[], localization: FootLocaliz
   }));
 }
 
+/**
+ * Returns a copy of `section` without derived localization: foot GPS of every support but the first
+ * (start anchor) and every `spanAzimut` are reset to `null`.
+ */
+export function clearDerivedLocalization(section: Section): Section {
+  return {
+    ...section,
+    supports: (section.supports ?? []).map((support, i) =>
+      i === 0
+        ? { ...support, spanAzimut: null }
+        : { ...support, footLatitude: null, footLongitude: null, spanAzimut: null }
+    )
+  };
+}
+
 /** Returns `true` when every entry of the coordinate arrays is a number (same length as `supportsCount`). */
 export function areCoordinatesComplete(coordinates: SectionImportCoordinates, supportsCount: number): boolean {
   const isComplete = (values: readonly (number | null)[]): values is readonly number[] =>

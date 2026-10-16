@@ -419,7 +419,7 @@ describe('SectionImportService — adapter orchestration', () => {
       runTaskMock.mockImplementation((task: Task) => {
         const localization = { latitude: [45, 45.1], longitude: [3, 3.1], azimuth, lambert_x: [], lambert_y: [] };
         return Promise.resolve({
-          result: task === Task.importLambert ? localization : { localization, meanGpsDiffMeter: 1 },
+          result: task === Task.importLambert ? localization : { localization, meanGpsDiffMeter: 1, startAzimuth: 0 },
           error: null,
           diagnostics: []
         });

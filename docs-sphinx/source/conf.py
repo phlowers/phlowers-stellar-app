@@ -58,6 +58,7 @@ js_source_path = [
 # Common ancestor of js_source_path entries, needed to disambiguate relative JS paths
 root_for_relative_js_paths = "../../src"
 jsdoc_tsconfig_path = "../tsconfig.typedoc.json"
+jsdoc_config_path = "../typedoc.json"
 primary_domain = "js"
 
 # MyST-Parser configuration for Markdown support
