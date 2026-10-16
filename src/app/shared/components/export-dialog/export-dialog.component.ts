@@ -8,6 +8,8 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { StudiesService } from '@services/studies/studies.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
+import { StudyExportFormat, StudyExportFormatOption } from '@services/studies/studies.interfaces';
+import { DEFAULT_STUDY_EXPORT_FORMAT, STUDY_EXPORT_FORMAT_OPTIONS } from '@services/studies/studies.constantes';
 
 import { SelectModule } from 'primeng/select';
 
@@ -34,11 +36,11 @@ import { SelectModule } from 'primeng/select';
 })
 export class ExportDialogComponent {
   /** Available export format options. */
-  exportFormats = input<{ label: string; value: string }[]>([{ label: '.clst', value: 'clst' }]);
+  exportFormats = input<StudyExportFormatOption[]>(STUDY_EXPORT_FORMAT_OPTIONS);
 
   form: FormGroup<{
     filename: FormControl<string | null>;
-    exportFormat: FormControl<string | null>;
+    exportFormat: FormControl<StudyExportFormat | null>;
   }>;
 
   readonly studiesService = inject(StudiesService);
@@ -49,7 +51,7 @@ export class ExportDialogComponent {
   constructor() {
     this.form = new FormGroup({
       filename: new FormControl<string>('', [Validators.required]),
-      exportFormat: new FormControl<string>(this.exportFormats()[0]?.value || '', [Validators.required])
+      exportFormat: new FormControl<StudyExportFormat>(DEFAULT_STUDY_EXPORT_FORMAT, [Validators.required])
     });
 
     effect(() => {
@@ -58,17 +60,18 @@ export class ExportDialogComponent {
         this.studiesService.exportDialogData()?.title &&
         this.studiesService.exportDialogData()?.uuid
       ) {
-        const defaultFilename = this.studiesService.exportDialogData()?.title.replace(/\.clst$/, '');
-        this.form.patchValue({ filename: defaultFilename });
+        const defaultFilename = this.studiesService.exportDialogData()?.title.replace(/\.(clst|stsd)$/, '');
+        this.form.patchValue({ filename: defaultFilename, exportFormat: DEFAULT_STUDY_EXPORT_FORMAT });
       }
     });
   }
 
   exportStudy() {
     const filename = this.form.value.filename;
+    const format = this.form.value.exportFormat ?? DEFAULT_STUDY_EXPORT_FORMAT;
     const uuid = this.studiesService.exportDialogData()?.uuid;
-    if (this.form.valid && uuid && filename && filename) {
-      this.studiesService.downloadStudy(uuid, filename).catch((error: unknown) => {
+    if (this.form.valid && uuid && filename) {
+      this.studiesService.downloadStudy(uuid, filename, format).catch((error: unknown) => {
         this.logger.error('Failed to export study', error);
         this.notificationService.error(this.translocoService.translate('shared.global-error-handler.unexpected-error'));
       });
